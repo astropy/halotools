@@ -7,8 +7,9 @@ as well as subsequently derived value-added catalogs.
 """
 
 from astropy.io import ascii
+import pyfits
 
-def read_barebones_halo_catalog_for_initial_mock_development(filename):
+def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
     """Read filename and return something called 'halos', 
     which I would like to be a numpty array, but it is not currently.
     Also, this takes forever."""
@@ -19,4 +20,10 @@ def read_barebones_halo_catalog_for_initial_mock_development(filename):
     print 'number of host halos read in:', len(halos)
     return halos
 
+def load_bolshoi_host_halos_fits(filename):
+    """Load .fits file containing host halo information 
+    down to logMvir>10.5. """
+    halos = pyfits.getdata(filename,0)
+    
+    return halos
 
