@@ -11,6 +11,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+.. automodule:: mock
+.. automodule:: read_nbody
+.. automodule:: halo_occupation
+
+.. autoclass:: HOD_mock
+	:members:
 
 
 Indices and tables
