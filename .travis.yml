@@ -3,7 +3,7 @@ python:
 	- "2.6"
 	- "2.7"
 # command to install dependencies
-script: python tests/test_hod_mocks.py
+script: python test_hod_mocks.py
 branches:
 	- master
 	- develop
