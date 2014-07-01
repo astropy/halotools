@@ -7,6 +7,7 @@ Created on Mon Jun 23 10:52:05 2014
 
 import numpy as np
 from scipy.special import erf
+from scipy.stats import poisson
 
 def mean_ncen(logM,hod_dict=None):
     """Expected number of central galaxies in a halo of mass 10**logM"""
@@ -18,7 +19,11 @@ def mean_ncen(logM,hod_dict=None):
     mean_ncen = 0.5*(1.0 + erf((logM - hod_dict['logMmin_cen'])/hod_dict['sigma_logM']))
     return mean_ncen
 
-#def ng_ncen(logM)
+
+def num_ncen(logM,hod_dict):
+	"""Returns 1 or 0 for whether or not there is a central in this halo."""
+	return np.array(mean_ncen(logM,hod_dict) > np.random.random(len(logM)),dtype=int)
+
 
 def mean_nsat(logM,hod_dict=None):
     """Expected number of satellite galaxies in a halo of mass 10**logM."""
@@ -38,6 +43,15 @@ def mean_nsat(logM,hod_dict=None):
 
     return mean_nsat
 
+def num_nsat(logM,hod_dict):
+	'''    Returns a random number of satellites in a halo.'''
+	Prob_sat = mean_nsat(logM,hod_dict)
+	# NOTE: need to cut at zero, otherwise poisson bails
+    # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
+	test = Prob_sat <= 0
+	Prob_sat[test] = 1.e-20
+
+	return poisson.rvs(Prob_sat)
 
 
 
