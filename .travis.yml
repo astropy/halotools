@@ -7,3 +7,6 @@ script: python test_hod_mocks.py
 branches:
 	- master
 	- develop
+
+notifications:
+	email: true
