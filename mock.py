@@ -14,6 +14,10 @@ class HOD_mock(object):
 		self.halos = {}
 		self.halos['logM'] = np.array(np.log10(temp_halos.MVIR))
 		self.halos['conc'] = np.array(temp_halos.RVIR/temp_halos.RS)
+		self.halos['ID'] = np.array(temp_halos.ID)
+		self.halos['pos'] = np.array([temp_halos.POS[:,0],temp_halos.POS[:,1],temp_halos.POS[:,2]])
+		self.halos['vel'] = np.array([temp_halos.VEL[:,0],temp_halos.VEL[:,1],temp_halos.VEL[:,2]])
+		self.halos['rvir'] = np.array(temp_halos.RVIR)
 
 		# create a dictionary containing the HOD parameters
 		# does not seem to behave as I want:
