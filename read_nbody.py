@@ -23,6 +23,8 @@ def load_bolshoi_host_halos_fits(filename='/Users/aphearin/Dropbox/mock_for_surh
     """Load .fits file containing host halo information 
     down to logMvir>10.5. """
     halos = pyfits.getdata(filename,0)
-    
-    return halos
+    # should be using astropy units!
+    sim_dict = {'Lbox':250.0,'scale_factor':1.0003,'particle_mass':1.35e8,'softening':1.0}
+    simulation = {'halos':halos,'sim_dict':sim_dict}
+    return simulation
 

@@ -9,7 +9,8 @@ class HOD_mock(object):
 
 	def __init__(self,hod_dict=None):
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
-		temp_halos = read_nbody.load_bolshoi_host_halos_fits()
+		simulation = read_nbody.load_bolshoi_host_halos_fits()
+		temp_halos = simulation['halos']
 		# create a dictonary of numpy arrays containing relevant halo information
 		self.halos = {}
 		self.halos['logM'] = np.array(np.log10(temp_halos.MVIR))
@@ -18,6 +19,9 @@ class HOD_mock(object):
 		self.halos['pos'] = np.array([temp_halos.POS[:,0],temp_halos.POS[:,1],temp_halos.POS[:,2]])
 		self.halos['vel'] = np.array([temp_halos.VEL[:,0],temp_halos.VEL[:,1],temp_halos.VEL[:,2]])
 		self.halos['rvir'] = np.array(temp_halos.RVIR)
+
+		# mock object should know the basic attributs of its simulation
+		self.sim_dict = simulation['sim_dict']
 
 		# create a dictionary containing the HOD parameters
 		# does not seem to behave as I want:
