@@ -1,1 +1,9 @@
-Python package for analyzing N-body simulations and constraining galaxy evolution models.
+HaloTools User Guide
+==========
+This is a brief guide describing how to use the HaloTools package to analyze N-body simulations and constrain galaxy evolution models.
+----------
+
+To build the documentation, cd to the docs directory, and type "make html".
+This will trigger sphinx to generate html formatted documentation
+that can be viewed in docs/_build/html/index.html.
+
