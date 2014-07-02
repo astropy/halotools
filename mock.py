@@ -3,9 +3,29 @@
 import read_nbody
 import halo_occupation as ho
 import numpy as np
+import defaults
 
 class HOD_mock(object):
-	'''Base class for any HOD-based mock object'''
+	'''Base class for any HOD-based mock galaxy catalog object.
+
+	.. warning::
+		Still buggy and poorly tested.
+
+	Parameters
+	----------
+	hod_dict : dictionary
+		Contains parameter values specifying how to populated dark matter halos
+		with mock galaxies
+
+	Notes
+	----------
+	Instantiations of this class have bound to them: 
+	1) a dictionary of dark matter host halos, 
+	2) a dictionary of HOD model parameters,
+	3) a dictionary of galaxies populating those halos according to the model.
+
+
+	'''
 
 	def __init__(self,hod_dict=None):
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
@@ -21,7 +41,7 @@ class HOD_mock(object):
 		self.halos['rvir'] = np.array(temp_halos.RVIR)
 
 		# mock object should know the basic attributs of its simulation
-		self.sim_dict = simulation['sim_dict']
+		self.simulation_dict = simulation['simulation_dict']
 
 		# create a dictionary containing the HOD parameters
 		# does not seem to behave as I want:
