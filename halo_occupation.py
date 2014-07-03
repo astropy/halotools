@@ -123,9 +123,59 @@ def num_nsat(logM,hod_dict):
 
     return num_nsat_array
 
-#def quenched_fraction_centrals(logM,hod_dict):
-#    quenched_fraction_array = None
-#    return quenched_fraction_array
+def quenched_fraction_centrals(logM,hod_dict):
+    pass
+
+
+
+def solve_for_quenching_polynomial_coefficients(logM,quenched_fraction):
+    ''' Given the quenched fraction specified at three masses, returns corresponding quadratic polynomial coefficients.
+
+    Parameters
+    ----------
+    logM : array
+    array of log halo masses, treated as abcissa
+
+    quenched_fraction : array
+    array of values of the quenched fraction at the abcissa
+
+    Returns
+    ----------
+    quenched_fraction_polynomial_coefficients : array
+    array of coefficients determining the quenched fraction polynomial 
+
+    Notes
+    ----------
+    Not written quite generally enough to work with polynomials of arbitrary degree.
+    Currently only set up to work with quadratics, will break otherwise.
+    Should either re-write to throw an exception,
+    or simply generalize the definition of the quenching_model_matrix
+
+    '''
+
+    column1 = np.zeros(len(logM)) + 1
+    column2 = np.array(logM)
+    column3 = np.array(logM)**2
+    quenching_model_matrix = np.append(column1,[column2,column3]).reshape(len(logM),len(logM)).transpose()
+
+    quenched_fraction_polynomial_coefficients = np.linalg.solve(quenching_model_matrix,quenched_fraction)
+
+    return quenched_fraction_polynomial_coefficients
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
