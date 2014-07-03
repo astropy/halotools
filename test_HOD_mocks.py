@@ -12,4 +12,7 @@ print('')
 
 temp_halos = read_nbody.load_bolshoi_host_halos_fits()
 
-
+x=[0,1,-1,2]
+y=[10,15,11,26]
+coeff = ho.solve_for_quenching_polynomial_coefficients(x,y)
+#coeff should be [10,2,3,0]
