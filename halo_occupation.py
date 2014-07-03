@@ -123,7 +123,9 @@ def num_nsat(logM,hod_dict):
 
     return num_nsat_array
 
-
+#def quenched_fraction_centrals(logM,hod_dict):
+#    quenched_fraction_array = None
+#    return quenched_fraction_array
 
 
 
