@@ -129,7 +129,8 @@ def quenched_fraction_centrals(logM,hod_dict):
 
 
 def solve_for_quenching_polynomial_coefficients(logM,quenched_fraction):
-    ''' Given the quenched fraction specified at three masses, returns corresponding quadratic polynomial coefficients.
+    ''' Given the quenched fraction for some halo masses, 
+    returns standard form polynomial coefficients specifying quenching function.
 
     Parameters
     ----------
@@ -146,17 +147,21 @@ def solve_for_quenching_polynomial_coefficients(logM,quenched_fraction):
 
     Notes
     ----------
-    Not written quite generally enough to work with polynomials of arbitrary degree.
-    Currently only set up to work with quadratics, will break otherwise.
-    Should either re-write to throw an exception,
-    or simply generalize the definition of the quenching_model_matrix
+    Very general. Input arrays logM and quenched_fraction can in principle be of any dimension Ndim, 
+    and there will be Ndim output coefficients.
 
+    The input quenched_fractions specify the desired quenched fraction evaluated at the Ndim inputs for logM.
+    There exists a unique, order Ndim polynomial that produces those quenched fractions evaluated at the points logM.
+    The coefficients of that output polynomial are the output of the function, such that the quenching function is given by:
+    F_quenched(logM) = coeff[0] + coeff[1]*logM + coeff[2]*logM**2 + ... + coeff[len(logM)-1]*logM**(len(logM)-1)
+    
     '''
 
-    column1 = np.zeros(len(logM)) + 1
-    column2 = np.array(logM)
-    column3 = np.array(logM)**2
-    quenching_model_matrix = np.append(column1,[column2,column3]).reshape(len(logM),len(logM)).transpose()
+    ones = np.zeros(len(logM)) + 1
+    columns = ones
+    for i in np.arange(len(logM)-1):
+        columns = np.append(columns,[logM**(i+1)])
+    quenching_model_matrix = columns.reshape(len(logM),len(logM)).transpose()
 
     quenched_fraction_polynomial_coefficients = np.linalg.solve(quenching_model_matrix,quenched_fraction)
 
