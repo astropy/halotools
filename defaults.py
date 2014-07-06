@@ -76,3 +76,8 @@ default_hod_dict = {
 	'alpha_sat' : 1.0 # power law slope of the satellite occupation function
 }
 
+default_color_dict = {
+     'central_coefficients' : [0.35,0.75,0.95], #polynomial coefficients determining quenched fraction of centrals
+     'satellite_coefficients' : [0.5,0.75,0.85], #polynomial coefficients determining quenched fraction of centrals
+     'abcissa' : [12,13.5,15]
+}

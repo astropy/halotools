@@ -6,7 +6,7 @@ import read_nbody
 
 m = mock.HOD_mock()
 print("")
-print("Mock successfully created")
+print("Mock with all defaults successfully created")
 print("Satellite fraction = "+str(m.galaxies['satellite_fraction']))
 print('')
 

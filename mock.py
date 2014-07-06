@@ -24,11 +24,11 @@ class HOD_mock(object):
 
 	'''
 
-	def __init__(self,hod_dict=None):
+	def __init__(self,hod_dict=None,color_dict=None):
 
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
-		simulation = read_nbody.load_bolshoi_host_halos_fits()
-		temp_halos = simulation['halos']
+		simulation_data = read_nbody.load_bolshoi_host_halos_fits()
+		temp_halos = simulation_data['halos']
 
 		# create a dictonary of numpy arrays containing relevant halo information
 		self.halos = {}
@@ -40,13 +40,19 @@ class HOD_mock(object):
 		self.halos['rvir'] = np.array(temp_halos.RVIR)
 
 		# mock object should know the basic attributs of its simulation
-		self.simulation_dict = simulation['simulation_dict']
+		self.simulation_dict = simulation_data['simulation_dict']
+		
 
 		# create a dictionary containing the HOD parameters
 		if hod_dict is None:
 			self.hod_dict = defaults.default_hod_dict
 		else:
 			self.hod_dict = hod_dict
+
+		if color_dict is None:
+			self.color_dict = defaults.default_color_dict
+		else:
+			self.color_dict = color_dict
 
 		self.halos['ncen'] = ho.num_ncen(self.halos['logM'],self.hod_dict)
 		self.halos['nsat'] = ho.num_nsat(self.halos['logM'],self.hod_dict)
@@ -55,6 +61,7 @@ class HOD_mock(object):
 		self.galaxies = {}
 		self.galaxies['num_gals'] = np.sum(self.halos['ncen']) + np.sum(self.halos['nsat'])
 		self.galaxies['satellite_fraction'] = (1.0*np.sum(self.halos['nsat']))/self.galaxies['num_gals']
+		self.galaxies['logM'] = self.halos['logM']
 
 
 

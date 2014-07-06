@@ -165,7 +165,16 @@ def quenching_polynomial_function(logM,coefficients):
     
     return quenched_fraction
 
+def quenching_designation(logM,coefficients):
+    """ Returns Monte Carlo-generated array of 0 or 1 specifying whether the galaxy is quenched.
 
+
+
+    """
+    
+    #    num_ncen_array = np.array(mean_ncen(logM,hod_dict) > np.random.random(len(logM)),dtype=int)
+    quenching_designation_array = np.array(quenching_polynomial_function(logM,coefficients) > np.random.random(len(logM)),dtype=int)
+    return quenching_designation_array
 
 
 
