@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun 23 10:52:05 2014
 
-@author: aphearin
+.. module : halo_occupation 
+    :synopsis: Modules to and methods to generate HOD-type mocks  
+
+.. moduleauthor: Andrew Hearin <andrew.hearin@yale.edu>
+
+
 """
 
 import numpy as np
@@ -13,21 +17,15 @@ import defaults
 def mean_ncen(logM,hod_dict=None):
     """ Expected number of central galaxies in a halo of mass 10**logM.
 
-    Parameters
-    ----------
-    logM : float or array
-    hod_dict : dictionary
-    Contains model parameters used to define the central occupation function.
+    Args:
+        logM : float or array
+        hod_dict : dictionary
 
-    Returns
-    ----------
-    mean_ncen : float or array
-    Mean number of central galaxies in a host halo of the specified mass. 
-    Values are restricted 0 <= mean_ncen <= 1.
-
-    Notes 
-    ----------
-    Math equation should be inserted here.
+    Returns:
+        mean_ncen : float or array
+    
+    Synopsis:
+        Mean number of central galaxies in a host halo of the specified mass. Values are restricted 0 <= mean_ncen <= 1.
 
 
     """
@@ -42,20 +40,14 @@ def mean_ncen(logM,hod_dict=None):
 def num_ncen(logM,hod_dict):
     """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
 
-    Parameters
-    ----------
-    logM : float or array
-    hod_dict : dictionary
-    Contains model parameters used to define the central occupation function.
+    Args: 
+        logM : float or array
+        hod_dict : dictionary
 
-    Returns
-    ----------
-    num_ncen_array : int or array
-    Array is unity if input halo hosts a central galaxy, 0 if not.
+    Returns:
+        num_ncen_array : int or array
 
-    Notes 
-    ----------
-    Should say something about the analytical function used to generate the Monte Carlo.
+    
     """
 
     num_ncen_array = np.array(mean_ncen(logM,hod_dict) > np.random.random(len(logM)),dtype=int)
@@ -64,21 +56,15 @@ def num_ncen(logM,hod_dict):
 def mean_nsat(logM,hod_dict=None):
     """Expected number of satellite galaxies in a halo of mass 10**logM.
 
-    Parameters
-    ----------
-    logM : float or array
-    hod_dict : dictionary
-    Contains model parameters used to define the central occupation function.
+    Args:
+        logM : float or array
+        hod_dict : dictionary
 
-    Returns
-    ----------
-    mean_nsat : float or array
-    Mean number of satellite galaxies in a host halo of the specified mass. 
+    Returns:
+        mean_nsat : float or array
+        Mean number of satellite galaxies in a host halo of the specified mass. 
 
-    Notes 
-    ----------
-    Math equation should be inserted here.
-
+    
     """
     halo_mass = 10.**logM
 
@@ -97,20 +83,14 @@ def mean_nsat(logM,hod_dict=None):
 def num_nsat(logM,hod_dict):
     '''  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
 
-    Parameters
-    ----------
-    logM : float or array
-    hod_dict : dictionary
-    Contains model parameters used to define the central occupation function.
+    Args:
+        logM : float or array
+        hod_dict : dictionary
 
-    Returns
-    ----------
-    num_nsat_array : int or array
-    Values of array specify the number of satellites hosted by each halo.
+    Returns:
+        num_nsat_array : int or array
+        Values of array specify the number of satellites hosted by each halo.
 
-    Notes 
-    ----------
-    Should say something about the analytical function used to generate the Monte Carlo.
 
     '''
     Prob_sat = mean_nsat(logM,hod_dict)
@@ -132,23 +112,15 @@ def solve_for_quenching_polynomial_coefficients(logM,quenched_fraction):
     ''' Given the quenched fraction for some halo masses, 
     returns standard form polynomial coefficients specifying quenching function.
 
-    Parameters
-    ----------
-    logM : array
-    array of log halo masses, treated as abcissa
+    Args:
+        logM : array of log halo masses, treated as abcissa
+        quenched_fraction : array of values of the quenched fraction at the abcissa
 
-    quenched_fraction : array
-    array of values of the quenched fraction at the abcissa
+    Returns:
+        quenched_fraction_polynomial_coefficients : array of coefficients determining the quenched fraction polynomial 
 
-    Returns
-    ----------
-    quenched_fraction_polynomial_coefficients : array
-    array of coefficients determining the quenched fraction polynomial 
-
-    Notes
-    ----------
-    Very general. Input arrays logM and quenched_fraction can in principle be of any dimension Ndim, 
-    and there will be Ndim output coefficients.
+    Synopsis:
+        Very general. Input arrays logM and quenched_fraction can in principle be of any dimension Ndim, and there will be Ndim output coefficients.
 
     The input quenched_fractions specify the desired quenched fraction evaluated at the Ndim inputs for logM.
     There exists a unique, order Ndim polynomial that produces those quenched fractions evaluated at the points logM.

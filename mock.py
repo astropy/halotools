@@ -12,18 +12,14 @@ class HOD_mock(object):
 	.. warning::
 		Still buggy and poorly tested.
 
-	Parameters
-	----------
-	hod_dict : dictionary
-		Contains parameter values specifying how to populated dark matter halos
-		with mock galaxies
+	Args:
+		hod_dict : dictionary containing parameter values specifying how to populated dark matter halos with mock galaxies
 
-	Notes
-	----------
-	Instantiations of this class have bound to them: 
-	1) a dictionary of dark matter host halos, 
-	2) a dictionary of HOD model parameters,
-	3) a dictionary of galaxies populating those halos according to the model.
+	Synopsis:
+		Instantiations of this class have bound to them: 
+		1) a dictionary of dark matter host halos, 
+		2) a dictionary of HOD model parameters,
+		3) a dictionary of galaxies populating those halos according to the model.
 
 
 	'''
