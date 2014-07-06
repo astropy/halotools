@@ -1,6 +1,6 @@
 HaloTools User Guide
 ==========
-This is a brief guide describing how to use the HaloTools package to analyze N-body simulations and constrain galaxy evolution models.
+This is a brief guide describing how to use the HaloTools package to analyze N-body simulations and constrain models of cosmology and galaxy evolution.
 ----------
 
 To build the documentation, cd to the docs directory, and type "make html".

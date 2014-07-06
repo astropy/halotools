@@ -12,10 +12,10 @@ Contents:
    :maxdepth: 2
 
 .. automodule:: mock
+	:members:
 .. automodule:: read_nbody
+	:members:
 .. automodule:: halo_occupation
-
-.. autoclass:: HOD_mock
 	:members:
 
 
