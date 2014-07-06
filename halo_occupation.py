@@ -139,7 +139,31 @@ def solve_for_quenching_polynomial_coefficients(logM,quenched_fraction):
 
     return quenched_fraction_polynomial_coefficients
 
+def quenching_polynomial_function(logM,coefficients):
+    ''' Given a set of polynomial coefficients, returns the quenched fraction at the input logM.
+    
+    Args:
+        logM: array of log halo masses
+        coefficients: list of coefficients determining the quenching polynomial
+        
+    Returns:
+        quenched_fraction: array giving fraction of galaxies that are quenched for a halo of log mass logM
+    
+    
+    '''
 
+    quenched_fraction = np.zeros(len(logM))    
+    for degree,polynomial_coefficient in enumerate(coefficients):
+        quenched_fraction = quenched_fraction + (polynomial_coefficient*logM**degree)
+    
+    # Enforce condition on quenched fraction
+    # Consider using a decorator instead
+    idx_quenched_fraction_exceeds_unity = quenched_fraction > 1
+    quenched_fraction[idx_quenched_fraction_exceeds_unity] = 1
+    idx_quenched_fraction_negative = quenched_fraction < 0
+    quenched_fraction[idx_quenched_fraction_negative] = 0
+    
+    return quenched_fraction
 
 
 
