@@ -49,7 +49,7 @@ class hod(object):
         'central_coefficients' : [0.35,0.75,0.95], #polynomial coefficients determining quenched fraction of centrals
         'satellite_coefficients' : [0.5,0.75,0.85]        
         }
-        self.logM_abcissa = [12,13.5,15]
+        self.logM_abcissa = [12,13.5,15] #halo masses at which model quenching fractions are defined
 
 
 ### Default HOD model
