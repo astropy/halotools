@@ -73,7 +73,17 @@ class HOD_mock(object):
 		self.galaxies['rvir'][:np.sum(self.halos['ncen'])] = self.halos['rvir'][(self.halos['ncen']>0)]
 		self.galaxies['icen'][:np.sum(self.halos['ncen'])] = np.zeros(np.sum(self.halos['ncen']))+1
 		
-
+		# Assign host properties to the satellites
+		counter=np.sum(self.halos['ncen'])
+		halos_with_satellites = self.halos[self.halos['nsat']>0]
+		for halo in halos_with_satellites:
+			self.galaxies['logM'][counter:counter+halo['nsat']] = halo['logM']
+			self.galaxies['conc'][counter:counter+halo['nsat']] = halo['conc']
+			self.galaxies['haloID'][counter:counter+halo['nsat']] = halo['ID']
+			self.galaxies['hostpos'][counter:counter+halo['nsat']] = halo['pos']
+			self.galaxies['hostvel'][counter:counter+halo['nsat']] = halo['vel']
+			self.galaxies['rvir'][counter:counter+halo['nsat']] = halo['rvir']
+			counter += halo['nsat']
 
 
 
