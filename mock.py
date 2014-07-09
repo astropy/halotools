@@ -16,9 +16,9 @@ class HOD_mock(object):
 
 	Synopsis:
 		Instantiations of this class have bound to them: 
-		1) a dictionary of dark matter host halos, 
+		1) a numpy record array of dark matter host halos, 
 		2) a dictionary of HOD model parameters,
-		3) a dictionary of galaxies populating those halos according to the model.
+		3) a numpy record array of galaxies populating those halos according to the model.
 
 
 	'''
@@ -30,7 +30,7 @@ class HOD_mock(object):
 		temp_halos = simulation_data['halos']
 
 		# create a dictonary of numpy arrays containing relevant halo information		
-		halo_data_structure=[('logM','f4'),('conc','f4'),('ID','i8'),('pos','3float32'),('vel','3float32'),('rvir','f4')]
+		halo_data_structure=[('logM','f4'),('conc','f4'),('ID','i8'),('pos','3float32'),('vel','3float32'),('rvir','f4'),('ncen','i4'),('nsat','i4')]
 		self.halos = np.zeros(len(temp_halos.MVIR),dtype=halo_data_structure)				
 		self.halos['logM'] = np.log10(temp_halos.MVIR)
 		self.halos['conc'] = temp_halos.RVIR/temp_halos.RS
@@ -54,18 +54,28 @@ class HOD_mock(object):
 		else:
 			self.color_dict = color_dict
 
-		ncen_array = ho.num_ncen(self.halos['logM'],self.hod_dict)
-		nsat_array = ho.num_nsat(self.halos['logM'],self.hod_dict)
-		total_number_centrals = np.sum(ncen_array)
-		total_number_satellites = np.sum(nsat_array)
-		total_number_gals = total_number_centrals + total_number_satellites
+		self.halos['ncen']=np.array(ho.num_ncen(self.halos['logM'],self.hod_dict))
+		self.halos['nsat']=np.array(ho.num_nsat(self.halos['logM'],self.hod_dict))
+		self.ngals = np.sum(self.halos['ncen']) + np.sum(self.halos['nsat'])
+		self.satellite_fraction = 1.0*np.sum(self.halos['nsat'])/(1.0*self.ngals)
 
-				# create a dictionary of numpy arrays containing mock galaxies
-		galaxy_data_structure=[('logM','f4'),('conc','f4'),('haloID','i8'),('pos','3float32'),('vel','3float32'),('rvir','f4'),('icen','i2'),('ired','i2')]
-		self.galaxies = np.zeros(total_number_gals,dtype=galaxy_data_structure)
+		galaxy_data_structure=[('logM','f4'),('conc','f4'),('haloID','i8'),('pos','3float32'),('vel','3float32'),('hostpos','3float32'),('hostvel','3float32'),('rvir','f4'),('icen','i2'),('ired','i2')]
+		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
+		
+		# Assign properties to the centrals
+		self.galaxies['logM'][:np.sum(self.halos['ncen'])] = self.halos['logM'][(self.halos['ncen']>0)]
+		self.galaxies['conc'][:np.sum(self.halos['ncen'])] = self.halos['conc'][(self.halos['ncen']>0)]
+		self.galaxies['haloID'][:np.sum(self.halos['ncen'])] = self.halos['ID'][(self.halos['ncen']>0)]
+		self.galaxies['pos'][:np.sum(self.halos['ncen'])] = self.halos['pos'][(self.halos['ncen']>0)]
+		self.galaxies['hostpos'][:np.sum(self.halos['ncen'])] = self.halos['pos'][(self.halos['ncen']>0)]
+		self.galaxies['vel'][:np.sum(self.halos['ncen'])] = self.halos['vel'][(self.halos['ncen']>0)]
+		self.galaxies['hostvel'][:np.sum(self.halos['ncen'])] = self.halos['vel'][(self.halos['ncen']>0)]
+		self.galaxies['rvir'][:np.sum(self.halos['ncen'])] = self.halos['rvir'][(self.halos['ncen']>0)]
+		self.galaxies['icen'][:np.sum(self.halos['ncen'])] = np.zeros(np.sum(self.halos['ncen']))+1
+		
 
 
-		self.satellite_fraction = 1.0*total_number_satellites/(1.0*total_number_gals)
+
 
 
 
