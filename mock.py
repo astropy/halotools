@@ -14,6 +14,20 @@ def rewrap(coords,Lbox):
     coords[test] = Lbox + coords[test]
     return coords
 
+def anatoly_concentration(logM):
+	''' Concentration-mass relation from Anatoly Klypin's 2011 Bolshoi paper.
+	
+	'''
+	
+	masses = 10.**logM
+	c0 = 12.0
+	Mpiv = 1.e12
+	a = -0.075
+	concentrations = c0*(masses/Mpiv)**a
+	return concentrations
+	
+
+
 class HOD_mock(object):
 	'''Base class for any HOD-based mock galaxy catalog object.
 
@@ -72,10 +86,12 @@ class HOD_mock(object):
 
 		galaxy_data_structure=[('logM','f4'),('conc','f4'),('haloID','i8'),('pos','3float32'),('vel','3float32'),('hostpos','3float32'),('hostvel','3float32'),('rvir','f4'),('icen','i2'),('ired','i2')]
 		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
+		#over-write halo concentrations with Anatoly's best-fit relation
+		self.galaxies['conc'] = anatoly_concentration(self.galaxies['logM'])
 		
 		# Assign properties to the centrals
 		self.galaxies['logM'][:np.sum(self.halos['ncen'])] = self.halos['logM'][(self.halos['ncen']>0)]
-		self.galaxies['conc'][:np.sum(self.halos['ncen'])] = self.halos['conc'][(self.halos['ncen']>0)]
+#		self.galaxies['conc'][:np.sum(self.halos['ncen'])] = self.halos['conc'][(self.halos['ncen']>0)]
 		self.galaxies['haloID'][:np.sum(self.halos['ncen'])] = self.halos['ID'][(self.halos['ncen']>0)]
 		self.galaxies['pos'][:np.sum(self.halos['ncen'])] = self.halos['pos'][(self.halos['ncen']>0)]
 		self.galaxies['hostpos'][:np.sum(self.halos['ncen'])] = self.halos['pos'][(self.halos['ncen']>0)]
@@ -89,7 +105,7 @@ class HOD_mock(object):
 		halos_with_satellites = self.halos[self.halos['nsat']>0]
 		for halo in halos_with_satellites:
 			self.galaxies['logM'][counter:counter+halo['nsat']] = halo['logM']
-			self.galaxies['conc'][counter:counter+halo['nsat']] = halo['conc']
+#			self.galaxies['conc'][counter:counter+halo['nsat']] = halo['conc']
 			self.galaxies['haloID'][counter:counter+halo['nsat']] = halo['ID']
 			self.galaxies['hostpos'][counter:counter+halo['nsat']] = halo['pos']
 			self.galaxies['hostvel'][counter:counter+halo['nsat']] = halo['vel']
@@ -112,8 +128,8 @@ class HOD_mock(object):
 		satellite_coords_on_unit_sphere = self._generate_random_points_on_unit_sphere(self.galaxies.nsats)
 		for idim in np.arange(3):
 			self.galaxies['pos'][self.galaxies['icen']==0,idim]=satellite_coords_on_unit_sphere[:,idim]
-		self.galaxies['pos'][self.galaxies['icen']==0,:] *= self.galaxies['rvir']/1000.0
-		self.galaxies['pos'][self.galaxies['icen']==0,:] += self.galaxies['hostpos'][self.galaxies['icen']==0,:]
+#		self.galaxies['pos'][self.galaxies['icen']==0,:] *= self.galaxies['rvir']/1000.0
+#		self.galaxies['pos'][self.galaxies['icen']==0,:] += self.galaxies['hostpos'][self.galaxies['icen']==0,:]
 		
 
 
