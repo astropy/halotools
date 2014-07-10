@@ -3,7 +3,10 @@
 import read_nbody
 import halo_occupation as ho
 import numpy as np
+import scipy as sp
 import defaults
+import cPickle
+import os
 
 
 def rewrap(coords,Lbox):
@@ -26,7 +29,49 @@ def anatoly_concentration(logM):
 	concentrations = c0*(masses/Mpiv)**a
 	return concentrations
 	
+def _integrand_NFW_cumulative_PDF(x,conc):
+	
+	prefactor = (conc^3.)/(np.log(1.+conc) - (conc/(1.+conc)))
+	numerator = x**2
+	denominator = (conc*x)*(1. + conc*x)**2.
+	integrand = prefactor*numerator/denominator
+	
+	return integrand
 
+def draw_NFW_radial_positions(input_host_concentrations):
+	
+	NFW_lookup_table_filename = 'DATA/NFW_lookup_table.pickle'
+	
+	try:
+		input_file=open(NFW_lookup_table_filename,'rb')
+		NFW_lookup_table = cPickle.load(input_file)
+	except:
+		# set up concentration bins for NFW lookup table
+		concentrable_table_min = 1
+		concentrable_table_max = 25
+		concentrable_table_binwidth = 0.1
+		concentration_table = np.arange(concentrable_table_min,concentrable_table_max,concentrable_table_binwidth)
+		# set up radial bins for NFW lookup table
+		radius_abcissa_logmin = -4		
+		radius_abcissa_logmax = -0.01
+		radius_abcissa_Npts = 100		
+		radius_abcissa = np.logspace(radius_abcissa_logmin,radius_abcissa_logmax,radius_abcissa_Npts)
+		# create dictionary in which to store NFW lookup table
+		cumulative_NFW_PDF = np.zeros(len(radius_abcissa))
+		NFW_lookup_table = {}
+		table_values = np.append(radius_abcissa,cumulative_NFW_PDF).reshape(2,len(radius_abcissa))
+		
+		for concentration in concentration_table:
+			#scipy.integrate the NFW integrand ==> cumulative_NFW_PDF
+			#NFW_lookup_table[concentration] = np.append(radius_abcissa,cumulative_NFW_PDF).reshape(2,len(radius_abcissa))
+			pass
+			
+		
+		
+		NFW_lookup_table = None
+		
+	NFW_radial_positions = None
+	return NFW_radial_positions
 
 class HOD_mock(object):
 	'''Base class for any HOD-based mock galaxy catalog object.
