@@ -77,10 +77,12 @@ def _get_NFW_lookup_table():
 		if os.path.exists('DATA'):
 			output_file = open(NFW_lookup_table_filename,'wb')
 			cPickle.dump(NFW_lookup_table,output_file)
+			output_file.close()
 		else:
 			os.mkdir('DATA')
 			output_file = open(NFW_lookup_table_filename,'wb')
 			cPickle.dump(NFW_lookup_table,output_file)
+			output_file.close()
 	
 	return NFW_lookup_table
 
