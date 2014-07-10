@@ -7,6 +7,8 @@ import scipy as sp
 import defaults
 import cPickle
 import os
+from copy import copy
+from collections import Counter
 
 
 def rewrap(coords,Lbox):
@@ -30,15 +32,15 @@ def anatoly_concentration(logM):
 	return concentrations
 	
 def _integrand_NFW_cumulative_PDF(x,conc):
-	
-	prefactor = (conc^3.)/(np.log(1.+conc) - (conc/(1.+conc)))
+		
+	prefactor = (conc**3.)/(np.log(1.+conc) - (conc/(1.+conc)))
 	numerator = x**2
 	denominator = (conc*x)*(1. + conc*x)**2.
 	integrand = prefactor*numerator/denominator
 	
 	return integrand
-
-def draw_NFW_radial_positions(input_host_concentrations):
+	
+def _get_NFW_lookup_table():
 	
 	NFW_lookup_table_filename = 'DATA/NFW_lookup_table.pickle'
 	
@@ -47,31 +49,47 @@ def draw_NFW_radial_positions(input_host_concentrations):
 		NFW_lookup_table = cPickle.load(input_file)
 	except:
 		# set up concentration bins for NFW lookup table
-		concentrable_table_min = 1
-		concentrable_table_max = 25
-		concentrable_table_binwidth = 0.1
-		concentration_table = np.arange(concentrable_table_min,concentrable_table_max,concentrable_table_binwidth)
+		concentration_table_min = 1
+		concentration_table_max = 25
+		concentration_table_binwidth = 0.1
+		concentration_table = np.arange(concentration_table_min,concentration_table_max,concentration_table_binwidth)
+		concentration_keys = [str(round(c,2)) for c in concentration_table]
+		test_of_repeated_keys=[k for k,v in Counter(concentration_keys).items() if v>1]
+		if len(test_of_repeated_keys) > 0:
+			concentration_keys = list(set(concentration_keys))
+
 		# set up radial bins for NFW lookup table
 		radius_abcissa_logmin = -4		
 		radius_abcissa_logmax = -0.01
-		radius_abcissa_Npts = 100		
+		radius_abcissa_Npts = 100	
 		radius_abcissa = np.logspace(radius_abcissa_logmin,radius_abcissa_logmax,radius_abcissa_Npts)
 		# create dictionary in which to store NFW lookup table
 		cumulative_NFW_PDF = np.zeros(len(radius_abcissa))
 		NFW_lookup_table = {}
-		table_values = np.append(radius_abcissa,cumulative_NFW_PDF).reshape(2,len(radius_abcissa))
+
+		for conc_key in concentration_keys:
+			conc = round(float(conc_key),2)
+			for ii,radius in enumerate(radius_abcissa):
+				cumulative_NFW_PDF[ii] = sp.integrate.quad(_integrand_NFW_cumulative_PDF,0.0,radius,args=(conc,))[0]
+			table_values = copy(np.append(radius_abcissa,cumulative_NFW_PDF).reshape(2,len(radius_abcissa)))
+			NFW_lookup_table[conc_key] = table_values
 		
-		for concentration in concentration_table:
-			#scipy.integrate the NFW integrand ==> cumulative_NFW_PDF
-			#NFW_lookup_table[concentration] = np.append(radius_abcissa,cumulative_NFW_PDF).reshape(2,len(radius_abcissa))
-			pass
-			
-		
-		
-		NFW_lookup_table = None
-		
-	NFW_radial_positions = None
-	return NFW_radial_positions
+		if os.path.exists('DATA'):
+			output_file = open(NFW_lookup_table_filename,'wb')
+			cPickle.dump(NFW_lookup_table,output_file)
+		else:
+			os.mkdir('DATA')
+			output_file = open(NFW_lookup_table_filename,'wb')
+			cPickle.dump(NFW_lookup_table,output_file)
+	
+	return NFW_lookup_table
+
+
+def draw_NFW_radial_positions(input_host_concentrations):
+	NFW_lookup_table = _get_NFW_lookup_table()
+	pass
+	
+	
 
 class HOD_mock(object):
 	'''Base class for any HOD-based mock galaxy catalog object.
