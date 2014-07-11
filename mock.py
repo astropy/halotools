@@ -24,7 +24,7 @@ def anatoly_concentration(logM):
 	
 	'''
 	
-	masses = 10.**logM
+	masses = np.array(len(logM)) + 10.**logM
 	c0 = 12.0
 	Mpiv = 1.e12
 	a = -0.075
@@ -51,7 +51,7 @@ def _integrand_NFW_cumulative_PDF(x,conc):
 	
 	return integrand
 	
-def _get_NFW_lookup_table():
+def get_NFW_lookup_table():
 	
 	NFW_lookup_table_filename = 'DATA/NFW_lookup_table.pickle'
 	
@@ -163,31 +163,36 @@ class HOD_mock(object):
 		galaxy_data_structure=[('logM','f4'),('conc','f4'),('haloID','i8'),('pos','3float32'),('vel','3float32'),('hostpos','3float32'),('hostvel','3float32'),('rvir','f4'),('icen','i2'),('ired','i2')]
 		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
 		#over-write halo concentrations with Anatoly's best-fit relation
-		self.galaxies['conc'] = anatoly_concentration(self.galaxies['logM'])
 		
 		# Assign properties to the centrals
-		self.galaxies['logM'][:np.sum(self.halos['ncen'])] = self.halos['logM'][(self.halos['ncen']>0)]
-#		self.galaxies['conc'][:np.sum(self.halos['ncen'])] = self.halos['conc'][(self.halos['ncen']>0)]
-		self.galaxies['haloID'][:np.sum(self.halos['ncen'])] = self.halos['ID'][(self.halos['ncen']>0)]
-		self.galaxies['pos'][:np.sum(self.halos['ncen'])] = self.halos['pos'][(self.halos['ncen']>0)]
-		self.galaxies['hostpos'][:np.sum(self.halos['ncen'])] = self.halos['pos'][(self.halos['ncen']>0)]
-		self.galaxies['vel'][:np.sum(self.halos['ncen'])] = self.halos['vel'][(self.halos['ncen']>0)]
-		self.galaxies['hostvel'][:np.sum(self.halos['ncen'])] = self.halos['vel'][(self.halos['ncen']>0)]
-		self.galaxies['rvir'][:np.sum(self.halos['ncen'])] = self.halos['rvir'][(self.halos['ncen']>0)]
-		self.galaxies['icen'][:np.sum(self.halos['ncen'])] = np.zeros(np.sum(self.halos['ncen']))+1
+		self.galaxies['logM'][0:self.ncens] = self.halos['logM'][(self.halos['ncen']>0)]
+		self.galaxies['haloID'][0:self.ncens] = self.halos['ID'][(self.halos['ncen']>0)]
+		self.galaxies['pos'][0:self.ncens] = self.halos['pos'][(self.halos['ncen']>0)]
+		self.galaxies['hostpos'][0:self.ncens] = self.halos['pos'][(self.halos['ncen']>0)]
+		self.galaxies['vel'][0:self.ncens] = self.halos['vel'][(self.halos['ncen']>0)]
+		self.galaxies['hostvel'][0:self.ncens] = self.halos['vel'][(self.halos['ncen']>0)]
+		self.galaxies['rvir'][0:self.ncens] = self.halos['rvir'][(self.halos['ncen']>0)]
+		self.galaxies['icen'][0:self.ncens] = np.zeros(np.sum(self.halos['ncen']))+1
 		
 		# Assign host properties to the satellites
 		counter=np.sum(self.halos['ncen'])
 		halos_with_satellites = self.halos[self.halos['nsat']>0]
 		for halo in halos_with_satellites:
 			self.galaxies['logM'][counter:counter+halo['nsat']] = halo['logM']
-#			self.galaxies['conc'][counter:counter+halo['nsat']] = halo['conc']
 			self.galaxies['haloID'][counter:counter+halo['nsat']] = halo['ID']
 			self.galaxies['hostpos'][counter:counter+halo['nsat']] = halo['pos']
 			self.galaxies['hostvel'][counter:counter+halo['nsat']] = halo['vel']
 			self.galaxies['rvir'][counter:counter+halo['nsat']] = halo['rvir']
 			counter += halo['nsat']
-		self._assign_satellite_coords_on_virial_sphere
+		self.galaxies['conc'] = anatoly_concentration(self.galaxies['logM'])
+		ckeys = [str(round(c,2)) for c in self.galaxies['conc']]
+		#concentration_keys = [str(round(c,2)) for c in concentration_table]
+
+		#self.galaxies['conc'] = round(self.galaxies['conc'],2)
+
+		NFW_table = get_NFW_lookup_table()
+
+		#self._assign_satellite_coords_on_virial_sphere
 		
 		
 	def _assign_satellite_coords_on_virial_sphere(self):
