@@ -31,6 +31,17 @@ def anatoly_concentration(logM):
 	concentrations = c0*(masses/Mpiv)**a
 	return concentrations
 	
+def _generate_random_points_on_unit_sphere(self,Num_points):
+	"""Generate N random angles and assign them to coords[start:end]."""
+	phi = np.random.uniform(0,2*np.pi,Num_points)
+	cos_t = np.random.uniform(-1.,1.,Num_points)
+	sin_t = np.sqrt((1.-cos_t**2))
+	coords = np.zeros(Num_points*3).reshape([Num_points,3])
+	coords[:,0] = sin_t * np.cos(phi)
+	coords[:,1] = sin_t * np.sin(phi)
+	coords[:,2] = cos_t
+	return coords
+
 def _integrand_NFW_cumulative_PDF(x,conc):
 		
 	prefactor = (conc**3.)/(np.log(1.+conc) - (conc/(1.+conc)))
@@ -178,16 +189,6 @@ class HOD_mock(object):
 			counter += halo['nsat']
 		self._assign_satellite_coords_on_virial_sphere
 		
-	def _generate_random_points_on_unit_sphere(self,Num_points):
-		"""Generate N random angles and assign them to coords[start:end]."""
-		phi = np.random.uniform(0,2*np.pi,Num_points)
-		cos_t = np.random.uniform(-1.,1.,Num_points)
-		sin_t = np.sqrt((1.-cos_t**2))
-		coords = np.zeros(Num_points*3).reshape([Num_points,3])
-		coords[:,0] = sin_t * np.cos(phi)
-		coords[:,1] = sin_t * np.sin(phi)
-		coords[:,2] = cos_t
-		return coords
 		
 	def _assign_satellite_coords_on_virial_sphere(self):
 		satellite_coords_on_unit_sphere = self._generate_random_points_on_unit_sphere(self.galaxies.nsats)
