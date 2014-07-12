@@ -160,7 +160,7 @@ class HOD_mock(object):
 		self.ncens = np.sum(self.halos['ncen'])
 		self.satellite_fraction = 1.0*np.sum(self.halos['nsat'])/(1.0*self.ngals)
 
-		galaxy_data_structure=[('logM','f4'),('conc','f4'),('haloID','i8'),('pos','3float32'),('vel','3float32'),('hostpos','3float32'),('hostvel','3float32'),('rvir','f4'),('icen','i2'),('ired','i2')]
+		galaxy_data_structure=[('logM','f4'),('conc','f4'),('haloID','i8'),('pos','3float32'),('vel','3float32'),('hostpos','3float32'),('hostvel','3float32'),('rvir','f4'),('icen','i2'),('ired','i2'),('rhalo','f4')]
 		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
 		#over-write halo concentrations with Anatoly's best-fit relation
 		
@@ -173,6 +173,7 @@ class HOD_mock(object):
 		self.galaxies['hostvel'][0:self.ncens] = self.halos['vel'][(self.halos['ncen']>0)]
 		self.galaxies['rvir'][0:self.ncens] = self.halos['rvir'][(self.halos['ncen']>0)]
 		self.galaxies['icen'][0:self.ncens] = np.zeros(np.sum(self.halos['ncen']))+1
+		self.galaxies['rhalo'][0:self.ncens] = np.zeros(np.sum(self.halos['ncen']))
 		
 		# Assign host properties to the satellites
 		counter=np.sum(self.halos['ncen'])
@@ -184,16 +185,15 @@ class HOD_mock(object):
 			self.galaxies['hostvel'][counter:counter+halo['nsat']] = halo['vel']
 			self.galaxies['rvir'][counter:counter+halo['nsat']] = halo['rvir']
 			counter += halo['nsat']
-		self.galaxies['conc'] = anatoly_concentration(self.galaxies['logM'])
-		ckeys = [str(round(c,2)) for c in self.galaxies['conc']]
-		#concentration_keys = [str(round(c,2)) for c in concentration_table]
 
-		#self.galaxies['conc'] = round(self.galaxies['conc'],2)
+		self.galaxies['conc'] = anatoly_concentration(self.galaxies['logM'])
+		ckeys = [str(round(c,2)) for c in self.galaxies['conc'][self.ncens:]]
+		random_numbers_for_satellite_positions = np.random.random(self.nsats)
 
 		NFW_table = get_NFW_lookup_table()
 
-		#self._assign_satellite_coords_on_virial_sphere
-		
+
+
 		
 	def _assign_satellite_coords_on_virial_sphere(self):
 		satellite_coords_on_unit_sphere = self._generate_random_points_on_unit_sphere(self.galaxies.nsats)
