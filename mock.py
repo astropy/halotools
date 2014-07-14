@@ -3,7 +3,8 @@
 import read_nbody
 import halo_occupation as ho
 import numpy as np
-import scipy as sp
+from scipy.integrate import quad as quad
+from scipy.interpolate import interp1d as interp1d
 import defaults
 import cPickle
 import os
@@ -60,8 +61,8 @@ def get_NFW_lookup_table():
 		NFW_lookup_table = cPickle.load(input_file)
 	except:
 		# set up concentration bins for NFW lookup table
-		concentration_table_min = 1
-		concentration_table_max = 25
+		concentration_table_min = 0.1
+		concentration_table_max = 50
 		concentration_table_binwidth = 0.1
 		concentration_table = np.arange(concentration_table_min,concentration_table_max,concentration_table_binwidth)
 		concentration_keys = [str(round(c,2)) for c in concentration_table]
@@ -71,8 +72,8 @@ def get_NFW_lookup_table():
 
 		# set up radial bins for NFW lookup table
 		radius_abcissa_logmin = -4		
-		radius_abcissa_logmax = -0.01
-		radius_abcissa_Npts = 100	
+		radius_abcissa_logmax = 0
+		radius_abcissa_Npts = 200	
 		radius_abcissa = np.logspace(radius_abcissa_logmin,radius_abcissa_logmax,radius_abcissa_Npts)
 		# create dictionary in which to store NFW lookup table
 		cumulative_NFW_PDF = np.zeros(len(radius_abcissa))
@@ -81,7 +82,7 @@ def get_NFW_lookup_table():
 		for conc_key in concentration_keys:
 			conc = round(float(conc_key),2)
 			for ii,radius in enumerate(radius_abcissa):
-				cumulative_NFW_PDF[ii] = sp.integrate.quad(_integrand_NFW_cumulative_PDF,0.0,radius,args=(conc,))[0]
+				cumulative_NFW_PDF[ii] = quad(_integrand_NFW_cumulative_PDF,0.0,radius,args=(conc,))[0]
 			table_values = copy(np.append(radius_abcissa,cumulative_NFW_PDF).reshape(2,len(radius_abcissa)))
 			NFW_lookup_table[conc_key] = table_values
 		
@@ -98,9 +99,15 @@ def get_NFW_lookup_table():
 	return NFW_lookup_table
 
 
-def draw_NFW_radial_positions(input_host_concentrations):
-	NFW_lookup_table = _get_NFW_lookup_table()
-	pass
+def draw_NFW_radial_positions(NFW_table,conc_key,Nsats):
+	radii = NFW_table[conc_key][0]
+	cumulative_PDF = NFW_table[conc_key][1]
+	inverse_NFW_PDF = interp1d(cumulative_PDF,radii)
+
+	random_numbers_for_satellite_positions = np.random.random(Nsats)
+	random_radial_positions = inverse_NFW_PDF(random_numbers_for_satellite_positions)
+
+	return random_radial_positions
 	
 	
 
@@ -115,9 +122,9 @@ class HOD_mock(object):
 
 	Synopsis:
 		Instantiations of this class have bound to them: 
-		1) a numpy record array of dark matter host halos, 
-		2) a dictionary of HOD model parameters,
-		3) a numpy record array of galaxies populating those halos according to the model.
+		* a numpy record array of dark matter host halos, 
+		* a dictionary of HOD model parameters,
+		* a numpy record array of galaxies populating those halos according to the model.
 
 
 	'''
@@ -188,7 +195,6 @@ class HOD_mock(object):
 
 		self.galaxies['conc'] = anatoly_concentration(self.galaxies['logM'])
 		ckeys = [str(round(c,2)) for c in self.galaxies['conc'][self.ncens:]]
-		random_numbers_for_satellite_positions = np.random.random(self.nsats)
 
 		NFW_table = get_NFW_lookup_table()
 
