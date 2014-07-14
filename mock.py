@@ -195,10 +195,11 @@ class HOD_mock(object):
 		self.galaxies['conc'] = ho.anatoly_concentration(self.galaxies['logM'])*self.hod_dict['fconc']
 		concentration_array = np.linspace(np.min(self.galaxies['conc']),np.max(self.galaxies['conc']),1000)
 		radius_array = np.linspace(0.,1.,101)
-		self._nfw_interp = []
+		cumulative_nfw_PDF = []
 		for c in concentration_array:
-			self._nfw_interp.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
-		self._idx_conc = np.digitize(self.galaxies['conc'][self.ncens:-1],concentration_array)
+			cumulative_nfw_PDF.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
+		idx_conc = np.digitize(self.galaxies['conc'][self.ncens:],concentration_array)
+		
 
 
 
