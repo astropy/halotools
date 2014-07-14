@@ -42,6 +42,7 @@ def _integrand_NFW_cumulative_PDF(x,conc):
 	return integrand
 	
 def get_NFW_lookup_table(concentration_table_min=1, concentration_table_max = 25, concentration_table_binwidth = defaults.default_NFW_concentration_precision):
+# This is totally unnecessary, since the NFW profile can be integrated analytically. Sheesh, what a waste of coding time.
 
 	concentration_table_min = np.floor(concentration_table_min)
 	concentration_table_max = np.ceil(concentration_table_max)
@@ -192,13 +193,14 @@ class HOD_mock(object):
 
 		#over-write halo concentrations with Anatoly's best-fit relation
 		self.galaxies['conc'] = ho.anatoly_concentration(self.galaxies['logM'])*self.hod_dict['fconc']
+		concentration_array = np.linspace(np.min(self.galaxies['conc']),np.max(self.galaxies['conc']),1000)
+		radius_array = np.linspace(0.,1.,101)
+		self._nfw_interp = []
+		for c in concentration_array:
+			self._nfw_interp.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
+		self._idx_conc = np.digitize(self.galaxies['conc'][self.ncens:-1],concentration_array)
 
-		NFW_table = get_NFW_lookup_table()
-		conc_key_float_list = np.array(NFW_table.keys()).astype(np.float).sort()
-		#for ii,conc in enumerate(conc_key_float_list):
-		#	conc_key = str(round(conc,2))
-		#	table = NFW_table[conc_key]
-		#	idx_satellites_conc = (self.galaxies['conc'] >= conc_key_list )
+
 
 
 

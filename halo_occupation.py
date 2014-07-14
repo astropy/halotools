@@ -189,8 +189,8 @@ def anatoly_concentration(logM):
     concentrations = c0*(masses/Mpiv)**a
     return concentrations
 
-def NFW_PDF(r,c):
-    """Probability distribution function for an NFW profile.
+def cumulative_NFW_PDF(r,c):
+    """Cumulative probability distribution function for an NFW profile.
     where r = R/r_vir"""
     norm=np.log(1.+c)-c/(1.+c)
     return (np.log(1.+r*c) - r*c/(1.+r*c))/norm
