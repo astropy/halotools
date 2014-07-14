@@ -12,25 +12,14 @@ from copy import copy
 from collections import Counter
 
 
-def rewrap(coords,Lbox):
+def rewrap(coords, box_length):
     """Rewrap coords to all be within the box. Returns the rewrapped result."""
-    test = coords > Lbox
-    coords[test] = coords[test] - Lbox
+    test = coords > box_length
+    coords[test] = coords[test] - box_length
     test = coords < 0
-    coords[test] = Lbox + coords[test]
+    coords[test] = box_length + coords[test]
     return coords
 
-def anatoly_concentration(logM):
-	''' Concentration-mass relation from Anatoly Klypin's 2011 Bolshoi paper.
-	
-	'''
-	
-	masses = np.array(len(logM)) + 10.**logM
-	c0 = 12.0
-	Mpiv = 1.e12
-	a = -0.075
-	concentrations = c0*(masses/Mpiv)**a
-	return concentrations
 	
 def _generate_random_points_on_unit_sphere(self,Num_points):
 	"""Generate N random angles and assign them to coords[start:end]."""
@@ -52,28 +41,28 @@ def _integrand_NFW_cumulative_PDF(x,conc):
 	
 	return integrand
 	
-def get_NFW_lookup_table():
+def get_NFW_lookup_table(concentration_table_min=1, concentration_table_max = 25, concentration_table_binwidth = defaults.default_NFW_concentration_precision):
+
+	concentration_table_min = np.floor(concentration_table_min)
+	concentration_table_max = np.ceil(concentration_table_max)
+
+	NFW_lookup_table_filename = os.path.abspath('') + '/DATA/NFW_lookup_table.pickle'
 	
-	NFW_lookup_table_filename = 'DATA/NFW_lookup_table.pickle'
-	
-	try:
+	if os.path.exists(NFW_lookup_table_filename):
 		input_file=open(NFW_lookup_table_filename,'rb')
 		NFW_lookup_table = cPickle.load(input_file)
-	except:
+	else:
 		# set up concentration bins for NFW lookup table
-		concentration_table_min = 0.1
-		concentration_table_max = 50
-		concentration_table_binwidth = 0.1
 		concentration_table = np.arange(concentration_table_min,concentration_table_max,concentration_table_binwidth)
-		concentration_keys = [str(round(c,2)) for c in concentration_table]
-		test_of_repeated_keys=[k for k,v in Counter(concentration_keys).items() if v>1]
-		if len(test_of_repeated_keys) > 0:
-			concentration_keys = list(set(concentration_keys))
+		concentration_keys = list(set([str(round(c,2)) for c in concentration_table]))
+#		test_of_repeated_keys=[k for k,v in Counter(concentration_keys).items() if v>1]
+#		if len(test_of_repeated_keys) > 0:
+#			concentration_keys = list(set(concentration_keys))
 
 		# set up radial bins for NFW lookup table
-		radius_abcissa_logmin = -4		
+		radius_abcissa_logmin = -3		
 		radius_abcissa_logmax = 0
-		radius_abcissa_Npts = 200	
+		radius_abcissa_Npts = 100	
 		radius_abcissa = np.logspace(radius_abcissa_logmin,radius_abcissa_logmax,radius_abcissa_Npts)
 		# create dictionary in which to store NFW lookup table
 		cumulative_NFW_PDF = np.zeros(len(radius_abcissa))
@@ -136,7 +125,11 @@ class HOD_mock(object):
 		temp_halos = simulation_data['halos']
 
 		# create a dictonary of numpy arrays containing relevant halo information		
-		halo_data_structure=[('logM','f4'),('conc','f4'),('ID','i8'),('pos','3float32'),('vel','3float32'),('rvir','f4'),('ncen','i4'),('nsat','i4')]
+		halo_data_structure=[
+			('logM','f4'),('conc','f4'),('ID','i8'),
+			('pos','3float32'),('vel','3float32'),('rvir','f4'),
+			('ncen','i4'),('nsat','i4')
+			]
 		self.halos = np.zeros(len(temp_halos.MVIR),dtype=halo_data_structure)				
 		self.halos['logM'] = np.log10(temp_halos.MVIR)
 		self.halos['conc'] = temp_halos.RVIR/temp_halos.RS
@@ -167,9 +160,13 @@ class HOD_mock(object):
 		self.ncens = np.sum(self.halos['ncen'])
 		self.satellite_fraction = 1.0*np.sum(self.halos['nsat'])/(1.0*self.ngals)
 
-		galaxy_data_structure=[('logM','f4'),('conc','f4'),('haloID','i8'),('pos','3float32'),('vel','3float32'),('hostpos','3float32'),('hostvel','3float32'),('rvir','f4'),('icen','i2'),('ired','i2'),('rhalo','f4')]
+		galaxy_data_structure=[
+			('logM','f4'),('conc','f4'),('haloID','i8'),
+			('pos','3float32'),('vel','3float32'),('hostpos','3float32'),
+			('hostvel','3float32'),('rvir','f4'),('icen','i2'),
+			('ired','i2'),('rhalo','f4')
+			]
 		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
-		#over-write halo concentrations with Anatoly's best-fit relation
 		
 		# Assign properties to the centrals
 		self.galaxies['logM'][0:self.ncens] = self.halos['logM'][(self.halos['ncen']>0)]
@@ -193,10 +190,16 @@ class HOD_mock(object):
 			self.galaxies['rvir'][counter:counter+halo['nsat']] = halo['rvir']
 			counter += halo['nsat']
 
-		self.galaxies['conc'] = anatoly_concentration(self.galaxies['logM'])
-		ckeys = [str(round(c,2)) for c in self.galaxies['conc'][self.ncens:]]
+		#over-write halo concentrations with Anatoly's best-fit relation
+		self.galaxies['conc'] = ho.anatoly_concentration(self.galaxies['logM'])*self.hod_dict['fconc']
 
 		NFW_table = get_NFW_lookup_table()
+		conc_key_float_list = np.array(NFW_table.keys()).astype(np.float).sort()
+		#for ii,conc in enumerate(conc_key_float_list):
+		#	conc_key = str(round(conc,2))
+		#	table = NFW_table[conc_key]
+		#	idx_satellites_conc = (self.galaxies['conc'] >= conc_key_list )
+
 
 
 

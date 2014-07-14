@@ -57,7 +57,8 @@ class hod(object):
         'sigma_logM' : 0.15, # scatter in central galaxy stellar-to-halo mass
         'logMmin_sat' : 11.9, # low-end cutoff in log Mass for a halo to contain a satellite
         'Msat_ratio' : 20.0, # multiplicative factor specifying when a halo contains a satellite
-        'alpha_sat' : 1.0 # power law slope of the satellite occupation function
+        'alpha_sat' : 1.0, # power law slope of the satellite occupation function
+        'fconc' : 0.5 # multiplicative factor used to scale satellite concentrations
         }
         
         self.color_dict = {
@@ -73,7 +74,8 @@ default_hod_dict = {
 	'sigma_logM' : 0.15, # scatter in central galaxy stellar-to-halo mass
 	'logMmin_sat' : 11.9, # low-end cutoff in log Mass for a halo to contain a satellite
 	'Msat_ratio' : 20.0, # multiplicative factor specifying when a halo contains a satellite
-	'alpha_sat' : 1.0 # power law slope of the satellite occupation function
+	'alpha_sat' : 1.0, # power law slope of the satellite occupation function
+    'fconc' : 0.5 # multiplicative factor used to scale satellite concentrations
 }
 
 default_color_dict = {
@@ -81,3 +83,17 @@ default_color_dict = {
      'satellite_coefficients' : [0.5,0.75,0.85], #polynomial coefficients determining quenched fraction of centrals
      'abcissa' : [12,13.5,15]
 }
+
+
+default_NFW_concentration_precision = 0.5
+
+
+
+
+
+
+
+
+
+
+

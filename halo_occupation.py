@@ -177,6 +177,23 @@ def quenching_designation(logM,coefficients):
     return quenching_designation_array
 
 
+def anatoly_concentration(logM):
+    ''' Concentration-mass relation from Anatoly Klypin's 2011 Bolshoi paper.
+    
+    '''
+    
+    masses = np.zeros(len(logM)) + 10.**logM
+    c0 = 12.0
+    Mpiv = 1.e12
+    a = -0.075
+    concentrations = c0*(masses/Mpiv)**a
+    return concentrations
+
+def NFW_PDF(r,c):
+    """Probability distribution function for an NFW profile.
+    where r = R/r_vir"""
+    norm=np.log(1.+c)-c/(1.+c)
+    return (np.log(1.+r*c) - r*c/(1.+r*c))/norm
 
 
 
