@@ -21,7 +21,7 @@ def rewrap(coords, box_length):
     return coords
 
 	
-def _generate_random_points_on_unit_sphere(self,Num_points):
+def _generate_random_points_on_unit_sphere(Num_points):
 	"""Generate N random angles and assign them to coords[start:end]."""
 	phi = np.random.uniform(0,2*np.pi,Num_points)
 	cos_t = np.random.uniform(-1.,1.,Num_points)
@@ -73,7 +73,7 @@ class HOD_mock(object):
 		self.halos['ID'] = temp_halos.ID
 		self.halos['pos'] = temp_halos.POS
 		self.halos['vel'] = temp_halos.VEL
-		self.halos['rvir'] = np.array(temp_halos.RVIR)
+		self.halos['rvir'] = np.array(temp_halos.RVIR)/1000.
 
 		# mock object should know the basic attributs of its simulation
 		self.simulation_dict = simulation_data['simulation_dict']
@@ -128,6 +128,7 @@ class HOD_mock(object):
 			self.galaxies['logM'][counter:counter+halo['nsat']] = halo['logM']
 			self.galaxies['haloID'][counter:counter+halo['nsat']] = halo['ID']
 			self.galaxies['hostpos'][counter:counter+halo['nsat']] = halo['pos']
+			#self.galaxies['pos'][counter:counter+halo['nsat']] = halo['pos']
 			self.galaxies['hostvel'][counter:counter+halo['nsat']] = halo['vel']
 			self.galaxies['rvir'][counter:counter+halo['nsat']] = halo['rvir']
 			counter += halo['nsat']
@@ -160,6 +161,12 @@ class HOD_mock(object):
 		for ii in np.arange(len(satellite_indices)):
 			self.galaxies['rhalo'][satellite_indices[ii]] = cumulative_nfw_PDF[idx_conc[ii]](random_numbers_for_satellite_positions[ii])
 
+
+		self.galaxies['pos'][self.galaxies['icen']==0][:,0] = self.galaxies['hostpos'][self.galaxies['icen']==0][:,0] +  (_generate_random_points_on_unit_sphere(self.nsats)[:,0]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
+		self.galaxies['pos'][self.galaxies['icen']==0][:,1] = self.galaxies['hostpos'][self.galaxies['icen']==0][:,1] +  (_generate_random_points_on_unit_sphere(self.nsats)[:,1]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
+		self.galaxies['pos'][self.galaxies['icen']==0][:,2] = self.galaxies['hostpos'][self.galaxies['icen']==0][:,2] +  (_generate_random_points_on_unit_sphere(self.nsats)[:,2]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
+
+#def _generate_random_points_on_unit_sphere(self,Num_points):
 
 
 		

@@ -9,6 +9,7 @@ import numpy as np
 import mock
 import read_nbody
 import timeit
+from copy import copy
 
 
 m = mock.HOD_mock()
@@ -47,3 +48,25 @@ timeit_results =  t.repeat(3,1)
 average_runtime_of_mock_creation = np.mean(timeit_results)
 print("Average number of seconds to create mock:")
 print(average_runtime_of_mock_creation)
+print("")
+
+sats = m.galaxies[m.galaxies['icen']==0]
+cens = m.galaxies[m.galaxies['icen']==1]
+
+
+
+#		self.galaxies['pos'][self.galaxies['icen']==0][:,0] = self.galaxies['hostpos'][self.galaxies['icen']==0][:,0] +  _generate_random_points_on_unit_sphere(self.nsats)[:,0]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0]
+
+#sats['pos'][:,0] = sats['hostpos'][:,0] + (mock._generate_random_points_on_unit_sphere(m.nsats)[:,0]*sats['rhalo']*sats['rvir'])
+
+
+
+#m.galaxies['pos'][m.galaxies['icen']==0][:,0] = m.galaxies['hostpos'][m.galaxies['icen']==0][:,0] +  (mock._generate_random_points_on_unit_sphere(m.nsats)[:,0]*m.galaxies['rhalo'][m.galaxies['icen']==0]*m.galaxies['rvir'][m.galaxies['icen']==0])
+#m.galaxies['pos'][m.galaxies['icen']==0][0,0] = copy(mock._generate_random_points_on_unit_sphere(m.nsats)[0,0])
+
+
+#rpts = mock._generate_random_points_on_unit_sphere(m.nsats)
+#m.galaxies['pos'][m.galaxies['icen']==0][:,0] = copy(rpts[:,0])
+
+
+
