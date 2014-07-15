@@ -30,75 +30,7 @@ def _generate_random_points_on_unit_sphere(self,Num_points):
 	coords[:,0] = sin_t * np.cos(phi)
 	coords[:,1] = sin_t * np.sin(phi)
 	coords[:,2] = cos_t
-	return coords
-
-def _integrand_NFW_cumulative_PDF(x,conc):
-		
-	prefactor = (conc**3.)/(np.log(1.+conc) - (conc/(1.+conc)))
-	numerator = x**2
-	denominator = (conc*x)*(1. + conc*x)**2.
-	integrand = prefactor*numerator/denominator
-	
-	return integrand
-	
-def get_NFW_lookup_table(concentration_table_min=1, concentration_table_max = 25, concentration_table_binwidth = defaults.default_NFW_concentration_precision):
-# This is totally unnecessary, since the NFW profile can be integrated analytically. Sheesh, what a waste of coding time.
-
-	concentration_table_min = np.floor(concentration_table_min)
-	concentration_table_max = np.ceil(concentration_table_max)
-
-	NFW_lookup_table_filename = os.path.abspath('') + '/DATA/NFW_lookup_table.pickle'
-	
-	if os.path.exists(NFW_lookup_table_filename):
-		input_file=open(NFW_lookup_table_filename,'rb')
-		NFW_lookup_table = cPickle.load(input_file)
-	else:
-		# set up concentration bins for NFW lookup table
-		concentration_table = np.arange(concentration_table_min,concentration_table_max,concentration_table_binwidth)
-		concentration_keys = list(set([str(round(c,2)) for c in concentration_table]))
-#		test_of_repeated_keys=[k for k,v in Counter(concentration_keys).items() if v>1]
-#		if len(test_of_repeated_keys) > 0:
-#			concentration_keys = list(set(concentration_keys))
-
-		# set up radial bins for NFW lookup table
-		radius_abcissa_logmin = -3		
-		radius_abcissa_logmax = 0
-		radius_abcissa_Npts = 100	
-		radius_abcissa = np.logspace(radius_abcissa_logmin,radius_abcissa_logmax,radius_abcissa_Npts)
-		# create dictionary in which to store NFW lookup table
-		cumulative_NFW_PDF = np.zeros(len(radius_abcissa))
-		NFW_lookup_table = {}
-
-		for conc_key in concentration_keys:
-			conc = round(float(conc_key),2)
-			for ii,radius in enumerate(radius_abcissa):
-				cumulative_NFW_PDF[ii] = quad(_integrand_NFW_cumulative_PDF,0.0,radius,args=(conc,))[0]
-			table_values = copy(np.append(radius_abcissa,cumulative_NFW_PDF).reshape(2,len(radius_abcissa)))
-			NFW_lookup_table[conc_key] = table_values
-		
-		if os.path.exists('DATA'):
-			output_file = open(NFW_lookup_table_filename,'wb')
-			cPickle.dump(NFW_lookup_table,output_file)
-			output_file.close()
-		else:
-			os.mkdir('DATA')
-			output_file = open(NFW_lookup_table_filename,'wb')
-			cPickle.dump(NFW_lookup_table,output_file)
-			output_file.close()
-	
-	return NFW_lookup_table
-
-
-def draw_NFW_radial_positions(NFW_table,conc_key,Nsats):
-	radii = NFW_table[conc_key][0]
-	cumulative_PDF = NFW_table[conc_key][1]
-	inverse_NFW_PDF = interp1d(cumulative_PDF,radii)
-
-	random_numbers_for_satellite_positions = np.random.random(Nsats)
-	random_radial_positions = inverse_NFW_PDF(random_numbers_for_satellite_positions)
-
-	return random_radial_positions
-	
+	return coords	
 	
 
 class HOD_mock(object):
@@ -181,6 +113,8 @@ class HOD_mock(object):
 		self.galaxies['rhalo'][0:self.ncens] = np.zeros(np.sum(self.halos['ncen']))
 		
 		# Assign host properties to the satellites
+		# Currently involves looping over every host halo with Nsat > 0
+		# This is one of the potential speed bottlenecks
 		counter=np.sum(self.halos['ncen'])
 		halos_with_satellites = self.halos[self.halos['nsat']>0]
 		for halo in halos_with_satellites:
@@ -191,18 +125,30 @@ class HOD_mock(object):
 			self.galaxies['rvir'][counter:counter+halo['nsat']] = halo['rvir']
 			counter += halo['nsat']
 
-		#over-write halo concentrations with Anatoly's best-fit relation
+		#over-write the true halo concentrations with Anatoly's best-fit relation
+		#this erases the relationship between halo assembly and internal structure, 
+		#in accord with the conventions of "mass-only" HODs
 		self.galaxies['conc'] = ho.anatoly_concentration(self.galaxies['logM'])*self.hod_dict['fconc']
 		concentration_array = np.linspace(np.min(self.galaxies['conc']),np.max(self.galaxies['conc']),1000)
 		radius_array = np.linspace(0.,1.,101)
+		#cumulative_nfw_PDF is a list of functions. The list elements correspond to different NFW concentrations.
+		#Each function takes a scalar y in [0,1] as input, 
+		#and outputs the x = r/Rvir corresponding to P_NFW( x > r/Rvir ) = y. 
+		#Thus each list element is the inverse of the NFW cumulative mass PDF.
 		cumulative_nfw_PDF = []
 		for c in concentration_array:
 			cumulative_nfw_PDF.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
+		#idx_conc is an integer array, with one element for each satellite in self.galaxies
+		#the elements of idx_conc are the indices pointing to the bins defined by concentration_array
 		idx_conc = np.digitize(self.galaxies['conc'][self.ncens:],concentration_array)
-		
+		satellite_rhalo_array = np.random.random(self.nsats)
 
-
-
+		satellite_indices = np.nonzero(self.galaxies['icen']==0)[0]
+		random_numbers_for_satellite_positions = np.random.random(len(satellite_indices))
+		#Looping over each individual satellite adds an entire second to the runtime.
+		#This is unacceptable. Make it faster!
+		for ii in np.arange(len(satellite_indices)):
+			self.galaxies['rhalo'][satellite_indices[ii]] = cumulative_nfw_PDF[idx_conc[ii]](random_numbers_for_satellite_positions[ii])
 
 
 

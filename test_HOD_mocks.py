@@ -2,6 +2,7 @@ import halo_occupation as ho
 import numpy as np
 import mock
 import read_nbody
+import timeit
 
 
 m = mock.HOD_mock()
@@ -28,3 +29,15 @@ test_coeff = coeff - np.array([10,2,3,0])
 if any(test_coeff) != 0:
 	print("Bad determination of quenching coefficients!")
 
+if any(m.galaxies['rhalo'][m.galaxies['icen']==1] != 0.0):
+	print("Bad assignment of halo-centric position, some centrals are non-central")
+
+if any(m.galaxies['rhalo'][m.galaxies['icen']==0] == 0.0):
+	print("Bad assignment of halo-centric position, some satellites lie on top of their central")
+
+
+t=timeit.Timer("m=mock.HOD_mock()","import mock")
+timeit_results =  t.repeat(3,1)
+average_runtime_of_mock_creation = np.mean(timeit_results)
+print("Average number of seconds to create mock:")
+print(average_runtime_of_mock_creation)
