@@ -34,19 +34,22 @@ def _generate_random_points_on_unit_sphere(self,Num_points):
 	
 
 class HOD_mock(object):
-	'''Base class for any HOD-based mock galaxy catalog object.
+	'''Base class for any HOD-based mock galaxy catalog object. Basic API still under rapid development.
 
 	.. warning::
 		Still buggy and poorly tested.
 
 	Args:
-		hod_dict : dictionary containing parameter values specifying how to populated dark matter halos with mock galaxies
+		hod_dict : optional, dictionary containing parameter values specifying how to populated dark matter halos with mock galaxies
+		color_dict : optional, dictionary containing parameter values specifying how colors are assigned to mock galaxies
+
 
 	Synopsis:
 		Instantiations of this class have bound to them: 
 		* a numpy record array of dark matter host halos, 
 		* a dictionary of HOD model parameters,
 		* a numpy record array of galaxies populating those halos according to the model.
+		* methods for computing mock observables, such as (marked) two-point clustering, gg-lensing, conformity, etc. (yet to be implemented)
 
 
 	'''
@@ -54,10 +57,11 @@ class HOD_mock(object):
 	def __init__(self,hod_dict=None,color_dict=None):
 
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
+		# eventually this step will not require a "pre-processed" halo catalog, but this if fine for now.
 		simulation_data = read_nbody.load_bolshoi_host_halos_fits()
 		temp_halos = simulation_data['halos']
 
-		# create a dictonary of numpy arrays containing relevant halo information		
+		# create a numpy record array containing halo information relevant to this class of HODs	
 		halo_data_structure=[
 			('logM','f4'),('conc','f4'),('ID','i8'),
 			('pos','3float32'),('vel','3float32'),('rvir','f4'),
@@ -86,6 +90,7 @@ class HOD_mock(object):
 		else:
 			self.color_dict = color_dict
 
+		# add some convenience tags to the halos array as well as the mock object
 		self.halos['ncen']=np.array(ho.num_ncen(self.halos['logM'],self.hod_dict))
 		self.halos['nsat']=np.array(ho.num_nsat(self.halos['logM'],self.hod_dict))
 		self.ngals = np.sum(self.halos['ncen']) + np.sum(self.halos['nsat'])
@@ -93,6 +98,8 @@ class HOD_mock(object):
 		self.ncens = np.sum(self.halos['ncen'])
 		self.satellite_fraction = 1.0*np.sum(self.halos['nsat'])/(1.0*self.ngals)
 
+		# create a numpy record array containing galaxy catalog from which 
+		# properties of the mock object derive 	
 		galaxy_data_structure=[
 			('logM','f4'),('conc','f4'),('haloID','i8'),
 			('pos','3float32'),('vel','3float32'),('hostpos','3float32'),
@@ -112,7 +119,7 @@ class HOD_mock(object):
 		self.galaxies['icen'][0:self.ncens] = np.zeros(np.sum(self.halos['ncen']))+1
 		self.galaxies['rhalo'][0:self.ncens] = np.zeros(np.sum(self.halos['ncen']))
 		
-		# Assign host properties to the satellites
+		# Assign host halo properties to the satellites
 		# Currently involves looping over every host halo with Nsat > 0
 		# This is one of the potential speed bottlenecks
 		counter=np.sum(self.halos['ncen'])
@@ -131,6 +138,7 @@ class HOD_mock(object):
 		self.galaxies['conc'] = ho.anatoly_concentration(self.galaxies['logM'])*self.hod_dict['fconc']
 		concentration_array = np.linspace(np.min(self.galaxies['conc']),np.max(self.galaxies['conc']),1000)
 		radius_array = np.linspace(0.,1.,101)
+
 		#cumulative_nfw_PDF is a list of functions. The list elements correspond to different NFW concentrations.
 		#Each function takes a scalar y in [0,1] as input, 
 		#and outputs the x = r/Rvir corresponding to P_NFW( x > r/Rvir ) = y. 
@@ -138,25 +146,27 @@ class HOD_mock(object):
 		cumulative_nfw_PDF = []
 		for c in concentration_array:
 			cumulative_nfw_PDF.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
+
 		#idx_conc is an integer array, with one element for each satellite in self.galaxies
 		#the elements of idx_conc are the indices pointing to the bins defined by concentration_array
 		idx_conc = np.digitize(self.galaxies['conc'][self.ncens:],concentration_array)
-		satellite_rhalo_array = np.random.random(self.nsats)
 
 		satellite_indices = np.nonzero(self.galaxies['icen']==0)[0]
 		random_numbers_for_satellite_positions = np.random.random(len(satellite_indices))
 		#Looping over each individual satellite adds an entire second to the runtime.
-		#This is unacceptable. Make it faster!
+		#This is unacceptable. Make it faster! But the bookkeeping is correct, so this is fine for now.
+		#Since the total runtime for mock creation is just 2 seconds, 
+		#this will suffice until it's time to implement the likelihood engine.
 		for ii in np.arange(len(satellite_indices)):
 			self.galaxies['rhalo'][satellite_indices[ii]] = cumulative_nfw_PDF[idx_conc[ii]](random_numbers_for_satellite_positions[ii])
 
 
 
 		
-	def _assign_satellite_coords_on_virial_sphere(self):
-		satellite_coords_on_unit_sphere = self._generate_random_points_on_unit_sphere(self.galaxies.nsats)
-		for idim in np.arange(3):
-			self.galaxies['pos'][self.galaxies['icen']==0,idim]=satellite_coords_on_unit_sphere[:,idim]
+#	def _assign_satellite_coords_on_virial_sphere(self):
+#		satellite_coords_on_unit_sphere = self._generate_random_points_on_unit_sphere(self.galaxies.nsats)
+#		for idim in np.arange(3):
+#			self.galaxies['pos'][self.galaxies['icen']==0,idim]=satellite_coords_on_unit_sphere[:,idim]
 #		self.galaxies['pos'][self.galaxies['icen']==0,:] *= self.galaxies['rvir']/1000.0
 #		self.galaxies['pos'][self.galaxies['icen']==0,:] += self.galaxies['hostpos'][self.galaxies['icen']==0,:]
 		

@@ -1,3 +1,9 @@
+"""
+Very simple set of sanity checks on mock.py. 
+Not even close to a proper test suite yet. 
+
+"""
+
 import halo_occupation as ho
 import numpy as np
 import mock

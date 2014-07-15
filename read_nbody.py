@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 """
+Methods to load halo catalogs into memory.
+Not even close to the needed level of generality.
+Currently is only useful at loading in a pre-processed halo catalog.
+Adequate only while basic functionality of mock-making code is being developed.
 
 .. module : read_nbody 
     :synopsis: Modules to read and parse ASCII data of ROCKSTAR halo and merger tree catalogs.
@@ -14,7 +18,7 @@ import pyfits
 import defaults
 
 def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
-    """ Read filename and return an astropy structured table called 'halos'.
+    """ Read filename and return an astropy structured table called 'halos'. Currently a basically useless method.
 
     Args:
         filename (str): Name of file containing ASCII data
@@ -32,7 +36,7 @@ def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
     return halos
 
 def load_bolshoi_host_halos_fits(simulation_dict=None):
-    """Use pyfits to load a pre-processed .fits file containing host halo information.
+    """Placeholder method using pyfits to load a pre-processed .fits file containing host halo information.
 
     Args:
         simulation_dict : dictionary
