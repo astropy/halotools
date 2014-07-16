@@ -12,7 +12,7 @@ from copy import copy
 from collections import Counter
 
 
-def rewrap(coords, box_length):
+def apply_periodicity_of_box(coords, box_length):
     """Rewrap coords to all be within the box. Returns the rewrapped result."""
     test = coords > box_length
     coords[test] = coords[test] - box_length
@@ -128,7 +128,6 @@ class HOD_mock(object):
 			self.galaxies['logM'][counter:counter+halo['nsat']] = halo['logM']
 			self.galaxies['haloID'][counter:counter+halo['nsat']] = halo['ID']
 			self.galaxies['hostpos'][counter:counter+halo['nsat']] = halo['pos']
-			#self.galaxies['pos'][counter:counter+halo['nsat']] = halo['pos']
 			self.galaxies['hostvel'][counter:counter+halo['nsat']] = halo['vel']
 			self.galaxies['rvir'][counter:counter+halo['nsat']] = halo['rvir']
 			counter += halo['nsat']
@@ -161,10 +160,23 @@ class HOD_mock(object):
 		for ii in np.arange(len(satellite_indices)):
 			self.galaxies['rhalo'][satellite_indices[ii]] = cumulative_nfw_PDF[idx_conc[ii]](random_numbers_for_satellite_positions[ii])
 
+		#Assign positions to satellites by randomly drawing host-centric positions from an NFW profile
+		self.galaxies['pos'][:,0][self.galaxies['icen']==0] = self.galaxies['hostpos'][:,0][self.galaxies['icen']==0] + (_generate_random_points_on_unit_sphere(self.nsats)[:,0]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
+		self.galaxies['pos'][:,1][self.galaxies['icen']==0] = self.galaxies['hostpos'][:,1][self.galaxies['icen']==0] + (_generate_random_points_on_unit_sphere(self.nsats)[:,1]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
+		self.galaxies['pos'][:,2][self.galaxies['icen']==0] = self.galaxies['hostpos'][:,2][self.galaxies['icen']==0] + (_generate_random_points_on_unit_sphere(self.nsats)[:,2]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
+#		self.galaxies[self.galaxies['icen']==0]['pos'][:,0] = self.galaxies[self.galaxies['icen']==0]['hostpos'][:,0] + (_generate_random_points_on_unit_sphere(self.nsats)[:,0]*self.galaxies[self.galaxies['icen']==0]['rhalo']*self.galaxies[self.galaxies['icen']==0]['rvir'])
+#		self.galaxies[self.galaxies['icen']==0]['pos'][:,1] = self.galaxies[self.galaxies['icen']==0]['hostpos'][:,1] + (_generate_random_points_on_unit_sphere(self.nsats)[:,1]*self.galaxies[self.galaxies['icen']==0]['rhalo']*self.galaxies[self.galaxies['icen']==0]['rvir'])
+#		self.galaxies[self.galaxies['icen']==0]['pos'][:,2] = self.galaxies[self.galaxies['icen']==0]['hostpos'][:,2] + (_generate_random_points_on_unit_sphere(self.nsats)[:,2]*self.galaxies[self.galaxies['icen']==0]['rhalo']*self.galaxies[self.galaxies['icen']==0]['rvir'])
 
-		self.galaxies['pos'][self.galaxies['icen']==0][:,0] = self.galaxies['hostpos'][self.galaxies['icen']==0][:,0] +  (_generate_random_points_on_unit_sphere(self.nsats)[:,0]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
-		self.galaxies['pos'][self.galaxies['icen']==0][:,1] = self.galaxies['hostpos'][self.galaxies['icen']==0][:,1] +  (_generate_random_points_on_unit_sphere(self.nsats)[:,1]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
-		self.galaxies['pos'][self.galaxies['icen']==0][:,2] = self.galaxies['hostpos'][self.galaxies['icen']==0][:,2] +  (_generate_random_points_on_unit_sphere(self.nsats)[:,2]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
+		
+		#Apply correction to account for the periodic box
+		self.galaxies['pos'][:,0] = apply_periodicity_of_box(self.galaxies['pos'][:,0],self.simulation_dict['Lbox'])
+		self.galaxies['pos'][:,1] = apply_periodicity_of_box(self.galaxies['pos'][:,1],self.simulation_dict['Lbox'])
+		self.galaxies['pos'][:,2] = apply_periodicity_of_box(self.galaxies['pos'][:,2],self.simulation_dict['Lbox'])
+
+
+
+
 
 #def _generate_random_points_on_unit_sphere(self,Num_points):
 
