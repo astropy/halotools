@@ -13,7 +13,18 @@ from collections import Counter
 
 
 def apply_periodicity_of_box(coords, box_length):
-    """Rewrap coords to all be within the box. Returns the rewrapped result."""
+    """
+
+    Parameters
+    ----------
+    coords: 1d list of floats
+    box_length : scalar giving size of simulation box (currently hard-coded to be Mpc/h units)
+
+	Returns
+    -------
+    coords : 1d list of floats corrected for box periodicity
+
+    """
     test = coords > box_length
     coords[test] = coords[test] - box_length
     test = coords < 0
@@ -22,7 +33,19 @@ def apply_periodicity_of_box(coords, box_length):
 
 	
 def _generate_random_points_on_unit_sphere(Num_points):
-	"""Generate N random angles and assign them to coords[start:end]."""
+	"""
+	
+	Parameters
+    ----------
+    Num_points : int
+    	Specifies number of random points required
+
+    Returns
+    -------
+    coords : 3 x Num_points numpy array of coordinate points on the unit sphere.
+
+	"""
+	
 	phi = np.random.uniform(0,2*np.pi,Num_points)
 	cos_t = np.random.uniform(-1.,1.,Num_points)
 	sin_t = np.sqrt((1.-cos_t**2))
@@ -34,22 +57,27 @@ def _generate_random_points_on_unit_sphere(Num_points):
 	
 
 class HOD_mock(object):
-	'''Base class for any HOD-based mock galaxy catalog object. Basic API still under rapid development.
+	'''		
 
-	.. warning::
-		Still buggy and poorly tested.
+	Parameters
+	----------
+	hod_dict : optional, dictionary containing parameter values specifying how to populated dark matter halos with mock galaxies
+	color_dict : optional, dictionary containing parameter values specifying how colors are assigned to mock galaxies
 
-	Args:
-		hod_dict : optional, dictionary containing parameter values specifying how to populated dark matter halos with mock galaxies
-		color_dict : optional, dictionary containing parameter values specifying how colors are assigned to mock galaxies
-
-
-	Synopsis:
+	Synopsis
+	--------
+	Base class for any HOD-based mock galaxy catalog object. 
 		Instantiations of this class have bound to them: 
 		* a numpy record array of dark matter host halos, 
 		* a dictionary of HOD model parameters,
 		* a numpy record array of galaxies populating those halos according to the model.
 		* methods for computing mock observables, such as (marked) two-point clustering, gg-lensing, conformity, etc. (yet to be implemented)
+
+
+	Warning
+	-------
+	Still buggy and poorly tested. Basic API still under rapid development.
+	Not yet suitable even for use at your own risk.
 
 
 	'''

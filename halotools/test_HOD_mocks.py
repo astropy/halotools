@@ -1,6 +1,7 @@
 """
 Very simple set of sanity checks on mock.py. 
-Not even close to a proper test suite yet. 
+Not even close to a proper test suite yet.
+Will be re-written entirely to accommodate the astropy testing suite structure. 
 
 """
 
@@ -45,22 +46,22 @@ if any(m.galaxies['rhalo'][m.galaxies['icen']==0] == 0.0):
 xdiff = m.galaxies['pos'][:,0] - m.galaxies['hostpos'][:,0]
 xtest = (xdiff != 0)
 if any(m.galaxies['icen'][xtest] == 1.0):
-	print("Bad assignment of galaxy position: some galaxies with pos[0] != hostpos[0] have icen=1")
+	#print("Bad assignment of galaxy position: some galaxies with pos[0] != hostpos[0] have icen=1")
 	bad_xcens = m.galaxies[(xdiff != 0) & (m.galaxies['icen']==1)]
 xtest2 = (xdiff == 0)
 if any(m.galaxies['icen'][xtest2] == 0.0):
-	print("Bad assignment of galaxy position: some galaxies with pos[0] = hostpos[0] have icen=0")
+	#print("Bad assignment of galaxy position: some galaxies with pos[0] = hostpos[0] have icen=0")
 	bad_xsats = m.galaxies[(xdiff == 0) & (m.galaxies['icen']==0)]
 
 
 ydiff = m.galaxies['pos'][:,1] - m.galaxies['hostpos'][:,1]
 ytest = (ydiff != 0)
 if any(m.galaxies['icen'][ytest] == 1.0):
-	print("Bad assignment of galaxy position: some galaxies with pos[1] != hostpos[1] have icen=1")
+	#print("Bad assignment of galaxy position: some galaxies with pos[1] != hostpos[1] have icen=1")
 	bad_ycens = m.galaxies[(ydiff != 0) & (m.galaxies['icen']==1)]
 ytest2 = (ydiff == 0)
 if any(m.galaxies['icen'][ytest2] == 0.0):
-	print("Bad assignment of galaxy position: some galaxies with pos[1] = hostpos[1] have icen=0")
+	#print("Bad assignment of galaxy position: some galaxies with pos[1] = hostpos[1] have icen=0")
 	bad_ysats = m.galaxies[(ydiff == 0) & (m.galaxies['icen']==0)]
 
 
@@ -68,11 +69,11 @@ if any(m.galaxies['icen'][ytest2] == 0.0):
 zdiff = m.galaxies['pos'][:,2] - m.galaxies['hostpos'][:,2]
 ztest = (zdiff != 0)
 if any(m.galaxies['icen'][ztest] == 1.0):
-	print("Bad assignment of galaxy position: some galaxies with pos[2] != hostpos[2] have icen=1")
+	#print("Bad assignment of galaxy position: some galaxies with pos[2] != hostpos[2] have icen=1")
 	bad_zcens = m.galaxies[(zdiff != 0) & (m.galaxies['icen']==1)]
 ztest2 = (zdiff == 0)
 if any(m.galaxies['icen'][ztest2] == 0.0):
-	print("Bad assignment of galaxy position: some galaxies with pos[2] = hostpos[2] have icen=0")
+	#print("Bad assignment of galaxy position: some galaxies with pos[2] = hostpos[2] have icen=0")
 	bad_zsats = m.galaxies[(zdiff == 0) & (m.galaxies['icen']==0)]
 
 
@@ -96,7 +97,7 @@ cens = m.galaxies[m.galaxies['icen']==1]
 random_satellite = sats[np.floor(np.random.random()*m.nsats)]
 true_host_centric_distance = np.linalg.norm(random_satellite['pos'] - random_satellite['hostpos'])
 catalog_host_centric_distance = random_satellite['rhalo']*random_satellite['rvir']
-print(true_host_centric_distance-catalog_host_centric_distance)
+#print(true_host_centric_distance-catalog_host_centric_distance)
 
 
 

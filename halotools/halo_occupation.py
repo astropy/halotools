@@ -17,15 +17,18 @@ import defaults
 def mean_ncen(logM,hod_dict=None):
     """ Expected number of central galaxies in a halo of mass 10**logM.
 
-    Args:
-        logM : float or array
-        hod_dict : dictionary
+    Parameters
+    ----------        
+    logM : float or array
+    hod_dict : dictionary
 
-    Returns:
-        mean_ncen : float or array
+    Returns
+    -------
+    mean_ncen : float or array
     
-    Synopsis:
-        Mean number of central galaxies in a host halo of the specified mass. Values are restricted 0 <= mean_ncen <= 1.
+    Synopsis
+    -------
+    Mean number of central galaxies in a host halo of the specified mass. Values are restricted 0 <= mean_ncen <= 1.
 
 
     """
@@ -40,12 +43,14 @@ def mean_ncen(logM,hod_dict=None):
 def num_ncen(logM,hod_dict):
     """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
 
-    Args: 
-        logM : float or array
-        hod_dict : dictionary
+    Parameters
+    ----------
+    logM : float or array
+    hod_dict : dictionary
 
-    Returns:
-        num_ncen_array : int or array
+    Returns
+    -------
+    num_ncen_array : int or array
 
     
     """
@@ -56,12 +61,14 @@ def num_ncen(logM,hod_dict):
 def mean_nsat(logM,hod_dict=None):
     """Expected number of satellite galaxies in a halo of mass 10**logM.
 
-    Args:
-        logM : float or array
-        hod_dict : dictionary
+    Parameters
+    ----------
+    logM : float or array
+    hod_dict : dictionary
 
-    Returns:
-        mean_nsat : float or array
+    Returns
+    -------
+    mean_nsat : float or array
         Mean number of satellite galaxies in a host halo of the specified mass. 
 
     
@@ -83,12 +90,14 @@ def mean_nsat(logM,hod_dict=None):
 def num_nsat(logM,hod_dict):
     '''  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
 
-    Args:
-        logM : float or array
-        hod_dict : dictionary
+    Parameters
+    ----------
+    logM : float or array
+    hod_dict : dictionary
 
-    Returns:
-        num_nsat_array : int or array
+    Returns
+    -------
+    num_nsat_array : int or array
         Values of array specify the number of satellites hosted by each halo.
 
 
@@ -112,15 +121,18 @@ def solve_for_quenching_polynomial_coefficients(logM,quenched_fraction):
     ''' Given the quenched fraction for some halo masses, 
     returns standard form polynomial coefficients specifying quenching function.
 
-    Args:
-        logM : array of log halo masses, treated as abcissa
-        quenched_fraction : array of values of the quenched fraction at the abcissa
+    Parameters
+    ----------
+    logM : array of log halo masses, treated as abcissa
+    quenched_fraction : array of values of the quenched fraction at the abcissa
 
-    Returns:
-        quenched_fraction_polynomial_coefficients : array of coefficients determining the quenched fraction polynomial 
+    Returns
+    -------
+    quenched_fraction_polynomial_coefficients : array of coefficients determining the quenched fraction polynomial 
 
-    Synopsis:
-        Very general. Input arrays logM and quenched_fraction can in principle be of any dimension Ndim, and there will be Ndim output coefficients.
+    Synopsis
+    --------
+    Input arrays logM and quenched_fraction can in principle be of any dimension Ndim, and there will be Ndim output coefficients.
 
     The input quenched_fractions specify the desired quenched fraction evaluated at the Ndim inputs for logM.
     There exists a unique, order Ndim polynomial that produces those quenched fractions evaluated at the points logM.
@@ -142,12 +154,14 @@ def solve_for_quenching_polynomial_coefficients(logM,quenched_fraction):
 def quenching_polynomial_function(logM,coefficients):
     ''' Given a set of polynomial coefficients, returns the quenched fraction at the input logM.
     
-    Args:
-        logM: array of log halo masses
-        coefficients: list of coefficients determining the quenching polynomial
+    Parameters
+    ----------
+    logM: array of log halo masses
+    coefficients: list of coefficients determining the quenching polynomial
         
-    Returns:
-        quenched_fraction: array giving fraction of galaxies that are quenched for a halo of log mass logM
+    Returns
+    -------
+    quenched_fraction: array giving fraction of galaxies that are quenched for a halo of log mass logM
     
     
     '''
@@ -166,20 +180,34 @@ def quenching_polynomial_function(logM,coefficients):
     return quenched_fraction
 
 def quenching_designation(logM,coefficients):
-    """ Returns Monte Carlo-generated array of 0 or 1 specifying whether the galaxy is quenched.
+    """
 
+    Parameters
+    ----------
+    logM: array of log halo masses
+    coefficients: list of coefficients determining the quenching polynomial
 
+    Returns
+    -------
+    quenching_designation_array : Monte Carlo-generated array of 0 or 1 specifying whether the galaxy is quenched.
 
     """
     
-    #    num_ncen_array = np.array(mean_ncen(logM,hod_dict) > np.random.random(len(logM)),dtype=int)
     quenching_designation_array = np.array(quenching_polynomial_function(logM,coefficients) > np.random.random(len(logM)),dtype=int)
     return quenching_designation_array
 
 
 def anatoly_concentration(logM):
-    ''' Concentration-mass relation from Anatoly Klypin's 2011 Bolshoi paper.
-    
+    ''' 
+
+    Parameters
+    ----------
+    logM: array of log halo masses
+
+    Returns
+    -------
+    Concentrations deriving from c-M relation from Anatoly Klypin's 2011 Bolshoi paper.
+
     '''
     
     masses = np.zeros(len(logM)) + 10.**logM
@@ -190,11 +218,26 @@ def anatoly_concentration(logM):
     return concentrations
 
 def cumulative_NFW_PDF(r,c):
-    """Cumulative probability distribution function for an NFW profile.
-    where r = R/r_vir.
-    Currently being used by mock.HOD_mock to generate satellite profiles.
-    Basic API likely to change.
+    """
 
+    Parameters
+    ----------
+    r : list of N floats in the range (0,1)
+    c : list of N concentrations
+
+    Returns
+    -------
+    List of N floats in the range (0,1). These values are given by 
+    the cumulative probability distribution function for an NFW profile,
+    where the input r is the halo-centric distance scaled by the halo Rvir. 
+
+    Synopsis
+    --------
+    Currently being used by mock.HOD_mock to generate satellite profiles. 
+
+    Warning
+    -------
+    Basic API likely to change.
 
     """
     norm=np.log(1.+c)-c/(1.+c)

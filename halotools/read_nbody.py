@@ -18,13 +18,20 @@ import pyfits
 import defaults
 
 def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
-    """ Read filename and return an astropy structured table called 'halos'. Currently a basically useless method.
+    """ 
 
-    Args:
-        filename (str): Name of file containing ASCII data
+    Parameters
+    ----------
+    filename : string
+        Name of file containing ASCII data
 
-    Returns:
-        halos : A record array containing halo catalog information.
+    Returns
+    -------
+    halos : A numpy record array containing halo catalog information.
+
+    Synopsis
+    --------
+    Read filename and return an astropy structured table called 'halos'. Currently a basically useless method.
 
     """
     
@@ -38,18 +45,18 @@ def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
 def load_bolshoi_host_halos_fits(simulation_dict=None):
     """Placeholder method using pyfits to load a pre-processed .fits file containing host halo information.
 
-    Args:
-        simulation_dict : dictionary
+    Parameters
+    ----------
+    simulation_dict : dictionary
+        Contains keys for the filename, as well as simulation attributes such as box size, resolution, and scale factor of snapshot.
 
-    Contains keys for the filename, as well as simulation attributes such as 
-    box size, resolution, and scale factor of snapshot.
+    Returns
+    -------
+    simulation : dictionary
+        Halos key is a structured table containing halo catalog information. simulation_dict key is the input dictionary.
 
-    Returns:
-        simulation : dictionary
-
-    Halos key is a structured table containing halo catalog information.
-    simulation_dict key is the input dictionary.
-
+    Notes
+    -----
     Default is Rockstar V1.5 Bolshoi halos at a=1.0003.
 
     """
