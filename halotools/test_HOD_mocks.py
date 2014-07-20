@@ -94,7 +94,7 @@ cens = m.galaxies[m.galaxies['icen']==1]
 
 
 
-random_satellite = sats[np.floor(np.random.random()*m.nsats)]
+random_satellite = sats[int(np.floor(np.random.random()*m.nsats))]
 true_host_centric_distance = np.linalg.norm(random_satellite['pos'] - random_satellite['hostpos'])
 catalog_host_centric_distance = random_satellite['rhalo']*random_satellite['rvir']
 #print(true_host_centric_distance-catalog_host_centric_distance)

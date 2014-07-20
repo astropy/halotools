@@ -10,6 +10,7 @@ import cPickle
 import os
 from copy import copy
 from collections import Counter
+from astropy.table import Table
 
 
 def apply_periodicity_of_box(coords, box_length):
@@ -95,7 +96,7 @@ class HOD_mock(object):
 			('pos','3float32'),('vel','3float32'),('rvir','f4'),
 			('ncen','i4'),('nsat','i4')
 			]
-		self.halos = np.zeros(len(temp_halos.MVIR),dtype=halo_data_structure)				
+		self.halos = Table(np.zeros(len(temp_halos.MVIR),dtype=halo_data_structure))
 		self.halos['logM'] = np.log10(temp_halos.MVIR)
 		self.halos['conc'] = temp_halos.RVIR/temp_halos.RS
 		self.halos['ID'] = temp_halos.ID
@@ -134,7 +135,8 @@ class HOD_mock(object):
 			('hostvel','3float32'),('rvir','f4'),('icen','i2'),
 			('ired','i2'),('rhalo','f4')
 			]
-		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
+		self.galaxies = Table(np.zeros(self.ngals,dtype=galaxy_data_structure))
+#		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
 		
 		# Assign properties to the centrals
 		self.galaxies['logM'][0:self.ncens] = self.halos['logM'][(self.halos['ncen']>0)]
