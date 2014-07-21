@@ -7,13 +7,13 @@ Will be re-written entirely to accommodate the astropy testing suite structure.
 
 import halo_occupation as ho
 import numpy as np
-import mock
+import make_mocks
 import read_nbody
 import timeit
 from copy import copy
 
 
-m = mock.HOD_mock()
+m = make_mocks.HOD_mock()
 print("")
 print("Mock with all defaults successfully created")
 print("Satellite fraction = "+str(m.satellite_fraction))
@@ -78,9 +78,8 @@ if any(m.galaxies['icen'][ztest2] == 0.0):
 
 
 
-
 '''
-t=timeit.Timer("m=mock.HOD_mock()","import mock")
+t=timeit.Timer("m=make_mocks.HOD_mock()","import make_mocks")
 timeit_results =  t.repeat(3,1)
 average_runtime_of_mock_creation = np.mean(timeit_results)
 print("Average number of seconds to create mock:")
