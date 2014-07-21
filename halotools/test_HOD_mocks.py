@@ -14,129 +14,149 @@ import make_mocks
 import read_nbody
 import timeit
 from copy import copy
+import observables
 
+def main():
 
-m = make_mocks.HOD_mock()
-print("")
-print("Mock with all defaults successfully created")
-print("Satellite fraction = "+str(m.satellite_fraction))
-print('')
+	test_three_dimensional_periodic_distance()
+	halos = test_read_nbody()
 
-if any(m.galaxies['icen'][0:m.ncens] != 1):
-	print("Incorrect bookkeeping on central/satellite counts")
-	print("Some galaxy in [0:m.ncens] is not a central")
-
-if any(m.galaxies['icen'][m.ncens:-1] != 0):
-	print("Incorrect bookkeeping on central/satellite counts")
-	print("Some galaxy in [m.ncens:-1] is not a satellite")
-
-
-temp_halos = read_nbody.load_bolshoi_host_halos_fits()
-
-x=[0,1,-1,2]
-y=[10,15,11,26]
-coeff = ho.solve_for_quenching_polynomial_coefficients(x,y)
-test_coeff = coeff - np.array([10,2,3,0])
-if any(test_coeff) != 0:
-	print("Bad determination of quenching coefficients!")
-
-if any(m.galaxies['rhalo'][m.galaxies['icen']==1] != 0.0):
-	print("Bad assignment of Rvir-scaled halo-centric distance, some centrals have rhalo != 0")
-
-if any(m.galaxies['rhalo'][m.galaxies['icen']==0] == 0.0):
-	print("Bad assignment of Rvir-scaled halo-centric distance, some satellites have rhalo=0")
-
-xdiff = m.galaxies['pos'][:,0] - m.galaxies['hostpos'][:,0]
-xtest = (xdiff != 0)
-if any(m.galaxies['icen'][xtest] == 1.0):
-	#print("Bad assignment of galaxy position: some galaxies with pos[0] != hostpos[0] have icen=1")
-	bad_xcens = m.galaxies[(xdiff != 0) & (m.galaxies['icen']==1)]
-xtest2 = (xdiff == 0)
-if any(m.galaxies['icen'][xtest2] == 0.0):
-	#print("Bad assignment of galaxy position: some galaxies with pos[0] = hostpos[0] have icen=0")
-	bad_xsats = m.galaxies[(xdiff == 0) & (m.galaxies['icen']==0)]
-
-
-ydiff = m.galaxies['pos'][:,1] - m.galaxies['hostpos'][:,1]
-ytest = (ydiff != 0)
-if any(m.galaxies['icen'][ytest] == 1.0):
-	#print("Bad assignment of galaxy position: some galaxies with pos[1] != hostpos[1] have icen=1")
-	bad_ycens = m.galaxies[(ydiff != 0) & (m.galaxies['icen']==1)]
-ytest2 = (ydiff == 0)
-if any(m.galaxies['icen'][ytest2] == 0.0):
-	#print("Bad assignment of galaxy position: some galaxies with pos[1] = hostpos[1] have icen=0")
-	bad_ysats = m.galaxies[(ydiff == 0) & (m.galaxies['icen']==0)]
+	mock = test_make_HOD_mock(halos)
+	test_satellite_positions(mock)
 
 
 
-zdiff = m.galaxies['pos'][:,2] - m.galaxies['hostpos'][:,2]
-ztest = (zdiff != 0)
-if any(m.galaxies['icen'][ztest] == 1.0):
-	#print("Bad assignment of galaxy position: some galaxies with pos[2] != hostpos[2] have icen=1")
-	bad_zcens = m.galaxies[(zdiff != 0) & (m.galaxies['icen']==1)]
-ztest2 = (zdiff == 0)
-if any(m.galaxies['icen'][ztest2] == 0.0):
-	#print("Bad assignment of galaxy position: some galaxies with pos[2] = hostpos[2] have icen=0")
-	bad_zsats = m.galaxies[(zdiff == 0) & (m.galaxies['icen']==0)]
+def test_three_dimensional_periodic_distance():
+	""" Use a few known pencil-and-paper answers to check my 3D periodic distance function
+
+	"""
+
+	Lbox = 100.0
+	pos1 = np.zeros(3)
+	pos2 = pos1 + 1
+	pos3 = pos1 + Lbox - 1
+	pos4 = pos1 + 1 + (0.5*Lbox)
+	pos5 = pos1 + (0.5*Lbox)
+	pos1_array = np.tile(pos1,5).reshape(5,3)
+	test_points_array = np.append(pos1,[pos2,pos3,pos4,pos5]).reshape(5,3)
+
+	calculated_distances = observables.three_dimensional_periodic_distance(pos1_array,test_points_array,Lbox)
+
+	correct_distance1 = 0.0
+	correct_distance2 = np.sqrt(3)
+	correct_distance3 = np.sqrt(3)
+	correct_distance4 = np.sqrt(3)*(0.5*Lbox - 1)
+	correct_distance5 = np.sqrt(3)*(0.5*Lbox)
+	correct_distances = [correct_distance1,correct_distance2,correct_distance3,correct_distance4,correct_distance5]
+
+	test_answer =  calculated_distances - correct_distances
+	np.testing.assert_allclose(test_answer,np.zeros(len(test_answer)),rtol=1.e-5,atol=1.e-5)
+
+
+def test_make_HOD_mock(simulation=None):
+
+	if simulation == None:
+		simulation = read_nbody.load_bolshoi_host_halos_fits()
+
+	m = make_mocks.HOD_mock(simulation_data = simulation)
+	print("")
+	print("Mock with all defaults successfully created")
+	print("Satellite fraction = "+str(m.satellite_fraction))
+	print('')
+
+	if any(m.galaxies['icen'][0:m.ncens] != 1):
+		print("Incorrect bookkeeping on central/satellite counts")
+		print("Some galaxy in [0:m.ncens] is not a central")
+
+	if any(m.galaxies['icen'][m.ncens:-1] != 0):
+		print("Incorrect bookkeeping on central/satellite counts")
+		print("Some galaxy in [m.ncens:-1] is not a satellite")
+
+	return m
+
+
+def test_read_nbody():
+
+	simulation = read_nbody.load_bolshoi_host_halos_fits()
+
+	return simulation
+
+
+def test_solve_for_quenching_polynomial_coefficients():
+	""" 
+	Use known pencil-and-paper answer to check 
+	that solve_for_quenching_polynomial_coefficients
+	is correctly solving the input linear system"""
+
+	x=[0,1,-1,2]
+	y=[10,15,11,26]
+	coeff = ho.solve_for_quenching_polynomial_coefficients(x,y)
+	test_coeff = coeff - np.array([10,2,3,0])
+	if any(test_coeff) != 0:
+		print("Bad determination of quenching coefficients!")
+
+	if any(m.galaxies['rhalo'][m.galaxies['icen']==1] != 0.0):
+		print("Bad assignment of Rvir-scaled halo-centric distance, some centrals have rhalo != 0")
+
+	if any(m.galaxies['rhalo'][m.galaxies['icen']==0] == 0.0):
+		print("Bad assignment of Rvir-scaled halo-centric distance, some satellites have rhalo=0")
+
+
+def time_mock():
+	timer_string = "m=make_mocks.HOD_mock(simulation_data = bolshoi_simulation)"
+	setup_string = "import make_mocks; import read_nbody; bolshoi_simulation = read_nbody.load_bolshoi_host_halos_fits()"
+	t = timeit.Timer(timer_string,setup=setup_string)
+	timeit_results =  t.repeat(3,1)
+	average_runtime_of_mock_creation = np.mean(timeit_results)
+	print("Average number of seconds to create mock:")
+	print(average_runtime_of_mock_creation)
+	print("")
 
 
 
-'''
-t=timeit.Timer("m=make_mocks.HOD_mock()","import make_mocks")
-timeit_results =  t.repeat(3,1)
-average_runtime_of_mock_creation = np.mean(timeit_results)
-print("Average number of seconds to create mock:")
-print(average_runtime_of_mock_creation)
-print("")
-'''
+def test_satellite_positions(mock):
+	"""
+	Verify that rhalo*rvir gives the true halo-centric distance of all satellites.
+
+	"""
+
+	sats = mock.galaxies[mock.galaxies['icen']==0]
+	Lbox = mock.simulation_dict['Lbox']
+	actual_distances = observables.three_dimensional_periodic_distance(sats['pos'],sats['hostpos'],Lbox)
+	rhalo_derived_distances = sats['rhalo']*sats['rvir']
+	
 
 
-sats = m.galaxies[m.galaxies['icen']==0]
-cens = m.galaxies[m.galaxies['icen']==1]
 
-
-
-random_satellite = sats[int(np.floor(np.random.random()*m.nsats))]
-true_host_centric_distance = np.linalg.norm(random_satellite['pos'] - random_satellite['hostpos'])
-catalog_host_centric_distance = random_satellite['rhalo']*random_satellite['rvir']
+#random_satellite = sats[int(np.floor(np.random.random()*m.nsats))]
+#true_host_centric_distance = np.linalg.norm(random_satellite['pos'] - random_satellite['hostpos'])
+#catalog_host_centric_distance = random_satellite['rhalo']*random_satellite['rvir']
 #print(true_host_centric_distance-catalog_host_centric_distance)
 
 
 
-#bad_zsats[0]['pos'],bad_zsats[0]['hostpos']
 
 
 
 
 
-		#self.galaxies['pos'][self.galaxies['icen']==0][:,0] = self.galaxies['hostpos'][self.galaxies['icen']==0][:,0] +  (_generate_random_points_on_unit_sphere(self.nsats)[:,0]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
-
-'''
-print('')
-print(sats['pos'][:,0].min())
-print(sats['pos'][:,0].max())
-print('')
-print('')
-print(sats['pos'][:,1].min())
-print(sats['pos'][:,1].max())
-print('')
-'''
-
-#sats['rvir']
-#mock._generate_random_points_on_unit_sphere(m.nsats)[:,0]
-
-#		self.galaxies['pos'][self.galaxies['icen']==0][:,0] = self.galaxies['hostpos'][self.galaxies['icen']==0][:,0] +  _generate_random_points_on_unit_sphere(self.nsats)[:,0]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0]
-
-#sats['pos'][:,0] = sats['hostpos'][:,0] + (mock._generate_random_points_on_unit_sphere(m.nsats)[:,0]*sats['rhalo']*sats['rvir'])
 
 
 
-#m.galaxies['pos'][m.galaxies['icen']==0][:,0] = m.galaxies['hostpos'][m.galaxies['icen']==0][:,0] +  (mock._generate_random_points_on_unit_sphere(m.nsats)[:,0]*m.galaxies['rhalo'][m.galaxies['icen']==0]*m.galaxies['rvir'][m.galaxies['icen']==0])
-#m.galaxies['pos'][m.galaxies['icen']==0][0,0] = copy(mock._generate_random_points_on_unit_sphere(m.nsats)[0,0])
 
 
-#rpts = mock._generate_random_points_on_unit_sphere(m.nsats)
-#m.galaxies['pos'][m.galaxies['icen']==0][:,0] = copy(rpts[:,0])
+
+
+
+
+###################################################################################################
+# Trigger
+###################################################################################################
+
+if __name__ == "__main__":
+	main()
+
+
 
 
 

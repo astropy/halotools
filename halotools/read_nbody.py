@@ -19,6 +19,8 @@ Adequate only while basic functionality of mock-making code is being developed.
 from astropy.io import ascii
 import pyfits
 import defaults
+from astropy.table import Table
+
 
 def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
     """ 
@@ -66,7 +68,7 @@ def load_bolshoi_host_halos_fits(simulation_dict=None):
     if simulation_dict == None:
         simulation_dict = defaults.default_simulation_dict
 
-    halos = pyfits.getdata(simulation_dict['catalog_filename'],0)
+    halos = Table(pyfits.getdata(simulation_dict['catalog_filename'],0))
     # should be using astropy units!
     simulation = {'halos':halos,'simulation_dict':simulation_dict}
     return simulation

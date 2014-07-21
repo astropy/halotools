@@ -85,12 +85,13 @@ class HOD_mock(object):
 
 	'''
 
-	def __init__(self,hod_dict=None,color_dict=None):
+	def __init__(self,simulation_data=None,hod_dict=None,color_dict=None):
 
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
 		# eventually this step will not require a "pre-processed" halo catalog, but this if fine for now.
-		simulation_data = read_nbody.load_bolshoi_host_halos_fits()
-		temp_halos = simulation_data['halos']
+		if (simulation_data == None):
+			simulation_data = read_nbody.load_bolshoi_host_halos_fits()
+		table_of_halos = simulation_data['halos']
 
 		# create a numpy record array containing halo information relevant to this class of HODs	
 		halo_data_structure=[
@@ -99,13 +100,13 @@ class HOD_mock(object):
 			('ncen','i4'),('nsat','i4')
 			]
 
-		self.halos = Table(np.zeros(len(temp_halos.MVIR),dtype=halo_data_structure))
-		self.halos['logM'] = np.log10(temp_halos.MVIR)
-		self.halos['conc'] = temp_halos.RVIR/temp_halos.RS
-		self.halos['ID'] = temp_halos.ID
-		self.halos['pos'] = temp_halos.POS
-		self.halos['vel'] = temp_halos.VEL
-		self.halos['rvir'] = np.array(temp_halos.RVIR)/1000.
+		self.halos = (np.zeros(len(table_of_halos['MVIR']),dtype=halo_data_structure))
+		self.halos['logM'] = np.log10(table_of_halos['MVIR'])
+		self.halos['conc'] = table_of_halos['RVIR']/table_of_halos['RS']
+		self.halos['ID'] = table_of_halos['ID']
+		self.halos['pos'] = table_of_halos['POS']
+		self.halos['vel'] = table_of_halos['VEL']
+		self.halos['rvir'] = np.array(table_of_halos['RVIR'])/1000.
 
 		# mock object should know the basic attributs of its simulation
 		self.simulation_dict = simulation_data['simulation_dict']
@@ -138,8 +139,8 @@ class HOD_mock(object):
 			('hostvel','3float32'),('rvir','f4'),('icen','i2'),
 			('ired','i2'),('rhalo','f4')
 			]
-		self.galaxies = Table(np.zeros(self.ngals,dtype=galaxy_data_structure))
-#		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
+#		self.galaxies = Table(np.zeros(self.ngals,dtype=galaxy_data_structure))
+		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
 		
 		# Assign properties to the centrals
 		self.galaxies['logM'][0:self.ncens] = self.halos['logM'][(self.halos['ncen']>0)]

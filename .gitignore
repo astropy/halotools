@@ -35,6 +35,7 @@ distribute-*.tar.gz
 # Other
 .*.swp
 *~
+halotools/experimental_testing.py
 
 # Mac OSX
 .DS_Store
