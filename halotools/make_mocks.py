@@ -1,4 +1,6 @@
 
+#from __future__ import (absolute_import, division, print_function,
+#                        unicode_literals)
 
 import read_nbody
 import halo_occupation as ho
@@ -96,6 +98,7 @@ class HOD_mock(object):
 			('pos','3float32'),('vel','3float32'),('rvir','f4'),
 			('ncen','i4'),('nsat','i4')
 			]
+
 		self.halos = Table(np.zeros(len(temp_halos.MVIR),dtype=halo_data_structure))
 		self.halos['logM'] = np.log10(temp_halos.MVIR)
 		self.halos['conc'] = temp_halos.RVIR/temp_halos.RS

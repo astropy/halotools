@@ -5,6 +5,9 @@ Will be re-written entirely to accommodate the astropy testing suite structure.
 
 """
 
+#from __future__ import (absolute_import, division, print_function,
+#                        unicode_literals)
+
 import halo_occupation as ho
 import numpy as np
 import make_mocks

@@ -13,6 +13,9 @@ Adequate only while basic functionality of mock-making code is being developed.
 
 """
 
+#from __future__ import (absolute_import, division, print_function,
+#                        unicode_literals)
+
 from astropy.io import ascii
 import pyfits
 import defaults
@@ -39,7 +42,6 @@ def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
 #    types = ('long','float','float','float','float','float','float','float')
     halos = ascii.read(filename, delimiter='\s', names=column_names, data_start=0)
 
-    print 'number of host halos read in:', len(halos)
     return halos
 
 def load_bolshoi_host_halos_fits(simulation_dict=None):
