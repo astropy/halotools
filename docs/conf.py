@@ -64,8 +64,8 @@ rst_epilog += """
 # -- Project information ------------------------------------------------------
 
 # This does not *have* to match the package name, but typically does
-project = setup_cfg['package_name']
-author = setup_cfg['author']
+project = setup_cfg['halotools']
+author = setup_cfg['Andrew Hearin']
 copyright = '{0}, {1}'.format(
     datetime.datetime.now().year, setup_cfg['author'])
 
@@ -73,8 +73,8 @@ copyright = '{0}, {1}'.format(
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-__import__(setup_cfg['package_name'])
-package = sys.modules[setup_cfg['package_name']]
+__import__(setup_cfg['halotools'])
+package = sys.modules[setup_cfg['halotools']]
 
 # The short X.Y version.
 version = package.__version__.split('-', 1)[0]
@@ -141,7 +141,7 @@ man_pages = [('index', project.lower(), project + u' Documentation',
 if eval(setup_cfg.get('edit_on_github')):
     extensions += ['astropy.sphinx.ext.edit_on_github']
 
-    versionmod = __import__(setup_cfg['package_name'] + '.version')
+    versionmod = __import__(setup_cfg['halotools'] + '.version')
     edit_on_github_project = setup_cfg['github_project']
     if versionmod.version.release:
         edit_on_github_branch = "v" + versionmod.version.version
