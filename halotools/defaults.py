@@ -49,7 +49,7 @@ default_simulation_dict = {
 }
 
 class hod(object):
-    ''' Container class for model parameters determining the HOD.
+    ''' Container class for model parameters determining the HOD. Not currently in use. Implement later.
     
     
     '''
