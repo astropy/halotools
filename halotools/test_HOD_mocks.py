@@ -20,7 +20,6 @@ def main():
 
 	test_three_dimensional_periodic_distance()
 	halos = test_read_nbody()
-
 	mock = test_make_HOD_mock(halos)
 	test_satellite_positions(mock)
 

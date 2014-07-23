@@ -12,7 +12,7 @@ import cPickle
 import os
 from copy import copy
 from collections import Counter
-from astropy.table import Table
+import astropy
 
 
 def apply_periodicity_of_box(coords, box_length):
@@ -127,12 +127,15 @@ class HOD_mock(object):
 
 	'''
 
-	def __init__(self,simulation_data=None,hod_dict=None,color_dict=None):
+	def __init__(self,simulation_data,hod_dict=None,color_dict=None):
 
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
 		# eventually this step will not require a "pre-processed" halo catalog, but this if fine for now.
-		if (simulation_data == None):
-			simulation_data = read_nbody.load_bolshoi_host_halos_fits()
+
+		if not isinstance(simulation_data['halos'],astropy.table.table.Table):
+			raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
+		if not isinstance(simulation_data['simulation_dict'],dict):
+			raise TypeError("HOD_mock object requires a dictionary of simulation metadata as input")
 		table_of_halos = simulation_data['halos']
 
 		# create a numpy record array containing halo information relevant to this class of HODs	
@@ -181,7 +184,6 @@ class HOD_mock(object):
 			('hostvel','3float32'),('rvir','f4'),('icen','i2'),
 			('ired','i2'),('rhalo','f4')
 			]
-#		self.galaxies = Table(np.zeros(self.ngals,dtype=galaxy_data_structure))
 		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
 		
 		# Assign properties to the centrals
