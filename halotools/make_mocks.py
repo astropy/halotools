@@ -127,17 +127,59 @@ class HOD_mock(object):
 
 	'''
 
-	def __init__(self,simulation_data,hod_dict=None,color_dict=None):
+	def __init__(self,simulation_data,hod_dict=None,color_dict=None,seed=None):
 
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
 		# eventually this step will not require a "pre-processed" halo catalog, but this if fine for now.
 
 		if not isinstance(simulation_data['halos'],astropy.table.table.Table):
 			raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
-		if not isinstance(simulation_data['simulation_dict'],dict):
-			raise TypeError("HOD_mock object requires a dictionary of simulation metadata as input")
 		table_of_halos = simulation_data['halos']
 
+		if not isinstance(simulation_data['simulation_dict'],dict):
+			raise TypeError("HOD_mock object requires a dictionary of simulation metadata as input")
+		self.simulation_dict = simulation_data['simulation_dict']
+
+		self.logM = np.array(np.log10(table_of_halos['MVIR']))
+		self.ID = np.array(table_of_halos['ID'])
+		self.concen = ho.anatoly_concentration(self.logM)
+		self.Rvir = np.array(table_of_halos['RVIR'])/1000.
+
+		self.pos = np.empty((len(table_of_halos),3),'f8')
+		self.pos.T[0] = np.array(table_of_halos['POS'][:,0])
+		self.pos.T[1] = np.array(table_of_halos['POS'][:,1])
+		self.pos.T[2] = np.array(table_of_halos['POS'][:,2])
+
+		if seed != None:
+			np.random.seed(seed)
+
+		self.idx_current_halo = 0 # index for current halo (bookkeeping device to speed up array access)
+
+
+		#Set up the grid used to tabulate NFW profiles
+		#This will be used to assign halo-centric distances to the satellites
+		Npts_concen = defaults.default_Npts_concentration_array
+		concentration_array = np.linspace(self.concen.min(),self.concen.max(),Npts_concen)
+		Npts_radius = defaults.default_Npts_radius_array		
+		radius_array = np.linspace(0.,1.,Npts_radius)
+		
+		cumulative_nfw_PDF = []
+		# After executing the following lines, 
+		#cumulative_nfw_PDF will be a list of functions. 
+		#The list elements correspond to functions governing 
+		#radial profiles of halos with different NFW concentrations.
+		#Each function takes a scalar y in [0,1] as input, 
+		#and outputs the x = r/Rvir corresponding to Prob_NFW( x > r/Rvir ) = y. 
+		#Thus each list element is the inverse of the NFW cumulative NFW PDF.
+		for c in concentration_array:
+			cumulative_nfw_PDF.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
+
+		#interp_idx_concen is an integer array with one element per host halo
+		#each element gives the index pointing to the bins defined by concentration_array
+		self.interp_idx_concen = np.digitize(self.concen,concentration_array)
+
+
+"""
 		# create a numpy record array containing halo information relevant to this class of HODs	
 		halo_data_structure=[
 			('logM','f4'),('conc','f4'),('ID','i8'),
@@ -210,24 +252,8 @@ class HOD_mock(object):
 			self.galaxies['rvir'][counter:counter+halo['nsat']] = halo['rvir']
 			counter += halo['nsat']
 
-		#over-write the true halo concentrations with Anatoly's best-fit relation
-		#this erases the relationship between halo assembly and internal structure, 
-		#in accord with the conventions of "mass-only" HODs
-		self.galaxies['conc'] = ho.anatoly_concentration(self.galaxies['logM'])*self.hod_dict['fconc']
-		concentration_array = np.linspace(np.min(self.galaxies['conc']),np.max(self.galaxies['conc']),1000)
-		radius_array = np.linspace(0.,1.,101)
+			
 
-		#cumulative_nfw_PDF is a list of functions. The list elements correspond to different NFW concentrations.
-		#Each function takes a scalar y in [0,1] as input, 
-		#and outputs the x = r/Rvir corresponding to P_NFW( x > r/Rvir ) = y. 
-		#Thus each list element is the inverse of the NFW cumulative mass PDF.
-		cumulative_nfw_PDF = []
-		for c in concentration_array:
-			cumulative_nfw_PDF.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
-
-		#idx_conc is an integer array, with one element for each satellite in self.galaxies
-		#the elements of idx_conc are the indices pointing to the bins defined by concentration_array
-		idx_conc = np.digitize(self.galaxies['conc'][self.ncens:],concentration_array)
 
 		satellite_indices = np.nonzero(self.galaxies['icen']==0)[0]
 		random_numbers_for_satellite_positions = np.random.random(len(satellite_indices))
@@ -253,7 +279,7 @@ class HOD_mock(object):
 		self.galaxies['pos'][:,2] = apply_periodicity_of_box(self.galaxies['pos'][:,2],self.simulation_dict['Lbox'])
 
 
-
+"""
 
 
 #def _generate_random_points_on_unit_sphere(self,Num_points):

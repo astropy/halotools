@@ -52,6 +52,10 @@ default_simulation_dict = {
 default_luminosity_threshold = -19.5
 default_tiny_poisson_fluctuation = 1.e-20
 
+default_Npts_concentration_array = 1000
+default_Npts_radius_array = 101
+
+
 class hod_model(object):
     ''' Container class for model parameters determining the HOD. Not currently in use. Implement later.
     

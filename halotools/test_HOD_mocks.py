@@ -19,9 +19,10 @@ import observables
 def main():
 
 	test_three_dimensional_periodic_distance()
-	halos = test_read_nbody()
-	mock = test_make_HOD_mock(halos)
-	test_satellite_positions(mock)
+	simulation = test_read_nbody()
+	halos = simulation['halos']
+	mock = test_make_HOD_mock(simulation)
+	#test_satellite_positions(mock)
 
 
 
@@ -60,9 +61,12 @@ def test_make_HOD_mock(simulation=None):
 	m = make_mocks.HOD_mock(simulation_data = simulation)
 	print("")
 	print("Mock with all defaults successfully created")
-	print("Satellite fraction = "+str(m.satellite_fraction))
+	#print("Satellite fraction = "+str(m.satellite_fraction))
 	print('')
 
+	return m
+
+"""
 	if any(m.galaxies['icen'][0:m.ncens] != 1):
 		print("Incorrect bookkeeping on central/satellite counts")
 		print("Some galaxy in [0:m.ncens] is not a central")
@@ -70,8 +74,7 @@ def test_make_HOD_mock(simulation=None):
 	if any(m.galaxies['icen'][m.ncens:-1] != 0):
 		print("Incorrect bookkeeping on central/satellite counts")
 		print("Some galaxy in [m.ncens:-1] is not a satellite")
-
-	return m
+"""
 
 
 def test_read_nbody():
