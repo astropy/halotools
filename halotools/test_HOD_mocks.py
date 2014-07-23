@@ -105,7 +105,7 @@ def test_solve_for_quenching_polynomial_coefficients():
 
 
 def time_mock():
-	timer_string = "m=make_mocks.HOD_mock(simulation_data = bolshoi_simulation)"
+	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation)"
 	setup_string = "import make_mocks; import read_nbody; bolshoi_simulation = read_nbody.load_bolshoi_host_halos_fits()"
 	t = timeit.Timer(timer_string,setup=setup_string)
 	timeit_results =  t.repeat(3,1)

@@ -132,8 +132,8 @@ class HOD_mock(object):
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
 		# eventually this step will not require a "pre-processed" halo catalog, but this if fine for now.
 
-		if not isinstance(simulation_data['halos'],astropy.table.table.Table):
-			raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
+#		if not isinstance(simulation_data['halos'],astropy.table.table.Table):
+#			raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
 		table_of_halos = simulation_data['halos']
 
 		if not isinstance(simulation_data['simulation_dict'],dict):
@@ -141,7 +141,7 @@ class HOD_mock(object):
 		self.simulation_dict = simulation_data['simulation_dict']
 
 		self.logM = np.array(np.log10(table_of_halos['MVIR']))
-		self.ID = np.array(table_of_halos['ID'])
+		self.haloID = np.array(table_of_halos['ID'])
 		self.concen = ho.anatoly_concentration(self.logM)
 		self.Rvir = np.array(table_of_halos['RVIR'])/1000.
 
@@ -177,6 +177,56 @@ class HOD_mock(object):
 		#interp_idx_concen is an integer array with one element per host halo
 		#each element gives the index pointing to the bins defined by concentration_array
 		self.interp_idx_concen = np.digitize(self.concen,concentration_array)
+
+
+	def _setup(self,hod_dict=defaults.default_hod_dict):
+		"""
+		Compute NCen,Nsat and preallocate arrays for __call__().
+		
+		"""
+
+		self.Ncen = num_cen_monte_carlo(self.logM,hod_dict)
+		self.hasCentral = self.NCen > 0
+		self.NSat = np.zeros(len(self.logM),dtype=int)
+		self.NSat[self.hasCentral] = num_sat_monte_carlo(self.logM[self.hasCentral],hod_dict,output=self.Nsat[self.hasCentral])
+
+		self.num_total_cens = self.NCen.sum()
+		self.num_total_sats = self.NSat.sum()
+		self.num_total_gals = self.num_total_cens + self.num_total_sats
+
+		# preallocate output arrays
+		self.coords = np.empty((self.num_total_gals,3),dtype='f8')
+		self.mass = np.empty(self.num_total_gals,dtype='f8')
+		self.isSat = np.zeros(self.num_total_gals,dtype='i4')
+	#...
+
+	def _random_angles(self,coords,start,end,N):
+		"""
+		Generate N random angles and assign them to coords[start:end].
+		"""
+
+		cos_t = np.random.uniform(-1.,1.,N)
+		phi = np.random.uniform(0,2*np.pi,N)
+		sin_t = np.sqrt((1.-cos_t**2))
+		
+		coords[start:end,0] = sin_t * np.cos(phi)
+		coords[start:end,1] = sin_t * np.sin(phi)
+		coords[start:end,2] = cos_t
+	#...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 """
