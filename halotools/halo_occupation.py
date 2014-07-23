@@ -108,7 +108,7 @@ def num_nsat(logM,hod_dict):
 	# NOTE: need to cut at zero, otherwise poisson bails
     # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
     test = Prob_sat <= 0
-    Prob_sat[test] = 1.e-20
+    Prob_sat[test] = defaults.default_tiny_poisson_fluctuation
 
     num_nsat_array = poisson.rvs(Prob_sat)
 
