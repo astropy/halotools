@@ -145,10 +145,10 @@ class HOD_mock(object):
 		self.concen = ho.anatoly_concentration(self.logM)
 		self.Rvir = np.array(table_of_halos['RVIR'])/1000.
 
-		self.pos = np.empty((len(table_of_halos),3),'f8')
-		self.pos.T[0] = np.array(table_of_halos['POS'][:,0])
-		self.pos.T[1] = np.array(table_of_halos['POS'][:,1])
-		self.pos.T[2] = np.array(table_of_halos['POS'][:,2])
+		self.halopos = np.empty((len(table_of_halos),3),'f8')
+		self.halopos.T[0] = np.array(table_of_halos['POS'][:,0])
+		self.halopos.T[1] = np.array(table_of_halos['POS'][:,1])
+		self.halopos.T[2] = np.array(table_of_halos['POS'][:,2])
 
 		if seed != None:
 			np.random.seed(seed)
@@ -196,7 +196,7 @@ class HOD_mock(object):
 
 		# preallocate output arrays
 		self.coords = np.empty((self.num_total_gals,3),dtype='f8')
-		self.mass = np.empty(self.num_total_gals,dtype='f8')
+		self.logMhost = np.empty(self.num_total_gals,dtype='f8')
 		self.isSat = np.zeros(self.num_total_gals,dtype='i4')
 	#...
 
@@ -213,6 +213,48 @@ class HOD_mock(object):
 		coords[start:end,1] = sin_t * np.sin(phi)
 		coords[start:end,2] = cos_t
 	#...
+
+
+
+	def __call__(self,hod_dict=defaults.default_hod_dict,isSetup=False):
+		"""
+		Return a list of galaxies placed randomly in the halos.
+		Returns coordinates, halo mass, isSat (boolean array with True for satellites)
+		If isSetup is True, don't call _setup first (useful for calling from a child class).
+
+		"""
+
+		# pregenerate the output arrays
+		if not isSetup:
+			self._setup(hod_dict)
+
+		# Preallocate centrals so we don't have to touch them again.
+		self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
+		self.logMhost[:self.num_total_cens] = self.logM[self.hasCentral]
+
+		counter = self.num_total_cens
+		self.idx_current_halo = 0
+
+		self.isSat[counter:] = 1 # everything else is a satellite.
+		# Pregenerate satellite angles all in one fell swoop
+		self._random_angles(self.coords,counter,self.coords.shape[0],self.num_total_sats)
+
+		# all the satellites will now end up at the end of the array.
+		satellite_index_array = np.nonzero(self.NSat > 0)[0]
+		# these two save a bit of time by eliminating calls to records.__getattribute__
+		logmasses = self.logM
+
+		for self.ii in satellite_index_array:
+			logM,center,Nsat,r_vir,cidx = logmasses[self.ii],self.halopos[self.ii],self.NSat[self.ii],self.Rvir[self.ii],self.interp_idx_concen[self.ii]
+			self.logMhost[counter:counter+Nsat] = logM
+			counter += Nsat
+
+
+		x=4
+
+		return x
+	#...
+
 
 
 
