@@ -34,7 +34,49 @@ def apply_periodicity_of_box(coords, box_length):
     coords[test] = box_length + coords[test]
     return coords
 
-	
+def num_cen_monte_carlo(logM,hod_dict):
+    """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
+
+    Parameters
+    ----------
+    logM : float or array
+    hod_dict : dictionary
+
+    Returns
+    -------
+    num_ncen_array : int or array
+
+    
+    """
+
+    num_ncen_array = np.array(ho.mean_ncen(logM,hod_dict) > np.random.random(len(logM)),dtype=int)
+    return num_ncen_array
+
+def num_nsat_monte_carlo(logM,hod_dict):
+    '''  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
+
+    Parameters
+    ----------
+    logM : float or array
+    hod_dict : dictionary
+
+    Returns
+    -------
+    num_nsat_array : int or array
+        Values of array specify the number of satellites hosted by each halo.
+
+
+    '''
+    Prob_sat = ho.mean_nsat(logM,hod_dict)
+	# NOTE: need to cut at zero, otherwise poisson bails
+    # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
+    test = Prob_sat <= 0
+    Prob_sat[test] = defaults.default_tiny_poisson_fluctuation
+
+    num_nsat_array = poisson.rvs(Prob_sat)
+
+    return num_nsat_array
+
 def _generate_random_points_on_unit_sphere(Num_points):
 	"""
 	
