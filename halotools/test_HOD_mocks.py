@@ -22,6 +22,7 @@ def main():
 	simulation = test_read_nbody()
 	halos = simulation['halos']
 	mock = test_make_HOD_mock(simulation)
+	time_mock()
 	#test_satellite_positions(mock)
 
 
@@ -105,8 +106,8 @@ def test_solve_for_quenching_polynomial_coefficients():
 
 
 def time_mock():
-	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation)"
-	setup_string = "import make_mocks; import read_nbody; bolshoi_simulation = read_nbody.load_bolshoi_host_halos_fits()"
+	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation); m(); counter1 = pairs.mr_wpairs.radial_wpairs(None,m.coords,m.coords.copy())"
+	setup_string = "import make_mocks; import read_nbody; import copy; import pairs.mr_wpairs; bolshoi_simulation = read_nbody.load_bolshoi_host_halos_fits()"
 	t = timeit.Timer(timer_string,setup=setup_string)
 	timeit_results =  t.repeat(3,1)
 	average_runtime_of_mock_creation = np.mean(timeit_results)
