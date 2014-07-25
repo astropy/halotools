@@ -5,8 +5,11 @@
 import read_nbody
 import halo_occupation as ho
 import numpy as np
+
 from scipy.integrate import quad as quad
 from scipy.interpolate import interp1d as interp1d
+from scipy.stats import poisson
+
 import defaults
 import cPickle
 import os
@@ -48,11 +51,11 @@ def num_cen_monte_carlo(logM,hod_dict):
 
     
     """
-
     num_ncen_array = np.array(ho.mean_ncen(logM,hod_dict) > np.random.random(len(logM)),dtype=int)
+
     return num_ncen_array
 
-def num_nsat_monte_carlo(logM,hod_dict):
+def num_sat_monte_carlo(logM,hod_dict,output=None):
     '''  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
 
     Parameters
@@ -150,6 +153,8 @@ class HOD_mock(object):
 		self.halopos.T[1] = np.array(table_of_halos['POS'][:,1])
 		self.halopos.T[2] = np.array(table_of_halos['POS'][:,2])
 
+		self.Lbox = self.simulation_dict['Lbox']
+
 		if seed != None:
 			np.random.seed(seed)
 
@@ -185,10 +190,10 @@ class HOD_mock(object):
 		
 		"""
 
-		self.Ncen = num_cen_monte_carlo(self.logM,hod_dict)
+		self.NCen = num_cen_monte_carlo(self.logM,hod_dict)
 		self.hasCentral = self.NCen > 0
 		self.NSat = np.zeros(len(self.logM),dtype=int)
-		self.NSat[self.hasCentral] = num_sat_monte_carlo(self.logM[self.hasCentral],hod_dict,output=self.Nsat[self.hasCentral])
+		self.NSat[self.hasCentral] = num_sat_monte_carlo(self.logM[self.hasCentral],hod_dict,output=self.NSat[self.hasCentral])
 
 		self.num_total_cens = self.NCen.sum()
 		self.num_total_sats = self.NSat.sum()
@@ -215,8 +220,9 @@ class HOD_mock(object):
 		coords[start:end,2] = cos_t
 	#...
 
-	def assign_satellite_positions(self,Nsat,center,r_vir,M_halo,r_of_M,counter):
+	def assign_satellite_positions(self,Nsat,center,r_vir,r_of_M,counter):
 		""" 
+		Note that I deleted John's M_halo argument since this does not appear to be used.
 
 		"""
 
@@ -261,7 +267,7 @@ class HOD_mock(object):
 		for self.ii in satellite_index_array:
 			logM,center,Nsat,r_vir,concen_idx = logmasses[self.ii],self.halopos[self.ii],self.NSat[self.ii],self.Rvir[self.ii],self.interp_idx_concen[self.ii]
 			self.logMhost[counter:counter+Nsat] = logM
-			self.assign_satellite_positions(Nsat,center,r_vir,M,self.cumulative_nfw_PDF[concen_idx-1],counter)
+			self.assign_satellite_positions(Nsat,center,r_vir,self.cumulative_nfw_PDF[concen_idx-1],counter)
 			counter += Nsat
 
 		self.coords = apply_periodicity_of_box(self.coords,self.Lbox)
