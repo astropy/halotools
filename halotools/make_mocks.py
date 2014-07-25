@@ -163,16 +163,16 @@ class HOD_mock(object):
 		Npts_radius = defaults.default_Npts_radius_array		
 		radius_array = np.linspace(0.,1.,Npts_radius)
 		
-		cumulative_nfw_PDF = []
+		self.cumulative_nfw_PDF = []
 		# After executing the following lines, 
-		#cumulative_nfw_PDF will be a list of functions. 
+		#self.cumulative_nfw_PDF will be a list of functions. 
 		#The list elements correspond to functions governing 
 		#radial profiles of halos with different NFW concentrations.
 		#Each function takes a scalar y in [0,1] as input, 
 		#and outputs the x = r/Rvir corresponding to Prob_NFW( x > r/Rvir ) = y. 
 		#Thus each list element is the inverse of the NFW cumulative NFW PDF.
 		for c in concentration_array:
-			cumulative_nfw_PDF.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
+			self.cumulative_nfw_PDF.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
 
 		#interp_idx_concen is an integer array with one element per host halo
 		#each element gives the index pointing to the bins defined by concentration_array
@@ -198,6 +198,7 @@ class HOD_mock(object):
 		self.coords = np.empty((self.num_total_gals,3),dtype='f8')
 		self.logMhost = np.empty(self.num_total_gals,dtype='f8')
 		self.isSat = np.zeros(self.num_total_gals,dtype='i4')
+		self.isQuenched = np.zeros(self.num_total_gals,dtype='i4')
 	#...
 
 	def _random_angles(self,coords,start,end,N):
@@ -213,6 +214,19 @@ class HOD_mock(object):
 		coords[start:end,1] = sin_t * np.sin(phi)
 		coords[start:end,2] = cos_t
 	#...
+
+	def assign_satellite_positions(self,Nsat,center,r_vir,M_halo,r_of_M,counter):
+		""" 
+
+		"""
+
+		satellite_system_coordinates = self.coords[counter:counter+Nsat,:]
+		# Generate Nsat randoms in the interval [0,1)
+		# finding the r_vir associated with that probability by inverting mass(r,r_vir,c)
+		randoms = np.random.random(Nsat)
+		r_random = r_of_M(randoms)*r_vir
+		satellite_system_coordinates[:Nsat,:] *= r_random.reshape(Nsat,1)
+		satellite_system_coordinates[:Nsat,:] += center.reshape(1,3)
 
 
 
@@ -245,14 +259,14 @@ class HOD_mock(object):
 		logmasses = self.logM
 
 		for self.ii in satellite_index_array:
-			logM,center,Nsat,r_vir,cidx = logmasses[self.ii],self.halopos[self.ii],self.NSat[self.ii],self.Rvir[self.ii],self.interp_idx_concen[self.ii]
+			logM,center,Nsat,r_vir,concen_idx = logmasses[self.ii],self.halopos[self.ii],self.NSat[self.ii],self.Rvir[self.ii],self.interp_idx_concen[self.ii]
 			self.logMhost[counter:counter+Nsat] = logM
+			self.assign_satellite_positions(Nsat,center,r_vir,M,self.cumulative_nfw_PDF[concen_idx-1],counter)
 			counter += Nsat
 
+		self.coords = apply_periodicity_of_box(self.coords,self.Lbox)
 
-		x=4
-
-		return x
+		return self.coords,self.logMhost,self.isSat,self.isQuenched
 	#...
 
 
