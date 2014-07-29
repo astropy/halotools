@@ -22,7 +22,9 @@ def main():
 	simulation = test_read_nbody()
 	halos = simulation['halos']
 	mock = test_make_HOD_mock(simulation)
-	time_mock()
+	mock.populate()
+	print(str(mock.num_total_gals)+' galaxies in mock')
+	#time_mock()
 	#test_satellite_positions(mock)
 
 
@@ -61,9 +63,13 @@ def test_make_HOD_mock(simulation=None):
 
 	m = make_mocks.HOD_mock(simulation_data = simulation)
 	print("")
-	print("Mock with all defaults successfully created")
+	print("Mock with all defaults successfully initialized")
 	#print("Satellite fraction = "+str(m.satellite_fraction))
 	print('')
+	m.populate()
+	print("Mock with all defaults successfully populated")
+	print('')
+
 
 	return m
 
@@ -106,7 +112,8 @@ def test_solve_for_quenching_polynomial_coefficients():
 
 
 def time_mock():
-	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation); m(); counter1 = pairs.mr_wpairs.radial_wpairs(None,m.coords,m.coords.copy())"
+	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation); m(); nhalf = int(m.num_total_gals/2.); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[0:nhalf],m.coords[0:nhalf].copy()); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[0:nhalf],m.coords[nhalf:-1].copy()); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[nhalf:-1],m.coords[nhalf:-1].copy())"
+	#timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation); m(); nhalf = int(m.num_total_gals/2.); redcounter = pairs.mr_wpairs.radial_wpairs(None,m[0:nhalf].coords,m[0:nhalf].coords.copy()); bluecounter = pairs.mr_wpairs.radial_wpairs(None,m[nhalf:-1].coords,m[nhalf:-1].coords.copy())"
 	setup_string = "import make_mocks; import read_nbody; import copy; import pairs.mr_wpairs; bolshoi_simulation = read_nbody.load_bolshoi_host_halos_fits()"
 	t = timeit.Timer(timer_string,setup=setup_string)
 	timeit_results =  t.repeat(3,1)

@@ -18,7 +18,7 @@ from collections import Counter
 import astropy
 
 
-def apply_periodicity_of_box(coords, box_length):
+def enforce_periodicity_of_box(coords, box_length):
     """
 
     Parameters
@@ -79,29 +79,6 @@ def num_sat_monte_carlo(logM,hod_dict,output=None):
     num_nsat_array = poisson.rvs(Prob_sat)
 
     return num_nsat_array
-
-def _generate_random_points_on_unit_sphere(Num_points):
-	"""
-	
-	Parameters
-    ----------
-    Num_points : int
-    	Specifies number of random points required
-
-    Returns
-    -------
-    coords : 3 x Num_points numpy array of coordinate points on the unit sphere.
-
-	"""
-	
-	phi = np.random.uniform(0,2*np.pi,Num_points)
-	cos_t = np.random.uniform(-1.,1.,Num_points)
-	sin_t = np.sqrt((1.-cos_t**2))
-	coords = np.zeros(Num_points*3).reshape([Num_points,3])
-	coords[:,0] = sin_t * np.cos(phi)
-	coords[:,1] = sin_t * np.sin(phi)
-	coords[:,2] = cos_t
-	return coords	
 	
 
 class HOD_mock(object):
@@ -235,8 +212,7 @@ class HOD_mock(object):
 		satellite_system_coordinates[:Nsat,:] += center.reshape(1,3)
 
 
-
-	def __call__(self,hod_dict=defaults.default_hod_dict,isSetup=False):
+	def populate(self,hod_dict=defaults.default_hod_dict,isSetup=False):
 		"""
 		Return a list of galaxies placed randomly in the halos.
 		Returns coordinates, halo mass, isSat (boolean array with True for satellites)
@@ -270,9 +246,8 @@ class HOD_mock(object):
 			self.assign_satellite_positions(Nsat,center,r_vir,self.cumulative_nfw_PDF[concen_idx-1],counter)
 			counter += Nsat
 
-		self.coords = apply_periodicity_of_box(self.coords,self.Lbox)
+		self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
 
-		return self.coords,self.logMhost,self.isSat,self.isQuenched
 	#...
 
 
@@ -289,122 +264,6 @@ class HOD_mock(object):
 
 
 
-
-
-"""
-		# create a numpy record array containing halo information relevant to this class of HODs	
-		halo_data_structure=[
-			('logM','f4'),('conc','f4'),('ID','i8'),
-			('pos','3float32'),('vel','3float32'),('rvir','f4'),
-			('ncen','i4'),('nsat','i4')
-			]
-
-		self.halos = (np.zeros(len(table_of_halos['MVIR']),dtype=halo_data_structure))
-		self.halos['logM'] = np.log10(table_of_halos['MVIR'])
-		self.halos['conc'] = table_of_halos['RVIR']/table_of_halos['RS']
-		self.halos['ID'] = table_of_halos['ID']
-		self.halos['pos'] = table_of_halos['POS']
-		self.halos['vel'] = table_of_halos['VEL']
-		self.halos['rvir'] = np.array(table_of_halos['RVIR'])/1000.
-
-		# mock object should know the basic attributs of its simulation
-		self.simulation_dict = simulation_data['simulation_dict']
-		
-
-		# create a dictionary containing the HOD parameters
-		if hod_dict is None:
-			self.hod_dict = defaults.default_hod_dict
-		else:
-			self.hod_dict = hod_dict
-
-		if color_dict is None:
-			self.color_dict = defaults.default_color_dict
-		else:
-			self.color_dict = color_dict
-
-		# add some convenience tags to the halos array as well as the mock object
-		self.halos['ncen']=np.array(ho.num_ncen(self.halos['logM'],self.hod_dict))
-		self.halos['nsat']=np.array(ho.num_nsat(self.halos['logM'],self.hod_dict))
-		self.ngals = np.sum(self.halos['ncen']) + np.sum(self.halos['nsat'])
-		self.nsats = np.sum(self.halos['nsat'])
-		self.ncens = np.sum(self.halos['ncen'])
-		self.satellite_fraction = 1.0*np.sum(self.halos['nsat'])/(1.0*self.ngals)
-
-		# create a numpy record array containing galaxy catalog from which 
-		# properties of the mock object derive 	
-		galaxy_data_structure=[
-			('logM','f4'),('conc','f4'),('haloID','i8'),
-			('pos','3float32'),('vel','3float32'),('hostpos','3float32'),
-			('hostvel','3float32'),('rvir','f4'),('icen','i2'),
-			('ired','i2'),('rhalo','f4')
-			]
-		self.galaxies = np.zeros(self.ngals,dtype=galaxy_data_structure)
-		
-		# Assign properties to the centrals
-		self.galaxies['logM'][0:self.ncens] = self.halos['logM'][(self.halos['ncen']>0)]
-		self.galaxies['haloID'][0:self.ncens] = self.halos['ID'][(self.halos['ncen']>0)]
-		self.galaxies['pos'][0:self.ncens] = self.halos['pos'][(self.halos['ncen']>0)]
-		self.galaxies['hostpos'][0:self.ncens] = self.halos['pos'][(self.halos['ncen']>0)]
-		self.galaxies['vel'][0:self.ncens] = self.halos['vel'][(self.halos['ncen']>0)]
-		self.galaxies['hostvel'][0:self.ncens] = self.halos['vel'][(self.halos['ncen']>0)]
-		self.galaxies['rvir'][0:self.ncens] = self.halos['rvir'][(self.halos['ncen']>0)]
-		self.galaxies['icen'][0:self.ncens] = np.zeros(np.sum(self.halos['ncen']))+1
-		self.galaxies['rhalo'][0:self.ncens] = np.zeros(np.sum(self.halos['ncen']))
-		
-		# Assign host halo properties to the satellites
-		# Currently involves looping over every host halo with Nsat > 0
-		# This is one of the potential speed bottlenecks
-		counter=np.sum(self.halos['ncen'])
-		halos_with_satellites = self.halos[self.halos['nsat']>0]
-		for halo in halos_with_satellites:
-			self.galaxies['logM'][counter:counter+halo['nsat']] = halo['logM']
-			self.galaxies['haloID'][counter:counter+halo['nsat']] = halo['ID']
-			self.galaxies['hostpos'][counter:counter+halo['nsat']] = halo['pos']
-			self.galaxies['hostvel'][counter:counter+halo['nsat']] = halo['vel']
-			self.galaxies['rvir'][counter:counter+halo['nsat']] = halo['rvir']
-			counter += halo['nsat']
-
-			
-
-
-		satellite_indices = np.nonzero(self.galaxies['icen']==0)[0]
-		random_numbers_for_satellite_positions = np.random.random(len(satellite_indices))
-		#Looping over each individual satellite adds an entire second to the runtime.
-		#This is unacceptable. Make it faster! But the bookkeeping is correct, so this is fine for now.
-		#Since the total runtime for mock creation is just 2 seconds, 
-		#this will suffice until it's time to implement the likelihood engine.
-		for ii in np.arange(len(satellite_indices)):
-			self.galaxies['rhalo'][satellite_indices[ii]] = cumulative_nfw_PDF[idx_conc[ii]](random_numbers_for_satellite_positions[ii])
-
-		#Assign positions to satellites by randomly drawing host-centric positions from an NFW profile
-		self.galaxies['pos'][:,0][self.galaxies['icen']==0] = self.galaxies['hostpos'][:,0][self.galaxies['icen']==0] + (_generate_random_points_on_unit_sphere(self.nsats)[:,0]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
-		self.galaxies['pos'][:,1][self.galaxies['icen']==0] = self.galaxies['hostpos'][:,1][self.galaxies['icen']==0] + (_generate_random_points_on_unit_sphere(self.nsats)[:,1]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
-		self.galaxies['pos'][:,2][self.galaxies['icen']==0] = self.galaxies['hostpos'][:,2][self.galaxies['icen']==0] + (_generate_random_points_on_unit_sphere(self.nsats)[:,2]*self.galaxies['rhalo'][self.galaxies['icen']==0]*self.galaxies['rvir'][self.galaxies['icen']==0])
-#		self.galaxies[self.galaxies['icen']==0]['pos'][:,0] = self.galaxies[self.galaxies['icen']==0]['hostpos'][:,0] + (_generate_random_points_on_unit_sphere(self.nsats)[:,0]*self.galaxies[self.galaxies['icen']==0]['rhalo']*self.galaxies[self.galaxies['icen']==0]['rvir'])
-#		self.galaxies[self.galaxies['icen']==0]['pos'][:,1] = self.galaxies[self.galaxies['icen']==0]['hostpos'][:,1] + (_generate_random_points_on_unit_sphere(self.nsats)[:,1]*self.galaxies[self.galaxies['icen']==0]['rhalo']*self.galaxies[self.galaxies['icen']==0]['rvir'])
-#		self.galaxies[self.galaxies['icen']==0]['pos'][:,2] = self.galaxies[self.galaxies['icen']==0]['hostpos'][:,2] + (_generate_random_points_on_unit_sphere(self.nsats)[:,2]*self.galaxies[self.galaxies['icen']==0]['rhalo']*self.galaxies[self.galaxies['icen']==0]['rvir'])
-
-		
-		#Apply correction to account for the periodic box
-		self.galaxies['pos'][:,0] = apply_periodicity_of_box(self.galaxies['pos'][:,0],self.simulation_dict['Lbox'])
-		self.galaxies['pos'][:,1] = apply_periodicity_of_box(self.galaxies['pos'][:,1],self.simulation_dict['Lbox'])
-		self.galaxies['pos'][:,2] = apply_periodicity_of_box(self.galaxies['pos'][:,2],self.simulation_dict['Lbox'])
-
-
-"""
-
-
-#def _generate_random_points_on_unit_sphere(self,Num_points):
-
-
-		
-#	def _assign_satellite_coords_on_virial_sphere(self):
-#		satellite_coords_on_unit_sphere = self._generate_random_points_on_unit_sphere(self.galaxies.nsats)
-#		for idim in np.arange(3):
-#			self.galaxies['pos'][self.galaxies['icen']==0,idim]=satellite_coords_on_unit_sphere[:,idim]
-#		self.galaxies['pos'][self.galaxies['icen']==0,:] *= self.galaxies['rvir']/1000.0
-#		self.galaxies['pos'][self.galaxies['icen']==0,:] += self.galaxies['hostpos'][self.galaxies['icen']==0,:]
-		
 
 
 
