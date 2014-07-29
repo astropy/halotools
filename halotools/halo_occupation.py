@@ -263,7 +263,7 @@ class HOD_Model(object):
     
     def __init__(self,model_nickname):
 
-        self.model_nickname = model_nickname
+        self.hod_model_nickname = model_nickname
 #        self.parameter_dict = {}
 
     @abstractmethod
@@ -293,6 +293,7 @@ class Zheng07_HOD_Model(HOD_Model):
         if parameter_dict is None:
             self.parameter_dict = self.published_parameters(threshold)
         else:
+            #this should be more defensive. Fine for now.
             self.parameter_dict = parameter_dict
 
 

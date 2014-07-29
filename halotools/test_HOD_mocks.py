@@ -20,11 +20,12 @@ def main():
 
 	test_three_dimensional_periodic_distance()
 	simulation = test_read_nbody()
-	halos = simulation['halos']
-	mock = test_make_HOD_mock(simulation)
+	model = test_zheng07()
+
+	mock = test_make_HOD_mock(simulation,model)
 	mock.populate()
 	print(str(mock.num_total_gals)+' galaxies in mock')
-	#time_mock()
+	time_mock()
 	#test_satellite_positions(mock)
 
 
@@ -56,12 +57,21 @@ def test_three_dimensional_periodic_distance():
 	np.testing.assert_allclose(test_answer,np.zeros(len(test_answer)),rtol=1.e-5,atol=1.e-5)
 
 
-def test_make_HOD_mock(simulation=None):
+def test_zheng07():
+	model = ho.Zheng07_HOD_Model()
+	return model
+
+
+def test_make_HOD_mock(simulation=None,model=None):
 
 	if simulation == None:
 		simulation = read_nbody.load_bolshoi_host_halos_fits()
 
-	m = make_mocks.HOD_mock(simulation_data = simulation)
+	if model == None:
+		model = ho.Zheng07_HOD_Model()
+
+
+	m = make_mocks.HOD_mock(simulation_data = simulation,hod_model=model)
 	print("")
 	print("Mock with all defaults successfully initialized")
 	#print("Satellite fraction = "+str(m.satellite_fraction))
@@ -112,9 +122,10 @@ def test_solve_for_quenching_polynomial_coefficients():
 
 
 def time_mock():
-	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation); m(); nhalf = int(m.num_total_gals/2.); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[0:nhalf],m.coords[0:nhalf].copy()); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[0:nhalf],m.coords[nhalf:-1].copy()); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[nhalf:-1],m.coords[nhalf:-1].copy())"
+	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation,zheng07_model)"
+#	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation); m(); nhalf = int(m.num_total_gals/2.); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[0:nhalf],m.coords[0:nhalf].copy()); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[0:nhalf],m.coords[nhalf:-1].copy()); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[nhalf:-1],m.coords[nhalf:-1].copy())"
 	#timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation); m(); nhalf = int(m.num_total_gals/2.); redcounter = pairs.mr_wpairs.radial_wpairs(None,m[0:nhalf].coords,m[0:nhalf].coords.copy()); bluecounter = pairs.mr_wpairs.radial_wpairs(None,m[nhalf:-1].coords,m[nhalf:-1].coords.copy())"
-	setup_string = "import make_mocks; import read_nbody; import copy; import pairs.mr_wpairs; bolshoi_simulation = read_nbody.load_bolshoi_host_halos_fits()"
+	setup_string = "import make_mocks; import halo_occupation as ho; import read_nbody; import copy; import pairs.mr_wpairs; bolshoi_simulation = read_nbody.load_bolshoi_host_halos_fits(); zheng07_model = ho.Zheng07_HOD_Model(threshold=-19.5)"
 	t = timeit.Timer(timer_string,setup=setup_string)
 	timeit_results =  t.repeat(3,1)
 	average_runtime_of_mock_creation = np.mean(timeit_results)

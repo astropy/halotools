@@ -37,7 +37,7 @@ def enforce_periodicity_of_box(coords, box_length):
     coords[test] = box_length + coords[test]
     return coords
 
-def num_cen_monte_carlo(logM,hod_dict):
+def num_cen_monte_carlo(logM,hod_model):
     """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
 
     Parameters
@@ -51,11 +51,11 @@ def num_cen_monte_carlo(logM,hod_dict):
 
     
     """
-    num_ncen_array = np.array(ho.mean_ncen(logM,hod_dict) > np.random.random(len(logM)),dtype=int)
+    num_ncen_array = np.array(hod_model.mean_ncen(logM) > np.random.random(len(logM)),dtype=int)
 
     return num_ncen_array
 
-def num_sat_monte_carlo(logM,hod_dict,output=None):
+def num_sat_monte_carlo(logM,hod_model,output=None):
     '''  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
 
     Parameters
@@ -70,7 +70,7 @@ def num_sat_monte_carlo(logM,hod_dict,output=None):
 
 
     '''
-    Prob_sat = ho.mean_nsat(logM,hod_dict)
+    Prob_sat = hod_model.mean_nsat(logM)
 	# NOTE: need to cut at zero, otherwise poisson bails
     # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
     test = Prob_sat <= 0
@@ -107,18 +107,23 @@ class HOD_mock(object):
 
 	'''
 
-	def __init__(self,simulation_data,hod_dict=None,color_dict=None,seed=None):
+	def __init__(self,simulation_data,hod_model,color_dict=None,seed=None):
 
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
 		# eventually this step will not require a "pre-processed" halo catalog, but this if fine for now.
 
-#		if not isinstance(simulation_data['halos'],astropy.table.table.Table):
-#			raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
+		if not isinstance(simulation_data['halos'],astropy.table.table.Table):
+			raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
 		table_of_halos = simulation_data['halos']
 
 		if not isinstance(simulation_data['simulation_dict'],dict):
 			raise TypeError("HOD_mock object requires a dictionary of simulation metadata as input")
 		self.simulation_dict = simulation_data['simulation_dict']
+
+		if not isinstance(hod_model,ho.HOD_Model):
+			raise TypeError("HOD_mock object requires input hod_model to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
+		self.hod_model = hod_model
+
 
 		self.logM = np.array(np.log10(table_of_halos['MVIR']))
 		self.haloID = np.array(table_of_halos['ID'])
@@ -161,16 +166,16 @@ class HOD_mock(object):
 		self.interp_idx_concen = np.digitize(self.concen,concentration_array)
 
 
-	def _setup(self,hod_dict=defaults.default_hod_dict):
+	def _setup(self):
 		"""
 		Compute NCen,Nsat and preallocate arrays for __call__().
 		
 		"""
 
-		self.NCen = num_cen_monte_carlo(self.logM,hod_dict)
+		self.NCen = num_cen_monte_carlo(self.logM,self.hod_model)
 		self.hasCentral = self.NCen > 0
 		self.NSat = np.zeros(len(self.logM),dtype=int)
-		self.NSat[self.hasCentral] = num_sat_monte_carlo(self.logM[self.hasCentral],hod_dict,output=self.NSat[self.hasCentral])
+		self.NSat[self.hasCentral] = num_sat_monte_carlo(self.logM[self.hasCentral],self.hod_model,output=self.NSat[self.hasCentral])
 
 		self.num_total_cens = self.NCen.sum()
 		self.num_total_sats = self.NSat.sum()
@@ -212,7 +217,7 @@ class HOD_mock(object):
 		satellite_system_coordinates[:Nsat,:] += center.reshape(1,3)
 
 
-	def populate(self,hod_dict=defaults.default_hod_dict,isSetup=False):
+	def populate(self,isSetup=False):
 		"""
 		Return a list of galaxies placed randomly in the halos.
 		Returns coordinates, halo mass, isSat (boolean array with True for satellites)
@@ -220,9 +225,12 @@ class HOD_mock(object):
 
 		"""
 
+		if not isinstance(self.hod_model,ho.HOD_Model):
+			raise TypeError("HOD_mock object requires input hod_model to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
+
 		# pregenerate the output arrays
 		if not isSetup:
-			self._setup(hod_dict)
+			self._setup()
 
 		# Preallocate centrals so we don't have to touch them again.
 		self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
