@@ -291,63 +291,78 @@ class Zheng07_HOD_Model(HOD_Model):
         self.publication = 'arXiv:0703457'
 
         if parameter_dict is None:
-
-            #Check to see whether a luminosity threshold has been specified
-            if threshold is None:
-                warnings.warn("HOD threshold unspecified: setting to -19.5")
-                self.threshold = -19.5
-            else:
-                if isinstance(threshold,int) or isinstance(threshold,float):
-                    self.threshold = float(threshold)                
-                else:
-                    raise TypeError("input luminosity threshold must be a scalar")
-
-           #Load some tabulated data from Zheng et al. 2007, Table 1
-            logMmin_cen_array = [11.35,11.46,11.6,11.75,12.02,12.3,12.79,13.38,14.22]
-            sigma_logM_array = [0.25,0.24,0.26,0.28,0.26,0.21,0.39,0.51,0.77]
-            logM0_array = [11.2,10.59,11.49,11.69,11.38,11.84,11.92,13.94,14.0]
-            logM1_array = [12.4,12.68,12.83,13.01,13.31,13.58,13.94,13.91,14.69]
-            alpha_sat_array = [0.83,0.97,1.02,1.06,1.06,1.12,1.15,1.04,0.87]
-            threshold_array = np.arange(-22,-17.5,0.5)
-            threshold_array = threshold_array[::-1]
-
-            threshold_index = np.where(threshold_array==self.threshold)[0]
-            if len(threshold_index)==1:
-                self.parameter_dict = {
-                'logMmin_cen' : logMmin_cen_array[threshold_index[0]],
-                'sigma_logM' : sigma_logM_array[threshold_index[0]],
-                'logM0' : logM0_array[threshold_index[0]],
-                'logM1' : logM1_array[threshold_index[0]],
-                'alpha_sat' : alpha_sat_array[threshold_index[0]],
-                'fconc' : 1.0 # multiplicative factor used to scale satellite concentrations (not actually a parameter in Zheng+07)
-                }
-            else:
-                threshold_index = [3,] #choose Mr19.5 as the fallback. 
-                warnings.warn("Input luminosity threshold does not match any of the Table 1 values of Zheng et al. 2007, choosing Mr = -19.5 as default",UserWarning)
-
+            self.parameter_dict = self.published_parameters(threshold)
         else:
             self.parameter_dict = parameter_dict
 
 
     def mean_ncen(self,logM):
+        if not isinstance(logM,np.ndarray):
+            raise TypeError("Input logM to mean_ncen must be a numpy array")
         mean_ncen = 0.5*(1.0 + erf((logM - self.parameter_dict['logMmin_cen'])/self.parameter_dict['sigma_logM']))
         return mean_ncen
 
     def mean_nsat(self,logM):
+        if not isinstance(logM,np.ndarray):
+            raise TypeError("Input logM to mean_ncen must be a numpy array")
         halo_mass = 10.**logM
-        Mmin_sat = 10.**self.parameter_dict['logMmin_sat']
-        M1_sat = self.parameter_dict['Msat_ratio']*Mmin_sat
+        M0 = 10.**self.parameter_dict['logM0_sat']
+        M1 = 10.**self.parameter_dict['logM1_sat']
         mean_nsat = np.zeros(len(logM),dtype='f8')
-        idx_nonzero_satellites = (halo_mass - Mmin_sat) > 0
-        mean_nsat[idx_nonzero_satellites] = ((halo_mass[idx_nonzero_satellites] - Mmin_sat)/M1_sat)**self.parameter_dict['alpha_sat']
+        idx_nonzero_satellites = (halo_mass - M0) > 0
+        mean_nsat[idx_nonzero_satellites] = self.mean_ncen(logM[idx_nonzero_satellites])*(((halo_mass[idx_nonzero_satellites] - M0)/M1)**self.parameter_dict['alpha_sat'])
         return mean_nsat
 
     def mean_concentration(self,logM):
         return anatoly_concentration(logM)
 
+    def published_parameters(self,threshold=None):
+
+        # Check to see whether a luminosity threshold has been specified
+        # If not, use Mr = -19.5 as the default choice, and alert the user
+        if threshold is None:
+            warnings.warn("HOD threshold unspecified: setting to -19.5")
+            self.threshold = -19.5
+        else:
+            # If a threshold is specified, require that it is a sensible type
+            if isinstance(threshold,int) or isinstance(threshold,float):
+                self.threshold = float(threshold)                
+            else:
+                raise TypeError("Input luminosity threshold must be a scalar")
+
+
+        #Load tabulated data from Zheng et al. 2007, Table 1
+        logMmin_cen_array = [11.35,11.46,11.6,11.75,12.02,12.3,12.79,13.38,14.22]
+        sigma_logM_array = [0.25,0.24,0.26,0.28,0.26,0.21,0.39,0.51,0.77]
+        logM0_array = [11.2,10.59,11.49,11.69,11.38,11.84,11.92,13.94,14.0]
+        logM1_array = [12.4,12.68,12.83,13.01,13.31,13.58,13.94,13.91,14.69]
+        alpha_sat_array = [0.83,0.97,1.02,1.06,1.06,1.12,1.15,1.04,0.87]
+        # define the luminosity thresholds corresponding to the above data
+        threshold_array = np.arange(-22,-17.5,0.5)
+        threshold_array = threshold_array[::-1]
+
+        threshold_index = np.where(threshold_array==self.threshold)[0]
+        if len(threshold_index)==1:
+            parameter_dict = {
+            'logMmin_cen' : logMmin_cen_array[threshold_index[0]],
+            'sigma_logM' : sigma_logM_array[threshold_index[0]],
+            'logM0_sat' : logM0_array[threshold_index[0]],
+            'logM1_sat' : logM1_array[threshold_index[0]],
+            'alpha_sat' : alpha_sat_array[threshold_index[0]],
+            'fconc' : 1.0 # multiplicative factor used to scale satellite concentrations (not actually a parameter in Zheng+07)
+            }
+        else:
+            raise TypeError("Input luminosity threshold does not match any of the Table 1 values of Zheng et al. 2007.")
+
+        return parameter_dict
 
 
 
+
+
+
+
+        
 
 
 
