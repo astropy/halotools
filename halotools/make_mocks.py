@@ -51,7 +51,8 @@ def num_cen_monte_carlo(logM,hod_model):
 
     
     """
-    num_ncen_array = np.array(hod_model.mean_ncen(logM) > np.random.random(len(logM)),dtype=int)
+    num_ncen_array = np.array(
+    	hod_model.mean_ncen(logM) > np.random.random(len(logM)),dtype=int)
 
     return num_ncen_array
 
@@ -79,6 +80,35 @@ def num_sat_monte_carlo(logM,hod_model,output=None):
     num_nsat_array = poisson.rvs(Prob_sat)
 
     return num_nsat_array
+
+def quenched_monte_carlo(logM,quenching_model,galaxy_type):
+    """ Returns Monte Carlo-generated array of 0 or 1 specifying whether the galaxy is quenched.
+
+    Parameters
+    ----------
+    quenched_fractions : array of expectation values for quenching
+
+    Returns
+    -------
+    quenched_array : int or array
+
+    
+    """
+    if galaxy_type == 'central':
+    	quenching_function = quenching_model.mean_quenched_fraction_centrals
+    elif galaxy_type == 'satellite':
+    	quenching_function = quenching_model.mean_quenched_fraction_satellites
+    else:
+    	raise TypeError("input galaxy_type must be a string set either to 'central' or 'satellite'")
+
+
+    quenched_array = np.array(
+    	quenching_function(logM) > np.random.random(
+    		len(logM)),dtype=int)
+
+    return quenched_array
+
+
 	
 
 class HOD_mock(object):
@@ -86,8 +116,8 @@ class HOD_mock(object):
 
 	Parameters
 	----------
-	hod_dict : optional, dictionary containing parameter values specifying how to populated dark matter halos with mock galaxies
-	color_dict : optional, dictionary containing parameter values specifying how colors are assigned to mock galaxies
+	hod_model : optional, dictionary containing parameter values specifying how to populated dark matter halos with mock galaxies
+	quenching_model : optional, dictionary containing parameter values specifying how colors are assigned to mock galaxies
 
 	Synopsis
 	--------
@@ -107,7 +137,7 @@ class HOD_mock(object):
 
 	'''
 
-	def __init__(self,simulation_data,hod_model,color_dict=None,seed=None):
+	def __init__(self,simulation_data,hod_model,quenching_model,seed=None):
 
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
 		# eventually this step will not require a "pre-processed" halo catalog, but this if fine for now.
@@ -123,6 +153,11 @@ class HOD_mock(object):
 		if not isinstance(hod_model,ho.HOD_Model):
 			raise TypeError("HOD_mock object requires input hod_model to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
 		self.hod_model = hod_model
+
+		if not isinstance(quenching_model,ho.Quenching_Model):
+			raise TypeError("HOD_mock object requires input quenching_model to be an instance of halo_occupation.Quenching_Model, or one of its subclasses")
+		self.quenching_model = quenching_model
+
 
 
 		self.logM = np.array(np.log10(table_of_halos['MVIR']))
@@ -174,8 +209,14 @@ class HOD_mock(object):
 
 		self.NCen = num_cen_monte_carlo(self.logM,self.hod_model)
 		self.hasCentral = self.NCen > 0
+
 		self.NSat = np.zeros(len(self.logM),dtype=int)
-		self.NSat[self.hasCentral] = num_sat_monte_carlo(self.logM[self.hasCentral],self.hod_model,output=self.NSat[self.hasCentral])
+		self.NSat[self.hasCentral] = num_sat_monte_carlo(
+			self.logM[self.hasCentral],
+			self.hod_model,output=self.NSat[self.hasCentral])
+
+		self.would_have_quenched_central = quenched_monte_carlo(
+			self.logM,self.quenching_model,'central')
 
 		self.num_total_cens = self.NCen.sum()
 		self.num_total_sats = self.NSat.sum()
@@ -228,6 +269,9 @@ class HOD_mock(object):
 		if not isinstance(self.hod_model,ho.HOD_Model):
 			raise TypeError("HOD_mock object requires input hod_model to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
 
+		if not isinstance(self.quenching_model,ho.Quenching_Model):
+			raise TypeError("HOD_mock object requires input quenching_model to be an instance of halo_occupation.Quenching_Model, or one of its subclasses")
+
 		# pregenerate the output arrays
 		if not isSetup:
 			self._setup()
@@ -235,6 +279,8 @@ class HOD_mock(object):
 		# Preallocate centrals so we don't have to touch them again.
 		self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
 		self.logMhost[:self.num_total_cens] = self.logM[self.hasCentral]
+		self.isQuenched[:self.num_total_cens] = self.would_have_quenched_central[self.hasCentral]
+
 
 		counter = self.num_total_cens
 		self.idx_current_halo = 0
@@ -255,6 +301,11 @@ class HOD_mock(object):
 			counter += Nsat
 
 		self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
+		self.isQuenched[self.num_total_cens:-1] = quenched_monte_carlo(
+			self.logMhost[self.num_total_cens:-1],
+			self.quenching_model,'satellite')
+
+
 
 	#...
 

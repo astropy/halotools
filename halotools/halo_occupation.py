@@ -66,84 +66,6 @@ def num_nsat(logM,hod_dict):
 
 
 
-def solve_for_quenching_polynomial_coefficients(logM,quenched_fraction):
-    ''' Given the quenched fraction for some halo masses, 
-    returns standard form polynomial coefficients specifying quenching function.
-
-    Parameters
-    ----------
-    logM : array of log halo masses, treated as abcissa
-    quenched_fraction : array of values of the quenched fraction at the abcissa
-
-    Returns
-    -------
-    quenched_fraction_polynomial_coefficients : array of coefficients determining the quenched fraction polynomial 
-
-    Synopsis
-    --------
-    Input arrays logM and quenched_fraction can in principle be of any dimension Ndim, and there will be Ndim output coefficients.
-
-    The input quenched_fractions specify the desired quenched fraction evaluated at the Ndim inputs for logM.
-    There exists a unique, order Ndim polynomial that produces those quenched fractions evaluated at the points logM.
-    The coefficients of that output polynomial are the output of the function, such that the quenching function is given by:
-    F_quenched(logM) = coeff[0] + coeff[1]*logM + coeff[2]*logM**2 + ... + coeff[len(logM)-1]*logM**(len(logM)-1)
-    
-    '''
-
-    ones = np.zeros(len(logM)) + 1
-    columns = ones
-    for i in np.arange(len(logM)-1):
-        columns = np.append(columns,[logM**(i+1)])
-    quenching_model_matrix = columns.reshape(len(logM),len(logM)).transpose()
-
-    quenched_fraction_polynomial_coefficients = np.linalg.solve(quenching_model_matrix,quenched_fraction)
-
-    return quenched_fraction_polynomial_coefficients
-
-def quenching_polynomial_function(logM,coefficients):
-    ''' Given a set of polynomial coefficients, returns the quenched fraction at the input logM.
-    
-    Parameters
-    ----------
-    logM: array of log halo masses
-    coefficients: list of coefficients determining the quenching polynomial
-        
-    Returns
-    -------
-    quenched_fraction: array giving fraction of galaxies that are quenched for a halo of log mass logM
-    
-    
-    '''
-
-    quenched_fraction = np.zeros(len(logM))    
-    for degree,polynomial_coefficient in enumerate(coefficients):
-        quenched_fraction = quenched_fraction + (polynomial_coefficient*logM**degree)
-    
-    # Enforce condition on quenched fraction
-    # Consider using a decorator instead
-    idx_quenched_fraction_exceeds_unity = quenched_fraction > 1
-    quenched_fraction[idx_quenched_fraction_exceeds_unity] = 1
-    idx_quenched_fraction_negative = quenched_fraction < 0
-    quenched_fraction[idx_quenched_fraction_negative] = 0
-    
-    return quenched_fraction
-
-def quenching_designation(logM,coefficients):
-    """
-
-    Parameters
-    ----------
-    logM: array of log halo masses
-    coefficients: list of coefficients determining the quenching polynomial
-
-    Returns
-    -------
-    quenching_designation_array : Monte Carlo-generated array of 0 or 1 specifying whether the galaxy is quenched.
-
-    """
-    
-    quenching_designation_array = np.array(quenching_polynomial_function(logM,coefficients) > np.random.random(len(logM)),dtype=int)
-    return quenching_designation_array
 
 
 def anatoly_concentration(logM):
@@ -283,7 +205,10 @@ class Zheng07_HOD_Model(HOD_Model):
         M1 = 10.**self.parameter_dict['logM1_sat']
         mean_nsat = np.zeros(len(logM),dtype='f8')
         idx_nonzero_satellites = (halo_mass - M0) > 0
-        mean_nsat[idx_nonzero_satellites] = self.mean_ncen(logM[idx_nonzero_satellites])*(((halo_mass[idx_nonzero_satellites] - M0)/M1)**self.parameter_dict['alpha_sat'])
+        mean_nsat[idx_nonzero_satellites] = self.mean_ncen(
+            logM[idx_nonzero_satellites])*(
+            ((halo_mass[idx_nonzero_satellites] - M0)/M1)
+            **self.parameter_dict['alpha_sat'])
         return mean_nsat
 
     def mean_concentration(self,logM):
@@ -331,108 +256,116 @@ class Zheng07_HOD_Model(HOD_Model):
 
 
 @six.add_metaclass(ABCMeta)
-class Color_Model(object):
-    """ Base class for model parameters determining mock galaxy colors.
+class Quenching_Model(object):
+    """ Base class for model parameters determining mock galaxy quenching.
     
     
     """
 
     def __init__(self,model_nickname):
-        self.color_model_nickname = model_nickname
+        self.quenching_model_nickname = model_nickname
 
     @abstractmethod
-    def quenched_fraction_centrals(self,logM):
-        raise NotImplementedError("quenched_fraction_centrals is not implemented")
+    def mean_quenched_fraction_centrals(self,logM):
+        raise NotImplementedError(
+            "quenched_fraction_centrals is not implemented")
 
     @abstractmethod
-    def quenched_fraction_satellites(self,logM):
-        raise NotImplementedError("quenched_fraction_satellites is not implemented")
+    def mean_quenched_fraction_satellites(self,logM):
+        raise NotImplementedError(
+            "quenched_fraction_satellites is not implemented")
 
 
+class vdB03_Quenching_Model(Quenching_Model):
+    """
+    Traditional HOD model of galaxy quenching, similar to van den Bosch 2003
 
+    """
 
+    def __init__(self,parameter_dict=None):
+        model_nickname = 'vdB03'
+        Quenching_Model.__init__(self,model_nickname)
+        self.publication = 'arXiv:0210495v3'
 
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-        if (model_nickname == None) or (model_nickname == 'zheng_etal07'):
-            self.model_nickname = 'zheng_etal07'
-            self.publication = 'arXiv:0703457'
-
-        if threshold is None:
-            warnings.warn("HOD threshold unspecified: setting to -19.5")
-            self.threshold = default_luminosity_threshold
+        if parameter_dict is None:
+            self.parameter_dict = defaults.default_quenching_parameters
         else:
-            if isinstance(threshold,int) or isinstance(threshold,float):
-                self.threshold = float(threshold)                
-            else:
-                raise TypeError("input luminosity threshold must be a scalar")
+            #this should be more defensive. Fine for now.
+            self.parameter_dict = parameter_dict
 
-           #Load some tabulated data from Zheng et al. 2007, Table 1
-        logMmin_cen_array = [11.35,11.46,11.6,11.75,12.02,12.3,12.79,13.38,14.22]
-        sigma_logM_array = [0.25,0.24,0.26,0.28,0.26,0.21,0.39,0.51,0.77]
-        logM0_array = [11.2,10.59,11.49,11.69,11.38,11.84,11.92,13.94,14.0]
-        logM1_array = [12.4,12.68,12.83,13.01,13.31,13.58,13.94,13.91,14.69]
-        alpha_sat_array = [0.83,0.97,1.02,1.06,1.06,1.12,1.15,1.04,0.87]
-        threshold_array = np.arange(-22,-17.5,0.5)
-        threshold_array = threshold_array[::-1]
+        self.central_quenching_polynomial_coefficients = (
+            self.solve_for_quenching_polynomial_coefficients(
+                self.parameter_dict['logM_abcissa'],
+                self.parameter_dict['central_ordinates']))
 
-        threshold_index = np.where(threshold_array==self.threshold)[0]
-        if len(threshold_index)==1:
-            self.hod_dict = {
-            'logMmin_cen' : logMmin_cen_array[threshold_index[0]],
-            'sigma_logM' : sigma_logM_array[threshold_index[0]],
-            'logM0' : logM0_array[threshold_index[0]],
-            'logM1' : logM1_array[threshold_index[0]],
-            'alpha_sat' : alpha_sat_array[threshold_index[0]],
-            'fconc' : 1.0 # multiplicative factor used to scale satellite concentrations (not actually a parameter in Zheng+07)
-            }
-        else:
-            threshold_index = [3,] #choose Mr19.5 as the fallback. 
-            warnings.warn("Input luminosity threshold does not match any of the Table 1 values of Zheng et al. 2007, choosing Mr = -19.5 as default",UserWarning)                
-
-        self.hod_dict = {
-        'logMmin_cen' : logMmin_cen_array[threshold_index[0]],
-        'sigma_logM' : sigma_logM_array[threshold_index[0]],
-        'logM0' : logM0_array[threshold_index[0]],
-        'logM1' : logM1_array[threshold_index[0]],
-        'alpha_sat' : alpha_sat_array[threshold_index[0]],
-        'fconc' : 1.0 # multiplicative factor used to scale satellite concentrations (not actually a parameter in Zheng+07)
-        }
-
-        
-        self.color_dict = {
-        'central_coefficients' : [0.35,0.75,0.95], #polynomial coefficients determining quenched fraction of centrals
-        'satellite_coefficients' : [0.5,0.75,0.85]        
-        }
-        self.logM_abcissa = [12,13.5,15] #halo masses at which model quenching fractions are defined
+        self.satellite_quenching_polynomial_coefficients = (
+            self.solve_for_quenching_polynomial_coefficients(
+                self.parameter_dict['logM_abcissa'],
+                self.parameter_dict['satellite_ordinates']))
 
 
+    def mean_quenched_fraction_centrals(self,logM):
+        coefficients = self.central_quenching_polynomial_coefficients
+        mean_quenched_fractions = self.quenching_polynomial(logM,coefficients)
+        return mean_quenched_fractions
 
-"""
+    def mean_quenched_fraction_satellites(self,logM):
+        coefficients = self.satellite_quenching_polynomial_coefficients
+        mean_quenched_fractions = self.quenching_polynomial(logM,coefficients)
+        return mean_quenched_fractions
+
+    def quenching_polynomial(self,logM,coefficients):
+        mean_quenched_fractions = np.zeros(len(logM))
+        polynomial_degree = len(self.parameter_dict['logM_abcissa'])
+        for n,coeff in enumerate(coefficients):
+            mean_quenched_fractions += coeff*logM**n
+
+        test_negative = mean_quenched_fractions < 0
+        mean_quenched_fractions[test_negative] = 0
+        test_exceeds_unity = mean_quenched_fractions > 1
+        mean_quenched_fractions[test_exceeds_unity] = 1
+
+        return mean_quenched_fractions
+
+    def solve_for_quenching_polynomial_coefficients(self,logM_abcissa,quenched_fractions):
+        ''' Given the quenched fraction for some halo masses, 
+        returns standard form polynomial coefficients specifying quenching function.
+
+        Parameters
+        ----------
+        logM : array of log halo masses, treated as abcissa
+        quenched_fractions : array of values of the quenched fraction at the abcissa
+
+        Returns
+        -------
+        quenched_fraction_polynomial_coefficients : array of coefficients determining the quenched fraction polynomial 
+
+        Synopsis
+        --------
+        Input arrays logM and quenched_fraction can in principle be of any dimension Ndim, and there will be Ndim output coefficients.
+
+        The input quenched_fractions specify the desired quenched fraction evaluated at the Ndim inputs for logM.
+        There exists a unique, order Ndim polynomial that produces those quenched fractions evaluated at the points logM.
+        The coefficients of that output polynomial are the output of the function, such that the quenching function is given by:
+        F_quenched(logM) = coeff[0] + coeff[1]*logM + coeff[2]*logM**2 + ... + coeff[len(logM)-1]*logM**(len(logM)-1)
+    
+        '''
+
+        ones = np.zeros(len(logM_abcissa)) + 1
+        columns = ones
+        for i in np.arange(len(logM_abcissa)-1):
+            columns = np.append(columns,[logM_abcissa**(i+1)])
+        quenching_model_matrix = columns.reshape(
+            len(logM_abcissa),len(logM_abcissa)).transpose()
+
+        quenched_fraction_polynomial_coefficients = np.linalg.solve(
+            quenching_model_matrix,quenched_fractions)
+
+        return quenched_fraction_polynomial_coefficients
+
+
+
+
 
 
 
