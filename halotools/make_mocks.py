@@ -117,35 +117,26 @@ def quenched_monte_carlo(logM,quenching_model,galaxy_type):
 	
 
 class HOD_mock(object):
-	'''		
+	"""		
 
 	Parameters
 	----------
-	hod_model : optional, dictionary containing parameter values specifying how to populated dark matter halos with mock galaxies
-	quenching_model : optional, dictionary containing parameter values specifying how colors are assigned to mock galaxies
+	simulation_data : dictionary
+	'halos' key is an astropy table of information about halo catalog.
+	'simulation_dict' is a dictionary containing various properties of the simulation.
+	Currently only Bolshoi at z=0 is supported.
 
-	Synopsis
-	--------
-	Base class for any HOD-based mock galaxy catalog object. 
-		Instantiations of this class have bound to them: 
-		* a numpy record array of dark matter host halos, 
-		* a dictionary of HOD model parameters,
-		* a numpy record array of galaxies populating those halos according to the model.
-		* methods for computing mock observables, such as (marked) two-point clustering, gg-lensing, conformity, etc. (yet to be implemented)
+    hod_model : HOD_Model object defined in halo_occupation module.
+
+    quenching_model : Quenching_Model object defined in halo_occupation module.
 
 
-	Warning
-	-------
-	Still buggy and poorly tested. Basic API still under rapid development.
-	Not yet suitable even for use at your own risk.
-
-
-	'''
+	"""
 
 	def __init__(self,simulation_data,hod_model,quenching_model,seed=None):
 
 		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
-		# eventually this step will not require a "pre-processed" halo catalog, but this if fine for now.
+		# eventually this step will not require a "pre-processed" halo catalog, but this is fine for now.
 
 		if not isinstance(simulation_data['halos'],astropy.table.table.Table):
 			raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
@@ -208,7 +199,9 @@ class HOD_mock(object):
 
 	def _setup(self):
 		"""
-		Compute NCen,Nsat and preallocate arrays for __call__().
+		Compute NCen,Nsat and preallocate various arrays.
+		No inputs; returns nothing; only modifies attributes 
+		of the HOD_mock object to which the method is bound.
 		
 		"""
 
@@ -236,7 +229,9 @@ class HOD_mock(object):
 
 	def _random_angles(self,coords,start,end,N):
 		"""
-		Generate N random angles and assign them to coords[start:end].
+		Generate a list of random angles. 
+		Assign the angles to coords[start:end], 
+		an index bookkeeping trick to speed up satellite position assignment.
 		"""
 
 		cos_t = np.random.uniform(-1.,1.,N)
@@ -249,8 +244,28 @@ class HOD_mock(object):
 	#...
 
 	def assign_satellite_positions(self,Nsat,center,r_vir,r_of_M,counter):
-		""" 
-		Note that I deleted John's M_halo argument since this does not appear to be used.
+		""" Use pre-tabulated cumulative_NFW_PDF to 
+		draw random satellite positions. 
+
+		Parameters
+		----------
+		Nsat : Number of satellites in the host system whose positions are being assigned.
+		
+		center : position of the halo 
+		hosting the satellite system whose positions are being assigned.
+
+		r_vir : virial radius of the halo 
+		hosting the satellite system whose positions are being assigned.
+
+		r_of_M : function defined by scipy interpolation of cumulative_NFW_PDF.
+
+		counter : bookkeeping device controlling indices of 
+		satellites in the host system whose positions are being assigned.
+
+		Notes 
+		-----
+		Returns nothing. Modifies self.coords of the satellites 
+		indexed by input counter and Nsat.
 
 		"""
 
@@ -265,7 +280,7 @@ class HOD_mock(object):
 
 	def populate(self,isSetup=False):
 		"""
-		Return a list of galaxies placed randomly in the halos.
+		Assign positions to mock galaxies. 
 		Returns coordinates, halo mass, isSat (boolean array with True for satellites)
 		If isSetup is True, don't call _setup first (useful for calling from a child class).
 
