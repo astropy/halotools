@@ -260,8 +260,7 @@ class vdB03_Quenching_Model(Quenching_Model):
 
     """
 
-    def __init__(self,parameter_dict=None):
-        model_nickname = 'vdB03'
+    def __init__(self,parameter_dict=None,model_nickname='vdB03'):
         Quenching_Model.__init__(self,model_nickname)
         self.publication = 'arXiv:0210495v3'
 
@@ -340,6 +339,37 @@ class vdB03_Quenching_Model(Quenching_Model):
             quenching_model_matrix,quenched_fractions)
 
         return quenched_fraction_polynomial_coefficients
+
+
+class Hearin_1hconf(vdB03_Quenching_Model):
+    """
+    Occupation model in which halo mass primarily determines quenching, 
+    but the quenching designation of the central galaxy 
+    has an additional influence on the satellite. Identical to betahod.
+
+    """
+
+    def __init__(self,parameter_dict=None,model_nickname='1hconf'):
+        vdB03_Quenching_Model.__init__(self,parameter_dict,model_nickname)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
