@@ -48,6 +48,7 @@ def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
 
 def load_bolshoi_host_halos_fits(simulation_dict=None):
     """Placeholder method using pyfits to load a pre-processed .fits file containing host halo information.
+    Will soon enough be replaced by a more general/flexible routine.
 
     Parameters
     ----------

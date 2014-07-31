@@ -232,6 +232,12 @@ class HOD_mock(object):
 		Generate a list of random angles. 
 		Assign the angles to coords[start:end], 
 		an index bookkeeping trick to speed up satellite position assignment.
+
+		Notes 
+		-----
+		API is going to change, so that function actually returns values, 
+		rather than privately over-writing object attributes. 
+		
 		"""
 
 		cos_t = np.random.uniform(-1.,1.,N)
@@ -264,8 +270,8 @@ class HOD_mock(object):
 
 		Notes 
 		-----
-		Returns nothing. Modifies self.coords of the satellites 
-		indexed by input counter and Nsat.
+		API is going to change, so that function actually returns values, 
+		rather than privately over-writing object attributes. 
 
 		"""
 
@@ -283,6 +289,11 @@ class HOD_mock(object):
 		Assign positions to mock galaxies. 
 		Returns coordinates, halo mass, isSat (boolean array with True for satellites)
 		If isSetup is True, don't call _setup first (useful for calling from a child class).
+
+		Notes 
+		-----
+		API is going to change, so that function actually returns values, 
+		rather than privately over-writing object attributes. 
 
 		"""
 
