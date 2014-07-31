@@ -19,11 +19,12 @@ import astropy
 
 
 def enforce_periodicity_of_box(coords, box_length):
-    """
+    """ Function used to apply periodic boundary conditions 
+    of the simulation, so that mock galaxies all lie in the range [0, Lbox].
 
     Parameters
     ----------
-    coords: 1d list of floats
+    coords: 1d array of floats
     box_length : scalar giving size of simulation box (currently hard-coded to be Mpc/h units)
 
 	Returns
@@ -43,7 +44,7 @@ def num_cen_monte_carlo(logM,hod_model):
     Parameters
     ----------
     logM : float or array
-    hod_dict : dictionary
+    hod_model : HOD_Model object defined in halo_occupation module.
 
     Returns
     -------
@@ -57,12 +58,12 @@ def num_cen_monte_carlo(logM,hod_model):
     return num_ncen_array
 
 def num_sat_monte_carlo(logM,hod_model,output=None):
-    '''  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
+    """  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
 
     Parameters
     ----------
     logM : float or array
-    hod_dict : dictionary
+    hod_model : HOD_Model object defined in halo_occupation module.
 
     Returns
     -------
@@ -70,7 +71,7 @@ def num_sat_monte_carlo(logM,hod_model,output=None):
         Values of array specify the number of satellites hosted by each halo.
 
 
-    '''
+    """
     Prob_sat = hod_model.mean_nsat(logM)
 	# NOTE: need to cut at zero, otherwise poisson bails
     # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
@@ -86,11 +87,15 @@ def quenched_monte_carlo(logM,quenching_model,galaxy_type):
 
     Parameters
     ----------
-    quenched_fractions : array of expectation values for quenching
+    logM : float array of host halo masses.
+    quenching_model : Quenching_Model object defined in halo_occupation module.
+    galaxy_type : string
+    Only supported values are 'central' or 'satellite'.
 
     Returns
     -------
     quenched_array : int or array
+    Used to define whether mock galaxy is quenched (1) or star-forming (0)
 
     
     """

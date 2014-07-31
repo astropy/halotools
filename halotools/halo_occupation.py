@@ -109,7 +109,17 @@ class HOD_Model(object):
 
 
 class Zheng07_HOD_Model(HOD_Model):
-    """ HOD model taken from Zheng et al. 2007.
+    """ HOD model taken from Zheng et al. 2007, arXiv:0703457.
+
+    Parameters 
+    ----------
+    parameter_dict : dictionary, optional.
+    Contains values for the parameters specifying the model.
+    Dictionary keys should be 'logMmin_cen', 'sigma_logM', 'logM0_sat','logM1_sat','alpha_sat'.
+    threshold : float, optional.
+    Luminosity threshold of the mock galaxy sample. If specified, input value must agree with 
+    one of the thresholds used in Zheng07 to fit HODs: 
+    [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
 
     """
 
