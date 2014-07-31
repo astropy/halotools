@@ -8,7 +8,7 @@ Module expressing various default values of the mock-making code.
 
 
 ### Default halo catalog
-default_halo_catalog_filename='/Users/aphearin/Dropbox/mock_for_surhud/VALUE_ADDED_HALOS/value_added_z0_halos.fits'
+default_halo_catalog_filename='/Users/aphearin/Dropbox/mock_for_surhud/VALUE_ADDED_HALOS/presorted_host_halo_catalog.fits'
 default_simulation_dict = {
 	'catalog_filename':default_halo_catalog_filename,
 	'Lbox':250.0,
@@ -31,3 +31,10 @@ default_quenching_parameters = {
     'satellite_ordinates' : [0.5,0.75,0.85] #polynomial coefficients determining quenched fraction of centrals
     }
 
+default_conformity_parameters = {
+	'logM_abcissa' : [12,14],
+	'satellite_destruction_quenched_central_ordinates' : [1.1,1],
+	'satellite_destruction_no_central_ordinates' : [1.0,1.0],
+	'satellite_conformity_quenched_central_ordinates' : [1.1,1],
+	'satellite_conformity_no_central_ordinates' : [1.0,1.0],
+}

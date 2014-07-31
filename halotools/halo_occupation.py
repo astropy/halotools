@@ -304,26 +304,37 @@ class vdB03_Quenching_Model(Quenching_Model):
 
         return mean_quenched_fractions
 
-    def solve_for_quenching_polynomial_coefficients(self,logM_abcissa,quenched_fractions):
+    def solve_for_quenching_polynomial_coefficients(self,logM_abcissa,ordinates):
         ''' Given the quenched fraction for some halo masses, 
         returns standard form polynomial coefficients specifying quenching function.
 
         Parameters
         ----------
-        logM : array of log halo masses, treated as abcissa
-        quenched_fractions : array of values of the quenched fraction at the abcissa
+        logM_abcissa : array of log halo masses, treated as abcissa
+        ordinates : array of desired values of the polynomial when evaluated at the abcissa
 
         Returns
         -------
-        quenched_fraction_polynomial_coefficients : array of coefficients determining the quenched fraction polynomial 
+        polynomial_coefficients : array of coefficients determining the polynomial 
 
         Synopsis
         --------
-        Input arrays logM and quenched_fraction can in principle be of any dimension Ndim, and there will be Ndim output coefficients.
+        Input arrays logM_abcissa and ordinates can in principle be of any dimension Ndim, 
+        and there will be Ndim output coefficients.
 
-        The input quenched_fractions specify the desired quenched fraction evaluated at the Ndim inputs for logM.
-        There exists a unique, order Ndim polynomial that produces those quenched fractions evaluated at the points logM.
-        The coefficients of that output polynomial are the output of the function, such that the quenching function is given by:
+        The input ordinates specify the desired values of the polynomial 
+        when evaluated at the Ndim inputs specified by the input logM_abcissa.
+        There exists a unique, order Ndim polynomial that produces the input 
+        ordinates when the polynomial is evaluated at the input logM_abcissa.
+        The coefficients of that unique polynomial are the output of the function. 
+
+        Example
+        -------
+        A traditional quenching model, such as the one suggested in van den Bosch et al. 2003, 
+        is a polynomial determining the mean quenched fraction as a function of halo mass logM.
+        If we denote the output of solve_for_quenching_polynomial_coefficients as the array coeff, 
+        then the unique polynomial F_quenched determined by F_quenched(logM_abcissa) = ordinates 
+        is given by: 
         F_quenched(logM) = coeff[0] + coeff[1]*logM + coeff[2]*logM**2 + ... + coeff[len(logM)-1]*logM**(len(logM)-1)
     
         '''
@@ -335,10 +346,10 @@ class vdB03_Quenching_Model(Quenching_Model):
         quenching_model_matrix = columns.reshape(
             len(logM_abcissa),len(logM_abcissa)).transpose()
 
-        quenched_fraction_polynomial_coefficients = np.linalg.solve(
-            quenching_model_matrix,quenched_fractions)
+        polynomial_coefficients = np.linalg.solve(
+            quenching_model_matrix,ordinates)
 
-        return quenched_fraction_polynomial_coefficients
+        return polynomial_coefficients
 
 
 class Hearin_1hconf(vdB03_Quenching_Model):
@@ -351,6 +362,8 @@ class Hearin_1hconf(vdB03_Quenching_Model):
 
     def __init__(self,parameter_dict=None,model_nickname='1hconf'):
         vdB03_Quenching_Model.__init__(self,parameter_dict,model_nickname)
+
+
 
 
 
