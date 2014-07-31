@@ -21,103 +21,71 @@ from abc import ABCMeta, abstractmethod
 import warnings
 
 
-def num_ncen(logM,hod_dict):
-    """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
-
-    Parameters
-    ----------
-    logM : float or array
-    hod_dict : dictionary
-
-    Returns
-    -------
-    num_ncen_array : int or array
-
-    
-    """
-
-    num_ncen_array = np.array(mean_ncen(logM,hod_dict) > np.random.random(len(logM)),dtype=int)
-    return num_ncen_array
-
-def num_nsat(logM,hod_dict):
-    '''  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
-
-    Parameters
-    ----------
-    logM : float or array
-    hod_dict : dictionary
-
-    Returns
-    -------
-    num_nsat_array : int or array
-        Values of array specify the number of satellites hosted by each halo.
-
-
-    '''
-    Prob_sat = mean_nsat(logM,hod_dict)
-	# NOTE: need to cut at zero, otherwise poisson bails
-    # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
-    test = Prob_sat <= 0
-    Prob_sat[test] = defaults.default_tiny_poisson_fluctuation
-
-    num_nsat_array = poisson.rvs(Prob_sat)
-
-    return num_nsat_array
-
-
-
-
 
 def anatoly_concentration(logM):
-    ''' 
+    """ Power law fitting formula for the concentration-mass relation of Bolshoi host halos at z=0
+    Taken from Klypin et al. 2011, arXiv:1002.3660v4, Eqn. 12.
+
 
     Parameters
     ----------
-    logM: array of log halo masses
+    logM: float array of log halo masses
 
     Returns
     -------
-    Concentrations deriving from c-M relation from Anatoly Klypin's 2011 Bolshoi paper.
+    concentrations : float array of concentrations.
 
-    '''
+    """
     
     masses = np.zeros(len(logM)) + 10.**logM
-    c0 = 12.0
+    c0 = 9.6
     Mpiv = 1.e12
     a = -0.075
     concentrations = c0*(masses/Mpiv)**a
     return concentrations
 
-def cumulative_NFW_PDF(r,c):
-    """
+def cumulative_NFW_PDF(x,c):
+    """ Analytically calculated integral to the NFW profile.
+    Unit-normalized so that the result is a cumulative PDF. 
 
     Parameters
     ----------
-    r : list of N floats in the range (0,1)
-    c : list of N concentrations
+    x : array of floats in the range (0,1).
+        Variable x = r/Rvir specifies host-centric distances in the range 0 < r/Rvir < 1.
+    c : list of concentrations
 
     Returns
     -------
-    List of N floats in the range (0,1). These values are given by 
-    the cumulative probability distribution function for an NFW profile,
-    where the input r is the halo-centric distance scaled by the halo Rvir. 
+    List of floats in the range (0,1). 
+    Value gives the probability of randomly drawing a radial position x = r/Rvir 
+    from an NFW profile of input concentration c.
+    Function is used in Monte Carlo realization of satellite positions, using 
+    standard method of transformation of variables. 
 
     Synopsis
     --------
     Currently being used by mock.HOD_mock to generate satellite profiles. 
 
-    Warning
-    -------
-    Basic API likely to change.
-
     """
     norm=np.log(1.+c)-c/(1.+c)
-    return (np.log(1.+r*c) - r*c/(1.+r*c))/norm
+    return (np.log(1.+x*c) - x*c/(1.+x*c))/norm
 
 
 @six.add_metaclass(ABCMeta)
 class HOD_Model(object):
-    """ Base class for model parameters determining the HOD.
+    """ Abstract base class for model parameters determining the HOD.
+
+    Parameters 
+    ----------
+    hod_model_nickname : string giving shorthand for  model name. 
+    Always defined within the __init__ method of the subclass and passed to HOD_Model.
+
+    Note 
+    ----
+    Any HOD-based model is a subclass of the HOD_Model object. 
+    All such models must specify how the expectation value 
+    of both central and satellite galaxy occupations vary with host mass.
+    Additionally, any HOD-based mock must specify the assumed concentration-mass relation.
     
     
     """
@@ -141,7 +109,7 @@ class HOD_Model(object):
 
 
 class Zheng07_HOD_Model(HOD_Model):
-    """ HOD model taken from Zheng et al. 2007
+    """ HOD model taken from Zheng et al. 2007.
 
     """
 
