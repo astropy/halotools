@@ -5,6 +5,8 @@ Functions that compute statistics of a mock galaxy catalog in a periodic box.
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
+__all__=['one_dimensional_periodic_distance','three_dimensional_periodic_distance']
+
 import numpy as np
 
 

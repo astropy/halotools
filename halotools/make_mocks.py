@@ -3,7 +3,8 @@
 #                        unicode_literals)
 """ General overview of the module"""
 
-__all__= ['enforce_periodicity_of_box', 'num_sat_monte_carlo']
+__all__= ['enforce_periodicity_of_box', 'num_cen_monte_carlo','num_sat_monte_carlo',
+'quenched_monte_carlo','HOD_mock']
 
 import read_nbody
 import halo_occupation as ho

@@ -13,6 +13,8 @@ Adequate only while basic functionality of mock-making code is being developed.
 
 """
 
+__all__=['read_barebones_ascii_halo_catalog_for_initial_mock_development','load_bolshoi_host_halos_fits']
+
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
