@@ -363,6 +363,8 @@ class Hearin_1hconf(vdB03_Quenching_Model):
     def __init__(self,parameter_dict=None,model_nickname='1hconf'):
         vdB03_Quenching_Model.__init__(self,parameter_dict,model_nickname)
 
+#    def maximal_satellite_destruction(self)
+
 
 
 

@@ -16,6 +16,7 @@ import os
 from copy import copy
 from collections import Counter
 import astropy
+import time
 
 
 def enforce_periodicity_of_box(coords, box_length):
@@ -135,9 +136,7 @@ class HOD_mock(object):
 
 	def __init__(self,simulation_data,hod_model,quenching_model,seed=None):
 
-		# read in .fits file containing pre-processed z=0 ROCKSTAR host halo catalog
-		# eventually this step will not require a "pre-processed" halo catalog, but this is fine for now.
-
+		# Test to make sure the passed objects are of the appropriate type
 		if not isinstance(simulation_data['halos'],astropy.table.table.Table):
 			raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
 		table_of_halos = simulation_data['halos']
@@ -155,7 +154,7 @@ class HOD_mock(object):
 		self.quenching_model = quenching_model
 
 
-
+		# Create numpy arrays containing data from the halo catalog and bind them to the mock object
 		self.logM = np.array(np.log10(table_of_halos['MVIR']))
 		self.haloID = np.array(table_of_halos['ID'])
 		self.concen = ho.anatoly_concentration(self.logM)
@@ -326,13 +325,25 @@ class HOD_mock(object):
 		# these two save a bit of time by eliminating calls to records.__getattribute__
 		logmasses = self.logM
 
+
+
+		# The following loop assigning satellite positions takes up nearly 100% of the mock population time
+		start = time.time()
 		for self.ii in satellite_index_array:
-			logM,center,Nsat,r_vir,concen_idx = logmasses[self.ii],self.halopos[self.ii],self.NSat[self.ii],self.Rvir[self.ii],self.interp_idx_concen[self.ii]
+			logM = logmasses[self.ii]
+			center = self.halopos[self.ii]
+			Nsat = self.NSat[self.ii]
+			r_vir = self.Rvir[self.ii]
+			concen_idx = self.interp_idx_concen[self.ii]
 			self.logMhost[counter:counter+Nsat] = logM
+
 			self.assign_satellite_positions(Nsat,center,r_vir,self.cumulative_nfw_PDF[concen_idx-1],counter)
 			counter += Nsat
+		runtime = time.time() - start
+		#print(str(runtime)+' seconds to assign satellite positions')
 
 		self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
+
 		self.isQuenched[self.num_total_cens:-1] = quenched_monte_carlo(
 			self.logMhost[self.num_total_cens:-1],
 			self.quenching_model,'satellite')
