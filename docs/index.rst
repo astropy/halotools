@@ -1,13 +1,12 @@
-Documentation
+****************
+halotools
+****************
+
+This is the documentation for the affiliated package.
+
+Reference/API
 =============
 
-This is an affiliated package for the AstroPy package. The documentation for
-this package is here:
+.. automodapi:: halotools
 
-.. toctree::
-  :maxdepth: 2
-
-  halotools/index.rst
-
-.. note:: Do not edit this page - instead, place all documentation for the
-          affiliated package inside ``packagename/``
+.. automodapi:: halotools.make_mocks
