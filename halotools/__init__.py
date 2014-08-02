@@ -1,7 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """
-Halotools does some things. 
+Halotools is a python package designed to analyze N-body simulations and constrain models of cosmology and galaxy evolution. 
 """
 
 # Affiliated packages may add whatever they like to this file, but

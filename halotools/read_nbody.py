@@ -2,14 +2,8 @@
 """
 Methods to load halo catalogs into memory.
 Not even close to the needed level of generality.
-Currently is only useful at loading in a pre-processed halo catalog.
+Currently is only useful at loading in a single pre-processed halo catalog: Bolshoi at z=0.
 Adequate only while basic functionality of mock-making code is being developed.
-
-.. module : read_nbody 
-    :synopsis: Modules to read and parse ASCII data of ROCKSTAR halo and merger tree catalogs.
-
-.. moduleauthor: Andrew Hearin <andrew.hearin@yale.edu>
-
 
 """
 

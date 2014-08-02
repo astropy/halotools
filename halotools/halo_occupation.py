@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 
+This module contains the classes and methods used to model the 
+connection between galaxies and the halos they inhabit. 
+Classes (will) include support for HODs, CLFs, CSMFs, and 
+(conditional) abundance matching, including designations 
+for whether a galaxy is quenched or star-forming.
+
+
 .. module : halo_occupation 
     :synopsis: Modules to and methods to generate HOD-type mocks  
 

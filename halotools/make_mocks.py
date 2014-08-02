@@ -1,7 +1,9 @@
 
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
-""" General overview of the module"""
+""" The make_mocks module contains the classes and functions used 
+to populate N-body simulations with realizations of galaxy-halo models. 
+Class design is built around future MCMC applications. """
 
 __all__= ['enforce_periodicity_of_box', 'num_cen_monte_carlo','num_sat_monte_carlo',
 'quenched_monte_carlo','HOD_mock']

@@ -1,5 +1,6 @@
 """ 
-Functions that compute statistics of a mock galaxy catalog in a periodic box.
+Functions that compute statistics of a mock galaxy catalog in a periodic box. 
+Still largely unused in its present form. 
 """
 
 #from __future__ import (absolute_import, division, print_function,
