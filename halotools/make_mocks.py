@@ -132,9 +132,9 @@ class HOD_mock(object):
     Parameters
     ----------
     simulation_data : dictionary
-    'halos' key is an astropy table of information about halo catalog.
-    'simulation_dict' is a dictionary containing various properties of the simulation.
-    Currently only Bolshoi at z=0 is supported.
+        'halos' key is an astropy table of information about halo catalog.
+        'simulation_dict' is a dictionary containing various properties of the simulation.
+        Currently only Bolshoi at z=0 is supported.
 
     hod_model : HOD_Model object defined in halo_occupation module.
 
