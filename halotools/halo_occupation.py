@@ -32,11 +32,12 @@ def anatoly_concentration(logM):
 
     Parameters
     ----------
-    logM: float array of log halo masses
+    logM : array 
+        array of log10(Mvir) of halos in catalog
 
     Returns
     -------
-    concentrations : float array of concentrations.
+    concentrations : array
 
     """
     
@@ -53,17 +54,21 @@ def cumulative_NFW_PDF(x,c):
 
     Parameters
     ----------
-    x : array of floats in the range (0,1).
-        Variable x = r/Rvir specifies host-centric distances in the range 0 < r/Rvir < 1.
-    c : list of concentrations
+    x : array 
+        Values are in the range (0,1).
+        Elements x = r/Rvir specify host-centric distances in the range 0 < r/Rvir < 1.
+
+    c : array
+        Concentration of halo whose profile is being tabulated.
 
     Returns
     -------
-    List of floats in the range (0,1). 
-    Value gives the probability of randomly drawing a radial position x = r/Rvir 
-    from an NFW profile of input concentration c.
-    Function is used in Monte Carlo realization of satellite positions, using 
-    standard method of transformation of variables. 
+    pdf : array 
+        List of floats in the range (0,1). 
+        Value gives the probability of randomly drawing a radial position x = r/Rvir 
+        from an NFW profile of input concentration c.
+        Function is used in Monte Carlo realization of satellite positions, using 
+        standard method of transformation of variables. 
 
     Synopsis
     --------
@@ -77,11 +82,13 @@ def cumulative_NFW_PDF(x,c):
 @six.add_metaclass(ABCMeta)
 class HOD_Model(object):
     """ Abstract base class for model parameters determining the HOD.
+    Cannot be instantiated. 
 
     Parameters 
     ----------
-    hod_model_nickname : string giving shorthand for  model name. 
-    Always defined within the __init__ method of the subclass and passed to HOD_Model.
+    hod_model_nickname : string 
+        Shorthand for model name. 
+        Always defined within the __init__ method of the subclass and passed to HOD_Model.
 
     Note 
     ----
@@ -117,12 +124,13 @@ class Zheng07_HOD_Model(HOD_Model):
     Parameters 
     ----------
     parameter_dict : dictionary, optional.
-    Contains values for the parameters specifying the model.
-    Dictionary keys should be 'logMmin_cen', 'sigma_logM', 'logM0_sat','logM1_sat','alpha_sat'.
+        Contains values for the parameters specifying the model.
+        Dictionary keys should be 'logMmin_cen', 'sigma_logM', 'logM0_sat','logM1_sat','alpha_sat'.
+
     threshold : float, optional.
-    Luminosity threshold of the mock galaxy sample. If specified, input value must agree with 
-    one of the thresholds used in Zheng07 to fit HODs: 
-    [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+        Luminosity threshold of the mock galaxy sample. If specified, input value must agree with 
+        one of the thresholds used in Zheng07 to fit HODs: 
+        [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
 
     """
 
@@ -141,16 +149,16 @@ class Zheng07_HOD_Model(HOD_Model):
 
     def mean_ncen(self,logM):
         """
-        Expected number of central galaxies in a halo of mass 10**logM.
+        Expected number of central galaxies in a halo of mass logM.
 
         Parameters
         ----------        
-        logM : float or array
-        hod_dict : dictionary
+        logM : array 
+            array of log10(Mvir) of halos in catalog
 
         Returns
         -------
-        mean_ncen : float or array
+        mean_ncen : array
     
         Synopsis
         -------
@@ -164,12 +172,12 @@ class Zheng07_HOD_Model(HOD_Model):
         return mean_ncen
 
     def mean_nsat(self,logM):
-        """Expected number of satellite galaxies in a halo of mass 10**logM.
+        """Expected number of satellite galaxies in a halo of mass logM.
 
         Parameters
         ----------
-        logM : float or array
-        hod_dict : dictionary
+        logM : array 
+            array of log10(Mvir) of halos in catalog
 
         Returns
         -------
@@ -308,17 +316,22 @@ class vdB03_Quenching_Model(Quenching_Model):
         return mean_quenched_fractions
 
     def solve_for_quenching_polynomial_coefficients(self,logM_abcissa,ordinates):
-        ''' Given the quenched fraction for some halo masses, 
+        """ Given the quenched fraction for some halo masses, 
         returns standard form polynomial coefficients specifying quenching function.
 
         Parameters
         ----------
-        logM_abcissa : array of log halo masses, treated as abcissa
-        ordinates : array of desired values of the polynomial when evaluated at the abcissa
+        logM_abcissa : array 
+            Values are halo masses, the as abcissa of the polynomial.
+
+        ordinates : array 
+            Elements are the desired values of the polynomial when evaluated at the abcissa.
 
         Returns
         -------
-        polynomial_coefficients : array of coefficients determining the polynomial 
+        polynomial_coefficients : array 
+            Elements are the coefficients determining the polynomial. 
+            Element N of polynomial_coefficients gives the degree N coefficient.
 
         Synopsis
         --------
@@ -340,7 +353,7 @@ class vdB03_Quenching_Model(Quenching_Model):
         is given by: 
         F_quenched(logM) = coeff[0] + coeff[1]*logM + coeff[2]*logM**2 + ... + coeff[len(logM)-1]*logM**(len(logM)-1)
     
-        '''
+        """
 
         ones = np.zeros(len(logM_abcissa)) + 1
         columns = ones

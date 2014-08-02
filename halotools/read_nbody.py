@@ -34,7 +34,8 @@ def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
 
     Returns
     -------
-    halos : A numpy record array containing halo catalog information.
+    halos : Astropy Table
+         Halo catalog information.
 
     Synopsis
     --------
@@ -55,7 +56,9 @@ def load_bolshoi_host_halos_fits(simulation_dict=None):
     Parameters
     ----------
     simulation_dict : dictionary
-        Contains keys for the filename, as well as simulation attributes such as box size, resolution, and scale factor of snapshot.
+        The key 'halos' points to an astropy table containing halo catalog data.
+        The key 'simulation_dict' points to a dictionary with keys for 
+        simulation attributes such as box size, resolution, and scale factor of snapshot.
 
     Returns
     -------
@@ -81,12 +84,12 @@ def load_bolshoi_host_halos_fits(simulation_dict=None):
 
 
 class simulation(object):
-    ''' Container class for properties of the simulation being used.
+    """ Container class for properties of the simulation being used.
     
     Still unused.
     
     
-    '''
+    """
     
     def __init__(self,simulation_nickname=None):
         
