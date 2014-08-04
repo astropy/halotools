@@ -166,7 +166,6 @@ class Zheng07_HOD_Model(HOD_Model):
         Mean number of central galaxies in a host halo of the specified mass. Values are restricted 0 <= mean_ncen <= 1.
 
         """
-
         if not isinstance(logM,np.ndarray):
             raise TypeError("Input logM to mean_ncen must be a numpy array")
         mean_ncen = 0.5*(1.0 + erf((logM - self.parameter_dict['logMmin_cen'])/self.parameter_dict['sigma_logM']))

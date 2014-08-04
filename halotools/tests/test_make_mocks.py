@@ -15,8 +15,9 @@ from ..halo_occupation import Zheng07_HOD_Model
 
 def test_zheng_model():
 
-	m = Zheng07_HOD_Model(-20.0)
-	test_mean_ncen = m.mean_ncen(np.array([10,11,12,13,14,15]))
+	m = Zheng07_HOD_Model(threshold=-20.0)
+	test_mass = np.array([10,11,12,13,14,15])
+	test_mean_ncen = m.mean_ncen(test_mass)
 
 	assert np.all(test_mean_ncen >= 0)
 

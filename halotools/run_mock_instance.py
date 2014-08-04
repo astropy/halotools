@@ -113,7 +113,8 @@ def test_solve_for_quenching_polynomial_coefficients():
 
 	x=[0,1,-1,2]
 	y=[10,15,11,26]
-	coeff = ho.solve_for_quenching_polynomial_coefficients(x,y)
+	vdB_model = ho.vdB03_Quenching_Model()
+	coeff = vdB_model.solve_for_quenching_polynomial_coefficients(x,y)
 	test_coeff = coeff - np.array([10,2,3,0])
 	if any(test_coeff) != 0:
 		print("Bad determination of quenching coefficients!")
