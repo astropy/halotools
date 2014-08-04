@@ -83,7 +83,6 @@ def cumulative_NFW_PDF(x,c):
 @six.add_metaclass(ABCMeta)
 class HOD_Model(object):
     """ Abstract base class for model parameters determining the HOD.
-    Cannot be instantiated. 
 
     Parameters 
     ----------
@@ -101,10 +100,9 @@ class HOD_Model(object):
     
     """
     
-    def __init__(self,model_nickname):
-
-        self.hod_model_nickname = model_nickname
-#        self.parameter_dict = {}
+    def __init__(self):
+        self.publication = []
+        self.parameter_dict = {}
 
     @abstractmethod
     def mean_ncen(self,logM):
@@ -136,10 +134,9 @@ class Zheng07_HOD_Model(HOD_Model):
     """
 
     def __init__(self,parameter_dict=None,threshold=None):
-        model_nickname = 'Zheng07'
-        HOD_Model.__init__(self,model_nickname)
+        HOD_Model.__init__(self)
 
-        self.publication = 'arXiv:0703457'
+        self.publication.append('arXiv:0703457')
 
         if parameter_dict is None:
             self.parameter_dict = self.published_parameters(threshold)
@@ -151,6 +148,7 @@ class Zheng07_HOD_Model(HOD_Model):
     def mean_ncen(self,logM):
         """
         Expected number of central galaxies in a halo of mass logM.
+        See Equation 2 of arXiv:0703457.
 
         Parameters
         ----------        
@@ -173,6 +171,7 @@ class Zheng07_HOD_Model(HOD_Model):
 
     def mean_nsat(self,logM):
         """Expected number of satellite galaxies in a halo of mass logM.
+        See Equation 5 of arXiv:0703457.
 
         Parameters
         ----------
@@ -245,14 +244,16 @@ class Zheng07_HOD_Model(HOD_Model):
 
 
 @six.add_metaclass(ABCMeta)
-class Quenching_Model(object):
-    """ Base class for model parameters determining mock galaxy quenching.
-    
+class HOD_Quenching_Model(HOD_Model):
+    """ Abstract base class for model parameters determining mock galaxy quenching.    
     
     """
 
-    def __init__(self,model_nickname):
-        self.quenching_model_nickname = model_nickname
+    def __init__(self):
+
+        HOD_Model.__init__(self)
+        self.hod_model = None
+
 
     @abstractmethod
     def mean_quenched_fraction_centrals(self,logM):
@@ -265,36 +266,55 @@ class Quenching_Model(object):
             "quenched_fraction_satellites is not implemented")
 
 
-class vdB03_Quenching_Model(Quenching_Model):
+#Here's how to combine two dictionaries
+#x = {'a':4}
+#y = {'b':4}
+#z=dict(x.items()+y.items())
+
+class vdB03_Quenching_Model(HOD_Quenching_Model):
     """
-    Traditional HOD model of galaxy quenching, similar to van den Bosch 2003
+    Traditional HOD model of galaxy quenching. 
+    Approach is adapted from van den Bosch 2003.
 
     """
 
-    def __init__(self,parameter_dict=None,model_nickname='vdB03'):
-        Quenching_Model.__init__(self,model_nickname)
-        self.publication = 'arXiv:0210495v3'
+    def __init__(self,hod_modelname=None,hod_parameter_dict=None,threshold=None,
+        quenching_parameter_dict=None):
+        HOD_Quenching_Model.__init__(self)
 
-        if parameter_dict is None:
-            self.parameter_dict = defaults.default_quenching_parameters
+        if (hod_modelname == 'Zheng07_HOD_Model') or (hod_modelname is None):
+            self.hod_model = Zheng07_HOD_Model(parameter_dict = hod_parameter_dict,
+                threshold = threshold)
         else:
-            #this should be more defensive. Fine for now.
-            self.parameter_dict = parameter_dict
+            raise TypeError("input hod_modelname must agree with one of the supported HOD objects")
+
+        self.publication.extend(self.hod_model.publication)
+        self.publication.extend(['arXiv:0210495v3'])
+
+# This should be more defensive. Fine for now.
+        if quenching_parameter_dict is None:
+            quenching_parameter_dict = defaults.default_quenching_parameters
+        self.parameter_dict = dict(self.hod_model.parameter_dict.items() + 
+            quenching_parameter_dict.items())
 
         self.central_quenching_polynomial_coefficients = (
             self.solve_for_quenching_polynomial_coefficients(
-                self.parameter_dict['logM_abcissa'],
-                self.parameter_dict['central_ordinates']))
+                self.parameter_dict['logM_quenching_abcissa'],
+                self.parameter_dict['central_quenching_ordinates']))
 
         self.satellite_quenching_polynomial_coefficients = (
             self.solve_for_quenching_polynomial_coefficients(
-                self.parameter_dict['logM_abcissa'],
-                self.parameter_dict['satellite_ordinates']))
+                self.parameter_dict['logM_quenching_abcissa'],
+                self.parameter_dict['satellite_quenching_ordinates']))
 
-    #def mean_ncen(self,logM):
-     #   return Zheng07_HOD_Model.mean_ncen(logM)
+    def mean_ncen(self,logM):
+        return self.hod_model.mean_ncen(logM)
 
+    def mean_nsat(self,logM):
+        return self.hod_model.mean_nsat(logM)
 
+    def mean_concentration(self,logM):
+        return self.hod_model.mean_concentration(logM)
 
     def mean_quenched_fraction_centrals(self,logM):
         coefficients = self.central_quenching_polynomial_coefficients
@@ -308,7 +328,7 @@ class vdB03_Quenching_Model(Quenching_Model):
 
     def quenching_polynomial(self,logM,coefficients):
         mean_quenched_fractions = np.zeros(len(logM))
-        polynomial_degree = len(self.parameter_dict['logM_abcissa'])
+        polynomial_degree = len(self.parameter_dict['logM_quenching_abcissa'])
         for n,coeff in enumerate(coefficients):
             mean_quenched_fractions += coeff*logM**n
 
@@ -370,26 +390,6 @@ class vdB03_Quenching_Model(Quenching_Model):
             quenching_model_matrix,ordinates)
 
         return polynomial_coefficients
-
-
-class Hearin_1hconf(vdB03_Quenching_Model):
-    """
-    Occupation model in which halo mass primarily determines quenching, 
-    but the quenching designation of the central galaxy 
-    has an additional influence on the satellite. Identical to betahod.
-
-    """
-
-    def __init__(self,parameter_dict=None,model_nickname='1hconf'):
-        vdB03_Quenching_Model.__init__(self,parameter_dict,model_nickname)
-
-#    def maximal_satellite_destruction(self)
-
-
-
-
-
-
 
 
 
