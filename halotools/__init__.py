@@ -4,12 +4,11 @@
 Halotools is a python package designed to analyze N-body simulations and constrain models of cosmology and galaxy evolution. 
 """
 
-# Affiliated packages may add whatever they like to this file, but
-# should keep this content at the top.
 # ----------------------------------------------------------------------------
+# keep this content at the top.
 from ._astropy_init import *
-# ----------------------------------------------------------------------------
 
 # For egg_info test builds to pass, put package imports here.
 if not _ASTROPY_SETUP_:
 	pass
+	# ----------------------------------------------------------------------------

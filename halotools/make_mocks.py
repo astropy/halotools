@@ -3,7 +3,14 @@
 #                        unicode_literals)
 """ The make_mocks module contains the classes and functions used 
 to populate N-body simulations with realizations of galaxy-halo models. 
-Class design is built around future MCMC applications. """
+The functions in the halo_occupation module are used to define the analytical models
+of both stellar mass and quenching; this module paints monte carlo realizations of 
+those models onto halos in an N-body catalog at a single snapshot.
+Currently only set up for HOD-type models, but near-term features include 
+CLF/CSMF models, and (conditional) abundance matching models.
+Class design is built around future MCMC applications, so that 
+lower level objects like numpy ndarrays are used to store object attributes, 
+which are cheaper and faster to allocate memory for."""
 
 __all__= ['enforce_periodicity_of_box', 'num_cen_monte_carlo','num_sat_monte_carlo',
 'quenched_monte_carlo','HOD_mock']
@@ -39,7 +46,8 @@ def enforce_periodicity_of_box(coords, box_length):
 
     Returns
     -------
-    coords : 1d list of floats corrected for box periodicity
+    coords : array_like
+        1d list of floats giving coordinates that have been corrected for box periodicity
 
     """
     test = coords > box_length
@@ -54,7 +62,9 @@ def num_cen_monte_carlo(logM,hod_model):
     Parameters
     ----------
     logM : float or array
-    hod_model : HOD_Model object defined in halo_occupation module.
+
+    hod_model : 
+        HOD_Model object defined in halo_occupation module.
 
     Returns
     -------
@@ -73,6 +83,7 @@ def num_sat_monte_carlo(logM,hod_model,output=None):
     Parameters
     ----------
     logM : float or array
+
     hod_model : HOD_Model object defined in halo_occupation module.
 
     Returns
@@ -97,15 +108,19 @@ def quenched_monte_carlo(logM,quenching_model,galaxy_type):
 
     Parameters
     ----------
-    logM : float array of host halo masses.
-    quenching_model : Quenching_Model object defined in halo_occupation module.
+    logM : array_like
+
+    quenching_model : 
+        Any quenching_Model object defined in halo_occupation module.
+
     galaxy_type : string
-    Only supported values are 'central' or 'satellite'.
+        Only supported values are 'central' or 'satellite'. Used to indicate which 
+        quenching model method should used to generate the Monte Carlo.
 
     Returns
     -------
     quenched_array : int or array
-    Used to define whether mock galaxy is quenched (1) or star-forming (0)
+        Used to define whether mock galaxy is quenched (1) or star-forming (0)
 
     
     """
@@ -136,9 +151,11 @@ class HOD_mock(object):
         'simulation_dict' is a dictionary containing various properties of the simulation.
         Currently only Bolshoi at z=0 is supported.
 
-    hod_model : HOD_Model object defined in halo_occupation module.
+    hod_model : 
+        HOD_Model object defined in halo_occupation module.
 
-    quenching_model : Quenching_Model object defined in halo_occupation module.
+    quenching_model : 
+        Quenching_Model object defined in halo_occupation module.
 
 
     """
@@ -211,6 +228,11 @@ class HOD_mock(object):
         Compute NCen,Nsat and preallocate various arrays.
         No inputs; returns nothing; only modifies attributes 
         of the HOD_mock object to which the method is bound.
+
+        Warning
+        -------
+        The basic behavior of this method will soon be changed, correspondingly 
+        changing the basic API of the mock making.
         
         """
 
@@ -266,16 +288,17 @@ class HOD_mock(object):
         ----------
         Nsat : Number of satellites in the host system whose positions are being assigned.
         
-        center : position of the halo 
-        hosting the satellite system whose positions are being assigned.
+        center : array_like
+        position of the halo hosting the satellite system whose positions are being assigned.
 
-        r_vir : virial radius of the halo 
-        hosting the satellite system whose positions are being assigned.
+        r_vir : array_like
+        Virial radius of the halo hosting the satellite system whose positions are being assigned.
 
-        r_of_M : function defined by scipy interpolation of cumulative_NFW_PDF.
+        r_of_M : 
+            Function object defined by scipy interpolation of cumulative_NFW_PDF.
 
-        counter : bookkeeping device controlling indices of 
-        satellites in the host system whose positions are being assigned.
+        counter : int
+            bookkeeping device controlling indices of satellites in the host system whose positions are being assigned.
 
         Notes 
         -----
@@ -297,12 +320,7 @@ class HOD_mock(object):
         """
         Assign positions to mock galaxies. 
         Returns coordinates, halo mass, isSat (boolean array with True for satellites)
-        If isSetup is True, don't call _setup first (useful for calling from a child class).
-
-        Notes 
-        -----
-        API is going to change, so that function actually returns values, 
-        rather than privately over-writing object attributes. 
+        If isSetup is True, don't call _setup first (useful for future MCMC applications).
 
         """
 
