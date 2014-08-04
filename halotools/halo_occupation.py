@@ -136,7 +136,7 @@ class Zheng07_HOD_Model(HOD_Model):
     def __init__(self,parameter_dict=None,threshold=None):
         HOD_Model.__init__(self)
 
-        self.publication.append('arXiv:0703457')
+        self.publication.extend(['arXiv:0703457'])
 
         if parameter_dict is None:
             self.parameter_dict = self.published_parameters(threshold)
@@ -278,15 +278,19 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
     """
 
-    def __init__(self,hod_modelname=None,hod_parameter_dict=None,threshold=None,
+    def __init__(self,hod_model=Zheng07_HOD_Model,
+        hod_parameter_dict=None,threshold=None,
         quenching_parameter_dict=None):
-        HOD_Quenching_Model.__init__(self)
 
-        if (hod_modelname == 'Zheng07_HOD_Model') or (hod_modelname is None):
-            self.hod_model = Zheng07_HOD_Model(parameter_dict = hod_parameter_dict,
-                threshold = threshold)
-        else:
-            raise TypeError("input hod_modelname must agree with one of the supported HOD objects")
+        #if isinstance(hod_model,Zheng07_HOD_Model) is False:
+        #    raise TypeError("input hod_model must be one of the supported HOD_Model objects defined in this module")
+
+        if not isinstance(hod_model(),HOD_Model):
+            raise TypeError("input hod_model must be one of the supported HOD_Model objects defined in this module")
+        self.hod_model = hod_model(
+            parameter_dict = hod_parameter_dict,threshold = threshold)
+
+        HOD_Quenching_Model.__init__(self)
 
         self.publication.extend(self.hod_model.publication)
         self.publication.extend(['arXiv:0210495v3'])
