@@ -84,11 +84,6 @@ def cumulative_NFW_PDF(x,c):
 class HOD_Model(object):
     """ Abstract base class for model parameters determining the HOD.
 
-    Parameters 
-    ----------
-    hod_model_nickname : string 
-        Shorthand for model name. 
-        Always defined within the __init__ method of the subclass and passed to HOD_Model.
 
     Note 
     ----
@@ -118,7 +113,9 @@ class HOD_Model(object):
 
 
 class Zheng07_HOD_Model(HOD_Model):
-    """ HOD model taken from Zheng et al. 2007, arXiv:0703457.
+    """ Subclass of HOD_Model object, where functional forms for occupation statistics 
+    are taken from Zheng et al. 2007, arXiv:0703457.
+
 
     Parameters 
     ----------
@@ -130,6 +127,12 @@ class Zheng07_HOD_Model(HOD_Model):
         Luminosity threshold of the mock galaxy sample. If specified, input value must agree with 
         one of the thresholds used in Zheng07 to fit HODs: 
         [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+
+    Note
+    ----
+
+    Concentration-mass relation is current set to be Anatoly's, though 
+    this is not the relation used in Zheng07.
 
     """
 
@@ -200,9 +203,48 @@ class Zheng07_HOD_Model(HOD_Model):
         return mean_nsat
 
     def mean_concentration(self,logM):
-        return anatoly_concentration(logM)
+        """
+        Concentration-mass relation of the model.
+
+        Parameters 
+        ----------
+
+        logM : array_like
+
+        Returns 
+        -------
+
+        concentrations : array_like
+            Mean concentration of logM halos, using anatoly_concentration model.
+
+
+
+        """
+
+        concentrations = anatoly_concentration(logM)
+        return concentrations
 
     def published_parameters(self,threshold=None):
+        """
+        Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
+
+        Parameters 
+        ----------
+
+        threshold : float
+            Luminosity threshold defining the SDSS sample to which Zheng et al. 
+            fit their HOD model. Must be agree with one of the published values: 
+            [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+
+        Returns 
+        -------
+
+        parameter_dict : dict
+            Dictionary of model parameters whose values have been set to 
+            agree with the values taken from Table 1 of Zheng et al. 2007.
+
+
+        """
 
         # Check to see whether a luminosity threshold has been specified
         # If not, use Mr = -19.5 as the default choice, and alert the user
@@ -245,7 +287,9 @@ class Zheng07_HOD_Model(HOD_Model):
 
 @six.add_metaclass(ABCMeta)
 class HOD_Quenching_Model(HOD_Model):
-    """ Abstract base class for model parameters determining mock galaxy quenching.    
+    """ Abstract base class for model parameters determining mock galaxy quenching. 
+    This is a subclass of HOD_Mock, which additionally requires methods specifying 
+    the quenched fractions of centrals and satellites.  
     
     """
 
@@ -257,24 +301,34 @@ class HOD_Quenching_Model(HOD_Model):
 
     @abstractmethod
     def mean_quenched_fraction_centrals(self,logM):
+        """
+        Expected fraction of centrals that are quenched as a function of host halo mass logM.
+        A required method for any HOD_Quenching_Model object.
+        """
         raise NotImplementedError(
             "quenched_fraction_centrals is not implemented")
 
     @abstractmethod
     def mean_quenched_fraction_satellites(self,logM):
+        """
+        Expected fraction of satellites that are quenched as a function of host halo mass logM.
+        A required method for any HOD_Quenching_Model object.
+        """
         raise NotImplementedError(
             "quenched_fraction_satellites is not implemented")
 
 
-#Here's how to combine two dictionaries
-#x = {'a':4}
-#y = {'b':4}
-#z=dict(x.items()+y.items())
 
 class vdB03_Quenching_Model(HOD_Quenching_Model):
     """
-    Traditional HOD model of galaxy quenching. 
-    Approach is adapted from van den Bosch 2003.
+    Subclass of HOD_Quenching_Model, providing a traditional HOD model of galaxy quenching, 
+    in which quenching designation is purely determined by host halo virial mass.
+    Approach is adapted from van den Bosch 2003. All-galaxy central and satellite occupation 
+    statistics are specified first; Zheng07_HOD_Model is the default choice, 
+    but any supported HOD_Mock object could be chosen. A quenching designation is subsequently 
+    applied to the galaxies. 
+    Thus in this class of models, 
+    the central galaxy SMHM has no dependence on quenched/active designation.
 
     """
 
@@ -282,25 +336,35 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         hod_parameter_dict=None,threshold=None,
         quenching_parameter_dict=None):
 
-        #if isinstance(hod_model,Zheng07_HOD_Model) is False:
-        #    raise TypeError("input hod_model must be one of the supported HOD_Model objects defined in this module")
-
-        if not isinstance(hod_model(),HOD_Model):
+        if not isinstance(hod_model(threshold=threshold),HOD_Model):
             raise TypeError("input hod_model must be one of the supported HOD_Model objects defined in this module")
+
+        # Run initialization from super class. Currently not doing much.
+        HOD_Quenching_Model.__init__(self)
+
+
         self.hod_model = hod_model(
             parameter_dict = hod_parameter_dict,threshold = threshold)
 
-        HOD_Quenching_Model.__init__(self)
 
         self.publication.extend(self.hod_model.publication)
         self.publication.extend(['arXiv:0210495v3'])
 
-# This should be more defensive. Fine for now.
+        # The baseline HOD parameter dictionary is already an attribute 
+        # of self.hod_model. That dictionary needs to be joined with 
+        # the dictionary storing the quenching model parameters. 
+        # If a quenching parameter dictionary is passed to the constructor,
+        # concatenate that passed dictionary with the existing hod_model dictionary.
+        # Otherwise, choose the default quenching model parameter set in defaults.py 
+        # This should be more defensive. Fine for now.
         if quenching_parameter_dict is None:
             quenching_parameter_dict = defaults.default_quenching_parameters
         self.parameter_dict = dict(self.hod_model.parameter_dict.items() + 
             quenching_parameter_dict.items())
 
+        # The quenching parameter dictionary specifies the quenched fraction 
+        # at the input abcissa. Use this information to determine the unique polynomial
+        # satisfying those conditions, specified by a set of coefficients.
         self.central_quenching_polynomial_coefficients = (
             self.solve_for_quenching_polynomial_coefficients(
                 self.parameter_dict['logM_quenching_abcissa'],
@@ -312,25 +376,144 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
                 self.parameter_dict['satellite_quenching_ordinates']))
 
     def mean_ncen(self,logM):
-        return self.hod_model.mean_ncen(logM)
+        """
+        Expected number of central galaxies in a halo of mass logM.
+        The appropriate method is already bound to the self.hod_model object.
+
+        Parameters
+        ----------
+        logM : array 
+            array of log10(Mvir) of halos in catalog
+
+        Returns
+        -------
+        mean_ncen : float or array
+            Mean number of central galaxies in a host halo of the specified mass. 
+
+
+        """
+        mean_ncen = self.hod_model.mean_ncen(logM)
+        return mean_ncen
 
     def mean_nsat(self,logM):
-        return self.hod_model.mean_nsat(logM)
+        """
+        Expected number of satellite galaxies in a halo of mass logM.
+        The appropriate method is already bound to the self.hod_model object.
+
+        Parameters
+        ----------
+        logM : array 
+            array of log10(Mvir) of halos in catalog
+
+        Returns
+        -------
+        mean_nsat : float or array
+            Mean number of satellite galaxies in a host halo of the specified mass. 
+
+
+        """
+        mean_nsat = self.hod_model.mean_nsat(logM)
+        return mean_nsat
 
     def mean_concentration(self,logM):
-        return self.hod_model.mean_concentration(logM)
+        """ Concentration-mass relation assumed by the underlying HOD_Model object.
+        The appropriate method is already bound to the self.hod_model object.
+
+        Parameters 
+        ----------
+        logM : array 
+            array of log10(Mvir) of halos in catalog
+
+        Returns 
+        -------
+        concentrations : array
+
+        """
+
+        concentrations = self.hod_model.mean_concentration(logM)
+        return concentrations
 
     def mean_quenched_fraction_centrals(self,logM):
+        """
+        Expected fraction of centrals that are quenched as a function of host halo mass logM.
+        A required method for any HOD_Quenching_Model object.
+
+        Parameters 
+        ----------
+        logM : array_like
+            array of log10(Mvir) of halos in catalog
+
+        Returns 
+        -------
+        mean_quenched_fractions : array_like
+            Values of the quenched fraction in halos of the input logM
+
+        Notes 
+        -----
+        The model assumes the quenched fraction is a polynomial in logM.
+        The degree N quenching polynomial is determined by solving for 
+        the unique polynomial with values given by the central quenching ordinates 
+        at the logM abcissa. The coefficients of this polynomial are 
+        solved for by the solve_for_quenching_polynomial_coefficients method.
+        This function assumes that these coefficients have already been solved for and 
+        bound to the input object as an attribute.
+         
+        """
+ 
         coefficients = self.central_quenching_polynomial_coefficients
         mean_quenched_fractions = self.quenching_polynomial(logM,coefficients)
         return mean_quenched_fractions
 
     def mean_quenched_fraction_satellites(self,logM):
+        """
+        Expected fraction of satellites that are quenched as a function of host halo mass logM.
+        A required method for any HOD_Quenching_Model object.
+
+        Parameters 
+        ----------
+        logM : array_like
+            array of log10(Mvir) of halos in catalog
+
+        Returns 
+        -------
+        mean_quenched_fractions : array_like
+            Values of the quenched fraction in halos of the input logM
+
+        Notes 
+        -----
+        The model assumes the quenched fraction is a polynomial in logM.
+        The degree N quenching polynomial is determined by solving for 
+        the unique polynomial with values given by the central quenching ordinates 
+        at the logM abcissa. The coefficients of this polynomial are 
+        solved for by the solve_for_quenching_polynomial_coefficients method.
+        This function assumes that these coefficients have already been solved for and 
+        bound to the input object as an attribute.
+        
+        """
+
         coefficients = self.satellite_quenching_polynomial_coefficients
         mean_quenched_fractions = self.quenching_polynomial(logM,coefficients)
         return mean_quenched_fractions
 
     def quenching_polynomial(self,logM,coefficients):
+        """ Polynomial function used to specify the quenched fraction of centrals and satellites.
+
+        Parameters 
+        ----------
+        logM : array_like
+            values of the halo mass at which the quenched fraction is to be computed.
+
+        coefficients : array_like
+            Length N array containing the coefficients of the degree N polynomial governing the 
+            expected quenched fraction.
+
+        Returns 
+        -------
+        mean_quenched_fractions : array_like
+            numpy array giving the expected quenched fraction for galaxies in halos of mass logM 
+
+        """
+
         mean_quenched_fractions = np.zeros(len(logM))
         polynomial_degree = len(self.parameter_dict['logM_quenching_abcissa'])
         for n,coeff in enumerate(coefficients):
