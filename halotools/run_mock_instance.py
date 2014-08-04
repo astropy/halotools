@@ -14,7 +14,7 @@ import make_mocks
 import read_nbody
 import timeit
 from copy import copy
-import observables
+from mock_observables import observables
 
 def main():
 

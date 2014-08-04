@@ -291,6 +291,10 @@ class vdB03_Quenching_Model(Quenching_Model):
                 self.parameter_dict['logM_abcissa'],
                 self.parameter_dict['satellite_ordinates']))
 
+    #def mean_ncen(self,logM):
+     #   return Zheng07_HOD_Model.mean_ncen(logM)
+
+
 
     def mean_quenched_fraction_centrals(self,logM):
         coefficients = self.central_quenching_polynomial_coefficients
