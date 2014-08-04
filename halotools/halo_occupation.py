@@ -8,12 +8,6 @@ Classes (will) include support for HODs, CLFs, CSMFs, and
 for whether a galaxy is quenched or star-forming.
 
 
-.. module : halo_occupation 
-    :synopsis: Modules to and methods to generate HOD-type mocks  
-
-.. moduleauthor: Andrew Hearin <andrew.hearin@yale.edu>
-
-
 """
 
 __all__ = ['anatoly_concentration','cumulative_NFW_PDF','HOD_Model',
