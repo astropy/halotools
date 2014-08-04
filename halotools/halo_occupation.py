@@ -11,7 +11,7 @@ for whether a galaxy is quenched or star-forming.
 """
 
 __all__ = ['anatoly_concentration','cumulative_NFW_PDF','HOD_Model',
-'Zheng07_HOD_Model','Quenching_Model','vdB03_Quenching_Model','Hearin_1hconf']
+'Zheng07_HOD_Model','HOD_Quenching_Model','vdB03_Quenching_Model']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
@@ -84,14 +84,10 @@ def cumulative_NFW_PDF(x,c):
 class HOD_Model(object):
     """ Abstract base class for model parameters determining the HOD.
 
-
-    Note 
-    ----
     Any HOD-based model is a subclass of the HOD_Model object. 
     All such models must specify how the expectation value 
     of both central and satellite galaxy occupations vary with host mass.
     Additionally, any HOD-based mock must specify the assumed concentration-mass relation.
-    
     
     """
     
@@ -101,14 +97,24 @@ class HOD_Model(object):
 
     @abstractmethod
     def mean_ncen(self,logM):
+        """
+        Expected number of central galaxies in a halo of mass logM.
+        """
         raise NotImplementedError("mean_ncen is not implemented")
 
     @abstractmethod
     def mean_nsat(self,logM):
+        """
+        Expected number of satellite galaxies in a halo of mass logM.
+        """
         raise NotImplementedError("mean_nsat is not implemented")
 
     @abstractmethod
     def mean_concentration(self,logM):
+        """
+        Concentration-mass relation assumed by the model. 
+        Used to assign positions to satellites.
+        """
         raise NotImplementedError("mean_concentration is not implemented")
 
 
