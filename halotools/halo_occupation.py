@@ -4,14 +4,18 @@
 This module contains the classes and methods used to model the 
 connection between galaxies and the halos they inhabit. 
 Classes (will) include support for HODs, CLFs, CSMFs, and 
-(conditional) abundance matching, including designations 
-for whether a galaxy is quenched or star-forming.
+(conditional) abundance matching. Features will include designations 
+for whether a galaxy is quenched or star-forming, or in the case 
+of conditional abundance matching models, the full distributions 
+of secondary galaxy properties such as SFR, color, morphology, etc.
 
 
 """
 
 __all__ = ['anatoly_concentration','cumulative_NFW_PDF','HOD_Model',
-'Zheng07_HOD_Model','HOD_Quenching_Model','vdB03_Quenching_Model']
+'Zheng07_HOD_Model','HOD_Quenching_Model','vdB03_Quenching_Model',
+'Assembly_Biased_HOD_Model','Assembly_Biased_HOD_Quenching_Model',
+'SatCen_Correlation_HOD_Model']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
@@ -50,16 +54,16 @@ def anatoly_concentration(logM):
     return concentrations
 
 def cumulative_NFW_PDF(x,c):
-    """ Analytically calculated integral to the NFW profile.
+    """ Integral of the NFW profile.
     Unit-normalized so that the result is a cumulative PDF. 
 
     Parameters
     ----------
-    x : array 
+    x : array_like
         Values are in the range (0,1).
         Elements x = r/Rvir specify host-centric distances in the range 0 < r/Rvir < 1.
 
-    c : array
+    c : array_like
         Concentration of halo whose profile is being tabulated.
 
     Returns
@@ -71,11 +75,14 @@ def cumulative_NFW_PDF(x,c):
         Function is used in Monte Carlo realization of satellite positions, using 
         standard method of transformation of variables. 
 
-    Synopsis
+    Notes
     --------
-    Currently being used by mock.HOD_mock to generate satellite profiles. 
+    Currently being used by mock.HOD_mock to generate 
+    Monte Carlo realizations of satellite profiles. 
 
     """
+    c = np.array(c)
+    x = np.array(x)
     norm=np.log(1.+c)-c/(1.+c)
     return (np.log(1.+x*c) - x*c/(1.+x*c))/norm
 
@@ -85,9 +92,10 @@ class HOD_Model(object):
     """ Abstract base class for model parameters determining the HOD.
 
     Any HOD-based model is a subclass of the HOD_Model object. 
-    All such models must specify how the expectation value 
-    of both central and satellite galaxy occupations vary with host mass.
-    Additionally, any HOD-based mock must specify the assumed concentration-mass relation.
+    All such models must provide their own specific functional forms 
+    for how the expectation value of both central and satellite 
+    galaxy occupations vary with host mass. Additionally, 
+    any HOD-based mock must specify the assumed concentration-mass relation.
     
     """
     
@@ -134,8 +142,8 @@ class Zheng07_HOD_Model(HOD_Model):
         one of the thresholds used in Zheng07 to fit HODs: 
         [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
 
-    Note
-    ----
+    Notes
+    -----
 
     Concentration-mass relation is current set to be Anatoly's, though 
     this is not the relation used in Zheng07.
@@ -155,8 +163,7 @@ class Zheng07_HOD_Model(HOD_Model):
 
 
     def mean_ncen(self,logM):
-        """
-        Expected number of central galaxies in a halo of mass logM.
+        """ Expected number of central galaxies in a halo of mass logM.
         See Equation 2 of arXiv:0703457.
 
         Parameters
@@ -168,7 +175,7 @@ class Zheng07_HOD_Model(HOD_Model):
         -------
         mean_ncen : array
     
-        Synopsis
+        Notes
         -------
         Mean number of central galaxies in a host halo of the specified mass. Values are restricted 0 <= mean_ncen <= 1.
 
@@ -292,8 +299,149 @@ class Zheng07_HOD_Model(HOD_Model):
 
 
 @six.add_metaclass(ABCMeta)
+class Assembly_Biased_HOD_Model(HOD_Model):
+    """ Abstract base class for any HOD model in which 
+    central and/or satellite mean occupation depends on Mvir 
+    plus an additional property.
+
+    """
+
+    def __init__(self):
+
+        HOD_Model.__init__(self)
+        self.hod_model = None
+
+    @abstractmethod
+    def central_destruction(self,logM):
+        """ Determines the excess probability that ``type 0`` 
+        halos of logM host a central galaxy. """
+        raise NotImplementedError(
+            "central_destruction is not implemented")
+
+    @abstractmethod
+    def satellite_destruction(self,logM):
+        """ Determines the excess probability that ``type 0`` 
+        halos of logM host a satellite galaxy. """
+        raise NotImplementedError(
+            "satellite_destruction is not implemented")
+
+    @abstractmethod
+    def halo_type_fraction(self,logM):
+        """ Determines the fractional representation of host halo 
+        types as a function of logM.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+         """
+        raise NotImplementedError(
+            "halo_type_fraction is not implemented")
+
+
+class SatCen_Correlation_HOD_Model(Assembly_Biased_HOD_Model):
+    """ Betahod-style model in which satellite abundance 
+    is correlated with the presence of a central galaxy.
+    """
+
+    def __init__(self,hod_model=Zheng07_HOD_Model,
+            hod_parameter_dict=None,threshold=None):
+
+        if not isinstance(hod_model(threshold=threshold),HOD_Model):
+            raise TypeError(
+                "Input hod_model must be one of the supported HOD_Model objects defined in this module")
+
+        # Run initialization from super class. Currently not doing much.
+        Assembly_Biased_HOD_Model.__init__(self)
+
+        self.hod_model = hod_model(
+            parameter_dict = hod_parameter_dict,threshold = threshold)
+
+        self.publication.extend(self.hod_model.publication)
+
+
+
+    def mean_ncen(self,logM):
+        """
+        Expected number of central galaxies in a halo of mass logM.
+        The appropriate method is already bound to the self.hod_model object.
+
+        Parameters
+        ----------
+        logM : array 
+            array of log10(Mvir) of halos in catalog
+
+        Returns
+        -------
+        mean_ncen : float or array
+            Mean number of central galaxies in a host halo of the specified mass. 
+
+
+        """
+        mean_ncen = self.hod_model.mean_ncen(logM)
+        return mean_ncen
+
+    def mean_nsat(self,logM):
+        """
+        Expected number of satellite galaxies in a halo of mass logM.
+        The appropriate method is already bound to the self.hod_model object.
+
+        Parameters
+        ----------
+        logM : array 
+            array of log10(Mvir) of halos in catalog
+
+        Returns
+        -------
+        mean_nsat : float or array
+            Mean number of satellite galaxies in a host halo of the specified mass. 
+
+
+        """
+        mean_nsat = self.hod_model.mean_nsat(logM)
+        return mean_nsat
+
+    def mean_concentration(self,logM):
+        """ Concentration-mass relation assumed by the underlying HOD_Model object.
+        The appropriate method is already bound to the self.hod_model object.
+
+        Parameters 
+        ----------
+        logM : array 
+            array of log10(Mvir) of halos in catalog
+
+        Returns 
+        -------
+        concentrations : array
+
+        """
+
+        concentrations = self.hod_model.mean_concentration(logM)
+        return concentrations
+
+    def central_destruction(self,logM):
+        """ Determines the excess probability that ``type 0`` 
+        halos of logM host a central galaxy. """
+        return np.zeros(len(logM)) + 1
+
+    def satellite_destruction(self,logM):
+        """ Determines the excess probability that ``type 0`` 
+        halos of logM host a satellite galaxy. """
+        return np.zeros(len(logM)) + 1
+
+    def halo_type_fraction(self,logM):
+        """ Determines the fractional representation of host halo 
+        types as a function of logM.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+         """
+        return np.zeros(len(logM)) + 1
+
+
+@six.add_metaclass(ABCMeta)
 class HOD_Quenching_Model(HOD_Model):
-    """ Abstract base class for model parameters determining mock galaxy quenching. 
+    """ Abstract base class for models determining mock galaxy quenching. 
     This is a subclass of HOD_Mock, which additionally requires methods specifying 
     the quenched fractions of centrals and satellites.  
     
@@ -329,7 +477,9 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
     """
     Subclass of HOD_Quenching_Model, providing a traditional HOD model of galaxy quenching, 
     in which quenching designation is purely determined by host halo virial mass.
-    Approach is adapted from van den Bosch 2003. All-galaxy central and satellite occupation 
+    Approach is adapted from van den Bosch 2003. 
+
+    All-galaxy central and satellite occupation 
     statistics are specified first; Zheng07_HOD_Model is the default choice, 
     but any supported HOD_Mock object could be chosen. A quenching designation is subsequently 
     applied to the galaxies. 
@@ -550,7 +700,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
             Elements are the coefficients determining the polynomial. 
             Element N of polynomial_coefficients gives the degree N coefficient.
 
-        Synopsis
+        Notes
         --------
         Input arrays logM_abcissa and ordinates can in principle be of any dimension Ndim, 
         and there will be Ndim output coefficients.
@@ -561,8 +711,8 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         ordinates when the polynomial is evaluated at the input logM_abcissa.
         The coefficients of that unique polynomial are the output of the function. 
 
-        Example
-        -------
+        Examples
+        --------
         A traditional quenching model, such as the one suggested in van den Bosch et al. 2003, 
         is a polynomial determining the mean quenched fraction as a function of halo mass logM.
         If we denote the output of solve_for_quenching_polynomial_coefficients as the array coeff, 
@@ -584,6 +734,59 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
         return polynomial_coefficients
 
+
+@six.add_metaclass(ABCMeta)
+class Assembly_Biased_HOD_Quenching_Model(HOD_Quenching_Model):
+    """ Abstract base class for any HOD model in which 
+    central and/or satellite mean occupation depends on Mvir 
+    plus an additional property.
+
+    """
+
+    def __init__(self):
+
+        HOD_Quenching_Model.__init__(self)
+        self.hod_model = None
+
+    @abstractmethod
+    def central_destruction(self,logM):
+        """ Determines the excess probability that ``type 0`` 
+        halos of logM host a central galaxy. """
+        raise NotImplementedError(
+            "central_destruction is not implemented")
+
+    @abstractmethod
+    def satellite_destruction(self,logM):
+        """ Determines the excess probability that ``type 0`` 
+        halos of logM host a satellite galaxy. """
+        raise NotImplementedError(
+            "satellite_destruction is not implemented")
+
+    @abstractmethod
+    def halo_type_fraction(self,logM):
+        """ Determines the fractional representation of host halo 
+        types as a function of logM.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+         """
+        raise NotImplementedError(
+            "halo_type_fraction is not implemented")
+
+    @abstractmethod
+    def central_conformity(self,logM):
+        """ Determines the excess quenched fraction 
+        of central galaxies residing in ``type 0`` halos of logM. """
+        raise NotImplementedError(
+            "central_conformity is not implemented")
+
+    @abstractmethod
+    def satellite_conformity(self,logM):
+        """ Determines the excess quenched fraction 
+        of satellite galaxies residing in``type 0`` halos of logM. """
+        raise NotImplementedError(
+            "satellite_conformity is not implemented")
 
 
 

@@ -76,6 +76,12 @@ def load_bolshoi_host_halos_fits(simulation_dict=None):
     simulation = {'halos':halos,'simulation_dict':simulation_dict}
     return simulation
 
+def assign_host_halo_type(halos,halo_type_function=defaults.halo_type_function):
+    """ In bins of logMvir, over-write the values of HALOTYPE attribute."""
+    pass
+
+
+
 
 class simulation(object):
     """ Container class for properties of the simulation being used.

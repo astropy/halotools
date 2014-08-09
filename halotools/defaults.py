@@ -38,3 +38,30 @@ default_assembias_parameters = {
 	'satellite_conformity_quenched_central_ordinates' : [1.1,1],
 	'satellite_conformity_no_central_ordinates' : [1.0,1.0],
 }
+
+def halo_type_function(logM,Mvir_independent_fraction=[0.5,0.5]):
+	""" Place-holder method used to assign types to host halos.
+
+	Parameters 
+	----------
+	logM : array_like
+		array of log10(Mvir) of halos in catalog
+
+	Mvir_independent_fraction : array_like
+		Value of entry i gives the mass-independent fraction of 
+		halos that are assigned ``Type i``.
+	"""
+
+	Mvir_independent_fraction = np.array(Mvir_independent_fraction)
+	return Mvir_independent_fraction
+
+
+
+
+
+
+
+
+
+
+

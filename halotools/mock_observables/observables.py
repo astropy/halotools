@@ -1,6 +1,7 @@
 """ 
 Functions that compute statistics of a mock galaxy catalog in a periodic box. 
-Still largely unused in its present form. 
+Still largely unused in its present form, and needs to be integrated with 
+the pair counter and subvolume membership methods.
 """
 
 #from __future__ import (absolute_import, division, print_function,
