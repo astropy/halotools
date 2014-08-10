@@ -10,7 +10,7 @@ Currently only set up for HOD-type models, but near-term features include
 CLF/CSMF models, and (conditional) abundance matching models.
 Class design is built around future MCMC applications, so that 
 lower level objects like numpy ndarrays are used to store object attributes, 
-which are cheaper and faster to allocate memory for."""
+for which it is cheaper and faster to allocate memory."""
 
 __all__= ['enforce_periodicity_of_box', 'num_cen_monte_carlo','num_sat_monte_carlo',
 'quenched_monte_carlo','HOD_mock']

@@ -16,7 +16,7 @@ Reference/API
 
 .. automodapi:: halotools
 
+.. automodapi:: halotools.halo_occupation
 .. automodapi:: halotools.make_mocks
 .. automodapi:: halotools.read_nbody
-.. automodapi:: halotools.halo_occupation
 .. automodapi:: halotools.defaults
