@@ -13,6 +13,7 @@ import numpy as np
 import make_mocks
 import read_nbody
 import timeit
+import time.time
 from copy import copy
 from mock_observables import observables
 
@@ -26,6 +27,9 @@ def main():
 	mock.populate()
 	print(str(mock.num_total_gals)+' galaxies in mock')
 	time_mock()
+
+	start = time()
+	
 	#test_satellite_positions(mock)
 
 
