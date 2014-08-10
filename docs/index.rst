@@ -14,7 +14,6 @@ mock-making modules are set in place.
 Reference/API
 =============
 
-.. automodapi:: halotools
 
 .. automodapi:: halotools.halo_occupation
 .. automodapi:: halotools.make_mocks
