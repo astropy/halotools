@@ -121,7 +121,6 @@ def quenched_monte_carlo(logM,halo_occupation_model,galaxy_type):
     -------
     quenched_array : int or array
         Used to define whether mock galaxy is quenched (1) or star-forming (0)
-
     
     """
 
@@ -159,10 +158,13 @@ class HOD_mock(object):
     quenching_model : 
         Quenching_Model object defined in halo_occupation module.
 
-
     """
 
-    def __init__(self,simulation_data,halo_occupation_model,seed=None):
+    def __init__(self,simulation_data=None,
+        halo_occupation_model=ho.Zheng07_HOD_Model(threshold=-20),seed=None):
+
+        if simulation_data is None:
+            simulation_data = read_nbody.load_bolshoi_host_halos_fits()
 
         # Test to make sure the passed objects are of the appropriate type
         if not isinstance(simulation_data['halos'],astropy.table.table.Table):

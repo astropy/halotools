@@ -13,7 +13,7 @@ import numpy as np
 import make_mocks
 import read_nbody
 import timeit
-import time.time
+from time import time
 from copy import copy
 from mock_observables import observables
 
@@ -62,7 +62,7 @@ def test_three_dimensional_periodic_distance():
 
 
 def test_zheng07():
-	model = ho.Zheng07_HOD_Model()
+	model = ho.Zheng07_HOD_Model(threshold=-18)
 	return model
 
 
@@ -72,7 +72,7 @@ def test_make_HOD_mock(simulation=None,model=None):
 		simulation = read_nbody.load_bolshoi_host_halos_fits()
 
 	if model == None:
-		model = ho.Zheng07_HOD_Model()
+		model = ho.Zheng07_HOD_Model(threshold=-20)
 
 	m = make_mocks.HOD_mock(simulation_data = simulation,
 		halo_occupation_model=model)

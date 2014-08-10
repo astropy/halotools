@@ -177,12 +177,14 @@ class Zheng07_HOD_Model(HOD_Model):
     
         Notes
         -------
-        Mean number of central galaxies in a host halo of the specified mass. Values are restricted 0 <= mean_ncen <= 1.
+        Mean number of central galaxies in a host halo of the specified mass. 
+        Values are restricted 0 <= mean_ncen <= 1.
 
         """
         if not isinstance(logM,np.ndarray):
             raise TypeError("Input logM to mean_ncen must be a numpy array")
-        mean_ncen = 0.5*(1.0 + erf((logM - self.parameter_dict['logMmin_cen'])/self.parameter_dict['sigma_logM']))
+        mean_ncen = 0.5*(1.0 + erf(
+            (logM - self.parameter_dict['logMmin_cen'])/self.parameter_dict['sigma_logM']))
         return mean_ncen
 
     def mean_nsat(self,logM):
@@ -198,7 +200,6 @@ class Zheng07_HOD_Model(HOD_Model):
         -------
         mean_nsat : float or array
             Mean number of satellite galaxies in a host halo of the specified mass. 
-
     
         """
 
@@ -230,8 +231,6 @@ class Zheng07_HOD_Model(HOD_Model):
         concentrations : array_like
             Mean concentration of logM halos, using anatoly_concentration model.
 
-
-
         """
 
         concentrations = anatoly_concentration(logM)
@@ -255,7 +254,6 @@ class Zheng07_HOD_Model(HOD_Model):
         parameter_dict : dict
             Dictionary of model parameters whose values have been set to 
             agree with the values taken from Table 1 of Zheng et al. 2007.
-
 
         """
 
