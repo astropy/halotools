@@ -248,7 +248,7 @@ class HOD_mock(object):
             self.logM[self.hasCentral],
             self.halo_occupation_model,output=self.NSat[self.hasCentral])
 
-        if 'logM_quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.would_have_quenched_central = quenched_monte_carlo(
                 self.logM,self.halo_occupation_model,'central')
 
@@ -260,7 +260,7 @@ class HOD_mock(object):
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
-        if 'logM_quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched = np.zeros(self.num_total_gals,dtype='i4')
     #...
 
@@ -341,7 +341,7 @@ class HOD_mock(object):
         self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
         self.logMhost[:self.num_total_cens] = self.logM[self.hasCentral]
 
-        if 'logM_quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched[:self.num_total_cens] = self.would_have_quenched_central[self.hasCentral]
 
 
@@ -375,7 +375,7 @@ class HOD_mock(object):
 
         self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
 
-        if 'logM_quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched[self.num_total_cens:-1] = quenched_monte_carlo(
                 self.logMhost[self.num_total_cens:-1],
                 self.halo_occupation_model,'satellite')

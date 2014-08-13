@@ -26,18 +26,27 @@ default_Npts_radius_array = 101
 
 ### Default values specifying traditional quenching model
 default_quenching_parameters = {
-    'logM_quenching_abcissa' : [12,13.5,15],
+    'quenching_abcissa' : [12,13.5,15],
     'central_quenching_ordinates' : [0.35,0.75,0.95], #polynomial coefficients determining quenched fraction of centrals
     'satellite_quenching_ordinates' : [0.5,0.75,0.85] #polynomial coefficients determining quenched fraction of centrals
     }
 
 default_assembias_parameters = {
-	'logM_assembias_abcissa' : [12,14],
-	'satellite_destruction_quenched_central_ordinates' : [1.1,1],
-	'satellite_destruction_no_central_ordinates' : [1.0,1.0],
-	'satellite_conformity_quenched_central_ordinates' : [1.1,1],
-	'satellite_conformity_no_central_ordinates' : [1.0,1.0],
-}
+	'assembias_abcissa' : [12,14],
+	'satellite_assembias_ordinates' : [1.1,1],
+	'central_assembias_ordinates' : [1.0,1.1]
+	}
+
+default_satcen_parameters = {
+	'assembias_abcissa' : [12,14],
+	'satellite_assembias_ordinates' : [1.25,1],
+	'central_assembias_ordinates' : [1.0,1.0]
+	}
+
+default_halotype_split = {
+	'halotype_abcissa' : [13,],
+	'halotype_split' : [0.5,]
+	}
 
 def halo_type_function(logM,Mvir_independent_fraction=[0.5,0.5]):
 	""" Place-holder method used to assign types to host halos.
