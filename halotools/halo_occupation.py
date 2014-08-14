@@ -472,8 +472,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         and assigns halo type 0 (1) to the halos below (above) the split.
 
         """
-        halo_type_array = np.zeros(len(primary_halo_property))
-        return halo_type_array
+        pass
 
 
 
@@ -735,7 +734,7 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
 
         output_array = np.array(self.baseline_hod_model.mean_ncen(primary_halo_property))
         idx0 = np.where(halo_type == 0)[0]
-        output_array[idx0] = 1 - output_array[idx0]
+        output_array[idx0] = 1.0 - output_array[idx0]
 
         return output_array
 
