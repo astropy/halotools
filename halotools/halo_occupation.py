@@ -15,7 +15,7 @@ of secondary galaxy properties such as SFR, color, morphology, etc.
 __all__ = ['anatoly_concentration','cumulative_NFW_PDF','HOD_Model',
 'Zheng07_HOD_Model','HOD_Quenching_Model','vdB03_Quenching_Model',
 'Assembly_Biased_HOD_Model','Assembly_Biased_HOD_Quenching_Model',
-'SatCen_Correlation_HOD_Model']
+'Satcen_Correlation_Polynomial_HOD_Model']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
