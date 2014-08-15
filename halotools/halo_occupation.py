@@ -15,7 +15,7 @@ of secondary galaxy properties such as SFR, color, morphology, etc.
 __all__ = ['anatoly_concentration','cumulative_NFW_PDF','HOD_Model',
 'Zheng07_HOD_Model','HOD_Quenching_Model','vdB03_Quenching_Model',
 'Assembly_Biased_HOD_Model','Assembly_Biased_HOD_Quenching_Model',
-'Satcen_Correlation_Polynomial_HOD_Model']
+'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembly_Biased_HOD_Model']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
@@ -825,6 +825,161 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
             " Correct set of keys is {'assembias_abcissa',"
             "'satellite_assembias_ordinates', 'central_assembias_ordinates'}. ")
         pass
+
+
+class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
+    """ HOD-style model in which satellite abundance 
+    is correlated with the presence of a central galaxy.
+    """
+
+    def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
+            baseline_hod_parameter_dict=None,threshold=None,
+            assembias_parameter_dict=None,
+            secondary_halo_property_key='Z04'):
+
+
+        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
+        if not isinstance(baseline_hod_model_instance,HOD_Model):
+            raise TypeError(
+                "Input baseline_hod_model must be one of "
+                "the supported HOD_Model objects defined in this module or by the user")
+        # Temporarily store the baseline HOD model object
+        # into a "private" attribute. This is a clunky workaround
+        # to python's awkward conventions for required abstract properties
+        self._baseline_hod_model = baseline_hod_model_instance
+
+        # Executing the __init__ of the abstract base class Assembly_Biased_HOD_Model 
+        # does nothing besides executing the __init__ of the abstract base class HOD_Model 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        # sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []        
+        Assembly_Biased_HOD_Model.__init__(self)
+
+
+        self.threshold = threshold
+
+        self.publication.extend(self._baseline_hod_model.publication)
+        self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
+
+        if assembias_parameter_dict == None:
+            self.assembias_parameter_dict = defaults.default_assembias_parameters
+        else:
+            # If the user supplies a dictionary of assembly bias parameters, 
+            # require that the set of keys is correct
+            self.require_correct_keys(assembias_parameter_dict)
+            # If correct, bind the input dictionary to the instance.
+            self.assembias_parameter_dict = assembias_parameter_dict
+
+        # combine baseline HOD parameters and assembly bias parameters
+        # into the same dictionary
+        self.parameter_dict = dict(self.baseline_hod_parameter_dict.items() + 
+            self.assembias_parameter_dict.items())
+
+
+    @property
+    def baseline_hod_model(self):
+        return self._baseline_hod_model
+
+    @property 
+    def primary_halo_property_key(self):
+        return 'MVIR'
+
+    @property 
+    def secondary_halo_property_key(self):
+        return 'Z04'
+
+    def mean_concentration(self,primary_halo_property):
+        """ Concentration-halo relation assumed by the underlying HOD_Model object.
+        The appropriate method is already bound to the self.baseline_hod_model object.
+
+        Parameters 
+        ----------
+        primary_halo_property : array_like
+            array of primary halo property governing the occupation statistics 
+
+        Returns 
+        -------
+        concentrations : numpy array
+
+        """
+
+        concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
+        return concentrations
+
+
+    def halo_type1_fraction_centrals(self,primary_halo_property):
+        """ Determines the fractional representation of host halo 
+        types as a function of the value of the primary halo property.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+        """
+        # In this model, centrals exhibit no assembly bias
+        # So simply set the halo type1 fraction to unity for centrals
+        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        output_fraction = self.unconstrained_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
+        test_negative = (output_fraction < 0)
+        output_fraction[test_negative] = 0
+        test_exceeds_unity = (output_fraction > 1)
+        output_fraction[test_exceeds_unity] = 1
+        return output_fraction
+
+    def halo_type1_fraction_satellites(self,primary_halo_property):
+        """ Determines the fractional representation of host halo 
+        types as a function of the value of the primary halo property.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+         """
+
+        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        output_fraction = self.unconstrained_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
+        test_negative = (output_fraction < 0)
+        output_fraction[test_negative] = 0
+        test_exceeds_unity = (output_fraction > 1)
+        output_fraction[test_exceeds_unity] = 1
+        return output_fraction
+
+    def unconstrained_polynomial_model(self,abcissa,ordinates,primary_halo_property):
+        coefficient_array = solve_for_polynomial_coefficients(
+            abcissa,ordinates)
+        output_unconstrained_destruction_function = (
+            np.zeros(len(primary_halo_property)))
+
+        # Use coefficients to compute values of the destruction function polynomial
+        for n,coeff in enumerate(coefficient_array):
+            output_unconstrained_destruction_function += coeff*primary_halo_property**n
+
+        return output_unconstrained_destruction_function
+
+    def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['central_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+    def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['satellite_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+    def require_correct_keys(self,assembias_parameter_dict):
+        correct_set_of_satcen_keys = set(defaults.default_satcen_parameters.keys())
+        if set(assembias_parameter_dict.keys()) != correct_set_of_satcen_keys:
+            raise TypeError("Set of keys of input assembias_parameter_dict"
+            " does not match the set of keys required by the model." 
+            " Correct set of keys is {'assembias_abcissa',"
+            "'satellite_assembias_ordinates', 'central_assembias_ordinates'}. ")
+        pass
+
+
 
 @six.add_metaclass(ABCMeta)
 class HOD_Quenching_Model(HOD_Model):

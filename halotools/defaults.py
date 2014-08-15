@@ -33,8 +33,8 @@ default_quenching_parameters = {
 
 default_assembias_parameters = {
 	'assembias_abcissa' : [12,14],
-	'satellite_assembias_ordinates' : [1.1,1],
-	'central_assembias_ordinates' : [1.0,1.1]
+	'satellite_assembias_ordinates' : [2,-1],
+	'central_assembias_ordinates' : [-51.0,500.1]
 	}
 
 default_satcen_parameters = {
@@ -44,8 +44,8 @@ default_satcen_parameters = {
 	}
 
 default_halo_type_split = {
-	'halo_type_abcissa' : [13,],
-	'halo_type_split' : [0.5,]
+	'halo_type_split_abcissa' : [13,],
+	'halo_type_split_ordinates' : [0.5,]
 	}
 
 def halo_type_function(logM,Mvir_independent_fraction=[0.5,0.5]):
