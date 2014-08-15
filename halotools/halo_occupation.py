@@ -394,77 +394,293 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         raise NotImplementedError("primary_halo_property_key "
             "needs to be implemented to ensure self-consistency "
             "of baseline HOD and assembly-biased HOD model features")
+        pass
 
     @abstractmethod
-    def central_destruction(self,primary_halo_property,halo_type):
-        """ Determines the excess probability that ``type 0`` 
-        halos of logM host a central galaxy. """
+    def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
+        """ Determines the excess probability that ``type 1`` 
+        halos host a central galaxy. """
         raise NotImplementedError(
-            "central_destruction is not implemented")
+            "unconstrained_central_destruction_halo_type1 is not implemented")
+        pass
 
     @abstractmethod
-    def satellite_destruction(self,primary_halo_property,halo_type):
-        """ Determines the excess probability that ``type 0`` 
-        halos of logM host a satellite galaxy. """
+    def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
+        """ Determines the excess probability that ``type 1`` 
+        halos host a satellite galaxy. """
         raise NotImplementedError(
-            "satellite_destruction is not implemented")
+            "unconstrained_satellite_destruction_halo_type1 is not implemented")
+        pass
 
     @abstractmethod
-    def halotype_fraction_centrals(self,primary_halo_property,halo_type):
+    def halo_type1_fraction_centrals(self,primary_halo_property):
         """ Determines the fractional representation of host halo 
         type 1 as a function of primary_halo_property, as pertains to centrals. 
-
-        Halo types can be either given by fixed-Mvir rank-orderings 
-        of the host halos, or by the input occupation statistics functions.
 
          """
         raise NotImplementedError(
             "halo_type_fraction_centrals is not implemented")
+        pass
 
     @abstractmethod
-    def halotype_fraction_satellites(self,primary_halo_property,halo_type):
+    def halo_type1_fraction_satellites(self,primary_halo_property):
         """ Determines the fractional representation of host halo 
         type 1 as a function of primary_halo_property, as pertains to satellites.
-
-        Halo types can be either given by fixed-Mvir rank-orderings 
-        of the host halos, or by the input occupation statistics functions.
 
          """
         raise NotImplementedError(
             "halo_type_fraction_satellites is not implemented")
+        pass
 
-    def maximum_central_destruction(self,primary_halo_property,halo_type):
-        """ The maximum possible boost of central galaxy abundance 
-        in type 1 halos. 
+    def halo_type_fraction_centrals(self,primary_halo_property,halo_type):
+        """ Determines the fractional representation of host halos of input halo_type 
+        as a function of primary_halo_property, as pertains to centrals.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_halo_type_fraction : array_like
+            The ith element gives the probability that a halo with primary halo property = primary_halo_property[i] 
+            has halo_type = halo_type[i]
+
+         """
+
+        output_halo_type_fraction = self.halo_type1_fraction_centrals(primary_halo_property)
+        idx0 = np.where(halo_type == 0)[0]
+        output_halo_type_fraction[idx0] = 1.0 - output_halo_type_fraction[idx0]
+
+        return output_halo_type_fraction
+
+    def halo_type_fraction_satellites(self,primary_halo_property,halo_type):
+        """ Determines the fractional representation of host halos of input halo_type 
+        as a function of primary_halo_property, as pertains to satellites.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_halo_type_fraction : array_like
+            The ith element gives the probability that a halo with primary halo property = primary_halo_property[i] 
+            has halo_type = halo_type[i]
+        """
+        output_halo_type_fraction = self.halo_type1_fraction_satellites(primary_halo_property)
+        idx0 = np.where(halo_type == 0)[0]
+        output_halo_type_fraction[idx0] = 1.0 - output_halo_type_fraction[idx0]
+
+        return output_halo_type_fraction
+
+
+    def maximum_destruction_centrals(self,primary_halo_property,halo_type):
+        """ Maximum allowed value of the destruction function, as pertains to centrals.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_maximum_destruction : array_like
+            Maximum allowed value of the destruction function, as pertains to centrals.
+
         """
 
-        halotype_fraction = self.halotype_fraction_centrals(primary_halo_property,halo_type)
-        nonzero_fraction = halotype_fraction > 0
-        maximum_destruction = np.zeros(len(primary_halo_property))
-        maximum_destruction[nonzero_fraction] = 1./halotype_fraction[nonzero_fraction]
-        return maximum_destruction
+        output_maximum_destruction = np.zeros(len(primary_halo_property))
+        halo_type_fraction = self.halo_type_fraction_centrals(
+            primary_halo_property,halo_type)
+        idx_positive = halo_type_fraction > 0
+        output_maximum_destruction[idx_positive] = 1./halo_type_fraction[idx_positive]
+        return output_maximum_destruction
 
-    def maximum_satellite_destruction(self,primary_halo_property,halo_type):
-        """ The maximum possible boost of satellite galaxy abundance 
-        in type 1 halos. 
+    def maximum_destruction_satellites(self,primary_halo_property,halo_type):
+        """ Maximum allowed value of the destruction function, as pertains to centrals.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_maximum_destruction : array_like
+            Maximum allowed value of the destruction function, as pertains to centrals.
+
         """
-        halotype_fraction = self.halotype_fraction_satellites(primary_halo_property,halo_type)
-        nonzero_fraction = halotype_fraction > 0
-        maximum_destruction = np.zeros(len(primary_halo_property))
-        maximum_destruction[nonzero_fraction] = 1./halotype_fraction[nonzero_fraction]
-        return maximum_destruction
+
+        output_maximum_destruction = np.zeros(len(primary_halo_property))
+        halo_type_fraction = self.halo_type_fraction_satellites(
+            primary_halo_property,halo_type)
+        idx_positive = halo_type_fraction > 0
+        output_maximum_destruction[idx_positive] = 1./halo_type_fraction[idx_positive]
+        return output_maximum_destruction
+
+
+    def destruction_satellites(self,primary_halo_property,halo_type):
+
+        idx0 = np.where(halo_type == 0)[0]
+        idx1 = np.where(halo_type == 1)[0]
+
+        # Initialize array containing result to return
+        output_destruction_allhalos = np.zeros(len(primary_halo_property))
+
+        all_ones = np.zeros(len(primary_halo_property)) + 1
+
+        # Start by ignoring the input halo_type, and  
+        # assuming the halo_type = 1 for all inputs.
+        # This is convenient and costs nothing, 
+        # since the halo_type = 0 branch 
+        # is defined in terms of the halo_type = 1 branch.
+        output_destruction_allhalos = (
+            self.unconstrained_satellite_destruction_halo_type1(
+                primary_halo_property))
+        ########################################
+        # Now apply the baseline HOD constraints to output_destruction_allhalos, 
+        # still behaving as if every input halo has halo_type=1
+        # First, require that the destruction function is non-negative
+        test_negative = output_destruction_allhalos < 0
+        output_destruction_allhalos[test_negative] = 0
+        # Second, require that the destruction function never exceed the 
+        # maximum allowed value 
+        maximum = self.maximum_destruction_satellites(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_destruction_allhalos > maximum
+        output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Finally, require that the destruction function is set to unity 
+        # whenever the probability of halo_type=1 equals unity
+        # This is requirement supercedes the previous two
+        probability_type1 = self.halo_type_fraction_satellites(
+            primary_halo_property,all_ones)
+        test_unit_probability = (probability_type1 == 1)
+        output_destruction_allhalos[test_unit_probability] = 1
+        ########################################
+        # At this point, output_destruction_allhalos has been properly conditioned. 
+        # However, we have been assuming that all input halo_type = 1.
+        # We now need to compute the correct output 
+        # for cases where input halo_type = 0.
+        # Define some shorthands (bookkeeping convenience)
+        output_destruction_input_halo_type0 = output_destruction_allhalos[idx0]
+        primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
+        probability_type1_input_halo_type0 = probability_type1[idx0]
+        probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
+        # Whenever the fraction of halos of type=0 is zero, the destruction function 
+        # for type0 halos should be set to zero.
+        test_positive = (probability_type0_input_halo_type0 > 0)
+
+        output_destruction_input_halo_type0[test_positive] = (
+            (1.0 - output_destruction_input_halo_type0[test_positive]*
+                probability_type1_input_halo_type0[test_positive])/
+            probability_type0_input_halo_type0[test_positive])
+
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_destruction_input_halo_type0[test_zero] = 0
+
+        # Now write the results back to the output (Why doesn't the above syntax
+            # work without this step?)
+        output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
+
+        return output_destruction_allhalos
+
+    def destruction_centrals(self,primary_halo_property,halo_type):
+
+        idx0 = np.where(halo_type == 0)[0]
+        idx1 = np.where(halo_type == 1)[0]
+
+        # Initialize array containing result to return
+        output_destruction_allhalos = np.zeros(len(primary_halo_property))
+
+        all_ones = np.zeros(len(primary_halo_property)) + 1
+
+        # Start by ignoring the input halo_type, and  
+        # assuming the halo_type = 1 for all inputs.
+        # This is convenient and costs nothing, 
+        # since the halo_type = 0 branch 
+        # is defined in terms of the halo_type = 1 branch.
+        output_destruction_allhalos = (
+            self.unconstrained_central_destruction_halo_type1(
+                primary_halo_property))
+        ########################################
+        # Now apply the baseline HOD constraints to output_destruction_allhalos, 
+        # still behaving as if every input halo has halo_type=1
+        # First, require that the destruction function is non-negative
+        test_negative = output_destruction_allhalos < 0
+        output_destruction_allhalos[test_negative] = 0
+        # Second, require that the destruction function never exceed the 
+        # maximum allowed value 
+        maximum = self.maximum_destruction_centrals(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_destruction_allhalos > maximum
+        output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Finally, require that the destruction function is set to unity 
+        # whenever the probability of halo_type=1 equals unity
+        # This is requirement supercedes the previous two
+        probability_type1 = self.halo_type_fraction_centrals(
+            primary_halo_property,all_ones)
+        test_unit_probability = (probability_type1 == 1)
+        output_destruction_allhalos[test_unit_probability] = 1
+        ########################################
+        # At this point, output_destruction_allhalos has been properly conditioned. 
+        # However, we have been assuming that all input halo_type = 1.
+        # We now need to compute the correct output 
+        # for cases where input halo_type = 0.
+        # Define some shorthands (bookkeeping convenience)
+        output_destruction_input_halo_type0 = output_destruction_allhalos[idx0]
+        primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
+        probability_type1_input_halo_type0 = probability_type1[idx0]
+        probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
+        # Whenever the fraction of halos of type=0 is zero, the destruction function 
+        # for type0 halos should be set to zero.
+        test_positive = (probability_type0_input_halo_type0 > 0)
+
+        output_destruction_input_halo_type0[test_positive] = (
+            (1.0 - output_destruction_input_halo_type0[test_positive]*
+                probability_type1_input_halo_type0[test_positive])/
+            probability_type0_input_halo_type0[test_positive])
+
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_destruction_input_halo_type0[test_zero] = 0
+
+        # Now write the results back to the output (Why doesn't the above syntax
+            # work without this step?)
+        output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
+
+        return output_destruction_allhalos
 
     def mean_ncen(self,primary_halo_property,halo_type):
-        """ Override """
-        return self.central_destruction(primary_halo_property,halo_type)*(
+        """ Override the baseline HOD method so that mean_ncen is modulated by halo_type"""
+        return self.destruction_centrals(primary_halo_property,halo_type)*(
             self.baseline_hod_model.mean_ncen(primary_halo_property))
 
     def mean_nsat(self,primary_halo_property,halo_type):
-        """ Override """
-        return self.satellite_destruction(primary_halo_property,halo_type)*(
+        """ Override the baseline HOD method so that mean_ncen is modulated by halo_type"""
+        return self.destruction_satellites(primary_halo_property,halo_type)*(
             self.baseline_hod_model.mean_nsat(primary_halo_property))
 
-    def halo_type(self,primary_halo_property,secondary_halo_property):
+    def host_halo_type_calculator(self,primary_halo_property,secondary_halo_property):
         """ Determines the assembly bias type of the input halos.
 
         Bins input halos by primary_halo_property, splits each bin 
@@ -550,173 +766,8 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
         concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
         return concentrations
 
-    def central_destruction(self,primary_halo_property,halo_types):
-        """ Determines the excess probability due to assembly bias that 
-        halos host a central galaxy. """
 
-        def central_destruction_type1(self,primary_halo_property):
-
-            coefficient_array = solve_for_polynomial_coefficients(
-                self.parameter_dict['assembias_abcissa'],
-                self.parameter_dict['central_assembias_ordinates'])
-
-            # Initialize array that the function will return
-            output_destruction_function = np.zeros(len(primary_halo_property))
-
-            # Use coefficients to compute values of the destruction function polynomial
-            for n,coeff in enumerate(coefficient_array): 
-                output_destruction_function += coeff*primary_halo_property**n
-
-            # Apply baseline HOD constraint to central_destruction_type1
-            array_of_ones = np.zeros(len(output_destruction_function)) + 1
-            # First, apply the bound from above
-            test_type1_exceeds_maximum = output_destruction_function > (
-                self.maximum_central_destruction(primary_halo_property,array_of_ones))
-            output_destruction_function[test_type1_exceeds_maximum] = (
-                self.maximum_central_destruction(
-                    primary_halo_property[test_type1_exceeds_maximum],array_of_ones))
-            # Second, apply the bound from below
-            test_type1_negative = output_destruction_function < 0 
-            output_destruction_function[test_type1_negative] = 0
-
-            return np.array(output_destruction_function)
-
-        def central_destruction_type0(self,primary_halo_property):
-
-            array_of_ones = np.zeros(len(primary_halo_property)) + 1
-            type1_fraction = self.halotype_fraction_centrals(primary_halo_property,array_of_ones)
-            destruction_type1 = central_destruction_type1(self,
-                primary_halo_property)
-            type0_fraction = 1 - type1_fraction
-
-            output_destruction_function = np.zeros(len(primary_halo_property))
-
-            # Ensure that we do not divide by zero
-            test_positive = type0_fraction > np.zeros(len(type0_fraction))
-            # type0 destruction is defined in terms of type1 destruction 
-            # to ensure self-consistency of occupation statistics
-            output_destruction_function[test_positive] = (
-                (1-type1_fraction[test_positive]*
-                destruction_type1[test_positive])/
-                type0_fraction[test_positive])
-
-            # Apply baseline HOD constraint to central_destruction_type1
-            # First, apply the bound from above
-            array_of_zeros = array_of_ones-1
-            test_type0_exceeds_maximum = output_destruction_function > (
-                self.maximum_central_destruction(primary_halo_property,array_of_zeros))
-            output_destruction_function[test_type0_exceeds_maximum] = (
-                self.maximum_central_destruction(
-                    primary_halo_property[test_type0_exceeds_maximum],
-                    array_of_zeros[test_type0_exceeds_maximum]))
-
-            # Note that bound from below is automatically applied 
-            # since we initialized an output array of zeros
-            # and only filled entries that would be
-
-            return np.array(output_destruction_function)
-
-
-        # Run a blind search on values of halo_types
-        # This could possibly be a source of speedup if the 
-        # input arrays were pre-sorted
-        idx_halo_type0 = np.where(halo_types==0)[0]
-        idx_halo_type1 = np.where(halo_types==1)[0]
-
-        central_destruction = np.zeros(len(primary_halo_property))
-
-        central_destruction[idx_halo_type0] = (
-            central_destruction_type0(self,primary_halo_property[idx_halo_type0]))
-        central_destruction[idx_halo_type1] = (
-            central_destruction_type1(self,primary_halo_property[idx_halo_type1]))
-
-        return np.array(central_destruction)
-
-    def satellite_destruction(self,primary_halo_property,halo_types):
-        """ Determines the excess probability due to assembly bias that 
-        halos host a satellite galaxy. """
-
-        def satellite_destruction_type1(self,primary_halo_property):
-
-            coefficient_array = solve_for_polynomial_coefficients(
-                self.parameter_dict['assembias_abcissa'],
-                self.parameter_dict['satellite_assembias_ordinates'])
-
-            # Initialize array that the function will return
-            output_destruction_function = np.zeros(len(primary_halo_property))
-
-            # Use coefficients to compute values of the destruction function polynomial
-            for n,coeff in enumerate(coefficient_array): 
-                output_destruction_function += coeff*primary_halo_property**n
-
-            # Apply baseline HOD constraint to satellite_destruction_type1
-            array_of_ones = np.zeros(len(output_destruction_function)) + 1
-            # First, apply the bound from above
-            test_output_exceeds_maximum = output_destruction_function > (
-                self.maximum_satellite_destruction(primary_halo_property,array_of_ones))
-            output_destruction_function[test_output_exceeds_maximum] = (
-                self.maximum_satellite_destruction(
-                    primary_halo_property[test_output_exceeds_maximum],array_of_ones))
-            # Second, apply the bound from below
-            test_output_negative = output_destruction_function < 0 
-            output_destruction_function[test_output_negative] = 0
-            # Finally, for any range of the primary_halo_parameter 
-            # for which the probability of halo_type1 is unity, 
-            # set the destruction function equal to unity
-            probability_type1 = self.halotype_fraction_satellites(
-                primary_halo_property,array_of_ones)
-            probability_type1_is_unity = np.where(probability_type1 == 1)[0]
-            output_destruction_function[probability_type1_is_unity] = 1
-
-            return np.array(output_destruction_function)
-
-        def satellite_destruction_type0(self,primary_halo_property):
-
-            array_of_ones = np.zeros(len(primary_halo_property)) + 1
-            type1_fraction = self.halotype_fraction_satellites(primary_halo_property,array_of_ones)
-            destruction_type1 = satellite_destruction_type1(self,
-                primary_halo_property)
-            type0_fraction = 1 - type1_fraction
-
-            output_destruction_function = np.zeros(len(primary_halo_property))
-
-            # type0 destruction is defined in terms of type1 destruction 
-            # to ensure self-consistency of occupation statistics
-            # Ensure that we do not divide by zero
-            test_positive = type0_fraction > np.zeros(len(type0_fraction))
-            output_destruction_function[test_positive] = (
-                (1-type1_fraction[test_positive]*
-                destruction_type1[test_positive])/
-                type0_fraction[test_positive])
-            # Apply baseline HOD constraint to central_destruction_type1
-            # Apply the bound from above
-            array_of_zeros = array_of_ones-1
-            test_type0_exceeds_maximum = output_destruction_function > (
-                self.maximum_satellite_destruction(primary_halo_property,array_of_zeros))
-            output_destruction_function[test_type0_exceeds_maximum] = (
-                self.maximum_satellite_destruction(
-                    primary_halo_property[test_type0_exceeds_maximum],
-                    array_of_zeros[test_type0_exceeds_maximum]))
-
-
-            return np.array(output_destruction_function)
-
-        # Run a blind search on values of halo_types
-        # This could possibly be a source of speedup if the 
-        # input arrays were pre-sorted
-        idx_halo_type0 = np.where(halo_types==0)[0]
-        idx_halo_type1 = np.where(halo_types==1)[0]
-
-        satellite_destruction = np.zeros(len(primary_halo_property))
-
-        satellite_destruction[idx_halo_type0] = (
-            satellite_destruction_type0(self,primary_halo_property[idx_halo_type0]))
-        satellite_destruction[idx_halo_type1] = (
-            satellite_destruction_type1(self,primary_halo_property[idx_halo_type1]))
-
-        return np.array(satellite_destruction)
-
-    def halotype_fraction_centrals(self,primary_halo_property,halo_type):
+    def halo_type1_fraction_centrals(self,primary_halo_property):
         """ Determines the fractional representation of host halo 
         types as a function of the value of the primary halo property.
 
@@ -724,13 +775,12 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
         of the host halos, or by the input occupation statistics functions.
 
         """
+        # In this model, centrals exhibit no assembly bias
+        # So simply set the halo type1 fraction to unity for centrals
         output_array = np.zeros(len(primary_halo_property)) + 1
-        idx0 = np.where(np.array(halo_type) == 0)[0]
-        output_array[idx0] = 0
-
         return output_array
 
-    def halotype_fraction_satellites(self,primary_halo_property,halo_type):
+    def halo_type1_fraction_satellites(self,primary_halo_property):
         """ Determines the fractional representation of host halo 
         types as a function of the value of the primary halo property.
 
@@ -740,10 +790,32 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
          """
 
         output_array = np.array(self.baseline_hod_model.mean_ncen(primary_halo_property))
-        idx0 = np.where(halo_type == 0)[0]
-        output_array[idx0] = 1.0 - output_array[idx0]
 
         return output_array
+
+    def unconstrained_polynomial_model(self,abcissa,ordinates,primary_halo_property):
+        coefficient_array = solve_for_polynomial_coefficients(
+            abcissa,ordinates)
+        output_unconstrained_destruction_function = (
+            np.zeros(len(primary_halo_property)))
+
+        # Use coefficients to compute values of the destruction function polynomial
+        for n,coeff in enumerate(coefficient_array):
+            output_unconstrained_destruction_function += coeff*primary_halo_property**n
+
+        return output_unconstrained_destruction_function
+
+    def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['central_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+    def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['satellite_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
 
     def require_correct_keys(self,assembias_parameter_dict):
         correct_set_of_satcen_keys = set(defaults.default_satcen_parameters.keys())

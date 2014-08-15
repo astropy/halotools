@@ -39,13 +39,13 @@ default_assembias_parameters = {
 
 default_satcen_parameters = {
 	'assembias_abcissa' : [12,13.5,15],
-	'satellite_assembias_ordinates' : [-3000,3000,-3000],
+	'satellite_assembias_ordinates' : [1.5,1.25,0.5],
 	'central_assembias_ordinates' : [1.0,1.0,1.0]
 	}
 
-default_halotype_split = {
-	'halotype_abcissa' : [13,],
-	'halotype_split' : [0.5,]
+default_halo_type_split = {
+	'halo_type_abcissa' : [13,],
+	'halo_type_split' : [0.5,]
 	}
 
 def halo_type_function(logM,Mvir_independent_fraction=[0.5,0.5]):

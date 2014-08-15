@@ -26,7 +26,7 @@ def test_satcen():
 
 	m = satcen(threshold=-19.0)
 	# array of a few test masses
-	p = np.arange(10,16,0.1)
+	p = np.arange(5,20,0.1)
 	primary_halo_property = np.append(p,p)
 	# array of halo_types
 	h0 = np.zeros(len(p))
@@ -37,9 +37,9 @@ def test_satcen():
 	idx1=np.where(halo_types == 1)[0]
 
 	#probability of having halo_type=0
-	phs0 = m.halotype_fraction_satellites(primary_halo_property[idx0],halo_types[idx0])
+	phs0 = m.halo_type_fraction_satellites(primary_halo_property[idx0],halo_types[idx0])
 	#probability of having halo_type=1
-	phs1 = m.halotype_fraction_satellites(primary_halo_property[idx1],halo_types[idx1])
+	phs1 = m.halo_type_fraction_satellites(primary_halo_property[idx1],halo_types[idx1])
 	# Compute the value of mean_nsat that derives from the conditioned occupations
 	derived_nsat = (phs0*m.mean_nsat(primary_halo_property[idx0],halo_types[idx0]) + 
 		phs1*m.mean_nsat(primary_halo_property[idx1],halo_types[idx1]))
@@ -47,7 +47,7 @@ def test_satcen():
 	underlying_nsat = m.baseline_hod_model.mean_nsat(primary_halo_property[idx0])
 	# Require that the derived and underlying 
 	# satellite occupations are equal (highly non-trivial)
-	assert np.allclose(derived_nsat, underlying_nsat,rtol=1e-5)
+	assert np.allclose(derived_nsat, underlying_nsat,rtol=1e-6)
 
 
 

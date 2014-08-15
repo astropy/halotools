@@ -189,7 +189,7 @@ class HOD_mock(object):
         self.haloID = np.array(table_of_halos['ID'])
         self.concen = ho.anatoly_concentration(self.logM)
         self.Rvir = np.array(table_of_halos['RVIR'])/1000.
-        self.halotype = np.array(table_of_halos['HALOTYPE'])
+        self.halo_type = np.array(table_of_halos['HALOTYPE'])
 
         self.halopos = np.empty((len(table_of_halos),3),'f8')
         self.halopos.T[0] = np.array(table_of_halos['POS'][:,0])
