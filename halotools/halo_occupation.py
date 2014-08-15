@@ -660,6 +660,13 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
             # Second, apply the bound from below
             test_output_negative = output_destruction_function < 0 
             output_destruction_function[test_output_negative] = 0
+            # Finally, for any range of the primary_halo_parameter 
+            # for which the probability of halo_type1 is unity, 
+            # set the destruction function equal to unity
+            probability_type1 = self.halotype_fraction_satellites(
+                primary_halo_property,array_of_ones)
+            probability_type1_is_unity = np.where(probability_type1 == 1)[0]
+            output_destruction_function[probability_type1_is_unity] = 1
 
             return np.array(output_destruction_function)
 

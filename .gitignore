@@ -43,6 +43,7 @@ distribute-*.tar.gz
 *~
 halotools/experimental_testing.py
 halotools/plots/*
+halotools/syntax_checks.py
 
 # Mac OSX
 .DS_Store

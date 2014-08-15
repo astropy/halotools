@@ -22,11 +22,11 @@ def test_zheng_model():
 
 	assert np.all(test_mean_ncen >= 0)
 
-def test_satcen_mean_nsat():
+def test_satcen():
 
-	m = satcen(threshold=-19.5)
+	m = satcen(threshold=-19.0)
 	# array of a few test masses
-	p = np.arange(12,13,0.5)
+	p = np.arange(10,16,0.1)
 	primary_halo_property = np.append(p,p)
 	# array of halo_types
 	h0 = np.zeros(len(p))
@@ -47,7 +47,7 @@ def test_satcen_mean_nsat():
 	underlying_nsat = m.baseline_hod_model.mean_nsat(primary_halo_property[idx0])
 	# Require that the derived and underlying 
 	# satellite occupations are equal (highly non-trivial)
-	assert np.all(derived_nsat == underlying_nsat)
+	assert np.allclose(derived_nsat, underlying_nsat,rtol=1e-5)
 
 
 

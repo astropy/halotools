@@ -38,9 +38,9 @@ default_assembias_parameters = {
 	}
 
 default_satcen_parameters = {
-	'assembias_abcissa' : [12,14],
-	'satellite_assembias_ordinates' : [30,-30],
-	'central_assembias_ordinates' : [1.0,1.0]
+	'assembias_abcissa' : [12,13.5,15],
+	'satellite_assembias_ordinates' : [-3000,3000,-3000],
+	'central_assembias_ordinates' : [1.0,1.0,1.0]
 	}
 
 default_halotype_split = {
