@@ -14,8 +14,8 @@ of secondary galaxy properties such as SFR, color, morphology, etc.
 
 __all__ = ['anatoly_concentration','solve_for_polynomial_coefficients',
 'cumulative_NFW_PDF','HOD_Model',
-'Zheng07_HOD_Model','HOD_Quenching_Model','vdB03_Quenching_Model',
-'Assembly_Biased_HOD_Model','Assembly_Biased_HOD_Quenching_Model',
+'Zheng07_HOD_Model','Assembly_Biased_HOD_Model',
+'HOD_Quenching_Model','vdB03_Quenching_Model','Assembly_Biased_HOD_Quenching_Model',
 'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembly_Biased_HOD_Model']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
@@ -433,6 +433,11 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
     @abstractproperty
     def primary_halo_property_key(self):
+        """ String providing halo catalog dictionary key pointing 
+        to primary halo property. Necessary to ensure self-consistency between 
+        underlying halo model and assembly bias modulation. 
+
+        """
         raise NotImplementedError("primary_halo_property_key "
             "needs to be implemented to ensure self-consistency "
             "of baseline HOD and assembly-biased HOD model features")
@@ -440,8 +445,11 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
     @abstractmethod
     def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
-        """ Determines the excess probability that ``type 1`` 
-        halos host a central galaxy. """
+        """ Determines the excess probability that halos of type :math:`h_{1}` 
+        host a central galaxy. Can be any arbitrary function. 
+        Constraints on the value of this function resulting from the need to keep 
+        the baseline HOD fixed 
+        are automatically applied by the class. """
         raise NotImplementedError(
             "unconstrained_central_destruction_halo_type1 is not implemented")
         pass
