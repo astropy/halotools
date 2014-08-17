@@ -443,7 +443,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
     """ Abstract base class for any HOD model with assembly bias. 
 
     In this class of models, central and/or satellite mean occupation depends on some primary  
-    property, such as :math:`M_{vir}`, and is modulated by some secondary property, 
+    property, such as :math:`M_{vir}`, and the mean occupations are modulated by some secondary property, 
     such as :math:`z_{form}`. 
 
     """
@@ -458,7 +458,9 @@ class Assembly_Biased_HOD_Model(HOD_Model):
     @abstractproperty
     def baseline_hod_model(self):
         """ Underlying HOD model, about which assembly bias modulates 
-        galaxy abundance. The baseline HOD model can in principle be driven 
+        galaxy abundance and intra-halo spatial distribution. 
+        Must be one of the supported subclasses of `HOD_Model`. 
+        The baseline HOD model can in principle be driven 
         by any host halo property. 
         """
         pass
@@ -467,7 +469,8 @@ class Assembly_Biased_HOD_Model(HOD_Model):
     def primary_halo_property_key(self):
         """ String providing halo catalog dictionary key pointing 
         to primary halo property. Necessary to ensure self-consistency between 
-        underlying halo model and assembly bias modulation. 
+        underlying halo model, occupation-dependence of assembly bias, 
+        and color-dependence of assembly bias. 
 
         """
         raise NotImplementedError("primary_halo_property_key "
@@ -477,27 +480,51 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
     @abstractmethod
     def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
-        """ Determines the excess probability that halos of type :math:`h_{1}` 
-        host a central galaxy. Can be any arbitrary function. 
-        Constraints on the value of this function resulting from the need to keep 
-        the baseline HOD fixed 
-        are automatically applied by the class. """
+        """ Method determining :math:`\\tilde{D}_{cen}(p | h_{1})`, 
+        the unconstrained excess probability that halos of primary property :math:`p` and 
+        secondary property type :math:`h_{1}` 
+        host a central galaxy. 
+
+        Can be any arbitrary function, 
+        subject only to the requirement that it be bounded. 
+        Constraints on the value of this function required in order to keep the baseline 
+        :math:`\\langle N_{cen} \\rangle_{p}` fixed 
+        are automatically applied by `destruction_centrals`. """
         raise NotImplementedError(
             "unconstrained_central_destruction_halo_type1 is not implemented")
         pass
 
     @abstractmethod
     def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
-        """ Determines the excess probability that ``type 1`` 
-        halos host a satellite galaxy. """
+        """ Method determining :math:`\\tilde{D}_{sat}(p | h_{1})`, 
+        the unconstrained excess probability that halos of primary property :math:`p` and 
+        secondary property type :math:`h_{1}` 
+        host a satellite galaxy. 
+
+        Can be any arbitrary function, 
+        subject only to the requirement that it be bounded. 
+        Constraints on the value of this function required in order to keep the baseline 
+        :math:`\\langle N_{sat} \\rangle_{p}` fixed 
+        are automatically applied by `destruction_satellites`. """
         raise NotImplementedError(
             "unconstrained_satellite_destruction_halo_type1 is not implemented")
         pass
 
     @abstractmethod
     def halo_type1_fraction_centrals(self,primary_halo_property):
-        """ Determines the fractional representation of host halo 
-        type 1 as a function of primary_halo_property, as pertains to centrals. 
+        """ Determines :math:`F^{cen}_{h_{1}}(p)`, 
+        the fractional representation of host halos of type :math:`h_{1}` 
+        as a function of the primary halo property :math:`p`, as pertains to centrals. 
+
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for centrals, regardless of the 
+        behavior of `unconstrained_central_destruction_halo_type1`.
+
+        Notes 
+        -----
+        Code currently assumes that this function has already been guaranteed to 
+        be bounded by zero and unity. This will need to be fixed to be more defensive, 
+        so that any bounded function will automatically be converted to a proper PDF. 
 
          """
         raise NotImplementedError(
@@ -506,8 +533,19 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
     @abstractmethod
     def halo_type1_fraction_satellites(self,primary_halo_property):
-        """ Determines the fractional representation of host halo 
-        type 1 as a function of primary_halo_property, as pertains to satellites.
+        """ Determines :math:`F^{sat}_{h_{1}}(p)`, 
+        the fractional representation of host halos of type :math:`h_{1}` 
+        as a function of the primary halo property :math:`p`, as pertains to satellites. 
+
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for satellites, regardless of the 
+        behavior of `unconstrained_satellite_destruction_halo_type1`.
+
+        Notes 
+        -----
+        Code currently assumes that this function has already been guaranteed to 
+        be bounded by zero and unity. This will need to be fixed to be more defensive, 
+        so that any bounded function will automatically be converted to a proper PDF. 
 
          """
         raise NotImplementedError(
