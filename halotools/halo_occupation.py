@@ -12,11 +12,10 @@ of secondary galaxy properties such as SFR, color, morphology, etc.
 
 """
 
-__all__ = ['anatoly_concentration','solve_for_polynomial_coefficients',
-'cumulative_NFW_PDF','HOD_Model',
-'Zheng07_HOD_Model','Assembly_Biased_HOD_Model',
+__all__ = ['HOD_Model','Zheng07_HOD_Model','Assembly_Biased_HOD_Model',
 'HOD_Quenching_Model','vdB03_Quenching_Model','Assembly_Biased_HOD_Quenching_Model',
-'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembly_Biased_HOD_Model']
+'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembly_Biased_HOD_Model',
+'cumulative_NFW_PDF','anatoly_concentration','solve_for_polynomial_coefficients']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
@@ -40,7 +39,7 @@ def anatoly_concentration(logM):
     Parameters
     ----------
     logM : array 
-        array of log10(Mvir) of halos in catalog
+        array of :math:`log_{10}M_{vir}` of halos in catalog
 
     Returns
     -------
@@ -49,7 +48,7 @@ def anatoly_concentration(logM):
     Notes 
     -----
     This is currently the only concentration-mass relation implemented. This will later be 
-    bundled up into a class with a bunch of different radial profile methods. 
+    bundled up into a class with a bunch of different radial profile methods, NFW and non-.
 
     Values are currently hard-coded to Anatoly's best-fit values:
 
@@ -72,7 +71,7 @@ def cumulative_NFW_PDF(x,c):
     """ Integral of an NFW profile with concentration c.
     Unit-normalized so that the result is a cumulative PDF. 
 
-    cumlulative_NFW_PDF = :math:`\\frac{ln(1+xc) - \\frac{xc}{1+xc}} 
+    :math:`F(x,c) = \\frac{ln(1+xc) - \\frac{xc}{1+xc}} 
     {ln(1+c) - \\frac{c}{1+c}}`
 
     Parameters
@@ -86,24 +85,24 @@ def cumulative_NFW_PDF(x,c):
 
     Returns
     -------
-    pdf : array 
-        List of floats in the range (0,1). 
+    F : array 
+        Array of floats in the range (0,1). 
         Value gives the probability of randomly drawing 
         a radial position :math:`x = \\frac{r}{R_{vir}}`  
         from an NFW profile of input concentration c.
-        Function is used in Monte Carlo realization of satellite positions, using 
-        standard method of transformation of variables. 
 
     Notes
     --------
     Currently being used by mock.HOD_mock to generate 
-    Monte Carlo realizations of satellite profiles. 
+    Monte Carlo realizations of satellite profiles, 
+    using method of transformation of variables. 
 
     """
     c = np.array(c)
     x = np.array(x)
     norm=np.log(1.+c)-c/(1.+c)
-    return (np.log(1.+x*c) - x*c/(1.+x*c))/norm
+    F = (np.log(1.+x*c) - x*c/(1.+x*c))/norm
+    return F
 
 def solve_for_polynomial_coefficients(abcissa,ordinates):
     """ Solves for coefficients of the unique, 
@@ -132,16 +131,18 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
 
     The input ordinates specify the desired values of the polynomial 
     when evaluated at the Ndim inputs specified by the input abcissa.
-    There exists a unique, order Ndim polynomial that produces the input 
+    There exists a unique, order Ndim polynomial that returns the input 
     ordinates when the polynomial is evaluated at the input abcissa.
     The coefficients of that unique polynomial are the output of the function. 
 
-    This function is used by many of the methods below. For example, suppose 
+    This function is used by many of the methods in this module. For example, suppose 
     that a model in which the quenched fraction is 
-    :math:`F_{q}(logM = 12) = 0.25` and 0.9 at 
-    logM = 15. Then this function takes [12, 15] and [0.25, 0.9] as input, and 
-    returns the array [coeff0,coeff1]. The unique polynomial linear in logM 
-    that smoothly varies between the desired quenched fraction values is given by 
+    :math:`F_{q}(logM = 12) = 0.25` and :math:`F_{q}(logM = 15) = 0.9`. 
+    Then this function takes [12, 15] as the input abcissa, 
+    [0.25, 0.9] as the input ordinates, 
+    and returns the array :math:`[c_{0}, c_{1}]`. 
+    The unique polynomial linear in :math:`log_{10}M`  
+    that passes through the input ordinates and abcissa is given by 
     :math:`F(logM) = c_{0} + c_{1}*log_{10}logM`.
     
     """
@@ -162,21 +163,27 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
 
 @six.add_metaclass(ABCMeta)
 class HOD_Model(object):
-    """ Abstract base class for model parameters determining the HOD.
+    """ Base class for any HOD-style model of the galaxy-halo connection.
 
-    Any HOD-style model is a subclass of the HOD_Model object. 
-    All such models must provide their own specific functional forms 
-    for how the expectation value of both central and satellite 
-    galaxy occupations vary with host mass. Additionally, 
-    any HOD-based mock must specify the assumed concentration-halo relation.
+    This is an abstract class, so you can't instantiate it. 
+    Instead, you must work with one of its concrete subclasses, 
+    such as `Zheng07_HOD_Model`. 
+
+    All HOD-style models must provide their own specific functional forms 
+    for how :math:`\langle N_{cen} \\rangle` and :math:`\langle N_{sat}\\rangle` 
+    vary with the primary halo property. Additionally, 
+    any HOD-based mock must specify the assumed concentration-halo relation. 
 
     Notes 
     -----
     Currently, the only implemented HOD-style model that is supported is 
     based on Zheng et al. 2007, which is specified in terms of virial halo mass. 
-    But this abstract class is sufficiently general that it will support 
+    But the HOD_Model class is sufficiently general that it will support 
     models for the galaxy-halo connection based on alternative host halo properties, 
     such as :math:`V_{max}` or :math:`M_{PE-corrected}`. 
+
+    The current NFW profile requirement will eventually be relaxed, so that 
+    arbitrary radial profiles are supported. 
     
     """
     
@@ -190,6 +197,8 @@ class HOD_Model(object):
         """
         Expected number of central galaxies in a halo 
         as a function of the primary property.
+
+        Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_ncen is not implemented")
 
@@ -198,6 +207,8 @@ class HOD_Model(object):
         """
         Expected number of satellite galaxies in a halo 
         as a function of the primary property.
+
+        Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_nsat is not implemented")
 
@@ -206,11 +217,18 @@ class HOD_Model(object):
         """
         Concentration-halo relation assumed by the model. 
         Used to assign positions to satellites.
+
+        Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_concentration is not implemented")
 
     @abstractproperty
     def primary_halo_property_key(self):
+        """ String providing the key to the halo catalog dictionary 
+        where the primary halo property data is stored. 
+        
+        Required attribute of any HOD_Model subclass.
+        """
         raise NotImplementedError("primary_halo_property_key "
             "needs to be explicitly stated to ensure self-consistency "
             "of baseline HOD and assembly-biased HOD model features")
@@ -218,7 +236,7 @@ class HOD_Model(object):
 
 
 class Zheng07_HOD_Model(HOD_Model):
-    """ Subclass of HOD_Model object, where functional forms for occupation statistics 
+    """ Subclass of `HOD_Model` object, where functional forms for occupation statistics 
     are taken from Zheng et al. 2007, arXiv:0703457.
 
 
@@ -228,16 +246,19 @@ class Zheng07_HOD_Model(HOD_Model):
         Contains values for the parameters specifying the model.
         Dictionary keys are  
         'logMmin_cen', 'sigma_logM', 'logM0_sat','logM1_sat','alpha_sat'.
-        Default values are set in defaults.py to be the best-fit values 
-        given in Zheng et al. 2007 for their 
-        :math:`M_{r} - 5log_{10}h< -19.5` threshold sample. 
+        Default values pertain to the best-fit values of their 
+        :math:`M_{r} - 5log_{10}h< -19.5` threshold sample.
+
+        All the best-fit parameter values provided in Table 1 of 
+        Zheng et al. (2007) can be accessed via the 
+        `published_parameters` method.
 
     threshold : float, optional.
         Luminosity threshold of the mock galaxy sample. 
         If specified, input value must agree with 
         one of the thresholds used in Zheng07 to fit HODs: 
         [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-        Default value is -19.5. 
+        Default value is -19.5, specified in the `defaults` module.
 
     Notes
     -----
@@ -257,6 +278,8 @@ class Zheng07_HOD_Model(HOD_Model):
 
     @property 
     def primary_halo_property_key(self):
+        """ Model is based on :math:`M_{vir}`.
+        """
         return 'MVIR'
 
     def mean_ncen(self,logM):
@@ -329,7 +352,7 @@ class Zheng07_HOD_Model(HOD_Model):
         -------
 
         concentrations : array_like
-            Mean concentration of logM halos, using anatoly_concentration model.
+            Mean concentration of logM halos, using `anatoly_concentration` model.
 
         """
 
@@ -398,6 +421,10 @@ class Zheng07_HOD_Model(HOD_Model):
         return parameter_dict
 
     def require_correct_keys(self):
+        """ If a parameter dictionary is passed to the class upon instantiation, 
+        this method is used to enforce that the set of keys is in accord 
+        with the set of keys required by the model. 
+        """
         correct_set_of_keys = set(self.published_parameters(threshold = -20).keys())
         if set(self.parameter_dict.keys()) != correct_set_of_keys:
             raise TypeError("Set of keys of input parameter_dict do not match the set of keys required by the model")
