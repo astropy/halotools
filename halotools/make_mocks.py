@@ -114,7 +114,7 @@ class HOD_mock(object):
     """
 
     def __init__(self,simulation_data=None,
-        halo_occupation_model=ho.Polynomial_Assembly_Biased_HOD_Model(threshold=-20),seed=None):
+        halo_occupation_model=ho.Zheng07_HOD_Model(threshold=-21.5),seed=None):
 
         if simulation_data is None:
             simulation_data = read_nbody.load_bolshoi_host_halos_fits()
@@ -138,15 +138,17 @@ class HOD_mock(object):
 
 
         # Create numpy arrays containing data from the halo catalog and bind them to the mock object
-        self.primary_halo_property = np.array(table_of_halos[self.halo_occupation.primary_halo_property_key])
-        if self.primary_halo_property == 'MVIR':
+        self.primary_halo_property = np.array(table_of_halos[self.halo_occupation_model.primary_halo_property_key])
+        if self.halo_occupation_model.primary_halo_property_key == 'MVIR':
             self.primary_halo_property = np.log10(self.primary_halo_property)
-        self.secondary_halo_property = np.array(table_of_halos[self.halo_occupation.secondary_halo_property_key])
 
+        if isinstance(self.halo_occupation_model,ho.Assembly_Biased_HOD_Model):
+            self.secondary_halo_property = np.array(
+                table_of_halos[self.halo_occupation_model.secondary_halo_property_key])
 
 
         self.haloID = np.array(table_of_halos['ID'])
-        self.concen = ho.mean_concentration(self.primary_halo_property)
+        self.concen = self.halo_occupation_model.mean_concentration(self.primary_halo_property)
         self.Rvir = np.array(table_of_halos['RVIR'])/1000.
         self.halo_type = np.array(table_of_halos['HALOTYPE'])
 
@@ -199,12 +201,13 @@ class HOD_mock(object):
         
         """
 
-        self.NCen = self.num_cen_monte_carlo(self.logM,self.halo_occupation_model)
+        self.NCen = self.num_cen_monte_carlo(
+            self.primary_halo_property,self.halo_occupation_model)
         self.hasCentral = self.NCen > 0
 
-        self.NSat = np.zeros(len(self.logM),dtype=int)
+        self.NSat = np.zeros(len(self.primary_halo_property),dtype=int)
         self.NSat[self.hasCentral] = self.num_sat_monte_carlo(
-            self.logM[self.hasCentral],
+            self.primary_halo_property[self.hasCentral],
             self.halo_occupation_model,output=self.NSat[self.hasCentral])
 
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
@@ -298,7 +301,7 @@ class HOD_mock(object):
 
         # Preallocate centrals so we don't have to touch them again.
         self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
-        self.logMhost[:self.num_total_cens] = self.logM[self.hasCentral]
+        self.logMhost[:self.num_total_cens] = self.primary_halo_property[self.hasCentral]
 
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched[:self.num_total_cens] = self.would_have_quenched_central[self.hasCentral]
@@ -314,7 +317,7 @@ class HOD_mock(object):
         # all the satellites will now end up at the end of the array.
         satellite_index_array = np.nonzero(self.NSat > 0)[0]
         # these two save a bit of time by eliminating calls to records.__getattribute__
-        logmasses = self.logM
+        logmasses = self.primary_halo_property
 
 
         # The following loop assigning satellite positions takes up nearly 100% of the mock population time
@@ -340,7 +343,7 @@ class HOD_mock(object):
                 self.halo_occupation_model,'satellite')
 
 
-    def num_cen_monte_carlo(logM,hod_model):
+    def num_cen_monte_carlo(self,logM,hod_model):
         """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
 
         Parameters
@@ -361,7 +364,7 @@ class HOD_mock(object):
 
         return num_ncen_array
 
-    def num_sat_monte_carlo(logM,hod_model,output=None):
+    def num_sat_monte_carlo(self,logM,hod_model,output=None):
         """  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
 
         Parameters

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 """
-Very simple set of sanity checks on mock.py. 
-Still figuring out how to structure this properly.
+Very simple set of sanity checks on halo_occupation module 
 Will copy and paste my additional tests once I figure out the basic design conventions.
 """
 
