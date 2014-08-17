@@ -14,8 +14,6 @@ from ..halo_occupation import Satcen_Correlation_Polynomial_HOD_Model as satcen
 from ..halo_occupation import Polynomial_Assembly_Biased_HOD_Model as abhod
 
 
-
-
 def test_zheng_model():
 
 	m = Zheng07_HOD_Model(threshold=-20.0)
@@ -77,5 +75,26 @@ def test_abhod():
 	# Require that the derived and underlying 
 	# satellite occupations are equal (highly non-trivial)
 	assert np.allclose(derived_nsat, underlying_nsat,rtol=1e-6)
+
+
+# Can't figure out the relative import syntax for a module-wide function
+# comment out for now
+#def test_solve_for_quenching_polynomial_coefficients():
+	""" 
+	Use known pencil-and-paper answer to check 
+	that solve_for_quenching_polynomial_coefficients
+	is correctly solving the input linear system"""
+
+#	x=[0,1,-1,2]
+#	y=[10,15,11,26]
+#	coeff = solve_for_polynomial_coefficients(x,y)
+#	test_coeff = coeff - np.array([10,2,3,0])
+#	assert np.allclose(coeff, np.array([10,2,3,0])
+
+
+
+
+
+
 
 

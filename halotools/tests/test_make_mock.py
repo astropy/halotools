@@ -25,3 +25,19 @@ def test_Zheng07_mock():
 	satellite_fraction = mock.num_total_sats/float(mock.num_total_gals)
 	reasonable_satellite_fraction_boolean = (satellite_fraction > 0.1) and (satellite_fraction < 0.3)
 	assert reasonable_satellite_fraction_boolean == True
+
+"""
+def time_mock():
+	timer_string = "m.populate()"
+#	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation,zheng07_model)"
+#	timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation); m(); nhalf = int(m.num_total_gals/2.); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[0:nhalf],m.coords[0:nhalf].copy()); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[0:nhalf],m.coords[nhalf:-1].copy()); counter = pairs.mr_wpairs.radial_wpairs(None,m.coords[nhalf:-1],m.coords[nhalf:-1].copy())"
+	#timer_string = "m=make_mocks.HOD_mock(bolshoi_simulation); m(); nhalf = int(m.num_total_gals/2.); redcounter = pairs.mr_wpairs.radial_wpairs(None,m[0:nhalf].coords,m[0:nhalf].coords.copy()); bluecounter = pairs.mr_wpairs.radial_wpairs(None,m[nhalf:-1].coords,m[nhalf:-1].coords.copy())"
+	setup_string = "import make_mocks; import halo_occupation as ho; import read_nbody; import copy; import pairs.mr_wpairs; bolshoi_simulation = read_nbody.load_bolshoi_host_halos_fits(); hod_model = ho.Zheng07_HOD_Model(threshold=-20.5); m=make_mocks.HOD_mock(bolshoi_simulation,hod_model)"
+	t = timeit.Timer(timer_string,setup=setup_string)
+	timeit_results =  t.repeat(5,1)
+	average_runtime_of_mock_creation = np.mean(timeit_results)
+	print("Average number of seconds to create mock:")
+	print(average_runtime_of_mock_creation)
+	print("")
+"""
+
