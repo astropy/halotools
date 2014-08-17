@@ -263,7 +263,9 @@ class Zheng07_HOD_Model(HOD_Model):
     Notes
     -----
     :math:`c-M_{vir}` relation is current set to be Anatoly's, though 
-    this is not the relation used in Zheng07.
+    this is not the relation used in Zheng07. Their concentration-mass relation 
+    is of the same form as the one implemented one, but with different 
+    values for the hard-coded parameters. See Equation 1 of arXiv:0703457.
 
     """
 
@@ -278,7 +280,7 @@ class Zheng07_HOD_Model(HOD_Model):
 
     @property 
     def primary_halo_property_key(self):
-        """ Model is based on :math:`M_{vir}`.
+        """ Model is based on :math:`M = M_{vir}`.
         """
         return 'MVIR'
 
@@ -289,7 +291,7 @@ class Zheng07_HOD_Model(HOD_Model):
         Parameters
         ----------        
         logM : array 
-            array of :math:`log_{10}(M_{vir})` of halos in catalog
+            array of :math:`log_{10}(M)` of halos in catalog
 
         Returns
         -------
@@ -299,10 +301,10 @@ class Zheng07_HOD_Model(HOD_Model):
         -------
         Mean number of central galaxies in a host halo of the specified mass. 
 
-        :math:`\\langle N_{cen} \\rangle_{M_{vir}} = 
+        :math:`\\langle N_{cen} \\rangle_{M} = 
         \\frac{1}{2}\\left( 1 + 
-        erf\\left( \\frac{log_{10}M_{vir} - 
-        log_{10}M_{min}}{\\sigma_{log_{10}M_{vir}}} \\right) \\right)`
+        erf\\left( \\frac{log_{10}M - 
+        log_{10}M_{min}}{\\sigma_{log_{10}M}} \\right) \\right)`
 
         """
         logM = np.array(logM)
@@ -317,13 +319,16 @@ class Zheng07_HOD_Model(HOD_Model):
         Parameters
         ----------
         logM : array 
-            array of log10(Mvir) of halos in catalog
+            array of :math:`log_{10}(M)` of halos in catalog
 
         Returns
         -------
         mean_nsat : float or array
             Mean number of satellite galaxies in a host halo of the specified mass. 
-    
+
+        :math:`\\langle N_{sat} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha} \\langle N_{cen} \\rangle_{M}`
+
+
         """
 
         logM = np.array(logM)
