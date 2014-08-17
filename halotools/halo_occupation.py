@@ -489,7 +489,14 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         subject only to the requirement that it be bounded. 
         Constraints on the value of this function required in order to keep the baseline 
         :math:`\\langle N_{cen} \\rangle_{p}` fixed 
-        are automatically applied by `destruction_centrals`. """
+        are automatically applied by `destruction_centrals`. 
+
+        Notes 
+        -----
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for centrals.
+
+        """
         raise NotImplementedError(
             "unconstrained_central_destruction_halo_type1 is not implemented")
         pass
@@ -505,7 +512,14 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         subject only to the requirement that it be bounded. 
         Constraints on the value of this function required in order to keep the baseline 
         :math:`\\langle N_{sat} \\rangle_{p}` fixed 
-        are automatically applied by `destruction_satellites`. """
+        are automatically applied by `destruction_satellites`. 
+
+        Notes 
+        -----
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for satellites.
+
+        """
         raise NotImplementedError(
             "unconstrained_satellite_destruction_halo_type1 is not implemented")
         pass
@@ -516,12 +530,12 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         the fractional representation of host halos of type :math:`h_{1}` 
         as a function of the primary halo property :math:`p`, as pertains to centrals. 
 
+        Notes 
+        -----
         If this function is set to be either identically unity or identically zero, 
         there will be no assembly bias effects for centrals, regardless of the 
         behavior of `unconstrained_central_destruction_halo_type1`.
 
-        Notes 
-        -----
         Code currently assumes that this function has already been guaranteed to 
         be bounded by zero and unity. This will need to be fixed to be more defensive, 
         so that any bounded function will automatically be converted to a proper PDF. 
@@ -537,12 +551,13 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         the fractional representation of host halos of type :math:`h_{1}` 
         as a function of the primary halo property :math:`p`, as pertains to satellites. 
 
+
+        Notes 
+        -----
         If this function is set to be either identically unity or identically zero, 
         there will be no assembly bias effects for satellites, regardless of the 
         behavior of `unconstrained_satellite_destruction_halo_type1`.
 
-        Notes 
-        -----
         Code currently assumes that this function has already been guaranteed to 
         be bounded by zero and unity. This will need to be fixed to be more defensive, 
         so that any bounded function will automatically be converted to a proper PDF. 
@@ -553,8 +568,10 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         pass
 
     def halo_type_fraction_centrals(self,primary_halo_property,halo_type):
-        """ Determines the fractional representation of host halos of input halo_type 
-        as a function of primary_halo_property, as pertains to centrals.
+        """ Using the function `halo_type1_fraction_centrals` required by concrete subclasses,
+        this method determines :math:`F^{cen}_{h_{i}}(p)`, the fractional representation 
+        of host halos of input halo type :math:`h_{i}` 
+        as a function of input primary halo property :math:`p`, as pertains to centrals.
 
         Parameters 
         ----------
@@ -569,8 +586,9 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         Returns 
         -------
         output_halo_type_fraction : array_like
-            The ith element gives the probability that a halo with primary halo property = primary_halo_property[i] 
-            has halo_type = halo_type[i]
+            Each element gives the probability 
+            that a halo with input primary halo property :math:`p` 
+            has input halo type :math:`h_{i}`
 
          """
 
@@ -581,8 +599,10 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         return output_halo_type_fraction
 
     def halo_type_fraction_satellites(self,primary_halo_property,halo_type):
-        """ Determines the fractional representation of host halos of input halo_type 
-        as a function of primary_halo_property, as pertains to satellites.
+        """ Using the function `halo_type1_fraction_satellites` required by concrete subclasses,
+        this method determines :math:`F^{sat}_{h_{i}}(p)`, the fractional representation 
+        of host halos of input halo type :math:`h_{i}` 
+        as a function of input primary halo property :math:`p`, as pertains to satellites.
 
         Parameters 
         ----------
@@ -597,9 +617,11 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         Returns 
         -------
         output_halo_type_fraction : array_like
-            The ith element gives the probability that a halo with primary halo property = primary_halo_property[i] 
-            has halo_type = halo_type[i]
-        """
+            Each element gives the probability 
+            that a halo with input primary halo property :math:`p` 
+            has input halo type :math:`h_{i}`
+
+         """
         output_halo_type_fraction = self.halo_type1_fraction_satellites(primary_halo_property)
         idx0 = np.where(halo_type == 0)[0]
         output_halo_type_fraction[idx0] = 1.0 - output_halo_type_fraction[idx0]
@@ -608,7 +630,14 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
 
     def maximum_destruction_centrals(self,primary_halo_property,halo_type):
-        """ Maximum allowed value of the destruction function, as pertains to centrals.
+        """ The maximum allowed value of the destruction function, as pertains to centrals.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the destruction function :math:`D_{cen}(p | h_{i})` cannot exceed 
+        :math:`1 / F_{h_{i}}^{cen}(p)`, or it would be impossible to keep fixed 
+        the unconditioned mean central occupation :math:`\\langle N_{cen} \\rangle_{p}`. 
+
+        Additionally, :math:`F_{h_{i}}^{cen}(p) = 0 \Rightarrow D_{cen}(p | h_{i}) = 0`.
 
         Parameters 
         ----------
@@ -635,7 +664,14 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         return output_maximum_destruction
 
     def maximum_destruction_satellites(self,primary_halo_property,halo_type):
-        """ Maximum allowed value of the destruction function, as pertains to centrals.
+        """ Maximum allowed value of the destruction function, as pertains to satellites.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the destruction function :math:`D_{sat}(p | h_{i})` cannot exceed 
+        :math:`1 / F_{h_{i}}^{sat}(p)`, or it would be impossible to keep fixed 
+        the unconditioned mean satellite occupation :math:`\\langle N_{sat} \\rangle_{p}`. 
+
+        Additionally, :math:`F_{h_{i}}^{sat}(p) = 0 \Rightarrow D_{sat}(p | h_{i}) = 0`.
 
         Parameters 
         ----------
@@ -650,7 +686,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         Returns 
         -------
         output_maximum_destruction : array_like
-            Maximum allowed value of the destruction function, as pertains to centrals.
+            Maximum allowed value of the destruction function, as pertains to satellites.
 
         """
 
@@ -663,7 +699,33 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
 
     def destruction_satellites(self,primary_halo_property,halo_type):
+        """ Method determining :math:`D_{sat}(p | h_{i})`, 
+        the true excess probability that halos of primary property :math:`p` and 
+        secondary property type :math:`h_{i}` 
+        host a satellite galaxy. 
 
+        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} \equiv D_{sat}(p | h_{i}) \\langle N_{sat} \\rangle_{p}`.
+
+        All of the behavior of this function derives 
+        from `unconstrained_satellite_destruction_halo_type1` and `halo_type1_fraction_satellites`, 
+        both of which are required methods of the concrete subclass. The function 
+        :math:`D_{sat}(p | h_{i})` only differs from :math:`\\tilde{D}_{sat}(p | h_{i})` 
+        in regions of HOD parameter space where the provided values of 
+        :math:`\\tilde{D}_{sat}(p | h_{i})` would violate the following constraint: 
+
+        :math:`F^{sat}_{h_{0}}(p)\\langle N_{sat} | h_{0} \\rangle_{p} + 
+        F^{sat}_{h_{1}}(p)\\langle N_{sat} | h_{1} \\rangle_{p} = 
+        \\langle N_{sat} \\rangle_{p}^{baseline},`
+        where the RHS is given by `baseline_hod_model`. 
+
+        Defining :math:`D_{sat}(p | h_{i})` in this way 
+        guarantees that the parameters modulating assembly bias have zero intrinsic covariance with parameters governing  
+        the traditional HOD. Therefore, any degeneracy between the assembly bias parameters 
+        and the traditional HOD parameters in the posterior likelihood is purely due to degenerate effects 
+        of the parameters on the chosen observable. 
+
+        """
+ 
         idx0 = np.where(halo_type == 0)[0]
         idx1 = np.where(halo_type == 1)[0]
 
@@ -727,6 +789,32 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         return output_destruction_allhalos
 
     def destruction_centrals(self,primary_halo_property,halo_type):
+        """ Method determining :math:`D_{cen}(p | h_{i})`, 
+        the true excess probability that halos of primary property :math:`p` and 
+        secondary property type :math:`h_{i}` 
+        host a central galaxy. 
+
+        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} \equiv D_{cen}(p | h_{i}) \\langle N_{sat} \\rangle_{p}`.
+
+        All of the behavior of this function derives 
+        from `unconstrained_central_destruction_halo_type1` and `halo_type1_fraction_centrals`, 
+        both of which are required methods of the concrete subclass. The function 
+        :math:`D_{cen}(p | h_{i})` only differs from :math:`\\tilde{D}_{cen}(p | h_{i})` 
+        in regions of HOD parameter space where the provided values of 
+        :math:`\\tilde{D}_{cen}(p | h_{i})` would violate the following constraint: 
+
+        :math:`F^{cen}_{h_{0}}(p)\\langle N_{cen} | h_{0} \\rangle_{p} + 
+        F^{cen}_{h_{1}}(p)\\langle N_{cen} | h_{1} \\rangle_{p} = 
+        \\langle N_{cen} \\rangle_{p}^{baseline},`
+        where the RHS is given by `baseline_hod_model`. 
+
+        Defining :math:`D_{cen}(p | h_{i})` in this way 
+        guarantees that the parameters modulating assembly bias have zero intrinsic covariance with parameters governing  
+        the traditional HOD. Therefore, any degeneracy between the assembly bias parameters 
+        and the traditional HOD parameters in the posterior likelihood is purely due to degenerate effects 
+        of the parameters on the chosen observable. 
+
+        """
 
         idx0 = np.where(halo_type == 0)[0]
         idx1 = np.where(halo_type == 1)[0]
@@ -791,22 +879,96 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         return output_destruction_allhalos
 
     def mean_ncen(self,primary_halo_property,halo_type):
-        """ Override the baseline HOD method so that mean_ncen is modulated by halo_type"""
+        """ Override the baseline HOD method used to compute mean central occupation. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        mean_ncen : array_like
+            :math:`h_{i}`-conditioned mean central occupation as a function of the primary halo property :math:`p`.
+
+        :math:`\\langle N_{cen} | h_{i} \\rangle_{p} = D_{cen}(p | h_{i})\\langle N_{cen} \\rangle_{p}`
+
+        """
         return self.destruction_centrals(primary_halo_property,halo_type)*(
             self.baseline_hod_model.mean_ncen(primary_halo_property))
 
     def mean_nsat(self,primary_halo_property,halo_type):
-        """ Override the baseline HOD method so that mean_ncen is modulated by halo_type"""
+        """ Override the baseline HOD method used to compute mean satellite occupation. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        mean_nsat : array_like
+            :math:`h_{i}`-conditioned mean satellite occupation as a function of the primary halo property :math:`p`.
+
+        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} = D_{sat}(p | h_{i})\\langle N_{sat} \\rangle_{p}`
+
+        """
         return self.destruction_satellites(primary_halo_property,halo_type)*(
             self.baseline_hod_model.mean_nsat(primary_halo_property))
 
-    def host_halo_type_calculator(self,primary_halo_property,secondary_halo_property):
-        """ Determines the assembly bias type of the input halos.
+    def host_halo_type_calculator_centrals(self, primary_halo_property, secondary_halo_property, halo_type):
+        """ Determines the assembly bias type of the input halos, as pertains to centrals.
 
-        Bins input halos by primary_halo_property, splits each bin 
-        according to the value of the model's halo_type_fraction in the bin, 
-        and assigns halo type 0 (1) to the halos below (above) the split.
+        Method bins the input halos by the primary halo property :math:`p`, splits each bin 
+        according to the value of `halo_type_fraction_centrals` in the bin, 
+        and assigns halo type :math:`h_{0} (h_{1})` to the halos below (above) the split.
 
+        Parameters 
+        ----------
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property 
+
+        secondary_halo_property : array_like
+            Array with elements equal to the value of the secondary_halo_property 
+
+        Returns 
+        -------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        """
+        pass
+
+    def host_halo_type_calculator_satellites(self, primary_halo_property, secondary_halo_property, halo_type):
+        """ Determines the assembly bias type of the input halos, as pertains to satellites.
+
+        Method bins the input halos by the primary halo property :math:`p`, splits each bin 
+        according to the value of `halo_type_fraction_satellites` in the bin, 
+        and assigns halo type :math:`h_{0} (h_{1})` to the halos below (above) the split.
+
+        Parameters 
+        ----------
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property 
+
+        secondary_halo_property : array_like
+            Array with elements equal to the value of the secondary_halo_property 
+
+        Returns 
+        -------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
         """
         pass
 
