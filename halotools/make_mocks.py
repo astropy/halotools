@@ -12,8 +12,7 @@ Class design is built around future MCMC applications, so that
 lower level objects like numpy ndarrays are used to store object attributes, 
 for which it is cheaper and faster to allocate memory."""
 
-__all__= ['enforce_periodicity_of_box', 'num_cen_monte_carlo','num_sat_monte_carlo',
-'quenched_monte_carlo','HOD_mock']
+__all__= ['enforce_periodicity_of_box','quenched_monte_carlo','HOD_mock']
 
 import read_nbody
 import halo_occupation as ho
@@ -56,52 +55,6 @@ def enforce_periodicity_of_box(coords, box_length):
     coords[test] = box_length + coords[test]
     return coords
 
-def num_cen_monte_carlo(logM,hod_model):
-    """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
-
-    Parameters
-    ----------
-    logM : float or array
-
-    hod_model : 
-        HOD_Model object defined in halo_occupation module.
-
-    Returns
-    -------
-    num_ncen_array : int or array
-
-    
-    """
-    num_ncen_array = np.array(
-        hod_model.mean_ncen(logM) > np.random.random(len(logM)),dtype=int)
-
-    return num_ncen_array
-
-def num_sat_monte_carlo(logM,hod_model,output=None):
-    """  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
-
-    Parameters
-    ----------
-    logM : float or array
-
-    hod_model : HOD_Model object defined in halo_occupation module.
-
-    Returns
-    -------
-    num_nsat_array : int or array
-        Values of array specify the number of satellites hosted by each halo.
-
-
-    """
-    Prob_sat = hod_model.mean_nsat(logM)
-    # NOTE: need to cut at zero, otherwise poisson bails
-    # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
-    test = Prob_sat <= 0
-    Prob_sat[test] = defaults.default_tiny_poisson_fluctuation
-
-    num_nsat_array = poisson.rvs(Prob_sat)
-
-    return num_nsat_array
 
 def quenched_monte_carlo(logM,halo_occupation_model,galaxy_type):
     """ Returns Monte Carlo-generated array of 0 or 1 specifying whether the galaxy is quenched.
@@ -161,7 +114,7 @@ class HOD_mock(object):
     """
 
     def __init__(self,simulation_data=None,
-        halo_occupation_model=ho.Zheng07_HOD_Model(threshold=-20),seed=None):
+        halo_occupation_model=ho.Zheng07_HOD_Model(threshold=-21.5),seed=None):
 
         if simulation_data is None:
             simulation_data = read_nbody.load_bolshoi_host_halos_fits()
@@ -185,11 +138,19 @@ class HOD_mock(object):
 
 
         # Create numpy arrays containing data from the halo catalog and bind them to the mock object
-        self.logM = np.array(np.log10(table_of_halos['MVIR']))
+        self.primary_halo_property = np.array(table_of_halos[self.halo_occupation_model.primary_halo_property_key])
+        if self.halo_occupation_model.primary_halo_property_key == 'MVIR':
+            self.primary_halo_property = np.log10(self.primary_halo_property)
+
+        if isinstance(self.halo_occupation_model,ho.Assembly_Biased_HOD_Model):
+            self.secondary_halo_property = np.array(
+                table_of_halos[self.halo_occupation_model.secondary_halo_property_key])
+
+
         self.haloID = np.array(table_of_halos['ID'])
-        self.concen = ho.anatoly_concentration(self.logM)
+        self.concen = self.halo_occupation_model.mean_concentration(self.primary_halo_property)
         self.Rvir = np.array(table_of_halos['RVIR'])/1000.
-        self.halotype = np.array(table_of_halos['HALOTYPE'])
+        self.halo_type = np.array(table_of_halos['HALOTYPE'])
 
         self.halopos = np.empty((len(table_of_halos),3),'f8')
         self.halopos.T[0] = np.array(table_of_halos['POS'][:,0])
@@ -240,15 +201,16 @@ class HOD_mock(object):
         
         """
 
-        self.NCen = num_cen_monte_carlo(self.logM,self.halo_occupation_model)
+        self.NCen = self.num_cen_monte_carlo(
+            self.primary_halo_property,self.halo_occupation_model)
         self.hasCentral = self.NCen > 0
 
-        self.NSat = np.zeros(len(self.logM),dtype=int)
-        self.NSat[self.hasCentral] = num_sat_monte_carlo(
-            self.logM[self.hasCentral],
+        self.NSat = np.zeros(len(self.primary_halo_property),dtype=int)
+        self.NSat[self.hasCentral] = self.num_sat_monte_carlo(
+            self.primary_halo_property[self.hasCentral],
             self.halo_occupation_model,output=self.NSat[self.hasCentral])
 
-        if 'logM_quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.would_have_quenched_central = quenched_monte_carlo(
                 self.logM,self.halo_occupation_model,'central')
 
@@ -260,7 +222,7 @@ class HOD_mock(object):
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
-        if 'logM_quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched = np.zeros(self.num_total_gals,dtype='i4')
     #...
 
@@ -339,9 +301,9 @@ class HOD_mock(object):
 
         # Preallocate centrals so we don't have to touch them again.
         self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
-        self.logMhost[:self.num_total_cens] = self.logM[self.hasCentral]
+        self.logMhost[:self.num_total_cens] = self.primary_halo_property[self.hasCentral]
 
-        if 'logM_quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched[:self.num_total_cens] = self.would_have_quenched_central[self.hasCentral]
 
 
@@ -355,7 +317,7 @@ class HOD_mock(object):
         # all the satellites will now end up at the end of the array.
         satellite_index_array = np.nonzero(self.NSat > 0)[0]
         # these two save a bit of time by eliminating calls to records.__getattribute__
-        logmasses = self.logM
+        logmasses = self.primary_halo_property
 
 
         # The following loop assigning satellite positions takes up nearly 100% of the mock population time
@@ -375,12 +337,58 @@ class HOD_mock(object):
 
         self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
 
-        if 'logM_quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched[self.num_total_cens:-1] = quenched_monte_carlo(
                 self.logMhost[self.num_total_cens:-1],
                 self.halo_occupation_model,'satellite')
 
 
+    def num_cen_monte_carlo(self,logM,hod_model):
+        """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
+
+        Parameters
+        ----------
+        logM : float or array
+
+        hod_model : 
+            HOD_Model object defined in halo_occupation module.
+
+        Returns
+        -------
+        num_ncen_array : int or array
+
+        
+        """
+        num_ncen_array = np.array(
+            hod_model.mean_ncen(logM) > np.random.random(len(logM)),dtype=int)
+
+        return num_ncen_array
+
+    def num_sat_monte_carlo(self,logM,hod_model,output=None):
+        """  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
+
+        Parameters
+        ----------
+        logM : float or array
+
+        hod_model : HOD_Model object defined in halo_occupation module.
+
+        Returns
+        -------
+        num_nsat_array : int or array
+            Values of array specify the number of satellites hosted by each halo.
+
+
+        """
+        Prob_sat = hod_model.mean_nsat(logM)
+        # NOTE: need to cut at zero, otherwise poisson bails
+        # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
+        test = Prob_sat <= 0
+        Prob_sat[test] = defaults.default_tiny_poisson_fluctuation
+
+        num_nsat_array = poisson.rvs(Prob_sat)
+
+        return num_nsat_array
 
     #...
 

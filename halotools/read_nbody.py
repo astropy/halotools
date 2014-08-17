@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Methods to load halo catalogs into memory.
-Not even close to the needed level of generality.
-Currently is only useful at loading in a single pre-processed halo catalog: Bolshoi at z=0.
+Obviously this module needs to be generalized. 
+Currently it's only useful at loading in a single pre-processed halo catalog: Bolshoi at z=0.
 Adequate only while basic functionality of mock-making code is being developed.
 
 """
@@ -13,7 +13,6 @@ __all__=['read_barebones_ascii_halo_catalog_for_initial_mock_development','load_
 #                        unicode_literals)
 
 from astropy.io import ascii
-import pyfits
 import defaults
 from astropy.table import Table
 
@@ -31,8 +30,8 @@ def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
     halos : Astropy Table
          Halo catalog information.
 
-    Synopsis
-    --------
+    Notes
+    -----
     Read filename and return an astropy structured table called 'halos'. Currently a basically useless method.
 
     """
@@ -45,7 +44,6 @@ def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
 
 def load_bolshoi_host_halos_fits(simulation_dict=None):
     """Placeholder method using pyfits to load a pre-processed .fits file containing host halo information.
-    Will soon enough be replaced by a more general/flexible routine.
 
     Parameters
     ----------
@@ -62,8 +60,12 @@ def load_bolshoi_host_halos_fits(simulation_dict=None):
     Notes
     -----
     Default is Rockstar V1.5 Bolshoi halos at a=1.0003.
+    Will soon enough be replaced by a more general/flexible function 
+    that can read in a variety of pre-processed
+    halo catalogs. Ultimately wrapped up in a class with catalog I/O and analysis classes. 
 
     """
+    import pyfits
 
     if simulation_dict == None:
         simulation_dict = defaults.default_simulation_dict

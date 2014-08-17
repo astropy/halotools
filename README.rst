@@ -3,13 +3,13 @@
 Halotools is a python package designed  
 to study large scale structure, cosmology, and galaxy evolution using 
 N-body simulations and halo models. This code is publicly available at 
-``github.com/aphearin/halotools``. Most of the python code 
+``https://github.com/halotools``. Most of the python code 
 associated with halotools-related science is in the
 directory halotools/halotools. 
 
 ### Package dependencies
 
-1. Halotools is an affiliated package of astropy, and so astropy will need to be installed on your machine to use this package. If you are using the Anaconda python distribution, astropy comes pre-installed. Otherwise, see  github.com/astropy for installation instructions.
+1. Halotools is being written to be an affiliated package of astropy, and so astropy will need to be installed on your machine to use this package. If you are using the Anaconda python distribution, astropy comes pre-installed. Otherwise, see  github.com/astropy for installation instructions.
 
 2. Several subpackages of halotools require the use of MPI to parallelize various expensive calculations. MPI is not necessary to make the mocks themselves, but MPI makes it possible, for example, to hook the make_mocks subpackage into an MCMC engine so that model posteriors can be computed in a reasonable amount of time. To make use of this parallelization, you will need to install the mpi4py package.
 

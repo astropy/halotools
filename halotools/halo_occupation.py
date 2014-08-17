@@ -12,10 +12,10 @@ of secondary galaxy properties such as SFR, color, morphology, etc.
 
 """
 
-__all__ = ['anatoly_concentration','cumulative_NFW_PDF','HOD_Model',
-'Zheng07_HOD_Model','HOD_Quenching_Model','vdB03_Quenching_Model',
-'Assembly_Biased_HOD_Model','Assembly_Biased_HOD_Quenching_Model',
-'SatCen_Correlation_HOD_Model']
+__all__ = ['HOD_Model','Zheng07_HOD_Model','Assembly_Biased_HOD_Model',
+'HOD_Quenching_Model','vdB03_Quenching_Model','Assembly_Biased_HOD_Quenching_Model',
+'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembly_Biased_HOD_Model',
+'cumulative_NFW_PDF','anatoly_concentration','solve_for_polynomial_coefficients']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
@@ -25,7 +25,7 @@ from scipy.stats import poisson
 import defaults
 
 from astropy.extern import six
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
 
@@ -34,15 +34,29 @@ def anatoly_concentration(logM):
     """ Power law fitting formula for the concentration-mass relation of Bolshoi host halos at z=0
     Taken from Klypin et al. 2011, arXiv:1002.3660v4, Eqn. 12.
 
+    :math:`c(M) = c_{0}(M/M_{piv})^{\\alpha}`
 
     Parameters
     ----------
     logM : array 
-        array of log10(Mvir) of halos in catalog
+        array of :math:`log_{10}M_{vir}` of halos in catalog
 
     Returns
     -------
     concentrations : array
+
+    Notes 
+    -----
+    This is currently the only concentration-mass relation implemented. This will later be 
+    bundled up into a class with a bunch of different radial profile methods, NFW and non-.
+
+    Values are currently hard-coded to Anatoly's best-fit values:
+
+    :math:`c_{0} = 9.6`
+
+    :math:`\\alpha = -0.075`
+
+    :math:`M_{piv} = 10^{12}M_{\odot}/h`
 
     """
     
@@ -54,8 +68,11 @@ def anatoly_concentration(logM):
     return concentrations
 
 def cumulative_NFW_PDF(x,c):
-    """ Integral of the NFW profile.
+    """ Integral of an NFW profile with concentration c.
     Unit-normalized so that the result is a cumulative PDF. 
+
+    :math:`F(x,c) = \\frac{ln(1+xc) - \\frac{xc}{1+xc}} 
+    {ln(1+c) - \\frac{c}{1+c}}`
 
     Parameters
     ----------
@@ -68,66 +85,158 @@ def cumulative_NFW_PDF(x,c):
 
     Returns
     -------
-    pdf : array 
-        List of floats in the range (0,1). 
-        Value gives the probability of randomly drawing a radial position x = r/Rvir 
+    F : array 
+        Array of floats in the range (0,1). 
+        Value gives the probability of randomly drawing 
+        a radial position :math:`x = \\frac{r}{R_{vir}}`  
         from an NFW profile of input concentration c.
-        Function is used in Monte Carlo realization of satellite positions, using 
-        standard method of transformation of variables. 
 
     Notes
     --------
     Currently being used by mock.HOD_mock to generate 
-    Monte Carlo realizations of satellite profiles. 
+    Monte Carlo realizations of satellite profiles, 
+    using method of transformation of variables. 
 
     """
     c = np.array(c)
     x = np.array(x)
     norm=np.log(1.+c)-c/(1.+c)
-    return (np.log(1.+x*c) - x*c/(1.+x*c))/norm
+    F = (np.log(1.+x*c) - x*c/(1.+x*c))/norm
+    return F
+
+def solve_for_polynomial_coefficients(abcissa,ordinates):
+    """ Solves for coefficients of the unique, 
+    minimum-degree polynomial that passes through 
+    the input abcissa and attains values equal the input ordinates.  
+
+    Parameters
+    ----------
+    abcissa : array 
+        Elements are the abcissa at which the desired values of the polynomial 
+        have been tabulated.
+
+    ordinates : array 
+        Elements are the desired values of the polynomial when evaluated at the abcissa.
+
+    Returns
+    -------
+    polynomial_coefficients : array 
+        Elements are the coefficients determining the polynomial. 
+        Element i of polynomial_coefficients gives the degree i coefficient.
+
+    Notes
+    --------
+    Input arrays abcissa and ordinates can in principle be of any dimension Ndim, 
+    and there will be Ndim output coefficients.
+
+    The input ordinates specify the desired values of the polynomial 
+    when evaluated at the Ndim inputs specified by the input abcissa.
+    There exists a unique, order Ndim polynomial that returns the input 
+    ordinates when the polynomial is evaluated at the input abcissa.
+    The coefficients of that unique polynomial are the output of the function. 
+
+    This function is used by many of the methods in this module. For example, suppose 
+    that a model in which the quenched fraction is 
+    :math:`F_{q}(logM = 12) = 0.25` and :math:`F_{q}(logM = 15) = 0.9`. 
+    Then this function takes [12, 15] as the input abcissa, 
+    [0.25, 0.9] as the input ordinates, 
+    and returns the array :math:`[c_{0}, c_{1}]`. 
+    The unique polynomial linear in :math:`log_{10}M`  
+    that passes through the input ordinates and abcissa is given by 
+    :math:`F(logM) = c_{0} + c_{1}*log_{10}logM`.
+    
+    """
+
+    ones = np.zeros(len(abcissa)) + 1
+    columns = ones
+    for i in np.arange(len(abcissa)-1):
+        columns = np.append(columns,[abcissa**(i+1)])
+    quenching_model_matrix = columns.reshape(
+        len(abcissa),len(abcissa)).transpose()
+
+    polynomial_coefficients = np.linalg.solve(
+        quenching_model_matrix,ordinates)
+
+    return np.array(polynomial_coefficients)
+
 
 
 @six.add_metaclass(ABCMeta)
 class HOD_Model(object):
-    """ Abstract base class for model parameters determining the HOD.
+    """ Base class for any HOD-style model of the galaxy-halo connection.
 
-    Any HOD-based model is a subclass of the HOD_Model object. 
-    All such models must provide their own specific functional forms 
-    for how the expectation value of both central and satellite 
-    galaxy occupations vary with host mass. Additionally, 
-    any HOD-based mock must specify the assumed concentration-mass relation.
+    This is an abstract class, so you can't instantiate it. 
+    Instead, you must work with one of its concrete subclasses, 
+    such as `Zheng07_HOD_Model`. 
+
+    All HOD-style models must provide their own specific functional forms 
+    for how :math:`\langle N_{cen} \\rangle` and :math:`\langle N_{sat}\\rangle` 
+    vary with the primary halo property. Additionally, 
+    any HOD-based mock must specify the assumed concentration-halo relation. 
+
+    Notes 
+    -----
+    Currently, the only implemented HOD-style model that is supported is 
+    based on Zheng et al. 2007, which is specified in terms of virial halo mass. 
+    But the HOD_Model class is sufficiently general that it will support 
+    models for the galaxy-halo connection based on alternative host halo properties, 
+    such as :math:`V_{max}` or :math:`M_{PE-corrected}`. 
+
+    The current NFW profile requirement will eventually be relaxed, so that 
+    arbitrary radial profiles are supported. 
     
     """
     
-    def __init__(self):
+    def __init__(self,parameter_dict=None,threshold=None):
         self.publication = []
-        self.parameter_dict = {}
+        self.parameter_dict = parameter_dict
+        self.threshold = threshold
 
     @abstractmethod
-    def mean_ncen(self,logM):
+    def mean_ncen(self,primary_halo_property):
         """
-        Expected number of central galaxies in a halo of mass logM.
+        Expected number of central galaxies in a halo 
+        as a function of the primary property.
+
+        Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_ncen is not implemented")
 
     @abstractmethod
-    def mean_nsat(self,logM):
+    def mean_nsat(self,primary_halo_property):
         """
-        Expected number of satellite galaxies in a halo of mass logM.
+        Expected number of satellite galaxies in a halo 
+        as a function of the primary property.
+
+        Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_nsat is not implemented")
 
     @abstractmethod
-    def mean_concentration(self,logM):
+    def mean_concentration(self,primary_halo_property):
         """
-        Concentration-mass relation assumed by the model. 
+        Concentration-halo relation assumed by the model. 
         Used to assign positions to satellites.
+
+        Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_concentration is not implemented")
 
+    @abstractproperty
+    def primary_halo_property_key(self):
+        """ String providing the key to the halo catalog dictionary 
+        where the primary halo property data is stored. 
+        
+        Required attribute of any HOD_Model subclass.
+        """
+        raise NotImplementedError("primary_halo_property_key "
+            "needs to be explicitly stated to ensure self-consistency "
+            "of baseline HOD and assembly-biased HOD model features")
+
+
 
 class Zheng07_HOD_Model(HOD_Model):
-    """ Subclass of HOD_Model object, where functional forms for occupation statistics 
+    """ Subclass of `HOD_Model` object, where functional forms for occupation statistics 
     are taken from Zheng et al. 2007, arXiv:0703457.
 
 
@@ -135,18 +244,28 @@ class Zheng07_HOD_Model(HOD_Model):
     ----------
     parameter_dict : dictionary, optional.
         Contains values for the parameters specifying the model.
-        Dictionary keys should be 'logMmin_cen', 'sigma_logM', 'logM0_sat','logM1_sat','alpha_sat'.
+        Dictionary keys are  
+        'logMmin_cen', 'sigma_logM', 'logM0_sat','logM1_sat','alpha_sat'.
+        Default values pertain to the best-fit values of their 
+        :math:`M_{r} - 5log_{10}h< -19.5` threshold sample.
+
+        All the best-fit parameter values provided in Table 1 of 
+        Zheng et al. (2007) can be accessed via the 
+        `published_parameters` method.
 
     threshold : float, optional.
-        Luminosity threshold of the mock galaxy sample. If specified, input value must agree with 
+        Luminosity threshold of the mock galaxy sample. 
+        If specified, input value must agree with 
         one of the thresholds used in Zheng07 to fit HODs: 
         [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+        Default value is -19.5, specified in the `defaults` module.
 
     Notes
     -----
-
-    Concentration-mass relation is current set to be Anatoly's, though 
-    this is not the relation used in Zheng07.
+    :math:`c-M_{vir}` relation is current set to be Anatoly's, though 
+    this is not the relation used in Zheng07. Their concentration-mass relation 
+    is of the same form as the one implemented one, but with different 
+    values for the hard-coded parameters. See Equation 1 of arXiv:0703457.
 
     """
 
@@ -157,10 +276,13 @@ class Zheng07_HOD_Model(HOD_Model):
 
         if parameter_dict is None:
             self.parameter_dict = self.published_parameters(threshold)
-        else:
-            #this should be more defensive. Fine for now.
-            self.parameter_dict = parameter_dict
+        self.require_correct_keys()
 
+    @property 
+    def primary_halo_property_key(self):
+        """ Model is based on :math:`M = M_{vir}`.
+        """
+        return 'MVIR'
 
     def mean_ncen(self,logM):
         """ Expected number of central galaxies in a halo of mass logM.
@@ -169,7 +291,7 @@ class Zheng07_HOD_Model(HOD_Model):
         Parameters
         ----------        
         logM : array 
-            array of log10(Mvir) of halos in catalog
+            array of :math:`log_{10}(M)` of halos in catalog
 
         Returns
         -------
@@ -178,11 +300,14 @@ class Zheng07_HOD_Model(HOD_Model):
         Notes
         -------
         Mean number of central galaxies in a host halo of the specified mass. 
-        Values are restricted 0 <= mean_ncen <= 1.
+
+        :math:`\\langle N_{cen} \\rangle_{M} = 
+        \\frac{1}{2}\\left( 1 + 
+        erf\\left( \\frac{log_{10}M - 
+        log_{10}M_{min}}{\\sigma_{log_{10}M}} \\right) \\right)`
 
         """
-        if not isinstance(logM,np.ndarray):
-            raise TypeError("Input logM to mean_ncen must be a numpy array")
+        logM = np.array(logM)
         mean_ncen = 0.5*(1.0 + erf(
             (logM - self.parameter_dict['logMmin_cen'])/self.parameter_dict['sigma_logM']))
         return mean_ncen
@@ -194,18 +319,21 @@ class Zheng07_HOD_Model(HOD_Model):
         Parameters
         ----------
         logM : array 
-            array of log10(Mvir) of halos in catalog
+            array of :math:`log_{10}(M)` of halos in catalog
 
         Returns
         -------
         mean_nsat : float or array
             Mean number of satellite galaxies in a host halo of the specified mass. 
-    
+
+        :math:`\\langle N_{sat} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha} \\langle N_{cen} \\rangle_{M}`
+
+
         """
 
-        if not isinstance(logM,np.ndarray):
-            raise TypeError("Input logM to mean_ncen must be a numpy array")
+        logM = np.array(logM)
         halo_mass = 10.**logM
+
         M0 = 10.**self.parameter_dict['logM0_sat']
         M1 = 10.**self.parameter_dict['logM1_sat']
         mean_nsat = np.zeros(len(logM),dtype='f8')
@@ -229,9 +357,11 @@ class Zheng07_HOD_Model(HOD_Model):
         -------
 
         concentrations : array_like
-            Mean concentration of logM halos, using anatoly_concentration model.
+            Mean concentration of logM halos, using `anatoly_concentration` model.
 
         """
+
+        logM = np.array(logM)
 
         concentrations = anatoly_concentration(logM)
         return concentrations
@@ -295,146 +425,842 @@ class Zheng07_HOD_Model(HOD_Model):
 
         return parameter_dict
 
+    def require_correct_keys(self):
+        """ If a parameter dictionary is passed to the class upon instantiation, 
+        this method is used to enforce that the set of keys is in accord 
+        with the set of keys required by the model. 
+        """
+        correct_set_of_keys = set(self.published_parameters(threshold = -20).keys())
+        if set(self.parameter_dict.keys()) != correct_set_of_keys:
+            raise TypeError("Set of keys of input parameter_dict do not match the set of keys required by the model")
+        pass
+
+
+
 
 @six.add_metaclass(ABCMeta)
 class Assembly_Biased_HOD_Model(HOD_Model):
-    """ Abstract base class for any HOD model in which 
-    central and/or satellite mean occupation depends on Mvir 
-    plus an additional property.
+    """ Abstract base class for any HOD model with assembly bias. 
+
+    In this class of models, central and/or satellite mean occupation depends on some primary  
+    property, such as :math:`M_{vir}`, and the mean occupations are modulated by some secondary property, 
+    such as :math:`z_{form}`. 
 
     """
 
     def __init__(self):
 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        #sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []
         HOD_Model.__init__(self)
-        self.hod_model = None
+
+    @abstractproperty
+    def baseline_hod_model(self):
+        """ Underlying HOD model, about which assembly bias modulates 
+        galaxy abundance and intra-halo spatial distribution. 
+        Must be one of the supported subclasses of `HOD_Model`. 
+        The baseline HOD model can in principle be driven 
+        by any host halo property. 
+        """
+        pass
+
+    @abstractproperty
+    def primary_halo_property_key(self):
+        """ String providing halo catalog dictionary key pointing 
+        to primary halo property. Necessary to ensure self-consistency between 
+        underlying halo model, occupation-dependence of assembly bias, 
+        and color-dependence of assembly bias. 
+
+        """
+        raise NotImplementedError("primary_halo_property_key "
+            "needs to be implemented to ensure self-consistency "
+            "of baseline HOD and assembly-biased HOD model features")
+        pass
 
     @abstractmethod
-    def central_destruction(self,logM):
-        """ Determines the excess probability that ``type 0`` 
-        halos of logM host a central galaxy. """
+    def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
+        """ Method determining :math:`\\tilde{D}_{cen}(p | h_{1})`, 
+        the unconstrained excess probability that halos of primary property :math:`p` and 
+        secondary property type :math:`h_{1}` 
+        host a central galaxy. 
+
+        Can be any arbitrary function, 
+        subject only to the requirement that it be bounded. 
+        Constraints on the value of this function required in order to keep the baseline 
+        :math:`\\langle N_{cen} \\rangle_{p}` fixed 
+        are automatically applied by `destruction_centrals`. 
+
+        Notes 
+        -----
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for centrals.
+
+        """
         raise NotImplementedError(
-            "central_destruction is not implemented")
+            "unconstrained_central_destruction_halo_type1 is not implemented")
+        pass
 
     @abstractmethod
-    def satellite_destruction(self,logM):
-        """ Determines the excess probability that ``type 0`` 
-        halos of logM host a satellite galaxy. """
+    def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
+        """ Method determining :math:`\\tilde{D}_{sat}(p | h_{1})`, 
+        the unconstrained excess probability that halos of primary property :math:`p` and 
+        secondary property type :math:`h_{1}` 
+        host a satellite galaxy. 
+
+        Can be any arbitrary function, 
+        subject only to the requirement that it be bounded. 
+        Constraints on the value of this function required in order to keep the baseline 
+        :math:`\\langle N_{sat} \\rangle_{p}` fixed 
+        are automatically applied by `destruction_satellites`. 
+
+        Notes 
+        -----
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for satellites.
+
+        """
         raise NotImplementedError(
-            "satellite_destruction is not implemented")
+            "unconstrained_satellite_destruction_halo_type1 is not implemented")
+        pass
 
     @abstractmethod
-    def halo_type_fraction(self,logM):
-        """ Determines the fractional representation of host halo 
-        types as a function of logM.
+    def halo_type1_fraction_centrals(self,primary_halo_property):
+        """ Determines :math:`F^{cen}_{h_{1}}(p)`, 
+        the fractional representation of host halos of type :math:`h_{1}` 
+        as a function of the primary halo property :math:`p`, as pertains to centrals. 
 
-        Halo types can be either given by fixed-Mvir rank-orderings 
-        of the host halos, or by the input occupation statistics functions.
+        Notes 
+        -----
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for centrals, regardless of the 
+        behavior of `unconstrained_central_destruction_halo_type1`.
+
+        Code currently assumes that this function has already been guaranteed to 
+        be bounded by zero and unity. This will need to be fixed to be more defensive, 
+        so that any bounded function will automatically be converted to a proper PDF. 
 
          """
         raise NotImplementedError(
-            "halo_type_fraction is not implemented")
+            "halo_type_fraction_centrals is not implemented")
+        pass
+
+    @abstractmethod
+    def halo_type1_fraction_satellites(self,primary_halo_property):
+        """ Determines :math:`F^{sat}_{h_{1}}(p)`, 
+        the fractional representation of host halos of type :math:`h_{1}` 
+        as a function of the primary halo property :math:`p`, as pertains to satellites. 
 
 
-class SatCen_Correlation_HOD_Model(Assembly_Biased_HOD_Model):
-    """ Betahod-style model in which satellite abundance 
-    is correlated with the presence of a central galaxy.
-    """
+        Notes 
+        -----
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for satellites, regardless of the 
+        behavior of `unconstrained_satellite_destruction_halo_type1`.
 
-    def __init__(self,hod_model=Zheng07_HOD_Model,
-            hod_parameter_dict=None,threshold=None):
+        Code currently assumes that this function has already been guaranteed to 
+        be bounded by zero and unity. This will need to be fixed to be more defensive, 
+        so that any bounded function will automatically be converted to a proper PDF. 
 
-        if not isinstance(hod_model(threshold=threshold),HOD_Model):
-            raise TypeError(
-                "Input hod_model must be one of the supported HOD_Model objects defined in this module")
+         """
+        raise NotImplementedError(
+            "halo_type_fraction_satellites is not implemented")
+        pass
 
-        # Run initialization from super class. Currently not doing much.
-        Assembly_Biased_HOD_Model.__init__(self)
-
-        self.hod_model = hod_model(
-            parameter_dict = hod_parameter_dict,threshold = threshold)
-
-        self.publication.extend(self.hod_model.publication)
-
-
-
-    def mean_ncen(self,logM):
-        """
-        Expected number of central galaxies in a halo of mass logM.
-        The appropriate method is already bound to the self.hod_model object.
-
-        Parameters
-        ----------
-        logM : array 
-            array of log10(Mvir) of halos in catalog
-
-        Returns
-        -------
-        mean_ncen : float or array
-            Mean number of central galaxies in a host halo of the specified mass. 
-
-
-        """
-        mean_ncen = self.hod_model.mean_ncen(logM)
-        return mean_ncen
-
-    def mean_nsat(self,logM):
-        """
-        Expected number of satellite galaxies in a halo of mass logM.
-        The appropriate method is already bound to the self.hod_model object.
-
-        Parameters
-        ----------
-        logM : array 
-            array of log10(Mvir) of halos in catalog
-
-        Returns
-        -------
-        mean_nsat : float or array
-            Mean number of satellite galaxies in a host halo of the specified mass. 
-
-
-        """
-        mean_nsat = self.hod_model.mean_nsat(logM)
-        return mean_nsat
-
-    def mean_concentration(self,logM):
-        """ Concentration-mass relation assumed by the underlying HOD_Model object.
-        The appropriate method is already bound to the self.hod_model object.
+    def halo_type_fraction_centrals(self,primary_halo_property,halo_type):
+        """ Using the function `halo_type1_fraction_centrals` required by concrete subclasses,
+        this method determines :math:`F^{cen}_{h_{i}}(p)`, the fractional representation 
+        of host halos of input halo type :math:`h_{i}` 
+        as a function of input primary halo property :math:`p`, as pertains to centrals.
 
         Parameters 
         ----------
-        logM : array 
-            array of log10(Mvir) of halos in catalog
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
 
         Returns 
         -------
-        concentrations : array
+        output_halo_type_fraction : array_like
+            Each element gives the probability 
+            that a halo with input primary halo property :math:`p` 
+            has input halo type :math:`h_{i}`
+
+         """
+
+        output_halo_type_fraction = self.halo_type1_fraction_centrals(primary_halo_property)
+        idx0 = np.where(halo_type == 0)[0]
+        output_halo_type_fraction[idx0] = 1.0 - output_halo_type_fraction[idx0]
+
+        return output_halo_type_fraction
+
+    def halo_type_fraction_satellites(self,primary_halo_property,halo_type):
+        """ Using the function `halo_type1_fraction_satellites` required by concrete subclasses,
+        this method determines :math:`F^{sat}_{h_{i}}(p)`, the fractional representation 
+        of host halos of input halo type :math:`h_{i}` 
+        as a function of input primary halo property :math:`p`, as pertains to satellites.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_halo_type_fraction : array_like
+            Each element gives the probability 
+            that a halo with input primary halo property :math:`p` 
+            has input halo type :math:`h_{i}`
+
+         """
+        output_halo_type_fraction = self.halo_type1_fraction_satellites(primary_halo_property)
+        idx0 = np.where(halo_type == 0)[0]
+        output_halo_type_fraction[idx0] = 1.0 - output_halo_type_fraction[idx0]
+
+        return output_halo_type_fraction
+
+
+    def maximum_destruction_centrals(self,primary_halo_property,halo_type):
+        """ The maximum allowed value of the destruction function, as pertains to centrals.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the destruction function :math:`D_{cen}(p | h_{i})` cannot exceed 
+        :math:`1 / F_{h_{i}}^{cen}(p)`, or it would be impossible to keep fixed 
+        the unconditioned mean central occupation :math:`\\langle N_{cen} \\rangle_{p}`. 
+
+        Additionally, :math:`F_{h_{i}}^{cen}(p) = 0 \Rightarrow D_{cen}(p | h_{i}) = 0`.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_maximum_destruction : array_like
+            Maximum allowed value of the destruction function, as pertains to centrals.
 
         """
 
-        concentrations = self.hod_model.mean_concentration(logM)
+        output_maximum_destruction = np.zeros(len(primary_halo_property))
+        halo_type_fraction = self.halo_type_fraction_centrals(
+            primary_halo_property,halo_type)
+        idx_positive = halo_type_fraction > 0
+        output_maximum_destruction[idx_positive] = 1./halo_type_fraction[idx_positive]
+        return output_maximum_destruction
+
+    def maximum_destruction_satellites(self,primary_halo_property,halo_type):
+        """ Maximum allowed value of the destruction function, as pertains to satellites.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the destruction function :math:`D_{sat}(p | h_{i})` cannot exceed 
+        :math:`1 / F_{h_{i}}^{sat}(p)`, or it would be impossible to keep fixed 
+        the unconditioned mean satellite occupation :math:`\\langle N_{sat} \\rangle_{p}`. 
+
+        Additionally, :math:`F_{h_{i}}^{sat}(p) = 0 \Rightarrow D_{sat}(p | h_{i}) = 0`.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_maximum_destruction : array_like
+            Maximum allowed value of the destruction function, as pertains to satellites.
+
+        """
+
+        output_maximum_destruction = np.zeros(len(primary_halo_property))
+        halo_type_fraction = self.halo_type_fraction_satellites(
+            primary_halo_property,halo_type)
+        idx_positive = halo_type_fraction > 0
+        output_maximum_destruction[idx_positive] = 1./halo_type_fraction[idx_positive]
+        return output_maximum_destruction
+
+
+    def destruction_satellites(self,primary_halo_property,halo_type):
+        """ Method determining :math:`D_{sat}(p | h_{i})`, 
+        the true excess probability that halos of primary property :math:`p` and 
+        secondary property type :math:`h_{i}` 
+        host a satellite galaxy. 
+
+        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} \equiv D_{sat}(p | h_{i}) \\langle N_{sat} \\rangle_{p}`.
+
+        All of the behavior of this function derives 
+        from `unconstrained_satellite_destruction_halo_type1` and `halo_type1_fraction_satellites`, 
+        both of which are required methods of the concrete subclass. The function 
+        :math:`D_{sat}(p | h_{i})` only differs from :math:`\\tilde{D}_{sat}(p | h_{i})` 
+        in regions of HOD parameter space where the provided values of 
+        :math:`\\tilde{D}_{sat}(p | h_{i})` would violate the following constraint: 
+
+        :math:`F^{sat}_{h_{0}}(p)\\langle N_{sat} | h_{0} \\rangle_{p} + 
+        F^{sat}_{h_{1}}(p)\\langle N_{sat} | h_{1} \\rangle_{p} = 
+        \\langle N_{sat} \\rangle_{p}^{baseline},`
+        where the RHS is given by `baseline_hod_model`. 
+
+        Defining :math:`D_{sat}(p | h_{i})` in this way 
+        guarantees that the parameters modulating assembly bias have zero intrinsic covariance with parameters governing  
+        the traditional HOD. Therefore, any degeneracy between the assembly bias parameters 
+        and the traditional HOD parameters in the posterior likelihood is purely due to degenerate effects 
+        of the parameters on the chosen observable. 
+
+        """
+ 
+        idx0 = np.where(halo_type == 0)[0]
+        idx1 = np.where(halo_type == 1)[0]
+
+        # Initialize array containing result to return
+        output_destruction_allhalos = np.zeros(len(primary_halo_property))
+
+        all_ones = np.zeros(len(primary_halo_property)) + 1
+
+        # Start by ignoring the input halo_type, and  
+        # assuming the halo_type = 1 for all inputs.
+        # This is convenient and costs nothing, 
+        # since the halo_type = 0 branch 
+        # is defined in terms of the halo_type = 1 branch.
+        output_destruction_allhalos = (
+            self.unconstrained_satellite_destruction_halo_type1(
+                primary_halo_property))
+        ########################################
+        # Now apply the baseline HOD constraints to output_destruction_allhalos, 
+        # still behaving as if every input halo has halo_type=1
+        # First, require that the destruction function is non-negative
+        test_negative = output_destruction_allhalos < 0
+        output_destruction_allhalos[test_negative] = 0
+        # Second, require that the destruction function never exceed the 
+        # maximum allowed value 
+        maximum = self.maximum_destruction_satellites(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_destruction_allhalos > maximum
+        output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Finally, require that the destruction function is set to unity 
+        # whenever the probability of halo_type=1 equals unity
+        # This is requirement supercedes the previous two
+        probability_type1 = self.halo_type_fraction_satellites(
+            primary_halo_property,all_ones)
+        test_unit_probability = (probability_type1 == 1)
+        output_destruction_allhalos[test_unit_probability] = 1
+        ########################################
+        # At this point, output_destruction_allhalos has been properly conditioned. 
+        # However, we have been assuming that all input halo_type = 1.
+        # We now need to compute the correct output 
+        # for cases where input halo_type = 0.
+        # Define some shorthands (bookkeeping convenience)
+        output_destruction_input_halo_type0 = output_destruction_allhalos[idx0]
+        primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
+        probability_type1_input_halo_type0 = probability_type1[idx0]
+        probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
+        # Whenever the fraction of halos of type=0 is zero, the destruction function 
+        # for type0 halos should be set to zero.
+        test_positive = (probability_type0_input_halo_type0 > 0)
+
+        output_destruction_input_halo_type0[test_positive] = (
+            (1.0 - output_destruction_input_halo_type0[test_positive]*
+                probability_type1_input_halo_type0[test_positive])/
+            probability_type0_input_halo_type0[test_positive])
+
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_destruction_input_halo_type0[test_zero] = 0
+
+        # Now write the results back to the output (Why doesn't the above syntax
+            # work without this step?)
+        output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
+
+        return output_destruction_allhalos
+
+    def destruction_centrals(self,primary_halo_property,halo_type):
+        """ Method determining :math:`D_{cen}(p | h_{i})`, 
+        the true excess probability that halos of primary property :math:`p` and 
+        secondary property type :math:`h_{i}` 
+        host a central galaxy. 
+
+        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} \equiv D_{cen}(p | h_{i}) \\langle N_{sat} \\rangle_{p}`.
+
+        All of the behavior of this function derives 
+        from `unconstrained_central_destruction_halo_type1` and `halo_type1_fraction_centrals`, 
+        both of which are required methods of the concrete subclass. The function 
+        :math:`D_{cen}(p | h_{i})` only differs from :math:`\\tilde{D}_{cen}(p | h_{i})` 
+        in regions of HOD parameter space where the provided values of 
+        :math:`\\tilde{D}_{cen}(p | h_{i})` would violate the following constraint: 
+
+        :math:`F^{cen}_{h_{0}}(p)\\langle N_{cen} | h_{0} \\rangle_{p} + 
+        F^{cen}_{h_{1}}(p)\\langle N_{cen} | h_{1} \\rangle_{p} = 
+        \\langle N_{cen} \\rangle_{p}^{baseline},`
+        where the RHS is given by `baseline_hod_model`. 
+
+        Defining :math:`D_{cen}(p | h_{i})` in this way 
+        guarantees that the parameters modulating assembly bias have zero intrinsic covariance with parameters governing  
+        the traditional HOD. Therefore, any degeneracy between the assembly bias parameters 
+        and the traditional HOD parameters in the posterior likelihood is purely due to degenerate effects 
+        of the parameters on the chosen observable. 
+
+        """
+
+        idx0 = np.where(halo_type == 0)[0]
+        idx1 = np.where(halo_type == 1)[0]
+
+        # Initialize array containing result to return
+        output_destruction_allhalos = np.zeros(len(primary_halo_property))
+
+        all_ones = np.zeros(len(primary_halo_property)) + 1
+
+        # Start by ignoring the input halo_type, and  
+        # assuming the halo_type = 1 for all inputs.
+        # This is convenient and costs nothing, 
+        # since the halo_type = 0 branch 
+        # is defined in terms of the halo_type = 1 branch.
+        output_destruction_allhalos = (
+            self.unconstrained_central_destruction_halo_type1(
+                primary_halo_property))
+        ########################################
+        # Now apply the baseline HOD constraints to output_destruction_allhalos, 
+        # still behaving as if every input halo has halo_type=1
+        # First, require that the destruction function is non-negative
+        test_negative = output_destruction_allhalos < 0
+        output_destruction_allhalos[test_negative] = 0
+        # Second, require that the destruction function never exceed the 
+        # maximum allowed value 
+        maximum = self.maximum_destruction_centrals(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_destruction_allhalos > maximum
+        output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Finally, require that the destruction function is set to unity 
+        # whenever the probability of halo_type=1 equals unity
+        # This is requirement supercedes the previous two
+        probability_type1 = self.halo_type_fraction_centrals(
+            primary_halo_property,all_ones)
+        test_unit_probability = (probability_type1 == 1)
+        output_destruction_allhalos[test_unit_probability] = 1
+        ########################################
+        # At this point, output_destruction_allhalos has been properly conditioned. 
+        # However, we have been assuming that all input halo_type = 1.
+        # We now need to compute the correct output 
+        # for cases where input halo_type = 0.
+        # Define some shorthands (bookkeeping convenience)
+        output_destruction_input_halo_type0 = output_destruction_allhalos[idx0]
+        primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
+        probability_type1_input_halo_type0 = probability_type1[idx0]
+        probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
+        # Whenever the fraction of halos of type=0 is zero, the destruction function 
+        # for type0 halos should be set to zero.
+        test_positive = (probability_type0_input_halo_type0 > 0)
+
+        output_destruction_input_halo_type0[test_positive] = (
+            (1.0 - output_destruction_input_halo_type0[test_positive]*
+                probability_type1_input_halo_type0[test_positive])/
+            probability_type0_input_halo_type0[test_positive])
+
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_destruction_input_halo_type0[test_zero] = 0
+
+        # Now write the results back to the output (Why doesn't the above syntax
+            # work without this step?)
+        output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
+
+        return output_destruction_allhalos
+
+    def mean_ncen(self,primary_halo_property,halo_type):
+        """ Override the baseline HOD method used to compute mean central occupation. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        mean_ncen : array_like
+            :math:`h_{i}`-conditioned mean central occupation as a function of the primary halo property :math:`p`.
+
+        :math:`\\langle N_{cen} | h_{i} \\rangle_{p} = D_{cen}(p | h_{i})\\langle N_{cen} \\rangle_{p}`
+
+        """
+        return self.destruction_centrals(primary_halo_property,halo_type)*(
+            self.baseline_hod_model.mean_ncen(primary_halo_property))
+
+    def mean_nsat(self,primary_halo_property,halo_type):
+        """ Override the baseline HOD method used to compute mean satellite occupation. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        mean_nsat : array_like
+            :math:`h_{i}`-conditioned mean satellite occupation as a function of the primary halo property :math:`p`.
+
+        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} = D_{sat}(p | h_{i})\\langle N_{sat} \\rangle_{p}`
+
+        """
+        return self.destruction_satellites(primary_halo_property,halo_type)*(
+            self.baseline_hod_model.mean_nsat(primary_halo_property))
+
+    def host_halo_type_calculator_centrals(self, primary_halo_property, secondary_halo_property, halo_type):
+        """ Determines the assembly bias type of the input halos, as pertains to centrals.
+
+        Method bins the input halos by the primary halo property :math:`p`, splits each bin 
+        according to the value of `halo_type_fraction_centrals` in the bin, 
+        and assigns halo type :math:`h_{0} (h_{1})` to the halos below (above) the split.
+
+        Parameters 
+        ----------
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property 
+
+        secondary_halo_property : array_like
+            Array with elements equal to the value of the secondary_halo_property 
+
+        Returns 
+        -------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        """
+        pass
+
+    def host_halo_type_calculator_satellites(self, primary_halo_property, secondary_halo_property, halo_type):
+        """ Determines the assembly bias type of the input halos, as pertains to satellites.
+
+        Method bins the input halos by the primary halo property :math:`p`, splits each bin 
+        according to the value of `halo_type_fraction_satellites` in the bin, 
+        and assigns halo type :math:`h_{0} (h_{1})` to the halos below (above) the split.
+
+        Parameters 
+        ----------
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property 
+
+        secondary_halo_property : array_like
+            Array with elements equal to the value of the secondary_halo_property 
+
+        Returns 
+        -------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+        """
+        pass
+
+
+
+class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
+    """ HOD-style model in which satellite abundance 
+    is correlated with the presence of a central galaxy.
+    """
+
+    def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
+            baseline_hod_parameter_dict=None,threshold=None,
+            assembias_parameter_dict=None):
+
+
+        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
+        if not isinstance(baseline_hod_model_instance,HOD_Model):
+            raise TypeError(
+                "Input baseline_hod_model must be one of "
+                "the supported HOD_Model objects defined in this module or by the user")
+        # Temporarily store the baseline HOD model object
+        # into a "private" attribute. This is a clunky workaround
+        # to python's awkward conventions for required abstract properties
+        self._baseline_hod_model = baseline_hod_model_instance
+
+        # Executing the __init__ of the abstract base class Assembly_Biased_HOD_Model 
+        # does nothing besides executing the __init__ of the abstract base class HOD_Model 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        # sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []        
+        Assembly_Biased_HOD_Model.__init__(self)
+
+
+        self.threshold = threshold
+
+        self.publication.extend(self._baseline_hod_model.publication)
+        self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
+
+        if assembias_parameter_dict == None:
+            self.assembias_parameter_dict = defaults.default_satcen_parameters
+        else:
+            # If the user supplies a dictionary of assembly bias parameters, 
+            # require that the set of keys is correct
+            self.require_correct_keys(assembias_parameter_dict)
+            # If correct, bind the input dictionary to the instance.
+            self.assembias_parameter_dict = assembias_parameter_dict
+
+        # combine baseline HOD parameters and assembly bias parameters
+        # into the same dictionary
+        self.parameter_dict = dict(self.baseline_hod_parameter_dict.items() + 
+            self.assembias_parameter_dict.items())
+
+
+    @property
+    def baseline_hod_model(self):
+        return self._baseline_hod_model
+
+    @property 
+    def primary_halo_property_key(self):
+        return 'MVIR'
+
+    def mean_concentration(self,primary_halo_property):
+        """ Concentration-halo relation assumed by the underlying HOD_Model object.
+        The appropriate method is already bound to the self.baseline_hod_model object.
+
+        Parameters 
+        ----------
+        primary_halo_property : array_like
+            array of primary halo property governing the occupation statistics 
+
+        Returns 
+        -------
+        concentrations : numpy array
+
+        """
+
+        concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
         return concentrations
 
-    def central_destruction(self,logM):
-        """ Determines the excess probability that ``type 0`` 
-        halos of logM host a central galaxy. """
-        return np.zeros(len(logM)) + 1
 
-    def satellite_destruction(self,logM):
-        """ Determines the excess probability that ``type 0`` 
-        halos of logM host a satellite galaxy. """
-        return np.zeros(len(logM)) + 1
-
-    def halo_type_fraction(self,logM):
+    def halo_type1_fraction_centrals(self,primary_halo_property):
         """ Determines the fractional representation of host halo 
-        types as a function of logM.
+        types as a function of the value of the primary halo property.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+        """
+        # In this model, centrals exhibit no assembly bias
+        # So simply set the halo type1 fraction to unity for centrals
+        output_array = np.zeros(len(primary_halo_property)) + 1
+        return output_array
+
+    def halo_type1_fraction_satellites(self,primary_halo_property):
+        """ Determines the fractional representation of host halo 
+        types as a function of the value of the primary halo property.
 
         Halo types can be either given by fixed-Mvir rank-orderings 
         of the host halos, or by the input occupation statistics functions.
 
          """
-        return np.zeros(len(logM)) + 1
+
+        output_array = np.array(self.baseline_hod_model.mean_ncen(primary_halo_property))
+
+        return output_array
+
+    def unconstrained_polynomial_model(self,abcissa,ordinates,primary_halo_property):
+        coefficient_array = solve_for_polynomial_coefficients(
+            abcissa,ordinates)
+        output_unconstrained_destruction_function = (
+            np.zeros(len(primary_halo_property)))
+
+        # Use coefficients to compute values of the destruction function polynomial
+        for n,coeff in enumerate(coefficient_array):
+            output_unconstrained_destruction_function += coeff*primary_halo_property**n
+
+        return output_unconstrained_destruction_function
+
+    def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['central_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+    def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['satellite_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+    def require_correct_keys(self,assembias_parameter_dict):
+        correct_set_of_satcen_keys = set(defaults.default_satcen_parameters.keys())
+        if set(assembias_parameter_dict.keys()) != correct_set_of_satcen_keys:
+            raise TypeError("Set of keys of input assembias_parameter_dict"
+            " does not match the set of keys required by the model." 
+            " Correct set of keys is {'assembias_abcissa',"
+            "'satellite_assembias_ordinates', 'central_assembias_ordinates'}. ")
+        pass
+
+
+class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
+    """ HOD-style model in which satellite abundance 
+    is correlated with the presence of a central galaxy.
+    """
+
+    def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
+            baseline_hod_parameter_dict=None,threshold=None,
+            assembias_parameter_dict=None,
+            secondary_halo_property_key='Z04'):
+
+
+        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
+        if not isinstance(baseline_hod_model_instance,HOD_Model):
+            raise TypeError(
+                "Input baseline_hod_model must be one of "
+                "the supported HOD_Model objects defined in this module or by the user")
+        # Temporarily store the baseline HOD model object
+        # into a "private" attribute. This is a clunky workaround
+        # to python's awkward conventions for required abstract properties
+        self._baseline_hod_model = baseline_hod_model_instance
+
+        # Executing the __init__ of the abstract base class Assembly_Biased_HOD_Model 
+        # does nothing besides executing the __init__ of the abstract base class HOD_Model 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        # sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []        
+        Assembly_Biased_HOD_Model.__init__(self)
+
+
+        self.threshold = threshold
+
+        self.publication.extend(self._baseline_hod_model.publication)
+        self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
+
+        if assembias_parameter_dict == None:
+            self.assembias_parameter_dict = defaults.default_assembias_parameters
+        else:
+            # If the user supplies a dictionary of assembly bias parameters, 
+            # require that the set of keys is correct
+            self.require_correct_keys(assembias_parameter_dict)
+            # If correct, bind the input dictionary to the instance.
+            self.assembias_parameter_dict = assembias_parameter_dict
+
+        # combine baseline HOD parameters and assembly bias parameters
+        # into the same dictionary
+        self.parameter_dict = dict(self.baseline_hod_parameter_dict.items() + 
+            self.assembias_parameter_dict.items())
+
+
+    @property
+    def baseline_hod_model(self):
+        return self._baseline_hod_model
+
+    @property 
+    def primary_halo_property_key(self):
+        return 'MVIR'
+
+    @property 
+    def secondary_halo_property_key(self):
+        return 'Z04'
+
+    def mean_concentration(self,primary_halo_property):
+        """ Concentration-halo relation assumed by the underlying HOD_Model object.
+        The appropriate method is already bound to the self.baseline_hod_model object.
+
+        Parameters 
+        ----------
+        primary_halo_property : array_like
+            array of primary halo property governing the occupation statistics 
+
+        Returns 
+        -------
+        concentrations : numpy array
+
+        """
+
+        concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
+        return concentrations
+
+
+    def halo_type1_fraction_centrals(self,primary_halo_property):
+        """ Determines the fractional representation of host halo 
+        types as a function of the value of the primary halo property.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+        """
+        # In this model, centrals exhibit no assembly bias
+        # So simply set the halo type1 fraction to unity for centrals
+        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        output_fraction = self.unconstrained_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
+        test_negative = (output_fraction < 0)
+        output_fraction[test_negative] = 0
+        test_exceeds_unity = (output_fraction > 1)
+        output_fraction[test_exceeds_unity] = 1
+        return output_fraction
+
+    def halo_type1_fraction_satellites(self,primary_halo_property):
+        """ Determines the fractional representation of host halo 
+        types as a function of the value of the primary halo property.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+         """
+
+        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        output_fraction = self.unconstrained_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
+        test_negative = (output_fraction < 0)
+        output_fraction[test_negative] = 0
+        test_exceeds_unity = (output_fraction > 1)
+        output_fraction[test_exceeds_unity] = 1
+        return output_fraction
+
+    def unconstrained_polynomial_model(self,abcissa,ordinates,primary_halo_property):
+        coefficient_array = solve_for_polynomial_coefficients(
+            abcissa,ordinates)
+        output_unconstrained_destruction_function = (
+            np.zeros(len(primary_halo_property)))
+
+        # Use coefficients to compute values of the destruction function polynomial
+        for n,coeff in enumerate(coefficient_array):
+            output_unconstrained_destruction_function += coeff*primary_halo_property**n
+
+        return output_unconstrained_destruction_function
+
+    def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['central_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+    def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['satellite_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+    def require_correct_keys(self,assembias_parameter_dict):
+        correct_set_of_satcen_keys = set(defaults.default_satcen_parameters.keys())
+        if set(assembias_parameter_dict.keys()) != correct_set_of_satcen_keys:
+            raise TypeError("Set of keys of input assembias_parameter_dict"
+            " does not match the set of keys required by the model." 
+            " Correct set of keys is {'assembias_abcissa',"
+            "'satellite_assembias_ordinates', 'central_assembias_ordinates'}. ")
+        pass
+
 
 
 @six.add_metaclass(ABCMeta)
@@ -521,12 +1347,12 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         # satisfying those conditions, specified by a set of coefficients.
         self.central_quenching_polynomial_coefficients = (
             self.solve_for_quenching_polynomial_coefficients(
-                self.parameter_dict['logM_quenching_abcissa'],
+                self.parameter_dict['quenching_abcissa'],
                 self.parameter_dict['central_quenching_ordinates']))
 
         self.satellite_quenching_polynomial_coefficients = (
             self.solve_for_quenching_polynomial_coefficients(
-                self.parameter_dict['logM_quenching_abcissa'],
+                self.parameter_dict['quenching_abcissa'],
                 self.parameter_dict['satellite_quenching_ordinates']))
 
     def mean_ncen(self,logM):
@@ -669,7 +1495,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         """
 
         mean_quenched_fractions = np.zeros(len(logM))
-        polynomial_degree = len(self.parameter_dict['logM_quenching_abcissa'])
+        polynomial_degree = len(self.parameter_dict['quenching_abcissa'])
         for n,coeff in enumerate(coefficients):
             mean_quenched_fractions += coeff*logM**n
 
@@ -680,57 +1506,6 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
         return mean_quenched_fractions
 
-    def solve_for_quenching_polynomial_coefficients(self,logM_abcissa,ordinates):
-        """ Given the quenched fraction for some halo masses, 
-        returns standard form polynomial coefficients specifying quenching function.
-
-        Parameters
-        ----------
-        logM_abcissa : array 
-            Values are halo masses, the as abcissa of the polynomial.
-
-        ordinates : array 
-            Elements are the desired values of the polynomial when evaluated at the abcissa.
-
-        Returns
-        -------
-        polynomial_coefficients : array 
-            Elements are the coefficients determining the polynomial. 
-            Element N of polynomial_coefficients gives the degree N coefficient.
-
-        Notes
-        --------
-        Input arrays logM_abcissa and ordinates can in principle be of any dimension Ndim, 
-        and there will be Ndim output coefficients.
-
-        The input ordinates specify the desired values of the polynomial 
-        when evaluated at the Ndim inputs specified by the input logM_abcissa.
-        There exists a unique, order Ndim polynomial that produces the input 
-        ordinates when the polynomial is evaluated at the input logM_abcissa.
-        The coefficients of that unique polynomial are the output of the function. 
-
-        Examples
-        --------
-        A traditional quenching model, such as the one suggested in van den Bosch et al. 2003, 
-        is a polynomial determining the mean quenched fraction as a function of halo mass logM.
-        If we denote the output of solve_for_quenching_polynomial_coefficients as the array coeff, 
-        then the unique polynomial F_quenched determined by F_quenched(logM_abcissa) = ordinates 
-        is given by: 
-        F_quenched(logM) = coeff[0] + coeff[1]*logM + coeff[2]*logM**2 + ... + coeff[len(logM)-1]*logM**(len(logM)-1)
-    
-        """
-
-        ones = np.zeros(len(logM_abcissa)) + 1
-        columns = ones
-        for i in np.arange(len(logM_abcissa)-1):
-            columns = np.append(columns,[logM_abcissa**(i+1)])
-        quenching_model_matrix = columns.reshape(
-            len(logM_abcissa),len(logM_abcissa)).transpose()
-
-        polynomial_coefficients = np.linalg.solve(
-            quenching_model_matrix,ordinates)
-
-        return polynomial_coefficients
 
 
 @six.add_metaclass(ABCMeta)
