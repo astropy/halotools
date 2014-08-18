@@ -5,11 +5,12 @@
 #July 24, 2014
 #calculate pair counts with dumb brute force method as a sanity check.
 
-__all__=['npairs','wnpairs','pairs']
 
 from __future__ import division, print_function
 from spatial.distances import euclidean_distance as distance
 import numpy as np
+
+__all__=['npairs','wnpairs','pairs']
 
 
 def npairs(data1, data2, rbins, period=None):
