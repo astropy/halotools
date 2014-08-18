@@ -176,11 +176,10 @@ def pairs(data1, r, data2=None, period=None):
         data1: array_like
             N by k numpy array of k-dimensional positions. Should be between zero and period
             
-        rbins : array_like
-            numpy array of boundaries defining the bins in which pairs are counted. 
-            len(rbins) = Nrbins + 1.
+        r : float
+            radius for which pairs are counted. 
         
-        data2: array_like(optional)
+        data2: array_like
             N by k numpy array of k-dimensional positions. Should be between zero and period
             
         
@@ -201,8 +200,6 @@ def pairs(data1, r, data2=None, period=None):
     else:
         data2 = np.asarray(data2)
         self_match=True
-    r = np.asarray(r)
-    if r.size ==1: r = np.array([r])
     
     #Check to make sure both data sets have the same dimension. Otherwise, throw an error!
     if np.shape(data1)[-1]!=np.shape(data2)[-1]:
