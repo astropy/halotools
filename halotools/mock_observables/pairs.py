@@ -167,7 +167,7 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
     return n
 
 
-def pairs(data1, data2, r, period=None):
+def pairs(data1, r, data2=None, period=None):
     """
     Calculate the pairs with separations less than or equal to rbins[i].
     
@@ -176,26 +176,31 @@ def pairs(data1, data2, r, period=None):
         data1: array_like
             N by k numpy array of k-dimensional positions. Should be between zero and period
             
-        data2: array_like
-            N by k numpy array of k-dimensional positions. Should be between zero and period
-            
         rbins : array_like
             numpy array of boundaries defining the bins in which pairs are counted. 
             len(rbins) = Nrbins + 1.
+        
+        data2: array_like(optional)
+            N by k numpy array of k-dimensional positions. Should be between zero and period
             
+        
         period: (k,) array defining axis-aligned periodic boundary conditions.  If none, 
             PBCs are set to infinity
             
     Returns
     -------
-    pairs : list of sets
-        set of pairs
+    pairs : Set of pairs (i,j), with i < j
      
     """
     
     #work with arrays!
     data1 = np.asarray(data1)
-    data2 = np.asarray(data2)
+    if data2==None:
+        data2 = np.asarray(data1)
+        self_match=False
+    else:
+        data2 = np.asarray(data2)
+        self_match=True
     r = np.asarray(r)
     if r.size ==1: r = np.array([r])
     
@@ -225,7 +230,11 @@ def pairs(data1, data2, r, period=None):
     
     spairs = set()
     for i in range(len(pairs)):
-        spairs.add((pairs[i,0],pairs[i,1]))
+        if self_match==False:
+            if pairs[i,0] != pairs[i,1]:
+                spairs.add((min(pairs[i]),max(pairs[i])))
+        if self_match==True:
+            spairs.add((min(pairs[i]),max(pairs[i])))
     
     return spairs
 

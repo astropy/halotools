@@ -89,12 +89,10 @@ def test_query_pairs():
     
     tree_1 = cKDTree(data_1)
     
-    p1 = pairs(data_1, data_1, 0.25)
+    p1 = pairs(data_1, 0.25)
     p2 = tree_1.query_pairs(0.25)
     
-    print(len(p1), len(p2))
-    p3 = p1.intersection(p2)
-    assert (len(p2)==len(p3)) & (len(p2)==(len(p1)-len(data_1))/2), 'not all pairs found'
+    assert p1==p2, 'not all pairs found'
 
 
 def test_query_pairs_periodic():
@@ -104,12 +102,11 @@ def test_query_pairs_periodic():
     
     tree_1 = cKDTree(data_1)
     
-    p1 = pairs(data_1, data_1, 0.25, period=period)
+    p1 = pairs(data_1, 0.25, period=period)
     p2 = tree_1.query_pairs(0.25, period=period)
     
-    print(len(p1), len(p2))
-    p3 = p1.intersection(p2)
-    assert (len(p2)==len(p3)) & (len(p2)==(len(p1)-len(data_1))/2), 'not all pairs found'
+    print(p1.difference(p2))
+    assert p1==p2, 'not all pairs found'
 
 ##########################################################################################
 #tests for query_ball_tree
