@@ -2462,8 +2462,8 @@ cdef class cKDTree:
         inner_idx = np.empty((n_queries,), dtype=np.intp)
         idx = &inner_idx[0]
 
-        if node1.children * node2.children < 100.0:
-            return 0
+        #if node1.children * node2.children < 100.0:
+        #    return 0
 
         old_n_queries = n_queries
         n_queries = 0

@@ -50,7 +50,7 @@ def euclidean_distance(x1,x2,period=None):
         raise ValueError("period must have length equal to the dimension of x1 and x2.")
     
     m = np.minimum(np.fabs(x1 - x2), period - np.fabs(x1 - x2))
-    distance = np.sqrt(np.sum(m*m))
+    distance = np.sqrt(np.sum(m*m,axis=len(np.shape(m))-1))
     
     return distance
 
