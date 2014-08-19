@@ -1273,9 +1273,21 @@ class HOD_Quenching_Model(HOD_Model):
 
     def __init__(self):
 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        #sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []
         HOD_Model.__init__(self)
-        self.hod_model = None
 
+    @abstractproperty
+    def baseline_hod_model(self):
+        """ Underlying HOD model.
+
+        Must be one of the supported subclasses of `HOD_Model`. 
+        The baseline HOD model can in principle be driven 
+        by any host halo property, and can have distinct 
+        quenched/star-forming SMHM relations.
+        """
+        pass
 
     @abstractmethod
     def mean_quenched_fraction_centrals(self,logM):
@@ -1312,22 +1324,32 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
     """
 
-    def __init__(self,hod_model=Zheng07_HOD_Model,
-        hod_parameter_dict=None,threshold=None,
+    def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
+        baseline_hod_parameter_dict=None,threshold=None,
         quenching_parameter_dict=None):
 
-        if not isinstance(hod_model(threshold=threshold),HOD_Model):
-            raise TypeError("input hod_model must be one of the supported HOD_Model objects defined in this module")
 
-        # Run initialization from super class. Currently not doing much.
+        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
+        if not isinstance(baseline_hod_model_instance,HOD_Model):
+            raise TypeError(
+                "Input baseline_hod_model must be one of "
+                "the supported HOD_Model objects defined in this module or by the user")
+        # Temporarily store the baseline HOD model object
+        # into a "private" attribute. This is a clunky workaround
+        # to python's awkward conventions for required abstract properties
+        self._baseline_hod_model = baseline_hod_model_instance
+        self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
+
+        self.threshold = threshold
+
+        # Executing the __init__ of the abstract base class HOD_Quenching_Model 
+        # does nothing besides executing the __init__ of the abstract base class HOD_Model 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        # sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []        
         HOD_Quenching_Model.__init__(self)
 
-
-        self.hod_model = hod_model(
-            parameter_dict = hod_parameter_dict,threshold = threshold)
-
-
-        self.publication.extend(self.hod_model.publication)
+        self.publication.extend(self._baseline_hod_model.publication)
         self.publication.extend(['arXiv:0210495v3'])
 
         # The baseline HOD parameter dictionary is already an attribute 
@@ -1338,24 +1360,26 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         # Otherwise, choose the default quenching model parameter set in defaults.py 
         # This should be more defensive. Fine for now.
         if quenching_parameter_dict is None:
-            quenching_parameter_dict = defaults.default_quenching_parameters
-        self.parameter_dict = dict(self.hod_model.parameter_dict.items() + 
-            quenching_parameter_dict.items())
+            self.quenching_parameter_dict = defaults.default_quenching_parameters
+        else:
+            # If the user supplies a dictionary of quenching parameters, 
+            # require that the set of keys is correct
+            self.require_correct_keys(quenching_parameter_dict)
+            # If correct, bind the input dictionary to the instance.
+            self.quenching_parameter_dict = quenching_parameter_dict
 
-        # The quenching parameter dictionary specifies the quenched fraction 
-        # at the input abcissa. Use this information to determine the unique polynomial
-        # satisfying those conditions, specified by a set of coefficients.
-        self.central_quenching_polynomial_coefficients = (
-            self.solve_for_quenching_polynomial_coefficients(
-                self.parameter_dict['quenching_abcissa'],
-                self.parameter_dict['central_quenching_ordinates']))
+        self.parameter_dict = dict(self.baseline_hod_parameter_dict.items() + 
+            self.quenching_parameter_dict.items())
 
-        self.satellite_quenching_polynomial_coefficients = (
-            self.solve_for_quenching_polynomial_coefficients(
-                self.parameter_dict['quenching_abcissa'],
-                self.parameter_dict['satellite_quenching_ordinates']))
+    @property
+    def baseline_hod_model(self):
+        return self._baseline_hod_model
 
-    def mean_ncen(self,logM):
+    @property 
+    def primary_halo_property_key(self):
+        return 'MVIR'
+
+    def mean_ncen(self,primary_halo_property):
         """
         Expected number of central galaxies in a halo of mass logM.
         The appropriate method is already bound to the self.hod_model object.
@@ -1372,10 +1396,10 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
 
         """
-        mean_ncen = self.hod_model.mean_ncen(logM)
+        mean_ncen = self.baseline_hod_model.mean_ncen(primary_halo_property)
         return mean_ncen
 
-    def mean_nsat(self,logM):
+    def mean_nsat(self,primary_halo_property):
         """
         Expected number of satellite galaxies in a halo of mass logM.
         The appropriate method is already bound to the self.hod_model object.
@@ -1392,10 +1416,10 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
 
         """
-        mean_nsat = self.hod_model.mean_nsat(logM)
+        mean_nsat = self.baseline_hod_model.mean_nsat(primary_halo_property)
         return mean_nsat
 
-    def mean_concentration(self,logM):
+    def mean_concentration(self,primary_halo_property):
         """ Concentration-mass relation assumed by the underlying HOD_Model object.
         The appropriate method is already bound to the self.hod_model object.
 
@@ -1410,10 +1434,27 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
         """
 
-        concentrations = self.hod_model.mean_concentration(logM)
+        concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
         return concentrations
 
-    def mean_quenched_fraction_centrals(self,logM):
+    def quenching_polynomial_model(self,abcissa,ordinates,primary_halo_property):
+        coefficient_array = solve_for_polynomial_coefficients(
+            abcissa,ordinates)
+        output_quenched_fractions = (
+            np.zeros(len(primary_halo_property)))
+
+        # Use coefficients to compute values of the destruction function polynomial
+        for n,coeff in enumerate(coefficient_array):
+            output_quenched_fractions += coeff*primary_halo_property**n
+
+        test_negative = output_quenched_fractions < 0
+        output_quenched_fractions[test_negative] = 0
+        test_exceeds_unity = output_quenched_fractions > 1
+        output_quenched_fractions[test_exceeds_unity] = 1
+
+        return output_quenched_fractions
+
+    def mean_quenched_fraction_centrals(self,primary_halo_property):
         """
         Expected fraction of centrals that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1439,12 +1480,15 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         bound to the input object as an attribute.
          
         """
+        abcissa = self.quenching_parameter_dict['quenching_abcissa']
+        ordinates = self.quenching_parameter_dict['central_quenching_ordinates']
+
+        mean_quenched_fractions = self.quenching_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
  
-        coefficients = self.central_quenching_polynomial_coefficients
-        mean_quenched_fractions = self.quenching_polynomial(logM,coefficients)
         return mean_quenched_fractions
 
-    def mean_quenched_fraction_satellites(self,logM):
+    def mean_quenched_fraction_satellites(self,primary_halo_property):
         """
         Expected fraction of satellites that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1471,41 +1515,22 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         
         """
 
-        coefficients = self.satellite_quenching_polynomial_coefficients
-        mean_quenched_fractions = self.quenching_polynomial(logM,coefficients)
+        abcissa = self.quenching_parameter_dict['quenching_abcissa']
+        ordinates = self.quenching_parameter_dict['satellite_quenching_ordinates']
+
+        mean_quenched_fractions = self.quenching_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
+ 
         return mean_quenched_fractions
 
-    def quenching_polynomial(self,logM,coefficients):
-        """ Polynomial function used to specify the quenched fraction of centrals and satellites.
-
-        Parameters 
-        ----------
-        logM : array_like
-            values of the halo mass at which the quenched fraction is to be computed.
-
-        coefficients : array_like
-            Length N array containing the coefficients of the degree N polynomial governing the 
-            expected quenched fraction.
-
-        Returns 
-        -------
-        mean_quenched_fractions : array_like
-            numpy array giving the expected quenched fraction for galaxies in halos of mass logM 
-
-        """
-
-        mean_quenched_fractions = np.zeros(len(logM))
-        polynomial_degree = len(self.parameter_dict['quenching_abcissa'])
-        for n,coeff in enumerate(coefficients):
-            mean_quenched_fractions += coeff*logM**n
-
-        test_negative = mean_quenched_fractions < 0
-        mean_quenched_fractions[test_negative] = 0
-        test_exceeds_unity = mean_quenched_fractions > 1
-        mean_quenched_fractions[test_exceeds_unity] = 1
-
-        return mean_quenched_fractions
-
+    def require_correct_keys(self,quenching_parameter_dict):
+        correct_set_of_quenching_keys = set(defaults.default_quenching_parameters.keys())
+        if set(quenching_parameter_dict.keys()) != correct_set_of_quenching_keys:
+            raise TypeError("Set of keys of input quenching_parameter_dict"
+            " does not match the set of keys required by the model." 
+            " Correct set of keys is {'quenching_abcissa',"
+            "'central_quenching_ordinates', 'satellite_quenching_ordinates'}. ")
+        pass
 
 
 @six.add_metaclass(ABCMeta)

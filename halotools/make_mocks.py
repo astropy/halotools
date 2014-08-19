@@ -100,42 +100,38 @@ class HOD_mock(object):
 
     Parameters
     ----------
-    simulation_data : dictionary
-        'halos' key is an astropy table of information about halo catalog.
-        'simulation_dict' is a dictionary containing various properties of the simulation.
+    simulation_data : optional
+        simulation_data is an instance of the `simulation` class 
+        defined in the `read_nbody` module. 
         Currently only Bolshoi at z=0 is supported.
 
-    hod_model : 
-        HOD_Model object defined in halo_occupation module.
+    halo_occupation_model : optional 
+        halo_occupation_model is an instance of the 
+        `HOD_Model` class defined in the `halo_occupation` module.
 
-    quenching_model : 
-        Quenching_Model object defined in halo_occupation module.
+    seed : float, optional
+        Random number seed. Currently unused. Will be useful when implementing an MCMC.
 
     """
 
     def __init__(self,simulation_data=None,
-        halo_occupation_model=ho.Zheng07_HOD_Model(threshold=-21.5),seed=None):
+        halo_occupation_model=ho.Zheng07_HOD_Model(threshold=-20),seed=None):
 
         if simulation_data is None:
-            simulation_data = read_nbody.load_bolshoi_host_halos_fits()
+            #simulation_data = read_nbody.load_bolshoi_host_halos_fits()
+            simulation_data = read_nbody.simulation()
 
         # Test to make sure the passed objects are of the appropriate type
-        if not isinstance(simulation_data['halos'],astropy.table.table.Table):
+        if not isinstance(simulation_data.halos,astropy.table.table.Table):
             raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
-        table_of_halos = simulation_data['halos']
+        table_of_halos = simulation_data.halos
 
-        if not isinstance(simulation_data['simulation_dict'],dict):
-            raise TypeError("HOD_mock object requires a dictionary of simulation metadata as input")
-        self.simulation_dict = simulation_data['simulation_dict']
+        self.Lbox = simulation_data.Lbox
 
         if not isinstance(halo_occupation_model,ho.HOD_Model):
-            raise TypeError("HOD_mock object requires input halo_occupation_model to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
+            raise TypeError("HOD_mock object requires input halo_occupation_model "
+                "to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
         self.halo_occupation_model = halo_occupation_model
-
-     #   if not isinstance(quenching_model,ho.Quenching_Model):
-     #       raise TypeError("HOD_mock object requires input quenching_model to be an instance of halo_occupation.Quenching_Model, or one of its subclasses")
-     #   self.quenching_model = quenching_model
-
 
         # Create numpy arrays containing data from the halo catalog and bind them to the mock object
         self.primary_halo_property = np.array(table_of_halos[self.halo_occupation_model.primary_halo_property_key])
@@ -150,14 +146,12 @@ class HOD_mock(object):
         self.haloID = np.array(table_of_halos['ID'])
         self.concen = self.halo_occupation_model.mean_concentration(self.primary_halo_property)
         self.Rvir = np.array(table_of_halos['RVIR'])/1000.
-        self.halo_type = np.array(table_of_halos['HALOTYPE'])
+        self.halo_type = np.zeros(len(table_of_halos))
 
         self.halopos = np.empty((len(table_of_halos),3),'f8')
         self.halopos.T[0] = np.array(table_of_halos['POS'][:,0])
         self.halopos.T[1] = np.array(table_of_halos['POS'][:,1])
         self.halopos.T[2] = np.array(table_of_halos['POS'][:,2])
-
-        self.Lbox = self.simulation_dict['Lbox']
 
         if seed != None:
             np.random.seed(seed)
@@ -212,7 +206,7 @@ class HOD_mock(object):
 
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.would_have_quenched_central = quenched_monte_carlo(
-                self.logM,self.halo_occupation_model,'central')
+                self.primary_halo_property,self.halo_occupation_model,'central')
 
         self.num_total_cens = self.NCen.sum()
         self.num_total_sats = self.NSat.sum()
@@ -293,7 +287,8 @@ class HOD_mock(object):
         """
 
         if not isinstance(self.halo_occupation_model,ho.HOD_Model):
-            raise TypeError("HOD_mock object requires input hod_model to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
+            raise TypeError("HOD_mock object requires input hod_model "
+                "to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
 
         # pregenerate the output arrays
         if not isSetup:

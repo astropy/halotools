@@ -64,6 +64,11 @@ class simulation(object):
 
 
         self.simulation_name = simulation_name
+        if simulation_name=='bolshoi':
+            self.Lbox = 250.0
+        else:
+            self.Lbox = None
+        
         self.scale_factor = scale_factor
         self.halo_finder = halo_finder
         self.use_subhalos = use_subhalos

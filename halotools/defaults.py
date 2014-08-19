@@ -27,7 +27,7 @@ default_Npts_radius_array = 101
 ### Default values specifying traditional quenching model
 default_quenching_parameters = {
     'quenching_abcissa' : [12,13.5,15],
-    'central_quenching_ordinates' : [0.35,0.75,0.95], #polynomial coefficients determining quenched fraction of centrals
+    'central_quenching_ordinates' : [0.35,0.7,0.95], #polynomial coefficients determining quenched fraction of centrals
     'satellite_quenching_ordinates' : [0.5,0.75,0.85] #polynomial coefficients determining quenched fraction of centrals
     }
 
