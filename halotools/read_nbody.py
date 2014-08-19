@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Methods to load halo catalogs into memory.
-Obviously this module needs to be generalized. 
-Currently it's only useful at loading in a single pre-processed halo catalog: Bolshoi at z=0.
-Adequate only while basic functionality of mock-making code is being developed.
+Methods to load halo and particle catalogs into memory.
 
 """
 
-__all__=['read_barebones_ascii_halo_catalog_for_initial_mock_development','load_bolshoi_host_halos_fits']
+__all__=['load_bolshoi_host_halos_fits','simulation','particles']
 
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
@@ -101,6 +98,41 @@ class simulation(object):
         return halos
 
 
+class particles(object):
+    """ Container class for the simulation particles.    
+    
+    """
+
+    def __init__(self,simulation_name='bolshoi', scale_factor=1.0003):
+
+
+        self.simulation_name = simulation_name
+        self.scale_factor = scale_factor
+
+        self.particles = self.get_particles()
+
+
+    def get_particles(self):
+
+        import pyfits
+
+        configobj = Config()
+        self.catalog_path = configobj.catalog_pathname
+
+        self.filename = (self.simulation_name+'_2e5_particles_a'+
+            str(self.scale_factor)+'.fits')
+
+        if os.path.isfile(self.catalog_path+self.filename)==True:
+            particles = Table(pyfits.getdata(self.catalog_path+self.filename,0))
+        else:
+            warnings.warn("Particle data not found in cache directory, downloading...")
+            fileobj = urllib2.urlopen(configobj.hearin_url+self.filename)
+            output = open(self.catalog_path+self.filename,'wb')
+            output.write(fileobj.read())
+            output.close()
+            particles = Table(pyfits.getdata(self.catalog_path+self.filename,0))
+
+        return particles
 
 
 
