@@ -56,45 +56,6 @@ def enforce_periodicity_of_box(coords, box_length):
     return coords
 
 
-def quenched_monte_carlo(logM,halo_occupation_model,galaxy_type):
-    """ Returns Monte Carlo-generated array of 0 or 1 specifying whether the galaxy is quenched.
-
-    Parameters
-    ----------
-    logM : array_like
-
-    halo_occupation_model : 
-        Any HOD_Quenching_Model object defined in halo_occupation module.
-
-    galaxy_type : string
-        Only supported values are 'central' or 'satellite'. Used to indicate which 
-        quenching model method should used to generate the Monte Carlo.
-
-    Returns
-    -------
-    quenched_array : int or array
-        Used to define whether mock galaxy is quenched (1) or star-forming (0)
-    
-    """
-
-    if not isinstance(halo_occupation_model,ho.HOD_Quenching_Model):
-        raise TypeError("input halo_occupation_model must be an instance of a supported HOD_Quenching_Model, or one if its derived subclasses")
-
-    if galaxy_type == 'central':
-        quenching_function = halo_occupation_model.mean_quenched_fraction_centrals
-    elif galaxy_type == 'satellite':
-        quenching_function = halo_occupation_model.mean_quenched_fraction_satellites
-    else:
-        raise TypeError("input galaxy_type must be a string set either to 'central' or 'satellite'")
-
-
-    quenched_array = np.array(
-        quenching_function(logM) > np.random.random(
-            len(logM)),dtype=int)
-
-    return quenched_array
-
-
 class HOD_mock(object):
     """     
 
@@ -115,43 +76,48 @@ class HOD_mock(object):
     """
 
     def __init__(self,simulation_data=None,
-        halo_occupation_model=ho.Zheng07_HOD_Model(threshold=-20),seed=None):
+        halo_occupation_model=ho.vdB03_Quenching_Model,threshold = -20,seed=None):
 
         if simulation_data is None:
-            #simulation_data = read_nbody.load_bolshoi_host_halos_fits()
             simulation_data = read_nbody.simulation()
 
-        # Test to make sure the passed objects are of the appropriate type
+        # Test to make sure the simulation data is the appropriate type
         if not isinstance(simulation_data.halos,astropy.table.table.Table):
-            raise TypeError("HOD_mock object requires an astropy Table halo catalog as input")
-        table_of_halos = simulation_data.halos
+            raise TypeError("HOD_mock object requires an astropy Table object as input")
 
+        self.halos = simulation_data.halos
         self.Lbox = simulation_data.Lbox
+        # Add columns to the halos table to store the halo type for centrals & satellites
+        self.halos['HALO_TYPE_CENTRALS']=np.zeros(len(self.halos))
+        self.halos['HALO_TYPE_SATELLITES']=np.zeros(len(self.halos))
 
-        if not isinstance(halo_occupation_model,ho.HOD_Model):
+        # Test to make sure the hod model is the appropriate type
+        hod_model_instance = halo_occupation_model(threshold=threshold)
+        if not isinstance(hod_model_instance,ho.HOD_Model):
             raise TypeError("HOD_mock object requires input halo_occupation_model "
                 "to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
-        self.halo_occupation_model = halo_occupation_model
+        # Bind the instance of the hod model to the mock instance
+        self.halo_occupation_model = hod_model_instance
 
         # Create numpy arrays containing data from the halo catalog and bind them to the mock object
-        self.primary_halo_property = np.array(table_of_halos[self.halo_occupation_model.primary_halo_property_key])
+        self.primary_halo_property = np.array(self.halos[self.halo_occupation_model.primary_halo_property_key])
         if self.halo_occupation_model.primary_halo_property_key == 'MVIR':
             self.primary_halo_property = np.log10(self.primary_halo_property)
 
         if isinstance(self.halo_occupation_model,ho.Assembly_Biased_HOD_Model):
             self.secondary_halo_property = np.array(
-                table_of_halos[self.halo_occupation_model.secondary_halo_property_key])
+                self.halos[self.halo_occupation_model.secondary_halo_property_key])
 
 
-        self.haloID = np.array(table_of_halos['ID'])
+        self.haloID = np.array(self.halos['ID'])
         self.concen = self.halo_occupation_model.mean_concentration(self.primary_halo_property)
-        self.Rvir = np.array(table_of_halos['RVIR'])/1000.
-        self.halo_type = np.zeros(len(table_of_halos))
+        self.Rvir = np.array(self.halos['RVIR'])/1000.
+        self.halo_type = np.zeros(len(self.halos))
 
-        self.halopos = np.empty((len(table_of_halos),3),'f8')
-        self.halopos.T[0] = np.array(table_of_halos['POS'][:,0])
-        self.halopos.T[1] = np.array(table_of_halos['POS'][:,1])
-        self.halopos.T[2] = np.array(table_of_halos['POS'][:,2])
+        self.halopos = np.empty((len(self.halos),3),'f8')
+        self.halopos.T[0] = np.array(self.halos['POS'][:,0])
+        self.halopos.T[1] = np.array(self.halos['POS'][:,1])
+        self.halopos.T[2] = np.array(self.halos['POS'][:,2])
 
         if seed != None:
             np.random.seed(seed)
@@ -195,6 +161,10 @@ class HOD_mock(object):
         
         """
 
+        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        #    self.self.halos['HALO_TYPE_CENTRALS'] = self.quenched_monte_carlo(
+        #        self.primary_halo_property,self.halo_occupation_model,'central')
+
         self.NCen = self.num_cen_monte_carlo(
             self.primary_halo_property,self.halo_occupation_model)
         self.hasCentral = self.NCen > 0
@@ -204,10 +174,6 @@ class HOD_mock(object):
             self.primary_halo_property[self.hasCentral],
             self.halo_occupation_model,output=self.NSat[self.hasCentral])
 
-        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-            self.would_have_quenched_central = quenched_monte_carlo(
-                self.primary_halo_property,self.halo_occupation_model,'central')
-
         self.num_total_cens = self.NCen.sum()
         self.num_total_sats = self.NSat.sum()
         self.num_total_gals = self.num_total_cens + self.num_total_sats
@@ -216,8 +182,8 @@ class HOD_mock(object):
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
-        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-            self.isQuenched = np.zeros(self.num_total_gals,dtype='i4')
+        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        #    self.isQuenched = np.zeros(self.num_total_gals,dtype='i4')
     #...
 
     def _random_angles(self,coords,start,end,N):
@@ -298,8 +264,8 @@ class HOD_mock(object):
         self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
         self.logMhost[:self.num_total_cens] = self.primary_halo_property[self.hasCentral]
 
-        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-            self.isQuenched[:self.num_total_cens] = self.would_have_quenched_central[self.hasCentral]
+        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        #    self.isQuenched[:self.num_total_cens] = self.halo_isQuenched[self.hasCentral]
 
 
         counter = self.num_total_cens
@@ -333,7 +299,7 @@ class HOD_mock(object):
         self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
 
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-            self.isQuenched[self.num_total_cens:-1] = quenched_monte_carlo(
+            self.isQuenched[self.num_total_cens:-1] = self.quenched_monte_carlo(
                 self.logMhost[self.num_total_cens:-1],
                 self.halo_occupation_model,'satellite')
 
@@ -384,6 +350,44 @@ class HOD_mock(object):
         num_nsat_array = poisson.rvs(Prob_sat)
 
         return num_nsat_array
+
+    def quenched_monte_carlo(self,logM,halo_occupation_model,galaxy_type):
+        """ Returns Monte Carlo-generated array of 0 or 1 specifying whether the galaxy is quenched.
+        Parameters
+        ----------
+        logM : array_like
+
+        halo_occupation_model : 
+            Any HOD_Quenching_Model object defined in halo_occupation module.
+
+        galaxy_type : string
+            Only supported values are 'central' or 'satellite'. Used to indicate which 
+            quenching model method should used to generate the Monte Carlo.
+
+            Returns
+            -------
+            quenched_array : int or array
+                Used to define whether mock galaxy is quenched (1) or star-forming (0)
+
+        """
+
+        if not isinstance(halo_occupation_model,ho.HOD_Quenching_Model):
+            raise TypeError("input halo_occupation_model must be an instance of a supported HOD_Quenching_Model, or one if its derived subclasses")
+
+        if galaxy_type == 'central':
+            quenching_function = halo_occupation_model.mean_quenched_fraction_centrals
+        elif galaxy_type == 'satellite':
+            quenching_function = halo_occupation_model.mean_quenched_fraction_satellites
+        else:
+            raise TypeError("input galaxy_type must be a string set either to 'central' or 'satellite'")
+
+
+        quenched_array = np.array(
+            quenching_function(logM) > np.random.random(
+                len(logM)),dtype=int)
+
+        return quenched_array
+
 
     #...
 
