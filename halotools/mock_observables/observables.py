@@ -33,10 +33,10 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
     randoms : array_like, optional
         Nran x k numpy array containing k-d positions of Npts.
 
-     period: array_like, optional
-            length k array defining axis-aligned periodic boundary conditions. If only 
-            one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-            If none, PBCs are set to infinity.
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
 
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the KDtree pair counter. 
