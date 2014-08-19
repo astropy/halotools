@@ -60,7 +60,6 @@ cdef inline int set_add_pair(set results,
         results.add((i, j))
     return 0
 
-
 cdef inline int set_add_ordered_pair(set results,
                                      np.intp_t i,
                                      np.intp_t j) except -1:
@@ -90,7 +89,6 @@ cdef inline int list_append(list results, np.intp_t i) except -1:
         # Other platforms
         results.append(i)
     return 0
-    
 
 
 # Priority queue
@@ -200,66 +198,18 @@ cdef inline np.float64_t dmax(np.float64_t x, np.float64_t y):
         return x
     else:
         return y
-        
+
 cdef inline np.float64_t dabs(np.float64_t x):
     if x>0:
         return x
     else:
         return -x
-        
+
 cdef inline np.float64_t dmin(np.float64_t x, np.float64_t y):
     if x<y:
         return x
     else:
         return y
-        
-# Utility for building a coo matrix incrementally
-cdef class coo_entries:
-    cdef:
-        np.intp_t n, n_max
-        np.ndarray i, j
-        np.ndarray v
-        np.intp_t *i_data
-        np.intp_t *j_data
-        np.float64_t *v_data
-    
-    def __init__(self):
-        self.n = 0
-        self.n_max = 10
-        self.i = np.empty(self.n_max, dtype=np.intp)
-        self.j = np.empty(self.n_max, dtype=np.intp)
-        self.v = np.empty(self.n_max, dtype=np.float64)
-        self.i_data = <np.intp_t *>np.PyArray_DATA(self.i)
-        self.j_data = <np.intp_t *>np.PyArray_DATA(self.j)
-        self.v_data = <np.float64_t*>np.PyArray_DATA(self.v)
-
-    cdef void add(coo_entries self, np.intp_t i, np.intp_t j, np.float64_t v):
-        cdef np.intp_t k
-        if self.n == self.n_max:
-            self.n_max *= 2
-            self.i.resize(self.n_max)
-            self.j.resize(self.n_max)
-            self.v.resize(self.n_max)
-            self.i_data = <np.intp_t *>np.PyArray_DATA(self.i)
-            self.j_data = <np.intp_t *>np.PyArray_DATA(self.j)
-            self.v_data = <np.float64_t*>np.PyArray_DATA(self.v)
-        k = self.n
-        self.i_data[k] = i
-        self.j_data[k] = j
-        self.v_data[k] = v
-        self.n += 1
-
-    def to_matrix(coo_entries self, shape=None):
-        # Shrink arrays to size
-        self.i.resize(self.n)
-        self.j.resize(self.n)
-        self.v.resize(self.n)
-        self.i_data = <np.intp_t *>np.PyArray_DATA(self.i)
-        self.j_data = <np.intp_t *>np.PyArray_DATA(self.j)
-        self.v_data = <np.float64_t*>np.PyArray_DATA(self.v)
-        self.n_max = self.n
-        return scipy.sparse.coo_matrix((self.v, (self.i, self.j)),
-                                       shape=shape)
 
 
 # Measuring distances
@@ -304,7 +254,7 @@ cdef inline np.float64_t _distance_p_periodic(np.float64_t *x, np.float64_t *y,
                                      np.float64_t p, np.intp_t k,
                                      np.float64_t upperbound,
                                      np.float64_t *period):
-    """Compute the distance between x and y
+    """Compute the distance between x and y using periodic boundary conditoons.
     Computes the Minkowski p-distance to the power p between two points.
     If the distance**p is larger than upperbound, then any number larger
     than upperbound may be returned (the calculation is truncated).
@@ -359,6 +309,8 @@ cdef class Rectangle:
 
 # 1-d pieces
 # These should only be used if p != infinity
+# DC added periodic versions of the functions but left the originals incase they need to
+#   be used because they are faster.
 cdef inline np.float64_t min_dist_point_interval_p(np.float64_t* x,
                                                    Rectangle rect,
                                                    np.intp_t k,
@@ -457,7 +409,7 @@ cdef inline np.float64_t max_dist_interval_interval_p_periodic(Rectangle rect1,
     else: return dmax(d_lr,dmax(d_rl,dmax(d_rr,d_ll))) ** p
 
 
-#note: I have not modified these to work with periodic boundary conditions despite the names!
+#note: DC has not modified these to work with periodic boundary conditions despite the names!
 #I don't think ill be using a p=inf metric anytime soon... -DC
 
 # Interval arithmetic in m-D
@@ -594,8 +546,7 @@ cdef class RectRectDistanceTracker(object):
     cdef int _init_stack(self) except -1:
         cdef void *tmp
         self.stack_max_size = 10
-        tmp = stdlib.malloc(sizeof(RR_stack_item) *
-                            self.stack_max_size)
+        tmp = stdlib.malloc(sizeof(RR_stack_item) * self.stack_max_size)
         if tmp == NULL:
             raise MemoryError
         self.stack = <RR_stack_item*> tmp
@@ -605,8 +556,7 @@ cdef class RectRectDistanceTracker(object):
     cdef int _resize_stack(self, np.intp_t new_max_size) except -1:
         cdef void *tmp
         self.stack_max_size = new_max_size
-        tmp = stdlib.realloc(<RR_stack_item*> self.stack,
-                             new_max_size * sizeof(RR_stack_item))
+        tmp = stdlib.realloc(<RR_stack_item*> self.stack, new_max_size * sizeof(RR_stack_item))
         if tmp == NULL:
             raise MemoryError
         self.stack = <RR_stack_item*> tmp
@@ -1009,7 +959,7 @@ cdef class cKDTree:
     cdef np.float64_t* raw_maxes
     cdef readonly np.ndarray mins
     cdef np.float64_t* raw_mins
-    cdef np.ndarray indices
+    cdef readonly np.ndarray indices
     cdef np.intp_t* raw_indices
 
     def __init__(cKDTree self, data, np.intp_t leafsize=10):
@@ -1022,9 +972,9 @@ cdef class cKDTree:
         self.mins = np.ascontiguousarray(np.amin(self.data,axis=0), dtype=np.float64)
         self.indices = np.ascontiguousarray(np.arange(self.n,dtype=np.intp))
 
-        self.raw_data = <np.float64_t*>np.PyArray_DATA(self.data)
-        self.raw_maxes = <np.float64_t*>np.PyArray_DATA(self.maxes)
-        self.raw_mins = <np.float64_t*>np.PyArray_DATA(self.mins)
+        self.raw_data    = <np.float64_t*>np.PyArray_DATA(self.data)
+        self.raw_maxes   = <np.float64_t*>np.PyArray_DATA(self.maxes)
+        self.raw_mins    = <np.float64_t*>np.PyArray_DATA(self.mins)
         self.raw_indices = <np.intp_t*>np.PyArray_DATA(self.indices)
 
         self.tree = self.__build(0, self.n, self.raw_maxes, self.raw_mins)
@@ -2512,14 +2462,18 @@ cdef class cKDTree:
         inner_idx = np.empty((n_queries,), dtype=np.intp)
         idx = &inner_idx[0]
 
+        #if node1.children * node2.children < 100.0:
+        #    return 0
+
         old_n_queries = n_queries
         n_queries = 0
         for i in range(old_n_queries):
-            if tracker.max_distance < r[old_idx[i]]:
+            if tracker.max_distance < r[old_idx[i]] / tracker.epsfac:
                 results[old_idx[i]] += node1.children * node2.children
-            elif tracker.min_distance <= r[old_idx[i]]:
+            elif tracker.min_distance <= r[old_idx[i]] * tracker.epsfac:
                 idx[n_queries] = old_idx[i]
                 n_queries += 1
+                    
 
         if n_queries > 0:
             # OK, need to probe a bit deeper
@@ -2605,7 +2559,8 @@ cdef class cKDTree:
         return 0
 
     @cython.boundscheck(False)
-    def count_neighbors(cKDTree self, cKDTree other, object r, np.float64_t p=2., object period = None):
+    def count_neighbors(cKDTree self, cKDTree other, object r, np.float64_t p=2.,
+                        object period = None, eps=0.0):
         """count_neighbors(self, other, r, p)
 
         Count how many nearby pairs can be formed.
@@ -2628,6 +2583,11 @@ cdef class cKDTree:
             Which Minkowski p-norm to use
         period : array_like, dimension self.m
             A vector indicating the periodic length along each dimension.
+        eps : float, optional
+            Approximate search.  Branches of the tree are not explored
+            if their nearest points are further than ``r/(1+eps)``, and
+            branches are added in bulk if their furthest points are nearer
+            than ``r * (1+eps)``.  `eps` has to be non-negative.
 
         Returns
         -------
@@ -2674,7 +2634,7 @@ cdef class cKDTree:
         tracker = RectRectDistanceTracker(
             Rectangle(self.mins, self.maxes),
             Rectangle(other.mins, other.maxes),
-            p, 0.0, 0.0, period)
+            p, eps, 0.0, period)
         
         # Go!
         results = np.zeros((n_queries,), dtype=np.intp)
@@ -2728,16 +2688,14 @@ cdef class cKDTree:
         n_queries = 0
         for i in range(old_n_queries):
             if tracker.max_distance < r[old_idx[i]]:
-                #results[old_idx[i]] += node1.children * node2.children
                 #need to run through all children and sum weights
-                wsum = 0.000000000000000
+                wsum = 0.0
                 for j in range(node2.start_idx, node2.end_idx): #Fuck yes.
                     for k in range(node1.start_idx, node1.end_idx):
-                        #wsum += oweights[other.raw_indices[j]]*sweights[self.raw_indices[k]]
                         wsum += w.evaluate(sweights[self.raw_indices[k]],
-                                                    oweights[other.raw_indices[j]],
-                                                    saux[self.raw_indices[k]],
-                                                    oaux[other.raw_indices[j]])
+                                           oweights[other.raw_indices[j]],
+                                           saux[self.raw_indices[k]],
+                                           oaux[other.raw_indices[j]])
                 results[old_idx[i]] += wsum
             elif tracker.min_distance <= r[old_idx[i]]:
                 idx[n_queries] = old_idx[i]
@@ -2753,10 +2711,6 @@ cdef class cKDTree:
                     # brute-force
                     for i in range(lnode1.start_idx, lnode1.end_idx):
                         for j in range(lnode2.start_idx, lnode2.end_idx):
-                            #d = _distance_p(
-                            #    self.raw_data + self.raw_indices[i] * self.m,
-                            #    other.raw_data + other.raw_indices[j] * other.m,
-                            #    tracker.p, self.m, tracker.max_distance)
                             d = _distance_p_periodic(
                                 self.raw_data + self.raw_indices[i] * self.m,
                                 other.raw_data + other.raw_indices[j] * other.m,
@@ -2766,7 +2720,6 @@ cdef class cKDTree:
                             # search for all r's via binary search
                             for l in range(n_queries):
                                 if d <= r[idx[l]]:
-                                    #results[idx[l]] += oweights[other.raw_indices[j]] * sweights[self.raw_indices[i]]
                                     results[idx[l]] += w.evaluate(sweights[self.raw_indices[i]],
                                                                   oweights[other.raw_indices[j]],
                                                                   saux[self.raw_indices[i]],
@@ -2776,13 +2729,15 @@ cdef class cKDTree:
                     tracker.push_less_of(2, node2)
                     self.__wcount_neighbors_traverse(
                         other, n_queries, r, results, idx,
-                        node1, node2.less, tracker, period, sweights, oweights, w, saux, oaux)
+                        node1, node2.less, tracker,
+                        period, sweights, oweights, w, saux, oaux)
                     tracker.pop()
 
                     tracker.push_greater_of(2, node2)
                     self.__wcount_neighbors_traverse(
                         other, n_queries, r, results, idx,
-                        node1, node2.greater, tracker, period, sweights, oweights, w, saux, oaux)
+                        node1, node2.greater, tracker,
+                        period, sweights, oweights, w, saux, oaux)
                     tracker.pop()
                 
             else:  # 1 is an inner node
@@ -2790,13 +2745,15 @@ cdef class cKDTree:
                     tracker.push_less_of(1, node1)
                     self.__wcount_neighbors_traverse(
                         other, n_queries, r, results, idx,
-                        node1.less, node2, tracker, period, sweights, oweights, w, saux, oaux)
+                        node1.less, node2, tracker,
+                        period, sweights, oweights, w, saux, oaux)
                     tracker.pop()
                     
                     tracker.push_greater_of(1, node1)
                     self.__wcount_neighbors_traverse(
                         other, n_queries, r, results, idx,
-                        node1.greater, node2, tracker, period, sweights, oweights, w, saux, oaux)
+                        node1.greater, node2, tracker,
+                        period, sweights, oweights, w, saux, oaux)
                     tracker.pop()
                     
                 else: # 1 and 2 are inner nodes
@@ -2804,13 +2761,15 @@ cdef class cKDTree:
                     tracker.push_less_of(2, node2)
                     self.__wcount_neighbors_traverse(
                         other, n_queries, r, results, idx,
-                        node1.less, node2.less, tracker, period, sweights, oweights, w, saux, oaux)
+                        node1.less, node2.less, tracker,
+                        period, sweights, oweights, w, saux, oaux)
                     tracker.pop()
                         
                     tracker.push_greater_of(2, node2)
                     self.__wcount_neighbors_traverse(
                         other, n_queries, r, results, idx,
-                        node1.less, node2.greater, tracker, period, sweights, oweights, w, saux, oaux)
+                        node1.less, node2.greater, tracker,
+                        period, sweights, oweights, w, saux, oaux)
                     tracker.pop()
                     tracker.pop()
                         
@@ -2818,22 +2777,27 @@ cdef class cKDTree:
                     tracker.push_less_of(2, node2)
                     self.__wcount_neighbors_traverse(
                         other, n_queries, r, results, idx,
-                        node1.greater, node2.less, tracker, period, sweights, oweights, w, saux, oaux)
+                        node1.greater, node2.less, tracker,
+                        period, sweights, oweights, w, saux, oaux)
                     tracker.pop()
                         
                     tracker.push_greater_of(2, node2)
                     self.__wcount_neighbors_traverse(
                         other, n_queries, r, results, idx,
-                        node1.greater, node2.greater, tracker, period, sweights, oweights, w, saux, oaux)
+                        node1.greater, node2.greater, tracker,
+                        period, sweights, oweights, w, saux, oaux)
                     tracker.pop()
                     tracker.pop()
                     
         return 0
 
     @cython.boundscheck(False)
-    def wcount_neighbors(cKDTree self, cKDTree other, object r, np.float64_t p=2.,
-                         object period = None, object sweights = None,
-                         object oweights = None, Function w=None, object saux=None, object oaux=None):
+    def wcount_neighbors(cKDTree self, cKDTree other,
+                         object r, np.float64_t p=2.,
+                         object period = None, 
+                         object sweights = None, object oweights = None, 
+                         Function w=None, 
+                         object saux=None, object oaux=None):
         """wcount_neighbors(self, other, r, p)
 
         Weighted count of how many nearby pairs can be formed.
@@ -2965,148 +2929,279 @@ cdef class cKDTree:
             return results
 
 
-    # ----------------------
-    # sparse_distance_matrix
-    # ----------------------
-    cdef int __sparse_distance_matrix_traverse(cKDTree self, cKDTree other,
-                                               coo_entries results,
-                                               innernode* node1, innernode* node2,
-                                               RectRectDistanceTracker tracker) except -1:
+    # ---------------
+    # wcount_neighbors_custom
+    # ---------------
+    cdef int __wcount_neighbors_custom_traverse(cKDTree self,
+                                                cKDTree other,
+                                                np.intp_t n_queries,
+                                                np.float64_t* r,
+                                                np.float64_t[:,:] results,
+                                                np.intp_t * idx,
+                                                innernode* node1,
+                                                innernode* node2,
+                                                RectRectDistanceTracker tracker,
+                                                np.float64_t*period,
+                                                np.float64_t*sweights,
+                                                np.float64_t*oweights,
+                                                Function w,
+                                                np.float64_t*saux,
+                                                np.float64_t*oaux) except -1:
         cdef leafnode *lnode1
         cdef leafnode *lnode2
-        cdef list results_i
         cdef np.float64_t d
-        cdef np.intp_t i, j, min_j
-                
-        if tracker.min_distance > tracker.upper_bound:
-            return 0
-        elif node1.split_dim == -1:  # 1 is leaf node
-            lnode1 = <leafnode*>node1
-            
-            if node2.split_dim == -1:  # 1 & 2 are leaves
-                lnode2 = <leafnode*>node2
-                
-                # brute-force
-                for i in range(lnode1.start_idx, lnode1.end_idx):
-                    # Special care here to avoid duplicate pairs
-                    if node1 == node2:
-                        min_j = i+1
-                    else:
-                        min_j = lnode2.start_idx
-                        
-                    for j in range(min_j, lnode2.end_idx):
-                        d = _distance_p(
-                            self.raw_data + self.raw_indices[i] * self.m,
-                            other.raw_data + other.raw_indices[j] * self.m,
-                            tracker.p, self.m, tracker.upper_bound)
-                        if d <= tracker.upper_bound:
-                            if tracker.p != 1 and tracker.p != infinity:
-                                d = d**(1. / tracker.p)
-                            results.add(self.raw_indices[i],
-                                        other.raw_indices[j], d)
-                            if node1 == node2:
-                                results.add(self.raw_indices[j],
-                                            other.raw_indices[i], d)
+        cdef np.intp_t *old_idx
+        cdef np.intp_t old_n_queries, l, i, j
+        cdef np.float64_t wsum
 
-            else:  # 1 is a leaf node, 2 is inner node
-                tracker.push_less_of(2, node2)
-                self.__sparse_distance_matrix_traverse(
-                    other, results, node1, node2.less, tracker)
-                tracker.pop()
+        # Speed through pairs of nodes all of whose children are close
+        # and see if any work remains to be done
+        old_idx = idx
+        cdef np.ndarray[np.intp_t, ndim=1] inner_idx
+        inner_idx = np.empty((n_queries,), dtype=np.intp)
+        idx = &inner_idx[0]
+
+        old_n_queries = n_queries
+        n_queries = 0
+        for i in range(old_n_queries):
+            if tracker.max_distance < r[old_idx[i]]:
+                #need to run through all children and sum weights
+                for k in range(node1.start_idx, node1.end_idx):
+                    wsum = 0.0
+                    for j in range(node2.start_idx, node2.end_idx):
+                        wsum += w.evaluate(sweights[self.raw_indices[k]],
+                                           oweights[other.raw_indices[j]],
+                                           saux[self.raw_indices[k]],
+                                           oaux[other.raw_indices[j]])
+                    results[self.raw_indices[k],old_idx[i]] += wsum
+            elif tracker.min_distance <= r[old_idx[i]]:
+                idx[n_queries] = old_idx[i]
+                n_queries += 1
+
+        if n_queries > 0:
+            # OK, need to probe a bit deeper
+            if node1.split_dim == -1:  # 1 is leaf node
+                lnode1 = <leafnode*>node1
+                if node2.split_dim == -1:  # 1 & 2 are leaves
+                    lnode2 = <leafnode*>node2
                     
-                tracker.push_greater_of(2, node2)
-                self.__sparse_distance_matrix_traverse(
-                    other, results, node1, node2.greater, tracker)
-                tracker.pop()
-                
-        else:  # 1 is an inner node
-            if node2.split_dim == -1:  # 1 is an inner node, 2 is a leaf node
-                tracker.push_less_of(1, node1)
-                self.__sparse_distance_matrix_traverse(
-                    other, results, node1.less, node2, tracker)
-                tracker.pop()
-                
-                tracker.push_greater_of(1, node1)
-                self.__sparse_distance_matrix_traverse(
-                    other, results, node1.greater, node2, tracker)
-                tracker.pop()
-                
-            else: # 1 and 2 are inner nodes
-                tracker.push_less_of(1, node1)
-                tracker.push_less_of(2, node2)
-                self.__sparse_distance_matrix_traverse(
-                    other, results, node1.less, node2.less, tracker)
-                tracker.pop()
-                    
-                tracker.push_greater_of(2, node2)
-                self.__sparse_distance_matrix_traverse(
-                    other, results, node1.less, node2.greater, tracker)
-                tracker.pop()
-                tracker.pop()
-                    
-                tracker.push_greater_of(1, node1)
-                if node1 != node2:
-                    # Avoid traversing (node1.less, node2.greater) and
-                    # (node1.greater, node2.less) (it's the same node pair
-                    # twice over, which is the source of the complication in
-                    # the original KDTree.sparse_distance_matrix)
+                    # brute-force
+                    for i in range(lnode1.start_idx, lnode1.end_idx):
+                        for j in range(lnode2.start_idx, lnode2.end_idx):
+                            d = _distance_p_periodic(
+                                self.raw_data + self.raw_indices[i] * self.m,
+                                other.raw_data + other.raw_indices[j] * other.m,
+                                tracker.p, self.m, tracker.max_distance, period)
+                            # I think it's usually cheaper to test d against all r's
+                            # than to generate a distance array, sort it, then
+                            # search for all r's via binary search
+                            for l in range(n_queries):
+                                if d <= r[idx[l]]:
+                                    results[self.raw_indices[i],idx[l]] += w.evaluate(
+                                                                  sweights[self.raw_indices[i]],
+                                                                  oweights[other.raw_indices[j]],
+                                                                  saux[self.raw_indices[i]],
+                                                                  oaux[other.raw_indices[j]])
+                                
+                else:  # 1 is a leaf node, 2 is inner node
                     tracker.push_less_of(2, node2)
-                    self.__sparse_distance_matrix_traverse(
-                        other, results, node1.greater, node2.less, tracker)
+                    self.__wcount_neighbors_custom_traverse(
+                        other, n_queries, r, results, idx,
+                        node1, node2.less, tracker, period,
+                        sweights, oweights, w, saux, oaux)
+                    tracker.pop()
+
+                    tracker.push_greater_of(2, node2)
+                    self.__wcount_neighbors_custom_traverse(
+                        other, n_queries, r, results, idx,
+                        node1, node2.greater, tracker,
+                        period, sweights, oweights, w, saux, oaux)
+                    tracker.pop()
+                
+            else:  # 1 is an inner node
+                if node2.split_dim == -1:  # 1 is an inner node, 2 is a leaf node
+                    tracker.push_less_of(1, node1)
+                    self.__wcount_neighbors_custom_traverse(
+                        other, n_queries, r, results, idx,
+                        node1.less, node2, tracker,
+                        period, sweights, oweights, w, saux, oaux)
                     tracker.pop()
                     
-                tracker.push_greater_of(2, node2)
-                self.__sparse_distance_matrix_traverse(
-                    other, results, node1.greater, node2.greater, tracker)
-                tracker.pop()
-                tracker.pop()
-                
+                    tracker.push_greater_of(1, node1)
+                    self.__wcount_neighbors_custom_traverse(
+                        other, n_queries, r, results, idx,
+                        node1.greater, node2, tracker,
+                        period, sweights, oweights, w, saux, oaux)
+                    tracker.pop()
+                    
+                else: # 1 and 2 are inner nodes
+                    tracker.push_less_of(1, node1)
+                    tracker.push_less_of(2, node2)
+                    self.__wcount_neighbors_custom_traverse(
+                        other, n_queries, r, results, idx,
+                        node1.less, node2.less, tracker,
+                        period, sweights, oweights, w, saux, oaux)
+                    tracker.pop()
+                        
+                    tracker.push_greater_of(2, node2)
+                    self.__wcount_neighbors_custom_traverse(
+                        other, n_queries, r, results, idx,
+                        node1.less, node2.greater, tracker,
+                        period, sweights, oweights, w, saux, oaux)
+                    tracker.pop()
+                    tracker.pop()
+                        
+                    tracker.push_greater_of(1, node1)
+                    tracker.push_less_of(2, node2)
+                    self.__wcount_neighbors_custom_traverse(
+                        other, n_queries, r, results, idx,
+                        node1.greater, node2.less, tracker,
+                        period, sweights, oweights, w, saux, oaux)
+                    tracker.pop()
+                        
+                    tracker.push_greater_of(2, node2)
+                    self.__wcount_neighbors_custom_traverse(
+                        other, n_queries, r, results, idx,
+                        node1.greater, node2.greater, tracker,
+                        period, sweights, oweights, w, saux, oaux)
+                    tracker.pop()
+                    tracker.pop()
+                    
         return 0
-            
-    def sparse_distance_matrix(cKDTree self, cKDTree other,
-                               np.float64_t max_distance,
-                               np.float64_t p=2.):
-        """sparse_distance_matrix(self, other, max_distance, p=2.0)
 
-        Compute a sparse distance matrix
+    @cython.boundscheck(False)
+    def wcount_neighbors_custom(cKDTree self, cKDTree other, 
+                                object r, np.float64_t p=2.,
+                                object period = None, 
+                                object sweights = None, object oweights = None,
+                                Function w=None, object saux=None, object oaux=None):
+        """wcount_neighbors_custom(self, other, r, p)
 
-        Computes a distance matrix between two KDTrees, leaving as zero
-        any distance greater than max_distance.
+        Weighted count of how many nearby pairs can be formed for each point in self.
+
+        Count the number of pairs (x1,x2) can be formed, with x1 drawn
+        from self and x2 drawn from `other`, and where
+        ``distance(x1, x2, p) <= r``.
+        This is the "two-point correlation" described in Gray and Moore 2000,
+        "N-body problems in statistical learning", and the code here is based
+        on their algorithm.
 
         Parameters
         ----------
-        other : cKDTree
-
-        max_distance : positive float
-        
+        other : KDTree instance
+            The other tree to draw points from.
+        r : float or one-dimensional array of floats
+            The radius to produce a count for. Multiple radii are searched with
+            a single tree traversal.
         p : float, 1<=p<=infinity
-            Which Minkowski p-norm to use. 
+            Which Minkowski p-norm to use
+        period : array_like, dimension self.m
+            A vector indicating the periodic length along each dimension.
+        sweights : array_like, dimension self.n
+            A vector indicating the weight attached to each point in self.
+        oweights : array_like, dimension other.n
+            A vector indicating the weight attached to each point in other.
+        w: ckdtree.Function object.  Function used in weighting.  None results in w1*w2
+            w(self weight, other weight, self aux_data, other aux_data)
 
         Returns
         -------
-        result : dok_matrix
-            Sparse matrix representing the results in "dictionary of keys" format.
-            FIXME: Internally, built as a COO matrix, it would be more
-            efficient to return this COO matrix.
+        result : float or 1-D array of floats
+            The weighted number of pairs. Note that this is internally stored in a numpy float,
+            and so may overflow if very large (2e9).
 
         """
+        
+        #process count function
+        if w is None:
+            w = fmultiply()
+        
+        #process the period parameter
+        cdef np.ndarray[np.float64_t, ndim=1] cperiod
+        if period is None:
+            period = np.array([np.inf]*self.m)
+        else:
+            period = np.asarray(period).astype("float64")
+        cperiod = np.ascontiguousarray(period)
+        
+        cdef np.intp_t n_queries, i
+        cdef np.ndarray[np.float64_t, ndim=1, mode="c"] real_r
+        cdef np.ndarray[np.intp_t, ndim=1, mode="c"] idx
+        
+        #process the self weights parameter
+        cdef np.ndarray[np.float64_t, ndim=1] csweights #copy of self weights
+        if sweights is None:
+            sweights = np.array([1.0]*self.n, dtype=np.float64)
+        else:
+            sweights = np.asarray(sweights).astype("float64")
+        csweights = np.ascontiguousarray(sweights)
+        
+        #process the other weights parameter
+        cdef np.ndarray[np.float64_t, ndim=1] coweights #copy of other weights
+        if oweights is None:
+            oweights = np.array([1.0]*other.n, dtype=np.float64)
+        else:
+            oweights = np.asarray(oweights).astype("float64")
+        coweights = np.ascontiguousarray(oweights)
+        
+        #process the self aux parameter
+        cdef np.ndarray[np.float64_t, ndim=1] csaux #copy of self weights
+        if saux is None:
+            saux = np.array([1.0]*self.n, dtype=np.float64)
+        else:
+            saux = np.asarray(saux).astype("float64")
+        csaux = np.ascontiguousarray(saux)
+        
+        #process the other aux parameter
+        cdef np.ndarray[np.float64_t, ndim=1] coaux #copy of other weights
+        if oaux is None:
+            oaux = np.array([1.0]*other.n, dtype=np.float64)
+        else:
+            oweights = np.asarray(oaux).astype("float64")
+        coaux = np.ascontiguousarray(oaux)
 
         # Make sure trees are compatible
         if self.m != other.m:
-            raise ValueError("Trees passed to sparse_distance_matrix have different dimensionality")
+            raise ValueError("Trees passed to count_neighbors have different dimensionality")
 
-        # Calculate mins and maxes to outer box
-        tracker = RectRectDistanceTracker(
-            Rectangle(self.mins, self.maxes),
-            Rectangle(other.mins, other.maxes),
-            p, 0, max_distance)
+        # Make a copy of r array to ensure it's contiguous and to modify it below
+        if np.shape(r) == ():
+            real_r = np.array([r], dtype=np.float64)
+            n_queries = 1
+        elif len(np.shape(r))==1:
+            real_r = np.array(r, dtype=np.float64)
+            n_queries = r.shape[0]
+        else:
+            raise ValueError("r must be either a single value or a one-dimensional array of values")
+
+        # Internally, we represent all distances as distance ** p
+        if p != infinity:
+            for i in range(n_queries):
+                if real_r[i] != infinity:
+                    real_r[i] = real_r[i] ** p
+
+        # Track node-to-node min/max distances
+        tracker = RectRectDistanceTracker(Rectangle(self.mins, self.maxes),
+                                          Rectangle(other.mins, other.maxes),
+                                          p, 0.0, 0.0, period)
         
-        results = coo_entries()
-        self.__sparse_distance_matrix_traverse(other, results,
-                                               self.tree, other.tree,
-                                               tracker)
-        
-        return results.to_matrix(shape=(self.n, other.n)).todok()
+        results = np.zeros(self.n*n_queries, dtype=np.float64).reshape((self.n,n_queries))
+        cdef np.float64_t [:, :] results_view = results
+        idx = np.arange(n_queries, dtype=np.intp)
+        self.__wcount_neighbors_custom_traverse(other, n_queries,
+                                                &real_r[0], results_view, &idx[0],
+                                                self.tree, other.tree,
+                                                tracker,  <np.float64_t*>cperiod.data,
+                                                <np.float64_t*>csweights.data,
+                                                <np.float64_t*>coweights.data,
+                                                w, 
+                                                <np.float64_t*>csaux.data,
+                                                <np.float64_t*>coaux.data)
+
+        if np.shape(r) == ():
+            return results[:,0]
+        elif len(np.shape(r))==1:
+            return results
 
 
 cdef class Function:
