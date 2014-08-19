@@ -57,7 +57,8 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
 
         :math:`1 + \\xi(r) \equiv DD / RR`, 
         where `DD` is calculated by the pair counter, 
-        and RR is counted by the internally defined `randoms` function.
+        and RR is counted by the internally defined `randoms` function if PBCs are given, 
+        otherwise, randoms must be passed.
 
         If sample2 is passed as input, three arrays of length Nrbins are returned: two for each of the 
         auto-correlation functions, and one for the cross-correlation function. 
@@ -78,18 +79,18 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         if np.shape(period) == ():
             period = np.array([period]*np.shape(data1)[-1])
         elif np.shape(period)[0] != np.shape(data1)[-1]:
-            raise ValueError("period should have len == dimension of points")
+            raise ValueError("period should have shape (k,)")
             return None
     
     k = np.shape(sample1)[-1] #dimensionality of data
     
     #check for input parameter consistency
     if (Lbox != None) & (np.max(rbins)>np.min(Lbox)/2.0):
-        raise ValueError('Cannot calculate for seperations larger than Lbox/2')
+        raise ValueError('Cannot calculate for seperations larger than Lbox/2.')
     if (sample2 != None) & (sample1.shape[-1]!=sample2.shape[-1]):
         raise ValueError('Sample 1 and sample 2 must have same dimension.')
     if (randoms == None) & (Lbox==None):
-        raise ValueError('If no PBCs are specified, randoms must be proved.')
+        raise ValueError('If no PBCs are specified, randoms must be provided.')
 
     def random_counts(sample1, sample2, randoms, rbins, period, k=3):
         """
@@ -177,9 +178,9 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         xi_11 = estimator(D1D1,D1R,RR,factor,method):
         return xi_11
     else:
-        xi_11 = estimator(D1D1,D1R,RR,factor,method):
-        xi_12 = estimator(D1D2,D1R,RR,factor,method):
-        xi_22 = estimator(D2D2,D2R,RR,factor,method):
+        xi_11 = estimator(D1D1,D1R,RR,factor1,method):
+        xi_12 = estimator(D1D2,D1R,RR,factor1,method):
+        xi_22 = estimator(D2D2,D2R,RR,factor2,method):
         return xi_11, xi_12, xi_22
 
 
