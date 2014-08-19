@@ -18,12 +18,10 @@ import read_nbody
 import halo_occupation as ho
 import numpy as np
 
-from scipy.integrate import quad as quad
 from scipy.interpolate import interp1d as interp1d
 from scipy.stats import poisson
 
 import defaults
-import cPickle
 import os
 from copy import copy
 from collections import Counter
@@ -100,7 +98,8 @@ class HOD_mock(object):
         self.halo_occupation_model = hod_model_instance
 
         # Create numpy arrays containing data from the halo catalog and bind them to the mock object
-        self.primary_halo_property = np.array(self.halos[self.halo_occupation_model.primary_halo_property_key])
+        self.primary_halo_property = np.array(
+            self.halos[self.halo_occupation_model.primary_halo_property_key])
         if self.halo_occupation_model.primary_halo_property_key == 'MVIR':
             self.primary_halo_property = np.log10(self.primary_halo_property)
 
@@ -298,11 +297,10 @@ class HOD_mock(object):
 
         self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
 
-        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-            self.isQuenched[self.num_total_cens:-1] = self.quenched_monte_carlo(
-                self.logMhost[self.num_total_cens:-1],
-                self.halo_occupation_model,'satellite')
-
+        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+        #    self.isQuenched[self.num_total_cens:-1] = self.quenched_monte_carlo(
+        #        self.logMhost[self.num_total_cens:-1],
+        #        self.halo_occupation_model,'satellite')
 
     def num_cen_monte_carlo(self,logM,hod_model):
         """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
