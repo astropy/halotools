@@ -141,9 +141,9 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
                 rho2 = N2/global_volume
                 D2R = N2*(dv*rho2)
                 #calculate the random-random pairs.
-                NR = N1+N2
+                NR = N1*N2
                 rhor = NR/global_volume
-                RR = NR*(dv*rhor)
+                RR = (dv*rhor)
             else: #if not calculating cross-correlation, set RR exactly equal to D1R.
                 D2R = D1R #we don't really need this, but set it to something harmless.
                 RR = D1R
