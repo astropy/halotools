@@ -16,7 +16,7 @@ import pairs
 def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None, 
                                    period = None, max_sample_size=int(1e4), 
                                    estimator='Landy-Szalay'):
-    """ Place-holder function for the two-point function. 
+    """ Calculate the two-point correlation function. 
 
     Parameters 
     ----------
@@ -65,6 +65,11 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
 
     """
     
+    def list_estimators():
+        estimators = ['Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay']
+        return estimators
+    estimators = list_estimators()
+    
     #process input parameters
     sample1 = np.asarray(sample1)
     if sample2 != None: sample2 = np.asarray(sample2)
@@ -78,55 +83,66 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         period = np.asarray(period).astype("float64")
         if np.shape(period) == ():
             period = np.array([period]*np.shape(data1)[-1])
-        elif np.shape(period)[0] != np.shape(data1)[-1]:
+        elif np.shape(period)[0] != np.shape(sample1)[-1]:
             raise ValueError("period should have shape (k,)")
             return None
     
     k = np.shape(sample1)[-1] #dimensionality of data
     
     #check for input parameter consistency
-    if (Lbox != None) & (np.max(rbins)>np.min(Lbox)/2.0):
+    if (period != None) & (np.max(rbins)>np.min(period)/2.0):
         raise ValueError('Cannot calculate for seperations larger than Lbox/2.')
     if (sample2 != None) & (sample1.shape[-1]!=sample2.shape[-1]):
         raise ValueError('Sample 1 and sample 2 must have same dimension.')
-    if (randoms == None) & (Lbox==None):
+    if (randoms == None) & (min(period)==np.inf):
         raise ValueError('If no PBCs are specified, randoms must be provided.')
+    if estimator not in estimators: 
+        raise ValueError('Must specify a supported estimator. Supported estimators are:{0}'.value(estimators))
 
+    #If PBCs are defined, calculate the randoms analytically. Else, the user must specify 
+    #randoms and the pair counts are calculated the old fashion way.
     def random_counts(sample1, sample2, randoms, rbins, period, k=3):
         """
         Count random pairs.
         """
         def nball_volume(R,k):
             """
-            Calculate the volume of a n-shpere with.
+            Calculate the volume of a n-shpere.
             """
-            return (pi**(k/2)/gamma(k/2+1))*R**k
+            return (pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
         
-        if Lbox==None:
+        #If not using PBCs, you must have randoms.
+        if np.min(period)==np.inf:
             RR = pairs.npairs(randoms, randoms, rbins, period=period)
             RR = np.diff(RR)
             D1R = pairs.npairs(sample1, randoms, rbins, period=period)
             D1R = np.diff(D1R)
-            if sample1 != sample2:
+            if sample1 != sample2: #if calculating the cross-correlation
                 D2R = pairs.npairs(sample2, randoms, rbins, period=period)
                 D2R = np.diff(D2R)
             else: D2R = D1R
             
             return D1R, D2R, RR
-        else:
-        
+        else: #If you do have PBCs, calculate the randoms analytically.
             dv = nball_volume(rbins,k)
             dv = np.diff(dv)
-        
+            
             N1 = np.shape(sample1)[0]
-            global_volume = Lbox**k
+            global_volume = period.prod()
             rho1 = N1/global_volume
-            D1R = 0.5*(dv*rho1)*(dv*rho1-1.0)
-            if sample1 != sample2:
+            
+            D1R = N1*(dv*rho1)
+            
+            if np.all(sample1 != sample2): #if calculating the cross-correlation
                 N2 = np.shape(sample2)[0]
                 rho2 = N2/global_volume
-                D2R = 0.5*(dv*rho2)*(dv*rho2-1.0)
-            else: D2R = D1R
+                D2R = N2*(dv*rho2)
+                NR = N1+N2
+                rhor = NR/global_volume
+                RR = NR*(dv*rhor)
+            else: 
+                D2R = D1R
+                RR = D1R
 
             return D1R, D2R, RR
     
@@ -134,12 +150,12 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         """
         Count data pairs.
         """
-        D1D1 = pairs.npairs(sampel1, sample2, rbins, period=period)
+        D1D1 = pairs.npairs(sample1, sample1, rbins, period=period)
         D1D1 = np.diff(D1D1)
-        if sample1 != sample2
-            D1D2 = pairs.npairs(sampel1, sample2, rbins, period=period)
+        if np.all(sample1 != sample2):
+            D1D2 = pairs.npairs(sample1, sample2, rbins, period=period)
             D1D2 = np.diff(D1D2)
-            D2D2 = pairs.npairs(sampel2, sample2, rbins, period=period)
+            D2D2 = pairs.npairs(sample2, sample2, rbins, period=period)
             D2D2 = np.diff(D2D2)
         else:
             D1D2 = D1D1
@@ -147,23 +163,25 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
 
         return D1D1, D1D2, D2D2
         
-    def estimator(DD,DR,RR,factor,method):
-       """
-       two point correlation function estimator
-       """
-       if estimator == 'Natural':
-           xi = (1.0/factor**2.0)*DD/RR - 1.0
-       elif estimator == 'Davis-Peebles':
-           xi = (1.0/factor)*DD/DR - 1.0
-       elif estimator == 'Hewett':
-           xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*DR/RR #(DD-DR)/RR
-       elif estimator == 'Hamilton':
-           xi = (DD*RR)/(DR*DR) - 1.0
-       elif estimator == 'Landy-Szalay':
-           xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*2DR/RR + 1.0 #(DD - 2.0*DR + RR)/RR
-       return xi
+    def TP_estimator(DD,DR,RR,factor,estimator):
+        """
+        two point correlation function estimator
+        """
+        if estimator == 'Natural':
+            xi = (1.0/factor**2.0)*DD/RR - 1.0
+        elif estimator == 'Davis-Peebles':
+            xi = (1.0/factor)*DD/DR - 1.0
+        elif estimator == 'Hewett':
+            xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*DR/RR #(DD-DR)/RR
+        elif estimator == 'Hamilton':
+            xi = (DD*RR)/(DR*DR) - 1.0
+        elif estimator == 'Landy-Szalay':
+            xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*2.0*DR/RR + 1.0 #(DD - 2.0*DR + RR)/RR
+        else: 
+            raise ValueError("unsupported estimator!")
+        return xi
               
-    if randoms != None    
+    if randoms != None:
         factor1 = (len(sample1)*1.0)/len(randoms)
         factor2 = (len(sample2)*1.0)/len(randoms)
     else: 
@@ -174,13 +192,13 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
     D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rbins, period)
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period, k=k) 
     
-    if sample2==sample1:
-        xi_11 = estimator(D1D1,D1R,RR,factor,method):
+    if np.all(sample2==sample1):
+        xi_11 = TP_estimator(D1D1,D1R,RR,factor1,estimator)
         return xi_11
     else:
-        xi_11 = estimator(D1D1,D1R,RR,factor1,method):
-        xi_12 = estimator(D1D2,D1R,RR,factor1,method):
-        xi_22 = estimator(D2D2,D2R,RR,factor2,method):
+        xi_11 = TP_estimator(D1D1,D1R,RR,factor1,estimator)
+        xi_12 = TP_estimator(D1D2,D1R,RR,factor1,estimator)
+        xi_22 = TP_estimator(D2D2,D2R,RR,factor2,estimator)
         return xi_11, xi_12, xi_22
 
 
