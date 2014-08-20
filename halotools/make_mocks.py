@@ -88,6 +88,8 @@ class HOD_mock(object):
         # Add columns to the halos table to store the halo type for centrals & satellites
         self.halos['HALO_TYPE_CENTRALS']=np.zeros(len(self.halos))
         self.halos['HALO_TYPE_SATELLITES']=np.zeros(len(self.halos))
+        self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
+        self.halos['SECONDARY_HALO_PROPERTY']=np.zeros(len(self.halos))
 
         # Test to make sure the hod model is the appropriate type
         hod_model_instance = halo_occupation_model(threshold=threshold)
@@ -100,16 +102,26 @@ class HOD_mock(object):
         # Create numpy arrays containing data from the halo catalog and bind them to the mock object
         self.primary_halo_property = np.array(
             self.halos[self.halo_occupation_model.primary_halo_property_key])
+        self.halos['PRIMARY_HALO_PROPERTY']=np.array(
+            self.halos[self.halo_occupation_model.primary_halo_property_key])
+
         if self.halo_occupation_model.primary_halo_property_key == 'MVIR':
             self.primary_halo_property = np.log10(self.primary_halo_property)
+            self.halos['PRIMARY_HALO_PROPERTY']=np.log10(self.halos['PRIMARY_HALO_PROPERTY'])
 
         if isinstance(self.halo_occupation_model,ho.Assembly_Biased_HOD_Model):
             self.secondary_halo_property = np.array(
                 self.halos[self.halo_occupation_model.secondary_halo_property_key])
+            self.halos['SECONDARY_HALO_PROPERTY'] = np.array(
+                self.halos[self.halo_occupation_model.secondary_halo_property_key])
+
+        self.halo_type = self.halos['HALO_TYPE_CENTRALS']
 
 
         self.haloID = np.array(self.halos['ID'])
-        self.concen = self.halo_occupation_model.mean_concentration(self.primary_halo_property)
+        self.concen = self.halo_occupation_model.mean_concentration(
+            self.halos['PRIMARY_HALO_PROPERTY'],self.halos['HALO_TYPE_CENTRALS'])
+
         self.Rvir = np.array(self.halos['RVIR'])/1000.
         self.halo_type = np.zeros(len(self.halos))
 
@@ -165,13 +177,14 @@ class HOD_mock(object):
         #        self.primary_halo_property,self.halo_occupation_model,'central')
 
         self.NCen = self.num_cen_monte_carlo(
-            self.primary_halo_property,self.halo_occupation_model)
+            self.primary_halo_property,self.halo_type)
         self.hasCentral = self.NCen > 0
 
         self.NSat = np.zeros(len(self.primary_halo_property),dtype=int)
         self.NSat[self.hasCentral] = self.num_sat_monte_carlo(
             self.primary_halo_property[self.hasCentral],
-            self.halo_occupation_model,output=self.NSat[self.hasCentral])
+            self.halo_type[self.hasCentral],
+            output=self.NSat[self.hasCentral])
 
         self.num_total_cens = self.NCen.sum()
         self.num_total_sats = self.NSat.sum()
@@ -302,7 +315,7 @@ class HOD_mock(object):
         #        self.logMhost[self.num_total_cens:-1],
         #        self.halo_occupation_model,'satellite')
 
-    def num_cen_monte_carlo(self,logM,hod_model):
+    def num_cen_monte_carlo(self,primary_halo_property,halo_type):
         """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
 
         Parameters
@@ -318,12 +331,15 @@ class HOD_mock(object):
 
         
         """
+        mean_ncen_array = self.halo_occupation_model.mean_ncen(
+            primary_halo_property,halo_type)
+
         num_ncen_array = np.array(
-            hod_model.mean_ncen(logM) > np.random.random(len(logM)),dtype=int)
+            mean_ncen_array > np.random.random(len(primary_halo_property)),dtype=int)
 
         return num_ncen_array
 
-    def num_sat_monte_carlo(self,logM,hod_model,output=None):
+    def num_sat_monte_carlo(self,primary_halo_property,halo_type,output=None):
         """  Returns Monte Carlo-generated array of integers specifying the number of satellites in the halo.
 
         Parameters
@@ -339,7 +355,8 @@ class HOD_mock(object):
 
 
         """
-        Prob_sat = hod_model.mean_nsat(logM)
+        Prob_sat = self.halo_occupation_model.mean_nsat(
+            primary_halo_property,halo_type)
         # NOTE: need to cut at zero, otherwise poisson bails
         # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
         test = Prob_sat <= 0
@@ -349,7 +366,7 @@ class HOD_mock(object):
 
         return num_nsat_array
 
-    def quenched_monte_carlo(self,logM,halo_occupation_model,galaxy_type):
+    def quenched_monte_carlo(self,primary_halo_property,halo_type,galaxy_type):
         """ Returns Monte Carlo-generated array of 0 or 1 specifying whether the galaxy is quenched.
         Parameters
         ----------
@@ -369,20 +386,20 @@ class HOD_mock(object):
 
         """
 
-        if not isinstance(halo_occupation_model,ho.HOD_Quenching_Model):
+        if not isinstance(self.halo_occupation_model,ho.HOD_Quenching_Model):
             raise TypeError("input halo_occupation_model must be an instance of a supported HOD_Quenching_Model, or one if its derived subclasses")
 
         if galaxy_type == 'central':
-            quenching_function = halo_occupation_model.mean_quenched_fraction_centrals
+            quenching_function = self.halo_occupation_model.mean_quenched_fraction_centrals
         elif galaxy_type == 'satellite':
-            quenching_function = halo_occupation_model.mean_quenched_fraction_satellites
+            quenching_function = self.halo_occupation_model.mean_quenched_fraction_satellites
         else:
             raise TypeError("input galaxy_type must be a string set either to 'central' or 'satellite'")
 
 
         quenched_array = np.array(
-            quenching_function(logM) > np.random.random(
-                len(logM)),dtype=int)
+            quenching_function(primary_halo_property,halo_type) > np.random.random(
+                len(primary_halo_property)),dtype=int)
 
         return quenched_array
 

@@ -193,27 +193,29 @@ class HOD_Model(object):
         self.threshold = threshold
 
     @abstractmethod
-    def mean_ncen(self,primary_halo_property):
+    def mean_ncen(self,primary_halo_property,halo_type):
         """
         Expected number of central galaxies in a halo 
-        as a function of the primary property.
+        as a function of the primary property :math:`p` 
+        and binary-valued halo type :math:`h_{i}`
 
         Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_ncen is not implemented")
 
     @abstractmethod
-    def mean_nsat(self,primary_halo_property):
+    def mean_nsat(self,primary_halo_property,halo_type):
         """
         Expected number of satellite galaxies in a halo 
-        as a function of the primary property.
+        as a function of the primary property :math:`p` 
+        and binary-valued halo type :math:`h_{i}`
 
         Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_nsat is not implemented")
 
     @abstractmethod
-    def mean_concentration(self,primary_halo_property):
+    def mean_concentration(self,primary_halo_property,halo_type):
         """
         Concentration-halo relation assumed by the model. 
         Used to assign positions to satellites.
@@ -284,7 +286,7 @@ class Zheng07_HOD_Model(HOD_Model):
         """
         return 'MVIR'
 
-    def mean_ncen(self,logM):
+    def mean_ncen(self,logM,halo_type):
         """ Expected number of central galaxies in a halo of mass logM.
         See Equation 2 of arXiv:0703457.
 
@@ -292,6 +294,11 @@ class Zheng07_HOD_Model(HOD_Model):
         ----------        
         logM : array 
             array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns
         -------
@@ -312,7 +319,7 @@ class Zheng07_HOD_Model(HOD_Model):
             (logM - self.parameter_dict['logMmin_cen'])/self.parameter_dict['sigma_logM']))
         return mean_ncen
 
-    def mean_nsat(self,logM):
+    def mean_nsat(self,logM,halo_type):
         """Expected number of satellite galaxies in a halo of mass logM.
         See Equation 5 of arXiv:0703457.
 
@@ -320,6 +327,11 @@ class Zheng07_HOD_Model(HOD_Model):
         ----------
         logM : array 
             array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns
         -------
@@ -330,21 +342,24 @@ class Zheng07_HOD_Model(HOD_Model):
 
 
         """
-
+        halo_type = np.array(halo_type)
         logM = np.array(logM)
         halo_mass = 10.**logM
+
 
         M0 = 10.**self.parameter_dict['logM0_sat']
         M1 = 10.**self.parameter_dict['logM1_sat']
         mean_nsat = np.zeros(len(logM),dtype='f8')
         idx_nonzero_satellites = (halo_mass - M0) > 0
-        mean_nsat[idx_nonzero_satellites] = self.mean_ncen(
-            logM[idx_nonzero_satellites])*(
-            ((halo_mass[idx_nonzero_satellites] - M0)/M1)
-            **self.parameter_dict['alpha_sat'])
+
+        mean_nsat[idx_nonzero_satellites] = (
+        	self.mean_ncen(
+            logM[idx_nonzero_satellites],halo_type[idx_nonzero_satellites])*
+            (((halo_mass[idx_nonzero_satellites] - M0)/M1)
+            **self.parameter_dict['alpha_sat']))
         return mean_nsat
 
-    def mean_concentration(self,logM):
+    def mean_concentration(self,logM,halo_type):
         """
         Concentration-mass relation of the model.
 
@@ -352,6 +367,11 @@ class Zheng07_HOD_Model(HOD_Model):
         ----------
 
         logM : array_like
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns 
         -------
@@ -782,8 +802,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         test_zero = (probability_type0_input_halo_type0 == 0)
         output_destruction_input_halo_type0[test_zero] = 0
 
-        # Now write the results back to the output (Why doesn't the above syntax
-            # work without this step?)
+        # Now write the results back to the output 
         output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
 
         return output_destruction_allhalos
@@ -872,8 +891,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         test_zero = (probability_type0_input_halo_type0 == 0)
         output_destruction_input_halo_type0[test_zero] = 0
 
-        # Now write the results back to the output (Why doesn't the above syntax
-            # work without this step?)
+        # Now write the results back to the output 
         output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
 
         return output_destruction_allhalos
@@ -1030,7 +1048,7 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
     def primary_halo_property_key(self):
         return 'MVIR'
 
-    def mean_concentration(self,primary_halo_property):
+    def mean_concentration(self,primary_halo_property,halo_type):
         """ Concentration-halo relation assumed by the underlying HOD_Model object.
         The appropriate method is already bound to the self.baseline_hod_model object.
 
@@ -1038,6 +1056,9 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
         ----------
         primary_halo_property : array_like
             array of primary halo property governing the occupation statistics 
+
+        halo_type : array 
+            array of halo types. 
 
         Returns 
         -------
@@ -1170,7 +1191,7 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
     def secondary_halo_property_key(self):
         return 'Z04'
 
-    def mean_concentration(self,primary_halo_property):
+    def mean_concentration(self,primary_halo_property,halo_type):
         """ Concentration-halo relation assumed by the underlying HOD_Model object.
         The appropriate method is already bound to the self.baseline_hod_model object.
 
@@ -1178,6 +1199,9 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
         ----------
         primary_halo_property : array_like
             array of primary halo property governing the occupation statistics 
+
+        halo_type : array 
+            array of halo types. 
 
         Returns 
         -------
@@ -1290,7 +1314,7 @@ class HOD_Quenching_Model(HOD_Model):
         pass
 
     @abstractmethod
-    def mean_quenched_fraction_centrals(self,logM):
+    def mean_quenched_fraction_centrals(self,logM,halo_type):
         """
         Expected fraction of centrals that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1299,7 +1323,7 @@ class HOD_Quenching_Model(HOD_Model):
             "quenched_fraction_centrals is not implemented")
 
     @abstractmethod
-    def mean_quenched_fraction_satellites(self,logM):
+    def mean_quenched_fraction_satellites(self,logM,halo_type):
         """
         Expected fraction of satellites that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1379,7 +1403,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
     def primary_halo_property_key(self):
         return 'MVIR'
 
-    def mean_ncen(self,primary_halo_property):
+    def mean_ncen(self,primary_halo_property,halo_type):
         """
         Expected number of central galaxies in a halo of mass logM.
         The appropriate method is already bound to the self.hod_model object.
@@ -1389,6 +1413,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         logM : array 
             array of log10(Mvir) of halos in catalog
 
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
+
         Returns
         -------
         mean_ncen : float or array
@@ -1396,10 +1425,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
 
         """
-        mean_ncen = self.baseline_hod_model.mean_ncen(primary_halo_property)
+        mean_ncen = self.baseline_hod_model.mean_ncen(
+        	primary_halo_property,halo_type)
         return mean_ncen
 
-    def mean_nsat(self,primary_halo_property):
+    def mean_nsat(self,primary_halo_property,halo_type):
         """
         Expected number of satellite galaxies in a halo of mass logM.
         The appropriate method is already bound to the self.hod_model object.
@@ -1409,6 +1439,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         logM : array 
             array of log10(Mvir) of halos in catalog
 
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
+
         Returns
         -------
         mean_nsat : float or array
@@ -1416,10 +1451,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
 
         """
-        mean_nsat = self.baseline_hod_model.mean_nsat(primary_halo_property)
+        mean_nsat = self.baseline_hod_model.mean_nsat(
+        	primary_halo_property,halo_type)
         return mean_nsat
 
-    def mean_concentration(self,primary_halo_property):
+    def mean_concentration(self,primary_halo_property,halo_type):
         """ Concentration-mass relation assumed by the underlying HOD_Model object.
         The appropriate method is already bound to the self.hod_model object.
 
@@ -1428,13 +1464,19 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         logM : array 
             array of log10(Mvir) of halos in catalog
 
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
+
         Returns 
         -------
         concentrations : array
 
         """
 
-        concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
+        concentrations = self.baseline_hod_model.mean_concentration(
+        	primary_halo_property,halo_type)
         return concentrations
 
     def quenching_polynomial_model(self,abcissa,ordinates,primary_halo_property):
@@ -1454,7 +1496,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
         return output_quenched_fractions
 
-    def mean_quenched_fraction_centrals(self,primary_halo_property):
+    def mean_quenched_fraction_centrals(self,primary_halo_property,halo_type):
         """
         Expected fraction of centrals that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1463,6 +1505,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         ----------
         logM : array_like
             array of log10(Mvir) of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns 
         -------
@@ -1488,7 +1535,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
  
         return mean_quenched_fractions
 
-    def mean_quenched_fraction_satellites(self,primary_halo_property):
+    def mean_quenched_fraction_satellites(self,primary_halo_property,halo_type):
         """
         Expected fraction of satellites that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1497,6 +1544,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         ----------
         logM : array_like
             array of log10(Mvir) of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns 
         -------
