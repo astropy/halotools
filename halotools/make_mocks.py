@@ -78,7 +78,8 @@ class HOD_mock(object):
 
         # If no simulation object is passed to the constructor, 
         # the default simulation will be chosen
-        # Currently this 
+        # Currently this set to be Bolshoi at z=0, 
+        # as specified in the defaults module
         if simulation_data is None:
             simulation_data = read_nbody.simulation()
 
@@ -86,9 +87,11 @@ class HOD_mock(object):
         if not isinstance(simulation_data.halos,astropy.table.table.Table):
             raise TypeError("HOD_mock object requires an astropy Table object as input")
 
+        # Bind halo catalog to the HOD_mock object
         self.halos = simulation_data.halos
         self.Lbox = simulation_data.Lbox
-        # Add columns to the halos table to store the halo type for centrals & satellites
+
+        # Add columns to the halos table attribute of the mock object
         self.halos['HALO_TYPE_CENTRALS']=np.ones(len(self.halos))
         self.halos['HALO_TYPE_SATELLITES']=np.ones(len(self.halos))
         self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
@@ -99,7 +102,7 @@ class HOD_mock(object):
         if not isinstance(hod_model_instance,ho.HOD_Model):
             raise TypeError("HOD_mock object requires input halo_occupation_model "
                 "to be an instance of halo_occupation.HOD_Model, or one of its subclasses")
-        # Bind the instance of the hod model to the mock instance
+        # Bind the instance of the hod model to the HOD_mock object
         self.halo_occupation_model = hod_model_instance
 
         # Create numpy arrays containing data from the halo catalog and bind them to the mock object

@@ -353,7 +353,7 @@ class Zheng07_HOD_Model(HOD_Model):
         idx_nonzero_satellites = (halo_mass - M0) > 0
 
         mean_nsat[idx_nonzero_satellites] = (
-        	self.mean_ncen(
+            self.mean_ncen(
             logM[idx_nonzero_satellites],halo_type[idx_nonzero_satellites])*
             (((halo_mass[idx_nonzero_satellites] - M0)/M1)
             **self.parameter_dict['alpha_sat']))
@@ -944,7 +944,10 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         return self.destruction_satellites(primary_halo_property,halo_type)*(
             self.baseline_hod_model.mean_nsat(primary_halo_property))
 
-    def host_halo_type_calculator_centrals(self, primary_halo_property, secondary_halo_property, halo_type):
+    def halo_type_calculator(self, 
+        primary_halo_property, secondary_halo_property,
+        halo_type_fraction_function,
+        bin_spacing = defaults.default_halo_type_calculator_spacing):
         """ Determines the assembly bias type of the input halos, as pertains to centrals.
 
         Method bins the input halos by the primary halo property :math:`p`, splits each bin 
@@ -966,29 +969,61 @@ class Assembly_Biased_HOD_Model(HOD_Model):
             whose fractional representation is being returned.
 
         """
-        pass
+        halo_types = np.ones(len(primary_halo_property))
 
-    def host_halo_type_calculator_satellites(self, primary_halo_property, secondary_halo_property, halo_type):
-        """ Determines the assembly bias type of the input halos, as pertains to satellites.
+        # set up binning scheme
+        # Uses numpy.linspace, so the primary halo property 
+        # is presumed to be a logarithmic quantity
+        # Therefore, be careful if not using logMvir
+        minimum = primary_halo_property.min()
+        maximum = primary_halo_property.max() + defaults.default_bin_max_epsilon
+        Nbins = int(round((maximum-minimum)/bin_spacing))
+        primary_halo_property_bins = np.linspace(minimum,maximum,num=Nbins)
 
-        Method bins the input halos by the primary halo property :math:`p`, splits each bin 
-        according to the value of `halo_type_fraction_satellites` in the bin, 
-        and assigns halo type :math:`h_{0} (h_{1})` to the halos below (above) the split.
+        # Determine the fraction by which 
+        # each bin in the primary halo property should be split
+        bin_midpoints = (primary_halo_property_bins[0:-1] + 
+            np.diff(primary_halo_property_bins)/2.)
+        bin_splitting_fraction = halo_type_fraction_function(bin_midpoints)
 
-        Parameters 
-        ----------
-        primary_halo_property : array_like
-            Array with elements equal to the primary_halo_property 
+        # Find the bin index of every halo
+        array_of_bin_indices = np.digitize(primary_halo_property,primary_halo_property_bins)-1
 
-        secondary_halo_property : array_like
-            Array with elements equal to the value of the secondary_halo_property 
+        # Loop over bins of the primary halo property 
+        # containing at least one member
+        for bin_index_i in set(array_of_bin_indices):
+            # For all halos in bin = bin_index_i, 
+            # grab their secondary halo property
+            secondary_property_of_halos_with_bin_index_i = (
+                secondary_halo_property[(array_of_bin_indices==bin_index_i)])
+            # grab the corresponding elements of the output array
+            halo_types_with_bin_index_i = (
+                halo_types[(array_of_bin_indices==bin_index_i)])
+            # determine how the halos in this bin should be sorted
+            array_of_indices_that_would_sort_bin_i = (
+                np.argsort(secondary_property_of_halos_with_bin_index_i))
+            # split the bin according to the input halo type fraction function
+            bin_splitting_index = int(round(
+                len(array_of_indices_that_would_sort_bin_i)*
+                bin_splitting_fraction[bin_index_i]))
+            # Now for all halos in bin i 
+            # whose secondary property is below the splitting fraction of the bin, 
+            # set the halo type of those halos equal to zero.
+            # Since the halo type array was initialized to unity, 
+            # the remaining halo types pertaining to secondary property values 
+            # above the splitting fraction of the bin 
+            # already have their halo type set correctly
+            print('BEFORE: maximum_halo_types_with_bin_index_i = ',halo_types_with_bin_index_i.max())
+            print('len(array_of_indices_that_would_sort_bin_i) = ',len(array_of_indices_that_would_sort_bin_i))
+            print('bin_splitting_index = ',bin_splitting_index)
+            halo_types_with_bin_index_i[array_of_indices_that_would_sort_bin_i[0:bin_splitting_index]] = 0
+            print('AFTER: maximum_halo_types_with_bin_index_i = ',halo_types_with_bin_index_i.max())
+            print('')
+            # Finally, write these values back to the output array 
+            halo_types[(array_of_bin_indices==bin_index_i)] = halo_types_with_bin_index_i
 
-        Returns 
-        -------
-        halo_type : array_like
-            Array with elements equal to 0 or 1, specifying the type of the halo 
-        """
-        pass
+        return halo_types
+        
 
 
 
@@ -1426,7 +1461,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
         """
         mean_ncen = self.baseline_hod_model.mean_ncen(
-        	primary_halo_property,halo_type)
+            primary_halo_property,halo_type)
         return mean_ncen
 
     def mean_nsat(self,primary_halo_property,halo_type):
@@ -1452,7 +1487,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
         """
         mean_nsat = self.baseline_hod_model.mean_nsat(
-        	primary_halo_property,halo_type)
+            primary_halo_property,halo_type)
         return mean_nsat
 
     def mean_concentration(self,primary_halo_property,halo_type):
@@ -1476,7 +1511,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         """
 
         concentrations = self.baseline_hod_model.mean_concentration(
-        	primary_halo_property,halo_type)
+            primary_halo_property,halo_type)
         return concentrations
 
     def quenching_polynomial_model(self,abcissa,ordinates,primary_halo_property):
