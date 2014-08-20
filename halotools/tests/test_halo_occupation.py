@@ -18,7 +18,8 @@ def test_zheng_model():
 
 	m = Zheng07_HOD_Model(threshold=-20.0)
 	test_mass = np.array([10,11,12,13,14,15])
-	test_mean_ncen = m.mean_ncen(test_mass)
+	halo_types = np.ones(len(test_mass))
+	test_mean_ncen = m.mean_ncen(test_mass,halo_types)
 
 	assert np.all(test_mean_ncen >= 0)
 
@@ -44,7 +45,8 @@ def test_satcen():
 	derived_nsat = (phs0*m.mean_nsat(primary_halo_property[idx0],halo_types[idx0]) + 
 		phs1*m.mean_nsat(primary_halo_property[idx1],halo_types[idx1]))
 	# Compute the value of mean_nsat of the underlying baseline HOD model
-	underlying_nsat = m.baseline_hod_model.mean_nsat(primary_halo_property[idx0])
+	underlying_nsat = m.baseline_hod_model.mean_nsat(
+		primary_halo_property[idx0],halo_types[idx0])
 	# Require that the derived and underlying 
 	# satellite occupations are equal (highly non-trivial)
 	assert np.allclose(derived_nsat, underlying_nsat,rtol=1e-6)
@@ -71,7 +73,7 @@ def test_abhod():
 	derived_nsat = (phs0*m.mean_nsat(primary_halo_property[idx0],halo_types[idx0]) + 
 		phs1*m.mean_nsat(primary_halo_property[idx1],halo_types[idx1]))
 	# Compute the value of mean_nsat of the underlying baseline HOD model
-	underlying_nsat = m.baseline_hod_model.mean_nsat(primary_halo_property[idx0])
+	underlying_nsat = m.baseline_hod_model.mean_nsat(primary_halo_property[idx0],halo_types[idx0])
 	# Require that the derived and underlying 
 	# satellite occupations are equal (highly non-trivial)
 	assert np.allclose(derived_nsat, underlying_nsat,rtol=1e-6)

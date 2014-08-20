@@ -78,7 +78,7 @@ default_halo_type_split = {
 default_halo_type_calculator_spacing=0.1
 
 
-
+default_assembias_key = 'SCALE_50VMAX_MPEAK'
 
 
 

@@ -12,7 +12,7 @@ Class design is built around future MCMC applications, so that
 lower level objects like numpy ndarrays are used to store object attributes, 
 for which it is cheaper and faster to allocate memory."""
 
-__all__= ['enforce_periodicity_of_box','quenched_monte_carlo','HOD_mock']
+__all__= ['enforce_periodicity_of_box','HOD_mock']
 
 import read_nbody
 import halo_occupation as ho
@@ -92,10 +92,11 @@ class HOD_mock(object):
         self.Lbox = simulation_data.Lbox
 
         # Add columns to the halos table attribute of the mock object
+        self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
+        self.halos['SECONDARY_HALO_PROPERTY_SATELLITES']=np.zeros(len(self.halos))
+        self.halos['SECONDARY_HALO_PROPERTY_CENTRALS']=np.zeros(len(self.halos))
         self.halos['HALO_TYPE_CENTRALS']=np.ones(len(self.halos))
         self.halos['HALO_TYPE_SATELLITES']=np.ones(len(self.halos))
-        self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
-        self.halos['SECONDARY_HALO_PROPERTY']=np.zeros(len(self.halos))
 
         # Test to make sure the hod model is the appropriate type
         hod_model_instance = halo_occupation_model(threshold=threshold)
@@ -111,15 +112,37 @@ class HOD_mock(object):
         self.halos['PRIMARY_HALO_PROPERTY']=np.array(
             self.halos[self.halo_occupation_model.primary_halo_property_key])
 
+        # Use log10Mvir instead of Mvir if this is the primary halo property
         if self.halo_occupation_model.primary_halo_property_key == 'MVIR':
             self.primary_halo_property = np.log10(self.primary_halo_property)
             self.halos['PRIMARY_HALO_PROPERTY']=np.log10(self.halos['PRIMARY_HALO_PROPERTY'])
 
+        # If the mock was passed an assembly-biased HOD model, 
+        # set the secondary halo property and compute halo_types 
         if isinstance(self.halo_occupation_model,ho.Assembly_Biased_HOD_Model):
-            self.secondary_halo_property = np.array(
-                self.halos[self.halo_occupation_model.secondary_halo_property_key])
-            self.halos['SECONDARY_HALO_PROPERTY'] = np.array(
-                self.halos[self.halo_occupation_model.secondary_halo_property_key])
+
+            # If assembly bias is desired for centrals, implement it.
+            if self.halo_occupation_model.secondary_halo_property_centrals_key != None:
+
+                self.halos['SECONDARY_HALO_PROPERTY_CENTRALS'] = np.array(
+                    self.halos[self.halo_occupation_model.secondary_halo_property_centrals_key])
+                self.halos['HALO_TYPE_CENTRALS'] = (
+                    self.halo_occupation_model.halo_type_calculator(
+                    self.halos['PRIMARY_HALO_PROPERTY'],
+                    self.halos['SECONDARY_HALO_PROPERTY_CENTRALS'],
+                    self.halo_occupation_model.halo_type1_fraction_centrals))
+
+            # If assembly bias is desired for centrals, implement it.
+            if self.halo_occupation_model.secondary_halo_property_satellites_key != None: 
+
+                self.halos['SECONDARY_HALO_PROPERTY_SATELLITES'] = np.array(
+                    self.halos[self.halo_occupation_model.secondary_halo_property_satellites_key])
+                self.halos['HALO_TYPE_SATELLITES'] = (
+                    self.halo_occupation_model.halo_type_calculator(
+                    self.halos['PRIMARY_HALO_PROPERTY'],
+                    self.halos['SECONDARY_HALO_PROPERTY_SATELLITES'],
+                    self.halo_occupation_model.halo_type1_fraction_satellites))
+
 
         self.halo_type = self.halos['HALO_TYPE_CENTRALS']
 

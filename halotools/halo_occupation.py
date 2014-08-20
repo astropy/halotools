@@ -498,6 +498,34 @@ class Assembly_Biased_HOD_Model(HOD_Model):
             "of baseline HOD and assembly-biased HOD model features")
         pass
 
+    @abstractproperty
+    def secondary_halo_property_centrals_key(self):
+        """ String providing halo catalog dictionary key pointing 
+        to primary halo property. Necessary to ensure self-consistency between 
+        underlying halo model, occupation-dependence of assembly bias, 
+        and color-dependence of assembly bias. 
+
+        """
+        raise NotImplementedError("secondary_halo_property_centrals_key "
+            "needs to be implemented to ensure self-consistency "
+            "of baseline HOD and assembly-biased HOD model features")
+        pass
+
+    @abstractproperty
+    def secondary_halo_property_satellites_key(self):
+        """ String providing halo catalog dictionary key pointing 
+        to primary halo property. Necessary to ensure self-consistency between 
+        underlying halo model, occupation-dependence of assembly bias, 
+        and color-dependence of assembly bias. 
+
+        """
+        raise NotImplementedError("secondary_halo_property_centrals_key "
+            "needs to be implemented to ensure self-consistency "
+            "of baseline HOD and assembly-biased HOD model features")
+        pass
+
+
+
     @abstractmethod
     def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
         """ Method determining :math:`\\tilde{D}_{cen}(p | h_{1})`, 
@@ -918,7 +946,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         """
         return self.destruction_centrals(primary_halo_property,halo_type)*(
-            self.baseline_hod_model.mean_ncen(primary_halo_property))
+            self.baseline_hod_model.mean_ncen(primary_halo_property,halo_type))
 
     def mean_nsat(self,primary_halo_property,halo_type):
         """ Override the baseline HOD method used to compute mean satellite occupation. 
@@ -942,7 +970,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         """
         return self.destruction_satellites(primary_halo_property,halo_type)*(
-            self.baseline_hod_model.mean_nsat(primary_halo_property))
+            self.baseline_hod_model.mean_nsat(primary_halo_property,halo_type))
 
     def halo_type_calculator(self, 
         primary_halo_property, secondary_halo_property,
@@ -984,7 +1012,9 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         # each bin in the primary halo property should be split
         bin_midpoints = (primary_halo_property_bins[0:-1] + 
             np.diff(primary_halo_property_bins)/2.)
-        bin_splitting_fraction = halo_type_fraction_function(bin_midpoints)
+        bin_splitting_fraction = (np.ones(len(bin_midpoints)) - 
+            np.array(halo_type_fraction_function(bin_midpoints)))
+        #print('bin_splitting_fraction = ',bin_splitting_fraction)
 
         # Find the bin index of every halo
         array_of_bin_indices = np.digitize(primary_halo_property,primary_halo_property_bins)-1
@@ -1013,12 +1043,12 @@ class Assembly_Biased_HOD_Model(HOD_Model):
             # the remaining halo types pertaining to secondary property values 
             # above the splitting fraction of the bin 
             # already have their halo type set correctly
-            print('BEFORE: maximum_halo_types_with_bin_index_i = ',halo_types_with_bin_index_i.max())
-            print('len(array_of_indices_that_would_sort_bin_i) = ',len(array_of_indices_that_would_sort_bin_i))
-            print('bin_splitting_index = ',bin_splitting_index)
+            #print('BEFORE: maximum_halo_types_with_bin_index_i = ',halo_types_with_bin_index_i.max())
+            #print('len(array_of_indices_that_would_sort_bin_i) = ',len(array_of_indices_that_would_sort_bin_i))
+            #print('bin_splitting_index = ',bin_splitting_index)
             halo_types_with_bin_index_i[array_of_indices_that_would_sort_bin_i[0:bin_splitting_index]] = 0
-            print('AFTER: maximum_halo_types_with_bin_index_i = ',halo_types_with_bin_index_i.max())
-            print('')
+            #print('AFTER: maximum_halo_types_with_bin_index_i = ',halo_types_with_bin_index_i.max())
+            #print('')
             # Finally, write these values back to the output array 
             halo_types[(array_of_bin_indices==bin_index_i)] = halo_types_with_bin_index_i
 
@@ -1081,7 +1111,15 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
 
     @property 
     def primary_halo_property_key(self):
-        return 'MVIR'
+        return self.baseline_hod_model.primary_halo_property_key
+
+    @property 
+    def secondary_halo_property_centrals_key(self):
+        return None
+
+    @property 
+    def secondary_halo_property_satellites_key(self):
+        return None
 
     def mean_concentration(self,primary_halo_property,halo_type):
         """ Concentration-halo relation assumed by the underlying HOD_Model object.
@@ -1101,7 +1139,8 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
 
         """
 
-        concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
+        concentrations = self.baseline_hod_model.mean_concentration(
+            primary_halo_property,halo_type)
         return concentrations
 
 
@@ -1125,9 +1164,12 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
         Halo types can be either given by fixed-Mvir rank-orderings 
         of the host halos, or by the input occupation statistics functions.
 
-         """
+        """
+        all_ones = np.ones(len(primary_halo_property))
 
-        output_array = np.array(self.baseline_hod_model.mean_ncen(primary_halo_property))
+        output_array = np.array(
+            self.baseline_hod_model.mean_ncen(
+                primary_halo_property,all_ones))
 
         return output_array
 
@@ -1171,9 +1213,11 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
     """
 
     def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
-            baseline_hod_parameter_dict=None,threshold=None,
+            baseline_hod_parameter_dict=None,
+            threshold=defaults.default_luminosity_threshold,
             assembias_parameter_dict=None,
-            secondary_halo_property_key='Z04'):
+            secondary_halo_property_centrals_key=defaults.default_assembias_key,
+            secondary_halo_property_satellites_key=defaults.default_assembias_key):
 
 
         baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
@@ -1181,10 +1225,11 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
             raise TypeError(
                 "Input baseline_hod_model must be one of "
                 "the supported HOD_Model objects defined in this module or by the user")
-        # Temporarily store the baseline HOD model object
-        # into a "private" attribute. This is a clunky workaround
+        # Temporarily store a few "private" attributes. This is a clunky workaround
         # to python's awkward conventions for required abstract properties
         self._baseline_hod_model = baseline_hod_model_instance
+        self._secondary_halo_property_centrals_key = secondary_halo_property_centrals_key
+        self._secondary_halo_property_satellites_key = secondary_halo_property_satellites_key
 
         # Executing the __init__ of the abstract base class Assembly_Biased_HOD_Model 
         # does nothing besides executing the __init__ of the abstract base class HOD_Model 
@@ -1220,11 +1265,15 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
 
     @property 
     def primary_halo_property_key(self):
-        return 'MVIR'
+        return self.baseline_hod_model.primary_halo_property_key
 
     @property 
-    def secondary_halo_property_key(self):
-        return 'Z04'
+    def secondary_halo_property_centrals_key(self):
+        return self._secondary_halo_property_centrals_key
+
+    @property 
+    def secondary_halo_property_satellites_key(self):
+        return self._secondary_halo_property_satellites_key
 
     def mean_concentration(self,primary_halo_property,halo_type):
         """ Concentration-halo relation assumed by the underlying HOD_Model object.
@@ -1244,7 +1293,9 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
 
         """
 
-        concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
+        concentrations = (
+            self.baseline_hod_model.mean_concentration(
+                primary_halo_property,halo_type))
         return concentrations
 
 
