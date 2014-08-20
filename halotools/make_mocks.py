@@ -144,7 +144,7 @@ class HOD_mock(object):
                     self.halo_occupation_model.halo_type1_fraction_satellites))
 
 
-        self.halo_type = self.halos['HALO_TYPE_CENTRALS']
+        #self.halo_type = self.halos['HALO_TYPE_CENTRALS']
 
         self.haloID = np.array(self.halos['ID'])
         self.concen = self.halo_occupation_model.mean_concentration(

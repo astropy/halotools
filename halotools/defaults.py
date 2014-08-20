@@ -59,9 +59,9 @@ default_quenching_parameters = {
     }
 
 default_assembias_parameters = {
-	'assembias_abcissa' : [12,14],
-	'satellite_assembias_ordinates' : [2,-1],
-	'central_assembias_ordinates' : [-51.0,500.1]
+	'assembias_abcissa' : [12,15],
+	'satellite_assembias_ordinates' : [2,1],
+	'central_assembias_ordinates' : [2,1]
 	}
 
 default_satcen_parameters = {
