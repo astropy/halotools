@@ -15,7 +15,7 @@ import pairs
 
 def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None, 
                                    period = None, max_sample_size=int(1e4), 
-                                   estimator='Landy-Szalay'):
+                                   estimator='Natural'):
     """ Calculate the two-point correlation function. 
 
     Parameters 
@@ -39,7 +39,7 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         If none, PBCs are set to infinity.
 
     max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the KDtree pair counter. 
+        Defines maximum size of the sample that will be passed to the pair counter. 
 
         If sample size exeeds max_sample_size, the sample will be randomly down-sampled 
         such that the subsamples are (roughly) equal to max_sample_size. 
@@ -126,16 +126,18 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         elif randoms != None: #You have PBCs and randoms.
             pass
         else: #If you have PBCs, and no specified randoms--do analytic calculation.
+            #do volume calculations
             dv = nball_volume(rbins,k)
             dv = np.diff(dv)
-            
-            N1 = np.shape(sample1)[0]
             global_volume = period.prod()
-            rho1 = N1/global_volume
             
+            #calculate randoms for sample1
+            N1 = np.shape(sample1)[0]
+            rho1 = N1/global_volume
             D1R = N1*(dv*rho1)
             
-            if np.all(sample1 != sample2): #if calculating the cross-correlation
+            #if there is a sample2, calculate randoms for it.
+            if np.all(sample1 != sample2):
                 N2 = np.shape(sample2)[0]
                 rho2 = N2/global_volume
                 D2R = N2*(dv*rho2)
