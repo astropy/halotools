@@ -201,9 +201,9 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         xi_11 = TP_estimator(D1D1,D1R,RR,factor1,estimator)
         return xi_11
     elif randoms == None:
-        xi_11 = TP_estimator(D1D1,D1R,D1R,factor1,estimator)
-        xi_12 = TP_estimator(D1D2,D1R,RR,factor1,estimator)
-        xi_22 = TP_estimator(D2D2,D2R,D2R,factor2,estimator)
+        xi_11 = TP_estimator(D1D1,D1R,D1R,1.0,estimator)
+        xi_12 = TP_estimator(D1D2,D1R,RR,1.0,estimator)
+        xi_22 = TP_estimator(D2D2,D2R,D2R,1.0,estimator)
         return xi_11, xi_12, xi_22
     else:
         xi_11 = TP_estimator(D1D1,D1R,RR,factor1,estimator)
