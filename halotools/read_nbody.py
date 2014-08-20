@@ -16,6 +16,7 @@ from configuration import Config
 import os
 import urllib2
 import warnings
+import defaults
 
 def load_bolshoi_host_halos_fits(simulation_dict=None):
     """Placeholder method using pyfits to load a pre-processed .fits file containing host halo information.
@@ -60,7 +61,10 @@ class simulation(object):
     
     """
     
-    def __init__(self,simulation_name='bolshoi', scale_factor=1.0003, halo_finder='rockstar_V1.5', use_subhalos=False):
+    def __init__(self,simulation_name=defaults.default_simulation_name, 
+        scale_factor=defaults.default_scale_factor, 
+        halo_finder=defaults.default_halo_finder, 
+        use_subhalos=False):
 
 
         self.simulation_name = simulation_name

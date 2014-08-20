@@ -8,6 +8,11 @@ Module expressing various default values of the mock-making code.
 
 
 ### Default halo catalog
+
+default_simulation_name = 'bolshoi'
+default_halo_finder = 'rockstar_V1.5'
+default_scale_factor = 1.0003
+
 default_halo_catalog_filename='/Users/aphearin/Dropbox/mock_for_surhud/VALUE_ADDED_HALOS/presorted_host_halo_catalog.fits'
 default_simulation_dict = {
 	'catalog_filename':default_halo_catalog_filename,

@@ -76,6 +76,9 @@ class HOD_mock(object):
     def __init__(self,simulation_data=None,
         halo_occupation_model=ho.vdB03_Quenching_Model,threshold = -20,seed=None):
 
+        # If no simulation object is passed to the constructor, 
+        # the default simulation will be chosen
+        # Currently this 
         if simulation_data is None:
             simulation_data = read_nbody.simulation()
 
@@ -86,8 +89,8 @@ class HOD_mock(object):
         self.halos = simulation_data.halos
         self.Lbox = simulation_data.Lbox
         # Add columns to the halos table to store the halo type for centrals & satellites
-        self.halos['HALO_TYPE_CENTRALS']=np.zeros(len(self.halos))
-        self.halos['HALO_TYPE_SATELLITES']=np.zeros(len(self.halos))
+        self.halos['HALO_TYPE_CENTRALS']=np.ones(len(self.halos))
+        self.halos['HALO_TYPE_SATELLITES']=np.ones(len(self.halos))
         self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
         self.halos['SECONDARY_HALO_PROPERTY']=np.zeros(len(self.halos))
 
@@ -123,7 +126,6 @@ class HOD_mock(object):
             self.halos['PRIMARY_HALO_PROPERTY'],self.halos['HALO_TYPE_CENTRALS'])
 
         self.Rvir = np.array(self.halos['RVIR'])/1000.
-        self.halo_type = np.zeros(len(self.halos))
 
         self.halopos = np.empty((len(self.halos),3),'f8')
         self.halopos.T[0] = np.array(self.halos['POS'][:,0])
