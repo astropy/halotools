@@ -123,7 +123,9 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
             else: D2R = D1R
             
             return D1R, D2R, RR
-        else: #If you do have PBCs, calculate the randoms analytically.
+        elif randoms != None: #You have PBCs and randoms.
+            pass
+        else: #If you have PBCs, and no specified randoms--do analytic calculation.
             dv = nball_volume(rbins,k)
             dv = np.diff(dv)
             
