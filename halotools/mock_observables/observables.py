@@ -133,7 +133,7 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
             #calculate randoms for sample1
             N1 = np.shape(sample1)[0]
             rho1 = N1/global_volume
-            D1R = (N1-1.0)*(dv*rho1)
+            D1R = (N1)*(dv*rho1) #note pair counter counts self pairs.
             
             #if there is a sample2, calculate randoms for it.
             if np.all(sample1 != sample2):
