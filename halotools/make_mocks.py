@@ -146,7 +146,6 @@ class HOD_mock(object):
 
         self.halo_type = self.halos['HALO_TYPE_CENTRALS']
 
-
         self.haloID = np.array(self.halos['ID'])
         self.concen = self.halo_occupation_model.mean_concentration(
             self.halos['PRIMARY_HALO_PROPERTY'],self.halos['HALO_TYPE_CENTRALS'])
@@ -205,13 +204,20 @@ class HOD_mock(object):
         #        self.primary_halo_property,self.halo_occupation_model,'central')
 
         self.NCen = self.num_cen_monte_carlo(
-            self.primary_halo_property,self.halo_type)
+            self.halos['PRIMARY_HALO_PROPERTY'],self.halos['HALO_TYPE_CENTRALS'])
         self.hasCentral = self.NCen > 0
 
-        self.NSat = np.zeros(len(self.primary_halo_property),dtype=int)
+        self.NSat = np.zeros(len(self.halos['PRIMARY_HALO_PROPERTY']),dtype=int)
+
+        # version 1
+#        self.NSat[self.hasCentral] = self.num_sat_monte_carlo(
+#            self.primary_halo_property[self.hasCentral],
+#            self.halo_type[self.hasCentral],
+#            output=self.NSat[self.hasCentral])
+        # version 2
         self.NSat[self.hasCentral] = self.num_sat_monte_carlo(
-            self.primary_halo_property[self.hasCentral],
-            self.halo_type[self.hasCentral],
+            self.halos['PRIMARY_HALO_PROPERTY'][self.hasCentral],
+            self.halos['HALO_TYPE_SATELLITES'][self.hasCentral],
             output=self.NSat[self.hasCentral])
 
         self.num_total_cens = self.NCen.sum()
