@@ -193,27 +193,29 @@ class HOD_Model(object):
         self.threshold = threshold
 
     @abstractmethod
-    def mean_ncen(self,primary_halo_property):
+    def mean_ncen(self,primary_halo_property,halo_type):
         """
         Expected number of central galaxies in a halo 
-        as a function of the primary property.
+        as a function of the primary property :math:`p` 
+        and binary-valued halo type :math:`h_{i}`
 
         Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_ncen is not implemented")
 
     @abstractmethod
-    def mean_nsat(self,primary_halo_property):
+    def mean_nsat(self,primary_halo_property,halo_type):
         """
         Expected number of satellite galaxies in a halo 
-        as a function of the primary property.
+        as a function of the primary property :math:`p` 
+        and binary-valued halo type :math:`h_{i}`
 
         Required method of any HOD_Model subclass.
         """
         raise NotImplementedError("mean_nsat is not implemented")
 
     @abstractmethod
-    def mean_concentration(self,primary_halo_property):
+    def mean_concentration(self,primary_halo_property,halo_type):
         """
         Concentration-halo relation assumed by the model. 
         Used to assign positions to satellites.
@@ -284,7 +286,7 @@ class Zheng07_HOD_Model(HOD_Model):
         """
         return 'MVIR'
 
-    def mean_ncen(self,logM):
+    def mean_ncen(self,logM,halo_type):
         """ Expected number of central galaxies in a halo of mass logM.
         See Equation 2 of arXiv:0703457.
 
@@ -292,6 +294,11 @@ class Zheng07_HOD_Model(HOD_Model):
         ----------        
         logM : array 
             array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns
         -------
@@ -312,7 +319,7 @@ class Zheng07_HOD_Model(HOD_Model):
             (logM - self.parameter_dict['logMmin_cen'])/self.parameter_dict['sigma_logM']))
         return mean_ncen
 
-    def mean_nsat(self,logM):
+    def mean_nsat(self,logM,halo_type):
         """Expected number of satellite galaxies in a halo of mass logM.
         See Equation 5 of arXiv:0703457.
 
@@ -320,6 +327,11 @@ class Zheng07_HOD_Model(HOD_Model):
         ----------
         logM : array 
             array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns
         -------
@@ -330,21 +342,24 @@ class Zheng07_HOD_Model(HOD_Model):
 
 
         """
-
+        halo_type = np.array(halo_type)
         logM = np.array(logM)
         halo_mass = 10.**logM
+
 
         M0 = 10.**self.parameter_dict['logM0_sat']
         M1 = 10.**self.parameter_dict['logM1_sat']
         mean_nsat = np.zeros(len(logM),dtype='f8')
         idx_nonzero_satellites = (halo_mass - M0) > 0
-        mean_nsat[idx_nonzero_satellites] = self.mean_ncen(
-            logM[idx_nonzero_satellites])*(
-            ((halo_mass[idx_nonzero_satellites] - M0)/M1)
-            **self.parameter_dict['alpha_sat'])
+
+        mean_nsat[idx_nonzero_satellites] = (
+            self.mean_ncen(
+            logM[idx_nonzero_satellites],halo_type[idx_nonzero_satellites])*
+            (((halo_mass[idx_nonzero_satellites] - M0)/M1)
+            **self.parameter_dict['alpha_sat']))
         return mean_nsat
 
-    def mean_concentration(self,logM):
+    def mean_concentration(self,logM,halo_type):
         """
         Concentration-mass relation of the model.
 
@@ -352,6 +367,11 @@ class Zheng07_HOD_Model(HOD_Model):
         ----------
 
         logM : array_like
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns 
         -------
@@ -477,6 +497,34 @@ class Assembly_Biased_HOD_Model(HOD_Model):
             "needs to be implemented to ensure self-consistency "
             "of baseline HOD and assembly-biased HOD model features")
         pass
+
+    @abstractproperty
+    def secondary_halo_property_centrals_key(self):
+        """ String providing halo catalog dictionary key pointing 
+        to primary halo property. Necessary to ensure self-consistency between 
+        underlying halo model, occupation-dependence of assembly bias, 
+        and color-dependence of assembly bias. 
+
+        """
+        raise NotImplementedError("secondary_halo_property_centrals_key "
+            "needs to be implemented to ensure self-consistency "
+            "of baseline HOD and assembly-biased HOD model features")
+        pass
+
+    @abstractproperty
+    def secondary_halo_property_satellites_key(self):
+        """ String providing halo catalog dictionary key pointing 
+        to primary halo property. Necessary to ensure self-consistency between 
+        underlying halo model, occupation-dependence of assembly bias, 
+        and color-dependence of assembly bias. 
+
+        """
+        raise NotImplementedError("secondary_halo_property_centrals_key "
+            "needs to be implemented to ensure self-consistency "
+            "of baseline HOD and assembly-biased HOD model features")
+        pass
+
+
 
     @abstractmethod
     def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
@@ -782,8 +830,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         test_zero = (probability_type0_input_halo_type0 == 0)
         output_destruction_input_halo_type0[test_zero] = 0
 
-        # Now write the results back to the output (Why doesn't the above syntax
-            # work without this step?)
+        # Now write the results back to the output 
         output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
 
         return output_destruction_allhalos
@@ -872,8 +919,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         test_zero = (probability_type0_input_halo_type0 == 0)
         output_destruction_input_halo_type0[test_zero] = 0
 
-        # Now write the results back to the output (Why doesn't the above syntax
-            # work without this step?)
+        # Now write the results back to the output 
         output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
 
         return output_destruction_allhalos
@@ -900,7 +946,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         """
         return self.destruction_centrals(primary_halo_property,halo_type)*(
-            self.baseline_hod_model.mean_ncen(primary_halo_property))
+            self.baseline_hod_model.mean_ncen(primary_halo_property,halo_type))
 
     def mean_nsat(self,primary_halo_property,halo_type):
         """ Override the baseline HOD method used to compute mean satellite occupation. 
@@ -924,9 +970,12 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         """
         return self.destruction_satellites(primary_halo_property,halo_type)*(
-            self.baseline_hod_model.mean_nsat(primary_halo_property))
+            self.baseline_hod_model.mean_nsat(primary_halo_property,halo_type))
 
-    def host_halo_type_calculator_centrals(self, primary_halo_property, secondary_halo_property, halo_type):
+    def halo_type_calculator(self, 
+        primary_halo_property, secondary_halo_property,
+        halo_type_fraction_function,
+        bin_spacing = defaults.default_halo_type_calculator_spacing):
         """ Determines the assembly bias type of the input halos, as pertains to centrals.
 
         Method bins the input halos by the primary halo property :math:`p`, splits each bin 
@@ -948,29 +997,63 @@ class Assembly_Biased_HOD_Model(HOD_Model):
             whose fractional representation is being returned.
 
         """
-        pass
+        halo_types = np.ones(len(primary_halo_property))
 
-    def host_halo_type_calculator_satellites(self, primary_halo_property, secondary_halo_property, halo_type):
-        """ Determines the assembly bias type of the input halos, as pertains to satellites.
+        # set up binning scheme
+        # Uses numpy.linspace, so the primary halo property 
+        # is presumed to be a logarithmic quantity
+        # Therefore, be careful if not using logMvir
+        minimum = primary_halo_property.min()
+        maximum = primary_halo_property.max() + defaults.default_bin_max_epsilon
+        Nbins = int(round((maximum-minimum)/bin_spacing))
+        primary_halo_property_bins = np.linspace(minimum,maximum,num=Nbins)
 
-        Method bins the input halos by the primary halo property :math:`p`, splits each bin 
-        according to the value of `halo_type_fraction_satellites` in the bin, 
-        and assigns halo type :math:`h_{0} (h_{1})` to the halos below (above) the split.
+        # Determine the fraction by which 
+        # each bin in the primary halo property should be split
+        bin_midpoints = (primary_halo_property_bins[0:-1] + 
+            np.diff(primary_halo_property_bins)/2.)
+        bin_splitting_fraction = (np.ones(len(bin_midpoints)) - 
+            np.array(halo_type_fraction_function(bin_midpoints)))
+        #print('bin_splitting_fraction = ',bin_splitting_fraction)
 
-        Parameters 
-        ----------
-        primary_halo_property : array_like
-            Array with elements equal to the primary_halo_property 
+        # Find the bin index of every halo
+        array_of_bin_indices = np.digitize(primary_halo_property,primary_halo_property_bins)-1
 
-        secondary_halo_property : array_like
-            Array with elements equal to the value of the secondary_halo_property 
+        # Loop over bins of the primary halo property 
+        # containing at least one member
+        for bin_index_i in set(array_of_bin_indices):
+            # For all halos in bin = bin_index_i, 
+            # grab their secondary halo property
+            secondary_property_of_halos_with_bin_index_i = (
+                secondary_halo_property[(array_of_bin_indices==bin_index_i)])
+            # grab the corresponding elements of the output array
+            halo_types_with_bin_index_i = (
+                halo_types[(array_of_bin_indices==bin_index_i)])
+            # determine how the halos in this bin should be sorted
+            array_of_indices_that_would_sort_bin_i = (
+                np.argsort(secondary_property_of_halos_with_bin_index_i))
+            # split the bin according to the input halo type fraction function
+            bin_splitting_index = int(round(
+                len(array_of_indices_that_would_sort_bin_i)*
+                bin_splitting_fraction[bin_index_i]))
+            # Now for all halos in bin i 
+            # whose secondary property is below the splitting fraction of the bin, 
+            # set the halo type of those halos equal to zero.
+            # Since the halo type array was initialized to unity, 
+            # the remaining halo types pertaining to secondary property values 
+            # above the splitting fraction of the bin 
+            # already have their halo type set correctly
+            #print('BEFORE: maximum_halo_types_with_bin_index_i = ',halo_types_with_bin_index_i.max())
+            #print('len(array_of_indices_that_would_sort_bin_i) = ',len(array_of_indices_that_would_sort_bin_i))
+            #print('bin_splitting_index = ',bin_splitting_index)
+            halo_types_with_bin_index_i[array_of_indices_that_would_sort_bin_i[0:bin_splitting_index]] = 0
+            #print('AFTER: maximum_halo_types_with_bin_index_i = ',halo_types_with_bin_index_i.max())
+            #print('')
+            # Finally, write these values back to the output array 
+            halo_types[(array_of_bin_indices==bin_index_i)] = halo_types_with_bin_index_i
 
-        Returns 
-        -------
-        halo_type : array_like
-            Array with elements equal to 0 or 1, specifying the type of the halo 
-        """
-        pass
+        return halo_types
+        
 
 
 
@@ -1028,9 +1111,17 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
 
     @property 
     def primary_halo_property_key(self):
-        return 'MVIR'
+        return self.baseline_hod_model.primary_halo_property_key
 
-    def mean_concentration(self,primary_halo_property):
+    @property 
+    def secondary_halo_property_centrals_key(self):
+        return None
+
+    @property 
+    def secondary_halo_property_satellites_key(self):
+        return None
+
+    def mean_concentration(self,primary_halo_property,halo_type):
         """ Concentration-halo relation assumed by the underlying HOD_Model object.
         The appropriate method is already bound to the self.baseline_hod_model object.
 
@@ -1039,13 +1130,17 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
         primary_halo_property : array_like
             array of primary halo property governing the occupation statistics 
 
+        halo_type : array 
+            array of halo types. 
+
         Returns 
         -------
         concentrations : numpy array
 
         """
 
-        concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
+        concentrations = self.baseline_hod_model.mean_concentration(
+            primary_halo_property,halo_type)
         return concentrations
 
 
@@ -1069,9 +1164,12 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
         Halo types can be either given by fixed-Mvir rank-orderings 
         of the host halos, or by the input occupation statistics functions.
 
-         """
+        """
+        all_ones = np.ones(len(primary_halo_property))
 
-        output_array = np.array(self.baseline_hod_model.mean_ncen(primary_halo_property))
+        output_array = np.array(
+            self.baseline_hod_model.mean_ncen(
+                primary_halo_property,all_ones))
 
         return output_array
 
@@ -1115,9 +1213,11 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
     """
 
     def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
-            baseline_hod_parameter_dict=None,threshold=None,
+            baseline_hod_parameter_dict=None,
+            threshold=defaults.default_luminosity_threshold,
             assembias_parameter_dict=None,
-            secondary_halo_property_key='Z04'):
+            secondary_halo_property_centrals_key=defaults.default_assembias_key,
+            secondary_halo_property_satellites_key=defaults.default_assembias_key):
 
 
         baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
@@ -1125,10 +1225,11 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
             raise TypeError(
                 "Input baseline_hod_model must be one of "
                 "the supported HOD_Model objects defined in this module or by the user")
-        # Temporarily store the baseline HOD model object
-        # into a "private" attribute. This is a clunky workaround
+        # Temporarily store a few "private" attributes. This is a clunky workaround
         # to python's awkward conventions for required abstract properties
         self._baseline_hod_model = baseline_hod_model_instance
+        self._secondary_halo_property_centrals_key = secondary_halo_property_centrals_key
+        self._secondary_halo_property_satellites_key = secondary_halo_property_satellites_key
 
         # Executing the __init__ of the abstract base class Assembly_Biased_HOD_Model 
         # does nothing besides executing the __init__ of the abstract base class HOD_Model 
@@ -1164,13 +1265,17 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
 
     @property 
     def primary_halo_property_key(self):
-        return 'MVIR'
+        return self.baseline_hod_model.primary_halo_property_key
 
     @property 
-    def secondary_halo_property_key(self):
-        return 'Z04'
+    def secondary_halo_property_centrals_key(self):
+        return self._secondary_halo_property_centrals_key
 
-    def mean_concentration(self,primary_halo_property):
+    @property 
+    def secondary_halo_property_satellites_key(self):
+        return self._secondary_halo_property_satellites_key
+
+    def mean_concentration(self,primary_halo_property,halo_type):
         """ Concentration-halo relation assumed by the underlying HOD_Model object.
         The appropriate method is already bound to the self.baseline_hod_model object.
 
@@ -1179,13 +1284,18 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
         primary_halo_property : array_like
             array of primary halo property governing the occupation statistics 
 
+        halo_type : array 
+            array of halo types. 
+
         Returns 
         -------
         concentrations : numpy array
 
         """
 
-        concentrations = self.baseline_hod_model.mean_concentration(primary_halo_property)
+        concentrations = (
+            self.baseline_hod_model.mean_concentration(
+                primary_halo_property,halo_type))
         return concentrations
 
 
@@ -1273,12 +1383,24 @@ class HOD_Quenching_Model(HOD_Model):
 
     def __init__(self):
 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        #sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []
         HOD_Model.__init__(self)
-        self.hod_model = None
 
+    @abstractproperty
+    def baseline_hod_model(self):
+        """ Underlying HOD model.
+
+        Must be one of the supported subclasses of `HOD_Model`. 
+        The baseline HOD model can in principle be driven 
+        by any host halo property, and can have distinct 
+        quenched/star-forming SMHM relations.
+        """
+        pass
 
     @abstractmethod
-    def mean_quenched_fraction_centrals(self,logM):
+    def mean_quenched_fraction_centrals(self,logM,halo_type):
         """
         Expected fraction of centrals that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1287,7 +1409,7 @@ class HOD_Quenching_Model(HOD_Model):
             "quenched_fraction_centrals is not implemented")
 
     @abstractmethod
-    def mean_quenched_fraction_satellites(self,logM):
+    def mean_quenched_fraction_satellites(self,logM,halo_type):
         """
         Expected fraction of satellites that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1312,22 +1434,32 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
     """
 
-    def __init__(self,hod_model=Zheng07_HOD_Model,
-        hod_parameter_dict=None,threshold=None,
+    def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
+        baseline_hod_parameter_dict=None,threshold=None,
         quenching_parameter_dict=None):
 
-        if not isinstance(hod_model(threshold=threshold),HOD_Model):
-            raise TypeError("input hod_model must be one of the supported HOD_Model objects defined in this module")
 
-        # Run initialization from super class. Currently not doing much.
+        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
+        if not isinstance(baseline_hod_model_instance,HOD_Model):
+            raise TypeError(
+                "Input baseline_hod_model must be one of "
+                "the supported HOD_Model objects defined in this module or by the user")
+        # Temporarily store the baseline HOD model object
+        # into a "private" attribute. This is a clunky workaround
+        # to python's awkward conventions for required abstract properties
+        self._baseline_hod_model = baseline_hod_model_instance
+        self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
+
+        self.threshold = threshold
+
+        # Executing the __init__ of the abstract base class HOD_Quenching_Model 
+        # does nothing besides executing the __init__ of the abstract base class HOD_Model 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        # sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []        
         HOD_Quenching_Model.__init__(self)
 
-
-        self.hod_model = hod_model(
-            parameter_dict = hod_parameter_dict,threshold = threshold)
-
-
-        self.publication.extend(self.hod_model.publication)
+        self.publication.extend(self._baseline_hod_model.publication)
         self.publication.extend(['arXiv:0210495v3'])
 
         # The baseline HOD parameter dictionary is already an attribute 
@@ -1338,24 +1470,26 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         # Otherwise, choose the default quenching model parameter set in defaults.py 
         # This should be more defensive. Fine for now.
         if quenching_parameter_dict is None:
-            quenching_parameter_dict = defaults.default_quenching_parameters
-        self.parameter_dict = dict(self.hod_model.parameter_dict.items() + 
-            quenching_parameter_dict.items())
+            self.quenching_parameter_dict = defaults.default_quenching_parameters
+        else:
+            # If the user supplies a dictionary of quenching parameters, 
+            # require that the set of keys is correct
+            self.require_correct_keys(quenching_parameter_dict)
+            # If correct, bind the input dictionary to the instance.
+            self.quenching_parameter_dict = quenching_parameter_dict
 
-        # The quenching parameter dictionary specifies the quenched fraction 
-        # at the input abcissa. Use this information to determine the unique polynomial
-        # satisfying those conditions, specified by a set of coefficients.
-        self.central_quenching_polynomial_coefficients = (
-            self.solve_for_quenching_polynomial_coefficients(
-                self.parameter_dict['quenching_abcissa'],
-                self.parameter_dict['central_quenching_ordinates']))
+        self.parameter_dict = dict(self.baseline_hod_parameter_dict.items() + 
+            self.quenching_parameter_dict.items())
 
-        self.satellite_quenching_polynomial_coefficients = (
-            self.solve_for_quenching_polynomial_coefficients(
-                self.parameter_dict['quenching_abcissa'],
-                self.parameter_dict['satellite_quenching_ordinates']))
+    @property
+    def baseline_hod_model(self):
+        return self._baseline_hod_model
 
-    def mean_ncen(self,logM):
+    @property 
+    def primary_halo_property_key(self):
+        return 'MVIR'
+
+    def mean_ncen(self,primary_halo_property,halo_type):
         """
         Expected number of central galaxies in a halo of mass logM.
         The appropriate method is already bound to the self.hod_model object.
@@ -1365,6 +1499,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         logM : array 
             array of log10(Mvir) of halos in catalog
 
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
+
         Returns
         -------
         mean_ncen : float or array
@@ -1372,10 +1511,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
 
         """
-        mean_ncen = self.hod_model.mean_ncen(logM)
+        mean_ncen = self.baseline_hod_model.mean_ncen(
+            primary_halo_property,halo_type)
         return mean_ncen
 
-    def mean_nsat(self,logM):
+    def mean_nsat(self,primary_halo_property,halo_type):
         """
         Expected number of satellite galaxies in a halo of mass logM.
         The appropriate method is already bound to the self.hod_model object.
@@ -1385,6 +1525,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         logM : array 
             array of log10(Mvir) of halos in catalog
 
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
+
         Returns
         -------
         mean_nsat : float or array
@@ -1392,10 +1537,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
 
         """
-        mean_nsat = self.hod_model.mean_nsat(logM)
+        mean_nsat = self.baseline_hod_model.mean_nsat(
+            primary_halo_property,halo_type)
         return mean_nsat
 
-    def mean_concentration(self,logM):
+    def mean_concentration(self,primary_halo_property,halo_type):
         """ Concentration-mass relation assumed by the underlying HOD_Model object.
         The appropriate method is already bound to the self.hod_model object.
 
@@ -1404,16 +1550,39 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         logM : array 
             array of log10(Mvir) of halos in catalog
 
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
+
         Returns 
         -------
         concentrations : array
 
         """
 
-        concentrations = self.hod_model.mean_concentration(logM)
+        concentrations = self.baseline_hod_model.mean_concentration(
+            primary_halo_property,halo_type)
         return concentrations
 
-    def mean_quenched_fraction_centrals(self,logM):
+    def quenching_polynomial_model(self,abcissa,ordinates,primary_halo_property):
+        coefficient_array = solve_for_polynomial_coefficients(
+            abcissa,ordinates)
+        output_quenched_fractions = (
+            np.zeros(len(primary_halo_property)))
+
+        # Use coefficients to compute values of the destruction function polynomial
+        for n,coeff in enumerate(coefficient_array):
+            output_quenched_fractions += coeff*primary_halo_property**n
+
+        test_negative = output_quenched_fractions < 0
+        output_quenched_fractions[test_negative] = 0
+        test_exceeds_unity = output_quenched_fractions > 1
+        output_quenched_fractions[test_exceeds_unity] = 1
+
+        return output_quenched_fractions
+
+    def mean_quenched_fraction_centrals(self,primary_halo_property,halo_type):
         """
         Expected fraction of centrals that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1422,6 +1591,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         ----------
         logM : array_like
             array of log10(Mvir) of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns 
         -------
@@ -1439,12 +1613,15 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         bound to the input object as an attribute.
          
         """
+        abcissa = self.quenching_parameter_dict['quenching_abcissa']
+        ordinates = self.quenching_parameter_dict['central_quenching_ordinates']
+
+        mean_quenched_fractions = self.quenching_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
  
-        coefficients = self.central_quenching_polynomial_coefficients
-        mean_quenched_fractions = self.quenching_polynomial(logM,coefficients)
         return mean_quenched_fractions
 
-    def mean_quenched_fraction_satellites(self,logM):
+    def mean_quenched_fraction_satellites(self,primary_halo_property,halo_type):
         """
         Expected fraction of satellites that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -1453,6 +1630,11 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         ----------
         logM : array_like
             array of log10(Mvir) of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way mean_ncen is called by different models.
 
         Returns 
         -------
@@ -1471,41 +1653,22 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         
         """
 
-        coefficients = self.satellite_quenching_polynomial_coefficients
-        mean_quenched_fractions = self.quenching_polynomial(logM,coefficients)
+        abcissa = self.quenching_parameter_dict['quenching_abcissa']
+        ordinates = self.quenching_parameter_dict['satellite_quenching_ordinates']
+
+        mean_quenched_fractions = self.quenching_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
+ 
         return mean_quenched_fractions
 
-    def quenching_polynomial(self,logM,coefficients):
-        """ Polynomial function used to specify the quenched fraction of centrals and satellites.
-
-        Parameters 
-        ----------
-        logM : array_like
-            values of the halo mass at which the quenched fraction is to be computed.
-
-        coefficients : array_like
-            Length N array containing the coefficients of the degree N polynomial governing the 
-            expected quenched fraction.
-
-        Returns 
-        -------
-        mean_quenched_fractions : array_like
-            numpy array giving the expected quenched fraction for galaxies in halos of mass logM 
-
-        """
-
-        mean_quenched_fractions = np.zeros(len(logM))
-        polynomial_degree = len(self.parameter_dict['quenching_abcissa'])
-        for n,coeff in enumerate(coefficients):
-            mean_quenched_fractions += coeff*logM**n
-
-        test_negative = mean_quenched_fractions < 0
-        mean_quenched_fractions[test_negative] = 0
-        test_exceeds_unity = mean_quenched_fractions > 1
-        mean_quenched_fractions[test_exceeds_unity] = 1
-
-        return mean_quenched_fractions
-
+    def require_correct_keys(self,quenching_parameter_dict):
+        correct_set_of_quenching_keys = set(defaults.default_quenching_parameters.keys())
+        if set(quenching_parameter_dict.keys()) != correct_set_of_quenching_keys:
+            raise TypeError("Set of keys of input quenching_parameter_dict"
+            " does not match the set of keys required by the model." 
+            " Correct set of keys is {'quenching_abcissa',"
+            "'central_quenching_ordinates', 'satellite_quenching_ordinates'}. ")
+        pass
 
 
 @six.add_metaclass(ABCMeta)

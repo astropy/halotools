@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Methods to load halo catalogs into memory.
-Obviously this module needs to be generalized. 
-Currently it's only useful at loading in a single pre-processed halo catalog: Bolshoi at z=0.
-Adequate only while basic functionality of mock-making code is being developed.
+Methods to load halo and particle catalogs into memory.
 
 """
 
-__all__=['read_barebones_ascii_halo_catalog_for_initial_mock_development','load_bolshoi_host_halos_fits']
+__all__=['load_bolshoi_host_halos_fits','simulation','particles']
 
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
@@ -15,32 +12,11 @@ __all__=['read_barebones_ascii_halo_catalog_for_initial_mock_development','load_
 from astropy.io import ascii
 import defaults
 from astropy.table import Table
-
-
-def read_barebones_ascii_halo_catalog_for_initial_mock_development(filename):
-    """ 
-
-    Parameters
-    ----------
-    filename : string
-        Name of file containing ASCII data
-
-    Returns
-    -------
-    halos : Astropy Table
-         Halo catalog information.
-
-    Notes
-    -----
-    Read filename and return an astropy structured table called 'halos'. Currently a basically useless method.
-
-    """
-    
-    column_names = ('id','mvir','x','y','z','vx','vy','vz')
-#    types = ('long','float','float','float','float','float','float','float')
-    halos = ascii.read(filename, delimiter='\s', names=column_names, data_start=0)
-
-    return halos
+from configuration import Config
+import os
+import urllib2
+import warnings
+import defaults
 
 def load_bolshoi_host_halos_fits(simulation_dict=None):
     """Placeholder method using pyfits to load a pre-processed .fits file containing host halo information.
@@ -78,53 +54,94 @@ def load_bolshoi_host_halos_fits(simulation_dict=None):
     simulation = {'halos':halos,'simulation_dict':simulation_dict}
     return simulation
 
-def assign_host_halo_type(halos,halo_type_function=defaults.halo_type_function):
-    """ In bins of logMvir, over-write the values of HALOTYPE attribute."""
-    pass
-
-
 
 
 class simulation(object):
-    """ Container class for properties of the simulation being used.
-    
-    Still unused.
-    
+    """ Container class for the simulation being populated with mock galaxies.    
     
     """
     
-    def __init__(self,simulation_nickname=None):
-        
-        if simulation_nickname is None:
-            self.halo_catalog_filename='/Users/aphearin/Dropbox/mock_for_surhud/VALUE_ADDED_HALOS/value_added_z0_halos.fits'
-            self.simulation_dict = {
-            'catalog_filename':default_halo_catalog_filename,
-            'Lbox':250.0,
-            'scale_factor':1.0003,
-            'particle_mass':1.35e8,
-            'softening':1.0
-            }
-        elif simulation_nickname is 'Bolshoi':
-            self.halo_catalog_filename='/Users/aphearin/Dropbox/mock_for_surhud/VALUE_ADDED_HALOS/value_added_z0_halos.fits'
-            self.simulation_dict = {
-            'catalog_filename':default_halo_catalog_filename,
-            'Lbox':250.0,
-            'scale_factor':1.0003,
-            'particle_mass':1.35e8,
-            'softening':1.0
-            }
+    def __init__(self,simulation_name=defaults.default_simulation_name, 
+        scale_factor=defaults.default_scale_factor, 
+        halo_finder=defaults.default_halo_finder, 
+        use_subhalos=False):
+
+
+        self.simulation_name = simulation_name
+        if simulation_name=='bolshoi':
+            self.Lbox = 250.0
         else:
-            pass
+            self.Lbox = None
         
+        self.scale_factor = scale_factor
+        self.halo_finder = halo_finder
+        self.use_subhalos = use_subhalos
+
+        self.halos = self.get_catalog()
 
 
+    def get_catalog(self):
+
+        import pyfits
+
+        configobj = Config()
+        self.catalog_path = configobj.catalog_pathname
+
+        if self.use_subhalos==False:
+            self.filename = (self.simulation_name+'_a'+
+                str(self.scale_factor)+'_'+self.halo_finder+'_host_halos.fits' )
+        else:
+            self.filename = (self.simulation_name+'_a'+
+                str(self.scale_factor)+'_'+self.halo_finder+'_subhalos.fits' )
+
+        if os.path.isfile(self.catalog_path+self.filename)==True:
+            halos = Table(pyfits.getdata(self.catalog_path+self.filename,0))
+        else:
+            warnings.warn("Host halo catalog not found in cache directory, downloading...")
+            fileobj = urllib2.urlopen(configobj.hearin_url+self.filename)
+            output = open(self.catalog_path+self.filename,'wb')
+            output.write(fileobj.read())
+            output.close()
+            halos = Table(pyfits.getdata(self.catalog_path+self.filename,0))
+
+        return halos
 
 
+class particles(object):
+    """ Container class for the simulation particles.    
+    
+    """
+
+    def __init__(self,simulation_name='bolshoi', scale_factor=1.0003):
 
 
+        self.simulation_name = simulation_name
+        self.scale_factor = scale_factor
+
+        self.particles = self.get_particles()
 
 
+    def get_particles(self):
 
+        import pyfits
+
+        configobj = Config()
+        self.catalog_path = configobj.catalog_pathname
+
+        self.filename = (self.simulation_name+'_2e5_particles_a'+
+            str(self.scale_factor)+'.fits')
+
+        if os.path.isfile(self.catalog_path+self.filename)==True:
+            particles = Table(pyfits.getdata(self.catalog_path+self.filename,0))
+        else:
+            warnings.warn("Particle data not found in cache directory, downloading...")
+            fileobj = urllib2.urlopen(configobj.hearin_url+self.filename)
+            output = open(self.catalog_path+self.filename,'wb')
+            output.write(fileobj.read())
+            output.close()
+            particles = Table(pyfits.getdata(self.catalog_path+self.filename,0))
+
+        return particles
 
 
 
