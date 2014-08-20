@@ -215,10 +215,10 @@ class HOD_mock(object):
 #            self.halo_type[self.hasCentral],
 #            output=self.NSat[self.hasCentral])
         # version 2
-        self.NSat[self.hasCentral] = self.num_sat_monte_carlo(
-            self.halos['PRIMARY_HALO_PROPERTY'][self.hasCentral],
-            self.halos['HALO_TYPE_SATELLITES'][self.hasCentral],
-            output=self.NSat[self.hasCentral])
+        self.NSat = self.num_sat_monte_carlo(
+            self.halos['PRIMARY_HALO_PROPERTY'],
+            self.halos['HALO_TYPE_SATELLITES'],
+            output=self.NSat)
 
         self.num_total_cens = self.NCen.sum()
         self.num_total_sats = self.NSat.sum()
