@@ -143,6 +143,7 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
                 #calculate the random-random pairs.
                 NR = N1*N2
                 rhor = NR/global_volume
+                #vol_scale = dv/global_volume
                 RR = (dv*rhor)
             else: #if not calculating cross-correlation, set RR exactly equal to D1R.
                 D2R = D1R #we don't really need this, but set it to something harmless.
@@ -199,6 +200,11 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
     if np.all(sample2==sample1):
         xi_11 = TP_estimator(D1D1,D1R,RR,factor1,estimator)
         return xi_11
+    elif randoms == None:
+        xi_11 = TP_estimator(D1D1,D1R,D1R,factor1,estimator)
+        xi_12 = TP_estimator(D1D2,D1R,RR,factor1,estimator)
+        xi_22 = TP_estimator(D2D2,D2R,D2R,factor2,estimator)
+        return xi_11, xi_12, xi_22
     else:
         xi_11 = TP_estimator(D1D1,D1R,RR,factor1,estimator)
         xi_12 = TP_estimator(D1D2,D1R,RR,factor1,estimator)
