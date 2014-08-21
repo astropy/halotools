@@ -88,16 +88,20 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         PBCs = True
         period = np.asarray(period).astype("float64")
         if np.shape(period) == ():
-            period = np.array([period]*np.shape(data1)[-1])
+            period = np.array([period]*np.shape(sample1)[-1])
         elif np.shape(period)[0] != np.shape(sample1)[-1]:
             raise ValueError("period should have shape (k,)")
             return None
     #down sample is sample size exceeds max_sample_size.
     if len(sample1)>max_sample_size:
-        inds = np.random.shuffle(np.arange(0,len(sample1)))[0:max_sample_size]
+        inds = np.arange(0,len(sample1))
+        np.random.shuffle(inds)
+        inds = inds[0:max_sample_size]
         sample1 = sample1[inds]
     if len(sample2)>max_sample_size:
-        inds = np.random.shuffle(np.arange(0,len(sample2)))[0:max_sample_size]
+        inds = np.arange(0,len(sample2))
+        np.random.shuffle(inds)
+        inds = inds[0:max_sample_size]
         sample2 = sample2[inds]
     
     k = np.shape(sample1)[-1] #dimensionality of data
