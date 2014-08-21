@@ -167,7 +167,7 @@ class HOD_Model(object):
 
     This is an abstract class, so you can't instantiate it. 
     Instead, you must work with one of its concrete subclasses, 
-    such as `Zheng07_HOD_Model`. 
+    such as `Zheng07_HOD_Model` or `vdB03_Quenching_Model`. 
 
     All HOD-style models must provide their own specific functional forms 
     for how :math:`\langle N_{cen} \\rangle` and :math:`\langle N_{sat}\\rangle` 
@@ -176,14 +176,18 @@ class HOD_Model(object):
 
     Notes 
     -----
-    Currently, the only implemented HOD-style model that is supported is 
+    Currently, the only baseline HOD model that has been implemented is 
     based on Zheng et al. 2007, which is specified in terms of virial halo mass. 
     But the HOD_Model class is sufficiently general that it will support 
     models for the galaxy-halo connection based on alternative host halo properties, 
     such as :math:`V_{max}` or :math:`M_{PE-corrected}`. 
 
-    The current NFW profile requirement will eventually be relaxed, so that 
-    arbitrary radial profiles are supported. 
+    The only radial profile implemented is NFW, 
+    but this requirement will eventually be relaxed, so that 
+    arbitrary radial profiles are supported.
+
+    Mocks instances constructed with the current form of this class 
+    only exist in configuration space. Redshift-space features coming soon.
     
     """
     
@@ -260,7 +264,7 @@ class Zheng07_HOD_Model(HOD_Model):
         If specified, input value must agree with 
         one of the thresholds used in Zheng07 to fit HODs: 
         [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-        Default value is -19.5, specified in the `defaults` module.
+        Default value is -20, specified in the `~halotools.defaults` module.
 
     Notes
     -----
@@ -298,7 +302,7 @@ class Zheng07_HOD_Model(HOD_Model):
         halo_type : array 
             array of halo types. Entirely ignored in this model. 
             Included as a passed variable purely for consistency 
-            between the way mean_ncen is called by different models.
+            between the way this function is called by different models.
 
         Returns
         -------
@@ -331,7 +335,7 @@ class Zheng07_HOD_Model(HOD_Model):
         halo_type : array 
             array of halo types. Entirely ignored in this model. 
             Included as a passed variable purely for consistency 
-            between the way mean_ncen is called by different models.
+            between the way this function is called by different models.
 
         Returns
         -------
@@ -367,17 +371,18 @@ class Zheng07_HOD_Model(HOD_Model):
         ----------
 
         logM : array_like
+            array of :math:`log_{10}(M)` of halos in catalog
 
         halo_type : array 
             array of halo types. Entirely ignored in this model. 
             Included as a passed variable purely for consistency 
-            between the way mean_ncen is called by different models.
+            between the way this function is called by different models.
 
         Returns 
         -------
 
         concentrations : array_like
-            Mean concentration of logM halos, using `anatoly_concentration` model.
+            Mean concentration of halos of the input mass, using `anatoly_concentration` model.
 
         """
 
@@ -465,6 +470,57 @@ class Assembly_Biased_HOD_Model(HOD_Model):
     In this class of models, central and/or satellite mean occupation depends on some primary  
     property, such as :math:`M_{vir}`, and the mean occupations are modulated by some secondary property, 
     such as :math:`z_{form}`. 
+
+    Notes 
+    -----
+    All implementations of assembly bias are formulated in such a way that 
+    the baseline occupation statistics are kept fixed. For example, suppose that a subclass 
+    of this class introduces a dependence of :math:`\\langle N_{cen} \\rangle` on the 
+    secondary halo property :math:`z_{form}`, and that the primary halo property is the traditional 
+    :math:`M = M_{vir}`. Then in narrow bins of :math:`M`, host halos in the simulation 
+    will be rank-ordered by :math:`z_{form}`, 
+    and assigned a halo type :math:`h_{0}` or :math:`h_{1}`, 
+    where the halos may be split by any fraction into the two halo types, 
+    and this fractional split may vary with :math:`M` according to 
+    any arbitrary function :math:`P^{cen}_{h_{1}}(M)`  supplied by the model 
+    via the `halo_type1_fraction_centrals` method. 
+    The :math:`z_{form}`-dependence of central occupation is governed by 
+    the central destruction function :math:`D_{cen}(M | h_{i})` via 
+    :math:`\\langle N_{cen} | h_{i} \\rangle_{M} = D_{cen}(M | h_{i})\\langle N_{cen} \\rangle_{M}`. 
+    The subclass implementing assembly bias need only supply any arbitrary function 
+    :math:`\\tilde{D}_{cen}(M | h_{i})` via the `unconstrained_central_destruction_halo_type1` 
+    method, and a variety of the built-in methods of this class will automatically apply appropriate boundary 
+    conditions to determine :math:`D_{cen}(M | h_{i})` from :math:`\\tilde{D}_{cen}(M | h_{i})`, 
+    such that the following constraint is satisfied: 
+
+    :math:`\\langle N_{cen} \\rangle_{M} = P^{cen}_{h_{0}}(M)\\langle N_{cen} | h_{0} \\rangle_{M} 
+    + P^{cen}_{h_{1}}(M)\\langle N_{cen} | h_{1} \\rangle_{M}`. 
+
+    Therefore, assembly bias of arbitrary strength can be introduced in a way that preserves the 
+    baseline occupation statistics, allowing users of halotools to isolate the pure influence 
+    of assembly bias on any observational statistic that can be computed in a mock. 
+
+    There are entirely independent functions governing satellite galaxy assembly bias, 
+    allowing the role of centrals and satellites to be parsed. The secondary property 
+    used to modulate the occupation statistics of centrals can be distinct from the property 
+    modulating satellite occupation.
+
+    The secondary halo property can be any halo property computable from a halo catalog and/or merger tree. 
+    The user need only change `secondary_halo_property_centrals_key` and/or 
+    `secondary_halo_property_satellites_key` to create identical assembly-biased models based on 
+    different secondary properties. Likewise, the primary halo property may also be varied 
+    by changing `primary_halo_property_key`, provided that the user supplies a baseline HOD model 
+    predicated upon the suppiled primary halo property.
+    Thus this class allows one to create mock universes possessing 
+    assembly bias of arbitrary strength and character, 
+    subject to the caveat that the occupation statistics can be parameterized 
+    by two halo properties. 
+
+    Finally, the secondary property modulating the assembly bias 
+    need not be a physical attribute of the host halo. 
+    For example, the `Satcen_Correlation_Polynomial_HOD_Model` subclass 
+    can be used to create mocks in which of satellite occupation statistics are 
+    modulated by whether or not there is a central galaxy residing in the host halo.
 
     """
 

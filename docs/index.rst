@@ -5,7 +5,7 @@ halotools
 Welcome to the halotools documentation. Halotools is a python package 
 designed to study large scale structure, cosmology, and galaxy evolution 
 using N-body simulations and halo models. The code is publicly available 
-at https://github.com/aphearin/halotools.git.
+at https://github.com/halotools.
 
 The package is still under rapid development, with its API being restructured 
 frequently. In short, it is still not "stable". In particular, 

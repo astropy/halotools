@@ -55,21 +55,31 @@ def enforce_periodicity_of_box(coords, box_length):
 
 
 class HOD_mock(object):
-    """     
+    """ Class used to build mock realizations of any HOD-style model. 
+
+    Instances of this class represent a mock galaxy distribution whose properties 
+    depend on the style of HOD model passed to the constructor, and on the 
+    parameter values of the model. 
+
+    Currently supported models are `~halotools.halo_occupation.Zheng07_HOD_Model`, 
+    `~halotools.halo_occupation.Satcen_Correlation_Polynomial_HOD_Model`, 
+    `~halotools.halo_occupation.Polynomial_Assembly_Biased_HOD_Model`, 
+    and `~halotools.halo_occupation.vdB03_Quenching_Model`.
 
     Parameters
     ----------
     simulation_data : optional
-        simulation_data is an instance of the `simulation` class 
-        defined in the `read_nbody` module. 
-        Currently only Bolshoi at z=0 is supported.
+        simulation_data is an instance of the `~halotools.read_nbody.simulation` class 
+        defined in the `~halotools.read_nbody` module. 
 
     halo_occupation_model : optional 
-        halo_occupation_model is an instance of the 
-        `HOD_Model` class defined in the `halo_occupation` module.
+        halo_occupation_model is any subclass of the abstract class 
+        `~halotools.halo_occupation.HOD_Model` defined 
+        in the `~halotools.halo_occupation` module. 
+
 
     seed : float, optional
-        Random number seed. Currently unused. Will be useful when implementing an MCMC.
+        Random number seed. Currently ignored. Will be useful when implementing an MCMC.
 
     """
 
