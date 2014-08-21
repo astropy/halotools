@@ -114,6 +114,7 @@ class HOD_mock(object):
         self.halos['SECONDARY_HALO_PROPERTY_CENTRALS']=np.zeros(len(self.halos))
         self.halos['HALO_TYPE_CENTRALS']=np.ones(len(self.halos))
         self.halos['HALO_TYPE_SATELLITES']=np.ones(len(self.halos))
+        self.halos['QUENCHED_HALO']=np.zeros(len(self.halos))
 
         # Test to make sure the hod model is the appropriate type
         hod_model_instance = halo_occupation_model(threshold=threshold)
@@ -160,8 +161,6 @@ class HOD_mock(object):
                     self.halos['SECONDARY_HALO_PROPERTY_SATELLITES'],
                     self.halo_occupation_model.halo_type1_fraction_satellites))
 
-
-        #self.halo_type = self.halos['HALO_TYPE_CENTRALS']
 
         self.haloID = np.array(self.halos['ID'])
         self.concen = self.halo_occupation_model.mean_concentration(
@@ -216,9 +215,22 @@ class HOD_mock(object):
         
         """
 
-        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-        #    self.self.halos['HALO_TYPE_CENTRALS'] = self.quenched_monte_carlo(
-        #        self.primary_halo_property,self.halo_occupation_model,'central')
+        # If the HOD Model passed to the constructor has features supporting 
+        # quenched/star-forming designations, use the method 
+        # self.halo_occupation_model.mean_quenched_fraction_centrals
+        # to assign quenched/star-forming designations to the HALOS.
+        # Note that there will thus be many halos with a quenched designation 
+        # but yet without a central. While this may seem strange, 
+        # this needs to be done at this step, rather than after assigning 
+        # centrals to halos, to support models in which central galaxy 
+        # occupation statistics explicitly  
+        # depend on quenching/star-forming designation, 
+        # such as Tinker, Leauthaud, et al. 2013.
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+            self.halos['QUENCHED_HALO'] = (self.quenched_monte_carlo(
+                self.halos['PRIMARY_HALO_PROPERTY'],
+                self.halos['HALO_TYPE_CENTRALS'],
+                galaxy_type='central'))
 
         self.NCen = self.num_cen_monte_carlo(
             self.halos['PRIMARY_HALO_PROPERTY'],self.halos['HALO_TYPE_CENTRALS'])
@@ -226,12 +238,6 @@ class HOD_mock(object):
 
         self.NSat = np.zeros(len(self.halos['PRIMARY_HALO_PROPERTY']),dtype=int)
 
-        # version 1
-#        self.NSat[self.hasCentral] = self.num_sat_monte_carlo(
-#            self.primary_halo_property[self.hasCentral],
-#            self.halo_type[self.hasCentral],
-#            output=self.NSat[self.hasCentral])
-        # version 2
         self.NSat = self.num_sat_monte_carlo(
             self.halos['PRIMARY_HALO_PROPERTY'],
             self.halos['HALO_TYPE_SATELLITES'],
@@ -245,8 +251,13 @@ class HOD_mock(object):
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
-        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-        #    self.isQuenched = np.zeros(self.num_total_gals,dtype='i4')
+        self.halo_type = np.ones(self.num_total_gals,dtype='i4')
+
+
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+            self.isQuenched = np.zeros(self.num_total_gals,dtype='i4')
+
+
     #...
 
     def _random_angles(self,coords,start,end,N):
@@ -323,12 +334,15 @@ class HOD_mock(object):
         if not isSetup:
             self._setup()
 
-        # Preallocate centrals so we don't have to touch them again.
+        # Assign properties to centrals. Note that as a result of this step, 
+        # the first num_total_cens entries of the mock object ndarrays 
+        # pertain to centrals. 
         self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
         self.logMhost[:self.num_total_cens] = self.primary_halo_property[self.hasCentral]
 
-        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-        #    self.isQuenched[:self.num_total_cens] = self.halo_isQuenched[self.hasCentral]
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+            self.isQuenched[:self.num_total_cens] = (
+                self.halos['QUENCHED_HALO'][self.hasCentral])
 
 
         counter = self.num_total_cens
@@ -361,9 +375,9 @@ class HOD_mock(object):
 
         self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
 
-        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-        #    self.isQuenched[self.num_total_cens:-1] = self.quenched_monte_carlo(
-        #        self.logMhost[self.num_total_cens:-1],
+#        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+#            self.isQuenched[self.num_total_cens:-1] = self.quenched_monte_carlo(
+#                self.logMhost[self.num_total_cens:-1],
         #        self.halo_occupation_model,'satellite')
 
     def num_cen_monte_carlo(self,primary_halo_property,halo_type):
