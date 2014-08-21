@@ -251,11 +251,11 @@ class HOD_mock(object):
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
-        self.halo_type = np.ones(self.num_total_gals,dtype='i4')
+        self.halo_type = np.ones(self.num_total_gals,dtype='f8')
 
 
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-            self.isQuenched = np.zeros(self.num_total_gals,dtype='i4')
+            self.isQuenched = np.zeros(self.num_total_gals,dtype='f8')
 
 
     #...
@@ -337,8 +337,10 @@ class HOD_mock(object):
         # Assign properties to centrals. Note that as a result of this step, 
         # the first num_total_cens entries of the mock object ndarrays 
         # pertain to centrals. 
-        self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
-        self.logMhost[:self.num_total_cens] = self.primary_halo_property[self.hasCentral]
+        self.coords[:self.num_total_cens] = self.halos['POS'][self.hasCentral]
+#        self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
+        self.logMhost[:self.num_total_cens] = self.halos['PRIMARY_HALO_PROPERTY'][self.hasCentral]
+        self.halo_type[:self.num_total_cens] = self.halos['HALO_TYPE_CENTRALS'][self.hasCentral]
 
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched[:self.num_total_cens] = (

@@ -71,8 +71,8 @@ default_satcen_parameters = {
 	}
 
 default_halo_type_split = {
-	'halo_type_split_abcissa' : [12,15],
-	'halo_type_split_ordinates' : [0.25,0.75]
+	'halo_type_split_abcissa' : [12],
+	'halo_type_split_ordinates' : [0.4]
 	}
 
 default_halo_type_calculator_spacing=0.1
