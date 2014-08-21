@@ -321,6 +321,8 @@ class Zheng07_HOD_Model(HOD_Model):
         logM = np.array(logM)
         mean_ncen = 0.5*(1.0 + erf(
             (logM - self.parameter_dict['logMmin_cen'])/self.parameter_dict['sigma_logM']))
+
+        #mean_ncen = np.zeros(len(logM)) + 0.5
         return mean_ncen
 
     def mean_nsat(self,logM,halo_type):
@@ -1068,9 +1070,9 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         # each bin in the primary halo property should be split
         bin_midpoints = (primary_halo_property_bins[0:-1] + 
             np.diff(primary_halo_property_bins)/2.)
+
         bin_splitting_fraction = (np.ones(len(bin_midpoints)) - 
             np.array(halo_type_fraction_function(bin_midpoints)))
-        #print('bin_splitting_fraction = ',bin_splitting_fraction)
 
         # Find the bin index of every halo
         array_of_bin_indices = np.digitize(primary_halo_property,primary_halo_property_bins)-1
@@ -1109,8 +1111,6 @@ class Assembly_Biased_HOD_Model(HOD_Model):
             halo_types[(array_of_bin_indices==bin_index_i)] = halo_types_with_bin_index_i
 
         return halo_types
-        
-
 
 
 class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):

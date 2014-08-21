@@ -112,8 +112,8 @@ class HOD_mock(object):
         self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
         self.halos['SECONDARY_HALO_PROPERTY_SATELLITES']=np.zeros(len(self.halos))
         self.halos['SECONDARY_HALO_PROPERTY_CENTRALS']=np.zeros(len(self.halos))
-        self.halos['HALO_TYPE_CENTRALS']=np.ones(len(self.halos))
-        self.halos['HALO_TYPE_SATELLITES']=np.ones(len(self.halos))
+        self.halos['HALO_TYPE_CENTRALS']=np.zeros(len(self.halos))
+        self.halos['HALO_TYPE_SATELLITES']=np.zeros(len(self.halos))
         self.halos['QUENCHED_HALO']=np.zeros(len(self.halos))
 
         # Test to make sure the hod model is the appropriate type
