@@ -86,12 +86,18 @@ class HOD_mock(object):
     def __init__(self,simulation_data=None,
         halo_occupation_model=ho.vdB03_Quenching_Model,threshold = -20,seed=None):
 
-        # If no simulation object is passed to the constructor, 
+        # If no simulation_data object is passed to the constructor, 
         # the default simulation will be chosen
         # Currently this set to be Bolshoi at z=0, 
         # as specified in the defaults module
         if simulation_data is None:
-            simulation_data = read_nbody.simulation()
+
+            simulation_name=defaults.default_simulation_name
+            scale_factor=defaults.default_scale_factor
+            halo_finder=defaults.default_halo_finder
+
+            simulation_data = read_nbody.simulation(
+                simulation_name,scale_factor,halo_finder)
 
         # Test to make sure the simulation data is the appropriate type
         if not isinstance(simulation_data.halos,astropy.table.table.Table):
@@ -101,7 +107,8 @@ class HOD_mock(object):
         self.halos = simulation_data.halos
         self.Lbox = simulation_data.Lbox
 
-        # Add columns to the halos table attribute of the mock object
+        # Add columns to the halos table that are not present in the 
+        # downloaded halo catalog
         self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
         self.halos['SECONDARY_HALO_PROPERTY_SATELLITES']=np.zeros(len(self.halos))
         self.halos['SECONDARY_HALO_PROPERTY_CENTRALS']=np.zeros(len(self.halos))
@@ -116,7 +123,7 @@ class HOD_mock(object):
         # Bind the instance of the hod model to the HOD_mock object
         self.halo_occupation_model = hod_model_instance
 
-        # Create numpy arrays containing data from the halo catalog and bind them to the mock object
+        # Create numpy ndarrays containing data from the halo catalog and bind them to the mock object
         self.primary_halo_property = np.array(
             self.halos[self.halo_occupation_model.primary_halo_property_key])
         self.halos['PRIMARY_HALO_PROPERTY']=np.array(
