@@ -25,3 +25,5 @@ Reference/API
 .. automodapi:: halotools.make_mocks
 .. automodapi:: halotools.read_nbody
 .. automodapi:: halotools.defaults
+.. automodapi:: halotools.mock_observables.observables
+.. automodapi:: halotools.mock_observables.pairs

@@ -13,10 +13,9 @@ from astropy.io import ascii
 import defaults
 from astropy.table import Table
 from configuration import Config
-import os
-import urllib2
-import warnings
-import defaults
+import os, sys, warnings, urllib2
+
+
 
 def load_bolshoi_host_halos_fits(simulation_dict=None):
     """Placeholder method using pyfits to load a pre-processed .fits file containing host halo information.
@@ -85,26 +84,34 @@ class simulation(object):
         import pyfits
 
         configobj = Config()
-        self.catalog_path = configobj.catalog_pathname
+        cache_dir = configobj.getCatalogDir()
 
-        if self.use_subhalos==False:
-            self.filename = (self.simulation_name+'_a'+
-                str(self.scale_factor)+'_'+self.halo_finder+'_host_halos.fits' )
-        else:
-            self.filename = (self.simulation_name+'_a'+
-                str(self.scale_factor)+'_'+self.halo_finder+'_subhalos.fits' )
+        self.filename = configobj.getSimulationFilename(
+            self.simulation_name,self.scale_factor,self.halo_finder,self.use_subhalos)
 
-        if os.path.isfile(self.catalog_path+self.filename)==True:
-            halos = Table(pyfits.getdata(self.catalog_path+self.filename,0))
+        if os.path.isfile(cache_dir+self.filename)==True:
+            halos = Table(pyfits.getdata(cache_dir+self.filename,0))
         else:
-            warnings.warn("Host halo catalog not found in cache directory, downloading...")
-            fileobj = urllib2.urlopen(configobj.hearin_url+self.filename)
-            output = open(self.catalog_path+self.filename,'wb')
-            output.write(fileobj.read())
-            output.close()
-            halos = Table(pyfits.getdata(self.catalog_path+self.filename,0))
+            warnings.warn("\n Host halo catalog not found in cache directory")
+            download_yes_or_no = raw_input(" \n Enter yes to download, "
+                "any other key to exit:\n (File size is ~200Mb) \n\n ")
+
+            if download_yes_or_no=='y' or download_yes_or_no=='yes':
+                warnings.warn("...downloading halo catalog from www.astro.yale.edu/aphearin")
+                fileobj = urllib2.urlopen(configobj.hearin_url+self.filename)
+
+                output = open(cache_dir+self.filename,'wb')
+                output.write(fileobj.read())
+                output.close()
+                halos = Table(pyfits.getdata(cache_dir+self.filename,0))
+            else:
+                warnings.warn("\n ...Exiting halotools \n")
+                os._exit(1)
 
         return halos
+
+###################################################################################################
+
 
 
 class particles(object):
