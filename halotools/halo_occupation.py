@@ -793,8 +793,6 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         return output_maximum_destruction
 
-
-
     def minimum_destruction_centrals(self,primary_halo_property,halo_type):
         """ The minimum allowed value of the destruction function, as pertains to centrals.
 
@@ -823,7 +821,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         minimum_destruction_centrals = np.zeros(len(primary_halo_property))
 
         mean_ncen = self.baseline_hod_model.mean_ncen(
-            primary_halo_property,halo_type_fraction_cent)
+            primary_halo_property,halo_type)
 
         halo_type_fraction = self.halo_type_fraction_centrals(
             primary_halo_property,halo_type)
