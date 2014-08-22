@@ -9,7 +9,7 @@ __all__=['simulation','particles']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
-from astropy.io import ascii
+import astropy
 import defaults
 from astropy.table import Table
 from configuration import Config
@@ -42,8 +42,15 @@ class simulation(object):
 
 
     def get_catalog(self,manual_dirname=None):
+        """ Method to load halo catalogs into memory. 
 
-        import pyfits
+        If the halo catalog is already present in the cache directory, 
+        simply use pyfits to load it. If the catalog is not there, 
+        download it from www.astro.yale.edu/aphearin, and then load it into memory.
+
+        """
+
+        #import pyfits
 
         configobj = Config()
         if manual_dirname != None:
@@ -58,20 +65,24 @@ class simulation(object):
             self.simulation_name,self.scale_factor,self.halo_finder,self.use_subhalos)
 
         if os.path.isfile(cache_dir+self.filename)==True:
-            halos = Table(pyfits.getdata(cache_dir+self.filename,0))
+            hdulist = astropy.io.fits.open(cache_dir+self.filename)
+            halos = Table(hdulist[1].data)
+#            halos = Table(pyfits.getdata(cache_dir+self.filename,0))
         else:
             warnings.warn("\n Host halo catalog not found in cache directory")
             download_yes_or_no = raw_input(" \n Enter yes to download, "
                 "any other key to exit:\n (File size is ~200Mb) \n\n ")
 
             if download_yes_or_no=='y' or download_yes_or_no=='yes':
-                warnings.warn("...downloading halo catalog from www.astro.yale.edu/aphearin")
+                print("\n...downloading halo catalog from www.astro.yale.edu/aphearin")
                 fileobj = urllib2.urlopen(configobj.hearin_url+self.filename)
 
                 output = open(cache_dir+self.filename,'wb')
                 output.write(fileobj.read())
                 output.close()
-                halos = Table(pyfits.getdata(cache_dir+self.filename,0))
+                hdulist = astropy.io.fits.open(cache_dir+self.filename)
+                halos = Table(hdulist[1].data)
+                #halos = Table(pyfits.getdata(cache_dir+self.filename,0))
             else:
                 warnings.warn("\n ...Exiting halotools \n")
                 os._exit(1)

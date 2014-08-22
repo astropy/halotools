@@ -16,6 +16,11 @@ correctly interface with future versions of the code.
 Presently, only the basic API is documented. This will change once more of 
 the core functionality is in place.
 
+Contributions to the halotools package are warmly welcomed! 
+If you are interested in collaborating, and/or would like to know more 
+about the intended scope of the project, please contact Andrew Hearin 
+at andrew-dot-hearin-at-yale-dot-edu.
+
 
 Reference/API
 =============
@@ -25,5 +30,3 @@ Reference/API
 .. automodapi:: halotools.make_mocks
 .. automodapi:: halotools.read_nbody
 .. automodapi:: halotools.defaults
-.. automodapi:: halotools.mock_observables.observables
-.. automodapi:: halotools.mock_observables.pairs
