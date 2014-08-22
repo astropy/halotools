@@ -27,6 +27,7 @@ from copy import copy
 from collections import Counter
 import astropy
 import time
+import warnings 
 
 
 def enforce_periodicity_of_box(coords, box_length):
@@ -55,33 +56,49 @@ def enforce_periodicity_of_box(coords, box_length):
 
 
 class HOD_mock(object):
-    """     
+    """ Class used to build mock realizations of any HOD-style model. 
+
+    Instances of this class represent a mock galaxy distribution whose properties 
+    depend on the style of HOD model passed to the constructor, and on the 
+    parameter values of the model. 
+
+    Currently supported models are `~halotools.halo_occupation.Zheng07_HOD_Model`, 
+    `~halotools.halo_occupation.Satcen_Correlation_Polynomial_HOD_Model`, 
+    `~halotools.halo_occupation.Polynomial_Assembly_Biased_HOD_Model`, 
+    and `~halotools.halo_occupation.vdB03_Quenching_Model`.
 
     Parameters
     ----------
     simulation_data : optional
-        simulation_data is an instance of the `simulation` class 
-        defined in the `read_nbody` module. 
-        Currently only Bolshoi at z=0 is supported.
+        simulation_data is an instance of the `~halotools.read_nbody.simulation` class 
+        defined in the `~halotools.read_nbody` module. 
 
     halo_occupation_model : optional 
-        halo_occupation_model is an instance of the 
-        `HOD_Model` class defined in the `halo_occupation` module.
+        halo_occupation_model is any subclass of the abstract class 
+        `~halotools.halo_occupation.HOD_Model` defined 
+        in the `~halotools.halo_occupation` module. 
+
 
     seed : float, optional
-        Random number seed. Currently unused. Will be useful when implementing an MCMC.
+        Random number seed. Currently ignored. Will be useful when implementing an MCMC.
 
     """
 
     def __init__(self,simulation_data=None,
         halo_occupation_model=ho.vdB03_Quenching_Model,threshold = -20,seed=None):
 
-        # If no simulation object is passed to the constructor, 
+        # If no simulation_data object is passed to the constructor, 
         # the default simulation will be chosen
         # Currently this set to be Bolshoi at z=0, 
         # as specified in the defaults module
         if simulation_data is None:
-            simulation_data = read_nbody.simulation()
+
+            simulation_name=defaults.default_simulation_name
+            scale_factor=defaults.default_scale_factor
+            halo_finder=defaults.default_halo_finder
+
+            simulation_data = read_nbody.simulation(
+                simulation_name,scale_factor,halo_finder)
 
         # Test to make sure the simulation data is the appropriate type
         if not isinstance(simulation_data.halos,astropy.table.table.Table):
@@ -91,12 +108,14 @@ class HOD_mock(object):
         self.halos = simulation_data.halos
         self.Lbox = simulation_data.Lbox
 
-        # Add columns to the halos table attribute of the mock object
+        # Add columns to the halos table that are not present in the 
+        # downloaded halo catalog
         self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
         self.halos['SECONDARY_HALO_PROPERTY_SATELLITES']=np.zeros(len(self.halos))
         self.halos['SECONDARY_HALO_PROPERTY_CENTRALS']=np.zeros(len(self.halos))
-        self.halos['HALO_TYPE_CENTRALS']=np.ones(len(self.halos))
-        self.halos['HALO_TYPE_SATELLITES']=np.ones(len(self.halos))
+        self.halos['HALO_TYPE_CENTRALS']=np.zeros(len(self.halos))
+        self.halos['HALO_TYPE_SATELLITES']=np.zeros(len(self.halos))
+        self.halos['QUENCHED_HALO']=np.zeros(len(self.halos))
 
         # Test to make sure the hod model is the appropriate type
         hod_model_instance = halo_occupation_model(threshold=threshold)
@@ -106,7 +125,7 @@ class HOD_mock(object):
         # Bind the instance of the hod model to the HOD_mock object
         self.halo_occupation_model = hod_model_instance
 
-        # Create numpy arrays containing data from the halo catalog and bind them to the mock object
+        # Create numpy ndarrays containing data from the halo catalog and bind them to the mock object
         self.primary_halo_property = np.array(
             self.halos[self.halo_occupation_model.primary_halo_property_key])
         self.halos['PRIMARY_HALO_PROPERTY']=np.array(
@@ -123,6 +142,7 @@ class HOD_mock(object):
 
             # If assembly bias is desired for centrals, implement it.
             if self.halo_occupation_model.secondary_halo_property_centrals_key != None:
+                #warnings.warn("setting secondary halo property")
 
                 self.halos['SECONDARY_HALO_PROPERTY_CENTRALS'] = np.array(
                     self.halos[self.halo_occupation_model.secondary_halo_property_centrals_key])
@@ -143,8 +163,6 @@ class HOD_mock(object):
                     self.halos['SECONDARY_HALO_PROPERTY_SATELLITES'],
                     self.halo_occupation_model.halo_type1_fraction_satellites))
 
-
-        #self.halo_type = self.halos['HALO_TYPE_CENTRALS']
 
         self.haloID = np.array(self.halos['ID'])
         self.concen = self.halo_occupation_model.mean_concentration(
@@ -199,9 +217,22 @@ class HOD_mock(object):
         
         """
 
-        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-        #    self.self.halos['HALO_TYPE_CENTRALS'] = self.quenched_monte_carlo(
-        #        self.primary_halo_property,self.halo_occupation_model,'central')
+        # If the HOD Model passed to the constructor has features supporting 
+        # quenched/star-forming designations, use the method 
+        # self.halo_occupation_model.mean_quenched_fraction_centrals
+        # to assign quenched/star-forming designations to the HALOS.
+        # Note that there will thus be many halos with a quenched designation 
+        # but yet without a central. While this may seem strange, 
+        # this needs to be done at this step, rather than after assigning 
+        # centrals to halos, to support models in which central galaxy 
+        # occupation statistics explicitly  
+        # depend on quenching/star-forming designation, 
+        # such as Tinker, Leauthaud, et al. 2013.
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+            self.halos['QUENCHED_HALO'] = (self.quenched_monte_carlo(
+                self.halos['PRIMARY_HALO_PROPERTY'],
+                self.halos['HALO_TYPE_CENTRALS'],
+                galaxy_type='central'))
 
         self.NCen = self.num_cen_monte_carlo(
             self.halos['PRIMARY_HALO_PROPERTY'],self.halos['HALO_TYPE_CENTRALS'])
@@ -209,12 +240,6 @@ class HOD_mock(object):
 
         self.NSat = np.zeros(len(self.halos['PRIMARY_HALO_PROPERTY']),dtype=int)
 
-        # version 1
-#        self.NSat[self.hasCentral] = self.num_sat_monte_carlo(
-#            self.primary_halo_property[self.hasCentral],
-#            self.halo_type[self.hasCentral],
-#            output=self.NSat[self.hasCentral])
-        # version 2
         self.NSat = self.num_sat_monte_carlo(
             self.halos['PRIMARY_HALO_PROPERTY'],
             self.halos['HALO_TYPE_SATELLITES'],
@@ -228,8 +253,13 @@ class HOD_mock(object):
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
-        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-        #    self.isQuenched = np.zeros(self.num_total_gals,dtype='i4')
+        self.halo_type = np.ones(self.num_total_gals,dtype='f8')
+
+
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+            self.isQuenched = np.zeros(self.num_total_gals,dtype='f8')
+
+
     #...
 
     def _random_angles(self,coords,start,end,N):
@@ -306,12 +336,17 @@ class HOD_mock(object):
         if not isSetup:
             self._setup()
 
-        # Preallocate centrals so we don't have to touch them again.
-        self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
-        self.logMhost[:self.num_total_cens] = self.primary_halo_property[self.hasCentral]
+        # Assign properties to centrals. Note that as a result of this step, 
+        # the first num_total_cens entries of the mock object ndarrays 
+        # pertain to centrals. 
+        self.coords[:self.num_total_cens] = self.halos['POS'][self.hasCentral]
+#        self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
+        self.logMhost[:self.num_total_cens] = self.halos['PRIMARY_HALO_PROPERTY'][self.hasCentral]
+        self.halo_type[:self.num_total_cens] = self.halos['HALO_TYPE_CENTRALS'][self.hasCentral]
 
-        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-        #    self.isQuenched[:self.num_total_cens] = self.halo_isQuenched[self.hasCentral]
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+            self.isQuenched[:self.num_total_cens] = (
+                self.halos['QUENCHED_HALO'][self.hasCentral])
 
 
         counter = self.num_total_cens
@@ -344,9 +379,9 @@ class HOD_mock(object):
 
         self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
 
-        #if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-        #    self.isQuenched[self.num_total_cens:-1] = self.quenched_monte_carlo(
-        #        self.logMhost[self.num_total_cens:-1],
+#        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+#            self.isQuenched[self.num_total_cens:-1] = self.quenched_monte_carlo(
+#                self.logMhost[self.num_total_cens:-1],
         #        self.halo_occupation_model,'satellite')
 
     def num_cen_monte_carlo(self,primary_halo_property,halo_type):

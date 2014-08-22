@@ -27,4 +27,12 @@ make the structure of the code visually apparent. In order to view these diagram
 ### Building the docs
 The command "python setup.py build_sphinx"  will build the documentation into docs/_build/html. Throwing the -o flag with this command will automatically open the html version of the documentation in your default web browser. 
 
+---
+
+## Contributing
+
+Contributions to the halotools package are warmly welcomed! 
+If you are interested in collaborating, and/or would like to know more 
+about the intended scope of the project, please contact Andrew Hearin 
+at andrew-dot-hearin-at-yale-dot-edu.
 

@@ -12,12 +12,12 @@ from ..halo_occupation import Zheng07_HOD_Model
 from ..read_nbody import simulation
 from ..make_mocks import HOD_mock
 
-"""
+
 
 def test_Zheng07_mock():
-	model = Zheng07_HOD_Model(threshold=-20)
-	bolshoi = simulation()
-	mock = HOD_mock(bolshoi,model)
+	hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'
+	bolshoi = simulation(manual_dirname=hard_coded_catalog_dirname)
+	mock = HOD_mock(simulation_data=bolshoi,halo_occupation_model=Zheng07_HOD_Model)
 	mock.populate()
 
 	reasonable_ngal_boolean = (mock.num_total_gals > 5.e4) and (mock.num_total_gals < 1.e5)
@@ -26,6 +26,8 @@ def test_Zheng07_mock():
 	satellite_fraction = mock.num_total_sats/float(mock.num_total_gals)
 	reasonable_satellite_fraction_boolean = (satellite_fraction > 0.1) and (satellite_fraction < 0.3)
 	assert reasonable_satellite_fraction_boolean == True
+
+"""
 
 def time_mock():
 	timer_string = "m.populate()"
