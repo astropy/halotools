@@ -322,7 +322,7 @@ class Zheng07_HOD_Model(HOD_Model):
         mean_ncen = 0.5*(1.0 + erf(
             (logM - self.parameter_dict['logMmin_cen'])/self.parameter_dict['sigma_logM']))
 
-        #mean_ncen = np.zeros(len(logM)) + 0.5
+        #mean_ncen = np.zeros(len(logM)) + 0.01
         return mean_ncen
 
     def mean_nsat(self,logM,halo_type):
@@ -363,6 +363,8 @@ class Zheng07_HOD_Model(HOD_Model):
             logM[idx_nonzero_satellites],halo_type[idx_nonzero_satellites])*
             (((halo_mass[idx_nonzero_satellites] - M0)/M1)
             **self.parameter_dict['alpha_sat']))
+
+        #mean_nsat = np.zeros(len(logM)) + 0.01
         return mean_nsat
 
     def mean_concentration(self,logM,halo_type):
@@ -1019,6 +1021,11 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         maximum = self.maximum_destruction_centrals(primary_halo_property,all_ones)
         test_exceeds_maximum = output_destruction_allhalos > maximum
         output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Now require that the destruction function never falls below 
+        # its minimum allowed value
+        minimum = self.minimum_destruction_centrals(primary_halo_property,all_ones)
+        test_below_minimum = output_destruction_allhalos < minimum
+        output_destruction_allhalos[test_below_minimum] = minimum[test_below_minimum]
         # Finally, require that the destruction function is set to unity 
         # whenever the probability of halo_type=1 equals unity
         # This requirement supercedes the previous two

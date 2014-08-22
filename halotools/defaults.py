@@ -46,8 +46,8 @@ default_quenching_parameters = {
 
 default_assembias_parameters = {
 	'assembias_abcissa' : [12,15],
-	'satellite_assembias_ordinates' : [4,1],
-	'central_assembias_ordinates' : [4,1]
+	'satellite_assembias_ordinates' : [0.05,0.05],
+	'central_assembias_ordinates' : [0.1,0.1]
 	}
 
 default_satcen_parameters = {
@@ -58,13 +58,13 @@ default_satcen_parameters = {
 
 default_halo_type_split = {
 	'halo_type_split_abcissa' : [12],
-	'halo_type_split_ordinates' : [0.2]
+	'halo_type_split_ordinates' : [0.5]
 	}
 
 default_halo_type_calculator_spacing=0.1
 
 
-default_assembias_key = 'SCALE_50VMAX_MPEAK'
+default_assembias_key = 'VMAX'
 
 
 hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'

@@ -27,6 +27,7 @@ from copy import copy
 from collections import Counter
 import astropy
 import time
+import warnings 
 
 
 def enforce_periodicity_of_box(coords, box_length):
@@ -141,6 +142,7 @@ class HOD_mock(object):
 
             # If assembly bias is desired for centrals, implement it.
             if self.halo_occupation_model.secondary_halo_property_centrals_key != None:
+                #warnings.warn("setting secondary halo property")
 
                 self.halos['SECONDARY_HALO_PROPERTY_CENTRALS'] = np.array(
                     self.halos[self.halo_occupation_model.secondary_halo_property_centrals_key])
