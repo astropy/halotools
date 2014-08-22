@@ -67,7 +67,7 @@ default_halo_type_calculator_spacing=0.1
 default_assembias_key = 'SCALE_50VMAX_MPEAK'
 
 
-
+hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'
 
 
 

@@ -25,7 +25,7 @@ class simulation(object):
     def __init__(self,simulation_name=defaults.default_simulation_name, 
         scale_factor=defaults.default_scale_factor, 
         halo_finder=defaults.default_halo_finder, 
-        use_subhalos=False):
+        use_subhalos=False,manual_dirname=None):
 
 
         self.simulation_name = simulation_name
@@ -38,15 +38,21 @@ class simulation(object):
         self.halo_finder = halo_finder
         self.use_subhalos = use_subhalos
 
-        self.halos = self.get_catalog()
+        self.halos = self.get_catalog(manual_dirname)
 
 
-    def get_catalog(self):
+    def get_catalog(self,manual_dirname=None):
 
         import pyfits
 
         configobj = Config()
-        cache_dir = configobj.getCatalogDir()
+        if manual_dirname != None:
+            warnings.warn("using hard-coded directory name to load simulation")
+            cache_dir = manual_dirname
+        else:
+            cache_dir = configobj.getCatalogDir()
+
+        #print("cache directory = "+cache_dir)
 
         self.filename = configobj.getSimulationFilename(
             self.simulation_name,self.scale_factor,self.halo_finder,self.use_subhalos)
