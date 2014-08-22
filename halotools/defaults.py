@@ -60,8 +60,8 @@ default_quenching_parameters = {
 
 default_assembias_parameters = {
 	'assembias_abcissa' : [12,15],
-	'satellite_assembias_ordinates' : [2,1],
-	'central_assembias_ordinates' : [2,1]
+	'satellite_assembias_ordinates' : [4,1],
+	'central_assembias_ordinates' : [4,1]
 	}
 
 default_satcen_parameters = {
@@ -72,7 +72,7 @@ default_satcen_parameters = {
 
 default_halo_type_split = {
 	'halo_type_split_abcissa' : [12],
-	'halo_type_split_ordinates' : [0.4]
+	'halo_type_split_ordinates' : [0.2]
 	}
 
 default_halo_type_calculator_spacing=0.1

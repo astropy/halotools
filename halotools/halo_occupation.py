@@ -739,11 +739,15 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         """ The maximum allowed value of the destruction function, as pertains to centrals.
 
         The combinatorics of assembly-biased HODs are such that 
-        the destruction function :math:`D_{cen}(p | h_{i})` cannot exceed 
-        :math:`1 / F_{h_{i}}^{cen}(p)`, or it would be impossible to keep fixed 
-        the unconditioned mean central occupation :math:`\\langle N_{cen} \\rangle_{p}`. 
+        the destruction function :math:`D_{cen}(p | h_{i})` cannot exceed neither 
+        :math:`1 / F_{h_{i}}^{cen}(p)`, nor :math:`1 / \\langle N_{cen} \\rangle_{p}`. 
+        The first condition is necessary to keep fixed 
+        the unconditioned mean central occupation :math:`\\langle N_{cen} \\rangle_{p}`; 
+        the second condition is necessary to ensure that 
+        :math:`\\langle N_{cen} | h_{i} \\rangle_{p} <= 1`.
 
-        Additionally, :math:`F_{h_{i}}^{cen}(p) = 0 \Rightarrow D_{cen}(p | h_{i}) = 0`.
+        Additionally, :math:`F_{h_{i}}^{cen}(p) = 1 \Rightarrow D_{cen}(p | h_{i}) = 1`, 
+        which is applied not by this function but within `destruction_centrals`. 
 
         Parameters 
         ----------
@@ -761,13 +765,81 @@ class Assembly_Biased_HOD_Model(HOD_Model):
             Maximum allowed value of the destruction function, as pertains to centrals.
 
         """
-
-        output_maximum_destruction = np.zeros(len(primary_halo_property))
+        # First initialize the output array to zero
+        output_maximum_destruction_case1 = np.zeros(len(primary_halo_property))
+        # Whenever there are some type 1 halos, 
+        # set the maximum destruction function equal to 1/prob(type1 halos)
         halo_type_fraction = self.halo_type_fraction_centrals(
             primary_halo_property,halo_type)
         idx_positive = halo_type_fraction > 0
-        output_maximum_destruction[idx_positive] = 1./halo_type_fraction[idx_positive]
+        output_maximum_destruction_case1[idx_positive] = 1./halo_type_fraction[idx_positive]
+        # At this stage, maximum destruction still needs to be limited by <Ncen>
+        # Initialize another array to test the second case
+        output_maximum_destruction_case2 = np.zeros(len(primary_halo_property))
+        # Compute <Ncen> in the baseline model
+        mean_baseline_ncen = self.baseline_hod_model.mean_ncen(
+            primary_halo_property,halo_type)
+        # Where non-zero, set the case 2 condition to 1 / <Ncen>
+        idx_nonzero_centrals = mean_baseline_ncen > 0
+        output_maximum_destruction_case2[idx_nonzero_centrals] = (
+            1./mean_baseline_ncen[idx_nonzero_centrals])
+
+        # Now set the output array equal to the maximum of the above two arrays
+        output_maximum_destruction = output_maximum_destruction_case1
+        idx_case2_supercedes_case1 = (
+            output_maximum_destruction_case2 < output_maximum_destruction_case1)
+        output_maximum_destruction[idx_case2_supercedes_case1] = (
+            output_maximum_destruction_case2[idx_case2_supercedes_case1])
+
         return output_maximum_destruction
+
+
+
+    def minimum_destruction_centrals(self,primary_halo_property,halo_type):
+        """ The minimum allowed value of the destruction function, as pertains to centrals.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the destruction function :math:`D_{cen}(p | h_{0,1})` can neither be negative 
+        (which would be uphysical) nor fall below 
+        :math:`\\frac{1 - P_{h_{1,0}}(p) / \\langle N_{cen} \\rangle_{p}}{P_{h_{0,1}}(p)}`
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_maximum_destruction : array_like
+            Maximum allowed value of the destruction function, as pertains to centrals.
+
+
+        """
+        minimum_destruction_centrals = np.zeros(len(primary_halo_property))
+
+        mean_ncen = self.baseline_hod_model.mean_ncen(
+            primary_halo_property,halo_type_fraction_cent)
+
+        halo_type_fraction = self.halo_type_fraction_centrals(
+            primary_halo_property,halo_type)
+        complementary_halo_type_fraction = 1 - halo_type_fraction
+
+        idx_both_positive = ((halo_type_fraction > 0) & (mean_ncen > 0))
+
+        minimum_destruction_centrals[idx_both_positive] = (1 - 
+            (complementary_halo_type_fraction[idx_both_positive]/
+                mean_ncen[idx_both_positive]))/halo_type_fraction[idx_both_positive]
+
+        idx_negative = (minimum_destruction_centrals < 0)
+        minimum_destruction_centrals[idx_negative] = 0
+
+        return minimum_destruction_centrals
+
 
     def maximum_destruction_satellites(self,primary_halo_property,halo_type):
         """ Maximum allowed value of the destruction function, as pertains to satellites.
@@ -777,7 +849,8 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         :math:`1 / F_{h_{i}}^{sat}(p)`, or it would be impossible to keep fixed 
         the unconditioned mean satellite occupation :math:`\\langle N_{sat} \\rangle_{p}`. 
 
-        Additionally, :math:`F_{h_{i}}^{sat}(p) = 0 \Rightarrow D_{sat}(p | h_{i}) = 0`.
+        Additionally, :math:`F_{h_{i}}^{sat}(p) = 1 \Rightarrow D_{sat}(p | h_{i}) = 1`, 
+        which is applied not by this function but within `destruction_satellites`. 
 
         Parameters 
         ----------
@@ -861,7 +934,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
         # Finally, require that the destruction function is set to unity 
         # whenever the probability of halo_type=1 equals unity
-        # This is requirement supercedes the previous two
+        # This requirement supercedes the previous two
         probability_type1 = self.halo_type_fraction_satellites(
             primary_halo_property,all_ones)
         test_unit_probability = (probability_type1 == 1)
@@ -899,7 +972,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         secondary property type :math:`h_{i}` 
         host a central galaxy. 
 
-        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} \equiv D_{cen}(p | h_{i}) \\langle N_{sat} \\rangle_{p}`.
+        :math:`\\langle N_{cen} | h_{i} \\rangle_{p} \equiv D_{cen}(p | h_{i}) \\langle N_{cen} \\rangle_{p}`.
 
         All of the behavior of this function derives 
         from `unconstrained_central_destruction_halo_type1` and `halo_type1_fraction_centrals`, 
@@ -950,7 +1023,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
         # Finally, require that the destruction function is set to unity 
         # whenever the probability of halo_type=1 equals unity
-        # This is requirement supercedes the previous two
+        # This requirement supercedes the previous two
         probability_type1 = self.halo_type_fraction_centrals(
             primary_halo_property,all_ones)
         test_unit_probability = (probability_type1 == 1)
