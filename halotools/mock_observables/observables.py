@@ -6,7 +6,7 @@ the pair counter and subvolume membership methods.
 
 from __future__ import division
 
-__all__=['two_point_correlation_function','luminosity_function','HOD','CLF','isolator']
+__all__=['two_point_correlation_function','luminosity_function','HOD','CLF','isolatoion_criterion']
 
 import numpy as np
 from math import pi, gamma
@@ -267,7 +267,7 @@ def CLF():
     pass
 
 
-class isolator(object):
+class isolatoion_criterion(object):
     """
     A object that defines a galaxy isolation criterion.
     """
