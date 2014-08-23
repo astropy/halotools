@@ -6,26 +6,12 @@ Module expressing various default values of the mock-making code.
 #                        unicode_literals)
 
 
-
 ### Default halo catalog (used in read_nbody)
 # The following parameters are used by the 
 # simulation object in the read_nbody module
 default_simulation_name = 'bolshoi'
 default_halo_finder = 'rockstar_V1.5'
 default_scale_factor = 1.0003
-
-# The following parameters are used by the 
-# load_bolshoi_host_halos_fits method in 
-# the read_nbody module. Still trying to 
-# move away from this routine.
-default_halo_catalog_filename='/Users/aphearin/Dropbox/mock_for_surhud/VALUE_ADDED_HALOS/presorted_host_halo_catalog.fits'
-default_simulation_dict = {
-	'catalog_filename':default_halo_catalog_filename,
-	'Lbox':250.0,
-	'scale_factor':1.0003,
-	'particle_mass':1.35e8,
-	'softening':1.0
-}
 
 
 default_luminosity_threshold = -20
@@ -60,8 +46,8 @@ default_quenching_parameters = {
 
 default_assembias_parameters = {
 	'assembias_abcissa' : [12,15],
-	'satellite_assembias_ordinates' : [2,1],
-	'central_assembias_ordinates' : [2,1]
+	'satellite_assembias_ordinates' : [0.05,0.05],
+	'central_assembias_ordinates' : [0.1,0.1]
 	}
 
 default_satcen_parameters = {
@@ -71,17 +57,17 @@ default_satcen_parameters = {
 	}
 
 default_halo_type_split = {
-	'halo_type_split_abcissa' : [13,],
-	'halo_type_split_ordinates' : [0.5,]
+	'halo_type_split_abcissa' : [12],
+	'halo_type_split_ordinates' : [0.5]
 	}
 
 default_halo_type_calculator_spacing=0.1
 
 
-default_assembias_key = 'SCALE_50VMAX_MPEAK'
+default_assembias_key = 'VMAX'
 
 
-
+hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'
 
 
 

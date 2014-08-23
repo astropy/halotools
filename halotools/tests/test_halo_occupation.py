@@ -59,12 +59,14 @@ def test_abhod():
 	primary_halo_property = np.append(p,p)
 	# array of halo_types
 	h0 = np.zeros(len(p))
-	h1 = np.zeros(len(p)) + 1
+	h1 = np.ones(len(p)) 
 	halo_types = np.append(h0,h1)
 	# arrays of indices for bookkeeping
 	idx0=np.where(halo_types == 0)[0]
 	idx1=np.where(halo_types == 1)[0]
 
+
+	#### Test satellites ####
 	#probability of having halo_type=0
 	phs0 = m.halo_type_fraction_satellites(primary_halo_property[idx0],halo_types[idx0])
 	#probability of having halo_type=1
@@ -77,6 +79,21 @@ def test_abhod():
 	# Require that the derived and underlying 
 	# satellite occupations are equal (highly non-trivial)
 	assert np.allclose(derived_nsat, underlying_nsat,rtol=1e-6)
+
+	#### Test centrals ####
+	#probability of having halo_type=0
+	phs0 = m.halo_type_fraction_centrals(primary_halo_property[idx0],halo_types[idx0])
+	#probability of having halo_type=1
+	phs1 = m.halo_type_fraction_centrals(primary_halo_property[idx1],halo_types[idx1])
+	# Compute the value of mean_nsat that derives from the conditioned occupations
+	derived_ncen = (phs0*m.mean_ncen(primary_halo_property[idx0],halo_types[idx0]) + 
+		phs1*m.mean_ncen(primary_halo_property[idx1],halo_types[idx1]))
+	# Compute the value of mean_ncen of the underlying baseline HOD model
+	underlying_ncen = m.baseline_hod_model.mean_ncen(primary_halo_property[idx0],halo_types[idx0])
+	# Require that the derived and underlying 
+	# satellite occupations are equal (highly non-trivial)
+	assert np.allclose(derived_ncen, underlying_ncen,rtol=1e-6)
+
 
 
 # Can't figure out the relative import syntax for a module-wide function
