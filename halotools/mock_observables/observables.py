@@ -268,10 +268,12 @@ def CLF():
 
 
 class isolatoion_criterion(object):
+    from spatial.geometry import cylinder, sphere
     """
     A object that defines a galaxy isolation criterion.
     """
-    def __init__(self):
+    def __init__(self, volume = sphere, test_prop, test_function):
+        self.volume = volume 
         pass
 
     def apply_criterion(self, mock):
@@ -290,7 +292,7 @@ class isolatoion_criterion(object):
         inds: numpy.array
             indicies of galaxies in mock that pass the isolation criterion.
 
-    """
+        """
         pass
 
 
