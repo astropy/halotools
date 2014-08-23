@@ -6,7 +6,7 @@ the pair counter and subvolume membership methods.
 
 from __future__ import division
 
-__all__=['two_point_correlation_function']
+__all__=['two_point_correlation_function','luminosity_function','HOD','CLF','isolator']
 
 import numpy as np
 from math import pi, gamma
@@ -246,7 +246,52 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         return xi_11, xi_12, xi_22
 
 
+def luminosity_function():
+    """
+    Calculate the galaxy luminosity function.
+    """
+    pass
 
+
+def HOD():
+    """
+    Calculate the galaxy HOD.
+    """
+    pass
+
+
+def CLF():
+    """
+    Calculate the galaxy CLF.
+    """
+    pass
+
+
+class isolator(object):
+    """
+    A object that defines a galaxy isolation criterion.
+    """
+    def __init__(self):
+        pass
+
+    def apply_criterion(self, mock):
+        """
+        Return galaxies which pass isolation criterion. 
+    
+        Parameters 
+        ----------
+        mock: galaxy mock object
+    
+        isolator: isolator object
+            isolator object
+
+        Returns 
+        -------
+        inds: numpy.array
+            indicies of galaxies in mock that pass the isolation criterion.
+
+    """
+        pass
 
 
 
