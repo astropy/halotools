@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 
-This module contains the classes and methods used to model the 
-connection between galaxies and the halos they inhabit. 
-Classes (will) include support for HODs, CLFs, CSMFs, and 
-(conditional) abundance matching. Features will include designations 
-for whether a galaxy is quenched or star-forming, or in the case 
-of conditional abundance matching models, the full distributions 
-of secondary galaxy properties such as SFR, color, morphology, etc.
-
+This module contains the classes and methods used to connect  
+galaxies to halos using HOD-style models. 
 
 """
 
@@ -924,17 +918,23 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         ########################################
         # Now apply the baseline HOD constraints to output_destruction_allhalos, 
         # still behaving as if every input halo has halo_type=1
-        # First, require that the destruction function is non-negative
-        test_negative = output_destruction_allhalos < 0
-        output_destruction_allhalos[test_negative] = 0
-        # Second, require that the destruction function never exceed the 
-        # maximum allowed value 
+        # First, require that the destruction function never exceed the 
+        # maximum allowed value. This guarantees that < Nsat | h0 > >= 0, 
+        # and ensures that it will be possible to preserve the baseline HOD. 
         maximum = self.maximum_destruction_satellites(primary_halo_property,all_ones)
         test_exceeds_maximum = output_destruction_allhalos > maximum
         output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Second, require that the satellite destruction function 
+        # never exceed its minimum value of zero. This ensures < Nsat | h1 > >= 0
+        test_negative = output_destruction_allhalos < 0
+        output_destruction_allhalos[test_negative] = 0
         # Finally, require that the destruction function is set to unity 
         # whenever the probability of halo_type=1 equals unity
-        # This requirement supercedes the previous two
+        # This requirement supercedes the previous two, and ensures that 
+        # the central destruction in h1-halos will be ignored in cases 
+        # where there are no h0-halos. This self-consistency condition is necessary because 
+        # the unconstrained destruction function and the halo_type function 
+        # are both independently specified by user-supplied subclasses.  
         probability_type1 = self.halo_type_fraction_satellites(
             primary_halo_property,all_ones)
         test_unit_probability = (probability_type1 == 1)
@@ -951,15 +951,17 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
         # Whenever the fraction of halos of type=0 is zero, the destruction function 
         # for type0 halos should be set to zero.
-        test_positive = (probability_type0_input_halo_type0 > 0)
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_destruction_input_halo_type0[test_zero] = 0
 
+        # For non-trivial cases, define the type0 destruction function 
+        # in terms of the type1 destruction function in such a way that 
+        # the baseline HOD will be unadulterated by assembly bias
+        test_positive = (probability_type0_input_halo_type0 > 0)
         output_destruction_input_halo_type0[test_positive] = (
             (1.0 - output_destruction_input_halo_type0[test_positive]*
                 probability_type1_input_halo_type0[test_positive])/
             probability_type0_input_halo_type0[test_positive])
-
-        test_zero = (probability_type0_input_halo_type0 == 0)
-        output_destruction_input_halo_type0[test_zero] = 0
 
         # Now write the results back to the output 
         output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
@@ -1013,22 +1015,28 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         ########################################
         # Now apply the baseline HOD constraints to output_destruction_allhalos, 
         # still behaving as if every input halo has halo_type=1
-        # First, require that the destruction function is non-negative
-        test_negative = output_destruction_allhalos < 0
-        output_destruction_allhalos[test_negative] = 0
-        # Second, require that the destruction function never exceed the 
-        # maximum allowed value 
+        #output_destruction_allhalos[test_negative] = 0
+        # First, require that the destruction function never exceed the 
+        # maximum allowed value. This guarantees that < Ncen | h0 > >= 0, 
+        # that < Ncen | h1 > <= 1, and ensures that it will be possible to 
+        # preserve the baseline HOD.
         maximum = self.maximum_destruction_centrals(primary_halo_property,all_ones)
         test_exceeds_maximum = output_destruction_allhalos > maximum
         output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
-        # Now require that the destruction function never falls below 
-        # its minimum allowed value
+        # Next, require that the destruction function never falls below 
+        # its minimum allowed value. This guarantees that < Ncen | h1 > >= 0 
+        # that < Ncen | h0 > <= 1, and ensures that we will be able to preserve 
+        # the baseline HOD. 
         minimum = self.minimum_destruction_centrals(primary_halo_property,all_ones)
         test_below_minimum = output_destruction_allhalos < minimum
         output_destruction_allhalos[test_below_minimum] = minimum[test_below_minimum]
         # Finally, require that the destruction function is set to unity 
         # whenever the probability of halo_type=1 equals unity
-        # This requirement supercedes the previous two
+        # This requirement supercedes the previous two, and ensures that 
+        # the central destruction in h1-halos will be ignored in cases 
+        # where there are no h0-halos. This self-consistency condition is necessary because 
+        # the unconstrained destruction function and the halo_type function 
+        # are both independently specified by user-supplied subclasses.  
         probability_type1 = self.halo_type_fraction_centrals(
             primary_halo_property,all_ones)
         test_unit_probability = (probability_type1 == 1)
@@ -1045,15 +1053,17 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
         # Whenever the fraction of halos of type=0 is zero, the destruction function 
         # for type0 halos should be set to zero.
-        test_positive = (probability_type0_input_halo_type0 > 0)
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_destruction_input_halo_type0[test_zero] = 0
 
+        # For non-trivial cases, define the type0 destruction function 
+        # in terms of the type1 destruction function in such a way that 
+        # the baseline HOD will be unadulterated by assembly bias
+        test_positive = (probability_type0_input_halo_type0 > 0)
         output_destruction_input_halo_type0[test_positive] = (
             (1.0 - output_destruction_input_halo_type0[test_positive]*
                 probability_type1_input_halo_type0[test_positive])/
             probability_type0_input_halo_type0[test_positive])
-
-        test_zero = (probability_type0_input_halo_type0 == 0)
-        output_destruction_input_halo_type0[test_zero] = 0
 
         # Now write the results back to the output 
         output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
