@@ -268,15 +268,45 @@ def CLF():
 
 
 class isolatoion_criterion(object):
-    from spatial.geometry import cylinder, sphere
+    from spatial import geometry
     """
     A object that defines a galaxy isolation criterion.
+    
+    Parameters 
+    ----------
+    volume: geometry volume object
+        e.g. sphere, cylinder
+    
+    vol_args: list or function
+        arguments to initialize the volume objects defining the test region of candidates,
+        or function taking a galaxy object which returns the vol arguments.
+    
+    test_prop: string
+        mock property to test isolation against.  e.g. 'M_r', 'Mstar', etc.
+        
+    test_func: function
+        python function defining the property isolation test.
     """
-    def __init__(self, volume = sphere, test_prop, test_function):
-        self.volume = volume 
-        pass
+    def __init__(self, volume=geometry.sphere, vol_args=None, test_prop=None, test_func=None):
+        self.volume = volume
+        if hasattr(vol_args, '__call__'):
+            self.vol_args= vol_args
+            #do some tests to make sure the function returns args that are taken by volume
+        else:
+            def default_func(*args):
+                return vol_agrs
+            self.vol_agrs = default_func
+            #do some tests to make sure vol_args are taken by the volume object init.
+        self.test_prop = test_prop
+        self.test_func = test_func
+    
+    def make_volumes(self, mock, isolated_candidates):
+        volumes = np.empty((len(isolated_candidates),))
+        for i in range(0,len(isolated_candidates)):
+            volumes[i] = self.volume(self.vol_args(mock[isolated_candidates[i]]))
+        return volumes
 
-    def apply_criterion(self, mock):
+    def apply_criterion(self, mock, isolated_candidates):
         """
         Return galaxies which pass isolation criterion. 
     
@@ -284,16 +314,26 @@ class isolatoion_criterion(object):
         ----------
         mock: galaxy mock object
     
-        isolator: isolator object
-            isolator object
-
+        isolated_candidates: array_like
+            indices of mock galaxy candidates to test for isolation.
+        
         Returns 
         -------
         inds: numpy.array
             indicies of galaxies in mock that pass the isolation criterion.
 
         """
-        pass
+        
+        volumes = make_volumes(self,mock,isolated_candidates)
+        
+        neighbor_candidates = self.test_function(mock[self.test_prop])
+        
+        pass_isolation = np.logical_not(
+            geometry.inside_volume(
+                volumes, mock.coords[neighbor_candidates], period=mock.Lbox)[1]
+            )
+        
+        return inds
 
 
 

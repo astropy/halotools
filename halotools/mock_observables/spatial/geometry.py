@@ -430,3 +430,57 @@ class cylinder(object):
         return result
 
 
+def inside_volume(shapes, points, period=None):
+    '''
+    Check if a list of points is inside a volume.
+    parameters
+        shape: a geometry.py shape object, or list of objects
+        points: a list of points or a ckdtree object
+        period: length k array defining axis aligned PBCs. If set to none, PBCs = infinity.
+    returns
+        inside_points: np.array of ints of indices of points which fall within the 
+            specified volumes
+        inside_shapes: np.array of booleans, True if any points fall within the shape, 
+            False otherwise
+    '''
+    
+    if type(points) is not cKDTree:
+        points = np.array(points)
+        KDT = cKDTree(points)
+    else:
+        KDT=points
+    
+    #if shapes is a list of shapes
+    if type(shapes) is list:
+        inside_points=np.empty((0,), dtype=np.int)
+        inside_shapes=np.empty((len(shapes),), dtype=bool)
+        for i, shape in enumerate(shapes):
+            points_to_test = np.array(KDT.query_ball_point(shape.center,shape.circum_r(),period=period))
+    
+            if type(points) is cKDTree:
+                inside = shape.inside(KDT.data[points_to_test], period)
+                inside = points_to_test[inside]
+            else:
+                inside = shape.inside(points[points_to_test], period)
+                inside = points_to_test[inside]
+            if len(inside)>0:
+                inside_shapes[i]=True
+            else: inside_shapes[i]=False
+            inside_points = np.hstack((inside_points,inside))
+        inside_points = np.unique(inside_points)
+        return inside_points, inside_shapes
+    else: #if shapes is a single shape object
+        shape = shapes
+        points_to_test = np.array(KDT.query_ball_point(shape.center,shape.circum_r(),period=period))
+    
+        if type(points) is cKDTree:
+            inside = shape.inside(KDT.data[points_to_test], period)
+            inside = points_to_test[inside]
+        else:
+            inside = shape.inside(points[points_to_test], period)
+            inside = points_to_test[inside]
+        
+        if len(inside)>0: inside_shapes = True
+        else:  inside_shapes = False
+        inside_points = inside
+        return inside_points, inside_shapes
