@@ -1,3 +1,7 @@
+# cython: profile=True
+# filename: ckdtree.pyx
+# cython: boundscheck=False, overflowcheck=False
+
 # Copyright Anne M. Archibald 2008
 # Additional contributions by Patrick Varilly and Sturla Molden
 # Released under the scipy license
@@ -48,9 +52,7 @@ __all__ = ['cKDTree']
 # ints to lists.  The results of the if is known at compile time, so the
 # test is optimized away.
 
-cdef inline int set_add_pair(set results,
-                             np.intp_t i,
-                             np.intp_t j) except -1:
+cdef inline int set_add_pair(set results, np.intp_t i, np.intp_t j) except -1:
 
     if sizeof(long) < sizeof(np.intp_t):
         # Win 64
@@ -60,9 +62,7 @@ cdef inline int set_add_pair(set results,
         results.add((i, j))
     return 0
 
-cdef inline int set_add_ordered_pair(set results,
-                                     np.intp_t i,
-                                     np.intp_t j) except -1:
+cdef inline int set_add_ordered_pair(set results, np.intp_t i, np.intp_t j) except -1:
 
     if sizeof(long) < sizeof(np.intp_t):
         # Win 64
@@ -251,10 +251,11 @@ cdef inline np.float64_t _distance_p(np.float64_t *x, np.float64_t *y,
 
 
 cdef inline np.float64_t _distance_p_periodic(np.float64_t *x, np.float64_t *y,
-                                     np.float64_t p, np.intp_t k,
-                                     np.float64_t upperbound,
-                                     np.float64_t *period):
+                                              np.float64_t p, np.intp_t k,
+                                              np.float64_t upperbound,
+                                              np.float64_t *period):
     """Compute the distance between x and y using periodic boundary conditoons.
+    
     Computes the Minkowski p-distance to the power p between two points.
     If the distance**p is larger than upperbound, then any number larger
     than upperbound may be returned (the calculation is truncated).
@@ -265,25 +266,29 @@ cdef inline np.float64_t _distance_p_periodic(np.float64_t *x, np.float64_t *y,
     r = 0
     if p==infinity:
         for i in range(k):
-            m = dmin(dabs(x[i] - y[i]), period[i] - dabs(x[i] - y[i]))
+            diff = dabs(x[i] - y[i])
+            m = dmin(diff, period[i] - diff)
             r = dmax(r,m)
             if r>upperbound:
                 return r
     elif p==1:
         for i in range(k):
-            m = dmin(dabs(x[i] - y[i]), period[i] - dabs(x[i] - y[i]))
+            diff = dabs(x[i] - y[i])
+            m = dmin(diff, period[i] - diff)
             r += m
             if r>upperbound:
                 return r
     elif p==2:
         for i in range(k):
-            m = dmin(dabs(x[i] - y[i]), period[i] - dabs(x[i] - y[i]))
+            diff = dabs(x[i] - y[i])
+            m = dmin(diff, period[i] - diff)
             r += m*m
             if r>upperbound:
                 return r
     else:
         for i in range(k):
-            m = dmin(dabs(x[i] - y[i]), period[i] - dabs(x[i] - y[i]))
+            diff = dabs(x[i] - y[i])
+            m = dmin(diff, period[i] - diff)
             r += m**p
             if r>upperbound:
                 return r
