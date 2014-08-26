@@ -28,7 +28,7 @@ from collections import Counter
 import astropy
 import time
 import warnings 
-
+from astropy.table import Table
 
 def enforce_periodicity_of_box(coords, box_length):
     """ Function used to apply periodic boundary conditions 
@@ -85,7 +85,8 @@ class HOD_mock(object):
     """
 
     def __init__(self,simulation_data=None,
-        halo_occupation_model=ho.vdB03_Quenching_Model,threshold = -20,seed=None):
+        halo_occupation_model=ho.vdB03_Quenching_Model,threshold = -20,
+        seed=None,tableBundle=True):
 
         # If no simulation_data object is passed to the constructor, 
         # the default simulation will be chosen
@@ -104,18 +105,6 @@ class HOD_mock(object):
         if not isinstance(simulation_data.halos,astropy.table.table.Table):
             raise TypeError("HOD_mock object requires an astropy Table object as input")
 
-        # Bind halo catalog to the HOD_mock object
-        self.halos = simulation_data.halos
-        self.Lbox = simulation_data.Lbox
-
-        # Add columns to the halos table that are not present in the 
-        # downloaded halo catalog
-        self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
-        self.halos['SECONDARY_HALO_PROPERTY_SATELLITES']=np.zeros(len(self.halos))
-        self.halos['SECONDARY_HALO_PROPERTY_CENTRALS']=np.zeros(len(self.halos))
-        self.halos['HALO_TYPE_CENTRALS']=np.zeros(len(self.halos))
-        self.halos['HALO_TYPE_SATELLITES']=np.zeros(len(self.halos))
-        self.halos['QUENCHED_HALO']=np.zeros(len(self.halos))
 
         # Test to make sure the hod model is the appropriate type
         hod_model_instance = halo_occupation_model(threshold=threshold)
@@ -125,83 +114,109 @@ class HOD_mock(object):
         # Bind the instance of the hod model to the HOD_mock object
         self.halo_occupation_model = hod_model_instance
 
-        # Create numpy ndarrays containing data from the halo catalog and bind them to the mock object
-        self.primary_halo_property = np.array(
-            self.halos[self.halo_occupation_model.primary_halo_property_key])
-        self.halos['PRIMARY_HALO_PROPERTY']=np.array(
-            self.halos[self.halo_occupation_model.primary_halo_property_key])
+        # Bind halo catalog to the HOD_mock object
+        self.halos = simulation_data.halos
+        self.Lbox = simulation_data.Lbox
 
+        # Add columns to the halos table that are not present in the 
+        # downloaded halo catalog
+#        self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
+#        self.halos['SECONDARY_HALO_PROPERTY_SATELLITES']=np.zeros(len(self.halos))
+#        self.halos['SECONDARY_HALO_PROPERTY_CENTRALS']=np.zeros(len(self.halos))
+#        self.halos['HALO_TYPE_CENTRALS']=np.zeros(len(self.halos))
+#        self.halos['HALO_TYPE_SATELLITES']=np.zeros(len(self.halos))
+#        self.halos['QUENCHED_HALO']=np.zeros(len(self.halos))
+
+
+
+        # Create numpy ndarrays containing data from the halo catalog and bind them to the mock object
+ #       self.primary_halo_property = np.array(
+ #           self.halos[self.halo_occupation_model.primary_halo_property_key])
+
+        self._primary_halo_property = np.array(
+            self.halos[self.halo_occupation_model.primary_halo_property_key])
         # Use log10Mvir instead of Mvir if this is the primary halo property
         if self.halo_occupation_model.primary_halo_property_key == 'MVIR':
-            self.primary_halo_property = np.log10(self.primary_halo_property)
-            self.halos['PRIMARY_HALO_PROPERTY']=np.log10(self.halos['PRIMARY_HALO_PROPERTY'])
+            self._primary_halo_property = np.log10(self._primary_halo_property)
+            #self.halos['PRIMARY_HALO_PROPERTY']=np.log10(self.halos['PRIMARY_HALO_PROPERTY'])
 
+        #self.halos['PRIMARY_HALO_PROPERTY']=np.array(
+            #self.halos[self.halo_occupation_model.primary_halo_property_key])
+    
+
+        self._halo_type_centrals = np.ones(len(self._primary_halo_property))
+        self._halo_type_satellites = np.ones(len(self._primary_halo_property))
         # If the mock was passed an assembly-biased HOD model, 
         # set the secondary halo property and compute halo_types 
         if isinstance(self.halo_occupation_model,ho.Assembly_Biased_HOD_Model):
 
             # If assembly bias is desired for centrals, implement it.
             if self.halo_occupation_model.secondary_halo_property_centrals_key != None:
-                #warnings.warn("setting secondary halo property")
-
-                self.halos['SECONDARY_HALO_PROPERTY_CENTRALS'] = np.array(
+                #self.halos['SECONDARY_HALO_PROPERTY_CENTRALS'] = np.array(
+                    #self.halos[self.halo_occupation_model.secondary_halo_property_centrals_key])
+                self._secondary_halo_property_centrals = (
                     self.halos[self.halo_occupation_model.secondary_halo_property_centrals_key])
-                self.halos['HALO_TYPE_CENTRALS'] = (
+                self._halo_type_centrals = (
                     self.halo_occupation_model.halo_type_calculator(
-                    self.halos['PRIMARY_HALO_PROPERTY'],
-                    self.halos['SECONDARY_HALO_PROPERTY_CENTRALS'],
+                    self._primary_halo_property,
+                    self._secondary_halo_property_centrals,
                     self.halo_occupation_model.halo_type1_fraction_centrals))
 
-            # If assembly bias is desired for centrals, implement it.
+            # If assembly bias is desired for satellites, implement it.
             if self.halo_occupation_model.secondary_halo_property_satellites_key != None: 
 
-                self.halos['SECONDARY_HALO_PROPERTY_SATELLITES'] = np.array(
+                self._secondary_halo_property_satellites = np.array(
                     self.halos[self.halo_occupation_model.secondary_halo_property_satellites_key])
-                self.halos['HALO_TYPE_SATELLITES'] = (
+                self._halo_type_satellites = (
                     self.halo_occupation_model.halo_type_calculator(
-                    self.halos['PRIMARY_HALO_PROPERTY'],
-                    self.halos['SECONDARY_HALO_PROPERTY_SATELLITES'],
+                    self._primary_halo_property,
+                    self._secondary_halo_property_satellites,
                     self.halo_occupation_model.halo_type1_fraction_satellites))
 
+        # If the model includes quenching designations, pre-allocate an array 
+        # dedicated to whether or not the central galaxy that would be in a halo 
+        # will be quenched. Doing this in advance costs nothing, and simplifies 
+        # the unification of models with a distinct quenched/active SMHM 
+        self._quenched_halo = np.zeros(len(self._primary_halo_property))
 
-        self.haloID = np.array(self.halos['ID'])
-        self.concen = self.halo_occupation_model.mean_concentration(
-            self.halos['PRIMARY_HALO_PROPERTY'],self.halos['HALO_TYPE_CENTRALS'])
+        self._concen = self.halo_occupation_model.mean_concentration(
+            self._primary_halo_property,self._halo_type_centrals)
 
-        self.Rvir = np.array(self.halos['RVIR'])/1000.
+        self._rvir = np.array(self.halos['RVIR'])/1000.
 
-        self.halopos = np.empty((len(self.halos),3),'f8')
-        self.halopos.T[0] = np.array(self.halos['POS'][:,0])
-        self.halopos.T[1] = np.array(self.halos['POS'][:,1])
-        self.halopos.T[2] = np.array(self.halos['POS'][:,2])
+        self._halopos = np.empty((len(self.halos),3),'f8')
+        self._halopos.T[0] = np.array(self.halos['POS'][:,0])
+        self._halopos.T[1] = np.array(self.halos['POS'][:,1])
+        self._halopos.T[2] = np.array(self.halos['POS'][:,2])
 
         if seed != None:
             np.random.seed(seed)
 
-        self.idx_current_halo = 0 # index for current halo (bookkeeping device to speed up array access)
-
+        #self.idx_current_halo = 0 # index for current halo (bookkeeping device to speed up array access)
 
         #Set up the grid used to tabulate NFW profiles
         #This will be used to assign halo-centric distances to the satellites
         Npts_concen = defaults.default_Npts_concentration_array
-        concentration_array = np.linspace(self.concen.min(),self.concen.max(),Npts_concen)
+        concentration_array = np.linspace(self._concen.min(),self._concen.max(),Npts_concen)
         Npts_radius = defaults.default_Npts_radius_array        
         radius_array = np.linspace(0.,1.,Npts_radius)
         
-        self.cumulative_nfw_PDF = []
+        self._cumulative_nfw_PDF = []
         # After executing the following lines, 
-        #self.cumulative_nfw_PDF will be a list of functions. 
-        #The list elements correspond to functions governing 
-        #radial profiles of halos with different NFW concentrations.
-        #Each function takes a scalar y in [0,1] as input, 
-        #and outputs the x = r/Rvir corresponding to Prob_NFW( x > r/Rvir ) = y. 
-        #Thus each list element is the inverse of the NFW cumulative NFW PDF.
+        # self._cumulative_nfw_PDF will be a  (private) list of functions. 
+        # The elements of this list are functions governing 
+        # radial profiles of halos with different NFW concentrations.
+        # Each function takes a scalar y in [0,1] as input, 
+        # and outputs the x = r/Rvir corresponding to Prob_NFW( x < r/Rvir ) = y. 
+        # Thus each list element is the inverse of the NFW cumulative PDF.
         for c in concentration_array:
-            self.cumulative_nfw_PDF.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
+            self._cumulative_nfw_PDF.append(interp1d(ho.cumulative_NFW_PDF(radius_array,c),radius_array))
 
-        #interp_idx_concen is an integer array with one element per host halo
+        #interp_idx_concen is a (private) integer array with one element per host halo
         #each element gives the index pointing to the bins defined by concentration_array
-        self.interp_idx_concen = np.digitize(self.concen,concentration_array)
+        self._interp_idx_concen = np.digitize(self._concen,concentration_array)
+
+        self.tableBundle = tableBundle
 
 
     def _setup(self):
@@ -229,36 +244,35 @@ class HOD_mock(object):
         # depend on quenching/star-forming designation, 
         # such as Tinker, Leauthaud, et al. 2013.
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-            self.halos['QUENCHED_HALO'] = (self.quenched_monte_carlo(
-                self.halos['PRIMARY_HALO_PROPERTY'],
-                self.halos['HALO_TYPE_CENTRALS'],
+            self._quenched_halo = (self.quenched_monte_carlo(
+                self._primary_halo_property,
+                self._halo_type_centrals,
                 galaxy_type='central'))
 
-        self.NCen = self.num_cen_monte_carlo(
-            self.halos['PRIMARY_HALO_PROPERTY'],self.halos['HALO_TYPE_CENTRALS'])
-        self.hasCentral = self.NCen > 0
+        self._NCen = self.num_cen_monte_carlo(
+            self._primary_halo_property,self._halo_type_centrals)
+        self._hasCentral = self._NCen > 0
 
-        self.NSat = np.zeros(len(self.halos['PRIMARY_HALO_PROPERTY']),dtype=int)
+        self._NSat = np.zeros(len(self._primary_halo_property),dtype=int)
 
-        self.NSat = self.num_sat_monte_carlo(
-            self.halos['PRIMARY_HALO_PROPERTY'],
-            self.halos['HALO_TYPE_SATELLITES'],
-            output=self.NSat)
+        self._NSat = self.num_sat_monte_carlo(
+            self._primary_halo_property,
+            self._halo_type_satellites,
+            output=self._NSat)
 
-        self.num_total_cens = self.NCen.sum()
-        self.num_total_sats = self.NSat.sum()
+        self.num_total_cens = self._NCen.sum()
+        self.num_total_sats = self._NSat.sum()
         self.num_total_gals = self.num_total_cens + self.num_total_sats
 
         # preallocate output arrays
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
+        self.coordshost = np.empty((self.num_total_gals,3),dtype='f8')
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
         self.halo_type = np.ones(self.num_total_gals,dtype='f8')
 
-
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched = np.zeros(self.num_total_gals,dtype='f8')
-
 
     #...
 
@@ -339,50 +353,82 @@ class HOD_mock(object):
         # Assign properties to centrals. Note that as a result of this step, 
         # the first num_total_cens entries of the mock object ndarrays 
         # pertain to centrals. 
-        self.coords[:self.num_total_cens] = self.halos['POS'][self.hasCentral]
-#        self.coords[:self.num_total_cens] = self.halopos[self.hasCentral]
-        self.logMhost[:self.num_total_cens] = self.halos['PRIMARY_HALO_PROPERTY'][self.hasCentral]
-        self.halo_type[:self.num_total_cens] = self.halos['HALO_TYPE_CENTRALS'][self.hasCentral]
+        #self.coords[:self.num_total_cens] = self.halos['POS'][self._hasCentral]
+        #self.logMhost[:self.num_total_cens] = self.halos['PRIMARY_HALO_PROPERTY'][self.hasCentral]
+        #self.halo_type[:self.num_total_cens] = self.halos['HALO_TYPE_CENTRALS'][self.hasCentral]
+        self.coords[:self.num_total_cens] = self._halopos[self._hasCentral]
+        self.coordshost[:self.num_total_cens] = self._halopos[self._hasCentral]
+        self.logMhost[:self.num_total_cens] = self._primary_halo_property[self._hasCentral]
+        self.halo_type[:self.num_total_cens] = self._halo_type_centrals[self._hasCentral]
+
 
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched[:self.num_total_cens] = (
-                self.halos['QUENCHED_HALO'][self.hasCentral])
+                self._quenched_halo[self._hasCentral])
 
 
         counter = self.num_total_cens
-        self.idx_current_halo = 0
+        #self.idx_current_halo = 0
 
         self.isSat[counter:] = 1 # everything else is a satellite.
         # Pregenerate satellite angles all in one fell swoop
         self._random_angles(self.coords,counter,self.coords.shape[0],self.num_total_sats)
 
         # all the satellites will now end up at the end of the array.
-        satellite_index_array = np.nonzero(self.NSat > 0)[0]
+        satellite_index_array = np.nonzero(self._NSat > 0)[0]
         # these two save a bit of time by eliminating calls to records.__getattribute__
-        logmasses = self.primary_halo_property
+        logmasses = self._primary_halo_property
+        halo_type_satellites = self._halo_type_satellites
 
 
         # The following loop assigning satellite positions takes up nearly 100% of the mock population time
         start = time.time()
         for self.ii in satellite_index_array:
             logM = logmasses[self.ii]
-            center = self.halopos[self.ii]
-            Nsat = self.NSat[self.ii]
-            r_vir = self.Rvir[self.ii]
-            concen_idx = self.interp_idx_concen[self.ii]
-            self.logMhost[counter:counter+Nsat] = logM
+            halo_type = halo_type_satellites[self.ii]
+            center = self._halopos[self.ii]
+            Nsat = self._NSat[self.ii]
+            r_vir = self._rvir[self.ii]
+            concen_idx = self._interp_idx_concen[self.ii]
 
-            self.assign_satellite_positions(Nsat,center,r_vir,self.cumulative_nfw_PDF[concen_idx-1],counter)
+            self.logMhost[counter:counter+Nsat] = logM
+            self.halo_type[counter:counter+Nsat] = halo_type
+            self.coordshost[counter:counter+Nsat] = center
+
+            self.assign_satellite_positions(Nsat,center,r_vir,self._cumulative_nfw_PDF[concen_idx-1],counter)
             counter += Nsat
         runtime = time.time() - start
         #print(str(runtime)+' seconds to assign satellite positions')
 
         self.coords = enforce_periodicity_of_box(self.coords,self.Lbox)
 
-#        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-#            self.isQuenched[self.num_total_cens:-1] = self.quenched_monte_carlo(
-#                self.logMhost[self.num_total_cens:-1],
-        #        self.halo_occupation_model,'satellite')
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+            self.isQuenched[self.num_total_cens:-1] = self.quenched_monte_carlo(
+                self.logMhost[self.num_total_cens:-1],
+                self.halo_type[self.num_total_cens:-1],'satellite')
+
+        if self.tableBundle==True:
+            self.galaxies = self.table_bundle()
+
+    def table_bundle(self):
+        """ Create an astropy Table object and bind it to the mock object.
+
+        """
+
+        column_names = (['coords','coordshost',
+            'primary_halo_property','halo_type',
+            'isSat'])
+
+        tbdata = ([self.coords,self.coordshost,self.logMhost,
+            self.halo_type,self.isSat])
+    
+        if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
+            column_names.append('isQuenched')
+            tbdata.append(self.isQuenched)
+
+        galaxy_table = Table(tbdata,names=column_names)
+
+        return galaxy_table
 
     def num_cen_monte_carlo(self,primary_halo_property,halo_type):
         """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.

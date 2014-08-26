@@ -17,7 +17,8 @@ import os
 def test_Zheng07_mock():
     relative_filepath = '../CATALOGS/'
     catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath)
-    bolshoi = simulation(manual_dirname=catalog_dirname)
+    hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'
+    bolshoi = simulation(manual_dirname=hard_coded_catalog_dirname)
     mock = HOD_mock(simulation_data=bolshoi,halo_occupation_model=Zheng07_HOD_Model)
     mock.populate()
 

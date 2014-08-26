@@ -1,18 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 
-This module contains the classes and methods used to model the 
-connection between galaxies and the halos they inhabit. 
-Classes (will) include support for HODs, CLFs, CSMFs, and 
-(conditional) abundance matching. Features will include designations 
-for whether a galaxy is quenched or star-forming, or in the case 
-of conditional abundance matching models, the full distributions 
-of secondary galaxy properties such as SFR, color, morphology, etc.
-
+This module contains the classes and methods used to connect  
+galaxies to halos using HOD-style models. 
 
 """
 
-__all__ = ['HOD_Model','Zheng07_HOD_Model','Assembly_Biased_HOD_Model',
+__all__ = ['HOD_Model','Zheng07_HOD_Model','Toy_HOD_Model','Assembly_Biased_HOD_Model',
 'HOD_Quenching_Model','vdB03_Quenching_Model','Assembly_Biased_HOD_Quenching_Model',
 'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembly_Biased_HOD_Model',
 'cumulative_NFW_PDF','anatoly_concentration','solve_for_polynomial_coefficients']
@@ -464,6 +458,169 @@ class Zheng07_HOD_Model(HOD_Model):
             raise TypeError("Set of keys of input parameter_dict do not match the set of keys required by the model")
         pass
 
+
+class Toy_HOD_Model(HOD_Model):
+    """ Subclass of `HOD_Model` object, allowing for explicit specification of 
+    the occupation statistics.
+
+
+    Parameters 
+    ----------
+    mass_mask : array_like, optional.
+        List the values of :math:`log_{10}M` of halos occupied by galaxies. 
+
+    toy_ncen : array_like, optional.
+        List the desired mean abundance of centrals at the input mass_mask
+
+    toy_nsat : array_like, optional.
+        List the desired mean abundance of satellites at the input mass_mask
+
+
+    Notes
+    -----
+    Primarily useful for two reasons. First, constructing weird, unphysical HODs 
+    is useful for developing a rigorous test suite, since tests that pass extreme 
+    cases will pass reasonable cases. Second, useful to zero in on assembly bias effects 
+    that are operative only over specific mass ranges. 
+
+    """
+
+    def __init__(self,mass_mask=[12,13,14],
+        toy_ncen=[0.1,0.1,0.1],toy_nsat=[0.1,0.1,0.1],binsize=0.1,
+        threshold=None):
+
+        HOD_Model.__init__(self)
+        self.parameter_dict = {}
+
+        toy_ncen = np.array(toy_ncen)
+        toy_nsat = np.array(toy_nsat)
+        mass_mask = np.array(mass_mask)
+
+        if len(mass_mask) != len(toy_ncen):
+            raise TypeError("input toy_ncen array must be the same length as input mass_mask")
+        if len(mass_mask) != len(toy_nsat):
+            raise TypeError("input toy_nsat array must be the same length as input mass_mask")
+
+        self.mass_mask = mass_mask
+        self.binsize = self.impose_binsize_constraints(self.mass_mask,binsize)
+        self.toy_ncen = toy_ncen
+        self.toy_nsat = toy_nsat
+        # Impose constrains on the input abundances
+        idx_negative_ncen = np.where(self.toy_ncen < 0)[0]
+        self.toy_ncen[idx_negative_ncen] = 0
+        idx_negative_nsat = np.where(self.toy_nsat < 0)[0]
+        self.toy_nsat[idx_negative_nsat] = 0
+        idx_ncen_exceeds_unity = np.where(self.toy_ncen > 1)[0]
+        self.toy_ncen[idx_ncen_exceeds_unity] = 1
+
+
+    @property 
+    def primary_halo_property_key(self):
+        """ Model is based on :math:`M = M_{vir}`.
+        """
+        return 'MVIR'
+
+    def impose_binsize_constraints(self,mass_mask,binsize):
+        """ Make sure that the user-supplied mask_mask does not result 
+        in overlapping mass bins.
+        """
+        output_binsize = binsize
+        midpoint_differences = np.diff(mass_mask)
+        minimum_separation = midpoint_differences.min()
+        if minimum_separation < output_binsize:
+            output_binsize = minimum_separation
+
+        return output_binsize
+
+    def mean_ncen(self,logM,halo_type):
+        """ Expected number of central galaxies in a halo of mass logM.
+        For any input logM in the range of 
+        mass_mask[ii]-binsize/2 < logM < mass_mask[ii] + binsize/2 for some ii, 
+        set :math:`\\langle N_{cen} \\rangle` equal to the input toy_ncen[ii].
+
+        Parameters
+        ----------        
+        logM : array 
+            array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+
+        Returns
+        -------
+        mean_ncen : array
+            array giving :math:`\\langle N_{cen} \\rangle`
+    
+        """
+        logM = np.array(logM)
+        mean_ncen = np.zeros(len(logM))
+
+        for ii,logmass in enumerate(self.mass_mask):
+            idx_logM_in_binii = (
+                (logM > self.mass_mask[ii] - self.binsize/2.) & 
+                (logM < self.mass_mask[ii] + self.binsize/2.))
+            mean_ncen[idx_logM_in_binii] = self.toy_ncen[ii]
+
+        return mean_ncen
+
+    def mean_nsat(self,logM,halo_type):
+        """ Expected number of satellite galaxies in a halo of mass logM.
+        For any input logM in the range of 
+        mass_mask[ii]-binsize/2 < logM < mass_mask[ii] + binsize/2 for some ii, 
+        set :math:`\\langle N_{sat} \\rangle` equal to the input toy_nsat[ii].
+
+        Parameters
+        ----------        
+        logM : array 
+            array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+
+        Returns
+        -------
+        mean_nsat : array
+            array giving :math:`\\langle N_{sat} \\rangle`
+    
+        """
+        logM = np.array(logM)
+        mean_nsat = np.zeros(len(logM))
+
+        for ii,logmass in enumerate(self.mass_mask):
+            idx_logM_in_binii = (
+                (logM > self.mass_mask[ii] - self.binsize/2.) & 
+                (logM < self.mass_mask[ii] + self.binsize/2.))
+            mean_nsat[idx_logM_in_binii] = self.toy_nsat[ii]
+
+        return mean_nsat
+
+    def mean_concentration(self,logM,halo_type):
+        """
+        Concentration-mass relation of the model.
+
+        Parameters 
+        ----------
+
+        logM : array_like
+            array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way this function is called by different models.
+
+        Returns 
+        -------
+
+        concentrations : array_like
+            Mean concentration of halos of the input mass, using `anatoly_concentration` model.
+
+        """
+
+        logM = np.array(logM)
+
+        concentrations = anatoly_concentration(logM)
+        return concentrations
 
 
 
@@ -924,17 +1081,23 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         ########################################
         # Now apply the baseline HOD constraints to output_destruction_allhalos, 
         # still behaving as if every input halo has halo_type=1
-        # First, require that the destruction function is non-negative
-        test_negative = output_destruction_allhalos < 0
-        output_destruction_allhalos[test_negative] = 0
-        # Second, require that the destruction function never exceed the 
-        # maximum allowed value 
+        # First, require that the destruction function never exceed the 
+        # maximum allowed value. This guarantees that < Nsat | h0 > >= 0, 
+        # and ensures that it will be possible to preserve the baseline HOD. 
         maximum = self.maximum_destruction_satellites(primary_halo_property,all_ones)
         test_exceeds_maximum = output_destruction_allhalos > maximum
         output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Second, require that the satellite destruction function 
+        # never exceed its minimum value of zero. This ensures < Nsat | h1 > >= 0
+        test_negative = output_destruction_allhalos < 0
+        output_destruction_allhalos[test_negative] = 0
         # Finally, require that the destruction function is set to unity 
         # whenever the probability of halo_type=1 equals unity
-        # This requirement supercedes the previous two
+        # This requirement supercedes the previous two, and ensures that 
+        # the central destruction in h1-halos will be ignored in cases 
+        # where there are no h0-halos. This self-consistency condition is necessary because 
+        # the unconstrained destruction function and the halo_type function 
+        # are both independently specified by user-supplied subclasses.  
         probability_type1 = self.halo_type_fraction_satellites(
             primary_halo_property,all_ones)
         test_unit_probability = (probability_type1 == 1)
@@ -951,15 +1114,17 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
         # Whenever the fraction of halos of type=0 is zero, the destruction function 
         # for type0 halos should be set to zero.
-        test_positive = (probability_type0_input_halo_type0 > 0)
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_destruction_input_halo_type0[test_zero] = 0
 
+        # For non-trivial cases, define the type0 destruction function 
+        # in terms of the type1 destruction function in such a way that 
+        # the baseline HOD will be unadulterated by assembly bias
+        test_positive = (probability_type0_input_halo_type0 > 0)
         output_destruction_input_halo_type0[test_positive] = (
             (1.0 - output_destruction_input_halo_type0[test_positive]*
                 probability_type1_input_halo_type0[test_positive])/
             probability_type0_input_halo_type0[test_positive])
-
-        test_zero = (probability_type0_input_halo_type0 == 0)
-        output_destruction_input_halo_type0[test_zero] = 0
 
         # Now write the results back to the output 
         output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
@@ -1013,22 +1178,28 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         ########################################
         # Now apply the baseline HOD constraints to output_destruction_allhalos, 
         # still behaving as if every input halo has halo_type=1
-        # First, require that the destruction function is non-negative
-        test_negative = output_destruction_allhalos < 0
-        output_destruction_allhalos[test_negative] = 0
-        # Second, require that the destruction function never exceed the 
-        # maximum allowed value 
+        #output_destruction_allhalos[test_negative] = 0
+        # First, require that the destruction function never exceed the 
+        # maximum allowed value. This guarantees that < Ncen | h0 > >= 0, 
+        # that < Ncen | h1 > <= 1, and ensures that it will be possible to 
+        # preserve the baseline HOD.
         maximum = self.maximum_destruction_centrals(primary_halo_property,all_ones)
         test_exceeds_maximum = output_destruction_allhalos > maximum
         output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
-        # Now require that the destruction function never falls below 
-        # its minimum allowed value
+        # Next, require that the destruction function never falls below 
+        # its minimum allowed value. This guarantees that < Ncen | h1 > >= 0 
+        # that < Ncen | h0 > <= 1, and ensures that we will be able to preserve 
+        # the baseline HOD. 
         minimum = self.minimum_destruction_centrals(primary_halo_property,all_ones)
         test_below_minimum = output_destruction_allhalos < minimum
         output_destruction_allhalos[test_below_minimum] = minimum[test_below_minimum]
         # Finally, require that the destruction function is set to unity 
         # whenever the probability of halo_type=1 equals unity
-        # This requirement supercedes the previous two
+        # This requirement supercedes the previous two, and ensures that 
+        # the central destruction in h1-halos will be ignored in cases 
+        # where there are no h0-halos. This self-consistency condition is necessary because 
+        # the unconstrained destruction function and the halo_type function 
+        # are both independently specified by user-supplied subclasses.  
         probability_type1 = self.halo_type_fraction_centrals(
             primary_halo_property,all_ones)
         test_unit_probability = (probability_type1 == 1)
@@ -1045,15 +1216,17 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
         # Whenever the fraction of halos of type=0 is zero, the destruction function 
         # for type0 halos should be set to zero.
-        test_positive = (probability_type0_input_halo_type0 > 0)
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_destruction_input_halo_type0[test_zero] = 0
 
+        # For non-trivial cases, define the type0 destruction function 
+        # in terms of the type1 destruction function in such a way that 
+        # the baseline HOD will be unadulterated by assembly bias
+        test_positive = (probability_type0_input_halo_type0 > 0)
         output_destruction_input_halo_type0[test_positive] = (
             (1.0 - output_destruction_input_halo_type0[test_positive]*
                 probability_type1_input_halo_type0[test_positive])/
             probability_type0_input_halo_type0[test_positive])
-
-        test_zero = (probability_type0_input_halo_type0 == 0)
-        output_destruction_input_halo_type0[test_zero] = 0
 
         # Now write the results back to the output 
         output_destruction_allhalos[idx0] = output_destruction_input_halo_type0

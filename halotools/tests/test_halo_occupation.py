@@ -66,7 +66,7 @@ def test_abhod():
 	idx1=np.where(halo_types == 1)[0]
 
 
-	#### Test satellites ####
+	#### Ensure underlying satellite HOD is preserved ####
 	#probability of having halo_type=0
 	phs0 = m.halo_type_fraction_satellites(primary_halo_property[idx0],halo_types[idx0])
 	#probability of having halo_type=1
@@ -80,7 +80,7 @@ def test_abhod():
 	# satellite occupations are equal (highly non-trivial)
 	assert np.allclose(derived_nsat, underlying_nsat,rtol=1e-6)
 
-	#### Test centrals ####
+	#### Ensure underlying central HOD is preserved ####
 	#probability of having halo_type=0
 	phs0 = m.halo_type_fraction_centrals(primary_halo_property[idx0],halo_types[idx0])
 	#probability of having halo_type=1
@@ -93,6 +93,17 @@ def test_abhod():
 	# Require that the derived and underlying 
 	# satellite occupations are equal (highly non-trivial)
 	assert np.allclose(derived_ncen, underlying_ncen,rtol=1e-6)
+
+	# Require that < Ncen > doesn't exceed unity for type 0 halos
+	assert np.all( m.mean_ncen(primary_halo_property[idx0],halo_types[idx0]) <= 1.0001 )
+	# Require that < Ncen > doesn't exceed unity for type 1 halos
+	assert np.all( m.mean_ncen(primary_halo_property[idx1],halo_types[idx1]) <= 1.0001 )
+
+	# Require that < Ncen > is non-negative for type 0 halos
+	assert np.all( m.mean_ncen(primary_halo_property[idx0],halo_types[idx0]) >= 0 )
+	# Require that < Ncen > doesn't exceed unity for type 1 halos
+	assert np.all( m.mean_ncen(primary_halo_property[idx1],halo_types[idx1]) >= 0 )
+
 
 
 
