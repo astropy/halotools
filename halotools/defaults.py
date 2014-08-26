@@ -4,7 +4,8 @@ Module expressing various default values of the mock-making code.
 
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
-
+import os
+import sys
 
 ### Default halo catalog (used in read_nbody)
 # The following parameters are used by the 
@@ -66,8 +67,8 @@ default_halo_type_calculator_spacing=0.1
 
 default_assembias_key = 'VMAX'
 
-
-hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'
+relative_filepath = '/CATALOGS/'
+catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath) 
 
 
 

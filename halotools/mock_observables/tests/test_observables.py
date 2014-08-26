@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 from __future__ import division, print_function
-
-from ..observables import two_point_correlation_function
 import numpy as np
+from ..observables import two_point_correlation_function
+from ..observables import isolatoion_criterion
+from ..spatial import geometry
 
 def test_TPCF_auto():
 
@@ -126,6 +127,20 @@ def test_TPCF_period_API():
     
     assert len(result_1)==3, "One or more correlation functions returned erroneously."
     assert len(result_2)==3, "One or more correlation functions returned erroneously."
+
+
+def test_isolation_criterion_API():
+    #define isolation function
+    def iso_func(M1,M2):
+        delta_M = 0.5
+        return M2<(M1+delta_M)
+    
+    ios_crit = isolatoion_criterion(volume=geometry.sphere, vol_args=[1], test_prop='M_r', test_func=iso_func)
+    
+    pass
+    
+    
+    
     
     
     
