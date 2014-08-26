@@ -11,21 +11,22 @@ import numpy as np
 from ..halo_occupation import Zheng07_HOD_Model
 from ..read_nbody import simulation
 from ..make_mocks import HOD_mock
-
+import os
 
 
 def test_Zheng07_mock():
-	hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'
-	bolshoi = simulation(manual_dirname=hard_coded_catalog_dirname)
-	mock = HOD_mock(simulation_data=bolshoi,halo_occupation_model=Zheng07_HOD_Model)
-	mock.populate()
+    relative_filepath = '../CATALOGS/'
+    catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath)
+    bolshoi = simulation(manual_dirname=catalog_dirname)
+    mock = HOD_mock(simulation_data=bolshoi,halo_occupation_model=Zheng07_HOD_Model)
+    mock.populate()
 
-	reasonable_ngal_boolean = (mock.num_total_gals > 5.e4) and (mock.num_total_gals < 1.e5)
-	assert reasonable_ngal_boolean == True
+    reasonable_ngal_boolean = (mock.num_total_gals > 5.e4) and (mock.num_total_gals < 1.e5)
+    assert reasonable_ngal_boolean == True
 
-	satellite_fraction = mock.num_total_sats/float(mock.num_total_gals)
-	reasonable_satellite_fraction_boolean = (satellite_fraction > 0.1) and (satellite_fraction < 0.3)
-	assert reasonable_satellite_fraction_boolean == True
+    satellite_fraction = mock.num_total_sats/float(mock.num_total_gals)
+    reasonable_satellite_fraction_boolean = (satellite_fraction > 0.1) and (satellite_fraction < 0.3)
+    assert reasonable_satellite_fraction_boolean == True
 
 """
 

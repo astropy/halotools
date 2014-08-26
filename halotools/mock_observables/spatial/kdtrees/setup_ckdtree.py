@@ -10,6 +10,7 @@ from Cython.Build import cythonize
 import numpy
 
 ext_modules = [Extension("ckdtree", ["ckdtree.pyx"])]
+extra_compile_args=["-O3"]
 
 setup(
   name = 'ckdtree app',
