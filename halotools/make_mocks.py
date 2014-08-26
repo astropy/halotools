@@ -266,6 +266,7 @@ class HOD_mock(object):
 
         # preallocate output arrays
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
+        self.coordshost = np.empty((self.num_total_gals,3),dtype='f8')
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
         self.halo_type = np.ones(self.num_total_gals,dtype='f8')
@@ -356,6 +357,7 @@ class HOD_mock(object):
         #self.logMhost[:self.num_total_cens] = self.halos['PRIMARY_HALO_PROPERTY'][self.hasCentral]
         #self.halo_type[:self.num_total_cens] = self.halos['HALO_TYPE_CENTRALS'][self.hasCentral]
         self.coords[:self.num_total_cens] = self._halopos[self._hasCentral]
+        self.coordshost[:self.num_total_cens] = self._halopos[self._hasCentral]
         self.logMhost[:self.num_total_cens] = self._primary_halo_property[self._hasCentral]
         self.halo_type[:self.num_total_cens] = self._halo_type_centrals[self._hasCentral]
 
@@ -391,6 +393,7 @@ class HOD_mock(object):
 
             self.logMhost[counter:counter+Nsat] = logM
             self.halo_type[counter:counter+Nsat] = halo_type
+            self.coordshost[counter:counter+Nsat] = center
 
             self.assign_satellite_positions(Nsat,center,r_vir,self._cumulative_nfw_PDF[concen_idx-1],counter)
             counter += Nsat
@@ -405,7 +408,7 @@ class HOD_mock(object):
                 self.halo_type[self.num_total_cens:-1],'satellite')
 
         if self.tableBundle==True:
-            self.table_bundle()
+            self.galaxies = self.table_bundle()
 
     def table_bundle(self):
         """ Create an astropy Table object and bind it to the mock object.
@@ -413,19 +416,19 @@ class HOD_mock(object):
         """
 
         column_names = (['coords','coordshost',
-            'primary_halo_property','secondary_halo_propery','halo_type',
-            'isSat','isQuenched'])
+            'primary_halo_property','halo_type',
+            'isSat'])
 
-        #tbdata = [self.coords,...]
-        #galaxy_table = Table(tbdata,names=column_names)
+        tbdata = ([self.coords,self.coordshost,self.logMhost,
+            self.halo_type,self.isSat])
     
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             column_names.append('isQuenched')
+            tbdata.append(self.isQuenched)
 
+        galaxy_table = Table(tbdata,names=column_names)
 
-
-        pass
-        #return galaxy_table
+        return galaxy_table
 
     def num_cen_monte_carlo(self,primary_halo_property,halo_type):
         """ Returns Monte Carlo-generated array of 0 or 1 specifying whether there is a central in the halo.
