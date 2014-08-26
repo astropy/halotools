@@ -17,6 +17,9 @@ directory halotools/halotools.
 
 ## Documentation
 
+The latest build of the documentation can be found at www.astro.yale.edu/halotoolsdocs. If you would like to build 
+your own copy of the docs on your local machine, see below.
+
 ### Dependencies
 
 1. To read the documentation, you will need to have Sphinx installed. If you are using the anaconda python distribution, "conda install sphinx" will install the package in a directory that is already in your PYTHONPATH. Otherwise, you can use a package manager like brew or macports, making sure that the installation location of your package manager is in your PYTHONPATH.

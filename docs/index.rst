@@ -13,8 +13,9 @@ if you download the code and write
 scripts based on the current API, your scripts will likely not 
 correctly interface with future versions of the code.
 
-Presently, only the basic API is documented. This will change once more of 
-the core functionality is in place.
+Presently, only the basic API is documented. Once more of 
+the core functionality is in place, step-by-step examples will be included, 
+as will iPython notebook tutorials. 
 
 Contributions to the halotools package are warmly welcomed! 
 If you are interested in collaborating, and/or would like to know more 
