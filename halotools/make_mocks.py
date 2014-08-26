@@ -1,16 +1,11 @@
 
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
-""" The make_mocks module contains the classes and functions used 
+""" This module contains the classes and functions used 
 to populate N-body simulations with realizations of galaxy-halo models. 
-The functions in the halo_occupation module are used to define the analytical models
-of both stellar mass and quenching; this module paints monte carlo realizations of 
-those models onto halos in an N-body catalog at a single snapshot.
-Currently only set up for HOD-type models, but near-term features include 
+Currently only set up for HOD-style models, but near-term features include 
 CLF/CSMF models, and (conditional) abundance matching models.
-Class design is built around future MCMC applications, so that 
-lower level objects like numpy ndarrays are used to store object attributes, 
-for which it is cheaper and faster to allocate memory."""
+Class design is built around future MCMC applications. """
 
 __all__= ['enforce_periodicity_of_box','HOD_mock']
 
@@ -56,7 +51,7 @@ def enforce_periodicity_of_box(coords, box_length):
 
 
 class HOD_mock(object):
-    """ Class used to build mock realizations of any HOD-style model. 
+    """ Class used to build mock realizations of any HOD-style model defined in `halo_occupation` module.
 
     Instances of this class represent a mock galaxy distribution whose properties 
     depend on the style of HOD model passed to the constructor, and on the 
@@ -66,6 +61,8 @@ class HOD_mock(object):
     `~halotools.halo_occupation.Satcen_Correlation_Polynomial_HOD_Model`, 
     `~halotools.halo_occupation.Polynomial_Assembly_Biased_HOD_Model`, 
     and `~halotools.halo_occupation.vdB03_Quenching_Model`.
+
+    To create a mock, instantiate this class and then call the `populate` method.
 
     Parameters
     ----------
@@ -78,9 +75,15 @@ class HOD_mock(object):
         `~halotools.halo_occupation.HOD_Model` defined 
         in the `~halotools.halo_occupation` module. 
 
+    threshold : optional
+        Luminosity or stellar mass threshold of the mock galaxy sample.
 
     seed : float, optional
         Random number seed. Currently ignored. Will be useful when implementing an MCMC.
+
+    tableBundle : boolean, optional
+        If set to True, the class instance will have a `galaxies` attribute, 
+        which is an astropy Table providing a convenient bundle of the mock.
 
     """
 
@@ -118,21 +121,8 @@ class HOD_mock(object):
         self.halos = simulation_data.halos
         self.Lbox = simulation_data.Lbox
 
-        # Add columns to the halos table that are not present in the 
-        # downloaded halo catalog
-#        self.halos['PRIMARY_HALO_PROPERTY']=np.zeros(len(self.halos))
-#        self.halos['SECONDARY_HALO_PROPERTY_SATELLITES']=np.zeros(len(self.halos))
-#        self.halos['SECONDARY_HALO_PROPERTY_CENTRALS']=np.zeros(len(self.halos))
-#        self.halos['HALO_TYPE_CENTRALS']=np.zeros(len(self.halos))
-#        self.halos['HALO_TYPE_SATELLITES']=np.zeros(len(self.halos))
-#        self.halos['QUENCHED_HALO']=np.zeros(len(self.halos))
-
-
 
         # Create numpy ndarrays containing data from the halo catalog and bind them to the mock object
- #       self.primary_halo_property = np.array(
- #           self.halos[self.halo_occupation_model.primary_halo_property_key])
-
         self._primary_halo_property = np.array(
             self.halos[self.halo_occupation_model.primary_halo_property_key])
         # Use log10Mvir instead of Mvir if this is the primary halo property
@@ -140,12 +130,9 @@ class HOD_mock(object):
             self._primary_halo_property = np.log10(self._primary_halo_property)
             #self.halos['PRIMARY_HALO_PROPERTY']=np.log10(self.halos['PRIMARY_HALO_PROPERTY'])
 
-        #self.halos['PRIMARY_HALO_PROPERTY']=np.array(
-            #self.halos[self.halo_occupation_model.primary_halo_property_key])
-    
-
         self._halo_type_centrals = np.ones(len(self._primary_halo_property))
         self._halo_type_satellites = np.ones(len(self._primary_halo_property))
+
         # If the mock was passed an assembly-biased HOD model, 
         # set the secondary halo property and compute halo_types 
         if isinstance(self.halo_occupation_model,ho.Assembly_Biased_HOD_Model):
@@ -253,6 +240,12 @@ class HOD_mock(object):
             self._primary_halo_property,self._halo_type_centrals)
         self._hasCentral = self._NCen > 0
 
+        # If implementing central-satellite correlations, 
+        # set the satellite halo type according to whether the halo 
+        # hosts a central.
+        if isinstance(self.halo_occupation_model,ho.Satcen_Correlation_Polynomial_HOD_Model):
+            self._halo_type_satellites = self._NCen
+
         self._NSat = np.zeros(len(self._primary_halo_property),dtype=int)
 
         self._NSat = self.num_sat_monte_carlo(
@@ -353,9 +346,6 @@ class HOD_mock(object):
         # Assign properties to centrals. Note that as a result of this step, 
         # the first num_total_cens entries of the mock object ndarrays 
         # pertain to centrals. 
-        #self.coords[:self.num_total_cens] = self.halos['POS'][self._hasCentral]
-        #self.logMhost[:self.num_total_cens] = self.halos['PRIMARY_HALO_PROPERTY'][self.hasCentral]
-        #self.halo_type[:self.num_total_cens] = self.halos['HALO_TYPE_CENTRALS'][self.hasCentral]
         self.coords[:self.num_total_cens] = self._halopos[self._hasCentral]
         self.coordshost[:self.num_total_cens] = self._halopos[self._hasCentral]
         self.logMhost[:self.num_total_cens] = self._primary_halo_property[self._hasCentral]

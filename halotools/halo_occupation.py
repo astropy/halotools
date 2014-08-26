@@ -1367,6 +1367,14 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
     """ HOD-style model in which satellite abundance 
     is correlated with the presence of a central galaxy.
+
+    Notes 
+    -----
+    This is special case of assembly biased occupation statistics. 
+    It is implemented in `~make_mocks.HOD_Mock` 
+    by setting the halo type of satellites after centrals have been 
+    assigned to halos (satellite halo type = 1 if there is a central in the halo).
+
     """
 
     def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
@@ -1515,8 +1523,11 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
 
 
 class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
-    """ HOD-style model in which satellite abundance 
-    is correlated with the presence of a central galaxy.
+    """ Concrete subclass of `Assembly_Biased_HOD_Model`  
+    in which occupation statistics exhibit assembly bias, 
+    where some secondary host halo property modulates the mean galaxy abundance. 
+    The strength of the assembly bias is set by explicitly specifing the strength 
+    at specific values of the primary halo property. 
     """
 
     def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
@@ -1683,7 +1694,7 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
 @six.add_metaclass(ABCMeta)
 class HOD_Quenching_Model(HOD_Model):
     """ Abstract base class for models determining mock galaxy quenching. 
-    This is a subclass of HOD_Mock, which additionally requires methods specifying 
+    A subclass of `HOD_Mock`, this class additionally requires methods specifying 
     the quenched fractions of centrals and satellites.  
     
     """
@@ -1728,10 +1739,16 @@ class HOD_Quenching_Model(HOD_Model):
 
 class vdB03_Quenching_Model(HOD_Quenching_Model):
     """
-    Subclass of HOD_Quenching_Model, providing a traditional HOD model of galaxy quenching, 
+    Subclass of `HOD_Quenching_Model`, providing a traditional HOD model of galaxy quenching, 
     in which quenching designation is purely determined by host halo virial mass.
-    Approach is adapted from van den Bosch 2003. 
+    
+    Approach is adapted from van den Bosch 2003. The desired quenched fraction is specified 
+    at a particular set of masses, and the code then uses the unique, minimal-degree 
+    polynomial passing through those points to determine the quenched fraction at any mass. 
+    The desired quenched fraction must be independently specified for centrals and satellites. 
 
+    Notes 
+    -----
     All-galaxy central and satellite occupation 
     statistics are specified first; Zheng07_HOD_Model is the default choice, 
     but any supported HOD_Mock object could be chosen. A quenching designation is subsequently 
