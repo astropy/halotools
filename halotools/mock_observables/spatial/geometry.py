@@ -11,6 +11,8 @@ import math
 import numpy as np
 from distances import euclidean_distance
 
+__all__=['polygon2D','circle','face','polygon3D','sphere','cylinder','inside_volume']
+
 class polygon2D(object):
     """
     object that defines a 2-D polygon
