@@ -1,3 +1,7 @@
+#Duncan Campbell
+#August 27, 2014
+#Yale University
+
 """ 
 Functions that compute statistics of a mock galaxy catalog in a periodic box. 
 Still largely unused in its present form, and needs to be integrated with 
@@ -6,7 +10,7 @@ the pair counter and subvolume membership methods.
 
 from __future__ import division
 
-__all__=['two_point_correlation_function','luminosity_function','HOD','CLF','isolatoion_criterion']
+__all__=['two_point_correlation_function','apparent_to_absolute_magnitude','luminosity_to_absolute_magnitude','get_sun_mag','luminosity_function','HOD','CLF','isolatoion_criterion']
 
 import numpy as np
 from math import pi, gamma
@@ -246,11 +250,157 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         return xi_11, xi_12, xi_22
 
 
-def luminosity_function():
+def apparent_to_absolute_magnitude(m, d_L):
+    """
+    calculate the absolute magnitude
+    
+    Parameters
+    ----------
+    m: array_like
+        apparent magnitude
+    
+    d_L: array_like
+        luminosity distance to object
+    
+    Returns
+    -------
+    Mag: np.array of absolute magnitudes
+    """
+    
+    M = m - 5.0*(np.log10(d_L)-1.0)
+    
+    return M
+
+
+def luminosity_to_absolute_magnitude(L, band, system='SDSS_Blanton_2003_z0.1'):
+    """
+    calculate the absolute magnitude
+    
+    Parameters
+    ----------
+    L: array_like
+        apparent magnitude
+    
+    band: string
+       filter band
+    
+    system: string, optional
+        filter systems: default is 'SDSS_Blanton_2003_z0.1'
+          1. Binney_and_Merrifield_1998
+          2. SDSS_Blanton_2003_z0.1
+    
+    Returns
+    -------
+    Mag: np.array of absolute magnitudes
+    """
+    
+    Msun = get_sun_mag(band,system)
+    Lsun = 1.0
+    M = -2.5*np.log10(L/Lsun) + Msun
+            
+    return M
+
+
+def get_sun_mag(filter,system):
+    """
+    get the solar value for a filter in a system.
+    
+    Parameters
+    ----------
+    filter: string
+    
+    system: string
+    
+    Returns
+    -------
+    Msun: float
+    """
+    if system=='Binney_and_Merrifield_1998':
+    #see Binney and Merrifield 1998
+        if filter=='U':
+            return 5.61
+        elif filter=='B':
+            return 5.48
+        elif filter=='V':
+            return 4.83
+        elif filter=='R':
+            return 4.42
+        elif filter=='I':
+            return 4.08
+        elif filter=='J':
+            return 3.64
+        elif filter=='H':
+            return 3.32
+        elif filter=='K':
+            return 3.28
+        else:
+            raise ValueError('Filter does not exist in this system.')
+    if system=='SDSS_Blanton_2003_z0.1':
+    #see Blanton et al. 2003 equation 14
+        if filter=='u':
+            return 6.80
+        elif filter=='g':
+            return 5.45
+        elif filter=='r':
+            return 4.76
+        elif filter=='i':
+            return 4.58
+        elif filter=='z':
+            return 4.51
+        else:
+            raise ValueError('Filter does not exist in this system.')
+    else:
+        raise ValueError('Filter system not included in this package.')
+
+
+def luminosity_function(m, z, band, cosmo, system='SDSS_Blanton_2003_z0.1', L_bins=None):
     """
     Calculate the galaxy luminosity function.
+    
+    Parameters
+    ----------
+    m: array_like
+        apparent magnitude of galaxies
+    
+    z: array_like
+        redshifts of galaxies
+    
+    band: string
+        filter band
+    
+    cosmo: astropy.cosmology object 
+        specifies the cosmology to use, default is FlatLambdaCDM(H0=70, Om0=0.3)
+    
+    system: string, optional
+        filter systems: default is 'SDSS_Blanton_2003_z0.1'
+          1. Binney_and_Merrifield_1998
+          2. SDSS_Blanton_2003_z0.1
+    
+    L_bins: array_like, optional
+        bin edges to use for for the luminosity function. If None is given, "Scott's rule"
+        is used where delta_L = 3.5sigma/N**(1/3)
+    
+    Returns
+    -------
+    counts, L_bins: np.array, np.array
     """
-    pass
+    
+    from astropy import cosmology
+    d_L = cosmo.luminosity_distance(z)
+    
+    M = apparant_to_absolute_magnitude(m,d_L)
+    Msun = get_sun_mag(filter,system)
+    L = 10.0**((Msun-M)/2.5)
+    
+    #determine Luminosity bins
+    if L_bins==None:
+        delta_L = 3.5*np.std(L)/float(L.shape[0]) #scott's rule
+        Nbins = np.ceil((np.max(L)-np.min(L))/delta_L)
+        L_bins = np.linspace(np.min(L),np.max(L),Nbins)
+    
+    counts = np.histogram(L,L_bins)[0]
+    
+    return counts, L_bins
 
 
 def HOD():
@@ -287,16 +437,20 @@ class isolatoion_criterion(object):
     test_func: function
         python function defining the property isolation test.
     """
-    def __init__(self, volume=geometry.sphere, vol_args=None, test_prop=None, test_func=None):
+    def __init__(self, volume=geometry.sphere, vol_args=None, test_prop='primary_galprop', test_func=None):
         self.volume = volume
-        if hasattr(vol_args, '__call__'):
+        if vol_args==None:
+            def default_func(galaxy):
+                center = galaxy['coords']
+                vol_args = [center]
+                return [center,radius]
+            self.vol_agrs = default_func
+        elif hasattr(vol_args, '__call__'):
             self.vol_args= vol_args
-            #do some tests to make sure the function returns args that are taken by volume
         else:
-            def default_func(*args):
+            def default_func(galaxy):
                 return vol_agrs
             self.vol_agrs = default_func
-            #do some tests to make sure vol_args are taken by the volume object init.
         self.test_prop = test_prop
         self.test_func = test_func
     
@@ -323,6 +477,10 @@ class isolatoion_criterion(object):
             indicies of galaxies in mock that pass the isolation criterion.
 
         """
+        
+        #check input
+        if self.test_prop not in mock.galaxies.dtype.names:
+            raise ValueError('test_prop not present in mock.galaxies table.')
         
         volumes = make_volumes(self,mock,isolated_candidates)
         
