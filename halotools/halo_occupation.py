@@ -646,12 +646,12 @@ class Assembly_Biased_HOD_Model(HOD_Model):
     any arbitrary function :math:`P^{cen}_{h_{1}}(M)`  supplied by the model 
     via the `halo_type1_fraction_centrals` method. 
     The :math:`z_{form}`-dependence of central occupation is governed by 
-    the central destruction function :math:`D_{cen}(M | h_{i})` via 
-    :math:`\\langle N_{cen} | h_{i} \\rangle_{M} = D_{cen}(M | h_{i})\\langle N_{cen} \\rangle_{M}`. 
+    the central inflection function :math:`\\mathcal{I}_{cen}(M | h_{i})` via 
+    :math:`\\langle N_{cen} | h_{i} \\rangle_{M} = \\mathcal{I}_{cen}(M | h_{i})\\langle N_{cen} \\rangle_{M}`. 
     The subclass implementing assembly bias need only supply any arbitrary function 
-    :math:`\\tilde{D}_{cen}(M | h_{i})` via the `unconstrained_central_destruction_halo_type1` 
+    :math:`\\tilde{\\mathcal{I}}_{cen}(M | h_{i})` via the `unconstrained_central_inflection_halo_type1` 
     method, and a variety of the built-in methods of this class will automatically apply appropriate boundary 
-    conditions to determine :math:`D_{cen}(M | h_{i})` from :math:`\\tilde{D}_{cen}(M | h_{i})`, 
+    conditions to determine :math:`\\mathcal{I}_{cen}(M | h_{i})` from :math:`\\tilde{\\mathcal{I}}_{cen}(M | h_{i})`, 
     such that the following constraint is satisfied: 
 
     :math:`\\langle N_{cen} \\rangle_{M} = P^{cen}_{h_{0}}(M)\\langle N_{cen} | h_{0} \\rangle_{M} 
@@ -744,8 +744,8 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
 
     @abstractmethod
-    def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
-        """ Method determining :math:`\\tilde{D}_{cen}(p | h_{1})`, 
+    def unconstrained_central_inflection_halo_type1(self,primary_halo_property):
+        """ Method determining :math:`\\tilde{\\mathcal{I}}_{cen}(p | h_{1})`, 
         the unconstrained excess probability that halos of primary property :math:`p` and 
         secondary property type :math:`h_{1}` 
         host a central galaxy. 
@@ -754,7 +754,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         subject only to the requirement that it be bounded. 
         Constraints on the value of this function required in order to keep the baseline 
         :math:`\\langle N_{cen} \\rangle_{p}` fixed 
-        are automatically applied by `destruction_centrals`. 
+        are automatically applied by `inflection_centrals`. 
 
         Notes 
         -----
@@ -763,12 +763,12 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         """
         raise NotImplementedError(
-            "unconstrained_central_destruction_halo_type1 is not implemented")
+            "unconstrained_central_inflection_halo_type1 is not implemented")
         pass
 
     @abstractmethod
-    def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
-        """ Method determining :math:`\\tilde{D}_{sat}(p | h_{1})`, 
+    def unconstrained_satellite_inflection_halo_type1(self,primary_halo_property):
+        """ Method determining :math:`\\tilde{\\mathcal{I}}_{sat}(p | h_{1})`, 
         the unconstrained excess probability that halos of primary property :math:`p` and 
         secondary property type :math:`h_{1}` 
         host a satellite galaxy. 
@@ -777,7 +777,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         subject only to the requirement that it be bounded. 
         Constraints on the value of this function required in order to keep the baseline 
         :math:`\\langle N_{sat} \\rangle_{p}` fixed 
-        are automatically applied by `destruction_satellites`. 
+        are automatically applied by `inflection_satellites`. 
 
         Notes 
         -----
@@ -786,7 +786,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         """
         raise NotImplementedError(
-            "unconstrained_satellite_destruction_halo_type1 is not implemented")
+            "unconstrained_satellite_inflection_halo_type1 is not implemented")
         pass
 
     @abstractmethod
@@ -799,7 +799,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         -----
         If this function is set to be either identically unity or identically zero, 
         there will be no assembly bias effects for centrals, regardless of the 
-        behavior of `unconstrained_central_destruction_halo_type1`.
+        behavior of `unconstrained_central_inflection_halo_type1`.
 
         Code currently assumes that this function has already been guaranteed to 
         be bounded by zero and unity. This will need to be fixed to be more defensive, 
@@ -821,7 +821,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         -----
         If this function is set to be either identically unity or identically zero, 
         there will be no assembly bias effects for satellites, regardless of the 
-        behavior of `unconstrained_satellite_destruction_halo_type1`.
+        behavior of `unconstrained_satellite_inflection_halo_type1`.
 
         Code currently assumes that this function has already been guaranteed to 
         be bounded by zero and unity. This will need to be fixed to be more defensive, 
@@ -894,19 +894,19 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         return output_halo_type_fraction
 
 
-    def maximum_destruction_centrals(self,primary_halo_property,halo_type):
-        """ The maximum allowed value of the destruction function, as pertains to centrals.
+    def maximum_inflection_centrals(self,primary_halo_property,halo_type):
+        """ The maximum allowed value of the inflection function, as pertains to centrals.
 
         The combinatorics of assembly-biased HODs are such that 
-        the destruction function :math:`D_{cen}(p | h_{i})` cannot exceed neither 
+        the inflection function :math:`\\mathcal{I}_{cen}(p | h_{i})` cannot exceed neither 
         :math:`1 / F_{h_{i}}^{cen}(p)`, nor :math:`1 / \\langle N_{cen} \\rangle_{p}`. 
         The first condition is necessary to keep fixed 
         the unconditioned mean central occupation :math:`\\langle N_{cen} \\rangle_{p}`; 
         the second condition is necessary to ensure that 
         :math:`\\langle N_{cen} | h_{i} \\rangle_{p} <= 1`.
 
-        Additionally, :math:`F_{h_{i}}^{cen}(p) = 1 \Rightarrow D_{cen}(p | h_{i}) = 1`, 
-        which is applied not by this function but within `destruction_centrals`. 
+        Additionally, :math:`F_{h_{i}}^{cen}(p) = 1 \Rightarrow \\mathcal{I}_{cen}(p | h_{i}) = 1`, 
+        which is applied not by this function but within `inflection_centrals`. 
 
         Parameters 
         ----------
@@ -920,43 +920,43 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         Returns 
         -------
-        output_maximum_destruction : array_like
-            Maximum allowed value of the destruction function, as pertains to centrals.
+        output_maximum_inflection : array_like
+            Maximum allowed value of the inflection function, as pertains to centrals.
 
         """
         # First initialize the output array to zero
-        output_maximum_destruction_case1 = np.zeros(len(primary_halo_property))
+        output_maximum_inflection_case1 = np.zeros(len(primary_halo_property))
         # Whenever there are some type 1 halos, 
-        # set the maximum destruction function equal to 1/prob(type1 halos)
+        # set the maximum inflection function equal to 1/prob(type1 halos)
         halo_type_fraction = self.halo_type_fraction_centrals(
             primary_halo_property,halo_type)
         idx_positive = halo_type_fraction > 0
-        output_maximum_destruction_case1[idx_positive] = 1./halo_type_fraction[idx_positive]
-        # At this stage, maximum destruction still needs to be limited by <Ncen>
+        output_maximum_inflection_case1[idx_positive] = 1./halo_type_fraction[idx_positive]
+        # At this stage, maximum inflection still needs to be limited by <Ncen>
         # Initialize another array to test the second case
-        output_maximum_destruction_case2 = np.zeros(len(primary_halo_property))
+        output_maximum_inflection_case2 = np.zeros(len(primary_halo_property))
         # Compute <Ncen> in the baseline model
         mean_baseline_ncen = self.baseline_hod_model.mean_ncen(
             primary_halo_property,halo_type)
         # Where non-zero, set the case 2 condition to 1 / <Ncen>
         idx_nonzero_centrals = mean_baseline_ncen > 0
-        output_maximum_destruction_case2[idx_nonzero_centrals] = (
+        output_maximum_inflection_case2[idx_nonzero_centrals] = (
             1./mean_baseline_ncen[idx_nonzero_centrals])
 
         # Now set the output array equal to the maximum of the above two arrays
-        output_maximum_destruction = output_maximum_destruction_case1
+        output_maximum_inflection = output_maximum_inflection_case1
         idx_case2_supercedes_case1 = (
-            output_maximum_destruction_case2 < output_maximum_destruction_case1)
-        output_maximum_destruction[idx_case2_supercedes_case1] = (
-            output_maximum_destruction_case2[idx_case2_supercedes_case1])
+            output_maximum_inflection_case2 < output_maximum_inflection_case1)
+        output_maximum_inflection[idx_case2_supercedes_case1] = (
+            output_maximum_inflection_case2[idx_case2_supercedes_case1])
 
-        return output_maximum_destruction
+        return output_maximum_inflection
 
-    def minimum_destruction_centrals(self,primary_halo_property,halo_type):
-        """ The minimum allowed value of the destruction function, as pertains to centrals.
+    def minimum_inflection_centrals(self,primary_halo_property,halo_type):
+        """ The minimum allowed value of the inflection function, as pertains to centrals.
 
         The combinatorics of assembly-biased HODs are such that 
-        the destruction function :math:`D_{cen}(p | h_{0,1})` can neither be negative 
+        the inflection function :math:`\\mathcal{I}_{cen}(p | h_{0,1})` can neither be negative 
         (which would be uphysical) nor fall below 
         :math:`\\frac{1 - P_{h_{1,0}}(p) / \\langle N_{cen} \\rangle_{p}}{P_{h_{0,1}}(p)}`
 
@@ -972,12 +972,12 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         Returns 
         -------
-        output_maximum_destruction : array_like
-            Maximum allowed value of the destruction function, as pertains to centrals.
+        output_maximum_inflection : array_like
+            Maximum allowed value of the inflection function, as pertains to centrals.
 
 
         """
-        minimum_destruction_centrals = np.zeros(len(primary_halo_property))
+        minimum_inflection_centrals = np.zeros(len(primary_halo_property))
 
         mean_ncen = self.baseline_hod_model.mean_ncen(
             primary_halo_property,halo_type)
@@ -988,26 +988,26 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         idx_both_positive = ((halo_type_fraction > 0) & (mean_ncen > 0))
 
-        minimum_destruction_centrals[idx_both_positive] = (1 - 
+        minimum_inflection_centrals[idx_both_positive] = (1 - 
             (complementary_halo_type_fraction[idx_both_positive]/
                 mean_ncen[idx_both_positive]))/halo_type_fraction[idx_both_positive]
 
-        idx_negative = (minimum_destruction_centrals < 0)
-        minimum_destruction_centrals[idx_negative] = 0
+        idx_negative = (minimum_inflection_centrals < 0)
+        minimum_inflection_centrals[idx_negative] = 0
 
-        return minimum_destruction_centrals
+        return minimum_inflection_centrals
 
 
-    def maximum_destruction_satellites(self,primary_halo_property,halo_type):
-        """ Maximum allowed value of the destruction function, as pertains to satellites.
+    def maximum_inflection_satellites(self,primary_halo_property,halo_type):
+        """ Maximum allowed value of the inflection function, as pertains to satellites.
 
         The combinatorics of assembly-biased HODs are such that 
-        the destruction function :math:`D_{sat}(p | h_{i})` cannot exceed 
+        the inflection function :math:`\\mathcal{I}_{sat}(p | h_{i})` cannot exceed 
         :math:`1 / F_{h_{i}}^{sat}(p)`, or it would be impossible to keep fixed 
         the unconditioned mean satellite occupation :math:`\\langle N_{sat} \\rangle_{p}`. 
 
-        Additionally, :math:`F_{h_{i}}^{sat}(p) = 1 \Rightarrow D_{sat}(p | h_{i}) = 1`, 
-        which is applied not by this function but within `destruction_satellites`. 
+        Additionally, :math:`F_{h_{i}}^{sat}(p) = 1 \Rightarrow \\mathcal{I}_{sat}(p | h_{i}) = 1`, 
+        which is applied not by this function but within `inflection_satellites`. 
 
         Parameters 
         ----------
@@ -1021,40 +1021,40 @@ class Assembly_Biased_HOD_Model(HOD_Model):
 
         Returns 
         -------
-        output_maximum_destruction : array_like
-            Maximum allowed value of the destruction function, as pertains to satellites.
+        output_maximum_inflection : array_like
+            Maximum allowed value of the inflection function, as pertains to satellites.
 
         """
 
-        output_maximum_destruction = np.zeros(len(primary_halo_property))
+        output_maximum_inflection = np.zeros(len(primary_halo_property))
         halo_type_fraction = self.halo_type_fraction_satellites(
             primary_halo_property,halo_type)
         idx_positive = halo_type_fraction > 0
-        output_maximum_destruction[idx_positive] = 1./halo_type_fraction[idx_positive]
-        return output_maximum_destruction
+        output_maximum_inflection[idx_positive] = 1./halo_type_fraction[idx_positive]
+        return output_maximum_inflection
 
 
-    def destruction_satellites(self,primary_halo_property,halo_type):
-        """ Method determining :math:`D_{sat}(p | h_{i})`, 
+    def inflection_satellites(self,primary_halo_property,halo_type):
+        """ Method determining :math:`\\mathcal{I}_{sat}(p | h_{i})`, 
         the true excess probability that halos of primary property :math:`p` and 
         secondary property type :math:`h_{i}` 
         host a satellite galaxy. 
 
-        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} \equiv D_{sat}(p | h_{i}) \\langle N_{sat} \\rangle_{p}`.
+        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} \equiv \\mathcal{I}_{sat}(p | h_{i}) \\langle N_{sat} \\rangle_{p}`.
 
         All of the behavior of this function derives 
-        from `unconstrained_satellite_destruction_halo_type1` and `halo_type1_fraction_satellites`, 
+        from `unconstrained_satellite_inflection_halo_type1` and `halo_type1_fraction_satellites`, 
         both of which are required methods of the concrete subclass. The function 
-        :math:`D_{sat}(p | h_{i})` only differs from :math:`\\tilde{D}_{sat}(p | h_{i})` 
+        :math:`\\mathcal{I}_{sat}(p | h_{i})` only differs from :math:`\\tilde{\\mathcal{I}}_{sat}(p | h_{i})` 
         in regions of HOD parameter space where the provided values of 
-        :math:`\\tilde{D}_{sat}(p | h_{i})` would violate the following constraint: 
+        :math:`\\tilde{\\mathcal{I}}_{sat}(p | h_{i})` would violate the following constraint: 
 
         :math:`F^{sat}_{h_{0}}(p)\\langle N_{sat} | h_{0} \\rangle_{p} + 
         F^{sat}_{h_{1}}(p)\\langle N_{sat} | h_{1} \\rangle_{p} = 
         \\langle N_{sat} \\rangle_{p}^{baseline},`
         where the RHS is given by `baseline_hod_model`. 
 
-        Defining :math:`D_{sat}(p | h_{i})` in this way 
+        Defining :math:`\\mathcal{I}_{sat}(p | h_{i})` in this way 
         guarantees that the parameters modulating assembly bias have zero intrinsic covariance with parameters governing  
         the traditional HOD. Therefore, any degeneracy between the assembly bias parameters 
         and the traditional HOD parameters in the posterior likelihood is purely due to degenerate effects 
@@ -1066,7 +1066,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         idx1 = np.where(halo_type == 1)[0]
 
         # Initialize array containing result to return
-        output_destruction_allhalos = np.zeros(len(primary_halo_property))
+        output_inflection_allhalos = np.zeros(len(primary_halo_property))
 
         all_ones = np.zeros(len(primary_halo_property)) + 1
 
@@ -1075,83 +1075,83 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         # This is convenient and costs nothing, 
         # since the halo_type = 0 branch 
         # is defined in terms of the halo_type = 1 branch.
-        output_destruction_allhalos = (
-            self.unconstrained_satellite_destruction_halo_type1(
+        output_inflection_allhalos = (
+            self.unconstrained_satellite_inflection_halo_type1(
                 primary_halo_property))
         ########################################
-        # Now apply the baseline HOD constraints to output_destruction_allhalos, 
+        # Now apply the baseline HOD constraints to output_inflection_allhalos, 
         # still behaving as if every input halo has halo_type=1
-        # First, require that the destruction function never exceed the 
+        # First, require that the inflection function never exceed the 
         # maximum allowed value. This guarantees that < Nsat | h0 > >= 0, 
         # and ensures that it will be possible to preserve the baseline HOD. 
-        maximum = self.maximum_destruction_satellites(primary_halo_property,all_ones)
-        test_exceeds_maximum = output_destruction_allhalos > maximum
-        output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
-        # Second, require that the satellite destruction function 
+        maximum = self.maximum_inflection_satellites(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_inflection_allhalos > maximum
+        output_inflection_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Second, require that the satellite inflection function 
         # never exceed its minimum value of zero. This ensures < Nsat | h1 > >= 0
-        test_negative = output_destruction_allhalos < 0
-        output_destruction_allhalos[test_negative] = 0
-        # Finally, require that the destruction function is set to unity 
+        test_negative = output_inflection_allhalos < 0
+        output_inflection_allhalos[test_negative] = 0
+        # Finally, require that the inflection function is set to unity 
         # whenever the probability of halo_type=1 equals unity
         # This requirement supercedes the previous two, and ensures that 
-        # the central destruction in h1-halos will be ignored in cases 
+        # the central inflection in h1-halos will be ignored in cases 
         # where there are no h0-halos. This self-consistency condition is necessary because 
-        # the unconstrained destruction function and the halo_type function 
+        # the unconstrained inflection function and the halo_type function 
         # are both independently specified by user-supplied subclasses.  
         probability_type1 = self.halo_type_fraction_satellites(
             primary_halo_property,all_ones)
         test_unit_probability = (probability_type1 == 1)
-        output_destruction_allhalos[test_unit_probability] = 1
+        output_inflection_allhalos[test_unit_probability] = 1
         ########################################
-        # At this point, output_destruction_allhalos has been properly conditioned. 
+        # At this point, output_inflection_allhalos has been properly conditioned. 
         # However, we have been assuming that all input halo_type = 1.
         # We now need to compute the correct output 
         # for cases where input halo_type = 0.
         # Define some shorthands (bookkeeping convenience)
-        output_destruction_input_halo_type0 = output_destruction_allhalos[idx0]
+        output_inflection_input_halo_type0 = output_inflection_allhalos[idx0]
         primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
         probability_type1_input_halo_type0 = probability_type1[idx0]
         probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
-        # Whenever the fraction of halos of type=0 is zero, the destruction function 
+        # Whenever the fraction of halos of type=0 is zero, the inflection function 
         # for type0 halos should be set to zero.
         test_zero = (probability_type0_input_halo_type0 == 0)
-        output_destruction_input_halo_type0[test_zero] = 0
+        output_inflection_input_halo_type0[test_zero] = 0
 
-        # For non-trivial cases, define the type0 destruction function 
-        # in terms of the type1 destruction function in such a way that 
+        # For non-trivial cases, define the type0 inflection function 
+        # in terms of the type1 inflection function in such a way that 
         # the baseline HOD will be unadulterated by assembly bias
         test_positive = (probability_type0_input_halo_type0 > 0)
-        output_destruction_input_halo_type0[test_positive] = (
-            (1.0 - output_destruction_input_halo_type0[test_positive]*
+        output_inflection_input_halo_type0[test_positive] = (
+            (1.0 - output_inflection_input_halo_type0[test_positive]*
                 probability_type1_input_halo_type0[test_positive])/
             probability_type0_input_halo_type0[test_positive])
 
         # Now write the results back to the output 
-        output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
+        output_inflection_allhalos[idx0] = output_inflection_input_halo_type0
 
-        return output_destruction_allhalos
+        return output_inflection_allhalos
 
-    def destruction_centrals(self,primary_halo_property,halo_type):
-        """ Method determining :math:`D_{cen}(p | h_{i})`, 
+    def inflection_centrals(self,primary_halo_property,halo_type):
+        """ Method determining :math:`\\mathcal{I}_{cen}(p | h_{i})`, 
         the true excess probability that halos of primary property :math:`p` and 
         secondary property type :math:`h_{i}` 
         host a central galaxy. 
 
-        :math:`\\langle N_{cen} | h_{i} \\rangle_{p} \equiv D_{cen}(p | h_{i}) \\langle N_{cen} \\rangle_{p}`.
+        :math:`\\langle N_{cen} | h_{i} \\rangle_{p} \equiv \\mathcal{I}_{cen}(p | h_{i}) \\langle N_{cen} \\rangle_{p}`.
 
         All of the behavior of this function derives 
-        from `unconstrained_central_destruction_halo_type1` and `halo_type1_fraction_centrals`, 
+        from `unconstrained_central_inflection_halo_type1` and `halo_type1_fraction_centrals`, 
         both of which are required methods of the concrete subclass. The function 
-        :math:`D_{cen}(p | h_{i})` only differs from :math:`\\tilde{D}_{cen}(p | h_{i})` 
+        :math:`\\mathcal{I}_{cen}(p | h_{i})` only differs from :math:`\\tilde{\\mathcal{I}}_{cen}(p | h_{i})` 
         in regions of HOD parameter space where the provided values of 
-        :math:`\\tilde{D}_{cen}(p | h_{i})` would violate the following constraint: 
+        :math:`\\tilde{\\mathcal{I}}_{cen}(p | h_{i})` would violate the following constraint: 
 
         :math:`F^{cen}_{h_{0}}(p)\\langle N_{cen} | h_{0} \\rangle_{p} + 
         F^{cen}_{h_{1}}(p)\\langle N_{cen} | h_{1} \\rangle_{p} = 
         \\langle N_{cen} \\rangle_{p}^{baseline},`
         where the RHS is given by `baseline_hod_model`. 
 
-        Defining :math:`D_{cen}(p | h_{i})` in this way 
+        Defining :math:`\\mathcal{I}_{cen}(p | h_{i})` in this way 
         guarantees that the parameters modulating assembly bias have zero intrinsic covariance with parameters governing  
         the traditional HOD. Therefore, any degeneracy between the assembly bias parameters 
         and the traditional HOD parameters in the posterior likelihood is purely due to degenerate effects 
@@ -1163,7 +1163,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         idx1 = np.where(halo_type == 1)[0]
 
         # Initialize array containing result to return
-        output_destruction_allhalos = np.zeros(len(primary_halo_property))
+        output_inflection_allhalos = np.zeros(len(primary_halo_property))
 
         all_ones = np.zeros(len(primary_halo_property)) + 1
 
@@ -1172,66 +1172,66 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         # This is convenient and costs nothing, 
         # since the halo_type = 0 branch 
         # is defined in terms of the halo_type = 1 branch.
-        output_destruction_allhalos = (
-            self.unconstrained_central_destruction_halo_type1(
+        output_inflection_allhalos = (
+            self.unconstrained_central_inflection_halo_type1(
                 primary_halo_property))
         ########################################
-        # Now apply the baseline HOD constraints to output_destruction_allhalos, 
+        # Now apply the baseline HOD constraints to output_inflection_allhalos, 
         # still behaving as if every input halo has halo_type=1
-        #output_destruction_allhalos[test_negative] = 0
-        # First, require that the destruction function never exceed the 
+        #output_inflection_allhalos[test_negative] = 0
+        # First, require that the inflection function never exceed the 
         # maximum allowed value. This guarantees that < Ncen | h0 > >= 0, 
         # that < Ncen | h1 > <= 1, and ensures that it will be possible to 
         # preserve the baseline HOD.
-        maximum = self.maximum_destruction_centrals(primary_halo_property,all_ones)
-        test_exceeds_maximum = output_destruction_allhalos > maximum
-        output_destruction_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
-        # Next, require that the destruction function never falls below 
+        maximum = self.maximum_inflection_centrals(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_inflection_allhalos > maximum
+        output_inflection_allhalos[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Next, require that the inflection function never falls below 
         # its minimum allowed value. This guarantees that < Ncen | h1 > >= 0 
         # that < Ncen | h0 > <= 1, and ensures that we will be able to preserve 
         # the baseline HOD. 
-        minimum = self.minimum_destruction_centrals(primary_halo_property,all_ones)
-        test_below_minimum = output_destruction_allhalos < minimum
-        output_destruction_allhalos[test_below_minimum] = minimum[test_below_minimum]
-        # Finally, require that the destruction function is set to unity 
+        minimum = self.minimum_inflection_centrals(primary_halo_property,all_ones)
+        test_below_minimum = output_inflection_allhalos < minimum
+        output_inflection_allhalos[test_below_minimum] = minimum[test_below_minimum]
+        # Finally, require that the inflection function is set to unity 
         # whenever the probability of halo_type=1 equals unity
         # This requirement supercedes the previous two, and ensures that 
-        # the central destruction in h1-halos will be ignored in cases 
+        # the central inflection in h1-halos will be ignored in cases 
         # where there are no h0-halos. This self-consistency condition is necessary because 
-        # the unconstrained destruction function and the halo_type function 
+        # the unconstrained inflection function and the halo_type function 
         # are both independently specified by user-supplied subclasses.  
         probability_type1 = self.halo_type_fraction_centrals(
             primary_halo_property,all_ones)
         test_unit_probability = (probability_type1 == 1)
-        output_destruction_allhalos[test_unit_probability] = 1
+        output_inflection_allhalos[test_unit_probability] = 1
         ########################################
-        # At this point, output_destruction_allhalos has been properly conditioned. 
+        # At this point, output_inflection_allhalos has been properly conditioned. 
         # However, we have been assuming that all input halo_type = 1.
         # We now need to compute the correct output 
         # for cases where input halo_type = 0.
         # Define some shorthands (bookkeeping convenience)
-        output_destruction_input_halo_type0 = output_destruction_allhalos[idx0]
+        output_inflection_input_halo_type0 = output_inflection_allhalos[idx0]
         primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
         probability_type1_input_halo_type0 = probability_type1[idx0]
         probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
-        # Whenever the fraction of halos of type=0 is zero, the destruction function 
+        # Whenever the fraction of halos of type=0 is zero, the inflection function 
         # for type0 halos should be set to zero.
         test_zero = (probability_type0_input_halo_type0 == 0)
-        output_destruction_input_halo_type0[test_zero] = 0
+        output_inflection_input_halo_type0[test_zero] = 0
 
-        # For non-trivial cases, define the type0 destruction function 
-        # in terms of the type1 destruction function in such a way that 
+        # For non-trivial cases, define the type0 inflection function 
+        # in terms of the type1 inflection function in such a way that 
         # the baseline HOD will be unadulterated by assembly bias
         test_positive = (probability_type0_input_halo_type0 > 0)
-        output_destruction_input_halo_type0[test_positive] = (
-            (1.0 - output_destruction_input_halo_type0[test_positive]*
+        output_inflection_input_halo_type0[test_positive] = (
+            (1.0 - output_inflection_input_halo_type0[test_positive]*
                 probability_type1_input_halo_type0[test_positive])/
             probability_type0_input_halo_type0[test_positive])
 
         # Now write the results back to the output 
-        output_destruction_allhalos[idx0] = output_destruction_input_halo_type0
+        output_inflection_allhalos[idx0] = output_inflection_input_halo_type0
 
-        return output_destruction_allhalos
+        return output_inflection_allhalos
 
     def mean_ncen(self,primary_halo_property,halo_type):
         """ Override the baseline HOD method used to compute mean central occupation. 
@@ -1251,10 +1251,10 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         mean_ncen : array_like
             :math:`h_{i}`-conditioned mean central occupation as a function of the primary halo property :math:`p`.
 
-        :math:`\\langle N_{cen} | h_{i} \\rangle_{p} = D_{cen}(p | h_{i})\\langle N_{cen} \\rangle_{p}`
+        :math:`\\langle N_{cen} | h_{i} \\rangle_{p} = \\mathcal{I}_{cen}(p | h_{i})\\langle N_{cen} \\rangle_{p}`
 
         """
-        return self.destruction_centrals(primary_halo_property,halo_type)*(
+        return self.inflection_centrals(primary_halo_property,halo_type)*(
             self.baseline_hod_model.mean_ncen(primary_halo_property,halo_type))
 
     def mean_nsat(self,primary_halo_property,halo_type):
@@ -1275,10 +1275,10 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         mean_nsat : array_like
             :math:`h_{i}`-conditioned mean satellite occupation as a function of the primary halo property :math:`p`.
 
-        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} = D_{sat}(p | h_{i})\\langle N_{sat} \\rangle_{p}`
+        :math:`\\langle N_{sat} | h_{i} \\rangle_{p} = \\mathcal{I}_{sat}(p | h_{i})\\langle N_{sat} \\rangle_{p}`
 
         """
-        return self.destruction_satellites(primary_halo_property,halo_type)*(
+        return self.inflection_satellites(primary_halo_property,halo_type)*(
             self.baseline_hod_model.mean_nsat(primary_halo_property,halo_type))
 
     def halo_type_calculator(self, 
@@ -1491,22 +1491,22 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
     def unconstrained_polynomial_model(self,abcissa,ordinates,primary_halo_property):
         coefficient_array = solve_for_polynomial_coefficients(
             abcissa,ordinates)
-        output_unconstrained_destruction_function = (
+        output_unconstrained_inflection_function = (
             np.zeros(len(primary_halo_property)))
 
-        # Use coefficients to compute values of the destruction function polynomial
+        # Use coefficients to compute values of the inflection function polynomial
         for n,coeff in enumerate(coefficient_array):
-            output_unconstrained_destruction_function += coeff*primary_halo_property**n
+            output_unconstrained_inflection_function += coeff*primary_halo_property**n
 
-        return output_unconstrained_destruction_function
+        return output_unconstrained_inflection_function
 
-    def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
+    def unconstrained_central_inflection_halo_type1(self,primary_halo_property):
         abcissa = self.parameter_dict['assembias_abcissa']
         ordinates = self.parameter_dict['central_assembias_ordinates']
 
         return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
 
-    def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
+    def unconstrained_satellite_inflection_halo_type1(self,primary_halo_property):
         abcissa = self.parameter_dict['assembias_abcissa']
         ordinates = self.parameter_dict['satellite_assembias_ordinates']
 
@@ -1659,22 +1659,22 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
     def unconstrained_polynomial_model(self,abcissa,ordinates,primary_halo_property):
         coefficient_array = solve_for_polynomial_coefficients(
             abcissa,ordinates)
-        output_unconstrained_destruction_function = (
+        output_unconstrained_inflection_function = (
             np.zeros(len(primary_halo_property)))
 
-        # Use coefficients to compute values of the destruction function polynomial
+        # Use coefficients to compute values of the inflection function polynomial
         for n,coeff in enumerate(coefficient_array):
-            output_unconstrained_destruction_function += coeff*primary_halo_property**n
+            output_unconstrained_inflection_function += coeff*primary_halo_property**n
 
-        return output_unconstrained_destruction_function
+        return output_unconstrained_inflection_function
 
-    def unconstrained_central_destruction_halo_type1(self,primary_halo_property):
+    def unconstrained_central_inflection_halo_type1(self,primary_halo_property):
         abcissa = self.parameter_dict['assembias_abcissa']
         ordinates = self.parameter_dict['central_assembias_ordinates']
 
         return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
 
-    def unconstrained_satellite_destruction_halo_type1(self,primary_halo_property):
+    def unconstrained_satellite_inflection_halo_type1(self,primary_halo_property):
         abcissa = self.parameter_dict['assembias_abcissa']
         ordinates = self.parameter_dict['satellite_assembias_ordinates']
 
@@ -1895,7 +1895,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         output_quenched_fractions = (
             np.zeros(len(primary_halo_property)))
 
-        # Use coefficients to compute values of the destruction function polynomial
+        # Use coefficients to compute values of the inflection function polynomial
         for n,coeff in enumerate(coefficient_array):
             output_quenched_fractions += coeff*primary_halo_property**n
 
@@ -2009,18 +2009,18 @@ class Assembly_Biased_HOD_Quenching_Model(HOD_Quenching_Model):
         self.hod_model = None
 
     @abstractmethod
-    def central_destruction(self,logM):
+    def central_inflection(self,logM):
         """ Determines the excess probability that ``type 0`` 
         halos of logM host a central galaxy. """
         raise NotImplementedError(
-            "central_destruction is not implemented")
+            "central_inflection is not implemented")
 
     @abstractmethod
-    def satellite_destruction(self,logM):
+    def satellite_inflection(self,logM):
         """ Determines the excess probability that ``type 0`` 
         halos of logM host a satellite galaxy. """
         raise NotImplementedError(
-            "satellite_destruction is not implemented")
+            "satellite_inflection is not implemented")
 
     @abstractmethod
     def halo_type_fraction(self,logM):
