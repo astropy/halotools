@@ -10,7 +10,9 @@ the pair counter and subvolume membership methods.
 
 from __future__ import division
 
-__all__=['two_point_correlation_function','apparent_to_absolute_magnitude','luminosity_to_absolute_magnitude','get_sun_mag','luminosity_function','HOD','CLF','CSMF','isolatoion_criterion']
+__all__=['two_point_correlation_function','apparent_to_absolute_magnitude',
+         'luminosity_to_absolute_magnitude','get_sun_mag','luminosity_function','HOD',
+         'CLF','CSMF','isolatoion_criterion']
 
 import numpy as np
 from math import pi, gamma
@@ -403,25 +405,81 @@ def luminosity_function(m, z, band, cosmo, system='SDSS_Blanton_2003_z0.1', L_bi
     return counts, L_bins
 
 
-def HOD():
+def HOD(mock,galaxy_mask=None, mass_bins=None):
     """
     Calculate the galaxy HOD.
+    
+    Parameters
+    ----------
+    mock: mock object
+    
+    galaxy_mask: array_like, optional
+        boolean array specifying subset of galaxies for which to calculate the HOD.
+    
+    mass_bins: array_like, optional
+        array indicating bin edges to use for HOD calculation
+    
+    Returns
+    -------
+    N_avg, mass_bins: np.array, np.array
+        mean number of galaxies per halo within the bin defined by bins, bin edges
     """
+    
+    from halotools.utils import match
+    
+    if not hasattr(mock, 'halos'):
+        raise ValueError('mock must contain halos.')
+    if not hasattr(mock, 'galaxies'):
+        raise ValueError('mock must contain galaxies. execute mock.populate().')
+    
+    if galaxy_mask != None:
+        if len(galaxy_mask) != len(mock.galaxies):
+            raise ValueError('galaxy mask be the same length as mock.galaxies')
+        elif x.dtype != bool:
+            raise TypeError('galaxy mask must be of type bool')
+        else:
+            galaxies = mock.galaxies[galaxy_mask]
+    else:
+        galaxies = np.array(mock.galaxies)
+    
+    galaxy_to_halo = match(galaxies['haloID'],halo['ID'])
+    
+    galaxy_halos = halos[galaxy_to_halo]
+    unq_IDs, unq_inds = np.unique(galaxy_halos['ID'], return_index=True)
+    Ngals_in_halo = np.bincount(galaxy_halos['ID'])
+    Ngals_in_halo = Ngals_in_halo[galaxy_halos['ID']]
+    
+    Mhalo = galaxy_haloes[unq_inds]
+    Ngals = Ngals_in_halo[unq_inds]
+    
+    inds_in_bins = np.digitize(Mhalo,mass_bins)
+    
+    N_avg = np.zeros((len(mass_bins)-1,))
+    for i in range(0,len(N_avg)):
+        inds = np.where(inds_in_bins==i+1)[0]
+        Nhalos_in_bin = float(len(inds))
+        Ngals_in_bin = float(sum(Ngal[inds]))
+        if Nhalos_in_bin==0: N_avg[i]=0.0
+        else: N_avg[i] = Ngals_in_bin/Nhalos_in_bin
+    
+    return N_avg, mass_bins
+    
     pass
 
 
-def CLF():
+def CLF(mock):
     """
     Calculate the galaxy CLF.
     """
     pass
 
 
-def CSMF():
+def CSMF(mock):
     """
     Calculate the galaxy CSMF.
     """
     pass
+
 
 from halotools.mock_observables.spatial import geometry
 class isolatoion_criterion(object):
@@ -443,6 +501,7 @@ class isolatoion_criterion(object):
     test_func: function
         python function defining the property isolation test.
     """
+    
     def __init__(self, volume=geometry.sphere, vol_args=None,
                  test_prop='primary_galprop', test_func=None):
         #check to make sure the volume object passed is in fact a volume object 
