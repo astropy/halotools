@@ -926,12 +926,14 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         """
         # First initialize the output array to zero
         output_maximum_inflection_case1 = np.zeros(len(primary_halo_property))
+
         # Whenever there are some type 1 halos, 
         # set the maximum inflection function equal to 1/prob(type1 halos)
         halo_type_fraction = self.halo_type_fraction_centrals(
             primary_halo_property,halo_type)
         idx_positive = halo_type_fraction > 0
         output_maximum_inflection_case1[idx_positive] = 1./halo_type_fraction[idx_positive]
+
         # At this stage, maximum inflection still needs to be limited by <Ncen>
         # Initialize another array to test the second case
         output_maximum_inflection_case2 = np.zeros(len(primary_halo_property))
@@ -943,12 +945,9 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         output_maximum_inflection_case2[idx_nonzero_centrals] = (
             1./mean_baseline_ncen[idx_nonzero_centrals])
 
-        # Now set the output array equal to the maximum of the above two arrays
-        output_maximum_inflection = output_maximum_inflection_case1
-        idx_case2_supercedes_case1 = (
-            output_maximum_inflection_case2 < output_maximum_inflection_case1)
-        output_maximum_inflection[idx_case2_supercedes_case1] = (
-            output_maximum_inflection_case2[idx_case2_supercedes_case1])
+        # Now set the output array equal to the element-wise minimum of the above two arrays
+        output_maximum_inflection = np.minimum(
+            output_maximum_inflection_case1,output_maximum_inflection_case2)
 
         return output_maximum_inflection
 
@@ -1681,8 +1680,8 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
         return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
 
     def require_correct_keys(self,assembias_parameter_dict):
-        correct_set_of_satcen_keys = set(defaults.default_satcen_parameters.keys())
-        if set(assembias_parameter_dict.keys()) != correct_set_of_satcen_keys:
+        correct_set_of_assembias_keys = set(defaults.default_assembias_parameters.keys())
+        if set(assembias_parameter_dict.keys()) != correct_set_of_assembias_keys:
             raise TypeError("Set of keys of input assembias_parameter_dict"
             " does not match the set of keys required by the model." 
             " Correct set of keys is {'assembias_abcissa',"
@@ -1718,19 +1717,21 @@ class HOD_Quenching_Model(HOD_Model):
         pass
 
     @abstractmethod
-    def mean_quenched_fraction_centrals(self,logM,halo_type):
+    def mean_quenched_fraction_centrals(self,primary_halo_property,halo_type):
         """
-        Expected fraction of centrals that are quenched as a function of host halo mass logM.
-        A required method for any HOD_Quenching_Model object.
+        Expected fraction of centrals that are quenched as a function of 
+        the primary halo property.
+        A required method for any halo occupation object with quenching designation.
         """
         raise NotImplementedError(
             "quenched_fraction_centrals is not implemented")
 
     @abstractmethod
-    def mean_quenched_fraction_satellites(self,logM,halo_type):
+    def mean_quenched_fraction_satellites(self,primary_halo_property,halo_type):
         """
-        Expected fraction of satellites that are quenched as a function of host halo mass logM.
-        A required method for any HOD_Quenching_Model object.
+        Expected fraction of satellites that are quenched as a function of 
+        the primary halo property.
+        A required method for any halo occupation object with quenching designation.
         """
         raise NotImplementedError(
             "quenched_fraction_satellites is not implemented")
@@ -1996,43 +1997,38 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
 
 
 @six.add_metaclass(ABCMeta)
-class Assembly_Biased_HOD_Quenching_Model(HOD_Quenching_Model):
+class Assembly_Biased_HOD_Quenching_Model(Assembly_Biased_HOD_Model):
     """ Abstract base class for any HOD model in which 
-    central and/or satellite mean occupation depends on Mvir 
+    both galaxy abundance and galaxy quenching on Mvir 
     plus an additional property.
 
     """
 
     def __init__(self):
 
-        HOD_Quenching_Model.__init__(self)
-        self.hod_model = None
+        # Executing the __init__ of the abstract base class HOD_Model 
+        #sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []
+        Assembly_Biased_HOD_Model.__init__(self)
+
 
     @abstractmethod
-    def central_inflection(self,logM):
-        """ Determines the excess probability that ``type 0`` 
-        halos of logM host a central galaxy. """
+    def mean_quenched_fraction_centrals(self,logM,halo_type):
+        """
+        Expected fraction of centrals that are quenched as a function of host halo mass logM.
+        A required method for any HOD_Quenching_Model object.
+        """
         raise NotImplementedError(
-            "central_inflection is not implemented")
+            "quenched_fraction_centrals is not implemented")
 
     @abstractmethod
-    def satellite_inflection(self,logM):
-        """ Determines the excess probability that ``type 0`` 
-        halos of logM host a satellite galaxy. """
+    def mean_quenched_fraction_satellites(self,logM,halo_type):
+        """
+        Expected fraction of satellites that are quenched as a function of host halo mass logM.
+        A required method for any HOD_Quenching_Model object.
+        """
         raise NotImplementedError(
-            "satellite_inflection is not implemented")
-
-    @abstractmethod
-    def halo_type_fraction(self,logM):
-        """ Determines the fractional representation of host halo 
-        types as a function of logM.
-
-        Halo types can be either given by fixed-Mvir rank-orderings 
-        of the host halos, or by the input occupation statistics functions.
-
-         """
-        raise NotImplementedError(
-            "halo_type_fraction is not implemented")
+            "quenched_fraction_satellites is not implemented")
 
     @abstractmethod
     def central_conformity(self,logM):
