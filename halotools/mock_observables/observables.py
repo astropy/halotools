@@ -10,7 +10,7 @@ the pair counter and subvolume membership methods.
 
 from __future__ import division
 
-__all__=['two_point_correlation_function','apparent_to_absolute_magnitude','luminosity_to_absolute_magnitude','get_sun_mag','luminosity_function','HOD','CLF','isolatoion_criterion']
+__all__=['two_point_correlation_function','apparent_to_absolute_magnitude','luminosity_to_absolute_magnitude','get_sun_mag','luminosity_function','HOD','CLF','CSMF','isolatoion_criterion']
 
 import numpy as np
 from math import pi, gamma
@@ -60,7 +60,7 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
 
         :math:`1 + \\xi(r) \equiv DD / RR`, 
         where `DD` is calculated by the pair counter, and RR is counted by the internally 
-        defined `randoms`.
+        defined `randoms` if no randoms are passed as an argument.
 
         If sample2 is passed as input, three arrays of length Nrbins are returned: two for
         each of the auto-correlation functions, and one for the cross-correlation function. 
@@ -238,7 +238,7 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         xi_11 = TP_estimator(D1D1,D1R,RR,factor1,estimator)
         return xi_11
     elif (PBCs==True) & (randoms == None): 
-        #Analytical randoms used. D1R1=R1R1, D2R2=R2R2, and R2R2=RR. See random_counts().
+        #Analytical randoms used. D1R1=R1R1, D2R2=R2R2, and R1R2=RR. See random_counts().
         xi_11 = TP_estimator(D1D1,D1R,D1R,1.0,estimator)
         xi_12 = TP_estimator(D1D2,D1R,RR,1.0,estimator)
         xi_22 = TP_estimator(D2D2,D2R,D2R,1.0,estimator)
@@ -417,8 +417,14 @@ def CLF():
     pass
 
 
+def CSMF():
+    """
+    Calculate the galaxy CSMF.
+    """
+    pass
+
+from halotools.mock_observables.spatial import geometry
 class isolatoion_criterion(object):
-    from spatial import geometry
     """
     A object that defines a galaxy isolation criterion.
     
@@ -428,8 +434,8 @@ class isolatoion_criterion(object):
         e.g. sphere, cylinder
     
     vol_args: list or function
-        arguments to initialize the volume objects defining the test region of candidates,
-        or function taking a galaxy object which returns the vol arguments.
+        arguments to initialize the volume objects defining the test region of isolated 
+        candidates, or function taking a galaxy object which returns the vol arguments.
     
     test_prop: string
         mock property to test isolation against.  e.g. 'M_r', 'Mstar', etc.
@@ -437,27 +443,35 @@ class isolatoion_criterion(object):
     test_func: function
         python function defining the property isolation test.
     """
-    def __init__(self, volume=geometry.sphere, vol_args=None, test_prop='primary_galprop', test_func=None):
-        self.volume = volume
+    def __init__(self, volume=geometry.sphere, vol_args=None,
+                 test_prop='primary_galprop', test_func=None):
+        #check to make sure the volume object passed is in fact a volume object 
+        if not issubclass(volume,geometry.volume):
+            raise ValueError('volume object must be a subclass of geometry.volume')
+        else: self.volume = volume
+        #check volume object arguments. Is it None, a function, or a list?
         if vol_args==None:
+            #default only passes center argument to volume object
             def default_func(galaxy):
                 center = galaxy['coords']
-                vol_args = [center]
-                return [center,radius]
+                return center
             self.vol_agrs = default_func
         elif hasattr(vol_args, '__call__'):
             self.vol_args= vol_args
+            #check for compatibility with the mock in the method
         else:
+            #else, return the list of values passes in every time.
             def default_func(galaxy):
                 return vol_agrs
             self.vol_agrs = default_func
+        #store these two and check if they are compatible with a mock later in the method.
         self.test_prop = test_prop
         self.test_func = test_func
     
-    def make_volumes(self, mock, isolated_candidates):
+    def make_volumes(self, galaxies, isolated_candidates):
         volumes = np.empty((len(isolated_candidates),))
         for i in range(0,len(isolated_candidates)):
-            volumes[i] = self.volume(self.vol_args(mock[isolated_candidates[i]]))
+            volumes[i] = self.volume(self.vol_args(galaxies[isolated_candidates[i]]))
         return volumes
 
     def apply_criterion(self, mock, isolated_candidates):
@@ -479,19 +493,25 @@ class isolatoion_criterion(object):
         """
         
         #check input
+        if not hasattr(mock, 'galaxies'):
+            raise ValueError('mock must contain galaxies. execute mock.populate()')
         if self.test_prop not in mock.galaxies.dtype.names:
             raise ValueError('test_prop not present in mock.galaxies table.')
+        try: self.volume(self.vol_args(mock.galaxies[0]))
+        except TypeError: print('vol_args are not compatable with the volume object.')
         
-        volumes = make_volumes(self,mock,isolated_candidates)
+        volumes = make_volumes(self,mock.galaxies,isolated_candidates)
         
-        neighbor_candidates = self.test_function(mock[self.test_prop])
+        points_inside_shapes = geometry.inside_volume(
+                               volumes, mock.coords[neighbor_candidates], period=mock.Lbox
+                               )[2]
         
-        pass_isolation = np.logical_not(
-            geometry.inside_volume(
-                volumes, mock.coords[neighbor_candidates], period=mock.Lbox)[1]
-            )
+        ioslated = np.array([True]*len(isolated_candidates))
+        for i in range(0,len(isolated_candidates)):
+            inside = points_inside_shapes[i] 
+            isolated[i] = np.all(self.test_func(mock.galaxies[isolated_candidates[i]][self.test_prop],mock.galaxies[inside][self.test_prop]))
         
-        return inds
+        return isolated
 
 
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-from ..geometry import face, polygon3D, sphere, polygon2D, circle
-from ..geometry import cylinder, distance3D, distance2D, distance3D_periodic
-from ..geometry import distance2D_periodic
+from ..geometry import face, polygon3D, sphere, polygon2D, circle, cylinder
 import numpy as np
 import math
 

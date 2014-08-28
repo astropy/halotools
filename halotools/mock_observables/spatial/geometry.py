@@ -194,7 +194,14 @@ class polygon3D(object):
             pass
 
 
-class sphere(object):
+class volume(object):
+    """
+    abstract volume class
+    """
+    def __init__(self):
+        self.center = (0.0,0.0,0.0)
+
+class sphere(volume):
     """
     sphere volume object
     
@@ -208,6 +215,7 @@ class sphere(object):
     """
     
     def __init__(self,center=(0.0,0.0,0.0), radius=1.0):
+        super(sphere, self).__init__()
         self.center = center
         self.radius = radius
     
@@ -215,7 +223,7 @@ class sphere(object):
         return (4.0/3.0)*math.pi*self.radius**3.0
 
 
-class cylinder(object):
+class cylinder(volume):
     """
     cylinder volume object
     
@@ -235,6 +243,7 @@ class cylinder(object):
     """
     def __init__(self, center=(0.0,0.0,0.0), radius = 1.0, length=1.0, \
                  normal=np.array([0.0,0.0,1.0])):
+        super(cylinder, self).__init__()
         self.center = center
         self.normal = normal
         self.radius = radius
@@ -395,6 +404,8 @@ def inside_volume(shapes, points, period=None):
         indices of points which fall within the specified volumes.
     inside_shapes: np.array
         array of booleans, True if any points fall within the shape, False otherwise
+    points_in_shapes: list
+        list of arrays of points inside each shape
     """
     
     #check input
@@ -421,6 +432,7 @@ def inside_volume(shapes, points, period=None):
         #create arrays to store results
         inside_points = np.empty((0,), dtype=np.int)
         inside_shapes = np.empty((len(shapes),), dtype=bool)
+        points_in_shapes = []
         for i, shape in enumerate(shapes):
             points_to_test = np.array(KDT.query_ball_point(shape.center,shape.circum_r(),period=period))
             #need to do some special maneuvering to deal with kdtree/array input for points.
@@ -436,6 +448,7 @@ def inside_volume(shapes, points, period=None):
             else: inside_shapes[i]=False
             #append indices of points which fell within the volume
             inside_points = np.hstack((inside_points,inside))
+            points_in_shapes.append(inside)
         inside_points = np.unique(inside_points) #remove repeats
         return inside_points, inside_shapes
     else:
@@ -452,4 +465,4 @@ def inside_volume(shapes, points, period=None):
         if len(inside)>0: inside_shapes = True
         else:  inside_shapes = False
         inside_points = inside
-        return inside_points, inside_shapes
+        return inside_points, inside_shapes, inside_points
