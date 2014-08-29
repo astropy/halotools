@@ -2056,7 +2056,81 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         pass
 
 
+    @abstractmethod
+    def unconstrained_satellite_conformity_halo_type1(self,primary_halo_property):
+        """ Method determining :math:`\\tilde{\\mathcal{C}}_{sat_{Q}}(p | h_{1})`, 
+        the unconstrained excess quenched fraction of satellites 
+        in halos of primary property :math:`p` and 
+        secondary property type :math:`h_{1}`.
 
+        Can be any arbitrary function, 
+        subject only to the requirement that it be bounded. 
+        Constraints on the value of this function required 
+        in order to keep the unconditioned quenched fraction  
+        :math:`F_{sat_{Q}}(p)` fixed 
+        are automatically applied by `conformity_satellites`. 
+
+        Notes 
+        -----
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for centrals.
+
+        """
+        raise NotImplementedError(
+            "unconstrained_central_conformity_halo_type1 is not implemented")
+        pass
+
+    def maximum_conformity_centrals(self,primary_halo_property,halo_type):
+        """ The maximum allowed value of the inflection function, as pertains to centrals.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the conformity function :math:`\\mathcal{C}_{cen_{Q}}(p | h_{i})` can exceed neither 
+        :math:`1 / \\mathcal{I}_{cen}(p | h_{i})P_{h_{i}}(p)`, 
+        nor :math:`1 / F_{cen_{Q}}(p | h_{i})`. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_maximum_inflection : array_like
+            Maximum allowed value of the inflection function, as pertains to centrals.
+
+        """
+        pass
+
+    def minimum_conformity_centrals(self,primary_halo_property,halo_type):
+        """ The minimum allowed value of the inflection function, as pertains to centrals.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the conformity function :math:`\\mathcal{C}_{cen_{Q}}(p | h_{0,1})` 
+        must exceed both a and b.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_minimum_conformity : array_like
+            Minimum allowed value of the conformity function, as pertains to centrals.
+
+
+        """
+        pass
 
 
 
