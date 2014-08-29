@@ -6,9 +6,9 @@ galaxies to halos using HOD-style models.
 
 """
 
-__all__ = ['HOD_Model','Zheng07_HOD_Model','Toy_HOD_Model','Assembly_Biased_HOD_Model',
-'HOD_Quenching_Model','vdB03_Quenching_Model','Assembly_Biased_HOD_Quenching_Model',
-'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembly_Biased_HOD_Model',
+__all__ = ['HOD_Model','Zheng07_HOD_Model','Toy_HOD_Model','Assembias_HOD_Model',
+'HOD_Quenching_Model','vdB03_Quenching_Model','Assembias_HOD_Quenching_Model',
+'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembias_HOD_Model',
 'cumulative_NFW_PDF','anatoly_concentration','solve_for_polynomial_coefficients']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
@@ -625,7 +625,7 @@ class Toy_HOD_Model(HOD_Model):
 
 
 @six.add_metaclass(ABCMeta)
-class Assembly_Biased_HOD_Model(HOD_Model):
+class Assembias_HOD_Model(HOD_Model):
     """ Abstract base class for any HOD model with assembly bias. 
 
     In this class of models, central and/or satellite mean occupation depends on some primary  
@@ -898,7 +898,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         """ The maximum allowed value of the inflection function, as pertains to centrals.
 
         The combinatorics of assembly-biased HODs are such that 
-        the inflection function :math:`\\mathcal{I}_{cen}(p | h_{i})` cannot exceed neither 
+        the inflection function :math:`\\mathcal{I}_{cen}(p | h_{i})` can exceed neither 
         :math:`1 / F_{h_{i}}^{cen}(p)`, nor :math:`1 / \\langle N_{cen} \\rangle_{p}`. 
         The first condition is necessary to keep fixed 
         the unconditioned mean central occupation :math:`\\langle N_{cen} \\rangle_{p}`; 
@@ -1001,7 +1001,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         """ Maximum allowed value of the inflection function, as pertains to satellites.
 
         The combinatorics of assembly-biased HODs are such that 
-        the inflection function :math:`\\mathcal{I}_{sat}(p | h_{i})` cannot exceed 
+        the inflection function :math:`\\mathcal{I}_{sat}(p | h_{i})` can exceed 
         :math:`1 / F_{h_{i}}^{sat}(p)`, or it would be impossible to keep fixed 
         the unconditioned mean satellite occupation :math:`\\langle N_{sat} \\rangle_{p}`. 
 
@@ -1363,7 +1363,7 @@ class Assembly_Biased_HOD_Model(HOD_Model):
         return halo_types
 
 
-class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
+class Satcen_Correlation_Polynomial_HOD_Model(Assembias_HOD_Model):
     """ HOD-style model in which satellite abundance 
     is correlated with the presence of a central galaxy.
 
@@ -1391,12 +1391,12 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
         # to python's awkward conventions for required abstract properties
         self._baseline_hod_model = baseline_hod_model_instance
 
-        # Executing the __init__ of the abstract base class Assembly_Biased_HOD_Model 
+        # Executing the __init__ of the abstract base class Assembias_HOD_Model 
         # does nothing besides executing the __init__ of the abstract base class HOD_Model 
         # Executing the __init__ of the abstract base class HOD_Model 
         # sets self.parameter_dict to None, self.threshold to None, 
         # and self.publication to []        
-        Assembly_Biased_HOD_Model.__init__(self)
+        Assembias_HOD_Model.__init__(self)
 
 
         self.threshold = threshold
@@ -1521,8 +1521,8 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembly_Biased_HOD_Model):
         pass
 
 
-class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
-    """ Concrete subclass of `Assembly_Biased_HOD_Model`  
+class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
+    """ Concrete subclass of `Assembias_HOD_Model`  
     in which occupation statistics exhibit assembly bias, 
     where some secondary host halo property modulates the mean galaxy abundance. 
     The strength of the assembly bias is set by explicitly specifing the strength 
@@ -1548,12 +1548,12 @@ class Polynomial_Assembly_Biased_HOD_Model(Assembly_Biased_HOD_Model):
         self._secondary_halo_property_centrals_key = secondary_halo_property_centrals_key
         self._secondary_halo_property_satellites_key = secondary_halo_property_satellites_key
 
-        # Executing the __init__ of the abstract base class Assembly_Biased_HOD_Model 
+        # Executing the __init__ of the abstract base class Assembias_HOD_Model 
         # does nothing besides executing the __init__ of the abstract base class HOD_Model 
         # Executing the __init__ of the abstract base class HOD_Model 
         # sets self.parameter_dict to None, self.threshold to None, 
         # and self.publication to []        
-        Assembly_Biased_HOD_Model.__init__(self)
+        Assembias_HOD_Model.__init__(self)
 
 
         self.threshold = threshold
@@ -1996,8 +1996,9 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         pass
 
 
+
 @six.add_metaclass(ABCMeta)
-class Assembly_Biased_HOD_Quenching_Model(Assembly_Biased_HOD_Model):
+class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
     """ Abstract base class for any HOD model in which 
     both galaxy abundance and galaxy quenching on Mvir 
     plus an additional property.
@@ -2006,11 +2007,11 @@ class Assembly_Biased_HOD_Quenching_Model(Assembly_Biased_HOD_Model):
 
     def __init__(self):
 
-        # Executing the __init__ of the abstract base class HOD_Model 
-        #sets self.parameter_dict to None, self.threshold to None, 
+        # Executing the init constructor of the abstract base class Assembias_HOD_Model 
+        # only executes the initialization constructor of HOD_Model.
+        # This just sets self.parameter_dict to None, self.threshold to None, 
         # and self.publication to []
-        Assembly_Biased_HOD_Model.__init__(self)
-
+        Assembias_HOD_Model.__init__(self)
 
     @abstractmethod
     def mean_quenched_fraction_centrals(self,logM,halo_type):
@@ -2031,20 +2032,28 @@ class Assembly_Biased_HOD_Quenching_Model(Assembly_Biased_HOD_Model):
             "quenched_fraction_satellites is not implemented")
 
     @abstractmethod
-    def central_conformity(self,logM):
-        """ Determines the excess quenched fraction 
-        of central galaxies residing in ``type 0`` halos of logM. """
+    def unconstrained_central_conformity_halo_type1(self,primary_halo_property):
+        """ Method determining :math:`\\tilde{\\mathcal{C}}_{cen_{Q}}(p | h_{1})`, 
+        the unconstrained excess quenched fraction of centrals 
+        in halos of primary property :math:`p` and 
+        secondary property type :math:`h_{1}`.
+
+        Can be any arbitrary function, 
+        subject only to the requirement that it be bounded. 
+        Constraints on the value of this function required 
+        in order to keep the unconditioned quenched fraction  
+        :math:`F_{cen_{Q}}(p)` fixed 
+        are automatically applied by `conformity_centrals`. 
+
+        Notes 
+        -----
+        If this function is set to be either identically unity or identically zero, 
+        there will be no assembly bias effects for centrals.
+
+        """
         raise NotImplementedError(
-            "central_conformity is not implemented")
-
-    @abstractmethod
-    def satellite_conformity(self,logM):
-        """ Determines the excess quenched fraction 
-        of satellite galaxies residing in``type 0`` halos of logM. """
-        raise NotImplementedError(
-            "satellite_conformity is not implemented")
-
-
+            "unconstrained_central_conformity_halo_type1 is not implemented")
+        pass
 
 
 

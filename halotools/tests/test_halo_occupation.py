@@ -11,7 +11,7 @@ Will copy and paste my additional tests once I figure out the basic design conve
 import numpy as np
 from ..halo_occupation import Zheng07_HOD_Model
 from ..halo_occupation import Satcen_Correlation_Polynomial_HOD_Model as satcen
-from ..halo_occupation import Polynomial_Assembly_Biased_HOD_Model as abhod
+from ..halo_occupation import Polynomial_Assembias_HOD_Model as abhod
 
 
 def test_zheng_model():

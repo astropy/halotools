@@ -59,7 +59,7 @@ class HOD_mock(object):
 
     Currently supported models are `~halotools.halo_occupation.Zheng07_HOD_Model`, 
     `~halotools.halo_occupation.Satcen_Correlation_Polynomial_HOD_Model`, 
-    `~halotools.halo_occupation.Polynomial_Assembly_Biased_HOD_Model`, 
+    `~halotools.halo_occupation.Polynomial_Assembias_HOD_Model`, 
     and `~halotools.halo_occupation.vdB03_Quenching_Model`.
 
     To create a mock, instantiate this class and then call the `populate` method.
@@ -135,7 +135,7 @@ class HOD_mock(object):
 
         # If the mock was passed an assembly-biased HOD model, 
         # set the secondary halo property and compute halo_types 
-        if isinstance(self.halo_occupation_model,ho.Assembly_Biased_HOD_Model):
+        if isinstance(self.halo_occupation_model,ho.Assembias_HOD_Model):
 
             # If assembly bias is desired for centrals, implement it.
             if self.halo_occupation_model.secondary_halo_property_centrals_key != None:
