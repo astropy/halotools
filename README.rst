@@ -17,6 +17,9 @@ directory halotools/halotools.
 
 ## Documentation
 
+The latest build of the documentation can be found at www.astro.yale.edu/halotoolsdocs. If you would like to build 
+your own copy of the docs on your local machine, see below.
+
 ### Dependencies
 
 1. To read the documentation, you will need to have Sphinx installed. If you are using the anaconda python distribution, "conda install sphinx" will install the package in a directory that is already in your PYTHONPATH. Otherwise, you can use a package manager like brew or macports, making sure that the installation location of your package manager is in your PYTHONPATH.
@@ -25,7 +28,8 @@ directory halotools/halotools.
 make the structure of the code visually apparent. In order to view these diagrams, you will need to install the graphviz package onto your machine. Graphviz is readily available and maintained by common package managers such as brew and macports.
 
 ### Building the docs
-The command "python setup.py build_sphinx"  will build the documentation into docs/_build/html. Throwing the -o flag with this command will automatically open the html version of the documentation in your default web browser. 
+
+The command `python setup.py build_sphinx`  will build the documentation into docs/_build/html. Throwing the -o flag with this command will automatically open the html version of the documentation in your default web browser. 
 
 ---
 
@@ -35,4 +39,21 @@ Contributions to the halotools package are warmly welcomed!
 If you are interested in collaborating, and/or would like to know more 
 about the intended scope of the project, please contact Andrew Hearin 
 at andrew-dot-hearin-at-yale-dot-edu.
+
+---
+
+## Running the test suite
+
+The halotools package includes a test suite designed around the py.test framework. 
+To run the test suite, navigate to the root directory of the package, and run 
+the command `python setup.py test`. 
+
+
+
+
+
+
+
+
+
 

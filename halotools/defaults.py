@@ -1,3 +1,4 @@
+
 """
 Module expressing various default values of the mock-making code.
 """
@@ -48,7 +49,7 @@ default_quenching_parameters = {
 default_assembias_parameters = {
 	'assembias_abcissa' : [12,15],
 	'satellite_assembias_ordinates' : [0.05,0.05],
-	'central_assembias_ordinates' : [0.1,0.1]
+	'central_assembias_ordinates' : [100,100]
 	}
 
 default_satcen_parameters = {
