@@ -4,14 +4,16 @@
 #Duncan Campbell
 #August 22, 2014
 #Yale University
-#Calculate the number of pairs with separations less than r.
+#Calculate the number of pairs with separations less than r. This code has been optimized 
+#for speed, so it may not be the most readable thing in the whole world.  See pairs.py for
+#a pretty clear pure python version.
 
 from __future__ import print_function, division
 cimport cython
 cimport numpy as np
 import numpy as np
 
-__all__=['npairs','wnpairs']
+__all__=['npairs','wnpairs','pairwise_distances']
 
 from libc.math cimport sqrt, floor, fabs, fmin
 cdef np.float64_t infinity = np.inf
@@ -72,6 +74,12 @@ def npairs(data1, data2, rbins, period=None):
         elif np.shape(period)[0] != np.shape(data1)[ii]:
             raise ValueError("period should have len == dimension of points")
     
+    #square the radial bins, so I don't have to take the squareroot in the dist calc
+    if np.shape(rbins)==(): rbins = np.array([rbins])
+    else: rbins = np.array(rbins)
+    if rbins.ndim != 1: raise ValueError('rbins must be a 1-D array')
+    rbins = rbins**2.0
+    
     #static type and fix efficient indexing.
     cdef np.ndarray[np.float64_t, ndim=2] cdata1 = np.ascontiguousarray(data1,dtype=np.float64)
     cdef np.ndarray[np.float64_t, ndim=2] cdata2 = np.ascontiguousarray(data2,dtype=np.float64)
@@ -96,7 +104,7 @@ def npairs(data1, data2, rbins, period=None):
                     tmp = fmin(tmp, cperiod[k] - tmp)
                     #tmp = cdata1[i, k] - cdata2[j, k] #non-periodic dist calc
                     d += tmp * tmp
-                d = sqrt(d)
+                #d = sqrt(d)
                 k = nbins-1
                 while d<=crbins[k]:
                     counts[k] += 1
@@ -112,7 +120,7 @@ def npairs(data1, data2, rbins, period=None):
                     #tmp = fmin(tmp, cperiod[k] - tmp)
                     tmp = cdata1[i, k] - cdata2[j, k]
                     d += tmp * tmp
-                d = sqrt(d)
+                #d = sqrt(d)
                 k = nbins-1
                 while d<=crbins[k]:
                     counts[k] += 1
@@ -192,6 +200,12 @@ def wnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None):
         if np.shape(weights2)[0] != np.shape(data2)[0]:
             raise ValueError("weights2 should have same len as data2")
     
+    #square the radial bins, so I don't have to take the squareroot in the dist calc
+    if np.shape(rbins)==(): rbins = np.array([rbins])
+    else: rbins = np.array(rbins)
+    if rbins.ndim != 1: raise ValueError('rbins must be a 1-D array')
+    rbins = rbins**2.0
+    
     #static type and fix efficient indexing.
     cdef np.ndarray[np.float64_t, ndim=2] cdata1 = np.ascontiguousarray(data1,dtype=np.float64)
     cdef np.ndarray[np.float64_t, ndim=2] cdata2 = np.ascontiguousarray(data2,dtype=np.float64)
@@ -218,7 +232,7 @@ def wnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None):
                     tmp = fmin(tmp, cperiod[k] - tmp)
                     #tmp = cdata1[i, k] - cdata2[j, k]
                     d += tmp * tmp
-                d = sqrt(d)
+                #d = sqrt(d)
                 k = nbins-1
                 while d<=crbins[k]:
                     counts[k] += cweights1[i]*cweights2[j]
@@ -234,7 +248,7 @@ def wnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None):
                     #tmp = fmin(tmp, cperiod[k] - tmp)
                     tmp = cdata1[i, k] - cdata2[j, k] #non-periodic dist calc
                     d += tmp * tmp
-                d = sqrt(d)
+                #d = sqrt(d)
                 k = nbins-1
                 while d<=crbins[k]:
                     counts[k] += cweights1[i]*cweights2[j]
