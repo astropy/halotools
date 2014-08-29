@@ -153,26 +153,52 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         
         #No PBCs, randoms must have been provided.
         if PBCs==False:
-            RR = npairs(randoms, randoms, rbins, period=period)
-            RR = np.diff(RR)
-            D1R = npairs(sample1, randoms, rbins, period=period)
-            D1R = np.diff(D1R)
-            if np.all(sample1 != sample2): #calculating the cross-correlation
-                D2R = npairs(sample2, randoms, rbins, period=period)
-                D2R = np.diff(D2R)
-            else: D2R = None
+            if N_thread==1:
+                RR = npairs(randoms, randoms, rbins, period=period)
+                RR = np.diff(RR)
+                D1R = npairs(sample1, randoms, rbins, period=period)
+                D1R = np.diff(D1R)
+                if np.all(sample1 != sample2): #calculating the cross-correlation
+                    D2R = npairs(sample2, randoms, rbins, period=period)
+                    D2R = np.diff(D2R)
+                else: D2R = None
+            else:
+                args = [[chunk,randoms,rbins,period] for chunk in np.array_split(randoms,N_threads)]
+                RR = np.sum(pool.map(_npairs_wrapper,args),axis=0)
+                RR = np.diff(RR)
+                args = [[chunk,randoms,rbins,period] for chunk in np.array_split(sample1,N_threads)]
+                D1R = np.sum(pool.map(_npairs_wrapper,args),axis=0)
+                D1R = np.diff(D1R)
+                if np.all(sample1 != sample2): #calculating the cross-correlation
+                    args = [[chunk,randoms,rbins,period] for chunk in np.array_split(sample2,N_threads)]
+                    D2R = np.sum(pool.map(_npairs_wrapper,args),axis=0)
+                    D2R = np.diff(D2R)
+                else: D2R = None
             
             return D1R, D2R, RR
         #PBCs and randoms.
         elif randoms != None:
-            RR = npairs(randoms, randoms, rbins, period=period)
-            RR = np.diff(RR)
-            D1R = npairs(sample1, randoms, rbins, period=period)
-            D1R = np.diff(D1R)
-            if np.all(sample1 != sample2): #calculating the cross-correlation
-                D2R = npairs(sample2, randoms, rbins, period=period)
-                D2R = np.diff(D2R)
-            else: D2R = None
+            if N_threads==1:
+                RR = npairs(randoms, randoms, rbins, period=period)
+                RR = np.diff(RR)
+                D1R = npairs(sample1, randoms, rbins, period=period)
+                D1R = np.diff(D1R)
+                if np.all(sample1 != sample2): #calculating the cross-correlation
+                    D2R = npairs(sample2, randoms, rbins, period=period)
+                    D2R = np.diff(D2R)
+                else: D2R = None
+            else:
+                args = [[chunk,randoms,rbins,period] for chunk in np.array_split(randoms,N_threads)]
+                RR = np.sum(pool.map(_npairs_wrapper,args),axis=0)
+                RR = np.diff(RR)
+                args = [[chunk,randoms,rbins,period] for chunk in np.array_split(sample1,N_threads)]
+                D1R = np.sum(pool.map(_npairs_wrapper,args),axis=0)
+                D1R = np.diff(D1R)
+                if np.all(sample1 != sample2): #calculating the cross-correlation
+                    args = [[chunk,randoms,rbins,period] for chunk in np.array_split(sample2,N_threads)]
+                    D2R = np.sum(pool.map(_npairs_wrapper,args),axis=0)
+                    D2R = np.diff(D2R)
+                else: D2R = None
             
             return D1R, D2R, RR
         #PBCs and no randoms--calculate randoms analytically.
