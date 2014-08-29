@@ -1,16 +1,16 @@
+#Duncan Campbell
+#August 27, 2014
+#Yale University
+
 """ 
-Functions that compute distances in a mock galaxy catalog in a periodic box. 
-Still largely unused in its present form, and needs to be integrated with 
-the pair counter and subvolume membership methods.
+Functions to calculate distances in mock galaxy catalogues.
 """
 
-#from __future__ import (absolute_import, division, print_function,
-#                        unicode_literals)
+from __future__ import division, print_function
 
 __all__=['euclidean_distance','angular_distance']
 
 import numpy as np
-
 
 def euclidean_distance(x1,x2,period=None):
     """ 

@@ -130,14 +130,21 @@ def test_TPCF_period_API():
 
 
 def test_isolation_criterion_API():
-    #define isolation function
-    def iso_func(M1,M2):
-        delta_M = 0.5
-        return M2<(M1+delta_M)
+    #define isolation function. This one works with magnitudes, to find galaxies with no 
+    #neighbors brighter than host+0.5 mag
+    def is_isolated(candidate_prop,other_prop):
+        delta = 0.5
+        return other_prop>(candidate_prop+delta)
     
-    ios_crit = isolatoion_criterion(volume=geometry.sphere, vol_args=[1], test_prop='M_r', test_func=iso_func)
+    iso_crit = isolatoion_criterion(volume=geometry.sphere, test_func=is_isolated)
     
-    pass
+    from halotools import make_mocks
+    mock = make_mocks.HOD_mock()
+    mock.populate()
+    
+    result = iso_crit.apply_criterion(mock,[0])
+    print(result)
+    assert True==False
     
     
     
