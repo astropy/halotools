@@ -16,10 +16,10 @@ __all__=['two_point_correlation_function','apparent_to_absolute_magnitude',
 
 import numpy as np
 from math import pi, gamma
-import pairs
+from cpairs import npairs
 
 def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None, 
-                                   period = None, max_sample_size=int(1e4), 
+                                   period = None, max_sample_size=int(1e6), 
                                    estimator='Natural'):
     """ Calculate the two-point correlation function. 
     
@@ -99,16 +99,21 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
             raise ValueError("period should have shape (k,)")
             return None
     #down sample is sample size exceeds max_sample_size.
+    if (len(sample2)>max_sample_size) & (not np.all(sample1==sample2)):
+        inds = np.arange(0,len(sample2))
+        np.random.shuffle(inds)
+        inds = inds[0:max_sample_size]
+        sample2 = sample2[inds]
+        print('down sampling sample2...')
     if len(sample1)>max_sample_size:
         inds = np.arange(0,len(sample1))
         np.random.shuffle(inds)
         inds = inds[0:max_sample_size]
         sample1 = sample1[inds]
-    if len(sample2)>max_sample_size:
-        inds = np.arange(0,len(sample2))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample2 = sample2[inds]
+        print('down sampling sample1...')
+    
+    if np.shape(rbins) == ():
+        rbins = np.array([rbins])
     
     k = np.shape(sample1)[-1] #dimensionality of data
     
@@ -139,24 +144,24 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         
         #No PBCs, randoms must have been provided.
         if PBCs==False:
-            RR = pairs.npairs(randoms, randoms, rbins, period=period)
+            RR = npairs(randoms, randoms, rbins, period=period)
             RR = np.diff(RR)
-            D1R = pairs.npairs(sample1, randoms, rbins, period=period)
+            D1R = npairs(sample1, randoms, rbins, period=period)
             D1R = np.diff(D1R)
             if np.all(sample1 != sample2): #calculating the cross-correlation
-                D2R = pairs.npairs(sample2, randoms, rbins, period=period)
+                D2R = npairs(sample2, randoms, rbins, period=period)
                 D2R = np.diff(D2R)
             else: D2R = None
             
             return D1R, D2R, RR
         #PBCs and randoms.
         elif randoms != None:
-            RR = pairs.npairs(randoms, randoms, rbins, period=period)
+            RR = npairs(randoms, randoms, rbins, period=period)
             RR = np.diff(RR)
-            D1R = pairs.npairs(sample1, randoms, rbins, period=period)
+            D1R = npairs(sample1, randoms, rbins, period=period)
             D1R = np.diff(D1R)
             if np.all(sample1 != sample2): #calculating the cross-correlation
-                D2R = pairs.npairs(sample2, randoms, rbins, period=period)
+                D2R = npairs(sample2, randoms, rbins, period=period)
                 D2R = np.diff(D2R)
             else: D2R = None
             
@@ -194,12 +199,12 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         """
         Count data pairs.
         """
-        D1D1 = pairs.npairs(sample1, sample1, rbins, period=period)
+        D1D1 = npairs(sample1, sample1, rbins, period=period)
         D1D1 = np.diff(D1D1)
         if np.all(sample1 != sample2):
-            D1D2 = pairs.npairs(sample1, sample2, rbins, period=period)
+            D1D2 = npairs(sample1, sample2, rbins, period=period)
             D1D2 = np.diff(D1D2)
-            D2D2 = pairs.npairs(sample2, sample2, rbins, period=period)
+            D2D2 = npairs(sample2, sample2, rbins, period=period)
             D2D2 = np.diff(D2D2)
         else:
             D1D2 = D1D1
