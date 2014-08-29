@@ -11,7 +11,7 @@ Will copy and paste my additional tests once I figure out the basic design conve
 import numpy as np
 from ..halo_occupation import Zheng07_HOD_Model
 from ..halo_occupation import Satcen_Correlation_Polynomial_HOD_Model as satcen
-from ..halo_occupation import Polynomial_Assembly_Biased_HOD_Model as abhod
+from ..halo_occupation import Polynomial_Assembias_HOD_Model as abhod
 
 
 def test_zheng_model():
@@ -53,7 +53,19 @@ def test_satcen():
 
 def test_abhod():
 
-	m = abhod(threshold=-20.0)
+	abcissa = np.linspace(11,15,20)
+	satellite_assembias = np.ones(len(abcissa))*1000
+	satellite_assembias[0::2] = -1.*satellite_assembias[0::2]
+	central_assembias = np.ones(len(abcissa))*1000
+	central_assembias[0::2] = -1.*central_assembias[0::2]
+	input_assembias_dictionary = (
+		{'assembias_abcissa':abcissa, 
+		'central_assembias_ordinates':central_assembias,
+		'satellite_assembias_ordinates':satellite_assembias}
+		)
+
+	m = abhod(threshold=-20.0,assembias_parameter_dict=input_assembias_dictionary)
+#	m = abhod(threshold=-20.0)
 	# array of a few test masses
 	p = np.arange(5,20,0.1)
 	primary_halo_property = np.append(p,p)
