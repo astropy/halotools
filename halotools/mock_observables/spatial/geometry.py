@@ -1,122 +1,22 @@
 #Duncan Campbell
 #August 22, 2014
 #Yale University
-#This code includes geometric objects and methods to work on those objects.
 
-from __future__ import division
+"""
+Objects and methods for 2D and 3D shapes
+"""
+
+from __future__ import division, print_function
 import math
 import numpy as np
+from distances import euclidean_distance
 
-#this function works with numpy arrays
-def distance2D(point, points):
-    '''
-    Calculate the distance between two points with cartesian coordinates.
-    '''
-    if len(point) != 2: raise ValueError('first argument must be a list of 2 floats')
-    x1 = point[0]
-    y1 = point[1]
-    points = np.array(points)
-    if points.shape[0] != 2: raise ValueError('second argument must have shape (2,N)')
-    if len(points.shape) > 1:
-        x2 = points[:,0]
-        y2 = points[:,1]
-    else:
-        x2 = np.array([points[0]])
-        y2 = np.array([points[1]])
-    
-    return np.sqrt((x1-x2)**2.0+(y1-y2)**2.0)
-
-
-#this function works with numpy arrays
-def distance2D_periodic(point, points, box_size=0.0):
-    '''
-    Calculate the distance between two points with cartesian coordinates in a periodic 
-    box with a corner of the box at (0,0,0).
-    '''
-    
-    if len(point) != 2: raise ValueError('first argument must be a list of 2 floats')
-    x1 = point[0]
-    y1 = point[1]
-    points = np.array(points)
-    if points.shape[0] != 2: raise ValueError('second argument must have shape (2,N)')
-    if len(points.shape) > 1:
-        x2 = points[:,0]
-        y2 = points[:,1]
-    else:
-        x2 = np.array([points[0]])
-        y2 = np.array([points[1]])
-    
-    delta_x = np.fabs(x1 - x2)
-    wrap = (delta_x > box_size/2.0)
-    delta_x[wrap] = box_size - delta_x[wrap]
-    delta_y = np.fabs(y1 - y2)
-    wrap = (delta_y > box_size/2.0)
-    delta_y[wrap] = box_size - delta_y[wrap]
-    d = np.sqrt(delta_x ** 2.0 + delta_y ** 2.0)
-    
-    return d
-
-
-#this function works with numpy arrays
-def distance3D(point, points):
-    '''
-    Calculate the distance between two points with cartesian coordinates.
-    '''
-    if len(point) != 3: raise ValueError('first argument must be a list of 3 floats')
-    x1 = point[0]
-    y1 = point[1]
-    z1 = point[2]
-    points = np.array(points)
-    if points.shape[0] != 3: raise ValueError('second argument must have shape (3,N)')
-    if len(points.shape) > 1:
-        x2 = points[:,0]
-        y2 = points[:,1]
-        z2 = points[:,2]
-    else:
-        x2 = np.array([points[0]])
-        y2 = np.array([points[1]])
-        z2 = np.array([points[2]])
-    
-    return np.sqrt((x1-x2)**2.0+(y1-y2)**2.0+(z1-z2)**2.0)
-
-
-#this function works with numpy arrays
-def distance3D_periodic(point, points, box_size=0.0):
-    '''
-    Calculate the distance between two points with cartesian coordinates in a periodic 
-    box with a corner of the box at (0,0,0).
-    '''
-    
-    if len(point) != 3: raise ValueError('first argument must be a list of 3 floats')
-    x1 = point[0]
-    y1 = point[1]
-    z1 = point[2]
-    points = np.array(points)
-    if points.shape[0] != 3: raise ValueError('second argument must have shape (3,N)')
-    if len(points.shape) > 1:
-        x2 = points[:,0]
-        y2 = points[:,1]
-        z2 = points[:,2]
-    else:
-        x2 = np.array([points[0]])
-        y2 = np.array([points[1]])
-        z2 = np.array([points[2]])
-    
-    delta_x = np.fabs(x1 - x2)
-    wrap = (delta_x > box_size/2.0)
-    delta_x[wrap] = box_size - delta_x[wrap]
-    delta_y = np.fabs(y1 - y2)
-    wrap = (delta_y > box_size/2.0)
-    delta_y[wrap] = box_size - delta_y[wrap]
-    delta_z = np.fabs(z1 - z2)
-    wrap = (delta_z > box_size/2.0)
-    delta_z[wrap] = box_size - delta_z[wrap]
-    d = np.sqrt(delta_x ** 2.0 + delta_y ** 2.0 + delta_z ** 2.0)
-    
-    return d
-
+__all__=['polygon2D','circle','face','polygon3D','sphere','cylinder','inside_volume']
 
 class polygon2D(object):
+    """
+    object that defines a 2-D polygon
+    """
     def __init__(self,v=[(0,0),(0,0),(0,0)]):
         self.vertices = v # list of point objects
         for vert in self.vertices:
@@ -135,7 +35,6 @@ class polygon2D(object):
         Cx = 0.0
         Cy = 0.0
         A = self.area()
-        print A
         for i in range(0,len(self.vertices)-1):
             Cx += 1.0/(6.0*A)*(self.vertices[i][0]+self.vertices[i+1][0])\
                  *(self.vertices[i][0]*self.vertices[i+1][1]\
@@ -148,16 +47,25 @@ class polygon2D(object):
     def circum_r(self):
         d = 0.0
         for i in range(0,len(self.vertices)):
-            print distance2D(self.center(),self.vertices[i])
-            print max(d,distance2D(self.center(),self.vertices[i]))
-            d = max(d,distance2D(self.center(),self.vertices[i]))
+            d = max(d,euclidean_distance(self.center(),self.vertices[i]))
         return d
 
 
 class circle(object):
-    def __init__(self,center=[0.0,0.0], r=0.0):
+    """
+    object that defines a 2-D circle
+    
+    Parameters
+    ----------
+    center: array_like
+        center of mass of the circle, default is 0.0
+    
+    radius: float
+        radius of circle, default is 1.0
+    """
+    def __init__(self,center=[0.0,0.0], radius=1.0):
         self.center = np.array(center)
-        self.radius = r
+        self.radius = radius
     
     def area(self):
         return math.pi*self.radius**2.0
@@ -165,6 +73,9 @@ class circle(object):
 
 
 class face(object):
+    """
+    object that defines a face of a 3-D polygone.
+    """
     def __init__(self,v=[(0.0,0.0,0.0),(0.0,0.0,0.0),(0.0,0.0,0.0)]):
         self.vertices = v
         #check to see if vertices are co-planer
@@ -250,9 +161,7 @@ class polygon3D(object):
         self.vertices = [(unq_verts[i][0],unq_verts[i][1],unq_verts[i][2])\
                          for i in range(len(unq_verts))] 
         for f in self.faces:
-            print type(f)
             if not isinstance(f,face):
-                print type(f)
                 raise ValueError('arguments must be of type face')
                 
     def volume(self):
@@ -285,52 +194,99 @@ class polygon3D(object):
             pass
 
 
-class sphere(object):
-    def __init__(self,center=(0.0,0.0,0.0), r=0.0):
+class volume(object):
+    """
+    abstract volume class
+    """
+    def __init__(self):
+        self.center = (0.0,0.0,0.0)
+
+class sphere(volume):
+    """
+    sphere volume object
+    
+    parameters
+    ----------
+    center: array_like, optional
+        center of mass of the volume, default is the origin (0,0,0)
+    
+    radius: float, optional
+        radius of the sphere, default is 1.0
+    """
+    
+    def __init__(self,center=(0.0,0.0,0.0), radius=1.0):
+        super(sphere, self).__init__()
         self.center = center
-        self.radius = r
+        self.radius = radius
     
     def volume(self):
         return (4.0/3.0)*math.pi*self.radius**3.0
 
 
-class cylinder(object):
+class cylinder(volume):
+    """
+    cylinder volume object
+    
+    parameters
+    ----------
+    center: array_like, optional
+        center of mass of the volume, default is the origin (0,0,0)
+    
+    radius: float, optional
+        radius of the circular faces of the cylinder,default is 1.0
+    
+    length: float, optional
+        length of the cylinder, default is 1.0
+    
+    normal: array_like, optional
+        vector defining the normal to the circular fave of the cylinder, default is [0,0,1]
+    """
     def __init__(self, center=(0.0,0.0,0.0), radius = 1.0, length=1.0, \
                  normal=np.array([0.0,0.0,1.0])):
+        super(cylinder, self).__init__()
         self.center = center
         self.normal = normal
         self.radius = radius
         self.length = length
         
     def volume(self):
+        """
+        volume of cylinder
+        """
         return math.pi * self.radius**2.0 * self.length
     
     def circum_r(self):
-        '''
-        radius to circumscribe the volume given the center
-        '''
+        """
+        radius of sphere needed to circumscribe the volume centered on self.center
+        """
         r = math.sqrt(self.radius**2.0+(self.length/2.0)**2.0)
         return r
     
     def inside(self, points=(0,0,0), period=None):
-        '''
+        """
         Calculate whether a point is inside or outside the volume.
+        
         Parameters
-            self: polygon3D object which defines volume
-            point3D object to test
+        ----------
+        points: array_like
+            numpy.array or numpy.ndarray of points with shape (N,3).
+        
         Returns
-            True: point is inside the volume
-            False: point is outside the volume
-        '''
+        -------
+        inside: boolean
+            True, point is inside the volume
+            False, point is outside the volume
+        """
+        
         points = np.array(points)
         if len(points.shape) > 1:
-            if points.shape[1] != 3: raise ValueError('argument must have shape (3,N)')
+            if points.shape[1] != 3: raise ValueError('points argument must have shape (3,N)')
             x = points[:,0]
             y = points[:,1]
             z = points[:,2]
             N=points.shape[0]
         else:
-            if points.shape[0] != 3: raise ValueError('argument must have shape (3,N)')
+            if points.shape[0] != 3: raise ValueError('points argument must have shape (3,N)')
             x = points[0]
             y = points[1]
             z = points[2]
@@ -340,7 +296,7 @@ class cylinder(object):
             period = np.array([np.inf]*3)
         else:
             period = np.asarray(period).astype("float64")
-        if period.shape[0]!=3: raise ValueError('period must have shape (3,)')
+        if period.shape[0]!=3: raise ValueError('period must be None or have shape (3,)')
         
         if np.max(period)==np.inf:
             #define coordinate origin
@@ -392,7 +348,6 @@ class cylinder(object):
             for reflection in reflections:
                 #define coordinate origin
                 x0,y0,z0 = reflection+np.array(self.center)
-                #print reflection, x0,y0,z0
                 #recenter on origin
                 xp = x-x0
                 yp = y-y0
@@ -431,56 +386,83 @@ class cylinder(object):
 
 
 def inside_volume(shapes, points, period=None):
-    '''
+    """
     Check if a list of points is inside a volume.
-    parameters
-        shape: a geometry.py shape object, or list of objects
-        points: a list of points or a ckdtree object
-        period: length k array defining axis aligned PBCs. If set to none, PBCs = infinity.
-    returns
-        inside_points: np.array of ints of indices of points which fall within the 
-            specified volumes
-        inside_shapes: np.array of booleans, True if any points fall within the shape, 
-            False otherwise
-    '''
     
+    parameters
+    ----------
+    shapes: list
+        a list of volume objects, or list of objects
+    points: array_like
+        a list of points or a ckdtree object
+    period: array_like, optional
+        length k array defining axis aligned PBCs. If set to none, PBCs = infinity.
+    
+    returns
+    -------
+    inside_points: np.array
+        indices of points which fall within the specified volumes.
+    inside_shapes: np.array
+        array of booleans, True if any points fall within the shape, False otherwise
+    points_in_shapes: list
+        list of arrays of points inside each shape
+    """
+    
+    #check input
+    if type(points) is not cKDTree:
+        points = np.array(points) 
+        if points.shape[-1] != 3:
+            raise ValueError('points must be 3-dimensional.')
+    elif type(points) is cKDTree:
+        if points.m != 3:
+            raise ValueError('kdtree must be made of 3-dimensional points.')
+    else:
+        raise ValueError('points must be either an array of points or ckdtree.')
+    
+    #check to see if a kdtree was passed and if not, create one.
     if type(points) is not cKDTree:
         points = np.array(points)
         KDT = cKDTree(points)
     else:
-        KDT=points
+        KDT = points
+        #points = KDT.data #will this make a copy and take up memory?
     
-    #if shapes is a list of shapes
+    #is shapes a list, or a single shape?
     if type(shapes) is list:
-        inside_points=np.empty((0,), dtype=np.int)
-        inside_shapes=np.empty((len(shapes),), dtype=bool)
+        #create arrays to store results
+        inside_points = np.empty((0,), dtype=np.int)
+        inside_shapes = np.empty((len(shapes),), dtype=bool)
+        points_in_shapes = []
         for i, shape in enumerate(shapes):
             points_to_test = np.array(KDT.query_ball_point(shape.center,shape.circum_r(),period=period))
-    
+            #need to do some special maneuvering to deal with kdtree/array input for points.
             if type(points) is cKDTree:
                 inside = shape.inside(KDT.data[points_to_test], period)
                 inside = points_to_test[inside]
             else:
                 inside = shape.inside(points[points_to_test], period)
                 inside = points_to_test[inside]
+            #does a point fell within the volume?
             if len(inside)>0:
                 inside_shapes[i]=True
             else: inside_shapes[i]=False
+            #append indices of points which fell within the volume
             inside_points = np.hstack((inside_points,inside))
-        inside_points = np.unique(inside_points)
+            points_in_shapes.append(inside)
+        inside_points = np.unique(inside_points) #remove repeats
         return inside_points, inside_shapes
-    else: #if shapes is a single shape object
+    else:
         shape = shapes
         points_to_test = np.array(KDT.query_ball_point(shape.center,shape.circum_r(),period=period))
-    
+        #need to do some special maneuvering to deal with kdtree/array input for points.
         if type(points) is cKDTree:
             inside = shape.inside(KDT.data[points_to_test], period)
             inside = points_to_test[inside]
         else:
             inside = shape.inside(points[points_to_test], period)
             inside = points_to_test[inside]
-        
+        #does a point fell within the volume?
         if len(inside)>0: inside_shapes = True
         else:  inside_shapes = False
         inside_points = inside
-        return inside_points, inside_shapes
+        return inside_points, inside_shapes, inside_points
