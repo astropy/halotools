@@ -143,7 +143,7 @@ class particles(object):
         else:
             warnings.warn("\n Particle data not found in cache directory")
             download_yes_or_no = raw_input(" \n Enter yes to download, "
-                "any other key to exit:\n (File size is ~100Mb) \n\n ")
+                "any other key to exit:\n (File size is ~10Mb) \n\n ")
 
             if download_yes_or_no=='y' or download_yes_or_no=='yes':
                 print("\n...downloading particle data from www.astro.yale.edu/aphearin")
