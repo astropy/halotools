@@ -170,6 +170,7 @@ class HOD_mock(object):
             self._primary_halo_property,self._halo_type_centrals)
 
         self._rvir = np.array(self.halos['RVIR'])/1000.
+        self._haloID = np.array(self.halos['ID'])
 
         self._halopos = np.empty((len(self.halos),3),'f8')
         self._halopos.T[0] = np.array(self.halos['POS'][:,0])
@@ -263,6 +264,7 @@ class HOD_mock(object):
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
         self.halo_type = np.ones(self.num_total_gals,dtype='f8')
+        self.haloID = np.zeros(self.num_total_gals,dtype='i8')
 
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             self.isQuenched = np.zeros(self.num_total_gals,dtype='f8')
@@ -350,6 +352,7 @@ class HOD_mock(object):
         self.coordshost[:self.num_total_cens] = self._halopos[self._hasCentral]
         self.logMhost[:self.num_total_cens] = self._primary_halo_property[self._hasCentral]
         self.halo_type[:self.num_total_cens] = self._halo_type_centrals[self._hasCentral]
+        self.haloID[:self.num_total_cens] = self._haloID[self._hasCentral]
 
 
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
@@ -377,6 +380,7 @@ class HOD_mock(object):
             logM = logmasses[self.ii]
             halo_type = halo_type_satellites[self.ii]
             center = self._halopos[self.ii]
+            ID = self._haloID[self.ii]
             Nsat = self._NSat[self.ii]
             r_vir = self._rvir[self.ii]
             concen_idx = self._interp_idx_concen[self.ii]
@@ -384,6 +388,7 @@ class HOD_mock(object):
             self.logMhost[counter:counter+Nsat] = logM
             self.halo_type[counter:counter+Nsat] = halo_type
             self.coordshost[counter:counter+Nsat] = center
+            self.haloID[counter:counter+Nsat] = ID
 
             self.assign_satellite_positions(Nsat,center,r_vir,self._cumulative_nfw_PDF[concen_idx-1],counter)
             counter += Nsat
@@ -407,10 +412,10 @@ class HOD_mock(object):
 
         column_names = (['coords','coordshost',
             'primary_halo_property','halo_type',
-            'isSat'])
+            'isSat','haloID'])
 
         tbdata = ([self.coords,self.coordshost,self.logMhost,
-            self.halo_type,self.isSat])
+            self.halo_type,self.isSat,self.haloID])
     
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             column_names.append('isQuenched')
