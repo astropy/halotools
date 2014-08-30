@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 """
-Very simple set of sanity checks on halo_occupation module 
-Will copy and paste my additional tests once I figure out the basic design conventions.
+Very simple set of sanity checks on halo_occupation module. Highly incomplete.
 """
 
 #from __future__ import (absolute_import, division, print_function,
@@ -10,6 +9,7 @@ Will copy and paste my additional tests once I figure out the basic design conve
 import numpy as np
 from ..halo_occupation import Zheng07_HOD_Model
 from ..read_nbody import simulation
+from ..read_nbody import particles
 from ..make_mocks import HOD_mock
 import os
 
@@ -19,7 +19,11 @@ def test_Zheng07_mock():
     catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath)
     hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'
     bolshoi = simulation(manual_dirname=hard_coded_catalog_dirname)
-    mock = HOD_mock(simulation_data=bolshoi,halo_occupation_model=Zheng07_HOD_Model)
+
+    particle_data = particles(manual_dirname=hard_coded_catalog_dirname)
+
+    mock = HOD_mock(simulation_data=bolshoi,halo_occupation_model=Zheng07_HOD_Model,
+        simulation_particle_data = particle_data)
     mock.populate()
 
     reasonable_ngal_boolean = (mock.num_total_gals > 5.e4) and (mock.num_total_gals < 1.e5)

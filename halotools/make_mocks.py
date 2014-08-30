@@ -88,6 +88,7 @@ class HOD_mock(object):
     """
 
     def __init__(self,simulation_data=None,
+        simulation_particle_data=None,use_particles=True,
         halo_occupation_model=ho.vdB03_Quenching_Model,threshold = -20,
         seed=None,tableBundle=True):
 
@@ -104,6 +105,23 @@ class HOD_mock(object):
             simulation_data = read_nbody.simulation(
                 simulation_name,scale_factor,halo_finder)
 
+        if use_particles is True:
+
+            if (simulation_particle_data is None):
+                simulation_name=defaults.default_simulation_name
+                scale_factor=defaults.default_scale_factor
+                num_ptcl_string = defaults.default_size_particle_data
+
+                simulation_particle_data = read_nbody.particles(
+                    simulation_name,scale_factor,num_ptcl_string)
+
+            self.particle_data = simulation_particle_data.particle_data
+
+        else:
+            if simulation_particle_data != None:
+                raise TypeError("Boolean use_particles is set to False, but HOD_Mock constructor was passed particle data file")
+
+
         # Test to make sure the simulation data is the appropriate type
         if not isinstance(simulation_data.halos,astropy.table.table.Table):
             raise TypeError("HOD_mock object requires an astropy Table object as input")
@@ -117,7 +135,7 @@ class HOD_mock(object):
         # Bind the instance of the hod model to the HOD_mock object
         self.halo_occupation_model = hod_model_instance
 
-        # Bind halo catalog to the HOD_mock object
+        # Bind halo catalog  and particles to the HOD_mock object
         self.halos = simulation_data.halos
         self.Lbox = simulation_data.Lbox
 

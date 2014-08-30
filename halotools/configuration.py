@@ -36,6 +36,12 @@ class Config(object):
 
         return fname
 
+    def getParticleFilename(self,simulation_name,scale_factor,num_ptcl):
+
+        fname = simulation_name+'_'+num_ptcl+'_particles_a'+str(scale_factor)+'.fits'
+
+        return fname
+
 
 
 
