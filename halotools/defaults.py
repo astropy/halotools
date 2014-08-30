@@ -15,6 +15,11 @@ default_simulation_name = 'bolshoi'
 default_halo_finder = 'rockstar_V1.5'
 default_scale_factor = 1.0003
 
+### Default particle data (used in read_nbody)
+# The following parameters are used by the 
+# particles object in the read_nbody module
+default_size_particle_data = '2e5'
+
 
 default_luminosity_threshold = -20
 
