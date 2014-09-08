@@ -51,29 +51,37 @@ def enforce_periodicity_of_box(coords, box_length):
 
 
 class HOD_mock(object):
-    """ Class used to build mock realizations of any HOD-style model defined in `halo_occupation` module.
+    """ Class used to build mock realizations of any HOD-style model defined in `~halotools.halo_occupation` module.
 
     Instances of this class represent a mock galaxy distribution whose properties 
     depend on the style of HOD model passed to the constructor, and on the 
     parameter values of the model. 
 
-    Currently supported models are `~halotools.halo_occupation.Zheng07_HOD_Model`, 
-    `~halotools.halo_occupation.Satcen_Correlation_Polynomial_HOD_Model`, 
-    `~halotools.halo_occupation.Polynomial_Assembias_HOD_Model`, 
-    and `~halotools.halo_occupation.vdB03_Quenching_Model`.
-
-    To create a mock, instantiate this class and then call the `populate` method.
+    To create a mock, first instantiate the class. 
+    This will load the halo catalog into memory (and DM particles, if using), 
+    bind the catalog data to the mock object, initialize a few empty arrays, 
+    and create any necessary lookup tables that can be pre-computed. 
+    Then run the `populate` method to assign galaxies to the halos. 
 
     Parameters
     ----------
     simulation_data : optional
         simulation_data is an instance of the `~halotools.read_nbody.simulation` class 
-        defined in the `~halotools.read_nbody` module. 
+        defined in the `~halotools.read_nbody` module. If unspecified, 
+        the halo catalog specified in `~halotools.defaults` will be chosen. 
+
+    particle_data : optional
+        particle_data is an instance of the `~halotools.read_nbody.particles` class 
+        defined in the `~halotools.read_nbody` module. If unspecified, and if 
+        the input use_particles boolean is set to be True, then
+        the particle data specified in `~halotools.defaults` will be chosen. 
 
     halo_occupation_model : optional 
         halo_occupation_model is any subclass of the abstract class 
         `~halotools.halo_occupation.HOD_Model` defined 
         in the `~halotools.halo_occupation` module. 
+        If unspecified, a traditional HOD quenching model
+        (`~halotools.halo_occupation.vdB03_Quenching_Model`) will be chosen by default.
 
     threshold : optional
         Luminosity or stellar mass threshold of the mock galaxy sample.
@@ -81,16 +89,28 @@ class HOD_mock(object):
     seed : float, optional
         Random number seed. Currently ignored. Will be useful when implementing an MCMC.
 
-    tableBundle : boolean, optional
+    create_galaxies_table : boolean, optional
         If set to True, the class instance will have a `galaxies` attribute, 
-        which is an astropy Table providing a convenient bundle of the mock.
+        which is an astropy Table providing a convenient bundle of the mock. 
+        If set to be False, only the bare minimum of datum will be bound to the mock object. 
+        The former behavior is more useful for model exploration, 
+        the latter for likelihood analyses. 
+
+    Notes 
+    -----
+
+    Currently supported models are `~halotools.halo_occupation.Zheng07_HOD_Model`, 
+    `~halotools.halo_occupation.Satcen_Correlation_Polynomial_HOD_Model`, 
+    `~halotools.halo_occupation.Polynomial_Assembias_HOD_Model`, 
+    and `~halotools.halo_occupation.vdB03_Quenching_Model`.
 
     """
 
     def __init__(self,simulation_data=None,
         simulation_particle_data=None,use_particles=True,
-        halo_occupation_model=ho.vdB03_Quenching_Model,threshold = -20,
-        seed=None,tableBundle=True):
+        halo_occupation_model=ho.vdB03_Quenching_Model,
+        threshold = defaults.default_luminosity_threshold,
+        seed=None,create_galaxies_table=True):
 
         # If no simulation_data object is passed to the constructor, 
         # the default simulation will be chosen
@@ -105,6 +125,7 @@ class HOD_mock(object):
             simulation_data = read_nbody.simulation(
                 simulation_name,scale_factor,halo_finder)
 
+        # If using particle data, load the particles into memory 
         if use_particles is True:
 
             if (simulation_particle_data is None):
@@ -195,6 +216,11 @@ class HOD_mock(object):
         self._halopos.T[1] = np.array(self.halos['POS'][:,1])
         self._halopos.T[2] = np.array(self.halos['POS'][:,2])
 
+        self._halovel = np.empty((len(self.halos),3),'f8')
+        self._halovel.T[0] = np.array(self.halos['VEL'][:,0])
+        self._halovel.T[1] = np.array(self.halos['VEL'][:,1])
+        self._halovel.T[2] = np.array(self.halos['VEL'][:,2])
+
         if seed != None:
             np.random.seed(seed)
 
@@ -222,10 +248,10 @@ class HOD_mock(object):
         #each element gives the index pointing to the bins defined by concentration_array
         self._interp_idx_concen = np.digitize(self._concen,concentration_array)
 
-        self.tableBundle = tableBundle
+        self.create_galaxies_table = create_galaxies_table
 
 
-    def _setup(self):
+    def _allocate_memory(self):
         """
         Compute NCen,Nsat and preallocate various arrays.
         No inputs; returns nothing; only modifies attributes 
@@ -279,6 +305,9 @@ class HOD_mock(object):
         # preallocate output arrays
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
         self.coordshost = np.empty((self.num_total_gals,3),dtype='f8')
+        self.vel = np.empty((self.num_total_gals,3),dtype='f8')
+        self.velhost = np.empty((self.num_total_gals,3),dtype='f8')
+
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
         self.halo_type = np.ones(self.num_total_gals,dtype='f8')
@@ -351,7 +380,7 @@ class HOD_mock(object):
         """
         Assign positions to mock galaxies. 
         Returns coordinates, halo mass, isSat (boolean array with True for satellites)
-        If isSetup is True, don't call _setup first (useful for future MCMC applications).
+        If isSetup is True, don't call _allocate_memory first (useful for future MCMC applications).
 
         """
 
@@ -361,13 +390,16 @@ class HOD_mock(object):
 
         # pregenerate the output arrays
         if not isSetup:
-            self._setup()
+            self._allocate_memory()
 
         # Assign properties to centrals. Note that as a result of this step, 
         # the first num_total_cens entries of the mock object ndarrays 
         # pertain to centrals. 
         self.coords[:self.num_total_cens] = self._halopos[self._hasCentral]
         self.coordshost[:self.num_total_cens] = self._halopos[self._hasCentral]
+        self.vel[:self.num_total_cens] = self._halovel[self._hasCentral]
+        self.velhost[:self.num_total_cens] = self._halovel[self._hasCentral]
+
         self.logMhost[:self.num_total_cens] = self._primary_halo_property[self._hasCentral]
         self.halo_type[:self.num_total_cens] = self._halo_type_centrals[self._hasCentral]
         self.haloID[:self.num_total_cens] = self._haloID[self._hasCentral]
@@ -398,6 +430,7 @@ class HOD_mock(object):
             logM = logmasses[self.ii]
             halo_type = halo_type_satellites[self.ii]
             center = self._halopos[self.ii]
+            velocity = self._halovel[self.ii]
             ID = self._haloID[self.ii]
             Nsat = self._NSat[self.ii]
             r_vir = self._rvir[self.ii]
@@ -407,6 +440,9 @@ class HOD_mock(object):
             self.halo_type[counter:counter+Nsat] = halo_type
             self.coordshost[counter:counter+Nsat] = center
             self.haloID[counter:counter+Nsat] = ID
+
+            self.vel[counter:counter+Nsat] = velocity
+            self.velhost[counter:counter+Nsat] = velocity
 
             self.assign_satellite_positions(Nsat,center,r_vir,self._cumulative_nfw_PDF[concen_idx-1],counter)
             counter += Nsat
@@ -420,19 +456,19 @@ class HOD_mock(object):
                 self.logMhost[self.num_total_cens:-1],
                 self.halo_type[self.num_total_cens:-1],'satellite')
 
-        if self.tableBundle==True:
-            self.galaxies = self.table_bundle()
+        if self.create_galaxies_table==True:
+            self.galaxies = self.galaxies_table_bundle()
 
-    def table_bundle(self):
+    def galaxies_table_bundle(self):
         """ Create an astropy Table object and bind it to the mock object.
 
         """
 
-        column_names = (['coords','coordshost',
+        column_names = (['coords','coordshost','vel','velhost',
             'primary_halo_property','halo_type',
             'isSat','haloID'])
 
-        tbdata = ([self.coords,self.coordshost,self.logMhost,
+        tbdata = ([self.coords,self.coordshost,self.vel,self.velhost,self.logMhost,
             self.halo_type,self.isSat,self.haloID])
     
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
