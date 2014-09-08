@@ -110,6 +110,12 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
             length k array defining axis-aligned periodic boundary conditions. If only 
             one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
             If none, PBCs are set to infinity.
+        
+        weights1: array_like, optional
+            length N1 array containing weights used for weighted pair counts, w1*w2.
+        
+        weights2: array_like, optional
+            length N2 array containing weights used for weighted pair counts, w1*w2.
             
     Returns
     -------
