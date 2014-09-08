@@ -104,9 +104,6 @@ class HOD_mock(object):
     `~halotools.halo_occupation.Polynomial_Assembias_HOD_Model`, 
     and `~halotools.halo_occupation.vdB03_Quenching_Model`.
 
-
-
-
     """
 
     def __init__(self,simulation_data=None,
@@ -128,6 +125,7 @@ class HOD_mock(object):
             simulation_data = read_nbody.simulation(
                 simulation_name,scale_factor,halo_finder)
 
+        # If using particle data, load the particles into memory 
         if use_particles is True:
 
             if (simulation_particle_data is None):
@@ -218,6 +216,11 @@ class HOD_mock(object):
         self._halopos.T[1] = np.array(self.halos['POS'][:,1])
         self._halopos.T[2] = np.array(self.halos['POS'][:,2])
 
+        self._halovel = np.empty((len(self.halos),3),'f8')
+        self._halovel.T[0] = np.array(self.halos['VEL'][:,0])
+        self._halovel.T[1] = np.array(self.halos['VEL'][:,1])
+        self._halovel.T[2] = np.array(self.halos['VEL'][:,2])
+
         if seed != None:
             np.random.seed(seed)
 
@@ -302,6 +305,9 @@ class HOD_mock(object):
         # preallocate output arrays
         self.coords = np.empty((self.num_total_gals,3),dtype='f8')
         self.coordshost = np.empty((self.num_total_gals,3),dtype='f8')
+        self.vel = np.empty((self.num_total_gals,3),dtype='f8')
+        self.velhost = np.empty((self.num_total_gals,3),dtype='f8')
+
         self.logMhost = np.empty(self.num_total_gals,dtype='f8')
         self.isSat = np.zeros(self.num_total_gals,dtype='i4')
         self.halo_type = np.ones(self.num_total_gals,dtype='f8')
@@ -391,6 +397,9 @@ class HOD_mock(object):
         # pertain to centrals. 
         self.coords[:self.num_total_cens] = self._halopos[self._hasCentral]
         self.coordshost[:self.num_total_cens] = self._halopos[self._hasCentral]
+        self.vel[:self.num_total_cens] = self._halovel[self._hasCentral]
+        self.velhost[:self.num_total_cens] = self._halovel[self._hasCentral]
+
         self.logMhost[:self.num_total_cens] = self._primary_halo_property[self._hasCentral]
         self.halo_type[:self.num_total_cens] = self._halo_type_centrals[self._hasCentral]
         self.haloID[:self.num_total_cens] = self._haloID[self._hasCentral]
@@ -421,6 +430,7 @@ class HOD_mock(object):
             logM = logmasses[self.ii]
             halo_type = halo_type_satellites[self.ii]
             center = self._halopos[self.ii]
+            velocity = self._halovel[self.ii]
             ID = self._haloID[self.ii]
             Nsat = self._NSat[self.ii]
             r_vir = self._rvir[self.ii]
@@ -430,6 +440,9 @@ class HOD_mock(object):
             self.halo_type[counter:counter+Nsat] = halo_type
             self.coordshost[counter:counter+Nsat] = center
             self.haloID[counter:counter+Nsat] = ID
+
+            self.vel[counter:counter+Nsat] = velocity
+            self.velhost[counter:counter+Nsat] = velocity
 
             self.assign_satellite_positions(Nsat,center,r_vir,self._cumulative_nfw_PDF[concen_idx-1],counter)
             counter += Nsat
@@ -451,11 +464,11 @@ class HOD_mock(object):
 
         """
 
-        column_names = (['coords','coordshost',
+        column_names = (['coords','coordshost','vel','velhost',
             'primary_halo_property','halo_type',
             'isSat','haloID'])
 
-        tbdata = ([self.coords,self.coordshost,self.logMhost,
+        tbdata = ([self.coords,self.coordshost,self.vel,self.velhost,self.logMhost,
             self.halo_type,self.isSat,self.haloID])
     
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
