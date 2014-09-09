@@ -22,8 +22,6 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
-
-
 def anatoly_concentration(logM):
     """ Power law fitting formula for the concentration-mass relation of Bolshoi host halos at z=0
     Taken from Klypin et al. 2011, arXiv:1002.3660v4, Eqn. 12.
@@ -413,8 +411,8 @@ class Zheng07_HOD_Model(HOD_Model):
         # Check to see whether a luminosity threshold has been specified
         # If not, use Mr = -19.5 as the default choice, and alert the user
         if threshold is None:
-            warnings.warn("HOD threshold unspecified: setting to -19.5")
-            self.threshold = -19.5
+            warnings.warn("HOD threshold unspecified: setting to value defined in defaults.py")
+            self.threshold = defaults.default_luminosity_threshold
         else:
             # If a threshold is specified, require that it is a sensible type
             if isinstance(threshold,int) or isinstance(threshold,float):

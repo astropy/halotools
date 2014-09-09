@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+"""
 
 Jeans analysis for spherically symmetric halos with spherically symmetric
 distributions of tracer particles.
@@ -9,7 +9,7 @@ Author: Surhud More (surhudkicp@gmail.com), Kavli IPMU
 
 Bugs: Report to the above email address
 
-'''
+"""
 
 import scipy.integrate as si
 import scipy.interpolate as sint
@@ -21,7 +21,7 @@ from pylab import *
 # Some physical constants
 gee=4.2994E-9
 
-'''
+"""
 
 Implemented integration equation:
 sigma^2(r|M) = 1/nsat(r|M) \int_r^{\infty} nsat(r'|M) 4 pi G M(<r')/r'^2 dr'
@@ -37,13 +37,13 @@ sigma^2(r|M) = 1/nsat(r|M) \int_r^{\infty} nsat(r'|M) 4 pi G M(<r')/r'^2 dr'
 -    result: d[Sigma^2(r|M)]
 
 
-'''
+"""
 def dsigmasq(rrp,nsat_spl,massprof_spl,norm):
     nsat_part=nsat_spl(rrp)
     mass_part=massprof_spl(rrp)
     return norm*nsat_part*4*np.pi*gee*mass_part/rrp^2
 
-'''
+"""
 
 Implemented integration equation:
 sigma^2(r|M) = 1/nsat(r|M) \int_r^{\infty} nsat(r'|M) 4 pi G M(<r')/r'^2 dr'
@@ -62,7 +62,7 @@ sigma^2(r|M) = 1/nsat(r|M) \int_r^{\infty} nsat(r'|M) 4 pi G M(<r')/r'^2 dr'
 
 :Examples:
 
-'''
+"""
 def sigmasq(rr, nsat, massprof, rr_compute):
 
     # Do not raise a bouunds error, but just assume the value to be zero when
@@ -79,7 +79,7 @@ def sigmasq(rr, nsat, massprof, rr_compute):
 
     return res_arr
 
-'''
+"""
 
 Implemented integration equation:
 sigma_los^2(rap|M) = N/D
@@ -94,11 +94,11 @@ sight distance is rap
 -    rap: The fixed projected radius at which dnsat is calculated
 -    nsat_spl: Spline with the number density distribution of satellites
 
-'''
+"""
 def dnsat(rr,rap,nsat_spl):
     return nsat_spl(rr)*2*rr/(rr**2-rap**2)**0.5
 
-'''
+"""
 
 Implemented integration equation:
 sigma_los^2(rap|M) = N/D
@@ -115,11 +115,11 @@ line of sight velocity dispersion
 -    nsat_spl: Spline with the number density distribution of satellites
 -    sigmasq_spl: Spline with the sigma^2(r) is initialized
 
-'''
+"""
 def dsigmasq_los(rr,rap,nsat_spl,sigmasq_spl):
     return sigmasq_spl(rr)*nsat_spl(rr)*2*rr/(rr**2-rap**2)**0.5
 
-'''
+"""
 
 Implemented integration equation:
 sigma_los^2(rap|M) = N/D
@@ -147,7 +147,7 @@ desired
 
 :Examples:
 
-'''
+"""
 def sigmasq_los(rr, nsat, massprof, rap_compute, los_integral_limit=np.inf):
 
     if(los_integral_limit==np.inf):
