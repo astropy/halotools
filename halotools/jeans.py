@@ -10,8 +10,9 @@ Author: Surhud More (surhudkicp@gmail.com), Kavli IPMU
 Bugs: Report to the above email address
 
 """
+# = \\frac{4\\pi G N_{sat}(r | M) M(<r)}{r^{2}}
 
-__all__ = ['dsigmasq']
+__all__ = ['dsigmasq','sigmasq']
 
 import scipy.integrate as si
 import scipy.interpolate as sint
@@ -26,17 +27,17 @@ gee=4.2994E-9
 def dsigmasq(rrp,nsat_spl,massprof_spl,norm):
     """ Function returns LHS of the following integration:
 
-    :math:`\\sigma^2(r|M) = \\frac{4\\pi G}{N_{sat}(r | M)}\\int_{r}^{\\infty}\\frac{dr'}{r'^{2}}N_{sat}(r' | M) M(<r')`
+    :math:`\\frac{d\\sigma^2(r|M)}{dr} = \\frac{4\\pi G N_{sat}(r | M) M(<r)}{r^{2}}`
 
     Parameters 
     ----------
     rrp : array_like 
         An array with radii at which dsigma^s(r|M) needs to be computed
 
-    nsat_spl: array_like
+    nsat_spl : array_like
         Spline with the number density distribution of satellites
 
-    massprof_spl: array_like
+    massprof_spl : array_like
         Spline with the mass profile M(<r)
 
     Returns 
@@ -70,6 +71,11 @@ sigma^2(r|M) = 1/nsat(r|M) \int_r^{\infty} nsat(r'|M) 4 pi G M(<r')/r'^2 dr'
 
 """
 def sigmasq(rr, nsat, massprof, rr_compute):
+    """ Normalized integral of `dsigmasq`:
+
+    :math:`\\sigma^2(r|M) = \\frac{1}{N_{sat}(r|M)}\\int_{r}^{\\infty}dr'\\frac{d\\sigma^{2}(r'|M)}{dr'}`
+
+    """
 
     # Do not raise a bouunds error, but just assume the value to be zero when
     # out of bounds
