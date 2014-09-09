@@ -2,7 +2,7 @@
 
 """
 
-Jeans analysis for spherically symmetric halos with spherically symmetric
+Module encoding jeans analysis for spherically symmetric halos with spherically symmetric
 distributions of tracer particles.
 
 Author: Surhud More (surhudkicp@gmail.com), Kavli IPMU
@@ -10,6 +10,8 @@ Author: Surhud More (surhudkicp@gmail.com), Kavli IPMU
 Bugs: Report to the above email address
 
 """
+
+__all__ = ['dsigmasq']
 
 import scipy.integrate as si
 import scipy.interpolate as sint
@@ -21,24 +23,28 @@ from pylab import *
 # Some physical constants
 gee=4.2994E-9
 
-"""
-
-Implemented integration equation:
-sigma^2(r|M) = 1/nsat(r|M) \int_r^{\infty} nsat(r'|M) 4 pi G M(<r')/r'^2 dr'
-
-:Parameters:
-
--    rrp: An array with radii at which dsigma^s(r|M) needs to be computed
--    nsat_spl: Spline with the number density distribution of satellites
--    massprof_spl: Spline with the mass profile M(<r)
-
-:Returns:
-
--    result: d[Sigma^2(r|M)]
-
-
-"""
 def dsigmasq(rrp,nsat_spl,massprof_spl,norm):
+    """ Function returns LHS of the following integration:
+
+    :math:`\\sigma^2(r|M) = \\frac{4\\pi G}{N_{sat}(r | M)}\\int_{r}^{\\infty}\\frac{dr'}{r'^{2}}N_{sat}(r' | M) M(<r')`
+
+    Parameters 
+    ----------
+    rrp : array_like 
+        An array with radii at which dsigma^s(r|M) needs to be computed
+
+    nsat_spl: array_like
+        Spline with the number density distribution of satellites
+
+    massprof_spl: array_like
+        Spline with the mass profile M(<r)
+
+    Returns 
+    -------
+    result : array_like
+        d[Sigma^2(r|M)]
+
+    """
     nsat_part=nsat_spl(rrp)
     mass_part=massprof_spl(rrp)
     return norm*nsat_part*4*np.pi*gee*mass_part/rrp^2
