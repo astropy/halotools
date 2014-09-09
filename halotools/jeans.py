@@ -25,7 +25,7 @@ from pylab import *
 gee=4.2994E-9
 
 def dsigmasq(rrp,nsat_spl,massprof_spl,norm):
-    """ Function returns LHS of the following integration:
+    """ Integrand of the spherical Jeans equation:
 
     :math:`\\frac{d\\sigma^2(r|M)}{dr} = \\frac{4\\pi G N_{sat}(r | M) M(<r)}{r^{2}}`
 
@@ -50,34 +50,35 @@ def dsigmasq(rrp,nsat_spl,massprof_spl,norm):
     mass_part=massprof_spl(rrp)
     return norm*nsat_part*4*np.pi*gee*mass_part/rrp^2
 
-"""
-
-Implemented integration equation:
-sigma^2(r|M) = 1/nsat(r|M) \int_r^{\infty} nsat(r'|M) 4 pi G M(<r')/r'^2 dr'
-
-:Parameters:
-
--    rr: An array with radii at which the the number density distribution of
-     satellites and the mass profile (M[<rr]) are calculated
--    nsat: Number density of satellites at a given radius rr
--    massprof: Mass within a given radius rr
--    rr_compute: Radii at which sigma^2 should be computed
-
-:Returns:
-
--    res_arr: Sigma^2(rr_compute|nsat,massprof) in (km/s)^2
-
-:Examples:
-
-"""
 def sigmasq(rr, nsat, massprof, rr_compute):
-    """ Normalized integral of `dsigmasq`:
+    """ 3d velocity dispersion profile of a tracer population, 
+    computed by integrating `dsigmasq`:
 
     :math:`\\sigma^2(r|M) = \\frac{1}{N_{sat}(r|M)}\\int_{r}^{\\infty}dr'\\frac{d\\sigma^{2}(r'|M)}{dr'}`
 
+    Parameters 
+    ----------
+    rr : array_like
+        An array with radii at which the the number density distribution of
+        satellites :math:`N_{sat}(r)` and the mass profile :math:`M(<r)` are calculated
+
+    nsat : array_like
+        Number density of satellites at the input radii rr
+
+    massprof : array_like
+        Mass within a given radius r
+
+    rr_compute : array_like
+        Radii at which sigma^2 should be computed
+
+    Returns 
+    -------
+    res_arr : array_like
+        :math:`\\sigma^{2}` (rr_compute | nsat, massprof), returned in units of (km/s)^2
+
     """
 
-    # Do not raise a bouunds error, but just assume the value to be zero when
+    # Do not raise a bounds error, but just assume the value to be zero when
     # out of bounds
     nsat_spl=sint.interp1d(rr,nsat,bounds_error=0,fill_value=0,kind='cubic')
     massprof_spl=sint.interp1d(rr,massprof,bounds_error=0,fill_value=0,kind='cubic')
