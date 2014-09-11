@@ -23,6 +23,10 @@ default_size_particle_data = '2e5'
 
 default_luminosity_threshold = -20
 
+# Default stellar mass threshold for stellar mass
+# limited samples
+default_stellar_mass_threshold = 10.5
+
 # Small numerical value passed to the scipy Poisson number generator. 
 # Used when executing a Monte Carlo realization of a Poission distribution 
 # whose mean is formally zero, which causes the built-in 
