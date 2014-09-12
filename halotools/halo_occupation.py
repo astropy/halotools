@@ -545,6 +545,16 @@ class Leauthaud11_SHMR_Model(HOD_Model):
         Input is stellar mass in log10 units
         Output is Mh in log units
 
+        Parameters 
+        ----------
+        ms : array_like
+            array of stellar mass
+
+        Returns 
+        -------
+        mh : array_like
+            array of halo masses corresponding to the input stellar masses.
+
         """
 
         # In linear units
@@ -564,6 +574,17 @@ class Leauthaud11_SHMR_Model(HOD_Model):
     def mh2ms(self,mh):
         """
         Converts Halo mass to Stellar mass by inverting SHMR
+
+        Parameters 
+        ----------
+        mh : array_like
+            array of stellar mass
+
+        Returns 
+        -------
+        ms : array_like
+            array of halo masses corresponding to the input stellar masses.
+
         """
 
         out=brentq(self.mh2ms_funct,8,12,args=(mh))
