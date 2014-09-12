@@ -14,7 +14,7 @@ __all__ = ['HOD_Model','Zheng07_HOD_Model','Leauthaud11_SHMR_Model','Toy_HOD_Mod
 #                        unicode_literals)
 
 import numpy as np
-from scipy.special import erf
+from scipy.special import erf 
 from scipy.stats import poisson
 from scipy.optimize import brentq
 import defaults
@@ -22,8 +22,6 @@ import defaults
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
-
-
 
 def anatoly_concentration(logM):
     """ Power law fitting formula for the concentration-mass relation of Bolshoi host halos at z=0
@@ -272,6 +270,7 @@ class Zheng07_HOD_Model(HOD_Model):
 
     def __init__(self,parameter_dict=None,threshold=None):
         HOD_Model.__init__(self)
+        self.threshold = defaults.default_luminosity_threshold
 
         self.publication.extend(['arXiv:0703457'])
 
@@ -414,8 +413,8 @@ class Zheng07_HOD_Model(HOD_Model):
         # Check to see whether a luminosity threshold has been specified
         # If not, use Mr = -19.5 as the default choice, and alert the user
         if threshold is None:
-            warnings.warn("HOD threshold unspecified: setting to -19.5")
-            self.threshold = -19.5
+            warnings.warn("HOD threshold unspecified: setting to value defined in defaults.py")
+            self.threshold = defaults.default_luminosity_threshold
         else:
             # If a threshold is specified, require that it is a sensible type
             if isinstance(threshold,int) or isinstance(threshold,float):
@@ -486,7 +485,7 @@ class Leauthaud11_SHMR_Model(HOD_Model):
     def __init__(self,parameter_dict=None,threshold=None):
         HOD_Model.__init__(self)
 
-        self.publication.extend(['arXiv:103.2077'])
+        self.publication.extend(['arXiv:1103.2077'])
         
         if parameter_dict is None:
             self.parameter_dict = self.published_parameters(threshold)
@@ -498,13 +497,13 @@ class Leauthaud11_SHMR_Model(HOD_Model):
 
     @property 
     def primary_halo_property_key(self):
-        """ Model is based on :math:`M = M_{vir}`.  **** M200b
+        """ Model is based on :math:`M = M_{vir}`.
         """
         return 'MVIR'
 
     def mean_ncen(self,logM,halo_type):
         """ Expected number of central galaxies in a halo of mass logM.
-        See Equation 8 of arXiv:103.2077
+        See Equation 8 of arXiv:1103.2077
 
         Parameters
         ----------        
@@ -546,6 +545,16 @@ class Leauthaud11_SHMR_Model(HOD_Model):
         Input is stellar mass in log10 units
         Output is Mh in log units
 
+        Parameters 
+        ----------
+        ms : array_like
+            array of stellar mass
+
+        Returns 
+        -------
+        mh : array_like
+            array of halo masses corresponding to the input stellar masses.
+
         """
 
         # In linear units
@@ -565,6 +574,17 @@ class Leauthaud11_SHMR_Model(HOD_Model):
     def mh2ms(self,mh):
         """
         Converts Halo mass to Stellar mass by inverting SHMR
+
+        Parameters 
+        ----------
+        mh : array_like
+            array of stellar mass
+
+        Returns 
+        -------
+        ms : array_like
+            array of halo masses corresponding to the input stellar masses.
+
         """
 
         out=brentq(self.mh2ms_funct,8,12,args=(mh))
