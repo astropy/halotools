@@ -485,7 +485,7 @@ class Leauthaud11_SHMR_Model(HOD_Model):
     def __init__(self,parameter_dict=None,threshold=None):
         HOD_Model.__init__(self)
 
-        self.publication.extend(['arXiv:103.2077'])
+        self.publication.extend(['arXiv:1103.2077'])
         
         if parameter_dict is None:
             self.parameter_dict = self.published_parameters(threshold)
@@ -497,13 +497,13 @@ class Leauthaud11_SHMR_Model(HOD_Model):
 
     @property 
     def primary_halo_property_key(self):
-        """ Model is based on :math:`M = M_{vir}`.  **** M200b
+        """ Model is based on :math:`M = M_{vir}`.
         """
         return 'MVIR'
 
     def mean_ncen(self,logM,halo_type):
         """ Expected number of central galaxies in a halo of mass logM.
-        See Equation 8 of arXiv:103.2077
+        See Equation 8 of arXiv:1103.2077
 
         Parameters
         ----------        
