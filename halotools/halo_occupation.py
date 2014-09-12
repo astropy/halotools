@@ -14,7 +14,7 @@ __all__ = ['HOD_Model','Zheng07_HOD_Model','Toy_HOD_Model','Assembias_HOD_Model'
 #                        unicode_literals)
 
 import numpy as np
-from scipy.special import erf
+from scipy.special import erf 
 from scipy.stats import poisson
 import defaults
 
@@ -269,6 +269,7 @@ class Zheng07_HOD_Model(HOD_Model):
 
     def __init__(self,parameter_dict=None,threshold=None):
         HOD_Model.__init__(self)
+        self.threshold = defaults.default_luminosity_threshold
 
         self.publication.extend(['arXiv:0703457'])
 
