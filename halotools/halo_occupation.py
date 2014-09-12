@@ -6,7 +6,7 @@ galaxies to halos using HOD-style models.
 
 """
 
-__all__ = ['HOD_Model','Zheng07_HOD_Model','Toy_HOD_Model','Assembias_HOD_Model',
+__all__ = ['HOD_Model','Zheng07_HOD_Model','Leauthaud11_SHMR_Model','Toy_HOD_Model','Assembias_HOD_Model',
 'HOD_Quenching_Model','vdB03_Quenching_Model','Assembias_HOD_Quenching_Model',
 'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembias_HOD_Model',
 'cumulative_NFW_PDF','anatoly_concentration','solve_for_polynomial_coefficients']
@@ -16,6 +16,7 @@ __all__ = ['HOD_Model','Zheng07_HOD_Model','Toy_HOD_Model','Assembias_HOD_Model'
 import numpy as np
 from scipy.special import erf
 from scipy.stats import poisson
+from scipy.optimize import brentq
 import defaults
 
 from astropy.extern import six
@@ -459,6 +460,240 @@ class Zheng07_HOD_Model(HOD_Model):
         pass
 
 
+class Leauthaud11_SHMR_Model(HOD_Model):
+    """ Subclass of `HOD_Model` object, where functional forms for occupation statistics 
+    are taken from Leauthaud et al. 2011 arXiv:1103.2077
+
+
+    Parameters 
+    ----------
+    parameter_dict : dictionary, optional.
+        Contains values for the parameters specifying the model.
+        Dictionary keys are  
+        'm1','ms0','beta','delta','gamma','siglogm','bcut','bsat','betacut','betasat','alphasat'.
+
+        Default values pertain to the best-fit values for the z2 redshift bin in
+        leauthaud et al. 2012. Note these these default values assume h=0.72, M200b, and a Chabrier IMF.
+
+        threshold : float. Default value is default_stellar_mass_threshold
+        Stellar Mass Threshold.
+        
+    Notes
+    -----
+    :math:`c-M_{vir}` relation is current set to be Anatoly's.
+    """
+
+    def __init__(self,parameter_dict=None,threshold=None):
+        HOD_Model.__init__(self)
+
+        self.publication.extend(['arXiv:103.2077'])
+        
+        if parameter_dict is None:
+            self.parameter_dict = self.published_parameters(threshold)
+            
+        if threshold is None:
+            self.threshold = defaults.default_stellar_mass_threshold
+            
+        self.require_correct_keys()
+
+    @property 
+    def primary_halo_property_key(self):
+        """ Model is based on :math:`M = M_{vir}`.  **** M200b
+        """
+        return 'MVIR'
+
+    def mean_ncen(self,logM,halo_type):
+        """ Expected number of central galaxies in a halo of mass logM.
+        See Equation 8 of arXiv:103.2077
+
+        Parameters
+        ----------        
+        logM : array 
+            array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way this function is called by different models.
+
+        Returns
+        -------
+        mean_ncen : array
+    
+        Notes
+        -------
+        Mean number of central galaxies in a host halo of the specified mass. 
+
+        """
+        logM = np.array(logM) 
+
+        ms_shmr = np.zeros(len(logM),dtype='f8')
+
+        # Invert SHMR for this Mh value
+        for i in np.arange(len(logM)):
+            ms_shmr[i] = self.mh2ms(logM[i])
+	
+        # Eq 8 in Leauthaud 2011
+        x=(self.threshold-ms_shmr)/(np.sqrt(2)*self.parameter_dict['siglogm']) 
+
+        # Ncen
+        return 0.5*(1-erf(x))   
+        
+        
+    def ms2mh(self,ms):
+        """
+        Converts Stellar mass to Mhalo using SHMR
+        Input is stellar mass in log10 units
+        Output is Mh in log units
+
+        """
+
+        # In linear units
+        x=10.**(ms-self.parameter_dict['ms0'])
+
+        m1 = self.parameter_dict['m1']
+        beta = self.parameter_dict['beta']
+        delta = self.parameter_dict['delta']
+        gamma = self.parameter_dict['gamma']
+        
+        # In log10
+        mh=m1+(beta*np.log10(x))+(x**delta/(1+x**(-gamma)))-0.5
+        
+        return mh
+
+
+    def mh2ms(self,mh):
+        """
+        Converts Halo mass to Stellar mass by inverting SHMR
+        """
+
+        out=brentq(self.mh2ms_funct,8,12,args=(mh))
+	
+        return out
+
+    def mh2ms_funct(self,ms,mh):
+        """
+        Function for brentq
+        Returns SHMR-Mh
+        """
+        out=self.ms2mh(ms)-mh 
+    
+        return out
+
+    def mean_nsat(self,logM,halo_type):
+        """Expected number of satellite galaxies in a halo of mass logM.
+        See Equation 12 of arXiv:1103.2077
+
+        Parameters
+        ----------
+        logM : array 
+            array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way this function is called by different models.
+
+        Returns
+        -------
+        mean_nsat : float or array
+            Mean number of satellite galaxies in a host halo of the specified mass. 
+
+        """
+        halo_type = np.array(halo_type)
+        logM = np.array(logM)
+        halo_mass = 10.**logM
+
+        mean_nsat = np.zeros(len(logM),dtype='f8')
+
+        mh_shmr=10.**(self.ms2mh(self.threshold)-12.0)
+        msat=self.parameter_dict['bsat']*(10.**12)*(mh_shmr)**self.parameter_dict['betasat']
+        mcut=self.parameter_dict['bcut']*(10.**12)*(mh_shmr)**self.parameter_dict['betacut']
+
+        htype = np.ones(len(logM))
+        
+        mean_nsat=self.mean_ncen(logM,htype)*((halo_mass/msat)**self.parameter_dict['alphasat'])*np.exp(-mcut/halo_mass)
+    
+        return mean_nsat
+
+    def mean_concentration(self,logM,halo_type):
+        """
+        Concentration-mass relation of the model.
+
+        Parameters 
+        ----------
+
+        logM : array_like
+            array of :math:`log_{10}(M)` of halos in catalog
+
+        halo_type : array 
+            array of halo types. Entirely ignored in this model. 
+            Included as a passed variable purely for consistency 
+            between the way this function is called by different models.
+
+        Returns 
+        -------
+
+        concentrations : array_like
+            Mean concentration of halos of the input mass, using `anatoly_concentration` model.
+
+        """
+
+        logM = np.array(logM)
+
+        concentrations = anatoly_concentration(logM)
+        return concentrations
+
+    def published_parameters(self,threshold=None):   
+        """
+        Best-fit HOD parameters from Table 5 of Leauthaud et al. 2012. For the second redshift bin.
+
+        Parameters 
+        ----------
+
+        threshold : float
+            Any stellar mass threshold
+
+        Returns 
+        -------
+
+        parameter_dict : dict
+            Dictionary of model parameters whose values have been set to 
+            agree with the values taken from Table 5 of Leauthaud et al. 2012.
+
+        """
+
+        # Check to see whether a luminosity threshold has been specified
+        if threshold is None:
+            warnings.warn("stellar mass threshold unspecified: setting to default value")
+            self.threshold = defaults.default_stellar_mass_threshold
+
+        parameter_dict = {
+            'm1':12.725,
+            'ms0':11.038,
+            'beta':0.466,
+            'delta':0.61,
+            'gamma':1.95,
+            'siglogm':0.249,
+            'bcut':1.65,
+            'bsat':9.04,
+            'betacut':0.59,
+            'betasat':0.740,
+            'alphasat':1.0}
+
+        return parameter_dict
+
+    def require_correct_keys(self):
+        """ If a parameter dictionary is passed to the class upon instantiation, 
+        this method is used to enforce that the set of keys is in accord 
+        with the set of keys required by the model. 
+        """
+        correct_set_of_keys = set(self.published_parameters(threshold = defaults.default_stellar_mass_threshold).keys()) 
+        if set(self.parameter_dict.keys()) != correct_set_of_keys:
+            raise TypeError("Set of keys of input parameter_dict do not match the set of keys required by the model")
+        pass
+
+    
 class Toy_HOD_Model(HOD_Model):
     """ Subclass of `HOD_Model` object, allowing for explicit specification of 
     the occupation statistics.
