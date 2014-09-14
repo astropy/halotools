@@ -19,22 +19,22 @@ def npairs(data1, data2, rbins, period=None):
     
     Parameters
     ----------
-        data1: array_like
-            N by k numpy array of k-dimensional positions. Should be between zero and 
-            period
+    data1: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
             
-        data2: array_like
-            N by k numpy array of k-dimensional positions. Should be between zero and 
-            period
+    data2: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
             
-        rbins : array_like
-            numpy array of boundaries defining the bins in which pairs are counted. 
-            len(rbins) = Nrbins + 1.
+    rbins : array_like
+        numpy array of boundaries defining the bins in which pairs are counted. 
+        len(rbins) = Nrbins + 1.
             
-        period: array_like, optional
-            length k array defining axis-aligned periodic boundary conditions. If only 
-            one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-            If none, PBCs are set to infinity.
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
             
     Returns
     -------
@@ -94,28 +94,28 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
     
     Parameters
     ----------
-        data1: array_like
-            N by k numpy array of k-dimensional positions. Should be between zero and 
-            period
+    data1: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
             
-        data2: array_like
-            N by k numpy array of k-dimensional positions. Should be between zero and 
-            period
+    data2: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
             
-        rbins : array_like
-            numpy array of boundaries defining the bins in which pairs are counted. 
-            len(rbins) = Nrbins + 1.
+    rbins : array_like
+        numpy array of boundaries defining the bins in which pairs are counted. 
+        len(rbins) = Nrbins + 1.
             
-        period: array_like, optional
-            length k array defining axis-aligned periodic boundary conditions. If only 
-            one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-            If none, PBCs are set to infinity.
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
         
-        weights1: array_like, optional
-            length N1 array containing weights used for weighted pair counts, w1*w2.
+    weights1: array_like, optional
+        length N1 array containing weights used for weighted pair counts, w1*w2.
         
-        weights2: array_like, optional
-            length N2 array containing weights used for weighted pair counts, w1*w2.
+    weights2: array_like, optional
+        length N2 array containing weights used for weighted pair counts, w1*w2.
             
     Returns
     -------
@@ -191,21 +191,21 @@ def pairs(data1, r, data2=None, period=None):
     
     Parameters
     ----------
-        data1: array_like
-            N by k numpy array of k-dimensional positions. Should be between zero and 
-            period
+    data1: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
             
-        r : float
-            radius for which pairs are counted. 
+    r : float
+        radius for which pairs are counted. 
         
-        data2: array_like
-            N by k numpy array of k-dimensional positions. Should be between zero and 
-            period
+    data2: array_like, optional
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
             
-        period: array_like, optional
-            length k array defining axis-aligned periodic boundary conditions. If only 
-            one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-            If none, PBCs are set to infinity.
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
             
     Returns
     -------
