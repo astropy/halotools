@@ -26,22 +26,22 @@ def npairs(data1, data2, rbins, period=None):
     
     Parameters
     ----------
-        data1: array_like
-            N by k numpy array of k-dimensional positions. Should be between zero and 
-            period. This cython implementation requires data1.ndim==2.
+    data1: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period. This cython implementation requires data1.ndim==2.
             
-        data2: array_like
-            N by k numpy array of k-dimensional positions. Should be between zero and 
-            period. This cython implementation requires data2.ndim==2.
+    data2: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period. This cython implementation requires data2.ndim==2.
             
-        rbins : array_like
-            numpy array of boundaries defining the bins in which pairs are counted. 
-            len(rbins) = Nrbins + 1.
+    rbins : array_like
+        numpy array of boundaries defining the bins in which pairs are counted. 
+        len(rbins) = Nrbins + 1.
             
-        period: array_like, optional
-            length k array defining axis-aligned periodic boundary conditions. If only 
-            one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-            If none, PBCs are set to infinity.
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
             
     Returns
     -------
