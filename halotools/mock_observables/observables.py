@@ -324,7 +324,7 @@ def apparent_to_absolute_magnitude(m, d_L):
     Mag: np.array of absolute magnitudes
     """
     
-    M = m - 5.0*(np.log10(d_L)-1.0)
+    M = m - 5.0*(np.log10(d_L)+5.0)
     
     return M
 
