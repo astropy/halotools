@@ -2276,7 +2276,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         The baseline HOD model can in principle be driven 
         by any host halo property. 
         """
-        pass
 
     @abstractmethod
     def mean_quenched_fraction_centrals(self,primary_halo_property,halo_type):
@@ -2318,7 +2317,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         """
         raise NotImplementedError(
             "unconstrained_central_conformity_halo_type1 is not implemented")
-        pass
 
 
     @abstractmethod
@@ -2343,7 +2341,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         """
         raise NotImplementedError(
             "unconstrained_central_conformity_halo_type1 is not implemented")
-        pass
 
     def conformity_case_ratio_centrals(self,primary_halo_property,halo_type):
         """
@@ -2364,7 +2361,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
             )
 
         return conformity_case_ratio 
-
 
     def maximum_conformity_centrals(self,primary_halo_property,halo_type):
         """ The maximum allowed value of the conformity function, as pertains to centrals.
@@ -2463,7 +2459,298 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         return output_minimum_conformity
 
 
+    def conformity_centrals(primary_halo_property,halo_type):
+        """
+        Conformity function as pertains to centrals
+        """
 
+        idx0 = np.where(halo_type == 0)[0]
+        idx1 = np.where(halo_type == 1)[0]
+
+        # Initialize array containing result to return
+        output_conformity = np.zeros(len(primary_halo_property))
+
+        all_ones = np.zeros(len(primary_halo_property)) + 1
+
+        # Start by ignoring the input halo_type, and  
+        # assuming the halo_type = 1 for all inputs.
+        # This is convenient and costs nothing, 
+        # since the halo_type = 0 branch 
+        # is defined in terms of the halo_type = 1 branch.
+        output_conformity = (
+            self.unconstrained_central_conformity_halo_type1(
+                primary_halo_property))
+        ########################################
+        # Now apply the baseline HOD constraints to output_conformity, 
+        # still behaving as if every input halo has halo_type=1
+        maximum = self.maximum_conformity_centrals(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_conformity > maximum
+        output_conformity[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Next, require that the conformity function never falls below 
+        # its minimum allowed value. This guarantees that ... 
+        minimum = self.minimum_conformity_centrals(primary_halo_property,all_ones)
+        test_below_minimum = output_conformity < minimum
+        output_conformity[test_below_minimum] = minimum[test_below_minimum]
+        # Finally, require that the conformity function is set to unity 
+        # whenever the probability of halo_type=1 equals unity
+        # This requirement supercedes the previous two, and ensures that 
+        # the conformity inflection in h1-halos will be ignored in cases 
+        # where there are no h0-halos. This self-consistency condition is necessary because 
+        # the unconstrained conformity function and the halo_type function 
+        # are both independently specified by user-supplied subclasses.  
+        ###
+        # NOTE: This may need to have an additional condition for Fq = 1 cases.
+        ###
+        probability_type1 = self.halo_type_fraction_centrals(
+            primary_halo_property,all_ones)
+        test_unit_probability = (probability_type1 == 1)
+        output_conformity[test_unit_probability] = 1
+
+        ########################################
+        # At this point, output_conformity has been properly conditioned. 
+        # However, we have been assuming that all input halo_type = 1.
+        # We now need to compute the correct output 
+        # for cases where input halo_type = 0.
+        # Define some shorthands (bookkeeping convenience)
+        output_conformity_input_halo_type0 = output_conformity[idx0]
+        primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
+        probability_type1_input_halo_type0 = probability_type1[idx0]
+        probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
+        # Whenever the fraction of halos of type=0 is zero, the inflection function 
+        # for type0 halos should be set to zero.
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_conformity_input_halo_type0[test_zero] = 0
+
+        # For non-trivial cases, define the type0 conformity function 
+        # in terms of the type1 conformity function in such a way that 
+        # the baseline HOD will be unadulterated by assembly bias
+        test_positive = (probability_type0_input_halo_type0 > 0)
+        output_conformity_input_halo_type0[test_positive] = (
+            (1.0 - output_conformity_input_halo_type0[test_positive]*
+                probability_type1_input_halo_type0[test_positive])/
+            probability_type0_input_halo_type0[test_positive])
+
+
+        # Now write the results back to the output 
+        output_conformity[idx0] = output_conformity_input_halo_type0
+
+        return output_conformity
+
+
+    def conformity_case_ratio_satellites(self,primary_halo_property,halo_type):
+        """
+        The bounds on the conformity function depend on the other HOD model parameters.
+        This function determines which case should be used in computing the conformity bounds.
+        """
+
+        conformity_case_ratio = np.ones(len(primary_halo_property))
+
+        idx_both_positive = ( (self.halo_type_fraction_satellites(primary_halo_property,halo_type) > 0) & 
+            self.inflection_satellites(primary_halo_property,halo_type) > 0 )
+
+        conformity_case_ratio[idx_both_positive] = (
+            self.mean_quenched_fraction_satellites(
+                primary_halo_property[idx_both_positive],halo_type[idx_both_positive]) / 
+            (self.halo_type_fraction_satellites(primary_halo_property[idx_both_positive],halo_type[idx_both_positive])*
+                self.inflection_satellites(primary_halo_property[idx_both_positive],halo_type[idx_both_positive]))
+            )
+
+        return conformity_case_ratio 
+
+    def maximum_conformity_satellites(self,primary_halo_property,halo_type):
+        """ The maximum allowed value of the conformity function, as pertains to satellites.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the conformity function :math:`\\mathcal{C}_{cen_{Q}}(p | h_{i})` can exceed neither 
+        :math:`1 / \\mathcal{I}_{cen}(p | h_{i})P_{h_{i}}(p)`, 
+        nor :math:`1 / F_{cen_{Q}}(p | h_{i})`. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_maximum_conformity : array_like
+            Maximum allowed value of the inflection function, as pertains to satellites.
+
+        """
+
+        output_maximum_conformity = np.zeros(len(primary_halo_property))
+
+        conformity_case_ratio = self.conformity_case_ratio_satellites(primary_halo_property,halo_type)
+
+        inflection = self.inflection_satellites(primary_halo_property,halo_type)
+        halo_type_fraction = self.halo_type_fraction_satellites(primary_halo_property,halo_type)
+        quenched_fraction = self.mean_quenched_fraction_satellites(primary_halo_property,halo_type)
+
+        idx_nontrivial_case1 = (
+            (conformity_case_ratio < 1) & 
+            (inflection > 0) & (halo_type_fraction > 0) )
+
+        output_maximum_conformity[idx_nontrivial_case1] = (1. / 
+            (inflection[idx_nontrivial_case1]*halo_type_fraction[idx_nontrivial_case1])
+            )
+
+        idx_nontrivial_case2 = (
+            (conformity_case_ratio >= 1) & (quenched_fraction > 0) )
+
+        output_maximum_conformity[idx_nontrivial_case2] = 1. / quenched_fraction[idx_nontrivial_case2]
+
+        return output_maximum_conformity
+
+
+    def minimum_conformity_satellites(self,primary_halo_property,halo_type):
+        """ The minimum allowed value of the inflection function, as pertains to satellites.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the conformity function :math:`\\mathcal{C}_{cen_{Q}}(p | h_{0,1})` 
+        must exceed both a and b.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_minimum_conformity : array_like
+            Minimum allowed value of the conformity function, as pertains to satellites.
+
+
+        """
+        output_minimum_conformity = np.zeros(len(primary_halo_property))
+
+        opposite_halo_type = np.zeros(len(halo_type))
+        opposite_halo_type[halo_type==0] = 1
+
+        inflection = self.inflection_satellites(primary_halo_property,halo_type)
+        halo_type_fraction = self.halo_type_fraction_satellites(primary_halo_property,halo_type)
+
+        opposite_inflection = self.inflection_satellites(primary_halo_property,opposite_halo_type)
+        opposite_halo_type_fraction = self.halo_type_fraction_satellites(primary_halo_property,opposite_halo_type)
+        opposite_maximum_conformity = self.maximum_conformity_satellites(primary_halo_property,opposite_halo_type)
+
+        idx_nontrivial_case = ( (inflection > 0) & (halo_type_fraction > 0) )
+
+        output_minimum_conformity[idx_nontrivial_case] = (
+            (1. - (opposite_halo_type_fraction[idx_nontrivial_case]*
+                opposite_halo_type_fraction[idx_nontrivial_case]*
+                opposite_maximum_conformity[idx_nontrivial_case])) / (
+            inflection[idx_nontrivial_case]*halo_type_fraction[idx_nontrivial_case])
+                )
+
+        return output_minimum_conformity
+
+
+    def conformity_satellites(primary_halo_property,halo_type):
+        """
+        Conformity function as pertains to satellites
+        """
+
+        idx0 = np.where(halo_type == 0)[0]
+        idx1 = np.where(halo_type == 1)[0]
+
+        # Initialize array containing result to return
+        output_conformity = np.zeros(len(primary_halo_property))
+
+        all_ones = np.zeros(len(primary_halo_property)) + 1
+
+        # Start by ignoring the input halo_type, and  
+        # assuming the halo_type = 1 for all inputs.
+        # This is convenient and costs nothing, 
+        # since the halo_type = 0 branch 
+        # is defined in terms of the halo_type = 1 branch.
+        output_conformity = (
+            self.unconstrained_satellite_conformity_halo_type1(
+                primary_halo_property))
+        ########################################
+        # Now apply the baseline HOD constraints to output_conformity, 
+        # still behaving as if every input halo has halo_type=1
+        maximum = self.maximum_conformity_satellites(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_conformity > maximum
+        output_conformity[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Next, require that the conformity function never falls below 
+        # its minimum allowed value. This guarantees that ... 
+        minimum = self.minimum_conformity_satellites(primary_halo_property,all_ones)
+        test_below_minimum = output_conformity < minimum
+        output_conformity[test_below_minimum] = minimum[test_below_minimum]
+        # Finally, require that the conformity function is set to unity 
+        # whenever the probability of halo_type=1 equals unity
+        # This requirement supercedes the previous two, and ensures that 
+        # the conformity inflection in h1-halos will be ignored in cases 
+        # where there are no h0-halos. This self-consistency condition is necessary because 
+        # the unconstrained conformity function and the halo_type function 
+        # are both independently specified by user-supplied subclasses.  
+        ###
+        # NOTE: This may need to have an additional condition for Fq = 1 cases.
+        ###
+        probability_type1 = self.halo_type_fraction_satellites(
+            primary_halo_property,all_ones)
+        test_unit_probability = (probability_type1 == 1)
+        output_conformity[test_unit_probability] = 1
+
+        ########################################
+        # At this point, output_conformity has been properly conditioned. 
+        # However, we have been assuming that all input halo_type = 1.
+        # We now need to compute the correct output 
+        # for cases where input halo_type = 0.
+        # Define some shorthands (bookkeeping convenience)
+        output_conformity_input_halo_type0 = output_conformity[idx0]
+        primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
+        probability_type1_input_halo_type0 = probability_type1[idx0]
+        probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
+        # Whenever the fraction of halos of type=0 is zero, the inflection function 
+        # for type0 halos should be set to zero.
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_conformity_input_halo_type0[test_zero] = 0
+
+        # For non-trivial cases, define the type0 conformity function 
+        # in terms of the type1 conformity function in such a way that 
+        # the baseline HOD will be unadulterated by assembly bias
+        test_positive = (probability_type0_input_halo_type0 > 0)
+        output_conformity_input_halo_type0[test_positive] = (
+            (1.0 - output_conformity_input_halo_type0[test_positive]*
+                probability_type1_input_halo_type0[test_positive])/
+            probability_type0_input_halo_type0[test_positive])
+
+
+        # Now write the results back to the output 
+        output_conformity[idx0] = output_conformity_input_halo_type0
+
+        return output_conformity
+
+
+
+"""
+class Polynomial_Assembias_HOD_Quenching_Model(Assembias_HOD_Quenching_Model):
+     Concrete subclass of `Assembias_HOD_Model`  
+    in which occupation statistics exhibit assembly bias, 
+    where some secondary host halo property modulates the mean galaxy abundance. 
+    The strength of the assembly bias is set by explicitly specifing the strength 
+    at specific values of the primary halo property. 
+
+    def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
+            baseline_hod_parameter_dict=None,
+            threshold=defaults.default_luminosity_threshold,
+            assembias_parameter_dict=None,
+            secondary_halo_property_centrals_key=defaults.default_assembias_key,
+            secondary_halo_property_satellites_key=defaults.default_assembias_key):
+
+
+
+    """
 
 
 
