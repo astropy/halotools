@@ -2413,10 +2413,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         output_maximum_conformity[idx_nontrivial_case2] = 1. / quenched_fraction[idx_nontrivial_case2]
 
         return output_maximum_conformity
-        
-
-
-
 
 
     def minimum_conformity_centrals(self,primary_halo_property,halo_type):
@@ -2443,7 +2439,28 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
 
         """
-        pass
+        output_minimum_conformity = np.zeros(len(primary_halo_property))
+
+        opposite_halo_type = np.zeros(len(halo_type))
+        opposite_halo_type[halo_type==0] = 1
+
+        inflection = self.inflection_centrals(primary_halo_property,halo_type)
+        halo_type_fraction = self.halo_type_fraction_centrals(primary_halo_property,halo_type)
+
+        opposite_inflection = self.inflection_centrals(primary_halo_property,opposite_halo_type)
+        opposite_halo_type_fraction = self.halo_type_fraction_centrals(primary_halo_property,opposite_halo_type)
+        opposite_maximum_conformity = self.maximum_conformity_centrals(primary_halo_property,opposite_halo_type)
+
+        idx_nontrivial_case = ( (inflection > 0) & (halo_type_fraction > 0) )
+
+        output_minimum_conformity[idx_nontrivial_case] = (
+            (1. - (opposite_halo_type_fraction[idx_nontrivial_case]*
+                opposite_halo_type_fraction[idx_nontrivial_case]*
+                opposite_maximum_conformity[idx_nontrivial_case])) / (
+            inflection[idx_nontrivial_case]*halo_type_fraction[idx_nontrivial_case])
+                )
+
+        return output_minimum_conformity
 
 
 
