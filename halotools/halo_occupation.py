@@ -2268,8 +2268,18 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         # and self.publication to []
         Assembias_HOD_Model.__init__(self)
 
+    @abstractproperty
+    def baseline_hod_model(self):
+        """ Underlying HOD model, about which assembly bias modulates 
+        galaxy abundance and intra-halo spatial distribution. 
+        Must be one of the supported subclasses of `HOD_Model`. 
+        The baseline HOD model can in principle be driven 
+        by any host halo property. 
+        """
+        pass
+
     @abstractmethod
-    def mean_quenched_fraction_centrals(self,logM,halo_type):
+    def mean_quenched_fraction_centrals(self,primary_halo_property,halo_type):
         """
         Expected fraction of centrals that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -2278,7 +2288,7 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
             "quenched_fraction_centrals is not implemented")
 
     @abstractmethod
-    def mean_quenched_fraction_satellites(self,logM,halo_type):
+    def mean_quenched_fraction_satellites(self,primary_halo_property,halo_type):
         """
         Expected fraction of satellites that are quenched as a function of host halo mass logM.
         A required method for any HOD_Quenching_Model object.
@@ -2335,8 +2345,29 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
             "unconstrained_central_conformity_halo_type1 is not implemented")
         pass
 
+    def conformity_case_ratio_centrals(self,primary_halo_property,halo_type):
+        """
+        The bounds on the conformity function depend on the other HOD model parameters.
+        This function determines which case should be used in computing the conformity bounds.
+        """
+
+        conformity_case_ratio = np.ones(len(primary_halo_property))
+
+        idx_both_positive = ( (self.halo_type_fraction_centrals(primary_halo_property,halo_type) > 0) & 
+            self.inflection_centrals(primary_halo_property,halo_type) > 0 )
+
+        conformity_case_ratio[idx_both_positive] = (
+            self.mean_quenched_fraction_centrals(
+                primary_halo_property[idx_both_positive],halo_type[idx_both_positive]) / 
+            (self.halo_type_fraction_centrals(primary_halo_property[idx_both_positive],halo_type[idx_both_positive])*
+                self.inflection_centrals(primary_halo_property[idx_both_positive],halo_type[idx_both_positive]))
+            )
+
+        return conformity_case_ratio 
+
+
     def maximum_conformity_centrals(self,primary_halo_property,halo_type):
-        """ The maximum allowed value of the inflection function, as pertains to centrals.
+        """ The maximum allowed value of the conformity function, as pertains to centrals.
 
         The combinatorics of assembly-biased HODs are such that 
         the conformity function :math:`\\mathcal{C}_{cen_{Q}}(p | h_{i})` can exceed neither 
@@ -2355,11 +2386,38 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         Returns 
         -------
-        output_maximum_inflection : array_like
+        output_maximum_conformity : array_like
             Maximum allowed value of the inflection function, as pertains to centrals.
 
         """
-        pass
+
+        output_maximum_conformity = np.zeros(len(primary_halo_property))
+
+        conformity_case_ratio = self.conformity_case_ratio_centrals(primary_halo_property,halo_type)
+
+        inflection = self.inflection_centrals(primary_halo_property,halo_type)
+        halo_type_fraction = self.halo_type_fraction_centrals(primary_halo_property,halo_type)
+        quenched_fraction = self.mean_quenched_fraction_centrals(primary_halo_property,halo_type)
+
+        idx_nontrivial_case1 = (
+            (conformity_case_ratio < 1) & 
+            (inflection > 0) & (halo_type_fraction > 0) )
+
+        output_maximum_conformity[idx_nontrivial_case1] = (1. / 
+            (inflection[idx_nontrivial_case1]*halo_type_fraction[idx_nontrivial_case1])
+            )
+
+        idx_nontrivial_case2 = (
+            (conformity_case_ratio >= 1) & (quenched_fraction > 0) )
+
+        output_maximum_conformity[idx_nontrivial_case2] = 1. / quenched_fraction[idx_nontrivial_case2]
+
+        return output_maximum_conformity
+        
+
+
+
+
 
     def minimum_conformity_centrals(self,primary_halo_property,halo_type):
         """ The minimum allowed value of the inflection function, as pertains to centrals.
