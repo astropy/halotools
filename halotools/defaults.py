@@ -55,10 +55,16 @@ default_quenching_parameters = {
     'satellite_quenching_ordinates' : [0.5,0.75,0.85] #polynomial coefficients determining quenched fraction of centrals
     }
 
-default_assembias_parameters = {
+default_occupation_assembias_parameters = {
 	'assembias_abcissa' : [12,15],
 	'satellite_assembias_ordinates' : [0.05,0.05],
 	'central_assembias_ordinates' : [100,100]
+	}
+
+default_quenching_assembias_parameters = {
+	'quenching_assembias_abcissa' : [12,15],
+	'satellite_quenching_assembias_ordinates' : [0.05,0.05],
+	'central_quenching_assembias_ordinates' : [100,100]
 	}
 
 default_satcen_parameters = {
