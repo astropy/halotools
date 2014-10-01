@@ -276,6 +276,8 @@ class Zheng07_HOD_Model(HOD_Model):
 
         if parameter_dict is None:
             self.parameter_dict = self.published_parameters(threshold)
+        else:
+            self.parameter_dict = parameter_dict
         self.require_correct_keys()
 
     @property 
