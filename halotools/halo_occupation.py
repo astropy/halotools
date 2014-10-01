@@ -2268,15 +2268,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         # and self.publication to []
         Assembias_HOD_Model.__init__(self)
 
-    @abstractproperty
-    def baseline_hod_model(self):
-        """ Underlying HOD model, about which assembly bias modulates 
-        galaxy abundance and intra-halo spatial distribution. 
-        Must be one of the supported subclasses of `HOD_Model`. 
-        The baseline HOD model can in principle be driven 
-        by any host halo property. 
-        """
-
     @abstractmethod
     def mean_quenched_fraction_centrals(self,primary_halo_property,halo_type):
         """
@@ -2350,14 +2341,15 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         conformity_case_ratio = np.ones(len(primary_halo_property))
 
-        idx_both_positive = ( (self.halo_type_fraction_centrals(primary_halo_property,halo_type) > 0) & 
-            self.inflection_centrals(primary_halo_property,halo_type) > 0 )
+        inflection = self.inflection_centrals(primary_halo_property,halo_type)
+        type_fraction = self.halo_type_fraction_centrals(primary_halo_property,halo_type)
+        quenched_fraction = self.mean_quenched_fraction_centrals(primary_halo_property,halo_type)
+
+        idx_both_positive = ( (type_fraction > 0) & (inflection > 0) )
 
         conformity_case_ratio[idx_both_positive] = (
-            self.mean_quenched_fraction_centrals(
-                primary_halo_property[idx_both_positive],halo_type[idx_both_positive]) / 
-            (self.halo_type_fraction_centrals(primary_halo_property[idx_both_positive],halo_type[idx_both_positive])*
-                self.inflection_centrals(primary_halo_property[idx_both_positive],halo_type[idx_both_positive]))
+            quenched_fraction[idx_both_positive] / 
+                (inflection[idx_both_positive]*type_fraction[idx_both_positive])
             )
 
         return conformity_case_ratio 
@@ -2470,7 +2462,7 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         # Initialize array containing result to return
         output_conformity = np.zeros(len(primary_halo_property))
 
-        all_ones = np.zeros(len(primary_halo_property)) + 1
+        all_ones = np.ones(len(primary_halo_property))
 
         # Start by ignoring the input halo_type, and  
         # assuming the halo_type = 1 for all inputs.
@@ -2499,12 +2491,18 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         # the unconstrained conformity function and the halo_type function 
         # are both independently specified by user-supplied subclasses.  
         ###
-        # NOTE: This may need to have an additional condition for Fq = 1 cases.
-        ###
         probability_type1 = self.halo_type_fraction_centrals(
             primary_halo_property,all_ones)
-        test_unit_probability = (probability_type1 == 1)
-        output_conformity[test_unit_probability] = 1
+        idx_trivial_probability = (probability_type1 == 0) | (probability_type1 == 1)
+
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_centrals(
+            primary_halo_property,all_ones)
+            )
+        idx_trivial_quenching = (baseline_quenched_fraction == 1)
+
+        output_conformity[idx_trivial_probability] = 1
+        output_conformity[idx_trivial_quenching] = 1
 
         ########################################
         # At this point, output_conformity has been properly conditioned. 
@@ -2516,10 +2514,10 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
         probability_type1_input_halo_type0 = probability_type1[idx0]
         probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
-        # Whenever the fraction of halos of type=0 is zero, the inflection function 
-        # for type0 halos should be set to zero.
+        # Whenever the fraction of halos of type=0 is zero, the conformity function 
+        # for type0 halos should be set to unity.
         test_zero = (probability_type0_input_halo_type0 == 0)
-        output_conformity_input_halo_type0[test_zero] = 0
+        output_conformity_input_halo_type0[test_zero] = 1
 
         # For non-trivial cases, define the type0 conformity function 
         # in terms of the type1 conformity function in such a way that 
@@ -2529,7 +2527,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
             (1.0 - output_conformity_input_halo_type0[test_positive]*
                 probability_type1_input_halo_type0[test_positive])/
             probability_type0_input_halo_type0[test_positive])
-
 
         # Now write the results back to the output 
         output_conformity[idx0] = output_conformity_input_halo_type0
@@ -2545,14 +2542,15 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         conformity_case_ratio = np.ones(len(primary_halo_property))
 
-        idx_both_positive = ( (self.halo_type_fraction_satellites(primary_halo_property,halo_type) > 0) & 
-            self.inflection_satellites(primary_halo_property,halo_type) > 0 )
+        inflection = self.inflection_satellites(primary_halo_property,halo_type)
+        type_fraction = self.halo_type_fraction_satellites(primary_halo_property,halo_type)
+        quenched_fraction = self.mean_quenched_fraction_satellites(primary_halo_property,halo_type)
+
+        idx_both_positive = ( (type_fraction > 0) & (inflection > 0) )
 
         conformity_case_ratio[idx_both_positive] = (
-            self.mean_quenched_fraction_satellites(
-                primary_halo_property[idx_both_positive],halo_type[idx_both_positive]) / 
-            (self.halo_type_fraction_satellites(primary_halo_property[idx_both_positive],halo_type[idx_both_positive])*
-                self.inflection_satellites(primary_halo_property[idx_both_positive],halo_type[idx_both_positive]))
+            quenched_fraction[idx_both_positive] / 
+                (inflection[idx_both_positive]*type_fraction[idx_both_positive])
             )
 
         return conformity_case_ratio 
@@ -2665,7 +2663,7 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         # Initialize array containing result to return
         output_conformity = np.zeros(len(primary_halo_property))
 
-        all_ones = np.zeros(len(primary_halo_property)) + 1
+        all_ones = np.ones(len(primary_halo_property))
 
         # Start by ignoring the input halo_type, and  
         # assuming the halo_type = 1 for all inputs.
@@ -2694,12 +2692,18 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         # the unconstrained conformity function and the halo_type function 
         # are both independently specified by user-supplied subclasses.  
         ###
-        # NOTE: This may need to have an additional condition for Fq = 1 cases.
-        ###
         probability_type1 = self.halo_type_fraction_satellites(
             primary_halo_property,all_ones)
-        test_unit_probability = (probability_type1 == 1)
-        output_conformity[test_unit_probability] = 1
+        idx_trivial_probability = (probability_type1 == 0) | (probability_type1 == 1)
+
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_satellites(
+            primary_halo_property,all_ones)
+            )
+        idx_trivial_quenching = (baseline_quenched_fraction == 1)
+
+        output_conformity[idx_trivial_probability] = 1
+        output_conformity[idx_trivial_quenching] = 1
 
         ########################################
         # At this point, output_conformity has been properly conditioned. 
@@ -2711,10 +2715,10 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
         probability_type1_input_halo_type0 = probability_type1[idx0]
         probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
-        # Whenever the fraction of halos of type=0 is zero, the inflection function 
-        # for type0 halos should be set to zero.
+        # Whenever the fraction of halos of type=0 is zero, the conformity function 
+        # for type0 halos should be set to unity.
         test_zero = (probability_type0_input_halo_type0 == 0)
-        output_conformity_input_halo_type0[test_zero] = 0
+        output_conformity_input_halo_type0[test_zero] = 1
 
         # For non-trivial cases, define the type0 conformity function 
         # in terms of the type1 conformity function in such a way that 
@@ -2725,12 +2729,59 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
                 probability_type1_input_halo_type0[test_positive])/
             probability_type0_input_halo_type0[test_positive])
 
-
         # Now write the results back to the output 
         output_conformity[idx0] = output_conformity_input_halo_type0
 
         return output_conformity
 
+
+    def mean_quenched_fraction_centrals(self,primary_halo_property,halo_type):
+        """ Override the baseline HOD method used to compute central quenched fraction. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        quenched_fraction : array_like
+            :math:`h_{i}`-conditioned central quenched fraction as a function of the primary halo property :math:`p`.
+
+        :math:`F_{Q}^{cen}(p | h_{i}) = \\mathcal{C}_{cen}(p | h_{i})F_{Q}^{cen}(p)`
+
+        """
+        return self.conformity_centrals(primary_halo_property,halo_type)*(
+            self.baseline_hod_model.mean_quenched_fraction_centrals(primary_halo_property,halo_type))
+
+    def mean_quenched_fraction_satellites(self,primary_halo_property,halo_type):
+        """ Override the baseline HOD method used to compute satellite quenched fraction. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        quenched_fraction : array_like
+            :math:`h_{i}`-conditioned central quenched fraction as a function of the primary halo property :math:`p`.
+
+        :math:`F_{Q}^{sat}(p | h_{i}) = \\mathcal{C}_{sat}(p | h_{i})F_{Q}^{sat}(p)`
+
+        """
+        return self.conformity_satellites(primary_halo_property,halo_type)*(
+            self.baseline_hod_model.mean_quenched_fraction_satellites(primary_halo_property,halo_type))
 
 
 """
