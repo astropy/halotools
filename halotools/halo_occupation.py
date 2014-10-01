@@ -2025,7 +2025,9 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         quenching_parameter_dict=None):
 
 
-        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
+        baseline_hod_model_instance = (
+            baseline_hod_model(threshold=threshold,parameter_dict=baseline_hod_parameter_dict)
+            )
         if not isinstance(baseline_hod_model_instance,HOD_Model):
             raise TypeError(
                 "Input baseline_hod_model must be one of "
