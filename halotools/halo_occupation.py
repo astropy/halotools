@@ -2268,23 +2268,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         # and self.publication to []
         Assembias_HOD_Model.__init__(self)
 
-    @abstractmethod
-    def mean_quenched_fraction_centrals(self,primary_halo_property,halo_type):
-        """
-        Expected fraction of centrals that are quenched as a function of host halo mass logM.
-        A required method for any HOD_Quenching_Model object.
-        """
-        raise NotImplementedError(
-            "quenched_fraction_centrals is not implemented")
-
-    @abstractmethod
-    def mean_quenched_fraction_satellites(self,primary_halo_property,halo_type):
-        """
-        Expected fraction of satellites that are quenched as a function of host halo mass logM.
-        A required method for any HOD_Quenching_Model object.
-        """
-        raise NotImplementedError(
-            "quenched_fraction_satellites is not implemented")
 
     @abstractmethod
     def unconstrained_central_conformity_halo_type1(self,primary_halo_property):
@@ -2337,6 +2320,22 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         """
         The bounds on the conformity function depend on the other HOD model parameters.
         This function determines which case should be used in computing the conformity bounds.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        conformity_case_ratio : array_like 
+            Array giving the ratio that determines how maximum conformity is computed.
+
         """
 
         conformity_case_ratio = np.ones(len(primary_halo_property))
@@ -2375,7 +2374,7 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         Returns 
         -------
         output_maximum_conformity : array_like
-            Maximum allowed value of the inflection function, as pertains to centrals.
+            Maximum allowed value of the conformity function, as pertains to centrals.
 
         """
 
@@ -2454,6 +2453,21 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
     def conformity_centrals(primary_halo_property,halo_type):
         """
         Conformity function as pertains to centrals
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_conformity : array_like 
+            Array giving the multiple by which the mean quenched fraction is boosted.
         """
 
         idx0 = np.where(halo_type == 0)[0]
@@ -2538,6 +2552,22 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         """
         The bounds on the conformity function depend on the other HOD model parameters.
         This function determines which case should be used in computing the conformity bounds.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        conformity_case_ratio : array_like 
+            Array giving the ratio that determines how maximum conformity is computed.
+
         """
 
         conformity_case_ratio = np.ones(len(primary_halo_property))
@@ -2576,7 +2606,7 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         Returns 
         -------
         output_maximum_conformity : array_like
-            Maximum allowed value of the inflection function, as pertains to satellites.
+            Maximum allowed value of the conformity function, as pertains to satellites.
 
         """
 
@@ -2654,7 +2684,23 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
     def conformity_satellites(primary_halo_property,halo_type):
         """
-        Conformity function as pertains to satellites
+        Conformity function as pertains to satellites.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_conformity : array_like 
+            Array giving the multiple by which the mean quenched fraction is boosted.
+
         """
 
         idx0 = np.where(halo_type == 0)[0]
