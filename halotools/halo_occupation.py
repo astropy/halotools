@@ -2460,7 +2460,7 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         return output_minimum_conformity
 
 
-    def conformity_centrals(primary_halo_property,halo_type):
+    def conformity_centrals(self,primary_halo_property,halo_type):
         """
         Conformity function as pertains to centrals
 
@@ -2692,7 +2692,7 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         return output_minimum_conformity
 
 
-    def conformity_satellites(primary_halo_property,halo_type):
+    def conformity_satellites(self,primary_halo_property,halo_type):
         """
         Conformity function as pertains to satellites.
 

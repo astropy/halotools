@@ -63,8 +63,8 @@ default_occupation_assembias_parameters = {
 
 default_quenching_assembias_parameters = {
 	'quenching_assembias_abcissa' : [12,15],
-	'satellite_quenching_assembias_ordinates' : [0.05,0.05],
-	'central_quenching_assembias_ordinates' : [100,100]
+	'satellite_quenching_assembias_ordinates' : [1,1],
+	'central_quenching_assembias_ordinates' : [1,1.5]
 	}
 
 default_satcen_parameters = {
