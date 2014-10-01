@@ -1637,8 +1637,10 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembias_HOD_Model):
             baseline_hod_parameter_dict=None,threshold=None,
             assembias_parameter_dict=None):
 
+        baseline_hod_model_instance = (
+            baseline_hod_model(threshold=threshold,parameter_dict=baseline_hod_parameter_dict)
+            )
 
-        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
         if not isinstance(baseline_hod_model_instance,HOD_Model):
             raise TypeError(
                 "Input baseline_hod_model must be one of "
@@ -1794,7 +1796,9 @@ class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
             secondary_halo_property_satellites_key=defaults.default_assembias_key):
 
 
-        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
+        baseline_hod_model_instance = (
+            baseline_hod_model(threshold=threshold,parameter_dict=baseline_hod_parameter_dict)
+            )
         if not isinstance(baseline_hod_model_instance,HOD_Model):
             raise TypeError(
                 "Input baseline_hod_model must be one of "
