@@ -550,8 +550,8 @@ class HOD_mock(object):
 
         """
 
-        if not isinstance(self.halo_occupation_model,ho.HOD_Quenching_Model):
-            raise TypeError("input halo_occupation_model must be an instance of a supported HOD_Quenching_Model, or one if its derived subclasses")
+        #if not isinstance(self.halo_occupation_model,ho.HOD_Quenching_Model):
+        #    raise TypeError("input halo_occupation_model must be an instance of a supported HOD_Quenching_Model, or one if its derived subclasses")
 
         if galaxy_type == 'central':
             quenching_function = self.halo_occupation_model.mean_quenched_fraction_centrals

@@ -9,6 +9,7 @@ galaxies to halos using HOD-style models.
 __all__ = ['HOD_Model','Zheng07_HOD_Model','Leauthaud11_SHMR_Model','Toy_HOD_Model','Assembias_HOD_Model',
 'HOD_Quenching_Model','vdB03_Quenching_Model','Assembias_HOD_Quenching_Model',
 'Satcen_Correlation_Polynomial_HOD_Model','Polynomial_Assembias_HOD_Model',
+'Polynomial_Assembias_HOD_Quenching_Model',
 'cumulative_NFW_PDF','anatoly_concentration','solve_for_polynomial_coefficients']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
@@ -270,12 +271,18 @@ class Zheng07_HOD_Model(HOD_Model):
 
     def __init__(self,parameter_dict=None,threshold=None):
         HOD_Model.__init__(self)
-        self.threshold = defaults.default_luminosity_threshold
+
+        self.threshold = threshold
+        if self.threshold==None:
+            warnings.warn("HOD threshold unspecified: setting to value defined in defaults.py")
+            self.threshold = defaults.default_luminosity_threshold
 
         self.publication.extend(['arXiv:0703457'])
 
         if parameter_dict is None:
-            self.parameter_dict = self.published_parameters(threshold)
+            self.parameter_dict = self.published_parameters()
+        else:
+            self.parameter_dict = parameter_dict
         self.require_correct_keys()
 
     @property 
@@ -389,7 +396,7 @@ class Zheng07_HOD_Model(HOD_Model):
         concentrations = anatoly_concentration(logM)
         return concentrations
 
-    def published_parameters(self,threshold=None):
+    def published_parameters(self):
         """
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
 
@@ -409,19 +416,6 @@ class Zheng07_HOD_Model(HOD_Model):
             agree with the values taken from Table 1 of Zheng et al. 2007.
 
         """
-
-        # Check to see whether a luminosity threshold has been specified
-        # If not, use Mr = -19.5 as the default choice, and alert the user
-        if threshold is None:
-            warnings.warn("HOD threshold unspecified: setting to value defined in defaults.py")
-            self.threshold = defaults.default_luminosity_threshold
-        else:
-            # If a threshold is specified, require that it is a sensible type
-            if isinstance(threshold,int) or isinstance(threshold,float):
-                self.threshold = float(threshold)                
-            else:
-                raise TypeError("Input luminosity threshold must be a scalar")
-
 
         #Load tabulated data from Zheng et al. 2007, Table 1
         logMmin_cen_array = [11.35,11.46,11.6,11.75,12.02,12.3,12.79,13.38,14.22]
@@ -453,7 +447,7 @@ class Zheng07_HOD_Model(HOD_Model):
         this method is used to enforce that the set of keys is in accord 
         with the set of keys required by the model. 
         """
-        correct_set_of_keys = set(self.published_parameters(threshold = -20).keys())
+        correct_set_of_keys = set(self.published_parameters().keys())
         if set(self.parameter_dict.keys()) != correct_set_of_keys:
             raise TypeError("Set of keys of input parameter_dict do not match the set of keys required by the model")
         pass
@@ -1635,8 +1629,10 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembias_HOD_Model):
             baseline_hod_parameter_dict=None,threshold=None,
             assembias_parameter_dict=None):
 
+        baseline_hod_model_instance = (
+            baseline_hod_model(threshold=threshold,parameter_dict=baseline_hod_parameter_dict)
+            )
 
-        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
         if not isinstance(baseline_hod_model_instance,HOD_Model):
             raise TypeError(
                 "Input baseline_hod_model must be one of "
@@ -1767,6 +1763,7 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembias_HOD_Model):
         return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
 
     def require_correct_keys(self,assembias_parameter_dict):
+        # What is the purpose of using "set" here? The .keys() method never returns duplicates
         correct_set_of_satcen_keys = set(defaults.default_satcen_parameters.keys())
         if set(assembias_parameter_dict.keys()) != correct_set_of_satcen_keys:
             raise TypeError("Set of keys of input assembias_parameter_dict"
@@ -1792,7 +1789,9 @@ class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
             secondary_halo_property_satellites_key=defaults.default_assembias_key):
 
 
-        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
+        baseline_hod_model_instance = (
+            baseline_hod_model(threshold=threshold,parameter_dict=baseline_hod_parameter_dict)
+            )
         if not isinstance(baseline_hod_model_instance,HOD_Model):
             raise TypeError(
                 "Input baseline_hod_model must be one of "
@@ -1817,7 +1816,7 @@ class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
         self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
 
         if assembias_parameter_dict == None:
-            self.assembias_parameter_dict = defaults.default_assembias_parameters
+            self.assembias_parameter_dict = defaults.default_occupation_assembias_parameters
         else:
             # If the user supplies a dictionary of assembly bias parameters, 
             # require that the set of keys is correct
@@ -1935,7 +1934,7 @@ class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
         return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
 
     def require_correct_keys(self,assembias_parameter_dict):
-        correct_set_of_assembias_keys = set(defaults.default_assembias_parameters.keys())
+        correct_set_of_assembias_keys = set(defaults.default_occupation_assembias_parameters.keys())
         if set(assembias_parameter_dict.keys()) != correct_set_of_assembias_keys:
             raise TypeError("Set of keys of input assembias_parameter_dict"
             " does not match the set of keys required by the model." 
@@ -2019,7 +2018,18 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         quenching_parameter_dict=None):
 
 
-        baseline_hod_model_instance = baseline_hod_model(threshold=threshold)
+        # Executing the __init__ of the abstract base class HOD_Quenching_Model 
+        # does nothing besides executing the __init__ of the abstract base class HOD_Model 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        # sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []        
+        HOD_Quenching_Model.__init__(self)
+
+        baseline_hod_model_instance = (
+            baseline_hod_model(
+                threshold=threshold,
+                parameter_dict=baseline_hod_parameter_dict)
+            )
         if not isinstance(baseline_hod_model_instance,HOD_Model):
             raise TypeError(
                 "Input baseline_hod_model must be one of "
@@ -2030,14 +2040,8 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         self._baseline_hod_model = baseline_hod_model_instance
         self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
 
-        self.threshold = threshold
+        self.threshold = self._baseline_hod_model.threshold
 
-        # Executing the __init__ of the abstract base class HOD_Quenching_Model 
-        # does nothing besides executing the __init__ of the abstract base class HOD_Model 
-        # Executing the __init__ of the abstract base class HOD_Model 
-        # sets self.parameter_dict to None, self.threshold to None, 
-        # and self.publication to []        
-        HOD_Quenching_Model.__init__(self)
 
         self.publication.extend(self._baseline_hod_model.publication)
         self.publication.extend(['arXiv:0210495v3'])
@@ -2268,23 +2272,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         # and self.publication to []
         Assembias_HOD_Model.__init__(self)
 
-    @abstractmethod
-    def mean_quenched_fraction_centrals(self,logM,halo_type):
-        """
-        Expected fraction of centrals that are quenched as a function of host halo mass logM.
-        A required method for any HOD_Quenching_Model object.
-        """
-        raise NotImplementedError(
-            "quenched_fraction_centrals is not implemented")
-
-    @abstractmethod
-    def mean_quenched_fraction_satellites(self,logM,halo_type):
-        """
-        Expected fraction of satellites that are quenched as a function of host halo mass logM.
-        A required method for any HOD_Quenching_Model object.
-        """
-        raise NotImplementedError(
-            "quenched_fraction_satellites is not implemented")
 
     @abstractmethod
     def unconstrained_central_conformity_halo_type1(self,primary_halo_property):
@@ -2308,7 +2295,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         """
         raise NotImplementedError(
             "unconstrained_central_conformity_halo_type1 is not implemented")
-        pass
 
 
     @abstractmethod
@@ -2333,10 +2319,49 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
         """
         raise NotImplementedError(
             "unconstrained_central_conformity_halo_type1 is not implemented")
-        pass
+
+    def conformity_case_ratio_centrals(self,primary_halo_property,halo_type):
+        """
+        The bounds on the conformity function depend on the other HOD model parameters.
+        This function determines which case should be used in computing the conformity bounds.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        conformity_case_ratio : array_like 
+            Array giving the ratio that determines how maximum conformity is computed.
+
+        """
+
+        conformity_case_ratio = np.ones(len(primary_halo_property))
+
+        inflection = self.inflection_centrals(primary_halo_property,halo_type)
+        type_fraction = self.halo_type_fraction_centrals(primary_halo_property,halo_type)
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_centrals(
+                primary_halo_property,halo_type)
+            )
+
+        idx_both_positive = ( (type_fraction > 0) & (inflection > 0) )
+
+        conformity_case_ratio[idx_both_positive] = (
+            baseline_quenched_fraction[idx_both_positive] / 
+                (inflection[idx_both_positive]*type_fraction[idx_both_positive])
+            )
+
+        return conformity_case_ratio 
 
     def maximum_conformity_centrals(self,primary_halo_property,halo_type):
-        """ The maximum allowed value of the inflection function, as pertains to centrals.
+        """ The maximum allowed value of the conformity function, as pertains to centrals.
 
         The combinatorics of assembly-biased HODs are such that 
         the conformity function :math:`\\mathcal{C}_{cen_{Q}}(p | h_{i})` can exceed neither 
@@ -2355,11 +2380,36 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         Returns 
         -------
-        output_maximum_inflection : array_like
-            Maximum allowed value of the inflection function, as pertains to centrals.
+        output_maximum_conformity : array_like
+            Maximum allowed value of the conformity function, as pertains to centrals.
 
         """
-        pass
+
+        output_maximum_conformity = np.zeros(len(primary_halo_property))
+
+        conformity_case_ratio = self.conformity_case_ratio_centrals(primary_halo_property,halo_type)
+
+        inflection = self.inflection_centrals(primary_halo_property,halo_type)
+        halo_type_fraction = self.halo_type_fraction_centrals(primary_halo_property,halo_type)
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_centrals(
+                primary_halo_property,halo_type))
+
+        idx_nontrivial_case1 = (
+            (conformity_case_ratio < 1) & 
+            (inflection > 0) & (halo_type_fraction > 0) )
+
+        output_maximum_conformity[idx_nontrivial_case1] = (1. / 
+            (inflection[idx_nontrivial_case1]*halo_type_fraction[idx_nontrivial_case1])
+            )
+
+        idx_nontrivial_case2 = (
+            (conformity_case_ratio >= 1) & (baseline_quenched_fraction > 0) )
+
+        output_maximum_conformity[idx_nontrivial_case2] = 1. / baseline_quenched_fraction[idx_nontrivial_case2]
+
+        return output_maximum_conformity
+
 
     def minimum_conformity_centrals(self,primary_halo_property,halo_type):
         """ The minimum allowed value of the inflection function, as pertains to centrals.
@@ -2385,12 +2435,638 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
 
         """
-        pass
+        output_minimum_conformity = np.zeros(len(primary_halo_property))
+
+        opposite_halo_type = np.zeros(len(halo_type))
+        opposite_halo_type[halo_type==0] = 1
+
+        inflection = self.inflection_centrals(primary_halo_property,halo_type)
+        halo_type_fraction = self.halo_type_fraction_centrals(primary_halo_property,halo_type)
+
+        opposite_inflection = self.inflection_centrals(primary_halo_property,opposite_halo_type)
+        opposite_halo_type_fraction = self.halo_type_fraction_centrals(primary_halo_property,opposite_halo_type)
+        opposite_maximum_conformity = self.maximum_conformity_centrals(primary_halo_property,opposite_halo_type)
+
+        idx_nontrivial_case = ( (inflection > 0) & (halo_type_fraction > 0) )
+
+        output_minimum_conformity[idx_nontrivial_case] = (
+            (1. - (opposite_halo_type_fraction[idx_nontrivial_case]*
+                opposite_halo_type_fraction[idx_nontrivial_case]*
+                opposite_maximum_conformity[idx_nontrivial_case])) / (
+            inflection[idx_nontrivial_case]*halo_type_fraction[idx_nontrivial_case])
+                )
+
+        return output_minimum_conformity
 
 
+    def conformity_centrals(self,primary_halo_property,halo_type):
+        """
+        Conformity function as pertains to centrals
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_conformity : array_like 
+            Array giving the multiple by which the mean quenched fraction is boosted.
+        """
+
+        idx0 = np.where(halo_type == 0)[0]
+        idx1 = np.where(halo_type == 1)[0]
+
+        # Initialize array containing result to return
+        output_conformity = np.zeros(len(primary_halo_property))
+
+        all_ones = np.ones(len(primary_halo_property))
+
+        # Start by ignoring the input halo_type, and  
+        # assuming the halo_type = 1 for all inputs.
+        # This is convenient and costs nothing, 
+        # since the halo_type = 0 branch 
+        # is defined in terms of the halo_type = 1 branch.
+        output_conformity = (
+            self.unconstrained_central_conformity_halo_type1(
+                primary_halo_property))
+        ########################################
+        # Now apply the baseline HOD constraints to output_conformity, 
+        # still behaving as if every input halo has halo_type=1
+        maximum = self.maximum_conformity_centrals(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_conformity > maximum
+        output_conformity[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Next, require that the conformity function never falls below 
+        # its minimum allowed value. This guarantees that ... 
+        minimum = self.minimum_conformity_centrals(primary_halo_property,all_ones)
+        test_below_minimum = output_conformity < minimum
+        output_conformity[test_below_minimum] = minimum[test_below_minimum]
+        # Finally, require that the conformity function is set to unity 
+        # whenever the probability of halo_type=1 equals unity
+        # This requirement supercedes the previous two, and ensures that 
+        # the conformity inflection in h1-halos will be ignored in cases 
+        # where there are no h0-halos. This self-consistency condition is necessary because 
+        # the unconstrained conformity function and the halo_type function 
+        # are both independently specified by user-supplied subclasses.  
+        ###
+        probability_type1 = self.halo_type_fraction_centrals(
+            primary_halo_property,all_ones)
+        idx_trivial_probability = (probability_type1 == 0) | (probability_type1 == 1)
+
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_centrals(
+            primary_halo_property,all_ones)
+            )
+        idx_trivial_quenching = (baseline_quenched_fraction == 1)
+
+        output_conformity[idx_trivial_probability] = 1
+        output_conformity[idx_trivial_quenching] = 1
+
+        ########################################
+        # At this point, output_conformity has been properly conditioned. 
+        # However, we have been assuming that all input halo_type = 1.
+        # We now need to compute the correct output 
+        # for cases where input halo_type = 0.
+        # Define some shorthands (bookkeeping convenience)
+        output_conformity_input_halo_type0 = output_conformity[idx0]
+        primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
+        probability_type1_input_halo_type0 = probability_type1[idx0]
+        probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
+        # Whenever the fraction of halos of type=0 is zero, the conformity function 
+        # for type0 halos should be set to unity.
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_conformity_input_halo_type0[test_zero] = 1
+
+        # For non-trivial cases, define the type0 conformity function 
+        # in terms of the type1 conformity function in such a way that 
+        # the baseline HOD will be unadulterated by assembly bias
+        test_positive = (probability_type0_input_halo_type0 > 0)
+        output_conformity_input_halo_type0[test_positive] = (
+            (1.0 - output_conformity_input_halo_type0[test_positive]*
+                probability_type1_input_halo_type0[test_positive])/
+            probability_type0_input_halo_type0[test_positive])
+
+        # Now write the results back to the output 
+        output_conformity[idx0] = output_conformity_input_halo_type0
+
+        return output_conformity
 
 
+    def conformity_case_ratio_satellites(self,primary_halo_property,halo_type):
+        """
+        The bounds on the conformity function depend on the other HOD model parameters.
+        This function determines which case should be used in computing the conformity bounds.
 
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        conformity_case_ratio : array_like 
+            Array giving the ratio that determines how maximum conformity is computed.
+
+        """
+
+        conformity_case_ratio = np.ones(len(primary_halo_property))
+
+        inflection = self.inflection_satellites(primary_halo_property,halo_type)
+        type_fraction = self.halo_type_fraction_satellites(primary_halo_property,halo_type)
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_satellites(primary_halo_property,halo_type))
+
+        idx_both_positive = ( (type_fraction > 0) & (inflection > 0) )
+
+        conformity_case_ratio[idx_both_positive] = (
+            baseline_quenched_fraction[idx_both_positive] / 
+                (inflection[idx_both_positive]*type_fraction[idx_both_positive])
+            )
+
+        return conformity_case_ratio 
+
+    def maximum_conformity_satellites(self,primary_halo_property,halo_type):
+        """ The maximum allowed value of the conformity function, as pertains to satellites.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the conformity function :math:`\\mathcal{C}_{cen_{Q}}(p | h_{i})` can exceed neither 
+        :math:`1 / \\mathcal{I}_{cen}(p | h_{i})P_{h_{i}}(p)`, 
+        nor :math:`1 / F_{cen_{Q}}(p | h_{i})`. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_maximum_conformity : array_like
+            Maximum allowed value of the conformity function, as pertains to satellites.
+
+        """
+
+        output_maximum_conformity = np.zeros(len(primary_halo_property))
+
+        conformity_case_ratio = self.conformity_case_ratio_satellites(primary_halo_property,halo_type)
+
+        inflection = self.inflection_satellites(primary_halo_property,halo_type)
+        halo_type_fraction = self.halo_type_fraction_satellites(primary_halo_property,halo_type)
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_satellites(primary_halo_property,halo_type))
+
+        idx_nontrivial_case1 = (
+            (conformity_case_ratio < 1) & 
+            (inflection > 0) & (halo_type_fraction > 0) )
+
+        output_maximum_conformity[idx_nontrivial_case1] = (1. / 
+            (inflection[idx_nontrivial_case1]*halo_type_fraction[idx_nontrivial_case1])
+            )
+
+        idx_nontrivial_case2 = (
+            (conformity_case_ratio >= 1) & (baseline_quenched_fraction > 0) )
+
+        output_maximum_conformity[idx_nontrivial_case2] = 1. / baseline_quenched_fraction[idx_nontrivial_case2]
+
+        return output_maximum_conformity
+
+
+    def minimum_conformity_satellites(self,primary_halo_property,halo_type):
+        """ The minimum allowed value of the inflection function, as pertains to satellites.
+
+        The combinatorics of assembly-biased HODs are such that 
+        the conformity function :math:`\\mathcal{C}_{cen_{Q}}(p | h_{0,1})` 
+        must exceed both a and b.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_minimum_conformity : array_like
+            Minimum allowed value of the conformity function, as pertains to satellites.
+
+
+        """
+        output_minimum_conformity = np.zeros(len(primary_halo_property))
+
+        opposite_halo_type = np.zeros(len(halo_type))
+        opposite_halo_type[halo_type==0] = 1
+
+        inflection = self.inflection_satellites(primary_halo_property,halo_type)
+        halo_type_fraction = self.halo_type_fraction_satellites(primary_halo_property,halo_type)
+
+        opposite_inflection = self.inflection_satellites(primary_halo_property,opposite_halo_type)
+        opposite_halo_type_fraction = self.halo_type_fraction_satellites(primary_halo_property,opposite_halo_type)
+        opposite_maximum_conformity = self.maximum_conformity_satellites(primary_halo_property,opposite_halo_type)
+
+        idx_nontrivial_case = ( (inflection > 0) & (halo_type_fraction > 0) )
+
+        output_minimum_conformity[idx_nontrivial_case] = (
+            (1. - (opposite_halo_type_fraction[idx_nontrivial_case]*
+                opposite_halo_type_fraction[idx_nontrivial_case]*
+                opposite_maximum_conformity[idx_nontrivial_case])) / (
+            inflection[idx_nontrivial_case]*halo_type_fraction[idx_nontrivial_case])
+                )
+
+        return output_minimum_conformity
+
+
+    def conformity_satellites(self,primary_halo_property,halo_type):
+        """
+        Conformity function as pertains to satellites.
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        output_conformity : array_like 
+            Array giving the multiple by which the mean quenched fraction is boosted.
+
+        """
+
+        idx0 = np.where(halo_type == 0)[0]
+        idx1 = np.where(halo_type == 1)[0]
+
+        # Initialize array containing result to return
+        output_conformity = np.zeros(len(primary_halo_property))
+
+        all_ones = np.ones(len(primary_halo_property))
+
+        # Start by ignoring the input halo_type, and  
+        # assuming the halo_type = 1 for all inputs.
+        # This is convenient and costs nothing, 
+        # since the halo_type = 0 branch 
+        # is defined in terms of the halo_type = 1 branch.
+        output_conformity = (
+            self.unconstrained_satellite_conformity_halo_type1(
+                primary_halo_property))
+        ########################################
+        # Now apply the baseline HOD constraints to output_conformity, 
+        # still behaving as if every input halo has halo_type=1
+        maximum = self.maximum_conformity_satellites(primary_halo_property,all_ones)
+        test_exceeds_maximum = output_conformity > maximum
+        output_conformity[test_exceeds_maximum] = maximum[test_exceeds_maximum]
+        # Next, require that the conformity function never falls below 
+        # its minimum allowed value. This guarantees that ... 
+        minimum = self.minimum_conformity_satellites(primary_halo_property,all_ones)
+        test_below_minimum = output_conformity < minimum
+        output_conformity[test_below_minimum] = minimum[test_below_minimum]
+        # Finally, require that the conformity function is set to unity 
+        # whenever the probability of halo_type=1 equals unity
+        # This requirement supercedes the previous two, and ensures that 
+        # the conformity inflection in h1-halos will be ignored in cases 
+        # where there are no h0-halos. This self-consistency condition is necessary because 
+        # the unconstrained conformity function and the halo_type function 
+        # are both independently specified by user-supplied subclasses.  
+        ###
+        probability_type1 = self.halo_type_fraction_satellites(
+            primary_halo_property,all_ones)
+        idx_trivial_probability = (probability_type1 == 0) | (probability_type1 == 1)
+
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_satellites(
+            primary_halo_property,all_ones)
+            )
+        idx_trivial_quenching = (baseline_quenched_fraction == 1)
+
+        output_conformity[idx_trivial_probability] = 1
+        output_conformity[idx_trivial_quenching] = 1
+
+        ########################################
+        # At this point, output_conformity has been properly conditioned. 
+        # However, we have been assuming that all input halo_type = 1.
+        # We now need to compute the correct output 
+        # for cases where input halo_type = 0.
+        # Define some shorthands (bookkeeping convenience)
+        output_conformity_input_halo_type0 = output_conformity[idx0]
+        primary_halo_property_input_halo_type0 = primary_halo_property[idx0]
+        probability_type1_input_halo_type0 = probability_type1[idx0]
+        probability_type0_input_halo_type0 = 1.0 - probability_type1_input_halo_type0
+        # Whenever the fraction of halos of type=0 is zero, the conformity function 
+        # for type0 halos should be set to unity.
+        test_zero = (probability_type0_input_halo_type0 == 0)
+        output_conformity_input_halo_type0[test_zero] = 1
+
+        # For non-trivial cases, define the type0 conformity function 
+        # in terms of the type1 conformity function in such a way that 
+        # the baseline HOD will be unadulterated by assembly bias
+        test_positive = (probability_type0_input_halo_type0 > 0)
+        output_conformity_input_halo_type0[test_positive] = (
+            (1.0 - output_conformity_input_halo_type0[test_positive]*
+                probability_type1_input_halo_type0[test_positive])/
+            probability_type0_input_halo_type0[test_positive])
+
+        # Now write the results back to the output 
+        output_conformity[idx0] = output_conformity_input_halo_type0
+
+        return output_conformity
+
+
+    def mean_quenched_fraction_centrals(self,primary_halo_property,halo_type):
+        """ Override the baseline HOD method used to compute central quenched fraction. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        quenched_fraction : array_like
+            :math:`h_{i}`-conditioned central quenched fraction as a function of the primary halo property :math:`p`.
+
+        :math:`F_{Q}^{cen}(p | h_{i}) = \\mathcal{C}_{cen}(p | h_{i})F_{Q}^{cen}(p)`
+
+        """
+        return self.conformity_centrals(primary_halo_property,halo_type)*(
+            self.baseline_hod_model.mean_quenched_fraction_centrals(primary_halo_property,halo_type))
+
+    def mean_quenched_fraction_satellites(self,primary_halo_property,halo_type):
+        """ Override the baseline HOD method used to compute satellite quenched fraction. 
+
+        Parameters 
+        ----------
+        halo_type : array_like
+            Array with elements equal to 0 or 1, specifying the type of the halo 
+            whose fractional representation is being returned.
+
+        primary_halo_property : array_like
+            Array with elements equal to the primary_halo_property at which 
+            the fractional representation of the halos of input halo_type is being returned.
+
+        Returns 
+        -------
+        quenched_fraction : array_like
+            :math:`h_{i}`-conditioned central quenched fraction as a function of the primary halo property :math:`p`.
+
+        :math:`F_{Q}^{sat}(p | h_{i}) = \\mathcal{C}_{sat}(p | h_{i})F_{Q}^{sat}(p)`
+
+        """
+        return self.conformity_satellites(primary_halo_property,halo_type)*(
+            self.baseline_hod_model.mean_quenched_fraction_satellites(primary_halo_property,halo_type))
+
+
+class Polynomial_Assembias_HOD_Quenching_Model(Assembias_HOD_Quenching_Model):
+    """ Concrete subclass of `Assembias_HOD_Model`. 
+
+    In this model, both galaxy abundances and quenched fractions exhibit assembly bias, 
+    where some secondary host halo property modulates the mean galaxy abundance. 
+    The assembly bias effect is set by explicitly specifing its strength 
+    at specific values of the primary halo property. 
+
+    """
+
+    def __init__(self,
+        baseline_hod_quenching_model=vdB03_Quenching_Model,
+        baseline_hod_quenching_parameter_dict=None,
+        baseline_hod_model=Zheng07_HOD_Model,
+        baseline_hod_parameter_dict=None,
+        threshold=defaults.default_luminosity_threshold,
+        occupation_assembias_parameter_dict=None,quenching_assembias_parameter_dict=None,
+        secondary_halo_property_centrals_key=defaults.default_assembias_key,
+        secondary_halo_property_satellites_key=defaults.default_assembias_key):
+
+        baseline_hod_quenching_model_instance = (
+            baseline_hod_quenching_model(baseline_hod_model=baseline_hod_model,
+                threshold=threshold,baseline_hod_parameter_dict=baseline_hod_parameter_dict)
+            )
+        if not isinstance(baseline_hod_quenching_model_instance,HOD_Quenching_Model):
+            raise TypeError(
+                "Input baseline_hod_quenching_model must be one of "
+                "the supported HOD_Quenching_Model objects defined in this module or by the user")
+        # Temporarily store the baseline HOD quenching model object
+        # into a "private" attribute. This is a clunky workaround
+        # to python's awkward conventions for required abstract properties
+        self._baseline_hod_model = baseline_hod_quenching_model_instance
+        self._secondary_halo_property_centrals_key = secondary_halo_property_centrals_key
+        self._secondary_halo_property_satellites_key = secondary_halo_property_satellites_key
+
+        # Executing the __init__ of the abstract base class Assembias_HOD_Quenching_Model  
+        # does nothing besides executing the __init__ of the abstract base class Assembias_HOD_Model, 
+        # which in turn does nothing besides execute the __init__ of the abstract base class HOD_Model. 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        # sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []        
+        Assembias_HOD_Quenching_Model.__init__(self)
+
+
+        # The following line should probably instead be self.threshold = self._baseline_hod_model.threshold
+        # Leave as is for now, but when I fix this, fix it everywhere
+        self.threshold = threshold 
+        self.publication.extend(self._baseline_hod_model.publication)
+        self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
+
+
+        if occupation_assembias_parameter_dict == None:
+            self.occupation_assembias_parameter_dict = defaults.default_occupation_assembias_parameters
+        else:
+            self.occupation_assembias_parameter_dict = occupation_assembias_parameter_dict
+
+        if quenching_assembias_parameter_dict == None:
+            self.quenching_assembias_parameter_dict = defaults.default_quenching_assembias_parameters
+        else:
+            self.quenching_assembias_parameter_dict = quenching_assembias_parameter_dict
+
+        # combine occupation assembias parameters and quenching assembias parameters
+        # into the same dictionary
+        self.assembias_parameter_dict = dict(
+            self.occupation_assembias_parameter_dict.items() + 
+            self.quenching_assembias_parameter_dict.items()
+            )
+            # require that the set of keys is correct
+        self.require_correct_keys(self.assembias_parameter_dict)
+
+        self.parameter_dict = dict(
+            self.baseline_hod_parameter_dict.items() + 
+            self.assembias_parameter_dict.items()
+            )
+
+
+# Note that this is only checking correct keys for the assembly bias parameter dictionary
+    def require_correct_keys(self,assembias_parameter_dict):
+        """ If the init constructor is passed an input parameter dictionary, 
+        verify that the keys are correct."""
+
+        correct_set_of_occupation_keys = defaults.default_occupation_assembias_parameters.keys()
+        correct_set_of_quenching_keys = defaults.default_quenching_assembias_parameters.keys()
+        correct_set_of_keys = correct_set_of_occupation_keys + correct_set_of_quenching_keys
+        if set(assembias_parameter_dict.keys()) != set(correct_set_of_keys):
+            raise TypeError("Set of keys of input assembias_parameter_dict"
+            " does not match the set of keys required by the model." 
+            " Correct set of keys is {'assembias_abcissa', "
+            "'satellite_assembias_ordinates', 'central_assembias_ordinates',"
+            "'quenching_assembias_abcissa', "
+            "'satellite_assembias_ordinates', 'central_assembias_ordinates'} ")
+        
+
+
+    @property
+    def baseline_hod_model(self):
+        return self._baseline_hod_model
+
+    @property 
+    def primary_halo_property_key(self):
+        return self.baseline_hod_model.primary_halo_property_key
+
+    @property 
+    def secondary_halo_property_centrals_key(self):
+        return self._secondary_halo_property_centrals_key
+
+    @property 
+    def secondary_halo_property_satellites_key(self):
+        return self._secondary_halo_property_satellites_key
+
+    def mean_concentration(self,primary_halo_property,halo_type):
+        """ Concentration-halo relation assumed by the underlying HOD_Model object.
+        The appropriate method is already bound to the self.baseline_hod_model object.
+
+        Parameters 
+        ----------
+        primary_halo_property : array_like
+            array of primary halo property governing the occupation statistics 
+
+        halo_type : array 
+            array of halo types. 
+
+        Returns 
+        -------
+        concentrations : numpy array
+
+        """
+
+        concentrations = (
+            self.baseline_hod_model.mean_concentration(
+                primary_halo_property,halo_type))
+        return concentrations
+
+
+##################################################
+########## The following lines of code are copied-and-pasted from 
+########## the Polynomial_Assembias_HOD_Model. This is bad practice.
+########## Figure out some new design so that both classes 
+########## can call the same methods, to avoid duplication.
+    def halo_type1_fraction_centrals(self,primary_halo_property):
+        """ Determines the fractional representation of host halo 
+        types as a function of the value of the primary halo property.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+        """
+        # In this model, centrals exhibit no assembly bias
+        # So simply set the halo type1 fraction to unity for centrals
+        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        output_fraction = self.unconstrained_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
+        test_negative = (output_fraction < 0)
+        output_fraction[test_negative] = 0
+        test_exceeds_unity = (output_fraction > 1)
+        output_fraction[test_exceeds_unity] = 1
+        return output_fraction
+
+    def halo_type1_fraction_satellites(self,primary_halo_property):
+        """ Determines the fractional representation of host halo 
+        types as a function of the value of the primary halo property.
+
+        Halo types can be either given by fixed-Mvir rank-orderings 
+        of the host halos, or by the input occupation statistics functions.
+
+         """
+
+        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        output_fraction = self.unconstrained_polynomial_model(
+            abcissa,ordinates,primary_halo_property)
+        test_negative = (output_fraction < 0)
+        output_fraction[test_negative] = 0
+        test_exceeds_unity = (output_fraction > 1)
+        output_fraction[test_exceeds_unity] = 1
+        return output_fraction
+
+    def unconstrained_polynomial_model(self,abcissa,ordinates,primary_halo_property):
+        coefficient_array = solve_for_polynomial_coefficients(
+            abcissa,ordinates)
+        output_unconstrained_inflection_function = (
+            np.zeros(len(primary_halo_property)))
+
+        # Use coefficients to compute values of the inflection function polynomial
+        for n,coeff in enumerate(coefficient_array):
+            output_unconstrained_inflection_function += coeff*primary_halo_property**n
+
+        return output_unconstrained_inflection_function
+
+    def unconstrained_central_inflection_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['central_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+    def unconstrained_satellite_inflection_halo_type1(self,primary_halo_property):
+        abcissa = self.parameter_dict['assembias_abcissa']
+        ordinates = self.parameter_dict['satellite_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+##################################################
+
+
+    def unconstrained_central_conformity_halo_type1(self,primary_halo_property):
+        """ Method determining :math:`\\tilde{\\mathcal{C}}_{cen_{Q}}(p | h_{1})`, 
+        the unconstrained excess quenched fraction of centrals 
+        in halos of primary property :math:`p` and 
+        secondary property type :math:`h_{1}`.
+        """
+        abcissa = self.parameter_dict['quenching_assembias_abcissa']
+        ordinates = self.parameter_dict['central_quenching_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
+
+    def unconstrained_satellite_conformity_halo_type1(self,primary_halo_property):
+        """ Method determining :math:`\\tilde{\\mathcal{C}}_{cen_{Q}}(p | h_{1})`, 
+        the unconstrained excess quenched fraction of satellites 
+        in halos of primary property :math:`p` and 
+        secondary property type :math:`h_{1}`.
+        """
+        abcissa = self.parameter_dict['quenching_assembias_abcissa']
+        ordinates = self.parameter_dict['satellite_quenching_assembias_ordinates']
+
+        return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
 
 
 
