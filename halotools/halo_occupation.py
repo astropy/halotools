@@ -2919,6 +2919,9 @@ class Polynomial_Assembias_HOD_Quenching_Model(Assembias_HOD_Quenching_Model):
 
 # Note that this is only checking correct keys for the assembly bias parameter dictionary
     def require_correct_keys(self,assembias_parameter_dict):
+        """ If the init constructor is passed an input parameter dictionary, 
+        verify that the keys are correct."""
+
         correct_set_of_occupation_keys = defaults.default_occupation_assembias_parameters.keys()
         correct_set_of_quenching_keys = defaults.default_quenching_assembias_parameters.keys()
         correct_set_of_keys = correct_set_of_occupation_keys + correct_set_of_quenching_keys
@@ -2929,7 +2932,7 @@ class Polynomial_Assembias_HOD_Quenching_Model(Assembias_HOD_Quenching_Model):
             "'satellite_assembias_ordinates', 'central_assembias_ordinates',"
             "'quenching_assembias_abcissa', "
             "'satellite_assembias_ordinates', 'central_assembias_ordinates'} ")
-        pass
+        
 
 
     @property

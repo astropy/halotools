@@ -62,9 +62,9 @@ default_occupation_assembias_parameters = {
 	}
 
 default_quenching_assembias_parameters = {
-	'quenching_assembias_abcissa' : [12,15],
-	'satellite_quenching_assembias_ordinates' : [0.5,0.5],
-	'central_quenching_assembias_ordinates' : [2,2]
+	'quenching_assembias_abcissa' : [12,13.5,15],
+	'satellite_quenching_assembias_ordinates' : [0.05,0.05,100],
+	'central_quenching_assembias_ordinates' : [20,-20,20]
 	}
 
 default_satcen_parameters = {
@@ -74,12 +74,11 @@ default_satcen_parameters = {
 	}
 
 default_halo_type_split = {
-	'halo_type_split_abcissa' : [12],
-	'halo_type_split_ordinates' : [0.5]
+	'halo_type_split_abcissa' : [12,13,14,15],
+	'halo_type_split_ordinates' : [0.1,0.9,0.5,0.9]
 	}
 
 default_halo_type_calculator_spacing=0.1
-
 
 default_assembias_key = 'VMAX'
 
