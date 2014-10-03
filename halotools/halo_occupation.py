@@ -2018,8 +2018,17 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         quenching_parameter_dict=None):
 
 
+        # Executing the __init__ of the abstract base class HOD_Quenching_Model 
+        # does nothing besides executing the __init__ of the abstract base class HOD_Model 
+        # Executing the __init__ of the abstract base class HOD_Model 
+        # sets self.parameter_dict to None, self.threshold to None, 
+        # and self.publication to []        
+        HOD_Quenching_Model.__init__(self)
+
         baseline_hod_model_instance = (
-            baseline_hod_model(threshold=threshold,parameter_dict=baseline_hod_parameter_dict)
+            baseline_hod_model(
+                threshold=threshold,
+                parameter_dict=baseline_hod_parameter_dict)
             )
         if not isinstance(baseline_hod_model_instance,HOD_Model):
             raise TypeError(
@@ -2031,14 +2040,8 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         self._baseline_hod_model = baseline_hod_model_instance
         self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
 
-        self.threshold = threshold
+        self.threshold = self._baseline_hod_model.threshold
 
-        # Executing the __init__ of the abstract base class HOD_Quenching_Model 
-        # does nothing besides executing the __init__ of the abstract base class HOD_Model 
-        # Executing the __init__ of the abstract base class HOD_Model 
-        # sets self.parameter_dict to None, self.threshold to None, 
-        # and self.publication to []        
-        HOD_Quenching_Model.__init__(self)
 
         self.publication.extend(self._baseline_hod_model.publication)
         self.publication.extend(['arXiv:0210495v3'])
