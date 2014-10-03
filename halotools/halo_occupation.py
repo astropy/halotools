@@ -271,12 +271,16 @@ class Zheng07_HOD_Model(HOD_Model):
 
     def __init__(self,parameter_dict=None,threshold=None):
         HOD_Model.__init__(self)
-        self.threshold = defaults.default_luminosity_threshold
+
+        self.threshold = threshold
+        if self.threshold==None:
+            warnings.warn("HOD threshold unspecified: setting to value defined in defaults.py")
+            self.threshold = defaults.default_luminosity_threshold
 
         self.publication.extend(['arXiv:0703457'])
 
         if parameter_dict is None:
-            self.parameter_dict = self.published_parameters(threshold)
+            self.parameter_dict = self.published_parameters()
         else:
             self.parameter_dict = parameter_dict
         self.require_correct_keys()
@@ -392,7 +396,7 @@ class Zheng07_HOD_Model(HOD_Model):
         concentrations = anatoly_concentration(logM)
         return concentrations
 
-    def published_parameters(self,threshold=None):
+    def published_parameters(self):
         """
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
 
@@ -412,19 +416,6 @@ class Zheng07_HOD_Model(HOD_Model):
             agree with the values taken from Table 1 of Zheng et al. 2007.
 
         """
-
-        # Check to see whether a luminosity threshold has been specified
-        # If not, use Mr = -19.5 as the default choice, and alert the user
-        if threshold is None:
-            warnings.warn("HOD threshold unspecified: setting to value defined in defaults.py")
-            self.threshold = defaults.default_luminosity_threshold
-        else:
-            # If a threshold is specified, require that it is a sensible type
-            if isinstance(threshold,int) or isinstance(threshold,float):
-                self.threshold = float(threshold)                
-            else:
-                raise TypeError("Input luminosity threshold must be a scalar")
-
 
         #Load tabulated data from Zheng et al. 2007, Table 1
         logMmin_cen_array = [11.35,11.46,11.6,11.75,12.02,12.3,12.79,13.38,14.22]
@@ -456,7 +447,7 @@ class Zheng07_HOD_Model(HOD_Model):
         this method is used to enforce that the set of keys is in accord 
         with the set of keys required by the model. 
         """
-        correct_set_of_keys = set(self.published_parameters(threshold = -20).keys())
+        correct_set_of_keys = set(self.published_parameters().keys())
         if set(self.parameter_dict.keys()) != correct_set_of_keys:
             raise TypeError("Set of keys of input parameter_dict do not match the set of keys required by the model")
         pass
