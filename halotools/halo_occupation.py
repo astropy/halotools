@@ -2346,12 +2346,15 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         inflection = self.inflection_centrals(primary_halo_property,halo_type)
         type_fraction = self.halo_type_fraction_centrals(primary_halo_property,halo_type)
-        quenched_fraction = self.mean_quenched_fraction_centrals(primary_halo_property,halo_type)
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_centrals(
+                primary_halo_property,halo_type)
+            )
 
         idx_both_positive = ( (type_fraction > 0) & (inflection > 0) )
 
         conformity_case_ratio[idx_both_positive] = (
-            quenched_fraction[idx_both_positive] / 
+            baseline_quenched_fraction[idx_both_positive] / 
                 (inflection[idx_both_positive]*type_fraction[idx_both_positive])
             )
 
@@ -2388,7 +2391,9 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         inflection = self.inflection_centrals(primary_halo_property,halo_type)
         halo_type_fraction = self.halo_type_fraction_centrals(primary_halo_property,halo_type)
-        quenched_fraction = self.mean_quenched_fraction_centrals(primary_halo_property,halo_type)
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_centrals(
+                primary_halo_property,halo_type))
 
         idx_nontrivial_case1 = (
             (conformity_case_ratio < 1) & 
@@ -2399,9 +2404,9 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
             )
 
         idx_nontrivial_case2 = (
-            (conformity_case_ratio >= 1) & (quenched_fraction > 0) )
+            (conformity_case_ratio >= 1) & (baseline_quenched_fraction > 0) )
 
-        output_maximum_conformity[idx_nontrivial_case2] = 1. / quenched_fraction[idx_nontrivial_case2]
+        output_maximum_conformity[idx_nontrivial_case2] = 1. / baseline_quenched_fraction[idx_nontrivial_case2]
 
         return output_maximum_conformity
 
@@ -2578,12 +2583,13 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         inflection = self.inflection_satellites(primary_halo_property,halo_type)
         type_fraction = self.halo_type_fraction_satellites(primary_halo_property,halo_type)
-        quenched_fraction = self.mean_quenched_fraction_satellites(primary_halo_property,halo_type)
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_satellites(primary_halo_property,halo_type))
 
         idx_both_positive = ( (type_fraction > 0) & (inflection > 0) )
 
         conformity_case_ratio[idx_both_positive] = (
-            quenched_fraction[idx_both_positive] / 
+            baseline_quenched_fraction[idx_both_positive] / 
                 (inflection[idx_both_positive]*type_fraction[idx_both_positive])
             )
 
@@ -2620,7 +2626,8 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         inflection = self.inflection_satellites(primary_halo_property,halo_type)
         halo_type_fraction = self.halo_type_fraction_satellites(primary_halo_property,halo_type)
-        quenched_fraction = self.mean_quenched_fraction_satellites(primary_halo_property,halo_type)
+        baseline_quenched_fraction = (
+            self.baseline_hod_model.mean_quenched_fraction_satellites(primary_halo_property,halo_type))
 
         idx_nontrivial_case1 = (
             (conformity_case_ratio < 1) & 
@@ -2631,9 +2638,9 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
             )
 
         idx_nontrivial_case2 = (
-            (conformity_case_ratio >= 1) & (quenched_fraction > 0) )
+            (conformity_case_ratio >= 1) & (baseline_quenched_fraction > 0) )
 
-        output_maximum_conformity[idx_nontrivial_case2] = 1. / quenched_fraction[idx_nontrivial_case2]
+        output_maximum_conformity[idx_nontrivial_case2] = 1. / baseline_quenched_fraction[idx_nontrivial_case2]
 
         return output_maximum_conformity
 

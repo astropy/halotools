@@ -50,21 +50,21 @@ default_Npts_radius_array = 101
 ### Default values specifying traditional quenching model
 # Used by models in the halo_occupation module
 default_quenching_parameters = {
-    'quenching_abcissa' : [12,13.5,15],
-    'central_quenching_ordinates' : [0.35,0.7,0.95], #polynomial coefficients determining quenched fraction of centrals
-    'satellite_quenching_ordinates' : [0.5,0.75,0.85] #polynomial coefficients determining quenched fraction of centrals
+    'quenching_abcissa' : [12,15],
+    'central_quenching_ordinates' : [0.5,0.5], #polynomial coefficients determining quenched fraction of centrals
+    'satellite_quenching_ordinates' : [0.5,0.5] #polynomial coefficients determining quenched fraction of centrals
     }
 
 default_occupation_assembias_parameters = {
 	'assembias_abcissa' : [12,15],
-	'satellite_assembias_ordinates' : [0.05,0.05],
-	'central_assembias_ordinates' : [100,100]
+	'satellite_assembias_ordinates' : [0.5,0.5],
+	'central_assembias_ordinates' : [2,2]
 	}
 
 default_quenching_assembias_parameters = {
 	'quenching_assembias_abcissa' : [12,15],
-	'satellite_quenching_assembias_ordinates' : [1,1],
-	'central_quenching_assembias_ordinates' : [1,1.5]
+	'satellite_quenching_assembias_ordinates' : [0.5,0.5],
+	'central_quenching_assembias_ordinates' : [2,2]
 	}
 
 default_satcen_parameters = {
