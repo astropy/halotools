@@ -16,6 +16,7 @@ __all__=['two_point_correlation_function','apparent_to_absolute_magnitude',
 
 import numpy as np
 from math import pi, gamma
+#from pairs import npairs
 #from cpairs import npairs
 from kdpairs import npairs
 from multiprocessing import Pool
