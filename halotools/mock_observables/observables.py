@@ -16,7 +16,9 @@ __all__=['two_point_correlation_function','apparent_to_absolute_magnitude',
 
 import numpy as np
 from math import pi, gamma
-from cpairs import npairs
+#from pairs import npairs
+#from cpairs import npairs
+from kdpairs import npairs
 from multiprocessing import Pool
 
 def _npairs_wrapper(tup):
@@ -153,7 +155,7 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         
         #No PBCs, randoms must have been provided.
         if PBCs==False:
-            if N_thread==1:
+            if N_threads==1:
                 RR = npairs(randoms, randoms, rbins, period=period)
                 RR = np.diff(RR)
                 D1R = npairs(sample1, randoms, rbins, period=period)
@@ -324,7 +326,7 @@ def apparent_to_absolute_magnitude(m, d_L):
     Mag: np.array of absolute magnitudes
     """
     
-    M = m - 5.0*(np.log10(d_L)-1.0)
+    M = m - 5.0*(np.log10(d_L)+5.0)
     
     return M
 

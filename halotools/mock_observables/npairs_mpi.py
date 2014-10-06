@@ -72,20 +72,37 @@ def main():
         ascii.write(data, savename)
     
 def npairs(data_1, data_2, bins, period=None, comm=None):
-    '''
-    Count pairs with separations given by bins.
-    parameters
-        data_1: N,k array or list of points
-        data_2: N,k array or list of points
-        bins: array or list of continuos bins edges
-        period: length k array defining axis aligned PBCs. If set to none, PBCs = infinity.
-        comm: mpi Intracommunicator object, or None (run on 1 core)
-    returns:
-        DD_11: data_1-data_1 pairs (auto correlation)
-        DD_22: data_2-data_2 pairs (auto correlation)
-        DD_12: data_1-data_2 pairs (cross-correlation)
-        bins
-    '''
+    """
+    Calculate the number of pairs with separations less than or equal to rbins[i].
+    
+    Parameters
+    ----------
+    data1: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    data2: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    bins : array_like
+        numpy array of boundaries defining the bins in which pairs are counted. 
+        len(rbins) = Nrbins + 1.
+            
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
+    
+    comm: mpi Intracommunicator object, optional
+    
+    returns
+    -------
+    DD_11: data_1-data_1 pairs (auto correlation)
+    DD_22: data_2-data_2 pairs (auto correlation)
+    DD_12: data_1-data_2 pairs (cross-correlation)
+    bins
+    """
     from scipy.spatial import cKDTree
     
     if comm==None: 
@@ -173,23 +190,48 @@ def npairs(data_1, data_2, bins, period=None, comm=None):
 
 
 def wnpairs(data_1, data_2, bins, period=None , weights_1=None, weights_2=None, wf=None, comm=None):
-    '''
-    weighted counts of pairs with separations given by bins.
-    parameters
-        data_1: N1,k array or list of points
-        data_2: N2,k array or list of points
-        bins: array or list of continuos bins edges
-        period: length k array defining axis aligned PBCs. If set to none, PBCs = infinity.
-        weights1: (N1,) array of float weights
-        weights2: (N2,) array of float weights
+    """
+    Calculate the weighted number of pairs with separations less than or equal to rbins[i].
+    
+    Parameters
+    ----------
+    data1: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    data2: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    rbins : array_like
+        numpy array of boundaries defining the bins in which pairs are counted. 
+        len(rbins) = Nrbins + 1.
+            
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
+        
+    weights1: array_like, optional
+        length N1 array containing weights used for weighted pair counts, w1*w2.
+        
+    weights2: array_like, optional
+        length N2 array containing weights used for weighted pair counts, w1*w2.
         wf: ckdtree.Function object , weighting function. None uses standard return w1*w2.
         comm: mpi Intracommunicator object, or None (run on one core)
-    returns:
-        DD_11: data_1-data_1 weighted pairs (auto correlation)
-        DD_22: data_2-data_2 weighted pairs (auto correlation)
-        DD_12: data_1-data_2 weighted pairs (cross-correlation)
-        bins
-    '''
+    
+    wf: function object, optional
+        weighting function.  default is w(w1,w2) returns w1*w2
+    
+    comm: mpi Intracommunicator object, optional
+    
+    returns
+    -------
+    DD_11: data_1-data_1 weighted pairs (auto correlation)
+    DD_22: data_2-data_2 weighted pairs (auto correlation)
+    DD_12: data_1-data_2 weighted pairs (cross-correlation)
+    bins
+    """
     from kdtrees.ckdtree import cKDTree
     
     if comm==None: 

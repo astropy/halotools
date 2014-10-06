@@ -1,5 +1,6 @@
+__all__=['observables','spatial','pairs','cpairs']
+
 """ 
-This sub-package will contain the code that computes various 
-observational quantities from a mock galaxy catalog, 
-such as correlation functions, HODs, etc. 
+This sub-package contains code that computes various observational quantities from a mock 
+galaxy catalog.
 """

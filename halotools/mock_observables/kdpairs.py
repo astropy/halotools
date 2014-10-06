@@ -2,12 +2,12 @@
 
 #Duncan Campbell
 #Yale University
-#July 24, 2014
-#calculate pair counts with dumb brute force method as a sanity check.
+#October 6, 2014
+#Calculate pair counts with a kdtree structure.
 
 
 from __future__ import division, print_function
-from spatial.distances import euclidean_distance as distance
+from spatial.kdtrees.ckdtree import cKDTree
 import numpy as np
 
 __all__=['npairs','wnpairs','pairs']
@@ -67,30 +67,17 @@ def npairs(data1, data2, rbins, period=None):
             raise ValueError("period should have len == dimension of points")
             return None
     
-    N1 = len(data1)
-    N2 = len(data2)
-    dd = np.zeros((N1*N2,)) #store radial pair seperations 
-    for i in range(0,N1): #calculate distance between every point and every other point
-        x1 = data1[i,:]
-        x2 = data2
-        dd[i*N2:i*N2+N2] = distance(x1, x2, period)
-        
-    #sort results
-    dd.sort()
-    #count number less than r
-    n = np.zeros((rbins.size,), dtype=np.int)
-    for i in range(rbins.size): #this is ugly... is there a sexier way?
-        if rbins[i]>np.min(period)/2.0:
-            print("Warning: counting pairs with seperations larger than period/2 is awkward.")
-            print("r=", rbins[i], "  min(period)/2=",np.min(period)/2.0)
-        n[i] = len(np.where(dd<=rbins[i])[0])
+    tree_1 = cKDTree(data1)
+    tree_2 = cKDTree(data2)
+    
+    n = tree_1.count_neighbors(tree_2,rbins,period=period)
     
     return n
 
 
-def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
+def wnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None):
     """
-    Calculate the weighted number of pairs with separations less than or equal to rbins[i].
+    Calculate the number of pairs with separations less than or equal to rbins[i].
     
     Parameters
     ----------
@@ -110,17 +97,11 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
-        
-    weights1: array_like, optional
-        length N1 array containing weights used for weighted pair counts, w1*w2.
-        
-    weights2: array_like, optional
-        length N2 array containing weights used for weighted pair counts, w1*w2.
             
     Returns
     -------
-    wN_pairs : array of length len(rbins)
-        weighted number counts of pairs
+    N_pairs : array of length len(rbins)
+        number counts of pairs
      
     """
     
@@ -129,8 +110,8 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
     if data1.ndim ==1: data1 = np.array([data1])
     data2 = np.asarray(data2)
     if data2.ndim ==1: data2 = np.array([data2])
-    r = np.asarray(r)
-    if r.size == 1: r = np.array([r])
+    rbins = np.asarray(rbins)
+    if rbins.size ==1: rbins = np.array([rbins])
     
     #Check to make sure both data sets have the same dimension. Otherwise, throw an error!
     if np.shape(data1)[-1]!=np.shape(data2)[-1]:
@@ -144,7 +125,7 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
         period = np.asarray(period).astype("float64")
         if np.shape(period) == ():
             period = np.array([period]*np.shape(data1)[-1])
-        if np.shape(period)[0] != np.shape(data1)[-1]:
+        elif np.shape(period)[0] != np.shape(data1)[-1]:
             raise ValueError("period should have len == dimension of points")
             return None
     
@@ -165,22 +146,11 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
             raise ValueError("weights2 should have same len as data2")
             return None
     
-    N1 = len(data1)
-    N2 = len(data2)
-    dd = np.zeros((N1,N2), dtype=np.float64) #store radial pair seperations 
-    for i in range(0,N1): #calculate distance between every point and every other point
-        x1 = data1[i,:]
-        x2 = data2
-        dd[i,:] = distance(x1, x2, period)
-        
-    #count number less than r
-    n = np.zeros((r.size,), dtype=np.float64)
-    for i in range(r.size): #this is ugly... is there a sexier way?
-        if r[i]>np.min(period)/2:
-            print("Warning: counting pairs with seperations larger than period/2 is awkward.")
-            print("r=", r[i], "  min(period)/2=",np.min(period)/2)
-        for j in range(N1):
-            n[i] += np.sum(np.extract(dd[j,:]<=r[i],weights2))*weights1[j]
+    tree_1 = cKDTree(data1)
+    tree_2 = cKDTree(data2)
+    
+    n = tree_1.wcount_neighbors(tree_2, rbins, period=period, \
+                                sweight=weights1, oweight=weights2)
     
     return n
 
@@ -238,15 +208,9 @@ def pairs(data1, r, data2=None, period=None):
             raise ValueError("period should have len == dimension of points")
             return None
     
-    N1 = len(data1)
-    N2 = len(data2)
-    dd = np.zeros((N1,N2)) #store radial pair seperations 
-    for i in range(0,N1): #calculate distance between every point and every other point
-        x1 = data1[i,:]
-        x2 = data2
-        dd[i,:] = distance(x1, x2, period)
+    tree_1 = cKDTree(data1)
     
-    pairs = np.argwhere(dd<=r)
+    pairs = tree_1.query_ball_tree(tree_2, r, period=period)
     
     spairs = set()
     for i in range(len(pairs)):
