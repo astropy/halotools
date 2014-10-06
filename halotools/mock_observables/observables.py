@@ -10,7 +10,7 @@ the pair counter and subvolume membership methods.
 
 from __future__ import division
 
-__all__=['two_point_correlation_function','apparent_to_absolute_magnitude',
+__all__=['two_point_correlation_function','Delta_Sigma','apparent_to_absolute_magnitude',
          'luminosity_to_absolute_magnitude','get_sun_mag','luminosity_function','HOD',
          'CLF','CSMF','isolatoion_criterion']
 
@@ -307,6 +307,71 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         xi_12 = TP_estimator(D1D2,D1R,RR,factor1,estimator)
         xi_22 = TP_estimator(D2D2,D2R,RR,factor2,estimator)
         return xi_11, xi_12, xi_22
+
+
+def Delta_Sigma(centers, particles, rbins, bounds=[-50.0,50.0],
+                randoms=None, period = None, N_threads=1):
+    """
+    Calculate the galaxy-galaxy lensing signal, $\Delata\Sigma$.
+    
+    Parameters
+    ----------
+    centers: array_like
+    
+    particles: array_like
+    
+    rbins: array_like
+    
+    bounds: array_like, optional
+    
+    randoms: array_like, optional
+    
+    period: array_like, optional
+    
+    N_threads: int, optional
+    
+    
+    Returns
+    -------
+    
+    Delata_Sigma: np.array
+    """
+    from halotools.mock_observables.spatial.geometry import inside_volume
+    from halotools.mock_observables.spatial.geometry import cylinder
+    from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
+    
+    N_targets = len(centers)
+    normal = np.array([0,0,1])
+    length = bounds[1]-bounds[0]
+    
+    #create cylinders
+    cyls = np.ndarray((N_targets,len(rbins)))
+    for i in range(0,N_targets):
+        normal = np.array([0,0,1])
+        for j in range(0,len(rbins)):
+            cyls[i,j] = geometry.cylinder(center=centers[i], radius = rbins[j],\
+                                         length=length,\
+                                         normal=normal)
+    
+    #calculate the number of particles inside each cylinder 
+    tree = cKDTree(particles)
+    N = np.ndarray((len(centers),len(rbins)))
+    for j in range(0,len(rbins)):
+        dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j], tree, period=period)
+    
+    area = 2.0*np.pi*r_bins**2.0
+    sigma = N/area
+    
+    delta_sigma = np.zeros((N_targets,len(rbins)-1))
+    for i in range(0,N_targets):
+        for j in range(1,rbins):
+            A = area[i]-area[i-1] 
+            outer = 1.0/(np.pi*rbins[i]**2.0)
+            for k in range(0,j-1):
+                inner_sum = sigma[k]*area[k]-sigma[j]
+            delta_sigam[j] = outer*inner_sum
+    
+    return delta_sigma
 
 
 def apparent_to_absolute_magnitude(m, d_L):
