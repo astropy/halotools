@@ -50,15 +50,21 @@ default_Npts_radius_array = 101
 ### Default values specifying traditional quenching model
 # Used by models in the halo_occupation module
 default_quenching_parameters = {
-    'quenching_abcissa' : [12,13.5,15],
-    'central_quenching_ordinates' : [0.35,0.7,0.95], #polynomial coefficients determining quenched fraction of centrals
-    'satellite_quenching_ordinates' : [0.5,0.75,0.85] #polynomial coefficients determining quenched fraction of centrals
+    'quenching_abcissa' : [12,15],
+    'central_quenching_ordinates' : [0.5,0.5], #polynomial coefficients determining quenched fraction of centrals
+    'satellite_quenching_ordinates' : [0.5,0.5] #polynomial coefficients determining quenched fraction of centrals
     }
 
-default_assembias_parameters = {
+default_occupation_assembias_parameters = {
 	'assembias_abcissa' : [12,15],
-	'satellite_assembias_ordinates' : [0.05,0.05],
-	'central_assembias_ordinates' : [100,100]
+	'satellite_assembias_ordinates' : [0.5,0.5],
+	'central_assembias_ordinates' : [2,2]
+	}
+
+default_quenching_assembias_parameters = {
+	'quenching_assembias_abcissa' : [12,13.5,15],
+	'satellite_quenching_assembias_ordinates' : [0.05,0.05,100],
+	'central_quenching_assembias_ordinates' : [20,-20,20]
 	}
 
 default_satcen_parameters = {
@@ -68,12 +74,11 @@ default_satcen_parameters = {
 	}
 
 default_halo_type_split = {
-	'halo_type_split_abcissa' : [12],
-	'halo_type_split_ordinates' : [0.5]
+	'halo_type_split_abcissa' : [12,13,14,15],
+	'halo_type_split_ordinates' : [0.1,0.9,0.5,0.9]
 	}
 
 default_halo_type_calculator_spacing=0.1
-
 
 default_assembias_key = 'VMAX'
 
