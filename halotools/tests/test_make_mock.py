@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Very simple set of sanity checks on halo_occupation module. Highly incomplete.
+Very simple set of sanity checks on make_mocks module. Highly incomplete.
 """
 
 #from __future__ import (absolute_import, division, print_function,

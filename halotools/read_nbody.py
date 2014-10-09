@@ -25,7 +25,7 @@ class simulation(object):
     def __init__(self,simulation_name=defaults.default_simulation_name, 
         scale_factor=defaults.default_scale_factor, 
         halo_finder=defaults.default_halo_finder, 
-        use_subhalos=False,manual_dirname=None):
+        use_subhalos=False,manual_dirname=None,ask_permission=False):
 
 
         self.simulation_name = simulation_name
@@ -38,10 +38,10 @@ class simulation(object):
         self.halo_finder = halo_finder
         self.use_subhalos = use_subhalos
 
-        self.halos = self.get_catalog(manual_dirname)
+        self.halos = self.get_catalog(manual_dirname,ask_permission)
 
 
-    def get_catalog(self,manual_dirname=None):
+    def get_catalog(self,manual_dirname=None,ask_permission=False):
         """ Method to load halo catalogs into memory. 
 
         If the halo catalog is already present in the cache directory, 
@@ -50,7 +50,7 @@ class simulation(object):
 
         """
 
-        #import pyfits
+        download_yes_or_no = None
 
         configobj = Config()
         if manual_dirname != None:
@@ -69,11 +69,12 @@ class simulation(object):
             halos = Table(hdulist[1].data)
 #            halos = Table(pyfits.getdata(cache_dir+self.filename,0))
         else:
-            warnings.warn("\n Host halo catalog not found in cache directory")
-            download_yes_or_no = raw_input(" \n Enter yes to download, "
-                "any other key to exit:\n (File size is ~200Mb) \n\n ")
+            if ask_permission==True:
+                warnings.warn("\n Host halo catalog not found in cache directory")
+                download_yes_or_no = raw_input(" \n Enter yes to download, "
+                    "any other key to exit:\n (File size is ~200Mb) \n\n ")
 
-            if download_yes_or_no=='y' or download_yes_or_no=='yes':
+            if (download_yes_or_no=='y') or (download_yes_or_no=='yes') or (ask_permission==False):
                 print("\n...downloading halo catalog from www.astro.yale.edu/aphearin")
                 fileobj = urllib2.urlopen(configobj.hearin_url+self.filename)
 
@@ -102,7 +103,7 @@ class particles(object):
     def __init__(self,simulation_name=defaults.default_simulation_name, 
         scale_factor=defaults.default_scale_factor, 
         num_ptcl_string=defaults.default_size_particle_data,
-        manual_dirname=None):
+        manual_dirname=None,ask_permission=False):
 
 
         self.simulation_name = simulation_name
@@ -114,10 +115,10 @@ class particles(object):
         self.scale_factor = scale_factor
         self.num_ptcl_string = num_ptcl_string
 
-        self.particle_data = self.get_particles(manual_dirname)
+        self.particle_data = self.get_particles(manual_dirname,ask_permission)
 
 
-    def get_particles(self,manual_dirname=None):
+    def get_particles(self,manual_dirname=None,ask_permission=False):
         """ Method to load simulation particle data into memory. 
 
         If the particle dataset is already present in the cache directory, 
@@ -125,6 +126,7 @@ class particles(object):
         download it from www.astro.yale.edu/aphearin, and then load it into memory.
 
         """
+        download_yes_or_no = None
 
         configobj = Config()
         if manual_dirname != None:
@@ -141,11 +143,13 @@ class particles(object):
             particle_data = Table(hdulist[1].data)
 #            halos = Table(pyfits.getdata(cache_dir+self.filename,0))
         else:
-            warnings.warn("\n Particle data not found in cache directory")
-            download_yes_or_no = raw_input(" \n Enter yes to download, "
-                "any other key to exit:\n (File size is ~10Mb) \n\n ")
 
-            if download_yes_or_no=='y' or download_yes_or_no=='yes':
+            if ask_permission==True:
+                warnings.warn("\n Particle data not found in cache directory")
+                download_yes_or_no = raw_input(" \n Enter yes to download, "
+                    "any other key to exit:\n (File size is ~10Mb) \n\n ")
+
+            if (download_yes_or_no=='y') or (download_yes_or_no=='yes') or (ask_permission==False):
                 print("\n...downloading particle data from www.astro.yale.edu/aphearin")
                 fileobj = urllib2.urlopen(configobj.hearin_url+self.filename)
 
@@ -162,25 +166,5 @@ class particles(object):
         return particle_data
 
 ###################################################################################################
-
-
-
-
-
-"""
-        configobj = Config()
-        if manual_dirname != None:
-            warnings.warn("using hard-coded directory name to load simulation")
-            cache_dir = manual_dirname
-        else:
-            cache_dir = configobj.getCatalogDir()
-        self.cache_dir = cache_dir
-
-        self.filename = configobj.getParticleFilename(
-            self.simulation_name,self.scale_factor,self.num_ptcl_string)
-"""
-
-
-
 
 
