@@ -466,10 +466,11 @@ class HOD_mock(object):
 
         column_names = (['coords','coordshost','vel','velhost',
             'primary_halo_property','halo_type',
-            'isSat','haloID'])
+            'isSat','haloID','luminosity','stellar_mass','primary_galprop'])
 
         tbdata = ([self.coords,self.coordshost,self.vel,self.velhost,self.logMhost,
-            self.halo_type,self.isSat,self.haloID])
+            self.halo_type,self.isSat,self.haloID,
+            np.zeros(len(self.haloID)),np.zeros(len(self.haloID)),np.zeros(len(self.haloID))])
     
         if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
             column_names.append('isQuenched')
