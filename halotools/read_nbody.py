@@ -22,53 +22,6 @@ import defaults
 
 
 
-def get_local_filename_from_remote_url(remote_url):
-    """
-    Helper function used to test whether catalog data has already been 
-    downloaded and stored in the astropy cache directory.
-
-    Parameters
-    ----------
-    remote_url : string 
-        String giving the url of the catalog to be downloaded.
-
-    Returns
-    -------
-    local_filename : string
-        String giving the filename where the catalog is stored locally.
-        The directory will be the default astropy cache download directory.
-        If None, then there is no catalog present in the local cache directory 
-        that corresponds to the input remote_url.
-
-    Notes 
-    -----
-    Brief explanation of the astropy cache system. Refer to the main docs page for details. 
-
-
-    """
-
-    url_key = remote_url
-
-    dldir, urlmapfn = get_download_cache_locs()
-    with open_shelve(urlmapfn, True) as url2hash:
-        if url_key in url2hash:
-            local_filename = url2hash[url_key]
-        else:
-            local_filename = None
-
-    return local_filename
-
-
-def get_halo_catalog_filename(nickname=defaults.default_simulation_name,
-    redshift=defaults.default_redshift,
-    scale_factor=defaults.default_scale_factor,
-    halo_finder=defaults.default_halo_finder,
-    web_location=defaults.aph_web_location):
-
-    #output_string = web_location+nickname+'_'+
-
-    pass
-
 ##bolshoi_a1.0003_rockstar_V1.5_host_halos.fits'
 
 
@@ -151,6 +104,14 @@ class catalog_manager(object):
                 file_list.append(a['href'])
 
         return file_list
+
+    def get_halo_catalog_filename(nickname=defaults.default_simulation_name,
+        redshift=defaults.default_redshift,
+        scale_factor=defaults.default_scale_factor,
+        halo_finder=defaults.default_halo_finder,
+        web_location=defaults.aph_web_location):
+    pass
+    #output_string = web_location+nickname+'_'+
 
 
 ###################################################################################################
