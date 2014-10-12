@@ -47,7 +47,7 @@ class processed_snapshot(object):
         self.catalog_dir = self.configuration.get_halotools_catalog_dir()
 
         fname, nearest_a = self.find_nearest_snapshot_in_cache()
-        self.catalog_filename = os.path.join(self.catalog_dir,fname)
+        self.halo_catalog_filename = os.path.join(self.catalog_dir,fname)
 
         adiff_tol = defaults.scale_factor_difference_tol
         adiff = np.abs(nearest_a - self.scale_factor)
@@ -102,10 +102,30 @@ class processed_snapshot(object):
 
         """
 
-        with get_readable_fileobj(url_string,cache=True) as f: 
-            fits_object = fits.HDUList.fromfile(f)
-            particle_catalog = fits_object[1].data
-            return particle_catalog
+        pass
+
+    @property
+    def halos(self):
+        """ Method to load simulation halo catalog into memory. 
+
+        The behavior of this method is governed by the astropy utility get_readable_fileobj. 
+        If the particle dataset is already present in the astropy cache directory, 
+        get_readable_fileobj will detect it and the retrieve_particles method 
+        will use astropy.io.fits to load the particles into memory. 
+        If the catalog is not there, 
+        get_readable_fileobj will download it from www.astro.yale.edu/aphearin, 
+        and then load it into memory, again using astropy.io.fits.
+
+        """
+
+        pass
+ 
+
+# Easy way to load fits data from a website using astropy.utils
+#with get_readable_fileobj(url_string,cache=True) as f: 
+#    fits_object = fits.HDUList.fromfile(f)
+#    particle_catalog = fits_object[1].data
+#    return particle_catalog
 
 
 
