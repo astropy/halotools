@@ -105,7 +105,7 @@ behroozi_web_location = 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs
 
 
 
-
+scale_factor_difference_tol = 0.05
 
 
 

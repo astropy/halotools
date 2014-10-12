@@ -15,6 +15,7 @@ from astropy.utils.data import get_readable_fileobj
 from astropy.utils.data import _get_download_cache_locs as get_download_cache_locs
 from astropy.utils.data import _open_shelve as open_shelve
 
+import numpy as np
 
 from configuration import Config
 import os, sys, warnings, urllib2
@@ -37,10 +38,54 @@ class processed_snapshot(object):
 
         self.simulation_name = simulation_name
         self.redshift = redshift
+        self.scale_factor = 1./(1.+self.redshift)
         self.halo_finder = halo_finder
 
-        halo_catalog_manager = catalog_manager()
-        self.cache_dir = halo_catalog_manager.cache_dir
+        self.catalog_manager = catalog_manager()
+        self.configuration = Config()
+
+        self.catalog_dir = self.configuration.get_halotools_catalog_dir()
+
+        fname, nearest_a = self.find_nearest_snapshot_in_cache()
+        self.catalog_filename = os.path.join(self.catalog_dir,fname)
+
+        adiff_tol = defaults.scale_factor_difference_tol
+        adiff = np.abs(nearest_a - self.scale_factor)
+        if adiff > adiff_tol:
+            msg = "Closest match to desired snapshot has a scale factor differing by "+str(adiff)
+            warnings.warn(msg)
+
+
+    def find_nearest_snapshot_in_cache(self):
+        """ Identify the catalog in the cache directory with the 
+        closest redshift to the requested redshift.
+
+        Returns 
+        ------- 
+        catalog_filename_of_nearest_snapshot : string 
+            filename of pre-processed catalog in cache directory with closest redshift to 
+            the requested redshift
+
+        nearest_snapshot : float
+            Value of the scale factor of the returned catalog
+
+        """
+
+        available_catalogs = self.configuration.list_of_catalogs_in_cache()
+
+        simtag = self.simulation_name
+        relevant_catalogs = [ c for c in available_catalogs if c[0:len(simtag)]==simtag ]
+
+        first_scale_factor_index=len(simtag)+2
+        last_scale_factor_index = first_scale_factor_index + 6
+        available_snapshots = [float(a[first_scale_factor_index:last_scale_factor_index]) for a in relevant_catalogs]
+
+        idx_nearest_snapshot = np.abs(np.array(available_snapshots)-self.scale_factor).argmin()
+        nearest_snapshot = available_snapshots[idx_nearest_snapshot]
+
+        catalog_filename_of_nearest_snapshot = relevant_catalogs[idx_nearest_snapshot]
+
+        return catalog_filename_of_nearest_snapshot,nearest_snapshot
 
 
     @property
@@ -110,7 +155,7 @@ class catalog_manager(object):
         scale_factor=defaults.default_scale_factor,
         halo_finder=defaults.default_halo_finder,
         web_location=defaults.aph_web_location):
-    pass
+        pass
     #output_string = web_location+nickname+'_'+
 
 
