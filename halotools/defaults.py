@@ -12,7 +12,7 @@ import sys
 # The following parameters are used by the 
 # simulation object in the read_nbody module
 default_simulation_name = 'bolshoi'
-default_halo_finder = 'rockstar_V1.5'
+default_halo_finder = 'rockstar'
 default_scale_factor = 1.0003
 default_redshift = 0.0
 
