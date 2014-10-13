@@ -125,6 +125,13 @@ class HOD_mock(object):
             simulation_data = read_nbody.simulation(
                 simulation_name,scale_factor,halo_finder)
 
+        # Test to make sure the simulation data is the appropriate type
+        if not isinstance(simulation_data.halos,astropy.table.table.Table):
+            raise TypeError("HOD_mock object requires an astropy Table object as input")
+        # Bind halo catalog  and particles to the HOD_mock object
+        self.halos = simulation_data.halos
+        self.Lbox = simulation_data.Lbox
+
         # If using particle data, load the particles into memory 
         if use_particles is True:
 
@@ -142,12 +149,6 @@ class HOD_mock(object):
             if simulation_particle_data != None:
                 raise TypeError("Boolean use_particles is set to False, but HOD_Mock constructor was passed particle data file")
 
-
-        # Test to make sure the simulation data is the appropriate type
-        if not isinstance(simulation_data.halos,astropy.table.table.Table):
-            raise TypeError("HOD_mock object requires an astropy Table object as input")
-
-
         # Test to make sure the hod model is the appropriate type
         hod_model_instance = halo_occupation_model(threshold=threshold)
         if not isinstance(hod_model_instance,ho.HOD_Model):
@@ -156,9 +157,6 @@ class HOD_mock(object):
         # Bind the instance of the hod model to the HOD_mock object
         self.halo_occupation_model = hod_model_instance
 
-        # Bind halo catalog  and particles to the HOD_mock object
-        self.halos = simulation_data.halos
-        self.Lbox = simulation_data.Lbox
 
 
         # Create numpy ndarrays containing data from the halo catalog and bind them to the mock object

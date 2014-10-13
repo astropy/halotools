@@ -22,43 +22,43 @@ import os, sys, warnings, urllib2
 import defaults
 
 
-
-
-
 class processed_snapshot(object):
     """ Class containing halo and particle data taken from 
     a single snapshot of some Nbody simulation.
     """
 
     def __init__(self,
-        simulation_name=defaults.default_simulation_name,
+        simname=defaults.default_simulation_name,
         redshift=defaults.default_redshift,
         halo_finder=defaults.default_halo_finder,
         ask_permission=True):
 
-        self.simulation_name = simulation_name
+        self.simulation_name = simname
         self.redshift = redshift
         self.scale_factor = 1./(1.+self.redshift)
         self.halo_finder = halo_finder
 
-        self.catalog_manager = catalog_manager()
+        catman = Catalog_Manager()
 
         self.catalog_dir = configuration.get_halotools_catalog_dir()
 
-        fname, nearest_a = self.find_nearest_snapshot_in_cache()
-        self.halo_catalog_filename = os.path.join(self.catalog_dir,fname)
+        halo_catalog_filename,closest_scale_factor = (
+            catman.find_nearest_snapshot_in_cache(
+                catalog_type='halos',scale_factor = self.scale_factor,
+                simname=self.simulation_name,
+                halo_finder=self.halo_finder)
+            )
+        self.halo_catalog_filename = (
+            os.path.join(self.catalog_dir,halo_catalog_filename))
 
-        adiff_tol = defaults.scale_factor_difference_tol
-        adiff = np.abs(nearest_a - self.scale_factor)
-        if adiff > adiff_tol:
-            msg = "Closest match to desired snapshot has a scale factor of "+str(nearest_a)
-            warnings.warn(msg)
-
-        #if ask_permission==True:
-        #    warnings.warn("\n Particle data not found in cache directory")
-        #    download_yes_or_no = raw_input(" \n Enter yes to download, "
-        #        "any other key to exit:\n (File size is ~10Mb) \n\n ")
-        #if (download_yes_or_no=='y') or (download_yes_or_no=='yes') or (ask_permission==False):
+        particle_catalog_filename,closest_scale_factor = (
+            catman.find_nearest_snapshot_in_cache(
+                catalog_type='particles',scale_factor = self.scale_factor,
+                simname=self.simulation_name,
+                halo_finder=self.halo_finder)
+            )
+        self.particle_catalog_filename = (
+            os.path.join(self.catalog_dir,particle_catalog_filename))
 
     @property
     def particles(self):
@@ -138,7 +138,7 @@ class Catalog_Manager(object):
         file_list : list 
             List of strings of filenames available for downloaded at the provided url.
         """
-        
+
         from bs4 import BeautifulSoup
         import requests
 
@@ -159,13 +159,24 @@ class Catalog_Manager(object):
 
         return file_list
 
-    def get_halo_catalog_filename(self,
+    def get_processed_halo_catalog_filename(self,
         simname=defaults.default_simulation_name,
-        redshift=defaults.default_redshift,
         scale_factor=defaults.default_scale_factor,
-        halo_finder=defaults.default_halo_finder,
-        web_location=defaults.aph_web_location):
-        pass
+        halo_finder=defaults.default_halo_finder):
+        """ Use the input specifications to identify the filename 
+        of the processed catalog in the cache directory. 
+        Returns None if no match is found.
+
+        """
+        #bolshoi_a1.0003_rockstar_halos.fits
+        filename = simname+'_a'+scale_factor+'_'+halo_finder+'_halos.fits'
+        dirname = configuration.get_halotools_catalog_dir()
+        full_filename = os.path.join(dirname,filename)
+
+        if not os.path.isfile(full_filename):
+            warnings.warn("output filename does not have a matching catalog in cache")
+
+        return full_filename
 
     def identify_relevant_catalogs(self,catalog_type=None,
         simname=None,halo_finder=None):
@@ -284,8 +295,15 @@ class Catalog_Manager(object):
 
         idx_nearest_snapshot = np.abs(np.array(available_snapshots)-scale_factor).argmin()
         nearest_snapshot = available_snapshots[idx_nearest_snapshot]
-
         catalog_filename_of_nearest_snapshot = relevant_catalogs[idx_nearest_snapshot]
+
+        # Warn the user if the nearest scale factor differs by more than the 
+        # tolerance value set in defaults module
+        adiff_tol = defaults.scale_factor_difference_tol
+        adiff = np.abs(nearest_snapshot - scale_factor)
+        if adiff > adiff_tol:
+            msg = "Closest match to desired snapshot has a scale factor of "+str(nearest_snapshot)
+            warnings.warn(msg)
 
         return catalog_filename_of_nearest_snapshot,nearest_snapshot
 
