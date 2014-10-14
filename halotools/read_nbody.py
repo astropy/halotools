@@ -114,16 +114,15 @@ class Catalog_Manager(object):
         'consuelo_halos' : 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
         }
 
-        self.default_halo_catalog = (
+        self.default_halo_catalog_filename = (
             defaults.default_simulation_name+'_a'+
             str(np.round(defaults.default_scale_factor,4))+'_'+
             defaults.default_halo_finder+'_halos.fits')
 
-        self.default_particle_catalog = (
+        self.default_particle_catalog_filename = (
             defaults.default_simulation_name+'_a'+
             str(np.round(defaults.default_scale_factor,4))+'_'+
             self.numptcl_to_string(defaults.default_numptcl)+'_particles.fits')
-
 
 
     def retrieve_catalog_filenames_from_url(self,url,catalog_type='halos'):
@@ -361,7 +360,9 @@ class Catalog_Manager(object):
 
         return output_string
 
-    def load_catalog(self,dirname,filename,download_yn=False,url=defaults.aph_web_location):
+    def load_catalog(self,
+        dirname=defaults.halo_catalog_dirname,filename=None,
+        download_yn=False,url=defaults.aph_web_location):
         """ Use the astropy fits reader to load the halo or particle catalog into memory.
 
         Parameters 
@@ -383,6 +384,8 @@ class Catalog_Manager(object):
             Data structure located at the input filename.
 
         """
+        if filename==None:
+            filename = self.default_halo_catalog_filename
 
         if os.path.isfile(os.path.join(dirname,filename)):
             hdulist = fits.open(os.path.join(dirname,filename))
@@ -393,9 +396,9 @@ class Catalog_Manager(object):
                 return None
             else:
                 # Download one of the default catalogs hosted at Yale
-                if filename[-10:]=='halos.fits':
+                if filename==self.default_halo_catalog_filename:
                     catalog_type='halos'
-                elif filename[-14:]=='particles.fits':
+                if filename==self.default_particle_catalog_filename:
                     catalog_type='particles'
                 else:
                     raise IOError("Input filename does not match one of the provided default catalogs")
