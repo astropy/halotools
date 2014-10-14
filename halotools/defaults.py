@@ -7,6 +7,7 @@ Module expressing various default values of the mock-making code.
 #                        unicode_literals)
 import os
 import sys
+import configuration
 
 ### Default halo catalog (used in read_nbody)
 # The following parameters are used by the 
@@ -102,7 +103,8 @@ aph_web_location = 'http://www.astro.yale.edu/aphearin/Data_files/'
 behroozi_web_location = 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
 
 
-
+halo_catalog_dirname = configuration.get_catalogs_dir('halos')
+particle_catalog_dirname = configuration.get_catalogs_dir('particles')
 
 
 scale_factor_difference_tol = 0.05

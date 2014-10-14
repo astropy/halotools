@@ -118,7 +118,7 @@ class Catalog_Manager(object):
 
         self.cache_dir = get_download_cache_locs()[0].encode('utf-8')+'/'
 
-    def retrieve_snapshot_filenames_from_slac_url(self,url,catalog_type='halos'):
+    def retrieve_catalog_filenames_from_url(self,url,catalog_type='halos'):
         """ Get the full list of filenames available at the provided url.
 
         This method uses BeautifulSoup to query the provided url for the list of files stored there. 
@@ -142,22 +142,50 @@ class Catalog_Manager(object):
         from bs4 import BeautifulSoup
         import requests
 
-        if catalog_type == 'halo' or 'halos': 
-            expected_filename_prefix = 'hlist_'
-        elif catalog_type == 'tree' or 'trees':
-            expected_filename_prefix = 'tree_'
-        else:
-            raise TypeError("Input catalog type must either be 'halos' or 'trees'")
-
         soup = BeautifulSoup(requests.get(url).text)
         file_list = []
 
-        for a in soup.find_all('a'):
-            link = a['href']
-            if link[0:len(expected_filename_prefix)]==expected_filename_prefix: 
+        ##################
+        ### SLAC url case
+        if url==defaults.behroozi_web_location:
+            ### Set naming conventions of the files hosted at SLAC
+            if (catalog_type == 'halo') or (catalog_type=='halos'): 
+                expected_filename_prefix = 'hlist_'
+            elif (catalog_type == 'tree') or (catalog_type == 'trees'):
+                expected_filename_prefix = 'tree_'
+            else:
+                raise TypeError("Input catalog type must either be 'halos' or 'trees'")
+            ### Grab all filenames with the assumed prefix
+            for a in soup.find_all('a'):
+                link = a['href']
+                if link[0:len(expected_filename_prefix)]==expected_filename_prefix: 
+                    file_list.append(a['href'])
+        ##################
+        ### APH url case (simpler, since only two default catalogs are hosted here)
+        elif url==defaults.aph_web_location:
+            #Currently broken due to permissions settings at Yale
+            pass
+            ### Set naming conventions of the files hosted at Yale
+            #if (catalog_type == 'halo') or (catalog_type=='halos'): 
+            #    expected_filename_suffix = 'halos.fits'
+            #elif (catalog_type == 'particle') or (catalog_type=='particles'):
+            #    expected_filename_suffix = 'particles.fits'
+            #else:
+            #    expected_filename_suffix = '.fits'
+            ### Grab all filenames with the assumed suffix
+            #for a in soup.find_all('a'):
+            #    link = a['href']
+                #if link[-len(expected_filename_suffix):]==expected_filename_suffix: 
+            #    file_list.append(a['href'])
+        ##################
+        ### Some other url managed by the user
+        else:
+            for a in soup.find_all('a'):
+                link = a['href']
                 file_list.append(a['href'])
 
         return file_list
+        ##################
 
 
     def identify_relevant_catalogs(self,catalog_type=None,
@@ -325,6 +353,57 @@ class Catalog_Manager(object):
 
         return output_string
 
+    def load_catalog(self,dirname,filename,download_yn=False,url=defaults.aph_web_location):
+        """ Use the astropy fits reader to load the halo or particle catalog into memory.
+
+        Parameters 
+        ----------
+        dirname : string 
+            Name of directory where filename is stored.
+
+        filename : string 
+            Name of file being loaded into memory. Method assumes .fits file format.
+
+        download_yn : boolean, optional
+            If set to True, and if filename is not already stored in the cache directory, 
+            method will attempt to download the file from the provided url. If there is no corresponding 
+            file at the input url, an exception will be raised.
+
+        Returns 
+        -------
+        catalog : object
+            Data structure located at the input filename.
+
+        """
+
+        if os.path.isfile(os.path.join(dirname,filename)):
+            hdulist = fits.open(os.path.join(dirname,filename))
+            catalog = Table(hdulist[1].data)
+        else:
+            ### Requested filename is not in cache, and external download is not requested
+            if download_yn==False:
+                return None
+            else:
+                # Download one of the default catalogs hosted at Yale
+                if filename[-10:]=='halos.fits':
+                    catalog_type='halos'
+                elif filename[-14:]=='particles.fits':
+                    catalog_type='particles'
+                else:
+                    raise IOError("Input filename does not match one of the provided default catalogs")
+                ###
+                remote_filename = os.path.join(url,filename)
+                fileobj = urllib2.urlopen(remote_filename)
+                output_directory = configuration.get_catalogs_dir(catalog_type=catalog_type)
+                output_filename = os.path.join(output_directory,filename)
+                output = open(output_filename,'wb')
+                output.write(fileobj.read())
+                output.close()
+                hdulist = fits.open(output_filename)
+                catalog = Table(hdulist[1].data)
+
+
+        return catalog
 
 ###################################################################################################
 
