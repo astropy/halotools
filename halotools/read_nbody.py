@@ -42,6 +42,11 @@ class processed_snapshot(object):
         catman = Catalog_Manager()
         self.catalog_manager = catman
 
+        Lbox, mp, softening = catman.get_simulation_properties(self.simulation_name)
+        self.Lbox = Lbox
+        self.particle_mass = mp
+        self.softening_length = softening
+
         halo_catalog_filename,closest_scale_factor = (
             catman.find_nearest_snapshot_in_cache('halos',
                 scale_factor = self.scale_factor,
@@ -222,6 +227,37 @@ class Catalog_Manager(object):
 
         return file_list
         ##################
+
+    def get_simulation_properties(self,simname):
+        """ Return a few characteristics of the input simulation.
+
+        Parameters 
+        ----------
+        simname : string 
+            Specifies the simulation of interest, e.g., 'bolshoi'.
+
+        Returns 
+        -------
+        Lbox : float 
+            Box size in Mpc/h.
+
+        particle_mass : float 
+            Particle mass in Msun/h.
+
+        softening : float 
+            Softening length in kpc/h.
+
+        """
+
+        Lbox, particle_mass, softening = None, None, None
+
+        if (simname=='bolshoi'):
+            Lbox = 250.0
+            particle_mass = 1.35e8
+            softening = 1.0
+
+        return Lbox, particle_mass, softening 
+
 
 
     def identify_relevant_catalogs(self,catalog_type=None,
