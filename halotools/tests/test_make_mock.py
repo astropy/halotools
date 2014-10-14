@@ -15,15 +15,16 @@ import os
 
 
 def test_Zheng07_mock():
-    relative_filepath = '../CATALOGS/'
-    catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath)
-    hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'
-    bolshoi = simulation(manual_dirname=hard_coded_catalog_dirname)
+    #relative_filepath = '../CATALOGS/'
+    #catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath)
+    #hard_coded_catalog_dirname='/Users/aphearin/work/repositories/python/halotools/halotools/CATALOGS/'
+    #bolshoi = simulation(manual_dirname=hard_coded_catalog_dirname)
 
-    particle_data = particles(manual_dirname=hard_coded_catalog_dirname)
+    #particle_data = particles(manual_dirname=hard_coded_catalog_dirname)
+    mock = HOD_mock()
 
-    mock = HOD_mock(simulation_data=bolshoi,halo_occupation_model=Zheng07_HOD_Model,
-        simulation_particle_data = particle_data)
+    #mock = HOD_mock(simulation_data=bolshoi,halo_occupation_model=Zheng07_HOD_Model,
+    #    simulation_particle_data = particle_data)
     mock.populate()
 
     reasonable_ngal_boolean = (mock.num_total_gals > 5.e4) and (mock.num_total_gals < 1.e5)
