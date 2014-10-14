@@ -15,7 +15,6 @@ import configuration
 default_simulation_name = 'bolshoi'
 default_halo_finder = 'rockstar'
 default_scale_factor = 1.0003
-default_redshift = 0.0
 default_numptcl = 2.0e5
 
 
