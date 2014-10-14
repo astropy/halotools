@@ -40,7 +40,7 @@ class processed_snapshot(object):
 
         catman = Catalog_Manager()
 
-        self.catalog_dir = configuration.get_halotools_catalog_dir()
+        self.catalog_dir = configuration.get_halotools_cache_dir()
 
         halo_catalog_filename,closest_scale_factor = (
             catman.find_nearest_snapshot_in_cache(
@@ -159,24 +159,6 @@ class Catalog_Manager(object):
 
         return file_list
 
-    def get_processed_halo_catalog_filename(self,
-        simname=defaults.default_simulation_name,
-        scale_factor=defaults.default_scale_factor,
-        halo_finder=defaults.default_halo_finder):
-        """ Use the input specifications to identify the filename 
-        of the processed catalog in the cache directory. 
-        Returns None if no match is found.
-
-        """
-        #bolshoi_a1.0003_rockstar_halos.fits
-        filename = simname+'_a'+scale_factor+'_'+halo_finder+'_halos.fits'
-        dirname = configuration.get_halotools_catalog_dir()
-        full_filename = os.path.join(dirname,filename)
-
-        if not os.path.isfile(full_filename):
-            warnings.warn("output filename does not have a matching catalog in cache")
-
-        return full_filename
 
     def identify_relevant_catalogs(self,catalog_type=None,
         simname=None,halo_finder=None):
@@ -203,14 +185,9 @@ class Catalog_Manager(object):
         if catalog_type == 'halo': catalog_type='halos'
         if catalog_type == 'particle': catalog_type='particles'
 
-        # Require a sensible input catalog type
-        if (catalog_type != None) & (catalog_type != 'halos') & (catalog_type != 'particles'):
-            raise TypeError("Input catalog_type can only be either 'halos' or 'particles'")
-        if (catalog_type=='particles') & (halo_finder != None):
-            raise TypeError("Do not specify a halo-finder when requesting particle data")
-
-        # Identify all catalogs currently stored in the halotools cache directory
-        available_catalogs = np.array(configuration.list_of_catalogs_in_cache())
+        # Identify all catalogs currently stored in the cache directory
+        available_catalogs = np.array(
+            configuration.list_of_catalogs_in_cache(catalog_type=catalog_type))
 
         #########
         # The file_mask array will determine which of the available catalogs 
@@ -253,7 +230,7 @@ class Catalog_Manager(object):
 
         Returns 
         ------- 
-        catalog_filename_of_nearest_snapshot : string 
+        filename : string 
             filename of pre-processed catalog in cache directory with closest redshift to 
             the requested redshift
 
@@ -261,6 +238,10 @@ class Catalog_Manager(object):
             Value of the scale factor of the returned catalog
 
         """
+
+        # Fix possible pluralization mistake of user
+        if catalog_type == 'halo': catalog_type='halos'
+        if catalog_type == 'particle': catalog_type='particles'
 
         if (scale_factor == None):
             if (redshift == None):
@@ -295,7 +276,8 @@ class Catalog_Manager(object):
 
         idx_nearest_snapshot = np.abs(np.array(available_snapshots)-scale_factor).argmin()
         nearest_snapshot = available_snapshots[idx_nearest_snapshot]
-        catalog_filename_of_nearest_snapshot = relevant_catalogs[idx_nearest_snapshot]
+        filename_of_nearest_snapshot = relevant_catalogs[idx_nearest_snapshot]
+
 
         # Warn the user if the nearest scale factor differs by more than the 
         # tolerance value set in defaults module
@@ -305,9 +287,9 @@ class Catalog_Manager(object):
             msg = "Closest match to desired snapshot has a scale factor of "+str(nearest_snapshot)
             warnings.warn(msg)
 
-        return catalog_filename_of_nearest_snapshot,nearest_snapshot
+        return filename_of_nearest_snapshot,nearest_snapshot
 
-    def create_numptcl_string(self,numptcl):
+    def numptcl_to_string(self,numptcl):
         """ Reduce the input number to a 3-character string used to encode 
         the number of particles in the particle catalog filenames.
 
