@@ -70,12 +70,6 @@ class HOD_mock(object):
         defined in the `~halotools.read_nbody` module. If unspecified, 
         the halo catalog specified in `~halotools.defaults` will be chosen. 
 
-    particle_data : optional
-        particle_data is an instance of the `~halotools.read_nbody.particles` class 
-        defined in the `~halotools.read_nbody` module. If unspecified, and if 
-        the input use_particles boolean is set to be True, then
-        the particle data specified in `~halotools.defaults` will be chosen. 
-
     halo_occupation_model : optional 
         halo_occupation_model is any subclass of the abstract class 
         `~halotools.halo_occupation.HOD_Model` defined 
@@ -107,7 +101,9 @@ class HOD_mock(object):
     """
 
     def __init__(self,simulation_data=None,
-        simulation_particle_data=None,use_particles=True,
+        simname = defaults.default_simulation_name,
+        scale_factor=defaults.default_scale_factor,
+        halo_finder=defaults.default_halo_finder,
         halo_occupation_model=ho.vdB03_Quenching_Model,
         threshold = defaults.default_luminosity_threshold,
         seed=None,create_galaxies_table=True):
@@ -117,38 +113,14 @@ class HOD_mock(object):
         # Currently this set to be Bolshoi at z=0, 
         # as specified in the defaults module
         if simulation_data is None:
+            simulation_data = read_nbody.processed_snapshot(
+                simname,scale_factor,halo_finder)
 
-            simulation_name=defaults.default_simulation_name
-            scale_factor=defaults.default_scale_factor
-            halo_finder=defaults.default_halo_finder
-
-            simulation_data = read_nbody.simulation(
-                simulation_name,scale_factor,halo_finder)
-
-        # Test to make sure the simulation data is the appropriate type
-        if not isinstance(simulation_data.halos,astropy.table.table.Table):
-            raise TypeError("HOD_mock object requires an astropy Table object as input")
         # Bind halo catalog  and particles to the HOD_mock object
         self.halos = simulation_data.halos
         self.Lbox = simulation_data.Lbox
+        self.particles = simulation_data.particles
 
-        # If using particle data, load the particles into memory 
-        if use_particles is True:
-
-            if (simulation_particle_data is None):
-                simulation_name=defaults.default_simulation_name
-                scale_factor=defaults.default_scale_factor
-                num_ptcl_string = defaults.default_size_particle_data
-
-                simulation_particle_data = read_nbody.particles(
-                    simulation_name,scale_factor,num_ptcl_string)
-
-            self.particle_data = simulation_particle_data.particle_data
-
-        else:
-            if simulation_particle_data != None:
-                raise TypeError("Boolean use_particles is set to False, "
-                    "but HOD_Mock constructor was passed particle data file")
 
         # Test to make sure the hod model is the appropriate type
         hod_model_instance = halo_occupation_model(threshold=threshold)
