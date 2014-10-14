@@ -147,7 +147,8 @@ class HOD_mock(object):
 
         else:
             if simulation_particle_data != None:
-                raise TypeError("Boolean use_particles is set to False, but HOD_Mock constructor was passed particle data file")
+                raise TypeError("Boolean use_particles is set to False, "
+                    "but HOD_Mock constructor was passed particle data file")
 
         # Test to make sure the hod model is the appropriate type
         hod_model_instance = halo_occupation_model(threshold=threshold)

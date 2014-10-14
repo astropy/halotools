@@ -16,6 +16,8 @@ default_simulation_name = 'bolshoi'
 default_halo_finder = 'rockstar'
 default_scale_factor = 1.0003
 default_redshift = 0.0
+default_numptcl = 2.0e5
+
 
 ### Default particle data (used in read_nbody)
 # The following parameters are used by the 
@@ -83,21 +85,6 @@ default_halo_type_split = {
 default_halo_type_calculator_spacing=0.1
 
 default_assembias_key = 'VMAX'
-
-relative_filepath = '/CATALOGS/'
-catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath) 
-
-
-
-# Filenames of pointing to various simulation data 
-bolshoi_z0_2e5_particles_filename='http://www.astro.yale.edu/aphearin/Data_files/bolshoi_2e5_particles_a1.0003.fits'
-bolshoi_z0_halos_filename='http://www.astro.yale.edu/aphearin/Data_files/bolshoi_a1.0003_rockstar_V1.5_host_halos.fits'
-
-
-# Set the defaults to bolshoi at z=0
-default_halo_catalog_filename=bolshoi_z0_halos_filename
-default_particle_catalog_filename=bolshoi_z0_2e5_particles_filename
-
 
 aph_web_location = 'http://www.astro.yale.edu/aphearin/Data_files/'
 behroozi_web_location = 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'

@@ -114,9 +114,17 @@ class Catalog_Manager(object):
         'consuelo_halos' : 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
         }
 
-        self.aph_url = 'http://www.astro.yale.edu/aphearin/Data_files/'
+        self.default_halo_catalog = (
+            defaults.default_simulation_name+'_a'+
+            str(np.round(defaults.default_scale_factor,4))+'_'+
+            defaults.default_halo_finder+'_halos.fits')
 
-        self.cache_dir = get_download_cache_locs()[0].encode('utf-8')+'/'
+        self.default_particle_catalog = (
+            defaults.default_simulation_name+'_a'+
+            str(np.round(defaults.default_scale_factor,4))+'_'+
+            self.numptcl_to_string(defaults.default_numptcl)+'_particles.fits')
+
+
 
     def retrieve_catalog_filenames_from_url(self,url,catalog_type='halos'):
         """ Get the full list of filenames available at the provided url.
