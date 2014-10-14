@@ -51,7 +51,7 @@ class processed_snapshot(object):
 
         # If there are no matching halo catalogs in cache,
         # set the halo catalog to the default halo catalog
-        if halo_catalog_filename==None:
+        if (halo_catalog_filename==None) or (closest_scale_factor != self.scale_factor):
             halo_catalog_filename = catman.default_halo_catalog_filename
             # Download the catalog, if desired
             if download_yn==True:
@@ -69,7 +69,7 @@ class processed_snapshot(object):
 
         # If there are no matching particle catalogs in cache,
         # set the particle catalog to the default particle catalog
-        if particle_catalog_filename==None:
+        if (particle_catalog_filename==None) or (closest_scale_factor != self.scale_factor):
             particle_catalog_filename = catman.default_particle_catalog_filename
             # Download the catalog, if desired
             if download_yn==True:
