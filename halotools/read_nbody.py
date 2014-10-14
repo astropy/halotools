@@ -125,15 +125,6 @@ class processed_snapshot(object):
             download_yn = self.download_yn)
 
         return halos
- 
-
-# Easy way to load fits data from a website using astropy.utils
-#with get_readable_fileobj(url_string,cache=True) as f: 
-#    fits_object = fits.HDUList.fromfile(f)
-#    particle_catalog = fits_object[1].data
-#    return particle_catalog
-
-
 
 ###################################################################################################
 
@@ -207,17 +198,17 @@ class Catalog_Manager(object):
             #Currently broken due to permissions settings at Yale
             pass
             ### Set naming conventions of the files hosted at Yale
-            #if (catalog_type == 'halo') or (catalog_type=='halos'): 
-            #    expected_filename_suffix = 'halos.fits'
-            #elif (catalog_type == 'particle') or (catalog_type=='particles'):
-            #    expected_filename_suffix = 'particles.fits'
-            #else:
-            #    expected_filename_suffix = '.fits'
+            if (catalog_type == 'halo') or (catalog_type=='halos'): 
+                expected_filename_suffix = 'halos.fits'
+            elif (catalog_type == 'particle') or (catalog_type=='particles'):
+                expected_filename_suffix = 'particles.fits'
+            else:
+                expected_filename_suffix = '.fits'
             ### Grab all filenames with the assumed suffix
-            #for a in soup.find_all('a'):
-            #    link = a['href']
-                #if link[-len(expected_filename_suffix):]==expected_filename_suffix: 
-            #    file_list.append(a['href'])
+            for a in soup.find_all('a'):
+                link = a['href']
+                if link[-len(expected_filename_suffix):]==expected_filename_suffix: 
+                    file_list.append(a['href'])
         ##################
         ### Some other url managed by the user
         else:
