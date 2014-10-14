@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-from ..configuration import Config
+from ..configuration import get_halotools_cache_dir
+from ..configuration import get_catalogs_dir
+from ..configuration import get_local_filename_from_remote_url
+from ..configuration import list_of_catalogs_in_cache
 
 """
 def test_code_dir():

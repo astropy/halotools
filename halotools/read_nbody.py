@@ -4,7 +4,7 @@ Methods and classes to load halo and particle catalogs into memory.
 
 """
 
-__all__=['simulation','processed_snapshot','Catalog_Manager']
+__all__=['processed_snapshot','Catalog_Manager']
 
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
@@ -87,6 +87,9 @@ class processed_snapshot(object):
     def particles(self):
         """ Method to load simulation particle data into memory. 
 
+        The property decorator syntax allows this method to be called 
+        as if it is an attribute.
+
         """
 
         particles = self.catalog_manager.load_catalog(
@@ -100,6 +103,9 @@ class processed_snapshot(object):
     @property
     def halos(self):
         """ Method to load simulation halo catalog into memory. 
+
+        The property decorator syntax allows this method to be called 
+        as if it is an attribute.
 
         """
 
@@ -415,6 +421,9 @@ class Catalog_Manager(object):
             If set to True, and if filename is not already stored in the cache directory, 
             method will attempt to download the file from the provided url. If there is no corresponding 
             file at the input url, an exception will be raised.
+
+        url : string 
+            Web location from which to download the catalog if it is not present in the cache directory.
 
         Returns 
         -------
