@@ -31,11 +31,13 @@ class processed_snapshot(object):
         simname=defaults.default_simulation_name,
         scale_factor=defaults.default_scale_factor,
         halo_finder=defaults.default_halo_finder,
-        ask_permission=True):
+        download_yn=True):
 
         self.simulation_name = simname
         self.scale_factor = scale_factor
         self.halo_finder = halo_finder
+
+        self.download_yn = download_yn
 
         catman = Catalog_Manager()
         self.catalog_manager = catman
@@ -46,6 +48,15 @@ class processed_snapshot(object):
                 simname=self.simulation_name,
                 halo_finder=self.halo_finder)
             )
+
+        # If there are no matching halo catalogs in cache,
+        # set the halo catalog to the default halo catalog
+        if halo_catalog_filename==None:
+            halo_catalog_filename = catman.default_halo_catalog_filename
+            # Download the catalog, if desired
+            if download_yn==True:
+                catman.download_all_default_catalogs()
+
         self.halo_catalog_filename = halo_catalog_filename
         self.halo_catalog_dirname = configuration.get_catalogs_dir('halos')
 
@@ -55,6 +66,15 @@ class processed_snapshot(object):
                 simname=self.simulation_name,
                 halo_finder=self.halo_finder)
             )
+
+        # If there are no matching particle catalogs in cache,
+        # set the particle catalog to the default particle catalog
+        if particle_catalog_filename==None:
+            particle_catalog_filename = catman.default_particle_catalog_filename
+            # Download the catalog, if desired
+            if download_yn==True:
+                catman.download_all_default_catalogs()
+
         self.particle_catalog_filename = particle_catalog_filename
         self.particle_catalog_dirname = configuration.get_catalogs_dir('particles')
 
@@ -71,9 +91,11 @@ class processed_snapshot(object):
         and then load it into memory, again using astropy.io.fits.
 
         """
+
         particles = self.catalog_manager.load_catalog(
             dirname = self.particle_catalog_dirname,
-            filename=self.particle_catalog_filename)
+            filename=self.particle_catalog_filename,
+            download_yn = self.download_yn)
 
         return particles
 
@@ -94,7 +116,8 @@ class processed_snapshot(object):
 
         halos = self.catalog_manager.load_catalog(
             dirname = self.halo_catalog_dirname,
-            filename=self.halo_catalog_filename)
+            filename=self.halo_catalog_filename,
+            download_yn = self.download_yn)
 
         return halos
  
