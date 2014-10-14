@@ -13,7 +13,7 @@ from ..read_nbody import particles
 from ..make_mocks import HOD_mock
 import os
 
-
+"""
 def test_Zheng07_mock():
     #relative_filepath = '../CATALOGS/'
     #catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath)
@@ -33,6 +33,9 @@ def test_Zheng07_mock():
     satellite_fraction = mock.num_total_sats/float(mock.num_total_gals)
     reasonable_satellite_fraction_boolean = (satellite_fraction > 0.1) and (satellite_fraction < 0.3)
     assert reasonable_satellite_fraction_boolean == True
+"""
+
+
 
 """
 
