@@ -7,13 +7,16 @@ Module expressing various default values of the mock-making code.
 #                        unicode_literals)
 import os
 import sys
+import configuration
 
 ### Default halo catalog (used in read_nbody)
 # The following parameters are used by the 
 # simulation object in the read_nbody module
 default_simulation_name = 'bolshoi'
-default_halo_finder = 'rockstar_V1.5'
+default_halo_finder = 'rockstar'
 default_scale_factor = 1.0003
+default_numptcl = 2.0e5
+
 
 ### Default particle data (used in read_nbody)
 # The following parameters are used by the 
@@ -82,8 +85,18 @@ default_halo_type_calculator_spacing=0.1
 
 default_assembias_key = 'VMAX'
 
-relative_filepath = '/CATALOGS/'
-catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath) 
+aph_web_location = 'http://www.astro.yale.edu/aphearin/Data_files/'
+behroozi_web_location = 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
+
+
+halo_catalog_dirname = configuration.get_catalogs_dir('halos')
+particle_catalog_dirname = configuration.get_catalogs_dir('particles')
+
+
+scale_factor_difference_tol = 0.05
+
+
+
 
 
 
