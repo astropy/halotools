@@ -87,14 +87,6 @@ class processed_snapshot(object):
     def particles(self):
         """ Method to load simulation particle data into memory. 
 
-        The behavior of this method is governed by the astropy utility get_readable_fileobj. 
-        If the particle dataset is already present in the astropy cache directory, 
-        get_readable_fileobj will detect it and the retrieve_particles method 
-        will use astropy.io.fits to load the particles into memory. 
-        If the catalog is not there, 
-        get_readable_fileobj will download it from www.astro.yale.edu/aphearin, 
-        and then load it into memory, again using astropy.io.fits.
-
         """
 
         particles = self.catalog_manager.load_catalog(
@@ -108,14 +100,6 @@ class processed_snapshot(object):
     @property
     def halos(self):
         """ Method to load simulation halo catalog into memory. 
-
-        The behavior of this method is governed by the astropy utility get_readable_fileobj. 
-        If the particle dataset is already present in the astropy cache directory, 
-        get_readable_fileobj will detect it and the retrieve_particles method 
-        will use astropy.io.fits to load the particles into memory. 
-        If the catalog is not there, 
-        get_readable_fileobj will download it from www.astro.yale.edu/aphearin, 
-        and then load it into memory, again using astropy.io.fits.
 
         """
 
@@ -195,8 +179,6 @@ class Catalog_Manager(object):
         ##################
         ### APH url case (simpler, since only two default catalogs are hosted here)
         elif url==defaults.aph_web_location:
-            #Currently broken due to permissions settings at Yale
-            pass
             ### Set naming conventions of the files hosted at Yale
             if (catalog_type == 'halo') or (catalog_type=='halos'): 
                 expected_filename_suffix = 'halos.fits'
@@ -530,29 +512,6 @@ class particles(object):
         self.num_ptcl_string = num_ptcl_string
 
         self.particle_data = self.get_particles(manual_dirname,ask_permission)
-
-    def retrieve_particles(self,ask_permission=False):
-        """ Method to load simulation particle data into memory. 
-
-        The behavior of this method is governed by the astropy utility get_readable_fileobj. 
-        If the particle dataset is already present in the astropy cache directory, 
-        get_readable_fileobj will detect it and the retrieve_particles method 
-        will use astropy.io.fits to load the particles into memory. 
-        If the catalog is not there, 
-        get_readable_fileobj will download it from www.astro.yale.edu/aphearin, 
-        and then load it into memory, again using astropy.io.fits.
-
-        """
-
-        with get_readable_fileobj(url_string,cache=True) as f: 
-            fits_object = fits.HDUList.fromfile(f)
-            particle_catalog = fits_object[1].data
-            return particle_catalog
-
-
-
-        pass
-
 
     def get_particles(self,manual_dirname=None,ask_permission=False):
         """ Method to load simulation particle data into memory. 
