@@ -237,8 +237,6 @@ class Catalog_Manager(object):
 
         return Lbox, particle_mass, softening 
 
-
-
     def identify_relevant_catalogs(self,catalog_type=None,
         simname=None,halo_finder=None):
         """ Look in cache for any catalog that matches the inputs.

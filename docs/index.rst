@@ -32,3 +32,4 @@ Reference/API
 .. automodapi:: halotools.read_nbody
 .. automodapi:: halotools.defaults
 .. automodapi:: halotools.jeans
+.. automodapi:: halotools.configuration

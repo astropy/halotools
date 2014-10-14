@@ -1,9 +1,12 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 """This module standardizes access to
 various files used throughout the halotools package. 
-Global scope functions have been modified from the 
-paths methods of the astropy config sub-package.
 """
+
+__all__=['get_halotools_cache_dir','get_catalogs_dir',
+'get_local_filename_from_remote_url','list_of_catalogs_in_cache']
+
+
 import os
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 import warnings
@@ -37,6 +40,11 @@ def get_halotools_cache_dir():
 def get_catalogs_dir(catalog_type):
     """ Find the path to the halotools cache directory. 
     If the directory doesn't exist, make it, then return the path. 
+
+    Parameters
+    ----------
+    catalog_type : string 
+        String giving the type of catalog. Should be 'particles' or 'halos'.
 
     Returns
     -------
@@ -98,7 +106,20 @@ def get_local_filename_from_remote_url(remote_url):
 
 def list_of_catalogs_in_cache(catalog_type='halos'):
     """ Returns a list of strings of filenames pointing to every 
-    catalog currently in the cache directory"""
+    catalog currently in the cache directory.
+
+    Parameters
+    ----------
+    catalog_type : string, optional
+        String giving the type of catalog. Should be 'particles' or 'halos'.
+
+    Returns
+    -------
+    file_list : array_like
+        List of strings. Each entry corresponds to a filename of a catalog in 
+        the cache directory.
+
+    """
 
     from os import listdir
     from os.path import isfile, join
