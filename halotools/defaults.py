@@ -1,30 +1,24 @@
 
 """
-Module expressing various default values of the mock-making code.
+Module expressing various default values of the mock-making code. 
+
+All hard-coding should be restricted to this module, whenever possible.
 """
 
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
-import os
-import sys
+import os, sys, configuration
 
 ### Default halo catalog (used in read_nbody)
 # The following parameters are used by the 
 # simulation object in the read_nbody module
 default_simulation_name = 'bolshoi'
-default_halo_finder = 'rockstar_V1.5'
+default_halo_finder = 'rockstar'
 default_scale_factor = 1.0003
+default_numptcl = 2.0e5
 
-### Default particle data (used in read_nbody)
-# The following parameters are used by the 
-# particles object in the read_nbody module
-default_size_particle_data = '2e5'
-
-
+# Default thresholds for mocks
 default_luminosity_threshold = -20
-
-# Default stellar mass threshold for stellar mass
-# limited samples
 default_stellar_mass_threshold = 10.5
 
 # Small numerical value passed to the scipy Poisson number generator. 
@@ -78,12 +72,27 @@ default_halo_type_split = {
 	'halo_type_split_ordinates' : [0.1,0.9,0.5,0.9]
 	}
 
+# Set the default binsize used in assigning types to halos
 default_halo_type_calculator_spacing=0.1
 
+# Set the default secondary halo parameter used to generate assembly bias
 default_assembias_key = 'VMAX'
 
-relative_filepath = '/CATALOGS/'
-catalog_dirname = os.path.join(os.path.dirname(__file__),relative_filepath) 
+# URLs of websites hosting catalogs used by the package
+aph_web_location = 'http://www.astro.yale.edu/aphearin/Data_files/'
+behroozi_web_location = 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
+
+# Convenience strings for the directory locations of the default catalogs (probably unnecessary)
+halo_catalog_dirname = configuration.get_catalogs_dir('halos')
+particle_catalog_dirname = configuration.get_catalogs_dir('particles')
+
+# If the user requests a certain snapshot for halos or particles, 
+# and the nearest available snapshot differs by more than the following amount, 
+# the code will issue a warning.
+scale_factor_difference_tol = 0.05
+
+
+
 
 
 
