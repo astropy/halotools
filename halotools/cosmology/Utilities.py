@@ -11,6 +11,7 @@
 ###################################################################################################
 
 import os
+import configuration
 
 ###################################################################################################
 
@@ -19,6 +20,17 @@ def printLine():
 	print('-------------------------------------------------------------------------------------')
 
 	return
+
+###################################################################################################
+
+# Get a directory for the persistent caching of data. Here, this directory is chosen to be the
+# directory where this file is located. This directory obviously already exists.
+
+def getCacheDir():
+	
+	path = configuration.get_halotools_cache_dir() + '/'
+	
+	return path
 
 ###################################################################################################
 
