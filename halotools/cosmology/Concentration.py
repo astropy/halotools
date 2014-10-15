@@ -6,7 +6,7 @@
 #
 ###################################################################################################
 #
-# This module implements the concentration model of Diemer & Kravtsov 2014. Internally, this model
+# This module implements the concentration model of Diemer & Kravtsov 2014b. Internally, this model
 # is based in concentration-peak height space, but the user can give either mass or peak height as
 # input parameters. There are multiple types of concentration functions in this module, depending
 # on the desired overdensity definition:
@@ -22,6 +22,12 @@
 #               nu. Given these parameters, the result is independent of redshift. This function
 #               is mostly intended for internal use, but can be used to predict concentration at
 #               a fixed power spectrum slope.
+#
+# WARNING:      The following concentration() function is not as accurate as the c200c() functions
+#               above, simply because it uses NFW profiles to convert from M200c and c200c to 
+#               other definitions. Real profiles do not exactly follow the NFW form (see, e.g.,
+#               Diemer & Kravtsov 2014a), leading to inaccuracies of up to 20% at some redshifts
+#               and masses. See Appendix C in Diemer & Kravtsov 2014b for details.
 #
 # concentration This function predicts the c-M relation for mass definitions other than 200c.
 #               Mass definitions are given in a string format. Valid inputs are 
@@ -133,14 +139,16 @@ def c200c_n(nu, n, statistic = 'median'):
 
 ###################################################################################################
 
+# WARNING: The concentration predicted for mass definitions other than c200c is not as accurate as
+#          for c200c, due to differences between real profiles and the NFW approximation. See the 
+#          top of this file for details. Whenever possible, it is recommended to use the c200c 
+#          functions above.
+
 # Concentration for general mass definitions. In contrast to the c200c functions above, the input 
 # mass M can be in any mass definition mdef (see documentation at the top of this file for valid
 # formats). The concentration is returned in the same mass definition, e.g. cvir if mdef == 'vir'.
-#
-# Note that this function is significantly slower if mdef is not '200c'. Whenever possible, it is
-# recommended to use the c200c functions above.
 
-def concentration(M, z, statistic = 'median', mdef = '200c'):
+def concentration(M, z, statistic = 'median', mdef = '200c', conversion_profile = 'nfw'):
 	
 	def eq(M200c, M_desired):
 		
@@ -174,7 +182,8 @@ def concentration(M, z, statistic = 'median', mdef = '200c'):
 			M_max = 100.0 * M_use[i]
 			M200c = scipy.optimize.brentq(eq, M_min, M_max, args)
 			c200c = c200c_M(M200c, z, statistic = statistic)
-			_, _, c[i] = HaloDensityProfile.convertMassDefinition(M200c, c200c, z, '200c', mdef)
+			_, _, c[i] = HaloDensityProfile.convertMassDefinition(M200c, c200c, z, '200c', mdef, \
+												profile = conversion_profile)
 			
 		if not Utilities.isArray(M):
 			c = c[0]

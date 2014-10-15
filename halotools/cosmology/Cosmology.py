@@ -204,7 +204,7 @@ class Cosmology():
 	
 	def __init__(self, name = None, flat = True, \
 		Om0 = None, OL0 = None, Ob0 = None, H0 = None, sigma8 = None, ns = None, Tcmb0 = 2.725, \
-		power_law = False, power_law_n = 0.0, data_dir = 'Data/', text_output = False):
+		power_law = False, power_law_n = 0.0, text_output = False):
 		
 		if name == None:
 			raise Exception('A name for the cosmology must be set.')
@@ -253,7 +253,7 @@ class Cosmology():
 		self.z_bin_width = 0.001
 		
 		# Data directory and storage dictionary
-		self.data_dir = data_dir
+		self.data_dir = 'cosmology'
 		self.text_output = text_output
 		self.resetStorage()
 		
@@ -299,11 +299,11 @@ class Cosmology():
 	
 	def dataDir(self):
 		
-		path = Utilities.getCodeDir() + '/' + self.data_dir + '/'
+		path = Utilities.getCacheDir() + '/' + self.data_dir + '/'
 		
 		if not os.path.exists(path):
 			os.makedirs(path)
-			
+
 		return path
 
 	###############################################################################################
