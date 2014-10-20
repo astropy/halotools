@@ -41,15 +41,20 @@ def computeConcentration():
 	
 	Utilities.printLine()
 	print("Now compute concentrations for M200c:")
-	c = Concentration.c200c_M(M, 0.0, statistic = 'median')
+	c = Concentration.dk14_c200c_M(M, 0.0, statistic = 'median')
 	for i in range(len(M)):
 		print(("M200c = %.2e, c200c = %5.2f" % (M[i], c[i])))
 
 	Utilities.printLine()
 	print("Now compute concentrations for another mass definition, Mvir:")
-	c = Concentration.concentration(M, 0.0, statistic = 'median', mdef = 'vir')
+	c = Concentration.concentration(M, 'vir', 0.0, model = 'dk14', statistic = 'median')
 	for i in range(len(M)):
 		print(("Mvir = %.2e, cvir = %5.2f" % (M[i], c[i])))
+
+	Utilities.printLine()
+	print("We note that the prediction for mass definitions other than c200c is not as accurate")
+	print("due to differences between the real density profiles and the NFW approximation that")
+	print("is used for the conversion. See Appendix C of Diemer & Kravtsov 2014b for details.")
 	
 	return
 
@@ -114,7 +119,7 @@ def computeConcentrationTable(cosmo_name, statistic = 'median'):
 		M200c = 10**numpy.arange(log_M_min, log_M_max + bin_width_logM, bin_width_logM)
 		M200c = M200c[:n_M_bins]	
 		nu200c = cosmo.M_to_nu(M200c, z[i])
-		c200c = Concentration.c200c_nu(nu200c, z[i], statistic)
+		c200c = Concentration.dk14_c200c_nu(nu200c, z[i], statistic)
 		
 		for j in range(len(M200c)):
 			line = '%5.2f  %5.3f  %8.2e  %5.2f' % (z[i], nu200c[j], M200c[j], c200c[j])

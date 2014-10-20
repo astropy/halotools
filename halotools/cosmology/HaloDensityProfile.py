@@ -87,30 +87,37 @@ def pseudoEvolve(M_i, c_i, z_i, mdef_i, z_f, mdef_f):
 #
 # The function needs to assume a form of the density profile as a function of M and c. By default,
 # the NFW profile is used, but the user can also choose profile = 'dk14' for the DK14 profile. Note
-# that the latter version is much slower.
+# that the latter version is much slower. If return_parameters == True, the function also returns
+# additional information about the density profile used for the conversion. 
 
-def convertMassDefinition(M, c, z, mdef_in, mdef_out, profile = 'nfw'):
+def convertMassDefinition(M, c, z, mdef_in, mdef_out, \
+						profile = 'nfw', return_parameters = False):
 
 	if profile == 'nfw':
 		
 		Mnew, Rnew = pseudoEvolve(M, c, z, mdef_in, z, mdef_out)
-		_, rs, _ = NFW_getParameters(M, c, z, mdef_in)
+		Rold, rs, rho_s = NFW_getParameters(M, c, z, mdef_in)
 		cnew = Rnew / rs
+		
+		ret = (Mnew, Rnew, cnew)
+		if return_parameters:
+			ret = ret + (Rold, rs, rho_s)
 	
 	elif profile == 'dk14':
 		
 		par = DK14_getParameters(M, mdef_in, z, c = c, selected = 'by_mass', part = 'inner')
-		
-		# The DK14 profile "lives" in R200m space. Thus, R200m is automatically computed.
 		if mdef_out == '200m':
 			Rnew = par.R200m
 		else:
 			Rnew = DK14_getR(z, mdef_out, par)
-			
 		Mnew = M_Delta(Rnew, z, mdef_out)
 		cnew = Rnew / par.rs
+
+		ret = (Mnew, Rnew, cnew)
+		if return_parameters:
+			ret = ret + (par)
 		
-	return Mnew, Rnew, cnew
+	return ret
 
 ###################################################################################################
 # FUNCTIONS RELATED TO GENERAL DENSITY PROFILES
