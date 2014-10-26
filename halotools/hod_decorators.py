@@ -33,17 +33,21 @@ def main():
     print('Galaxy types: ',m.gal_types)
     print('model parameters:',m.parameter_dict)
     print('Mean Ncen:',m.mean_occupation('centrals'))
-    #print('Mean Nsat:',m.mean_occupation('satellites'))
+    print(m.mc_occupation('centrals'))
+    print(m.baseline_model)
     print('')
 
     satellite_params={'alpha':1.02}
-    m = Weinberg_Centrals(satellite_params,m)
+    m = Berlind_Satellites(satellite_params,m)
     print('')
     print('Galaxy types: ',m.gal_types)
     print('model parameters:',m.parameter_dict)
     print('Mean Ncen:',m.mean_occupation('centrals'))
-    #print('Mean Nsat:',m.mean_occupation('satellites'))
+    print('Mean Nsat:',m.mean_occupation('satellites'))
+    print(m.baseline_model)
     print('')
+    print(m.mc_occupation('centrals'))
+    #print(m.mc_occupation('satellites'))
 
 
 
@@ -89,6 +93,11 @@ class HOD_Model(object):
     def mean_occupation(self,gal_type):
         raise TypeError("Mean Occupation for input gal_type has not been defined")
 
+    def mc_occupation(self,gal_type):
+        print("testing A")
+        raise TypeError("Monte Carlo Occupation for input gal_type has not been defined")
+
+
 
 class Weinberg_Centrals(HOD_Model):
     """ Traditional erf model of central occupations. 
@@ -103,16 +112,29 @@ class Weinberg_Centrals(HOD_Model):
         # and threshold and baseline_model to None
         if baseline_model is None:
             HOD_Model.__init__(self)
-        self.baseline_model=baseline_model
+        else:
+            self.baseline_model=baseline_model
         if extend_params is True:
             self.extend_params(params,'centrals')
 
     def mean_occupation(self,gal_type):
         if gal_type == 'centrals':
-            return 1
+            return 0.5
         else:
             return self.baseline_model.mean_occupation(gal_type)
-            
+
+    def mc_occupation(self,gal_type):
+        print("Testing Weinberg")
+        if gal_type == 'centrals':
+            Ngals = 5
+            mcran = np.random.random(Ngals)
+            has_central = mcran < self.mean_occupation(gal_type)
+            return has_central
+        else:
+            return self.baseline_model.mc_occupation(gal_type)
+
+
+
 
 class Berlind_Satellites(HOD_Model):
     """ Traditional power law model of satellite occupations. 
@@ -127,7 +149,9 @@ class Berlind_Satellites(HOD_Model):
         # and threshold and baseline_model to None
         if baseline_model is None:
             HOD_Model.__init__(self)
-        self.baseline_model=baseline_model
+        else:
+            self.baseline_model=baseline_model
+
         if extend_params is True:
             self.extend_params(params,'satellites')
 
@@ -137,7 +161,16 @@ class Berlind_Satellites(HOD_Model):
         else:
             return self.baseline_model.mean_occupation(gal_type)
 
-
+"""
+    def mc_occupation(self,gal_type):
+        if gal_type == 'satellites':
+            Ngals = 5
+            mcran = np.random.random(Ngals)
+            has_central = mcran < self.mean_occupation(gal_type)
+            return has_central
+        else:
+            return self.baseline_model.mc_occupation(gal_type)
+"""
 
 
 
