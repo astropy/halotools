@@ -33,3 +33,6 @@ Reference/API
 .. automodapi:: halotools.defaults
 .. automodapi:: halotools.jeans
 .. automodapi:: halotools.configuration
+.. automodapi:: halotools.occupation_helpers
+.. automodapi:: halotools.hod_components
+.. automodapi:: halotools.hod_factory

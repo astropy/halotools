@@ -76,7 +76,21 @@ def format_parameter_keys(input_parameter_dict,correct_initial_keys,gal_type):
     Parameters 
     ----------
     input_parameter_dict : dictionary
-    
+        dictionary of parameters being used by the component model.
+
+    correct_initial_keys : list
+        list of strings providing the correct set of keys 
+        that input_parameter_dict should have. 
+
+    gal_type : string
+        Galaxy type of the population being modeled by the component model. 
+
+    Returns 
+    -------
+    output_parameter_dict : dictionary 
+        Provided that the keys of input_parameter_dict are correct, 
+        the output dictionary will be identical to the input, except 
+        now each key has the gal_type string appended to it. 
     """
 
     initial_keys = input_parameter_dict.keys()

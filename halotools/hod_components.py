@@ -7,7 +7,7 @@ by composing the behavior of the components.
 
 """
 
-__all__ = ['Zheng07_Centrals']
+__all__ = ['Zheng07_Centrals','Zheng07_Satellites']
 
 
 import numpy as np
@@ -21,8 +21,6 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
 import occupation_helpers as occuhelp
-
-
 
 
 class Zheng07_Centrals(object):

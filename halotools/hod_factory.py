@@ -6,6 +6,8 @@ composite HOD models from a set of components.
 
 """
 
+__all__ = ['HOD_Model']
+
 import numpy as np
 
 class HOD_Model(object):
