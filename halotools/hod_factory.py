@@ -73,8 +73,8 @@ class HOD_Model(object):
 				"by any of the components of this composite model")			
 
 		if component_key not in self.component_model_dict[gal_type]:
-			raise KeyError("Could not find method to compute "
-				" method in the provided component model")
+			raise KeyError("Could not find method to retrieve "
+				" inherited behavior from the provided component model")
 
 	def retrieve_inherited_behavior(self,inherited_method,*args):
 
