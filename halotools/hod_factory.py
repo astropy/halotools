@@ -10,9 +10,25 @@ import numpy as np
 
 class HOD_Model(object):
 	""" The most basic HOD model object. 
+	The only methods are for assigning the mean occupation of a galaxy population 
+	to a halo, the intra-halo radial profile of that population, and the 
+	accompanying methods to generate Monte Carlo realizations of those methods. 
+
+	All behavior is derived from external classes passed to the constructor via 
+	component_model_dict, which serves as a set of instructions for how the 
+	composite model is to be built from the components.  
+
 	"""
 
 	def __init__(self,component_model_dict):
+		""" The methods of this class derives their behavior from other, external classes, 
+		passed in the form of the component_model_dict, a dictionary whose keys 
+		are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
+		The values of the component_model_dict are themselves dictionaries whose keys are 
+		strings specifying the type of model being passes, e.g., 'occupation_model', and values 
+		are instances of that type of model. The component_model_dict dictionary is built by 
+		the hod_designer interface. 
+		"""
 		self.component_model_dict = component_model_dict
 		self.gal_types = component_model_dict.keys()
 
@@ -33,6 +49,9 @@ class HOD_Model(object):
 
 
 	def mc_occupation(self,gal_type,*args):
+		""" Method providing a Monte Carlo realization of the mean occupation.
+		The behavior of this method is inherited from one of the component models.
+		"""
 
 		self.test_component_consistency(gal_type,'occupation_model')
 
@@ -44,6 +63,10 @@ class HOD_Model(object):
 		
 
 	def mean_profile_parameters(self,gal_type,*args):
+		""" Method returning the mean value of the parameters governing the radial profile 
+		of gal_type galaxies. 
+		The behavior of this method is inherited from one of the component models.
+		"""
 
 		self.test_component_consistency(gal_type,'profile_model')
 
@@ -54,6 +77,9 @@ class HOD_Model(object):
 		return output_profiles
 
 	def mc_profile(self,gal_type,*args):
+		""" Method returning a Monte Carlo realization of the radial profile. 
+		The behavior of this method is inherited from one of the component models.
+		"""
 
 		self.test_component_consistency(gal_type,'profile_model')
 
@@ -77,6 +103,9 @@ class HOD_Model(object):
 				" inherited behavior from the provided component model")
 
 	def retrieve_inherited_behavior(self,inherited_method,*args):
+		""" Method whose function is solely to call the component model methods 
+		using the correct number of arguments. 
+		"""
 
 		if len(args)==1:
 			primary_haloprop = args[0]
