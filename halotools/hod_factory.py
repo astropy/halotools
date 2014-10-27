@@ -36,8 +36,6 @@ class HOD_Model(object):
 
 		self.test_component_consistency(gal_type,'occupation_model')
 
-		# For galaxies of type gal_type, the behavior of this method 
-		# will be set by the inherited occupation_model object 
 		occupation_model = self.component_model_dict[gal_type]['occupation_model']
 		inherited_method = occupation_model.mc_occupation
 		output_mc_realization = self.retrieve_inherited_behavior(inherited_method,args)
@@ -49,8 +47,6 @@ class HOD_Model(object):
 
 		self.test_component_consistency(gal_type,'profile_model')
 
-		# For galaxies of type gal_type, the behavior of this method 
-		# will be set by the inherited occupation_model object 
 		profile_model = self.component_model_dict[gal_type]['profile_model']
 		inherited_method = occupation_model.mean_profile_parameters
 		output_profiles = self.retrieve_inherited_behavior(inherited_method,args)
@@ -61,7 +57,11 @@ class HOD_Model(object):
 
 		self.test_component_consistency(gal_type,'profile_model')
 
-		pass
+		profile_model = self.component_model_dict[gal_type]['profile_model']
+		inherited_method = occupation_model.mc_profile
+		output_mc_realization = self.retrieve_inherited_behavior(inherited_method,args)
+
+		return output_mc_realization
 
 	def test_component_consistency(self,gal_type,component_key):
 		""" Simple tests to run to make sure that the desired behavior 
