@@ -7,6 +7,9 @@ by composing the behavior of the components.
 
 """
 
+__all__ = ['Zheng07_centrals']
+
+
 import numpy as np
 from scipy.special import erf 
 from scipy.stats import poisson
@@ -17,17 +20,45 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
-import occupation_helpers as ochelp
+import occupation_helpers as occuhelp
 
 
 
 
 class Zheng07_centrals(object):
+    """ Model for the occupation statistics of central galaxies, 
+    taken from Zheng et al. 2007, arXiv:0703457.
+
+
+    Parameters 
+    ----------
+    parameter_dict : dictionary, optional.
+        Contains values for the parameters specifying the model.
+        Dictionary keys are 'logMmin_cen' and 'sigma_logM'
+
+        Their best-fit parameter values provided in Table 1 of 
+        Zheng et al. (2007) are pre-loaded into this class, and 
+        can be accessed via the `published_parameters` method.
+
+    threshold : float, optional.
+        Luminosity threshold of the mock galaxy sample. 
+        If specified, input value must agree with 
+        one of the thresholds used in Zheng07 to fit HODs: 
+        [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+        Default value is specified in the `~halotools.defaults` module.
+
+    gal_type : string, optional
+        Sets the key value used by `~halotools.hod_designer` and 
+        `~halotools.hod_factory` to access the behavior of the methods 
+        of this class. 
+
+    """
 
     def __init__(self,parameter_dict=None,
-        threshold=defaults.default_luminosity_threshold):
+        threshold=defaults.default_luminosity_threshold,
+        gal_type='centrals'):
 
-        self.gal_type = 'centrals'
+        self.gal_type = gal_type
 
         self.threshold = threshold
         if parameter_dict is None:
@@ -36,7 +67,7 @@ class Zheng07_centrals(object):
             self.parameter_dict = parameter_dict
         # Put parameter_dict keys in standard form
         correct_keys = self.published_parameters(self.threshold).keys()
-        self.parameter_dict = ochelp.format_parameter_keys(
+        self.parameter_dict = occuhelp.format_parameter_keys(
             self.parameter_dict,correct_keys,self.gal_type)
         # get the new keys so that the methods know 
         # how to evaluate their functions
@@ -70,7 +101,8 @@ class Zheng07_centrals(object):
         logM = np.array(logM)
 
         mean_ncen = 0.5*(1.0 + erf(
-            (logM - self.parameter_dict[self.logMmin_key])/self.parameter_dict[self.sigma_logM_key]))
+            (logM - self.parameter_dict[self.logMmin_key])
+            /self.parameter_dict[self.sigma_logM_key]))
 
         return mean_ncen
 

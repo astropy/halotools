@@ -6,6 +6,8 @@ used by many of the hod model components.
 
 """
 
+__all__=['solve_for_polynomial_coefficients','format_parameter_keys']
+
 import numpy as np
 from copy import copy
 
@@ -68,6 +70,14 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
 
 
 def format_parameter_keys(input_parameter_dict,correct_initial_keys,gal_type):
+    """ Simple method that tests whether the input keys are correct, 
+    and if so, appends the key names with the galaxy type that they pertain to.
+
+    Parameters 
+    ----------
+    input_parameter_dict : dictionary
+    
+    """
 
     initial_keys = input_parameter_dict.keys()
 

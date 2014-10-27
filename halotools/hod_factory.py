@@ -30,9 +30,9 @@ class HOD_Model(object):
         the hod_designer interface. 
         """
         self.component_model_dict = component_model_dict
-        self.gal_types = component_model_dict.keys()
+        self.gal_types = self.component_model_dict.keys()
 
-        self.parameter_dict = {}
+        self.parameter_dict = self.retrieve_all_inherited_parameters(self.component_model_dict)
         self.publications = []
 
 
@@ -113,27 +113,32 @@ class HOD_Model(object):
 
         if len(args)==1:
             primary_haloprop = args[0]
-            output_occupation = inherited_method(primary_haloprop)
+            output = inherited_method(primary_haloprop)
         elif len(args)==2:
             primary_haloprop, secondary_haloprop = args[0], args[1]
-            output_occupation = inherited_method(primary_haloprop,secondary_haloprop)
+            output = inherited_method(primary_haloprop,secondary_haloprop)
         else:
             raise TypeError("Only one or two halo property inputs are supported by "
                 "mean_occupation method")
 
-    def retrieve_inherited_parameters(self):
+        return output
 
-        component_model_dict = self.component_model_dict
+    def retrieve_all_inherited_parameters(self,component_model_dict):
+
+        output_dict = {}
+
         # Loop over all galaxy types in the composite model
         for gal_type, model_list in component_model_dict.iteritems():
             # For each galaxy type, loop over its features
             for model_feature in model_list:
                 # Check to make sure we're not duplicating any dictionary keys
                 self.test_model_redundancy(
-                    self.parameter_dict,model_feature.parameter_dict)
-                self.parameter_dict = dict(
+                    output_dict,model_feature.parameter_dict)
+                output_dict = dict(
                     model_feature.parameter_dict.items() + 
-                    self.parameter_dict.items())
+                    output_dict.items())
+
+        return output_dict
 
     def test_model_redundancy(self,existing_composite_model,new_model_component):
         """ Check whether the new_model_component dictionary contains 
