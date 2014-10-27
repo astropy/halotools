@@ -7,6 +7,7 @@ used by many of the hod model components.
 """
 
 import numpy as np
+from copy import copy
 
 
 
@@ -64,4 +65,42 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
         quenching_model_matrix,ordinates)
 
     return np.array(polynomial_coefficients)
+
+
+def format_parameter_keys(input_parameter_dict,correct_initial_keys,gal_type):
+
+    initial_keys = input_parameter_dict.keys()
+
+    # Check that the keys are correct
+    # They should only be incorrect in cases where parameter_dict 
+    # was passed to the initialization constructor
+    if set(initial_keys) != set(correct_initial_keys):
+        raise KeyError("The parameter_dict passed to the initialization "
+            "constructor does not contain the expected keys")
+
+    output_parameter_dict = copy(input_parameter_dict)
+
+    key_suffix = '_'+gal_type
+    for old_key in initial_keys:
+        new_key = old_key+key_suffix
+        output_parameter_dict[new_key] = output_parameter_dict.pop(old_key)
+
+    return output_parameter_dict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
