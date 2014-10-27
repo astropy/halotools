@@ -26,17 +26,8 @@ class HOD_Model(object):
 		# For galaxies of type gal_type, the behavior of this method 
 		# will be set by the inherited occupation_model object 
 		occupation_model = self.component_model_dict[gal_type]['occupation_model']
-
-		if len(args)==1:
-			primary_haloprop = args[0]
-			output_occupation = occupation_model.mean_occupation(primary_haloprop)
-		elif len(args)==2:
-			primary_haloprop, secondary_haloprop = args[0], args[1]
-			output_occupation = occupation_model.mean_occupation(
-				primary_haloprop,secondary_haloprop)
-		else:
-			raise TypeError("Only one or two halo property inputs are supported by "
-				"mean_occupation method")				
+		inherited_method = occupation_model.mean_occupation
+		output_occupation = self.retrieve_inherited_behavior(inherited_method,args)
 
 		return output_occupation
 
@@ -45,13 +36,26 @@ class HOD_Model(object):
 
 		self.test_component_consistency(gal_type,'occupation_model')
 
-		pass
+		# For galaxies of type gal_type, the behavior of this method 
+		# will be set by the inherited occupation_model object 
+		occupation_model = self.component_model_dict[gal_type]['occupation_model']
+		inherited_method = occupation_model.mc_occupation
+		output_mc_realization = self.retrieve_inherited_behavior(inherited_method,args)
+
+		return output_mc_realization
+		
 
 	def mean_profile_parameters(self,gal_type,*args):
 
 		self.test_component_consistency(gal_type,'profile_model')
 
-		pass
+		# For galaxies of type gal_type, the behavior of this method 
+		# will be set by the inherited occupation_model object 
+		profile_model = self.component_model_dict[gal_type]['profile_model']
+		inherited_method = occupation_model.mean_profile_parameters
+		output_profiles = self.retrieve_inherited_behavior(inherited_method,args)
+
+		return output_profiles
 
 	def mc_profile(self,gal_type,*args):
 
@@ -71,6 +75,18 @@ class HOD_Model(object):
 		if component_key not in self.component_model_dict[gal_type]:
 			raise KeyError("Could not find method to compute "
 				" method in the provided component model")
+
+	def retrieve_inherited_behavior(self,inherited_method,*args):
+
+		if len(args)==1:
+			primary_haloprop = args[0]
+			output_occupation = inherited_method(primary_haloprop)
+		elif len(args)==2:
+			primary_haloprop, secondary_haloprop = args[0], args[1]
+			output_occupation = inherited_method(primary_haloprop,secondary_haloprop)
+		else:
+			raise TypeError("Only one or two halo property inputs are supported by "
+				"mean_occupation method")				
 
 
 
