@@ -330,7 +330,7 @@ class vdB03_Quiescence(object):
 
     """
 
-    def __init__(self, gal_type, parameter_dict=None, 
+    def __init__(self, gal_type, parameter_dict=defaults.default_quiescence_dict, 
         interpol_method='spline',input_spline_degree=3):
         """ 
         Parameters 
@@ -339,6 +339,10 @@ class vdB03_Quiescence(object):
             Sets the key value used by `~halotools.hod_designer` and 
             `~halotools.hod_factory` to access the behavior of the methods 
             of this class. 
+
+        parameter_dict : dictionary, optional 
+            Dictionary specifying what the quiescent fraction should be 
+            at a set of input values of the primary halo property. 
 
         interpol_method : string
             Keyword specifying how the method evaluates the result 
@@ -351,11 +355,7 @@ class vdB03_Quiescence(object):
 
         self.gal_type = gal_type
 
-
-        if parameter_dict is None:
-            self.parameter_dict = defaults.default_quiescence_dict
-        else:
-            self.parameter_dict = parameter_dict
+        self.parameter_dict = parameter_dict
         # Put parameter_dict keys in standard form
         correct_keys = defaults.default_quiescence_dict.keys()
         self.parameter_dict = occuhelp.format_parameter_keys(
@@ -377,8 +377,6 @@ class vdB03_Quiescence(object):
                 self.parameter_dict[self.abcissa_key],
                 self.parameter_dict[self.ordinates_key],
                 k=self.spline_degree)
-
-
 
 
     def mean_quiescence_fraction(self,input_abcissa):
@@ -412,7 +410,7 @@ class vdB03_Quiescence(object):
         model_ordinates = self.parameter_dict[self.ordinates_key]
 
         if self.interpol_method=='polynomial':
-            mean_quiescence_fraction = polynomial_from_table(
+            mean_quiescence_fraction = occuhelp.polynomial_from_table(
                 model_abcissa,model_ordinates,input_abcissa)
         elif self.interpol_method=='spline':
             mean_quiescence_fraction = self.spline_function(input_abcissa)
