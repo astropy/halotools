@@ -14,13 +14,16 @@ import numpy as np
 from scipy.special import erf 
 from scipy.stats import poisson
 from scipy.optimize import brentq
+from scipy.interpolate import UnivariateSpline as spline
+
 import defaults
+from utils.array_utils import array_like_length as aph_len
+import occupation_helpers as occuhelp
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
-import occupation_helpers as occuhelp
 
 
 class Zheng07_Centrals(object):
@@ -328,9 +331,26 @@ class vdB03_Quiescence(object):
     """
 
     def __init__(self, gal_type, parameter_dict=None, 
-        interpol_method='spline'):
+        interpol_method='spline',input_spline_degree=3):
+        """ 
+        Parameters 
+        ----------
+        gal_type : string, optional
+            Sets the key value used by `~halotools.hod_designer` and 
+            `~halotools.hod_factory` to access the behavior of the methods 
+            of this class. 
+
+        interpol_method : string
+            Keyword specifying how the method evaluates the result 
+            for abscissa that differ from the small number of values 
+            in self.parameter_dict. 
+            Supported options are 'spline' and 'polynomial'.
+
+
+        """
 
         self.gal_type = gal_type
+
 
         if parameter_dict is None:
             self.parameter_dict = defaults.default_quiescence_dict
@@ -343,8 +363,76 @@ class vdB03_Quiescence(object):
         self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
         self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
 
+        # Set the interpolation scheme 
+        if interpol_method not in ['spline', 'polynomial']:
+            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
+        self.interpol_method = interpol_method
 
-    
+        if self.interpol_method=='spline':
+            scipy_maxdegree = 5
+            self.spline_degree = np.min(
+                [scipy_maxdegree, input_spline_degree, 
+                aph_len(self.parameter_dict[self.abcissa_key])-1])
+            self.spline_function = spline(
+                self.parameter_dict[self.abcissa_key],
+                self.parameter_dict[self.ordinates_key],
+                k=self.spline_degree)
+
+
+
+
+    def mean_quiescence_fraction(self,input_abcissa):
+        """
+        Expected fraction of gal_type galaxies that are quiescent 
+        as a function of the primary halo property.
+
+        Parameters 
+        ----------
+        input_abcissa : array_like
+            array of primary halo property at which the quiescent fraction 
+            is being computed. 
+
+        Returns 
+        -------
+        mean_quiescence_fraction : array_like
+            Values of the quiescent fraction evaluated at input_abcissa. 
+
+        Notes 
+        -----
+        The model assumes the quenched fraction is a polynomial in logM.
+        The degree N quenching polynomial is determined by solving for 
+        the unique polynomial with values given by the central quenching ordinates 
+        at the logM abcissa. The coefficients of this polynomial are 
+        solved for by the solve_for_quenching_polynomial_coefficients method.
+        This function assumes that these coefficients have already been solved for and 
+        bound to the input object as an attribute.
+         
+        """
+        model_abcissa = self.parameter_dict[self.abcissa_key]
+        model_ordinates = self.parameter_dict[self.ordinates_key]
+
+        if self.interpol_method=='polynomial':
+            mean_quiescence_fraction = polynomial_from_table(
+                model_abcissa,model_ordinates,input_abcissa)
+        elif self.interpol_method=='spline':
+            mean_quiescence_fraction = self.spline_function(input_abcissa)
+        else:
+            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
+
+        # Enforce boundary conditions of any Fraction function
+        test_negative = np.array(mean_quiescence_fraction<0)
+        test_exceeds_unity = np.array(mean_quiescence_fraction>1)
+        mean_quiescence_fraction[test_negative]=0
+        mean_quiescence_fraction[test_exceeds_unity]=1
+
+        return mean_quiescence_fraction
+
+
+
+
+
+
+
 
 
 

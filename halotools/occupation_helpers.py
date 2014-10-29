@@ -10,7 +10,7 @@ __all__=['solve_for_polynomial_coefficients','format_parameter_keys']
 
 import numpy as np
 from copy import copy
-from utils.array_utils import initialize_matching_length_1d_array as init1d
+from utils.array_utils import array_like_length as aph_len
 
 
 
@@ -97,7 +97,7 @@ def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
         input_abcissa = np.array(input_abcissa)
     coefficient_array = solve_for_polynomial_coefficients(
         table_abcissa,table_ordinates)
-    output_ordinates = init1d(input_abcissa)
+    output_ordinates = np.zeros(aph_len(input_abcissa))
     # Use coefficients to compute values of the inflection function polynomial
     for n,coeff in enumerate(coefficient_array):
         output_ordinates += coeff*input_abcissa**n

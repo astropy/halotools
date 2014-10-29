@@ -51,7 +51,7 @@ default_quenching_parameters = {
 
 default_quiescence_dict = {
     'quiescence_abcissa' : [12,15], 
-    'quiescence_ordinates' : 0.25, 0.75]
+    'quiescence_ordinates' : [0.25, 0.75]
 }
 
 default_occupation_assembias_parameters = {

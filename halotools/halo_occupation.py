@@ -365,7 +365,6 @@ class Zheng07_HOD_Model(HOD_Model):
             (((halo_mass[idx_nonzero_satellites] - M0)/M1)
             **self.parameter_dict['alpha_sat']))
 
-        #mean_nsat = np.zeros(len(logM)) + 0.01
         return mean_nsat
 
     def mean_concentration(self,logM,halo_type):

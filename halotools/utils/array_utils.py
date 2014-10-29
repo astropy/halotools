@@ -11,7 +11,7 @@ import numpy as np
 
 import collections
 
-def initialize_matching_length_1d_array(x):
+def array_like_length(x):
 	""" Simple method to return a zero-valued 1-D numpy array 
 	with the length of the input x. 
 
@@ -20,29 +20,26 @@ def initialize_matching_length_1d_array(x):
 	x : array_like
 		Can be an iterable such as a list or non-iterable such as a float. 
 
-	y : array
-		1-D array with the same length as x.
+	Returns 
+	-------
+	array_length : int 
+		length of x
 
 	Notes 
 	----- 
-	Simple workaround of an awkward feature of numpy. It is common to desire 
-	an initialized numpy array, y, of the same length as some other array_like object, x, 
-	for example before looping over the initialized array. But non-iterables such as 
-	float return a TypeError when trying to evaluate the len() function on them, yet 
-	we would like to avoid having to write IF statements over and over again that account 
-	for this annoying case of not knowing whether x is iterable. This simple method solves 
-	this nuisance once and for all.
-
+	Simple workaround of an awkward feature of numpy. When evaluating 
+	the built-in len() function on non-iterables such as a 
+	float or int, len() returns a TypeError, rather than unity. 
+	Most annoyingly, the same is true on an object such as x=numpy.array(4), 
+	even though such an object formally counts as an Iterable, being an ndarray. 
+	This nuisance is so ubiquitous that it's convenient to have a single 
+	line of code that replaces the default python len() function with sensible behavior.
 	"""
 
-	if isinstance(x, collections.Iterable):
-		try:
-			array_length = len(x)
-			y = np.zeros(array_length)
-		except TypeError:
-			y = 0
-	else:
-		y = 0
+	try:
+		array_length = len(x)
+	except TypeError:
+		array_length = 1
 
-	return y
+	return array_length
 
