@@ -7,7 +7,7 @@ by composing the behavior of the components.
 
 """
 
-__all__ = ['Zheng07_Centrals','Zheng07_Satellites']
+__all__ = ['Zheng07_Centrals','Zheng07_Satellites','vdB03_Quiescence']
 
 
 import numpy as np
@@ -297,6 +297,39 @@ class Zheng07_Satellites(object):
         return parameter_dict
 
 
+
+class vdB03_Quiescence(object):
+    """
+    Traditional HOD-style model of galaxy quenching 
+    in which the expectation value for a binary SFR designation of the galaxy 
+    is purely determined by the primary halo property.
+    
+    Approach is adapted from van den Bosch et al. 2003. 
+    The parameters of this component model govern the value of the quiescent fraction 
+    at a particular set of masses. 
+    The class then uses an input `halotools.occupation_helpers` function 
+    to infer the quiescent fraction at values other than the input abcissa.
+
+    Notes 
+    -----
+    In the sequential construction of a composite HOD model, 
+    if `halotools.hod_designer` uses this component model *after* 
+    using a central occupation component, then by construction 
+    the resulting central galaxy stellar-to-halo mass relation 
+    has no dependence on quenched/active designation. 
+    Employing this component *before* the occupation component allows 
+    for an explicit halo mass dependence in the central galaxy SMHM. 
+    Thus the sequence of the composition of the quiescence and occupation models 
+    determines whether the resulting composite model satisfies the following 
+    classical separability condition between stellar mass and star formation rate: 
+
+    :math:`P( M_{*}, \dot{M_{*}} | M_{h}) = P( M_{*} | M_{h})\\times P( \dot{M_{*}} | M_{h})`
+
+    """
+
+    def __init__(self):
+
+        pass 
 
 
 
