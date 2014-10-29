@@ -345,11 +345,14 @@ class vdB03_Quiescence(object):
             at a set of input values of the primary halo property. 
 
         interpol_method : string
-            Keyword specifying how the method evaluates the result 
-            for abscissa that differ from the small number of values 
+            Keyword specifying how 'mean_quiescence_fraction' 
+            evaluates input value of the primary halo property 
+             that differ from the small number of values 
             in self.parameter_dict. 
-            Supported options are 'spline' and 'polynomial'.
-
+            The default 'spline' option interpolates the 
+            model's abcissa and ordinates. 
+            The 'polynomial' option uses the unique, degree N polynomial 
+            passing through the ordinates, where N is the number of supplied ordinates. 
 
         """
 
