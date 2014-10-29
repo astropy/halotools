@@ -45,32 +45,37 @@ default_Npts_radius_array = 101
 # Used by models in the halo_occupation module
 default_quenching_parameters = {
     'quenching_abcissa' : [12,15],
-    'central_quenching_ordinates' : [0.5,0.5], #polynomial coefficients determining quenched fraction of centrals
-    'satellite_quenching_ordinates' : [0.5,0.5] #polynomial coefficients determining quenched fraction of centrals
+    'central_quenching_ordinates' : [0.25,0.75], #polynomial coefficients determining quenched fraction of centrals
+    'satellite_quenching_ordinates' : [0.25,0.75] #polynomial coefficients determining quenched fraction of centrals
     }
 
+default_quiescence_dict = {
+    'quiescence_abcissa' : [12,15], 
+    'quiescence_ordinates' : 0.25, 0.75]
+}
+
 default_occupation_assembias_parameters = {
-	'assembias_abcissa' : [12,15],
-	'satellite_assembias_ordinates' : [0.5,0.5],
-	'central_assembias_ordinates' : [2,2]
-	}
+    'assembias_abcissa' : [12,15],
+    'satellite_assembias_ordinates' : [0.5,0.5],
+    'central_assembias_ordinates' : [2,2]
+    }
 
 default_quenching_assembias_parameters = {
-	'quenching_assembias_abcissa' : [12,13.5,15],
-	'satellite_quenching_assembias_ordinates' : [0.05,0.05,100],
-	'central_quenching_assembias_ordinates' : [20,-20,20]
-	}
+    'quenching_assembias_abcissa' : [12,13.5,15],
+    'satellite_quenching_assembias_ordinates' : [0.05,0.05,100],
+    'central_quenching_assembias_ordinates' : [20,-20,20]
+    }
 
 default_satcen_parameters = {
-	'assembias_abcissa' : [12,13.5,15],
-	'satellite_assembias_ordinates' : [1.5,1.25,0.5],
-	'central_assembias_ordinates' : [1.0,1.0,1.0]
-	}
+    'assembias_abcissa' : [12,13.5,15],
+    'satellite_assembias_ordinates' : [1.5,1.25,0.5],
+    'central_assembias_ordinates' : [1.0,1.0,1.0]
+    }
 
 default_halo_type_split = {
-	'halo_type_split_abcissa' : [12,13,14,15],
-	'halo_type_split_ordinates' : [0.1,0.9,0.5,0.9]
-	}
+    'halo_type_split_abcissa' : [12,13,14,15],
+    'halo_type_split_ordinates' : [0.1,0.9,0.5,0.9]
+    }
 
 # Set the default binsize used in assigning types to halos
 default_halo_type_calculator_spacing=0.1

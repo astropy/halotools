@@ -312,11 +312,11 @@ class vdB03_Quiescence(object):
 
     Notes 
     -----
-    In the sequential construction of a composite HOD model, 
+    In the construction sequence of a composite HOD model, 
     if `halotools.hod_designer` uses this component model *after* 
-    using a central occupation component, then by construction 
+    using a central occupation component, then  
     the resulting central galaxy stellar-to-halo mass relation 
-    has no dependence on quenched/active designation. 
+    will have no dependence on quenched/active designation. 
     Employing this component *before* the occupation component allows 
     for an explicit halo mass dependence in the central galaxy SMHM. 
     Thus the sequence of the composition of the quiescence and occupation models 
@@ -327,24 +327,24 @@ class vdB03_Quiescence(object):
 
     """
 
-    def __init__(self, gal_type, parameter_dict=None):
+    def __init__(self, gal_type, parameter_dict=None, 
+        interpol_method='spline'):
 
         self.gal_type = gal_type
 
-        self.threshold = threshold
         if parameter_dict is None:
-            self.parameter_dict = self.published_parameters(self.threshold)
+            self.parameter_dict = defaults.default_quiescence_dict
         else:
             self.parameter_dict = parameter_dict
         # Put parameter_dict keys in standard form
-        correct_keys = self.published_parameters(self.threshold).keys()
+        correct_keys = defaults.default_quiescence_dict.keys()
         self.parameter_dict = occuhelp.format_parameter_keys(
             self.parameter_dict,correct_keys,self.gal_type)
-        # get the new keys so that the methods know 
-        # how to evaluate their functions
-        self.logMmin_key = 'logMmin_'+self.gal_type
-        self.sigma_logM_key = 'sigma_logM_'+self.gal_type
+        self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
+        self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
 
+
+    
 
 
 
