@@ -315,6 +315,7 @@ class vdB03_Quiescence(object):
 
     Notes 
     -----
+
     In the construction sequence of a composite HOD model, 
     if `halotools.hod_designer` uses this component model *after* 
     using a central occupation component, then  
@@ -359,7 +360,6 @@ class vdB03_Quiescence(object):
             Degree of the spline interpolation for the case of interpol_method='spline'. 
             If there are k abcissa values specifying the model, input_spline_degree 
             is ensured to never exceed k-1, nor exceed 5. 
-
         """
 
         self.gal_type = gal_type
@@ -406,15 +406,13 @@ class vdB03_Quiescence(object):
 
         Notes 
         -----
-        The model assumes the quenched fraction is a polynomial in logM.
-        The degree N quenching polynomial is determined by solving for 
-        the unique polynomial with values given by the central quenching ordinates 
-        at the logM abcissa. The coefficients of this polynomial are 
-        solved for by the solve_for_quenching_polynomial_coefficients method.
-        This function assumes that these coefficients have already been solved for and 
-        bound to the input object as an attribute.
-         
+
+        Either assumes the quiescent fraction is a polynomial function 
+        of the primary halo property, or is interpolated from a grid. 
+        Either way, the behavior of this method is fully determined by 
+        its values at the model abcissa, as specified in parameter_dict. 
         """
+
         model_abcissa = self.parameter_dict[self.abcissa_key]
         model_ordinates = self.parameter_dict[self.ordinates_key]
 
