@@ -327,9 +327,23 @@ class vdB03_Quiescence(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, gal_type, parameter_dict=None):
 
-        pass 
+        self.gal_type = gal_type
+
+        self.threshold = threshold
+        if parameter_dict is None:
+            self.parameter_dict = self.published_parameters(self.threshold)
+        else:
+            self.parameter_dict = parameter_dict
+        # Put parameter_dict keys in standard form
+        correct_keys = self.published_parameters(self.threshold).keys()
+        self.parameter_dict = occuhelp.format_parameter_keys(
+            self.parameter_dict,correct_keys,self.gal_type)
+        # get the new keys so that the methods know 
+        # how to evaluate their functions
+        self.logMmin_key = 'logMmin_'+self.gal_type
+        self.sigma_logM_key = 'sigma_logM_'+self.gal_type
 
 
 

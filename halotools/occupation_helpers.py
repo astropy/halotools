@@ -68,6 +68,42 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
 
     return np.array(polynomial_coefficients)
 
+def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
+    """ Method to evaluate an input polynomial at the input_abcissa. 
+    The input polynomial is determined by `solve_for_polynomial_coefficients` 
+    from table_abcissa and table_ordinates. 
+
+    Parameters
+    ----------
+    table_abcissa : array 
+        Elements are the abcissa determining the input polynomial. 
+
+    table_ordinates : array 
+        Elements are the desired values of the input polynomial 
+        when evaluated at table_abcissa
+
+    input_abcissa : array 
+        Points at which to evaluate the input polynomial. 
+
+    Returns 
+    -------
+    output_ordinates : array 
+        Values of the input polynomial when evaluated at input_abscissa. 
+
+    """
+    coefficient_array = solve_for_polynomial_coefficients(
+        abcissa,ordinates)
+    output_ordinates = (
+        np.zeros(len(input_abcissa)))
+
+    # Use coefficients to compute values of the inflection function polynomial
+    for n,coeff in enumerate(coefficient_array):
+        output_quenched_fractions += coeff*primary_halo_property**n
+
+
+
+
+
 
 def format_parameter_keys(input_parameter_dict,correct_initial_keys,gal_type):
     """ Simple method that tests whether the input keys are correct, 
