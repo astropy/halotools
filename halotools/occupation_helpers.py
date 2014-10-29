@@ -10,6 +10,8 @@ __all__=['solve_for_polynomial_coefficients','format_parameter_keys']
 
 import numpy as np
 from copy import copy
+from utils.array_utils import initialize_matching_length_1d_array as init1d
+
 
 
 
@@ -91,17 +93,16 @@ def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
         Values of the input polynomial when evaluated at input_abscissa. 
 
     """
+    if not isinstance(input_abcissa, np.ndarray):
+        input_abcissa = np.array(input_abcissa)
     coefficient_array = solve_for_polynomial_coefficients(
-        abcissa,ordinates)
-    output_ordinates = (
-        np.zeros(len(input_abcissa)))
-
+        table_abcissa,table_ordinates)
+    output_ordinates = init1d(input_abcissa)
     # Use coefficients to compute values of the inflection function polynomial
     for n,coeff in enumerate(coefficient_array):
-        output_quenched_fractions += coeff*primary_halo_property**n
+        output_ordinates += coeff*input_abcissa**n
 
-
-
+    return output_ordinates
 
 
 
