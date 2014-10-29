@@ -336,23 +336,23 @@ class vdB03_Quiescence(object):
         Parameters 
         ----------
         gal_type : string, optional
-            Sets the key value used by `~halotools.hod_designer` and 
+            Sets the key value used by `halotools.hod_designer` and 
             `~halotools.hod_factory` to access the behavior of the methods 
             of this class. 
 
         parameter_dict : dictionary, optional 
             Dictionary specifying what the quiescent fraction should be 
             at a set of input values of the primary halo property. 
-            Default values are set in `halotools.defaults'. 
+            Default values are set in `halotools.defaults`. 
 
         interpol_method : string, optional 
-            Keyword specifying how 'mean_quiescence_fraction' 
+            Keyword specifying how `mean_quiescence_fraction` 
             evaluates input value of the primary halo property 
              that differ from the small number of values 
             in self.parameter_dict. 
-            The default 'spline' option interpolates the 
+            The default spline option interpolates the 
             model's abcissa and ordinates. 
-            The 'polynomial' option uses the unique, degree N polynomial 
+            The polynomial option uses the unique, degree N polynomial 
             passing through the ordinates, where N is the number of supplied ordinates. 
 
         input_spline_degree : int, optional

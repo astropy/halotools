@@ -2,8 +2,8 @@
 """
 
 The sole purpose of this module is to 
-provide an interface between `~halotools.hod_components`
-and `~halotools.hod_factory`. 
+provide an interface between `halotools.hod_components`
+and `halotools.hod_factory`. 
 
 """
 

@@ -36,3 +36,4 @@ Reference/API
 .. automodapi:: halotools.occupation_helpers
 .. automodapi:: halotools.hod_components
 .. automodapi:: halotools.hod_factory
+.. automodapi:: halotools.hod_designer
