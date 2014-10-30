@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 
-This module contains the model components used 
-by hod_designer to build composite HOD models 
+This module contains the components for occupation statistics 
+used by `halotools.hod_designer` to build composite HOD models 
 by composing the behavior of the components. 
 
 """
