@@ -107,6 +107,25 @@ class Zheng07_Centrals(object):
 
         return mean_ncen
 
+    def mc_occupation(self,logM):
+        """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
+
+        Parameters
+        ----------        
+        logM : array 
+            array of :math:`log_{10}(M)` of halos in catalog
+
+        Returns
+        -------
+        mc_abundance : array
+            array of length len(logM) giving the number of central galaxies in the halos. 
+    
+        """
+        mc_generator = np.random.random(aph_len(logM))
+        mc_abundance = np.where(mc_generator < self.mean_occupation(logM), 1, 0)
+
+        return mc_abundance
+
 
     def published_parameters(self,threshold):
         """
