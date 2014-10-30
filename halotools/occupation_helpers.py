@@ -148,6 +148,29 @@ def format_parameter_keys(input_parameter_dict,correct_initial_keys,gal_type):
 
     return output_parameter_dict
 
+def enforce_periodicity_of_box(coords, box_length):
+    """ Function used to apply periodic boundary conditions 
+    of the simulation, so that mock galaxies all lie in the range [0, Lbox].
+
+    Parameters
+    ----------
+    coords : array_like
+        float or ndarray containing a set of points with values ranging between 
+        [-box_length, 2*box_length]
+        
+    box_length : float
+        the size of simulation box (currently hard-coded to be Mpc/h units)
+
+    Returns
+    -------
+    periodic_coords : array_like
+        array with values and shape equal to input coords, 
+        but with periodic boundary conditions enforced
+
+    """
+    periodic_coords = np.where(coords > box_length, coords - box_length, coords)
+    periodic_coords = np.where(coords < 0, coords + box_length, coords)
+    return periodic_coords
 
 
 

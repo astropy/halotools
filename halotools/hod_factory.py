@@ -38,6 +38,8 @@ class HOD_Model(object):
         self.publications = []
 
 
+    # Consider deleting this method 
+    # In principle, the factory needs only know about the MC methods
     def mean_occupation(self,gal_type,*args):
         """ Method supplying the mean abundance of gal_type galaxies. 
         The behavior of this method is inherited from one of the component models. 
@@ -68,6 +70,8 @@ class HOD_Model(object):
         return output_mc_realization
         
 
+    # Consider deleting this method 
+    # In principle, the factory needs only know about the MC methods
     def mean_profile_parameters(self,gal_type,*args):
         """ Method returning the mean value of the parameters governing the radial profile 
         of gal_type galaxies. 
