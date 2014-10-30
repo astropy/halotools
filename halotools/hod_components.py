@@ -118,7 +118,7 @@ class Zheng07_Centrals(object):
         Returns
         -------
         mc_abundance : array
-            array of length len(logM) giving the number of central galaxies in the halos. 
+            array of length len(logM) giving the number of self.gal_type galaxies in the halos. 
     
         """
         mc_generator = np.random.random(aph_len(logM))
@@ -256,25 +256,54 @@ class Zheng07_Satellites(object):
         logM = np.array(logM)
         halo_mass = 10.**logM
 
-
         M0 = 10.**self.parameter_dict[self.logM0_key]
         M1 = 10.**self.parameter_dict[self.logM1_key]
-        mean_nsat = np.zeros(len(logM),dtype='f8')
-        idx_nonzero_satellites = (halo_mass - M0) > 0
 
+        # Call to np.where raises a harmless RuntimeWarning exception if 
+        # there are entries of input logM for which mean_nsat = 0
+        # Evaluating mean_nsat using the catch_warnings context manager 
+        # suppresses this warning
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            # Simultaneously evaluate mean_nsat and impose the usual cutoff
+            mean_nsat = np.where(halo_mass - M0 > 0, 
+                ((halo_mass - M0)/M1)**self.parameter_dict[self.alpha_key], 0)
 
-        mean_nsat[idx_nonzero_satellites] = (
-            (((halo_mass[idx_nonzero_satellites] - M0)/M1)
-            **self.parameter_dict[self.alpha_key]))
-
-        # If a central occupation model was passed to the constructor, 
-        # multiply the mean satellite occupation by the mean central occupation
+        #If a central occupation model was passed to the constructor, 
+        # multiply mean_nsat by an overall factor of mean_ncen
         if self.central_occupation_model is not None:
-            mean_ncen = self.central_occupation_model.mean_occupation(
-                logM[idx_nonzero_satellites])
-            mean_nsat[idx_nonzero_satellites] = mean_ncen*mean_nsat[idx_nonzero_satellites]
+            mean_nsat = np.where(mean_nsat > 0, 
+                mean_nsat*self.central_occupation_model.mean_occupation(logM), 
+                mean_nsat)
 
         return mean_nsat
+
+
+    def mc_occupation(self,logM):
+        """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
+        Assumes gal_type galaxies obey Poisson statistics. 
+
+        Parameters
+        ----------        
+        logM : array 
+            array of :math:`log_{10}(M)` of halos in catalog
+
+        Returns
+        -------
+        mc_abundance : array
+            array of length len(logM) giving the number of self.gal_type galaxies in the halos. 
+    
+        """
+
+        expectation_values = self.mean_occupation(logM)
+        # The scipy built-in Poisson number generator raises an exception 
+        # if its input is zero, so here we impose a simple workaround
+        expectation_values = np.where(expectation_values <=0, 
+            defaults.default_tiny_poisson_fluctuation, expectation_values)
+
+        mc_abundance = poisson.rvs(expectation_values)
+
+        return mc_abundance
 
     def published_parameters(self,threshold):
         """
