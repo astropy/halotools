@@ -9,6 +9,47 @@ Classes for halo profile objects.
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod
 import numpy as np
+from utils.array_utils import array_like_length as aph_len
+
+
+
+
+def anatoly_concentration(logM):
+    """ Power law fitting formula for the concentration-mass relation of Bolshoi host halos at z=0
+    Taken from Klypin et al. 2011, arXiv:1002.3660v4, Eqn. 12.
+
+    :math:`c(M) = c_{0}(M/M_{piv})^{\\alpha}`
+
+    Parameters
+    ----------
+    logM : array 
+        array of :math:`log_{10}M_{vir}` of halos in catalog
+
+    Returns
+    -------
+    concentrations : array
+
+    Notes 
+    -----
+    This is currently the only concentration-mass relation implemented. This will later be 
+    bundled up into a class with a bunch of different radial profile methods, NFW and non-.
+
+    Values are currently hard-coded to Anatoly's best-fit values:
+
+    :math:`c_{0} = 9.6`
+
+    :math:`\\alpha = -0.075`
+
+    :math:`M_{piv} = 10^{12}M_{\odot}/h`
+
+    """
+    
+    masses = np.zeros(aph_len(logM)) + 10.**np.array(logM)
+    c0 = 9.6
+    Mpiv = 1.e12
+    a = -0.075
+    concentrations = c0*(masses/Mpiv)**a
+    return concentrations
 
 
 @six.add_metaclass(ABCMeta)
@@ -16,8 +57,42 @@ class Halo_Profile(object):
     """ Container class for any halo profile.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self,parameter_function_dict):
+        """ 
+        Parameters 
+        ----------
+        parameter_function_dict : dict 
+            Dictionary of functions. Keys are the names of the 
+            parameters governing the behavior of the profile. 
+            Values are function objects governing how the profile 
+            parameters vary as a function of halo properties such as 
+            mass and accretion rate. 
+
+        """
+        self.parameter_function_dict = parameter_function_dict
+
+    def profile_parameter(self,profile_parameter_key,*args):
+        """ Method to compute the value of the profile parameter 
+        as a function of the halo properties. 
+        The behavior of this method is inherited by the function objects 
+        passed to the constructor of Halo_Profile. 
+
+        Parameters 
+        ----------
+        profile_parameter_key : string
+            Specifies the name of the profile parameter. 
+
+        args : array_like
+            Array of halo properties
+
+        Returns 
+        -------
+        parameters : array_like
+            Array of profile parameters. 
+
+        """
+        return self.parameter_function_dict[profile_parameter_key](args)
+
 
     @abstractmethod
     def density_profile(self,x,*args):
@@ -95,8 +170,9 @@ class Halo_Profile(object):
 
 class NFW_Profile(Halo_Profile):
 
-    def __init__(self):
-        pass
+    def __init__(self,
+        parameter_function_dict = {'conc':anatoly_concentration}):
+        Halo_Profile.__init__(self,parameter_function_dict)
 
     def density_profile(self,x,c):
         """ Intra-halo density profile. 
@@ -156,6 +232,14 @@ class NFW_Profile(Halo_Profile):
 
 
         
+
+
+
+
+
+
+
+
 
 
 
