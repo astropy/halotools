@@ -9,47 +9,11 @@ Classes for halo profile objects.
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod
 import numpy as np
+
 from utils.array_utils import array_like_length as aph_len
 
+import profile_components
 
-
-
-def anatoly_concentration(logM):
-    """ Power law fitting formula for the concentration-mass relation of Bolshoi host halos at z=0
-    Taken from Klypin et al. 2011, arXiv:1002.3660v4, Eqn. 12.
-
-    :math:`c(M) = c_{0}(M/M_{piv})^{\\alpha}`
-
-    Parameters
-    ----------
-    logM : array 
-        array of :math:`log_{10}M_{vir}` of halos in catalog
-
-    Returns
-    -------
-    concentrations : array
-
-    Notes 
-    -----
-    This is currently the only concentration-mass relation implemented. This will later be 
-    bundled up into a class with a bunch of different radial profile methods, NFW and non-.
-
-    Values are currently hard-coded to Anatoly's best-fit values:
-
-    :math:`c_{0} = 9.6`
-
-    :math:`\\alpha = -0.075`
-
-    :math:`M_{piv} = 10^{12}M_{\odot}/h`
-
-    """
-    
-    masses = np.zeros(aph_len(logM)) + 10.**np.array(logM)
-    c0 = 9.6
-    Mpiv = 1.e12
-    a = -0.075
-    concentrations = c0*(masses/Mpiv)**a
-    return concentrations
 
 
 @six.add_metaclass(ABCMeta)
@@ -171,7 +135,7 @@ class Halo_Profile(object):
 class NFW_Profile(Halo_Profile):
 
     def __init__(self,
-        parameter_function_dict = {'conc':anatoly_concentration}):
+        parameter_function_dict = {'conc':profile_components.anatoly_concentration}):
         Halo_Profile.__init__(self,parameter_function_dict)
 
     def density_profile(self,x,c):
