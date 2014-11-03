@@ -57,8 +57,6 @@ class Halo_Profile(object):
         """
         return self.parameter_function_dict[profile_parameter_key](args)
 
-
-    @abstractmethod
     def density_profile(self,x,*args):
         """ Intra-halo density profile. 
 
@@ -99,16 +97,11 @@ class Halo_Profile(object):
 
         Notes 
         -----
-        The generic behavior of this method derives from integrating the `density_profile` method. 
-        However, this behavior should be over-ridden by subclasses of profiles 
-        where the integral can be done analytically, such as for NFW profiles. 
-
+        The generic behavior of this method derives from either 
+        1) numerically integrating the `density_profile` method, 
+        or, preferably, 2) an explicit algebraic expression, in cases where 
+        `density_profile` can be integrated analytically. 
         """
-
-        # (1) code for interpolating from lookup table
-        # code for integrating self.density_profile
-        # will be over-ridden 
-
         pass
 
     def lookup_cumulative_profile(self):
@@ -196,29 +189,6 @@ class NFW_Profile(Halo_Profile):
 
 
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

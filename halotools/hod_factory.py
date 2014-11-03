@@ -27,7 +27,7 @@ class HOD_Model(object):
         passed in the form of the component_model_dict, a dictionary whose keys 
         are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
         The values of the component_model_dict are themselves dictionaries whose keys are 
-        strings specifying the type of model being passes, e.g., 'occupation_model', and values 
+        strings specifying the type of model being passed, e.g., 'occupation_model', and values 
         are instances of that type of model. The component_model_dict dictionary is built by 
         the hod_designer interface. 
         """
@@ -75,7 +75,7 @@ class HOD_Model(object):
         self.test_component_consistency(gal_type,'profile_model')
 
         profile_model = self.component_model_dict[gal_type]['profile_model']
-        inherited_method = occupation_model.mean_profile_parameters
+        inherited_method = profile_model.mean_profile_parameters
         output_profiles = self.retrieve_inherited_behavior(inherited_method,args)
 
         return output_profiles
@@ -88,7 +88,7 @@ class HOD_Model(object):
         self.test_component_consistency(gal_type,'profile_model')
 
         profile_model = self.component_model_dict[gal_type]['profile_model']
-        inherited_method = occupation_model.mc_profile
+        inherited_method = profile_model.mc_profile
         output_mc_realization = self.retrieve_inherited_behavior(inherited_method,args)
 
         return output_mc_realization
