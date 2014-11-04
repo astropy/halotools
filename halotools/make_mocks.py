@@ -394,8 +394,8 @@ class HOD_mock(object):
         logmasses = self._primary_halo_property
         halo_type_satellites = self._halo_type_satellites
 
-
-        # The following loop assigning satellite positions takes up nearly 100% of the mock population time
+        # The following loop assigning satellite positions 
+        #takes up nearly 100% of the mock population time
         start = time.time()
         for self.ii in satellite_index_array:
             logM = logmasses[self.ii]
