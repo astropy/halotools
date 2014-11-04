@@ -103,7 +103,8 @@ particle_catalog_dirname = configuration.get_catalogs_dir('particles')
 scale_factor_difference_tol = 0.05
 
 
-
+minimum_permitted_concentration = 1.0
+maximum_permitted_concentration = 25.0
 
 
 

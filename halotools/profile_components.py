@@ -183,10 +183,36 @@ class classic_spatial_bias(object):
                 [scipy_maxdegree, input_spline_degree, 
                 aph_len(self.parameter_dict[self.abcissa_key[profile_parameter]])-1])
                     )
-                #self.spline_function[profile_parameter] = spline(
-                #    self.parameter_dict[self.abcissa_key[profile_parameter]],
-                #    self.parameter_dict[self.ordinates_key[profile_parameter]],
-                #    k=self.spline_degree[profile_parameter])
+                self.spline_function[profile_parameter] = occuhelp.aph_spline(
+                    self.parameter_dict[self.abcissa_key[profile_parameter]],
+                    self.parameter_dict[self.ordinates_key[profile_parameter]],
+                    k=self.spline_degree[profile_parameter])
+
+    def profile_modulating_function(self,input_abcissa):
+        """
+        Factor by which gal_type galaxies differ from are quiescent 
+        as a function of the primary halo property.
+
+        Parameters 
+        ----------
+        input_abcissa : array_like
+            array of primary halo property at which the quiescent fraction 
+            is being computed. 
+
+        Returns 
+        -------
+        output_profile_parameters : array_like
+            Values of the profile parameters evaluated at input_abcissa. 
+
+        Notes 
+        -----
+        Either assumes the profile parameters are modulated from those 
+        of the underlying dark matter halo by a polynomial function 
+        of the primary halo property, or is interpolated from a grid. 
+        Either way, the behavior of this method is fully determined by 
+        its values at the model abcissa, as specified in parameter_dict. 
+        """
+        pass
 
 
 

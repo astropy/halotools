@@ -12,7 +12,7 @@ import numpy as np
 from copy import copy
 from utils.array_utils import array_like_length as aph_len
 
-
+from scipy.interpolate import UnivariateSpline as spline
 
 
 def solve_for_polynomial_coefficients(abcissa,ordinates):
@@ -190,6 +190,60 @@ def enforce_periodicity_of_box(coords, box_length):
     periodic_coords = np.where(coords > box_length, coords - box_length, coords)
     periodic_coords = np.where(coords < 0, coords + box_length, coords)
     return periodic_coords
+
+
+def aph_spline(table_abcissa, table_ordinates, k=0):
+    """ Simple workaround to replace scipy's silly convention 
+    for treating the spline_degree=0 edge case. 
+
+    Parameters 
+    ----------
+    table_abcissa : array_like
+        abcissa values defining the interpolation 
+
+    table_ordinates : array_like
+        ordinate values defining the interpolation 
+
+    k : int 
+        Degree of the desired spline interpolation
+
+    Returns 
+    -------
+    output : object  
+        Function object to use to evaluate the interpolation of 
+        the input table_abcissa & table_ordinates 
+
+    Notes 
+    -----
+    Only differs from the scipy.interpolate.UnivariateSpline for 
+    the case where the input tables have a single element. The default behavior 
+    of the scipy function is to raise an exception, which is silly: clearly 
+    the desired behavior in this case is to simply return the input value 
+    table_ordinates[0] for all values of the input abcissa. 
+
+    """
+
+
+    if aph_len(table_abcissa) != aph_len(table_ordinates):
+        raise TypeError("table_abcissa and table_abcissa must have the same length")
+
+    if k >= aph_len(table_abcissa):
+        raise ValueError("Input spline degree must be less than len(abcissa)")
+
+    max_scipy_spline_degree = 5
+    k = np.min([k, max_scipy_spline_degree])
+
+    if k<0:
+        raise ValueError("Spline degree must be non-negative")
+    elif k==0:
+        if aph_len(table_ordinates) != 1:
+            raise TypeError("In spline_degree=0 edge case, "
+                "table_abcissa and table_abcissa must be 1-element arrays")
+        return lambda x : table_ordinates[0]
+    else:
+        spline_function = spline(table_abcissa, table_ordinates, k=k)
+        return spline_function
+
 
 
 
