@@ -192,6 +192,32 @@ def enforce_periodicity_of_box(coords, box_length):
     return periodic_coords
 
 
+def binned_heaviside(abcissa_bins, values_inside_bins, value_outside_bins, input_abcissa):
+    """ Simple function to return an explicitly declared set of values when 
+    when evaluated at input_abcissa located inside an explicitly declared set of abcissa_bins.
+
+    Parameters 
+    ----------
+    abcissa_bins : array_like 
+        2 x Nbins array containing the lower and upper bounds of the abcissa bins. 
+        Bin boundaries may touch, but overlapping bins will raise an exception. 
+
+    values_inside_bins : array_like 
+        1-d array of length Nbins providing values of the desired function when evaluated 
+        at a point inside one of the abcissa_bins.
+
+    value_outside_bins : float 
+        value of the desired function when evaluated at any point outside the abcissa_bins.
+
+    input_abcissa : array_like 
+        array of inputs at which the desired function is to be evaluated. 
+
+    """
+    #Nbins = aph_len(abcissa_bins)
+
+    pass
+
+
 def aph_spline(table_abcissa, table_ordinates, k=0):
     """ Simple workaround to replace scipy's silly convention 
     for treating the spline_degree=0 edge case. 
