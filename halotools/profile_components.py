@@ -94,7 +94,7 @@ def cumulative_NFW_profile(x,c):
 
 
 
-class classic_spatial_bias(object):
+class ClassicalSpatialBias(object):
     """ Conventional model for the spatial bias of satellite galaxies. 
     The profile parameters governing the satellite distribution are set to be 
     a scalar multiple of the profile parameters of their host halo. 

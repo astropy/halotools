@@ -430,7 +430,7 @@ class vdB03_Quiescence(object):
             self.spline_degree = np.min(
                 [scipy_maxdegree, input_spline_degree, 
                 aph_len(self.parameter_dict[self.abcissa_key])-1])
-            self.spline_function = spline(
+            self.spline_function = occuhelp.aph_spline(
                 self.parameter_dict[self.abcissa_key],
                 self.parameter_dict[self.ordinates_key],
                 k=self.spline_degree)
