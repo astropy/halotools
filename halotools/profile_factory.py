@@ -27,19 +27,29 @@ class Galaxy_Profile(object):
     therefore only composes these behaviors into a composite object. 
     """
 
-    def __init__(self,parameter_function_dict=None):
+    def __init__(self,parameter_function_dict=None,
+        cumulative_profile_function=None,
+        galaxy_profile_component_model=None):
         """ 
         Parameters 
         ----------
-        parameter_function_dict : dict 
+        parameter_function_dict : dict, optional 
             Dictionary of functions. Keys are the names of the 
             parameters governing the behavior of the profile. 
             Values are function objects governing how the profile 
             parameters vary as a function of halo properties such as 
             mass and accretion rate. 
+            If None, all galaxies will reside at the center of their host halo. 
+
+        cumulative_profile_function : external function object
+            Function used to evaluate the cumulative profile. 
+
 
         """
         self.parameter_function_dict = parameter_function_dict
+        self.cumulative_profile_function = cumulative_profile_function
+        self.galaxy_profile_component_model = galaxy_profile_component_model
+
 
     def profile_parameter(self,profile_parameter_key,*args):
         """ Method to compute the value of the profile parameter 
@@ -59,14 +69,31 @@ class Galaxy_Profile(object):
 
         Returns 
         -------
-        parameters : array_like
+        output_parameters : array_like
             Array of profile parameters. 
 
         """
+
+        # For galaxy population types with trivial profiles, 
+        # such as centrals with no spatial bias, return None
         if self.parameter_function_dict is None:
-            return None
+            output_parameters = None
+        # For other cases such as satellites, orphans, biased centrals, etc., 
+        # retrieve the profile parameter-halo relation passed to the constructor
         else:
-            return self.parameter_function_dict[profile_parameter_key](args)
+            output_parameters = (
+                self.parameter_function_dict[profile_parameter_key](args))
+
+        # For cases where galaxies do not exactly trace the dark matter, 
+        # modulate the halo profile parameters via the input galaxy profile model component
+        if self.galaxy_profile_component_model is not None:
+            profile_modulating_function = (
+                self.galaxy_profile_model_component.profile_modulating_function[profile_parameter_key])
+            output_parameters = (output_parameters*
+                profile_modulating_function(args))
+
+        return output_parameters
+                
 
     def cumulative_profile(self,x,*args):
         """ Cumulative density profile. 

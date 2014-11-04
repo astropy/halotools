@@ -106,7 +106,8 @@ def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
 
 
 
-def format_parameter_keys(input_parameter_dict,correct_initial_keys,gal_type):
+def format_parameter_keys(input_parameter_dict,correct_initial_keys,
+    gal_type, key_prefix=None):
     """ Simple method that tests whether the input keys are correct, 
     and if so, appends the key names with the galaxy type that they pertain to.
 
@@ -121,6 +122,12 @@ def format_parameter_keys(input_parameter_dict,correct_initial_keys,gal_type):
 
     gal_type : string
         Galaxy type of the population being modeled by the component model. 
+        This string will be appended to each key, with a leading underscore. 
+
+    key_prefix : string, optional
+        If not None, key_prefix will be prepended to 
+        each dictionary key with a trailing underscore.
+
 
     Returns 
     -------
@@ -135,18 +142,30 @@ def format_parameter_keys(input_parameter_dict,correct_initial_keys,gal_type):
     # Check that the keys are correct
     # They should only be incorrect in cases where parameter_dict 
     # was passed to the initialization constructor
-    if set(initial_keys) != set(correct_initial_keys):
-        raise KeyError("The parameter_dict passed to the initialization "
-            "constructor does not contain the expected keys")
+    test_correct_keys(initial_keys, correct_initial_keys)
+#    if set(initial_keys) != set(correct_initial_keys):
+#        raise KeyError("The parameter_dict passed to the initialization "
+#            "constructor does not contain the expected keys")
 
     output_parameter_dict = copy(input_parameter_dict)
 
     key_suffix = '_'+gal_type
     for old_key in initial_keys:
-        new_key = old_key+key_suffix
+        if key_prefix is not None:
+            new_key = key_prefix+'_'+old_key+key_suffix
+        else:
+            new_key = old_key+key_suffix
         output_parameter_dict[new_key] = output_parameter_dict.pop(old_key)
 
+
     return output_parameter_dict
+
+def test_correct_keys(input_keys,correct_keys):
+
+    if set(input_keys) != set(correct_keys):
+        raise KeyError("The parameter_dict passed to the initialization "
+            "constructor does not contain the expected keys")
+
 
 def enforce_periodicity_of_box(coords, box_length):
     """ Function used to apply periodic boundary conditions 

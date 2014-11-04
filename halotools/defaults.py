@@ -54,6 +54,12 @@ default_quiescence_dict = {
     'quiescence_ordinates' : [0.25, 0.75]
 }
 
+default_profile_dict = {
+    'profile_abcissa' : [12.0], 
+    'profile_ordinates' : [1.0]
+}
+
+
 default_occupation_assembias_parameters = {
     'assembias_abcissa' : [12,15],
     'satellite_assembias_ordinates' : [0.5,0.5],

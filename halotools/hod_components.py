@@ -397,7 +397,7 @@ class vdB03_Quiescence(object):
         interpol_method : string, optional 
             Keyword specifying how `mean_quiescence_fraction` 
             evaluates input value of the primary halo property 
-             that differ from the small number of values 
+            that differ from the small number of values 
             in self.parameter_dict. 
             The default spline option interpolates the 
             model's abcissa and ordinates. 
