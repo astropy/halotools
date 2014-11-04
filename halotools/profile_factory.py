@@ -95,34 +95,6 @@ class Galaxy_Profile(object):
         """
         pass
 
-    def inverse_cumulative_profile(self, input_cumulative_density, abcissa, *args):
-        """ Numerical inversion of the cumulative density profile. 
-
-        Parameters 
-        ---------- 
-        cumulative_density : array_like 
-            Input values of the cumulative_profile at which 
-            the inverse function is being calculated.
-
-        abcissa : array_like 
-            1d array of values of halo-centric distance 
-            scaled by the size of the halo. This array is passed to 
-            cumulative_profile to construct a lookup table, which is then inverted. 
-
-        args : list 
-            Each element of the list is a len(input_cumulative_density)-array 
-            of halo profile parameters. For an NFW profile, len(args)=1, and 
-            the len(input_cumulative_density)-array contains 
-            values of the concentration parameter. 
-
-        Notes 
-        -----
-        Primarily used to generate a Monte Carlo realization of the profile.
-
-        """
-
-        inverse_function = interp1d(self.cumulative_profile(abcissa, args),abcissa)
-        return inverse_function(input_cumulative_density)
 
 
 
