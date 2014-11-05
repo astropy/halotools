@@ -406,6 +406,7 @@ def inside_volume(shapes, points, period=None):
         array of booleans, True if any points fall within the shape, False otherwise
     points_in_shapes: list
         list of arrays of points inside each shape
+    N_points_in_shapes: np.array
     """
     
     #check input
@@ -432,6 +433,7 @@ def inside_volume(shapes, points, period=None):
         #create arrays to store results
         inside_points = np.empty((0,), dtype=np.int)
         inside_shapes = np.empty((len(shapes),), dtype=bool)
+        N_points_in_shapes = np.zeros((len(shapes),))
         points_in_shapes = []
         for i, shape in enumerate(shapes):
             points_to_test = np.array(KDT.query_ball_point(shape.center,shape.circum_r(),period=period))
@@ -449,8 +451,9 @@ def inside_volume(shapes, points, period=None):
             #append indices of points which fell within the volume
             inside_points = np.hstack((inside_points,inside))
             points_in_shapes.append(inside)
+            N_points_in_shapes[i] = len(inside) 
         inside_points = np.unique(inside_points) #remove repeats
-        return inside_points, inside_shapes
+        return inside_points, inside_shapes, points_in_shapes, N_points_in_shapes
     else:
         shape = shapes
         points_to_test = np.array(KDT.query_ball_point(shape.center,shape.circum_r(),period=period))
@@ -465,4 +468,5 @@ def inside_volume(shapes, points, period=None):
         if len(inside)>0: inside_shapes = True
         else:  inside_shapes = False
         inside_points = inside
-        return inside_points, inside_shapes, inside_points
+        N_points_in_shapes = len(inside)
+        return inside_points, inside_shapes, inside_points, N_points_in_shapes
