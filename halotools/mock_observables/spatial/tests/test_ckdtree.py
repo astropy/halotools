@@ -5,6 +5,7 @@ from ..kdtrees.ckdtree import cKDTree
 from ...pairs import npairs
 from ...pairs import pairs
 from ...pairs import wnpairs
+from ...cpairs import pairwise_distances
 import numpy as np
 import sys
 
@@ -403,4 +404,30 @@ def test_wcount_neighbors_custom_double_weights_functionality():
     print(n0)
     assert np.all(np.fabs(n0-n1)/n0 < 10.0 * ep), 'weights are being handeled incorrectly'
 
+
+##########################################################################################
+#tests for sparse_distance_matrix
+##########################################################################################
+def test_sparse_distance_matrix():
+
+    data_1 = np.random.random((1000,3))
+    data_2 = np.random.random((1000,3))
+    
+    period = np.array([1,1,1])
+    
+    tree_1 = cKDTree(data_1)
+    tree_2 = cKDTree(data_2)
+    
+    result_1 = tree_1.sparse_distance_matrix(tree_1, 0.1, period=period)
+    
+    from scipy.sparse import coo_matrix
+    result_2 = pairwise_distances(data_1, period=period, max_distance=0.1)
+    result_2 = coo_matrix(result_2)
+    
+    diff = (result_1-result_2)
+    epsilon = np.float64(sys.float_info[8])
+    print(epsilon)
+    print(np.abs(diff)<epsilon)
+    
+    assert (np.abs(diff)>epsilon).nnz==0
 
