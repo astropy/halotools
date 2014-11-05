@@ -188,7 +188,7 @@ class ClassicalSpatialBias(object):
                     self.parameter_dict[self.ordinates_key[profile_parameter]],
                     k=self.spline_degree[profile_parameter])
 
-    def profile_modulating_function(self,input_abcissa):
+    def profile_modulating_function(self,profile_parameter_key,input_abcissa):
         """
         Factor by which gal_type galaxies differ from are quiescent 
         as a function of the primary halo property.
@@ -199,9 +199,12 @@ class ClassicalSpatialBias(object):
             array of primary halo property at which the quiescent fraction 
             is being computed. 
 
+        profile_parameter_key : string
+            Dictionary key of the profile parameter being modulated, e.g., 'conc'. 
+
         Returns 
         -------
-        output_profile_parameters : array_like
+        output_profile_modulation : array_like
             Values of the profile parameters evaluated at input_abcissa. 
 
         Notes 
@@ -212,9 +215,20 @@ class ClassicalSpatialBias(object):
         Either way, the behavior of this method is fully determined by 
         its values at the model abcissa, as specified in parameter_dict. 
         """
-        pass
 
+        model_abcissa = self.parameter_dict[self.abcissa_key[profile_parameter_key]]
+        model_ordinates = self.parameter_dict[self.ordinates_key[profile_parameter_key]]
 
+        if self.interpol_method=='polynomial':
+            output_profile_modulation = occuhelp.polynomial_from_table(
+                model_abcissa,model_ordinates,input_abcissa)
+        elif self.interpol_method=='spline':
+            modulating_function = self.spline_function[profile_parameter_key]
+            output_profile_modulation = modulating_function(input_abcissa)
+        else:
+            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
+
+        return output_profile_modulation
 
 
 
