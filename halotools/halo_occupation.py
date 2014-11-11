@@ -2450,7 +2450,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         output_minimum_conformity[idx_nontrivial_case] = (
             (1. - (opposite_halo_type_fraction[idx_nontrivial_case]*
-                opposite_halo_type_fraction[idx_nontrivial_case]*
                 opposite_maximum_conformity[idx_nontrivial_case])) / (
             inflection[idx_nontrivial_case]*halo_type_fraction[idx_nontrivial_case])
                 )
@@ -2684,7 +2683,6 @@ class Assembias_HOD_Quenching_Model(Assembias_HOD_Model):
 
         output_minimum_conformity[idx_nontrivial_case] = (
             (1. - (opposite_halo_type_fraction[idx_nontrivial_case]*
-                opposite_halo_type_fraction[idx_nontrivial_case]*
                 opposite_maximum_conformity[idx_nontrivial_case])) / (
             inflection[idx_nontrivial_case]*halo_type_fraction[idx_nontrivial_case])
                 )
