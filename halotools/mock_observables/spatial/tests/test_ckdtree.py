@@ -5,6 +5,7 @@ from ..kdtrees.ckdtree import cKDTree
 from ...pairs import npairs
 from ...pairs import pairs
 from ...pairs import wnpairs
+from ...cpairs import pairwise_distances
 import numpy as np
 import sys
 
@@ -403,4 +404,75 @@ def test_wcount_neighbors_custom_double_weights_functionality():
     print(n0)
     assert np.all(np.fabs(n0-n1)/n0 < 10.0 * ep), 'weights are being handeled incorrectly'
 
+
+##########################################################################################
+#tests for wcount_neighbors_custom_2D
+##########################################################################################
+def test_wcount_neighbors_custom_double_weights_functionality():
+    #need to know the float precision of the computer
+    epsilon = np.float64(sys.float_info[8])
+    
+    #user defined function
+    from ..kdtrees.ckdtree import Function
+    class MyFunction(Function):
+        def evaluate(self, x, y, a, b):
+            if a==0: return 1
+            elif (x==y) & (x==a): return 0.0
+            elif x==y: return 1.0
+            elif x!=y: return 0.5
+
+    #create random coordinates
+    N1 = 100
+    N2 = 100
+    data_1 = np.random.random((N1,3))
+    data_2 = np.random.random((N2,3))
+    
+    r = np.arange(0.1,1,0.1)
+    
+    #build trees for points
+    tree_1 = cKDTree(data_1)
+    tree_2 = cKDTree(data_2)
+    
+    #define random weights for test data set 2
+    weights1 = np.random.random_integers(1,16,size=N1)
+    weights2 = np.random.random_integers(1,16,size=N2)
+    wdim = 16
+    
+    #calculate weighted sums
+    n0 = npairs(data_1, data_2, r)
+    n1 = tree_1.wcount_neighbors_custom_2D(tree_2,r, sweights=weights1, oweights=weights2, w=MyFunction(), wdim=wdim)
+    
+    #what is the expected precision?
+    ep = epsilon*np.sqrt(np.float64(N1*N2))
+    
+    print(n1)
+    print(n0)
+    assert np.all(np.fabs(n0-n1)/n0 < 10.0 * ep), 'weights are being handeled incorrectly'
+
+
+##########################################################################################
+#tests for sparse_distance_matrix
+##########################################################################################
+def test_sparse_distance_matrix():
+
+    data_1 = np.random.random((1000,3))
+    data_2 = np.random.random((1000,3))
+    
+    period = np.array([1,1,1])
+    
+    tree_1 = cKDTree(data_1)
+    tree_2 = cKDTree(data_2)
+    
+    result_1 = tree_1.sparse_distance_matrix(tree_1, 0.1, period=period)
+    
+    from scipy.sparse import coo_matrix
+    result_2 = pairwise_distances(data_1, period=period, max_distance=0.1)
+    result_2 = coo_matrix(result_2)
+    
+    diff = (result_1-result_2)
+    epsilon = np.float64(sys.float_info[8])
+    print(epsilon)
+    print(np.abs(diff)<epsilon)
+    
+    assert (np.abs(diff)>epsilon).nnz==0
 
