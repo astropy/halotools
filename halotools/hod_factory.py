@@ -106,9 +106,11 @@ class HOD_Model(object):
             raise KeyError("Could not find method to retrieve "
                 " inherited behavior from the provided component model")
 
+#   This method seems silly, and needlessly abstract. Get rid of it.
     def retrieve_inherited_behavior(self,inherited_method,*args):
         """ Method whose function is solely to call the component model methods 
         using the correct number of arguments. 
+
         """
 
         if len(args)==1:

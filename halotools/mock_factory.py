@@ -24,7 +24,9 @@ class HodMockFactory(object):
 		self.snapshot = snapshot
 		self.halos = snapshot.halos
 		self.particles = snapshot.particles
+
 		self.model = composite_model
+		self.gal_types = self.model.gal_types
 
 		self.prim_haloprop_key = composite_model.prim_haloprop_key
 		self.prim_haloprop = self.halos[self.prim_haloprop_key]
@@ -34,11 +36,26 @@ class HodMockFactory(object):
 
 
 
+
 	def populate(self):
 
 		pass
 
 	def _allocate_memory(self):
+		self._abundance = {}
+		for gal_type in self.gal_types:
+			if hasattr(self.model,'sec_haloprop_key'):
+				self._abundance[gal_type] = (
+					self.model.mc_occupation(
+						gal_type, self.prim_haloprop, 
+						self.sec_haloprop)
+					)
+			else:
+				self._abundance[gal_type] = (
+					self.model.mc_occupation(
+						gal_type, self.prim_haloprop)
+					)
+
 
 
 
