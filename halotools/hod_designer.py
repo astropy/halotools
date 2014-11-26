@@ -4,6 +4,11 @@
 The sole purpose of this module is to 
 provide an interface between `halotools.hod_components`
 and `halotools.hod_factory`. 
+`halotools.hod_designer` creates a set of instructions 
+that is passed to `halotools.hod_factory`, 
+in the form of a dictionary. The dictionary provides 
+a blueprint telling the factory 
+how to build an HOD model from the HOD components. 
 
 """
 
