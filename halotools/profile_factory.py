@@ -18,7 +18,7 @@ import profile_components
 
 
 
-class Galaxy_Profile(object):
+class GalaxyProfile(object):
     """ Container class for the radial profile of any galaxy population. 
     The behavior of the profile parameter model 
     (e.g., a c-M relation such as Bullock 2001 or DK14)
