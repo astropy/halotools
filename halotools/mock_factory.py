@@ -33,8 +33,6 @@ class HodMockFactory(object):
 			self.sec_haloprop_key = composite_model.sec_haloprop_key
 
 
-
-
 	def populate(self):
 
 		pass

@@ -34,7 +34,10 @@ class HOD_Model(object):
         self.component_model_dict = component_model_dict
         self.gal_types = self.component_model_dict.keys()
 
-        self.parameter_dict = self.retrieve_all_inherited_parameters(self.component_model_dict)
+        self.parameter_dict = (
+            self.retrieve_all_inherited_parameters(
+                self.component_model_dict)
+            )
         self.publications = []
 
     def mean_occupation(self,gal_type,*args):

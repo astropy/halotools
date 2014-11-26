@@ -7,7 +7,7 @@ by composing the behavior of the components.
 
 """
 
-__all__ = ['Zheng07_Centrals','Zheng07_Satellites','vdB03_Quiescence']
+__all__ = ['Kravtsov04Cens','Kravtsov04Sats','vdB03Quiescence']
 
 
 import numpy as np
@@ -26,9 +26,9 @@ import warnings
 
 
 
-class Zheng07_Centrals(object):
-    """ Model for the occupation statistics of central galaxies, 
-    taken from Zheng et al. 2007, arXiv:0703457.
+class Kravtsov04Cens(object):
+    """ Erf function model for the occupation statistics of central galaxies, 
+    introduced in Kravtsov et al. 2004, arXiv:0308519.
 
 
     Parameters 
@@ -168,9 +168,9 @@ class Zheng07_Centrals(object):
         return parameter_dict
 
 
-class Zheng07_Satellites(object):
-    """ Model for the occupation statistics of central galaxies, 
-    taken from Zheng et al. 2007, arXiv:0703457.
+class Kravtsov04Sats(object):
+    """ Power law model for the occupation statistics of satellite galaxies, 
+    introduced in Kravtsov et al. 2004, arXiv:0308519.
 
 
     Parameters 
@@ -349,7 +349,7 @@ class Zheng07_Satellites(object):
 
 
 
-class vdB03_Quiescence(object):
+class vdB03Quiescence(object):
     """
     Traditional HOD-style model of galaxy quenching 
     in which the expectation value for a binary SFR designation of the galaxy 
