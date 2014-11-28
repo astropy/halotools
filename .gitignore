@@ -46,6 +46,8 @@ halotools/plots/*
 halotools/syntax_checks.py
 halotools/CATALOGS/*.fits
 halotools/check_mock.py
+halotools/cfcm/*
+halotools/cxcf/*
 
 # Mac OSX
 .DS_Store
