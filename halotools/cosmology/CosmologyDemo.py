@@ -34,7 +34,7 @@ def main():
 	#compute()
 
 	# ---------------------------------------------------------------------------------------------
-	# Advanced computations; these can take a while the first time they are executed, but the 
+	# Advanced computations; these can take a second the first time they are executed, but the 
 	# results are stored in lookup tables. The second execution should be lightning fast.
 	# ---------------------------------------------------------------------------------------------
 
@@ -68,6 +68,11 @@ def demonstrateSettingAndGetting():
 	printCosmologyName()
 	Cosmology.setCurrent(old_cosmo)
 	printCosmologyName()
+	print("We can also change individual parameters when setting a cosmology.")
+	cosmo = Cosmology.setCosmology('WMAP7', {"interpolation": False})
+	print cosmo.name
+	print cosmo.interpolation
+	print("We should be careful changing cosmological parameters this way, since the name does not match the cosmology any more.")
 
 	return
 
@@ -150,9 +155,13 @@ def computeAdvanced():
 	nu = cosmo.M_to_nu(M, z)
 	print(("Peak height = " + str(nu)))
 	Utilities.printLine()
-	print("Now, sigma(R) should be stored in a binary file in the Data/ directory.")
-	print("If you call this function again, it should execute much, much faster!")
-	
+	print("Now, a lookup table for sigma(R) should be stored in a binary file in the Data/ directory.")
+	print("If you call this function again, it should execute faster!")
+	Utilities.printLine()
+	print("If we want to turn this behavior off, set 'storage = False'.")
+	print("If we do not want to use any lookup tables at all, set 'interpolation = False'.")
+	print("This setting is almost never recommended, though.")
+		
 	return
 
 ###################################################################################################

@@ -11,6 +11,7 @@
 ###################################################################################################
 
 import os
+import numpy
 import configuration
 
 ###################################################################################################
@@ -54,5 +55,19 @@ def isArray(var):
 		ret = True
 		
 	return ret
+
+###################################################################################################
+
+# Convert a variable to a numpy array, whether it already is one or not.
+
+def getArray(var):
+	
+	is_array = isArray(var)
+	if is_array:
+		var_ret = var
+	else:
+		var_ret = numpy.array([var])
+		
+	return var_ret, is_array 
 
 ###################################################################################################

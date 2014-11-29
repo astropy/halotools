@@ -10,52 +10,77 @@
 # applications. It has no dependencies except for standarad python libraries such as numpy and 
 # scipy, and requires no installation (simply use "import Cosmology").
 #
-# PHYSICS:          The Cosmology class below implements a standard Lambda-CDM cosmology, with 
-# 	                fixed dark energy equation of state (w = const), and ignoring the constribution 
-#                   of relativistic species (photons and neutrinos). This implementation is focused 
-#                   on structure formation applications, and can compute:
+# -------------------------------------------------------------------------------------------------
+# FUNCTIONALITY
+# -------------------------------------------------------------------------------------------------
+#
+# The Cosmology class below implements a standard Lambda-CDM cosmology, with fixed dark energy 
+# equation of state (w = const), and ignoring the constribution of relativistic species (photons 
+# and neutrinos). This implementation is focused on structure formation applications. The most 
+# important functions are:
 # 
-#                   - standard cosmology quantities: E(z), distances, times, and densities as a 
-#                     function of redshift
-#                   - the linear growth factor
-#                   - the linear matter power spectrum (using the Eisenstein & Hu 98 approximation)
-#                   - the variance or the linear power spectrum, sigma(R), and thus peak height and
-#                     non-linear mass
-#                   - the curvature of the peaks in a Gaussian random field.
+# Ez(), Om(), age() etc.	Standard cosmology quantities: E(z), distances, times, and densities 
+#                         	as a function of redshift
+# growthFactor()			The linear growth factor D+(z)
+# matterPowerSpectrum()		The linear matter power spectrum from the Eisenstein & Hu 98 
+#  							approximation, and its logarithmic derivative
+# sigma(), M_to_nu() etc.   The variance of the linear density field, its derivative d log(sigma) 
+#							/ d log(R), peak height, and non-linear mass M*.
+# correlationFunction()		The linear matter-matter correlation function
+# peakCurvature()			The curvature of the peaks in a Gaussian random field.
 #
-# BASIC USAGE: 		Set a cosmology using a named set, e.g.
+# Unless otherwise stated, all functions of redshift, mass, radius or wavenumber can take both 
+# individual numbers or arrays as input. See the documentation of the individual functions below.
 #
-# 		       		cosmo = Cosmology.setCosmology('planck1')
+# -------------------------------------------------------------------------------------------------
+# BASIC USAGE
+# -------------------------------------------------------------------------------------------------
 #
-#					See below for a list of named cosmologies. Alternatively, create a new 
-#                   cosmology with a parameter dictionary similar to those below,
+# Create a cosmology object using a named set, e.g.
 #
-#	                params = {'flat': True, 'H0': 67.0, 'Om0': 0.32, 'Ob0': 0.0491 ... }
-#					cosmo = Cosmology.setCosmology('myCosmo', params)
+# cosmo = Cosmology.setCosmology('planck1')
 #
-#                   The current cosmology is also stored as a global variable so that the user can
-#                   obtain it at any time using
+# See below for a list of named cosmologies. Parameters from this standard cosmology can be 
+# overwritten with additional parameters, e.g.
+#                 
+# cosmo = Cosmology.setCosmology('planck1', {"interpolation": False})
 #
-#                   cosmo = Cosmology.getCurrent()
+# Alternatively, the user can create an entirely new cosmology with a parameter dictionary similar 
+# to those below. Only the main cosmological parameters are mandatory, all other parameters can be
+# left to their default values:
 #
-#					See the class definition below for a detailed documentation of its properties.
+# params = {'flat': True, 'H0': 67.2, 'Om0': 0.31, 'Ob0': 0.049, 'sigma8': 0.81, 'ns': 0.95}
+# cosmo = Cosmology.setCosmology('myCosmo', params)
 #
-# CHANGING PARAMS:	The user can change cosmological parameters at run-time, but MUST call the 
-#	                update function directly after the changes, otherwise wrong values may be 
-#                   returned:
+# Whichever way a cosmology is set, the current cosmology is also stored as a global variable so 
+# that the user can obtain it at any time using
 #
-#					cosmo.Om0 = 0.31
-#					cosmo.checkForChangedCosmology()
-#                  
-#					The latter function ensures that the parameters are consistent (e.g., flatness)
-#					and discards outdated stored quantities.
+# cosmo = Cosmology.getCurrent()
+#
+# The user can change cosmological parameters at run-time, but MUST call the update function 
+# directly after the changes. This function ensures that the parameters are consistent 
+# (e.g., flatness), and discards pre-computed quantities:
+#
+# cosmo.Om0 = 0.31
+# cosmo.checkForChangedCosmology()
 # 
-# FUNCTIONS:		Unless otherwise stated, all functions of redshift, mass, radius or wavenumber 
-#					can take both individual numbers or arrays as input. See the documentation of 
-#					the individual functions below.
+# -------------------------------------------------------------------------------------------------
+# PERFORMANCE OPTIMIZATION
+# -------------------------------------------------------------------------------------------------
 #
-# WARNING:          While this unit has been tested against various other codes, there is no
-#                   guarantee of that it is bug-free. Use at your own risk.
+# This module is optimized for fast performance, particularly in computationally intensive
+# functions such as the correlation function. All computationally intensive quantities are, by 
+# default, tabulated, stored in files, and re-loaded when the same cosmology is loaded again. 
+#
+# For some, rare applications, the user might want to turn this behavior off. Please see the 
+# documentation of the 'interpolation' and 'storage' parameters to the Cosmology() class.
+#
+# -------------------------------------------------------------------------------------------------
+# WARNING
+# -------------------------------------------------------------------------------------------------
+#
+# While this unit has been tested against various other codes, there is no guarantee of that it is 
+# bug-free. Use at your own risk.
 #
 ###################################################################################################
 
@@ -64,6 +89,7 @@ import math
 import numpy
 import scipy.integrate
 import scipy.special
+import scipy.interpolate
 import hashlib
 import pickle
 import Utilities
@@ -190,6 +216,21 @@ cosmologies['powerlaw']     = {'flat': True, 'H0': 70.00, 'Om0': 1.0000, 'Ob0': 
 # power_law_n	0.0			See above.
 # data_dir		'Data/'		Directory where persistent data is stored. This path is relative
 #							to the location of this file, not the execution directory.
+# interpolation True        By default, lookup tables are created for certain computationally 
+#                           intensive quantities, cutting down the computation times for future
+#                           calculations. If interpolation == False, all interpolation is switched
+#                           off. This can be useful when evaluating quantities for many different
+#                           cosmologies (where computing the tables takes a prohibitively long 
+#                           time). However, many functions will be MUCH slower if this setting is
+#                           False, please use it only if absolutely necessary. Furthermore, the 
+#                           derivative functions of P(k), sigma(R) etc will not work if 
+#                           interpolation == False.
+# storage       True        By default, the interpolation tables and such are stored in a permanent
+#                           file. This avoids re-computing the tables when the same cosmology is 
+#                           called again. However, if any file access is to be avoided (for example
+#                           in MCMC chains), the user can set storage = False.
+# print_info    False       Output information to the console.
+# print_warningsFalse       Output warnings to the console.
 # text_output	False		If text_output == True, all persistent data (such as lookup tables for 
 #							sigma(R), the growth factor etc) is written into named text files in
 #							addition to the default storage system. This feature allows the use
@@ -199,12 +240,15 @@ cosmologies['powerlaw']     = {'flat': True, 'H0': 70.00, 'Om0': 1.0000, 'Ob0': 
 #							are not necessarily reflected in the text file names, and they can thus
 #							overwrite the correct values. Always remove the text files from the 
 #							directory after use. 
+# -------------------------------------------------------------------------------------------------
 
 class Cosmology():
 	
 	def __init__(self, name = None, flat = True, \
 		Om0 = None, OL0 = None, Ob0 = None, H0 = None, sigma8 = None, ns = None, Tcmb0 = 2.725, \
-		power_law = False, power_law_n = 0.0, text_output = False):
+		power_law = False, power_law_n = 0.0, \
+		print_info = False, print_warnings = True, \
+		interpolation = True, storage = True, text_output = False):
 		
 		if name == None:
 			raise Exception('A name for the cosmology must be set.')
@@ -226,16 +270,16 @@ class Cosmology():
 			raise Exception('OL0 must be set for non-flat cosmologies.')
 	
 		self.name = name
-
 		self.flat = flat
 		self.power_law = power_law
 		self.power_law_n = power_law_n
-		
 		self.Om0 = Om0
 		self.OL0 = OL0
 		self.Ob0 = Ob0
 		self.H0 = H0
 		self.h = H0 / 100.0
+		self.Omh2 = self.Om0 * self.h**2
+		self.Ombh2 = self.Ob0 * self.h**2
 		self.sigma8 = sigma8
 		self.ns = ns
 		self.Tcmb0 = Tcmb0
@@ -243,18 +287,41 @@ class Cosmology():
 		# Make sure flatness is obeyed
 		self.ensureConsistency()
 		
-		# Lookup table for sigma
+		# Flag for interpolation tables, storage, printing etc
+		self.interpolation = interpolation
+		self.storage = storage
+		self.text_output = text_output
+		self.print_info = print_info
+		self.print_warnings = print_warnings
+		
+		# Lookup table for the linear growth factor, D+(z).
+		self.z_max_Dplus = 1000.0
+		self.z_Nbins_Dplus = 40
+		
+		# Lookup table for P(k). The Pk_norm field is only needed if interpolation == False.
+		# Note that the binning is highly irregular for P(k), since much more resolution is
+		# needed at the BAO scale and around the bend in the power spectrum. Thus, the binning
+		# is split into multiple regions with different resolutions.
+		self.k_Pk = [1E-20, 1E-4, 5E-2, 1E0, 1E6, 1E20]
+		self.k_Pk_Nbins = [10, 30, 60, 20, 10]
+		
+		# Lookup table for sigma. Note that the nominal accuracy to which the integral is 
+		# evaluated should match with the accuracy of the interpolation which is set by Nbins.
+		# Here, they are matched to be accurate to better than ~3E-3.
 		self.R_min_sigma = 1E-12
 		self.R_max_sigma = 1E3
-		self.R_bin_width_sigma = 0.025
+		self.R_Nbins_sigma = 18.0
+		self.accuracy_sigma = 3E-3
+	
+		# Lookup table for correlation function xi
+		self.R_xi = [1E-3, 5E1, 5E2]
+		self.R_xi_Nbins = [30, 40]
+		self.accuracy_xi = 1E-5
 		
-		# Lookup table in z. The bin width corresponds to bins in log10(1 + z).
-		self.z_max = 1000.0
-		self.z_bin_width = 0.001
-		
-		# Data directory and storage dictionary
+		# Data directory and storage dictionary. Note that the storage is active even if 
+		# interpolation == False or storage == False, since a few numbers still need to be 
+		# stored non-persistently.
 		self.data_dir = 'cosmology'
-		self.text_output = text_output
 		self.resetStorage()
 		
 		return
@@ -282,7 +349,8 @@ class Cosmology():
 		
 		hash_new = self.getHash()
 		if hash_new != self.hash_current:
-			print("Cosmology: Detected change in cosmological parameters.")
+			if self.print_warnings:
+				print("Cosmology: Detected change in cosmological parameters.")
 			self.ensureConsistency()
 			self.resetStorage()
 			
@@ -346,12 +414,14 @@ class Cosmology():
 		self.storage_temp = {}
 		
 		# Check if there is a persistent object storage file. If so, load its contents into the
-		# storage dictionary.
-		filename_pickle = self.getUniqueFilename()
-		if os.path.exists(filename_pickle):
-			input_file = open(filename_pickle, "rb")
-			self.storage_pers = pickle.load(input_file)
-			input_file.close()
+		# storage dictionary. We only load from file if the user has not switched of storage, and
+		# if the user has not switched off interpolation.
+		if self.storage and self.interpolation:
+			filename_pickle = self.getUniqueFilename()
+			if os.path.exists(filename_pickle):
+				input_file = open(filename_pickle, "rb")
+				self.storage_pers = pickle.load(input_file)
+				input_file.close()
 
 		return
 	
@@ -359,74 +429,130 @@ class Cosmology():
 
 	# Permanent storage system for objects such as 2-dimensional data tables. If an object is 
 	# already stored in memory, return it. If not, try to load it from file, otherwise return None.
+	# Certain operations can already be performed on certain objects, so that they do not need to 
+	# be repeated unnecessarily, for example:
+	#
+	# interpolator = True	Instead of a 2-dimensional table, return a spline interpolator that can
+	#                       be used to evaluate the table.
+	# inverse = True        Return an interpolator that gives x(y) instead of y(x)
 	
-	def getPersistentObject(self, object_name):
-
+	def getStoredObject(self, object_name, interpolator = False, inverse = False):
+		
 		# Check for cosmology change
 		self.checkForChangedCosmology()
 
-		# Check if the object is already in memory
-		if object_name in self.storage_pers:	
-			
-			# This object is already in persistent memory, simply return it
-			object_data = self.storage_pers[object_name]
+		# Compute object name
+		object_id = object_name
+		if interpolator:
+			object_id += '_interpolator'
+		if inverse:
+			object_id += '_inverse'
+
+		# Find the object. There are multiple possibilities:
+		# - Check for the exact object the user requested (the object_id)
+		#   - Check in persistent storage
+		#   - Check in temporary storage (where interpolator / inverse objects live)
+		#   - Check in user text files
+		# - Check for the raw object (the object_name)
+		#   - Check in persistent storage
+		#   - Check in user text files
+		#   - Convert to the exact object, store in temporary storage
+		# - If all fail, return None
+
+		if object_id in self.storage_pers:	
+			object_data = self.storage_pers[object_id]
 		
-		elif object_name in self.storage_temp: 
-			
-			# This object is already in temporary memory, simply return it
-			object_data = self.storage_temp[object_name]
+		elif object_id in self.storage_temp:	
+			object_data = self.storage_temp[object_id]
+
+		elif os.path.exists(self.dataDir() + object_id):
+			object_data = numpy.loadtxt(self.dataDir() + object_id, usecols = (0, 1), \
+									skiprows = 0, unpack = True)
+			self.storage_temp[object_id] = object_data
 			
 		else:
-			
-			# This object is not in memory, but the user might have placed a text file with this 
-			# object in the data directory.
-			filename_text =  self.dataDir() + object_name
-			if os.path.exists(filename_text):
 
-				# Load user-defined file. This works only for two-column look-up tables.
-				object_data = numpy.loadtxt(filename_text, usecols = (0, 1), skiprows = 0, unpack = True)
-				self.storage_temp[object_name] = object_data
+			# We could not find the object ID anywhere. This can have two reasons: the object does
+			# not exist, or we must transform an existing object.
 			
-			else:
+			if interpolator:
 				
-				# The object is not in storage at all, return none.
+				# First, a safety check; no interpolation objects should ever be requested if 
+				# the user has switched off interpolation.
+				if not self.interpolation:
+					raise Exception('An interpolator object was requested even though interpolation is off.')
+				
+				# Try to find the object to transform. This object CANNOT be in temporary storage,
+				# but it can be in persistent or user storage.
+				object_raw = None
+				
+				if object_name in self.storage_pers:	
+					object_raw = self.storage_pers[object_name]
+		
+				elif os.path.exists(self.dataDir() + object_name):
+					object_raw = numpy.loadtxt(self.dataDir() + object_name, usecols = (0, 1), \
+									skiprows = 0, unpack = True)
+
+				if object_raw == None:
+					
+					# We cannot find an object to convert, return none.
+					object_data = None
+				
+				else:
+					
+					# Convert and store in temporary storage.
+					if inverse: 
+						
+						# There is a subtlety: the spline interpolator can't deal with decreasing 
+						# x-values, so if the y-values 
+						if object_raw[1][-1] < object_raw[1][0]:
+							object_raw = object_raw[:,::-1]
+						
+						object_data = scipy.interpolate.InterpolatedUnivariateSpline(object_raw[1], \
+																					object_raw[0])
+					else:
+						object_data = scipy.interpolate.InterpolatedUnivariateSpline(object_raw[0], \
+																					object_raw[1])
+					self.storage_temp[object_id] = object_data
+						
+			else:
+							
+				# The object is not in storage at all, and cannot be generated; return none.
 				object_data = None
 				
 		return object_data
 	
 	###############################################################################################
 
-	# Save an object in memory and file storage.
-
-	def storePersistentObject(self, object_name, object_data):
+	# Save an object in memory and file storage. If persistent == True, this object is written to 
+	# file storage (unless storage == False), and will be loaded the next time the same cosmology
+	# is loaded. If persistent == False, the object is stored non-persistently.
+	#
+	# Note that all objects are reset if the cosmology changes. Thus, this function should be used
+	# for ALL data that depend on cosmological parameters.
 	
-		# Store in memory
-		self.storage_pers[object_name] = object_data
+	def storeObject(self, object_name, object_data, persistent = True):
 
-		# If the user has chosen text output, write a text file.
-		if self.text_output:
-			filename_text =  self.dataDir() + object_name
-			numpy.savetxt(filename_text, numpy.transpose(object_data), fmt = "%.8e")
-	
-		# Store in file. We do not wish to save the entire storage dictionary, as there might be
-		# user-defined objects in it.
-		filename_pickle = self.getUniqueFilename()
-		output_file = open(filename_pickle, "wb")
-		pickle.dump(self.storage_pers, output_file, pickle.HIGHEST_PROTOCOL)
-		output_file.close()  
-		
+		if persistent:
+			self.storage_pers[object_name] = object_data
+			
+			if self.storage:
+				# If the user has chosen text output, write a text file.
+				if self.text_output:
+					filename_text =  self.dataDir() + object_name
+					numpy.savetxt(filename_text, numpy.transpose(object_data), fmt = "%.8e")
+			
+				# Store in file. We do not wish to save the entire storage dictionary, as there might be
+				# user-defined objects in it.
+				filename_pickle = self.getUniqueFilename()
+				output_file = open(filename_pickle, "wb")
+				pickle.dump(self.storage_pers, output_file, pickle.HIGHEST_PROTOCOL)
+				output_file.close()  
+
+		else:
+			self.storage_temp[object_name] = object_data
+
 		return
-	
-	###############################################################################################
-
-	# General function for an array in z that can be used for interpolation tables.
-
-	def getZArray(self):
-
-		log_z_max = numpy.log10(1.0 + self.z_max)
-		z = 10**numpy.arange(0.0, log_z_max + self.z_bin_width, self.z_bin_width) - 1.0
-		
-		return z
 	
 	###############################################################################################
 	# Basic cosmology calculations
@@ -578,7 +704,18 @@ class Cosmology():
 	def distanceModulus(self, z):
 		
 		return 5.0 * numpy.log10(self.luminosityDistance(z) / self.h * 1E5)
+
+	###############################################################################################
+
+	# The sound horizon in Mpc (not Mpc / h!), according to Eisenstein & Hu 1998, equation 26. This 
+	# fitting function is accurate to 2% where Obh2 > 0.0125 and 0.025 < Omh2 < 0.5.
+
+	def soundHorizon(self):
 		
+		s = 44.5 * numpy.log(9.83 / self.Omh2) / numpy.sqrt(1.0 + 10.0 * self.Ombh2**0.75)
+		
+		return s
+
 	###############################################################################################
 	# Densities and overdensities
 	###############################################################################################
@@ -642,7 +779,8 @@ class Cosmology():
 
 	###############################################################################################
 
-	# The linear growth factor, D+(z), as defined in Eisenstein & Hu 99, eq. 8. There are other 
+	# The linear growth factor, D+(z), as defined in Eisenstein & Hu 99, eq. 8. The normalization
+	# is such that the growth factor approaches D+ -> 1/(1+z) at high z. There are other 
 	# normalizations of this quantity (e.g., Percival 2005, eq. 15), but since we almost always 
 	# care about the growth factor normalized to z = 0 the normalization does not matter.
 
@@ -652,26 +790,44 @@ class Cosmology():
 
 	###############################################################################################
 
+	# Return a spline interpolator for the growth factor. Generally, the growth factor should be 
+	# evaluated using the growthFactor() function below.
+	
+	def growthFactorInterpolator(self):
+		
+		table_name = 'growthfactor_%s' % (self.name)
+		interpolator = self.getStoredObject(table_name, interpolator = True)
+		
+		if interpolator == None:
+			if self.print_info:
+				print("Cosmology.growthFactor: Computing lookup table.")
+			log_max = numpy.log10(1.0 + self.z_max_Dplus)
+			bin_width = log_max / self.z_Nbins_Dplus
+			z_table = 10**numpy.arange(0.0, log_max + bin_width, bin_width) - 1.0
+			D_table = self.growthFactorUnnormalized(z_table) / self.growthFactorUnnormalized(0.0)
+			table_ = numpy.array([z_table, D_table])
+			self.storeObject(table_name, table_)
+			if self.print_info:
+				print("Cosmology.growthFactor: Lookup table completed.")
+			interpolator = self.getStoredObject(table_name, interpolator = True)
+		
+		return interpolator
+
+	###############################################################################################
+	
 	# The linear growth factor, normalized to z = 0.
 
 	def growthFactor(self, z):
 		
-		table_name = 'growthfactor_%s' % (self.name)
-		table = self.getPersistentObject(table_name)
-		if table == None:
-			print("Cosmology.growthFactor: Computing lookup table.")
-			z_table = self.getZArray()
-			D_table = self.growthFactorUnnormalized(z_table) / self.growthFactorUnnormalized(0.0)
-			table = numpy.array([z_table, D_table])
-			self.storePersistentObject(table_name, table)
-			print("Cosmology.growthFactor: Lookup table completed.")
-
-		# Check that z is within range		
-		if numpy.max(z) > self.z_max:
-			msg = "Cosmology.growthFactor: z = %.2f outside range (max. z is %.2f)." % (numpy.max(z), self.z_max)
-			raise Exception(msg)
-			
-		D = numpy.interp(z, table[0], table[1])
+		if self.interpolation:
+			interpolator = self.growthFactorInterpolator()
+			if numpy.max(z) > self.z_max_Dplus:
+				msg = "Cosmology.growthFactor: z = %.2f outside range (max. z is %.2f)." % (numpy.max(z), self.z_max_Dplus)
+				raise Exception(msg)
+			D = interpolator(z)
+		
+		else:
+			D = self.growthFactorUnnormalized(z) / self.growthFactorUnnormalized(0.0)
 
 		return D
 
@@ -827,16 +983,10 @@ class Cosmology():
 
 	###############################################################################################
 	
-	# Return the power spectrum at a scale k (h / Mpc), either computed by Eisenstein & Hu 98 
-	# (Pk_source = 'eh98', 'eh98smooth') or another method (e.g. Pk_source = 'camb'). If the latter 
-	# is chosen, the user must place a file with the power spectrum data (k, P(k)) in the data 
-	# directory, and name it matterpower_<cosmo_name>_<Pk_source>, e.g. matterpower_planck_camb. 
-	#
-	# Regardless of the source of the power spectrum, this function will normalize it to sigma8, 
-	# and store the normalization to speed up future calculations. However, for power-law 
-	# cosmologies, the spectrum is computed directly as k^n and NOT normalized.
+	# Evaluate the matter power spectrum. If ignore_norm == True, do not normalize by sigma8; this
+	# mode is for internal use only. k can be a number, or a numpy array.
 	
-	def matterPowerSpectrum(self, k, Pk_source = 'eh98', ignore_norm = False):
+	def matterPowerSpectrumExact(self, k, Pk_source = 'eh98', ignore_norm = False):
 		
 		if self.power_law:
 			
@@ -856,7 +1006,7 @@ class Cosmology():
 		else:
 			
 			table_name = 'matterpower_%s_%s' % (self.name, Pk_source)
-			table = self.getPersistentObject(table_name)
+			table = self.getStoredObject(table_name)
 
 			if table == None:
 				msg = "Could not load data table, %s." % (table_name)
@@ -870,19 +1020,22 @@ class Cosmology():
 
 			Pk = numpy.interp(k, table[0], table[1])
 		
+		# This is a little tricky. We need to store the normalization factor somewhere, even if 
+		# interpolation = False; otherwise, we get into an infinite loop of computing sigma8, P(k), 
+		# sigma8 etc.
 		if not ignore_norm:
 			norm_name = 'Pk_norm_%s_%s' % (self.name, Pk_source)
-			norm = self.getPersistentObject(norm_name)
+			norm = self.getStoredObject(norm_name)
 			if norm == None:
 				sigma_8Mpc = self.sigmaExact(8.0, filt = 'tophat', Pk_source = Pk_source, \
-											ignore_norm = True)
+											exact_Pk = True, ignore_norm = True)
 				norm = (self.sigma8 / sigma_8Mpc)**2
-				self.storePersistentObject(norm_name, norm)
+				self.storeObject(norm_name, norm, persistent = False)
 
 			Pk *= norm
 	
 		return Pk
-
+	
 	###############################################################################################
 
 	# Utility to get the min and max k for which a power spectrum is valid. Only for internal use.
@@ -890,11 +1043,11 @@ class Cosmology():
 	def matterPowerSpectrumLimits(self, Pk_source):
 		
 		if self.power_law or Pk_source == 'eh98' or Pk_source == 'eh98smooth':
-			k_min = 1E-30
-			k_max = 1E30
+			k_min = self.k_Pk[0]
+			k_max = self.k_Pk[-1]
 		else:
 			table_name = 'matterpower_%s_%s' % (self.name, Pk_source)
-			table = self.getPersistentObject(table_name)
+			table = self.getStoredObject(table_name)
 
 			if table == None:
 				msg = "Could not load data table, %s." % (table_name)
@@ -907,18 +1060,118 @@ class Cosmology():
 	
 	###############################################################################################
 
-	# The k-space filter function. This function is dimensionless, the input units are k in h / Mpc
-	# and R in Mpc / h. Possible filters are 'tophat' and 'gaussian'.
+	# Return a spline interpolator for the power spectrum. Generally, P(k) should be evaluated 
+	# using the matterPowerSpectrum() function below, but for some performance-critical operations
+	# it is faster to obtain the interpolator directly from this function. Note that the lookup 
+	# table created here is complicated, with extra resolution around the BAO scale.
 
-	def filterFunction(self, filt, k, R):
+	def matterPowerSpectrumInterpolator(self, Pk_source):
+		
+		table_name = 'Pk_%s_%s' % (self.name, Pk_source)
+		interpolator = self.getStoredObject(table_name, interpolator = True)
+	
+		if interpolator == None:
+			if self.print_info:
+				print("Cosmology.matterPowerSpectrum: Computing lookup table.")				
+			data_k = numpy.zeros((numpy.sum(self.k_Pk_Nbins) + 1), numpy.float)
+			n_regions = len(self.k_Pk_Nbins)
+			k_computed = 0
+			for i in range(n_regions):
+				log_min = numpy.log10(self.k_Pk[i])
+				log_max = numpy.log10(self.k_Pk[i + 1])
+				log_range = log_max - log_min
+				bin_width = log_range / self.k_Pk_Nbins[i]
+				if i == n_regions - 1:
+					data_k[k_computed:k_computed + self.k_Pk_Nbins[i] + 1] = \
+						10**numpy.arange(log_min, log_max + bin_width, bin_width)
+				else:
+					data_k[k_computed:k_computed + self.k_Pk_Nbins[i]] = \
+						10**numpy.arange(log_min, log_max, bin_width)
+				k_computed += self.k_Pk_Nbins[i]
+			
+			data_Pk = self.matterPowerSpectrumExact(data_k, Pk_source = Pk_source, ignore_norm = False)
+			table_ = numpy.array([numpy.log10(data_k), numpy.log10(data_Pk)])
+			self.storeObject(table_name, table_)
+			if self.print_info:
+				print("Cosmology.matterPowerSpectrum: Lookup table completed.")	
+			
+			interpolator = self.getStoredObject(table_name, interpolator = True)
+
+		return interpolator
+
+	###############################################################################################
+
+	# Return the power spectrum at a scale k (h / Mpc), either computed by Eisenstein & Hu 98 
+	# (Pk_source = 'eh98', 'eh98smooth') or another method (e.g. Pk_source = 'camb'). If the latter 
+	# is chosen, the user must place a file with the power spectrum data (k, P(k)) in the data 
+	# directory, and name it matterpower_<cosmo_name>_<Pk_source>, e.g. matterpower_planck_camb. 
+	#
+	# For the EH98 P(k) sources, this function creates a lookup table with generous limits in k
+	# space. If, for some reason, the exact value is desired, use the matterPowerSpectrumExact()
+	# function. The EH98 power spectrum is accurate to about 1%.
+	#
+	# If derivative == True, the logarithmic derivative is returned, d log(P) / d log(k).
+
+	def matterPowerSpectrum(self, k, Pk_source = 'eh98', derivative = False):
+		
+		if self.interpolation and (Pk_source == 'eh98' or Pk_source == 'eh98smooth'):
+			
+			# Load lookup-table
+			interpolator = self.matterPowerSpectrumInterpolator(Pk_source)
+			
+			# If the requested radius is outside the range, give a detailed error message.
+			k_req = numpy.min(k)
+			if k_req < self.k_Pk[0]:
+				msg = "k = %.2e is too small (min. k = %.2e)" % (k_req, self.k_min_Pk)
+				raise Exception(msg)
+		
+			k_req = numpy.max(k)
+			if k_req > self.k_Pk[-1]:
+				msg = "k = %.2e is too large (max. k = %.2e)" % (k_req, self.k_max_Pk)
+				raise Exception(msg)
+
+			if derivative:
+				Pk = interpolator(numpy.log10(k), nu = 1)
+			else:
+				Pk = interpolator(numpy.log10(k))
+				Pk = 10**Pk
+			
+		else:
+			
+			if derivative > 0:
+				raise Exception("Derivative can only be evaluated if interpolation == True.")
+
+			if Utilities.isArray(k):
+				Pk = k * 0.0
+				for i in range(len(k)):
+					Pk[i] = self.matterPowerSpectrumExact(k[i], Pk_source = Pk_source, ignore_norm = False)
+			else:
+				Pk = self.matterPowerSpectrumExact(k, Pk_source = Pk_source, ignore_norm = False)
+
+		return Pk
+	
+	###############################################################################################
+
+	# The k-space filter function. This function is dimensionless, the input units are k in h / Mpc
+	# and R in Mpc / h. Possible filters are 'tophat' and 'gaussian'. If no_oscillation == True, we
+	# are using the filter for an estimate.
+
+	def filterFunction(self, filt, k, R, no_oscillation = False):
 		
 		x = k * R
 		
 		if filt == 'tophat':
-			if x < 1E-5:
-				ret = 1.0
+			
+			if no_oscillation:
+				if x < 1.0:
+					ret = 1.0
+				else:
+					ret = x**-2
 			else:
-				ret = 3.0 / x**3 * (numpy.sin(x) - x * numpy.cos(x))
+				if x < 1E-3:
+					ret = 1.0
+				else:
+					ret = 3.0 / x**3 * (numpy.sin(x) - x * numpy.cos(x))
 				
 		elif filt == 'gaussian':
 			ret = numpy.exp(-x**2)
@@ -933,35 +1186,46 @@ class Cosmology():
 
 	# See documentation of sigma() function below. This function performs the actual calculation of
 	# sigma, and can be called directly by the user. However, this function will take much longer
-	# than the lookup table below. If ignore_norm == True, the unnormalized power spectrum is used. 
-	# This mode should only be used internally to compute the normalization in the first place.
+	# than the lookup table below. If exact_Pk == True and ignore_norm == True, the unnormalized 
+	# power spectrum is used. This mode should only be used internally to compute the normalization 
+	# in the first place.
 	#
 	# NOTE: This function does NOT accept a numpy integral for R, only a number.
+	#
+	# Accuracy: This function computes the integral to the accuracy set in self.accuracy_sigma, by
+	#           default 0.3%. Note that the power spectrum is generally known less accurately than 
+	#           that, for example if the EH98 approximation is used.
 
-	def sigmaExact(self, R, j = 0, filt = 'tophat', Pk_source = 'eh98', ignore_norm = False):
+	def sigmaExact(self, R, j = 0, filt = 'tophat', Pk_source = 'eh98', \
+				exact_Pk = False, ignore_norm = False):
 		
-		def logIntegrand(lnk):
+		# -----------------------------------------------------------------------------------------
+		def logIntegrand(lnk, Pk_interpolator, test = False):
 			
 			k = numpy.exp(lnk)
-			W = self.filterFunction(filt, k, R)
-			Pk = self.matterPowerSpectrum(k, Pk_source = Pk_source, ignore_norm = ignore_norm)
-			ret = Pk * W**2 * k**2 / 2.0 / math.pi**2
+			W = self.filterFunction(filt, k, R, no_oscillation = test)
+			
+			if exact_Pk or (not self.interpolation):
+				Pk = self.matterPowerSpectrumExact(k, Pk_source = Pk_source, ignore_norm = ignore_norm)
+			else:
+				Pk = 10**Pk_interpolator(numpy.log10(k))
+			
+			# One factor of k is due to the integration in log-k space
+			ret = Pk * W**2 * k**3
 			
 			# Higher moment terms
 			if j > 0:
 				ret *= k**(2 * j)
 			
-			# We are integrating in log-space
-			ret *= k
-			
 			return ret
-		
+
+		# -----------------------------------------------------------------------------------------
 		if filt == 'tophat' and j > 0:
 			msg = "Higher-order moments of sigma are not well-defined for " + "tophat filter. Choose filt = 'gaussian' instead."
 			raise Exception(msg)
 	
-		# For power-law cosmologies, we can evaluate sigma analytically. The exact exprssion 
-		# as a dependence on n that in turn depends on the filter used, but the dependence 
+		# For power-law cosmologies, we can evaluate sigma analytically. The exact expression 
+		# has a dependence on n that in turn depends on the filter used, but the dependence 
 		# on radius is simple and independent of the filter. Thus, we use sigma8 to normalize
 		# sigma directly. 
 		if self.power_law:
@@ -975,20 +1239,25 @@ class Cosmology():
 			
 		else:
 			
+			# If we are getting P(k) from a look-up table, it is a little more efficient to 
+			# get the interpolator object and use it directly, rather than using the P(k) function.
+			Pk_interpolator = None
+			if (not exact_Pk) and self.interpolation:
+				Pk_interpolator = self.matterPowerSpectrumInterpolator(Pk_source)
+			
 			# The infinite integral over k often causes trouble when the tophat filter is used. Thus,
 			# we determine sensible limits and integrate over a finite volume. For tabled power 
 			# spectra, we need to be careful not to exceed their limits.
-			test_integrand_min = 1E-8
+			test_integrand_min = 1E-6
 			test_k_min, test_k_max = self.matterPowerSpectrumLimits(Pk_source)
 			test_k_min = max(test_k_min * 1.0001, 1E-7)
 			test_k_max = min(test_k_max * 0.9999, 1E15)
-			test_k = numpy.arange(numpy.log(test_k_min), numpy.log(test_k_max), 0.5)
+			test_k = numpy.arange(numpy.log(test_k_min), numpy.log(test_k_max), 2.0)
 			n_test = len(test_k)
 			test_k_integrand = test_k * 0.0
-			integrand_max = 0.0
 			for i in range(n_test):
-				test_k_integrand[i] = logIntegrand(test_k[i])
-				integrand_max = max(integrand_max, test_k_integrand[i])
+				test_k_integrand[i] = logIntegrand(test_k[i], Pk_interpolator)
+			integrand_max = numpy.max(test_k_integrand)
 			
 			min_index = 0
 			while test_k_integrand[min_index] < integrand_max * test_integrand_min:
@@ -1004,10 +1273,11 @@ class Cosmology():
 				if max_index == n_test:
 					msg = "Could not find upper integration limit."
 					raise Exception(msg)
-			
+	
+			args = Pk_interpolator
 			sigma2, _ = scipy.integrate.quad(logIntegrand, test_k[min_index], test_k[max_index], \
-						epsabs = 0.0, epsrel = 1E-5, limit = 100)
-			sigma = numpy.sqrt(sigma2)
+						args = args, epsabs = 0.0, epsrel = self.accuracy_sigma, limit = 100)
+			sigma = numpy.sqrt(sigma2 / 2.0 / math.pi**2)
 		
 		if numpy.isnan(sigma):
 			msg = "Result is nan (cosmology %s, filter %s, R %.2e, j %d." % (self.name, filt, R, j)
@@ -1017,15 +1287,51 @@ class Cosmology():
 	
 	###############################################################################################
 
-	# The variance of the power spectrum, normalized such that sigma(8 Mpc/h) = sigma8. By default,
-	# a lookup table is stored and the result interpolated from this table to save time. The inter-
-	# polation errors were found to be less than 2E-4. For even greater interpolation accuracy, 
-	# the R_bin_width variable can be lowered.
+	# Return a spline interpolator for sigma(R) or R(sigma) if inverse == True. Generally, sigma(R) 
+	# should be evaluated using the sigma() function below, but for some performance-critical 
+	# operations it is faster to obtain the interpolator directly from this function.If the lookup-
+	# table does not exist yet, create it. For sigma, we use a very particular binning scheme. At 
+	# low R, sigma is a very smooth function, and very wellapproximated by a spline interpolation 
+	# between few points. Around the BAO scale, we need a higher resolution. Thus, the bins are 
+	# assigned in reverse log(log) space.
+
+	def sigmaInterpolator(self, j, Pk_source, filt, inverse):
+		
+		table_name = 'sigma%d_%s_%s_%s' % (j, self.name, Pk_source, filt)
+		interpolator = self.getStoredObject(table_name, interpolator = True, inverse = inverse)
+		
+		if interpolator == None:
+			if self.print_info:
+				print("Cosmology.sigma: Computing lookup table.")
+			max_log = numpy.log10(self.R_max_sigma)
+			log_range = max_log - numpy.log10(self.R_min_sigma)
+			max_loglog = numpy.log10(log_range + 1.0)
+			loglog_width = max_loglog / self.R_Nbins_sigma
+			R_loglog = numpy.arange(0.0, max_loglog + loglog_width, loglog_width)
+			log_R = max_log - 10**R_loglog[::-1] + 1.0
+			data_R = 10**log_R
+			data_sigma = data_R * 0.0
+			for i in range(len(data_R)):
+				data_sigma[i] = self.sigmaExact(data_R[i], j = j, filt = filt, Pk_source = Pk_source)
+			table_ = numpy.array([numpy.log10(data_R), numpy.log10(data_sigma)])
+			self.storeObject(table_name, table_)
+			if self.print_info:
+				print("Cosmology.sigma: Lookup table completed.")
+
+			interpolator = self.getStoredObject(table_name, interpolator = True, inverse = inverse)
+	
+		return interpolator
+
+	###############################################################################################
+
+	# The variance of the linear density field, sigma, smoothed over a scale R (Mpc / h) and 
+	# normalized such that sigma(8 Mpc/h) = sigma8. This function is accurate to ~1% if the EH98
+	# power spectrum is used.
 	#
 	# ---------------------------------------------------------------------------------------------
 	# Parameter		Default		Description
 	# ---------------------------------------------------------------------------------------------
-	# R				None		The radius of the filter , in Mpc / h
+	# R				None		The radius of the filter, in Mpc / h
 	# j				0			The order of the integral. j = 0 corresponds to the variance, j = 1
 	#							to the same integral with an extra k^2 term etc. See BBKS for the 
 	#							mathematical details.
@@ -1035,79 +1341,92 @@ class Cosmology():
 	# Pk_source		'eh98'		The source of the underlying power spectrum (eh98, eh98smooth or 
 	#							tabulated). For power-law cosmologies, this parameter is ignored.
 	# inverse		False		Compute R(sigma) rather than sigma(R), using the same lookup table.
+	# derivative	False		Return the logarithmic derivative, d log(sigma) / d log(R), or its
+	#                           inverse, d log(R) / d log(sigma), if inverse == True.
+	# ---------------------------------------------------------------------------------------------
 	
-	def sigma(self, R, j = 0, z = 0.0, filt = 'tophat', Pk_source = 'eh98', inverse = False):
+	def sigma(self, R, j = 0, z = 0.0, inverse = False, derivative = False, \
+			Pk_source = 'eh98', filt = 'tophat'):
 
-		# Load lookup-table
-		table_name = 'sigma%d_%s_%s_%s' % (j, self.name, Pk_source, filt)
-		table = self.getPersistentObject(table_name)
+		if self.interpolation:
+			interpolator = self.sigmaInterpolator(j, Pk_source, filt, inverse)
+			
+			if not inverse:
+	
+				# If the requested radius is outside the range, give a detailed error message.
+				R_req = numpy.min(R)
+				if R_req < self.R_min_sigma:
+					M_min = 4.0 / 3.0 * math.pi * self.R_min_sigma**3 * self.matterDensity(0.0) * 1E9
+					msg = "R = %.2e is too small (min. R = %.2e, min. M = %.2e)" \
+						% (R_req, self.R_min_sigma, M_min)
+					raise Exception(msg)
+			
+				R_req = numpy.max(R)
+				if R_req > self.R_max_sigma:
+					M_max = 4.0 / 3.0 * math.pi * self.R_max_sigma**3 * self.matterDensity(0.0) * 1E9
+					msg = "R = %.2e is too large (max. R = %.2e, max. M = %.2e)" \
+						% (R_req, self.R_max_sigma, M_max)
+					raise Exception(msg)
+	
+				if derivative:
+					ret = interpolator(numpy.log10(R), nu = 1)
+				else:
+					ret = 10**interpolator(numpy.log10(R))
+					if z > 1E-5:
+						ret *= self.growthFactor(z)
+	
+			else:
+				
+				sigma_ = R
+				if z > 1E-5:
+					sigma_ /= self.growthFactor(z)
+
+				# Get the limits in sigma from storage, or compute and store them. Using the 
+				# storage mechanism seems like overkill, but these numbers should be erased if 
+				# the cosmology changes and sigma is re-computed.
+				sigma_min = self.getStoredObject('sigma_min')
+				sigma_max = self.getStoredObject('sigma_max')
+				if sigma_min == None or sigma_min == None:
+					knots = interpolator.get_knots()
+					sigma_min = 10**numpy.min(knots)
+					sigma_max = 10**numpy.max(knots)
+					self.storeObject('sigma_min', sigma_min, persistent = False)
+					self.storeObject('sigma_max', sigma_max, persistent = False)
+				
+				# If the requested sigma is outside the range, give a detailed error message.
+				sigma_req = numpy.max(sigma_)
+				if sigma_req > sigma_max:
+					msg = "sigma = %.2e is too large (max. sigma = %.2e)" % (sigma_req, sigma_max)
+					raise Exception(msg)
+					
+				sigma_req = numpy.min(sigma_)
+				if sigma_req < sigma_min:
+					msg = "sigma = %.2e is too small (min. sigma = %.2e)" % (sigma_req, sigma_min)
+					raise Exception(msg)
+				
+				# Interpolate to get R(sigma)
+				if derivative: 
+					ret = interpolator(numpy.log10(sigma_), nu = 1)					
+				else:
+					ret = 10**interpolator(numpy.log10(sigma_))
 		
-		# If the lookup-table does not exist yet, create it
-		if table == None:
-			print("Cosmology.sigma: Computing lookup table. This may take a few minutes, please do not interrupt.")
-			data_R = 10**numpy.arange(numpy.log10(self.R_min_sigma), numpy.log10(self.R_max_sigma) \
-									+ self.R_bin_width_sigma, self.R_bin_width_sigma)
-			data_sigma = data_R * 0.0
-			for i in range(len(data_R)):
-				if i % 100 == 0:
-					print(("Cosmology.sigma: Bin %d / %d." % (i, len(data_R))))
-				data_sigma[i] = self.sigmaExact(data_R[i], j = j, filt = filt, Pk_source = Pk_source)
-			table = numpy.array([data_R, data_sigma])
-			self.storePersistentObject(table_name, table)
-			print("Cosmology.sigma: Lookup table completed.")
-
-		if not inverse:
-
-			# If the requested radius is outside the range, give a detailed error message.
-			R_req = numpy.min(R)
-			R_min = table[0][0]
-			if R_req < R_min:
-				M_min = 4.0 / 3.0 * math.pi * self.R_min**3 * self.matterDensity(0.0) * 1E9
-				msg = "R = %.2e is too small (min. R = %.2e, min. M = %.2e)" % (R_req, R_min, M_min)
-				raise Exception(msg)
-		
-			R_req = numpy.max(R)
-			R_max = table[0][-1]
-			if R_req > R_max:
-				M_max = 4.0 / 3.0 * math.pi * self.R_max**3 * self.matterDensity(0.0) * 1E9
-				msg = "R = %.2e is too large (max. R = %.2e, max. M = %.2e)" % (R_req, R_max, M_max)
-				raise Exception(msg)
-
-			# Interpolate to get sigma(R). The interpolation is performed in log space for
-			# higher accuracy.
-			ret = numpy.interp(numpy.log10(R), numpy.log10(table[0]), numpy.log10(table[1]))
-			ret = 10**ret
-			if z > 1E-5:
-				ret *= self.growthFactor(z)
-
 		else:
 			
-			# Interpolate to get R(sigma). We need to invert the table first, as numpy.interp 
-			# demands the elements to be in ascending order.		
-			table_inverted = table[:,::-1]
+			if inverse:
+				raise Exception('R(sigma), and thus nu_to_M(), cannot be evaluated with interpolation == False.')
+			if derivative:
+				raise Exception('Derivative of sigma cannot be evaluated if interpolation == False.')
 
-			sigma_ = R
+			if Utilities.isArray(R):
+				ret = R * 0.0
+				for i in range(len(R)):
+					ret[i] = self.sigmaExact(R[i], j = j, filt = filt, Pk_source = Pk_source)
+			else:
+				ret = self.sigmaExact(R, j = j, filt = filt, Pk_source = Pk_source)
 			if z > 1E-5:
-				sigma_ /= self.growthFactor(z)
-			
-			# If the requested sigma is outside the range, give a detailed error message.
-			sigma_req = numpy.max(sigma_)
-			sigma_max = table_inverted[1][-1]
-			if sigma_req > sigma_max:
-				msg = "sigma = %.2e is too large (max. sigma = %.2e)" % (sigma_req, sigma_max)
-				raise Exception(msg)
-				
-			sigma_req = numpy.min(sigma_)
-			sigma_min = table_inverted[1][0]
-			if sigma_req < sigma_min:
-				msg = "sigma = %.2e is too small (min. sigma = %.2e)" % (sigma_req, sigma_min)
-				raise Exception(msg)
-			
-			# Interpolate to get R(sigma)
-			ret = numpy.interp(numpy.log10(sigma_), numpy.log10(table_inverted[1]), numpy.log10(table_inverted[0]))
-			ret = 10**ret
+				ret *= self.growthFactor(z)
 		
-		return	ret
+		return ret
 
 	###############################################################################################
 	
@@ -1139,9 +1458,146 @@ class Cosmology():
 	# The non-linear mass M* (or M_NL), i.e. the mass for which the variance is equal to the 
 	# collapse threshold.
 	
-	def Mstar(self, z, filt = 'tophat', Pk_source = 'eh98'):
+	def nonLinearMass(self, z, filt = 'tophat', Pk_source = 'eh98'):
 		
 		return self.nu_to_M(1.0, z = z, filt = filt, Pk_source = Pk_source, deltac_const = True)
+
+	###############################################################################################
+
+	# Compute the linear matter-matter correlation function at scale R in Mpc / h at z = 0. This 
+	# function does NOT accept a numpy integral for R, only a number. This function is accurate to 
+	# ~1-2% in for 1E-3 < R < 500. 
+
+	def correlationFunctionExact(self, R, Pk_source = 'eh98'):
+
+		f_cut = 0.001
+
+		# -----------------------------------------------------------------------------------------
+		# The integrand is exponentially cut off at a scale 1000 * R.
+		def integrand(k, R, Pk_source, Pk_interpolator):
+			
+			if self.interpolation:
+				Pk = 10**Pk_interpolator(numpy.log10(k))
+			else:
+				Pk = self.matterPowerSpectrumExact(k, Pk_source)
+
+			ret = Pk * k / R * numpy.exp(-(k * R * f_cut)**2)
+			
+			return ret
+
+		# -----------------------------------------------------------------------------------------
+		# If we are getting P(k) from a look-up table, it is a little more efficient to 
+		# get the interpolator object and use it directly, rather than using the P(k) function.
+		Pk_interpolator = None
+		if self.interpolation:
+			Pk_interpolator = self.matterPowerSpectrumInterpolator(Pk_source)
+
+		# Use a Clenshaw-Curtis integration, i.e. an integral weighted by sin(kR). 
+		k_min = 1E-6 / R
+		k_max = 10.0 / f_cut / R
+		args = R, Pk_source, Pk_interpolator
+		xi, _ = scipy.integrate.quad(integrand, k_min, k_max, args = args, epsabs = 0.0, \
+					epsrel = self.accuracy_xi, limit = 100, weight = 'sin', wvar = R)
+		xi /= 2.0 * math.pi**2
+
+		if numpy.isnan(xi):
+			msg = 'Result is nan (cosmology %s, R %.2e).' % (self.name, R)
+			raise Exception(msg)
+
+		return xi
+	
+	###############################################################################################
+
+	# Return a spline interpolator for the correlation function, xi(R). Generally, xi(R) should be 
+	# evaluated using the correlationFunction() function below, but for some performance-critical 
+	# operations it is faster to obtain the interpolator directly from this function.
+
+	def correlationFunctionInterpolator(self, Pk_source):
+
+		table_name = 'correlation_%s_%s' % (self.name, Pk_source)
+		interpolator = self.getStoredObject(table_name, interpolator = True)
+		
+		if interpolator == None:
+			if self.print_info:
+				print("correlationFunction: Computing lookup table. This may take a few minutes, please do not interrupt.")
+			
+			data_R = numpy.zeros((numpy.sum(self.R_xi_Nbins) + 1), numpy.float)
+			n_regions = len(self.R_xi_Nbins)
+			k_computed = 0
+			for i in range(n_regions):
+				log_min = numpy.log10(self.R_xi[i])
+				log_max = numpy.log10(self.R_xi[i + 1])
+				log_range = log_max - log_min
+				bin_width = log_range / self.R_xi_Nbins[i]
+				if i == n_regions - 1:
+					data_R[k_computed:k_computed + self.R_xi_Nbins[i] + 1] = \
+						10**numpy.arange(log_min, log_max + bin_width, bin_width)
+				else:
+					data_R[k_computed:k_computed + self.R_xi_Nbins[i]] = \
+						10**numpy.arange(log_min, log_max, bin_width)
+				k_computed += self.R_xi_Nbins[i]
+			
+			data_xi = data_R * 0.0
+			for i in range(len(data_R)):
+				data_xi[i] = self.correlationFunctionExact(data_R[i], Pk_source = Pk_source)
+			table_ = numpy.array([data_R, data_xi])
+			self.storeObject(table_name, table_)
+			if self.print_info:
+				print("correlationFunction: Lookup table completed.")
+			interpolator = self.getStoredObject(table_name, interpolator = True)
+		
+		return interpolator
+
+	###############################################################################################
+
+	# The linear matter-matter correlation function as function of radius in Mpc / h. This function
+	# as well as the interpolation routine are accurate to ~1-2%. Note that evaluating this 
+	# function is relatively expensive due to the nature of the xi integral. If you only need to 
+	# evaluate xi at a few R, setting interpolation = False might speed up the computation.
+	#
+	# If derivative == True, the linear derivative d xi / d R is returned.
+
+	def correlationFunction(self, R, z = 0.0, derivative = False, Pk_source = 'eh98'):
+
+		if self.interpolation:
+			
+			# Load lookup-table
+			interpolator = self.correlationFunctionInterpolator(Pk_source)
+				
+			# If the requested radius is outside the range, give a detailed error message.
+			R_req = numpy.min(R)
+			if R_req < self.R_xi[0]:
+				msg = 'R = %.2e is too small (min. R = %.2e)' % (R_req, self.R_xi[0])
+				raise Exception(msg)
+		
+			R_req = numpy.max(R)
+			if R_req > self.R_xi[-1]:
+				msg = 'R = %.2e is too large (max. R = %.2e)' % (R_req, self.R_xi[-1])
+				raise Exception(msg)
+	
+			# Interpolate to get xi(R). Note that the interpolation is performed in linear 
+			# space, since xi can be negative.
+			if derivative:
+				ret = interpolator(R, nu = 1)
+			else:
+				ret = interpolator(R)
+			
+		else:
+
+			if derivative:
+				raise Exception('Derivative of xi cannot be evaluated if interpolation == False.')
+
+			if Utilities.isArray(R):
+				ret = R * 0.0
+				for i in range(len(R)):
+					ret[i] = self.correlationFunctionExact(R[i], Pk_source = Pk_source)
+			else:
+				ret = self.correlationFunctionExact(R, Pk_source = Pk_source)
+
+		if not derivative and z > 1E-5:
+			ret *= self.growthFactor(z)**2
+		
+		return	ret
 
 	###############################################################################################
 	# Peak curvature routines
@@ -1300,7 +1756,9 @@ def getCurrent():
 
 # Set a named cosmology. The name has to be...
 #
-# 1) In the cosmologies dictionary defined at the top of this file
+# 1) In the cosmologies dictionary defined at the top of this file. Parameters from this cosmology
+#    can be overwritten with the params dictionary (for example, settings such as interpolation
+#    and storage).
 # 2) powerlaw_**** with a slope as the final digits, e.g. powerlaw_-2.61
 # 3) Some other name, and the user passes a parameter dictionary like the ones listed at the top
 #    of this file.
@@ -1316,6 +1774,8 @@ def setCosmology(cosmo_name, params = None):
 		param_dict['power_law_n'] = n
 	elif cosmo_name in cosmologies:		
 		param_dict = cosmologies[cosmo_name]
+		if params != None:
+			param_dict = dict(param_dict.items() + params.items())
 	else:
 		if params != None:
 			param_dict = params.copy()
