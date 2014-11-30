@@ -3,7 +3,9 @@
 from __future__ import division, print_function
 import numpy as np
 from ..observables import two_point_correlation_function
+from ..observables import two_point_correlation_function_jackknife
 from ..observables import isolatoion_criterion
+from ..observables import Delta_Sigma
 from ..spatial import geometry
 
 def test_TPCF_auto():
@@ -146,6 +148,33 @@ def test_isolation_criterion_API():
     print(result)
     assert True==False
 """
+
+
+def test_delta_sigma():
+    
+    sample1 = np.random.random((10,3))
+    sample2 = np.random.random((100,3))
+    period = np.array([1,1,1])
+    rbins = np.linspace(0.1,0.5,4)
+    
+    result = Delta_Sigma(sample1, sample2, rbins, period=period)
+    
+    pass
+
+def test_two_point_correlation_function_jackknife():
+    
+    sample1 = np.random.random((100,3))
+    randoms = np.random.random((1000,3))
+    period = np.array([1,1,1])
+    Lbox = np.array([1,1,1])
+    rbins = np.linspace(0.0,0.5,5)
+    
+    result_1 = two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=Lbox, period = period, N_threads=2)
+    result_2 = two_point_correlation_function(sample1, rbins,  randoms=randoms, period = period, N_threads=2)
+    
+    print(result_1)
+    print(result_2)
+    assert True==False
     
     
     
