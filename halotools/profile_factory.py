@@ -87,10 +87,10 @@ class GalaxyProfile(object):
         # For cases where galaxies do not exactly trace the dark matter, 
         # modulate the halo profile parameters via the input galaxy profile model component
         if self.galaxy_profile_component_model is not None:
-            profile_modulating_function = (
-                self.galaxy_profile_model_component.profile_modulating_function[profile_parameter_key])
+            radprof_modfunc = (
+                self.galaxy_profile_model_component.radprof_modfunc[profile_parameter_key])
             output_parameters = (output_parameters*
-                profile_modulating_function(args))
+                radprof_modfunc(args))
 
         return output_parameters
                 

@@ -94,7 +94,7 @@ def cumulative_NFW_profile(x,c):
 
 
 
-class ClassicalSpatialBias(object):
+class RadProfBias(object):
     """ Conventional model for the spatial bias of satellite galaxies. 
     The profile parameters governing the satellite distribution are set to be 
     a scalar multiple of the profile parameters of their host halo. 
@@ -124,7 +124,7 @@ class ClassicalSpatialBias(object):
             Thus parameter_dict is a dictionary of dictionaries. 
 
         interpol_method : string, optional 
-            Keyword specifying how `profile_modulating_function` 
+            Keyword specifying how `radprof_modfunc` 
             evaluates input values that differ from the small number of values 
             in self.parameter_dict. 
             The default spline option interpolates the 
@@ -157,7 +157,7 @@ class ClassicalSpatialBias(object):
                 self.parameter_dict.items() + 
                 new_dict_to_append.items() 
                 )
-            # The profile_modulating_function method needs to access the ordinates and abcissa
+            # The radprof_modfunc method needs to access the ordinates and abcissa
             # This is accomplished by binding the key to an attribute of the model object
             # This binding is done via a dictionary, where each key of the dictionary 
             # corresponds to a profile parameter that is being modulated.
@@ -188,7 +188,7 @@ class ClassicalSpatialBias(object):
                     self.parameter_dict[self.ordinates_key[profile_parameter]],
                     k=self.spline_degree[profile_parameter])
 
-    def profile_modulating_function(self,profile_parameter_key,input_abcissa):
+    def radprof_modfunc(self,profile_parameter_key,input_abcissa):
         """
         Factor by which gal_type galaxies differ from are quiescent 
         as a function of the primary halo property.
