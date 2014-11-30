@@ -33,6 +33,10 @@ class HOD_Model(object):
         """
         self.component_model_dict = component_model_dict
         self.gal_types = self.component_model_dict.keys()
+        self.occupation_bound = {}
+        for gal_type in self.gal_types:
+            self.occupation_bound[gal_type] = (
+                self.component_model_dict[gal_type]['occupation_model'].upper_bound)
 
         self.parameter_dict = (
             self.retrieve_all_inherited_parameters(

@@ -60,6 +60,7 @@ class Kravtsov04Cens(object):
         gal_type='centrals'):
 
         self.gal_type = gal_type
+        self.upper_bound = 1.0
 
         self.threshold = threshold
         if parameter_dict is None:
@@ -209,6 +210,8 @@ class Kravtsov04Sats(object):
         central_occupation_model=None):
 
         self.gal_type = gal_type
+        self.upper_bound = float("inf")
+
         self.central_occupation_model = central_occupation_model
         if self.central_occupation_model is not None:
             if threshold != self.central_occupation_model.threshold:

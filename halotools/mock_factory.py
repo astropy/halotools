@@ -26,7 +26,12 @@ class HodMockFactory(object):
 		self.particles = snapshot.particles
 
 		self.model = composite_model
-		self.gal_types = self.model.gal_types
+
+		# Set the gal_types attribute, sorted so that bounded populations appear first
+		occupation_bounds = []
+		for ii,gal_type in enumerate(self.model.gal_types):
+			occupation_bounds[ii]=self.model.occupation_bounds[gal_type]
+		self.gal_types = self.model.gal_types[np.argsort(occupation_bounds)]
 
 		self.prim_haloprop_key = composite_model.prim_haloprop_key
 		if hasattr(composite_model,'sec_haloprop_key'): 
