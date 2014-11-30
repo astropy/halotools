@@ -28,10 +28,11 @@ class HodMockFactory(object):
 		self.model = composite_model
 
 		# Set the gal_types attribute, sorted so that bounded populations appear first
-		occupation_bounds = []
-		for ii,gal_type in enumerate(self.model.gal_types):
-			occupation_bounds[ii]=self.model.occupation_bounds[gal_type]
-		self.gal_types = self.model.gal_types[np.argsort(occupation_bounds)]
+		self._occupation_bound = []
+		for gal_type in self.model.gal_types:
+			self._occupation_bound.extend(self.model.occupation_bound[gal_type])
+		self.gal_types = np.array(self.model.gal_types[np.argsort(self._occupation_bound)])
+		self._occupation_bound = np.array(self._occupation_bound[np.argsort(self._occupation_bound)])
 
 		self.prim_haloprop_key = composite_model.prim_haloprop_key
 		if hasattr(composite_model,'sec_haloprop_key'): 
@@ -40,6 +41,7 @@ class HodMockFactory(object):
 
 	def populate(self):
 		# Assign properties to bounded populations first.
+
 		# self.coords[:self.num_total_cens] = self._halopos[self._hasCentral]
 		pass
 
