@@ -8,7 +8,7 @@ Classes for halo profile objects.
 
 from abc import ABCMeta, abstractmethod
 import numpy as np
-from scipy.interpolate import interp1d as interp1d
+from occupation_helpers import aph_spline
 
 from astropy.extern import six
 

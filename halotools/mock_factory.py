@@ -62,6 +62,10 @@ class HodMockFactory(object):
                     self.halos[self.sec_haloprop_key][self._occupation[gal_type]==1])
             self.gal_type[self._gal_type_indices[gal_type][0]:self._gal_type_indices[gal_type][1]] = gal_type
 
+
+            #self._random_angles(self.coords,counter,self.coords.shape[0],self.num_total_sats)
+
+
     def _allocate_memory(self):
         self._occupation = {}
         self._total_abundance = {}
@@ -108,13 +112,15 @@ class HodMockFactory(object):
         self.quiescent = np.empty(self.Ngals,dtype=object)
 
 
-    def _random_angles(self,coords,first_galaxy_index,last_galaxy_index,Ngals):
+    def _random_angles(self,coords,first_galaxy_index,last_galaxy_index):
         """
-        Generate a list of Ngals random angles. 
+        Generate a list of random angles. 
         Assign the angles to coords[start:end], 
         an index bookkeeping trick to speed up satellite position assignment.
 
         """
+        
+        Ngals = last_galaxy_index - first_galaxy_index + 1
 
         cos_t = np.random.uniform(-1.,1.,Ngals)
         phi = np.random.uniform(0,2*np.pi,Ngals)
