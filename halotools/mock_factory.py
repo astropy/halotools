@@ -39,12 +39,15 @@ class HodMockFactory(object):
 
 
 	def populate(self):
-
+		# Assign properties to bounded populations first.
+		# self.coords[:self.num_total_cens] = self._halopos[self._hasCentral]
 		pass
 
 	def _allocate_memory(self):
 		self._occupation = {}
 		self._total_abundance = {}
+		self._gal_type_indices = {}
+		first_galaxy_index = 0
 		for gal_type in self.gal_types:
 			if hasattr(self.model,'sec_haloprop_key'):
 				self._occupation[gal_type] = (
@@ -62,6 +65,11 @@ class HodMockFactory(object):
 			self._total_abundance[gal_type] = (
 				self._occupation[gal_type].sum()
 				)
+			last_galaxy_index = first_galaxy_index + self._total_abundance[gal_type]
+			self._gal_type_indices[gal_type] = (
+				first_galaxy_index, last_galaxy_index)
+			first_galaxy_index = last_galaxy_index
+
 		self.Ngals = np.sum(self._total_abundance.values())
 
 		self.coords = np.empty((self.Ngals,3),dtype='f8')
