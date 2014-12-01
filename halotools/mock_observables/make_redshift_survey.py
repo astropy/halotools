@@ -2,6 +2,9 @@
 #November, 2014
 #Yale University
 
+"""
+create mock redshift space coordinates
+"""
 
 from __future__ import division, print_function
 
@@ -29,7 +32,12 @@ def distant_observer(mock,cosmo,los='z'):
     f = interp1d(x, y, kind='cubic')
     z_cos = f(mock.galaxies['coords'][:,los])
     
+    #redshift is combination of cosmological and peculiar velocities
     z = z_cos+(v_los/c)*(1.0+z_cos)
+    
+    #reflect galaxies around redshift PBC
+    flip = (z>f(mock.Lbox))
+    z[flip] = z[flip]-f(mock.Lbox)
     
     mock.galaxies['redshift']=z
 
