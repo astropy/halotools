@@ -94,6 +94,7 @@ def cumulative_NFW_profile(x,c):
 
 
 
+##################################################################################
 class RadProfBias(object):
     """ Conventional model for the spatial bias of satellite galaxies. 
     The profile parameters governing the satellite distribution are set to be 
