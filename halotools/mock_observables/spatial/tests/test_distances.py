@@ -6,6 +6,7 @@ Test the distance functions in distance.py
 
 from ..distances import euclidean_distance
 from ..distances import angular_distance
+from ..distances import projected_distance
 
 import numpy as np
 
@@ -32,3 +33,15 @@ def test_angular_distance():
     da = angular_distance(p1,p2)
     
     assert da==90.0, "incorrect angular distance measure."
+
+
+def test_projected_distance():
+
+    p1 = np.array([0.0,0.0])
+    p2 = np.array([0.0,1.0])
+    los = np.array([0.0,1.0])
+    
+    d_para, d_perp = projected_distance(p1,p2,los)
+    
+    assert d_para==1, "incorrect parallel distance measure."
+    assert d_perp==0, "incorrect parallel distance measure."
