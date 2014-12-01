@@ -241,7 +241,7 @@ class cylinder(volume):
     normal: array_like, optional
         vector defining the normal to the circular fave of the cylinder, default is [0,0,1]
     """
-    def __init__(self, center=(0.0,0.0,0.0), radius = 1.0, length=1.0, \
+    def __init__(self, center=np.array([0.0,0.0,0.0]), radius = 1.0, length=1.0, \
                  normal=np.array([0.0,0.0,1.0])):
         super(cylinder, self).__init__()
         self.center = center
@@ -408,6 +408,7 @@ def inside_volume(shapes, points, period=None):
         list of arrays of points inside each shape
     N_points_in_shapes: np.array
     """
+    from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
     
     #check input
     if type(points) is not cKDTree:
@@ -438,20 +439,21 @@ def inside_volume(shapes, points, period=None):
         for i, shape in enumerate(shapes):
             points_to_test = np.array(KDT.query_ball_point(shape.center,shape.circum_r(),period=period))
             #need to do some special maneuvering to deal with kdtree/array input for points.
-            if type(points) is cKDTree:
-                inside = shape.inside(KDT.data[points_to_test], period)
-                inside = points_to_test[inside]
-            else:
-                inside = shape.inside(points[points_to_test], period)
-                inside = points_to_test[inside]
-            #does a point fell within the volume?
-            if len(inside)>0:
-                inside_shapes[i]=True
-            else: inside_shapes[i]=False
-            #append indices of points which fell within the volume
-            inside_points = np.hstack((inside_points,inside))
-            points_in_shapes.append(inside)
-            N_points_in_shapes[i] = len(inside) 
+            if len(points_to_test)>0:
+                if type(points) is cKDTree:
+                    inside = shape.inside(KDT.data[points_to_test], period)
+                    inside = points_to_test[inside]
+                else:
+                    inside = shape.inside(points[points_to_test], period)
+                    inside = points_to_test[inside]
+                #does a point fell within the volume?
+                if len(inside)>0:
+                     inside_shapes[i]=True
+                else: inside_shapes[i]=False
+                #append indices of points which fell within the volume
+                inside_points = np.hstack((inside_points,inside))
+                points_in_shapes.append(inside)
+                N_points_in_shapes[i] = len(inside) 
         inside_points = np.unique(inside_points) #remove repeats
         return inside_points, inside_shapes, points_in_shapes, N_points_in_shapes
     else:

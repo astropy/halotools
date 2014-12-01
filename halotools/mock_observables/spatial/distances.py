@@ -8,7 +8,7 @@ Functions to calculate distances in mock galaxy catalogues.
 
 from __future__ import division, print_function
 
-__all__=['euclidean_distance','angular_distance','projected_distances']
+__all__=['euclidean_distance','angular_distance','projected_distance']
 
 import numpy as np
 
@@ -127,7 +127,7 @@ def _spherical_to_cartesian(ra, dec):
     return x, y, z
     
 
-def projected_distances(x1,x2,los,period=None):
+def projected_distance(x1,x2,los,period=None):
     """ 
     Find the projected Euclidean distances (parallel and perpendicular) between x1 & x2 given a line-of-sight vector to
     x1, accounting for box periodicity.
@@ -162,6 +162,11 @@ def projected_distances(x1,x2,los,period=None):
     if period is None:
         period = np.array([np.inf]*np.shape(x1)[-1])
     los = np.asarray(los)
+    if los.ndim ==1: los = np.array([los])
+    
+    #normalize the los array
+    norm = np.sqrt(np.sum(los*los, axis=los.ndim-1))
+    los = (los.T/norm).T
     
     #check for consistency
     if np.shape(x1)[-1] != np.shape(x2)[-1]:
