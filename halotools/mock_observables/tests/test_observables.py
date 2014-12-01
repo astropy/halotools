@@ -169,12 +169,23 @@ def test_two_point_correlation_function_jackknife():
     Lbox = np.array([1,1,1])
     rbins = np.linspace(0.0,0.5,5)
     
-    result_1 = two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=Lbox, period = period, N_threads=2)
-    result_2 = two_point_correlation_function(sample1, rbins,  randoms=randoms, period = period, N_threads=2)
+    result_1,err = two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=Lbox, period = period, N_threads=1)
+    result_2 = two_point_correlation_function(sample1, rbins,  randoms=randoms, period = period, N_threads=1)
     
-    print(result_1)
-    print(result_2)
-    assert True==False
+    assert np.all(result_1==result_2), "correlation functions do not match"
+
+def test_two_point_correlation_function_jackknife_threading():
+    
+    sample1 = np.random.random((100,3))
+    randoms = np.random.random((1000,3))
+    period = np.array([1,1,1])
+    Lbox = np.array([1,1,1])
+    rbins = np.linspace(0.0,0.5,5)
+    
+    result_1,err = two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=Lbox, period = period, N_threads=4)
+    result_2 = two_point_correlation_function(sample1, rbins,  randoms=randoms, period = period, N_threads=1)
+    
+    assert np.all(result_1==result_2), "correlation functions do not match"
     
     
     

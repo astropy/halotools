@@ -3374,6 +3374,7 @@ cdef class cKDTree:
                                                                   sweights[self.raw_indices[i]],
                                                                   oweights[other.raw_indices[j]],
                                                                   k,wdim)
+                                        
                                 
                 else:  # 1 is a leaf node, 2 is inner node
                     tracker.push_less_of(2, node2)
@@ -3494,7 +3495,7 @@ cdef class cKDTree:
         
         #process count function
         if w is None:
-            w = fmultiply()
+            w = jweight()
         
         #process the period parameter
         cdef np.ndarray[np.float64_t, ndim=1] cperiod
@@ -3965,4 +3966,12 @@ cdef class Function:
 cdef class fmultiply(Function):
     cpdef double evaluate(self, double x, double y, double a, double b) except *:
         return x * y
+
+cdef class jweight(Function):
+    cpdef double evaluate(self, double x, double y, double a, double b) except *:
+        if a==0: return 1.0
+        elif (x==y) & (x==a): return 0.0 # both outside the sub-sample
+        elif x==y: return 1.0 # both inside the sub-sample        
+        elif (x!=y) & ((x==a) or (y==a)): return 0.5 # only one inside the sub-sample
+        elif (x!=y) & (x!=a) & (y!=a): return 1.0 # both inside the sub-sample
         

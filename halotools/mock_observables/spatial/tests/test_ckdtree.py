@@ -1,13 +1,21 @@
 #!/usr/bin/env python
 
+#import modules
 from __future__ import division
 from ..kdtrees.ckdtree import cKDTree
+#import simple pair counter to compare results with ckdtree pair counter
 from ...pairs import npairs
 from ...pairs import pairs
 from ...pairs import wnpairs
 from ...cpairs import pairwise_distances
+#other modules
 import numpy as np
 import sys
+
+
+"""
+This script contains code to test the functionality of ckdtree.pyx 
+"""
 
 
 ##########################################################################################
@@ -25,6 +33,7 @@ def test_initialization():
     assert np.all(tree.mins == np.amin(data,axis=0)), 'mins are off'
     assert np.all(tree.maxes == np.amax(data,axis=0)), 'maxes are off'
     assert tree.leafsize==10, 'default leafsize is not 10'
+
 
 ##########################################################################################
 #tests for count_neighbors
@@ -59,7 +68,8 @@ def test_count_neighbors_periodic():
     n2 = tree_1.count_neighbors(tree_2,0.25, period=period)
     
     assert n1==n2, 'tree calc did not find same number of pairs'
-    
+
+
 def test_count_neighbors_approximation():
     import time
     data_1 = np.random.random((10000,3))
@@ -81,6 +91,7 @@ def test_count_neighbors_approximation():
     #print n1
     #print n2
     #assert True==False
+
 
 ##########################################################################################
 #tests for query pairs
@@ -108,6 +119,7 @@ def test_query_pairs_periodic():
     
     print(p1.difference(p2))
     assert p1==p2, 'not all pairs found'
+
 
 ##########################################################################################
 #tests for query_ball_tree
@@ -138,6 +150,7 @@ def test_query_ball_tree_periodic():
     n2 = sum(len(x) for x in n2) #number of pairs found
     
     assert n1==n2, 'inconsistent number found'
+
 
 ##########################################################################################
 #tests for query_ball_point
@@ -196,6 +209,7 @@ def test_query_ball_point_wcounts():
     print('error:{0} expected error:{1}'.format(np.fabs(n0-n1)/n0,ep))
     assert np.fabs(n0-n1)/n0 < 10.0 * ep, 'weights are being handeled incorrectly'
 
+
 ##########################################################################################
 #tests for query
 ##########################################################################################
@@ -223,6 +237,7 @@ def test_query_periodic(): #not a very good test...
     ps = tree_1.query(x,10,period=period)[0]
     print ps
     assert len(ps)==10, 'inconsistent number of points found...'
+
 
 ##########################################################################################
 #tests for wcount_neighbors
@@ -263,7 +278,7 @@ def test_wcount_neighbors_periodic():
     print('brute force result:{0:0.10f} ckdtree result:{1:0.10f}'.format(n0,n2))
     print('error:{0} expected error:{1}'.format(np.fabs(n0-n2)/n0,ep))
     assert np.fabs(n0-n2)/n0 < 10.0 * ep, 'weights are being handeled incorrectly'
-    
+
 
 def test_wcount_neighbors_large():
     return 0 #skip this as it takes some time!
@@ -408,7 +423,7 @@ def test_wcount_neighbors_custom_double_weights_functionality():
 ##########################################################################################
 #tests for wcount_neighbors_custom_2D
 ##########################################################################################
-def test_wcount_neighbors_custom_double_weights_functionality():
+def test_wcount_neighbors_custom_2D_double_weights_functionality():
     #need to know the float precision of the computer
     epsilon = np.float64(sys.float_info[8])
     
@@ -423,30 +438,72 @@ def test_wcount_neighbors_custom_double_weights_functionality():
 
     #create random coordinates
     N1 = 100
-    N2 = 100
+    N2 = 1000
     data_1 = np.random.random((N1,3))
     data_2 = np.random.random((N2,3))
     
-    r = np.arange(0.1,1,0.1)
+    r = np.arange(0.1,0.5,0.1)
     
     #build trees for points
     tree_1 = cKDTree(data_1)
     tree_2 = cKDTree(data_2)
     
     #define random weights for test data set 2
-    weights1 = np.random.random_integers(1,16,size=N1)
-    weights2 = np.random.random_integers(1,16,size=N2)
-    wdim = 16
+    weights1 = np.random.random_integers(1,100,size=N1)
+    weights2 = np.random.random_integers(1,100,size=N2)
+    wdim = 101
     
     #calculate weighted sums
     n0 = npairs(data_1, data_2, r)
-    n1 = tree_1.wcount_neighbors_custom_2D(tree_2,r, sweights=weights1, oweights=weights2, w=MyFunction(), wdim=wdim)
+    n1 = tree_1.wcount_neighbors_custom_2D(tree_2,r, sweights=weights1, oweights=weights2, wdim=wdim)[0]
     
     #what is the expected precision?
     ep = epsilon*np.sqrt(np.float64(N1*N2))
     
-    print(n1)
-    print(n0)
+    print(n0,n1)
+    print(np.fabs(n0-n1)/n0 < 10.0 * ep)
+    assert np.all(np.fabs(n0-n1)/n0 < 10.0 * ep), 'weights are being handeled incorrectly'
+
+
+def test_wcount_neighbors_custom_2D_double_weights_pbcs():
+    #need to know the float precision of the computer
+    epsilon = np.float64(sys.float_info[8])
+    
+    #user defined function
+    from ..kdtrees.ckdtree import Function
+    class MyFunction(Function):
+        def evaluate(self, x, y, a, b):
+            if a==0: return 1
+            elif (x==y) & (x==a): return 0.0
+            elif x==y: return 1.0
+            elif x!=y: return 0.5
+
+    #create random coordinates
+    N1 = 100
+    N2 = 1000
+    data_1 = np.random.random((N1,3))
+    data_2 = np.random.random((N2,3))
+    period = np.array([1,1,1])
+    r = np.arange(0.1,0.5,0.1)
+    
+    #build trees for points
+    tree_1 = cKDTree(data_1)
+    tree_2 = cKDTree(data_2)
+    
+    #define random weights for test data set 2
+    weights1 = np.random.random_integers(1,100,size=N1)
+    weights2 = np.random.random_integers(1,100,size=N2)
+    wdim = 101
+    
+    #calculate weighted sums
+    n0 = npairs(data_1, data_2, r, period=period)
+    n1 = tree_1.wcount_neighbors_custom_2D(tree_2,r, sweights=weights1, oweights=weights2, wdim=wdim, period=period)[0]
+    
+    #what is the expected precision?
+    ep = epsilon*np.sqrt(np.float64(N1*N2))
+    
+    print(n0,n1)
+    print(np.fabs(n0-n1)/n0 < 10.0 * ep)
     assert np.all(np.fabs(n0-n1)/n0 < 10.0 * ep), 'weights are being handeled incorrectly'
 
 
