@@ -8,7 +8,7 @@ Functions to calculate distances in mock galaxy catalogues.
 
 from __future__ import division, print_function
 
-__all__=['euclidean_distance','angular_distance']
+__all__=['euclidean_distance','angular_distance','projected_distance']
 
 import numpy as np
 
@@ -125,4 +125,68 @@ def _spherical_to_cartesian(ra, dec):
     z = np.sin(decr)
     
     return x, y, z
+    
+
+def projected_distance(x1,x2,los,period=None):
+    """ 
+    Find the projected Euclidean distances (parallel and perpendicular) between x1 & x2 given a line-of-sight vector to
+    x1, accounting for box periodicity.
+    
+    Parameters
+    ----------
+    x1 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and period
+    
+    x2 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and period.
+    
+    los : array_like
+        N by k numpy array of k-dimensional los vecotrs.
+    
+    period : array_like
+        Size of the simulation box along each dimension. Defines periodic boundary 
+        conditioning.  Must be axis aligned.
+    
+    Returns
+    -------
+    projected distances : d_para, d_perp
+        np.ndarray
+    
+    """
+    
+    #process inputs
+    x1 = np.asarray(x1)
+    if x1.ndim ==1: x1 = np.array([x1])
+    x2 = np.asarray(x2)
+    if x2.ndim ==1: x2 = np.array([x2])
+    if period is None:
+        period = np.array([np.inf]*np.shape(x1)[-1])
+    los = np.asarray(los)
+    if los.ndim ==1: los = np.array([los])
+    
+    #normalize the los array
+    norm = np.sqrt(np.sum(los*los, axis=los.ndim-1))
+    los = (los.T/norm).T
+    
+    #check for consistency
+    if np.shape(x1)[-1] != np.shape(x2)[-1]:
+        raise ValueError("x1 and x2 list of points must have same dimension k.")
+    else: k = np.shape(x1)[-1]
+    if np.shape(period)[0] != np.shape(x1)[-1]:
+        raise ValueError("period must have length equal to the dimension of x1 and x2.")
+    if np.shape(los) != np.shape(x1):
+        raise ValueError("los must a list of lenght len(x1) of k-dimensional vectors defining the los direction")
+    
+    d_para_1 = x1 * los
+    d_perp_1 = x1 - d_para_1
+    d_para_2 = x2 * los
+    d_perp_2 = x2 - d_para_2
+    
+    d_para = np.minimum(np.fabs(d_para_1-d_para_2), period - np.fabs(d_para_1-d_para_2))
+    d_perp = np.minimum(np.fabs(d_perp_1-d_perp_2), period - np.fabs(d_perp_1-d_perp_2)) 
+    
+    d_para = np.sqrt(np.sum(d_para*d_para, axis=len(np.shape(d_para))-1))
+    d_perp = np.sqrt(np.sum(d_perp*d_perp, axis=len(np.shape(d_perp))-1))
+    
+    return d_para, d_perp
 

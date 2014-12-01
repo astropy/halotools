@@ -266,7 +266,7 @@ def wnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def pairwise_distances(double[:, ::1] data1, period=None):
+def pairwise_distances(np.float64_t[:, ::1] data1, period=None, max_distance=None):
     """
     Calculate the distance between all pairs of points.
     
@@ -306,18 +306,27 @@ def pairwise_distances(double[:, ::1] data1, period=None):
         elif np.shape(period)[0] != np.shape(data1)[ii]:
             raise ValueError("period should have len == dimension of points")
     
+    #Process max_distance entry and check for consistency.
+    if max_distance is None:
+            max_distance = infinity
+    else:
+        max_distance = np.float64(max_distance**2.0)
+    
     cdef np.ndarray[np.float64_t, ndim=1] cperiod = np.ascontiguousarray(period,dtype=np.float64)
     cdef int M = data1.shape[0]
     cdef int N = data1.shape[1]
-    cdef double tmp, d
-    cdef double[:, ::1] D = np.empty((M, M), dtype=np.float64)
+    cdef np.float64_t tmp, d
+    cdef np.float64_t[:, ::1] D = np.zeros((M, M), dtype=np.float64)
     for i in range(M):
-        for j in range(M):
+        for j in range(i,M):
             d = 0.0
             for k in range(N):
                 tmp = fabs(data1[i, k] - data1[j, k])
                 tmp = fmin(tmp, cperiod[k] - tmp)
                 #tmp = data1[i, k] - data1[j, k] #non-periodic dist calc
                 d += tmp * tmp
-            D[i, j] = sqrt(d)
+            if d>max_distance: d=0
+            else: D[i, j] = sqrt(d)
     return np.asmatrix(D)
+    
+    

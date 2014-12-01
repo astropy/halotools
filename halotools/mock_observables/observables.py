@@ -4,13 +4,12 @@
 
 """ 
 Functions that compute statistics of a mock galaxy catalog in a periodic box. 
-Still largely unused in its present form, and needs to be integrated with 
-the pair counter and subvolume membership methods.
 """
 
 from __future__ import division
 
-__all__=['two_point_correlation_function','apparent_to_absolute_magnitude',
+__all__=['two_point_correlation_function','two_point_correlation_function_jackknife',
+         'Delta_Sigma','apparent_to_absolute_magnitude',
          'luminosity_to_absolute_magnitude','get_sun_mag','luminosity_function','HOD',
          'CLF','CSMF','isolatoion_criterion']
 
@@ -18,11 +17,20 @@ import numpy as np
 from math import pi, gamma
 #from pairs import npairs
 #from cpairs import npairs
-from kdpairs import npairs
+from kdpairs import npairs, wnpairs, jnpairs
 from multiprocessing import Pool
 
+####define wrapper functions for pair counters to facilitate parallelization##############
+#straight pair counter
 def _npairs_wrapper(tup):
     return npairs(*tup)
+#weighted pair counter
+def _wnpairs_wrapper(tup):
+    return wnpairs(*tup)
+#jackknife pair counter
+def _jnpairs_wrapper(tup):
+    return jnpairs(*tup)
+##########################################################################################
 
 def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None, 
                                    period = None, max_sample_size=int(1e6), 
@@ -81,7 +89,7 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
     #The pair counter returns all pairs, including self pairs and double counted pairs 
     #with separations less than r. If PBCs are set to none, then period=np.inf. This makes
     #all distance calculations equivalent to the non-periodic case, while using the same 
-    #periodic distance functions within the pair counter..
+    #periodic distance functions within the pair counter.
     ###############
     
     pool = Pool(N_threads)
@@ -307,6 +315,360 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         xi_12 = TP_estimator(D1D2,D1R,RR,factor1,estimator)
         xi_22 = TP_estimator(D2D2,D2R,RR,factor2,estimator)
         return xi_11, xi_12, xi_22
+
+
+#created by Shany Danieli and Duncan Campbell December 2014
+def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10, Lbox=[250.0,250.0,250.0], sample2 = None, 
+                                             period = None, max_sample_size=int(1e6), 
+                                             estimator='Natural', N_threads=1):
+    """
+    Calculate the two-point correlation function with jackknife errors. 
+    
+    Parameters 
+    ----------
+    sample1 : array_like
+        Npts x k numpy array containing k-d positions of Npts.
+    
+    randoms : array_like
+        Nran x k numpy array containing k-d positions of Npts. 
+    
+    rbins : array_like
+        numpy array of boundaries defining the bins in which pairs are counted. 
+        len(rbins) = Nrbins + 1.
+    
+    Nsub : array_like, optional
+        numpy array of number of divisions along each dimension defining jackknife subvolumes
+        if single integer is given, assumed to be equivalent for each dimension
+    
+    Lbox : array_like, optional
+        length of data volume along each dimension
+    
+    sample2 : array_like, optional
+        Npts x k numpy array containing k-d positions of Npts.
+    
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
+    
+    max_sample_size : int, optional
+        Defines maximum size of the sample that will be passed to the pair counter. 
+        
+        If sample size exeeds max_sample_size, the sample will be randomly down-sampled 
+        such that the subsamples are (roughly) equal to max_sample_size. 
+        Subsamples will be passed to the pair counter in a simple loop, 
+        and the correlation function will be estimated from the median pair counts in each bin.
+    
+    estimator: string, optional
+        options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+    
+    N_thread: int, optional
+        number of threads to use in calculation.
+
+    Returns 
+    -------
+    correlation_function : array_like
+        array containing correlation function :math:`\\xi` computed in each of the Nrbins 
+        defined by input `rbins`.
+
+    """
+
+    pool = Pool(N_threads)
+    
+    def list_estimators(): #I would like to make this accessible from the outside. Know how?
+        estimators = ['Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay']
+        return estimators
+    estimators = list_estimators()
+    
+    #process input parameters
+    sample1 = np.asarray(sample1)
+    if sample2 != None: sample2 = np.asarray(sample2)
+    else: sample2 = sample1
+    randoms = np.asarray(randoms)
+    rbins = np.asarray(rbins)
+    if type(Nsub) is int: Nsub = np.array([Nsub]*np.shape(sample1)[-1])
+    else: Nsub = np.asarray(Nsub)
+    if type(Lbox) in (int,float): Lbox = np.array([Lbox]*np.shape(sample1)[-1])
+    else: Lbox = np.asarray(Lbox)
+    #Process period entry and check for consistency.
+    if period is None:
+            PBCs = False
+            period = np.array([np.inf]*np.shape(sample1)[-1])
+    else:
+        PBCs = True
+        period = np.asarray(period).astype("float64")
+        if np.shape(period) == ():
+            period = np.array([period]*np.shape(sample1)[-1])
+        elif np.shape(period)[0] != np.shape(sample1)[-1]:
+            raise ValueError("period should have shape (k,)")
+            return None
+    #down sample is sample size exceeds max_sample_size.
+    if (len(sample2)>max_sample_size) & (not np.all(sample1==sample2)):
+        inds = np.arange(0,len(sample2))
+        np.random.shuffle(inds)
+        inds = inds[0:max_sample_size]
+        sample2 = sample2[inds]
+        print('down sampling sample2...')
+    if len(sample1)>max_sample_size:
+        inds = np.arange(0,len(sample1))
+        np.random.shuffle(inds)
+        inds = inds[0:max_sample_size]
+        sample1 = sample1[inds]
+        print('down sampling sample1...')
+    if np.shape(Nsub)[0]!=np.shape(sample1)[-1]:
+        raise ValueError("Nsub should have shape (k,) or be a single integer")
+    
+    if np.shape(rbins) == ():
+        rbins = np.array([rbins])
+    
+    k = np.shape(sample1)[-1] #dimensionality of data
+    N1 = len(sample1)
+    N2 = len(sample2)
+    Nran = len(randoms)
+    
+    #check for input parameter consistency
+    if (period != None) & (np.max(rbins)>np.min(period)/2.0):
+        raise ValueError('Cannot calculate for seperations larger than Lbox/2.')
+    if (sample2 != None) & (sample1.shape[-1]!=sample2.shape[-1]):
+        raise ValueError('Sample 1 and sample 2 must have same dimension.')
+    if estimator not in estimators: 
+        raise ValueError('Must specify a supported estimator. Supported estimators are:{0}'
+        .value(estimators))
+    if (PBCs==True) & (max(period)==np.inf):
+        raise ValueError('If a non-infinte PBC specified, all PBCs must be non-infinte.')
+    
+    def get_subvolume_labels(sample1, sample2, randoms, Nsub, Lbox):
+        """
+        Split volume into subvolumes, and tag points in subvolumes with integer labels for 
+        use in the jackknife calculation.
+        
+        note: '0' tag should be reserved. It is used in the jackknife calculation to mean
+        'full sample'
+        """
+        
+        dL = Lbox/Nsub # length of subvolumes along each dimension
+        N_sub_vol = np.prod(Nsub) # total the number of subvolumes
+    
+        #tag each particle with an integer indicating which jackknife subvolume it is in
+        #subvolume indices for the sample1 particle's positions
+        index_1 = np.sum(np.floor(sample1/dL)*np.hstack((1,np.cumprod(Nsub[:-1]))),axis=1)+1
+        j_index_1 = index_1.astype(int)
+        #subvolume indices for the random particle's positions
+        index_random = np.sum(np.floor(randoms/dL)*np.hstack((1,np.cumprod(Nsub[:-1]))),axis=1)+1
+        j_index_random = index_random.astype(int)
+        #subvolume indices for the sample2 particle's positions
+        index_2 = np.sum(np.floor(sample2/dL)*np.hstack((1,np.cumprod(Nsub[:-1]))),axis=1)+1
+        j_index_2 = index_2.astype(int)
+        
+        return j_index_1, j_index_2, j_index_random, N_sub_vol
+    
+    def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins, period, N_thread):
+        """
+        Count jackknife data pairs: DD
+        """
+        if N_threads==1:
+            D1D1 = jnpairs(sample1, sample1, rbins, period=period,  weights1=j_index_1, weights2=j_index_1, N_vol_elements=N_sub_vol)
+            D1D1 = np.diff(D1D1,axis=1)
+            if np.all(sample1 != sample2):
+                D1D2 = jnpairs(sample1, sample2, rbins, period=period, weights1=j_index_1, weights2=j_index_2, N_vol_elements=N_sub_vol)
+                D1D2 = np.diff(D1D2,axis=1)
+                D2D2 = jnpairs(sample2, sample2, rbins, period=period, weights1=j_index_2, weights2=j_index_2, N_vol_elements=N_sub_vol)
+                D2D2 = np.diff(D2D2,axis=1)
+            else:
+                D1D2 = D1D1
+                D2D2 = D1D1
+        else:
+            inds1 = np.arange(0,len(sample1)) #array which is just indices into sample1
+            inds2 = np.arange(0,len(sample2)) #array which is just indices into sample2
+            args = [[sample1[chunk],sample1,rbins,period,j_index_1[chunk],j_index_1,N_sub_vol] for chunk in np.array_split(inds1,N_threads)]
+            D1D1 = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
+            D1D1 = np.diff(D1D1,axis=1)
+            if np.all(sample1 != sample2):
+                args = [[sample1[chunk],sample2,rbins,period,jindex_1[chunk],j_index_2,N_sub_vol] for chunk in np.array_split(inds1,N_threads)]
+                D1D2 = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
+                D1D2 = np.diff(D1D2,axis=1)
+                args = [[sample2[chunk],sample2,rbins,period,j_index_2[chunk],j_index_2,N_sub_vol] for chunk in np.array_split(inds2,N_threads)]
+                D2D2 = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
+                D2D2 = np.diff(D2D2,axis=1)
+            else:
+                D1D2 = D1D1
+                D2D2 = D1D1
+
+        return D1D1, D1D2, D2D2
+    
+    def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins, period, N_thread, calculate_rr=True):
+        """
+        Count jackknife random pairs: DR, RR
+        """
+        
+        if N_threads==1:
+            DR = jnpairs(sample, randoms, rbins, period=period,\
+                           weights1=j_index, weights2=j_index_randoms,\
+                           N_vol_elements=N_sub_vol)
+            DR = np.diff(DR,axis=1)
+            if calculate_rr==True:
+                RR = jnpairs(randoms, randoms, rbins, period=period,\
+                             weights1=j_index_randoms, weights2=j_index_randoms,\
+                             N_vol_elements=N_sub_vol)
+                RR = np.diff(RR,axis=1)
+            else: RR=None
+        else:
+            inds1 = np.arange(0,len(sample)) #array which is just indices into sample1
+            inds2 = np.arange(0,len(randoms)) #array which is just indices into sample2
+            args = [[sample[chunk],randoms,rbins,period,j_index[chunk],j_index_randoms,N_sub_vol]\
+                    for chunk in np.array_split(inds1,N_threads)]
+            DR = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
+            DR = np.diff(DR,axis=1)
+            if calculate_rr==True:
+                args = [[randoms[chunk],randoms,rbins,period,j_index_randoms[chunk],j_index_randoms,N_sub_vol]\
+                       for chunk in np.array_split(inds2,N_threads)]
+                RR = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
+                RR = np.diff(RR,axis=1)
+            else: RR=None
+
+        return DR, RR
+        
+    def TP_estimator(DD,DR,RR,factor,estimator):
+        """
+        two point correlation function estimator
+        """
+        if estimator == 'Natural':
+            xi = (1.0/factor**2.0)*DD/RR - 1.0
+        elif estimator == 'Davis-Peebles':
+            xi = (1.0/factor)*DD/DR - 1.0
+        elif estimator == 'Hewett':
+            xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*DR/RR #(DD-DR)/RR
+        elif estimator == 'Hamilton':
+            xi = (DD*RR)/(DR*DR) - 1.0
+        elif estimator == 'Landy-Szalay':
+            xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*2.0*DR/RR + 1.0 #(DD - 2.0*DR + RR)/RR
+        else: 
+            raise ValueError("unsupported estimator!")
+        return xi
+    
+    def jackknife_errors(sub,full,N_sub_vol):
+        """
+        Calculate jackknife errors.
+        """
+        after_subtraction =  sub - full
+        squared = after_subtraction**2.0
+        error2 = ((N_sub_vol-1)/N_sub_vol)*squared.sum(axis=0)
+        error = error2**0.5
+        
+        return error
+    
+    #ratio of the number of data points to random points
+    factor1 = (len(sample1)*1.0)/len(randoms)
+    factor2 = (len(sample2)*1.0)/len(randoms)
+    
+    j_index_1, j_index_2, j_index_random, N_sub_vol = get_subvolume_labels(sample1, sample2,\
+                                                                           randoms, Nsub, Lbox)
+    
+    #calculate all the pair counts
+    D1D1, D1D2, D2D2 = jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins, period, N_threads)
+    D1D1_full = D1D1[0,:]
+    D1D1_sub = D1D1[1:,:]
+    D1D2_full = D1D2[0,:]
+    D1D2_sub = D1D2[1:,:]
+    D2D2_full = D2D2[0,:]
+    D2D2_sub = D2D2[1:,:]
+    D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol, rbins, period, N_threads)
+    D2R, RR_dummy= jrandom_counts(sample2, randoms, j_index_2, j_index_random, N_sub_vol, rbins, period, N_threads, calculate_rr=False)
+    D1R_full = D1R[0,:]
+    D1R_sub = D1R[1:,:]
+    D2R_full = D2R[0,:]
+    D2R_sub = D2R[1:,:]
+    RR_full = RR[0,:]
+    RR_sub = RR[1:,:]
+    
+    #calculate the correlation function for the full sample
+    xi_11_full  = TP_estimator(D1D1_full,D1R_full,RR_full,factor1,estimator)
+    xi_12_full  = TP_estimator(D1D2_full,D1R_full,RR_full,factor1,estimator)
+    xi_22_full  = TP_estimator(D2D2_full,D2R_full,RR_full,factor2,estimator)
+    #calculate the correlation function for the subsamples
+    xi_11_sub  = TP_estimator(D1D1_sub,D1R_sub,RR_sub,factor1,estimator)
+    xi_12_sub  = TP_estimator(D1D2_sub,D1R_sub,RR_sub,factor1,estimator)
+    xi_22_sub  = TP_estimator(D2D2_sub,D2R_sub,RR_sub,factor2,estimator)
+    
+    #calculate the errors
+    xi_11_err = jackknife_errors(xi_11_sub,xi_11_full,N_sub_vol)
+    xi_12_err = jackknife_errors(xi_12_sub,xi_12_full,N_sub_vol)
+    xi_22_err = jackknife_errors(xi_22_sub,xi_22_full,N_sub_vol)
+    
+    if np.all(sample1==sample2):
+        return xi_11_full,xi_11_err
+    else:
+        return xi_11_full,xi_12_full,xi_22_full,xi_11_err,xi_12_err,xi_22_err
+    
+    
+
+def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.0],
+                randoms=None, period=None, N_threads=1):
+    """
+    Calculate the galaxy-galaxy lensing signal, $\Delata\Sigma$.
+    
+    Parameters
+    ----------
+    centers: array_like
+    
+    particles: array_like
+    
+    rbins: array_like
+    
+    bounds: array_like, optional
+    
+    normal: array_like, optional
+    
+    randoms: array_like, optional
+    
+    period: array_like, optional
+    
+    N_threads: int, optional
+    
+    
+    Returns
+    -------
+    
+    Delata_Sigma: np.array
+    """
+    from halotools.mock_observables.spatial.geometry import inside_volume
+    from halotools.mock_observables.spatial.geometry import cylinder
+    from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
+    
+    normal = np.asarray(normal)
+    bounds = np.asarray(bounds)
+    centers = np.asarray(centers)
+    
+    N_targets = len(centers)
+    length = bounds[1]-bounds[0]
+    
+    #create cylinders
+    cyls = np.ndarray((N_targets,len(rbins)),dtype=object)
+    for i in range(0,N_targets):
+        for j in range(0,len(rbins)):
+            cyls[i,j] = geometry.cylinder(center=centers[i], radius = rbins[j], length=length, normal=normal)
+    
+    #calculate the number of particles inside each cylinder 
+    tree = cKDTree(particles)
+    N = np.ndarray((len(centers),len(rbins)))
+    for j in range(0,len(rbins)):
+        dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j].tolist(), tree, period=period)
+    
+    area = 2.0*np.pi*rbins**2.0
+    sigma = N/area
+    
+    delta_sigma = np.zeros((N_targets,len(rbins)-1))
+    for i in range(0,N_targets):
+        for j in range(1,len(rbins)):
+            A = area[j]-area[j-1] 
+            outer = 1.0/(np.pi*rbins[j]**2.0)
+            inner_sum=0.0
+            for k in range(0,j-1):
+                inner_sum = sigma[k]*area[k]-sigma[j]
+            inner_sum = np.sum(inner_sum)
+            delta_sigma[j] = outer*inner_sum
+    
+    return delta_sigma
 
 
 def apparent_to_absolute_magnitude(m, d_L):

@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-# Concentration.py 		(c) Benedikt Diemer
+# HaloConcentration.py 	(c) Benedikt Diemer
 #						University of Chicago
 #     				    bdiemer@oddjob.uchicago.edu
 #
@@ -9,8 +9,18 @@
 # This module implements the concentration model of Diemer & Kravtsov 2014b, as well as several 
 # other, mostly power-law based models. The main function in this module, concentration(), is a 
 # wrapper for all models and mass definitions. Alternatively, the user can also call the individual
-# model functions directly. Note that most models are only valid over a certain range of masses, 
-# redshifts, and cosmology.
+# model functions directly. 
+#
+# Note that most models are only valid over a certain range of masses, redshifts, and cosmology.
+# All models are only calibrated for particular mass definitions, such as c200c, cvir et. If these
+# mass definitions match the definition desired by the user, the native model predictions are 
+# returned. If the mass definition requested by the user does not match the model requested, c is
+# converted.
+#
+# SPEED:        The dk14 model uses certain cosmological quantities, such as sigma(R), that can 
+#               be computationally intensive. If you wish to compute concentration for many 
+#               different cosmologies, please read the documentation of the 'interpolation' switch
+#               in the Cosmology class.
 #
 # Beside the general concentration() function, the user can directly call the specific functions
 # for each model. In the case of the DK14 model, for example, that might make sense if the user 
@@ -69,12 +79,14 @@ import HaloDensityProfile
 # -------------------------------------------------------------------------------------------------
 # Model          Mass defs.       Mass(z=0)        Redshift   Cosmo.   Reference
 # -------------------------------------------------------------------------------------------------
-# dk14           200c             All              All        All      Diemer & Kravtsov 2014
-# dutton14       200c, vir        M > 1E10         0 < z < 5  Planck1  Dutton & Maccio 2014, MNRAS 441, 3359
-# bhattacharya13 200c, vir, 200m  2E12 < M < 2E15  0 < z < 2  WMAP7    Bhattacharya et al. 2013, ApJ 766, 32
-# prada12        200c             All              All        All      Prada et al. 2012, MNRAS 423, 3018
-# klypin11       vir              3E10 < M < 5E14  0          WMAP7    Klypin et al. 2011, ApJ 740, 102
-# duffy08        200c, vir, 200m  1E11 < M < 1E15  0 < z < 2  WMAP5    Duffy et al. 2008, MNRAS 390, L64
+# dk14 (default) 200c             All              All        All            Diemer & Kravtsov 2014
+# klypin15_nu    200c, vir        M > 1E10         0 < z < 5  Planck1        Klypin et al. 2014
+# klypin15_m     200c, vir        M > 1E10         0 < z < 5  Planck1, WMAP7 Klypin et al. 2014
+# dutton14       200c, vir        M > 1E10         0 < z < 5  Planck1        Dutton & Maccio 2014, MNRAS 441, 3359
+# bhattacharya13 200c, vir, 200m  2E12 < M < 2E15  0 < z < 2  WMAP7          Bhattacharya et al. 2013, ApJ 766, 32
+# prada12        200c             All              All        All            Prada et al. 2012, MNRAS 423, 3018
+# klypin11       vir              3E10 < M < 5E14  0          WMAP7          Klypin et al. 2011, ApJ 740, 102
+# duffy08        200c, vir, 200m  1E11 < M < 1E15  0 < z < 2  WMAP5          Duffy et al. 2008, MNRAS 390, L64
 # -------------------------------------------------------------------------------------------------
 #
 # If the user requests a mass definition that is not one of the native definitions of the c-M model,
@@ -115,7 +127,7 @@ def concentration(M, mdef, z, \
 	# corresponding mass in the user's mass definition is M_desired.
 	def eq(MDelta, M_desired, mdef_model, func, limited, args):
 		cDelta, _ = evaluateC(func, MDelta, limited, args)
-		Mnew, _, _ = HaloDensityProfile.convertMassDefinition(MDelta, cDelta, z, mdef_model, mdef,\
+		Mnew, _, _ = HaloDensityProfile.changeMassDefinition(MDelta, cDelta, z, mdef_model, mdef,\
 												profile = 'nfw')
 		return Mnew - M_desired
 
@@ -126,6 +138,18 @@ def concentration(M, mdef, z, \
 		args = (z, statistic)
 		limited = False
 		
+	elif model == 'klypin15_nu':
+		mdefs_model = ['200c', 'vir']
+		func = klypin15_nu_c
+		args = (z,)
+		limited = True
+
+	elif model == 'klypin15_m':
+		mdefs_model = ['200c', 'vir']
+		func = klypin15_m_c
+		args = (z,)
+		limited = True
+
 	elif model == 'dutton14':
 		mdefs_model = ['200c', 'vir']
 		func = dutton14_c
@@ -135,25 +159,25 @@ def concentration(M, mdef, z, \
 	elif model == 'bhattacharya13':
 		mdefs_model = ['200c', 'vir', '200m']
 		func = bhattacharya13_c
-		args = z,
+		args = (z,)
 		limited = True
 
 	elif model == 'prada12':
 		mdefs_model = ['200c']
 		func = prada12_c200c
-		args = z,
+		args = (z,)
 		limited = False
 
 	elif model == 'klypin11':
 		mdefs_model = ['vir']
 		func = klypin11_cvir
-		args = z,
+		args = (z,)
 		limited = True
 		
 	elif model == 'duffy08':
 		mdefs_model = ['200c', 'vir', '200m']
 		func = duffy08_c
-		args = z,
+		args = (z,)
 		limited = True
 	
 	else:
@@ -188,7 +212,7 @@ def concentration(M, mdef, z, \
 			args_solver = M_use[i], mdef_model, func, limited, args
 			MDelta = scipy.optimize.brentq(eq, M_min, M_max, args = args_solver)
 			cDelta, mask[i] = evaluateC(func, MDelta, limited, args)
-			_, _, c[i] = HaloDensityProfile.convertMassDefinition(MDelta, cDelta, z, mdef_model, \
+			_, _, c[i] = HaloDensityProfile.changeMassDefinition(MDelta, cDelta, z, mdef_model, \
 										mdef, profile = conversion_profile)
 		if not Utilities.isArray(M):
 			c = c[0]
@@ -258,7 +282,7 @@ def dk14_c200c_M(M200c, z, statistic = 'median'):
 	if cosmo.power_law:
 		n = cosmo.power_law_n * M200c / M200c
 	else:
-		n = dk14_compute_n_M(M200c, z)
+		n = dk14_compute_n_M(M200c)
 	
 	nu = cosmo.M_to_nu(M200c, z)
 	ret = dk14_c200c_n(nu, n, statistic)
@@ -310,6 +334,8 @@ def dk14_c200c_n(nu, n, statistic = 'median'):
 	
 	return c
 
+###################################################################################################
+
 # Compute the characteristic wavenumber for a particular halo mass.
 
 def dk14_wavenumber_k_R(M):
@@ -326,28 +352,28 @@ def dk14_wavenumber_k_R(M):
 # Get the slope n = d log(P) / d log(k) at a scale k_R and a redshift z. The slope is computed from
 # the Eisenstein & Hu 1998 approximation to the power spectrum (without BAO).
 
-def dk14_compute_n(k_R, z):
+def dk14_compute_n(k_R):
 
 	if numpy.min(k_R) < 0:
 		raise Exception("k_R < 0.")
 
 	cosmo = Cosmology.getCurrent()
-
-	# We need coverage to compute the local slope at kR. For the spline, we evaluate a somewhat
-	# larger range in k.
-	k_min = numpy.min(k_R) / 2.0
-	k_max = numpy.max(k_R) * 2.0
 	
-	# Now compute a grid of k and P(k) values
-	k = 10**numpy.arange(numpy.log10(k_min), numpy.log10(k_max), 0.01)
-	Pk = cosmo.matterPowerSpectrum(k, Pk_source = 'eh98smooth')
-	
-	# Compute the slope
-	logk = numpy.log(k)
-	a, b, c = scipy.interpolate.splrep(logk, numpy.log(Pk), s = 0.0)
-	tup = a, b, c
-	dPdk = scipy.interpolate.splev(logk, tup, der = 1)
-	n = numpy.interp(k_R, k, dPdk)
+	# The way we compute the slope depends on the settings in the Cosmology module. If interpolation
+	# tables are used, we can compute the slope directly from the spline interpolation which is
+	# very fast. If not, we need to compute the slope manually.
+	if cosmo.interpolation:
+		n = cosmo.matterPowerSpectrum(k_R, Pk_source = 'eh98smooth', derivative = True)
+		
+	else:
+		# We need coverage to compute the local slope at kR, which can be an array. Thus, central
+		# difference derivatives don't make much sense here, and we use a spline instead.
+		k_min = numpy.min(k_R) * 0.9
+		k_max = numpy.max(k_R) * 1.1
+		logk = numpy.arange(numpy.log10(k_min), numpy.log10(k_max), 0.01)
+		Pk = cosmo.matterPowerSpectrum(10**logk, Pk_source = 'eh98smooth')
+		interp = scipy.interpolate.InterpolatedUnivariateSpline(logk, numpy.log10(Pk))
+		n = interp(numpy.log10(k_R), nu = 1)
 	
 	return n
 
@@ -355,10 +381,10 @@ def dk14_compute_n(k_R, z):
 
 # Wrapper for the function above which accepts M instead of k.
 
-def dk14_compute_n_M(M, z):
+def dk14_compute_n_M(M):
 
 	k_R = dk14_wavenumber_k_R(M)
-	n = dk14_compute_n(k_R, z)
+	n = dk14_compute_n(k_R)
 	
 	return n
 
@@ -370,9 +396,96 @@ def dk14_compute_n_nu(nu, z):
 
 	cosmo = Cosmology.getCurrent()
 	M = cosmo.nu_to_M(nu, z)
-	n = dk14_compute_n_M(M, z)
+	n = dk14_compute_n_M(M)
 	
 	return n
+
+###################################################################################################
+# KLYPIN ET AL 2015 MODELS
+###################################################################################################
+
+# Klypin et al. 2015 suggest both peak height-based and mass-based fitting functions for c, 
+# implemented in the two functions below. For the peak height-based version, the fits are only given
+# for the planck1 cosmology; for the mass-based version, the fits are given for the planck1
+# and bolshoi cosmologies. Thus, the user must set one of those cosmologies before evaluating this
+# model.
+#
+# The fits below refer to the mass-selected samples of all halos (as opposed to v_max-selected 
+# samples, or relaxed halos).
+
+def klypin15_nu_c(M, z, mdef):
+
+	if mdef == '200c':
+		z_bins = [0.0, 0.38, 0.5, 1.0, 1.44, 2.5, 2.89, 5.41]
+		a0_bins = [0.4, 0.65, 0.82, 1.08, 1.23, 1.6, 1.68, 1.7]
+		b0_bins = [0.278, 0.375, 0.411, 0.436, 0.426, 0.375, 0.360, 0.351]
+	elif mdef == 'vir':
+		z_bins = [0.0, 0.38, 0.5, 1.0, 1.44, 2.5, 5.5]
+		a0_bins = [0.75, 0.9, 0.97, 1.12, 1.28, 1.52, 1.62]
+		b0_bins = [0.567, 0.541, 0.529, 0.496, 0.474, 0.421, 0.393]
+	else:
+		msg = 'Invalid mass definition for Klypin et al 2015 peak height-based model, %s.' % mdef
+		raise Exception(msg)
+
+	cosmo = Cosmology.getCurrent()
+	nu = cosmo.M_to_nu(M, z)
+	sigma = Cosmology.AST_delta_collapse / nu
+	a0 = numpy.interp(z, z_bins, a0_bins)
+	b0 = numpy.interp(z, z_bins, b0_bins)
+
+	sigma_a0 = sigma / a0
+	c = b0 * (1.0 + 7.37 * sigma_a0**0.75) * (1.0 + 0.14 * sigma_a0**-2.0)
+	
+	mask = (M > 1E10) & (z <= z_bins[-1])
+
+	return c, mask
+
+###################################################################################################
+
+def klypin15_m_c(M, z, mdef):
+
+	if not mdef in ['200c', 'vir']:
+		msg = 'Invalid mass definition for Klypin et al 2015 m-based model, %s.' % mdef
+		raise Exception(msg)
+
+	cosmo = Cosmology.getCurrent()
+
+	if cosmo.name == 'planck1':
+		z_bins = [0.0, 0.35, 0.5, 1.0, 1.44, 2.15, 2.5, 2.9, 4.1, 5.4]
+		if mdef == '200c':
+			C0_bins = [7.4, 6.25, 5.65, 4.3, 3.53, 2.7, 2.42, 2.2, 1.92, 1.65]
+			gamma_bins = [0.120, 0.117, 0.115, 0.110, 0.095, 0.085, 0.08, 0.08, 0.08, 0.08]
+			M0_bins = [5.5E5, 1E5, 2E4, 900.0, 300.0, 42.0, 17.0, 8.5, 2.0, 0.3]
+		elif mdef == 'vir':
+			C0_bins = [9.75, 7.25, 6.5, 4.75, 3.8, 3.0, 2.65, 2.42, 2.1, 1.86]
+			gamma_bins = [0.110, 0.107, 0.105, 0.1, 0.095, 0.085, 0.08, 0.08, 0.08, 0.08]
+			M0_bins = [5E5, 2.2E4, 1E4, 1000.0, 210.0, 43.0, 18.0, 9.0, 1.9, 0.42]
+			
+	elif cosmo.name == 'bolshoi':
+		z_bins = [0.0, 0.5, 1.0, 1.44, 2.15, 2.5, 2.9, 4.1]
+		if mdef == '200c':
+			C0_bins = [6.6, 5.25, 3.85, 3.0, 2.1, 1.8, 1.6, 1.4]
+			gamma_bins = [0.110, 0.105, 0.103, 0.097, 0.095, 0.095, 0.095, 0.095]
+			M0_bins = [2E6, 6E4, 800.0, 110.0, 13.0, 6.0, 3.0, 1.0]
+		elif mdef == 'vir':
+			C0_bins = [9.0, 6.0, 4.3, 3.3, 2.3, 2.1, 1.85, 1.7]
+			gamma_bins = [0.1, 0.1, 0.1, 0.1, 0.095, 0.095, 0.095, 0.095]
+			M0_bins = [2E6, 7E3, 550.0, 90.0, 11.0, 6.0, 2.5, 1.0]
+		
+	else:
+		msg = 'Invalid cosmology for Klypin et al 2015 m-based model, %s.' % cosmo.name
+		raise Exception(msg)
+
+	C0 = numpy.interp(z, z_bins, C0_bins)
+	gamma = numpy.interp(z, z_bins, gamma_bins)
+	M0 = numpy.interp(z, z_bins, M0_bins)
+	M0 *= 1E12
+
+	c = C0 * (M / 1E12)**-gamma * (1.0 + (M / M0)**0.4)
+	
+	mask = (M > 1E10) & (z <= z_bins[-1])
+
+	return c, mask
 
 ###################################################################################################
 # DUTTON & MACCIO 2014 MODEL
