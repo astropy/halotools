@@ -110,8 +110,58 @@ class TrivialCenProfile(object):
 class IsotropicSats(object):
     """ Classical satellite profile. """
 
-    def __init__(self, gal_type):
+    def __init__(self, gal_type, halo_prof_model, spatial_bias_model=None):
         self.gal_type = gal_type
+
+        self.halo_prof_model = halo_prof_model
+        self.sec_haloprop_bool = self.halo_prof_model.sec_haloprop_bool
+
+        self.spatial_bias_model = spatial_bias_model
+
+
+    def mc_coords(self, coords, occupations, *args):
+        host_centers = args[0]
+        host_Rvirs = args[1]
+        prim_haloprops = args[2]
+        if self.sec_haloprop_bool is True:
+            if aph_len(args) <= 3:
+                raise("Input halo_prof_model requires two halo properties, only one was passed to mc_coords")
+            else:
+                sec_haloprops = args[3]
+                host_prof_params = self.halo_prof_model(prim_haloprops, sec_haloprops)
+        else:
+            host_prof_params = (
+                self.halo_prof_model(prim_haloprops)
+                )
+
+        inv_cumu_prof_funcs = self.halo_profile_model.inv_cumu_prof_funcs
+        host_prof_param_bins = self.halo_profile_model.prof_param_bins
+
+        if self.spatial_bias_model is None:
+            satsys_prof_params = host_prof_params
+        else:
+            # Spatial bias model not yet integrated
+            pass
+
+        inv_cumu_prof_func_indices = np.digitize(satsys_prof_params, host_prof_param_bins)
+
+        coords = self.mc_angles(coords)
+
+        satsys_first_index = 0
+        for host_index, Nsatsys in enumerate(occupations):
+            satsys_coords = coords[satsys_first_index:satsys_first_index+Nsatsys]
+            host_center = host_centers[host_index]
+            host_Rvir = host_Rvirs[host_index]
+            inv_cumu_prof_func = (inv_cumu_prof_funcs[
+                inv_cumu_prof_func_indices[host_index]])
+
+            satsys_coords = (self.mc_coords_singlesys(
+                satsys_coords, inv_cumu_prof_func, host_center, host_Rvir)
+                )
+            satsys_first_index += Nsatsys
+
+
+
 
     def mc_angles(self,coords):
         """
@@ -131,14 +181,14 @@ class IsotropicSats(object):
 
         return coords
 
-    def mc_coords(self,coords,inv_cumu_prof_func,host_Rvir,host_center):
+    def mc_coords_singlesys(self,coords,inv_cumu_prof_func,system_center,host_Rvir):
         Ngals = aph_len(coords[:,0])
         random_cumu_prof_vals = np.random.random(Ngals)
 
         r_random = inv_cumu_prof_func(random_cumu_prof_vals)*host_Rvir
 
         coords *= r_random.reshape(Ngals,1)
-        coords += host_center.reshape(1,3)
+        coords += system_center.reshape(1,3)
 
         return coords
 
