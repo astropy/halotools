@@ -131,6 +131,17 @@ class IsotropicSats(object):
 
         return coords
 
+    def mc_coords(self,coords,inv_cumu_prof_func,host_Rvir,host_center):
+        Ngals = aph_len(coords[:,0])
+        random_cumu_prof_vals = np.random.random(Ngals)
+
+        r_random = inv_cumu_prof_func(random_cumu_prof_vals)*host_Rvir
+
+        coords *= r_random.reshape(Ngals,1)
+        coords += host_center.reshape(1,3)
+
+        return coords
+
 
 
 
