@@ -92,6 +92,46 @@ def cumulative_NFW_profile(x,c):
     return F
 ##################################################################################
 
+class TrivialCenProfile(object):
+    """ Profile assigning central galaxies to reside at exactly the halo center."""
+
+    def __init__(self, gal_type):
+        self.gal_type = gal_type
+
+    def mc_coords(self, coords, *args):
+        halo_coords = args[0]
+        occupation = args[1]
+        has_central = (occupation==1)
+        coords = halo_coords[has_central]
+        return coords
+
+##################################################################################
+
+class IsotropicSats(object):
+    """ Classical satellite profile. """
+
+    def __init__(self, gal_type):
+        self.gal_type = gal_type
+
+    def mc_angles(self,coords):
+        """
+        Generate a list of Ngals random points on the unit sphere. 
+        The coords array is passed as input to save memory, 
+        speeding up satellite position assignment when building mocks.
+
+        """
+        Ngals = aph_len(coords[:,0])
+        cos_t = np.random.uniform(-1.,1.,Ngals)
+        phi = np.random.uniform(0,2*np.pi,Ngals)
+        sin_t = np.sqrt((1.-(cos_t*cos_t)))
+        
+        coords[:,0] = sin_t * np.cos(phi)
+        coords[:,1] = sin_t * np.sin(phi)
+        coords[:,2] = cos_t
+
+        return coords
+
+
 
 
 ##################################################################################
