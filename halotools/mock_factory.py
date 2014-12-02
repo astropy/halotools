@@ -38,48 +38,53 @@ class HodMockFactory(object):
         if hasattr(composite_model,'sec_haloprop_key'): 
             self.sec_haloprop_key = composite_model.sec_haloprop_key
 
+    def populate_bounded(self,gal_type):
+        first_index = self._gal_type_indices[gal_type][0]
+        last_index = self._gal_type_indices[gal_type][1]
+
+        # First assign the trivial properties
+        self.gal_type[first_index:last_index] = gal_type
+        self.haloID[first_index:last_index] = (
+            self.halos['ID'][self._occupation[gal_type]==1])
+        self.prim_haloprop[first_index:last_index]= (
+            self.halos[self.prim_haloprop_key][self._occupation[gal_type]==1])
+        if hasattr(self.model,'sec_haloprop_key'):
+            self.sec_haloprop[first_index:last_index] = (
+                self.halos[self.sec_haloprop_key][self._occupation[gal_type]==1])
+        self.coordshost[first_index:last_index] = (
+            self.halos['POS'][self._occupation[gal_type]==1])
+        self.velhost[first_index:last_index] = (
+            self.halos['VEL'][self._occupation[gal_type]==1])
+
+        # Now call the phase space model
+        # Note that this call to mc_coords will eventually need to be modified 
+        # to accommodate profile models that depend on two halo properties
+        occupations = self._occupation[gal_type][self._occupation[gal_type]>0]
+        virial_radii = self.halos['RVIR'][self._occupation[gal_type]==1]
+        self.coords[first_index:last_index] = (
+            self.model.mc_coords(self.coords[first_index:last_index], occupations, 
+                self.coordshost[first_index:last_index], virial_radii, 
+                self.prim_haloprop[first_index:last_index]
+                )
+            )
+        self.vel[first_index:last_index] = (
+            self.halos['VEL'][self._occupation[gal_type]==1])
+
+
+    def populate_unbounded(self,gal_type):
+
+        pass
+
 
     def populate(self):
-        # Assign properties to bounded populations first.
+        # Assign properties to bounded populations
         unity_bounded_populations = self.gal_types[self._occupation_bound == 1]
-
         for gal_type in unity_bounded_populations:
-            first_index = self._gal_type_indices[gal_type][0]
-            last_index = self._gal_type_indices[gal_type][1]
-
-            # First assign the trivial properties
-            self.gal_type[first_index:last_index] = gal_type
-            self.haloID[first_index:last_index] = (
-                self.halos['ID'][self._occupation[gal_type]==1])
-            self.prim_haloprop[first_index:last_index]= (
-                self.halos[self.prim_haloprop_key][self._occupation[gal_type]==1])
-            if hasattr(self.model,'sec_haloprop_key'):
-                self.sec_haloprop[first_index:last_index] = (
-                    self.halos[self.sec_haloprop_key][self._occupation[gal_type]==1])
-            self.coordshost[first_index:last_index] = (
-                self.halos['POS'][self._occupation[gal_type]==1])
-            self.velhost[first_index:last_index] = (
-                self.halos['VEL'][self._occupation[gal_type]==1])
-
-            # Now call the phase space model
-            # Note that thie call to mc_coords will eventually need to be modified 
-            # to accommodate profile models that depend on two halo properties
-            occupations = self._occupation[gal_type][self._occupation[gal_type]>0]
-            virial_radii = self.halos['RVIR'][self._occupation[gal_type]==1]
-            self.coords[first_index:last_index] = (
-                self.model.mc_coords(self.coords[first_index:last_index], occupations, 
-                    self.coordshost[first_index:last_index], virial_radii, 
-                    self.prim_haloprop[first_index:last_index]
-                    )
-                )
-            self.vel[first_index:last_index] = (
-                self.halos['VEL'][self._occupation[gal_type]==1])
-
+            self.populate_bounded(gal_type)
 
         unbounded_populations = self.gal_types[self._occupation_bound == float("inf")]
-        for gal_type in unity_bounded_populations:
-            first_index = self._gal_type_indices[gal_type][0]
-            last_index = self._gal_type_indices[gal_type][1]
+        for gal_type in unbounded_populations:
+            self.populate_unbounded(gal_type)
 
             # Need to rewrite profile model so that satellite loop is not run twice
 
