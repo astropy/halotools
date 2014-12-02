@@ -9,6 +9,7 @@ Currently only composite HOD models are supported.
 """
 
 import numpy as np
+import occupation_helpers as occuhelp
 
 class HodMockFactory(object):
     """ The constructor of this class takes 
@@ -38,6 +39,7 @@ class HodMockFactory(object):
         if hasattr(composite_model,'sec_haloprop_key'): 
             self.sec_haloprop_key = composite_model.sec_haloprop_key
 
+
     def populate_bounded(self,gal_type):
         first_index = self._gal_type_indices[gal_type][0]
         last_index = self._gal_type_indices[gal_type][1]
@@ -61,17 +63,29 @@ class HodMockFactory(object):
         # to accommodate profile models that depend on two halo properties
         occupations = self._occupation[gal_type][self._occupation[gal_type]>0]
         virial_radii = self.halos['RVIR'][self._occupation[gal_type]==1]
+
+        ### Note that self.model does not yet correctly interface with the following API
         self.coords[first_index:last_index] = (
-            self.model.mc_coords(self.coords[first_index:last_index], occupations, 
+            self.model.mc_coords(gal_type, 
+                self.coords[first_index:last_index], occupations, 
                 self.coordshost[first_index:last_index], virial_radii, 
                 self.prim_haloprop[first_index:last_index]
                 )
             )
+        # Velocities are still unmodeled for now
         self.vel[first_index:last_index] = (
             self.halos['VEL'][self._occupation[gal_type]==1])
 
 
     def populate_unbounded(self,gal_type):
+
+        # Not defensive enough, the following dictionaries might not exist
+        inv_cumu_prof_funcs = self.model.inv_cumu_prof_funcs_dict[gal_type]
+        host_prof_param_bins = self.model.host_prof_param_bins_dict[gal_type]
+
+
+        # Still need to finish transferring behavior here from 
+        # profile_components.IsotropicSats.mc_coords
 
         pass
 
@@ -86,9 +100,9 @@ class HodMockFactory(object):
         for gal_type in unbounded_populations:
             self.populate_unbounded(gal_type)
 
-            # Need to rewrite profile model so that satellite loop is not run twice
-
-
+        # Positions are now assigned to all populations. 
+        # Now enforce the periodic boundary conditions of the simulation box
+        self.coords = occuhelp.enforce_periodicity_of_box(self.coords, self.snapshot.Lbox)
 
     def _allocate_memory(self):
         self._occupation = {}

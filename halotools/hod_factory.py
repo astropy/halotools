@@ -44,6 +44,14 @@ class HOD_Model(object):
             )
         self.publications = []
 
+        self.inv_cumu_prof_funcs_dict = {}
+        self.host_prof_param_bins = {}
+        for gal_type in self.gal_types:
+            profile_component_model = self.component_model_dict[gal_type]['profile_model']
+            if hasattr(profile_component_model,'inv_cumu_prof_funcs'):
+                self.inv_cumu_prof_funcs_dict[gal_type] = profile_component_model.inv_cumu_prof_funcs
+                self.host_prof_param_bins[gal_type] = profile_component_model.host_prof_param_bins
+
     def mean_occupation(self,gal_type,*args):
         """ Method supplying the mean abundance of gal_type galaxies. 
         The behavior of this method is inherited from one of the component models. 

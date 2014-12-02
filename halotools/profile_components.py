@@ -98,6 +98,12 @@ class TrivialCenProfile(object):
     def __init__(self, gal_type):
         self.gal_type = gal_type
 
+        # The following few lines may indicate that TrivialCenProfile 
+        # should actually be a child class, fine for now as is 
+        #self.halo_prof_model = None
+        #self.sec_haloprop_bool = False
+        #self.spatial_bias_model = None
+
     def mc_coords(self, coords, occupations, *args):
         host_centers = args[0]
         if np.all(occupations==1):
@@ -117,15 +123,18 @@ class IsotropicSats(object):
 
         self.halo_prof_model = halo_prof_model
         self.sec_haloprop_bool = self.halo_prof_model.sec_haloprop_bool
+        self.inv_cumu_prof_funcs = self.halo_prof_model.inv_cumu_prof_funcs
+        self.host_prof_param_bins = self.halo_prof_model.prof_param_bins
 
         self.spatial_bias_model = spatial_bias_model
+
 
 
     def mc_coords(self, coords, occupations, *args):
 
         if np.any(occupations==0):
             raise("Only occupied halos should be passed to mc_coords method")
-        
+
         host_centers = args[0]
         host_Rvirs = args[1]
         prim_haloprops = args[2]
@@ -140,16 +149,13 @@ class IsotropicSats(object):
                 self.halo_prof_model(prim_haloprops)
                 )
 
-        inv_cumu_prof_funcs = self.halo_profile_model.inv_cumu_prof_funcs
-        host_prof_param_bins = self.halo_profile_model.prof_param_bins
-
         if self.spatial_bias_model is None:
             satsys_prof_params = host_prof_params
         else:
             # Spatial bias model not yet integrated
             pass
 
-        inv_cumu_prof_func_indices = np.digitize(satsys_prof_params, host_prof_param_bins)
+        inv_cumu_prof_func_indices = np.digitize(satsys_prof_params, self.host_prof_param_bins)
 
         coords = self.mc_angles(coords)
 
@@ -158,7 +164,7 @@ class IsotropicSats(object):
             satsys_coords = coords[satsys_first_index:satsys_first_index+Nsatsys]
             host_center = host_centers[host_index]
             host_Rvir = host_Rvirs[host_index]
-            inv_cumu_prof_func = (inv_cumu_prof_funcs[
+            inv_cumu_prof_func = (self.inv_cumu_prof_funcs[
                 inv_cumu_prof_func_indices[host_index]])
 
             satsys_coords = (self.mc_coords_singlesys(
