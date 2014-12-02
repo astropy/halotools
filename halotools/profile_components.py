@@ -98,11 +98,13 @@ class TrivialCenProfile(object):
     def __init__(self, gal_type):
         self.gal_type = gal_type
 
-    def mc_coords(self, coords, *args):
-        halo_coords = args[0]
-        occupation = args[1]
-        has_central = (occupation==1)
-        coords = halo_coords[has_central]
+    def mc_coords(self, coords, occupations, *args):
+        host_centers = args[0]
+        if np.all(occupations==1):
+            coords = host_centers
+        else:
+            raise("Only occupied halos should be passed to mc_coords method")
+
         return coords
 
 ##################################################################################
@@ -120,6 +122,10 @@ class IsotropicSats(object):
 
 
     def mc_coords(self, coords, occupations, *args):
+
+        if np.any(occupations==0):
+            raise("Only occupied halos should be passed to mc_coords method")
+        
         host_centers = args[0]
         host_Rvirs = args[1]
         prim_haloprops = args[2]
@@ -159,9 +165,6 @@ class IsotropicSats(object):
                 satsys_coords, inv_cumu_prof_func, host_center, host_Rvir)
                 )
             satsys_first_index += Nsatsys
-
-
-
 
     def mc_angles(self,coords):
         """
