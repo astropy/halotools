@@ -42,7 +42,6 @@ class HodMockFactory(object):
     def populate(self):
         # Assign properties to bounded populations first.
         unity_bounded_populations = self.gal_types[self._occupation_bound == 1]
-        unbounded_populations = self.gal_types[self._occupation_bound == float("inf")]
 
         for gal_type in unity_bounded_populations:
             first_index = self._gal_type_indices[gal_type][0]
@@ -75,6 +74,14 @@ class HodMockFactory(object):
                 )
             self.vel[first_index:last_index] = (
                 self.halos['VEL'][self._occupation[gal_type]==1])
+
+
+        unbounded_populations = self.gal_types[self._occupation_bound == float("inf")]
+        for gal_type in unity_bounded_populations:
+            first_index = self._gal_type_indices[gal_type][0]
+            last_index = self._gal_type_indices[gal_type][1]
+
+            # Need to rewrite profile model so that satellite loop is not run twice
 
 
 
