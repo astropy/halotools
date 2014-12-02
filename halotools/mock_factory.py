@@ -45,25 +45,30 @@ class HodMockFactory(object):
         unbounded_populations = self.gal_types[self._occupation_bound > 1]
 
         for gal_type in bounded_populations:
-            self.coords[self._gal_type_indices[gal_type][0]:self._gal_type_indices[gal_type][1]] = (
-                self.halos['POS'][self._occupation[gal_type]==1])
-            self.coordshost[self._gal_type_indices[gal_type][0]:self._gal_type_indices[gal_type][1]] = (
-                self.halos['POS'][self._occupation[gal_type]==1])
-            self.vel[self._gal_type_indices[gal_type][0]:self._gal_type_indices[gal_type][1]] = (
-                self.halos['VEL'][self._occupation[gal_type]==1])
-            self.velhost[self._gal_type_indices[gal_type][0]:self._gal_type_indices[gal_type][1]] = (
-                self.halos['VEL'][self._occupation[gal_type]==1])
-            self.haloID[self._gal_type_indices[gal_type][0]:self._gal_type_indices[gal_type][1]] = (
+            first_index = self._gal_type_indices[gal_type][0]
+            last_index = self._gal_type_indices[gal_type][1]
+
+            # First assign the trivial properties
+            self.gal_type[first_index:last_index] = gal_type
+            self.haloID[first_index:last_index] = (
                 self.halos['ID'][self._occupation[gal_type]==1])
-            self.prim_haloprop[self._gal_type_indices[gal_type][0]:self._gal_type_indices[gal_type][1]] = (
+            self.prim_haloprop[first_index:last_index]= (
                 self.halos[self.prim_haloprop_key][self._occupation[gal_type]==1])
             if hasattr(self.model,'sec_haloprop_key'):
-                self.sec_haloprop[self._gal_type_indices[gal_type][0]:self._gal_type_indices[gal_type][1]] = (
+                self.sec_haloprop[first_index:last_index] = (
                     self.halos[self.sec_haloprop_key][self._occupation[gal_type]==1])
-            self.gal_type[self._gal_type_indices[gal_type][0]:self._gal_type_indices[gal_type][1]] = gal_type
+
+            # Now call the phase space model
+            self.coords[first_index:last_index] = (
+                self.halos['POS'][self._occupation[gal_type]==1])
+            self.coordshost[first_index:last_index] = (
+                self.halos['POS'][self._occupation[gal_type]==1])
+            self.vel[first_index:last_index] = (
+                self.halos['VEL'][self._occupation[gal_type]==1])
+            self.velhost[first_index:last_index] = (
+                self.halos['VEL'][self._occupation[gal_type]==1])
 
 
-            #self._random_angles(self.coords,counter,self.coords.shape[0],self.num_total_sats)
 
 
     def _allocate_memory(self):
@@ -110,25 +115,6 @@ class HodMockFactory(object):
         # what features have been compiled (definitely not as follows, though)
         # if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
         self.quiescent = np.empty(self.Ngals,dtype=object)
-
-
-    def _random_angles(self,coords,first_galaxy_index,last_galaxy_index):
-        """
-        Generate a list of random angles. 
-        Assign the angles to coords[start:end], 
-        an index bookkeeping trick to speed up satellite position assignment.
-
-        """
-        
-        Ngals = last_galaxy_index - first_galaxy_index + 1
-
-        cos_t = np.random.uniform(-1.,1.,Ngals)
-        phi = np.random.uniform(0,2*np.pi,Ngals)
-        sin_t = np.sqrt((1.-(cos_t*cos_t)))
-        
-        coords[first_galaxy_index:last_galaxy_index,0] = sin_t * np.cos(phi)
-        coords[first_galaxy_index:last_galaxy_index,1] = sin_t * np.sin(phi)
-        coords[first_galaxy_index:last_galaxy_index,2] = cos_t
 
 
 
