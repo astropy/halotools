@@ -17,8 +17,6 @@ class HodMockFactory(object):
     painted onto the input snapshot. 
     """
 
-
-
     def __init__(self, snapshot, composite_model, bundle_into_table=True):
 
         self.snapshot = snapshot
@@ -33,6 +31,8 @@ class HodMockFactory(object):
             self._occupation_bound.extend(self.model.occupation_bound[gal_type])
         self.gal_types = np.array(self.model.gal_types[np.argsort(self._occupation_bound)])
         self._occupation_bound = np.array(self._occupation_bound[np.argsort(self._occupation_bound)])
+        if (set(self._occupation_bound) != {1, float("inf")}):
+            raise ValueError("The only supported occupation bound is unity, otherwise it must be set to infinity")
 
         self.prim_haloprop_key = composite_model.prim_haloprop_key
         if hasattr(composite_model,'sec_haloprop_key'): 
@@ -41,10 +41,10 @@ class HodMockFactory(object):
 
     def populate(self):
         # Assign properties to bounded populations first.
-        bounded_populations = self.gal_types[self._occupation_bound <= 1]
-        unbounded_populations = self.gal_types[self._occupation_bound > 1]
+        unity_bounded_populations = self.gal_types[self._occupation_bound == 1]
+        unbounded_populations = self.gal_types[self._occupation_bound == float("inf")]
 
-        for gal_type in bounded_populations:
+        for gal_type in unity_bounded_populations:
             first_index = self._gal_type_indices[gal_type][0]
             last_index = self._gal_type_indices[gal_type][1]
 
@@ -57,17 +57,24 @@ class HodMockFactory(object):
             if hasattr(self.model,'sec_haloprop_key'):
                 self.sec_haloprop[first_index:last_index] = (
                     self.halos[self.sec_haloprop_key][self._occupation[gal_type]==1])
-
-            # Now call the phase space model
-            self.coords[first_index:last_index] = (
-                self.halos['POS'][self._occupation[gal_type]==1])
             self.coordshost[first_index:last_index] = (
                 self.halos['POS'][self._occupation[gal_type]==1])
-            self.vel[first_index:last_index] = (
-                self.halos['VEL'][self._occupation[gal_type]==1])
             self.velhost[first_index:last_index] = (
                 self.halos['VEL'][self._occupation[gal_type]==1])
 
+            # Now call the phase space model
+            # Note that thie call to mc_coords will eventually need to be modified 
+            # to accommodate profile models that depend on two halo properties
+            occupations = self._occupation[gal_type][self._occupation[gal_type]>0]
+            virial_radii = self.halos['RVIR'][self._occupation[gal_type]==1]
+            self.coords[first_index:last_index] = (
+                self.model.mc_coords(self.coords[first_index:last_index], occupations, 
+                    self.coordshost[first_index:last_index], virial_radii, 
+                    self.prim_haloprop[first_index:last_index]
+                    )
+                )
+            self.vel[first_index:last_index] = (
+                self.halos['VEL'][self._occupation[gal_type]==1])
 
 
 
