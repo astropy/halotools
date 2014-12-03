@@ -19,78 +19,6 @@ import occupation_helpers as occuhelp
 import defaults
 
 ##################################################################################
-######## Currently only in this module for temporary development purposes ########
-def anatoly_concentration(logM):
-    """ Power law fitting formula for the concentration-mass relation of Bolshoi host halos at z=0
-    Taken from Klypin et al. 2011, arXiv:1002.3660v4, Eqn. 12.
-
-    :math:`c(M) = c_{0}(M/M_{piv})^{\\alpha}`
-
-    Parameters
-    ----------
-    logM : array 
-        array of :math:`log_{10}M_{vir}` of halos in catalog
-
-    Returns
-    -------
-    concentrations : array
-
-    Notes 
-    -----
-    This is currently the only concentration-mass relation implemented. This will later be 
-    bundled up into a class with a bunch of different radial profile methods, NFW and non-.
-
-    Values are currently hard-coded to Anatoly's best-fit values:
-
-    :math:`c_{0} = 9.6`
-
-    :math:`\\alpha = -0.075`
-
-    :math:`M_{piv} = 10^{12}M_{\odot}/h`
-
-    """
-    
-    masses = np.zeros(aph_len(logM)) + 10.**np.array(logM)
-    c0 = 9.6
-    Mpiv = 1.e12
-    a = -0.075
-    concentrations = c0*(masses/Mpiv)**a
-    return concentrations
-##################################################################################
-
-
-
-##################################################################################
-######## Currently only in this module for temporary development purposes ########
-
-def cumulative_NFW_profile(x,c):
-    """ Unit-normalized integral of an NFW profile with concentration c.
-
-    :math:`F(x,c) = \\frac{ln(1+xc) - \\frac{xc}{1+xc}} 
-    {ln(1+c) - \\frac{c}{1+c}}`
-
-    Parameters
-    ----------
-    x : array_like
-        Values are in the range (0,1).
-        Elements x = r/Rvir specify host-centric distances in the range 0 < r/Rvir < 1.
-
-    c : array_like
-        Concentration of halo whose profile is being tabulated.
-
-    Returns
-    -------
-    F : array 
-        Array of floats in the range 0 < x < 1 corresponding to the 
-        cumulative mass of an NFW profile at x = r/Rhalo.
-
-    """
-    c = np.array(c)
-    x = np.array(x)
-    norm=np.log(1.+c)-c/(1.+c)
-    F = (np.log(1.+x*c) - x*c/(1.+x*c))/norm
-    return F
-##################################################################################
 
 class TrivialCenProfile(object):
     """ Profile assigning central galaxies to reside at exactly the halo center."""
@@ -118,59 +46,13 @@ class TrivialCenProfile(object):
 class IsotropicSats(object):
     """ Classical satellite profile. """
 
-    def __init__(self, gal_type, halo_prof_model, spatial_bias_model=None):
+    def __init__(self, gal_type, halo_prof_model):
         self.gal_type = gal_type
 
         self.halo_prof_model = halo_prof_model
         self.sec_haloprop_bool = self.halo_prof_model.sec_haloprop_bool
         self.inv_cumu_prof_funcs = self.halo_prof_model.inv_cumu_prof_funcs
         self.host_prof_param_bins = self.halo_prof_model.prof_param_bins
-
-        self.spatial_bias_model = spatial_bias_model
-
-
-
-    def mc_coords(self, coords, occupations, *args):
-
-        if np.any(occupations==0):
-            raise("Only occupied halos should be passed to mc_coords method")
-
-        host_centers = args[0]
-        host_Rvirs = args[1]
-        prim_haloprops = args[2]
-        if self.sec_haloprop_bool is True:
-            if aph_len(args) <= 3:
-                raise("Input halo_prof_model requires two halo properties, only one was passed to mc_coords")
-            else:
-                sec_haloprops = args[3]
-                host_prof_params = self.halo_prof_model(prim_haloprops, sec_haloprops)
-        else:
-            host_prof_params = (
-                self.halo_prof_model(prim_haloprops)
-                )
-
-        if self.spatial_bias_model is None:
-            satsys_prof_params = host_prof_params
-        else:
-            # Spatial bias model not yet integrated
-            pass
-
-        inv_cumu_prof_func_indices = np.digitize(satsys_prof_params, self.host_prof_param_bins)
-
-        coords = self.mc_angles(coords)
-
-        satsys_first_index = 0
-        for host_index, Nsatsys in enumerate(occupations):
-            satsys_coords = coords[satsys_first_index:satsys_first_index+Nsatsys]
-            host_center = host_centers[host_index]
-            host_Rvir = host_Rvirs[host_index]
-            inv_cumu_prof_func = (self.inv_cumu_prof_funcs[
-                inv_cumu_prof_func_indices[host_index]])
-
-            satsys_coords = (self.mc_coords_singlesys(
-                satsys_coords, inv_cumu_prof_func, host_center, host_Rvir)
-                )
-            satsys_first_index += Nsatsys
 
     def mc_angles(self,coords):
         """
@@ -190,7 +72,7 @@ class IsotropicSats(object):
 
         return coords
 
-    def mc_coords_singlesys(self,coords,inv_cumu_prof_func,system_center,host_Rvir):
+    def mc_coords(self,coords,inv_cumu_prof_func,system_center,host_Rvir):
         Ngals = aph_len(coords[:,0])
         random_cumu_prof_vals = np.random.random(Ngals)
 
@@ -307,8 +189,7 @@ class RadProfBias(object):
         Parameters 
         ----------
         input_abcissa : array_like
-            array of primary halo property at which the quiescent fraction 
-            is being computed. 
+            array of primary halo property 
 
         profile_parameter_key : string
             Dictionary key of the profile parameter being modulated, e.g., 'conc'. 

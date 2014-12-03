@@ -30,7 +30,12 @@ class HOD_Model_Designer(object):
 
 	def __init__(self, *args, **kwargs):
 
+		# Needs to be an attribute for halo_prof_model 
+		# This should be passed to the profile_component  models 
+		# to ensure that they are always passed the same underlying halo 
+		# profile model
 
+		
 		
 		pass
 
