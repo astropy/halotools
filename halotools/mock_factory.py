@@ -83,27 +83,19 @@ class HodMockFactory(object):
 
         sat_prof_model = self.model.component_model_dict[gal_type]['profile_model']
 
-        host_prof_params = {}
+        host_prof_param_dict = {}
         for prof_param_key in self.halos.halo_prof_param_keys:
-            host_prof_params[prof_param_key] = (
+            host_prof_param_dict[prof_param_key] = (
                 self.halos[prof_param_key][self._occupation[gal_type]>0])
 
-        satsys_prof_params = host_prof_params
-
+        satsys_prof_param_dict = host_prof_param_dict
         # Profile modulating functions allow satellites to be biased tracers 
         # of the halo profile. Not implemented yet. 
         if hasattr(sat_prof_model, 'prof_param_modfunc'):
             pass 
 
-        inv_cumu_prof_funcs = sat_prof_model.inv_cumu_prof_funcs_dict
-        host_prof_param_bins = sat_prof_model.host_prof_param_bins_dict
-
-        inv_cumu_prof_func_indices_dict = {}
-        for prof_param_key in self.halos.halo_prof_param_keys:
-            inv_cumu_prof_func_indices_dict[prof_param_key] = (
-                np.digitize())
-
-            #np.digitize(satsys_prof_params, host_prof_param_bins)
+        inv_cumu_prof_funcs = self.model.halo_prof_model.digitized_inv_cumu_profs(
+            satsys_prof_param_dict)
 
         # Define some convenient shorthands for the properties 
         # that will be assigned to the satellites
@@ -125,8 +117,7 @@ class HodMockFactory(object):
             host_vel = host_vels[host_index]
             host_Rvir = host_Rvirs[host_index]
 
-            inv_cumu_prof_func = (self.inv_cumu_prof_funcs[
-                inv_cumu_prof_func_indices[host_index]])
+            inv_cumu_prof_func = inv_cumu_prof_funcs[host_index]
 
             satsys_coords = (self.model.mc_coords(
                 satsys_coords, inv_cumu_prof_func, host_center, host_Rvir)

@@ -26,12 +26,6 @@ class TrivialCenProfile(object):
     def __init__(self, gal_type):
         self.gal_type = gal_type
 
-        # The following few lines may indicate that TrivialCenProfile 
-        # should actually be a child class, fine for now as is 
-        #self.halo_prof_model = None
-        #self.sec_haloprop_bool = False
-        #self.spatial_bias_model = None
-
     def mc_coords(self, coords, occupations, *args):
         host_centers = args[0]
         if np.all(occupations==1):
@@ -46,13 +40,8 @@ class TrivialCenProfile(object):
 class IsotropicSats(object):
     """ Classical satellite profile. """
 
-    def __init__(self, gal_type, halo_prof_model):
+    def __init__(self, gal_type):
         self.gal_type = gal_type
-
-        self.halo_prof_model = halo_prof_model
-        self.sec_haloprop_bool = self.halo_prof_model.sec_haloprop_bool
-        self.inv_cumu_prof_funcs = self.halo_prof_model.inv_cumu_prof_funcs
-        self.host_prof_param_bins = self.halo_prof_model.prof_param_bins
 
     def mc_angles(self,coords):
         """
@@ -82,8 +71,6 @@ class IsotropicSats(object):
         coords += system_center.reshape(1,3)
 
         return coords
-
-
 
 
 ##################################################################################
