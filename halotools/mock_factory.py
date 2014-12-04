@@ -33,7 +33,7 @@ class HodMockFactory(object):
         self.gal_types = np.array(self.model.gal_types[np.argsort(self._occupation_bound)])
         self._occupation_bound = np.array(self._occupation_bound[np.argsort(self._occupation_bound)])
         if (set(self._occupation_bound) != {1, float("inf")}):
-            raise ValueError("The only supported occupation bound is unity, otherwise it must be set to infinity")
+            raise ValueError("The only supported finite occupation bound is unity, otherwise it must be set to infinity")
 
         self.prim_haloprop_key = composite_model.prim_haloprop_key
         if hasattr(composite_model,'sec_haloprop_key'): 
@@ -135,6 +135,8 @@ class HodMockFactory(object):
 
 
     def populate(self):
+
+        self._allocate_memory()f
         # Assign properties to bounded populations
         unity_bounded_populations = self.gal_types[self._occupation_bound == 1]
         for gal_type in unity_bounded_populations:
