@@ -9,7 +9,7 @@ by composing the behavior of the components.
 """
 
 from astropy.extern import six
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
@@ -208,11 +208,6 @@ class RadProfBias(object):
             raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
 
         return output_profile_modulation
-
-
-
-
-
 
 
 
