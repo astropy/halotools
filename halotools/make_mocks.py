@@ -199,7 +199,7 @@ class HOD_mock(object):
 
         #Set up the grid used to tabulate NFW profiles
         #This will be used to assign halo-centric distances to the satellites
-        Npts_concen = defaults.default_Npts_concentration_array
+        Npts_concen = defaults.default_Npts_concen_array
         concentration_array = np.linspace(self._concen.min(),self._concen.max(),Npts_concen)
         Npts_radius = defaults.default_Npts_radius_array        
         radius_array = np.linspace(0.,1.,Npts_radius)

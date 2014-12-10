@@ -21,7 +21,7 @@ import defaults
 import astropy.cosmology as cosmology
 from astropy import units as u
 
-
+import defaults
 
 ##################################################################################
 
@@ -109,10 +109,16 @@ class NFWProfile(HaloProfileModel):
 
     """
 
-    def __init__(self, delta_vir=360, cosmology=cosmology.WMAP5, redshift=0.0):
+    def __init__(self, 
+        delta_vir=360, cosmology=cosmology.WMAP5, redshift=0.0, 
+        build_inv_cumu_table=False):
 
         HaloProfileModel.__init__(self, delta_vir, cosmology, redshift)
         self.publication = ['arXiv:9611107']
+
+        if build_inv_cumu_table is True:
+            self.build_inv_cumu_lookup_table()
+
 
     def g(self, x):
         """ Convenience function used to evaluate the profile. 
@@ -184,6 +190,32 @@ class NFWProfile(HaloProfileModel):
         """
         return self.g(c) / self.g(r*c)
 
+    def build_inv_cumu_lookup_table(self):
+
+        #Set up the grid used to tabulate inverse cumulative NFW mass profiles
+        #This will be used to assign halo-centric distances to the satellites
+        Npts_radius = defaults.default_Npts_radius_array  
+        minrad = defaults.default_min_rad 
+        radius_array = np.linspace(minrad,1.,Npts_radius)
+        Npts_concen = defaults.default_Npts_concen_array
+        cmin = defaults.min_permitted_conc     
+        cmax = defaults.max_permitted_conc     
+        conc_array = np.linspace(cmin,cmax,Npts_concen)
+
+        # After executing the following lines, 
+        # self._cumu_inv_nfw_funcs will be a list of functions 
+        # bound to the NFW profile object.
+        # The elements of this list are functions giving spline interpolations of the 
+        # inverse cumulative mass of halos with different NFW concentrations.
+        # Each function takes a scalar y in [0,1] as input, 
+        # and outputs the x = r/Rvir corresponding to Prob_NFW( x < r/Rvir ) = y. 
+        # Thus each list element is a function object. 
+        cumu_inv_funcs = []
+        for c in conc_array:
+            cumu_inv_funcs.append(
+                spline(self.cumulative_mass_PDF(radius_array,c),radius_array))
+        self.cumu_inv_func_table = np.array(cumu_inv_funcs)
+        self.cumu_inv_conc_table = conc_array
 
 
 

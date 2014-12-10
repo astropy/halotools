@@ -37,9 +37,11 @@ default_bin_max_epsilon = 1.e-5
 
 # Number of bins to use in the digitization of the NFW radial profile. 
 # Used by HOD_Mock object in make_mocks module.
-default_Npts_concentration_array = 1000
+default_Npts_concen_array = 1000
+min_permitted_conc = 1.0
+max_permitted_conc = 25.0
 default_Npts_radius_array = 101
-
+default_min_rad = 0.0001
 
 ### Default values specifying traditional quenching model
 # Used by models in the halo_occupation module
@@ -103,8 +105,6 @@ particle_catalog_dirname = configuration.get_catalogs_dir('particles')
 scale_factor_difference_tol = 0.05
 
 
-minimum_permitted_concentration = 1.0
-maximum_permitted_concentration = 25.0
 
 
 
