@@ -64,7 +64,7 @@ class HaloProfileModel(object):
         ----------
         r : array_like 
             Value of the radius at which density profile is to be evaluated. 
-            Should be scaled by the halo boundary, so that :math: `0 < r < 1`
+            Should be scaled by the halo boundary, so that :math:`0 < r < 1`
 
         args : array_like 
             Parameters specifying the halo profile. If an array, should be of the same length 
@@ -114,8 +114,8 @@ class NFWProfile(HaloProfileModel):
         HaloProfileModel.__init__(self, delta_vir, cosmology, redshift)
         self.publication = ['arXiv:9611107']
 
-    def _g(self, x):
-        """ Internal convenience function used to evaluate the profile. 
+    def g(self, x):
+        """ Convenience function used to evaluate the profile. 
 
         Parameters 
         ----------
@@ -140,14 +140,14 @@ class NFWProfile(HaloProfileModel):
         Returns 
         -------
         rho_s : array_like 
-            Profile normalization :math:`\\rho_{s}^{NFW} = \\frac{1}{3}\\Delta_{vir}c^{3}g(c)\\rho_{m}`
+            Profile normalization :math:`\\rho_{s}^{NFW} = \\frac{1}{3}\\Delta_{vir}c^{3}g(c)\\bar{\\rho}_{m}`
 
         """
-        return (self.delta_vir/3.)*c*c*c*self._g(c)*self.cosmic_matter_density
+        return (self.delta_vir/3.)*c*c*c*self.g(c)*self.cosmic_matter_density
 
     def density_profile(self, r, c):
         """ Mass density profile given by 
-        :math: `\\rho^{NFW}(r | c) = \\rho_{s}^{NFW} / cr(1+cr)^{2}`
+        :math:`\\rho^{NFW}(r | c) = \\rho_{s}^{NFW} / cr(1+cr)^{2}`
 
         Parameters 
         ----------
@@ -170,7 +170,7 @@ class NFWProfile(HaloProfileModel):
         ----------
         r : array_like 
             Value of the radius at which density profile is to be evaluated. 
-            Should be scaled by the halo boundary, so that :math: `0 < r < 1`
+            Should be scaled by the halo boundary, so that :math:`0 < r < 1`
 
         c : array_like 
             Concentration specifying the halo profile. If an array, should be of the same length 
@@ -179,10 +179,10 @@ class NFWProfile(HaloProfileModel):
         Returns 
         -------
         cumulative_PDF : array_like
-            :math:`P(<r | c) = g(c) / g(c*r)`    
+            :math:`P(<r | c) = g(c) / g(c*r)`. 
 
         """
-        return self._g(c) / self._g(r*c)
+        return self.g(c) / self.g(r*c)
 
 
 
