@@ -16,6 +16,11 @@ from utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
 import defaults
 
+import astropy.cosmology as cosmology
+from astropy import units as u
+
+
+
 ##################################################################################
 
 
@@ -27,7 +32,7 @@ class HaloProfileModel(object):
     	pass
 
     @abstractmethod
-    def mass_density(self, r, *args):
+    def density_profile(self, r, *args):
     	raise NotImplementedError("All halo profile models must include a mass_density method")
 
     @abstractmethod
@@ -37,18 +42,23 @@ class HaloProfileModel(object):
 
 class NFWProfile(HaloProfileModel):
 
-	def __init__(self, delta_vir=360.0, cosmic_matter_density=1.0):
+	def __init__(self, delta_vir=360.0, cosmology=cosmology.WMAP5):
+
 		self.delta_vir = delta_vir
-		self.cosmic_matter_density = cosmic_matter_density
+		self.cosmology = cosmology
+		littleh = self.cosmology.H0/100.0
+		crit_density = (
+			self.cosmology.critical_density(0).to(u.Msun/u.Mpc**3)/littleh**2)
+		self.cosmic_matter_density = crit_density*self.cosmology.Om0
 
 	def _g(self, x):
 		denominator = np.log(1.0+x) - (x/(1.0+x))
 		return 1./denominator
 
 	def rho_s(self, c):
-		return (self.delta_vir/3.)*c*c*c*self._g(c)*cosmic_matter_density
+		return (self.delta_vir/3.)*c*c*c*self._g(c)*self.cosmic_matter_density
 
-	def mass_density(self, r, c):
+	def density_profile(self, r, c):
 		numerator = self.rho_s(c)
 		denominator = (c*r)*(1.0 + c*r)*(1.0 + c*r)
 		return numerator / denominator
