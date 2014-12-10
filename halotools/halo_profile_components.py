@@ -191,6 +191,10 @@ class NFWProfile(HaloProfileModel):
         return self.g(c) / self.g(r*c)
 
     def build_inv_cumu_lookup_table(self):
+        """ Method used to create a lookup table of inverse cumulative mass 
+        profile functions. Used by `~halotools.mock_factory` to rapidly generate 
+        Monte Carlo realizations of satellite profiles. 
+        """
 
         #Set up the grid used to tabulate inverse cumulative NFW mass profiles
         #This will be used to assign halo-centric distances to the satellites
@@ -203,13 +207,13 @@ class NFWProfile(HaloProfileModel):
         conc_array = np.linspace(cmin,cmax,Npts_concen)
 
         # After executing the following lines, 
-        # self._cumu_inv_nfw_funcs will be a list of functions 
-        # bound to the NFW profile object.
-        # The elements of this list are functions giving spline interpolations of the 
+        # self.cumu_inv_func_table will be an array of functions 
+        # bound to the NFW profile instance.
+        # The elements of this array are functions giving spline interpolations of the 
         # inverse cumulative mass of halos with different NFW concentrations.
         # Each function takes a scalar y in [0,1] as input, 
         # and outputs the x = r/Rvir corresponding to Prob_NFW( x < r/Rvir ) = y. 
-        # Thus each list element is a function object. 
+        # Thus each array element is a function object. 
         cumu_inv_funcs = []
         for c in conc_array:
             cumu_inv_funcs.append(
