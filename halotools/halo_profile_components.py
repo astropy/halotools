@@ -42,7 +42,7 @@ class NFWProfile(HaloProfileModel):
 		self.cosmic_matter_density = cosmic_matter_density
 
 	def _g(self, x):
-		denominator = np.log(1+x) - (x/(1+x))
+		denominator = np.log(1.0+x) - (x/(1.0+x))
 		return 1./denominator
 
 	def rho_s(self, c):
@@ -50,7 +50,7 @@ class NFWProfile(HaloProfileModel):
 
 	def mass_density(self, r, c):
 		numerator = self.rho_s(c)
-		denominator = (c*r)*(1 + c*r)*(1 + c*r)
+		denominator = (c*r)*(1.0 + c*r)*(1.0 + c*r)
 		return numerator / denominator
 
 	def cumulative_mass_PDF(self, r, c):
