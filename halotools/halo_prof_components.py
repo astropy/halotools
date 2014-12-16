@@ -47,14 +47,14 @@ class HaloProfileModel(object):
 
     """
 
-    def __init__(self, delta_vir, cosmology, redshift):
-        self.delta_vir = 360.0
-        self.redshift = 0.0
+    def __init__(self, cosmology, redshift):
+
+        self.redshift = redshift
         self.cosmology = cosmology
-        littleh = self.cosmology.H0/100.0
-        crit_density = (
-            self.cosmology.critical_density(0).to(u.Msun/u.Mpc**3)/littleh**2)
-        self.cosmic_matter_density = crit_density*self.cosmology.Om0
+
+        #littleh = self.cosmology.H0/100.0
+        #crit_density = (self.cosmology.critical_density(0).to(u.Msun/u.Mpc**3)/littleh**2)
+        #self.cosmic_matter_density = crit_density*self.cosmology.Om0
 
     @abstractmethod
     def density_profile(self, r, *args):
@@ -104,20 +104,51 @@ class NFWProfile(HaloProfileModel):
 
     Notes 
     -----
-    For development purposes, object is temporarily hard-coded to only use z=0 Bryan & Norman 
-    virial mass definition for standard LCDM cosmological parameter values.
+    For development purposes, object is temporarily hard-coded to only use  
+    the Dutton & Maccio 2014 concentration-mass relation pertaining to 
+    a virial mass definition of a dark matter halo.
 
     """
 
     def __init__(self, 
-        delta_vir=360, cosmology=cosmology.WMAP5, redshift=0.0, 
+        cosmology=cosmology.WMAP5, redshift=0.0, 
         build_inv_cumu_table=False):
 
-        HaloProfileModel.__init__(self, delta_vir, cosmology, redshift)
-        self.publication = ['arXiv:9611107']
+        HaloProfileModel.__init__(self, cosmology, redshift)
+
+        self.publication = ['arXiv:9611107','arXiv:1402.7073']
 
         if build_inv_cumu_table is True:
             self.build_inv_cumu_lookup_table()
+
+    def conc_mass(self, mass):
+        """ Power-law fit to the concentration-mass relation from 
+        Dutton & Maccio 2014, MNRAS 441, 3359, arXiv:1402.7073.
+
+        Parameters 
+        ----------
+        mass : array_like 
+            Input array of halo masses. 
+
+        Returns 
+        -------
+        c : array_like
+            Concentrations of the input halos. 
+
+        Notes 
+        -----
+        This model was only calibrated for the Planck 1-year cosmology.
+
+        Model assumes that halo mass definition is Mvir.
+        """
+
+        a = 0.537 + (1.025 - 0.537) * np.exp(-0.718 * self.redshift**1.08)
+        b = -0.097 + 0.024 * self.redshift
+
+        logc = a + b * np.log10(mass / 1.E12)
+        c = 10**logc
+
+        return c
 
 
     def g(self, x):
@@ -223,6 +254,7 @@ class NFWProfile(HaloProfileModel):
 
 
 
+##################################################################################
 
 
 
