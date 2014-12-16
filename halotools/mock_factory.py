@@ -136,7 +136,7 @@ class HodMockFactory(object):
 
     def populate(self):
 
-        self._allocate_memory()f
+        self._allocate_memory()
         # Assign properties to bounded populations
         unity_bounded_populations = self.gal_types[self._occupation_bound == 1]
         for gal_type in unity_bounded_populations:

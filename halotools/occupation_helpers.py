@@ -241,7 +241,8 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
     output = np.zeros(aph_len(abcissa)) + value_outside_bins
 
     if aph_len(bin_midpoints)==1:
-        idx_abcissa_in_bin = np.where( (abcissa >= bin_midpoints - bin_width/2.) & (abcissa < bin_midpoints + bin_width/2.) )[0]
+        idx_abcissa_in_bin = np.where( 
+            (abcissa >= bin_midpoints - bin_width/2.) & (abcissa < bin_midpoints + bin_width/2.) )[0]
         print(idx_abcissa_in_bin)
         output[idx_abcissa_in_bin] = values_inside_bins
     else:
