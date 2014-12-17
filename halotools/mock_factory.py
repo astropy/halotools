@@ -20,11 +20,40 @@ class HodMockFactory(object):
 
     def __init__(self, snapshot, composite_model, bundle_into_table=True):
 
+        # Bind the inputs to the mock object
         self.snapshot = snapshot
         self.halos = snapshot.halos
         self.particles = snapshot.particles
-
         self.model = composite_model
+
+        self._set_gal_types()
+        self.process_halo_catalog()
+
+
+    def process_halo_catalog(self):
+
+        self.prim_haloprop_key = self.model.prim_haloprop_key
+        if hasattr(self.model,'sec_haloprop_key'): 
+            self.sec_haloprop_key = self.model.sec_haloprop_key
+
+        # At least need profile parameters for every halo
+        # May also wish to add data for prim_haloprop and sec_haloprop
+
+        halo_prof_param_keys = []
+        prim_haloprop = self.halos[self.prim_haloprop_key]
+
+        halo_prof_param_model_dict = self.model.halo_prof_param_model.param_func_dict
+        for key, prof_param_func in halo_prof_param_model_dict.iteritems():
+            new_key = 'prof_model_'+key
+            halo_prof_param_keys.extend([new_key])
+            self.halos[new_key] = prof_param_func(prim_haloprop)
+
+        setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
+
+    def _set_gal_types(self):
+        """ Internal bookkeeping method used to conveniently bind the gal_types of a 
+        composite model, and their occupation bounds, to the mock object. 
+        """
 
         # Set the gal_types attribute, sorted so that bounded populations appear first
         self._occupation_bound = []
@@ -35,11 +64,6 @@ class HodMockFactory(object):
         if (set(self._occupation_bound) != {1, float("inf")}):
             raise ValueError("The only supported finite occupation bound is unity,"
                 " otherwise it must be set to infinity")
-
-        self.prim_haloprop_key = composite_model.prim_haloprop_key
-        if hasattr(composite_model,'sec_haloprop_key'): 
-            self.sec_haloprop_key = composite_model.sec_haloprop_key
-
 
     def populate_bounded(self,gal_type):
         first_index = self._gal_type_indices[gal_type][0]
@@ -197,21 +221,6 @@ class HodMockFactory(object):
         # if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
         self.quiescent = np.zeros(self.Ngals,dtype=object)
 
-    def process_halo_catalog(self):
-
-        # At least need profile parameters for every halo
-        # May also wish to add data for prim_haloprop and sec_haloprop
-
-        halo_prof_param_keys = []
-        prim_haloprop = self.halos[self.prim_haloprop_key]
-
-        halo_prof_param_model_dict = self.model.halo_prof_param_model.param_func_dict
-        for key, prof_param_func in halo_prof_param_model_dict.iteritems():
-            new_key = 'prof_model_'+key
-            halo_prof_param_keys.extend([new_key])
-            self.halos[new_key] = prof_param_func(prim_haloprop)
-
-        setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
 
 
 
