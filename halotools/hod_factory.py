@@ -22,15 +22,19 @@ class HOD_Model(object):
 
     """
 
-    def __init__(self,component_model_dict):
+    def __init__(self, halo_prof_model, component_model_dict):
         """ The methods of this class derives their behavior from other, external classes, 
         passed in the form of the component_model_dict, a dictionary whose keys 
         are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
         The values of the component_model_dict are themselves dictionaries whose keys are 
         strings specifying the type of model being passed, e.g., 'occupation_model', and values 
         are instances of that type of model. The component_model_dict dictionary is built by 
-        the hod_designer interface. 
+        the hod_designer interface. The input halo_prof_model is an instance of the class 
+        governing the assumed profile of the underlying halos. 
+
         """
+        self.halo_prof_model = halo_prof_model
+        
         self.component_model_dict = component_model_dict
         self.gal_types = self.component_model_dict.keys()
         self.occupation_bound = {}

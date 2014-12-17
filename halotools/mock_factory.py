@@ -36,19 +36,20 @@ class HodMockFactory(object):
         if hasattr(self.model,'sec_haloprop_key'): 
             self.sec_haloprop_key = self.model.sec_haloprop_key
 
-        # At least need profile parameters for every halo
-        # May also wish to add data for prim_haloprop and sec_haloprop
-
+        # Create new columns for self.halos associated with each 
+        # parameter of the halo profile, e.g., 'conc'. 
+        # Use the halo profile model to compute every halo's value
+        # for each halo profile model parameter 
         halo_prof_param_keys = []
         prim_haloprop = self.halos[self.prim_haloprop_key]
-
-        halo_prof_param_model_dict = self.model.halo_prof_param_model.param_func_dict
-        for key, prof_param_func in halo_prof_param_model_dict.iteritems():
-            new_key = 'prof_model_'+key
-            halo_prof_param_keys.extend([new_key])
-            self.halos[new_key] = prof_param_func(prim_haloprop)
-
+        halo_prof_dict = self.model.halo_prof_model.param_func_dict
+        for key, prof_param_func in halo_prof_dict.iteritems():
+            self.halos[key] = prof_param_func(prim_haloprop)
+            halo_prof_param_keys.extend([key])
+        # Create a convenient bookkeeping device to keep track of the 
+        # halo profile parameter model keys
         setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
+
 
     def _set_gal_types(self):
         """ Internal bookkeeping method used to conveniently bind the gal_types of a 
