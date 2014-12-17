@@ -122,7 +122,7 @@ class NFWProfile(HaloProfileModel):
 
         HaloProfileModel.__init__(self, cosmology, redshift)
 
-        self.set_param_func_dict({'model_conc':self.conc_mass})
+        self.set_param_func_dict({'halo_prof_model_conc':self.conc_mass})
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
 
         self.publication = ['arXiv:9611107','arXiv:1402.7073']
@@ -241,9 +241,7 @@ class NFWProfile(HaloProfileModel):
         #This will be used to assign halo-centric distances to the satellites
         self.set_prof_param_table_dict(prof_param_table_dict)
 
-        cmin = self.prof_param_table_dict['model_conc'][0]
-        cmax = self.prof_param_table_dict['model_conc'][1]
-        dconc = self.prof_param_table_dict['model_conc'][2]
+        cmin, cmax, dconc = self.prof_param_table_dict['halo_prof_model_conc']
 
         Npts_radius = defaults.default_Npts_radius_array  
         minrad = defaults.default_min_rad 
@@ -288,15 +286,15 @@ class NFWProfile(HaloProfileModel):
             cmax = defaults.max_permitted_conc
             dconc = defaults.default_dconc
             self.prof_param_table_dict = (
-                {'model_conc':(cmin, cmax, dconc)})
+                {'halo_prof_model_conc':(cmin, cmax, dconc)})
         else:
             # Run some tests on the input_dict before binding it to the model instance
-            if set(input_dict.keys()) != {'model_conc'}:
+            if set(input_dict.keys()) != {'halo_prof_model_conc'}:
                 raise KeyError("The only prof_param_table_dict key of "
-                    " the NFWProfile model is 'model_conc'")
-            if not isinstance(input_dict['model_conc'], tuple):
-                raise TypeError("Value of prof_param_table_dict['model_conc'] must be a tuple instance")
-            if len(input_dict['model_conc']) != 3:
+                    " the NFWProfile model is 'halo_prof_model_conc'")
+            if not isinstance(input_dict['halo_prof_model_conc'], tuple):
+                raise TypeError("Value of prof_param_table_dict['halo_prof_model_conc'] must be a tuple instance")
+            if len(input_dict['halo_prof_model_conc']) != 3:
                 raise TypeError("Tuple value of prof_param_table_dict must have exactly 3 elements")
             self.prof_param_table_dict = input_dict
 

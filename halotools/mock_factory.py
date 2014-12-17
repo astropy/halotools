@@ -96,10 +96,8 @@ class HodMockFactory(object):
             self.halos['VEL'][self._occupation[gal_type]==1])
 
         # Now call the phase space model
-        # Note that this call to mc_coords will eventually need to be modified 
-        # to accommodate profile models that depend on two halo properties
         occupations = self._occupation[gal_type][self._occupation[gal_type]>0]
-        virial_radii = self.halos['RVIR'][self._occupation[gal_type]==1]
+        virial_radii = self.halos['RVIR'][self._occupation[gal_type]==1]/1000.
 
         ### Note that self.model does not yet correctly interface with the following API
         self.coords[first_index:last_index] = (
