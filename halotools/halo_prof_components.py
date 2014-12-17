@@ -88,6 +88,12 @@ class HaloProfileModel(object):
         """
         raise NotImplementedError("All halo profile models must include a cumulative_mass_PDF method")
 
+    @abstractmethod
+    def set_param_func_dict(self,input_dict):
+        raise NotImplementedError("All halo profile models must"
+            " provide a dictionary with keys giving the names of the halo profile parameters, "
+            " and values being the functions used to map parameter values onto halos")
+
 
 class NFWProfile(HaloProfileModel):
     """ NFW halo profile, based on Navarro, Frenk, and White (1999).
@@ -111,10 +117,12 @@ class NFWProfile(HaloProfileModel):
     """
 
     def __init__(self, 
-        cosmology=cosmology.WMAP5, redshift=0.0, 
+        cosmology=cosmology.WMAP5, redshift=0.0,
         build_inv_cumu_table=True):
 
         HaloProfileModel.__init__(self, cosmology, redshift)
+
+        self.set_param_func_dict({'model_conc':self.conc_mass})
 
         self.publication = ['arXiv:9611107','arXiv:1402.7073']
 
@@ -254,6 +262,9 @@ class NFWProfile(HaloProfileModel):
                 spline(self.cumulative_mass_PDF(radius_array,c),radius_array))
         self.cumu_inv_func_table = np.array(cumu_inv_funcs)
         self.cumu_inv_conc_table = conc_array
+
+    def set_param_func_dict(self, input_dict):
+        self.param_func_dict = input_dict
 
 
 
