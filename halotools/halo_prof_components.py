@@ -112,7 +112,7 @@ class NFWProfile(HaloProfileModel):
 
     def __init__(self, 
         cosmology=cosmology.WMAP5, redshift=0.0, 
-        build_inv_cumu_table=False):
+        build_inv_cumu_table=True):
 
         HaloProfileModel.__init__(self, cosmology, redshift)
 
@@ -221,7 +221,10 @@ class NFWProfile(HaloProfileModel):
         """
         return self.g(c) / self.g(r*c)
 
-    def build_inv_cumu_lookup_table(self):
+    def build_inv_cumu_lookup_table(self,
+        cmin = defaults.min_permitted_conc, 
+        cmax = defaults.max_permitted_conc, 
+        dconc = defaults.default_dconc):
         """ Method used to create a lookup table of inverse cumulative mass 
         profile functions. Used by `~halotools.mock_factory` to rapidly generate 
         Monte Carlo realizations of satellite profiles. 
@@ -231,10 +234,10 @@ class NFWProfile(HaloProfileModel):
         #This will be used to assign halo-centric distances to the satellites
         Npts_radius = defaults.default_Npts_radius_array  
         minrad = defaults.default_min_rad 
-        radius_array = np.linspace(minrad,1.,Npts_radius)
-        Npts_concen = defaults.default_Npts_concen_array
-        cmin = defaults.min_permitted_conc     
-        cmax = defaults.max_permitted_conc     
+        maxrad = defaults.default_max_rad 
+        radius_array = np.linspace(minrad,maxrad,Npts_radius)
+
+        Npts_concen = int(np.round((cmax-cmin)/dconc))
         conc_array = np.linspace(cmin,cmax,Npts_concen)
 
         # After executing the following lines, 
