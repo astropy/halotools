@@ -118,16 +118,18 @@ class NFWProfile(HaloProfileModel):
 
     def __init__(self, 
         cosmology=cosmology.WMAP5, redshift=0.0,
-        build_inv_cumu_table=True):
+        build_inv_cumu_table=True, prof_param_table_dict=None):
 
         HaloProfileModel.__init__(self, cosmology, redshift)
 
         self.set_param_func_dict({'model_conc':self.conc_mass})
+        self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
 
         self.publication = ['arXiv:9611107','arXiv:1402.7073']
 
         if build_inv_cumu_table is True:
-            self.build_inv_cumu_lookup_table()
+            self.build_inv_cumu_lookup_table(
+                prof_param_table_dict=self.prof_param_table_dict)
 
     def conc_mass(self, mass):
         """ Power-law fit to the concentration-mass relation from 
@@ -229,10 +231,7 @@ class NFWProfile(HaloProfileModel):
         """
         return self.g(c) / self.g(r*c)
 
-    def build_inv_cumu_lookup_table(self,
-        cmin = defaults.min_permitted_conc, 
-        cmax = defaults.max_permitted_conc, 
-        dconc = defaults.default_dconc):
+    def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
         """ Method used to create a lookup table of inverse cumulative mass 
         profile functions. Used by `~halotools.mock_factory` to rapidly generate 
         Monte Carlo realizations of satellite profiles. 
@@ -240,6 +239,12 @@ class NFWProfile(HaloProfileModel):
 
         #Set up the grid used to tabulate inverse cumulative NFW mass profiles
         #This will be used to assign halo-centric distances to the satellites
+        self.set_prof_param_table_dict(prof_param_table_dict)
+
+        cmin = self.prof_param_table_dict['model_conc'][0]
+        cmax = self.prof_param_table_dict['model_conc'][1]
+        dconc = self.prof_param_table_dict['model_conc'][2]
+
         Npts_radius = defaults.default_Npts_radius_array  
         minrad = defaults.default_min_rad 
         maxrad = defaults.default_max_rad 
@@ -264,7 +269,36 @@ class NFWProfile(HaloProfileModel):
         self.cumu_inv_conc_table = conc_array
 
     def set_param_func_dict(self, input_dict):
+        """ Trivial required method whose sole design purpose is to 
+        standardize the interface of future profile models. 
+        """
         self.param_func_dict = input_dict
+
+    def set_prof_param_table_dict(self,input_dict=None):
+        """ Method sets the value of the prof_param_table_dict attribute. 
+        The prof_param_table_dict attribute is a dictionary used to set up a 
+        grid of halo profile properties and pre-tabulated 
+        inverse cumulative functions. 
+        This grid is used by the mock_factory to rapidly generate 
+        Monte Carlo realizations of satellite profiles. 
+        """
+
+        if input_dict is None:
+            cmin = defaults.min_permitted_conc
+            cmax = defaults.max_permitted_conc
+            dconc = defaults.default_dconc
+            self.prof_param_table_dict = (
+                {'model_conc':(cmin, cmax, dconc)})
+        else:
+            # Run some tests on the input_dict before binding it to the model instance
+            if set(input_dict.keys()) != {'model_conc'}:
+                raise KeyError("The only prof_param_table_dict key of "
+                    " the NFWProfile model is 'model_conc'")
+            if not isinstance(input_dict['model_conc'], tuple):
+                raise TypeError("Value of prof_param_table_dict['model_conc'] must be a tuple instance")
+            if len(input_dict['model_conc']) != 3:
+                raise TypeError("Tuple value of prof_param_table_dict must have exactly 3 elements")
+            self.prof_param_table_dict = input_dict
 
 
 

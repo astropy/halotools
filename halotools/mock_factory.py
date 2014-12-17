@@ -50,6 +50,17 @@ class HodMockFactory(object):
         # halo profile parameter model keys
         setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
 
+        # Now re-compute the lookup tables associated with each halo profile parameter
+        prof_param_table_dict = {}
+        for key in self.halos.halo_prof_param_keys:
+            dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
+            parmin = self.halos[key].min() - dpar
+            parmax = self.halos[key].max() + dpar
+            prof_param_table_dict[key] = (parmin, parmax, dpar)
+
+        self.model.halo_prof_model.build_inv_cumu_lookup_table(
+            prof_param_table_dict=prof_param_table_dict)
+
 
     def _set_gal_types(self):
         """ Internal bookkeeping method used to conveniently bind the gal_types of a 
