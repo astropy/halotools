@@ -15,7 +15,7 @@ how to build an HOD model from the HOD components.
 import numpy as np
 
 
-class HOD_Model_Designer(object):
+class HodModelDesigner(object):
 	""" The constructor of this class takes 
 	a set of HOD model components as input, 
 	and composes their behavior in the appropriate fashion 

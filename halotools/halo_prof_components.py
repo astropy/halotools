@@ -47,10 +47,11 @@ class HaloProfileModel(object):
 
     """
 
-    def __init__(self, cosmology, redshift):
+    def __init__(self, cosmology, redshift, prim_haloprop_key='MVIR'):
 
         self.redshift = redshift
         self.cosmology = cosmology
+        self.prim_haloprop_key = prim_haloprop_key
 
         #littleh = self.cosmology.H0/100.0
         #crit_density = (self.cosmology.critical_density(0).to(u.Msun/u.Mpc**3)/littleh**2)
@@ -118,9 +119,10 @@ class NFWProfile(HaloProfileModel):
 
     def __init__(self, 
         cosmology=cosmology.WMAP5, redshift=0.0,
-        build_inv_cumu_table=True, prof_param_table_dict=None):
+        build_inv_cumu_table=True, prof_param_table_dict=None,
+        prim_haloprop_key='MVIR'):
 
-        HaloProfileModel.__init__(self, cosmology, redshift)
+        HaloProfileModel.__init__(self, cosmology, redshift, prim_haloprop_key)
 
         self.set_param_func_dict({'halo_prof_model_conc':self.conc_mass})
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
