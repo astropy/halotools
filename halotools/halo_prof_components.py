@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 
-This module contains the classes related to 
-the radial profiles of dark matter halos.
+halotools.halo_prof_components contains the classes and functions 
+used by galaxy occupation models to control the intra-halo position 
+of mock galaxies. 
 
 """
 
@@ -28,13 +29,13 @@ import defaults
 
 @six.add_metaclass(ABCMeta)
 class HaloProfileModel(object):
-    """ Container class for any halo profile model. 
+    """ Container class for any halo profile model. This is an abstract class, 
+    and cannot itself be instantiated. Rather, HaloProfileModel provides a 
+    blueprint for any radial profile component model used by the 
+    empirical model factories such as `halotools.hod_factory`. 
 
     Parameters 
     ----------
-    delta_vir : float
-        Density of the halo enclosed by the halo boundary. Currently hard-coded to 360
-
     cosmology : object 
         astropy cosmology object
 
@@ -48,6 +49,19 @@ class HaloProfileModel(object):
     """
 
     def __init__(self, cosmology, redshift, prim_haloprop_key='MVIR'):
+        """
+        Parameters 
+        ----------
+        cosmology : object 
+            astropy cosmology object
+
+        redshift : float 
+
+        prim_haloprop_key : string, optional
+            This string controls which column of the halo_table 
+            is used as the primary halo property governing the 
+            radial profile. Default is 'MVIR'. 
+        """
 
         self.redshift = redshift
         self.cosmology = cosmology
@@ -59,7 +73,7 @@ class HaloProfileModel(object):
 
     @abstractmethod
     def density_profile(self, r, *args):
-        """ Value of the density profile evaluated at the input radius. 
+        """ Required method giving the density profile evaluated at the input radius. 
 
         Parameters 
         ----------
@@ -68,22 +82,25 @@ class HaloProfileModel(object):
             Should be scaled by the halo boundary, so that :math:`0 < r < 1`
 
         args : array_like 
-            Parameters specifying the halo profile. If an array, should be of the same length 
+            Parameters specifying the halo profile. 
+            If an array, should be of the same length 
             as the input r. 
         """
         raise NotImplementedError("All halo profile models must include a mass_density method")
 
     @abstractmethod
     def cumulative_mass_PDF(self, r, *args):
-        """ Cumulative PDF of the halo mass profile. 
+        """ Required method specifying the cumulative PDF of the halo mass profile. 
 
         Parameters 
         ----------
         r : array_like 
-            Value of the radius at which cumulative profile is to be evaluated. 
+            Value of the radius at which the 
+            cumulative profile is to be evaluated. 
 
         args : array_like 
-            Parameters specifying the halo profile. If an array, should be of the same length 
+            Parameters specifying the halo profile. 
+            If an array, should be of the same length 
             as the input r. 
 
         """
@@ -91,6 +108,30 @@ class HaloProfileModel(object):
 
     @abstractmethod
     def set_param_func_dict(self,input_dict):
+        """ Required method specifying the mapping between halo profile parameters 
+        and some halo property (or properties). 
+        The most common example halo profile parameter 
+        is NFW concentration, and the most common mapping is a power-law type
+        concentration-mass relation. 
+
+        The sole function of this method is to bind a dictionary to the 
+        HaloProfileModel instance. The purpose of this dictionary 
+        is to provide a standardized way that composite models can access 
+        the halo-parameter mappings, regardless of what the user names the methods. 
+        The key(s) of the dictionary created by this method gives the name(s) of the 
+        halo profile parameter(s) of the model; the value(s) of the dictionary are 
+        function object(s) providing the mapping between halos and profile parameter(s).  
+        When HaloProfileModel is called by mock factories such as `halotools.mock_factory`, 
+        each dictionary key will correspond to the name of a new column for halo_table
+        that will be created by the mock factory during the pre-processing of the halo catalog.
+
+        By strongly suggested convention, the dictionary keys giving the 
+        names of halo profile parameters should begin with 'halo_prof_model_'. 
+        This will make clear the interpretation of the new columns of the halo_table 
+        created by the mock factories, and helps ensure that the no existing 
+        columns of a halo_table will be over-written. 
+
+        """
         raise NotImplementedError("All halo profile models must"
             " provide a dictionary with keys giving the names of the halo profile parameters, "
             " and values being the functions used to map parameter values onto halos")
@@ -99,30 +140,40 @@ class HaloProfileModel(object):
 class NFWProfile(HaloProfileModel):
     """ NFW halo profile, based on Navarro, Frenk, and White (1999).
 
-    Parameters 
-    ----------
-    delta_vir : float
-        Density of the halo enclosed by the halo boundary. Currently hard-coded to 360
-
-    cosmology : object 
-        astropy cosmology object
-
-    redshift : float 
-
     Notes 
     -----
     For development purposes, object is temporarily hard-coded to only use  
     the Dutton & Maccio 2014 concentration-mass relation pertaining to 
-    a virial mass definition of a dark matter halo.
-
+    a virial mass definition of a dark matter halo. This should eventually be 
+    generalized to allow for other concentration-mass relations, including those 
+    that are dependent on cosmology, such as Diemer & Kravtsov 2014. 
     """
 
     def __init__(self, 
         cosmology=cosmology.WMAP5, redshift=0.0,
         build_inv_cumu_table=True, prof_param_table_dict=None,
         prim_haloprop_key='MVIR'):
+        """
+        Parameters 
+        ----------
+        cosmology : object, optional
+            astropy cosmology object. Default cosmology is WMAP5. 
 
+        redshift : float, optional
+            Default redshift is 0.
+
+        build_inv_cumu_table : bool, optional
+            If True, upon instantiation the __init__ constructor 
+            will build a sequence of interpolation lookup tables 
+            providing a mapping between :math:`x = r / R_{\\mathrm{vir}}` 
+            and the unit-normalized cumulative mass profile function 
+            :math:`\\rho_{NFW}(x | c)`. 
+        """
+        # Call the init constructor of the super-class, 
+        # whose only purpose is to bind cosmology, redshift, and prim_haloprop_key
+        # to the NFWProfile instance. 
         HaloProfileModel.__init__(self, cosmology, redshift, prim_haloprop_key)
+
 
         self.set_param_func_dict({'halo_prof_model_conc':self.conc_mass})
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
@@ -189,7 +240,8 @@ class NFWProfile(HaloProfileModel):
         Returns 
         -------
         rho_s : array_like 
-            Profile normalization :math:`\\rho_{s}^{NFW} = \\frac{1}{3}\\Delta_{vir}c^{3}g(c)\\bar{\\rho}_{m}`
+            Profile normalization 
+            :math:`\\rho_{s}^{NFW} = \\frac{1}{3}\\Delta_{vir}c^{3}g(c)\\bar{\\rho}_{m}`
 
         """
         return (self.delta_vir/3.)*c*c*c*self.g(c)*self.cosmic_matter_density
@@ -205,15 +257,22 @@ class NFWProfile(HaloProfileModel):
             Should be scaled by the halo boundary, so that :math: `0 < r < 1`
 
         c : array_like 
-            Concentration specifying the halo profile. If an array, should be of the same length 
+            Concentration specifying the halo profile. 
+            If an array, should be of the same length 
             as the input r. 
+
+        Returns 
+        -------
+        result : array_like 
+            NFW density profile :math:`\\rho^{NFW}(r | c)`.
         """
         numerator = self.rho_s(c)
         denominator = (c*r)*(1.0 + c*r)*(1.0 + c*r)
         return numerator / denominator
 
     def cumulative_mass_PDF(self, r, c):
-        """ Cumulative probability distribution of the NFW profile. 
+        """ Cumulative probability distribution of the NFW profile, 
+        :math:`P^{NFW}( <r | c)`. 
 
         Parameters 
         ----------
@@ -228,15 +287,34 @@ class NFWProfile(HaloProfileModel):
         Returns 
         -------
         cumulative_PDF : array_like
-            :math:`P(<r | c) = g(c) / g(c*r)`. 
+            :math:`P^{NFW}(<r | c) = g(c) / g(c*r)`. 
 
         """
         return self.g(c) / self.g(r*c)
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
         """ Method used to create a lookup table of inverse cumulative mass 
-        profile functions. Used by `~halotools.mock_factory` to rapidly generate 
-        Monte Carlo realizations of satellite profiles. 
+        profile functions. Used by mock factories such as `~halotools.mock_factory` 
+        to rapidly generate Monte Carlo realizations of satellite profiles. 
+
+        Parameters 
+        ----------
+        prof_param_table_dict : dict, optional
+            Dictionary providing instructions for how to generate a grid of 
+            values for each halo profile parameter. Keys of this dictionary 
+            are the profile parameter names; each value is a 3-element tuple 
+            giving the minimum parameter value of the table to be built, the 
+            maximum value, and the linear spacing. Default is None, 
+            in which case the `NFWProfile.set_prof_param_table_dict` method 
+            will control the grid values. 
+
+            This method does not return anything. Instead, when called 
+            the NFWProfile instance will have two new attributes: 
+            cumu_inv_conc_table and cumu_inv_func_table. 
+            The former is an array of NFW concentration parameter values, 
+            the latter is an array of inverse cumulative density profile 
+            function objects :math:`P^{NFW}( <r | c)` associated with 
+            each concentration in the table. 
         """
 
         #Set up the grid used to tabulate inverse cumulative NFW mass profiles
@@ -271,7 +349,24 @@ class NFWProfile(HaloProfileModel):
     def set_param_func_dict(self, input_dict):
         """ Trivial required method whose sole design purpose is to 
         standardize the interface of future profile models. 
+
+        Parameters 
+        ----------
+        input_dict : dict 
+            Each key corresponds to the name of a halo profile parameter, 
+            e.g., 'halo_prof_model_conc'. Each value is a 3-element tuple used 
+            to govern how that parameter is gridded up by 
+            `NFWProfile.build_inv_cumu_lookup_table`. 
+            The entries of each tuple give the minimum parameter 
+            value of the table to be built, the 
+            maximum value, and the linear spacing.
+
+        Notes 
+        ----- 
+        Method does not return anything. Instead, input_dict is bound to 
+        the NFWProfile instance with the attribute name param_func_dict. 
         """
+        
         self.param_func_dict = input_dict
 
     def set_prof_param_table_dict(self,input_dict=None):
@@ -279,7 +374,7 @@ class NFWProfile(HaloProfileModel):
         The prof_param_table_dict attribute is a dictionary used to set up a 
         grid of halo profile properties and pre-tabulated 
         inverse cumulative functions. 
-        This grid is used by the mock_factory to rapidly generate 
+        This grid is used by `halotools.mock_factory` to rapidly generate 
         Monte Carlo realizations of satellite profiles. 
         """
 

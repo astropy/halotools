@@ -12,6 +12,8 @@ how to build an HOD model from the HOD components.
 
 """
 
+__all__ = ['HodModelDesigner']
+
 import numpy as np
 
 
