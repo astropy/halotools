@@ -48,7 +48,9 @@ class HodModel(object):
         # halo table passed by the mock factory
         # Currently, all behaviors of all galaxy types must use 
         # the same primary (and, if applicable, secondary) halo property. 
-        self.create_haloprop_keys()
+        # Also create a dictionary for which gal_types, and which behaviors, 
+        # are assembly biased. 
+        self._create_haloprop_keys()
 
         # The details of how parameters are passed back and forth still need to be worked out
         self.parameter_dict = (
@@ -78,13 +80,18 @@ class HodModel(object):
         The behavior of this method is inherited from one of the component models.
         """
 
-        # First retrieve the appropriate columns from halo_table
+        # Retrieve the appropriate columns from halo_table
+        input_haloprops = [halo_table[self.prim_haloprop_key]]
+        assembias_occupation = ((gal_type in self.sec_haloprop_key_dict.keys()) & 
+            ('occupation_model' in self.sec_haloprop_key_dict[gal_type]) )
+        if assembias_occupation == True:
+            input_haloprops.extend([halo_table[self.sec_haloprop_key]])
 
         self.test_component_consistency(gal_type,'occupation_model')
 
         occupation_model = self.component_model_dict[gal_type]['occupation_model']
         inherited_method = occupation_model.mc_occupation
-        output_mc_realization = self.retrieve_component_behavior(inherited_method,args)
+        output_mc_realization = self.retrieve_component_behavior(inherited_method,input_haloprops)
 
         return output_mc_realization
         
@@ -174,7 +181,7 @@ class HodModel(object):
         if intersection != []:
             raise KeyError("New component model contains duplicate parameter keys")
 
-    def create_haloprop_keys(self):
+    def _create_haloprop_keys(self):
 
         # Create attribute for primary halo property used by all component models
         # Forced to be the same property defining the underlying halo profile 
@@ -196,12 +203,13 @@ class HodModel(object):
                     "must use the same secondary halo property "
                     " for all behaviors of this galaxy type")
             elif len(set(temp_dict.values())) == 1:
-                sec_haloprop_key_dict[gal_type] = temp_dict.values()[0]
+                sec_haloprop_key_dict[gal_type] = temp_dict
         if len(set(sec_haloprop_key_dict.values())) > 1:
             raise KeyError("If implementing assembly bias in a composite model, "
                 " must use same secondary halo property for all galaxy types")
         elif len(set(sec_haloprop_key_dict.values())) == 1:
             self.sec_haloprop_key = sec_haloprop_key_dict.values()[0]
+            self.sec_haloprop_key_dict = sec_haloprop_key_dict
 
 
 
