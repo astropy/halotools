@@ -348,11 +348,35 @@ class NFWProfile(HaloProfileModel):
 
     def set_param_func_dict(self, input_dict):
         """ Trivial required method whose sole design purpose is to 
-        standardize the interface of future profile models. 
+        standardize the interface of halo profile models. 
 
         Parameters 
         ----------
         input_dict : dict 
+            Each key corresponds to the name of a halo profile parameter, 
+            e.g., 'halo_prof_model_conc'. Each value is a function object 
+            providing the mapping between halos and the halo profile parameter, 
+            such as a concentration-mass function. 
+
+        Notes 
+        ----- 
+        Method does not return anything. Instead, input_dict is bound to 
+        the NFWProfile instance with the attribute name param_func_dict. 
+        """
+
+        self.param_func_dict = input_dict
+
+    def set_prof_param_table_dict(self,input_dict=None):
+        """ Method sets the value of the prof_param_table_dict attribute. 
+        The prof_param_table_dict attribute is a dictionary 
+        used in the set up of a gridded correspondence between 
+        halo profile properties and inverse cumulative function objects. 
+        This grid is used by mock factories such as `halotools.mock_factory` 
+        to rapidly generate Monte Carlo realizations of satellite profiles. 
+
+        Parameters 
+        ----------
+        input_dict : dict, optional
             Each key corresponds to the name of a halo profile parameter, 
             e.g., 'halo_prof_model_conc'. Each value is a 3-element tuple used 
             to govern how that parameter is gridded up by 
@@ -360,22 +384,13 @@ class NFWProfile(HaloProfileModel):
             The entries of each tuple give the minimum parameter 
             value of the table to be built, the 
             maximum value, and the linear spacing.
+            If None, default behavior is set in `halotools.defaults` module. 
 
         Notes 
         ----- 
         Method does not return anything. Instead, input_dict is bound to 
-        the NFWProfile instance with the attribute name param_func_dict. 
-        """
-        
-        self.param_func_dict = input_dict
+        the NFWProfile instance with the attribute name prof_param_table_dict. 
 
-    def set_prof_param_table_dict(self,input_dict=None):
-        """ Method sets the value of the prof_param_table_dict attribute. 
-        The prof_param_table_dict attribute is a dictionary used to set up a 
-        grid of halo profile properties and pre-tabulated 
-        inverse cumulative functions. 
-        This grid is used by `halotools.mock_factory` to rapidly generate 
-        Monte Carlo realizations of satellite profiles. 
         """
 
         if input_dict is None:
