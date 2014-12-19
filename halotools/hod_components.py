@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 
-This module contains the components for occupation statistics 
-used by `halotools.hod_designer` to build composite HOD models 
-by composing the behavior of the components. 
-
+This module contains functions and classes 
+providing mappings between halos and the abundance and properties of 
+galaxies residing in those halos. The classes serve primarily 
+as components used by `halotools.hod_factory` and 
+`halotools.hod_designer`, which act together to compose 
+the behavior of the components into composite models. 
 """
 
 __all__ = ['Kravtsov04Cens','Kravtsov04Sats','vdB03Quiescence']
@@ -30,34 +32,35 @@ class Kravtsov04Cens(object):
     """ Erf function model for the occupation statistics of central galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
-
-    Parameters 
-    ----------
-    parameter_dict : dictionary, optional.
-        Contains values for the parameters specifying the model.
-        Dictionary keys are 'logMmin_cen' and 'sigma_logM'
-
-        Their best-fit parameter values provided in Table 1 of 
-        Zheng et al. (2007) are pre-loaded into this class, and 
-        can be accessed via the `published_parameters` method.
-
-    threshold : float, optional.
-        Luminosity threshold of the mock galaxy sample. 
-        If specified, input value must agree with 
-        one of the thresholds used in Zheng07 to fit HODs: 
-        [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-        Default value is specified in the `~halotools.defaults` module.
-
-    gal_type : string, optional
-        Sets the key value used by `~halotools.hod_designer` and 
-        `~halotools.hod_factory` to access the behavior of the methods 
-        of this class. 
-
     """
 
     def __init__(self,parameter_dict=None,
         threshold=defaults.default_luminosity_threshold,
         gal_type='centrals'):
+        """
+        Parameters 
+        ----------
+        parameter_dict : dictionary, optional.
+            Contains values for the parameters specifying the model.
+            Dictionary keys are 'logMmin_cen' and 'sigma_logM'
+
+            Their best-fit parameter values provided in Table 1 of 
+            Zheng et al. (2007) are pre-loaded into this class, and 
+            can be accessed via the `published_parameters` method.
+
+        threshold : float, optional.
+            Luminosity threshold of the mock galaxy sample. 
+            If specified, input value must agree with 
+            one of the thresholds used in Zheng07 to fit HODs: 
+            [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+            Default value is specified in the `~halotools.defaults` module.
+
+        gal_type : string, optional
+            Sets the key value used by `~halotools.hod_designer` and 
+            `~halotools.hod_factory` to access the behavior of the methods 
+            of this class. 
+
+        """
 
         self.gal_type = gal_type
         self.upper_bound = 1.0
@@ -142,7 +145,6 @@ class Kravtsov04Cens(object):
 
         Returns 
         -------
-
         parameter_dict : dict
             Dictionary of model parameters whose values have been set to 
             agree with the values taken from Table 1 of Zheng et al. 2007.
@@ -173,41 +175,42 @@ class Kravtsov04Sats(object):
     """ Power law model for the occupation statistics of satellite galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
-
-    Parameters 
-    ----------
-    parameter_dict : dictionary, optional.
-        Contains values for the parameters specifying the model.
-        Dictionary keys are 'logMmin_cen' and 'sigma_logM'
-
-        Their best-fit parameter values provided in Table 1 of 
-        Zheng et al. (2007) are pre-loaded into this class, and 
-        can be accessed via the `published_parameters` method.
-
-    threshold : float, optional.
-        Luminosity threshold of the mock galaxy sample. 
-        If specified, input value must agree with 
-        one of the thresholds used in Zheng07 to fit HODs: 
-        [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-        Default value is specified in the `~halotools.defaults` module.
-
-    gal_type : string, optional
-        Sets the key value used by `~halotools.hod_designer` and 
-        `~halotools.hod_factory` to access the behavior of the methods 
-        of this class. 
-
-    central_occupation_model : occupation model instance, optional
-        If present, the mean occupation method of this model will 
-        be multiplied by the value of central_occupation_model at each mass, 
-        as in Zheng et al. 2007.
-        Default is None.
-
     """
 
     def __init__(self,parameter_dict=None,
         threshold=defaults.default_luminosity_threshold,
         gal_type='satellites',
         central_occupation_model=None):
+        """
+        Parameters 
+        ----------
+        parameter_dict : dictionary, optional.
+            Contains values for the parameters specifying the model.
+            Dictionary keys are 'logMmin_cen' and 'sigma_logM'
+
+            Their best-fit parameter values provided in Table 1 of 
+            Zheng et al. (2007) are pre-loaded into this class, and 
+            can be accessed via the `published_parameters` method.
+
+        threshold : float, optional.
+            Luminosity threshold of the mock galaxy sample. 
+            If specified, input value must agree with 
+            one of the thresholds used in Zheng07 to fit HODs: 
+            [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+            Default value is specified in the `~halotools.defaults` module.
+
+        gal_type : string, optional
+            Sets the key value used by `~halotools.hod_designer` and 
+            `~halotools.hod_factory` to access the behavior of the methods 
+            of this class. 
+
+        central_occupation_model : occupation model instance, optional
+            If present, the mean occupation method of this model will 
+            be multiplied by the value of central_occupation_model at each mass, 
+            as in Zheng et al. 2007.
+            Default is None.
+
+        """
 
         self.gal_type = gal_type
         self.upper_bound = float("inf")

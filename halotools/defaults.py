@@ -1,6 +1,6 @@
 
 """
-Module expressing various default values of the mock-making code. 
+Module expressing various default values of halotools. 
 
 All hard-coding should be restricted to this module, whenever possible.
 """
