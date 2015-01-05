@@ -36,6 +36,9 @@ class HodMockFactory(object):
         # The process_halo_catalog method 
         self.process_halo_catalog()
 
+        if populate==True:
+            self.populate()
+
 
     def process_halo_catalog(self):
         """ Method to pre-process a halo catalog upon instantiation of 
@@ -104,6 +107,16 @@ class HodMockFactory(object):
                 " otherwise it must be set to infinity")
 
 
+    def _set_mock_attributes(self):
+
+        self._mock_attr_dict = {}
+        # Dict needs to provide the following data:
+        # 1. Attribute name of array, e.g., 'coords' and 'hostvel'
+        # 2. Corresponding halo catalog dictionary key (None for pure model quantities like color)
+        # 3. Array shape
+        # 4. Array dtype
+
+
     def populate(self):
 
         self._allocate_memory()
@@ -118,7 +131,8 @@ class HodMockFactory(object):
 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions of the simulation box
-        self.coords = occuhelp.enforce_periodicity_of_box(self.coords, self.snapshot.Lbox)
+        self.coords = occuhelp.enforce_periodicity_of_box(
+            self.coords, self.snapshot.Lbox)
 
 
     def populate_bounded(self,gal_type):
@@ -214,6 +228,12 @@ class HodMockFactory(object):
 
 
     def _allocate_memory(self):
+        """ Method determines how many galaxies of each type 
+        will populate the mock realization, initializes 
+        various arrays to store mock catalog data, 
+        and creates internal self._gal_type_indices attribute 
+        for bookkeeping purposes. 
+        """
         self._occupation = {}
         self._total_abundance = {}
         self._gal_type_indices = {}
@@ -244,7 +264,6 @@ class HodMockFactory(object):
         self.prim_haloprop = np.zeros(self.Ngals,dtype='f8')
         if hasattr(self.model,'sec_haloprop_key'):
             self.sec_haloprop = np.zeros(self.Ngals,dtype='f8')
-
 
         # Still not sure how the composite model keeps track of  
         # what features have been compiled (definitely not as follows, though)
