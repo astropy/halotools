@@ -65,15 +65,19 @@ class HodMockFactory(object):
         # When the halo profile model component was instantiated 
         # during the composite model build, a lookup table 
         # for the inverse cumulative profile may have been 
-        # built. We need to make sure that the lookup table spans 
-        # the required range of halo profile parameters, 
-        # so re-compute these lookup tables according to the 
-        # range required by the range spanned by the halo catalog.
+        # built. At a minimum, the range of profile parameters in 
+        # the lookup table must span the range of the 
+        # halo catalog. So re-compute this lookup table 
+        # to insure that the necessary range is covered.
         prof_param_table_dict = {}
         for key in self.halos.halo_prof_param_keys:
             dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
-            parmin = self.halos[key].min() - dpar
-            parmax = self.halos[key].max() + dpar
+            halocat_parmin = self.halos[key].min() - dpar
+            model_parmin = self.model.halo_prof_model.prof_param_table_dict[key][0]
+            parmin = np.min(halocat_parmin,model_parmin)
+            halocat_parmax = self.halos[key].max() + dpar
+            model_parmax = self.model.halo_prof_model.prof_param_table_dict[key][1]
+            parmax = np.max(halocat_parmax,model_parmax)
             prof_param_table_dict[key] = (parmin, parmax, dpar)
 
         self.model.halo_prof_model.build_inv_cumu_lookup_table(

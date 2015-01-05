@@ -398,9 +398,11 @@ class NFWProfile(HaloProfileModel):
             cmax = defaults.max_permitted_conc
             dconc = defaults.default_dconc
             self.prof_param_table_dict = (
-                {'halo_prof_model_conc':(cmin, cmax, dconc)})
+                {'halo_prof_model_conc':(cmin, cmax, dconc)}
+                )
         else:
-            # Run some tests on the input_dict before binding it to the model instance
+            # Run some consistencty checks on  
+            # input_dict before binding it to the model instance
             if set(input_dict.keys()) != {'halo_prof_model_conc'}:
                 raise KeyError("The only prof_param_table_dict key of "
                     " the NFWProfile model is 'halo_prof_model_conc'")
