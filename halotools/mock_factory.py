@@ -18,7 +18,8 @@ class HodMockFactory(object):
     painted onto the input snapshot. 
     """
 
-    def __init__(self, snapshot, composite_model, bundle_into_table=True):
+    def __init__(self, snapshot, composite_model, 
+        bundle_into_table=True, populate=True):
 
         # Bind the inputs to the mock object
         self.snapshot = snapshot
@@ -26,11 +27,22 @@ class HodMockFactory(object):
         self.particles = snapshot.particles
         self.model = composite_model
 
+        # Bind a list of strings containing the gal_types 
+        # of the composite model to the mock instance. 
+        # The self.gal_types list is ordered such that 
+        # populations with unity-bounded occupations appear first
         self._set_gal_types()
+
+        # The process_halo_catalog method 
         self.process_halo_catalog()
 
 
     def process_halo_catalog(self):
+        """ Method to pre-process a halo catalog upon instantiation of 
+        the mock object. This processing includes identifying the 
+        catalog columns that will be used to construct the mock, 
+        and building lookup tables associated with the halo profile. 
+        """
 
         self.prim_haloprop_key = self.model.prim_haloprop_key
         if hasattr(self.model,'sec_haloprop_key'): 
@@ -50,7 +62,13 @@ class HodMockFactory(object):
         # halo profile parameter model keys
         setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
 
-        # Now re-compute the lookup tables associated with each halo profile parameter
+        # When the halo profile model component was instantiated 
+        # during the composite model build, a lookup table 
+        # for the inverse cumulative profile may have been 
+        # built. We need to make sure that the lookup table spans 
+        # the required range of halo profile parameters, 
+        # so re-compute these lookup tables according to the 
+        # range required by the range spanned by the halo catalog.
         prof_param_table_dict = {}
         for key in self.halos.halo_prof_param_keys:
             dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
@@ -65,6 +83,10 @@ class HodMockFactory(object):
     def _set_gal_types(self):
         """ Internal bookkeeping method used to conveniently bind the gal_types of a 
         composite model, and their occupation bounds, to the mock object. 
+
+        This method identifies all gal_type strings used in the composite model, 
+        and creates a list of those strings, ordered such that gal_types with 
+        unit-bounded occupations (e.g., centrals) appear first. 
         """
 
         # Set the gal_types attribute, sorted so that bounded populations appear first
@@ -76,6 +98,24 @@ class HodMockFactory(object):
         if (set(self._occupation_bound) != {1, float("inf")}):
             raise ValueError("The only supported finite occupation bound is unity,"
                 " otherwise it must be set to infinity")
+
+
+    def populate(self):
+
+        self._allocate_memory()
+        # Assign properties to bounded populations
+        unity_bounded_populations = self.gal_types[self._occupation_bound == 1]
+        for gal_type in unity_bounded_populations:
+            self.populate_bounded(gal_type)
+
+        unbounded_populations = self.gal_types[self._occupation_bound == float("inf")]
+        for gal_type in unbounded_populations:
+            self.populate_unbounded(gal_type)
+
+        # Positions are now assigned to all populations. 
+        # Now enforce the periodic boundary conditions of the simulation box
+        self.coords = occuhelp.enforce_periodicity_of_box(self.coords, self.snapshot.Lbox)
+
 
     def populate_bounded(self,gal_type):
         first_index = self._gal_type_indices[gal_type][0]
@@ -167,23 +207,6 @@ class HodMockFactory(object):
                     host_sec_haloprops[host_index])
 
             satsys_first_index += Nsatsys
-
-
-    def populate(self):
-
-        self._allocate_memory()
-        # Assign properties to bounded populations
-        unity_bounded_populations = self.gal_types[self._occupation_bound == 1]
-        for gal_type in unity_bounded_populations:
-            self.populate_bounded(gal_type)
-
-        unbounded_populations = self.gal_types[self._occupation_bound == float("inf")]
-        for gal_type in unbounded_populations:
-            self.populate_unbounded(gal_type)
-
-        # Positions are now assigned to all populations. 
-        # Now enforce the periodic boundary conditions of the simulation box
-        self.coords = occuhelp.enforce_periodicity_of_box(self.coords, self.snapshot.Lbox)
 
 
     def _allocate_memory(self):
