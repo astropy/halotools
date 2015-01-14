@@ -26,14 +26,17 @@ class TrivialCenProfile(object):
     def __init__(self, gal_type):
         self.gal_type = gal_type
 
-    def mc_coords(self, mock):
-        host_centers = args[0]
-        if np.all(occupations==1):
-            coords = host_centers
-        else:
-            raise("Only occupied halos should be passed to mc_coords method")
+    def mc_coords(self, *args,**kwargs):
 
-        return coords
+        # If we are running in testmode, require that all galaxies 
+        # passed to mc_coords are actually the same type
+        if defaults.testmode_string in kwargs.keys():
+            if kwargs[defaults.testmode_string]==True:
+                assert np.all(mock_galaxies.gal_type == self.gal_type)
+
+        Ngals = occuhelp.aph_len(mock_galaxies.gal_type)
+
+        return np.zeros(Ngals*3).reshape(Ngals,3)
 
 ##################################################################################
 
