@@ -26,7 +26,7 @@ class TrivialCenProfile(object):
     def __init__(self, gal_type):
         self.gal_type = gal_type
 
-    def mc_coords(self, coords, occupations, *args):
+    def mc_coords(self, mock):
         host_centers = args[0]
         if np.all(occupations==1):
             coords = host_centers
