@@ -109,7 +109,7 @@ class HodModel(object):
 
         return output_profiles
 
-    def mc_profile(self,gal_type,*args):
+    def mc_coords(self,gal_type,*args):
         """ Method returning a Monte Carlo realization of the radial profile. 
         The behavior of this method is inherited from one of the component models.
         """
@@ -117,7 +117,7 @@ class HodModel(object):
         self.test_component_consistency(gal_type,'profile_model')
 
         profile_model = self.component_model_dict[gal_type]['profile_model']
-        inherited_method = profile_model.mc_profile
+        inherited_method = profile_model.mc_coords
         output_mc_realization = self.retrieve_component_behavior(inherited_method,args)
 
         return output_mc_realization

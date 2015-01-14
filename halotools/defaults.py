@@ -8,6 +8,7 @@ All hard-coding should be restricted to this module, whenever possible.
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 import os, sys, configuration
+import numpy as np
 
 ### Default halo catalog (used in read_nbody)
 # The following parameters are used by the 
@@ -104,6 +105,20 @@ particle_catalog_dirname = configuration.get_catalogs_dir('particles')
 # and the nearest available snapshot differs by more than the following amount, 
 # the code will issue a warning.
 scale_factor_difference_tol = 0.05
+
+# At minimum, the following halo and galaxy properties 
+# will be bound to each mock galaxy 
+host_haloprop_prefix = 'halo_'
+haloprop_list = ['ID', 'POS', 'VEL', 'MVIR', 'RVIR']
+galprop_dict = {'gal_type':4,'pos':[4,4,4]}
+
+
+
+
+
+
+
+
 
 
 
