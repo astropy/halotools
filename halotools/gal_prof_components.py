@@ -99,7 +99,7 @@ class RadProfBias(object):
 
         input_parameter_dict : dictionary, optional 
             Dictionary specifying how each profile parameter should be modulated. 
-            Keys are names of the profile parameter, e.g., 'conc'. 
+            Keys are names of the profile parameter, e.g., 'conc', or 'gamma'. 
             Values are dictionaries of abcissa and ordinates. 
             Thus parameter_dict is a dictionary of dictionaries. 
 
@@ -116,6 +116,14 @@ class RadProfBias(object):
             Degree of the spline interpolation for the case of interpol_method='spline'. 
             If there are k abcissa values specifying the model, input_spline_degree 
             is ensured to never exceed k-1, nor exceed 5. 
+
+        Notes 
+        -----
+        The initialization constructor will use input_parameter_dict to create a 
+        new dictionary, prepend/append to the  
+        input_parameter_dict keys to avoid potential key duplication 
+        when using this class as a component of a composite model. 
+
         """
 
         self.gal_type = gal_type
@@ -124,7 +132,10 @@ class RadProfBias(object):
         self.abcissa_key = {}
         self.ordinates_key = {}
 
+        # The correct keys are strings for the abcissa and ordinate arrays
+        # with a naming convention set in the defaults module
         correct_keys = defaults.default_profile_dict.keys()
+
         # Loop over all profile parameters that are being modulated 
         for profile_parameter, profile_parameter_dict in input_parameter_dict.iteritems():
             # Test that the dictionary associated with profile_parameter has the right keys
@@ -142,16 +153,16 @@ class RadProfBias(object):
             # This binding is done via a dictionary, where each key of the dictionary 
             # corresponds to a profile parameter that is being modulated.
             self.abcissa_key[profile_parameter] = (
-                profile_parameter+'_profile_abcissa_'+self.gal_type )
+                profile_parameter+'_model_abcissa_'+self.gal_type )
             self.ordinates_key[profile_parameter] = (
-                profile_parameter+'_profile_ordinates_'+self.gal_type )
+                profile_parameter+'_model_ordinates_'+self.gal_type )
 
         # Set the interpolation scheme 
         if interpol_method not in ['spline', 'polynomial']:
             raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
         self.interpol_method = interpol_method
 
-        # Set the degree of the spline
+        # If using spline interpolation, configure its settings 
         if self.interpol_method=='spline':
             scipy_maxdegree = 5
             self.spline_degree ={}
