@@ -28,11 +28,18 @@ class TrivialCenProfile(object):
 
     def mc_coords(self, *args,**kwargs):
 
+        too_many_args = (occuhelp.aph_len(args) > 0) & 'mock_galaxies' in kwargs.keys()
+        if too_many_args == True:
+            raise TypeError("TrivialCenProfile can be passed an array, or a mock, but not both")
+
         # If we are running in testmode, require that all galaxies 
         # passed to mc_coords are actually the same type
-        if defaults.testmode_string in kwargs.keys():
-            if kwargs[defaults.testmode_string]==True:
-                assert np.all(mock_galaxies.gal_type == self.gal_type)
+        runtest = ( (defaults.testmode_string in kwargs.keys()) & 
+            (kwargs[defaults.testmode_string]==True) & 
+            ('mock_galaxies' in kwargs.keys()) )
+        if runtest == True:
+            assert np.all(mock_galaxies.gal_type == self.gal_type)
+        ###
 
         return 0
 
