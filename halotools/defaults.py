@@ -110,7 +110,7 @@ scale_factor_difference_tol = 0.05
 # will be bound to each mock galaxy 
 host_haloprop_prefix = 'halo_'
 haloprop_list = ['ID', 'POS', 'VEL', 'MVIR', 'RVIR']
-galprop_list = ['gal_type','pos']
+galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 
 
 
