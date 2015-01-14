@@ -34,9 +34,7 @@ class TrivialCenProfile(object):
             if kwargs[defaults.testmode_string]==True:
                 assert np.all(mock_galaxies.gal_type == self.gal_type)
 
-        Ngals = occuhelp.aph_len(mock_galaxies.gal_type)
-
-        return np.zeros(Ngals*3).reshape(Ngals,3)
+        return 0
 
 ##################################################################################
 
