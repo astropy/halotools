@@ -2,7 +2,7 @@
 """
 
 Module used to construct mock galaxy populations. 
-Each mock factory only has knowledge of a processed snapshot 
+Each mock factory only has knowledge of a simulation snapshot 
 and composite model object. 
 Currently only composite HOD models are supported. 
 
@@ -19,7 +19,8 @@ class HodMockFactory(object):
     """
 
     def __init__(self, snapshot, composite_model, 
-        bundle_into_table=True, populate=True):
+        bundle_into_table=True, populate=True,
+        supplemental_haloprops=None):
 
         # Bind the inputs to the mock object
         self.snapshot = snapshot
@@ -108,13 +109,38 @@ class HodMockFactory(object):
 
 
     def _set_mock_attributes(self):
+        """ Internal method used to create a mock_attr_dict, a 
+        private dictionary bound to the mock object. The dictionary 
+        mock_attr_dict determines the attributes of the 
+        mock galaxy population. 
+        """
 
         self._mock_attr_dict = {}
-        # Dict needs to provide the following data:
-        # 1. Attribute name of array, e.g., 'coords' and 'hostvel'
-        # 2. Corresponding halo catalog dictionary key (None for pure model quantities like color)
-        # 3. Array shape
-        # 4. Array dtype
+        #for halokey in defaults.haloprop_list:
+        #    newkey=defaults.host_haloprop_prefix+halokey
+
+            # Identify shape of corresponding halo property
+        #    halokey_shape = np.shape(self.halos[halokey])
+            #if halokey_shape == np.shape(halos):
+                #shape = 
+
+        # should be using np.zeros_like 
+
+        # Now rename the keys of the dictionary to have a prefix 
+        # indicating that this galaxy property is lifted directly from 
+        # the halo catalog
+        #for key in self._mock_attr_dict.keys():
+        #    newkey=defaults.host_haloprop_prefix+key
+        #    self._mock_attr_dict[newkey] = self._mock_attr_dict.pop(key)
+
+        # Include the minimum number of mock galaxy properties
+        #for key in defaults.min_galprops_dict.keys():
+        #    self._mock_attr_dict[key] = defaults.min_galprops_dict[key]
+
+
+
+        # Need to include attribute for color, still not sure of API
+
 
 
     def populate(self):
@@ -182,11 +208,16 @@ class HodMockFactory(object):
                 self.halos[prof_param_key][self._occupation[gal_type]>0])
 
         satsys_prof_param_dict = host_prof_param_dict
-        # Profile modulating functions allow satellites to be biased tracers 
-        # of the halo profile. Not implemented yet. 
+        # Profile parameter modulating functions allow satellites to be 
+        # spatially biased tracers of the underlying halo profile. 
+        # Not implemented yet. 
         if hasattr(sat_prof_model, 'prof_param_modfunc'):
             pass 
 
+        # To assign intra-halo positions to galaxies, 
+        # we use the method of transformation of variables. 
+        # The inverse cumulative profile of the halo mass density 
+        # gives our equal probability volume element. 
         inv_cumu_prof_funcs = self.model.halo_prof_model.digitized_inv_cumu_profs(
             satsys_prof_param_dict)
 
@@ -249,6 +280,8 @@ class HodMockFactory(object):
                 self._occupation[gal_type].sum()
                 )
             last_galaxy_index = first_galaxy_index + self._total_abundance[gal_type]
+            # Build a bookkeeping device to keep track of 
+            # which array elements pertain to which gal_type. 
             self._gal_type_indices[gal_type] = (
                 first_galaxy_index, last_galaxy_index)
             first_galaxy_index = last_galaxy_index
