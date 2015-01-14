@@ -20,14 +20,14 @@ class HodMockFactory(object):
 
     def __init__(self, snapshot, composite_model, 
         bundle_into_table=True, populate=True,
-        supplemental_haloprops=[]):
+        additional_haloprops=[]):
 
         # Bind the inputs to the mock object
         self.snapshot = snapshot
         self.halos = snapshot.halos
         self.particles = snapshot.particles
         self.model = composite_model
-        self.supplemental_haloprops = supplemental_haloprops
+        self.additional_haloprops = additional_haloprops
 
         # Bind a list of strings containing the gal_types 
         # of the composite model to the mock instance. 
@@ -67,11 +67,8 @@ class HodMockFactory(object):
         # halo profile parameter model keys
         setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
 
-        # When the halo profile model component was instantiated 
-        # during the composite model build, a lookup table 
-        # for the inverse cumulative profile may have been 
-        # built. At a minimum, the range of profile parameters in 
-        # the lookup table must span the range of the 
+        # The range of profile parameters in the lookup table for 
+        # the inverse cumulative profile must span the range of the 
         # halo catalog. So re-compute this lookup table 
         # to insure that the necessary range is covered.
         prof_param_table_dict = {}
@@ -120,18 +117,23 @@ class HodMockFactory(object):
         # The entries of _mock_galprops will be used as column names in the 
         # data structure containing the mock galaxies
         self._mock_galprops = defaults.galprop_dict.keys()
-        self._mock_galprops.extend(self.model.supplemental_galprops)
+
+        # Currently the composite model is not set up to create this list
+        self._mock_galprops.extend(self.model.additional_galprops)
+
         # Throw away any possible repeated entries
         self._mock_galprops = list(set(self._mock_galprops))
 
-        # The entries of _mock_haloprops will be used as column names in the 
+        # The entries of self._mock_haloprops (which are strings) 
+        # will be used as column names in the 
         # data structure containing the mock galaxies, but prepended by 'halo_'.
         self._mock_haloprops = defaults.haloprop_list
-        self._mock_haloprops.extend(self.supplemental_haloprops)
+        self._mock_haloprops.extend(self.additional_haloprops)
         # Throw away any possible repeated entries
         self._mock_haloprops = list(set(self._mock_haloprops))
         # Prepend 'halo_' to the strings 
-        self._mock_haloprops = [host_haloprop_prefix + s for s in self._mock_haloprops]
+        prefix = defaults.host_haloprop_prefix
+        self._mock_haloprops = [prefix + s for s in self._mock_haloprops]
 
 
     def populate(self):
