@@ -148,9 +148,27 @@ class RadProfBias(object):
             self.input_spline_degree=input_spline_degree
             self.setup_spline()
 
-    def get_modified_prof_params(self,input_params,galaxies):
+    def get_modified_prof_params(self, *args, **kwargs):
 
-        return output_params
+        if occuhelp.aph_len(args) > 0:
+            if 'mock_galaxies' in kwargs.keys():
+                raise TypeError("TrivialCenProfile can be passed an array, "
+                    "or a mock, but not both")
+            #
+            input_halo_prof_params = args[0]
+            # do something 
+        elif 'mock_galaxies' in kwargs.keys():
+            input_halo_prof_params = kwargs['mock_galaxies']
+            # do something 
+        else:
+            raise SyntaxError("get_modified_prof_params was called with "
+                " incorrect inputs. Method accepts a positional input array "
+                "of input_halo_prof_params, or alternatively the same array "
+                "stored in kwargs['mock_galaxies']")
+        #output_halo_prof_params = input_halo_prof_params*self.radprof_modfunc(###something###)
+
+        return output_halo_prof_params
+
 
 
     def radprof_modfunc(self,profile_parameter_key,input_abcissa):
