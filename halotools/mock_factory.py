@@ -56,7 +56,7 @@ class HodMockFactory(object):
         # Create new columns for self.halos associated with each 
         # parameter of the halo profile, e.g., 'conc'. 
         # Use the halo profile model to compute every halo's value
-        # for each halo profile model parameter 
+        # of each halo profile model parameter 
         halo_prof_param_keys = []
         prim_haloprop = self.halos[self.prim_haloprop_key]
         halo_prof_dict = self.model.halo_prof_model.param_func_dict

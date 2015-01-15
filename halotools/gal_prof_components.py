@@ -28,7 +28,7 @@ class TrivialCenProfile(object):
 
     def mc_coords(self, *args,**kwargs):
 
-        too_many_args = (occuhelp.aph_len(args) > 0) & 'mock_galaxies' in kwargs.keys()
+        too_many_args = (occuhelp.aph_len(args) > 0) & ('mock_galaxies' in kwargs.keys())
         if too_many_args == True:
             raise TypeError("TrivialCenProfile can be passed an array, or a mock, but not both")
 
