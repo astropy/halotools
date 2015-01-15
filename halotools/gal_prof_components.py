@@ -140,46 +140,18 @@ class RadProfBias(object):
 
         self.set_parameter_dict()
 
-        # Loop over all profile parameters that are being modulated 
-        for profile_parameter, parameter_dict in self.parameter_dict.iteritems():
-            # Append the table_dictionary of each profile parameter 
-            # to self.parameter_dict 
-            new_dict_to_append = occuhelp.format_parameter_keys(parameter_dict,
-                correct_keys, self.gal_type, key_prefix=profile_parameter)
-            self.parameter_dict = dict(
-                self.parameter_dict.items() + 
-                new_dict_to_append.items() 
-                )
-            # The radprof_modfunc method needs to access the ordinates and abcissa
-            # This is accomplished by binding the key to an attribute of the model object
-            # This binding is done via a dictionary, where each key of the dictionary 
-            # corresponds to a profile parameter that is being modulated.
-            self.abcissa_key[profile_parameter] = (
-                profile_parameter+'_model_abcissa_'+self.gal_type )
-            self.ordinates_key[profile_parameter] = (
-                profile_parameter+'_model_ordinates_'+self.gal_type )
-
         # Set the interpolation scheme 
         if interpol_method not in ['spline', 'polynomial']:
             raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
         self.interpol_method = interpol_method
-
-        # If using spline interpolation, configure its settings 
         if self.interpol_method=='spline':
-            scipy_maxdegree = 5
-            self.spline_degree ={}
-            self.spline_function = {}
+            self.input_spline_degree=input_spline_degree
+            self.setup_spline()
 
-            for profile_parameter, profile_parameter_dict in input_parameter_dict.iteritems():
-                self.spline_degree[profile_parameter] = (
-                    np.min(
-                [scipy_maxdegree, input_spline_degree, 
-                aph_len(self.parameter_dict[self.abcissa_key[profile_parameter]])-1])
-                    )
-                self.spline_function[profile_parameter] = occuhelp.aph_spline(
-                    self.parameter_dict[self.abcissa_key[profile_parameter]],
-                    self.parameter_dict[self.ordinates_key[profile_parameter]],
-                    k=self.spline_degree[profile_parameter])
+    def get_modified_prof_params(self,input_params,galaxies):
+
+        return output_params
+
 
     def radprof_modfunc(self,profile_parameter_key,input_abcissa):
         """
@@ -224,34 +196,83 @@ class RadProfBias(object):
 
     def set_parameter_dict(self):
 
-        if defaults.testmode==True:
-            # The input parameters must also be params of the halo profile model
-            try:
-                assert set(self.input_parameter_dict).issubset(
-                    set(self.halo_prof_model.param_keys))
-            except:
-                raise KeyError("keys of input_parameter_dict must be a "
-                    "subset input halo_prof_model keys")
-            # For any parameter, the correct keys of its associate dictionary 
-            # are strings for the abcissa and ordinate arrays
-            # with a naming convention set in the defaults module
-            correct_keys = defaults.default_profile_dict.keys()
-            occuhelp.test_correct_keys(self.input_parameter_dict, correct_keys)
+        ### Verify that the initialization constructor was passed sensible inputs
+        # The input parameters must also be params of the halo profile model
+        try:
+            assert set(self.input_parameter_dict).issubset(
+                set(self.halo_prof_model.param_keys))
+        except:
+            raise KeyError("keys of input_parameter_dict must be a "
+                "subset input halo_prof_model keys")
+        # For any parameter, the correct keys of its associate dictionary 
+        # are strings for the abcissa and ordinate arrays
+        # with a naming convention set in the defaults module
+        correct_keys = defaults.default_profile_dict.keys()
+        occuhelp.test_correct_keys(self.input_parameter_dict, correct_keys)
+        # Now the keys of self.input_parameter_dict, and the keys of the 
+        # sub-dictionaries, have been verified to be sensible
+        ###
 
         if type(self.input_parameter_dict) is list:
+            # Only a list of strings was provided specifying the profile bias, 
+            # so choose the default abcissa and ordinates to define the model behavior
             default_value = defaults.default_profile_dict
             self.parameter_dict = (
                 [{key:default_value} for key in self.input_parameter_dict]
                 )
         elif type(self.input_parameter_dict) is dict:
+            # Here the abcissa and ordinates were passed to the constructor. 
             self.parameter_dict = self.input_parameter_dict
         else:
             raise TypeError("input_parameter_dict must be a dict or a list")
 
+        # Now use a dictionary comprehension to rename the keys 
+        # so that abcissa & ordinates pertaining to different 
+        # profile parameters have distinct keynames
+        for key, dict_of_key in self.input_parameter_dict.iteritems():
+            new_dict_of_key = ({key+'biasfunc_par'+str(ii)+'_'+self.gal_type}:val 
+                for ii, val in enumerate(dict_of_key['profile_ordinates'])
 
 
 
+        # Loop over all profile parameters that are being modulated 
+        for profile_parameter, parameter_dict in self.parameter_dict.iteritems():
+            # Append the table_dictionary of each profile parameter 
+            # to self.parameter_dict 
+#            new_dict_to_append = occuhelp.format_parameter_keys(parameter_dict,
+#                correct_keys, self.gal_type, key_prefix=profile_parameter)
+#            self.parameter_dict = dict(
+#                self.parameter_dict.items() + 
+#                new_dict_to_append.items() 
+#                )
+            # The radprof_modfunc method needs to access the ordinates and abcissa
+            # This is accomplished by binding the key to an attribute of the model object
+            # This binding is done via a dictionary, where each key of the dictionary 
+            # corresponds to a profile parameter that is being modulated.
+            self.abcissa_key[profile_parameter] = (
+                profile_parameter+'_model_abcissa_'+self.gal_type )
+            self.ordinates_key[profile_parameter] = (
+                profile_parameter+'_model_ordinates_'+self.gal_type )
 
+
+
+    def setup_spline(self):
+        # If using spline interpolation, configure its settings 
+        
+        scipy_maxdegree = 5
+        self.spline_degree ={}
+        self.spline_function = {}
+
+        for profile_parameter, profile_parameter_dict in self.input_parameter_dict.iteritems():
+            self.spline_degree[profile_parameter] = (
+                np.min(
+            [scipy_maxdegree, self.input_spline_degree, 
+            aph_len(self.parameter_dict[self.abcissa_key[profile_parameter]])-1])
+                )
+            self.spline_function[profile_parameter] = occuhelp.aph_spline(
+                self.parameter_dict[self.abcissa_key[profile_parameter]],
+                self.parameter_dict[self.ordinates_key[profile_parameter]],
+                k=self.spline_degree[profile_parameter])
 
 
 

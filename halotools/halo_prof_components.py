@@ -134,11 +134,10 @@ class HaloProfileModel(object):
         each dictionary key will correspond to the name of a new column for halo_table
         that will be created by the mock factory during the pre-processing of the halo catalog.
 
-        By strongly suggested convention, the dictionary keys giving the 
-        names of halo profile parameters should begin with 'halo_prof_model_'. 
+        All dictionary keys will be prepended with host_haloprop_prefix, set in `~halotools.defaults`. 
         This will make clear the interpretation of the new columns of the halo_table 
         created by the mock factories, and helps ensure that the no existing 
-        columns of a halo_table will be over-written. 
+        columns of a halo catalog will be over-written. 
 
         """
         raise NotImplementedError("All halo profile models must"
@@ -185,7 +184,7 @@ class NFWProfile(HaloProfileModel):
 
         self.model_nickname = 'NFW'
         self._conc_parname = self.get_param_key(self.model_nickname, 'conc')
-        param_keys = [self._conc_parname]
+        self.param_keys = [self._conc_parname]
 
         self.set_param_func_dict({self._conc_parname:self.conc_mass})
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
@@ -372,7 +371,7 @@ class NFWProfile(HaloProfileModel):
         ----------
         input_dict : dict 
             Each key corresponds to the name of a halo profile parameter, 
-            e.g., 'halo_prof_model_conc', which are set by the get_param_key 
+            e.g., 'halo_NFW_conc', which are set by the get_param_key 
             method if the super-class. The value attached to each key is a function object 
             providing the mapping between halos and the halo profile parameter, 
             such as a concentration-mass function. 
@@ -397,7 +396,7 @@ class NFWProfile(HaloProfileModel):
         ----------
         input_dict : dict, optional
             Each key corresponds to the name of a halo profile parameter, 
-            e.g., 'halo_prof_model_conc'. Each value is a 3-element tuple used 
+            e.g., 'halo_NFW_conc'. Each value is a 3-element tuple used 
             to govern how that parameter is gridded up by 
             `NFWProfile.build_inv_cumu_lookup_table`. 
             The entries of each tuple give the minimum parameter 
