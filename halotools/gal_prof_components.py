@@ -34,8 +34,7 @@ class TrivialCenProfile(object):
 
         # If we are running in testmode, require that all galaxies 
         # passed to mc_coords are actually the same type
-        runtest = ( (defaults.testmode_string in kwargs.keys()) & 
-            (kwargs[defaults.testmode_string]==True) & 
+        runtest = ( (defaults.testmode == True) & 
             ('mock_galaxies' in kwargs.keys()) )
         if runtest == True:
             assert np.all(mock_galaxies.gal_type == self.gal_type)
@@ -94,9 +93,8 @@ class RadProfBias(object):
     as well as (mass-dependent) quenching gradients. 
     """
 
-    def __init__(self, gal_type, 
-        input_parameter_dict={'conc':defaults.default_profile_dict}, 
-        interpol_method='spline',input_spline_degree=3):
+    def __init__(self, gal_type, halo_prof_model,
+        input_parameter_dict={}, interpol_method='spline',input_spline_degree=3):
         """ 
         Parameters 
         ----------
@@ -105,18 +103,24 @@ class RadProfBias(object):
             `~halotools.profile_factory` to access the behavior of the methods 
             of this class. 
 
+        halo_prof_model : object 
+            `~halotools.HaloProfileModel` class instance. The primary function of this class 
+            is to modulate the mean values of `~halotools.HaloProfileModel` as a function of 
+            halo properties. 
+
         input_parameter_dict : dictionary, optional 
             Dictionary specifying how each profile parameter should be modulated. 
-            Keys are names of the profile parameter, e.g., 'conc', or 'gamma'. 
-            Values are dictionaries of abcissa and ordinates. 
-            Thus parameter_dict is a dictionary of dictionaries. 
+            Keys are names of the profile parameter, and must be consistent 
+            with parameter names of input halo_prof_model. 
+            Values are dictionaries with entries for the abcissa and ordinates 
+            governing the modulation of the halo_prof_model parameters. 
+            Thus input_parameter_dict is a dictionary of dictionaries. 
 
         interpol_method : string, optional 
             Keyword specifying how `radprof_modfunc` 
             evaluates input values that differ from the small number of values 
             in self.parameter_dict. 
-            The default spline option interpolates the 
-            model's abcissa and ordinates. 
+            The default spline option interpolates the model's abcissa and ordinates. 
             The polynomial option uses the unique, degree N polynomial 
             passing through the ordinates, where N is the number of supplied ordinates. 
 
@@ -125,32 +129,22 @@ class RadProfBias(object):
             If there are k abcissa values specifying the model, input_spline_degree 
             is ensured to never exceed k-1, nor exceed 5. 
 
-        Notes 
-        -----
-        The initialization constructor will use input_parameter_dict to create a 
-        new dictionary, prepend/append to the  
-        input_parameter_dict keys to avoid potential key duplication 
-        when using this class as a component of a composite model. 
-
         """
 
         self.gal_type = gal_type
+        self.halo_prof_model = halo_prof_model
+        self.input_parameter_dict = input_parameter_dict
 
-        self.parameter_dict = {}
         self.abcissa_key = {}
         self.ordinates_key = {}
 
-        # The correct keys are strings for the abcissa and ordinate arrays
-        # with a naming convention set in the defaults module
-        correct_keys = defaults.default_profile_dict.keys()
+        self.set_parameter_dict()
 
         # Loop over all profile parameters that are being modulated 
-        for profile_parameter, profile_parameter_dict in input_parameter_dict.iteritems():
-            # Test that the dictionary associated with profile_parameter has the right keys
-            occuhelp.test_correct_keys(profile_parameter_dict, correct_keys)
+        for profile_parameter, parameter_dict in self.parameter_dict.iteritems():
             # Append the table_dictionary of each profile parameter 
             # to self.parameter_dict 
-            new_dict_to_append = occuhelp.format_parameter_keys(profile_parameter_dict,
+            new_dict_to_append = occuhelp.format_parameter_keys(parameter_dict,
                 correct_keys, self.gal_type, key_prefix=profile_parameter)
             self.parameter_dict = dict(
                 self.parameter_dict.items() + 
@@ -227,6 +221,36 @@ class RadProfBias(object):
             raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
 
         return output_profile_modulation
+
+    def set_parameter_dict(self):
+
+        if defaults.testmode==True:
+            # The input parameters must also be params of the halo profile model
+            try:
+                assert set(self.input_parameter_dict).issubset(
+                    set(self.halo_prof_model.param_keys))
+            except:
+                raise KeyError("keys of input_parameter_dict must be a "
+                    "subset input halo_prof_model keys")
+            # For any parameter, the correct keys of its associate dictionary 
+            # are strings for the abcissa and ordinate arrays
+            # with a naming convention set in the defaults module
+            correct_keys = defaults.default_profile_dict.keys()
+            occuhelp.test_correct_keys(self.input_parameter_dict, correct_keys)
+
+        if type(self.input_parameter_dict) is list:
+            default_value = defaults.default_profile_dict
+            self.parameter_dict = (
+                [{key:default_value} for key in self.input_parameter_dict]
+                )
+        elif type(self.input_parameter_dict) is dict:
+            self.parameter_dict = self.input_parameter_dict
+        else:
+            raise TypeError("input_parameter_dict must be a dict or a list")
+
+
+
+
 
 
 

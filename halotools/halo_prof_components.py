@@ -54,7 +54,7 @@ class HaloProfileModel(object):
     set_param_func_dict, respectively. 
     """
 
-    def __init__(self, cosmology, redshift, prim_haloprop_key='MVIR'):
+    def __init__(self, cosmology, redshift, param_keys,prim_haloprop_key='MVIR'):
         """
         Parameters 
         ----------
@@ -72,6 +72,7 @@ class HaloProfileModel(object):
         self.redshift = redshift
         self.cosmology = cosmology
         self.prim_haloprop_key = prim_haloprop_key
+        self.param_keys = list(param_keys)
 
         #littleh = self.cosmology.H0/100.0
         #crit_density = (self.cosmology.critical_density(0).to(u.Msun/u.Mpc**3)/littleh**2)
@@ -181,13 +182,11 @@ class NFWProfile(HaloProfileModel):
             and the unit-normalized cumulative mass profile function 
             :math:`\\rho_{NFW}(x | c)`. 
         """
-        # Call the init constructor of the super-class, 
-        # whose only purpose is to bind cosmology, redshift, and prim_haloprop_key
-        # to the NFWProfile instance. 
-        HaloProfileModel.__init__(self, cosmology, redshift, prim_haloprop_key)
 
         self.model_nickname = 'NFW'
         self._conc_parname = self.get_param_key(self.model_nickname, 'conc')
+        param_keys = [self._conc_parname]
+
         self.set_param_func_dict({self._conc_parname:self.conc_mass})
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
 
@@ -196,6 +195,11 @@ class NFWProfile(HaloProfileModel):
         if build_inv_cumu_table is True:
             self.build_inv_cumu_lookup_table(
                 prof_param_table_dict=self.prof_param_table_dict)
+
+        # Call the init constructor of the super-class, 
+        # whose only purpose is to bind cosmology, redshift, and prim_haloprop_key
+        # to the NFWProfile instance. 
+        HaloProfileModel.__init__(self, cosmology, redshift, prim_haloprop_key)
 
 
     def conc_mass(self, mass):
