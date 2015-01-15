@@ -126,14 +126,20 @@ class HodMockFactory(object):
 
         # The entries of self._mock_haloprops (which are strings) 
         # will be used as column names in the 
-        # data structure containing the mock galaxies, but prepended by 'halo_'.
-        self._mock_haloprops = defaults.haloprop_list
-        self._mock_haloprops.extend(self.additional_haloprops)
+        # data structure containing the mock galaxies, 
+        # but prepended by host_haloprop_prefix, set in halotools.defaults
+        _mock_haloprops = defaults.haloprop_list # store the strings in a temporary list
+        _mock_haloprops.extend(self.halos.halo_prof_param_keys)
+        _mock_haloprops.extend(self.additional_haloprops)
+        # Now we use a conditional list comprehension to ensure 
+        # that all entries begin with host_haloprop_prefix, 
+        # and also that host_haloprop_prefix is not needlessly duplicated
+        prefix = defaults.host_haloprop_prefix
+        self._mock_haloprops = (
+            [entry if entry[0:len(prefix)]==prefix else prefix+entry for entry in _mock_haloprops]
+            )
         # Throw away any possible repeated entries
         self._mock_haloprops = list(set(self._mock_haloprops))
-        # Prepend 'halo_' to the strings 
-        prefix = defaults.host_haloprop_prefix
-        self._mock_haloprops = [prefix + s for s in self._mock_haloprops]
 
 
     def populate(self):

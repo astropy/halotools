@@ -46,6 +46,12 @@ class HaloProfileModel(object):
     For development purposes, object is temporarily hard-coded to only use z=0 Bryan & Norman 
     virial mass definition for standard LCDM cosmological parameter values.
 
+    The first characters of any string used as a key 
+    for a halo profile parameter must be host_haloprop_prefix, set in `~halotools.defaults`, 
+    or else the resulting class will not correctly interface with the mock factory. 
+    The two dictionaries using these keys are 
+    prof_param_table_dict and param_func_dict, which are set by set_prof_param_table_dict and 
+    set_param_func_dict, respectively. 
     """
 
     def __init__(self, cosmology, redshift, prim_haloprop_key='MVIR'):
@@ -118,6 +124,8 @@ class HaloProfileModel(object):
         HaloProfileModel instance. The purpose of this dictionary 
         is to provide a standardized way that composite models can access 
         the halo-parameter mappings, regardless of what the user names the methods. 
+        So even though this method has rather trivial functionality, it is required 
+        to help ensure standardized behavior of future subclass extensions.  
         The key(s) of the dictionary created by this method gives the name(s) of the 
         halo profile parameter(s) of the model; the value(s) of the dictionary are 
         function object(s) providing the mapping between halos and profile parameter(s).  
@@ -135,6 +143,10 @@ class HaloProfileModel(object):
         raise NotImplementedError("All halo profile models must"
             " provide a dictionary with keys giving the names of the halo profile parameters, "
             " and values being the functions used to map parameter values onto halos")
+
+    def get_param_key(self, model_nickname, param_nickname):
+        param_key = defaults.host_haloprop_prefix+model_nickname+'_'+param_nickname
+        return param_key
 
 
 class NFWProfile(HaloProfileModel):
@@ -174,8 +186,9 @@ class NFWProfile(HaloProfileModel):
         # to the NFWProfile instance. 
         HaloProfileModel.__init__(self, cosmology, redshift, prim_haloprop_key)
 
-
-        self.set_param_func_dict({'halo_prof_model_conc':self.conc_mass})
+        self.model_nickname = 'NFW'
+        self._conc_parname = self.get_param_key(self.model_nickname, 'conc')
+        self.set_param_func_dict({self._conc_parname:self.conc_mass})
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
 
         self.publication = ['arXiv:9611107','arXiv:1402.7073']
@@ -183,6 +196,7 @@ class NFWProfile(HaloProfileModel):
         if build_inv_cumu_table is True:
             self.build_inv_cumu_lookup_table(
                 prof_param_table_dict=self.prof_param_table_dict)
+
 
     def conc_mass(self, mass):
         """ Power-law fit to the concentration-mass relation from 
@@ -321,7 +335,7 @@ class NFWProfile(HaloProfileModel):
         #This will be used to assign halo-centric distances to the satellites
         self.set_prof_param_table_dict(prof_param_table_dict)
 
-        cmin, cmax, dconc = self.prof_param_table_dict['halo_prof_model_conc']
+        cmin, cmax, dconc = self.prof_param_table_dict[self._conc_parname]
 
         Npts_radius = defaults.default_Npts_radius_array  
         minrad = defaults.default_min_rad 
@@ -354,7 +368,8 @@ class NFWProfile(HaloProfileModel):
         ----------
         input_dict : dict 
             Each key corresponds to the name of a halo profile parameter, 
-            e.g., 'halo_prof_model_conc'. Each value is a function object 
+            e.g., 'halo_prof_model_conc', which are set by the get_param_key 
+            method if the super-class. The value attached to each key is a function object 
             providing the mapping between halos and the halo profile parameter, 
             such as a concentration-mass function. 
 
@@ -398,18 +413,19 @@ class NFWProfile(HaloProfileModel):
             cmax = defaults.max_permitted_conc
             dconc = defaults.default_dconc
             self.prof_param_table_dict = (
-                {'halo_prof_model_conc':(cmin, cmax, dconc)}
+                {self._conc_parname:(cmin, cmax, dconc)}
                 )
         else:
-            # Run some consistencty checks on  
+            # Run some consistency checks on  
             # input_dict before binding it to the model instance
-            if set(input_dict.keys()) != {'halo_prof_model_conc'}:
-                raise KeyError("The only prof_param_table_dict key of "
-                    " the NFWProfile model is 'halo_prof_model_conc'")
-            if not isinstance(input_dict['halo_prof_model_conc'], tuple):
-                raise TypeError("Value of prof_param_table_dict['halo_prof_model_conc'] must be a tuple instance")
-            if len(input_dict['halo_prof_model_conc']) != 3:
-                raise TypeError("Tuple value of prof_param_table_dict must have exactly 3 elements")
+            if set(input_dict.keys()) != {self._self._conc_parname}:
+                raise KeyError("The only permitted key of prof_param_table_dict "
+                    " in the NFWProfile model is %s" % self._self._conc_parname)
+            if not isinstance(input_dict[self._self._conc_parname], tuple):
+                raise TypeError("Values of prof_param_table_dict must be a tuple")
+            if len(input_dict[self._self._conc_parname]) != 3:
+                raise TypeError("Tuple value of prof_param_table_dict " 
+                    "must have exactly 3 elements")
             self.prof_param_table_dict = input_dict
 
 
