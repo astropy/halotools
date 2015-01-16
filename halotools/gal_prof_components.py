@@ -93,8 +93,9 @@ class RadProfBias(object):
     as well as (mass-dependent) quenching gradients. 
     """
 
-    def __init__(self, gal_type, halo_prof_model,
-        input_parameter_dict={}, interpol_method='spline',input_spline_degree=3):
+    def __init__(self, gal_type, halo_prof_model, 
+        input_prof_params=[], input_abcissa_dict={}, input_ordinates_dict={}, 
+        interpol_method='spline',input_spline_degree=3):
         """ 
         Parameters 
         ----------
@@ -108,13 +109,25 @@ class RadProfBias(object):
             is to modulate the mean values of `~halotools.HaloProfileModel` as a function of 
             halo properties. 
 
-        input_parameter_dict : dictionary, optional 
-            Dictionary specifying how each profile parameter should be modulated. 
-            Keys are names of the profile parameter, and must be consistent 
-            with parameter names of input halo_prof_model. 
-            Values are dictionaries with entries for the abcissa and ordinates 
-            governing the modulation of the halo_prof_model parameters. 
-            Thus input_parameter_dict is a dictionary of dictionaries. 
+        input_prof_params : array_like, optional
+            string array specifying the halo profile parameters to be modulated. If passed, 
+            input_abcissa_dict and input_ordinates_dict should not be passed, and 
+            the abcissa and ordinates defining the modulation of the halo profile parameters 
+            will be set according to the default_profile_dict dict in `~halotools.defaults`
+
+        input_abcissa_dict : dictionary, optional 
+            Dictionary whose keys are halo profile parameters and values 
+            are the abcissa used to define the profile parameter modulating function. 
+            Default values are set according to default_profile_dict in `~halotools.defaults`
+            If passed, input_ordinates_dict must also be passed, 
+            and the input_prof_params list may not.
+
+        input_ordinates_dict : dictionary, optional 
+            Dictionary whose keys are halo profile parameters and values 
+            are the ordinates used to define the profile parameter modulating function. 
+            Default values are set according to default_profile_dict in `~halotools.defaults`
+            If passed, input_abcissa_dict must also be passed, 
+            and the input_prof_params list may not.
 
         interpol_method : string, optional 
             Keyword specifying how `radprof_modfunc` 
@@ -133,12 +146,16 @@ class RadProfBias(object):
 
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
-        self.input_parameter_dict = input_parameter_dict
 
-        self.abcissa_key = {}
-        self.ordinates_key = {}
 
-        self.set_parameter_dict()
+        self.set_parameter_dict(input_abcissa_dict,input_ordinates_dict)
+
+        #self.input_abcissa_dict = input_abcissa_dict
+        #self.input_ordinates_dict = input_ordinates_dict
+
+        #self.abcissa_key = {}
+        #self.ordinates_key = {}
+
 
         # Set the interpolation scheme 
         if interpol_method not in ['spline', 'polynomial']:
@@ -253,8 +270,9 @@ class RadProfBias(object):
         its values at the model abcissa, as specified in parameter_dict. 
         """
 
-        model_abcissa = self.parameter_dict[self.abcissa_key[profile_parameter_key]]
-        model_ordinates = self.parameter_dict[self.ordinates_key[profile_parameter_key]]
+        model_abcissa, model_ordinates = (
+            self.retrieve_model_abcissa_ordinates(profile_parameter_key)
+            )
 
         if self.interpol_method=='polynomial':
             output_profile_modulation = occuhelp.polynomial_from_table(
@@ -310,16 +328,23 @@ class RadProfBias(object):
  
         return abcissa, ordinates
 
-    def set_parameter_dict(self):
+    def set_parameter_dict(self, input_abcissa_dict, input_ordinates_dict):
 
         ### Verify that the initialization constructor was passed sensible inputs
-        # The input parameters must also be params of the halo profile model
         try:
-            assert set(self.input_parameter_dict).issubset(
+            assert set(input_abcissa_dict).issubset(
                 set(self.halo_prof_model.param_keys))
         except:
-            raise KeyError("keys of input_parameter_dict must be a "
+            raise KeyError("keys of input_abcissa_dict must be a "
                 "subset input halo_prof_model keys")
+
+        try:
+            assert set(input_ordinates_dict).issubset(
+                set(self.halo_prof_model.param_keys))
+        except:
+            raise KeyError("keys of input_ordinates_dict must be a "
+                "subset input halo_prof_model keys")
+
         # For any parameter, the correct keys of its associate dictionary 
         # are strings for the abcissa and ordinate arrays
         # with a naming convention set in the defaults module
