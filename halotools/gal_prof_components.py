@@ -286,6 +286,16 @@ class RadProfBias(object):
 
         """
 
+        abcissa = self.abcissa_dict[profile_parameter_key]
+
+        # The initial ordinates can be accessed in the same way as the initial abcissa 
+        # However, the ordinates may have changed from their initial values, 
+        # for example by an MCMC walkers. So we must access the up-to-date ordinate values 
+        # through self.parameter_dict, which is how the outside world modifies the 
+        # model parameters. The keys to this dictionary are strings such as 
+        # 'halo_NFW_conc_pari_gal_type', whose value is ordinates[i]. However, 
+        # dictionaries have no intrinsic ordering, so in order to 
+        # construct our ordinates list, we have to jump through a few hoops. 
         relevant_sub_dict = {}
         for key, value in self.parameter_dict.iteritems():
             if key[0:len(profile_parameter_key)]==profile_parameter_key:
@@ -296,8 +306,6 @@ class RadProfBias(object):
             key_ipar = profile_parameter_key+'_biasfunc_par'+str(ipar+1)+self.gal_type
             value_ipar = relevant_sub_dict[key_ipar]
             ordinates.extend([value_ipar])
-
-        
 
  
         return abcissa, ordinates
