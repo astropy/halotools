@@ -267,6 +267,41 @@ class RadProfBias(object):
 
         return output_profile_modulation
 
+    def retrieve_model_abcissa_ordinates(self, profile_parameter_key):
+        """ Method to pack the values of the model parameters 
+        into a list used by radprof_modfunc. 
+
+        Parameters 
+        ----------
+        profile_parameter_key : string 
+            Specifies the halo profile parameter to be modulated by the model.
+
+        Returns 
+        -------
+        abcissa : array_like 
+            Array at which the values of the modulating function are anchored. 
+
+        ordinates : array_like
+            Array of values of the modulating function when evaulated at the abcissa. 
+
+        """
+
+        relevant_sub_dict = {}
+        for key, value in self.parameter_dict.iteritems():
+            if key[0:len(profile_parameter_key)]==profile_parameter_key:
+                relevant_sub_dict[key] = value
+
+        ordinates = []
+        for ipar in range(len(relevant_sub_dict)):
+            key_ipar = profile_parameter_key+'_biasfunc_par'+str(ipar+1)+self.gal_type
+            value_ipar = relevant_sub_dict[key_ipar]
+            ordinates.extend([value_ipar])
+
+        
+
+ 
+        return abcissa, ordinates
+
     def set_parameter_dict(self):
 
         ### Verify that the initialization constructor was passed sensible inputs
@@ -303,7 +338,7 @@ class RadProfBias(object):
         # so that abcissa & ordinates pertaining to different 
         # profile parameters have distinct keynames
         for key, dict_of_key in self.input_parameter_dict.iteritems():
-            new_dict_of_key = ({key+'biasfunc_par'+str(ii)+'_'+self.gal_type:val 
+            new_dict_of_key = ({key+'_biasfunc_par'+str(ii)+'_'+self.gal_type:val 
                 for ii, val in enumerate(dict_of_key['profile_ordinates'])}
                 )
 
