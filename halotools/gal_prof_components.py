@@ -148,7 +148,7 @@ class RadProfBias(object):
         self.halo_prof_model = halo_prof_model
 
 
-        self.set_parameter_dict(input_abcissa_dict,input_ordinates_dict)
+        self.set_parameter_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
 
         #self.input_abcissa_dict = input_abcissa_dict
         #self.input_ordinates_dict = input_ordinates_dict
@@ -328,22 +328,55 @@ class RadProfBias(object):
  
         return abcissa, ordinates
 
-    def set_parameter_dict(self, input_abcissa_dict, input_ordinates_dict):
 
-        ### Verify that the initialization constructor was passed sensible inputs
-        try:
-            assert set(input_abcissa_dict).issubset(
-                set(self.halo_prof_model.param_keys))
-        except:
-            raise KeyError("keys of input_abcissa_dict must be a "
-                "subset input halo_prof_model keys")
+    def test_sensible_inputs(self, input_prof_params, input_abcissa_dict, input_ordinates_dict):
 
-        try:
-            assert set(input_ordinates_dict).issubset(
-                set(self.halo_prof_model.param_keys))
-        except:
-            raise KeyError("keys of input_ordinates_dict must be a "
-                "subset input halo_prof_model keys")
+        if input_prof_params is not []:
+            try:
+                assert input_abcissa_dict is {}
+            except:
+                raise SyntaxError("If passing input_prof_params to the constructor,"
+                    " do not pass input_abcissa_dict")
+            try:
+                assert input_ordinates_dict is {}
+            except:
+                raise SyntaxError("If passing input_prof_params to the constructor,"
+                    " do not pass input_ordinates_dict")
+            try:
+                assert set(input_prof_params).issubset(
+                    set(self.halo_prof_model.param_keys))
+            except:
+                raise SyntaxError("Entries of input_prof_params must be keys of halo_prof_model")
+        else:
+            try:
+                assert input_abcissa_dict is not {}
+            except:
+                raise SyntaxError("If not passing input_prof_params to the constructor,"
+                    "must pass input_abcissa_dict")
+            try:
+                assert input_ordinates_dict is not {}
+            except:
+                raise SyntaxError("If not passing input_ordinates_dict to the constructor,"
+                    "must pass input_abcissa_dict")
+
+    def set_parameter_dict(self, input_prof_params, input_abcissa_dict, input_ordinates_dict):
+        """
+        """
+
+        self.test_sensible_inputs(input_prof_params, input_abcissa_dict, input_ordinates_dict)
+
+        self.input_abcissa_dict={}
+        self.input_ordinates_dict={}
+
+        if input_prof_params is not []:
+            for prof_param_key in input_prof_params:
+                self.input_abcissa_dict[prof_param_key] = defaults.default_profile_dict['profile_abcissa']
+                self.input_ordinates_dict[prof_param_key] = defaults.default_profile_dict['profile_ordinates']
+        else:
+            self.input_abcissa_dict[prof_param_key] = input_abcissa_dict
+            self.input_ordinates_dict[prof_param_key] = input_ordinates_dict
+
+        self.parameter_dict = 
 
         # For any parameter, the correct keys of its associate dictionary 
         # are strings for the abcissa and ordinate arrays
