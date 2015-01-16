@@ -146,29 +146,84 @@ class RadProfBias(object):
         self.interpol_method = interpol_method
         if self.interpol_method=='spline':
             self.input_spline_degree=input_spline_degree
-            self.setup_spline()
+            self._setup_spline()
 
-    def get_modified_prof_params(self, *args, **kwargs):
+    def get_modulated_prof_params(prof_param_keys, *args, **kwargs):
+        """ 
 
+        Parameters 
+        ----------
+        prof_param_keys : array_like
+
+        input_params : array_like, optional positional argument
+
+        mock_galaxies : object, optional keyword argument 
+
+        Returns 
+        ------- 
+        output_param_dict : dict
+
+        """
+
+        input_param_dict = self.retrieve_input_prof_params(
+            prof_param_keys, args, kwargs)
+
+        output_param_dict = {}
+        for prof_param_key in prof_param_keys:
+            multiplicative_modulation = (
+                self.radprof_modfunc(
+                    prof_param_key, input_param_dict[prof_param_key])
+                )
+            output_param_dict[prof_param_key] = (
+                multiplicative_modulation*input_param_dict[prof_param_key]
+                )
+
+        return output_param_dict
+
+
+    def retrieve_input_prof_params(self, prof_param_keys, *args, **kwargs):
+        """ Method to create a dictionary containing arrays of 
+        input halo profile parameters that are to be modulated. 
+        The keys of the output dictionary provide instructions to 
+        the rest of the class about which model parameters to use 
+        to modulate the input arrays. 
+
+        Parameters 
+        ----------
+        prof_param_keys : array_like
+
+        input_params : array_like, optional positional argument
+
+        mock_galaxies : object, optional keyword argument 
+
+        Returns 
+        ------- 
+        input_param_dict : dict
+
+        """
+
+        ###
+        prof_param_keys = list(prof_param_keys)
+        # First retrieve the profile parameters of the halos 
         if occuhelp.aph_len(args) > 0:
+            # We were passed an array of profile parameters, 
+            # so we should not have also been passed a galaxy sample
             if 'mock_galaxies' in kwargs.keys():
-                raise TypeError("TrivialCenProfile can be passed an array, "
+                raise TypeError("RadProfBias can be passed an array, "
                     "or a mock, but not both")
-            #
-            input_halo_prof_params = args[0]
-            # do something 
-        elif 'mock_galaxies' in kwargs.keys():
-            input_halo_prof_params = kwargs['mock_galaxies']
-            # do something 
+            input_param_dict = {prof_param_keys[ii]:value for ii, value in enumerate(args)}
+        elif (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()):
+            # We were passed a collection of galaxies
+            mock_galaxies = kwargs['mock_galaxies']
+            input_param_dict = {key:getattr(mock_galaxies, key) for key in prof_param_keys}
         else:
             raise SyntaxError("get_modified_prof_params was called with "
-                " incorrect inputs. Method accepts a positional input array "
-                "of input_halo_prof_params, or alternatively the same array "
-                "stored in kwargs['mock_galaxies']")
-        #output_halo_prof_params = input_halo_prof_params*self.radprof_modfunc(###something###)
+                " incorrect inputs. Method accepts a positional argument that is an array "
+                "storing the initial profile parameters to be modulated, "
+                "or alternatively a mock galaxy object with the same array"
+                " stored in the mock_galaxies.prof_param_keys attribute")
 
-        return output_halo_prof_params
-
+        return input_param_dict
 
 
     def radprof_modfunc(self,profile_parameter_key,input_abcissa):
@@ -248,8 +303,9 @@ class RadProfBias(object):
         # so that abcissa & ordinates pertaining to different 
         # profile parameters have distinct keynames
         for key, dict_of_key in self.input_parameter_dict.iteritems():
-            new_dict_of_key = ({key+'biasfunc_par'+str(ii)+'_'+self.gal_type}:val 
-                for ii, val in enumerate(dict_of_key['profile_ordinates'])
+            new_dict_of_key = ({key+'biasfunc_par'+str(ii)+'_'+self.gal_type:val 
+                for ii, val in enumerate(dict_of_key['profile_ordinates'])}
+                )
 
 
 
@@ -274,7 +330,7 @@ class RadProfBias(object):
 
 
 
-    def setup_spline(self):
+    def _setup_spline(self):
         # If using spline interpolation, configure its settings 
         
         scipy_maxdegree = 5
