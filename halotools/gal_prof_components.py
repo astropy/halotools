@@ -380,6 +380,9 @@ class RadProfBias(object):
         for prof_param_key, ordinates in self.input_ordinates_dict:
             for ii, val in enumerate(ordinates):
                 parameter_dict_key = prof_param_key+'_biasfunc_par'+str(ii+1)+self.gal_type
+                self.parameter_dict[parameter_dict_key] = val
+
+                #### THIS SHOULD BE IT!!!
 
 
         self.parameter_dict = {profile_parameter_key+'_biasfunc_par'+str(ipar+1)+self.gal_type}
