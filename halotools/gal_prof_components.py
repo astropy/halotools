@@ -376,7 +376,13 @@ class RadProfBias(object):
             self.input_abcissa_dict[prof_param_key] = input_abcissa_dict
             self.input_ordinates_dict[prof_param_key] = input_ordinates_dict
 
-        self.parameter_dict = 
+        self.parameter_dict={}
+        for prof_param_key, ordinates in self.input_ordinates_dict:
+            for ii, val in enumerate(ordinates):
+                parameter_dict_key = prof_param_key+'_biasfunc_par'+str(ii+1)+self.gal_type
+
+
+        self.parameter_dict = {profile_parameter_key+'_biasfunc_par'+str(ipar+1)+self.gal_type}
 
         # For any parameter, the correct keys of its associate dictionary 
         # are strings for the abcissa and ordinate arrays
