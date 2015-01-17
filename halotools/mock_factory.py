@@ -54,9 +54,7 @@ class HodMockFactory(object):
             self.sec_haloprop_key = self.model.sec_haloprop_key
 
         # Create new columns for self.halos associated with each 
-        # parameter of the halo profile, e.g., 'conc'. 
-        # Use the halo profile model to compute every halo's value
-        # of each halo profile model parameter 
+        # parameter of the halo profile model, e.g., 'conc'. 
         halo_prof_param_keys = []
         prim_haloprop = self.halos[self.prim_haloprop_key]
         halo_prof_dict = self.model.halo_prof_model.param_func_dict
@@ -67,20 +65,27 @@ class HodMockFactory(object):
         # halo profile parameter model keys
         setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
 
-        # The range of profile parameters in the lookup table for 
-        # the inverse cumulative profile must span the range of the 
-        # halo catalog. So re-compute this lookup table 
+        self.build_profile_lookup_tables()
+
+
+    def build_profile_lookup_tables(self, prof_param_table_dict={}):
+
+        # The range of profile parameters in the 
+        # inverse cumulative profile lookup table  
+        # must span the range of the halo catalog. 
+        # So re-compute this lookup table 
         # to insure that the necessary range is covered.
-        prof_param_table_dict = {}
-        for key in self.halos.halo_prof_param_keys:
-            dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
-            halocat_parmin = self.halos[key].min() - dpar
-            model_parmin = self.model.halo_prof_model.prof_param_table_dict[key][0]
-            parmin = np.min(halocat_parmin,model_parmin)
-            halocat_parmax = self.halos[key].max() + dpar
-            model_parmax = self.model.halo_prof_model.prof_param_table_dict[key][1]
-            parmax = np.max(halocat_parmax,model_parmax)
-            prof_param_table_dict[key] = (parmin, parmax, dpar)
+
+        if prof_param_table_dict != {}:
+            for key in self.halos.halo_prof_param_keys:
+                dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
+                halocat_parmin = self.halos[key].min() - dpar
+                model_parmin = self.model.halo_prof_model.prof_param_table_dict[key][0]
+                parmin = np.min(halocat_parmin,model_parmin)
+                halocat_parmax = self.halos[key].max() + dpar
+                model_parmax = self.model.halo_prof_model.prof_param_table_dict[key][1]
+                parmax = np.max(halocat_parmax,model_parmax)
+                prof_param_table_dict[key] = (parmin, parmax, dpar)
 
         self.model.halo_prof_model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)
