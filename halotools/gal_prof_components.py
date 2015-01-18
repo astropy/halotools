@@ -87,10 +87,11 @@ class RadProfBias(object):
     a scalar multiple of the profile parameters of their host halo. 
 
     Traditionally applied to the NFW case, where the only profile parameter is 
-    halo concentration, and the scalar multiple is mass-independent. This 
-    traditional model is a special case of this class, 
-    which encompasses halo-dependent spatial bias, non-NFW profiles, 
-    as well as (mass-dependent) quenching gradients. 
+    halo concentration, and the scalar multiple is mass-independent, so that 
+    :math:`c_{\\mathrm{gal}} = F*c_{\\mathrm{halo}}`. 
+    That traditional model is a special case of this class, 
+    which encompasses halo-dependence to the multiplicatively biased parameters, 
+    as well as support for any profile model with any number of parameters. 
     """
 
     def __init__(self, gal_type, halo_prof_model, 
@@ -100,18 +101,16 @@ class RadProfBias(object):
         Parameters 
         ----------
         gal_type : string, optional
-            Sets the key value used by `halotools.hod_designer` and 
-            `~halotools.profile_factory` to access the behavior of the methods 
-            of this class. 
+            Used to set the key value of the galaxy population being modeled.  
 
         halo_prof_model : object 
-            `~halotools.HaloProfileModel` class instance. The primary function of this class 
-            is to modulate the mean values of `~halotools.HaloProfileModel` as a function of 
-            halo properties. 
+            `~halotools.HaloProfileModel` class instance. Determines the 
+            underlying dark matter halo profile to which gal_type galaxies respond.
 
         input_prof_params : array_like, optional
-            string array specifying the halo profile parameters to be modulated. If passed, 
-            input_abcissa_dict and input_ordinates_dict should not be passed, and 
+            String array specifying the halo profile parameters to be modulated. 
+            Values of this array must equal one of halo_prof_model.param_keys. 
+            If passed, input_abcissa_dict and input_ordinates_dict should not be passed, and 
             the abcissa and ordinates defining the modulation of the halo profile parameters 
             will be set according to the default_profile_dict dict in `~halotools.defaults`
 
@@ -130,17 +129,18 @@ class RadProfBias(object):
             and the input_prof_params list may not.
 
         interpol_method : string, optional 
-            Keyword specifying how `radprof_modfunc` 
-            evaluates input values that differ from the small number of values 
-            in self.parameter_dict. 
-            The default spline option interpolates the model's abcissa and ordinates. 
-            The polynomial option uses the unique, degree N polynomial 
-            passing through the ordinates, where N is the number of supplied ordinates. 
+            Keyword specifying the method used to define the continuous function  
+            `radprof_modfunc` while only specifying its values at a finite 
+            number of points. The default spline option interpolates 
+            the model's abcissa and ordinates. The polynomial option uses the unique, 
+            degree N polynomial passing through (abcissa, ordinates), 
+            where N = len(abcissa) = len(ordinates). 
 
         input_spline_degree : int, optional
             Degree of the spline interpolation for the case of interpol_method='spline'. 
             If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
+            is ensured to never exceed k-1, 
+            nor exceed the maximum value of 5 supported by scipy. 
 
         """
 
@@ -153,7 +153,10 @@ class RadProfBias(object):
 
 
     def get_modulated_prof_params(prof_param_keys, *args, **kwargs):
-        """ 
+        """ Primary function of this class. Used to assign new values of 
+        halo profile parameters to gal_type galaxies that differ from the 
+        profile parameters of the galaxies' underlying halo 
+        by a (possibly halo-dependent) multiplicative factor. 
 
         Parameters 
         ----------

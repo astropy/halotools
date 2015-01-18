@@ -184,7 +184,11 @@ class NFWProfile(HaloProfileModel):
 
         self.model_nickname = 'NFW'
         self._conc_parname = self.get_param_key(self.model_nickname, 'conc')
-        self.param_keys = [self._conc_parname]
+        # Call the init constructor of the super-class, 
+        # whose only purpose is to bind cosmology, redshift, and prim_haloprop_key
+        # to the NFWProfile instance. 
+        HaloProfileModel.__init__(self, 
+            cosmology, redshift, [self._conc_parname], prim_haloprop_key)
 
         self.set_param_func_dict({self._conc_parname:self.conc_mass})
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
@@ -194,11 +198,6 @@ class NFWProfile(HaloProfileModel):
         if build_inv_cumu_table is True:
             self.build_inv_cumu_lookup_table(
                 prof_param_table_dict=self.prof_param_table_dict)
-
-        # Call the init constructor of the super-class, 
-        # whose only purpose is to bind cosmology, redshift, and prim_haloprop_key
-        # to the NFWProfile instance. 
-        HaloProfileModel.__init__(self, cosmology, redshift, prim_haloprop_key)
 
 
     def conc_mass(self, mass):
