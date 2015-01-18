@@ -384,7 +384,11 @@ class RadProfBias(object):
 
         self.param_keys = self.abcissa_dict.keys()
 
-    def _test_sensible_inputs(self, input_prof_params, input_abcissa_dict, input_ordinates_dict):
+    def _test_sensible_inputs(self, 
+        input_prof_params, input_abcissa_dict, input_ordinates_dict):
+        """ Private method to verify that `set_parameter_dict` was passed 
+        a reasonable set of inputs. 
+        """
 
         if input_prof_params != []:
             try:
@@ -415,6 +419,9 @@ class RadProfBias(object):
                     "must pass input_abcissa_dict")
 
     def _setup_interpol(self, interpol_method, input_spline_degree):
+        """ Private method used to configure the behavior of `radprof_modfunc`. 
+        """
+
         if interpol_method not in ['spline', 'polynomial']:
             raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
         self.interpol_method = interpol_method
@@ -442,6 +449,10 @@ class RadProfBias(object):
             _setup_spline(self)
 
     def _get_parameter_key(self, profile_parameter_key, ipar):
+        """ Private method used to retrieve the key of self.parameter_dict 
+        that corresponds to the appropriately selected i^th ordinate defining 
+        `radprof_modfunc`. 
+        """
         return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
 
 
