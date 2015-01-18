@@ -420,12 +420,12 @@ class NFWProfile(HaloProfileModel):
         else:
             # Run some consistency checks on  
             # input_dict before binding it to the model instance
-            if set(input_dict.keys()) != {self._self._conc_parname}:
+            if set(input_dict.keys()) != {self._conc_parname}:
                 raise KeyError("The only permitted key of prof_param_table_dict "
-                    " in the NFWProfile model is %s" % self._self._conc_parname)
-            if not isinstance(input_dict[self._self._conc_parname], tuple):
+                    " in the NFWProfile model is %s" % self._conc_parname)
+            if not isinstance(input_dict[self._conc_parname], tuple):
                 raise TypeError("Values of prof_param_table_dict must be a tuple")
-            if len(input_dict[self._self._conc_parname]) != 3:
+            if len(input_dict[self._conc_parname]) != 3:
                 raise TypeError("Tuple value of prof_param_table_dict " 
                     "must have exactly 3 elements")
             self.prof_param_table_dict = input_dict

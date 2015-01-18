@@ -324,33 +324,35 @@ class RadProfBias(object):
 
         self._test_sensible_inputs(input_prof_params, input_abcissa_dict, input_ordinates_dict)
 
-        self.input_abcissa_dict={}
-        self.input_ordinates_dict={}
+        self.abcissa_dict={}
+        self.ordinates_dict={}
 
         if input_prof_params is not []:
             for prof_param_key in input_prof_params:
-                self.input_abcissa_dict[prof_param_key] = defaults.default_profile_dict['profile_abcissa']
-                self.input_ordinates_dict[prof_param_key] = defaults.default_profile_dict['profile_ordinates']
+                self.abcissa_dict[prof_param_key] = defaults.default_profile_dict['profile_abcissa']
+                self.ordinates_dict[prof_param_key] = defaults.default_profile_dict['profile_ordinates']
         else:
-            self.input_abcissa_dict[prof_param_key] = input_abcissa_dict
-            self.input_ordinates_dict[prof_param_key] = input_ordinates_dict
+            self.abcissa_dict = input_abcissa_dict
+            self.ordinates_dict = input_ordinates_dict
 
         self.parameter_dict={}
-        for prof_param_key, ordinates in self.input_ordinates_dict:
+        for prof_param_key, ordinates in self.ordinates_dict.iteritems():
             for ii, val in enumerate(ordinates):
                 key = self._get_parameter_key(prof_param_key, ii)
                 self.parameter_dict[key] = val
 
+        self.param_keys = self.abcissa_dict.keys()
+
     def _test_sensible_inputs(self, input_prof_params, input_abcissa_dict, input_ordinates_dict):
 
-        if input_prof_params is not []:
+        if input_prof_params != []:
             try:
-                assert input_abcissa_dict is {}
+                assert input_abcissa_dict == {}
             except:
                 raise SyntaxError("If passing input_prof_params to the constructor,"
                     " do not pass input_abcissa_dict")
             try:
-                assert input_ordinates_dict is {}
+                assert input_ordinates_dict == {}
             except:
                 raise SyntaxError("If passing input_prof_params to the constructor,"
                     " do not pass input_ordinates_dict")
@@ -361,12 +363,12 @@ class RadProfBias(object):
                 raise SyntaxError("Entries of input_prof_params must be keys of halo_prof_model")
         else:
             try:
-                assert input_abcissa_dict is not {}
+                assert input_abcissa_dict != {}
             except:
                 raise SyntaxError("If not passing input_prof_params to the constructor,"
                     "must pass input_abcissa_dict")
             try:
-                assert input_ordinates_dict is not {}
+                assert input_ordinates_dict != {}
             except:
                 raise SyntaxError("If not passing input_ordinates_dict to the constructor,"
                     "must pass input_abcissa_dict")
@@ -383,20 +385,20 @@ class RadProfBias(object):
             self.spline_degree ={}
             self.spline_function = {}
 
-            for profile_parameter, profile_parameter_dict in self.input_parameter_dict.iteritems():
-                self.spline_degree[profile_parameter] = (
+            for prof_param_key in self.abcissa_dict.keys():
+                self.spline_degree[prof_param_key] = (
                     np.min(
                 [scipy_maxdegree, self.input_spline_degree, 
-                aph_len(self.parameter_dict[self.abcissa_key[profile_parameter]])-1])
+                aph_len(self.abcissa_dict[prof_param_key])-1])
                     )
-                self.spline_function[profile_parameter] = occuhelp.aph_spline(
-                    self.parameter_dict[self.abcissa_key[profile_parameter]],
-                    self.parameter_dict[self.ordinates_key[profile_parameter]],
-                    k=self.spline_degree[profile_parameter])
+                self.spline_function[prof_param_key] = occuhelp.aph_spline(
+                    self.abcissa_dict[prof_param_key], 
+                    self.ordinates_dict[prof_param_key], 
+                    k=self.spline_degree[prof_param_key])
 
         if self.interpol_method=='spline':
             self.input_spline_degree=input_spline_degree
-            self._setup_spline()
+            _setup_spline(self)
 
     def _get_parameter_key(self, profile_parameter_key, ipar):
         return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
