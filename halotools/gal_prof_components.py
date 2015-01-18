@@ -250,21 +250,22 @@ class RadProfBias(object):
 
     def radprof_modfunc(self,profile_parameter_key,input_abcissa):
         """
-        Factor by which gal_type galaxies differ from are quiescent 
-        as a function of the primary halo property.
+        Factor by which the halo profile parameters of gal_type galaxies 
+        differ from the profile parameter of their underlying dark matter halo. 
 
         Parameters 
         ----------
+        profile_parameter_key : string
+            Dictionary key of the profile parameter being modulated, e.g., 'halo_NFW_conc'. 
+
         input_abcissa : array_like
             array of primary halo property 
-
-        profile_parameter_key : string
-            Dictionary key of the profile parameter being modulated, e.g., 'conc'. 
 
         Returns 
         -------
         output_profile_modulation : array_like
-            Values of the profile parameters evaluated at input_abcissa. 
+            Values of the multiplicative factor that will be used to 
+            modulate the halo profile parameters. 
 
         Notes 
         -----
@@ -272,11 +273,12 @@ class RadProfBias(object):
         of the underlying dark matter halo by a polynomial function 
         of the primary halo property, or is interpolated from a grid. 
         Either way, the behavior of this method is fully determined by 
-        its values at the model abcissa, as specified in parameter_dict. 
+        its values at the model's (abcissa, ordinates), specified by 
+        self.abcissa_dict and self.ordinates_dict.
         """
 
         model_abcissa, model_ordinates = (
-            self.retrieve_model_abcissa_ordinates(profile_parameter_key)
+            self._retrieve_model_abcissa_ordinates(profile_parameter_key)
             )
 
         if self.interpol_method=='polynomial':
@@ -290,9 +292,9 @@ class RadProfBias(object):
 
         return output_profile_modulation
 
-    def retrieve_model_abcissa_ordinates(self, profile_parameter_key):
-        """ Method to pack the values of the model parameters 
-        into a list used by radprof_modfunc. 
+    def _retrieve_model_abcissa_ordinates(self, profile_parameter_key):
+        """ Private method used to make API convenient. 
+        Used to pass the correct (abcissa, ordinates) pair to radprof_modfunc. 
 
         Parameters 
         ----------
@@ -307,36 +309,60 @@ class RadProfBias(object):
         ordinates : array_like
             Array of values of the modulating function when evaulated at the abcissa. 
 
+        Notes 
+        -----
+        Retrieving the ordinates requires more complicated bookkeeping than 
+        retrieving the abcissa. 
+        This is because abcissa values will never vary in an MCMC, whereas 
+        ordinate values will. All halotools models are set up so that 
+        all model parameters varied by an MCMC walker have their values stored 
+        in a parameter_dict dictionary. Thus the ordinate values 
+        that actually govern the behavior of `get_modulated_prof_params` 
+        must be stored in RadProfBias.parameter_dict, and when those values 
+        are updated the behavior of `get_modulated_prof_params` needs to vary accordingly. 
+        The primary purpose of this private method is to produce that behavior. 
         """
 
         abcissa = self.abcissa_dict[profile_parameter_key]
 
-        # The initial ordinates can be accessed in the same way as the initial abcissa 
-        # However, the ordinates may have changed from their initial values, 
-        # for example by an MCMC walkers. So we must access the up-to-date ordinate values 
+        # We need to access the up-to-date ordinate values 
         # through self.parameter_dict, which is how the outside world modifies the 
         # model parameters. The keys to this dictionary are strings such as 
-        # 'halo_NFW_conc_pari_gal_type', whose value is ordinates[i]. However, 
-        # dictionaries have no intrinsic ordering, so in order to 
-        # construct our ordinates list, we have to jump through a few hoops. 
-        relevant_sub_dict = {}
-        for key, value in self.parameter_dict.iteritems():
-            if key[0:len(profile_parameter_key)]==profile_parameter_key:
-                relevant_sub_dict[key] = value
-
+        # 'halo_NFW_conc_pari_gal_type', whose value is the i^th ordinate. 
+        # However, dictionaries have no intrinsic ordering, so in order to 
+        # construct a properly sequenced and up-to-date ordinates list, 
+        # we have to jump through the following hoop. 
         ordinates = []
-        for ipar in range(len(relevant_sub_dict)):
+        for ipar in range(len(self.ordinates_dict)):
             key_ipar = self._get_parameter_key(profile_parameter_key, ipar)
-            value_ipar = relevant_sub_dict[key_ipar]
+            value_ipar = self.parameter_dict[key_ipar]
             ordinates.extend([value_ipar])
 
  
         return abcissa, ordinates
 
-    def set_parameter_dict(self, input_prof_params, input_abcissa_dict, input_ordinates_dict):
-        """
+    def set_parameter_dict(self, 
+        input_prof_params, input_abcissa_dict, input_ordinates_dict):
+        """ Method used to set up dictionaries governing the behavior of the 
+        profile modulating function. 
+
+        Parameters 
+        ---------- 
+        input_prof_params : array_like 
+            String array of keys of the halo profile parameter being modulated. 
+
+        input_abcissa_dict : dict 
+            keys are halo profile parameter keys, e.g., 'halo_NFW_conc', 
+            values are abcissa defining the behavior of the modulating function 
+            on that halo profile parameter. 
+
+        input_ordinates_dict : dict  
+            keys are halo profile parameter keys, e.g., 'halo_NFW_conc', 
+            values are ordinates defining the behavior of the modulating function 
+            on that halo profile parameter. 
         """
 
+        input_prof_params = list(input_prof_params)
         self._test_sensible_inputs(input_prof_params, input_abcissa_dict, input_ordinates_dict)
 
         self.abcissa_dict={}
@@ -417,7 +443,6 @@ class RadProfBias(object):
 
     def _get_parameter_key(self, profile_parameter_key, ipar):
         return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
-
 
 
 
