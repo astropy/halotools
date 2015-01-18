@@ -384,6 +384,10 @@ class RadProfBias(object):
 
         self.param_keys = self.abcissa_dict.keys()
 
+    def get_gal_prof_param_key(self, prof_param_key):
+        key = 'gal_'+prof_param_key[len(defaults.host_haloprop_prefix):]
+        return key
+
     def _test_sensible_inputs(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
         """ Private method to verify that `set_parameter_dict` was passed 
