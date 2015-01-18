@@ -109,8 +109,9 @@ class RadProfBias(object):
 
         input_prof_params : array_like, optional
             String array specifying the halo profile parameters to be modulated. 
-            Values of this array must equal one of halo_prof_model.param_keys. 
-            If passed, input_abcissa_dict and input_ordinates_dict should not be passed, and 
+            Values of this array must equal one of halo_prof_model.param_keys, e.g., 'halo_NFW_conc'.
+            If input_prof_params is passed to the constructor, 
+            input_abcissa_dict and input_ordinates_dict should not be passed, and 
             the abcissa and ordinates defining the modulation of the halo profile parameters 
             will be set according to the default_profile_dict dict in `~halotools.defaults`
 
@@ -118,19 +119,19 @@ class RadProfBias(object):
             Dictionary whose keys are halo profile parameters and values 
             are the abcissa used to define the profile parameter modulating function. 
             Default values are set according to default_profile_dict in `~halotools.defaults`
-            If passed, input_ordinates_dict must also be passed, 
-            and the input_prof_params list may not.
+            If input_abcissa_dict is passed to the constructor, 
+            input_ordinates_dict must also be passed, and the input_prof_params list must not.
 
         input_ordinates_dict : dictionary, optional 
             Dictionary whose keys are halo profile parameters and values 
             are the ordinates used to define the profile parameter modulating function. 
             Default values are set according to default_profile_dict in `~halotools.defaults`
-            If passed, input_abcissa_dict must also be passed, 
-            and the input_prof_params list may not.
+            If input_ordinates_dict is passed to the constructor, 
+            input_abcissa_dict must also be passed, and the input_prof_params list must not.
 
         interpol_method : string, optional 
-            Keyword specifying the method used to define the continuous function  
-            `radprof_modfunc` while only specifying its values at a finite 
+            Keyword specifying the method used to interpolate continuous behavior of the function  
+            `radprof_modfunc` from only knowledge of its values at a finite 
             number of points. The default spline option interpolates 
             the model's abcissa and ordinates. The polynomial option uses the unique, 
             degree N polynomial passing through (abcissa, ordinates), 
@@ -153,16 +154,23 @@ class RadProfBias(object):
 
 
     def get_modulated_prof_params(self, prof_param_key, *args, **kwargs):
-        """ Primary function of this class. Used to assign new values of 
-        halo profile parameters to gal_type galaxies that differ from the 
+        """ Primary method used by the outside world. 
+        Used to assign new values of halo profile parameters to gal_type galaxies. 
+        The new values will differ from the 
         profile parameters of the galaxies' underlying halo 
-        by a (possibly halo-dependent) multiplicative factor. 
+        by a (possibly halo-dependent) multiplicative factor, governed by `radprof_modfunc`. 
 
         Parameters 
         ----------
         prof_param_key : string
+            Specifies the halo profile parameter being modulated. 
 
-        input_params : array_like, optional positional argument
+        input_prim_haloprops : array_like, optional positional argument
+            Array of the primary halo property of the mock galaxies.
+
+        input_halo_prof_params : array_like, optional positional argument
+            Array of the underlying dark matter halo profile 
+            parameters of the mock galaxies.
 
         mock_galaxies : object, optional keyword argument 
 
@@ -174,7 +182,7 @@ class RadProfBias(object):
 
         kwargs['prof_param_key'] = prof_param_key
         input_prim_haloprops, input_halo_prof_params = (
-            self.retrieve_input_halo_data(*args, **kwargs)
+            self._retrieve_input_halo_data(*args, **kwargs)
             )
 
         multiplicative_modulation = (
@@ -186,20 +194,26 @@ class RadProfBias(object):
         return output_prof_params
 
 
-    def retrieve_input_halo_data(self, *args, **kwargs):
-        """ Method to create a dictionary containing arrays of 
-        input halo profile parameters that are to be modulated. 
-        The keys of the output dictionary provide instructions to 
-        the rest of the class about which model parameters to use 
-        to modulate the input arrays. 
+    def _retrieve_input_halo_data(self, *args, **kwargs):
+        """ Private method to retrieve an array of the primary halo property (e.g., Mvir), 
+        and an array of the halo profile parameter values, associated with 
+        the mock galaxies. Mostly used for convenient API. This method allows 
+        us to pass either two input arrays, or an entire mock galaxy population, 
+        to get_modulated_prof_params. 
 
         Parameters 
         ----------
-        input_params : array_like, optional positional argument
+        input_prim_haloprops : array_like, optional positional argument
+            Array of the primary halo property of the mock galaxies.
+
+        input_halo_prof_params : array_like, optional positional argument
+            Array of the underlying dark matter halo profile 
+            parameters of the mock galaxies.
 
         mock_galaxies : object, optional keyword argument 
 
         prof_param_key : string, optional keyword argument
+            Used to access the correct halo profile parameter. 
 
         Returns 
         ------- 
