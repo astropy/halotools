@@ -147,23 +147,10 @@ class RadProfBias(object):
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
 
-
         self.set_parameter_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
 
-        #self.input_abcissa_dict = input_abcissa_dict
-        #self.input_ordinates_dict = input_ordinates_dict
+        self._setup_interpol(interpol_method, input_spline_degree)
 
-        #self.abcissa_key = {}
-        #self.ordinates_key = {}
-
-
-        # Set the interpolation scheme 
-        if interpol_method not in ['spline', 'polynomial']:
-            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
-        self.interpol_method = interpol_method
-        if self.interpol_method=='spline':
-            self.input_spline_degree=input_spline_degree
-            self._setup_spline()
 
     def get_modulated_prof_params(prof_param_keys, *args, **kwargs):
         """ 
@@ -321,15 +308,37 @@ class RadProfBias(object):
 
         ordinates = []
         for ipar in range(len(relevant_sub_dict)):
-            key_ipar = profile_parameter_key+'_biasfunc_par'+str(ipar+1)+self.gal_type
+            key_ipar = self._get_parameter_key(profile_parameter_key, ipar)
             value_ipar = relevant_sub_dict[key_ipar]
             ordinates.extend([value_ipar])
 
  
         return abcissa, ordinates
 
+    def set_parameter_dict(self, input_prof_params, input_abcissa_dict, input_ordinates_dict):
+        """
+        """
 
-    def test_sensible_inputs(self, input_prof_params, input_abcissa_dict, input_ordinates_dict):
+        self._test_sensible_inputs(input_prof_params, input_abcissa_dict, input_ordinates_dict)
+
+        self.input_abcissa_dict={}
+        self.input_ordinates_dict={}
+
+        if input_prof_params is not []:
+            for prof_param_key in input_prof_params:
+                self.input_abcissa_dict[prof_param_key] = defaults.default_profile_dict['profile_abcissa']
+                self.input_ordinates_dict[prof_param_key] = defaults.default_profile_dict['profile_ordinates']
+        else:
+            self.input_abcissa_dict[prof_param_key] = input_abcissa_dict
+            self.input_ordinates_dict[prof_param_key] = input_ordinates_dict
+
+        self.parameter_dict={}
+        for prof_param_key, ordinates in self.input_ordinates_dict:
+            for ii, val in enumerate(ordinates):
+                key = self._get_parameter_key(prof_param_key, ii)
+                self.parameter_dict[key] = val
+
+    def _test_sensible_inputs(self, input_prof_params, input_abcissa_dict, input_ordinates_dict):
 
         if input_prof_params is not []:
             try:
@@ -359,109 +368,46 @@ class RadProfBias(object):
                 raise SyntaxError("If not passing input_ordinates_dict to the constructor,"
                     "must pass input_abcissa_dict")
 
-    def set_parameter_dict(self, input_prof_params, input_abcissa_dict, input_ordinates_dict):
-        """
-        """
+    def _setup_interpol(self, interpol_method, input_spline_degree):
+        if interpol_method not in ['spline', 'polynomial']:
+            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
+        self.interpol_method = interpol_method
 
-        self.test_sensible_inputs(input_prof_params, input_abcissa_dict, input_ordinates_dict)
-
-        self.input_abcissa_dict={}
-        self.input_ordinates_dict={}
-
-        if input_prof_params is not []:
-            for prof_param_key in input_prof_params:
-                self.input_abcissa_dict[prof_param_key] = defaults.default_profile_dict['profile_abcissa']
-                self.input_ordinates_dict[prof_param_key] = defaults.default_profile_dict['profile_ordinates']
-        else:
-            self.input_abcissa_dict[prof_param_key] = input_abcissa_dict
-            self.input_ordinates_dict[prof_param_key] = input_ordinates_dict
-
-        self.parameter_dict={}
-        for prof_param_key, ordinates in self.input_ordinates_dict:
-            for ii, val in enumerate(ordinates):
-                parameter_dict_key = prof_param_key+'_biasfunc_par'+str(ii+1)+self.gal_type
-                self.parameter_dict[parameter_dict_key] = val
-
-                #### THIS SHOULD BE IT!!!
-
-
-        self.parameter_dict = {profile_parameter_key+'_biasfunc_par'+str(ipar+1)+self.gal_type}
-
-        # For any parameter, the correct keys of its associate dictionary 
-        # are strings for the abcissa and ordinate arrays
-        # with a naming convention set in the defaults module
-        correct_keys = defaults.default_profile_dict.keys()
-        occuhelp.test_correct_keys(self.input_parameter_dict, correct_keys)
-        # Now the keys of self.input_parameter_dict, and the keys of the 
-        # sub-dictionaries, have been verified to be sensible
-        ###
-
-        if type(self.input_parameter_dict) is list:
-            # Only a list of strings was provided specifying the profile bias, 
-            # so choose the default abcissa and ordinates to define the model behavior
-            default_value = defaults.default_profile_dict
-            self.parameter_dict = (
-                [{key:default_value} for key in self.input_parameter_dict]
-                )
-        elif type(self.input_parameter_dict) is dict:
-            # Here the abcissa and ordinates were passed to the constructor. 
-            self.parameter_dict = self.input_parameter_dict
-        else:
-            raise TypeError("input_parameter_dict must be a dict or a list")
-
-        # Now use a dictionary comprehension to rename the keys 
-        # so that abcissa & ordinates pertaining to different 
-        # profile parameters have distinct keynames
-        for key, dict_of_key in self.input_parameter_dict.iteritems():
-            new_dict_of_key = ({key+'_biasfunc_par'+str(ii)+'_'+self.gal_type:val 
-                for ii, val in enumerate(dict_of_key['profile_ordinates'])}
-                )
-
-
-
-        # Loop over all profile parameters that are being modulated 
-        for profile_parameter, parameter_dict in self.parameter_dict.iteritems():
-            # Append the table_dictionary of each profile parameter 
-            # to self.parameter_dict 
-#            new_dict_to_append = occuhelp.format_parameter_keys(parameter_dict,
-#                correct_keys, self.gal_type, key_prefix=profile_parameter)
-#            self.parameter_dict = dict(
-#                self.parameter_dict.items() + 
-#                new_dict_to_append.items() 
-#                )
-            # The radprof_modfunc method needs to access the ordinates and abcissa
-            # This is accomplished by binding the key to an attribute of the model object
-            # This binding is done via a dictionary, where each key of the dictionary 
-            # corresponds to a profile parameter that is being modulated.
-            self.abcissa_key[profile_parameter] = (
-                profile_parameter+'_model_abcissa_'+self.gal_type )
-            self.ordinates_key[profile_parameter] = (
-                profile_parameter+'_model_ordinates_'+self.gal_type )
-
-
-
-    def _setup_spline(self):
+        def _setup_spline(self):
         # If using spline interpolation, configure its settings 
         
-        scipy_maxdegree = 5
-        self.spline_degree ={}
-        self.spline_function = {}
+            scipy_maxdegree = 5
+            self.spline_degree ={}
+            self.spline_function = {}
 
-        for profile_parameter, profile_parameter_dict in self.input_parameter_dict.iteritems():
-            self.spline_degree[profile_parameter] = (
-                np.min(
-            [scipy_maxdegree, self.input_spline_degree, 
-            aph_len(self.parameter_dict[self.abcissa_key[profile_parameter]])-1])
-                )
-            self.spline_function[profile_parameter] = occuhelp.aph_spline(
-                self.parameter_dict[self.abcissa_key[profile_parameter]],
-                self.parameter_dict[self.ordinates_key[profile_parameter]],
-                k=self.spline_degree[profile_parameter])
+            for profile_parameter, profile_parameter_dict in self.input_parameter_dict.iteritems():
+                self.spline_degree[profile_parameter] = (
+                    np.min(
+                [scipy_maxdegree, self.input_spline_degree, 
+                aph_len(self.parameter_dict[self.abcissa_key[profile_parameter]])-1])
+                    )
+                self.spline_function[profile_parameter] = occuhelp.aph_spline(
+                    self.parameter_dict[self.abcissa_key[profile_parameter]],
+                    self.parameter_dict[self.ordinates_key[profile_parameter]],
+                    k=self.spline_degree[profile_parameter])
+
+        if self.interpol_method=='spline':
+            self.input_spline_degree=input_spline_degree
+            self._setup_spline()
+
+    def _get_parameter_key(self, profile_parameter_key, ipar):
+        return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
 
 
 
 
 
+        
+            
+        
+        
+            
+            
 
 
 
