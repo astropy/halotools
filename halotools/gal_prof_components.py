@@ -152,7 +152,7 @@ class RadProfBias(object):
         self._setup_interpol(interpol_method, input_spline_degree)
 
 
-    def get_modulated_prof_params(prof_param_keys, *args, **kwargs):
+    def get_modulated_prof_params(self, prof_param_key, *args, **kwargs):
         """ Primary function of this class. Used to assign new values of 
         halo profile parameters to gal_type galaxies that differ from the 
         profile parameters of the galaxies' underlying halo 
@@ -160,7 +160,7 @@ class RadProfBias(object):
 
         Parameters 
         ----------
-        prof_param_keys : array_like
+        prof_param_key : string
 
         input_params : array_like, optional positional argument
 
@@ -168,27 +168,25 @@ class RadProfBias(object):
 
         Returns 
         ------- 
-        output_param_dict : dict
+        output_prof_params : array_like
 
         """
 
-        input_param_dict = self.retrieve_input_prof_params(
-            prof_param_keys, args, kwargs)
+        kwargs['prof_param_key'] = prof_param_key
+        input_prim_haloprops, input_halo_prof_params = (
+            self.retrieve_input_halo_data(*args, **kwargs)
+            )
 
-        output_param_dict = {}
-        for prof_param_key in prof_param_keys:
-            multiplicative_modulation = (
-                self.radprof_modfunc(
-                    prof_param_key, input_param_dict[prof_param_key])
-                )
-            output_param_dict[prof_param_key] = (
-                multiplicative_modulation*input_param_dict[prof_param_key]
-                )
+        multiplicative_modulation = (
+            self.radprof_modfunc(prof_param_key, input_prim_haloprops)
+            )
 
-        return output_param_dict
+        output_prof_params = multiplicative_modulation*input_halo_prof_params
+
+        return output_prof_params
 
 
-    def retrieve_input_prof_params(self, prof_param_keys, *args, **kwargs):
+    def retrieve_input_halo_data(self, *args, **kwargs):
         """ Method to create a dictionary containing arrays of 
         input halo profile parameters that are to be modulated. 
         The keys of the output dictionary provide instructions to 
@@ -197,32 +195,35 @@ class RadProfBias(object):
 
         Parameters 
         ----------
-        prof_param_keys : array_like
-
         input_params : array_like, optional positional argument
 
         mock_galaxies : object, optional keyword argument 
 
+        prof_param_key : string, optional keyword argument
+
         Returns 
         ------- 
-        input_param_dict : dict
+        input_halo_prof_params : array_like
 
         """
 
         ###
-        prof_param_keys = list(prof_param_keys)
-        # First retrieve the profile parameters of the halos 
         if occuhelp.aph_len(args) > 0:
             # We were passed an array of profile parameters, 
             # so we should not have also been passed a galaxy sample
             if 'mock_galaxies' in kwargs.keys():
                 raise TypeError("RadProfBias can be passed an array, "
                     "or a mock, but not both")
-            input_param_dict = {prof_param_keys[ii]:value for ii, value in enumerate(args)}
+            input_prim_haloprops = args[0]
+            input_halo_prof_params = args[1]
+
         elif (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()):
             # We were passed a collection of galaxies
             mock_galaxies = kwargs['mock_galaxies']
-            input_param_dict = {key:getattr(mock_galaxies, key) for key in prof_param_keys}
+            halo_prof_param_key = kwargs['prof_param_key']
+            prim_haloprop_key = mock_galaxies.model.prim_haloprop_key
+            input_prim_haloprops = mock_galaxies[prim_haloprop_key]
+            input_halo_prof_params = mock_galaxies[halo_prof_param_key]
         else:
             raise SyntaxError("get_modified_prof_params was called with "
                 " incorrect inputs. Method accepts a positional argument that is an array "
@@ -230,7 +231,7 @@ class RadProfBias(object):
                 "or alternatively a mock galaxy object with the same array"
                 " stored in the mock_galaxies.prof_param_keys attribute")
 
-        return input_param_dict
+        return input_prim_haloprops, input_halo_prof_params
 
 
     def radprof_modfunc(self,profile_parameter_key,input_abcissa):
