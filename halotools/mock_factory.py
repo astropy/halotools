@@ -33,7 +33,7 @@ class HodMockFactory(object):
         # of the composite model to the mock instance. 
         # The self.gal_types list is ordered such that 
         # populations with unity-bounded occupations appear first
-        self._set_gal_types()
+        self.gal_types = self._get_gal_types()
 
         # The process_halo_catalog method 
         self.process_halo_catalog()
@@ -54,7 +54,7 @@ class HodMockFactory(object):
             self.sec_haloprop_key = self.model.sec_haloprop_key
 
         # Create new columns for self.halos associated with each 
-        # parameter of the halo profile model, e.g., 'conc'. 
+        # parameter of the halo profile model, e.g., 'halo_NFW_conc'. 
         halo_prof_param_keys = []
         prim_haloprop = self.halos[self.prim_haloprop_key]
         halo_prof_dict = self.model.halo_prof_model.param_func_dict
@@ -70,12 +70,8 @@ class HodMockFactory(object):
 
     def build_profile_lookup_tables(self, prof_param_table_dict={}):
 
-        # The range of profile parameters in the 
-        # inverse cumulative profile lookup table  
-        # must span the range of the halo catalog. 
-        # So re-compute this lookup table 
-        # to insure that the necessary range is covered.
-
+       # Compute the halo profile lookup table, ensuring that the min/max 
+       # range spanned by the halo catalog is covered. 
         if prof_param_table_dict != {}:
             for key in self.halos.halo_prof_param_keys:
                 dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
@@ -91,25 +87,29 @@ class HodMockFactory(object):
             prof_param_table_dict=prof_param_table_dict)
 
 
-    def _set_gal_types(self):
+    def _get_gal_types(self):
         """ Internal bookkeeping method used to conveniently bind the gal_types of a 
         composite model, and their occupation bounds, to the mock object. 
 
         This method identifies all gal_type strings used in the composite model, 
-        and creates a list of those strings, ordered such that gal_types with 
+        and creates an array of those strings, ordered such that gal_types with 
         unit-bounded occupations (e.g., centrals) appear first. 
         """
 
         # Set the gal_types attribute, sorted so that bounded populations appear first
-        self._occupation_bound = ([self.model.occupation_bound[gal_type] 
+        self._occupation_bound = np.array([self.model.occupation_bound[gal_type] 
             for gal_type in self.model.gal_types])
 
-        self.gal_types = self.model.gal_types[np.argsort(self._occupation_bound)]
-        self._occupation_bound = self._occupation_bound[np.argsort(self._occupation_bound)]
-        # The following precaution is questionable
-        if (set(self._occupation_bound) != {1, float("inf")}):
-            raise ValueError("The only supported finite occupation bound is unity,"
-                " otherwise it must be set to infinity")
+        if defaults.testmode==True:
+            if (set(self._occupation_bound) != {1, float("inf")}):
+                raise ValueError("The only supported finite occupation bound is unity,"
+                    " otherwise it must be set to infinity")
+
+        sorted_idx = np.argsort(self._occupation_bound)
+        self._occupation_bound = self._occupation_bound[sorted_idx]
+        sorted_gal_type_list = self.model.gal_types[sorted_idx]
+
+        return sorted_gal_type_list
 
 
     def _set_mock_attributes(self):
@@ -176,7 +176,7 @@ class HodMockFactory(object):
                     self._occupation[gal_type])
 
             # Bind all relevant halo properties to the mock
-            for haloprop in self.haloprop_list:
+            for haloprop in self._mock_haloprops:
                 # Strip the halo prefix
                 key = haloprop[len(defaults.host_haloprop_prefix):]
                 getattr(self, haloprop)[gal_type_slice] = np.repeat(
@@ -188,78 +188,6 @@ class HodMockFactory(object):
         # Now enforce the periodic boundary conditions of the simulation box
         self.coords = occuhelp.enforce_periodicity_of_box(
             self.coords, self.snapshot.Lbox)
-
-
-    def populate_bounded(self,gal_type):
-
-        ### Note that self.model does not yet correctly interface with the following API
-        self.coords[first_index:last_index] = (
-            self.model.mc_coords(gal_type, 
-                self.coords[first_index:last_index], occupations, 
-                self.coordshost[first_index:last_index], virial_radii, 
-                self.prim_haloprop[first_index:last_index]
-                )
-            )
-
-    def populate_unbounded(self,gal_type):
-
-        sat_prof_model = self.model.component_model_dict[gal_type]['profile_model']
-
-        host_prof_param_dict = {}
-        for prof_param_key in self.halos.halo_prof_param_keys:
-            host_prof_param_dict[prof_param_key] = (
-                self.halos[prof_param_key][self._occupation[gal_type]>0])
-
-        satsys_prof_param_dict = host_prof_param_dict
-        # Profile parameter modulating functions allow satellites to be 
-        # spatially biased tracers of the underlying halo profile. 
-        # Not implemented yet. 
-        if hasattr(sat_prof_model, 'prof_param_modfunc'):
-            pass 
-
-        # To assign intra-halo positions to galaxies, 
-        # we use the method of transformation of variables. 
-        # The inverse cumulative profile of the halo mass density 
-        # gives our equal probability volume element. 
-        inv_cumu_prof_funcs = self.model.halo_prof_model.digitized_inv_cumu_profs(
-            satsys_prof_param_dict)
-
-        # Define some convenient shorthands for the properties 
-        # that will be assigned to the satellites
-        occupations = self._occupation[gal_type][self._occupation[gal_type]>0]
-        host_centers = self.halos['POS'][self._occupation[gal_type]>0]
-        host_vels = self.halos['VEL'][self._occupation[gal_type]>0]
-        host_Rvirs = self.halos['RVIR'][self._occupation[gal_type]>0]/1000.
-        host_IDs = self.halos['ID'][self._occupation[gal_type]>0]
-        host_prim_haloprops = self.halos[self.prim_haloprop_key][self._occupation[gal_type]>0]
-        if hasattr(self.model,'sec_haloprop_key'):
-            host_sec_haloprops = (
-                self.halos[self.sec_haloprop_key][self._occupation[gal_type]>0])
-
-
-        satsys_first_index = first_index
-        for host_index, Nsatsys in enumerate(occupations):
-            satsys_coords = self.coords[satsys_first_index:satsys_first_index+Nsatsys]
-            host_center = host_centers[host_index]
-            host_vel = host_vels[host_index]
-            host_Rvir = host_Rvirs[host_index]
-
-            inv_cumu_prof_func = inv_cumu_prof_funcs[host_index]
-
-            satsys_coords = (self.model.mc_coords(
-                satsys_coords, inv_cumu_prof_func, host_center, host_Rvir)
-                )
-            self.coordshost[satsys_first_index:satsys_first_index+Nsatsys]=host_center
-            self.velhost[satsys_first_index:satsys_first_index+Nsatsys]=host_vel
-            self.haloID[satsys_first_index:satsys_first_index+Nsatsys]=host_IDs[host_index]
-            self.prim_haloprop[satsys_first_index:satsys_first_index+Nsatsys] = (
-                host_prim_haloprops[host_index])
-            if hasattr(self.model,'sec_haloprop_key'):
-                self.sec_haloprop[satsys_first_index:satsys_first_index+Nsatsys] = (
-                    host_sec_haloprops[host_index])
-
-            satsys_first_index += Nsatsys
-
 
     def _allocate_memory(self):
         """ Method determines how many galaxies of each type 
@@ -312,25 +240,6 @@ class HodMockFactory(object):
         self.prim_haloprop = np.zeros(self.Ngals)
         if hasattr(self.model,'sec_haloprop_key'):
             self.sec_haloprop = np.zeros(self.Ngals)
-
-
-        #self.coords = np.zeros((self.Ngals,3),dtype='f8')
-        #self.coordshost = np.zeros((self.Ngals,3),dtype='f8')
-        #self.vel = np.zeros((self.Ngals,3),dtype='f8')
-        #self.velhost= np.zeros((self.Ngals,3),dtype='f8')
-        #self.gal_type = np.zeros(self.Ngals,dtype=object)
-        #self.haloID = np.zeros(self.Ngals,dtype='i8')
-        #self.prim_haloprop = np.zeros(self.Ngals,dtype='f8')
-        #if hasattr(self.model,'sec_haloprop_key'):
-        #    self.sec_haloprop = np.zeros(self.Ngals,dtype='f8')
-
-        # Still not sure how the composite model keeps track of  
-        # what features have been compiled (definitely not as follows, though)
-        # if 'quenching_abcissa' in self.halo_occupation_model.parameter_dict.keys():
-        #self.quiescent = np.zeros(self.Ngals,dtype=object)
-
-
-
 
 
 
