@@ -6,7 +6,9 @@
 #calculate number of pairs with separations given in bins.
 
 from __future__ import division, print_function
-from mpi4py import MPI
+try: from mpi4py import MPI
+except ImportError:
+    print("mpi4py module not available.  MPI functioality will not work.")
 import numpy as np 
 
 def main():
@@ -65,7 +67,10 @@ def main():
     bins=np.logspace(-1,1.5,10)
     bin_centers = (bins[:-1]+bins[1:])/2.0
     
-    DD,RR,DR,bins = wnpairs(data_1, data_2, bins, period=None, weights_1=weights_1, weights_2=weights_2, comm=comm)
+    #DD,RR,DR,bins = wnpairs(data_1, data_2, bins, period=None, weights_1=weights_1, weights_2=weights_2, comm=comm)
+    DD = wnpairs(data_1, data_1, bins, period=None, weights_1=weights_1, weights_2=weights_1, comm=comm)
+    DR = wnpairs(data_1, randoms, bins, period=None, weights_1=weights_1, weights_2=weights_2, comm=comm)
+    RR = wnpairs(randoms, randoms, bins, period=None, weights_1=weights_2, weights_2=weights_2, comm=comm)
     
     if rank==0:
         data = Table([bins[1:], DD, RR, DR], names=['r', 'DD', 'RR', 'DR'])
@@ -150,43 +155,42 @@ def npairs(data_1, data_2, bins, period=None, comm=None):
     
     #creating trees seems very cheap, so I don't worry about this too much.
     #create full trees
-    KDT_1 = cKDTree(data_1)
+    #KDT_1 = cKDTree(data_1)
     KDT_2 = cKDTree(data_2)
     #create chunked up trees
     KDT_1_small = cKDTree(data_1[inds1])
-    KDT_2_small = cKDTree(data_2[inds2])
+    #KDT_2_small = cKDTree(data_2[inds2])
     
     #count!
-    counts_11 = KDT_1_small.count_neighbors(KDT_1, bins, period=period)
-    counts_22 = KDT_2_small.count_neighbors(KDT_2, bins, period=period)
+    #counts_11 = KDT_1_small.count_neighbors(KDT_1, bins, period=period)
+    #counts_22 = KDT_2_small.count_neighbors(KDT_2, bins, period=period)
     counts_12 = KDT_1_small.count_neighbors(KDT_2, bins, period=period)
-    #DD_11     = np.diff(counts_11)
-    #DD_22     = np.diff(counts_22)
-    #DD_12     = np.diff(counts_12)
-    DD_11     = counts_11
-    DD_22     = counts_22
+    #DD_11     = counts_11
+    #DD_22     = counts_22
     DD_12     = counts_12
     
     if comm==None:
-        return DD_11, DD_12, DD_22, bins
+        #return DD_11, DD_12, DD_22, bins
+        return DD_12
     else:
         #gather results from each subprocess
-        DD_11 = comm.gather(DD_11,root=0)
-        DD_22 = comm.gather(DD_22,root=0)
+        #DD_11 = comm.gather(DD_11,root=0)
+        #DD_22 = comm.gather(DD_22,root=0)
         DD_12 = comm.gather(DD_12,root=0)
         
     if (rank==0) & (comm!=None):
         #combine counts from subprocesses
-        DD_11=np.sum(DD_11, axis=0)
-        DD_22=np.sum(DD_22, axis=0)
+        #DD_11=np.sum(DD_11, axis=0)
+        #DD_22=np.sum(DD_22, axis=0)
         DD_12=np.sum(DD_12, axis=0)
     
     #receive result from rank 0
-    DD_11 = comm.bcast(DD_11, root=0)
-    DD_22 = comm.bcast(DD_22, root=0)
+    #DD_11 = comm.bcast(DD_11, root=0)
+    #DD_22 = comm.bcast(DD_22, root=0)
     DD_12 = comm.bcast(DD_12, root=0)
     
-    return DD_11, DD_12, DD_22, bins
+    #return DD_11, DD_12, DD_22, bins
+    return DD_12
 
 
 def wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf=None, comm=None):
@@ -295,49 +299,179 @@ def wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf
     
     #creating trees seems very cheap, so I don't worry about this too much.
     #create full trees
-    KDT_1 = cKDTree(data_1)
+    #KDT_1 = cKDTree(data_1)
     KDT_2 = cKDTree(data_2)
     #create chunked up trees
     KDT_1_small = cKDTree(data_1[inds1])
-    KDT_2_small = cKDTree(data_2[inds2])
+    #KDT_2_small = cKDTree(data_2[inds2])
     
     #count!
-    counts_11 = KDT_1_small.wcount_neighbors(KDT_1, bins, period=period,\
-        sweights=weights1[inds1], oweights=weights1, w=wf)
-    counts_22 = KDT_2_small.wcount_neighbors(KDT_2, bins, period=period,\
-        sweights=weights2[inds2], oweights=weights2, w=wf)
+    #counts_11 = KDT_1_small.wcount_neighbors(KDT_1, bins, period=period,\
+    #    sweights=weights1[inds1], oweights=weights1, w=wf)
+    #counts_22 = KDT_2_small.wcount_neighbors(KDT_2, bins, period=period,\
+    #    sweights=weights2[inds2], oweights=weights2, w=wf)
     counts_12 = KDT_1_small.wcount_neighbors(KDT_2, bins, period=period,\
         sweights=weights1[inds1], oweights=weights2, w=wf)
-    #DD_11     = np.diff(counts_11)
-    #DD_22     = np.diff(counts_22)
-    #DD_12     = np.diff(counts_12)
-    DD_11     = counts_11
-    DD_22     = counts_22
+    #DD_11     = counts_11
+    #DD_22     = counts_22
     DD_12     = counts_12
     
     if comm==None:
-        return DD_11, DD_12, DD_22, bins
+        #return DD_11, DD_12, DD_22, bins
+        return DD_12
     else:
         #gather results from each subprocess
-        DD_11 = comm.gather(DD_11,root=0)
-        DD_22 = comm.gather(DD_22,root=0)
+        #DD_11 = comm.gather(DD_11,root=0)
+        #DD_22 = comm.gather(DD_22,root=0)
         DD_12 = comm.gather(DD_12,root=0)
         
     if (rank==0) & (comm!=None):
         #combine counts from subprocesses
-        DD_11=np.sum(DD_11, axis=0)
-        DD_22=np.sum(DD_22, axis=0)
+        #DD_11=np.sum(DD_11, axis=0)
+        #DD_22=np.sum(DD_22, axis=0)
         DD_12=np.sum(DD_12, axis=0)
     
     #receive result from rank 0
-    DD_11 = comm.bcast(DD_11, root=0)
-    DD_22 = comm.bcast(DD_22, root=0)
+    #DD_11 = comm.bcast(DD_11, root=0)
+    #DD_22 = comm.bcast(DD_22, root=0)
     DD_12 = comm.bcast(DD_12, root=0)
     
-    return DD_11, DD_12, DD_22, bins
+    #return DD_11, DD_12, DD_22, bins
+    return DD_12
 
 
-def jnpairs(data_1, data_2, bins, period=None , weights_1=None, weights_2=None, N_vol_elements=None, comm=None):
+def specific_wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf=None, comm=None):
+    """
+    Calculate the weighted number of pairs with separations less than or equal to rbins[i]
+    for each point in data_1.
+    
+    Parameters
+    ----------
+    data1: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    data2: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    rbins : array_like
+        numpy array of boundaries defining the bins in which pairs are counted. 
+        len(rbins) = Nrbins + 1.
+            
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
+        
+    weights1: array_like, optional
+        length N1 array containing weights used for weighted pair counts, w1*w2.
+        
+    weights2: array_like, optional
+        length N2 array containing weights used for weighted pair counts, w1*w2.
+        wf: ckdtree.Function object , weighting function. None uses standard return w1*w2.
+        comm: mpi Intracommunicator object, or None (run on one core)
+    
+    wf: function object, optional
+        weighting function.  default is w(w1,w2) returns w1*w2
+    
+    comm: mpi Intracommunicator object, optional
+    
+    returns
+    -------
+    DD_12: data_1-data_2 weighted pairs counts
+    """
+    from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
+    
+    if comm==None: 
+        rank = 0
+        size = 1
+    else: 
+        rank = comm.rank
+        size = comm.Get_size()
+    
+    #Check to make sure both data sets have the same dimension. Otherwise, throw an error!
+    if np.shape(data_1)[-1]!=np.shape(data_2)[-1]:
+        raise ValueError("data_1 and data_2 inputs do not have the same dimension.")
+        return None
+        
+    #Process period entry and check for consistency.
+    if period is None:
+            period = np.array([np.inf]*np.shape(data_1)[-1])
+    else:
+        period = np.asarray(period).astype("float64")
+        if np.shape(period)[0] != np.shape(data_1)[-1]:
+            raise ValueError("period should have len == dimension of points")
+            return None
+    
+    #Process weights1 entry and check for consistency.
+    if weights1 is None:
+            weights1 = np.array([1.0]*np.shape(data_1)[0], dtype=np.float64)
+    else:
+        weights1 = np.asarray(weights1).astype("float64")
+        if np.shape(weights1)[0] != np.shape(data_1)[0]:
+            raise ValueError("weights_1 should have same len as data_1")
+            return None
+    #Process weights2 entry and check for consistency.
+    if weights2 is None:
+            weights2 = np.array([1.0]*np.shape(data_2)[0], dtype=np.float64)
+    else:
+        weights2 = np.asarray(weights2).astype("float64")
+        if np.shape(weights2)[0] != np.shape(data_2)[0]:
+            raise ValueError("weights_2 should have same len as data_2")
+            return None
+    
+    N1 = len(data_1)
+    N2 = len(data_2)
+    
+    #define the indices
+    inds1 = np.arange(0,N1)
+    inds2 = np.arange(0,N2)
+    
+    #split up indices for each subprocess
+    sendbuf_1=[] #need these as place holders till each process get its list
+    sendbuf_2=[]
+    if rank==0:
+        chunks = np.array_split(inds1,size)
+        sendbuf_1 = chunks
+        chunks = np.array_split(inds2,size)
+        sendbuf_2 = chunks
+    
+    if comm!=None:
+        #send out lists of indices for each subprocess to use
+        inds1=comm.scatter(sendbuf_1,root=0)
+        inds2=comm.scatter(sendbuf_2,root=0)
+    
+    #creating trees seems very cheap, so I don't worry about this too much.
+    #create full trees
+    #KDT_1 = cKDTree(data_1)
+    KDT_2 = cKDTree(data_2)
+    #create chunked up trees
+    KDT_1_small = cKDTree(data_1[inds1])
+    #KDT_2_small = cKDTree(data_2[inds2])
+    
+    #count!
+    counts_12 = KDT_1_small.wcount_neighbors_custom(KDT_2, bins, period=period,\
+                            sweights=weights1[inds1], oweights=weights2, w=wf)
+    DD_12     = counts_12
+    
+    if comm==None:
+        return DD_12
+    else:
+        #gather results from each subprocess
+        DD_12 = comm.gather(DD_12,root=0)
+        
+    if (rank==0) & (comm!=None):
+        #combine counts from subprocesses
+        DD_12=np.vstack(DD_12)
+    
+    #receive result from rank 0
+    DD_12 = comm.bcast(DD_12, root=0)
+    
+    return DD_12
+
+
+def jnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, N_vol_elements=None, comm=None):
     """
     Calculate the jackknife number of pairs with separations less than or equal to rbins[i].
     
@@ -406,19 +540,19 @@ def jnpairs(data_1, data_2, bins, period=None , weights_1=None, weights_2=None, 
             return None
     
     #Process weights1 entry and check for consistency.
-    if weights_1 is None:
-            weights_1 = np.array([1.0]*np.shape(data_1)[0], dtype=np.float64)
+    if weights1 is None:
+            weights1 = np.array([1.0]*np.shape(data_1)[0], dtype=np.float64)
     else:
-        weights_1 = np.asarray(weights_1).astype("float64")
-        if np.shape(weights_1)[0] != np.shape(data_1)[0]:
+        weights1 = np.asarray(weights1).astype("float64")
+        if np.shape(weights1)[0] != np.shape(data_1)[0]:
             raise ValueError("weights_1 should have same len as data_1")
             return None
     #Process weights2 entry and check for consistency.
-    if weights_2 is None:
-            weights_2 = np.array([1.0]*np.shape(data_2)[0], dtype=np.float64)
+    if weights2 is None:
+            weights2 = np.array([1.0]*np.shape(data_2)[0], dtype=np.float64)
     else:
-        weights_2 = np.asarray(weights_2).astype("float64")
-        if np.shape(weights_2)[0] != np.shape(data_2)[0]:
+        weights2 = np.asarray(weights2).astype("float64")
+        if np.shape(weights2)[0] != np.shape(data_2)[0]:
             raise ValueError("weights_2 should have same len as data_2")
             return None
     
@@ -446,46 +580,45 @@ def jnpairs(data_1, data_2, bins, period=None , weights_1=None, weights_2=None, 
     
     #creating trees seems very cheap, so I don't worry about this too much.
     #create full trees
-    KDT_1 = cKDTree(data_1)
+    #KDT_1 = cKDTree(data_1)
     KDT_2 = cKDTree(data_2)
     #create chunked up trees
     KDT_1_small = cKDTree(data_1[inds1])
-    KDT_2_small = cKDTree(data_2[inds2])
+    #KDT_2_small = cKDTree(data_2[inds2])
     
     #count!
-    counts_11 = KDT_1_small.wcount_neighbors_custom_2D(KDT_1, bins, period=period,\
-        sweights=weights_1[inds1], oweights=weights_1, wdim=wdim)
-    counts_22 = KDT_2_small.wcount_neighbors_custom_2D(KDT_2, bins, period=period,\
-        sweights=weights_2[inds2], oweights=weights_2, wdim=wdim)
+    #counts_11 = KDT_1_small.wcount_neighbors_custom_2D(KDT_1, bins, period=period,\
+    #    sweights=weights1[inds1], oweights=weights1, wdim=wdim)
+    #counts_22 = KDT_2_small.wcount_neighbors_custom_2D(KDT_2, bins, period=period,\
+    #    sweights=weights2[inds2], oweights=weights2, wdim=wdim)
     counts_12 = KDT_1_small.wcount_neighbors_custom_2D(KDT_2, bins, period=period,\
-        sweights=weights_1[inds1], oweights=weights_2, wdim=wdim)
-    #DD_11     = np.diff(counts_11)
-    #DD_22     = np.diff(counts_22)
-    #DD_12     = np.diff(counts_12)
-    DD_11     = counts_11
-    DD_22     = counts_22
+        sweights=weights1[inds1], oweights=weights2, wdim=wdim)
+    #DD_11     = counts_11
+    #DD_22     = counts_22
     DD_12     = counts_12
     
     if comm==None:
-        return DD_11, DD_12, DD_22, bins
+        #return DD_11, DD_12, DD_22, bins
+        return DD_12
     else:
         #gather results from each subprocess
-        DD_11 = comm.gather(DD_11,root=0)
-        DD_22 = comm.gather(DD_22,root=0)
+        #DD_11 = comm.gather(DD_11,root=0)
+        #DD_22 = comm.gather(DD_22,root=0)
         DD_12 = comm.gather(DD_12,root=0)
         
     if (rank==0) & (comm!=None):
         #combine counts from subprocesses
-        DD_11=np.sum(DD_11, axis=0)
-        DD_22=np.sum(DD_22, axis=0)
+        #DD_11=np.sum(DD_11, axis=0)
+        #DD_22=np.sum(DD_22, axis=0)
         DD_12=np.sum(DD_12, axis=0)
     
     #receive result from rank 0
-    DD_11 = comm.bcast(DD_11, root=0)
-    DD_22 = comm.bcast(DD_22, root=0)
+    #DD_11 = comm.bcast(DD_11, root=0)
+    #DD_22 = comm.bcast(DD_22, root=0)
     DD_12 = comm.bcast(DD_12, root=0)
     
-    return DD_11, DD_12, DD_22, bins
+    #return DD_11, DD_12, DD_22, bins
+    return DD_12
 
 
 if __name__ == '__main__':
