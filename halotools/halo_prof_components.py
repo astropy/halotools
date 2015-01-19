@@ -54,7 +54,8 @@ class HaloProfileModel(object):
     set_param_func_dict, respectively. 
     """
 
-    def __init__(self, cosmology, redshift, param_keys,prim_haloprop_key='MVIR'):
+    def __init__(self, cosmology, redshift, param_keys,prim_haloprop_key='MVIR', 
+        param_attr_examples=None):
         """
         Parameters 
         ----------
@@ -72,11 +73,15 @@ class HaloProfileModel(object):
         self.redshift = redshift
         self.cosmology = cosmology
         self.prim_haloprop_key = prim_haloprop_key
-        self.param_keys = list(param_keys)
 
-        #littleh = self.cosmology.H0/100.0
-        #crit_density = (self.cosmology.critical_density(0).to(u.Msun/u.Mpc**3)/littleh**2)
-        #self.cosmic_matter_density = crit_density*self.cosmology.Om0
+        self.param_keys = list(param_keys)
+        if param_attr_examples==None:
+            self._example_attr_dict = {key:1 for key in self.param_keys}
+        else:
+            self._example_attr_dict = (
+                {self.param_keys[i]:param_attr_examples[i] 
+                for i in range(len(param_keys))}
+                )
 
     @abstractmethod
     def density_profile(self, r, *args):
@@ -182,7 +187,7 @@ class NFWProfile(HaloProfileModel):
             :math:`\\rho_{NFW}(x | c)`. 
         """
 
-        self.model_nickname = 'NFW'
+        self.model_nickname = 'NFWmodel'
         self._conc_parname = self.get_param_key(self.model_nickname, 'conc')
         # Call the init constructor of the super-class, 
         # whose only purpose is to bind cosmology, redshift, and prim_haloprop_key

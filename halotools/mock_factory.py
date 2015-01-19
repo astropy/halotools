@@ -10,6 +10,7 @@ Currently only composite HOD models are supported.
 
 import numpy as np
 import occupation_helpers as occuhelp
+import defaults
 
 class HodMockFactory(object):
     """ The constructor of this class takes 
@@ -35,7 +36,6 @@ class HodMockFactory(object):
         # populations with unity-bounded occupations appear first
         self.gal_types = self._get_gal_types()
 
-        # The process_halo_catalog method 
         self.process_halo_catalog()
 
         if populate==True:
@@ -112,7 +112,7 @@ class HodMockFactory(object):
         return sorted_gal_type_list
 
 
-    def _set_mock_attributes(self):
+    def _set_mock_attributes(self, testmode=defaults.testmode):
         """ Internal method used to create self._mock_galprops and 
         self._mock_haloprops, which are lists of strings 
         of halo and galaxy properties 
@@ -134,7 +134,6 @@ class HodMockFactory(object):
         # data structure containing the mock galaxies, 
         # but prepended by host_haloprop_prefix, set in halotools.defaults
         _mock_haloprops = defaults.haloprop_list # store the strings in a temporary list
-        _mock_haloprops.extend(self.halos.halo_prof_param_keys)
         _mock_haloprops.extend(self.additional_haloprops)
         # Now we use a conditional list comprehension to ensure 
         # that all entries begin with host_haloprop_prefix, 
@@ -143,8 +142,19 @@ class HodMockFactory(object):
         self._mock_haloprops = (
             [entry if entry[0:len(prefix)]==prefix else prefix+entry for entry in _mock_haloprops]
             )
+        # Key conventions in the models is different from the halo catalog, 
+        # so create separate lists       
+        self._mock_halomodelprops = self.halos.halo_prof_param_keys
+        self._mock_galmodelprops = self.model._example_attr_dict.keys()
+
+        if testmode==True:
+            assert len(self._mock_halomodelprops)==len(set(self._mock_halomodelprops))
+            assert len(self._mock_galmodelprops)==len(set(self._mock_galmodelprops))
+
         # Throw away any possible repeated entries
         self._mock_haloprops = list(set(self._mock_haloprops))
+        self._mock_halomodelprops = list(set(self._mock_halomodelprops))
+        self._mock_galmodelprops = list(set(self._mock_galmodelprops))
 
 
     def populate(self):
@@ -219,27 +229,49 @@ class HodMockFactory(object):
 
         self.Ngals = np.sum(self._total_abundance.values())
 
-        for galprop in self._mock_galprops:
-            example_entry = defaults.galprop_dict[galprop]
-            example_shape = list(np.shape(example_entry))
-            total_entries_pergal = self.Ngals*np.product(example_shape)
-            example_shape.insert(0, self.Ngals)
-            setattr(self, galprop, 
-                np.zeros(total_entries_pergal).reshape(example_shape))
+        def _allocate_ndarray_attr(self, propname, example_entry):
+            """ Private method of _allocate_memory used to create an empty 
+            ndarray of the appropriate shape and bind it to the mock instance. 
 
-        for haloprop in self._mock_haloprops:
-            # Strip the prefix from the string
-            key = haloprop[len(defaults.host_haloprop_prefix):]
-            example_entry = self.halos[key]
-            example_shape = list(np.shape(example_entry))
-            total_entries_pergal = self.Ngals*np.product(example_shape)
-            example_shape.insert(0, self.Ngals)
-            setattr(self, haloprop, 
-                np.zeros(total_entries_pergal).reshape(example_shape))
+            Parameters 
+            ----------
+            propname : string 
+                Used to define the name of the attribute being created. 
 
-        self.prim_haloprop = np.zeros(self.Ngals)
+            example_entry : array_like 
+                Used to define the shape of attribute
+            """
+            example_shape = list(np.shape(example_entry))
+            example_shape.insert(0, self.Ngals)
+            total_entries = np.product(example_shape)
+            setattr(self, propname, 
+                np.zeros(total_entries).reshape(example_shape))
+
+
+        for propname in self._mock_galprops:
+            example_entry = defaults.galprop_dict[propname]
+            _allocate_ndarray_attr(self, propname, example_entry)
+
+        for propname in self._mock_haloprops:
+            # for halo catalog-derived properties 
+            # we need to strip the prefix from the string
+            halocatkey = propname[len(defaults.host_haloprop_prefix):]
+            example_entry = self.halos[halocatkey]
+            _allocate_ndarray_attr(self, propname, example_entry)
+
+        # DM halo model properties are accessed in the same way as 
+        # galaxy occupation model properties, so lump these to tasks together
+        model_proplist = np.append(self._mock_halomodelprops, self._mock_galmodelprops)
+        for propname in model_proplist:
+            example_entry = self.model._example_attr_dict[propname]
+            _allocate_ndarray_attr(self, propname, example_entry)
+
+        # Finally, set the primary and secondary (if using) halo properties
+        _allocate_ndarray_attr(self, 'prim_haloprop', 0)
         if hasattr(self.model,'sec_haloprop_key'):
-            self.sec_haloprop = np.zeros(self.Ngals)
+            _allocate_ndarray_attr(self, 'sec_haloprop', 0)
+
+
 
 
 
