@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 
+#Duncan Campbell
+#January 19, 2015
+#Yale University
+
+
 import numpy as np
 
 def main():
-    '''
+    """
     example code calling match()
-    '''
+    """
     
     x = np.random.permutation(np.arange(0,1000))
     x = np.random.permutation(x)
@@ -14,18 +19,22 @@ def main():
     
     print np.all(x[match_into_y]==y[matched_y])
 
+
 def match(x,y):
-    '''
-    determines the indices of matches in list one into list two
+    """
+    a function that determines the indices of matches in x into y
     
-    paramters
-    x: list to be matched
-    y: unique list to matched against
-    
-    retruns:
-    matches: indices in list one that return matches into list 2
-    matched: indices of list 2
-    '''
+    Parameters 
+    ----------
+    x: array_like
+        array to be matched
+    y: array_like
+        unique array to matched against
+
+    Returns 
+    -------
+    matches, matched: indices in list x that return matches into list y, indices of list y
+    """
     
     #check to make sure the second list is unique
     if len(np.unique(y))!=len(y):
