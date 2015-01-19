@@ -186,11 +186,22 @@ class HodMockFactory(object):
                     self._occupation[gal_type])
 
             # Bind all relevant halo properties to the mock
-            for haloprop in self._mock_haloprops:
+            for propname in self._mock_haloprops:
                 # Strip the halo prefix
-                key = haloprop[len(defaults.host_haloprop_prefix):]
-                getattr(self, haloprop)[gal_type_slice] = np.repeat(
-                    self.halos[key], self._occupation[gal_type])
+                halocatkey = propname[len(defaults.host_haloprop_prefix):]
+                getattr(self, propname)[gal_type_slice] = np.repeat(
+                    self.halos[halocatkey], self._occupation[gal_type])
+
+            for propname in self._mock_halomodelprops:
+                getattr(self, propname)[gal_type_slice] = np.repeat(
+                    self.halos[propname], self._occupation[gal_type])
+
+            for propname in self._mock_galmodelprops:
+                getattr(self, propname)[gal_type_slice] = (
+                    self.model.retrieve_component_behavior(self, propname, gal_type)
+                    )
+
+
 
         # Now need to call the phase space models for position and velocity
 
@@ -247,7 +258,6 @@ class HodMockFactory(object):
             setattr(self, propname, 
                 np.zeros(total_entries).reshape(example_shape))
 
-
         for propname in self._mock_galprops:
             example_entry = defaults.galprop_dict[propname]
             _allocate_ndarray_attr(self, propname, example_entry)
@@ -266,8 +276,8 @@ class HodMockFactory(object):
             example_entry = self.model._example_attr_dict[propname]
             _allocate_ndarray_attr(self, propname, example_entry)
 
-        # Finally, set the primary and secondary (if using) halo properties
         _allocate_ndarray_attr(self, 'prim_haloprop', 0)
+        _allocate_ndarray_attr(self, 'gal_type', 0)
         if hasattr(self.model,'sec_haloprop_key'):
             _allocate_ndarray_attr(self, 'sec_haloprop', 0)
 
