@@ -61,6 +61,9 @@ class HodMockFactory(object):
 
         # Create new columns for self.halos associated with each 
         # parameter of the halo profile model, e.g., 'halo_NFW_conc'. 
+        # The function objects that operate on the halos to create new columns 
+        # are bound as values of the param_func_dict dictionary, whose keys 
+        # are the column names to be created with those functions. 
         halo_prof_param_keys = []
         prim_haloprop = self.halos[self.prim_haloprop_key]
         halo_prof_dict = self.model.halo_prof_model.param_func_dict
@@ -77,7 +80,9 @@ class HodMockFactory(object):
     def build_profile_lookup_tables(self, prof_param_table_dict={}):
 
        # Compute the halo profile lookup table, ensuring that the min/max 
-       # range spanned by the halo catalog is covered. 
+       # range spanned by the halo catalog is covered. The grid of parameters 
+       # is defined by a tuple (xlow, xhigh, dx) in prof_param_table_dict, 
+       # whose keys are the name of the halo profile parameter being digitized
         if prof_param_table_dict != {}:
             for key in self.halos.halo_prof_param_keys:
                 dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
@@ -142,7 +147,7 @@ class HodMockFactory(object):
         _mock_haloprops.extend(self.additional_haloprops)
         # Now we use a conditional list comprehension to ensure 
         # that all entries begin with host_haloprop_prefix, 
-        # and also that host_haloprop_prefix is not needlessly duplicated
+        # and also that host_haloprop_prefix is not duplicated
         prefix = defaults.host_haloprop_prefix
         self._mock_haloprops = (
             [entry if entry[0:len(prefix)]==prefix else prefix+entry for entry in _mock_haloprops]
