@@ -4,10 +4,10 @@
 from __future__ import division
 from ..kdtrees.ckdtree import cKDTree
 #import simple pair counter to compare results with ckdtree pair counter
-from ...pairs import npairs
-from ...pairs import pairs
-from ...pairs import wnpairs
-from ...cpairs import pairwise_distances
+from halotools.mock_observables.pair_counters.pairs import npairs
+from halotools.mock_observables.pair_counters.pairs import pairs
+from halotools.mock_observables.pair_counters.pairs import wnpairs
+from halotools.mock_observables.pair_counters.cpairs import pairwise_distances
 #other modules
 import numpy as np
 import sys
