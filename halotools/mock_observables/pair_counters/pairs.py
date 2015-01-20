@@ -7,7 +7,7 @@
 
 
 from __future__ import division, print_function
-from spatial.distances import euclidean_distance as distance
+from halotools.mock_observables.spatial.distances import euclidean_distance as distance
 import numpy as np
 
 __all__=['npairs','wnpairs','pairs']
