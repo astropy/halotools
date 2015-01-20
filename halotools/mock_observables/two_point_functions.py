@@ -338,7 +338,27 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         """
         Count data pairs.
         """
-        if N_threads==1:
+        if comm!=None:
+            if do_auto==True:
+                if rank==0: print('Running MPI pair counter for D1D1 with {0} processes.'.format(comm.size))
+                D1D1 = npairs(sample1, sample1, rbins, period=period, comm=comm)
+                D1D1 = np.diff(D1D1)
+            else: D1D1=None
+            if np.all(sample1 == sample2):
+                D1D2 = D1D1
+                D2D2 = D1D1
+            else:
+                if do_cross==True:
+                    if rank==0: print('Running MPI pair counter for D1D2 with {0} processes.'.format(comm.size))
+                    D1D2 = npairs(sample1, sample2, rbins, period=period, comm=comm)
+                    D1D2 = np.diff(D1D2)
+                else: D1D2=None
+                if do_auto==True:
+                    if rank==0: print('Running MPI pair counter for D2D2 with {0} processes.'.format(comm.size))
+                    D2D2 = npairs(sample2, sample2, rbins, period=period, comm=comm)
+                    D2D2 = np.diff(D2D2)
+                else: D2D2=False
+        elif N_threads==1:
             D1D1 = npairs(sample1, sample1, rbins, period=period)
             D1D1 = np.diff(D1D1)
             if np.all(sample1 == sample2):
@@ -457,6 +477,7 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
 def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10, 
                                              Lbox=[250.0,250.0,250.0], sample2 = None, 
                                              period = None, max_sample_size=int(1e6), 
+                                             do_auto=True, do_cross=True, 
                                              estimator='Natural', N_threads=1, comm=None):
     """
     Calculate the two-point correlation function with jackknife errors. 
@@ -512,6 +533,10 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
 
     """
     
+    #parallel processing things
+    if comm!=None:
+        rank=comm.rank
+    else: rank=0
     if N_threads>1:
         pool = Pool(N_threads)
     
@@ -609,11 +634,37 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         return j_index_1, j_index_2, j_index_random, N_sub_vol
     
     def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,\
-                      period, N_thread, comm):
+                      period, N_thread, do_auto, do_cross, do_DD, comm):
         """
         Count jackknife data pairs: DD
         """
-        if N_threads==1:
+        if comm!=None:
+            if do_auto==True:
+                if rank==0: print('Running MPI pair counter for D1D1 with {0} processes.'.format(comm.size))
+                D1D1 = jnpairs(sample1, sample1, rbins, period=period,\
+                               weights1=j_index_1, weights2=j_index_1,\
+                               N_vol_elements=N_sub_vol, comm=comm)
+                D1D1 = np.diff(D1D1,axis=1)
+            else: D1D1=None
+            if np.all(sample1 == sample2):
+                D1D2 = D1D1
+                D2D2 = D1D1
+            else:
+                if do_cross==True:
+                    if rank==0: print('Running MPI pair counter for D1D2 with {0} processes.'.format(comm.size))
+                    D1D2 = jnpairs(sample1, sample2, rbins, period=period,\
+                                   weights1=j_index_2, weights2=j_index_2,\
+                                   N_vol_elements=N_sub_vol, comm=comm)
+                    D1D2 = np.diff(D1D2,axis=1)
+                else: D1D2=None
+                if do_auto==True:
+                    if rank==0: print('Running MPI pair counter for D2D2 with {0} processes.'.format(comm.size))
+                    D2D2 = jnpairs(sample2, sample2, rbins, period=period,\
+                                   weights1=j_index_2, weights2=j_index_2,\
+                                   N_vol_elements=N_sub_vol, comm=comm)
+                    D2D2 = np.diff(D2D2,axis=1)
+                else: D2D2=False
+        elif N_threads==1:
             D1D1 = jnpairs(sample1, sample1, rbins, period=period,\
                        weights1=j_index_1, weights2=j_index_1, N_vol_elements=N_sub_vol)
             D1D1 = np.diff(D1D1,axis=1)
@@ -652,28 +703,32 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         return D1D1, D1D2, D2D2
     
     def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,\
-                       period, N_thread, comm, calculate_rr=True):
+                       period, N_thread, do_DR, do_RR, comm):
         """
         Count jackknife random pairs: DR, RR
         """
         
         if comm!=None:
-            DR = jnpairs(sample, randoms, rbins, period=period,\
+            if do_DR==True:
+                DR = jnpairs(sample, randoms, rbins, period=period,\
                            weights1=j_index, weights2=j_index_randoms,\
                            N_vol_elements=N_sub_vol, comm=comm)
-            DR = np.diff(DR,axis=1)
-            if calculate_rr==True:
+                DR = np.diff(DR,axis=1)
+            else: DR=None
+            if do_RR==True:
                 RR = jnpairs(randoms, randoms, rbins, period=period,\
                              weights1=j_index_randoms, weights2=j_index_randoms,\
                              N_vol_elements=N_sub_vol, comm=comm)
                 RR = np.diff(RR,axis=1)
             else: RR=None
         elif N_threads==1:
-            DR = jnpairs(sample, randoms, rbins, period=period,\
+            if do_DR==True:
+                DR = jnpairs(sample, randoms, rbins, period=period,\
                            weights1=j_index, weights2=j_index_randoms,\
                            N_vol_elements=N_sub_vol)
-            DR = np.diff(DR,axis=1)
-            if calculate_rr==True:
+                DR = np.diff(DR,axis=1)
+            else: DR=None
+            if do_RR==True:
                 RR = jnpairs(randoms, randoms, rbins, period=period,\
                              weights1=j_index_randoms, weights2=j_index_randoms,\
                              N_vol_elements=N_sub_vol)
@@ -682,11 +737,13 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         else:
             inds1 = np.arange(0,len(sample)) #array which is just indices into sample1
             inds2 = np.arange(0,len(randoms)) #array which is just indices into sample2
-            args = [[sample[chunk],randoms,rbins,period,j_index[chunk],j_index_randoms,N_sub_vol]\
+            if do_DR == True:
+                args = [[sample[chunk],randoms,rbins,period,j_index[chunk],j_index_randoms,N_sub_vol]\
                     for chunk in np.array_split(inds1,N_threads)]
-            DR = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
-            DR = np.diff(DR,axis=1)
-            if calculate_rr==True:
+                DR = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
+                DR = np.diff(DR,axis=1)
+            else: DR = None
+            if do_RR==True:
                 args = [[randoms[chunk],randoms,rbins,period,j_index_randoms[chunk],j_index_randoms,N_sub_vol]\
                        for chunk in np.array_split(inds2,N_threads)]
                 RR = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
@@ -769,7 +826,7 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     
     #calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol,\
-                                     rbins, period, N_threads, comm)
+                                     rbins, period, N_threads, do_auto, do_cross, do_DD, comm)
     D1D1_full = D1D1[0,:]
     D1D1_sub = D1D1[1:,:]
     D1D2_full = D1D2[0,:]
@@ -777,28 +834,41 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     D2D2_full = D2D2[0,:]
     D2D2_sub = D2D2[1:,:]
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,\
-                             rbins, period, N_threads, comm)
+                             rbins, period, N_threads, do_DR, do_RR, comm)
     if np.all(sample1==sample2):
         D2R=D1R
     else:
-        D2R, RR_dummy= jrandom_counts(sample2, randoms, j_index_2, j_index_random,\
-                                      N_sub_vol, rbins, period, N_threads, comm,\
-                                      calculate_rr=False)
-    D1R_full = D1R[0,:]
-    D1R_sub = D1R[1:,:]
-    D2R_full = D2R[0,:]
-    D2R_sub = D2R[1:,:]
-    RR_full = RR[0,:]
-    RR_sub = RR[1:,:]
+        if do_DR==True:
+            D2R, RR_dummy= jrandom_counts(sample2, randoms, j_index_2, j_index_random,\
+                                      N_sub_vol, rbins, period, N_threads, do_DR, False, comm)
+        else: D2R = None
+    
+    if do_DR==True:    
+        D1R_full = D1R[0,:]
+        D1R_sub = D1R[1:,:]
+        D2R_full = D2R[0,:]
+        D2R_sub = D2R[1:,:]
+    else:
+        D1R_full = None
+        D1R_sub = None
+        D2R_full = None
+        D2R_sub = None
+    if do_RR==True:
+        RR_full = RR[0,:]
+        RR_sub = RR[1:,:]
+    else:
+        RR_full = None
+        RR_sub = None
+    
     
     #calculate the correlation function for the full sample
-    xi_11_full  = TP_estimator(D1D1_full,D1R_full,RR_full,N1,N1,NR,NR,estimator)
-    xi_12_full  = TP_estimator(D1D2_full,D1R_full,RR_full,N1,N2,NR,NR,estimator)
-    xi_22_full  = TP_estimator(D2D2_full,D2R_full,RR_full,N2,N2,NR,NR,estimator)
+    xi_11_full = TP_estimator(D1D1_full,D1R_full,RR_full,N1,N1,NR,NR,estimator)
+    xi_12_full = TP_estimator(D1D2_full,D1R_full,RR_full,N1,N2,NR,NR,estimator)
+    xi_22_full = TP_estimator(D2D2_full,D2R_full,RR_full,N2,N2,NR,NR,estimator)
     #calculate the correlation function for the subsamples
-    xi_11_sub  = TP_estimator(D1D1_sub,D1R_sub,RR_sub,N1,N1,NR,NR,estimator)
-    xi_12_sub  = TP_estimator(D1D2_sub,D1R_sub,RR_sub,N1,N2,NR,NR,estimator)
-    xi_22_sub  = TP_estimator(D2D2_sub,D2R_sub,RR_sub,N2,N2,NR,NR,estimator)
+    xi_11_sub = TP_estimator(D1D1_sub,D1R_sub,RR_sub,N1,N1,NR,NR,estimator)
+    xi_12_sub = TP_estimator(D1D2_sub,D1R_sub,RR_sub,N1,N2,NR,NR,estimator)
+    xi_22_sub = TP_estimator(D2D2_sub,D2R_sub,RR_sub,N2,N2,NR,NR,estimator)
     
     #calculate the errors
     xi_11_err = jackknife_errors(xi_11_sub,xi_11_full,N_sub_vol)
