@@ -15,7 +15,7 @@ from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
 def main():
     '''
     example:
-    mpirun -np 4 python npairs_mpi.py output.dat input1.dat input2.dat
+    mpirun -np 4 python mpipairs.py output.dat input1.dat input2.dat
     
     Input files should be formatted as N rows of k columns for N k dimensional points.  
         column headers are ok.  e.g. x y z.  If points have weights attached, these must 
