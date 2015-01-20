@@ -9,7 +9,8 @@ from __future__ import division, print_function
 try: from mpi4py import MPI
 except ImportError:
     print("mpi4py module not available.  MPI functioality will not work.")
-import numpy as np 
+import numpy as np
+from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree 
 
 def main():
     '''
@@ -109,7 +110,6 @@ def npairs(data_1, data_2, bins, period=None, comm=None):
     DD_12: data_1-data_2 pairs (cross-correlation)
     bins
     """
-    from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
     
     if comm==None: 
         rank = 0
@@ -236,7 +236,6 @@ def wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf
     DD_12: data_1-data_2 weighted pairs (cross-correlation)
     bins
     """
-    from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
     
     if comm==None: 
         rank = 0
@@ -381,7 +380,6 @@ def specific_wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2
     -------
     DD_12: data_1-data_2 weighted pairs counts
     """
-    from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
     
     if comm==None: 
         rank = 0
@@ -516,7 +514,6 @@ def jnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, N_
     The first row is the pair counts for the full sample, the remaining i rows are the pair 
     counts in the ith jackknife samples 
     """
-    from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
     
     if comm==None: 
         rank = 0
