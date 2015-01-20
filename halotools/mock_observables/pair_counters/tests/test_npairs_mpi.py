@@ -5,10 +5,11 @@ from __future__ import division, print_function
 import numpy as np
 import sys
 from mpi4py import MPI
-from halotools.mock_observables.npairs_mpi import npairs, wnpairs, jnpairs
+from halotools.mock_observables.pair_counters.mpipairs import npairs, wnpairs, jnpairs
+
 #import simple pair counter to compare results
-from halotools.mock_observables.pairs import npairs as comp_npairs
-from halotools.mock_observables.pairs import wnpairs as comp_wnpairs
+from halotools.mock_observables.pair_counters.pairs import npairs as comp_npairs
+from halotools.mock_observables.pair_counters.pairs import wnpairs as comp_wnpairs
 
 """
 This script tests the functionality of npairs_mpi.py
