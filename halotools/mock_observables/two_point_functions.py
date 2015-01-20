@@ -19,9 +19,10 @@ __all__=['two_point_correlation_function','two_point_correlation_function_jackkn
 ####import modules########################################################################
 import numpy as np
 from math import pi, gamma
+import spatial.geometry as geometry
 from multiprocessing import Pool
 ####try to import the best pair counter###################################################
-try: from pair_counters.npairs_mpi import npairs, wnpairs, specific_wnpairs, jnpairs
+try: from pair_counters.mpipairs import npairs, wnpairs, specific_wnpairs, jnpairs
 except ImportError:
     print "MPI pair counter not available.  MPI functionality will not be supported."
     try: from pair_counters.kdpairs import npairs, wnpairs, specific_wnpairs, jnpairs
