@@ -34,8 +34,14 @@ class HodMockFactory(object):
         # of the composite model to the mock instance. 
         # The self.gal_types list is ordered such that 
         # populations with unity-bounded occupations appear first
-        self.gal_types = self._get_gal_types()
+        self.gal_types, self._occupation_bounds = self._get_gal_types()
 
+        # There are various columns of the halo catalog 
+        # to create in advance of populating a galaxy model. 
+        # For example, a column called 'prim_haloprop' will be made 
+        # in advance of populating any traditional empirical model. 
+        # The composite model bound to the mock contains the instructions to give to 
+        # the process_halo_catalog method about what columns to construct. 
         self.process_halo_catalog()
 
         if populate==True:
@@ -87,29 +93,28 @@ class HodMockFactory(object):
             prof_param_table_dict=prof_param_table_dict)
 
 
-    def _get_gal_types(self):
+    def _get_gal_types(self, testmode=defaults.testmode):
         """ Internal bookkeeping method used to conveniently bind the gal_types of a 
         composite model, and their occupation bounds, to the mock object. 
 
         This method identifies all gal_type strings used in the composite model, 
         and creates an array of those strings, ordered such that gal_types with 
-        unit-bounded occupations (e.g., centrals) appear first. 
+        unity-bounded occupations (e.g., centrals) appear first. 
         """
 
-        # Set the gal_types attribute, sorted so that bounded populations appear first
-        self._occupation_bound = np.array([self.model.occupation_bound[gal_type] 
+        occupation_bound = np.array([self.model.occupation_bound[gal_type] 
             for gal_type in self.model.gal_types])
 
-        if defaults.testmode==True:
-            if (set(self._occupation_bound) != {1, float("inf")}):
+        if testmode==True:
+            if (set(occupation_bound) != {1, float("inf")}):
                 raise ValueError("The only supported finite occupation bound is unity,"
                     " otherwise it must be set to infinity")
 
-        sorted_idx = np.argsort(self._occupation_bound)
-        self._occupation_bound = self._occupation_bound[sorted_idx]
+        sorted_idx = np.argsort(occupation_bound)
+        occupation_bound = occupation_bound[sorted_idx]
         sorted_gal_type_list = self.model.gal_types[sorted_idx]
 
-        return sorted_gal_type_list
+        return sorted_gal_type_list, occupation_bound
 
 
     def _set_mock_attributes(self, testmode=defaults.testmode):
