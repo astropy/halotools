@@ -290,10 +290,15 @@ def aph_spline(table_abcissa, table_ordinates, k=0):
 
 
     if aph_len(table_abcissa) != aph_len(table_ordinates):
-        raise TypeError("table_abcissa and table_abcissa must have the same length")
+        len_abcissa = aph_len(table_abcissa)
+        len_ordinates = aph_len(table_ordinates)
+        raise TypeError("table_abcissa and table_ordinates must have the same length \n"
+            " len(table_abcissa) = %i and len(table_ordinates) = %i" % (len_abcissa, len_ordinates))
 
     if k >= aph_len(table_abcissa):
-        raise ValueError("Input spline degree must be less than len(abcissa)")
+        len_abcissa = aph_len(table_abcissa)
+        raise ValueError("Input spline degree k = %i "
+            "must be less than len(abcissa) = %i" % (k, len_abcissa))
 
     max_scipy_spline_degree = 5
     k = np.min([k, max_scipy_spline_degree])
@@ -308,6 +313,7 @@ def aph_spline(table_abcissa, table_ordinates, k=0):
     else:
         spline_function = spline(table_abcissa, table_ordinates, k=k)
         return spline_function
+
 
 
 
