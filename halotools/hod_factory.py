@@ -59,6 +59,9 @@ class HodModel(object):
             )
         self.publications = []
 
+        # dummy array for now
+        self.additional_haloprops = []
+
     def mean_occupation(self,gal_type,*args):
         """ Method supplying the mean abundance of gal_type galaxies. 
         The behavior of this method is inherited from one of the component models. 
