@@ -1267,7 +1267,7 @@ def angular_two_point_correlation_function(sample1, theta_bins, sample2=None, ra
 
 
 def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.0],
-                randoms=None, period=None, N_threads=1):
+                randoms=None, period=[1.0,1.0,1.0], N_threads=1):
     """
     Calculate the galaxy-galaxy lensing signal, $\Delata\Sigma$.
     
@@ -1318,10 +1318,12 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     length = bounds[1]-bounds[0]
     
     #create cylinders
+    print 'making cylinders for all galaxies...'
     cyls = np.ndarray((N_targets,len(rbins)),dtype=object)
     for i in range(0,N_targets):
         for j in range(0,len(rbins)):
             cyls[i,j] = geometry.cylinder(center=centers[i], radius = rbins[j], length=length, normal=normal)
+    print 'done making cylinders for all galaxies.'
     
     #calculate the number of particles inside each cylinder 
     tree = cKDTree(particles)
@@ -1330,16 +1332,17 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     for j in range(0,len(rbins)):
         dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j].tolist(), tree, period=period)
     print 'here here'
+    
     #numbers in annular bins, N
     N = np.diff(N,axis=1)
     
-    #area of a annular ring, A
+    #area of an annular ring, A
     A = np.pi*rbins**2.0
     A = np.diff(A)
-    print A
     
     #calculate the surface density in annular bins, Sigma
     Sigma = N/A
+    print Sigma
     
     delta_Sigma = np.zeros((N_targets,len(rbins)-1))
     
@@ -1349,9 +1352,10 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
             outer = 1.0/(np.pi*rbins[i]**2.0)
             inner_sum=0.0
             #loop over annular bins internal to the ith one.
-            for n in range(0,i):
-                inner_sum += Sigma[target,n]*A[n]-Sigma[target,i]
-            delta_Sigma[target,i] = inner_sum*outer
+            for n in range(0,i-1):
+                inner_sum += Sigma[target,n]*A[n]
+            print inner_sum, outer
+            delta_Sigma[target,i] = inner_sum*outer-Sigma[target,i]
     
     return np.mean(delta_Sigma, axis=0)
 
