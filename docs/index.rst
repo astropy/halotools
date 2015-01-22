@@ -26,4 +26,13 @@ at andrew-dot-hearin-at-yale-dot-edu.
 Reference/API
 =============
 .. automodapi:: halotools.hod_designer
+.. automodapi:: halotools.make_mocks
+.. automodapi:: halotools.halo_occupation
+.. automodapi:: halotools.occupation_helpers
+.. automodapi:: halotools.mock_factory
+.. automodapi:: halotools.hod_factory
+.. automodapi:: halotools.hod_components
+.. automodapi:: halotools.jeans
+.. automodapi:: halotools.defaults
+.. automodapi:: halotools.read_nbody
 
