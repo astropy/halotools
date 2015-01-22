@@ -33,13 +33,13 @@ class Kravtsov04Cens(object):
 
     """
 
-    def __init__(self,parameter_dict=None,
+    def __init__(self,param_dict=None,
         threshold=defaults.default_luminosity_threshold,
         gal_type='centrals'):
         """
         Parameters 
         ----------
-        parameter_dict : dictionary, optional.
+        param_dict : dictionary, optional.
             Contains values for the parameters specifying the model.
             Dictionary keys are 'logMmin_cen' and 'sigma_logM'
 
@@ -65,14 +65,14 @@ class Kravtsov04Cens(object):
         self.occupation_bound = 1.0
 
         self.threshold = threshold
-        if parameter_dict is None:
-            self.parameter_dict = self.published_parameters(self.threshold)
+        if param_dict is None:
+            self.param_dict = self.published_parameters(self.threshold)
         else:
-            self.parameter_dict = parameter_dict
-        # Put parameter_dict keys in standard form
+            self.param_dict = param_dict
+        # Put param_dict keys in standard form
         correct_keys = self.published_parameters(self.threshold).keys()
-        self.parameter_dict = occuhelp.format_parameter_keys(
-            self.parameter_dict,correct_keys,self.gal_type)
+        self.param_dict = occuhelp.format_parameter_keys(
+            self.param_dict,correct_keys,self.gal_type)
         # get the new keys so that the methods know 
         # how to evaluate their functions
         self.logMmin_key = 'logMmin_'+self.gal_type
@@ -105,8 +105,8 @@ class Kravtsov04Cens(object):
         logM = np.array(logM)
 
         mean_ncen = 0.5*(1.0 + erf(
-            (logM - self.parameter_dict[self.logMmin_key])
-            /self.parameter_dict[self.sigma_logM_key]))
+            (logM - self.param_dict[self.logMmin_key])
+            /self.param_dict[self.sigma_logM_key]))
 
         return mean_ncen
 
@@ -144,7 +144,7 @@ class Kravtsov04Cens(object):
 
         Returns 
         -------
-        parameter_dict : dict
+        param_dict : dict
             Dictionary of model parameters whose values have been set to 
             agree with the values taken from Table 1 of Zheng et al. 2007.
 
@@ -159,7 +159,7 @@ class Kravtsov04Cens(object):
 
         threshold_index = np.where(threshold_array==threshold)[0]
         if len(threshold_index)==1:
-            parameter_dict = {
+            param_dict = {
             'logMmin' : logMmin_array[threshold_index[0]],
             'sigma_logM' : sigma_logM_array[threshold_index[0]]
             }
@@ -167,7 +167,7 @@ class Kravtsov04Cens(object):
             raise ValueError("Input luminosity threshold "
                 "does not match any of the Table 1 values of Zheng et al. 2007 (arXiv:0703457).")
 
-        return parameter_dict
+        return param_dict
 
 
 class Kravtsov04Sats(object):
@@ -176,14 +176,14 @@ class Kravtsov04Sats(object):
 
     """
 
-    def __init__(self,parameter_dict=None,
+    def __init__(self,param_dict=None,
         threshold=defaults.default_luminosity_threshold,
         gal_type='satellites',
         central_occupation_model=None):
         """
         Parameters 
         ----------
-        parameter_dict : dictionary, optional.
+        param_dict : dictionary, optional.
             Contains values for the parameters specifying the model.
             Dictionary keys are 'logMmin_cen' and 'sigma_logM'
 
@@ -220,14 +220,14 @@ class Kravtsov04Sats(object):
                 warnings.warn("Satellite and Central luminosity tresholds do not match")
 
         self.threshold = threshold
-        if parameter_dict is None:
-            self.parameter_dict = self.published_parameters(self.threshold)
+        if param_dict is None:
+            self.param_dict = self.published_parameters(self.threshold)
         else:
-            self.parameter_dict = parameter_dict
-        # Put parameter_dict keys in standard form
+            self.param_dict = param_dict
+        # Put param_dict keys in standard form
         correct_keys = self.published_parameters(self.threshold).keys()
-        self.parameter_dict = occuhelp.format_parameter_keys(
-            self.parameter_dict,correct_keys,self.gal_type)
+        self.param_dict = occuhelp.format_parameter_keys(
+            self.param_dict,correct_keys,self.gal_type)
         # get the new keys so that the methods know 
         # how to evaluate their functions
         self.logM0_key = 'logM0_'+self.gal_type
@@ -261,8 +261,8 @@ class Kravtsov04Sats(object):
         logM = np.array(logM)
         halo_mass = 10.**logM
 
-        M0 = 10.**self.parameter_dict[self.logM0_key]
-        M1 = 10.**self.parameter_dict[self.logM1_key]
+        M0 = 10.**self.param_dict[self.logM0_key]
+        M1 = 10.**self.param_dict[self.logM1_key]
 
         # Call to np.where raises a harmless RuntimeWarning exception if 
         # there are entries of input logM for which mean_nsat = 0
@@ -272,7 +272,7 @@ class Kravtsov04Sats(object):
             warnings.simplefilter("ignore", RuntimeWarning)
             # Simultaneously evaluate mean_nsat and impose the usual cutoff
             mean_nsat = np.where(halo_mass - M0 > 0, 
-                ((halo_mass - M0)/M1)**self.parameter_dict[self.alpha_key], 0)
+                ((halo_mass - M0)/M1)**self.param_dict[self.alpha_key], 0)
 
         #If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
@@ -325,7 +325,7 @@ class Kravtsov04Sats(object):
         Returns 
         -------
 
-        parameter_dict : dict
+        param_dict : dict
             Dictionary of model parameters whose values have been set to 
             agree with the values taken from Table 1 of Zheng et al. 2007.
 
@@ -341,7 +341,7 @@ class Kravtsov04Sats(object):
 
         threshold_index = np.where(threshold_array==threshold)[0]
         if len(threshold_index)==1:
-            parameter_dict = {
+            param_dict = {
             'logM0' : logM0_array[threshold_index[0]],
             'logM1' : logM1_array[threshold_index[0]],
             'alpha' : alpha_array[threshold_index[0]]
@@ -350,7 +350,7 @@ class Kravtsov04Sats(object):
             raise ValueError("Input luminosity threshold "
                 "does not match any of the Table 1 values of Zheng et al. 2007 (arXiv:0703457).")
 
-        return parameter_dict
+        return param_dict
 
 
 
@@ -384,7 +384,7 @@ class vdB03Quiescence(object):
 
     """
 
-    def __init__(self, gal_type, parameter_dict=defaults.default_quiescence_dict, 
+    def __init__(self, gal_type, param_dict=defaults.default_quiescence_dict, 
         interpol_method='spline',input_spline_degree=3):
         """ 
         Parameters 
@@ -394,7 +394,7 @@ class vdB03Quiescence(object):
             `~halotools.hod_factory` to access the behavior of the methods 
             of this class. 
 
-        parameter_dict : dictionary, optional 
+        param_dict : dictionary, optional 
             Dictionary specifying what the quiescent fraction should be 
             at a set of input values of the primary halo property. 
             Default values are set in `halotools.defaults`. 
@@ -403,7 +403,7 @@ class vdB03Quiescence(object):
             Keyword specifying how `mean_quiescence_fraction` 
             evaluates input value of the primary halo property 
             that differ from the small number of values 
-            in self.parameter_dict. 
+            in self.param_dict. 
             The default spline option interpolates the 
             model's abcissa and ordinates. 
             The polynomial option uses the unique, degree N polynomial 
@@ -417,11 +417,11 @@ class vdB03Quiescence(object):
 
         self.gal_type = gal_type
 
-        self.parameter_dict = parameter_dict
-        # Put parameter_dict keys in standard form
+        self.param_dict = param_dict
+        # Put param_dict keys in standard form
         correct_keys = defaults.default_quiescence_dict.keys()
-        self.parameter_dict = occuhelp.format_parameter_keys(
-            self.parameter_dict,correct_keys,self.gal_type)
+        self.param_dict = occuhelp.format_parameter_keys(
+            self.param_dict,correct_keys,self.gal_type)
         self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
         self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
 
@@ -434,10 +434,10 @@ class vdB03Quiescence(object):
             scipy_maxdegree = 5
             self.spline_degree = np.min(
                 [scipy_maxdegree, input_spline_degree, 
-                aph_len(self.parameter_dict[self.abcissa_key])-1])
+                aph_len(self.param_dict[self.abcissa_key])-1])
             self.spline_function = occuhelp.aph_spline(
-                self.parameter_dict[self.abcissa_key],
-                self.parameter_dict[self.ordinates_key],
+                self.param_dict[self.abcissa_key],
+                self.param_dict[self.ordinates_key],
                 k=self.spline_degree)
 
 
@@ -463,11 +463,11 @@ class vdB03Quiescence(object):
         Either assumes the quiescent fraction is a polynomial function 
         of the primary halo property, or is interpolated from a grid. 
         Either way, the behavior of this method is fully determined by 
-        its values at the model abcissa, as specified in parameter_dict. 
+        its values at the model abcissa, as specified in param_dict. 
         """
 
-        model_abcissa = self.parameter_dict[self.abcissa_key]
-        model_ordinates = self.parameter_dict[self.ordinates_key]
+        model_abcissa = self.param_dict[self.abcissa_key]
+        model_ordinates = self.param_dict[self.ordinates_key]
 
         if self.interpol_method=='polynomial':
             mean_quiescence_fraction = occuhelp.polynomial_from_table(

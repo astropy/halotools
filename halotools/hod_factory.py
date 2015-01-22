@@ -58,7 +58,7 @@ class HodModel(object):
         # will propagate to the behavior of the component models, 
         # though the param_dict attributes attached to the component model 
         # instances themselves will not be changed. 
-        self.parameter_dict = (
+        self.param_dict = (
             self.retrieve_all_inherited_parameters(
                 self.component_model_dict)
             )
@@ -188,10 +188,10 @@ class HodModel(object):
 
                 if testmode == True:
                     occuhelp.test_repeated_keys(
-                        output_dict, model_instance.parameter_dict)
+                        output_dict, model_instance.param_dict)
 
                 output_dict = dict(
-                    model_instance.parameter_dict.items() + 
+                    model_instance.param_dict.items() + 
                     output_dict.items())
 
         return output_dict
