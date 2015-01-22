@@ -166,6 +166,10 @@ def test_correct_keys(input_keys,correct_keys):
         raise KeyError("The parameter_dict passed to the initialization "
             "constructor does not contain the expected keys")
 
+def test_repeated_keys(dict1, dict2):
+    intersection = set(dict1) & set(dict2)
+    assert intersection == set()
+
 
 def enforce_periodicity_of_box(coords, box_length):
     """ Function used to apply periodic boundary conditions 

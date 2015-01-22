@@ -52,15 +52,20 @@ class HodModel(object):
         # are assembly biased. 
         self._create_haloprop_keys()
 
-        # The details of how parameters are passed back and forth still need to be worked out
+        # In MCMC applications, the output_dict items define the 
+        # parameter set explored by the likelihood engine. 
+        # Changing the values of the parameters in param_dict 
+        # will propagate to the behavior of the component models, 
+        # though the param_dict attributes attached to the component model 
+        # instances themselves will not be changed. 
         self.parameter_dict = (
             self.retrieve_all_inherited_parameters(
                 self.component_model_dict)
             )
-        self.publications = []
 
-        # dummy array for now
-        self.additional_haloprops = []
+        self.publications = self.retrieve_all_publications(
+            self.component_model_dict)
+
 
     def mean_occupation(self,gal_type,*args):
         """ Method supplying the mean abundance of gal_type galaxies. 
@@ -156,33 +161,65 @@ class HodModel(object):
 
         return output
 
-    def retrieve_all_inherited_parameters(self,component_model_dict):
+    def retrieve_all_inherited_parameters(self,component_model_dict, 
+        testmode=defaults.testmode):
+        """ Method to build a dictionary of parameters for the composite model 
+        by retrieving all the parameters of the component models. 
+
+        Parameters 
+        ----------
+        component_model_dict : dict 
+            Dictionary passed to the HOD factory __init__ constructor 
+            that is used to provide instructions for how to build a 
+            composite model from a set of components. 
+
+        Returns 
+        -------
+        output_dict : dict 
+            Dictionary of all parameters used by all component models. 
+        """
 
         output_dict = {}
 
         # Loop over all galaxy types in the composite model
-        for gal_type, model_list in component_model_dict.iteritems():
+        for gal_type_dict in component_model_dict.values():
             # For each galaxy type, loop over its features
-            for model_feature in model_list:
-                # Check to make sure we're not duplicating any dictionary keys
-                self.test_model_redundancy(
-                    output_dict,model_feature.parameter_dict)
+            for model_instance in gal_type_dict.values():
+
+                if testmode == True:
+                    occuhelp.test_repeated_keys(
+                        output_dict, model_instance.parameter_dict)
+
                 output_dict = dict(
-                    model_feature.parameter_dict.items() + 
+                    model_instance.parameter_dict.items() + 
                     output_dict.items())
 
         return output_dict
 
-    def test_model_redundancy(self,existing_composite_model,new_model_component):
-        """ Check whether the new_model_component dictionary contains 
-        keys that duplicate the keys in the existing_composite_model dictionary.
+    def retrieve_all_publications(self, component_model_dict):
+        """ Method to build a list of publications 
+        associated with each component model. 
 
+        Parameters 
+        ----------
+        component_model_dict : dict 
+            Dictionary passed to the HOD factory __init__ constructor 
+            that is used to provide instructions for how to build a 
+            composite model from a set of components. 
+
+        Returns 
+        -------
+        pub_list : array_like 
         """
+        pub_list = []
 
-        intersection = list(set(existing_composite_model) & set(new_model_component))
-        print(set(existing_composite_model),set(new_model_component))
-        if intersection != []:
-            raise KeyError("New component model contains duplicate parameter keys")
+        # Loop over all galaxy types in the composite model
+        for gal_type_dict in component_model_dict.values():
+            # For each galaxy type, loop over its features
+            for model_instance in gal_type_dict.values():
+                pub_list.extend(model_instance.publications)
+
+        return pub_list
 
     def _create_haloprop_keys(self):
 
