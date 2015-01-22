@@ -1,6 +1,7 @@
-****************
-halotools
-****************
+=======================
+Halotools Documentation
+=======================
+
 
 Welcome to the halotools documentation. Halotools is a python package 
 designed to study large-scale structure, cosmology, and galaxy evolution 
