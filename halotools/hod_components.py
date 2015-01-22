@@ -27,7 +27,6 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
 
-
 class Kravtsov04Cens(object):
     """ Erf function model for the occupation statistics of central galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
@@ -63,7 +62,7 @@ class Kravtsov04Cens(object):
         """
 
         self.gal_type = gal_type
-        self.upper_bound = 1.0
+        self.occupation_bound = 1.0
 
         self.threshold = threshold
         if parameter_dict is None:
@@ -213,7 +212,7 @@ class Kravtsov04Sats(object):
         """
 
         self.gal_type = gal_type
-        self.upper_bound = float("inf")
+        self.occupation_bound = float("inf")
 
         self.central_occupation_model = central_occupation_model
         if self.central_occupation_model is not None:
