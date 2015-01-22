@@ -26,14 +26,29 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
+@six.add_metaclass(ABCMeta)
+class OccupationComponent(object):
+    """ Abstract super class of any occupation model. 
+    Functionality is mostly trivial. 
+    The sole function of the super class is to 
+    standardize the attributes required of any occupation model component. 
+    """
+    def __init__(self, gal_type, haloprop_key_dict, 
+        threshold, occupation_bound):
+        self.gal_type = gal_type
+        self.haloprop_key_dict = haloprop_key_dict
+        self.threshold = threshold
+        self.occupation_bound = occupation_bound
 
-class Kravtsov04Cens(object):
+
+class Kravtsov04Cens(OccupationComponent):
     """ Erf function model for the occupation statistics of central galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
     """
 
     def __init__(self,param_dict=None,
+        haloprop_key_dict=defaults.haloprop_key_dict,
         threshold=defaults.default_luminosity_threshold,
         gal_type='centrals'):
         """
@@ -61,10 +76,12 @@ class Kravtsov04Cens(object):
 
         """
 
-        self.gal_type = gal_type
-        self.occupation_bound = 1.0
+        occupation_bound = 1.0
+        # Call the super class constructor, which binds all the 
+        # arguments to the instance.  
+        OccupationComponent.__init__(gal_type, haloprop_key_dict, 
+            threshold, occupation_bound)
 
-        self.threshold = threshold
         if param_dict is None:
             self.param_dict = self.published_parameters(self.threshold)
         else:
@@ -177,6 +194,7 @@ class Kravtsov04Sats(object):
     """
 
     def __init__(self,param_dict=None,
+        haloprop_key_dict=defaults.haloprop_key_dict,
         threshold=defaults.default_luminosity_threshold,
         gal_type='satellites',
         central_occupation_model=None):
@@ -211,15 +229,17 @@ class Kravtsov04Sats(object):
 
         """
 
-        self.gal_type = gal_type
-        self.occupation_bound = float("inf")
+        occupation_bound = float("inf")
+        # Call the super class constructor, which binds all the 
+        # arguments to the instance.  
+        OccupationComponent.__init__(gal_type, haloprop_key_dict, 
+            threshold, occupation_bound)
 
         self.central_occupation_model = central_occupation_model
         if self.central_occupation_model is not None:
             if threshold != self.central_occupation_model.threshold:
                 warnings.warn("Satellite and Central luminosity tresholds do not match")
 
-        self.threshold = threshold
         if param_dict is None:
             self.param_dict = self.published_parameters(self.threshold)
         else:

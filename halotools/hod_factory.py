@@ -9,6 +9,7 @@ composite HOD models from a set of components.
 __all__ = ['HodModel']
 
 import numpy as np
+import occupation_helpers as occuhelp
 
 class HodModel(object):
     """ Composite HOD model object. 
@@ -66,7 +67,6 @@ class HodModel(object):
         self.publications = self.retrieve_all_publications(
             self.component_model_dict)
 
-
     def mean_occupation(self,gal_type,*args):
         """ Method supplying the mean abundance of gal_type galaxies. 
         The behavior of this method is inherited from one of the component models. 
@@ -78,6 +78,7 @@ class HodModel(object):
         # will be set by the inherited occupation_model object 
         occupation_model = self.component_model_dict[gal_type]['occupation_model']
         inherited_method = occupation_model.mean_occupation
+
         output_occupation = self.retrieve_component_behavior(inherited_method,args)
 
         return output_occupation
@@ -220,6 +221,28 @@ class HodModel(object):
                 pub_list.extend(model_instance.publications)
 
         return pub_list
+
+    def retrieve_relevant_haloprops(self, *args, **kwargs):
+        """ Method returning the arrays that need to be passed 
+        to the component model in order to access its behavior. 
+        """
+
+        if ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()) ):
+            pass
+        elif ( (occuhelp.aph_len(args) > 0) & ('mock_galaxies' not in kwargs.keys()) ):
+            return args
+        elif ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' not in kwargs.keys()) ):
+            raise SyntaxError("Neither an array of halo properties "
+                " nor a mock galaxy population was passed")
+        else ( (occuhelp.aph_len(args) > 0) & ('mock_galaxies' in kwargs.keys()) ):
+            raise SyntaxError("Do not pass both an array of halo properties "
+                " and a mock galaxy population - pick one")
+
+
+
+
+
+
 
     def _create_haloprop_keys(self):
 
