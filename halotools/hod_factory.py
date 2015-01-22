@@ -10,6 +10,7 @@ __all__ = ['HodModel']
 
 import numpy as np
 import occupation_helpers as occuhelp
+import defaults
 
 class HodModel(object):
     """ Composite HOD model object. 
@@ -222,19 +223,27 @@ class HodModel(object):
 
         return pub_list
 
-    def retrieve_relevant_haloprops(self, *args, **kwargs):
+    def retrieve_relevant_haloprops(self, gal_type, component_key, 
+        *args, **kwargs):
         """ Method returning the arrays that need to be passed 
         to the component model in order to access its behavior. 
         """
 
         if ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()) ):
-            pass
+            mock = kwargs['mock_galaxies']
+            haloprop_key_dict = self.component_model_dict[gal_type][component_key].haloprop_key_dict
+            prim_haloprop = mock[haloprop_key_dict['prim_haloprop_key']][mock['gal_type']==gal_type]
+            output_columns = list(prim_haloprop)
+            if 'sec_haloprop_key' in haloprop_key_dict.keys():
+                sec_haloprop = mock[haloprop_key_dict['sec_haloprop_key']][mock['gal_type']==gal_type]
+                output_columns.extend([sec_haloprop])
+            return output_columns
         elif ( (occuhelp.aph_len(args) > 0) & ('mock_galaxies' not in kwargs.keys()) ):
             return args
         elif ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' not in kwargs.keys()) ):
             raise SyntaxError("Neither an array of halo properties "
                 " nor a mock galaxy population was passed")
-        else ( (occuhelp.aph_len(args) > 0) & ('mock_galaxies' in kwargs.keys()) ):
+        else:
             raise SyntaxError("Do not pass both an array of halo properties "
                 " and a mock galaxy population - pick one")
 
