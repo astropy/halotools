@@ -1274,26 +1274,31 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     Parameters
     ----------
     centers: array_like
+        N_galaxies x 3 array of locations of galaxies to calculate $\Delata\Sigma$ around.
     
     particles: array_like
+        N_particles x 3 array of locations ofmatter particles
     
     rbins: array_like
+        location of bin edges
     
     bounds: array_like, optional
+        len(2) array defining how far in fornt and behind a galaxy to integrate over
     
     normal: array_like, optional
-    
-    randoms: array_like, optional
+        len(3) normal vector defining observer - target direction
     
     period: array_like, optional
+        period of simulation box
     
     N_threads: int, optional
-    
+        number of threads to use for calculation
     
     Returns
     -------
     
     Delata_Sigma: np.array
+        len(rbins)-1 array of $\Delata\Sigma$
     """
     from halotools.mock_observables.spatial.geometry import inside_volume
     from halotools.mock_observables.spatial.geometry import cylinder
@@ -1317,21 +1322,18 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     N_targets = len(centers)
     length = bounds[1]-bounds[0]
     
-    #create cylinders
-    print 'making cylinders for all galaxies...'
+    #create cylinders for each galaxy and each radial bin
     cyls = np.ndarray((N_targets,len(rbins)),dtype=object)
     for i in range(0,N_targets):
         for j in range(0,len(rbins)):
-            cyls[i,j] = geometry.cylinder(center=centers[i], radius = rbins[j], length=length, normal=normal)
-    print 'done making cylinders for all galaxies.'
+            cyls[i,j] = geometry.cylinder(center=centers[i], radius = rbins[j],\
+                                          length=length, normal=normal)
     
     #calculate the number of particles inside each cylinder 
     tree = cKDTree(particles)
     N = np.ndarray((len(centers),len(rbins)))
-    print 'here'
     for j in range(0,len(rbins)):
         dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j].tolist(), tree, period=period)
-    print 'here here'
     
     #numbers in annular bins, N
     N = np.diff(N,axis=1)
@@ -1342,7 +1344,6 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     
     #calculate the surface density in annular bins, Sigma
     Sigma = N/A
-    print Sigma
     
     delta_Sigma = np.zeros((N_targets,len(rbins)-1))
     
@@ -1354,7 +1355,6 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
             #loop over annular bins internal to the ith one.
             for n in range(0,i-1):
                 inner_sum += Sigma[target,n]*A[n]
-            print inner_sum, outer
             delta_Sigma[target,i] = inner_sum*outer-Sigma[target,i]
     
     return np.mean(delta_Sigma, axis=0)
