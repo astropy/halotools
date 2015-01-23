@@ -48,8 +48,6 @@ class HodModel(object):
 
         # Create strings used by the MC methods to access the appropriate columns of the 
         # halo table passed by the mock factory
-        # Currently, all behaviors of all galaxy types must use 
-        # the same primary (and, if applicable, secondary) halo property. 
         # Also create a dictionary for which gal_types, and which behaviors, 
         # are assembly biased. 
         self._create_haloprop_keys()
@@ -61,24 +59,68 @@ class HodModel(object):
         # though the param_dict attributes attached to the component model 
         # instances themselves will not be changed. 
         self.param_dict = (
-            self.retrieve_all_inherited_parameters(
+            self.build_composite_param_dict(
                 self.component_model_dict)
             )
 
         self.publications = self.retrieve_all_publications(
             self.component_model_dict)
 
-    def mean_occupation(self,gal_type,*args):
+    def retrieve_relevant_haloprops(self, gal_type, component_key, 
+        *args, **kwargs):
+        """ Method returning the arrays that need to be passed 
+        to a component model in order to access its behavior. 
+        """
+
+        if ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()) ):
+            # In this case, we were passed a full mock galaxy catalog as a keyword argument
+            mock = kwargs['mock_galaxies']
+            # each component model has a dictionary containing the keys of the 
+            # halo catalog that the component model needs from the halo catalog
+            haloprop_key_dict = self.component_model_dict[gal_type][component_key].haloprop_key_dict
+            # All such dictionaries have a key indicating the primary halo property governing the behavior
+            prim_haloprop_key = haloprop_key_dict['prim_haloprop_key']
+            # We were passed the full mock, but this function call only pertains to the slice of 
+            # the arrays that correspond to gal_type galaxies. 
+            # We save time by having pre-computed the relevant slice. 
+            gal_type_slice = mock._gal_type_indices[gal_type]
+            prim_haloprop = getattr(mock, prim_haloprop_key)[gal_type_slice]
+            # Now pack the prim_haloprop array into a 1-element list
+            output_columns = [prim_haloprop]
+            # If there is a secondary halo property used by this component model, 
+            # repeat the above retrieval and extend the list. 
+            if 'sec_haloprop_key' in haloprop_key_dict.keys():
+                sec_haloprop_key = haloprop_key_dict['sec_haloprop_key']
+                sec_haloprop = getattr(mock, sec_haloprop_key)[gal_type_slice]
+                output_columns.extend([sec_haloprop])
+
+            return output_columns
+
+        elif ( (occuhelp.aph_len(args) > 0) & ('mock_galaxies' not in kwargs.keys()) ):
+            # In this case, we were directly passed the relevant arrays
+            return list(args)
+        ###
+        ### Now address the cases where we were passed insensible arguments
+        elif ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' not in kwargs.keys()) ):
+            raise SyntaxError("Neither an array of halo properties "
+                " nor a mock galaxy population was passed")
+        else:
+            raise SyntaxError("Do not pass both an array of halo properties "
+                " and a mock galaxy population - pick one")
+
+    def mean_occupation(self,gal_type,*args, **kwargs):
         """ Method supplying the mean abundance of gal_type galaxies. 
         The behavior of this method is inherited from one of the component models. 
         """
 
         self.test_component_consistency(gal_type,'occupation_model')
 
-        # For galaxies of type gal_type, the behavior of this method 
-        # will be set by the inherited occupation_model object 
+        # The behavior of mean_occupation is inherited by the component model 
         occupation_model = self.component_model_dict[gal_type]['occupation_model']
         inherited_method = occupation_model.mean_occupation
+
+        self.retrieve_relevant_haloprops(gal_type, 'occupation_model', 
+            *args, **kwargs)
 
         output_occupation = self.retrieve_component_behavior(inherited_method,args)
 
@@ -163,8 +205,7 @@ class HodModel(object):
 
         return output
 
-    def retrieve_all_inherited_parameters(self,component_model_dict, 
-        testmode=defaults.testmode):
+    def build_composite_param_dict(self,component_model_dict):
         """ Method to build a dictionary of parameters for the composite model 
         by retrieving all the parameters of the component models. 
 
@@ -188,13 +229,13 @@ class HodModel(object):
             # For each galaxy type, loop over its features
             for model_instance in gal_type_dict.values():
 
-                if testmode == True:
-                    occuhelp.test_repeated_keys(
-                        output_dict, model_instance.param_dict)
+                occuhelp.test_repeated_keys(
+                    output_dict, model_instance.param_dict)
 
                 output_dict = dict(
                     model_instance.param_dict.items() + 
-                    output_dict.items())
+                    output_dict.items()
+                    )
 
         return output_dict
 
@@ -222,35 +263,6 @@ class HodModel(object):
                 pub_list.extend(model_instance.publications)
 
         return pub_list
-
-    def retrieve_relevant_haloprops(self, gal_type, component_key, 
-        *args, **kwargs):
-        """ Method returning the arrays that need to be passed 
-        to the component model in order to access its behavior. 
-        """
-
-        if ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()) ):
-            mock = kwargs['mock_galaxies']
-            haloprop_key_dict = self.component_model_dict[gal_type][component_key].haloprop_key_dict
-            prim_haloprop = mock[haloprop_key_dict['prim_haloprop_key']][mock['gal_type']==gal_type]
-            output_columns = list(prim_haloprop)
-            if 'sec_haloprop_key' in haloprop_key_dict.keys():
-                sec_haloprop = mock[haloprop_key_dict['sec_haloprop_key']][mock['gal_type']==gal_type]
-                output_columns.extend([sec_haloprop])
-            return output_columns
-        elif ( (occuhelp.aph_len(args) > 0) & ('mock_galaxies' not in kwargs.keys()) ):
-            return args
-        elif ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' not in kwargs.keys()) ):
-            raise SyntaxError("Neither an array of halo properties "
-                " nor a mock galaxy population was passed")
-        else:
-            raise SyntaxError("Do not pass both an array of halo properties "
-                " and a mock galaxy population - pick one")
-
-
-
-
-
 
 
     def _create_haloprop_keys(self):
