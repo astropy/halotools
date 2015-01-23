@@ -141,7 +141,7 @@ def projected_distance(x1,x2,los,period=None):
         N by k numpy array of k-dimensional positions. Should be between zero and period.
     
     los : array_like
-        N by k numpy array of k-dimensional los vecotrs.
+        N by k numpy array of k-dimensional los vectors.
     
     period : array_like
         Size of the simulation box along each dimension. Defines periodic boundary 
