@@ -63,7 +63,7 @@ class HodModel(object):
                 self.component_model_dict)
             )
 
-        self.publications = self.retrieve_all_publications(
+        self.publications = self.build_publication_list(
             self.component_model_dict)
 
     def retrieve_relevant_haloprops(self, gal_type, component_key, 
@@ -135,7 +135,7 @@ class HodModel(object):
 
         return output_mc_realization
         
-    def mean_profile_parameters(self,gal_type,*args):
+    def mean_profile_parameters(self,gal_type,*args, **kwargs):
         """ Method returning the mean value of the parameters governing the radial profile 
         of gal_type galaxies. 
         The behavior of this method is inherited from one of the component models.
@@ -147,7 +147,7 @@ class HodModel(object):
 
         return output_profiles
 
-    def mc_coords(self,gal_type,*args):
+    def mc_coords(self,gal_type,*args, **kwargs):
         """ Method returning a Monte Carlo realization of the radial profile. 
         The behavior of this method is inherited from one of the component models.
         """
@@ -179,9 +179,6 @@ class HodModel(object):
 
         return output
  
-
-
-
 
     def build_composite_param_dict(self,component_model_dict):
         """ Method to build a dictionary of parameters for the composite model 
@@ -217,7 +214,7 @@ class HodModel(object):
 
         return output_dict
 
-    def retrieve_all_publications(self, component_model_dict):
+    def build_publication_list(self, component_model_dict):
         """ Method to build a list of publications 
         associated with each component model. 
 
