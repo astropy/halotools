@@ -286,10 +286,10 @@ class Kravtsov04Sats(OccupationComponent):
         
         if self.central_occupation_model is not None:
             # Test thresholds of centrals and satellites are equal
-            if threshold != self.central_occupation_model.threshold:
+            if self.threshold != self.central_occupation_model.threshold:
                 warnings.warn("Satellite and Central luminosity tresholds do not match")
             #
-            self.input_central_param_dict = (
+            self.central_param_dict = (
                 self.central_occupation_model._get_param_dict(
                     input_central_param_dict)
                 )
@@ -323,7 +323,7 @@ class Kravtsov04Sats(OccupationComponent):
             param_dict = input_param_dict
 
         if input_central_param_dict is None:
-            central_param_dict = input_central_param_dict
+            central_param_dict = self.central_param_dict
         else:
             central_param_dict = input_central_param_dict
 
@@ -343,17 +343,17 @@ class Kravtsov04Sats(OccupationComponent):
             mean_nsat = np.where(halo_mass - M0 > 0, 
                 ((halo_mass - M0)/M1)**param_dict[self.alpha_key], 0)
 
-        #If a central occupation model was passed to the constructor, 
+        # If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
         if self.central_occupation_model is not None:
-            mean_nsat = np.where(mean_nsat > 0, 
-                mean_nsat*self.central_occupation_model.mean_occupation(logM, central_param_dict), 
-                mean_nsat)
+            mean_ncen = self.central_occupation_model.mean_occupation(
+                logM, input_param_dict=central_param_dict)
+            mean_nsat = np.where(mean_nsat > 0, mean_nsat*mean_ncen, mean_nsat)
 
         return mean_nsat
 
 
-    def mc_occupation(self,logM):
+    def mc_occupation(self, logM, input_param_dict=None, input_central_param_dict=None):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
         Assumes gal_type galaxies obey Poisson statistics. 
 
@@ -369,7 +369,10 @@ class Kravtsov04Sats(OccupationComponent):
     
         """
 
-        expectation_values = self.mean_occupation(logM)
+        expectation_values = self.mean_occupation(logM, 
+            input_param_dict=input_param_dict, 
+            input_central_param_dict=input_central_param_dict)
+
         # The scipy built-in Poisson number generator raises an exception 
         # if its input is zero, so here we impose a simple workaround
         expectation_values = np.where(expectation_values <=0, 
