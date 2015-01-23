@@ -42,7 +42,7 @@ class OccupationComponent(object):
         self.occupation_bound = occupation_bound
 
     @abstractmethod
-    def _set_param_dict(self):
+    def _get_param_dict(self):
         pass
 
 
@@ -88,19 +88,22 @@ class Kravtsov04Cens(OccupationComponent):
         OccupationComponent.__init__(self, gal_type, haloprop_key_dict, 
             threshold, occupation_bound)
 
-        self._set_param_dict(input_param_dict)
+        self.param_dict = self._get_param_dict(input_param_dict)
 
 
-    def _set_param_dict(self, input_param_dict):
+    def _get_param_dict(self, input_param_dict):
 
         self.logMmin_key = 'logMmin_'+self.gal_type
         self.sigma_logM_key = 'sigma_logM_'+self.gal_type
+
         correct_keys = [self.logMmin_key, self.sigma_logM_key]
         if input_param_dict != None:
             occuhelp.test_correct_keys(input_param_dict, correct_keys)
-            self.param_dict = input_param_dict
+            output_param_dict = input_param_dict
         else:
-            self.param_dict = self.get_published_parameters(self.threshold)
+            output_param_dict = self.get_published_parameters(self.threshold)
+
+        return output_param_dict
 
 
     def mean_occupation(self, logM, input_param_dict=None):
@@ -206,7 +209,7 @@ class Kravtsov04Cens(OccupationComponent):
         return param_dict
 
 
-class Kravtsov04Sats(object):
+class Kravtsov04Sats(OccupationComponent):
     """ Power law model for the occupation statistics of satellite galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
@@ -216,7 +219,7 @@ class Kravtsov04Sats(object):
         haloprop_key_dict=defaults.haloprop_key_dict,
         threshold=defaults.default_luminosity_threshold,
         gal_type='satellites',
-        central_occupation_model=None):
+        central_occupation_model=None, input_central_param_dict=None):
         """
         Parameters 
         ----------
@@ -254,14 +257,12 @@ class Kravtsov04Sats(object):
         OccupationComponent.__init__(self, gal_type, haloprop_key_dict, 
             threshold, occupation_bound)
 
-        self.central_occupation_model = central_occupation_model
-        if self.central_occupation_model is not None:
-            if threshold != self.central_occupation_model.threshold:
-                warnings.warn("Satellite and Central luminosity tresholds do not match")
+        self.param_dict = self._get_param_dict(input_param_dict)
 
-        self._set_param_dict(input_param_dict)
+        self._set_central_behavior(
+            central_occupation_model, input_central_param_dict)
 
-    def _set_param_dict(self, input_param_dict):
+    def _get_param_dict(self, input_param_dict):
 
         # set attribute names for the keys so that the methods know 
         # how to evaluate their functions
@@ -272,13 +273,28 @@ class Kravtsov04Sats(object):
         correct_keys = [self.logM0_key, self.logM1_key, self.alpha_key]
         if input_param_dict != None:
             occuhelp.test_correct_keys(input_param_dict, correct_keys)
-            self.param_dict = input_param_dict
+            output_param_dict = input_param_dict
         else:
-            self.param_dict = self.get_published_parameters(self.threshold)
+            output_param_dict = self.get_published_parameters(self.threshold)
+
+        return output_param_dict
 
 
+    def _set_central_behavior(self, central_occupation_model, input_central_param_dict):
 
-    def mean_occupation(self,logM):
+        self.central_occupation_model = central_occupation_model
+        
+        if self.central_occupation_model is not None:
+            # Test thresholds of centrals and satellites are equal
+            if threshold != self.central_occupation_model.threshold:
+                warnings.warn("Satellite and Central luminosity tresholds do not match")
+            #
+            self.input_central_param_dict = (
+                self.central_occupation_model._get_param_dict(
+                    input_central_param_dict)
+                )
+
+    def mean_occupation(self,logM, input_param_dict=None, input_central_param_dict=None):
         """Expected number of satellite galaxies in a halo of mass logM.
         See Equation 5 of arXiv:0703457.
 
@@ -301,11 +317,21 @@ class Kravtsov04Sats(object):
 
 
         """
+        if input_param_dict is None:
+            param_dict = self.param_dict 
+        else:
+            param_dict = input_param_dict
+
+        if input_central_param_dict is None:
+            central_param_dict = input_central_param_dict
+        else:
+            central_param_dict = input_central_param_dict
+
         logM = np.array(logM)
         halo_mass = 10.**logM
 
-        M0 = 10.**self.param_dict[self.logM0_key]
-        M1 = 10.**self.param_dict[self.logM1_key]
+        M0 = 10.**param_dict[self.logM0_key]
+        M1 = 10.**param_dict[self.logM1_key]
 
         # Call to np.where raises a harmless RuntimeWarning exception if 
         # there are entries of input logM for which mean_nsat = 0
@@ -315,13 +341,13 @@ class Kravtsov04Sats(object):
             warnings.simplefilter("ignore", RuntimeWarning)
             # Simultaneously evaluate mean_nsat and impose the usual cutoff
             mean_nsat = np.where(halo_mass - M0 > 0, 
-                ((halo_mass - M0)/M1)**self.param_dict[self.alpha_key], 0)
+                ((halo_mass - M0)/M1)**param_dict[self.alpha_key], 0)
 
         #If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
         if self.central_occupation_model is not None:
             mean_nsat = np.where(mean_nsat > 0, 
-                mean_nsat*self.central_occupation_model.mean_occupation(logM), 
+                mean_nsat*self.central_occupation_model.mean_occupation(logM, central_param_dict), 
                 mean_nsat)
 
         return mean_nsat
