@@ -85,7 +85,7 @@ class Kravtsov04Cens(OccupationComponent):
         occupation_bound = 1.0
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
-        OccupationComponent.__init__(gal_type, haloprop_key_dict, 
+        OccupationComponent.__init__(self, gal_type, haloprop_key_dict, 
             threshold, occupation_bound)
 
         self._set_param_dict(input_param_dict)
