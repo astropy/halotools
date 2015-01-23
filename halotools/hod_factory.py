@@ -113,37 +113,25 @@ class HodModel(object):
         The behavior of this method is inherited from one of the component models. 
         """
 
-        self.test_component_consistency(gal_type,'occupation_model')
+        component_key = 'occupation_model'
+        method_name = 'mean_occupation'
 
-        # The behavior of mean_occupation is inherited by the component model 
-        occupation_model = self.component_model_dict[gal_type]['occupation_model']
-        inherited_method = occupation_model.mean_occupation
-
-        self.retrieve_relevant_haloprops(gal_type, 'occupation_model', 
-            *args, **kwargs)
-
-        output_occupation = self.retrieve_component_behavior(inherited_method,args)
+        output_occupation = self.retrieve_component_behavior(
+            gal_type, component_key, method_name, *args, **kwargs)
 
         return output_occupation
 
 
-    def mc_occupation(self,gal_type,halo_table):
+    def mc_occupation(self,gal_type,*args, **kwargs):
         """ Method providing a Monte Carlo realization of the mean occupation.
         The behavior of this method is inherited from one of the component models.
         """
 
-        # Retrieve the appropriate columns from halo_table
-        input_haloprops = [halo_table[self.prim_haloprop_key]]
-        assembias_occupation = ((gal_type in self.sec_haloprop_key_dict.keys()) & 
-            ('occupation_model' in self.sec_haloprop_key_dict[gal_type]) )
-        if assembias_occupation == True:
-            input_haloprops.extend([halo_table[self.sec_haloprop_key]])
+        component_key = 'occupation_model'
+        method_name = 'mc_occupation'
 
-        self.test_component_consistency(gal_type,'occupation_model')
-
-        occupation_model = self.component_model_dict[gal_type]['occupation_model']
-        inherited_method = occupation_model.mc_occupation
-        output_mc_realization = self.retrieve_component_behavior(inherited_method,input_haloprops)
+        output_mc_realization = self.retrieve_component_behavior(
+            gal_type, component_key, method_name, *args, **kwargs)
 
         return output_mc_realization
         
@@ -152,8 +140,6 @@ class HodModel(object):
         of gal_type galaxies. 
         The behavior of this method is inherited from one of the component models.
         """
-
-        self.test_component_consistency(gal_type,'profile_model')
 
         profile_model = self.component_model_dict[gal_type]['profile_model']
         inherited_method = profile_model.mean_profile_parameters
@@ -166,44 +152,36 @@ class HodModel(object):
         The behavior of this method is inherited from one of the component models.
         """
 
-        self.test_component_consistency(gal_type,'profile_model')
-
         profile_model = self.component_model_dict[gal_type]['profile_model']
         inherited_method = profile_model.mc_coords
         output_mc_realization = self.retrieve_component_behavior(inherited_method,args)
 
         return output_mc_realization
 
-    def test_component_consistency(self,gal_type,component_key):
-        """ Simple tests to run to make sure that the desired behavior 
-        can be found in the component model.
-        """
 
-        if gal_type not in self.gal_types:
-            raise KeyError("Input gal_type is not supported "
-                "by any of the components of this composite model")         
-
-        if component_key not in self.component_model_dict[gal_type]:
-            raise KeyError("Could not find method to retrieve "
-                " inherited behavior from the provided component model")
-
-    def retrieve_component_behavior(self,inherited_method,*args):
+    def retrieve_component_behavior(self, gal_type, component_key, method_name, 
+        *args, **kwargs):
         """ Wrapper method whose purpose is solely to call the component model methods 
         using the correct number of arguments. Purely for user convenience. 
 
         """
 
-        if len(args)==1:
-            prim_haloprop = args[0]
-            output = inherited_method(prim_haloprop)
-        elif len(args)==2:
-            prim_haloprop, sec_haloprop = args[0], args[1]
-            output = inherited_method(prim_haloprop,sec_haloprop)
-        else:
-            raise TypeError("Only one or two halo property inputs are supported by "
-                "mean_occupation method")
+        # The behavior of mc_occupation is inherited by the component model 
+        component_model_instance = self.component_model_dict[gal_type][component_key]
+        inherited_method = getattr(component_model_instance, method_name)
+
+        # Retrieve the appropriate columns from halo_table
+        haloprop_list = self.retrieve_relevant_haloprops(
+            gal_type, component_key, *args, **kwargs)
+        # haloprop_list is a one- or two-element list of arrays of halo properties. 
+        # Use the * syntax to unpack this list into a sequence of positional arguments. 
+        output = inherited_method(*haloprop_list)
 
         return output
+ 
+
+
+
 
     def build_composite_param_dict(self,component_model_dict):
         """ Method to build a dictionary of parameters for the composite model 
