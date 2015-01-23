@@ -31,7 +31,8 @@ class OccupationComponent(object):
     """ Abstract super class of any occupation model. 
     Functionality is mostly trivial. 
     The sole function of the super class is to 
-    standardize the attributes required of any occupation model component. 
+    standardize the attributes and methods 
+    required of any occupation model component. 
     """
     def __init__(self, gal_type, haloprop_key_dict, 
         threshold, occupation_bound):
@@ -40,6 +41,11 @@ class OccupationComponent(object):
         self.threshold = threshold
         self.occupation_bound = occupation_bound
 
+    @abstractmethod
+    def _set_param_dict(self):
+        pass
+
+
 
 class Kravtsov04Cens(OccupationComponent):
     """ Erf function model for the occupation statistics of central galaxies, 
@@ -47,14 +53,14 @@ class Kravtsov04Cens(OccupationComponent):
 
     """
 
-    def __init__(self,param_dict=None,
+    def __init__(self,input_param_dict=None,
         haloprop_key_dict=defaults.haloprop_key_dict,
         threshold=defaults.default_luminosity_threshold,
         gal_type='centrals'):
         """
         Parameters 
         ----------
-        param_dict : dictionary, optional.
+        input_param_dict : dictionary, optional.
             Contains values for the parameters specifying the model.
             Dictionary keys are 'logMmin_cen' and 'sigma_logM'
 
@@ -82,21 +88,22 @@ class Kravtsov04Cens(OccupationComponent):
         OccupationComponent.__init__(gal_type, haloprop_key_dict, 
             threshold, occupation_bound)
 
-        if param_dict is None:
-            self.param_dict = self.published_parameters(self.threshold)
-        else:
-            self.param_dict = param_dict
-        # Put param_dict keys in standard form
-        correct_keys = self.published_parameters(self.threshold).keys()
-        self.param_dict = occuhelp.format_parameter_keys(
-            self.param_dict,correct_keys,self.gal_type)
-        # get the new keys so that the methods know 
-        # how to evaluate their functions
+        self._set_param_dict(input_param_dict)
+
+
+    def _set_param_dict(self, input_param_dict):
+
         self.logMmin_key = 'logMmin_'+self.gal_type
         self.sigma_logM_key = 'sigma_logM_'+self.gal_type
+        correct_keys = [self.logMmin_key, self.sigma_logM_key]
+        if input_param_dict != None:
+            occuhelp.test_correct_keys(input_param_dict, correct_keys)
+            self.param_dict = input_param_dict
+        else:
+            self.param_dict = self.get_published_parameters(self.threshold)
 
 
-    def mean_occupation(self,logM):
+    def mean_occupation(self, logM, input_param_dict=None):
         """ Expected number of central galaxies in a halo of mass logM.
         See Equation 2 of arXiv:0703457.
 
@@ -119,15 +126,20 @@ class Kravtsov04Cens(OccupationComponent):
         log_{10}M_{min}}{\\sigma_{log_{10}M}} \\right) \\right)`
 
         """
+        if input_param_dict is None:
+            param_dict = self.param_dict 
+        else:
+            param_dict = input_param_dict
+
         logM = np.array(logM)
 
         mean_ncen = 0.5*(1.0 + erf(
-            (logM - self.param_dict[self.logMmin_key])
-            /self.param_dict[self.sigma_logM_key]))
+            (logM - param_dict[self.logMmin_key])
+            /param_dict[self.sigma_logM_key]))
 
         return mean_ncen
 
-    def mc_occupation(self,logM):
+    def mc_occupation(self, logM, input_param_dict=None):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 
         Parameters
@@ -141,13 +153,19 @@ class Kravtsov04Cens(OccupationComponent):
             array of length len(logM) giving the number of self.gal_type galaxies in the halos. 
     
         """
-        mc_generator = np.random.random(aph_len(logM))
-        mc_abundance = np.where(mc_generator < self.mean_occupation(logM), 1, 0)
+        if input_param_dict is None:
+            param_dict = self.param_dict 
+        else:
+            param_dict = input_param_dict
+
+        mc_generator = np.random.uniform(0, 1, aph_len(logM))
+        mc_abundance = np.where(mc_generator < self.mean_occupation(logM, 
+            input_param_dict = param_dict), 1, 0)
 
         return mc_abundance
 
 
-    def published_parameters(self,threshold):
+    def get_published_parameters(self,threshold):
         """
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
 
@@ -177,12 +195,13 @@ class Kravtsov04Cens(OccupationComponent):
         threshold_index = np.where(threshold_array==threshold)[0]
         if len(threshold_index)==1:
             param_dict = {
-            'logMmin' : logMmin_array[threshold_index[0]],
-            'sigma_logM' : sigma_logM_array[threshold_index[0]]
+            self.logMmin_key : logMmin_array[threshold_index[0]],
+            self.sigma_logM_key : sigma_logM_array[threshold_index[0]]
             }
         else:
             raise ValueError("Input luminosity threshold "
-                "does not match any of the Table 1 values of Zheng et al. 2007 (arXiv:0703457).")
+                "does not match any of the Table 1 values of "
+                "Zheng et al. 2007 (arXiv:0703457)")
 
         return param_dict
 
