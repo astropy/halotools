@@ -259,19 +259,23 @@ class Kravtsov04Sats(object):
             if threshold != self.central_occupation_model.threshold:
                 warnings.warn("Satellite and Central luminosity tresholds do not match")
 
-        if param_dict is None:
-            self.param_dict = self.published_parameters(self.threshold)
-        else:
-            self.param_dict = param_dict
-        # Put param_dict keys in standard form
-        correct_keys = self.published_parameters(self.threshold).keys()
-        self.param_dict = occuhelp.format_parameter_keys(
-            self.param_dict,correct_keys,self.gal_type)
-        # get the new keys so that the methods know 
+        self._set_param_dict(input_param_dict)
+
+    def _set_param_dict(self, input_param_dict):
+
+        # set attribute names for the keys so that the methods know 
         # how to evaluate their functions
         self.logM0_key = 'logM0_'+self.gal_type
         self.logM1_key = 'logM1_'+self.gal_type
         self.alpha_key = 'alpha_'+self.gal_type
+
+        correct_keys = [self.logM0_key, self.logM1_key, self.alpha_key]
+        if input_param_dict != None:
+            occuhelp.test_correct_keys(input_param_dict, correct_keys)
+            self.param_dict = input_param_dict
+        else:
+            self.param_dict = self.get_published_parameters(self.threshold)
+
 
 
     def mean_occupation(self,logM):
@@ -349,7 +353,7 @@ class Kravtsov04Sats(object):
 
         return mc_abundance
 
-    def published_parameters(self,threshold):
+    def get_published_parameters(self,threshold):
         """
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
 
@@ -381,16 +385,15 @@ class Kravtsov04Sats(object):
         threshold_index = np.where(threshold_array==threshold)[0]
         if len(threshold_index)==1:
             param_dict = {
-            'logM0' : logM0_array[threshold_index[0]],
-            'logM1' : logM1_array[threshold_index[0]],
-            'alpha' : alpha_array[threshold_index[0]]
+            self.logM0_key : logM0_array[threshold_index[0]],
+            self.logM1_key : logM1_array[threshold_index[0]],
+            self.alpha_key : alpha_array[threshold_index[0]]
             }
         else:
             raise ValueError("Input luminosity threshold "
                 "does not match any of the Table 1 values of Zheng et al. 2007 (arXiv:0703457).")
 
         return param_dict
-
 
 
 class vdB03Quiescence(object):
