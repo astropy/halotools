@@ -212,7 +212,7 @@ class Kravtsov04Sats(object):
 
     """
 
-    def __init__(self,param_dict=None,
+    def __init__(self,input_param_dict=None,
         haloprop_key_dict=defaults.haloprop_key_dict,
         threshold=defaults.default_luminosity_threshold,
         gal_type='satellites',
@@ -251,7 +251,7 @@ class Kravtsov04Sats(object):
         occupation_bound = float("inf")
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
-        OccupationComponent.__init__(gal_type, haloprop_key_dict, 
+        OccupationComponent.__init__(self, gal_type, haloprop_key_dict, 
             threshold, occupation_bound)
 
         self.central_occupation_model = central_occupation_model
