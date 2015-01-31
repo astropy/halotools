@@ -45,10 +45,18 @@ User Documentation
 .. toctree::
    :maxdepth: 1
 
+   sim_analysis/overview
    sim_analysis/halo_catalogs
    sim_analysis/halo_analysis
    sim_analysis/merger_trees
 
+**Tutorials**
+--------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   tutorials/example_tutorial
 
 .. _developer-docs:
 
