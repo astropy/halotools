@@ -39,6 +39,16 @@ User Documentation
    mock_making/models
    mock_making/mock_population
 
+**Simulation analysis tools**
+--------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   sim_analysis/halo_catalogs
+   sim_analysis/halo_analysis
+
+
 .. _developer-docs:
 
 ***********************
