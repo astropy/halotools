@@ -1,7 +1,7 @@
-****************
-Halo catalogs 
-****************
+********************************
+Halo catalog management
+********************************
 
-Halotools comes with a halo catalog manager 
+Here we describe the halo catalog manager 
 that helps you keep track of simulated data, 
 and reduced versions of catalogs.  

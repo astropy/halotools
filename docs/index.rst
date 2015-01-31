@@ -47,6 +47,7 @@ User Documentation
 
    sim_analysis/halo_catalogs
    sim_analysis/halo_analysis
+   sim_analysis/merger_trees
 
 
 .. _developer-docs:
