@@ -37,8 +37,15 @@ the Kravtsov04 class. For example,
 
 For a complete listing of the optional features supported 
 by this pre-built model, see the Kravtsov04 documentation.
+You can read the details about each of the pre-loaded models 
+here: 
 
-
+* Behroozi10, parameterized abundance matching
+* Leauthaud11, an HOD model deriving from a central galaxy stellar-to-halo mass relation
+* Zehavi11, red/blue luminosity-based HOD
+* Hearin13, direct abundance matching
+* Behroozi13, assembly history model based on abundance matching 
+* Tinker13, similar to Leauthaud11, but with quenched and star-forming designations 
 
 
 Composing your own galaxy-halo model
