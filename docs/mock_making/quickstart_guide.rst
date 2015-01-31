@@ -29,16 +29,6 @@ packaged with halotools here :ref:`simulation_list`.
 The options for defaults.default_model 
 are those listed at :ref:`list_of_default_models`
 
-.. _sim_analysis:
-
-========================================================
-Studying pure CDM structure formation trends
-========================================================
-
-Cold dark matter structure formation is interesting in its own right,
-and halotools provides large mix of methods that you can use 
-to study the manifestation of model predictions on various observational 
-statistics. For example. It is interesting to consdier how much a halo gets its ass accretion rate stuppresse as a result o fsome external tidal field 
 
 
 

@@ -25,10 +25,22 @@ of a potentially large amount of simulated data.
 Those lines show that it is possible hold in your hand a full-on 
 single-snapshot catalog of dark matter halos with just one line of code. 
 
-Simulation list
-===============
+List of built-in simulations
+==============================
 
-Bolshoi
---------
+* Bolshoi
+* MultiDark
+* Consuelo
 
-Here I colloquially describe Bolhoi. 
+
+.. _lss_analysis:
+
+Studying structure formation with N-body simulations
+------------------------------------------------------------
+
+Dark matter simulations of cosmological structure formation 
+are interesting in their own right,
+and halotools provides modules that you can use to study them. 
+For example, suppose you are interested in the following question: 
+how does the tidal environment of a dark matter halo 
+impact its mass accretion rate? 

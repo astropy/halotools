@@ -65,7 +65,6 @@ def test_ipynb(fname, enforce_pass=True):
 ########################################################
 ########### MAIN ###########
 
-
 def main():
 	tutorial_list = ['example_tutorial']
 
