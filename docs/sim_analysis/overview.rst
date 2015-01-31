@@ -22,16 +22,10 @@ of a potentially large amount of simulated data.
 	>>> bolshoi_snaplistf = catman.retrieve_particles('bolshoi', z=[0.02,0.25,0.5,0.8])
 	>>> bolshoi_particles_z0 = catman.retrieve_particles('bolshoi_z0')
 
-Those lines show that it is possible hold in your hand a full-on 
-single-snapshot catalog of dark matter halos with just one line of code. 
-
-List of built-in simulations
-==============================
-
-* Bolshoi
-* MultiDark
-* Consuelo
-
+Those lines show that you can retrieve processed snapshot data 
+from one of the built-in simulations with just one line of code. 
+See :ref:`simulation_list` for more information about what simulations come pre-packaged 
+with Halotools. 
 
 .. _lss_analysis:
 

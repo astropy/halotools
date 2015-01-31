@@ -11,5 +11,6 @@ and reduced versions of catalogs.
 List of simulations provided by Halotools
 ------------------------------------------
 
-	* Bolshoi (WMAP5 cosmology, 250Mpc/h box, mptcl=1.35e8 Msun/h, softening=1 kpc/h)
-	* BigBolshoi (WMAP5 cosmology, 1Gpc/h box, mptcl=? Msun/h, softening=? kpc/h)
+	* Bolshoi (WMAP5 cosmology, 250 Mpc/h box, mptcl=1.35e8 Msun/h, softening=1 kpc/h)
+	* BigBolshoi (WMAP5 cosmology, 1 Gpc/h box, mptcl=8.7e9 Msun/h, softening=7 kpc/h)
+	* Consuelo (WMAP5 cosmology, 420 Mpc/h box, mptcl=1.87e9 Msun/h, softening=8 kpc/h)
