@@ -11,5 +11,5 @@ build a mock galaxy population with Halotools.
 Creating a mock galaxy distribution
 =============================================
 
-
+  
 
