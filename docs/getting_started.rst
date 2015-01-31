@@ -17,7 +17,7 @@ that you need for your application:
 
     >>> from halotools import make_mocks
 
-For more detailed information about how to make mocks, see :ref:`halotools-quickstart`
+For more detailed information about how to make mocks, see :ref:`mock_making_quickstart:`
 
     >>> from halotools import model_builder
     >>> from halotools import sim_analysis
