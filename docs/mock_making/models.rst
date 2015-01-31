@@ -20,7 +20,26 @@ each of these three modes of model building below.
 Pre-loaded halo occupation models 
 =================================
 There are numerous specific models that come pre-built 
-into the model building package. 
+into the model building package. After importing 
+the module, each pre-built model can be loaded into 
+memory with a single line of code. 
+
+	>>> from halotools import pre_loaded_models
+	>>> kravtsov04 = pre_loaded_models.Kravtsov04()
+
+This simple call with no arguments builds an 
+instance of a model based on the formulation of the HOD introduced in 
+Kravtsov, et al. 2004. There are several optional keyword arguments 
+that allow you to toggle between different galaxy samples built by 
+the Kravtsov04 class. For example, 
+
+	>>> kravtsov04 = pre_loaded_models.Kravtsov04(luminosity_threshold=-18, redshift_space=True, colors='sdss')
+
+For a complete listing of the optional features supported 
+by this pre-built model, see the Kravtsov04 documentation.
+
+
+
 
 Composing your own galaxy-halo model
 ====================================
