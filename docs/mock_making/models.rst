@@ -58,9 +58,37 @@ The way this works in Halotools is most easily explained by example.
 
 	>>> from halotools.models import hod_designer
 
-The HOD Designer class provides a blueprint 
-that gives instructions to the model factories and mock 
-factories. 
+The HOD Designer class provides a blueprint for building a 
+galaxy-halo model. After you write that blueprint, as described below, 
+you pass it to a model factory, and you get back a 
+you get a composite model. That's model that governs how 
+galaxies are connected to halos. That galaxy-halo model object 
+you get back has a built-in method to populate a mock universe with galaxies 
+in a way that is determined by the parameter values of the model. 
+
+Here we give a few examples of how to build a composite model blueprint. 
+First, a very simple one based on direct abundance matching. 
+
+	>>> galaxies = {model='Hearin13', sm_threshold=9.75}
+
+	>>> centrals = {model='Leauthaud11', sm_threshold=10.5, redshift=0.4}
+	>>> orphans = {model='Jiang15'}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
