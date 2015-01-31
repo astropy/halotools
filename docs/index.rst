@@ -35,7 +35,7 @@ User Documentation
 
    mock_making/overview
    mock_making/quickstart_guide
-   mock_making/simulations 
+   mock_making/simulations
    mock_making/models
    mock_making/mock_population
 

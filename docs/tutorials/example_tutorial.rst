@@ -1,3 +1,6 @@
+*********************************
+Example IPython Notebook Tutorial
+*********************************
 
 .. code:: python
 
