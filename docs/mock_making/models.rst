@@ -37,8 +37,12 @@ the Kravtsov04 class. For example,
 
 For a complete listing of the optional features supported 
 by this pre-built model, see the Kravtsov04 documentation.
-You can read the details about each of the pre-loaded models 
-here: 
+
+
+.. _list_of_default_models: 
+
+List of pre-loaded models 
+--------------------------------
 
 * Behroozi10, parameterized abundance matching
 * Leauthaud11, an HOD model deriving from a central galaxy stellar-to-halo mass relation
