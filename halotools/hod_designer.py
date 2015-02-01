@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 
-The sole purpose of this module is to 
-provide an interface between `halotools.hod_components`
-and `halotools.hod_factory`. 
+This module provides a convenient interface 
+for building composite models from a set of 
+component features. 
 `halotools.hod_designer` creates a set of instructions 
 that is passed to `halotools.hod_factory`, 
 in the form of a dictionary. The dictionary provides 

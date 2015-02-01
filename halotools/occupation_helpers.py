@@ -106,19 +106,19 @@ def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
 
 
 
-def format_parameter_keys(input_parameter_dict,correct_initial_keys,
+def format_parameter_keys(input_param_dict,correct_initial_keys,
     gal_type, key_prefix=None):
     """ Simple method that tests whether the input keys are correct, 
     and if so, appends the key names with the galaxy type that they pertain to.
 
     Parameters 
     ----------
-    input_parameter_dict : dictionary
+    input_param_dict : dictionary
         dictionary of parameters being used by the component model.
 
     correct_initial_keys : list
         list of strings providing the correct set of keys 
-        that input_parameter_dict should have. 
+        that input_param_dict should have. 
 
     gal_type : string
         Galaxy type of the population being modeled by the component model. 
@@ -131,23 +131,23 @@ def format_parameter_keys(input_parameter_dict,correct_initial_keys,
 
     Returns 
     -------
-    output_parameter_dict : dictionary 
-        Provided that the keys of input_parameter_dict are correct, 
+    output_param_dict : dictionary 
+        Provided that the keys of input_param_dict are correct, 
         the output dictionary will be identical to the input, except 
         now each key has the gal_type string appended to it. 
     """
 
-    initial_keys = input_parameter_dict.keys()
+    initial_keys = input_param_dict.keys()
 
     # Check that the keys are correct
-    # They should only be incorrect in cases where parameter_dict 
+    # They should only be incorrect in cases where param_dict 
     # was passed to the initialization constructor
     test_correct_keys(initial_keys, correct_initial_keys)
 #    if set(initial_keys) != set(correct_initial_keys):
-#        raise KeyError("The parameter_dict passed to the initialization "
+#        raise KeyError("The param_dict passed to the initialization "
 #            "constructor does not contain the expected keys")
 
-    output_parameter_dict = copy(input_parameter_dict)
+    output_param_dict = copy(input_param_dict)
 
     key_suffix = '_'+gal_type
     for old_key in initial_keys:
@@ -155,16 +155,20 @@ def format_parameter_keys(input_parameter_dict,correct_initial_keys,
             new_key = key_prefix+'_'+old_key+key_suffix
         else:
             new_key = old_key+key_suffix
-        output_parameter_dict[new_key] = output_parameter_dict.pop(old_key)
+        output_param_dict[new_key] = output_param_dict.pop(old_key)
 
 
-    return output_parameter_dict
+    return output_param_dict
 
 def test_correct_keys(input_keys,correct_keys):
 
     if set(input_keys) != set(correct_keys):
-        raise KeyError("The parameter_dict passed to the initialization "
+        raise KeyError("The param_dict passed to the initialization "
             "constructor does not contain the expected keys")
+
+def test_repeated_keys(dict1, dict2):
+    intersection = set(dict1) & set(dict2)
+    assert intersection == set()
 
 
 def enforce_periodicity_of_box(coords, box_length):
