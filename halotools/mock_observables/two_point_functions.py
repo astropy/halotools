@@ -50,8 +50,9 @@ def _jnpairs_wrapper(tup):
 ##########################################################################################
 
 def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None, 
-                                   period = None, max_sample_size=int(1e6), 
-                                   estimator='Natural', N_threads=1):
+                                   period = None, max_sample_size=int(1e6),
+                                   do_auto=True, do_cross=True, estimator='Natural', 
+                                   N_threads=1, comm=None):
     """ Calculate the two-point correlation function. 
     
     Parameters 
@@ -87,6 +88,14 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
     
     N_thread: int, optional
         number of threads to use in calculation.
+    
+    comm: mpi Intracommunicator object, optional
+    
+    do_auto: boolean, optional
+        do auto-correlation?
+    
+    do_cross: boolean, optional
+        do cross-correlation?
 
     Returns 
     -------
@@ -109,6 +118,10 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
     #periodic distance functions within the pair counter.
     ###############
     
+    #parallel processing things...
+    if comm!=None:
+        rank=comm.rank
+    else: rank=0
     if N_threads>1:
         pool = Pool(N_threads)
     
@@ -169,19 +182,47 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
 
     #If PBCs are defined, calculate the randoms analytically. Else, the user must specify 
     #randoms and the pair counts are calculated the old fashion way.
-    def random_counts(sample1, sample2, randoms, rbins, period, PBCs, k, N_threads):
+    def random_counts(sample1, sample2, randoms, rbins, period, PBCs, k, N_threads, do_RR, do_DR, comm):
         """
-        Count random pairs.
+        Count random pairs.  There are three high level branches: 
+            1. no PBCs w/ randoms.
+            2. PBCs w/ randoms
+            3. PBCs and analytical randoms
+        Within each of those branches there are 3 branches to use:
+            1. MPI
+            2. no threads
+            3. threads
+        There are also logical bits to do RR and DR pair counts, as not all estimators 
+        need one or the other, and not doing these can save a lot of calculation.
         """
         def nball_volume(R,k):
             """
-            Calculate the volume of a n-shpere.
+            Calculate the volume of a n-shpere.  This is used for the analytical randoms.
             """
             return (pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
         
         #No PBCs, randoms must have been provided.
         if PBCs==False:
-            if N_threads==1:
+            if comm!=None:
+                if do_RR==True:
+                    if rank==0: print('Running MPI pair counter for RR with {0} processes.'.format(comm.size))
+                    RR = npairs(randoms, randoms, rbins, comm=comm)
+                    RR = np.diff(RR)
+                else: RR=None
+                if do_DR==True:
+                    if rank==0: print('Running MPI pair counter for D1R with {0} processes.'.format(comm.size))
+                    D1R = npairs(sample1, randoms, rbins, comm=comm)
+                    D1R = np.diff(D1R)
+                else: D1R=None
+                if np.all(sample1 == sample2): #calculating the cross-correlation
+                    D2R = None
+                else:
+                    if do_DR==True:
+                        if rank==0: print('Running MPI pair counter for D2R with {0} processes.'.format(comm.size))
+                        D2R = npairs(sample2, randoms, rbins, comm=comm)
+                        D2R = np.diff(D2R)
+                    else: D2R=None
+            elif N_threads==1:
                 RR = npairs(randoms, randoms, rbins, period=period)
                 RR = np.diff(RR)
                 D1R = npairs(sample1, randoms, rbins, period=period)
@@ -208,29 +249,60 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
             return D1R, D2R, RR
         #PBCs and randoms.
         elif randoms != None:
-            if N_threads==1:
-                RR = npairs(randoms, randoms, rbins, period=period)
-                RR = np.diff(RR)
-                D1R = npairs(sample1, randoms, rbins, period=period)
-                D1R = np.diff(D1R)
+            if comm!=None:
+                if do_RR==True:
+                    if rank==0: print('Running MPI pair counter for RR with {0} processes.'.format(comm.size))
+                    RR = npairs(randoms, randoms, rbins, period=period, comm=comm)
+                    RR = np.diff(RR)
+                else: RR=None
+                if do_DR==True:
+                    if rank==0: print('Running MPI pair counter for D1R with {0} processes.'.format(comm.size))
+                    D1R = npairs(sample1, randoms, rbins, period=period, comm=comm)
+                    D1R = np.diff(D1R)
+                else: D1R=None
                 if np.all(sample1 == sample2): #calculating the cross-correlation
                     D2R = None
                 else:
-                    D2R = npairs(sample2, randoms, rbins, period=period)
-                    D2R = np.diff(D2R)
+                    if do_DR==True:
+                        if rank==0: print('Running MPI pair counter for D2R with {0} processes.'.format(comm.size))
+                        D2R = npairs(sample2, randoms, rbins, period=period, comm=comm)
+                        D2R = np.diff(D2R)
+                    else: D2R=None
+            elif N_threads==1:
+                if do_RR==True:
+                    RR = npairs(randoms, randoms, rbins, period=period)
+                    RR = np.diff(RR)
+                else: RR=None
+                if do_DR==True:
+                    D1R = npairs(sample1, randoms, rbins, period=period)
+                    D1R = np.diff(D1R)
+                else: D1R=None
+                if np.all(sample1 == sample2): #calculating the cross-correlation
+                    D2R = None
+                else:
+                    if do_DR==True:
+                        D2R = npairs(sample2, randoms, rbins, period=period)
+                        D2R = np.diff(D2R)
+                    else: D2R=None
             else:
-                args = [[chunk,randoms,rbins,period] for chunk in np.array_split(randoms,N_threads)]
-                RR = np.sum(pool.map(_npairs_wrapper,args),axis=0)
-                RR = np.diff(RR)
-                args = [[chunk,randoms,rbins,period] for chunk in np.array_split(sample1,N_threads)]
-                D1R = np.sum(pool.map(_npairs_wrapper,args),axis=0)
-                D1R = np.diff(D1R)
+                if do_RR==True:
+                    args = [[chunk,randoms,rbins,period] for chunk in np.array_split(randoms,N_threads)]
+                    RR = np.sum(pool.map(_npairs_wrapper,args),axis=0)
+                    RR = np.diff(RR)
+                else: RR=None
+                if do_DR==True:
+                    args = [[chunk,randoms,rbins,period] for chunk in np.array_split(sample1,N_threads)]
+                    D1R = np.sum(pool.map(_npairs_wrapper,args),axis=0)
+                    D1R = np.diff(D1R)
+                else: D1R=None
                 if np.all(sample1 == sample2): #calculating the cross-correlation
                     D2R = None
                 else:
-                    args = [[chunk,randoms,rbins,period] for chunk in np.array_split(sample2,N_threads)]
-                    D2R = np.sum(pool.map(_npairs_wrapper,args),axis=0)
-                    D2R = np.diff(D2R)
+                    if do_DR==True:
+                        args = [[chunk,randoms,rbins,period] for chunk in np.array_split(sample2,N_threads)]
+                        D2R = np.sum(pool.map(_npairs_wrapper,args),axis=0)
+                        D2R = np.diff(D2R)
+                    else: D2R=None
             
             return D1R, D2R, RR
         #PBCs and no randoms--calculate randoms analytically.
@@ -262,11 +334,31 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
         else:
             raise ValueError('Un-supported combination of PBCs and randoms provided.')
     
-    def pair_counts(sample1, sample2, rbins, period, N_thread):
+    def pair_counts(sample1, sample2, rbins, period, N_thread, do_auto, do_cross, do_DD, comm):
         """
         Count data pairs.
         """
-        if N_threads==1:
+        if comm!=None:
+            if do_auto==True:
+                if rank==0: print('Running MPI pair counter for D1D1 with {0} processes.'.format(comm.size))
+                D1D1 = npairs(sample1, sample1, rbins, period=period, comm=comm)
+                D1D1 = np.diff(D1D1)
+            else: D1D1=None
+            if np.all(sample1 == sample2):
+                D1D2 = D1D1
+                D2D2 = D1D1
+            else:
+                if do_cross==True:
+                    if rank==0: print('Running MPI pair counter for D1D2 with {0} processes.'.format(comm.size))
+                    D1D2 = npairs(sample1, sample2, rbins, period=period, comm=comm)
+                    D1D2 = np.diff(D1D2)
+                else: D1D2=None
+                if do_auto==True:
+                    if rank==0: print('Running MPI pair counter for D2D2 with {0} processes.'.format(comm.size))
+                    D2D2 = npairs(sample2, sample2, rbins, period=period, comm=comm)
+                    D2D2 = np.diff(D2D2)
+                else: D2D2=False
+        elif N_threads==1:
             D1D1 = npairs(sample1, sample1, rbins, period=period)
             D1D1 = np.diff(D1D1)
             if np.all(sample1 == sample2):
@@ -294,56 +386,98 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
 
         return D1D1, D1D2, D2D2
         
-    def TP_estimator(DD,DR,RR,factor,estimator):
+    def TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
         """
         two point correlation function estimator
         """
         if estimator == 'Natural':
-            xi = (1.0/factor**2.0)*DD/RR - 1.0
+            factor = ND1*ND2/(NR1*NR2)
+            xi = (1.0/factor)*DD/RR - 1.0 #DD/RR-1
         elif estimator == 'Davis-Peebles':
-            xi = (1.0/factor)*DD/DR - 1.0
+            factor = ND1*ND2/(ND1*NR2)
+            xi = (1.0/factor)*DD/DR - 1.0 #DD/DR-1
         elif estimator == 'Hewett':
-            xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*DR/RR #(DD-DR)/RR
+            factor1 = ND1*ND2/(NR1*NR2)
+            factor2 = ND1*NR2/(NR1*NR2)
+            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*DR/RR #(DD-DR)/RR
         elif estimator == 'Hamilton':
-            xi = (DD*RR)/(DR*DR) - 1.0
+            xi = (DD*RR)/(DR*DR) - 1.0 #DDRR/DRDR-1
         elif estimator == 'Landy-Szalay':
-            xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*2.0*DR/RR + 1.0 #(DD - 2.0*DR + RR)/RR
+            factor1 = ND1*ND2/(NR1*NR2)
+            factor2 = ND1*NR2/(NR1*NR2)
+            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*2.0*DR/RR + 1.0 #(DD - 2.0*DR + RR)/RR
         else: 
             raise ValueError("unsupported estimator!")
         return xi
+    
+    def TP_estimator_requirements(estimator):
+        """
+        return booleans indicating which pairs need to be counted for the chosen estimator
+        """
+        if estimator == 'Natural':
+            do_DD = True
+            do_DR = False
+            do_RR = True
+        elif estimator == 'Davis-Peebles':
+            do_DD = True
+            do_DR = True
+            do_RR = False
+        elif estimator == 'Hewett':
+            do_DD = True
+            do_DR = True
+            do_RR = True
+        elif estimator == 'Hamilton':
+            do_DD = True
+            do_DR = True
+            do_RR = True
+        elif estimator == 'Landy-Szalay':
+            do_DD = True
+            do_DR = True
+            do_RR = True
+        else: 
+            raise ValueError("unsupported estimator!")
+        return do_DD, do_DR, do_RR
+    
+    do_DD, do_DR, do_RR = TP_estimator_requirements(estimator)
               
-    if randoms != None:
-        factor1 = (len(sample1)*1.0)/len(randoms)
-        factor2 = (len(sample2)*1.0)/len(randoms)
-        factor3 = (len(sample1)**0.5)*((len(sample2)**0.5))/len(randoms)
+    if np.all(randoms != None):
+        N1 = len(sample1)
+        N2 = len(sample2)
+        NR = len(randoms)
     else: 
-        factor1 = 1.0
-        factor2 = 1.0
-        factor3 = 1.0
+        N1 = 1.0
+        N2 = 1.0
+        NR = 1.0
     
     #count pairs
-    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rbins, period, N_threads)
-    D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period, PBCs, k, N_threads) 
+    if rank==0: print('counting data pairs...')
+    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rbins, period, N_threads, do_auto, do_cross, do_DD, comm)
+    if rank==0: print('counting random pairs...')
+    D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period, PBCs, k, N_threads, do_RR, do_DR, comm)
+    if rank==0: print('done counting pairs') 
     
     if np.all(sample2==sample1):
-        xi_11 = TP_estimator(D1D1,D1R,RR,factor1,estimator)
+        xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
-    elif (PBCs==True) & (randoms == None): 
-        #Analytical randoms used. D1R1=R1R1, D2R2=R2R2, and R1R2=RR. See random_counts().
-        xi_11 = TP_estimator(D1D1,D1R,D1R,1.0,estimator)
-        xi_12 = TP_estimator(D1D2,D1R,RR,1.0,estimator)
-        xi_22 = TP_estimator(D2D2,D2R,D2R,1.0,estimator)
-        return xi_11, xi_12, xi_22
     else:
-        xi_11 = TP_estimator(D1D1,D1R,RR,factor1,estimator)
-        xi_12 = TP_estimator(D1D2,D1R,RR,factor3,estimator)
-        xi_22 = TP_estimator(D2D2,D2R,RR,factor2,estimator)
-        return xi_11, xi_12, xi_22
+        if (do_auto==True) & (do_cross==True): 
+            xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+            xi_12 = TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            xi_22 = TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
+            return xi_11, xi_12, xi_22
+        elif (do_cross==True):
+            xi_12 = TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            return xi_12
+        elif (do_auto==True):
+            xi_11 = TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
+            xi_22 = TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
+            return xi_11
 
 
 def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10, 
                                              Lbox=[250.0,250.0,250.0], sample2 = None, 
                                              period = None, max_sample_size=int(1e6), 
+                                             do_auto=True, do_cross=True, 
                                              estimator='Natural', N_threads=1, comm=None):
     """
     Calculate the two-point correlation function with jackknife errors. 
@@ -399,6 +533,10 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
 
     """
     
+    #parallel processing things
+    if comm!=None:
+        rank=comm.rank
+    else: rank=0
     if N_threads>1:
         pool = Pool(N_threads)
     
@@ -496,11 +634,37 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         return j_index_1, j_index_2, j_index_random, N_sub_vol
     
     def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,\
-                      period, N_thread, comm):
+                      period, N_thread, do_auto, do_cross, do_DD, comm):
         """
         Count jackknife data pairs: DD
         """
-        if N_threads==1:
+        if comm!=None:
+            if do_auto==True:
+                if rank==0: print('Running MPI pair counter for D1D1 with {0} processes.'.format(comm.size))
+                D1D1 = jnpairs(sample1, sample1, rbins, period=period,\
+                               weights1=j_index_1, weights2=j_index_1,\
+                               N_vol_elements=N_sub_vol, comm=comm)
+                D1D1 = np.diff(D1D1,axis=1)
+            else: D1D1=None
+            if np.all(sample1 == sample2):
+                D1D2 = D1D1
+                D2D2 = D1D1
+            else:
+                if do_cross==True:
+                    if rank==0: print('Running MPI pair counter for D1D2 with {0} processes.'.format(comm.size))
+                    D1D2 = jnpairs(sample1, sample2, rbins, period=period,\
+                                   weights1=j_index_2, weights2=j_index_2,\
+                                   N_vol_elements=N_sub_vol, comm=comm)
+                    D1D2 = np.diff(D1D2,axis=1)
+                else: D1D2=None
+                if do_auto==True:
+                    if rank==0: print('Running MPI pair counter for D2D2 with {0} processes.'.format(comm.size))
+                    D2D2 = jnpairs(sample2, sample2, rbins, period=period,\
+                                   weights1=j_index_2, weights2=j_index_2,\
+                                   N_vol_elements=N_sub_vol, comm=comm)
+                    D2D2 = np.diff(D2D2,axis=1)
+                else: D2D2=False
+        elif N_threads==1:
             D1D1 = jnpairs(sample1, sample1, rbins, period=period,\
                        weights1=j_index_1, weights2=j_index_1, N_vol_elements=N_sub_vol)
             D1D1 = np.diff(D1D1,axis=1)
@@ -539,28 +703,32 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         return D1D1, D1D2, D2D2
     
     def jrandom_counts(sample, randoms, j_index, j_index_randoms, N_sub_vol, rbins,\
-                       period, N_thread, comm, calculate_rr=True):
+                       period, N_thread, do_DR, do_RR, comm):
         """
         Count jackknife random pairs: DR, RR
         """
         
         if comm!=None:
-            DR = jnpairs(sample, randoms, rbins, period=period,\
+            if do_DR==True:
+                DR = jnpairs(sample, randoms, rbins, period=period,\
                            weights1=j_index, weights2=j_index_randoms,\
                            N_vol_elements=N_sub_vol, comm=comm)
-            DR = np.diff(DR,axis=1)
-            if calculate_rr==True:
+                DR = np.diff(DR,axis=1)
+            else: DR=None
+            if do_RR==True:
                 RR = jnpairs(randoms, randoms, rbins, period=period,\
                              weights1=j_index_randoms, weights2=j_index_randoms,\
                              N_vol_elements=N_sub_vol, comm=comm)
                 RR = np.diff(RR,axis=1)
             else: RR=None
         elif N_threads==1:
-            DR = jnpairs(sample, randoms, rbins, period=period,\
+            if do_DR==True:
+                DR = jnpairs(sample, randoms, rbins, period=period,\
                            weights1=j_index, weights2=j_index_randoms,\
                            N_vol_elements=N_sub_vol)
-            DR = np.diff(DR,axis=1)
-            if calculate_rr==True:
+                DR = np.diff(DR,axis=1)
+            else: DR=None
+            if do_RR==True:
                 RR = jnpairs(randoms, randoms, rbins, period=period,\
                              weights1=j_index_randoms, weights2=j_index_randoms,\
                              N_vol_elements=N_sub_vol)
@@ -569,11 +737,13 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         else:
             inds1 = np.arange(0,len(sample)) #array which is just indices into sample1
             inds2 = np.arange(0,len(randoms)) #array which is just indices into sample2
-            args = [[sample[chunk],randoms,rbins,period,j_index[chunk],j_index_randoms,N_sub_vol]\
+            if do_DR == True:
+                args = [[sample[chunk],randoms,rbins,period,j_index[chunk],j_index_randoms,N_sub_vol]\
                     for chunk in np.array_split(inds1,N_threads)]
-            DR = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
-            DR = np.diff(DR,axis=1)
-            if calculate_rr==True:
+                DR = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
+                DR = np.diff(DR,axis=1)
+            else: DR = None
+            if do_RR==True:
                 args = [[randoms[chunk],randoms,rbins,period,j_index_randoms[chunk],j_index_randoms,N_sub_vol]\
                        for chunk in np.array_split(inds2,N_threads)]
                 RR = np.sum(pool.map(_jnpairs_wrapper,args),axis=0)
@@ -582,23 +752,57 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
 
         return DR, RR
         
-    def TP_estimator(DD,DR,RR,factor,estimator):
+    def TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
         """
         two point correlation function estimator
         """
         if estimator == 'Natural':
-            xi = (1.0/factor**2.0)*DD/RR - 1.0
+            factor = ND1*ND2/(NR1*NR2)
+            xi = (1.0/factor)*DD/RR - 1.0 #DD/RR-1
         elif estimator == 'Davis-Peebles':
-            xi = (1.0/factor)*DD/DR - 1.0
+            factor = ND1*ND2/(ND1*NR2)
+            xi = (1.0/factor)*DD/DR - 1.0 #DD/DR-1
         elif estimator == 'Hewett':
-            xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*DR/RR #(DD-DR)/RR
+            factor1 = ND1*ND2/(NR1*NR2)
+            factor2 = ND1*NR2/(NR1*NR2)
+            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*DR/RR #(DD-DR)/RR
         elif estimator == 'Hamilton':
-            xi = (DD*RR)/(DR*DR) - 1.0
+            xi = (DD*RR)/(DR*DR) - 1.0 #DDRR/DRDR-1
         elif estimator == 'Landy-Szalay':
-            xi = (1.0/factor**2.0)*DD/RR - (1.0/factor)*2.0*DR/RR + 1.0 #(DD - 2.0*DR + RR)/RR
+            factor1 = ND1*ND2/(NR1*NR2)
+            factor2 = ND1*NR2/(NR1*NR2)
+            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*2.0*DR/RR + 1.0 #(DD - 2.0*DR + RR)/RR
         else: 
             raise ValueError("unsupported estimator!")
         return xi
+    
+    def TP_estimator_requirements(estimator):
+        """
+        return booleans indicating which pairs need to be counted for the chosen estimator
+        """
+        if estimator == 'Natural':
+            do_DD = True
+            do_DR = False
+            do_RR = True
+        elif estimator == 'Davis-Peebles':
+            do_DD = True
+            do_DR = True
+            do_RR = False
+        elif estimator == 'Hewett':
+            do_DD = True
+            do_DR = True
+            do_RR = True
+        elif estimator == 'Hamilton':
+            do_DD = True
+            do_DR = True
+            do_RR = True
+        elif estimator == 'Landy-Szalay':
+            do_DD = True
+            do_DR = True
+            do_RR = True
+        else: 
+            raise ValueError("unsupported estimator!")
+        return do_DD, do_DR, do_RR
     
     def jackknife_errors(sub,full,N_sub_vol):
         """
@@ -611,17 +815,18 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         
         return error
     
-    #ratio of the number of data points to random points
-    factor1 = (len(sample1)*1.0)/len(randoms)
-    factor2 = (len(sample2)*1.0)/len(randoms)
-    factor3 = (len(sample1)**0.5)*((len(sample2)**0.5))/len(randoms)
+    do_DD, do_DR, do_RR = TP_estimator_requirements(estimator)
+    
+    N1 = len(sample1)
+    N2 = len(sample2)
+    NR = len(randoms)
     
     j_index_1, j_index_2, j_index_random, N_sub_vol = \
                                get_subvolume_labels(sample1, sample2, randoms, Nsub, Lbox)
     
     #calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol,\
-                                     rbins, period, N_threads, comm)
+                                     rbins, period, N_threads, do_auto, do_cross, do_DD, comm)
     D1D1_full = D1D1[0,:]
     D1D1_sub = D1D1[1:,:]
     D1D2_full = D1D2[0,:]
@@ -629,28 +834,41 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     D2D2_full = D2D2[0,:]
     D2D2_sub = D2D2[1:,:]
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,\
-                             rbins, period, N_threads, comm)
+                             rbins, period, N_threads, do_DR, do_RR, comm)
     if np.all(sample1==sample2):
         D2R=D1R
     else:
-        D2R, RR_dummy= jrandom_counts(sample2, randoms, j_index_2, j_index_random,\
-                                      N_sub_vol, rbins, period, N_threads, comm,\
-                                      calculate_rr=False)
-    D1R_full = D1R[0,:]
-    D1R_sub = D1R[1:,:]
-    D2R_full = D2R[0,:]
-    D2R_sub = D2R[1:,:]
-    RR_full = RR[0,:]
-    RR_sub = RR[1:,:]
+        if do_DR==True:
+            D2R, RR_dummy= jrandom_counts(sample2, randoms, j_index_2, j_index_random,\
+                                      N_sub_vol, rbins, period, N_threads, do_DR, False, comm)
+        else: D2R = None
+    
+    if do_DR==True:    
+        D1R_full = D1R[0,:]
+        D1R_sub = D1R[1:,:]
+        D2R_full = D2R[0,:]
+        D2R_sub = D2R[1:,:]
+    else:
+        D1R_full = None
+        D1R_sub = None
+        D2R_full = None
+        D2R_sub = None
+    if do_RR==True:
+        RR_full = RR[0,:]
+        RR_sub = RR[1:,:]
+    else:
+        RR_full = None
+        RR_sub = None
+    
     
     #calculate the correlation function for the full sample
-    xi_11_full  = TP_estimator(D1D1_full,D1R_full,RR_full,factor1,estimator)
-    xi_12_full  = TP_estimator(D1D2_full,D1R_full,RR_full,factor3,estimator)
-    xi_22_full  = TP_estimator(D2D2_full,D2R_full,RR_full,factor2,estimator)
+    xi_11_full = TP_estimator(D1D1_full,D1R_full,RR_full,N1,N1,NR,NR,estimator)
+    xi_12_full = TP_estimator(D1D2_full,D1R_full,RR_full,N1,N2,NR,NR,estimator)
+    xi_22_full = TP_estimator(D2D2_full,D2R_full,RR_full,N2,N2,NR,NR,estimator)
     #calculate the correlation function for the subsamples
-    xi_11_sub  = TP_estimator(D1D1_sub,D1R_sub,RR_sub,factor1,estimator)
-    xi_12_sub  = TP_estimator(D1D2_sub,D1R_sub,RR_sub,factor3,estimator)
-    xi_22_sub  = TP_estimator(D2D2_sub,D2R_sub,RR_sub,factor2,estimator)
+    xi_11_sub = TP_estimator(D1D1_sub,D1R_sub,RR_sub,N1,N1,NR,NR,estimator)
+    xi_12_sub = TP_estimator(D1D2_sub,D1R_sub,RR_sub,N1,N2,NR,NR,estimator)
+    xi_22_sub = TP_estimator(D2D2_sub,D2R_sub,RR_sub,N2,N2,NR,NR,estimator)
     
     #calculate the errors
     xi_11_err = jackknife_errors(xi_11_sub,xi_11_full,N_sub_vol)
@@ -1049,33 +1267,38 @@ def angular_two_point_correlation_function(sample1, theta_bins, sample2=None, ra
 
 
 def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.0],
-                randoms=None, period=None, N_threads=1):
+                randoms=None, period=[1.0,1.0,1.0], N_threads=1):
     """
     Calculate the galaxy-galaxy lensing signal, $\Delata\Sigma$.
     
     Parameters
     ----------
     centers: array_like
+        N_galaxies x 3 array of locations of galaxies to calculate $\Delata\Sigma$ around.
     
     particles: array_like
+        N_particles x 3 array of locations ofmatter particles
     
     rbins: array_like
+        location of bin edges
     
     bounds: array_like, optional
+        len(2) array defining how far in fornt and behind a galaxy to integrate over
     
     normal: array_like, optional
-    
-    randoms: array_like, optional
+        len(3) normal vector defining observer - target direction
     
     period: array_like, optional
+        period of simulation box
     
     N_threads: int, optional
-    
+        number of threads to use for calculation
     
     Returns
     -------
     
     Delata_Sigma: np.array
+        len(rbins)-1 array of $\Delata\Sigma$
     """
     from halotools.mock_observables.spatial.geometry import inside_volume
     from halotools.mock_observables.spatial.geometry import cylinder
@@ -1099,26 +1322,25 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     N_targets = len(centers)
     length = bounds[1]-bounds[0]
     
-    #create cylinders
+    #create cylinders for each galaxy and each radial bin
     cyls = np.ndarray((N_targets,len(rbins)),dtype=object)
     for i in range(0,N_targets):
         for j in range(0,len(rbins)):
-            cyls[i,j] = geometry.cylinder(center=centers[i], radius = rbins[j], length=length, normal=normal)
+            cyls[i,j] = geometry.cylinder(center=centers[i], radius = rbins[j],\
+                                          length=length, normal=normal)
     
     #calculate the number of particles inside each cylinder 
     tree = cKDTree(particles)
     N = np.ndarray((len(centers),len(rbins)))
-    print 'here'
     for j in range(0,len(rbins)):
         dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j].tolist(), tree, period=period)
-    print 'here here'
+    
     #numbers in annular bins, N
     N = np.diff(N,axis=1)
     
-    #area of a annular ring, A
+    #area of an annular ring, A
     A = np.pi*rbins**2.0
     A = np.diff(A)
-    print A
     
     #calculate the surface density in annular bins, Sigma
     Sigma = N/A
@@ -1131,9 +1353,9 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
             outer = 1.0/(np.pi*rbins[i]**2.0)
             inner_sum=0.0
             #loop over annular bins internal to the ith one.
-            for n in range(0,i):
-                inner_sum += Sigma[target,n]*A[n]-Sigma[target,i]
-            delta_Sigma[target,i] = inner_sum*outer
+            for n in range(0,i-1):
+                inner_sum += Sigma[target,n]*A[n]
+            delta_Sigma[target,i] = inner_sum*outer-Sigma[target,i]
     
     return np.mean(delta_Sigma, axis=0)
 

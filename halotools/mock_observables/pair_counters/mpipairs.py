@@ -193,7 +193,7 @@ def npairs(data_1, data_2, bins, period=None, comm=None):
     return DD_12
 
 
-def wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf=None, comm=None):
+def wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf=None, aux1=None, aux2=None, comm=None):
     """
     Calculate the weighted number of pairs with separations less than or equal to rbins[i].
     
@@ -221,8 +221,12 @@ def wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf
         
     weights2: array_like, optional
         length N2 array containing weights used for weighted pair counts, w1*w2.
-        wf: ckdtree.Function object , weighting function. None uses standard return w1*w2.
-        comm: mpi Intracommunicator object, or None (run on one core)
+    
+    aux1: array_like, optional
+        length N1 array containing secondary weights used for weighted pair counts.
+        
+    aux2: array_like, optional
+        length N2 array containing secondary weights used for weighted pair counts.
     
     wf: function object, optional
         weighting function.  default is w(w1,w2) returns w1*w2
@@ -275,6 +279,23 @@ def wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf
             raise ValueError("weights_2 should have same len as data_2")
             return None
     
+    #Process aux1 entry and check for consistency.
+    if aux1 is None:
+            aux1 = np.array([1.0]*np.shape(data_1)[0], dtype=np.float64)
+    else:
+        aux1 = np.asarray(aux1).astype("float64")
+        if np.shape(aux1)[0] != np.shape(data_1)[0]:
+            raise ValueError("aux1 should have same len as data_1")
+            return None
+    #Process aux2 entry and check for consistency.
+    if aux2 is None:
+            aux2 = np.array([1.0]*np.shape(data_2)[0], dtype=np.float64)
+    else:
+        aux2 = np.asarray(aux2).astype("float64")
+        if np.shape(aux2)[0] != np.shape(data_2)[0]:
+            raise ValueError("weights_2 should have same len as data_2")
+            return None
+    
     N1 = len(data_1)
     N2 = len(data_2)
     
@@ -310,7 +331,7 @@ def wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf
     #counts_22 = KDT_2_small.wcount_neighbors(KDT_2, bins, period=period,\
     #    sweights=weights2[inds2], oweights=weights2, w=wf)
     counts_12 = KDT_1_small.wcount_neighbors(KDT_2, bins, period=period,\
-        sweights=weights1[inds1], oweights=weights2, w=wf)
+        sweights=weights1[inds1], oweights=weights2, w=wf, saux=aux1[inds1], oaux=aux2)
     #DD_11     = counts_11
     #DD_22     = counts_22
     DD_12     = counts_12
@@ -339,7 +360,7 @@ def wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf
     return DD_12
 
 
-def specific_wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf=None, comm=None):
+def specific_wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2=None, wf=None, aux1=None, aux2=None, comm=None):
     """
     Calculate the weighted number of pairs with separations less than or equal to rbins[i]
     for each point in data_1.
@@ -368,8 +389,12 @@ def specific_wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2
         
     weights2: array_like, optional
         length N2 array containing weights used for weighted pair counts, w1*w2.
-        wf: ckdtree.Function object , weighting function. None uses standard return w1*w2.
-        comm: mpi Intracommunicator object, or None (run on one core)
+    
+    aux1: array_like, optional
+        length N1 array containing secondary weights used for weighted pair counts.
+        
+    aux2: array_like, optional
+        length N2 array containing secondary weights used for weighted pair counts.
     
     wf: function object, optional
         weighting function.  default is w(w1,w2) returns w1*w2
@@ -419,6 +444,23 @@ def specific_wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2
             raise ValueError("weights_2 should have same len as data_2")
             return None
     
+    #Process aux1 entry and check for consistency.
+    if aux1 is None:
+            aux1 = np.array([1.0]*np.shape(data_1)[0], dtype=np.float64)
+    else:
+        aux1 = np.asarray(aux1).astype("float64")
+        if np.shape(aux1)[0] != np.shape(data_1)[0]:
+            raise ValueError("aux1 should have same len as data_1")
+            return None
+    #Process aux2 entry and check for consistency.
+    if aux2 is None:
+            aux2 = np.array([1.0]*np.shape(data_2)[0], dtype=np.float64)
+    else:
+        aux2 = np.asarray(aux2).astype("float64")
+        if np.shape(aux2)[0] != np.shape(data_2)[0]:
+            raise ValueError("weights_2 should have same len as data_2")
+            return None
+    
     N1 = len(data_1)
     N2 = len(data_2)
     
@@ -450,7 +492,8 @@ def specific_wnpairs(data_1, data_2, bins, period=None , weights1=None, weights2
     
     #count!
     counts_12 = KDT_1_small.wcount_neighbors_custom(KDT_2, bins, period=period,\
-                            sweights=weights1[inds1], oweights=weights2, w=wf)
+                            sweights=weights1[inds1], oweights=weights2, w=wf,\
+                            saux=aux1[inds1], oaux=aux2)
     DD_12     = counts_12
     
     if comm==None:

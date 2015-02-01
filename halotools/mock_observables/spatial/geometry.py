@@ -298,91 +298,15 @@ class cylinder(volume):
             period = np.asarray(period).astype("float64")
         if period.shape[0]!=3: raise ValueError('period must be None or have shape (3,)')
         
-        if np.max(period)==np.inf:
-            #define coordinate origin
-            x0,y0,z0 = np.array(self.center)
-            #recenter on origin
-            x = x-x0
-            y = y-y0
-            z = z-z0
-            #calculate new basis vectors
-            v1 = self.normal
-            #generate a random vector that is not parallel to v1
-            ran_v = np.random.random(3)
-            angle = np.dot(v1,ran_v)/(np.sqrt(np.dot(v1,v1)*np.dot(ran_v,ran_v)))
-            while angle<0.02:
-                ran_v = np.random.random(3)
-                angle = np.dot(v1,ran_v)/(np.sqrt(np.dot(v1,v1)*np.dot(ran_v,ran_v)))
+        from halotools.mock_observables.spatial.distances import projected_distance
         
-            #define new basis vectors
-            e1= np.array([1,0,0])
-            e2= np.array([0,1,0])
-            e3= np.array([0,0,1])
-            v1 = v1/np.sqrt(v1[0]**2.0+v1[1]**2.0+v1[2]**2.0) #normalize
-            v2 = np.cross(v1,ran_v)
-            v2 = v2/np.sqrt(v2[0]**2.0+v2[1]**2.0+v2[2]**2.0) #normalize
-            v3 = np.cross(v1,v2)
-            v3 = v3/np.sqrt(v3[0]**2.0+v3[1]**2.0+v3[2]**2.0) #normalize
+        #need to repeat this in order to use distance calculation
+        center = np.tile(self.center,(N,1))
+        normal = np.tile(self.normal,(N,1))
         
-            #calculate coordinate of point given new basis        
-            Q = np.array([[np.dot(e1,v1),np.dot(e1,v2),np.dot(e1,v3)],
-                      [np.dot(e2,v1),np.dot(e2,v2),np.dot(e2,v3)],
-                      [np.dot(e3,v1),np.dot(e3,v2),np.dot(e3,v3)],])
-            xp,yp,zp = np.dot(Q.T,np.array([x,y,z]))
+        d_para, d_perp = projected_distance(center,points,normal,period=period)
         
-            L_proj = np.fabs(xp)
-            R_proj = np.sqrt(yp**2.0+zp**2.0)
-            
-            result = (L_proj<self.length/2.0) & (R_proj<self.radius)
-    
-        else:
-            cases = np.array([[False,False,False],\
-                              [True,False,False],[True,True,False],[True,True,True],\
-                              [False,True,False],[False,True,True],\
-                              [False,False,True]])
-            dir = np.array(self.center)>period/2.0
-            period[dir] = -period[dir]
-            reflections = cases*period
-            result = np.empty((N,), dtype=bool)
-            result.fill(False)
-            for reflection in reflections:
-                #define coordinate origin
-                x0,y0,z0 = reflection+np.array(self.center)
-                #recenter on origin
-                xp = x-x0
-                yp = y-y0
-                zp = z-z0
-                #calculate new basis vectors
-                v1 = self.normal
-                #generate a random vector that is not parallel to v1
-                ran_v = np.random.random(3)
-                angle = np.dot(v1,ran_v)/(np.sqrt(np.dot(v1,v1)*np.dot(ran_v,ran_v)))
-                while angle<0.02:
-                        ran_v = np.random.random(3)
-                        angle = np.dot(v1,ran_v)/(np.sqrt(np.dot(v1,v1)*np.dot(ran_v,ran_v)))
-        
-                #define new basis vectors
-                e1= np.array([1,0,0])
-                e2= np.array([0,1,0])
-                e3= np.array([0,0,1])
-                v1 = v1/np.sqrt(v1[0]**2.0+v1[1]**2.0+v1[2]**2.0) #normalize
-                v2 = np.cross(v1,ran_v)
-                v2 = v2/np.sqrt(v2[0]**2.0+v2[1]**2.0+v2[2]**2.0) #normalize
-                v3 = np.cross(v1,v2)
-                v3 = v3/np.sqrt(v3[0]**2.0+v3[1]**2.0+v3[2]**2.0) #normalize
-        
-                #calculate coordinate of point given new basis        
-                Q = np.array([[np.dot(e1,v1),np.dot(e1,v2),np.dot(e1,v3)],
-                              [np.dot(e2,v1),np.dot(e2,v2),np.dot(e2,v3)],
-                              [np.dot(e3,v1),np.dot(e3,v2),np.dot(e3,v3)],])
-                xp,yp,zp = np.dot(Q.T,np.array([xp,yp,zp]))
-        
-                L_proj = np.fabs(xp)
-                R_proj = np.sqrt(yp**2.0+zp**2.0)
-                
-                result = result + np.array((L_proj<self.length/2.0) & (R_proj<self.radius))
-
-        return result
+        return (d_para<self.length/2.0) & (d_perp<self.radius)
 
 
 def inside_volume(shapes, points, period=None):
