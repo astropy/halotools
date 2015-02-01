@@ -26,5 +26,8 @@ features you are interested in studying.
 
     >>> from halotools import sim_analysis
 
+Halotools comes with halo/merger tree catalog management and analysis tools, 
+documented in the :ref:`sim_analysis`. 
+
 
 

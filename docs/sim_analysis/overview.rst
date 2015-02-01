@@ -5,15 +5,17 @@
 Overview of simulation analysis tools 
 ****************************************
 
-We now describe the functionality of Halotools 
-related to the study of pure halo-level 
-trends, in the absence of any galaxy evolution model ansatz. 
+Halotools can be used to study the assembly history and environmental 
+trends of dark matter halos. 
+
+.. _cat_manage:
 
 Catalog management 
 --------------------
 
 Halotools provides bookeeping tools to keep track 
-of a potentially large amount of simulated data. 
+of a potentially large amount of simulated data, 
+and also your various reductions of that data. 
 
 	>>> from  halotools import catalog_manager as catman
 	>>> print(catalog_manager.available_simulations)
