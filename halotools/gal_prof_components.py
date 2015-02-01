@@ -148,7 +148,7 @@ class RadProfBias(object):
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
 
-        self.set_parameter_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
+        self.set_param_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
 
         self._setup_interpol(interpol_method, input_spline_degree)
 
@@ -316,9 +316,9 @@ class RadProfBias(object):
         This is because abcissa values will never vary in an MCMC, whereas 
         ordinate values will. All halotools models are set up so that 
         all model parameters varied by an MCMC walker have their values stored 
-        in a parameter_dict dictionary. Thus the ordinate values 
+        in a param_dict dictionary. Thus the ordinate values 
         that actually govern the behavior of `get_modulated_prof_params` 
-        must be stored in RadProfBias.parameter_dict, and when those values 
+        must be stored in RadProfBias.param_dict, and when those values 
         are updated the behavior of `get_modulated_prof_params` needs to vary accordingly. 
         The primary purpose of this private method is to produce that behavior. 
         """
@@ -326,7 +326,7 @@ class RadProfBias(object):
         abcissa = self.abcissa_dict[profile_parameter_key]
 
         # We need to access the up-to-date ordinate values 
-        # through self.parameter_dict, which is how the outside world modifies the 
+        # through self.param_dict, which is how the outside world modifies the 
         # model parameters. The keys to this dictionary are strings such as 
         # 'halo_NFW_conc_pari_gal_type', whose value is the i^th ordinate. 
         # However, dictionaries have no intrinsic ordering, so in order to 
@@ -335,13 +335,13 @@ class RadProfBias(object):
         ordinates = []
         for ipar in range(len(self.ordinates_dict)):
             key_ipar = self._get_parameter_key(profile_parameter_key, ipar)
-            value_ipar = self.parameter_dict[key_ipar]
+            value_ipar = self.param_dict[key_ipar]
             ordinates.extend([value_ipar])
 
  
         return abcissa, ordinates
 
-    def set_parameter_dict(self, 
+    def set_param_dict(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
         """ Method used to set up dictionaries governing the behavior of the 
         profile modulating function. 
@@ -376,11 +376,11 @@ class RadProfBias(object):
             self.abcissa_dict = input_abcissa_dict
             self.ordinates_dict = input_ordinates_dict
 
-        self.parameter_dict={}
+        self.param_dict={}
         for prof_param_key, ordinates in self.ordinates_dict.iteritems():
             for ii, val in enumerate(ordinates):
                 key = self._get_parameter_key(prof_param_key, ii)
-                self.parameter_dict[key] = val
+                self.param_dict[key] = val
 
         self.param_keys = self.abcissa_dict.keys()
 
@@ -390,7 +390,7 @@ class RadProfBias(object):
 
     def _test_sensible_inputs(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
-        """ Private method to verify that `set_parameter_dict` was passed 
+        """ Private method to verify that `set_param_dict` was passed 
         a reasonable set of inputs. 
         """
 
@@ -453,7 +453,7 @@ class RadProfBias(object):
             _setup_spline(self)
 
     def _get_parameter_key(self, profile_parameter_key, ipar):
-        """ Private method used to retrieve the key of self.parameter_dict 
+        """ Private method used to retrieve the key of self.param_dict 
         that corresponds to the appropriately selected i^th ordinate defining 
         `radprof_modfunc`. 
         """

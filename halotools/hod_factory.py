@@ -9,6 +9,8 @@ composite HOD models from a set of components.
 __all__ = ['HodModel']
 
 import numpy as np
+import occupation_helpers as occuhelp
+import defaults
 
 class HodModel(object):
     """ Composite HOD model object. 
@@ -23,17 +25,17 @@ class HodModel(object):
     """
 
     def __init__(self, halo_prof_model, component_model_dict):
-        """ The methods of this class derives their behavior from other, external classes, 
+        """ The methods of this class derive their behavior from other, external classes, 
         passed in the form of the component_model_dict, a dictionary whose keys 
         are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
-        The values of the component_model_dict are themselves dictionaries whose keys are 
-        strings specifying the type of model being passed, e.g., 'occupation_model', and values 
+        The values of the component_model_dict are themselves dictionaries whose keys  
+        specify the type of model being passed, e.g., 'occupation_model', and values 
         are instances of that type of model. The component_model_dict dictionary is built by 
         the hod_designer interface. The input halo_prof_model is an instance of the class 
         governing the assumed profile of the underlying halos. 
 
         """
-        # Bind the model-making instructions to the composite model
+        # Bind the model-building instructions to the composite model
         self.halo_prof_model = halo_prof_model
         self.component_model_dict = component_model_dict
 
@@ -42,69 +44,102 @@ class HodModel(object):
         self.occupation_bound = {}
         for gal_type in self.gal_types:
             self.occupation_bound[gal_type] = (
-                self.component_model_dict[gal_type]['occupation_model'].upper_bound)
+                self.component_model_dict[gal_type]['occupation_model'].occupation_bound)
 
         # Create strings used by the MC methods to access the appropriate columns of the 
         # halo table passed by the mock factory
-        # Currently, all behaviors of all galaxy types must use 
-        # the same primary (and, if applicable, secondary) halo property. 
         # Also create a dictionary for which gal_types, and which behaviors, 
         # are assembly biased. 
         self._create_haloprop_keys()
 
-        # The details of how parameters are passed back and forth still need to be worked out
-        self.parameter_dict = (
-            self.retrieve_all_inherited_parameters(
+        # In MCMC applications, the output_dict items define the 
+        # parameter set explored by the likelihood engine. 
+        # Changing the values of the parameters in param_dict 
+        # will propagate to the behavior of the component models, 
+        # though the param_dict attributes attached to the component model 
+        # instances themselves will not be changed. 
+        self.param_dict = (
+            self.build_composite_param_dict(
                 self.component_model_dict)
             )
-        self.publications = []
 
-        # dummy array for now
-        self.additional_haloprops = []
+        self.publications = self.build_publication_list(
+            self.component_model_dict)
 
-    def mean_occupation(self,gal_type,*args):
+    def retrieve_relevant_haloprops(self, gal_type, component_key, 
+        *args, **kwargs):
+        """ Method returning the arrays that need to be passed 
+        to a component model in order to access its behavior. 
+        """
+
+        if ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()) ):
+            # In this case, we were passed a full mock galaxy catalog as a keyword argument
+            mock = kwargs['mock_galaxies']
+            # each component model has a dictionary containing the keys of the 
+            # halo catalog that the component model needs from the halo catalog
+            haloprop_key_dict = self.component_model_dict[gal_type][component_key].haloprop_key_dict
+            # All such dictionaries have a key indicating the primary halo property governing the behavior
+            prim_haloprop_key = haloprop_key_dict['prim_haloprop_key']
+            # We were passed the full mock, but this function call only pertains to the slice of 
+            # the arrays that correspond to gal_type galaxies. 
+            # We save time by having pre-computed the relevant slice. 
+            gal_type_slice = mock._gal_type_indices[gal_type]
+            prim_haloprop = getattr(mock, prim_haloprop_key)[gal_type_slice]
+            # Now pack the prim_haloprop array into a 1-element list
+            output_columns = [prim_haloprop]
+            # If there is a secondary halo property used by this component model, 
+            # repeat the above retrieval and extend the list. 
+            if 'sec_haloprop_key' in haloprop_key_dict.keys():
+                sec_haloprop_key = haloprop_key_dict['sec_haloprop_key']
+                sec_haloprop = getattr(mock, sec_haloprop_key)[gal_type_slice]
+                output_columns.extend([sec_haloprop])
+
+            return output_columns
+
+        elif ( (occuhelp.aph_len(args) > 0) & ('mock_galaxies' not in kwargs.keys()) ):
+            # In this case, we were directly passed the relevant arrays
+            return list(args)
+        ###
+        ### Now address the cases where we were passed insensible arguments
+        elif ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' not in kwargs.keys()) ):
+            raise SyntaxError("Neither an array of halo properties "
+                " nor a mock galaxy population was passed")
+        else:
+            raise SyntaxError("Do not pass both an array of halo properties "
+                " and a mock galaxy population - pick one")
+
+    def mean_occupation(self,gal_type,*args, **kwargs):
         """ Method supplying the mean abundance of gal_type galaxies. 
         The behavior of this method is inherited from one of the component models. 
         """
 
-        self.test_component_consistency(gal_type,'occupation_model')
+        component_key = 'occupation_model'
+        method_name = 'mean_occupation'
 
-        # For galaxies of type gal_type, the behavior of this method 
-        # will be set by the inherited occupation_model object 
-        occupation_model = self.component_model_dict[gal_type]['occupation_model']
-        inherited_method = occupation_model.mean_occupation
-        output_occupation = self.retrieve_component_behavior(inherited_method,args)
+        output_occupation = self.retrieve_component_behavior(
+            gal_type, component_key, method_name, *args, **kwargs)
 
         return output_occupation
 
 
-    def mc_occupation(self,gal_type,halo_table):
+    def mc_occupation(self,gal_type,*args, **kwargs):
         """ Method providing a Monte Carlo realization of the mean occupation.
         The behavior of this method is inherited from one of the component models.
         """
 
-        # Retrieve the appropriate columns from halo_table
-        input_haloprops = [halo_table[self.prim_haloprop_key]]
-        assembias_occupation = ((gal_type in self.sec_haloprop_key_dict.keys()) & 
-            ('occupation_model' in self.sec_haloprop_key_dict[gal_type]) )
-        if assembias_occupation == True:
-            input_haloprops.extend([halo_table[self.sec_haloprop_key]])
+        component_key = 'occupation_model'
+        method_name = 'mc_occupation'
 
-        self.test_component_consistency(gal_type,'occupation_model')
-
-        occupation_model = self.component_model_dict[gal_type]['occupation_model']
-        inherited_method = occupation_model.mc_occupation
-        output_mc_realization = self.retrieve_component_behavior(inherited_method,input_haloprops)
+        output_mc_realization = self.retrieve_component_behavior(
+            gal_type, component_key, method_name, *args, **kwargs)
 
         return output_mc_realization
         
-    def mean_profile_parameters(self,gal_type,*args):
+    def mean_profile_parameters(self,gal_type,*args, **kwargs):
         """ Method returning the mean value of the parameters governing the radial profile 
         of gal_type galaxies. 
         The behavior of this method is inherited from one of the component models.
         """
-
-        self.test_component_consistency(gal_type,'profile_model')
 
         profile_model = self.component_model_dict[gal_type]['profile_model']
         inherited_method = profile_model.mean_profile_parameters
@@ -112,12 +147,10 @@ class HodModel(object):
 
         return output_profiles
 
-    def mc_coords(self,gal_type,*args):
+    def mc_coords(self,gal_type,*args, **kwargs):
         """ Method returning a Monte Carlo realization of the radial profile. 
         The behavior of this method is inherited from one of the component models.
         """
-
-        self.test_component_consistency(gal_type,'profile_model')
 
         profile_model = self.component_model_dict[gal_type]['profile_model']
         inherited_method = profile_model.mc_coords
@@ -125,64 +158,87 @@ class HodModel(object):
 
         return output_mc_realization
 
-    def test_component_consistency(self,gal_type,component_key):
-        """ Simple tests to run to make sure that the desired behavior 
-        can be found in the component model.
-        """
 
-        if gal_type not in self.gal_types:
-            raise KeyError("Input gal_type is not supported "
-                "by any of the components of this composite model")         
-
-        if component_key not in self.component_model_dict[gal_type]:
-            raise KeyError("Could not find method to retrieve "
-                " inherited behavior from the provided component model")
-
-    def retrieve_component_behavior(self,inherited_method,*args):
+    def retrieve_component_behavior(self, gal_type, component_key, method_name, 
+        *args, **kwargs):
         """ Wrapper method whose purpose is solely to call the component model methods 
         using the correct number of arguments. Purely for user convenience. 
 
         """
 
-        if len(args)==1:
-            prim_haloprop = args[0]
-            output = inherited_method(prim_haloprop)
-        elif len(args)==2:
-            prim_haloprop, sec_haloprop = args[0], args[1]
-            output = inherited_method(prim_haloprop,sec_haloprop)
-        else:
-            raise TypeError("Only one or two halo property inputs are supported by "
-                "mean_occupation method")
+        # The behavior of mc_occupation is inherited by the component model 
+        component_model_instance = self.component_model_dict[gal_type][component_key]
+        inherited_method = getattr(component_model_instance, method_name)
+
+        # Retrieve the appropriate columns from halo_table
+        haloprop_list = self.retrieve_relevant_haloprops(
+            gal_type, component_key, *args, **kwargs)
+        # haloprop_list is a one- or two-element list of arrays of halo properties. 
+        # Use the * syntax to unpack this list into a sequence of positional arguments. 
+        output = inherited_method(*haloprop_list)
 
         return output
+ 
 
-    def retrieve_all_inherited_parameters(self,component_model_dict):
+    def build_composite_param_dict(self,component_model_dict):
+        """ Method to build a dictionary of parameters for the composite model 
+        by retrieving all the parameters of the component models. 
+
+        Parameters 
+        ----------
+        component_model_dict : dict 
+            Dictionary passed to the HOD factory __init__ constructor 
+            that is used to provide instructions for how to build a 
+            composite model from a set of components. 
+
+        Returns 
+        -------
+        output_dict : dict 
+            Dictionary of all parameters used by all component models. 
+        """
 
         output_dict = {}
 
         # Loop over all galaxy types in the composite model
-        for gal_type, model_list in component_model_dict.iteritems():
+        for gal_type_dict in component_model_dict.values():
             # For each galaxy type, loop over its features
-            for model_feature in model_list:
-                # Check to make sure we're not duplicating any dictionary keys
-                self.test_model_redundancy(
-                    output_dict,model_feature.parameter_dict)
+            for model_instance in gal_type_dict.values():
+
+                occuhelp.test_repeated_keys(
+                    output_dict, model_instance.param_dict)
+
                 output_dict = dict(
-                    model_feature.parameter_dict.items() + 
-                    output_dict.items())
+                    model_instance.param_dict.items() + 
+                    output_dict.items()
+                    )
 
         return output_dict
 
-    def test_model_redundancy(self,existing_composite_model,new_model_component):
-        """ Check whether the new_model_component dictionary contains 
-        keys that duplicate the keys in the existing_composite_model dictionary.
+    def build_publication_list(self, component_model_dict):
+        """ Method to build a list of publications 
+        associated with each component model. 
 
+        Parameters 
+        ----------
+        component_model_dict : dict 
+            Dictionary passed to the HOD factory __init__ constructor 
+            that is used to provide instructions for how to build a 
+            composite model from a set of components. 
+
+        Returns 
+        -------
+        pub_list : array_like 
         """
+        pub_list = []
 
-        intersection = list(set(existing_composite_model) & set(new_model_component))
-        print(set(existing_composite_model),set(new_model_component))
-        if intersection != []:
-            raise KeyError("New component model contains duplicate parameter keys")
+        # Loop over all galaxy types in the composite model
+        for gal_type_dict in component_model_dict.values():
+            # For each galaxy type, loop over its features
+            for model_instance in gal_type_dict.values():
+                pub_list.extend(model_instance.publications)
+
+        return pub_list
+
 
     def _create_haloprop_keys(self):
 
