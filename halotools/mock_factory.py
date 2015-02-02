@@ -78,8 +78,8 @@ class HodMockFactory(object):
         # are the column names to be created with those functions. 
         halo_prof_param_keys = []
         prim_haloprop = self.halos[self.prim_haloprop_key]
-        halo_prof_dict = self.model.halo_prof_model.param_func_dict
-        for key, prof_param_func in halo_prof_dict.iteritems():
+        function_dict = self.model.halo_prof_model.param_func_dict
+        for key, prof_param_func in function_dict.iteritems():
             self.halos[key] = prof_param_func(prim_haloprop)
             halo_prof_param_keys.extend([key])
         # Create a convenient bookkeeping device to keep track of the 
@@ -95,7 +95,7 @@ class HodMockFactory(object):
        # range spanned by the halo catalog is covered. The grid of parameters 
        # is defined by a tuple (xlow, xhigh, dx) in prof_param_table_dict, 
        # whose keys are the name of the halo profile parameter being digitized
-        if prof_param_table_dict != {}:
+        if prof_param_table_dict == {}:
             for key in self.halos.halo_prof_param_keys:
                 dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
                 halocat_parmin = self.halos[key].min() - dpar
