@@ -208,7 +208,6 @@ class NFWProfile(HaloProfileModel):
         # For this, we use Python's functools
         conc_mass_func = functools.partial(
             conc_mass_model_instance.conc_mass, model=conc_mass_relation_key)
-        conc_mass_model_instance.conc_mass
         # Now bind this function object up into a dictionary
         # This saves us from some hard-coding, since non-standard profiles 
         # will have entirely different names for their halo-parameter relations, 
