@@ -20,10 +20,11 @@ class ConcMass(object):
 
     def __init__(self, cosmology=defaults.default_cosmology, 
         redshift = defaults.default_redshift):
+
         self.cosmology = cosmology
         self.redshift = redshift
 
-    def conc_mass(self, mass, model='dutton_maccio14', **kwargs):
+    def conc_mass(self, mass, model=defaults.conc_mass_relation_key, **kwargs):
         """ Method used to evaluate the mean NFW concentration as a function of 
         halo mass. 
 

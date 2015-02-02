@@ -15,6 +15,8 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
+import functools
+
 from utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
 import defaults
@@ -22,7 +24,8 @@ import defaults
 import astropy.cosmology as cosmology
 from astropy import units as u
 
-import defaults
+import defaults, halo_prof_param_components
+
 
 ##################################################################################
 
@@ -54,8 +57,8 @@ class HaloProfileModel(object):
     set_param_func_dict, respectively. 
     """
 
-    def __init__(self, cosmology, redshift, 
-        param_keys, prim_haloprop_key='MVIR', 
+    def __init__(self, cosmology, redshift, param_keys, 
+        prim_haloprop_key=defaults.haloprop_key_dict['prim_haloprop'], 
         param_attr_examples=None):
         """
         Parameters 
@@ -68,7 +71,7 @@ class HaloProfileModel(object):
         prim_haloprop_key : string, optional
             This string controls which column of the halo_table 
             is used as the primary halo property governing the 
-            radial profile. Default is 'MVIR'. 
+            radial profile. Default is set in `halotools.defaults`. 
         """
 
         self.redshift = redshift
@@ -170,7 +173,8 @@ class NFWProfile(HaloProfileModel):
     def __init__(self, 
         cosmology=defaults.default_cosmology, redshift=defaults.default_redshift,
         build_inv_cumu_table=True, prof_param_table_dict=None,
-        prim_haloprop_key='MVIR'):
+        prim_haloprop_key=defaults.haloprop_key_dict['prim_haloprop'],
+        conc_mass_relation_key = defaults.conc_mass_relation_key):
         """
         Parameters 
         ----------
@@ -196,7 +200,17 @@ class NFWProfile(HaloProfileModel):
         HaloProfileModel.__init__(self, 
             cosmology, redshift, [self._conc_parname], prim_haloprop_key)
 
-        self.set_param_func_dict({self._conc_parname:self.conc_mass})
+        # Now set the function used for the concentration-mass relation
+        conc_mass_model_instance = halo_prof_param_components.ConcMass(
+            cosmology = self.cosmology, redshift = self.redshift)
+        # We want to call the specific function where the 'model' keyword argument 
+        # is fixed to the conc-mass relation we want. For this, we use functools.partial. 
+        conc_mass_func = functools.partial(
+            conc_mass_model_instance.conc_mass, model=conc_mass_relation_key)
+        conc_mass_model_instance.conc_mass
+        # Now bind this functon object up into a dictionary
+        self.set_param_func_dict({self._conc_parname:conc_mass_func})
+
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
 
         self.publication = ['arXiv:9611107','arXiv:1402.7073']

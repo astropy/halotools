@@ -24,7 +24,7 @@ class HodModel(object):
 
     """
 
-    def __init__(self, halo_prof_model, component_model_dict):
+    def __init__(self, halo_prof_model, halo_prof_param_model, component_model_dict):
         """ The methods of this class derive their behavior from other, external classes, 
         passed in the form of the component_model_dict, a dictionary whose keys 
         are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
@@ -37,6 +37,7 @@ class HodModel(object):
         """
         # Bind the model-building instructions to the composite model
         self.halo_prof_model = halo_prof_model
+        self.halo_prof_param_model = halo_prof_param_model
         self.component_model_dict = component_model_dict
 
         # Create attributes for galaxy types and their occupation bounds
