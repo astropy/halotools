@@ -35,6 +35,10 @@ class HodModel(object):
         governing the assumed profile of the underlying halos. 
 
         """
+
+        # Need to have a _example_attr_dict attribute. See end of 
+        # mock_factory._allocate_memory()
+
         # Bind the model-building instructions to the composite model
         self.halo_prof_model = halo_prof_model
         self.component_model_dict = component_model_dict

@@ -214,7 +214,10 @@ class HodMockFactory(object):
                 getattr(self, propname)[gal_type_slice] = np.repeat(
                     self.halos[halocatkey], self._occupation[gal_type])
 
-            # The following for loop does not work properly 
+            # Each halo has had one or more profile model parameters attached to it 
+            # during the call to process_halo_catalog(). Bind each of those 
+            # profile parameter values to the mock galaxy. 
+            # Note that these do not vary with the gal_type. 
             for propname in self._mock_halomodelprops:
                 getattr(self, propname)[gal_type_slice] = np.repeat(
                     self.halos[propname], self._occupation[gal_type])
