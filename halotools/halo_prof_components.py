@@ -168,7 +168,7 @@ class NFWProfile(HaloProfileModel):
     """
 
     def __init__(self, 
-        cosmology=cosmology.WMAP5, redshift=0.0,
+        cosmology=defaults.default_cosmology, redshift=defaults.default_redshift,
         build_inv_cumu_table=True, prof_param_table_dict=None,
         prim_haloprop_key='MVIR'):
         """
@@ -204,37 +204,6 @@ class NFWProfile(HaloProfileModel):
         if build_inv_cumu_table is True:
             self.build_inv_cumu_lookup_table(
                 prof_param_table_dict=self.prof_param_table_dict)
-
-
-    def conc_mass(self, mass):
-        """ Power-law fit to the concentration-mass relation from 
-        Dutton & Maccio 2014, MNRAS 441, 3359, arXiv:1402.7073.
-
-        Parameters 
-        ----------
-        mass : array_like 
-            Input array of halo masses. 
-
-        Returns 
-        -------
-        c : array_like
-            Concentrations of the input halos. 
-
-        Notes 
-        -----
-        This model was only calibrated for the Planck 1-year cosmology.
-
-        Model assumes that halo mass definition is Mvir.
-        """
-
-        a = 0.537 + (1.025 - 0.537) * np.exp(-0.718 * self.redshift**1.08)
-        b = -0.097 + 0.024 * self.redshift
-
-        logc = a + b * np.log10(mass / 1.E12)
-        c = 10**logc
-
-        return c
-
 
     def g(self, x):
         """ Convenience function used to evaluate the profile. 
