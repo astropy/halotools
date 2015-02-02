@@ -20,6 +20,31 @@ import defaults
 
 ##################################################################################
 
+class ConfigSpaceComponent(object):
+    """ Abstract super class of any model for 
+    the intra-halo position of galaxies. 
+    The sole function of the super class is to 
+    standardize the attributes and methods 
+    required of the component models.
+    """
+    def __init__(self, gal_type, haloprop_key_dict, 
+        threshold, occupation_bound):
+        self.gal_type = gal_type
+        self.haloprop_key_dict = haloprop_key_dict
+        self.threshold = threshold
+        self.occupation_bound = occupation_bound
+
+        self.galprop_dict = {'gal_type':4}
+
+    @abstractmethod
+    def _get_param_dict(self):
+        pass
+
+
+##################################################################################
+
+
+
 class TrivialCenProfile(object):
     """ Profile assigning central galaxies to reside at exactly the halo center."""
 
