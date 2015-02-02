@@ -34,7 +34,7 @@ class TrivialConfigSpaceModel(object):
         
         self.haloprop_key_dict = haloprop_key_dict
 
-        self.galprop_dict = {'pos':[0,0,0]}
+        self._example_attr_dict = {'pos':[0,0,0]}
 
 
     def mc_pos(self, *args, **kwargs):
@@ -109,6 +109,8 @@ class RadProfBias(object):
         halo_prof_model : object 
             `~halotools.HaloProfileModel` class instance. Determines the 
             underlying dark matter halo profile to which gal_type galaxies respond.
+            Used *only* to verify that the parameters set to be modulated are 
+            actually parameters of the underlying halo profile. 
 
         input_prof_params : array_like, optional
             String array specifying the halo profile parameters to be modulated. 
@@ -154,6 +156,8 @@ class RadProfBias(object):
         self.set_param_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
 
         self._setup_interpol(interpol_method, input_spline_degree)
+
+        self._example_attr_dict = self._get_example_attr_dict()
 
 
     def get_modulated_prof_params(self, prof_param_key, *args, **kwargs):
@@ -458,6 +462,16 @@ class RadProfBias(object):
         `radprof_modfunc`. 
         """
         return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
+
+    def _get_example_attr_dict(self):
+
+        output_dict = {}
+        for halokey in self.param_keys:
+            galkey = 'gal_'+halokey[len(defaults.host_haloprop_prefix):]
+            output_dict[galkey] = 0
+
+        return output_dict
+
 
 
 
