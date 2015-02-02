@@ -112,15 +112,9 @@ host_haloprop_prefix = 'halo_'
 haloprop_list = ['id', 'pos', 'vel', 'mvir', 'rvir']
 galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 
-
-
 testmode = False
 
-
 haloprop_key_dict = {'prim_haloprop':'Mvir'}
-
-
-
 
 
 

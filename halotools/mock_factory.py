@@ -55,6 +55,18 @@ class HodMockFactory(object):
         and building lookup tables associated with the halo profile. 
         """
 
+        # Note. Currently, all halo catalog columns added in this stage 
+        # pertain only to those halo properties needed to generate 
+        # halo profiles. However, it should be possible to add new columns 
+        # that can be used as either the primary or secondary halo properties. 
+        # And, additionally, different gal_types should be permitted to have 
+        # different primary and secondary halo properties. 
+        # Making these changes will require some new bookkeeping, including 
+        # 1. having prim_haloprop_key and sec_haloprop_key be dictionaries 
+        # with gal_type as keys, and 2. having the build_profile_lookup_tables 
+        # method only create tables for the halo paramters pertaining to profiles, 
+        # and ignoring new halo parameters. 
+        
         self.prim_haloprop_key = self.model.prim_haloprop_key
         if hasattr(self.model,'sec_haloprop_key'): 
             self.sec_haloprop_key = self.model.sec_haloprop_key
@@ -71,7 +83,7 @@ class HodMockFactory(object):
             self.halos[key] = prof_param_func(prim_haloprop)
             halo_prof_param_keys.extend([key])
         # Create a convenient bookkeeping device to keep track of the 
-        # halo profile parameter model keys
+        # halo profile parameter model keys that were added by the model
         setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
 
         self.build_profile_lookup_tables()
