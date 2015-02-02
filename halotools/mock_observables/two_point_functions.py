@@ -1318,6 +1318,10 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     normal = np.asarray(normal)
     bounds = np.asarray(bounds)
     centers = np.asarray(centers)
+    particles = np.asarray(particles)
+    
+    particle_tree= cKDTree(particles)
+    centers_tree = cKDTree(centers)
     
     N_targets = len(centers)
     length = bounds[1]-bounds[0]
@@ -1332,9 +1336,17 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     #calculate the number of particles inside each cylinder 
     tree = cKDTree(particles)
     N = np.ndarray((len(centers),len(rbins)))
+    N.fill(0.0)
+    periods = [period,]*len(centers)
     for j in range(0,len(rbins)):
-        dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j].tolist(), tree, period=period)
-    
+        print(j)
+        #dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j].tolist(), tree, period=period)
+        points_to_test = centers_tree.query_ball_tree(particle_tree,rbins[j],period=period)
+        coordinates_to_test = [particles[inds] for inds in points_to_test]
+        results = map(cylinder.inside,cyls[:,j].tolist(),coordinates_to_test,periods)
+        N_inside = [np.sum(result) for result in results]
+        N[:,j] = N_inside
+        
     #numbers in annular bins, N
     N = np.diff(N,axis=1)
     
