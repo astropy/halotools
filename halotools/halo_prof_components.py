@@ -204,11 +204,15 @@ class NFWProfile(HaloProfileModel):
         conc_mass_model_instance = halo_prof_param_components.ConcMass(
             cosmology = self.cosmology, redshift = self.redshift)
         # We want to call the specific function where the 'model' keyword argument 
-        # is fixed to the conc-mass relation we want. For this, we use functools.partial. 
+        # is fixed to the conc-mass relation we want. 
+        # For this, we use Python's functools
         conc_mass_func = functools.partial(
             conc_mass_model_instance.conc_mass, model=conc_mass_relation_key)
         conc_mass_model_instance.conc_mass
-        # Now bind this functon object up into a dictionary
+        # Now bind this function object up into a dictionary
+        # This saves us from some hard-coding, since non-standard profiles 
+        # will have entirely different names for their halo-parameter relations, 
+        # but written this way we can call them with a uniform syntax
         self.set_param_func_dict({self._conc_parname:conc_mass_func})
 
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
