@@ -294,10 +294,11 @@ class HodMockFactory(object):
             example_entry = self.halos[halocatkey]
             _allocate_ndarray_attr(self, propname, example_entry)
 
-        # DM halo model properties are accessed in the same way as 
-        # galaxy occupation model properties, so lump these to tasks together
-        model_proplist = np.append(self._mock_halomodelprops, self._mock_galmodelprops)
-        for propname in model_proplist:
+        for propname in self._mock_halomodelprops:
+            example_entry = 0 # All profile model properties, e.g., conc, are scalars
+            _allocate_ndarray_attr(self, propname, example_entry)
+
+        for propname in self._mock_galmodelprops:
             example_entry = self.model._example_attr_dict[propname]
             _allocate_ndarray_attr(self, propname, example_entry)
 
