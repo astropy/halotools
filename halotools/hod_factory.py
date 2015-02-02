@@ -67,7 +67,9 @@ class HodModel(object):
         # The following dictionary provides example shapes of all 
         # attributes created by component models. Used by the mock factories 
         # to allocate ndarrays for the galaxy properties. 
-        self._example_attr_dict = self.get_example_attr_dict()
+        self._example_attr_dict, self._gal_type_example_attr_dict = (
+            self.get_example_attr_dict()
+            )
 
         self.publications = self.build_publication_list(
             self.component_model_dict)
@@ -283,15 +285,20 @@ class HodModel(object):
         Information is used when the mock factory allocates memory for galaxies. 
         """
 
-        output_dict = {}
+        composite_dict = {}
+        component_dict = {}
         for gal_type in self.gal_types:
+
+            temp_component_dict={}
+
             for behavior_key, behavior_model in self.component_model_dict[gal_type].iteritems():
+
                 if hasattr(behavior_model, '_example_attr_dict'):
                     new_dict = behavior_model._example_attr_dict
-                    intersection = set(new_dict) & set(output_dict)
+                    intersection = set(new_dict) & set(composite_dict)
                     for duplicate_key in intersection:
                         shape1 = np.shape(new_dict[duplicate_key])
-                        shape2 = np.shape(output_dict[duplicate_key])
+                        shape2 = np.shape(composite_dict[duplicate_key])
                         if shape1 != shape2:
                             raise TypeError("For component model feature %s "
                                 "of gal_type %s, found problem with key %s "
@@ -299,9 +306,12 @@ class HodModel(object):
                                 "This key appears in at least one other component model dict, "
                                 "but the shapes of the two provided example "
                                 "values do not agree" % (behavior_key, gal_type, duplicate_key) )
-                    output_dict = dict(output_dict.items() + new_dict.items())
+                    composite_dict = dict(composite_dict.items() + new_dict.items())
+                    temp_component_dict = dict(temp_component_dict.items() + new_dict.items())
 
-        return output_dict
+            component_dict[gal_type] = temp_component_dict
+
+        return composite_dict, component_dict
 
 
 

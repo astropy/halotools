@@ -176,7 +176,7 @@ class HodMockFactory(object):
         # Throw away any possible repeated entries
         self._mock_haloprops = list(set(self._mock_haloprops))
         self._mock_halomodelprops = list(set(self._mock_halomodelprops))
-        self._mock_galmodelprops = list(set(self._mock_galmodelprops))
+        self._mock_galmodelprops = self.model._example_attr_dict.keys()
 
 
     def populate(self):
@@ -224,9 +224,11 @@ class HodMockFactory(object):
 
             # The following for loop does not work properly 
             for propname in self._mock_galmodelprops:
-                getattr(self, propname)[gal_type_slice] = (
-                    self.model.retrieve_component_behavior(self, propname, gal_type)
-                    )
+                if propname in self.model._gal_type_example_attr_dict.keys():
+                    getattr(self, propname)[gal_type_slice] = (
+                        self.model.retrieve_component_behavior(
+                            self, propname, gal_type)
+                        )
 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions of the simulation box
