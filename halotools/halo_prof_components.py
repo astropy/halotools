@@ -54,7 +54,8 @@ class HaloProfileModel(object):
     set_param_func_dict, respectively. 
     """
 
-    def __init__(self, cosmology, redshift, param_keys,prim_haloprop_key='MVIR', 
+    def __init__(self, cosmology, redshift, 
+        param_keys, prim_haloprop_key='MVIR', 
         param_attr_examples=None):
         """
         Parameters 

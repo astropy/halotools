@@ -66,7 +66,7 @@ class HodMockFactory(object):
         # with gal_type as keys, and 2. having the build_profile_lookup_tables 
         # method only create tables for the halo paramters pertaining to profiles, 
         # and ignoring new halo parameters. 
-        
+
         self.prim_haloprop_key = self.model.prim_haloprop_key
         if hasattr(self.model,'sec_haloprop_key'): 
             self.sec_haloprop_key = self.model.sec_haloprop_key
@@ -188,8 +188,8 @@ class HodMockFactory(object):
 
         # Loop over all gal_types in the model 
         for gal_type in self.gal_types:
-            # Retrieve via hash lookup the indices 
-            # storing gal_type galaxy info in our pre-allocated arrays
+            # Retrieve the indices of our pre-allocated arrays 
+            # that store gal_type galaxy info 
             gal_type_slice = self._gal_type_indices[gal_type]
 
             # Set the value of the gal_type string

@@ -41,6 +41,8 @@ class OccupationComponent(object):
         self.threshold = threshold
         self.occupation_bound = occupation_bound
 
+        self.galprop_dict = {'gal_type':4}
+
     @abstractmethod
     def _get_param_dict(self):
         pass
