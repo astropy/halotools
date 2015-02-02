@@ -132,11 +132,11 @@ class HaloProfileModel(object):
         is to provide a standardized way that composite models can access 
         the halo-parameter mappings, regardless of what the user names the methods. 
         So even though this method has rather trivial functionality, it is required 
-        to help ensure standardized behavior of future subclass extensions.  
+        to help ensure standardized behavior of future extensions.  
         The key(s) of the dictionary created by this method gives the name(s) of the 
         halo profile parameter(s) of the model; the value(s) of the dictionary are 
         function object(s) providing the mapping between halos and profile parameter(s).  
-        When HaloProfileModel is called by mock factories such as `halotools.mock_factory`, 
+        When HaloProfileModel is called by the mock factories in `halotools.mock_factory`, 
         each dictionary key will correspond to the name of a new column for halo_table
         that will be created by the mock factory during the pre-processing of the halo catalog.
 

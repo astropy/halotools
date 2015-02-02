@@ -10,6 +10,8 @@ All hard-coding should be restricted to this module, whenever possible.
 import os, sys, configuration
 import numpy as np
 
+from astropy import cosmology
+
 ### Default halo catalog (used in read_nbody)
 # The following parameters are used by the 
 # simulation object in the read_nbody module
@@ -44,6 +46,10 @@ default_dconc = 0.02
 default_Npts_radius_array = 101
 default_min_rad = 0.0001
 default_max_rad = 1.0
+
+default_redshift = 0.0
+default_cosmology = cosmology.WMAP5
+
 
 ### Default values specifying traditional quenching model
 # Used by models in the halo_occupation module
