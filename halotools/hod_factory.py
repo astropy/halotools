@@ -49,7 +49,7 @@ class HodModel(object):
         # Create strings used by the MC methods to access the appropriate columns of the 
         # halo table passed by the mock factory
         # Also create a dictionary for which gal_types, and which behaviors, 
-        # are assembly biased. 
+        # are assembly-biased. 
         self._create_haloprop_keys()
 
         # In MCMC applications, the output_dict items define the 

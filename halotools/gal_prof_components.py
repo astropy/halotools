@@ -20,52 +20,30 @@ import defaults
 
 ##################################################################################
 
-class ConfigSpaceComponent(object):
-    """ Abstract super class of any model for 
+class TrivialConfigSpaceModel(object):
+    """ Super class of any model for 
     the intra-halo position of galaxies. 
     The sole function of the super class is to 
     standardize the attributes and methods 
     required of the component models.
     """
     def __init__(self, gal_type, haloprop_key_dict, 
-        threshold, occupation_bound):
+        halo_prof_model, ):
+
         self.gal_type = gal_type
+        
         self.haloprop_key_dict = haloprop_key_dict
-        self.threshold = threshold
-        self.occupation_bound = occupation_bound
 
-        self.galprop_dict = {'gal_type':4}
+        self.galprop_dict = {'pos':[0,0,0]}
 
-    @abstractmethod
-    def _get_param_dict(self):
-        pass
+
+    def mc_pos(self, *args, **kwargs):
+        return 0
+
+
 
 
 ##################################################################################
-
-
-
-class TrivialCenProfile(object):
-    """ Profile assigning central galaxies to reside at exactly the halo center."""
-
-    def __init__(self, gal_type):
-        self.gal_type = gal_type
-
-    def mc_coords(self, *args,**kwargs):
-
-        too_many_args = (occuhelp.aph_len(args) > 0) & ('mock_galaxies' in kwargs.keys())
-        if too_many_args == True:
-            raise TypeError("TrivialCenProfile can be passed an array, or a mock, but not both")
-
-        # If we are running in testmode, require that all galaxies 
-        # passed to mc_coords are actually the same type
-        runtest = ( (defaults.testmode == True) & 
-            ('mock_galaxies' in kwargs.keys()) )
-        if runtest == True:
-            assert np.all(mock_galaxies.gal_type == self.gal_type)
-        ###
-
-        return 0
 
 ##################################################################################
 
@@ -205,6 +183,8 @@ class RadProfBias(object):
 
         """
 
+        # Create a new dictionary key to conveniently pass 
+        # 'prof_param_key' to _retrieve_input_halo_data via **kwargs
         kwargs['prof_param_key'] = prof_param_key
         input_prim_haloprops, input_halo_prof_params = (
             self._retrieve_input_halo_data(*args, **kwargs)
@@ -218,6 +198,49 @@ class RadProfBias(object):
 
         return output_prof_params
 
+    def radprof_modfunc(self,profile_parameter_key,input_abcissa):
+        """
+        Factor by which the halo profile parameters of gal_type galaxies 
+        differ from the profile parameter of their underlying dark matter halo. 
+
+        Parameters 
+        ----------
+        profile_parameter_key : string
+            Dictionary key of the profile parameter being modulated, e.g., 'halo_NFW_conc'. 
+
+        input_abcissa : array_like
+            array of primary halo property 
+
+        Returns 
+        -------
+        output_profile_modulation : array_like
+            Values of the multiplicative factor that will be used to 
+            modulate the halo profile parameters. 
+
+        Notes 
+        -----
+        Either assumes the profile parameters are modulated from those 
+        of the underlying dark matter halo by a polynomial function 
+        of the primary halo property, or is interpolated from a grid. 
+        Either way, the behavior of this method is fully determined by 
+        its values at the model's (abcissa, ordinates), specified by 
+        self.abcissa_dict and self.ordinates_dict.
+        """
+
+        model_abcissa, model_ordinates = (
+            self._retrieve_model_abcissa_ordinates(profile_parameter_key)
+            )
+
+        if self.interpol_method=='polynomial':
+            output_profile_modulation = occuhelp.polynomial_from_table(
+                model_abcissa,model_ordinates,input_abcissa)
+        elif self.interpol_method=='spline':
+            modulating_function = self.spline_function[profile_parameter_key]
+            output_profile_modulation = modulating_function(input_abcissa)
+        else:
+            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
+
+        return output_profile_modulation
 
     def _retrieve_input_halo_data(self, *args, **kwargs):
         """ Private method to retrieve an array of the primary halo property (e.g., Mvir), 
@@ -272,50 +295,6 @@ class RadProfBias(object):
 
         return input_prim_haloprops, input_halo_prof_params
 
-
-    def radprof_modfunc(self,profile_parameter_key,input_abcissa):
-        """
-        Factor by which the halo profile parameters of gal_type galaxies 
-        differ from the profile parameter of their underlying dark matter halo. 
-
-        Parameters 
-        ----------
-        profile_parameter_key : string
-            Dictionary key of the profile parameter being modulated, e.g., 'halo_NFW_conc'. 
-
-        input_abcissa : array_like
-            array of primary halo property 
-
-        Returns 
-        -------
-        output_profile_modulation : array_like
-            Values of the multiplicative factor that will be used to 
-            modulate the halo profile parameters. 
-
-        Notes 
-        -----
-        Either assumes the profile parameters are modulated from those 
-        of the underlying dark matter halo by a polynomial function 
-        of the primary halo property, or is interpolated from a grid. 
-        Either way, the behavior of this method is fully determined by 
-        its values at the model's (abcissa, ordinates), specified by 
-        self.abcissa_dict and self.ordinates_dict.
-        """
-
-        model_abcissa, model_ordinates = (
-            self._retrieve_model_abcissa_ordinates(profile_parameter_key)
-            )
-
-        if self.interpol_method=='polynomial':
-            output_profile_modulation = occuhelp.polynomial_from_table(
-                model_abcissa,model_ordinates,input_abcissa)
-        elif self.interpol_method=='spline':
-            modulating_function = self.spline_function[profile_parameter_key]
-            output_profile_modulation = modulating_function(input_abcissa)
-        else:
-            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
-
-        return output_profile_modulation
 
     def _retrieve_model_abcissa_ordinates(self, profile_parameter_key):
         """ Private method used to make API convenient. 
@@ -408,10 +387,6 @@ class RadProfBias(object):
                 self.param_dict[key] = val
 
         self.param_keys = self.abcissa_dict.keys()
-
-    def get_gal_prof_param_key(self, prof_param_key):
-        key = 'gal_'+prof_param_key[len(defaults.host_haloprop_prefix):]
-        return key
 
     def _test_sensible_inputs(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
