@@ -106,6 +106,13 @@ class HodMockFactory(object):
                 parmax = np.max(halocat_parmax,model_parmax)
                 prof_param_table_dict[key] = (parmin, parmax, dpar)
 
+        # Calling the following method will create new attributes 
+        # for self.model.halo_prof_model that can be used to discretize 
+        # the galaxy profile parameters and the functions that govern the profile
+        # Using NFWProfile class as an example, there will be two new attributes: 
+        # 1. cumu_inv_conc_table, an array of concentration bins, and 
+        # 2. cumu_inv_func_table, an array of profile function objects, 
+        # one function for each element of cumu_inv_conc_table
         self.model.halo_prof_model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)
 
@@ -141,31 +148,25 @@ class HodMockFactory(object):
         that will be bound to the mock object. 
         """
 
-        # The entries of _mock_galprops will be used as column names in the 
-        # data structure containing the mock galaxies
-        self._mock_galprops = defaults.galprop_dict.keys()
-
-        # Currently the composite model is not set up to create this list
-        self._mock_galprops.extend(self.model.additional_galprops)
-
-        # Throw away any possible repeated entries
-        self._mock_galprops = list(set(self._mock_galprops))
-
         # The entries of self._mock_haloprops (which are strings) 
-        # will be used as column names in the 
-        # data structure containing the mock galaxies, 
-        # but prepended by host_haloprop_prefix, set in halotools.defaults
+        # refer to column names of the halo catalog upon which the mock is built. 
+        # Each galaxy's host halo property listed in self._mock_haloprops will be included 
+        # in the final data structure containing the collection of mock galaxies. 
+        # However, in the output mock galaxy table, these column names will be 
+        # prepended by host_haloprop_prefix, set in halotools.defaults
         _mock_haloprops = defaults.haloprop_list # store the strings in a temporary list
         _mock_haloprops.extend(self.additional_haloprops)
+
         # Now we use a conditional list comprehension to ensure 
         # that all entries begin with host_haloprop_prefix, 
         # and also that host_haloprop_prefix is not duplicated
+        # This just protects against what should be considered an innocuous usage error
         prefix = defaults.host_haloprop_prefix
         self._mock_haloprops = (
             [entry if entry[0:len(prefix)]==prefix else prefix+entry for entry in _mock_haloprops]
             )
-        # Key conventions in the models is different from the halo catalog, 
-        # so create separate lists       
+
+        # Some models require 
         self._mock_halomodelprops = self.halos.halo_prof_param_keys
         self._mock_galmodelprops = self.model._example_attr_dict.keys()
 
@@ -291,7 +292,7 @@ class HodMockFactory(object):
             # for halo catalog-derived properties 
             # we need to strip the prefix from the string
             halocatkey = propname[len(defaults.host_haloprop_prefix):]
-            example_entry = self.halos[halocatkey]
+            example_entry = self.halos[halocatkey][0]
             _allocate_ndarray_attr(self, propname, example_entry)
 
         for propname in self._mock_halomodelprops:

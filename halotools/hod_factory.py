@@ -64,12 +64,19 @@ class HodModel(object):
                 self.component_model_dict)
             )
 
-        # The following dictionary provides example shapes of all 
+        # The following dictionary provides example shapes of all galaxy 
         # attributes created by component models. Used by the mock factories 
         # to allocate ndarrays for the galaxy properties. 
         self._example_attr_dict, self._gal_type_example_attr_dict = (
             self.get_example_attr_dict()
             )
+
+        # The following dictionary has values that are function objects 
+        # used to calculate new halo properties from existing ones. 
+        # Its keys will be used as the names of the newly created columns
+        # This includes halo profile parameters such as 'NFWmodel_conc', 
+        # and also any other halo properties used by the component models
+        self.additional_haloprops = self.get_new_haloprop_dict()
 
         self.publications = self.build_publication_list(
             self.component_model_dict)
@@ -312,6 +319,50 @@ class HodModel(object):
             component_dict[gal_type] = temp_component_dict
 
         return composite_dict, component_dict
+
+    def get_new_haloprop_dict(self):
+        """ Return a dictionary that can be used to create an additional set of 
+        halo properties that the halo catalog may not have. The keys of this 
+        dictionary will be new column names to attach to the halo catalog, the 
+        values of this dictionary are function objects used to compute the 
+        new columns from the existing ones. Classic example is computing an NFW 
+        concentration by a model for the concentration-mass relation. 
+        """
+
+        # Begin with the dictionary used by halo profile models to 
+        # assign profile parameters (e.g., concentration) to halos
+        output_haloprop_dict = self.halo_prof_model.param_func_dict
+
+        # Search all features of every gal_type for new halo properties that need to be computed
+        for gal_type in self.gal_types:
+            for behavior_key, behavior_model in self.component_model_dict[gal_type].iteritems():
+                if hasattr(behavior_model, 'new_haloprop_dict'):
+                    new_dict = behavior_model.new_haloprop_dict
+                    # Now check to see if the new halo property has already been 
+                    # included by some other component model feature
+                    intersection = set(new_dict) & set(output_haloprop_dict)
+                    if intersection != {}:
+                        repeated_key = intersection.pop()
+                        warnings.warn("Found duplication of new halo property %s "
+                            "to calculate. Ignoring the version defined in %s feature"
+                            " of %s galaxies" % (intersection, repeated_key, gal_type))
+                    else:
+                        output_haloprop_dict = dict(
+                            output_haloprop_dict.items() + new_dict.items()
+                            )
+
+
+        return output_haloprop_dict
+
+
+
+
+
+
+
+
+
+
 
 
 

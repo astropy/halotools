@@ -213,6 +213,7 @@ class NFWProfile(HaloProfileModel):
         # will have entirely different names for their halo-parameter relations, 
         # but written this way we can call them with a uniform syntax
         self.set_param_func_dict({self._conc_parname:conc_mass_func})
+        # After the above line, self now has a dictionary attribute param_func_dict
 
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
 
@@ -317,7 +318,7 @@ class NFWProfile(HaloProfileModel):
             will control the grid values. 
 
             This method does not return anything. Instead, when called 
-            the NFWProfile instance will have two new attributes: 
+            the NFWProfile model instance will have two new attributes: 
             cumu_inv_conc_table and cumu_inv_func_table. 
             The former is an array of NFW concentration parameter values, 
             the latter is an array of inverse cumulative density profile 
