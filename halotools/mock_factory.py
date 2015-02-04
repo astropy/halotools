@@ -55,7 +55,7 @@ class HodMockFactory(object):
         and building lookup tables associated with the halo profile. 
         """
 
-        # Note. Currently, all halo catalog columns added in this stage 
+        # Currently, all halo catalog columns added in this stage 
         # pertain only to those halo properties needed to generate 
         # halo profiles. However, it should be possible to add new columns 
         # that can be used as either the primary or secondary halo properties. 
@@ -166,7 +166,7 @@ class HodMockFactory(object):
             [entry if entry[0:len(prefix)]==prefix else prefix+entry for entry in _mock_haloprops]
             )
 
-        # Some models require 
+        # Some models require ...
         self._mock_halomodelprops = self.halos.halo_prof_param_keys
         self._mock_galmodelprops = self.model._example_attr_dict.keys()
 
