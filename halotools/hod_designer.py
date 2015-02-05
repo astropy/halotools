@@ -48,7 +48,7 @@ class HodModelDesigner(object):
 	for the HOD factory to understand. 
 	In particular, the prime function of this class 
 	is to bundle a set of input component models into a 
-	component_model_dict, which is a dictionary 
+	model_blueprint, which is a dictionary 
 	containing a set of instructions to pass to the HOD factory. 
 	"""
 

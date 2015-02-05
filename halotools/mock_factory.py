@@ -44,8 +44,7 @@ class HodMockFactory(object):
         # the process_halo_catalog method about what columns to construct. 
         self.process_halo_catalog()
 
-        if populate==True:
-            self.populate()
+        if populate==True: self.populate()
 
 
     def process_halo_catalog(self):

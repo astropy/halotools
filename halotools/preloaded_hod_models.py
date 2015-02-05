@@ -42,12 +42,12 @@ def Kravtsov04(**kwargs):
 	sat_model_dict['profile_model'] = None
 
 
-	component_model_dict = {
+	model_blueprint = {
 		dark_side_cen_model.gal_type : cen_model_dict,
 		dark_side_sat_model.gal_type : sat_model_dict
 		}
 
-	return component_model_dict
+	return model_blueprint
 
 
 
