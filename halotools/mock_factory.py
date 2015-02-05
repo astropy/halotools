@@ -93,7 +93,7 @@ class HodMockFactory(object):
        # Compute the halo profile lookup table, ensuring that the min/max 
        # range spanned by the halo catalog is covered. The grid of parameters 
        # is defined by a tuple (xlow, xhigh, dx) in prof_param_table_dict, 
-       # whose keys are the name of the halo profile parameter being digitized
+       # whose keys are the name of the halo profile parameter being discretized
         if prof_param_table_dict == {}:
             for key in self.halos.halo_prof_param_keys:
                 dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
@@ -107,8 +107,9 @@ class HodMockFactory(object):
 
         # Calling the following method will create new attributes 
         # for self.model.halo_prof_model that can be used to discretize 
-        # the galaxy profile parameters and the functions that govern the profile
-        # Using NFWProfile class as an example, there will be two new attributes: 
+        # the galaxy profile parameters and the functions that govern the profile. 
+        # Taking NFWProfile class as an example, the line of code that follows 
+        # will create two new attributes of self.model.halo_prof_model:
         # 1. cumu_inv_conc_table, an array of concentration bins, and 
         # 2. cumu_inv_func_table, an array of profile function objects, 
         # one function for each element of cumu_inv_conc_table

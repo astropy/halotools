@@ -85,6 +85,27 @@ class HodModel(object):
         *args, **kwargs):
         """ Method returning the arrays that need to be passed 
         to a component model in order to access its behavior. 
+
+        Parameters 
+        ----------
+        gal_type : string 
+
+        component_key : string 
+            Key used to access the behavior of the component model. 
+            component_key must be an element prim_func_dict.keys(), 
+            a dictionary bound to every component model. 
+
+        prim_haloprop : array_like, optional positional argument
+
+        sec_haloprop : array_like, optional positional argument
+
+        mock_galaxies : object, optional keyword argument 
+
+        Returns 
+        -------
+        result : list 
+            List of arrays of the relevant halo properties
+
         """
 
         if ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()) ):
