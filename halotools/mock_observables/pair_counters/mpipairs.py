@@ -6,9 +6,12 @@
 #calculate number of pairs with separations given in bins.
 
 from __future__ import division, print_function
-try: from mpi4py import MPI
+try: 
+    from mpi4py import MPI
+    mpi4py_installed=True
 except ImportError:
-    print("mpi4py module not available.  MPI functioality will not work.")
+    print("mpi4py module not available.  MPI functionality will not work.")
+    mpi4py_installed=False
 import numpy as np
 from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree 
 
@@ -24,8 +27,12 @@ def main():
     import sys
     import os
     
-    comm = MPI.COMM_WORLD
-    rank = comm.rank
+    if mpi4py_installed==True:
+        comm = MPI.COMM_WORLD
+        rank = comm.rank
+    else: 
+        comm = None
+        rank = 0
     
     #this first option is for my test files, so only works if you have a copy or make one!
     if len(sys.argv)==1:
