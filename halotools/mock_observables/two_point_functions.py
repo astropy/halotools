@@ -466,10 +466,10 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
             return xi_11
 
 
-def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10, 
-                                             Lbox=[250.0,250.0,250.0], sample2 = None, 
-                                             period = None, max_sample_size=int(1e6), 
-                                             do_auto=True, do_cross=True, 
+def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
+                                             Lbox=[250.0,250.0,250.0], sample2 = None,
+                                             period = None, max_sample_size=int(1e6),
+                                             do_auto=True, do_cross=True,
                                              estimator='Natural', N_threads=1, comm=None):
     """
     Calculate the two-point correlation function with jackknife errors. 
@@ -519,9 +519,10 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
 
     Returns 
     -------
-    correlation_function : array_like
-        array containing correlation function :math:`\\xi` computed in each of the Nrbins 
+    correlation_function(s), cov_matrix : array_like
+        array containing correlation function :math:`\\xi(r)` computed in each of the Nrbins 
         defined by input `rbins`.
+        Nrbins x Nrbins array containing the covariance matrix of `\\xi(r)`
 
     """
     
@@ -807,6 +808,23 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         
         return error
     
+    def covariance_matrix(sub,full,N_sub_vol):
+        """
+        Calculate the covariance matrix.
+        """
+        Nr = full.shape[0] # Nr is the number of radial bins
+        cov = np.zeros((Nr,Nr)) # 2D array that keeps the covariance matrix 
+        after_subtraction = sub - full
+        tmp = 0
+        for i in range(Nr):
+            for j in range(Nr):
+                for k in range(N_sub_vol):
+                    tmp = tmp + after_subtraction[k,i]*after_subtraction[k,j]
+                cov[i,j] = (((N_sub_vol-1)/N_sub_vol)*tmp)
+                tmp = 0
+    
+        return cov
+    
     do_DD, do_DR, do_RR = TP_estimator_requirements(estimator)
     
     N1 = len(sample1)
@@ -867,10 +885,20 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     xi_12_err = jackknife_errors(xi_12_sub,xi_12_full,N_sub_vol)
     xi_22_err = jackknife_errors(xi_22_sub,xi_22_full,N_sub_vol)
     
+    #calculate the covariance matrix
+    xi_11_cov = jackknife_errors(xi_11_sub,xi_11_full,N_sub_vol)
+    xi_12_cov = jackknife_errors(xi_12_sub,xi_12_full,N_sub_vol)
+    xi_22_cov = jackknife_errors(xi_22_sub,xi_22_full,N_sub_vol)
+    
     if np.all(sample1==sample2):
-        return xi_11_full,xi_11_err
+        return xi_11_full,xi_11_cov
     else:
-        return xi_11_full,xi_12_full,xi_22_full,xi_11_err,xi_12_err,xi_22_err
+        if (do_auto==True) & (do_cross==True):
+            return xi_11_full,xi_12_full,xi_22_full,xi_11_cov,xi_12_cov,xi_22_cov
+        elif du_auto==True:
+            return xi_11_full,xi_22_full,xi_11_cov,xi_22_cov
+        elif do_cross==True:
+            return xi_12_full,xi_12_cov
 
 
 def angular_two_point_correlation_function(sample1, theta_bins, sample2=None, randoms=None, 
