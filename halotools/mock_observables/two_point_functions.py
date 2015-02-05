@@ -466,7 +466,7 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
             return xi_11
 
 
-def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
+def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5,
                                              Lbox=[250.0,250.0,250.0], sample2 = None,
                                              period = None, max_sample_size=int(1e6),
                                              do_auto=True, do_cross=True,
@@ -612,22 +612,27 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         
         dL = Lbox/Nsub # length of subvolumes along each dimension
         N_sub_vol = np.prod(Nsub) # total the number of subvolumes
+        inds = np.arange(1,N_sub_vol+1).reshape(Nsub[0],Nsub[1],Nsub[2])
     
         #tag each particle with an integer indicating which jackknife subvolume it is in
         #subvolume indices for the sample1 particle's positions
-        index_1 = np.sum(np.floor(sample1/dL)*np.hstack((1,np.cumprod(Nsub[:-1]))),axis=1)+1
-        j_index_1 = index_1.astype(int)
+        index_1 = np.floor(sample1/dL).astype(int)
+        j_index_1 = inds[index_1[:,0],index_1[:,1],index_1[:,2]].astype(int)
+    
         #subvolume indices for the random particle's positions
-        index_random = np.sum(np.floor(randoms/dL)*np.hstack((1,np.cumprod(Nsub[:-1]))),axis=1)+1
-        j_index_random = index_random.astype(int)
+        index_random = np.floor(randoms/dL).astype(int)
+        j_index_random = inds[index_random[:,0],index_random[:,1],index_random[:,2]].astype(int)
+        
         #subvolume indices for the sample2 particle's positions
-        index_2 = np.sum(np.floor(sample2/dL)*np.hstack((1,np.cumprod(Nsub[:-1]))),axis=1)+1
-        j_index_2 = index_2.astype(int)
+        index_2 = np.floor(sample2/dL).astype(int)
+        j_index_2 = inds[index_2[:,0],index_2[:,1],index_2[:,2]].astype(int)
         
         return j_index_1, j_index_2, j_index_random, N_sub_vol
     
-    def get_subvolume_numbers(j_index):
-        labels, N = np.unique(j_index,return_counts=True)
+    def get_subvolume_numbers(j_index,N_sub_vol):
+        temp = np.hstack((j_index,np.arange(1,N_sub_vol+1,1))) #kinda hacky, but need to every label to be in there at least once
+        labels, N = np.unique(temp,return_counts=True)
+        N = N-1 #remove the place holder I added two lines above.
         return N
     
     def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,\
@@ -755,23 +760,23 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         """
         if estimator == 'Natural':
             factor = ND1*ND2/(NR1*NR2)
-            xi = (1.0/factor)*DD/RR - 1.0 #DD/RR-1
+            xi = (1.0/factor)*(DD/RR).T - 1.0 #DD/RR-1
         elif estimator == 'Davis-Peebles':
             factor = ND1*ND2/(ND1*NR2)
-            xi = (1.0/factor)*DD/DR - 1.0 #DD/DR-1
+            xi = (1.0/factor)*(DD/DR).T - 1.0 #DD/DR-1
         elif estimator == 'Hewett':
             factor1 = ND1*ND2/(NR1*NR2)
             factor2 = ND1*NR2/(NR1*NR2)
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*DR/RR #(DD-DR)/RR
+            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*(DR/RR).T #(DD-DR)/RR
         elif estimator == 'Hamilton':
             xi = (DD*RR)/(DR*DR) - 1.0 #DDRR/DRDR-1
         elif estimator == 'Landy-Szalay':
             factor1 = ND1*ND2/(NR1*NR2)
             factor2 = ND1*NR2/(NR1*NR2)
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*2.0*DR/RR + 1.0 #(DD - 2.0*DR + RR)/RR
+            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*2.0*(DR/RR).T + 1.0 #(DD - 2.0*DR + RR)/RR
         else: 
             raise ValueError("unsupported estimator!")
-        return xi
+        return xi.T #had to transpose twice to get the multiplication to work for the jackknife samples
     
     def TP_estimator_requirements(estimator):
         """
@@ -838,9 +843,14 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     j_index_1, j_index_2, j_index_random, N_sub_vol = \
                                get_subvolume_labels(sample1, sample2, randoms, Nsub, Lbox)
     
-    N1_subs = get_subvolume_numbers(j_index_1)[1:]
-    N2_subs = get_subvolume_numbers(j_index_2)[1:]
-    NR_subs = get_subvolume_numbers(j_index_random)[1:]
+    #number of points in each subvolume
+    NR_subs = get_subvolume_numbers(j_index_random,N_sub_vol)
+    N1_subs = get_subvolume_numbers(j_index_1,N_sub_vol)
+    N2_subs = get_subvolume_numbers(j_index_2,N_sub_vol)
+    #number of points in each jackknife sample
+    N1_subs = N1 - N1_subs
+    N2_subs = N2 - N2_subs
+    NR_subs = NR - NR_subs
     
     #calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol,\
@@ -889,14 +899,14 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     xi_22_sub = TP_estimator(D2D2_sub,D2R_sub,RR_sub,N2_subs,N2_subs,NR_subs,NR_subs,estimator)
     
     #calculate the errors
-    xi_11_err = jackknife_errors(xi_11_sub,xi_11_full,N_sub_vol)
-    xi_12_err = jackknife_errors(xi_12_sub,xi_12_full,N_sub_vol)
-    xi_22_err = jackknife_errors(xi_22_sub,xi_22_full,N_sub_vol)
+    xi_11_err = covariance_matrix(xi_11_sub,xi_11_full,N_sub_vol)
+    xi_12_err = covariance_matrix(xi_12_sub,xi_12_full,N_sub_vol)
+    xi_22_err = covariance_matrix(xi_22_sub,xi_22_full,N_sub_vol)
     
     #calculate the covariance matrix
-    xi_11_cov = jackknife_errors(xi_11_sub,xi_11_full,N_sub_vol)
-    xi_12_cov = jackknife_errors(xi_12_sub,xi_12_full,N_sub_vol)
-    xi_22_cov = jackknife_errors(xi_22_sub,xi_22_full,N_sub_vol)
+    xi_11_cov = covariance_matrix(xi_11_sub,xi_11_full,N_sub_vol)
+    xi_12_cov = covariance_matrix(xi_12_sub,xi_12_full,N_sub_vol)
+    xi_22_cov = covariance_matrix(xi_22_sub,xi_22_full,N_sub_vol)
     
     if np.all(sample1==sample2):
         return xi_11_full,xi_11_cov
