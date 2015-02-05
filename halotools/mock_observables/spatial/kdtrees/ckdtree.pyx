@@ -3298,8 +3298,8 @@ cdef class cKDTree:
             return results[:,0]
         elif len(np.shape(r))==1:
             return results
-    
-    
+
+
     # ---------------
     # wcount_neighbors_custom_2D
     # ---------------

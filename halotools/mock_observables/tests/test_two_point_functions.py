@@ -2,6 +2,7 @@
 
 from __future__ import division, print_function
 import numpy as np
+import sys
 from ..two_point_functions import two_point_correlation_function
 from ..two_point_functions import angular_two_point_correlation_function
 from ..two_point_functions import two_point_correlation_function_jackknife
@@ -80,16 +81,17 @@ def test_TPCF_randoms():
     
     #No PBCs w/ randoms
     result_1 = two_point_correlation_function(sample1, rbins, sample2 = sample2, 
-                                            randoms=randoms, period = None, 
-                                            max_sample_size=int(1e4), estimator='Natural')
+                                              randoms=randoms, period = None, 
+                                              max_sample_size=int(1e4), estimator='Natural')
     #PBCs w/o randoms
     result_2 = two_point_correlation_function(sample1, rbins, sample2 = sample2, 
-                                            randoms=None, period = period, 
-                                            max_sample_size=int(1e4), estimator='Natural')
+                                              randoms=None, period = period, 
+                                              max_sample_size=int(1e4), estimator='Natural')
     #PBCs w/ randoms
     result_3 = two_point_correlation_function(sample1, rbins, sample2 = sample2, 
-                                            randoms=randoms, period = period, 
-                                            max_sample_size=int(1e4), estimator='Natural')
+                                              randoms=randoms, period = period, 
+                                              max_sample_size=int(1e4), estimator='Natural')
+    
     #know how to make sure this throws a valueerror?
     '''
     #no randoms, no PBCs, should throw error!
@@ -142,8 +144,10 @@ def test_two_point_correlation_function_jackknife():
     rbins = np.linspace(0.0,0.5,5)
     
     result_1,err = two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=Lbox, period = period, N_threads=1)
-    result_2 = two_point_correlation_function(sample1, rbins,  randoms=randoms, period = period, N_threads=1)
+    result_2 = two_point_correlation_function(sample1, rbins, randoms=randoms, period = period, N_threads=1)
     
+    print(result_1)
+    print(result_2)
     assert np.all(result_1==result_2), "correlation functions do not match"
 
 def test_two_point_correlation_function_jackknife_threading():
