@@ -24,7 +24,8 @@ class HodModel(object):
 
     """
 
-    def __init__(self, halo_prof_model, model_blueprint):
+    def __init__(self, halo_prof_model, model_blueprint, 
+        haloprop_key_dict=defaults.haloprop_key_dict):
         """ The methods of this class derive their behavior from other, external classes, 
         passed in the form of the model_blueprint, a dictionary whose keys 
         are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
@@ -39,6 +40,7 @@ class HodModel(object):
         # Bind the model-building instructions to the composite model
         self.halo_prof_model = halo_prof_model
         self.model_blueprint = model_blueprint
+        self.haloprop_key_dict = haloprop_key_dict
 
         # Create attributes for galaxy types and their occupation bounds
         self.gal_types = self.model_blueprint.keys()
@@ -81,6 +83,15 @@ class HodModel(object):
         self.publications = self.build_publication_list(
             self.model_blueprint)
 
+    def component_behavior(self, gal_type, component_key, ):
+
+        #component_model_function =  
+        pass
+
+
+
+
+
     def retrieve_relevant_haloprops(self, gal_type, component_key, 
         *args, **kwargs):
         """ Method returning the arrays that need to be passed 
@@ -111,11 +122,8 @@ class HodModel(object):
         if ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()) ):
             # In this case, we were passed a full mock galaxy catalog as a keyword argument
             mock = kwargs['mock_galaxies']
-            # each component model has a dictionary containing the keys of the 
-            # halo catalog that the component model needs from the halo catalog
-            haloprop_key_dict = self.model_blueprint[gal_type][component_key].haloprop_key_dict
-            # All such dictionaries have a key indicating the primary halo property governing the behavior
-            prim_haloprop_key = haloprop_key_dict['prim_haloprop_key']
+
+            prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
             # We were passed the full mock, but this function call only pertains to the slice of 
             # the arrays that correspond to gal_type galaxies. 
             # We save time by having pre-computed the relevant slice. 
@@ -125,8 +133,8 @@ class HodModel(object):
             output_columns = [prim_haloprop]
             # If there is a secondary halo property used by this component model, 
             # repeat the above retrieval and extend the list. 
-            if 'sec_haloprop_key' in haloprop_key_dict.keys():
-                sec_haloprop_key = haloprop_key_dict['sec_haloprop_key']
+            if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
+                sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
                 sec_haloprop = getattr(mock, sec_haloprop_key)[gal_type_slice]
                 output_columns.extend([sec_haloprop])
 

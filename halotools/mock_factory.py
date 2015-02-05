@@ -231,8 +231,8 @@ class HodMockFactory(object):
             for propname in self._mock_galmodelprops:
                 if propname in self.model._gal_type_example_attr_dict.keys():
                     getattr(self, propname)[gal_type_slice] = (
-                        self.model.retrieve_component_behavior(
-                            self, propname, gal_type)
+                        self.model.component_behavior(
+                            gal_type, propname, mock_galaxies=self)
                         )
 
         # Positions are now assigned to all populations. 
