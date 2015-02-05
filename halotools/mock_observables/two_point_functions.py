@@ -626,6 +626,10 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         
         return j_index_1, j_index_2, j_index_random, N_sub_vol
     
+    def get_subvolume_numbers(j_index):
+        labels, N = np.unique(j_index,return_counts=True)
+        return N
+    
     def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,\
                       period, N_thread, do_auto, do_cross, do_DD, comm):
         """
@@ -801,7 +805,7 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         """
         Calculate jackknife errors.
         """
-        after_subtraction =  sub - full
+        after_subtraction =  sub - np.mean(sub,axis=0)
         squared = after_subtraction**2.0
         error2 = ((N_sub_vol-1)/N_sub_vol)*squared.sum(axis=0)
         error = error2**0.5
@@ -814,7 +818,7 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         """
         Nr = full.shape[0] # Nr is the number of radial bins
         cov = np.zeros((Nr,Nr)) # 2D array that keeps the covariance matrix 
-        after_subtraction = sub - full
+        after_subtraction = sub - np.mean(sub,axis=0)
         tmp = 0
         for i in range(Nr):
             for j in range(Nr):
@@ -833,6 +837,10 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     
     j_index_1, j_index_2, j_index_random, N_sub_vol = \
                                get_subvolume_labels(sample1, sample2, randoms, Nsub, Lbox)
+    
+    N1_subs = get_subvolume_numbers(j_index_1)[1:]
+    N2_subs = get_subvolume_numbers(j_index_2)[1:]
+    NR_subs = get_subvolume_numbers(j_index_random)[1:]
     
     #calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol,\
@@ -876,9 +884,9 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     xi_12_full = TP_estimator(D1D2_full,D1R_full,RR_full,N1,N2,NR,NR,estimator)
     xi_22_full = TP_estimator(D2D2_full,D2R_full,RR_full,N2,N2,NR,NR,estimator)
     #calculate the correlation function for the subsamples
-    xi_11_sub = TP_estimator(D1D1_sub,D1R_sub,RR_sub,N1,N1,NR,NR,estimator)
-    xi_12_sub = TP_estimator(D1D2_sub,D1R_sub,RR_sub,N1,N2,NR,NR,estimator)
-    xi_22_sub = TP_estimator(D2D2_sub,D2R_sub,RR_sub,N2,N2,NR,NR,estimator)
+    xi_11_sub = TP_estimator(D1D1_sub,D1R_sub,RR_sub,N1_subs,N1_subs,NR_subs,NR_subs,estimator)
+    xi_12_sub = TP_estimator(D1D2_sub,D1R_sub,RR_sub,N1_subs,N2_subs,NR_subs,NR_subs,estimator)
+    xi_22_sub = TP_estimator(D2D2_sub,D2R_sub,RR_sub,N2_subs,N2_subs,NR_subs,NR_subs,estimator)
     
     #calculate the errors
     xi_11_err = jackknife_errors(xi_11_sub,xi_11_full,N_sub_vol)
