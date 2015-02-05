@@ -202,18 +202,16 @@ class HodMockFactory(object):
                 getattr(self, propname)[gal_type_slice] = np.repeat(
                     self.halos[halocatkey], self._occupation[gal_type])
 
+            # The following for loop does not work properly 
             for propname in self._mock_halomodelprops:
                 getattr(self, propname)[gal_type_slice] = np.repeat(
                     self.halos[propname], self._occupation[gal_type])
 
+            # The following for loop does not work properly 
             for propname in self._mock_galmodelprops:
                 getattr(self, propname)[gal_type_slice] = (
                     self.model.retrieve_component_behavior(self, propname, gal_type)
                     )
-
-
-
-        # Now need to call the phase space models for position and velocity
 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions of the simulation box

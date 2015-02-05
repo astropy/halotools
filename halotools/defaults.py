@@ -117,7 +117,7 @@ galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 testmode = False
 
 
-
+haloprop_key_dict = {'prim_haloprop':'Mvir'}
 
 
 
