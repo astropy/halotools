@@ -43,6 +43,8 @@ class OccupationComponent(object):
 
         self.prim_func_dict = {None : self.set_primary_function_dict()}
 
+        self.convenience_methods = [self.mean_occupation]
+
     @abstractmethod
     def _get_param_dict(self):
         pass

@@ -83,13 +83,17 @@ class HodModel(object):
         self.publications = self.build_publication_list(
             self.model_blueprint)
 
-    def component_behavior(self, gal_type, component_key, ):
+    def component_behavior(self, gal_type, component_key, *args, **kwargs):
 
-        #component_model_function =  
-        pass
+        relevant_data = self.retrieve_relevant_haloprops(
+            gal_type, component_key, *args, **kwargs)
 
+        component_model_function = (
+            self.model_blueprint[gal_type][component_key].prim_func_dict[component_key]
+            )
 
-
+        return component_model_function(*relevant_data, 
+            input_param_dict=self.param_dict)
 
 
     def retrieve_relevant_haloprops(self, gal_type, component_key, 
@@ -152,77 +156,12 @@ class HodModel(object):
             raise SyntaxError("Do not pass both an array of halo properties "
                 " and a mock galaxy population - pick one")
 
-    def mean_occupation(self,gal_type,*args, **kwargs):
-        """ Method supplying the mean abundance of gal_type galaxies. 
-        The behavior of this method is inherited from one of the component models. 
-        """
-
-        component_key = 'occupation_model'
-        method_name = 'mean_occupation'
-
-        output_occupation = self.retrieve_component_behavior(
-            gal_type, component_key, method_name, *args, **kwargs)
-
-        return output_occupation
-
-
-    def mc_occupation(self,gal_type,*args, **kwargs):
-        """ Method providing a Monte Carlo realization of the mean occupation.
-        The behavior of this method is inherited from one of the component models.
-        """
-
-        component_key = 'occupation_model'
-        method_name = 'mc_occupation'
-
-        output_mc_realization = self.retrieve_component_behavior(
-            gal_type, component_key, method_name, *args, **kwargs)
-
-        return output_mc_realization
-        
-    def mean_profile_parameters(self,gal_type,*args, **kwargs):
-        """ Method returning the mean value of the parameters governing the radial profile 
-        of gal_type galaxies. 
-        The behavior of this method is inherited from one of the component models.
-        """
-
-        profile_model = self.model_blueprint[gal_type]['profile_model']
-        inherited_method = profile_model.mean_profile_parameters
-        output_profiles = self.retrieve_component_behavior(inherited_method,args)
-
-        return output_profiles
-
-    def mc_coords(self,gal_type,*args, **kwargs):
-        """ Method returning a Monte Carlo realization of the radial profile. 
-        The behavior of this method is inherited from one of the component models.
-        """
-
-        profile_model = self.model_blueprint[gal_type]['profile_model']
-        inherited_method = profile_model.mc_coords
-        output_mc_realization = self.retrieve_component_behavior(inherited_method,args)
-
-        return output_mc_realization
-
-
-    def retrieve_component_behavior(self, gal_type, component_key, method_name, 
-        *args, **kwargs):
-        """ Wrapper method whose purpose is solely to call the component model methods 
-        using the correct number of arguments. Purely for user convenience. 
-
-        """
-
-        # The behavior of mc_occupation is inherited by the component model 
-        component_model_instance = self.model_blueprint[gal_type][component_key]
-        inherited_method = getattr(component_model_instance, method_name)
-
-        # Retrieve the appropriate columns from halo_table
-        haloprop_list = self.retrieve_relevant_haloprops(
-            gal_type, component_key, *args, **kwargs)
-        # haloprop_list is a one- or two-element list of arrays of halo properties. 
-        # Use the * syntax to unpack this list into a sequence of positional arguments. 
-        output = inherited_method(*haloprop_list)
-
-        return output
- 
+    def _create_convenience_attributes(self):
+        # Should be able to figure out a way to have 
+        # self.mean_occupation be inherited. The trick will 
+        # involve using self.some_method.__name__. 
+        # Figure this out later
+        pass 
 
     def build_composite_param_dict(self,model_blueprint):
         """ Method to build a dictionary of parameters for the composite model 
