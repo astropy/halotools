@@ -827,10 +827,10 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5,
         tmp = 0
         for i in range(Nr):
             for j in range(Nr):
+                tmp = 0.0
                 for k in range(N_sub_vol):
                     tmp = tmp + after_subtraction[k,i]*after_subtraction[k,j]
                 cov[i,j] = (((N_sub_vol-1)/N_sub_vol)*tmp)
-                tmp = 0
     
         return cov
     
