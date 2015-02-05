@@ -161,6 +161,14 @@ class HodModel(object):
         # self.mean_occupation be inherited. The trick will 
         # involve using self.some_method.__name__. 
         # Figure this out later
+
+        # Basically, each component model should come with a list of 
+        # methods that should be assigned as bound method of the composite model.
+        # The following syntax is halfway there:
+        # for convenience_method in some_list:
+        #     setattr(self, convenience_method.__name__, convenience_method) 
+        # The problem is that I want to use different convenience methods 
+        # with the same name for different gal_types. 
         pass 
 
     def build_composite_param_dict(self,model_blueprint):
