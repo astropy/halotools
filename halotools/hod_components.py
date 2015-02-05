@@ -43,9 +43,6 @@ class OccupationComponent(object):
 
         self.galprop_dict = {'gal_type':4}
 
-        self.set_primary_function_dictionary()
-
-
     @abstractmethod
     def _get_param_dict(self):
         pass
@@ -53,9 +50,6 @@ class OccupationComponent(object):
     @abstractmethod
     def mc_occupation(self):
         pass
-
-    def set_primary_function_dictionary(self):
-        self.prim_func_dict = {None : self.mc_occupation}
 
 
 class Kravtsov04Cens(OccupationComponent):

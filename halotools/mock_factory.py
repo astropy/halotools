@@ -190,7 +190,7 @@ class HodMockFactory(object):
         # Loop over all gal_types in the model 
         for gal_type in self.gal_types:
             # Retrieve the indices of our pre-allocated arrays 
-            # that store gal_type galaxy info 
+            # that store the info pertaining to gal_type galaxies
             gal_type_slice = self._gal_type_indices[gal_type]
 
             # Set the value of the gal_type string
@@ -208,9 +208,13 @@ class HodMockFactory(object):
                     self.halos[self.sec_haloprop_key], 
                     self._occupation[gal_type])
 
-            # Bind all relevant halo properties to the mock
+
+            # Bind all additional halo properties to the mock
             for propname in self._mock_haloprops:
-                # Strip the halo prefix
+                # In the mock galaxy catalog, host halo properties have the same 
+                # column names as in the halo catalog, but prepended by the halo prefix 
+                # set in defaults module. 
+                # So strip the halo prefix to access the columns of the halo catalog
                 halocatkey = propname[len(defaults.host_haloprop_prefix):]
                 getattr(self, propname)[gal_type_slice] = np.repeat(
                     self.halos[halocatkey], self._occupation[gal_type])

@@ -159,6 +159,12 @@ class RadProfBias(object):
 
         self._example_attr_dict = self._get_example_attr_dict()
 
+        self.prim_func_dict = self.set_primary_function_dict()
+
+
+    def set_primary_function_dict(self):
+        return self.get_modulated_prof_params
+        
 
     def get_modulated_prof_params(self, prof_param_key, *args, **kwargs):
         """ Primary method used by the outside world. 
