@@ -21,18 +21,10 @@ import numpy as np
 from math import pi, gamma
 import spatial.geometry as geometry
 from multiprocessing import Pool
-####try to import the best pair counter###################################################
 try: from pair_counters.mpipairs import npairs, wnpairs, specific_wnpairs, jnpairs
 except ImportError:
-    print "MPI pair counter not available.  MPI functionality will not be supported."
-    try: from pair_counters.kdpairs import npairs, wnpairs, specific_wnpairs, jnpairs
-    except ImportError:
-        print "kdtree pair counter not available. Brute force methods will be used."
-        try: from pair_counters.cpairs import npairs, wnpairs, specific_wnpairs, jnpairs
-        except ImportError:
-            print "cython pair counter not available. Python brute force methods will be used."
-            from pair_counters.pairs import npairs, wnpairs, specific_wnpairs, jnpairs
-##########################################################################################
+    print("MPI functionality not available.")
+    from pair_counters.kdpairs import npairs, wnpairs, specific_wnpairs, jnpairs
 
 ####define wrapper functions for pair counters to facilitate parallelization##############
 #straight pair counter
@@ -1304,6 +1296,9 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     from halotools.mock_observables.spatial.geometry import cylinder
     from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
     
+    if N_threads>1:
+        pool = Pool(N_threads)
+    
     if period is None:
             PBCs = False
             period = np.array([np.inf]*np.shape(sample1)[-1])
@@ -1320,11 +1315,18 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     centers = np.asarray(centers)
     particles = np.asarray(particles)
     
+    print np.shape(particles)
+    
     particle_tree= cKDTree(particles)
+    proj_particle_tree = cKDTree(particles[:,0:2])
     centers_tree = cKDTree(centers)
+    proj_centers_tree = cKDTree(centers[:,0:2])
+    
+    proj_period = period[0:2]
     
     N_targets = len(centers)
     length = bounds[1]-bounds[0]
+    print('length:',length)
     
     #create cylinders for each galaxy and each radial bin
     cyls = np.ndarray((N_targets,len(rbins)),dtype=object)
@@ -1339,36 +1341,32 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     N.fill(0.0)
     periods = [period,]*len(centers)
     for j in range(0,len(rbins)):
-        print(j)
+        print(j,rbins[j])
         #dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j].tolist(), tree, period=period)
-        points_to_test = centers_tree.query_ball_tree(particle_tree,rbins[j],period=period)
+        points_to_test = proj_centers_tree.query_ball_tree(proj_particle_tree,rbins[j],period=proj_period)
+        N_test = [len(inds) for inds in points_to_test]
+        print('mean number to test:',np.mean(N_test))
+        """
         coordinates_to_test = [particles[inds] for inds in points_to_test]
         results = map(cylinder.inside,cyls[:,j].tolist(),coordinates_to_test,periods)
         N_inside = [np.sum(result) for result in results]
         N[:,j] = N_inside
+        print('mean number inside:',np.mean(N_inside))
+        """
+        N[:,j] = N_test
         
     #numbers in annular bins, N
-    N = np.diff(N,axis=1)
+    N_diff = np.diff(N,axis=1)
     
     #area of an annular ring, A
-    A = np.pi*rbins**2.0
-    A = np.diff(A)
+    A_circle = np.pi*rbins**2.0
+    A_annulus = np.diff(A_circle)
     
     #calculate the surface density in annular bins, Sigma
-    Sigma = N/A
+    Sigma_diff = np.mean(N_diff,axis=0)/A_annulus
+    Sigma_inside = np.mean(N,axis=0)/A_circle
     
-    delta_Sigma = np.zeros((N_targets,len(rbins)-1))
+    Delta_Sigma = Sigma_inside[:-1]-Sigma_diff
     
-    for target in range(0,N_targets):
-        #loop over each each radial bin
-        for i in range(1,len(rbins)-1):
-            outer = 1.0/(np.pi*rbins[i]**2.0)
-            inner_sum=0.0
-            #loop over annular bins internal to the ith one.
-            for n in range(0,i-1):
-                inner_sum += Sigma[target,n]*A[n]
-            delta_Sigma[target,i] = inner_sum*outer-Sigma[target,i]
-    
-    return np.mean(delta_Sigma, axis=0)
-
+    return Delta_Sigma
 

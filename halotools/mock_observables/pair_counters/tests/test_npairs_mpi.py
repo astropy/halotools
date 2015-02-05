@@ -4,8 +4,14 @@
 from __future__ import division, print_function
 import numpy as np
 import sys
-from mpi4py import MPI
-from halotools.mock_observables.pair_counters.mpipairs import npairs, wnpairs, jnpairs
+
+try: 
+    from mpi4py import MPI
+    from halotools.mock_observables.pair_counters.mpipairs import npairs, wnpairs, jnpairs
+    mpi4py_installed = True
+except ImportError:
+    print("mpi4py package unavailable.  MPI pair counter tests not possible.")
+    mpi4py_installed = False
 
 #import simple pair counter to compare results
 from halotools.mock_observables.pair_counters.pairs import npairs as comp_npairs
@@ -27,8 +33,12 @@ def main():
     import time
     
     #initialize communication object
-    comm = MPI.COMM_WORLD
-    rank = comm.rank
+    if mpi4py_installed==True:
+        comm = MPI.COMM_WORLD
+        rank = comm.rank
+    else:
+        comm = None
+        rank=0
     
     if rank==0: start = time.time()
     test_npairs_speed(comm=comm, N1=N_points, N2=N_points)
