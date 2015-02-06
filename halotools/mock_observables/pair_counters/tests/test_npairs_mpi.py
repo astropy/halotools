@@ -7,12 +7,12 @@ import sys
 
 try: 
     from mpi4py import MPI
-    from halotools.mock_observables.pair_counters.mpipairs import npairs, wnpairs, jnpairs
     mpi4py_installed = True
 except ImportError:
     print("mpi4py package unavailable.  MPI pair counter tests not possible.")
     mpi4py_installed = False
 
+from halotools.mock_observables.pair_counters.mpipairs import npairs, wnpairs, jnpairs
 #import simple pair counter to compare results
 from halotools.mock_observables.pair_counters.pairs import npairs as comp_npairs
 from halotools.mock_observables.pair_counters.pairs import wnpairs as comp_wnpairs
