@@ -175,16 +175,22 @@ class RadProfBias(object):
         # allocate the appropriate shape ndarray for the modulated profile parameter
         self._example_attr_dict = self._get_example_attr_dict()
 
+        # The primary method of this class is get_modulated_prof_params, which 
+        # derives its behavior from radprof_modfunc. Both of these methods are 
+        # written to be totally generic. But model instances will be clearer 
+        # if the primary methods have easy-to-interpret names. Moreover, 
+        # we need to have separate attribute names for the methods in prim_func_dict 
+        # for each halo profile parameter being modulated. 
+        # The following few lines accomplish that specificity, and define self.prim_func_dict.
         self.prim_func_dict = {}
-        self.additional_methods_to_inherit = []
         for halokey in self.prof_param_keys:
             galkey = self._get_gal_prof_param_key(halokey)
-            method_name = 'get_'+galkey
+            new_method_name = 'get_'+galkey
             parameter_specific_modulation_function = (
                 partial(self.get_modulated_prof_params,
                     prof_param_key = halokey)
                 )
-            setattr(self, method_name, parameter_specific_modulation_function)
+            setattr(self, new_method_name, parameter_specific_modulation_function)
             self.prim_func_dict[galkey] = parameter_specific_modulation_function
         
 
