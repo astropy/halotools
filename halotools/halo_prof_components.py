@@ -57,7 +57,7 @@ class HaloProfileModel(object):
     set_param_func_dict, respectively. 
     """
 
-    def __init__(self, cosmology, redshift, param_keys, 
+    def __init__(self, cosmology, redshift, prof_param_keys, 
         prim_haloprop_key=defaults.haloprop_key_dict['prim_haloprop'], 
         param_attr_examples=None):
         """
@@ -78,13 +78,13 @@ class HaloProfileModel(object):
         self.cosmology = cosmology
         self.prim_haloprop_key = prim_haloprop_key
 
-        self.param_keys = list(param_keys)
+        self.prof_param_keys = list(prof_param_keys)
         if param_attr_examples==None:
-            self._example_attr_dict = {key:1 for key in self.param_keys}
+            self._example_attr_dict = {key:1 for key in self.prof_param_keys}
         else:
             self._example_attr_dict = (
-                {self.param_keys[i]:param_attr_examples[i] 
-                for i in range(len(param_keys))}
+                {self.prof_param_keys[i]:param_attr_examples[i] 
+                for i in range(len(self.prof_param_keys))}
                 )
 
     @abstractmethod

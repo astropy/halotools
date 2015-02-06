@@ -18,6 +18,8 @@ from utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
 import defaults
 
+from functools import partial
+
 ##################################################################################
 
 class TrivialConfigSpaceModel(object):
@@ -114,7 +116,8 @@ class RadProfBias(object):
 
         input_prof_params : array_like, optional
             String array specifying the halo profile parameters to be modulated. 
-            Values of this array must equal one of halo_prof_model.param_keys, e.g., 'halo_NFW_conc'.
+            Values of this array must equal one of 
+            halo_prof_model.prof_param_keys, e.g., 'halo_NFW_conc'.
             If input_prof_params is passed to the constructor, 
             input_abcissa_dict and input_ordinates_dict should not be passed, and 
             the abcissa and ordinates defining the modulation of the halo profile parameters 
@@ -150,20 +153,39 @@ class RadProfBias(object):
 
         """
 
+        # Bind the inputs to the instance
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
 
+        # set_param_dict primarily does three things:
+        # 1. Creates attributes self.abcissa_dict and self.ordinates_dict, 
+        # each with one key per halo profile parameter being modulated
+        # 2. Creates an attribute self.param_dict. This is the dictionary 
+        # that actually governs the behavior of the model. Its keys have names 
+        # such as 'halo_NFWmodel_conc_biasfunc_par1_satellites'
+        # 3. Creates a convenient list self.prof_param_keys, with entries such as 
+        # 'halo_NFWmodel_conc', the keys of self.abcissa_dict
         self.set_param_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
 
+        # Configure the settings of scipy's spline interpolation routine
         self._setup_interpol(interpol_method, input_spline_degree)
 
+        # Create a dictionary with one key per halo profile parameter being modulated, 
+        # and values equal to any arbitrary scalar. Used by the mock factory to 
+        # allocate the appropriate shape ndarray for the modulated profile parameter
         self._example_attr_dict = self._get_example_attr_dict()
 
-        self.prim_func_dict = self.set_primary_function_dict()
-
-
-    def set_primary_function_dict(self):
-        return self.get_modulated_prof_params
+        self.prim_func_dict = {}
+        self.additional_methods_to_inherit = []
+        for halokey in self.prof_param_keys:
+            galkey = self._get_gal_prof_param_key(halokey)
+            method_name = 'get_'+galkey
+            parameter_specific_modulation_function = (
+                partial(self.get_modulated_prof_params,
+                    prof_param_key = halokey)
+                )
+            setattr(self, method_name, parameter_specific_modulation_function)
+            self.prim_func_dict[galkey] = parameter_specific_modulation_function
         
 
     def get_modulated_prof_params(self, prof_param_key, *args, **kwargs):
@@ -396,7 +418,7 @@ class RadProfBias(object):
                 key = self._get_parameter_key(prof_param_key, ii)
                 self.param_dict[key] = val
 
-        self.param_keys = self.abcissa_dict.keys()
+        self.prof_param_keys = self.abcissa_dict.keys()
 
     def _test_sensible_inputs(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
@@ -416,8 +438,8 @@ class RadProfBias(object):
                 raise SyntaxError("If passing input_prof_params to the constructor,"
                     " do not pass input_ordinates_dict")
             try:
-                assert set(input_prof_params).issubset(
-                    set(self.halo_prof_model.param_keys))
+                assert set(input_prof_params.keys()).issubset(
+                    set(self.halo_prof_model.prof_param_keys))
             except:
                 raise SyntaxError("Entries of input_prof_params must be keys of halo_prof_model")
         else:
@@ -438,6 +460,7 @@ class RadProfBias(object):
 
         if interpol_method not in ['spline', 'polynomial']:
             raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
+
         self.interpol_method = interpol_method
 
         def _setup_spline(self):
@@ -472,11 +495,14 @@ class RadProfBias(object):
     def _get_example_attr_dict(self):
 
         output_dict = {}
-        for halokey in self.param_keys:
-            galkey = 'gal_'+halokey[len(defaults.host_haloprop_prefix):]
+        for halokey in self.prof_param_keys:
+            galkey = self._get_gal_prof_param_key(halokey)
             output_dict[galkey] = 0
 
         return output_dict
+
+    def _get_gal_prof_param_key(self, halo_prof_param_key):
+        return halo_prof_param_key + '_' + self.gal_type
 
 
 

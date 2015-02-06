@@ -41,10 +41,8 @@ class OccupationComponent(object):
         self.threshold = threshold
         self.occupation_bound = occupation_bound
 
-        self.prim_func_dict = {None : self.set_primary_function_dict()}
-
-        self.convenience_methods = [self.mean_occupation]
-
+        self._set_primary_function_dict()
+        
     @abstractmethod
     def _get_param_dict(self):
         pass
@@ -53,9 +51,9 @@ class OccupationComponent(object):
     def mc_occupation(self):
         pass
 
-    def set_primary_function_dict(self):
-        return self.mc_occupation
-
+    def _set_primary_function_dict(self):
+        self.prim_func_dict = {None : self.mc_occupation}
+        self.additional_methods_to_inherit = [self.mean_occupation]
 
 
 class Kravtsov04Cens(OccupationComponent):

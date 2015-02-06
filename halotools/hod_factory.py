@@ -157,19 +157,25 @@ class HodModel(object):
                 " and a mock galaxy population - pick one")
 
     def _create_convenience_attributes(self):
-        # Should be able to figure out a way to have 
-        # self.mean_occupation be inherited. The trick will 
-        # involve using self.some_method.__name__. 
-        # Figure this out later
+        """ Create attributes of the composite model to conveniently access 
+        the most commonly used methods of the component models. 
+        """
 
-        # Basically, each component model should come with a list of 
-        # methods that should be assigned as bound method of the composite model.
-        # The following syntax is halfway there:
-        # for convenience_method in some_list:
-        #     setattr(self, convenience_method.__name__, convenience_method) 
-        # The problem is that I want to use different convenience methods 
-        # with the same name for different gal_types. 
-        pass 
+        for gal_type, gal_type_dict in self.model_blueprint.iteritems():
+            for component_key, component_instance in gal_type_dict.iteritems():
+                # First create a convenience method for each entry in 
+                # the primary function dictionary
+                for method in component_instance.prim_func_dict.values():
+                    method_name = method.__name__+'_'+component_instance.gal_type
+                    setattr(self, method_name, method)
+                # If the component has additional methods 
+                # we'd like convenience attributes for, create those too.
+                if hasattr(component_instance, 'additional_methods_to_inherit'):
+                    convenience_methods = component_instance.additional_methods_to_inherit
+                for method in convenience_methods:
+                    method_name = method.__name__+'_'+component_instance.gal_type
+                    setattr(self, method_name, method)
+
 
     def build_composite_param_dict(self,model_blueprint):
         """ Method to build a dictionary of parameters for the composite model 
