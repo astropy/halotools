@@ -137,7 +137,7 @@ def test_TPCF_period_API():
 ####two point correlation jackknife function##############################################
 def test_two_point_correlation_function_jackknife():
     
-    sample1 = np.random.random((100,3))
+    sample1 = np.random.random((1000,3))
     randoms = np.random.random((1000,3))
     period = np.array([1,1,1])
     Lbox = np.array([1,1,1])
@@ -152,7 +152,7 @@ def test_two_point_correlation_function_jackknife():
 
 def test_two_point_correlation_function_jackknife_threading():
     
-    sample1 = np.random.random((100,3))
+    sample1 = np.random.random((1000,3))
     randoms = np.random.random((1000,3))
     period = np.array([1,1,1])
     Lbox = np.array([1,1,1])

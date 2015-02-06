@@ -21,18 +21,10 @@ import numpy as np
 from math import pi, gamma
 import spatial.geometry as geometry
 from multiprocessing import Pool
-####try to import the best pair counter###################################################
 try: from pair_counters.mpipairs import npairs, wnpairs, specific_wnpairs, jnpairs
 except ImportError:
-    print "MPI pair counter not available.  MPI functionality will not be supported."
-    try: from pair_counters.kdpairs import npairs, wnpairs, specific_wnpairs, jnpairs
-    except ImportError:
-        print "kdtree pair counter not available. Brute force methods will be used."
-        try: from pair_counters.cpairs import npairs, wnpairs, specific_wnpairs, jnpairs
-        except ImportError:
-            print "cython pair counter not available. Python brute force methods will be used."
-            from pair_counters.pairs import npairs, wnpairs, specific_wnpairs, jnpairs
-##########################################################################################
+    print("MPI functionality not available.")
+    from pair_counters.kdpairs import npairs, wnpairs, specific_wnpairs, jnpairs
 
 ####define wrapper functions for pair counters to facilitate parallelization##############
 #straight pair counter
@@ -474,10 +466,10 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
             return xi_11
 
 
-def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10, 
-                                             Lbox=[250.0,250.0,250.0], sample2 = None, 
-                                             period = None, max_sample_size=int(1e6), 
-                                             do_auto=True, do_cross=True, 
+def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5,
+                                             Lbox=[250.0,250.0,250.0], sample2 = None,
+                                             period = None, max_sample_size=int(1e6),
+                                             do_auto=True, do_cross=True,
                                              estimator='Natural', N_threads=1, comm=None):
     """
     Calculate the two-point correlation function with jackknife errors. 
@@ -527,9 +519,10 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
 
     Returns 
     -------
-    correlation_function : array_like
-        array containing correlation function :math:`\\xi` computed in each of the Nrbins 
+    correlation_function(s), cov_matrix : array_like
+        array containing correlation function :math:`\\xi(r)` computed in each of the Nrbins 
         defined by input `rbins`.
+        Nrbins x Nrbins array containing the covariance matrix of `\\xi(r)`
 
     """
     
@@ -619,19 +612,28 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         
         dL = Lbox/Nsub # length of subvolumes along each dimension
         N_sub_vol = np.prod(Nsub) # total the number of subvolumes
+        inds = np.arange(1,N_sub_vol+1).reshape(Nsub[0],Nsub[1],Nsub[2])
     
         #tag each particle with an integer indicating which jackknife subvolume it is in
         #subvolume indices for the sample1 particle's positions
-        index_1 = np.sum(np.floor(sample1/dL)*np.hstack((1,np.cumprod(Nsub[:-1]))),axis=1)+1
-        j_index_1 = index_1.astype(int)
+        index_1 = np.floor(sample1/dL).astype(int)
+        j_index_1 = inds[index_1[:,0],index_1[:,1],index_1[:,2]].astype(int)
+    
         #subvolume indices for the random particle's positions
-        index_random = np.sum(np.floor(randoms/dL)*np.hstack((1,np.cumprod(Nsub[:-1]))),axis=1)+1
-        j_index_random = index_random.astype(int)
+        index_random = np.floor(randoms/dL).astype(int)
+        j_index_random = inds[index_random[:,0],index_random[:,1],index_random[:,2]].astype(int)
+        
         #subvolume indices for the sample2 particle's positions
-        index_2 = np.sum(np.floor(sample2/dL)*np.hstack((1,np.cumprod(Nsub[:-1]))),axis=1)+1
-        j_index_2 = index_2.astype(int)
+        index_2 = np.floor(sample2/dL).astype(int)
+        j_index_2 = inds[index_2[:,0],index_2[:,1],index_2[:,2]].astype(int)
         
         return j_index_1, j_index_2, j_index_random, N_sub_vol
+    
+    def get_subvolume_numbers(j_index,N_sub_vol):
+        temp = np.hstack((j_index,np.arange(1,N_sub_vol+1,1))) #kinda hacky, but need to every label to be in there at least once
+        labels, N = np.unique(temp,return_counts=True)
+        N = N-1 #remove the place holder I added two lines above.
+        return N
     
     def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,\
                       period, N_thread, do_auto, do_cross, do_DD, comm):
@@ -758,23 +760,23 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         """
         if estimator == 'Natural':
             factor = ND1*ND2/(NR1*NR2)
-            xi = (1.0/factor)*DD/RR - 1.0 #DD/RR-1
+            xi = (1.0/factor)*(DD/RR).T - 1.0 #DD/RR-1
         elif estimator == 'Davis-Peebles':
             factor = ND1*ND2/(ND1*NR2)
-            xi = (1.0/factor)*DD/DR - 1.0 #DD/DR-1
+            xi = (1.0/factor)*(DD/DR).T - 1.0 #DD/DR-1
         elif estimator == 'Hewett':
             factor1 = ND1*ND2/(NR1*NR2)
             factor2 = ND1*NR2/(NR1*NR2)
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*DR/RR #(DD-DR)/RR
+            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*(DR/RR).T #(DD-DR)/RR
         elif estimator == 'Hamilton':
             xi = (DD*RR)/(DR*DR) - 1.0 #DDRR/DRDR-1
         elif estimator == 'Landy-Szalay':
             factor1 = ND1*ND2/(NR1*NR2)
             factor2 = ND1*NR2/(NR1*NR2)
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*2.0*DR/RR + 1.0 #(DD - 2.0*DR + RR)/RR
+            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*2.0*(DR/RR).T + 1.0 #(DD - 2.0*DR + RR)/RR
         else: 
             raise ValueError("unsupported estimator!")
-        return xi
+        return xi.T #had to transpose twice to get the multiplication to work for the jackknife samples
     
     def TP_estimator_requirements(estimator):
         """
@@ -808,12 +810,29 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
         """
         Calculate jackknife errors.
         """
-        after_subtraction =  sub - full
+        after_subtraction =  sub - np.mean(sub,axis=0)
         squared = after_subtraction**2.0
         error2 = ((N_sub_vol-1)/N_sub_vol)*squared.sum(axis=0)
         error = error2**0.5
         
         return error
+    
+    def covariance_matrix(sub,full,N_sub_vol):
+        """
+        Calculate the covariance matrix.
+        """
+        Nr = full.shape[0] # Nr is the number of radial bins
+        cov = np.zeros((Nr,Nr)) # 2D array that keeps the covariance matrix 
+        after_subtraction = sub - np.mean(sub,axis=0)
+        tmp = 0
+        for i in range(Nr):
+            for j in range(Nr):
+                tmp = 0.0
+                for k in range(N_sub_vol):
+                    tmp = tmp + after_subtraction[k,i]*after_subtraction[k,j]
+                cov[i,j] = (((N_sub_vol-1)/N_sub_vol)*tmp)
+    
+        return cov
     
     do_DD, do_DR, do_RR = TP_estimator_requirements(estimator)
     
@@ -823,6 +842,15 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     
     j_index_1, j_index_2, j_index_random, N_sub_vol = \
                                get_subvolume_labels(sample1, sample2, randoms, Nsub, Lbox)
+    
+    #number of points in each subvolume
+    NR_subs = get_subvolume_numbers(j_index_random,N_sub_vol)
+    N1_subs = get_subvolume_numbers(j_index_1,N_sub_vol)
+    N2_subs = get_subvolume_numbers(j_index_2,N_sub_vol)
+    #number of points in each jackknife sample
+    N1_subs = N1 - N1_subs
+    N2_subs = N2 - N2_subs
+    NR_subs = NR - NR_subs
     
     #calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol,\
@@ -866,19 +894,29 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=10,
     xi_12_full = TP_estimator(D1D2_full,D1R_full,RR_full,N1,N2,NR,NR,estimator)
     xi_22_full = TP_estimator(D2D2_full,D2R_full,RR_full,N2,N2,NR,NR,estimator)
     #calculate the correlation function for the subsamples
-    xi_11_sub = TP_estimator(D1D1_sub,D1R_sub,RR_sub,N1,N1,NR,NR,estimator)
-    xi_12_sub = TP_estimator(D1D2_sub,D1R_sub,RR_sub,N1,N2,NR,NR,estimator)
-    xi_22_sub = TP_estimator(D2D2_sub,D2R_sub,RR_sub,N2,N2,NR,NR,estimator)
+    xi_11_sub = TP_estimator(D1D1_sub,D1R_sub,RR_sub,N1_subs,N1_subs,NR_subs,NR_subs,estimator)
+    xi_12_sub = TP_estimator(D1D2_sub,D1R_sub,RR_sub,N1_subs,N2_subs,NR_subs,NR_subs,estimator)
+    xi_22_sub = TP_estimator(D2D2_sub,D2R_sub,RR_sub,N2_subs,N2_subs,NR_subs,NR_subs,estimator)
     
     #calculate the errors
-    xi_11_err = jackknife_errors(xi_11_sub,xi_11_full,N_sub_vol)
-    xi_12_err = jackknife_errors(xi_12_sub,xi_12_full,N_sub_vol)
-    xi_22_err = jackknife_errors(xi_22_sub,xi_22_full,N_sub_vol)
+    xi_11_err = covariance_matrix(xi_11_sub,xi_11_full,N_sub_vol)
+    xi_12_err = covariance_matrix(xi_12_sub,xi_12_full,N_sub_vol)
+    xi_22_err = covariance_matrix(xi_22_sub,xi_22_full,N_sub_vol)
+    
+    #calculate the covariance matrix
+    xi_11_cov = covariance_matrix(xi_11_sub,xi_11_full,N_sub_vol)
+    xi_12_cov = covariance_matrix(xi_12_sub,xi_12_full,N_sub_vol)
+    xi_22_cov = covariance_matrix(xi_22_sub,xi_22_full,N_sub_vol)
     
     if np.all(sample1==sample2):
-        return xi_11_full,xi_11_err
+        return xi_11_full,xi_11_cov
     else:
-        return xi_11_full,xi_12_full,xi_22_full,xi_11_err,xi_12_err,xi_22_err
+        if (do_auto==True) & (do_cross==True):
+            return xi_11_full,xi_12_full,xi_22_full,xi_11_cov,xi_12_cov,xi_22_cov
+        elif du_auto==True:
+            return xi_11_full,xi_22_full,xi_11_cov,xi_22_cov
+        elif do_cross==True:
+            return xi_12_full,xi_12_cov
 
 
 def angular_two_point_correlation_function(sample1, theta_bins, sample2=None, randoms=None, 
@@ -1304,6 +1342,9 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     from halotools.mock_observables.spatial.geometry import cylinder
     from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
     
+    if N_threads>1:
+        pool = Pool(N_threads)
+    
     if period is None:
             PBCs = False
             period = np.array([np.inf]*np.shape(sample1)[-1])
@@ -1318,9 +1359,20 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     normal = np.asarray(normal)
     bounds = np.asarray(bounds)
     centers = np.asarray(centers)
+    particles = np.asarray(particles)
+    
+    print np.shape(particles)
+    
+    particle_tree= cKDTree(particles)
+    proj_particle_tree = cKDTree(particles[:,0:2])
+    centers_tree = cKDTree(centers)
+    proj_centers_tree = cKDTree(centers[:,0:2])
+    
+    proj_period = period[0:2]
     
     N_targets = len(centers)
     length = bounds[1]-bounds[0]
+    print('length:',length)
     
     #create cylinders for each galaxy and each radial bin
     cyls = np.ndarray((N_targets,len(rbins)),dtype=object)
@@ -1332,31 +1384,35 @@ def Delta_Sigma(centers, particles, rbins, bounds=[-0.1,0.1], normal=[0.0,0.0,1.
     #calculate the number of particles inside each cylinder 
     tree = cKDTree(particles)
     N = np.ndarray((len(centers),len(rbins)))
+    N.fill(0.0)
+    periods = [period,]*len(centers)
     for j in range(0,len(rbins)):
-        dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j].tolist(), tree, period=period)
-    
+        print(j,rbins[j])
+        #dum1, dum2, dum3, N[:,j] = inside_volume(cyls[:,j].tolist(), tree, period=period)
+        points_to_test = proj_centers_tree.query_ball_tree(proj_particle_tree,rbins[j],period=proj_period)
+        N_test = [len(inds) for inds in points_to_test]
+        print('mean number to test:',np.mean(N_test))
+        """
+        coordinates_to_test = [particles[inds] for inds in points_to_test]
+        results = map(cylinder.inside,cyls[:,j].tolist(),coordinates_to_test,periods)
+        N_inside = [np.sum(result) for result in results]
+        N[:,j] = N_inside
+        print('mean number inside:',np.mean(N_inside))
+        """
+        N[:,j] = N_test
+        
     #numbers in annular bins, N
-    N = np.diff(N,axis=1)
+    N_diff = np.diff(N,axis=1)
     
     #area of an annular ring, A
-    A = np.pi*rbins**2.0
-    A = np.diff(A)
+    A_circle = np.pi*rbins**2.0
+    A_annulus = np.diff(A_circle)
     
     #calculate the surface density in annular bins, Sigma
-    Sigma = N/A
+    Sigma_diff = np.mean(N_diff,axis=0)/A_annulus
+    Sigma_inside = np.mean(N,axis=0)/A_circle
     
-    delta_Sigma = np.zeros((N_targets,len(rbins)-1))
+    Delta_Sigma = Sigma_inside[:-1]-Sigma_diff
     
-    for target in range(0,N_targets):
-        #loop over each each radial bin
-        for i in range(1,len(rbins)-1):
-            outer = 1.0/(np.pi*rbins[i]**2.0)
-            inner_sum=0.0
-            #loop over annular bins internal to the ith one.
-            for n in range(0,i-1):
-                inner_sum += Sigma[target,n]*A[n]
-            delta_Sigma[target,i] = inner_sum*outer-Sigma[target,i]
-    
-    return np.mean(delta_Sigma, axis=0)
-
+    return Delta_Sigma
 
