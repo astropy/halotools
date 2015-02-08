@@ -1,3 +1,4 @@
+##Pair-counters Submodule
 
 This submodule contains functions to calculate pair counts.  All of the pair counters 
 included here should have the same form of input and output.  Namely, the result of 
