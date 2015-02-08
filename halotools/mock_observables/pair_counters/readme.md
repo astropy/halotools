@@ -3,10 +3,10 @@
 This submodule contains functions to calculate pair counts.
 
 ###Available Pair-counters
-* pairs.py 
-* cpairs.pyx
-* kdpairs.py
-* mpipairs.py
+* pairs.py, a brute force pair counter
+* cpairs.pyx, a brite force cython pair counter
+* kdpairs.py, uses ckdtree for pair counting operations
+* mpipairs.py, mpi implementation which uses ckdtree for pair counting operations
 
 ###Guidlines
 All of the pair counters included here should have the same form of input and output. 
