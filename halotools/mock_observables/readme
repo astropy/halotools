@@ -1,4 +1,0 @@
-This directory should contain a class of objects and functions to calculate observational 
-statistics about mock galaxy catalogs.  Observational statistics are those that either 
-closely approximate those that can be made on real galaxy surveys, or are exactly 
-equivalent to those used on real surveys.
