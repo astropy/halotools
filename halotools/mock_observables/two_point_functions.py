@@ -899,9 +899,9 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5,
     xi_22_sub = TP_estimator(D2D2_sub,D2R_sub,RR_sub,N2_subs,N2_subs,NR_subs,NR_subs,estimator)
     
     #calculate the errors
-    xi_11_err = covariance_matrix(xi_11_sub,xi_11_full,N_sub_vol)
-    xi_12_err = covariance_matrix(xi_12_sub,xi_12_full,N_sub_vol)
-    xi_22_err = covariance_matrix(xi_22_sub,xi_22_full,N_sub_vol)
+    xi_11_err = covariance_err(xi_11_sub,xi_11_full,N_sub_vol)
+    xi_12_err = covariance_err(xi_12_sub,xi_12_full,N_sub_vol)
+    xi_22_err = covariance_err(xi_22_sub,xi_22_full,N_sub_vol)
     
     #calculate the covariance matrix
     xi_11_cov = covariance_matrix(xi_11_sub,xi_11_full,N_sub_vol)
@@ -913,7 +913,7 @@ def two_point_correlation_function_jackknife(sample1, randoms, rbins, Nsub=5,
     else:
         if (do_auto==True) & (do_cross==True):
             return xi_11_full,xi_12_full,xi_22_full,xi_11_cov,xi_12_cov,xi_22_cov
-        elif du_auto==True:
+        elif do_auto==True:
             return xi_11_full,xi_22_full,xi_11_cov,xi_22_cov
         elif do_cross==True:
             return xi_12_full,xi_12_cov
