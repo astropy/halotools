@@ -6,6 +6,7 @@ statistics on mock galaxy catalogs.
 ###Available Calculations and Submodules
 * two_point_functions.py, contains functions to calculate to point statistis like the two 
 point correlation function
+* make_redshift_survey.py, contains methods to construct mock redshift surveys
 * observables.py, contains functions to calculate miscellaneous statistics.
 * isolation_criteria.py, in development
 * pair_counters, submodule to preform pair counts
