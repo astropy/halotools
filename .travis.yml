@@ -47,12 +47,13 @@ matrix:
           env: SETUP_CMD='test'
 
         # Try older numpy versions
-        - python: 2.7
-          env: NUMPY_VERSION=1.8 SETUP_CMD='test'
-        - python: 2.7
-          env: NUMPY_VERSION=1.7 SETUP_CMD='test'
-        - python: 2.7
-          env: NUMPY_VERSION=1.6 SETUP_CMD='test'
+        # currently these are commented out because the conda copy of astropy is only up-to-date for numpy 1.9
+        #- python: 2.7
+        #  env: NUMPY_VERSION=1.8 SETUP_CMD='test'
+        #- python: 2.7
+        #  env: NUMPY_VERSION=1.7 SETUP_CMD='test'
+        #- python: 2.7
+        #  env: NUMPY_VERSION=1.6 SETUP_CMD='test'
 
 before_install:
 
