@@ -58,13 +58,6 @@ class HodMockFactory(object):
         # pertain only to those halo properties needed to generate 
         # halo profiles. However, it should be possible to add new columns 
         # that can be used as either the primary or secondary halo properties. 
-        # And, additionally, different gal_types should be permitted to have 
-        # different primary and secondary halo properties. 
-        # Making these changes will require some new bookkeeping, including 
-        # 1. having prim_haloprop_key and sec_haloprop_key be dictionaries 
-        # with gal_type as keys, and 2. having the build_profile_lookup_tables 
-        # method only create tables for the halo paramters pertaining to profiles, 
-        # and ignoring new halo parameters. 
 
         self.prim_haloprop_key = self.model.prim_haloprop_key
         if hasattr(self.model,'sec_haloprop_key'): 
@@ -76,7 +69,7 @@ class HodMockFactory(object):
         # are bound as values of the param_func_dict dictionary, whose keys 
         # are the column names to be created with those functions. 
         halo_prof_param_keys = []
-        prim_haloprop = self.halos[self.prim_haloprop_key]
+        prim_haloprop = self.halos[self.prim_haloprop_key] # This should be a possibly newly computed column
         function_dict = self.model.halo_prof_model.param_func_dict
         for key, prof_param_func in function_dict.iteritems():
             self.halos[key] = prof_param_func(prim_haloprop)
@@ -208,7 +201,6 @@ class HodMockFactory(object):
                     self.halos[self.sec_haloprop_key], 
                     self._occupation[gal_type])
 
-
             # Bind all additional halo properties to the mock
             for propname in self._mock_haloprops:
                 # In the mock galaxy catalog, host halo properties have the same 
@@ -227,13 +219,23 @@ class HodMockFactory(object):
                 getattr(self, propname)[gal_type_slice] = np.repeat(
                     self.halos[propname], self._occupation[gal_type])
 
-            # The following for loop does not work properly 
-            for propname in self._mock_galmodelprops:
-                if propname in self.model._gal_type_example_attr_dict.keys():
-                    getattr(self, propname)[gal_type_slice] = (
-                        self.model.component_behavior(
-                            gal_type, propname, mock_galaxies=self)
-                        )
+
+            # Call the galaxy profile components
+            for gal_prof_param in self.model.gal_prof_params:
+                getattr(self, gal_prof_params)[gal_type_slice] = (
+                    self.model.inherit_behavior(gal_type, gal_prof_param, self)
+                    )
+
+            # Call the SFR model, if relevant
+            if hasattr(self.model, 'sfr_model'):
+                pass
+
+
+            # Call mc_pos
+            getattr(self, 'pos')[gal_type_slice] = (
+                self.model.inherit_behavior(gal_type, 'pos', self)
+                )
+
 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions of the simulation box

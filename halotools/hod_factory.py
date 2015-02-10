@@ -83,6 +83,15 @@ class HodModel(object):
         self.publications = self.build_publication_list(
             self.model_blueprint)
 
+    def inherit_primary_behaviors(self):
+
+        for gal_type in self.gal_types:
+            for component_instance in self.model_blueprint[gal_type].values():
+                new_method_name = component_instance.new_colname+'_'+gal_type
+                behavior = component_instance.prim_func_dict
+                setattr(self, new_method_name, )
+
+
     def component_behavior(self, gal_type, component_key, *args, **kwargs):
 
         relevant_data = self.retrieve_relevant_haloprops(
@@ -155,26 +164,6 @@ class HodModel(object):
         else:
             raise SyntaxError("Do not pass both an array of halo properties "
                 " and a mock galaxy population - pick one")
-
-    def _create_convenience_attributes(self):
-        """ Create attributes of the composite model to conveniently access 
-        the most commonly used methods of the component models. 
-        """
-
-        for gal_type, gal_type_dict in self.model_blueprint.iteritems():
-            for component_key, component_instance in gal_type_dict.iteritems():
-                # First create a convenience method for each entry in 
-                # the primary function dictionary
-                for method in component_instance.prim_func_dict.values():
-                    method_name = method.__name__+'_'+component_instance.gal_type
-                    setattr(self, method_name, method)
-                # If the component has additional methods 
-                # we'd like convenience attributes for, create those too.
-                if hasattr(component_instance, 'additional_methods_to_inherit'):
-                    convenience_methods = component_instance.additional_methods_to_inherit
-                for method in convenience_methods:
-                    method_name = method.__name__+'_'+component_instance.gal_type
-                    setattr(self, method_name, method)
 
 
     def build_composite_param_dict(self,model_blueprint):
@@ -336,6 +325,26 @@ class HodModel(object):
 
         return output_haloprop_dict
 
+
+    def _create_convenience_attributes(self):
+        """ Create attributes of the composite model to conveniently access 
+        the most commonly used methods of the component models. 
+        """
+
+        for gal_type, gal_type_dict in self.model_blueprint.iteritems():
+            for component_key, component_instance in gal_type_dict.iteritems():
+                # First create a convenience method for each entry in 
+                # the primary function dictionary
+                for method in component_instance.prim_func_dict.values():
+                    method_name = method.__name__+'_'+component_instance.gal_type
+                    setattr(self, method_name, method)
+                # If the component has additional methods 
+                # we'd like convenience attributes for, create those too.
+                if hasattr(component_instance, 'additional_methods_to_inherit'):
+                    convenience_methods = component_instance.additional_methods_to_inherit
+                for method in convenience_methods:
+                    method_name = method.__name__+'_'+component_instance.gal_type
+                    setattr(self, method_name, method)
 
 
 
