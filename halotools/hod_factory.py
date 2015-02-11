@@ -40,7 +40,11 @@ class HodModel(object):
         # Bind the model-building instructions to the composite model
         self.halo_prof_model = halo_prof_model
         self.model_blueprint = model_blueprint
+
         self.haloprop_key_dict = haloprop_key_dict
+        self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
+        if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
+            self.sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
 
         # Create attributes for galaxy types and their occupation bounds
         self.gal_types = self.model_blueprint.keys()
@@ -49,11 +53,6 @@ class HodModel(object):
             self.occupation_bound[gal_type] = (
                 self.model_blueprint[gal_type]['occupation_model'].occupation_bound)
 
-        # Create strings used by the MC methods to access the appropriate columns of the 
-        # halo table passed by the mock factory
-        # Also create a dictionary for which gal_types, and which behaviors, 
-        # are assembly-biased. 
-        self._create_haloprop_keys()
 
         # In MCMC applications, the output_dict items define the 
         # parameter set explored by the likelihood engine. 
@@ -94,12 +93,10 @@ class HodModel(object):
                 component_behavior = getattr(component_instance, behavior_name)
                 setattr(self, behavior_name, component_behavior)
 
-            if hasattr(self.'sfr_model'):
-                pass
-
+            behavior_name = 'pos_'+gal_type
             component_instance = self.model_blueprint[gal_type]['pos']
             component_behavior = getattr(component_instance, 'mc_pos')
-            setattr(self, 'pos_'+gal_type, component_behavior)
+            setattr(self, behavior_name, component_behavior)
 
 
     def component_behavior(self, gal_type, colname, *args, **kwargs):
@@ -232,38 +229,7 @@ class HodModel(object):
                 pub_list.extend(model_instance.publications)
 
         return pub_list
-
-
-    def _create_haloprop_keys(self):
-
-        # Create attribute for primary halo property used by all component models
-        # Forced to be the same property defining the underlying halo profile 
-        # seen by all galaxy types 
-        self.prim_haloprop_key = self.halo_prof_model.prim_haloprop_key
-
-        # If any of the galaxy types have any assembly-biased component behavior, 
-        # create a second attribute called sec_haloprop_key. 
-        # Force the secondary halo property to be the same for all behaviors 
-        # of all galaxy types. May wish to relax this requirement later. 
-        sec_haloprop_key_dict = {}
-        for gal_type in self.gal_types:
-            temp_dict = {}
-            for behavior_key, behavior_model in self.model_blueprint[gal_type].iteritems():
-                if hasattr(behavior_model,'sec_haloprop_key'):
-                    temp_dict[behavior_key] = behavior_model.sec_haloprop_key
-            if len(set(temp_dict.values())) > 1:
-                raise KeyError("If implementing assembly bias for a particular gal_type, "
-                    "must use the same secondary halo property "
-                    " for all behaviors of this galaxy type")
-            elif len(set(temp_dict.values())) == 1:
-                sec_haloprop_key_dict[gal_type] = temp_dict
-        if len(set(sec_haloprop_key_dict.values())) > 1:
-            raise KeyError("If implementing assembly bias in a composite model, "
-                " must use same secondary halo property for all galaxy types")
-        elif len(set(sec_haloprop_key_dict.values())) == 1:
-            self.sec_haloprop_key = sec_haloprop_key_dict.values()[0]
-            self.sec_haloprop_key_dict = sec_haloprop_key_dict
-
+        
 
     def get_example_attr_dict(self):
         """ Loop over all features of all gal_types, and build a composite 
@@ -313,6 +279,9 @@ class HodModel(object):
         output_haloprop_dict = self.halo_prof_model.param_func_dict
 
         # Search all features of every gal_type for new halo properties that need to be computed
+        # Is this really necessary? When would a component of a specific galaxy ever ask for a 
+        # new property? Is this just a relic of the days when I thought prim & sec haloprops 
+        # might vary with gal_type? Consider deleting this loop. 
         for gal_type in self.gal_types:
             for behavior_key, behavior_model in self.model_blueprint[gal_type].iteritems():
                 if hasattr(behavior_model, 'new_haloprop_dict'):
@@ -329,7 +298,6 @@ class HodModel(object):
                         output_haloprop_dict = dict(
                             output_haloprop_dict.items() + new_dict.items()
                             )
-
 
         return output_haloprop_dict
 
