@@ -187,38 +187,33 @@ class HodMockFactory(object):
             gal_type_slice = self._gal_type_indices[gal_type]
 
             # Set the value of the gal_type string
-            self.gal_type[gal_type_slice] = np.repeat(gal_type, 
+            getattr(self, 'gal_type')[gal_type_slice] = np.repeat(gal_type, 
                 self._occupation[gal_type].sum())
 
             # Set the value of the primary halo property
-            self.prim_haloprop[gal_type_slice] = np.repeat(
+            getattr(self, 'prim_haloprop')[gal_type_slice] = np.repeat(
                 self.halos[self.prim_haloprop_key], 
                 self._occupation[gal_type])
 
             # Set the value of the secondary halo property, if relevant
             if hasattr(self.model, 'sec_haloprop_key'):
-                self.sec_haloprop[gal_type_slice] = np.repeat(
+                getattr(self, 'sec_haloprop')[gal_type_slice] = np.repeat(
                     self.halos[self.sec_haloprop_key], 
                     self._occupation[gal_type])
 
-            # Bind all additional halo properties to the mock
+            # Bind host halo properties to the mock
             for propname in self._mock_haloprops:
-                # In the mock galaxy catalog, host halo properties have the same 
-                # column names as in the halo catalog, but prepended by the halo prefix 
-                # set in defaults module. 
-                # So strip the halo prefix to access the columns of the halo catalog
+                # Host halo properties in the mock have the same 
+                # column names as appear in the halo catalog, 
+                # but prepended by the halo prefix set in defaults module. 
                 halocatkey = propname[len(defaults.host_haloprop_prefix):]
                 getattr(self, propname)[gal_type_slice] = np.repeat(
                     self.halos[halocatkey], self._occupation[gal_type])
 
-            # Each halo has had one or more profile model parameters attached to it 
-            # during the call to process_halo_catalog(). Bind each of those 
-            # profile parameter values to the mock galaxy. 
-            # Note that these do not vary with the gal_type. 
-            for propname in self._mock_halomodelprops:
-                getattr(self, propname)[gal_type_slice] = np.repeat(
-                    self.halos[propname], self._occupation[gal_type])
-
+            # Call the SFR model, if relevant for this model
+            if hasattr(self.model, 'sfr_model'):
+                # Code this up later
+                pass
 
             # Call the galaxy profile components
             for gal_prof_param in self.model.gal_prof_params:
@@ -226,19 +221,19 @@ class HodMockFactory(object):
                     self.model.inherit_behavior(gal_type, gal_prof_param, self)
                     )
 
-            # Call the SFR model, if relevant
-            if hasattr(self.model, 'sfr_model'):
-                pass
-
-
-            # Call mc_pos
+            # Assign positions
             getattr(self, 'pos')[gal_type_slice] = (
                 self.model.inherit_behavior(gal_type, 'pos', self)
                 )
 
+            # Assign velocities, if relevant for this model
+            if 'vel' in self.model.new_colnames:
+            getattr(self, 'vel')[gal_type_slice] = (
+                self.model.inherit_behavior(gal_type, 'pos', self)
+                )
 
         # Positions are now assigned to all populations. 
-        # Now enforce the periodic boundary conditions of the simulation box
+        # Now enforce the periodic boundary conditions for all populations at once
         self.coords = occuhelp.enforce_periodicity_of_box(
             self.coords, self.snapshot.Lbox)
 

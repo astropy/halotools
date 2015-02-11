@@ -154,7 +154,7 @@ class HaloProfileModel(object):
             " and values being the functions used to map parameter values onto halos")
 
     def get_param_key(self, model_nickname, param_nickname):
-        param_key = defaults.host_haloprop_prefix+model_nickname+'_'+param_nickname
+        param_key = model_nickname+'_'+param_nickname
         return param_key
 
 
