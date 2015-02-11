@@ -197,23 +197,9 @@ class NFWProfile(HaloProfileModel):
         HaloProfileModel.__init__(self, 
             cosmology, redshift, [self._conc_parname], prim_haloprop_key)
 
-        # Instantiate the container class for concentration-mass relations, 
-        # defined in the external module halo_prof_param_components
-        conc_mass_model_instance = halo_prof_param_components.ConcMass(
-            cosmology = self.cosmology, redshift = self.redshift)
-
-        # We want to call the specific function where the 'model' keyword argument 
-        # is fixed to the conc-mass relation we want. 
-        # For this, we use Python's functools
-        conc_mass_func = functools.partial(
-            conc_mass_model_instance.conc_mass, model=conc_mass_relation_key)
-
-        # Now bind this function object up into a dictionary
-        # This saves us from some hard-coding, since non-standard profiles 
-        # will have entirely different names for their halo-parameter relations, 
-        # but written this way we can call them with a consistent syntax
+        conc_mass_func = self.get_conc_mass_model(conc_mass_relation_key)
+        # Now wrap this function  into self.param_func_dict
         self.set_param_func_dict({self._conc_parname:conc_mass_func})
-        # The above line binds a dictionary attribute param_func_dict to the class instance 
 
         # Build a table stored in the dictionary prof_param_table_dict 
         # that dictates how to discretize the profile parameters
@@ -426,7 +412,20 @@ class NFWProfile(HaloProfileModel):
                     "must have exactly 3 elements")
             self.prof_param_table_dict = input_dict
 
+    def get_conc_mass_model(self, conc_mass_relation_key):
 
+        # Instantiate the container class for concentration-mass relations, 
+        # defined in the external module halo_prof_param_components
+        conc_mass_model_instance = halo_prof_param_components.ConcMass(
+            cosmology = self.cosmology, redshift = self.redshift)
+
+        # We want to call the specific function where the 'model' keyword argument 
+        # is fixed to the conc-mass relation we want. 
+        # For this, we use Python's functools
+        conc_mass_func = functools.partial(
+            conc_mass_model_instance.conc_mass, model=conc_mass_relation_key)
+
+        return conc_mass_func
 
 ##################################################################################
 
