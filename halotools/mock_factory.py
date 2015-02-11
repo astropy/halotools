@@ -21,14 +21,21 @@ class HodMockFactory(object):
 
     def __init__(self, snapshot, composite_model, 
         bundle_into_table=True, populate=True,
-        additional_haloprops=[]):
+        additional_haloprops=[], new_haloprop_funcs={}):
 
         # Bind the inputs to the mock object
         self.snapshot = snapshot
         self.halos = snapshot.halos
         self.particles = snapshot.particles
         self.model = composite_model
+
         self.additional_haloprops = additional_haloprops
+        # Make sure all the default haloprops are included
+        self.additional_haloprops.extend(defaults.haloprop_list) 
+        # Remove any possibly redundant items
+        self.additional_haloprops = list(set(self.additional_haloprops))
+
+        self.new_haloprop_funcs = new_haloprop_funcs
 
         # Bind a list of strings containing the gal_types 
         # of the composite model to the mock instance. 
@@ -54,10 +61,9 @@ class HodMockFactory(object):
         and building lookup tables associated with the halo profile. 
         """
 
-        # Currently, all halo catalog columns added in this stage 
-        # pertain only to those halo properties needed to generate 
-        # halo profiles. However, it should be possible to add new columns 
-        # that can be used as either the primary or secondary halo properties. 
+        for new_haloprop_key, new_haloprop_func in self.new_haloprop_funcs.iteritems():
+            self.halos[new_haloprop_key] = new_haloprop_func(self.halos)
+            self.additional_haloprops.append(new_haloprop_key)
 
         self.prim_haloprop_key = self.model.prim_haloprop_key
         if hasattr(self.model,'sec_haloprop_key'): 
@@ -69,11 +75,13 @@ class HodMockFactory(object):
         # are bound as values of the param_func_dict dictionary, whose keys 
         # are the column names to be created with those functions. 
         halo_prof_param_keys = []
-        prim_haloprop = self.halos[self.prim_haloprop_key] # This should be a possibly newly computed column
+        prim_haloprop = self.halos[self.prim_haloprop_key] 
         function_dict = self.model.halo_prof_model.param_func_dict
         for key, prof_param_func in function_dict.iteritems():
             self.halos[key] = prof_param_func(prim_haloprop)
-            halo_prof_param_keys.extend([key])
+            halo_prof_param_keys.append(key)
+            self.additional_haloprops.append(key)
+
         # Create a convenient bookkeeping device to keep track of the 
         # halo profile parameter model keys that were added by the model
         setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
@@ -280,16 +288,10 @@ class HodMockFactory(object):
             setattr(self, propname, 
                 np.zeros(total_entries).reshape(example_shape))
 
-        for propname in self._mock_haloprops:
-            # for halo catalog-derived properties 
-            # we need to strip the prefix from the string
-            halocatkey = propname[len(defaults.host_haloprop_prefix):]
+        for halocatkey in self.additional_haloprops:
+            galpropkey = defaults.host_haloprop_prefix+halocatkey
             example_entry = self.halos[halocatkey][0]
-            _allocate_ndarray_attr(self, propname, example_entry)
-
-        for propname in self._mock_halomodelprops:
-            example_entry = 0 # All profile model properties, e.g., conc, are scalars
-            _allocate_ndarray_attr(self, propname, example_entry)
+            _allocate_ndarray_attr(self, galpropkey, example_entry)
 
         _allocate_ndarray_attr(self, 'gal_type', 0)
         _allocate_ndarray_attr(self, 'prim_haloprop', 0)
