@@ -227,10 +227,8 @@ class HodMockFactory(object):
                 )
 
             # Assign velocities, if relevant for this model
-            if 'vel' in self.model.new_colnames:
-            getattr(self, 'vel')[gal_type_slice] = (
-                self.model.inherit_behavior(gal_type, 'pos', self)
-                )
+            if hasattr(self.model, 'vel'):
+                pass
 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once

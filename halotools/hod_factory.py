@@ -83,23 +83,31 @@ class HodModel(object):
         self.publications = self.build_publication_list(
             self.model_blueprint)
 
-    def inherit_primary_behaviors(self):
+    def set_primary_behaviors(self):
 
         for gal_type in self.gal_types:
-            for component_instance in self.model_blueprint[gal_type].values():
-                new_method_name = component_instance.new_colname+'_'+gal_type
-                behavior = component_instance.prim_func_dict
-                setattr(self, new_method_name, )
+
+            # First set a method for each profile parameter
+            for gal_prof_param in self.gal_prof_model.prof_param_keys:
+                behavior_name = gal_prof_param+'_'+gal_type
+                component_instance = self.model_blueprint[gal_type]['profile_model']
+                component_behavior = getattr(component_instance, behavior_name)
+                setattr(self, behavior_name, component_behavior)
+
+            if hasattr(self.'sfr_model'):
+                pass
+
+            component_instance = self.model_blueprint[gal_type]['pos']
+            component_behavior = getattr(component_instance, 'mc_pos')
+            setattr(self, 'pos_'+gal_type, component_behavior)
 
 
-    def component_behavior(self, gal_type, component_key, *args, **kwargs):
+    def component_behavior(self, gal_type, colname, *args, **kwargs):
 
         relevant_data = self.retrieve_relevant_haloprops(
-            gal_type, component_key, *args, **kwargs)
+            gal_type, colname, *args, **kwargs)
 
-        component_model_function = (
-            self.model_blueprint[gal_type][component_key].prim_func_dict[component_key]
-            )
+        component_model_function = getattr(self, colname='_'+gal_type)
 
         return component_model_function(*relevant_data, 
             input_param_dict=self.param_dict)
