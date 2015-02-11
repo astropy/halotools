@@ -93,8 +93,13 @@ class HaloProfileModel(object):
             Parameters specifying the halo profile. 
             If an array, should be of the same length 
             as the input r. 
+
+        Returns 
+        -------
+        rho : array_like 
+            Dark matter density evaluated at the input r. 
         """
-        raise NotImplementedError("All halo profile models must include a mass_density method")
+        raise NotImplementedError("All halo profile models must include a density_profile method")
 
     @abstractmethod
     def cumulative_mass_PDF(self, r, *args):
@@ -103,14 +108,18 @@ class HaloProfileModel(object):
         Parameters 
         ----------
         r : array_like 
-            Value of the radius at which the 
-            cumulative profile is to be evaluated. 
+            Value of the radius at which density profile is to be evaluated. 
+            Should be scaled by the halo boundary, so that :math:`0 < r < 1`
 
         args : array_like 
             Parameters specifying the halo profile. 
             If an array, should be of the same length 
             as the input r. 
 
+        Returns 
+        -------
+        cumu_mass_PDF : array_like 
+            Cumulative fraction of dark matter mass interior to input r. 
         """
         raise NotImplementedError("All halo profile models must include a cumulative_mass_PDF method")
 
@@ -119,26 +128,19 @@ class HaloProfileModel(object):
         """ Required method specifying the mapping between halo profile parameters 
         and some halo property (or properties). 
         The most common example halo profile parameter 
-        is NFW concentration, and the most common mapping is a power-law type
+        is NFW concentration, and the simplest mapping is a power-law type
         concentration-mass relation. 
 
         The sole function of this method is to bind a dictionary to the 
-        HaloProfileModel instance. The purpose of this dictionary 
-        is to provide a standardized way that composite models can access 
-        the halo-parameter mappings, regardless of what the user names the methods. 
-        So even though this method has rather trivial functionality, it is required 
-        to help ensure standardized behavior of future extensions.  
+        HaloProfileModel instance. 
+        This dictionary standardizes the way composite models access 
+        the profile parameter mappings, regardless of what the user names the methods. 
         The key(s) of the dictionary created by this method gives the name(s) of the 
         halo profile parameter(s) of the model; the value(s) of the dictionary are 
         function object(s) providing the mapping between halos and profile parameter(s).  
         When HaloProfileModel is called by the mock factories in `halotools.mock_factory`, 
-        each dictionary key will correspond to the name of a new column for halo_table
+        each dictionary key will correspond to the name of a new column for the halo catalog 
         that will be created by the mock factory during the pre-processing of the halo catalog.
-
-        All dictionary keys will be prepended with host_haloprop_prefix, set in `~halotools.defaults`. 
-        This will make clear the interpretation of the new columns of the halo_table 
-        created by the mock factories, and helps ensure that the no existing 
-        columns of a halo catalog will be over-written. 
 
         """
         raise NotImplementedError("All halo profile models must"
@@ -185,28 +187,36 @@ class NFWProfile(HaloProfileModel):
         """
 
         self.model_nickname = 'NFWmodel'
+        # Call the super-class to assign a string that will be used to 
+        # name the concentration parameter assigned to the halo catalog
         self._conc_parname = self.get_param_key(self.model_nickname, 'conc')
+
         # Call the init constructor of the super-class, 
-        # whose only purpose is to bind cosmology, redshift, and prim_haloprop_key
-        # to the NFWProfile instance. 
+        # whose only purpose is to bind cosmology, redshift, prim_haloprop_key, 
+        # and a list of prof_param_keys to the NFWProfile instance. 
         HaloProfileModel.__init__(self, 
             cosmology, redshift, [self._conc_parname], prim_haloprop_key)
 
-        # Now set the function used for the concentration-mass relation
+        # Instantiate the container class for concentration-mass relations, 
+        # defined in the external module halo_prof_param_components
         conc_mass_model_instance = halo_prof_param_components.ConcMass(
             cosmology = self.cosmology, redshift = self.redshift)
+
         # We want to call the specific function where the 'model' keyword argument 
         # is fixed to the conc-mass relation we want. 
         # For this, we use Python's functools
         conc_mass_func = functools.partial(
             conc_mass_model_instance.conc_mass, model=conc_mass_relation_key)
+
         # Now bind this function object up into a dictionary
         # This saves us from some hard-coding, since non-standard profiles 
         # will have entirely different names for their halo-parameter relations, 
-        # but written this way we can call them with a uniform syntax
+        # but written this way we can call them with a consistent syntax
         self.set_param_func_dict({self._conc_parname:conc_mass_func})
-        # After the above line, self now has a dictionary attribute param_func_dict
+        # The above line binds a dictionary attribute param_func_dict to the class instance 
 
+        # Build a table stored in the dictionary prof_param_table_dict 
+        # that dictates how to discretize the profile parameters
         self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
 
         self.publication = ['arXiv:9611107','arXiv:1402.7073']
@@ -214,6 +224,7 @@ class NFWProfile(HaloProfileModel):
         if build_inv_cumu_table is True:
             self.build_inv_cumu_lookup_table(
                 prof_param_table_dict=self.prof_param_table_dict)
+
 
     def g(self, x):
         """ Convenience function used to evaluate the profile. 
