@@ -61,15 +61,6 @@ class HodModelDesigner(object):
 		# to ensure that they are always passed the same underlying halo 
 		# profile model
 
-		# class instances need an attribute _example_attr_dict 
-		# that provides keys for all relevant galaxy properties, 
-		# such as 'stellar_mass', 'luminosity', 'quenched', etc., 
-		# and values will be used to provide the information 
-		# about the shape of the attribute
-		# this should inherit example entries also from, 
-		# for example, the halo profile model, so that the 
-		# composite model directly knows the shape information 
-		# of the halo_prof_model parameters. 
 		
 		pass
 

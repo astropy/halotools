@@ -58,8 +58,7 @@ class HaloProfileModel(object):
     """
 
     def __init__(self, cosmology, redshift, prof_param_keys, 
-        prim_haloprop_key=defaults.haloprop_key_dict['prim_haloprop'], 
-        param_attr_examples=None):
+        prim_haloprop_key=defaults.haloprop_key_dict['prim_haloprop']):
         """
         Parameters 
         ----------
@@ -79,13 +78,6 @@ class HaloProfileModel(object):
         self.prim_haloprop_key = prim_haloprop_key
 
         self.prof_param_keys = list(prof_param_keys)
-        if param_attr_examples==None:
-            self._example_attr_dict = {key:1 for key in self.prof_param_keys}
-        else:
-            self._example_attr_dict = (
-                {self.prof_param_keys[i]:param_attr_examples[i] 
-                for i in range(len(self.prof_param_keys))}
-                )
 
     @abstractmethod
     def density_profile(self, r, *args):

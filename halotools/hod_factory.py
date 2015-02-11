@@ -65,13 +65,6 @@ class HodModel(object):
                 self.model_blueprint)
             )
 
-        # The following dictionary provides example shapes of all galaxy 
-        # attributes created by component models. Used by the mock factories 
-        # to allocate ndarrays for the galaxy properties. 
-        self._example_attr_dict, self._gal_type_example_attr_dict = (
-            self.get_example_attr_dict()
-            )
-
         # The following dictionary has values that are function objects 
         # used to calculate new halo properties from existing ones. 
         # Its keys will be used as the names of the newly created columns
@@ -229,41 +222,6 @@ class HodModel(object):
                 pub_list.extend(model_instance.publications)
 
         return pub_list
-        
-
-    def get_example_attr_dict(self):
-        """ Loop over all features of all gal_types, and build a composite 
-        dictionary providing the shape of each attribute added by each feature. 
-        Information is used when the mock factory allocates memory for galaxies. 
-        """
-
-        composite_dict = {}
-        component_dict = {}
-        for gal_type in self.gal_types:
-
-            temp_component_dict={}
-
-            for behavior_key, behavior_model in self.model_blueprint[gal_type].iteritems():
-
-                if hasattr(behavior_model, '_example_attr_dict'):
-                    new_dict = behavior_model._example_attr_dict
-                    intersection = set(new_dict) & set(composite_dict)
-                    for duplicate_key in intersection:
-                        shape1 = np.shape(new_dict[duplicate_key])
-                        shape2 = np.shape(composite_dict[duplicate_key])
-                        if shape1 != shape2:
-                            raise TypeError("For component model feature %s "
-                                "of gal_type %s, found problem with key %s "
-                                " while building composite _example_attr_dict\n"
-                                "This key appears in at least one other component model dict, "
-                                "but the shapes of the two provided example "
-                                "values do not agree" % (behavior_key, gal_type, duplicate_key) )
-                    composite_dict = dict(composite_dict.items() + new_dict.items())
-                    temp_component_dict = dict(temp_component_dict.items() + new_dict.items())
-
-            component_dict[gal_type] = temp_component_dict
-
-        return composite_dict, component_dict
 
     def get_new_haloprop_dict(self):
         """ Return a dictionary that can be used to create an additional set of 

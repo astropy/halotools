@@ -22,33 +22,6 @@ from functools import partial
 
 ##################################################################################
 
-class TrivialConfigSpaceModel(object):
-    """ Super class of any model for 
-    the intra-halo position of galaxies. 
-    The sole function of the super class is to 
-    standardize the attributes and methods 
-    required of the component models.
-    """
-    def __init__(self, gal_type, haloprop_key_dict, 
-        halo_prof_model, ):
-
-        self.gal_type = gal_type
-        
-        self.haloprop_key_dict = haloprop_key_dict
-
-        self._example_attr_dict = {'pos':[0,0,0]}
-
-
-    def mc_pos(self, *args, **kwargs):
-        return 0
-
-
-
-
-##################################################################################
-
-##################################################################################
-
 class IsotropicSats(object):
     """ Classical satellite profile. """
 
@@ -169,11 +142,6 @@ class RadProfBias(object):
 
         # Configure the settings of scipy's spline interpolation routine
         self._setup_interpol(interpol_method, input_spline_degree)
-
-        # Create a dictionary with one key per halo profile parameter being modulated, 
-        # and values equal to any arbitrary scalar. Used by the mock factory to 
-        # allocate the appropriate shape ndarray for the modulated profile parameter
-        self._example_attr_dict = self._get_example_attr_dict()
 
         # The primary method of this class is get_modulated_prof_params, which 
         # derives its behavior from radprof_modfunc. Both of these methods are 
@@ -497,15 +465,6 @@ class RadProfBias(object):
         `radprof_modfunc`. 
         """
         return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
-
-    def _get_example_attr_dict(self):
-
-        output_dict = {}
-        for halokey in self.prof_param_keys:
-            galkey = self._get_gal_prof_param_key(halokey)
-            output_dict[galkey] = 0
-
-        return output_dict
 
     def _get_gal_prof_param_key(self, halo_prof_param_key):
         return halo_prof_param_key + '_' + self.gal_type

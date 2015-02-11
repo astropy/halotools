@@ -161,16 +161,13 @@ class HodMockFactory(object):
 
         # Some models require ...
         self._mock_halomodelprops = self.halos.halo_prof_param_keys
-        self._mock_galmodelprops = self.model._example_attr_dict.keys()
 
         if testmode==True:
             assert len(self._mock_halomodelprops)==len(set(self._mock_halomodelprops))
-            assert len(self._mock_galmodelprops)==len(set(self._mock_galmodelprops))
 
         # Throw away any possible repeated entries
         self._mock_haloprops = list(set(self._mock_haloprops))
         self._mock_halomodelprops = list(set(self._mock_halomodelprops))
-        self._mock_galmodelprops = self.model._example_attr_dict.keys()
 
 
     def populate(self):
@@ -283,10 +280,6 @@ class HodMockFactory(object):
             setattr(self, propname, 
                 np.zeros(total_entries).reshape(example_shape))
 
-        for propname in self._mock_galprops:
-            example_entry = defaults.galprop_dict[propname]
-            _allocate_ndarray_attr(self, propname, example_entry)
-
         for propname in self._mock_haloprops:
             # for halo catalog-derived properties 
             # we need to strip the prefix from the string
@@ -298,14 +291,15 @@ class HodMockFactory(object):
             example_entry = 0 # All profile model properties, e.g., conc, are scalars
             _allocate_ndarray_attr(self, propname, example_entry)
 
-        for propname in self._mock_galmodelprops:
-            example_entry = self.model._example_attr_dict[propname]
-            _allocate_ndarray_attr(self, propname, example_entry)
-
-        _allocate_ndarray_attr(self, 'prim_haloprop', 0)
         _allocate_ndarray_attr(self, 'gal_type', 0)
+        _allocate_ndarray_attr(self, 'prim_haloprop', 0)
         if hasattr(self.model,'sec_haloprop_key'):
             _allocate_ndarray_attr(self, 'sec_haloprop', 0)
+
+        _allocate_ndarray_attr(self, 'pos', [0,0,0])
+
+
+
 
 
 
