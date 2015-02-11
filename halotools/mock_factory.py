@@ -37,18 +37,10 @@ class HodMockFactory(object):
 
         self.new_haloprop_funcs = new_haloprop_funcs
 
-        # Bind a list of strings containing the gal_types 
-        # of the composite model to the mock instance. 
-        # The self.gal_types list is ordered such that 
-        # populations with unity-bounded occupations appear first
         self.gal_types, self._occupation_bounds = self._get_gal_types()
 
-        # There are various columns of the halo catalog 
-        # to create in advance of populating a galaxy model. 
-        # For example, a column called 'prim_haloprop' will be made 
-        # in advance of populating any traditional empirical model. 
-        # The composite model bound to the mock contains the instructions to give to 
-        # the process_halo_catalog method about what columns to construct. 
+        # Pre-compute any additional halo properties required by the model, 
+        # such as 'NFWmodel_conc'. Also build all necessary lookup tables.
         self.process_halo_catalog()
 
         if populate==True: self.populate()
@@ -69,21 +61,19 @@ class HodMockFactory(object):
         if hasattr(self.model,'sec_haloprop_key'): 
             self.sec_haloprop_key = self.model.sec_haloprop_key
 
-        # Create new columns for self.halos associated with each 
-        # parameter of the halo profile model, e.g., 'halo_NFW_conc'. 
-        # The function objects that operate on the halos to create new columns 
-        # are bound as values of the param_func_dict dictionary, whose keys 
-        # are the column names to be created with those functions. 
+        # Create new halo catalog columns associated with each 
+        # parameter of the halo profile model, e.g., 'NFWmodel_conc'. 
+        # The names of the new columns to create are the keys of the 
+        # halo profile model's param_func_dict dictionary; 
+        # each key's value is the function object that operates 
+        # on the halos to create the new columns 
         halo_prof_param_keys = []
-        prim_haloprop = self.halos[self.prim_haloprop_key] 
         function_dict = self.model.halo_prof_model.param_func_dict
-        for key, prof_param_func in function_dict.iteritems():
-            self.halos[key] = prof_param_func(prim_haloprop)
-            halo_prof_param_keys.append(key)
-            self.additional_haloprops.append(key)
+        for new_haloprop_key, prof_param_func in function_dict.iteritems():
+            self.halos[new_haloprop_key] = prof_param_func(self.halos[self.prim_haloprop_key])
+            halo_prof_param_keys.append(new_haloprop_key)
+            self.additional_haloprops.append(new_haloprop_key)
 
-        # Create a convenient bookkeeping device to keep track of the 
-        # halo profile parameter model keys that were added by the model
         setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
 
         self.build_profile_lookup_tables()
@@ -106,12 +96,11 @@ class HodMockFactory(object):
                 parmax = np.max(halocat_parmax,model_parmax)
                 prof_param_table_dict[key] = (parmin, parmax, dpar)
 
-        # Calling the following method will create new attributes 
-        # for self.model.halo_prof_model that can be used to discretize 
-        # the galaxy profile parameters and the functions that govern the profile. 
+        # Calling the following method will create new attributes of
+        # self.model.halo_prof_model that can be used to discretize halo profiles.
         # Taking NFWProfile class as an example, the line of code that follows 
         # will create two new attributes of self.model.halo_prof_model:
-        # 1. cumu_inv_conc_table, an array of concentration bins, and 
+        # 1. cumu_inv_conc_table, an array of concentration bin boundaries, and 
         # 2. cumu_inv_func_table, an array of profile function objects, 
         # one function for each element of cumu_inv_conc_table
         self.model.halo_prof_model.build_inv_cumu_lookup_table(
@@ -141,43 +130,6 @@ class HodMockFactory(object):
 
         return sorted_gal_type_list, occupation_bound
 
-
-    def _set_mock_attributes(self, testmode=defaults.testmode):
-        """ Internal method used to create self._mock_galprops and 
-        self._mock_haloprops, which are lists of strings 
-        of halo and galaxy properties 
-        that will be bound to the mock object. 
-        """
-
-        # The entries of self._mock_haloprops (which are strings) 
-        # refer to column names of the halo catalog upon which the mock is built. 
-        # Each galaxy's host halo property listed in self._mock_haloprops will be included 
-        # in the final data structure containing the collection of mock galaxies. 
-        # However, in the output mock galaxy table, these column names will be 
-        # prepended by host_haloprop_prefix, set in halotools.defaults
-        _mock_haloprops = defaults.haloprop_list # store the strings in a temporary list
-        _mock_haloprops.extend(self.additional_haloprops)
-
-        # Now we use a conditional list comprehension to ensure 
-        # that all entries begin with host_haloprop_prefix, 
-        # and also that host_haloprop_prefix is not duplicated
-        # This just protects against what should be considered an innocuous usage error
-        prefix = defaults.host_haloprop_prefix
-        self._mock_haloprops = (
-            [entry if entry[0:len(prefix)]==prefix else prefix+entry for entry in _mock_haloprops]
-            )
-
-        # Some models require ...
-        self._mock_halomodelprops = self.halos.halo_prof_param_keys
-
-        if testmode==True:
-            assert len(self._mock_halomodelprops)==len(set(self._mock_halomodelprops))
-
-        # Throw away any possible repeated entries
-        self._mock_haloprops = list(set(self._mock_haloprops))
-        self._mock_halomodelprops = list(set(self._mock_halomodelprops))
-
-
     def populate(self):
         """ Method used to call the composite models to 
         sprinkle mock galaxies into halos. 
@@ -206,13 +158,10 @@ class HodMockFactory(object):
                     self.halos[self.sec_haloprop_key], 
                     self._occupation[gal_type])
 
-            # Bind host halo properties to the mock
-            for propname in self._mock_haloprops:
-                # Host halo properties in the mock have the same 
-                # column names as appear in the halo catalog, 
-                # but prepended by the halo prefix set in defaults module. 
-                halocatkey = propname[len(defaults.host_haloprop_prefix):]
-                getattr(self, propname)[gal_type_slice] = np.repeat(
+            # Bind all relevant host halo properties to the mock
+            for halocatkey in self.additional_haloprops:
+                galcatkey = defaults.host_haloprop_prefix+halocatkey
+                getattr(self, galcatkey)[gal_type_slice] = np.repeat(
                     self.halos[halocatkey], self._occupation[gal_type])
 
             # Call the SFR model, if relevant for this model
@@ -222,7 +171,7 @@ class HodMockFactory(object):
 
             # Call the galaxy profile components
             for gal_prof_param in self.model.gal_prof_params:
-                getattr(self, gal_prof_params)[gal_type_slice] = (
+                getattr(self, gal_prof_param)[gal_type_slice] = (
                     self.model.inherit_behavior(gal_type, gal_prof_param, self)
                     )
 
