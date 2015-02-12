@@ -28,6 +28,29 @@ class GalProfModel(object):
 		self.cosmology = self.halo_prof_model.cosmology
 		self.redshift = self.halo_prof_model.redshift
 
+		self.spatial_bias_model = spatial_bias_model
+
+	def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
+		self.halo_prof_model.build_inv_cumu_lookup_table(
+			prof_param_table_dict=prof_param_table_dict)
+
+	def set_param_func_dict(self, input_dict):
+		self.halo_prof_model.set_param_func_dict(input_dict)
+		self.param_func_dict = self.halo_prof_model.param_func_dict
+
+	def set_prof_param_table_dict(self,input_dict=None):
+		self.halo_prof_model.set_prof_param_table_dict(input_dict)
+		self.prof_param_table_dict = self.halo_prof_model.prof_param_table_dict
+
+	def density_profile(self, *args):
+		return self.halo_prof_model.density_profile(*args)
+
+	def cumulative_mass_PDF(self, *args):
+		return self.halo_prof_model.cumulative_mass_PDF(*args)
+
+		
+
+
 
 
 
