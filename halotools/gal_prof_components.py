@@ -59,7 +59,7 @@ class IsotropicSats(object):
 
 
 ##################################################################################
-class RadProfBias(object):
+class SpatialBias(object):
     """ Classical model for the spatial bias of galaxies. 
     Class provides methods to allow the profile parameters 
     governing the galaxy's radial profile to systematically differ from 
@@ -294,7 +294,7 @@ class RadProfBias(object):
             # We were passed an array of profile parameters, 
             # so we should not have also been passed a galaxy sample
             if 'mock_galaxies' in kwargs.keys():
-                raise TypeError("RadProfBias can be passed an array, "
+                raise TypeError("SpatialBias can be passed an array, "
                     "or a mock, but not both")
             input_prim_haloprops = args[0]
             input_halo_prof_params = args[1]
@@ -342,7 +342,7 @@ class RadProfBias(object):
         all model parameters varied by an MCMC walker have their values stored 
         in a param_dict dictionary. Thus the ordinate values 
         that actually govern the behavior of `get_modulated_prof_params` 
-        must be stored in RadProfBias.param_dict, and when those values 
+        must be stored in SpatialBias.param_dict, and when those values 
         are updated the behavior of `get_modulated_prof_params` needs to vary accordingly. 
         The primary purpose of this private method is to produce that behavior. 
         """
