@@ -318,7 +318,38 @@ def aph_spline(table_abcissa, table_ordinates, k=0):
         spline_function = spline(table_abcissa, table_ordinates, k=k)
         return spline_function
 
+def call_func_table(func_table, abcissa, func_indices):
+    """ Returns the output of an array of functions evaluated at a set of input points 
+    if the indices of required functions is known. 
 
+    Parameters 
+    ----------
+    func_table : array_like 
+        Length k array of function objects
+
+    abcissa : array_like 
+        Length Npts array of points at which to evaluate the functions. 
+
+    func_indices : array_like 
+        Length Npts array providing the indices to use to choose which function 
+        operates on each abcissa element. Thus func_indices is an array of integers 
+        ranging between 0 and k-1. 
+
+    Returns 
+    -------
+    out : array_like 
+        Length Npts array giving the evaluation of the appropriate function on each 
+        abcissa element. 
+
+    """
+    func_argsort = func_indices.argsort()
+    func_ranges = list(np.searchsorted(func_indices[func_argsort], range(len(func_table))))
+    func_ranges.append(None)
+    out = np.zeros_like(abcissa)
+    for f, start, end in zip(func_table, func_ranges, func_ranges[1:]):
+        ix = func_argsort[start:end]
+        out[ix] = f(abcissa[ix])
+    return out
 
 
 
