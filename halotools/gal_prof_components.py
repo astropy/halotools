@@ -141,14 +141,14 @@ class SpatialBias(object):
 
         self.multiplicative_bias = multiplicative_bias
 
-        # set_param_dict primarily does three things:
+        # The following call to set_param_dict primarily does three things:
         # 1. Creates attributes self.abcissa_dict and self.ordinates_dict, 
-        # each with one key per halo profile parameter being modulated
+        # each with one key per biased galaxy profile parameter
         # 2. Creates an attribute self.param_dict. This is the dictionary 
         # that actually governs the behavior of the model. Its keys have names 
-        # such as 'halo_NFWmodel_conc_biasfunc_par1_satellites'
+        # such as 'NFWmodel_conc_biasfunc_par1_satellites'
         # 3. Creates a convenient list self.prof_param_keys, with entries such as 
-        # 'halo_NFWmodel_conc', the keys of self.abcissa_dict
+        # 'NFWmodel_conc', the keys of self.abcissa_dict
         self.set_param_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
 
         # Configure the settings of scipy's spline interpolation routine
