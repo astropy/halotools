@@ -60,21 +60,24 @@ class IsotropicSats(object):
 
 ##################################################################################
 class RadProfBias(object):
-    """ Conventional model for the spatial bias of satellite galaxies. 
-    The profile parameters governing the satellite distribution are set to be 
-    a scalar multiple of the profile parameters of their host halo. 
+    """ Classical model for the spatial bias of galaxies. 
+    Class provides methods to allow the profile parameters 
+    governing the galaxy's radial profile to systematically differ from 
+    the profile parameters of their host halo. 
 
     Traditionally applied to the NFW case, where the only profile parameter is 
-    halo concentration, and the scalar multiple is mass-independent, so that 
+    halo concentration, and the galaxy concentration is a mass-independent 
+    scalar multiple of its dark matter halo profile, so that 
     :math:`c_{\\mathrm{gal}} = F*c_{\\mathrm{halo}}`. 
     That traditional model is a special case of this class, 
     which encompasses halo-dependence to the multiplicatively biased parameters, 
-    as well as support for any profile model with any number of parameters. 
+    as well as support for any arbitrary profile model with any number of parameters. 
     """
 
     def __init__(self, gal_type, halo_prof_model, 
         input_prof_params=[], input_abcissa_dict={}, input_ordinates_dict={}, 
-        interpol_method='spline',input_spline_degree=3):
+        interpol_method='spline',input_spline_degree=3, 
+        multiplicative_bias = True):
         """ 
         Parameters 
         ----------
@@ -124,11 +127,19 @@ class RadProfBias(object):
             is ensured to never exceed k-1, 
             nor exceed the maximum value of 5 supported by scipy. 
 
+        multiplicative_bias : boolean, optional 
+            If True (the default setting), the galaxy profile parameters are set to be the 
+            multiplication of radprof_modfunc and the underlying halo profile parameter. 
+            If False, the galaxy profile parameters will be the actual value 
+            returned by radprof_modfunc. 
+
         """
 
         # Bind the inputs to the instance
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
+
+        self.multiplicative_bias = multiplicative_bias
 
         # set_param_dict primarily does three things:
         # 1. Creates attributes self.abcissa_dict and self.ordinates_dict, 
@@ -196,11 +207,14 @@ class RadProfBias(object):
             self._retrieve_input_halo_data(*args, **kwargs)
             )
 
-        multiplicative_modulation = (
+        parameter_modulation = (
             self.radprof_modfunc(prof_param_key, input_prim_haloprops)
             )
 
-        output_prof_params = multiplicative_modulation*input_halo_prof_params
+        if self.multiplicative_bias==True:
+            output_prof_params = parameter_modulation*input_halo_prof_params
+        else:
+            output_prof_params = parameter_modulation
 
         return output_prof_params
 
@@ -411,11 +425,17 @@ class RadProfBias(object):
             except:
                 raise SyntaxError("If passing input_prof_params to the constructor,"
                     " do not pass input_ordinates_dict")
-            try:
-                assert set(input_prof_params.keys()).issubset(
-                    set(self.halo_prof_model.prof_param_keys))
-            except:
-                raise SyntaxError("Entries of input_prof_params must be keys of halo_prof_model")
+            if self.multiplicative_bias==True:
+                try:
+                    input_keyset = set(input_prof_params)
+                    halo_keyset = set(self.halo_prof_model.prof_param_keys)
+                    assert input_keyset.issubset(halo_keyset)
+                except:
+                    errant_key = list(input_keyset-halo_keyset)[0]
+                    raise SyntaxError("If multiplicative_bias is True, "
+                        " input_prof_params must be keys of halo_prof_model\n"
+                        "For input_prof_param %s, found no matching key "
+                        " in the halo_prof_model" % errant_key) 
         else:
             try:
                 assert input_abcissa_dict != {}
