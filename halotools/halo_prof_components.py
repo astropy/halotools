@@ -308,7 +308,7 @@ class NFWProfile(HaloProfileModel):
 
             This method does not return anything. Instead, when called 
             the NFWProfile model instance will have two new attributes: 
-            cumu_inv_conc_table and cumu_inv_func_table. 
+            cumu_inv_param_table and cumu_inv_func_table. 
             The former is an array of NFW concentration parameter values, 
             the latter is an array of inverse cumulative density profile 
             function objects :math:`P^{NFW}( <r | c)` associated with 
@@ -342,7 +342,7 @@ class NFWProfile(HaloProfileModel):
             cumu_inv_funcs.append(
                 spline(self.cumulative_mass_PDF(radius_array,c),radius_array))
         self.cumu_inv_func_table = np.array(cumu_inv_funcs)
-        self.cumu_inv_conc_table = conc_array
+        self.cumu_inv_param_table = conc_array
 
     def set_param_func_dict(self, input_dict):
         """ Trivial required method whose sole design purpose is to 

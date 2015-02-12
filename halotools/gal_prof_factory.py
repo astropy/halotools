@@ -34,6 +34,10 @@ class GalProfModel(object):
 		self.halo_prof_model.build_inv_cumu_lookup_table(
 			prof_param_table_dict=prof_param_table_dict)
 
+		self.prof_param_table_dict = self.halo_prof_model.prof_param_table_dict
+		self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
+		self.cumu_inv_param_table = self.halo_prof_model.cumu_inv_param_table
+
 	def set_param_func_dict(self, input_dict):
 		self.halo_prof_model.set_param_func_dict(input_dict)
 		self.param_func_dict = self.halo_prof_model.param_func_dict
@@ -47,6 +51,17 @@ class GalProfModel(object):
 
 	def cumulative_mass_PDF(self, *args):
 		return self.halo_prof_model.cumulative_mass_PDF(*args)
+
+	def get_discretized_prof_funcs(self, params):
+		return self.cumu_inv_func_table[np.digitize(params, self.cumu_inv_param_table)]
+
+	
+
+
+
+
+
+
 
 		
 

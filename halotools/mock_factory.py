@@ -100,9 +100,9 @@ class HodMockFactory(object):
         # self.model.halo_prof_model that can be used to discretize halo profiles.
         # Taking NFWProfile class as an example, the line of code that follows 
         # will create two new attributes of self.model.halo_prof_model:
-        # 1. cumu_inv_conc_table, an array of concentration bin boundaries, and 
+        # 1. cumu_inv_param_table, an array of concentration bin boundaries, and 
         # 2. cumu_inv_func_table, an array of profile function objects, 
-        # one function for each element of cumu_inv_conc_table
+        # one function for each element of cumu_inv_param_table
         self.model.halo_prof_model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)
 
