@@ -1,7 +1,7 @@
 External C Libraries
 ====================
 
-This directory contains C libraries included with Astropy. Note that only C
-libraries without python-specific code  should be included in this directory.
-Cython or C code intended for use with Astropy or wrapper code should be in
-the Astropy source tree.
+This directory contains C libraries included with halotools. Note that only C
+libraries not maintained by halotools developers should be stored here. 
+Cython and wrapper code should be in an appropriate location within
+the halotools/halotools source tree.
