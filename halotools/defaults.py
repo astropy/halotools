@@ -91,7 +91,7 @@ default_halo_type_split = {
 default_halo_type_calculator_spacing=0.1
 
 # Set the default secondary halo parameter used to generate assembly bias
-default_assembias_key = 'VMAX'
+default_assembias_key = 'vmax'
 
 # URLs of websites hosting catalogs used by the package
 aph_web_location = 'http://www.astro.yale.edu/aphearin/Data_files/'
@@ -109,15 +109,15 @@ scale_factor_difference_tol = 0.05
 # At minimum, the following halo and galaxy properties 
 # will be bound to each mock galaxy 
 host_haloprop_prefix = 'halo_'
-haloprop_list = ['ID', 'POS', 'VEL', 'MVIR', 'RVIR']
+haloprop_list = ['id', 'pos', 'vel', 'mvir', 'rvir']
 galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 
 
 
+testmode = False
 
 
-
-
+haloprop_key_dict = {'prim_haloprop':'Mvir'}
 
 
 

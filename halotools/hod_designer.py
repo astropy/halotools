@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 
-The sole purpose of this module is to 
-provide an interface between `halotools.hod_components`
-and `halotools.hod_factory`. 
+This module provides a convenient interface 
+for building composite models from a set of 
+component features. 
 `halotools.hod_designer` creates a set of instructions 
 that is passed to `halotools.hod_factory`, 
 in the form of a dictionary. The dictionary provides 
@@ -61,7 +61,15 @@ class HodModelDesigner(object):
 		# to ensure that they are always passed the same underlying halo 
 		# profile model
 
-		
+		# class instances need an attribute _example_attr_dict 
+		# that provides keys for all relevant galaxy properties, 
+		# such as 'stellar_mass', 'luminosity', 'quenched', etc., 
+		# and values will be used to provide the information 
+		# about the shape of the attribute
+		# this should inherit example entries also from, 
+		# for example, the halo profile model, so that the 
+		# composite model directly knows the shape information 
+		# of the halo_prof_model parameters. 
 		
 		pass
 

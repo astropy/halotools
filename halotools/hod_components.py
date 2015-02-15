@@ -26,21 +26,41 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
+@six.add_metaclass(ABCMeta)
+class OccupationComponent(object):
+    """ Abstract super class of any occupation model. 
+    Functionality is mostly trivial. 
+    The sole function of the super class is to 
+    standardize the attributes and methods 
+    required of any occupation model component. 
+    """
+    def __init__(self, gal_type, haloprop_key_dict, 
+        threshold, occupation_bound):
+        self.gal_type = gal_type
+        self.haloprop_key_dict = haloprop_key_dict
+        self.threshold = threshold
+        self.occupation_bound = occupation_bound
+
+    @abstractmethod
+    def _get_param_dict(self):
+        pass
 
 
-class Kravtsov04Cens(object):
+
+class Kravtsov04Cens(OccupationComponent):
     """ Erf function model for the occupation statistics of central galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
     """
 
-    def __init__(self,parameter_dict=None,
+    def __init__(self,input_param_dict=None,
+        haloprop_key_dict=defaults.haloprop_key_dict,
         threshold=defaults.default_luminosity_threshold,
         gal_type='centrals'):
         """
         Parameters 
         ----------
-        parameter_dict : dictionary, optional.
+        input_param_dict : dictionary, optional.
             Contains values for the parameters specifying the model.
             Dictionary keys are 'logMmin_cen' and 'sigma_logM'
 
@@ -62,25 +82,31 @@ class Kravtsov04Cens(object):
 
         """
 
-        self.gal_type = gal_type
-        self.upper_bound = 1.0
+        occupation_bound = 1.0
+        # Call the super class constructor, which binds all the 
+        # arguments to the instance.  
+        OccupationComponent.__init__(self, gal_type, haloprop_key_dict, 
+            threshold, occupation_bound)
 
-        self.threshold = threshold
-        if parameter_dict is None:
-            self.parameter_dict = self.published_parameters(self.threshold)
-        else:
-            self.parameter_dict = parameter_dict
-        # Put parameter_dict keys in standard form
-        correct_keys = self.published_parameters(self.threshold).keys()
-        self.parameter_dict = occuhelp.format_parameter_keys(
-            self.parameter_dict,correct_keys,self.gal_type)
-        # get the new keys so that the methods know 
-        # how to evaluate their functions
+        self.param_dict = self._get_param_dict(input_param_dict)
+
+
+    def _get_param_dict(self, input_param_dict):
+
         self.logMmin_key = 'logMmin_'+self.gal_type
         self.sigma_logM_key = 'sigma_logM_'+self.gal_type
 
+        correct_keys = [self.logMmin_key, self.sigma_logM_key]
+        if input_param_dict != None:
+            occuhelp.test_correct_keys(input_param_dict, correct_keys)
+            output_param_dict = input_param_dict
+        else:
+            output_param_dict = self.get_published_parameters(self.threshold)
 
-    def mean_occupation(self,logM):
+        return output_param_dict
+
+
+    def mean_occupation(self, logM, input_param_dict=None):
         """ Expected number of central galaxies in a halo of mass logM.
         See Equation 2 of arXiv:0703457.
 
@@ -103,15 +129,20 @@ class Kravtsov04Cens(object):
         log_{10}M_{min}}{\\sigma_{log_{10}M}} \\right) \\right)`
 
         """
+        if input_param_dict is None:
+            param_dict = self.param_dict 
+        else:
+            param_dict = input_param_dict
+
         logM = np.array(logM)
 
         mean_ncen = 0.5*(1.0 + erf(
-            (logM - self.parameter_dict[self.logMmin_key])
-            /self.parameter_dict[self.sigma_logM_key]))
+            (logM - param_dict[self.logMmin_key])
+            /param_dict[self.sigma_logM_key]))
 
         return mean_ncen
 
-    def mc_occupation(self,logM):
+    def mc_occupation(self, logM, input_param_dict=None):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 
         Parameters
@@ -125,13 +156,19 @@ class Kravtsov04Cens(object):
             array of length len(logM) giving the number of self.gal_type galaxies in the halos. 
     
         """
-        mc_generator = np.random.random(aph_len(logM))
-        mc_abundance = np.where(mc_generator < self.mean_occupation(logM), 1, 0)
+        if input_param_dict is None:
+            param_dict = self.param_dict 
+        else:
+            param_dict = input_param_dict
+
+        mc_generator = np.random.uniform(0, 1, aph_len(logM))
+        mc_abundance = np.where(mc_generator < self.mean_occupation(logM, 
+            input_param_dict = param_dict), 1, 0)
 
         return mc_abundance
 
 
-    def published_parameters(self,threshold):
+    def get_published_parameters(self,threshold):
         """
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
 
@@ -145,7 +182,7 @@ class Kravtsov04Cens(object):
 
         Returns 
         -------
-        parameter_dict : dict
+        param_dict : dict
             Dictionary of model parameters whose values have been set to 
             agree with the values taken from Table 1 of Zheng et al. 2007.
 
@@ -160,31 +197,33 @@ class Kravtsov04Cens(object):
 
         threshold_index = np.where(threshold_array==threshold)[0]
         if len(threshold_index)==1:
-            parameter_dict = {
-            'logMmin' : logMmin_array[threshold_index[0]],
-            'sigma_logM' : sigma_logM_array[threshold_index[0]]
+            param_dict = {
+            self.logMmin_key : logMmin_array[threshold_index[0]],
+            self.sigma_logM_key : sigma_logM_array[threshold_index[0]]
             }
         else:
             raise ValueError("Input luminosity threshold "
-                "does not match any of the Table 1 values of Zheng et al. 2007 (arXiv:0703457).")
+                "does not match any of the Table 1 values of "
+                "Zheng et al. 2007 (arXiv:0703457)")
 
-        return parameter_dict
+        return param_dict
 
 
-class Kravtsov04Sats(object):
+class Kravtsov04Sats(OccupationComponent):
     """ Power law model for the occupation statistics of satellite galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
     """
 
-    def __init__(self,parameter_dict=None,
+    def __init__(self,input_param_dict=None,
+        haloprop_key_dict=defaults.haloprop_key_dict,
         threshold=defaults.default_luminosity_threshold,
         gal_type='satellites',
-        central_occupation_model=None):
+        central_occupation_model=None, input_central_param_dict=None):
         """
         Parameters 
         ----------
-        parameter_dict : dictionary, optional.
+        param_dict : dictionary, optional.
             Contains values for the parameters specifying the model.
             Dictionary keys are 'logMmin_cen' and 'sigma_logM'
 
@@ -212,31 +251,50 @@ class Kravtsov04Sats(object):
 
         """
 
-        self.gal_type = gal_type
-        self.upper_bound = float("inf")
+        occupation_bound = float("inf")
+        # Call the super class constructor, which binds all the 
+        # arguments to the instance.  
+        OccupationComponent.__init__(self, gal_type, haloprop_key_dict, 
+            threshold, occupation_bound)
 
-        self.central_occupation_model = central_occupation_model
-        if self.central_occupation_model is not None:
-            if threshold != self.central_occupation_model.threshold:
-                warnings.warn("Satellite and Central luminosity tresholds do not match")
+        self.param_dict = self._get_param_dict(input_param_dict)
 
-        self.threshold = threshold
-        if parameter_dict is None:
-            self.parameter_dict = self.published_parameters(self.threshold)
-        else:
-            self.parameter_dict = parameter_dict
-        # Put parameter_dict keys in standard form
-        correct_keys = self.published_parameters(self.threshold).keys()
-        self.parameter_dict = occuhelp.format_parameter_keys(
-            self.parameter_dict,correct_keys,self.gal_type)
-        # get the new keys so that the methods know 
+        self._set_central_behavior(
+            central_occupation_model, input_central_param_dict)
+
+    def _get_param_dict(self, input_param_dict):
+
+        # set attribute names for the keys so that the methods know 
         # how to evaluate their functions
         self.logM0_key = 'logM0_'+self.gal_type
         self.logM1_key = 'logM1_'+self.gal_type
         self.alpha_key = 'alpha_'+self.gal_type
 
+        correct_keys = [self.logM0_key, self.logM1_key, self.alpha_key]
+        if input_param_dict != None:
+            occuhelp.test_correct_keys(input_param_dict, correct_keys)
+            output_param_dict = input_param_dict
+        else:
+            output_param_dict = self.get_published_parameters(self.threshold)
 
-    def mean_occupation(self,logM):
+        return output_param_dict
+
+
+    def _set_central_behavior(self, central_occupation_model, input_central_param_dict):
+
+        self.central_occupation_model = central_occupation_model
+        
+        if self.central_occupation_model is not None:
+            # Test thresholds of centrals and satellites are equal
+            if self.threshold != self.central_occupation_model.threshold:
+                warnings.warn("Satellite and Central luminosity tresholds do not match")
+            #
+            self.central_param_dict = (
+                self.central_occupation_model._get_param_dict(
+                    input_central_param_dict)
+                )
+
+    def mean_occupation(self,logM, input_param_dict=None, input_central_param_dict=None):
         """Expected number of satellite galaxies in a halo of mass logM.
         See Equation 5 of arXiv:0703457.
 
@@ -259,11 +317,21 @@ class Kravtsov04Sats(object):
 
 
         """
+        if input_param_dict is None:
+            param_dict = self.param_dict 
+        else:
+            param_dict = input_param_dict
+
+        if input_central_param_dict is None:
+            central_param_dict = self.central_param_dict
+        else:
+            central_param_dict = input_central_param_dict
+
         logM = np.array(logM)
         halo_mass = 10.**logM
 
-        M0 = 10.**self.parameter_dict[self.logM0_key]
-        M1 = 10.**self.parameter_dict[self.logM1_key]
+        M0 = 10.**param_dict[self.logM0_key]
+        M1 = 10.**param_dict[self.logM1_key]
 
         # Call to np.where raises a harmless RuntimeWarning exception if 
         # there are entries of input logM for which mean_nsat = 0
@@ -273,19 +341,19 @@ class Kravtsov04Sats(object):
             warnings.simplefilter("ignore", RuntimeWarning)
             # Simultaneously evaluate mean_nsat and impose the usual cutoff
             mean_nsat = np.where(halo_mass - M0 > 0, 
-                ((halo_mass - M0)/M1)**self.parameter_dict[self.alpha_key], 0)
+                ((halo_mass - M0)/M1)**param_dict[self.alpha_key], 0)
 
-        #If a central occupation model was passed to the constructor, 
+        # If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
         if self.central_occupation_model is not None:
-            mean_nsat = np.where(mean_nsat > 0, 
-                mean_nsat*self.central_occupation_model.mean_occupation(logM), 
-                mean_nsat)
+            mean_ncen = self.central_occupation_model.mean_occupation(
+                logM, input_param_dict=central_param_dict)
+            mean_nsat = np.where(mean_nsat > 0, mean_nsat*mean_ncen, mean_nsat)
 
         return mean_nsat
 
 
-    def mc_occupation(self,logM):
+    def mc_occupation(self, logM, input_param_dict=None, input_central_param_dict=None):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
         Assumes gal_type galaxies obey Poisson statistics. 
 
@@ -301,7 +369,10 @@ class Kravtsov04Sats(object):
     
         """
 
-        expectation_values = self.mean_occupation(logM)
+        expectation_values = self.mean_occupation(logM, 
+            input_param_dict=input_param_dict, 
+            input_central_param_dict=input_central_param_dict)
+
         # The scipy built-in Poisson number generator raises an exception 
         # if its input is zero, so here we impose a simple workaround
         expectation_values = np.where(expectation_values <=0, 
@@ -311,7 +382,7 @@ class Kravtsov04Sats(object):
 
         return mc_abundance
 
-    def published_parameters(self,threshold):
+    def get_published_parameters(self,threshold):
         """
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
 
@@ -326,7 +397,7 @@ class Kravtsov04Sats(object):
         Returns 
         -------
 
-        parameter_dict : dict
+        param_dict : dict
             Dictionary of model parameters whose values have been set to 
             agree with the values taken from Table 1 of Zheng et al. 2007.
 
@@ -342,17 +413,16 @@ class Kravtsov04Sats(object):
 
         threshold_index = np.where(threshold_array==threshold)[0]
         if len(threshold_index)==1:
-            parameter_dict = {
-            'logM0' : logM0_array[threshold_index[0]],
-            'logM1' : logM1_array[threshold_index[0]],
-            'alpha' : alpha_array[threshold_index[0]]
+            param_dict = {
+            self.logM0_key : logM0_array[threshold_index[0]],
+            self.logM1_key : logM1_array[threshold_index[0]],
+            self.alpha_key : alpha_array[threshold_index[0]]
             }
         else:
             raise ValueError("Input luminosity threshold "
                 "does not match any of the Table 1 values of Zheng et al. 2007 (arXiv:0703457).")
 
-        return parameter_dict
-
+        return param_dict
 
 
 class vdB03Quiescence(object):
@@ -385,7 +455,7 @@ class vdB03Quiescence(object):
 
     """
 
-    def __init__(self, gal_type, parameter_dict=defaults.default_quiescence_dict, 
+    def __init__(self, gal_type, param_dict=defaults.default_quiescence_dict, 
         interpol_method='spline',input_spline_degree=3):
         """ 
         Parameters 
@@ -395,7 +465,7 @@ class vdB03Quiescence(object):
             `~halotools.hod_factory` to access the behavior of the methods 
             of this class. 
 
-        parameter_dict : dictionary, optional 
+        param_dict : dictionary, optional 
             Dictionary specifying what the quiescent fraction should be 
             at a set of input values of the primary halo property. 
             Default values are set in `halotools.defaults`. 
@@ -404,7 +474,7 @@ class vdB03Quiescence(object):
             Keyword specifying how `mean_quiescence_fraction` 
             evaluates input value of the primary halo property 
             that differ from the small number of values 
-            in self.parameter_dict. 
+            in self.param_dict. 
             The default spline option interpolates the 
             model's abcissa and ordinates. 
             The polynomial option uses the unique, degree N polynomial 
@@ -418,11 +488,11 @@ class vdB03Quiescence(object):
 
         self.gal_type = gal_type
 
-        self.parameter_dict = parameter_dict
-        # Put parameter_dict keys in standard form
+        self.param_dict = param_dict
+        # Put param_dict keys in standard form
         correct_keys = defaults.default_quiescence_dict.keys()
-        self.parameter_dict = occuhelp.format_parameter_keys(
-            self.parameter_dict,correct_keys,self.gal_type)
+        self.param_dict = occuhelp.format_parameter_keys(
+            self.param_dict,correct_keys,self.gal_type)
         self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
         self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
 
@@ -435,10 +505,10 @@ class vdB03Quiescence(object):
             scipy_maxdegree = 5
             self.spline_degree = np.min(
                 [scipy_maxdegree, input_spline_degree, 
-                aph_len(self.parameter_dict[self.abcissa_key])-1])
+                aph_len(self.param_dict[self.abcissa_key])-1])
             self.spline_function = occuhelp.aph_spline(
-                self.parameter_dict[self.abcissa_key],
-                self.parameter_dict[self.ordinates_key],
+                self.param_dict[self.abcissa_key],
+                self.param_dict[self.ordinates_key],
                 k=self.spline_degree)
 
 
@@ -464,11 +534,11 @@ class vdB03Quiescence(object):
         Either assumes the quiescent fraction is a polynomial function 
         of the primary halo property, or is interpolated from a grid. 
         Either way, the behavior of this method is fully determined by 
-        its values at the model abcissa, as specified in parameter_dict. 
+        its values at the model abcissa, as specified in param_dict. 
         """
 
-        model_abcissa = self.parameter_dict[self.abcissa_key]
-        model_ordinates = self.parameter_dict[self.ordinates_key]
+        model_abcissa = self.param_dict[self.abcissa_key]
+        model_ordinates = self.param_dict[self.ordinates_key]
 
         if self.interpol_method=='polynomial':
             mean_quiescence_fraction = occuhelp.polynomial_from_table(

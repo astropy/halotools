@@ -1,40 +1,78 @@
-****************
-halotools
-****************
+=======================
+Halotools Documentation
+=======================
 
-Welcome to the halotools documentation. Halotools is a python package 
+
+Halotools is a python package 
 designed to study large-scale structure, cosmology, and galaxy evolution 
 using N-body simulations and halo models. The code is publicly available 
-at https://github.com/halotools.
-
-The package is still under rapid development, with its API being restructured 
-frequently. In short, it is still not "stable." In particular, 
-if you download the code and write 
-scripts based on the current API, your scripts will likely not 
-correctly interface with future versions of the code.
-
-Presently, only the basic API is documented. Once more of 
-the core functionality is in place, step-by-step examples will be included, 
-as will iPython notebook tutorials. 
-
-Contributions to the halotools package are warmly welcomed! 
-If you are interested in collaborating, and/or would like to know more 
-about the intended scope of the project, please contact Andrew Hearin 
-at andrew-dot-hearin-at-yale-dot-edu.
+at https://github.com/astropy/halotools. You can find the latest build of 
+the documentation at halotools.readthedocs.org. 
 
 
-Reference/API
-=============
+.. _user-docs:
+
+******************
+User Documentation
+******************
 
 
-.. automodapi:: halotools.halo_occupation
-.. automodapi:: halotools.make_mocks
-.. automodapi:: halotools.read_nbody
-.. automodapi:: halotools.defaults
-.. automodapi:: halotools.jeans
-.. automodapi:: halotools.configuration
-.. automodapi:: halotools.occupation_helpers
-.. automodapi:: halotools.hod_components
-.. automodapi:: halotools.hod_factory
-.. automodapi:: halotools.hod_designer
-.. automodapi:: halotools.halo_profile_components
+**Halotools overview**
+----------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   overview
+   install
+   getting_started
+
+**Mock-making tools**
+----------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   mock_making/overview
+   mock_making/quickstart_guide
+   mock_making/simulations
+   mock_making/models
+   mock_making/mock_population
+
+**Simulation analysis tools**
+--------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   sim_analysis/overview
+   sim_analysis/halo_catalogs
+   sim_analysis/halo_analysis
+   sim_analysis/merger_trees
+
+**Tutorials**
+--------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   tutorials/example_tutorial
+
+.. _developer-docs:
+
+***********************
+Developer Documentation
+***********************
+
+The developer documentation contains instructions for how to contribute to
+halotools, as well as coding, documentation, and testing guidelines.
+
+
+
+
+
+
+
+
+
+
