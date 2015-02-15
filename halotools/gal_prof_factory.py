@@ -55,7 +55,7 @@ class GalProfModel(object):
     def get_prof_table_indices(self, params):
         return np.digitize(params, self.cumu_inv_param_table)
 
-    def get_scaled_radii_from_func_table(self, profile_params, rho):
+    def get_scaled_radii_from_func_table(self, rho, profile_params):
         func_table_indices = self.get_prof_table_indices(profile_params)
         prof_func_array = self.cumu_inv_func_table[func_table_indices]
         return occuhelp.call_func_table(
@@ -86,12 +86,17 @@ class GalProfModel(object):
 
         return output_pos
 
-    def mc_radii(self, profile_params):
-        rho = np.random.random(len(profile_params))
-        return self.get_scaled_radii_from_func_table(profile_params, rho)
+    def mc_radii(self, *args):
+        """ args is a tuple of profile parameter arrays. In the simplest case, 
+        this is a one-element tuple of concentration values. 
+        """
+        rho = np.random.random(len(args[0]))
+        return self.get_scaled_radii_from_func_table(rho, *args)
 
     def mc_pos(self, gals):
-        pass
+        Npts = len(gals.halo_rvir)
+        angles = self.mc_angles(Npts)
+        radii = None # need to know what the concentration attribute name is
 
 
 
