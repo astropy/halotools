@@ -47,33 +47,30 @@ class HodModel(object):
             self.sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
 
         # Create attributes for galaxy types and their occupation bounds
+        self.set_gal_types()
+
+        # Build the composite model parameter dictionary by retrieving 
+        # the relevant items from the component model dictionaries. 
+        self.param_dict = self.build_composite_param_dict(self.model_blueprint)
+
+        # The additional_haloprops dictionary has values that are function objects 
+        # used to calculate new halo properties from existing ones. 
+        # Its keys will be used as the names of the newly created columns
+        self.additional_haloprops = self.get_new_haloprop_dict()
+
+        self.publications = self.build_publication_list(
+            self.model_blueprint)
+
+    def set_gal_types(self):
+        """ Method creates attributes for the type of galaxies in the model 
+        and the upper bound on their per-halo abundance. 
+        """
+
         self.gal_types = self.model_blueprint.keys()
         self.occupation_bound = {}
         for gal_type in self.gal_types:
             self.occupation_bound[gal_type] = (
                 self.model_blueprint[gal_type]['occupation_model'].occupation_bound)
-
-
-        # In MCMC applications, the output_dict items define the 
-        # parameter set explored by the likelihood engine. 
-        # Changing the values of the parameters in param_dict 
-        # will propagate to the behavior of the component models, 
-        # though the param_dict attributes attached to the component model 
-        # instances themselves will not be changed. 
-        self.param_dict = (
-            self.build_composite_param_dict(
-                self.model_blueprint)
-            )
-
-        # The following dictionary has values that are function objects 
-        # used to calculate new halo properties from existing ones. 
-        # Its keys will be used as the names of the newly created columns
-        # This includes halo profile parameters such as 'NFWmodel_conc', 
-        # and also any other halo properties used by the component models
-        self.additional_haloprops = self.get_new_haloprop_dict()
-
-        self.publications = self.build_publication_list(
-            self.model_blueprint)
 
     def set_primary_behaviors(self):
 
@@ -167,6 +164,13 @@ class HodModel(object):
     def build_composite_param_dict(self,model_blueprint):
         """ Method to build a dictionary of parameters for the composite model 
         by retrieving all the parameters of the component models. 
+
+        In MCMC applications, the output_dict items define the 
+        parameter set explored by the likelihood engine. 
+        Changing the values of the parameters in param_dict 
+        will propagate to the behavior of the component models. 
+        Note, though, that the param_dict attributes attached to the component model 
+        instances themselves will not be changed. 
 
         Parameters 
         ----------
