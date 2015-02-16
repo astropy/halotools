@@ -170,9 +170,9 @@ class HodMockFactory(object):
                 pass
 
             # Call the galaxy profile components
-            for gal_prof_param in self.model.gal_prof_params:
-                getattr(self, gal_prof_param)[gal_type_slice] = (
-                    self.model.inherit_behavior(gal_type, gal_prof_param, self)
+            for gal_prof_param_key in self.model.gal_prof_params:
+                getattr(self, gal_prof_param_key)[gal_type_slice] = (
+                    self.model.inherit_behavior(gal_type, gal_prof_param_key, self)
                     )
 
             # Assign positions
@@ -241,6 +241,10 @@ class HodMockFactory(object):
             galpropkey = defaults.host_haloprop_prefix+halocatkey
             example_entry = self.halos[halocatkey][0]
             _allocate_ndarray_attr(self, galpropkey, example_entry)
+
+        for gal_prof_param_key in self.model.gal_prof_params:
+            example_entry = 0
+            _allocate_ndarray_attr(self, gal_prof_param_key, example_entry)
 
         _allocate_ndarray_attr(self, 'gal_type', 0)
         _allocate_ndarray_attr(self, 'prim_haloprop', 0)
