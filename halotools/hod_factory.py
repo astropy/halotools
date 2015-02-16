@@ -88,6 +88,33 @@ class HodModel(object):
             component_behavior = getattr(component_instance, 'mc_pos')
             setattr(self, behavior_name, component_behavior)
 
+    def set_halo_prof_param_dict(self):
+        """ Method to derive the halo profile parameter function dictionary 
+        from a collection of galaxies. If there are multiple NFWmodel_conc, 
+        only one will be used and a warning will be issued. 
+        """
+
+        self.halo_prof_param_dict = {}
+        key_correspondence = {}
+        for gal_type in self.gal_types:
+            gal_prof_model = self.model_blueprint[gal_type]['profile_model']
+            halo_param_func_dict = gal_prof_model.halo_prof_model.param_func_dict
+            for key in self.halo_prof_param_dict.keys():
+                if key not in self.halo_prof_param_dict.keys():
+                    self.halo_prof_param_dict[key] = halo_prof_param_dict[key]
+                    key_correspondence[key] = gal_type
+                else:
+                    msg = "The halo profile parameter function %s\n"
+                    "appears in the halo profile model associated with both\n"
+                    "%s and %s. \nIgnoring the %s model and using the %s model\n"
+                    "to compute the new halo catalog column %s"
+                    ignored_gal_type = gal_type
+                    relevant_gal_type = key_correspondence[key]
+                    print(msg % (key, ignored_gal_type, relevant_gal_type, 
+                        ignored_gal_type, relevant_gal_type, key))
+
+
+
 
     def component_behavior(self, gal_type, colname, *args, **kwargs):
 
@@ -225,7 +252,7 @@ class HodModel(object):
             for model_instance in gal_type_dict.values():
                 pub_list.extend(model_instance.publications)
 
-        return pub_list
+        return list(set(pub_list))
 
     def get_new_haloprop_dict(self):
         """ Return a dictionary that can be used to create an additional set of 

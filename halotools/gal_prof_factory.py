@@ -40,7 +40,6 @@ class GalProfModel(object):
 
     def set_param_func_dict(self, input_dict):
         self.halo_prof_model.set_param_func_dict(input_dict)
-        self.param_func_dict = self.halo_prof_model.param_func_dict
 
     def set_prof_param_table_dict(self,input_dict=None):
         self.halo_prof_model.set_prof_param_table_dict(input_dict)
