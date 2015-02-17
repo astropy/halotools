@@ -83,12 +83,12 @@ class HodMockFactory(object):
        # whose keys are the name of the halo profile parameter being discretized
         if prof_param_table_dict == {}:
             for key in self.model.halo_prof_func_dict.keys():
-                dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
+                dpar = self.model.prof_param_table_dict[key][2]
                 halocat_parmin = self.halos[key].min() - dpar
-                model_parmin = self.model.halo_prof_model.prof_param_table_dict[key][0]
+                model_parmin = self.model.prof_param_table_dict[key][0]
                 parmin = np.min(halocat_parmin,model_parmin)
                 halocat_parmax = self.halos[key].max() + dpar
-                model_parmax = self.model.halo_prof_model.prof_param_table_dict[key][1]
+                model_parmax = self.model.prof_param_table_dict[key][1]
                 parmax = np.max(halocat_parmax,model_parmax)
                 prof_param_table_dict[key] = (parmin, parmax, dpar)
 
