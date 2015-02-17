@@ -67,26 +67,22 @@ class HodMockFactory(object):
         # composite model's halo_prof_func_dict dictionary; 
         # each key's value is the function object that operates 
         # on the halos to create the new columns 
-        halo_prof_param_keys = []
         function_dict = self.model.halo_prof_func_dict
         for new_haloprop_key, prof_param_func in function_dict.iteritems():
             self.halos[new_haloprop_key] = prof_param_func(self.halos[self.prim_haloprop_key])
-            halo_prof_param_keys.append(new_haloprop_key)
             self.additional_haloprops.append(new_haloprop_key)
 
-        setattr(self.halos, 'halo_prof_param_keys', halo_prof_param_keys)
-
-        self.build_profile_lookup_tables()
+        self.build_halo_prof_lookup_tables()
 
 
-    def build_profile_lookup_tables(self, prof_param_table_dict={}):
+    def build_halo_prof_lookup_tables(self, prof_param_table_dict={}):
 
        # Compute the halo profile lookup table, ensuring that the min/max 
        # range spanned by the halo catalog is covered. The grid of parameters 
        # is defined by a tuple (xlow, xhigh, dx) in prof_param_table_dict, 
        # whose keys are the name of the halo profile parameter being discretized
         if prof_param_table_dict == {}:
-            for key in self.halos.halo_prof_param_keys:
+            for key in self.model.halo_prof_func_dict.keys():
                 dpar = self.model.halo_prof_model.prof_param_table_dict[key][2]
                 halocat_parmin = self.halos[key].min() - dpar
                 model_parmin = self.model.halo_prof_model.prof_param_table_dict[key][0]

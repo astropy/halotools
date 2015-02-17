@@ -114,6 +114,40 @@ class HodModel(object):
                     print(msg % (key, ignored_gal_type, relevant_gal_type, 
                         ignored_gal_type, relevant_gal_type, key))
 
+    def set_prof_param_table_dict(self,input_dict=None):
+
+        # Set all profile parameter table dictionaries. 
+        # At the end, if passed an input_dict,
+        # we will use it to over-write with the keys present in input_dict
+
+        self.prof_param_table_dict = {}
+        key_correspondence = {}
+        for gal_type in self.gal_types:
+            gal_prof_model = self.model_blueprint[gal_type]['profile_model']
+            prof_param_table_dict = gal_prof_model.halo_prof_model.prof_param_table_dict
+            for key in prof_param_table_dict.keys():
+                if key not in self.prof_param_table_dict.keys():
+                    self.prof_param_table_dict[key] = prof_param_table_dict[key]
+                    key_correspondence[key] = gal_type
+                else:
+                    msg = "The halo profile parameter %s\n"
+                    "appears in the halo profile model associated with both\n"
+                    "%s and %s. \nIgnoring the %s model and using the %s model\n"
+                    "to build prof_param_table_dict %s"
+                    ignored_gal_type = gal_type
+                    relevant_gal_type = key_correspondence[key]
+                    print(msg % (key, ignored_gal_type, relevant_gal_type, 
+                        ignored_gal_type, relevant_gal_type, key))
+ 
+        # Finally, use input_dict to overwrite table values, if applicable
+        if input_dict != None:
+            for key, table in input_dict.iteritems():
+                if type(table) is not tuple:
+                    raise TypeError("input_dict must have tuples for values")
+                if len(table) is not 3:
+                    raise TypeError("Length of input_dict tuple must be 3")
+                self.prof_param_table_dict[key] = table
+
 
     def component_behavior(self, gal_type, colname, *args, **kwargs):
 
