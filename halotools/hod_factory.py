@@ -53,11 +53,6 @@ class HodModel(object):
         # the relevant items from the component model dictionaries. 
         self.param_dict = self.build_composite_param_dict(self.model_blueprint)
 
-        # The additional_haloprops dictionary has values that are function objects 
-        # used to calculate new halo properties from existing ones. 
-        # Its keys will be used as the names of the newly created columns
-        self.additional_haloprops = self.get_new_haloprop_dict()
-
         self.publications = self.build_publication_list(
             self.model_blueprint)
 
@@ -118,8 +113,6 @@ class HodModel(object):
                     relevant_gal_type = key_correspondence[key]
                     print(msg % (key, ignored_gal_type, relevant_gal_type, 
                         ignored_gal_type, relevant_gal_type, key))
-
-
 
 
     def component_behavior(self, gal_type, colname, *args, **kwargs):
@@ -259,43 +252,6 @@ class HodModel(object):
                 pub_list.extend(model_instance.publications)
 
         return list(set(pub_list))
-
-    def get_new_haloprop_dict(self):
-        """ Return a dictionary that can be used to create an additional set of 
-        halo properties that the halo catalog may not have. The keys of this 
-        dictionary will be new column names to attach to the halo catalog, the 
-        values of this dictionary are function objects used to compute the 
-        new columns from the existing ones. Classic example is computing an NFW 
-        concentration by a model for the concentration-mass relation. 
-        """
-
-        # Begin with the dictionary used by halo profile models to 
-        # assign profile parameters (e.g., NFWmodel_conc) to halos
-        output_haloprop_dict = self.halo_prof_model.halo_prof_func_dict
-
-        # Search all features of every gal_type for new halo properties that need to be computed
-        # Is this really necessary? When would a component of a specific galaxy ever ask for a 
-        # new property? Is this just a relic of the days when I thought prim & sec haloprops 
-        # might vary with gal_type? Consider deleting this loop. 
-        for gal_type in self.gal_types:
-            for behavior_key, behavior_model in self.model_blueprint[gal_type].iteritems():
-                if hasattr(behavior_model, 'new_haloprop_dict'):
-                    new_dict = behavior_model.new_haloprop_dict
-                    # Now check to see if the new halo property has already been 
-                    # included by some other component model feature
-                    intersection = set(new_dict) & set(output_haloprop_dict)
-                    if intersection != {}:
-                        repeated_key = intersection.pop()
-                        warnings.warn("Found duplication of new halo property %s "
-                            "to calculate. Ignoring the version defined in %s feature"
-                            " of %s galaxies" % (intersection, repeated_key, gal_type))
-                    else:
-                        output_haloprop_dict = dict(
-                            output_haloprop_dict.items() + new_dict.items()
-                            )
-
-        return output_haloprop_dict
-
 
     def _create_convenience_attributes(self):
         """ Create attributes of the composite model to conveniently access 
