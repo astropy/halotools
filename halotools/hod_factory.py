@@ -88,20 +88,26 @@ class HodModel(object):
             component_behavior = getattr(component_instance, 'mc_pos')
             setattr(self, behavior_name, component_behavior)
 
-    def set_halo_prof_param_dict(self):
+    def set_halo_prof_func_dict(self):
         """ Method to derive the halo profile parameter function dictionary 
-        from a collection of galaxies. If there are multiple NFWmodel_conc, 
+        from a collection of galaxies. 
+
+        Notes 
+        -----
+        If there are multiple instances of the same underlying 
+        halo profile model, such as would happen if 
+        there are two satellite-like populations with NFW profiles, 
         only one will be used and a warning will be issued. 
         """
 
-        self.halo_prof_param_dict = {}
+        self.halo_prof_func_dict = {}
         key_correspondence = {}
         for gal_type in self.gal_types:
             gal_prof_model = self.model_blueprint[gal_type]['profile_model']
-            halo_param_func_dict = gal_prof_model.halo_prof_model.param_func_dict
-            for key in self.halo_prof_param_dict.keys():
-                if key not in self.halo_prof_param_dict.keys():
-                    self.halo_prof_param_dict[key] = halo_prof_param_dict[key]
+            halo_prof_func_dict = gal_prof_model.halo_prof_model.halo_prof_func_dict
+            for key in halo_prof_func_dict.keys():
+                if key not in self.halo_prof_func_dict.keys():
+                    self.halo_prof_func_dict[key] = halo_prof_func_dict[key]
                     key_correspondence[key] = gal_type
                 else:
                     msg = "The halo profile parameter function %s\n"
@@ -264,8 +270,8 @@ class HodModel(object):
         """
 
         # Begin with the dictionary used by halo profile models to 
-        # assign profile parameters (e.g., concentration) to halos
-        output_haloprop_dict = self.halo_prof_model.param_func_dict
+        # assign profile parameters (e.g., NFWmodel_conc) to halos
+        output_haloprop_dict = self.halo_prof_model.halo_prof_func_dict
 
         # Search all features of every gal_type for new halo properties that need to be computed
         # Is this really necessary? When would a component of a specific galaxy ever ask for a 

@@ -53,8 +53,8 @@ class HaloProfileModel(object):
     for a halo profile parameter must be host_haloprop_prefix, set in `~halotools.defaults`, 
     or else the resulting class will not correctly interface with the mock factory. 
     The two dictionaries using these keys are 
-    prof_param_table_dict and param_func_dict, which are set by set_prof_param_table_dict and 
-    set_param_func_dict, respectively. 
+    prof_param_table_dict and halo_prof_func_dict, which are set by set_prof_param_table_dict and 
+    set_halo_prof_func_dict, respectively. 
     """
 
     def __init__(self, cosmology, redshift, prof_param_keys, 
@@ -124,7 +124,7 @@ class HaloProfileModel(object):
         raise NotImplementedError("All halo profile models must include a cumulative_mass_PDF method")
 
     @abstractmethod
-    def set_param_func_dict(self,input_dict):
+    def set_halo_prof_func_dict(self,input_dict):
         """ Required method specifying the mapping between halo profile parameters 
         and some halo property (or properties). 
         The most common example halo profile parameter 
@@ -198,8 +198,8 @@ class NFWProfile(HaloProfileModel):
             cosmology, redshift, [self._conc_parname], prim_haloprop_key)
 
         conc_mass_func = self.get_conc_mass_model(conc_mass_relation_key)
-        # Now wrap this function  into self.param_func_dict
-        self.set_param_func_dict({self._conc_parname:conc_mass_func})
+        # Now bundle this function into self.set_halo_prof_func_dict
+        self.set_halo_prof_func_dict({self._conc_parname:conc_mass_func})
 
         # Build a table stored in the dictionary prof_param_table_dict 
         # that dictates how to discretize the profile parameters
@@ -344,7 +344,7 @@ class NFWProfile(HaloProfileModel):
         self.cumu_inv_func_table = np.array(cumu_inv_funcs)
         self.cumu_inv_param_table = conc_array
 
-    def set_param_func_dict(self, input_dict):
+    def set_halo_prof_func_dict(self, input_dict):
         """ Trivial required method whose sole design purpose is to 
         standardize the interface of halo profile models. 
 
@@ -360,10 +360,10 @@ class NFWProfile(HaloProfileModel):
         Notes 
         ----- 
         Method does not return anything. Instead, input_dict is bound to 
-        the NFWProfile instance with the attribute name param_func_dict. 
+        the NFWProfile instance with the attribute name halo_prof_func_dict. 
         """
 
-        self.param_func_dict = input_dict
+        self.halo_prof_func_dict = input_dict
 
     def set_prof_param_table_dict(self,input_dict=None):
         """ Method sets the value of the prof_param_table_dict attribute. 

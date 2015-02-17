@@ -63,12 +63,12 @@ class HodMockFactory(object):
 
         # Create new halo catalog columns associated with each 
         # parameter of the halo profile model, e.g., 'NFWmodel_conc'. 
-        # The names of the new columns to create are the keys of the 
-        # halo profile model's param_func_dict dictionary; 
+        # The names of the new columns are the keys of the 
+        # composite model's halo_prof_func_dict dictionary; 
         # each key's value is the function object that operates 
         # on the halos to create the new columns 
         halo_prof_param_keys = []
-        function_dict = self.model.halo_prof_model.param_func_dict
+        function_dict = self.model.halo_prof_func_dict
         for new_haloprop_key, prof_param_func in function_dict.iteritems():
             self.halos[new_haloprop_key] = prof_param_func(self.halos[self.prim_haloprop_key])
             halo_prof_param_keys.append(new_haloprop_key)

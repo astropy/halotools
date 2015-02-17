@@ -38,8 +38,8 @@ class GalProfModel(object):
         self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
         self.cumu_inv_param_table = self.halo_prof_model.cumu_inv_param_table
 
-    def set_param_func_dict(self, input_dict):
-        self.halo_prof_model.set_param_func_dict(input_dict)
+    def set_halo_prof_func_dict(self, input_dict):
+        self.halo_prof_model.set_halo_prof_func_dict(input_dict)
 
     def set_prof_param_table_dict(self,input_dict=None):
         self.halo_prof_model.set_prof_param_table_dict(input_dict)
