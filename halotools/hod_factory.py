@@ -51,7 +51,7 @@ class HodModel(object):
 
         # Build the composite model parameter dictionary by retrieving 
         # the relevant items from the component model dictionaries. 
-        self.param_dict = self.build_composite_param_dict(self.model_blueprint)
+        self.param_dict = self.set_param_dict(self.model_blueprint)
 
         self.publications = self.build_publication_list(
             self.model_blueprint)
