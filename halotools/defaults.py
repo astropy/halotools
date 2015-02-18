@@ -115,6 +115,7 @@ scale_factor_difference_tol = 0.05
 # At minimum, the following halo and galaxy properties 
 # will be bound to each mock galaxy 
 host_haloprop_prefix = 'halo_'
+galprop_prefix = 'gal_'
 haloprop_list = ['id', 'pos', 'vel', 'mvir', 'rvir']
 galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 

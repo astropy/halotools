@@ -67,11 +67,30 @@ class HodModel(object):
             self.occupation_bound[gal_type] = (
                 self.model_blueprint[gal_type]['occupation_model'].occupation_bound)
 
+    def gal_prof_param(self, gal_type, gal_prof_param_key, mock_galaxies):
+        """ If the galaxy profile model has gal_prof_param_key as a biased parameter, 
+        call the galaxy profile model. Otherwise, return the value of the halo profile parameter. 
+        """
+
+        method_name = gal_prof_param_key+'_'+gal_type
+        if hasattr(self, method_name):
+            pass
+        else:
+            halo_prof_param_key = (
+                defaults.host_haloprop_prefix + 
+                gal_prof_param_key[len(defaults.galprop_prefix):]
+                )
+            gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
+            return getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
+
     def set_primary_behaviors(self):
 
         for gal_type in self.gal_types:
 
             # First set a method for each profile parameter
+            gal_prof_model = self.model_blueprint[gal_type]['profile_model']
+
+
             for gal_prof_param in self.gal_prof_model.prof_param_keys:
                 behavior_name = gal_prof_param+'_'+gal_type
                 component_instance = self.model_blueprint[gal_type]['profile_model']
