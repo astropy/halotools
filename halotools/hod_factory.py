@@ -78,7 +78,8 @@ class HodModel(object):
 
         if hasattr(self, method_name):
             return self.method_name(
-                getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice])
+                getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
+                )
         else:
             halo_prof_param_key = (
                 defaults.host_haloprop_prefix + 
@@ -92,7 +93,8 @@ class HodModel(object):
 
             # First set a method for each profile parameter
             gal_prof_model = self.model_blueprint[gal_type]['profile_model']
-            for gal_prof_param_key, gal_prof_param_func in self.gal_prof_model.gal_prof_func_dict.iteritems():
+            for gal_prof_param_key, gal_prof_param_func in (
+                self.gal_prof_model.gal_prof_func_dict.iteritems()):
                 new_method_name = gal_prof_param_key+'_'+gal_type
                 new_method_behavior = gal_prof_param_func
                 setattr(self, new_method_name, new_method_behavior)
@@ -276,7 +278,7 @@ class HodModel(object):
                 " and a mock galaxy population - pick one")
 
 
-    def build_composite_param_dict(self,model_blueprint):
+    def set_param_dict(self,model_blueprint):
         """ Method to build a dictionary of parameters for the composite model 
         by retrieving all the parameters of the component models. 
 
@@ -294,13 +296,9 @@ class HodModel(object):
             that is used to provide instructions for how to build a 
             composite model from a set of components. 
 
-        Returns 
-        -------
-        output_dict : dict 
-            Dictionary of all parameters used by all component models. 
         """
 
-        output_dict = {}
+        self.param_dict = {}
 
         # Loop over all galaxy types in the composite model
         for gal_type_dict in model_blueprint.values():
@@ -308,14 +306,15 @@ class HodModel(object):
             for model_instance in gal_type_dict.values():
 
                 occuhelp.test_repeated_keys(
-                    output_dict, model_instance.param_dict)
+                    self.param_dict, model_instance.param_dict)
 
-                output_dict = dict(
+                self.param_dict = dict(
                     model_instance.param_dict.items() + 
-                    output_dict.items()
+                    self.param_dict.items()
                     )
 
-        return output_dict
+    def update_param_dict(self, new_param_dict):
+        pass
 
     def build_publication_list(self, model_blueprint):
         """ Method to build a list of publications 

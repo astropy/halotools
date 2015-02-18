@@ -21,7 +21,7 @@ class HodMockFactory(object):
 
     def __init__(self, snapshot, composite_model, 
         bundle_into_table=True, populate=True,
-        additional_haloprops=[], new_haloprop_funcs={}):
+        additional_haloprops=[], new_haloprop_func_dict={}):
 
         # Bind the inputs to the mock object
         self.snapshot = snapshot
@@ -35,7 +35,7 @@ class HodMockFactory(object):
         # Remove any possibly redundant items
         self.additional_haloprops = list(set(self.additional_haloprops))
 
-        self.new_haloprop_funcs = new_haloprop_funcs
+        self.new_haloprop_func_dict = new_haloprop_func_dict
 
         self.gal_types, self._occupation_bounds = self._get_gal_types()
 
@@ -53,7 +53,7 @@ class HodMockFactory(object):
         and building lookup tables associated with the halo profile. 
         """
 
-        for new_haloprop_key, new_haloprop_func in self.new_haloprop_funcs.iteritems():
+        for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
             self.halos[new_haloprop_key] = new_haloprop_func(self.halos)
             self.additional_haloprops.append(new_haloprop_key)
 

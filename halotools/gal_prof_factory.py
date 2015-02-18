@@ -30,6 +30,24 @@ class GalProfModel(object):
 
         self.spatial_bias_model = spatial_bias_model
 
+        self.set_param_dict()
+
+    def set_param_dict(self):
+        
+        if self.spatial_bias_model == None:
+            self.param_dict = {}
+        else:
+            self.param_dict = self.spatial_bias_model.param_dict
+
+    def update_param_dict(self, new_param_dict):
+
+        if self.spatial_bias_model == None:
+            pass
+        else:
+            self.spatial_bias_model.update_param_dict(new_param_dict)
+            self.param_dict = self.spatial_bias_model.param_dict
+
+
     def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
         self.halo_prof_model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)

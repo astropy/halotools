@@ -361,9 +361,12 @@ class SpatialBias(object):
             key_ipar = self._get_parameter_key(profile_parameter_key, ipar)
             value_ipar = self.param_dict[key_ipar]
             ordinates.extend([value_ipar])
-
  
         return abcissa, ordinates
+
+    def update_param_dict(self, new_param_dict):
+        for key in self.param_dict.keys():
+            self.param_dict[key] = new_param_dict[key]
 
     def set_param_dict(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
