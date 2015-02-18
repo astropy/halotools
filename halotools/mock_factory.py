@@ -72,6 +72,10 @@ class HodMockFactory(object):
             self.halos[new_haloprop_key] = prof_param_func(self.halos[self.prim_haloprop_key])
             self.additional_haloprops.append(new_haloprop_key)
 
+        # Create a list of galaxy profile parameter keys, 
+        # one for each halo profile parameter key
+        self._set_gal_prof_params()
+
         self.build_halo_prof_lookup_tables()
 
 
@@ -172,7 +176,7 @@ class HodMockFactory(object):
                 pass
 
             # Call the galaxy profile components
-            for gal_prof_param_key in self.model.gal_prof_params:
+            for gal_prof_param_key in self.gal_prof_param_keys:
                 getattr(self, gal_prof_param_key)[gal_type_slice] = (
                     self.model.inherit_behavior(gal_type, gal_prof_param_key, self)
                     )
@@ -248,8 +252,7 @@ class HodMockFactory(object):
 
         # Separately allocate memory for the values of the (possibly biased)
         # galaxy profile parameters such as 'gal_NFWmodel_conc'
-        for halocatkey in self.model.halo_prof_func_dict.keys():
-            galcatkey = 'gal_'+halocatkey[len(host_haloprop_prefix):]
+        for galcatkey in self.gal_prof_param_keys:
             example_entry = 0
             _allocate_ndarray_attr(self, galcatkey, example_entry)
 
@@ -260,6 +263,12 @@ class HodMockFactory(object):
 
         _allocate_ndarray_attr(self, 'pos', [0,0,0])
 
+
+    def _set_gal_prof_params(self):
+        self.gal_prof_param_keys = []
+        for key in self.model.halo_prof_func_dict.keys():
+            galkey = 'gal_'+key
+            self.gal_prof_param_keys.append(galkey)
 
 
 
