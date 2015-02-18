@@ -10,7 +10,7 @@ OPT += -DUSE_AVX
 #OPT += -DUSE_ISPC #### Do not USE. Yet. 
 # OPT += -DUSE_OMP
 
-CC=gcc
+CC=clang
 CLINK=
 CFLAGS=  $(OPT) -Wall -Wextra -Wshadow -Wunused -std=c99 -g -m64 -fPIC -Ofast -O3
 
