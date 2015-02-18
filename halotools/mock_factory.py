@@ -75,13 +75,14 @@ class HodMockFactory(object):
         self.build_halo_prof_lookup_tables()
 
 
-    def build_halo_prof_lookup_tables(self, prof_param_table_dict={}):
+    def build_halo_prof_lookup_tables(self, input_prof_param_table_dict={}):
 
        # Compute the halo profile lookup table, ensuring that the min/max 
        # range spanned by the halo catalog is covered. The grid of parameters 
        # is defined by a tuple (xlow, xhigh, dx) in prof_param_table_dict, 
        # whose keys are the name of the halo profile parameter being discretized
-        if prof_param_table_dict == {}:
+        prof_param_table_dict={}
+        if input_prof_param_table_dict == {}:
             for key in self.model.halo_prof_func_dict.keys():
                 dpar = self.model.prof_param_table_dict[key][2]
                 halocat_parmin = self.halos[key].min() - dpar
@@ -92,10 +93,15 @@ class HodMockFactory(object):
                 parmax = np.max(halocat_parmax,model_parmax)
                 prof_param_table_dict[key] = (parmin, parmax, dpar)
 
+        # Now over-write prof_param_table_dict with 
+        # input_prof_param_table_dict, if applicable
+        for key, value in input_prof_param_table_dict.iteritems():
+            prof_param_table_dict[key] = value
+
         # Calling the following method will create new attributes of
-        # self.model.halo_prof_model that can be used to discretize halo profiles.
+        # self.model that can be used to discretize halo profiles.
         # Taking NFWProfile class as an example, the line of code that follows 
-        # will create two new attributes of self.model.halo_prof_model:
+        # will create two new attributes of self.model:
         # 1. cumu_inv_param_table, an array of concentration bin boundaries, and 
         # 2. cumu_inv_func_table, an array of profile function objects, 
         # one function for each element of cumu_inv_param_table
