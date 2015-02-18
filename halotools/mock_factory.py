@@ -99,7 +99,7 @@ class HodMockFactory(object):
         # 1. cumu_inv_param_table, an array of concentration bin boundaries, and 
         # 2. cumu_inv_func_table, an array of profile function objects, 
         # one function for each element of cumu_inv_param_table
-        self.model.halo_prof_model.build_inv_cumu_lookup_table(
+        self.model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)
 
 
@@ -233,14 +233,19 @@ class HodMockFactory(object):
             setattr(self, propname, 
                 np.zeros(total_entries).reshape(example_shape))
 
+        # Allocate memory for all additional halo properties, 
+        # including profile parameters of the halos such as 'halo_NFWmodel_conc'
         for halocatkey in self.additional_haloprops:
             galpropkey = defaults.host_haloprop_prefix+halocatkey
             example_entry = self.halos[halocatkey][0]
             _allocate_ndarray_attr(self, galpropkey, example_entry)
 
-        for gal_prof_param_key in self.model.gal_prof_params:
+        # Separately allocate memory for the values of the (possibly biased)
+        # galaxy profile parameters such as 'gal_NFWmodel_conc'
+        for halocatkey in self.model.halo_prof_func_dict.keys():
+            galcatkey = 'gal_'+halocatkey[len(host_haloprop_prefix):]
             example_entry = 0
-            _allocate_ndarray_attr(self, gal_prof_param_key, example_entry)
+            _allocate_ndarray_attr(self, galcatkey, example_entry)
 
         _allocate_ndarray_attr(self, 'gal_type', 0)
         _allocate_ndarray_attr(self, 'prim_haloprop', 0)
