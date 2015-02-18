@@ -38,6 +38,12 @@ class GalProfModel(object):
         self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
         self.cumu_inv_param_table = self.halo_prof_model.cumu_inv_param_table
 
+    def set_gal_prof_func_dict(self, input_dict):
+        if self.spatial_bias_model == None:
+            self.gal_prof_func_dict = {}
+        else:
+            self.gal_prof_func_dict = self.spatial_bias_model.prim_func_dict
+
     def set_halo_prof_func_dict(self, input_dict):
         self.halo_prof_model.set_halo_prof_func_dict(input_dict)
 

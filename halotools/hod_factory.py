@@ -72,15 +72,18 @@ class HodModel(object):
         call the galaxy profile model. Otherwise, return the value of the halo profile parameter. 
         """
 
+        gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
+
         method_name = gal_prof_param_key+'_'+gal_type
+
         if hasattr(self, method_name):
-            pass
+            return self.method_name(
+                getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice])
         else:
             halo_prof_param_key = (
                 defaults.host_haloprop_prefix + 
                 gal_prof_param_key[len(defaults.galprop_prefix):]
                 )
-            gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
             return getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
 
     def set_primary_behaviors(self):
@@ -89,18 +92,15 @@ class HodModel(object):
 
             # First set a method for each profile parameter
             gal_prof_model = self.model_blueprint[gal_type]['profile_model']
+            for gal_prof_param_key, gal_prof_param_func in self.gal_prof_model.gal_prof_func_dict.iteritems():
+                new_method_name = gal_prof_param_key+'_'+gal_type
+                new_method_behavior = gal_prof_param_func
+                setattr(self, new_method_name, new_method_behavior)
 
-
-            for gal_prof_param in self.gal_prof_model.prof_param_keys:
-                behavior_name = gal_prof_param+'_'+gal_type
-                component_instance = self.model_blueprint[gal_type]['profile_model']
-                component_behavior = getattr(component_instance, behavior_name)
-                setattr(self, behavior_name, component_behavior)
-
-            behavior_name = 'pos_'+gal_type
+            new_method_name = 'pos_'+gal_type
             component_instance = self.model_blueprint[gal_type]['pos']
-            component_behavior = getattr(component_instance, 'mc_pos')
-            setattr(self, behavior_name, component_behavior)
+            new_method_behavior = getattr(component_instance, 'mc_pos')
+            setattr(self, new_method_name, new_method_behavior)
 
     def set_halo_prof_func_dict(self):
         """ Method to derive the halo profile parameter function dictionary 
