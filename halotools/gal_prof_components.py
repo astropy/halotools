@@ -308,24 +308,22 @@ class SpatialBias(object):
             if 'mock_galaxies' in kwargs.keys():
                 raise TypeError("SpatialBias can be passed an array, "
                     "or a mock, but not both")
-            input_prim_haloprops = args[0]
-            input_halo_prof_params = args[1]
+            return args[0], args[1]
 
         elif (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()):
             # We were passed a collection of galaxies
             mock_galaxies = kwargs['mock_galaxies']
             halo_prof_param_key = kwargs['prof_param_key']
             prim_haloprop_key = mock_galaxies.model.prim_haloprop_key
-            input_prim_haloprops = mock_galaxies[prim_haloprop_key]
-            input_halo_prof_params = mock_galaxies[halo_prof_param_key]
+
+            return mock_galaxies[prim_haloprop_key], mock_galaxies[halo_prof_param_key]
+            
         else:
             raise SyntaxError("get_modified_prof_params was called with "
                 " incorrect inputs. Method accepts a positional argument that is an array "
                 "storing the initial profile parameters to be modulated, "
                 "or alternatively a mock galaxy object with the same array"
                 " stored in the mock_galaxies.prof_param_keys attribute")
-
-        return input_prim_haloprops, input_halo_prof_params
 
 
     def _retrieve_model_abcissa_ordinates(self, profile_parameter_key):

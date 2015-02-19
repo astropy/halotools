@@ -76,13 +76,22 @@ class HodModel(object):
 
         gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
 
-        method_name = gal_prof_param_key+'_'+gal_type
+        method_name = gal_prof_param_key+'_'+gal_type            
 
         if hasattr(self, method_name):
-            return self.method_name(
+            # column name of mock_galaxies containing the profile parameter values 
+            # We are calling the component SpatialBias model, 
+            # so there should be no 'halo_' prefix
+            halo_prof_param_key = gal_prof_param_key[len(defaults.galprop_prefix):]
+            result = self.method_name(halo_prof_param_key, 
+                getattr(mock_galaxies, self.prim_haloprop_key)[gal_type_slice],
                 getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
                 )
+            return result
         else:
+            # column name of mock_galaxies containing the profile parameter values 
+            # We are accessing the existing column of mock_galaxies,
+            # so in this case there should be a 'halo_' prefix 
             halo_prof_param_key = (
                 defaults.host_haloprop_prefix + 
                 gal_prof_param_key[len(defaults.galprop_prefix):]
