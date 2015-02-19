@@ -121,7 +121,7 @@ galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 
 testmode = False
 
-haloprop_key_dict = {'prim_haloprop':'mvir', 'sec_haloprop':'vmax'}
+haloprop_key_dict = {'prim_haloprop':'mvir', 'halo_boundary':'rvir','sec_haloprop':'vmax'}
 
 conc_mass_relation_key = 'dutton_maccio14'
 

@@ -37,7 +37,10 @@ class OccupationComponent(object):
     def __init__(self, gal_type, haloprop_key_dict, 
         threshold, occupation_bound):
         self.gal_type = gal_type
+
+        occuhelp.enforce_required_haloprops(haloprop_key_dict)
         self.haloprop_key_dict = haloprop_key_dict
+        
         self.threshold = threshold
         self.occupation_bound = occupation_bound
 

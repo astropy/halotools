@@ -118,7 +118,13 @@ class GalProfModel(object):
         rho = np.random.random(len(args[0]))
         return self.get_scaled_radii_from_func_table(rho, *args)
 
-    def mc_pos(self, gals):
+    def mc_pos(self, mock_galaxies, gal_type_slice = slice(0, None)):
+
+        if isinstance(self.halo_prof_model, hpc.TrivialProfile) is True:
+            return 0
+        else:
+            pass
+
         Npts = len(gals.halo_rvir)
         angles = self.mc_angles(Npts)
         radii = None # need to know what the concentration attribute name is

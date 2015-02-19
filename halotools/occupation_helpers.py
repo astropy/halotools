@@ -351,6 +351,12 @@ def call_func_table(func_table, abcissa, func_indices):
         out[ix] = f(abcissa[ix])
     return out
 
+def enforce_required_haloprops(haloprop_dict):
+    required_prop_set = set(defaults.required_haloprops) - {'sec_haloprop'}
+    if not required_prop_set.issubset(set(haloprop_dict)):
+        raise KeyError("haloprop_key_dict must, at minimum, contain keys "
+            "'prim_haloprop' and 'halo_boundary'")
+
 
 
 

@@ -8,9 +8,12 @@ composite HOD models from a set of components.
 
 __all__ = ['HodModel']
 
+from functools import partial
 import numpy as np
 import occupation_helpers as occuhelp
 import defaults
+
+
 
 class HodModel(object):
     """ Composite HOD model object. 
@@ -41,6 +44,7 @@ class HodModel(object):
         self.halo_prof_model = halo_prof_model
         self.model_blueprint = model_blueprint
 
+        occuhelp.enforce_required_haloprops(haloprop_key_dict)
         self.haloprop_key_dict = haloprop_key_dict
         self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
         if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
@@ -111,8 +115,31 @@ class HodModel(object):
                 setattr(self, new_method_name, new_method_behavior)
 
             new_method_name = 'pos_'+gal_type
-            new_method_behavior = getattr(gal_prof_model, 'mc_pos')
+            new_method_behavior = partial(self.mc_pos, gal_type = gal_type)
             setattr(self, new_method_name, new_method_behavior)
+
+    def mc_pos(self, gal_type, mock_galaxies):
+        """ Method used to generate Monte Carlo realizations of galaxy positions. 
+
+        Identical to component model version from which the behavior derives, 
+        only this method re-centers the output of the component model 
+        to the halo location, and re-scales the halo-centric distance by the halo radius.
+
+        """
+        gal_prof_model = self.model_blueprint[gal_type]['profile']
+        component_behavior = getattr(gal_prof_model, 'mc_pos')
+
+        gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
+        output_pos = component_behavior(mock_galaxies)
+
+        # Re-scale the halo-centric distance by the halo boundary
+        output_pos *= something
+
+        # Re-center the positions by the host halo location
+        output_pos += something
+
+        return output_pos
+
 
     def set_halo_prof_func_dict(self):
         """ Method to derive the halo profile parameter function dictionary 
