@@ -151,6 +151,44 @@ class HaloProfileModel(object):
         param_key = model_nickname+'_'+param_nickname
         return param_key
 
+    def cumulative_mass_PDF(self, r, *args):
+        return 1
+
+
+
+class TrivialProfile(HaloProfileModel):
+    """ Profile of central galaxies residing at exactly the halo center. 
+    """
+    def __init__(self, 
+        cosmology=defaults.default_cosmology, redshift=defaults.default_redshift,
+        build_inv_cumu_table=True, prof_param_table_dict=None,
+        prim_haloprop_key=defaults.haloprop_key_dict['prim_haloprop']):
+
+        self.model_nickname = 'TrivialProfile'
+
+        # Call the init constructor of the super-class, 
+        # whose only purpose is to bind cosmology, redshift, prim_haloprop_key, 
+        # and a list of prof_param_keys to the NFWProfile instance. 
+        empty_list = []
+        HaloProfileModel.__init__(self, 
+            cosmology, redshift, empty_list, prim_haloprop_key)
+
+        empty_dict = {}
+        self.set_halo_prof_func_dict(empty_dict)
+        self.set_prof_param_table_dict(empty_dict)
+
+        self.publication = empty_list
+
+    def density_profile(self, r, *args):
+        return np.where(r == 0, 1, 0)
+
+    def set_halo_prof_func_dict(self,input_dict):
+        self.halo_prof_func_dict = input_dict
+
+    def set_prof_param_table_dict(self,input_dict):
+        self.prof_param_table_dict = input_dict
+
+
 
 class NFWProfile(HaloProfileModel):
     """ NFW halo profile, based on Navarro, Frenk, and White (1999).
