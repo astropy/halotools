@@ -96,7 +96,7 @@ class HodModel(object):
             # First set a method for each profile parameter
             gal_prof_model = self.model_blueprint[gal_type]['profile']
             for gal_prof_param_key, gal_prof_param_func in (
-                self.gal_prof_model.gal_prof_func_dict.iteritems()):
+                gal_prof_model.gal_prof_func_dict.iteritems()):
                 new_method_name = gal_prof_param_key+'_'+gal_type
                 new_method_behavior = gal_prof_param_func
                 setattr(self, new_method_name, new_method_behavior)
@@ -349,6 +349,18 @@ class HodModel(object):
 
         return list(set(pub_list))
 
+    def _set_gal_prof_params(self):
+        self.gal_prof_param_keys = []
+        for key in self.halo_prof_func_dict.keys():
+            galkey = defaults.galprop_prefix+key
+            self.gal_prof_param_keys.append(galkey)
+
+
+
+
+
+
+
     def _create_convenience_attributes(self):
         """ Create attributes of the composite model to conveniently access 
         the most commonly used methods of the component models. 
@@ -368,12 +380,6 @@ class HodModel(object):
                 for method in convenience_methods:
                     method_name = method.__name__+'_'+component_instance.gal_type
                     setattr(self, method_name, method)
-
-    def _set_gal_prof_params(self):
-        self.gal_prof_param_keys = []
-        for key in self.halo_prof_func_dict.keys():
-            galkey = defaults.galprop_prefix+key
-            self.gal_prof_param_keys.append(galkey)
 
 
 

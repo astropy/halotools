@@ -187,7 +187,8 @@ class NFWProfile(HaloProfileModel):
         """
 
         self.model_nickname = 'NFWmodel'
-        # Call the super-class to assign a string that will be used to 
+        # Call a method inherited from the super-class 
+        # to assign a string that will be used to 
         # name the concentration parameter assigned to the halo catalog
         self._conc_parname = self.get_param_key(self.model_nickname, 'conc')
 
@@ -198,7 +199,7 @@ class NFWProfile(HaloProfileModel):
             cosmology, redshift, [self._conc_parname], prim_haloprop_key)
 
         conc_mass_func = self.get_conc_mass_model(conc_mass_relation_key)
-        # Now bundle this function into self.set_halo_prof_func_dict
+        # Now bundle this function into self.halo_prof_func_dict
         self.set_halo_prof_func_dict({self._conc_parname:conc_mass_func})
 
         # Build a table stored in the dictionary prof_param_table_dict 

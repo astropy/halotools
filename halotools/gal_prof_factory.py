@@ -32,8 +32,10 @@ class GalProfModel(object):
 
         self.set_param_dict()
 
+        self.set_gal_prof_func_dict()
+
     def set_param_dict(self):
-        
+
         if self.spatial_bias_model == None:
             self.param_dict = {}
         else:
@@ -56,7 +58,7 @@ class GalProfModel(object):
         self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
         self.cumu_inv_param_table = self.halo_prof_model.cumu_inv_param_table
 
-    def set_gal_prof_func_dict(self, input_dict):
+    def set_gal_prof_func_dict(self):
         if self.spatial_bias_model == None:
             self.gal_prof_func_dict = {}
         else:

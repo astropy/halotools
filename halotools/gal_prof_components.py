@@ -149,12 +149,13 @@ class SpatialBias(object):
         # such as 'NFWmodel_conc_biasfunc_par1_satellites'
         self.set_param_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
 
-        # Create convenience lists self.halo_prof_param_keys and self.gal_prof_param_keys. 
+        # Create the following two convenience lists:
+        # self.halo_prof_param_keys and self.gal_prof_param_keys. 
         # halo_prof_param_keys has entries such as 'NFWmodel_conc'. 
         # These keys are simply the keys of self.abcissa_dict, 
-        # so that only spatially biased parameters are in the list. 
-        # gal_prof_param_keys is identical to halo_prof_param_keys, but each entry 
-        # has been prepended with 'gal_'. 
+        # so that ONLY SPATIALLY BIASED PARAMETERS ARE IN THE LIST. 
+        # gal_prof_param_keys is identical to halo_prof_param_keys, 
+        # but each entry has been prepended with 'gal_'. 
         self._set_prof_params()
 
         # Configure the settings of scipy's spline interpolation routine
