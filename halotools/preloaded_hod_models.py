@@ -38,8 +38,8 @@ def Kravtsov04(**kwargs):
 	sat_model_dict['quiescence_model'] = vdB03_sat_quiescence_model
 
 
-	cen_model_dict['profile_model'] = None
-	sat_model_dict['profile_model'] = None
+	cen_model_dict['profile'] = None
+	sat_model_dict['profile'] = None
 
 
 	model_blueprint = {

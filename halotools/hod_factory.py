@@ -92,7 +92,7 @@ class HodModel(object):
         for gal_type in self.gal_types:
 
             # First set a method for each profile parameter
-            gal_prof_model = self.model_blueprint[gal_type]['profile_model']
+            gal_prof_model = self.model_blueprint[gal_type]['profile']
             for gal_prof_param_key, gal_prof_param_func in (
                 self.gal_prof_model.gal_prof_func_dict.iteritems()):
                 new_method_name = gal_prof_param_key+'_'+gal_type
@@ -119,7 +119,7 @@ class HodModel(object):
         self.halo_prof_func_dict = {}
         tmp_key_correspondence = {}
         for gal_type in self.gal_types:
-            gal_prof_model = self.model_blueprint[gal_type]['profile_model']
+            gal_prof_model = self.model_blueprint[gal_type]['profile']
             halo_prof_func_dict = gal_prof_model.halo_prof_model.halo_prof_func_dict
             for key in halo_prof_func_dict.keys():
                 if key not in self.halo_prof_func_dict.keys():
@@ -137,6 +137,12 @@ class HodModel(object):
                     print(msg % (key, ignored_gal_type, relevant_gal_type, 
                         ignored_gal_type, relevant_gal_type, key))
 
+        # Finally, create a convenience list of galaxy profile parameter keys
+        # This list is identical to self.halo_prof_func_dict.keys(), 
+        # but pre-pended by defaults.galprop_prefix
+        self._set_gal_prof_params()
+
+
     def set_prof_param_table_dict(self,input_dict=None):
 
         # Set all profile parameter table dictionaries. 
@@ -151,7 +157,7 @@ class HodModel(object):
         self._gal_type_prof_param_key_correspondence = {}
 
         for gal_type in self.gal_types:
-            gal_prof_model = self.model_blueprint[gal_type]['profile_model']
+            gal_prof_model = self.model_blueprint[gal_type]['profile']
             prof_param_table_dict = gal_prof_model.halo_prof_model.prof_param_table_dict
             for key in prof_param_table_dict.keys():
                 if key not in self.prof_param_table_dict.keys():
@@ -192,7 +198,7 @@ class HodModel(object):
 
         for key in self.prof_param_table_dict.keys():
             gal_type = self._gal_type_prof_param_key_correspondence[key]
-            gal_prof_model = self.model_blueprint[gal_type]['profile_model']
+            gal_prof_model = self.model_blueprint[gal_type]['profile']
             builder = gal_prof_model.halo_prof_model.build_inv_cumu_lookup_table
 
             if key in prof_param_table_dict.keys():
@@ -362,6 +368,11 @@ class HodModel(object):
                     setattr(self, method_name, method)
 
 
+    def _set_gal_prof_params(self):
+        self.gal_prof_param_keys = []
+        for key in self.halo_prof_func_dict.keys():
+            galkey = defaults.galprop_prefix+key
+            self.gal_prof_param_keys.append(galkey)
 
 
 
