@@ -129,14 +129,20 @@ class HodModel(object):
         gal_prof_model = self.model_blueprint[gal_type]['profile']
         component_behavior = getattr(gal_prof_model, 'mc_pos')
 
-        gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
         output_pos = component_behavior(mock_galaxies)
 
+        gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
+
         # Re-scale the halo-centric distance by the halo boundary
-        output_pos *= something
+        halo_boundary_attr_name = (
+            defaults.host_haloprop_prefix + 
+            defaults.haloprop_key_dict['halo_boundary']
+            )
+        output_pos *= getattr(mock_galaxies.halo_boundary_attr_name)[gal_type_slice]
 
         # Re-center the positions by the host halo location
-        output_pos += something
+        halo_pos_attr_name = defaults.host_haloprop_prefix+'pos'
+        output_pos += getattr(mock_galaxies.halo_pos_attr_name)[gal_type_slice]
 
         return output_pos
 
