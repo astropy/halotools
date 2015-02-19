@@ -53,6 +53,8 @@ class HodModel(object):
         # the relevant items from the component model dictionaries. 
         self.param_dict = self.set_param_dict(self.model_blueprint)
 
+        self.set_halo_prof_func_dict()
+
         self.publications = self.build_publication_list(
             self.model_blueprint)
 
@@ -366,7 +368,6 @@ class HodModel(object):
                 for method in convenience_methods:
                     method_name = method.__name__+'_'+component_instance.gal_type
                     setattr(self, method_name, method)
-
 
     def _set_gal_prof_params(self):
         self.gal_prof_param_keys = []

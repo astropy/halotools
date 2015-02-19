@@ -91,7 +91,7 @@ class SpatialBias(object):
             actually parameters of the underlying halo profile. 
 
         input_prof_params : array_like, optional
-            String array specifying the halo profile parameters to be modulated. 
+            Array of strings specifying the halo profile parameters to be modulated. 
             Values of this array must equal one of 
             halo_prof_model.prof_param_keys, e.g., 'halo_NFW_conc'.
             If input_prof_params is passed to the constructor, 
@@ -141,18 +141,29 @@ class SpatialBias(object):
 
         self.multiplicative_bias = multiplicative_bias
 
-        # The following call to set_param_dict primarily does three things:
+        # The following call to set_param_dict primarily does two things:
         # 1. Creates attributes self.abcissa_dict and self.ordinates_dict, 
         # each with one key per biased galaxy profile parameter
         # 2. Creates an attribute self.param_dict. This is the dictionary 
         # that actually governs the behavior of the model. Its keys have names 
         # such as 'NFWmodel_conc_biasfunc_par1_satellites'
-        # 3. Creates a convenient list self.prof_param_keys, with entries such as 
-        # 'NFWmodel_conc', the keys of self.abcissa_dict
         self.set_param_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
+
+        # Create convenience lists self.halo_prof_param_keys and self.gal_prof_param_keys. 
+        # halo_prof_param_keys has entries such as 'NFWmodel_conc'. 
+        # These keys are simply the keys of self.abcissa_dict, 
+        # so that only spatially biased parameters are in the list. 
+        # gal_prof_param_keys is identical to halo_prof_param_keys, but each entry 
+        # has been prepended with 'gal_'. 
+        self._set_prof_params()
 
         # Configure the settings of scipy's spline interpolation routine
         self._setup_interpol(interpol_method, input_spline_degree)
+
+        self._set_prim_func_dict()
+
+
+    def _set_prim_func_dict(self):
 
         # The primary method of this class is get_modulated_prof_params, which 
         # derives its behavior from radprof_modfunc. Both of these methods are 
@@ -162,15 +173,15 @@ class SpatialBias(object):
         # for each halo profile parameter being modulated. 
         # The following few lines accomplish that specificity, and define self.prim_func_dict.
         self.prim_func_dict = {}
-        for halokey in self.prof_param_keys:
+        for halokey in self.halo_prof_param_keys:
             galkey = self._get_gal_prof_param_key(halokey)
-            new_method_name = 'get_'+galkey
-            parameter_specific_modulation_function = (
+            new_method_name = galkey
+            function = (
                 partial(self.get_modulated_prof_params,
                     prof_param_key = halokey)
                 )
-            setattr(self, new_method_name, parameter_specific_modulation_function)
-            self.prim_func_dict[galkey] = parameter_specific_modulation_function
+            setattr(self, new_method_name, function)
+            self.prim_func_dict[galkey] = function
         
 
     def get_modulated_prof_params(self, prof_param_key, *args, **kwargs):
@@ -409,7 +420,13 @@ class SpatialBias(object):
                 key = self._get_parameter_key(prof_param_key, ii)
                 self.param_dict[key] = val
 
+    def _set_prof_params(self):
+
         self.prof_param_keys = self.abcissa_dict.keys()
+        self.halo_prof_param_keys = self.abcissa_dict.keys()
+        self.gal_prof_param_keys = (
+            [self._get_gal_prof_param_key(key) for key in self.halo_prof_param_keys]
+            )
 
     def _test_sensible_inputs(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
@@ -490,7 +507,7 @@ class SpatialBias(object):
         return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
 
     def _get_gal_prof_param_key(self, halo_prof_param_key):
-        return halo_prof_param_key + '_' + self.gal_type
+        return defaults.galprop_prefix+'_'+halo_prof_param_key
 
 
 
