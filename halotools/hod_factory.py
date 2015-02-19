@@ -102,7 +102,7 @@ class HodModel(object):
 
         for gal_type in self.gal_types:
 
-            # First set a method for each profile parameter
+            # Set a method used to compute each profile parameter
             gal_prof_model = self.model_blueprint[gal_type]['profile']
             for gal_prof_param_key, gal_prof_param_func in (
                 gal_prof_model.gal_prof_func_dict.iteritems()):
@@ -111,8 +111,7 @@ class HodModel(object):
                 setattr(self, new_method_name, new_method_behavior)
 
             new_method_name = 'pos_'+gal_type
-            component_instance = self.model_blueprint[gal_type]['pos']
-            new_method_behavior = getattr(component_instance, 'mc_pos')
+            new_method_behavior = getattr(gal_prof_model, 'mc_pos')
             setattr(self, new_method_name, new_method_behavior)
 
     def set_halo_prof_func_dict(self):
@@ -369,11 +368,9 @@ class HodModel(object):
 
 
 
+""" # Not sure whether this is worth doing
 
     def _create_convenience_attributes(self):
-        """ Create attributes of the composite model to conveniently access 
-        the most commonly used methods of the component models. 
-        """
 
         for gal_type, gal_type_dict in self.model_blueprint.iteritems():
             for component_key, component_instance in gal_type_dict.iteritems():
@@ -390,7 +387,7 @@ class HodModel(object):
                     method_name = method.__name__+'_'+component_instance.gal_type
                     setattr(self, method_name, method)
 
-
+"""
 
 
 

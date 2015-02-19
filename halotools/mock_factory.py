@@ -181,9 +181,13 @@ class HodMockFactory(object):
                     self.model.gal_prof_param(gal_type, gal_prof_param_key, self)
                     )
 
-            # Assign positions
+            # Assign positions 
+            # This function is called differently than other galaxy properties, 
+            # since 'pos' is an attribute of any galaxy-halo model
+            # and any gal_type, without exception
+            pos_method_name = 'pos_'+gal_type
             getattr(self, 'pos')[gal_type_slice] = (
-                self.model.inherit_behavior(gal_type, 'pos', self)
+                getattr(self.model, pos_method_name)(self)
                 )
 
             # Assign velocities, if relevant for this model
