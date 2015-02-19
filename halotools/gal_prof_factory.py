@@ -86,30 +86,25 @@ class GalProfModel(object):
         return occuhelp.call_func_table(
             self.cumu_inv_func_table, rho, func_table_indices)
 
-    def mc_angles(self, Npts):
+    def mc_angles(self, pos):
         """ Returns Npts random points on the unit sphere. 
 
         Parameters 
         ----------
-        Npts : int 
-            Number of desired points. 
+        pos : array_like  
+            Array with shape (Npts, 3) of points. 
+            Method over-writes this array with points on the unit sphere. 
 
-        Returns 
-        -------
-        output_pos : array_like 
-            3-D coordinates on the unit sphere. Output_pos has shape (Npts, 3). 
         """
 
+        Npts = len(pos[:,0])
         cos_t = np.random.uniform(-1.,1.,Npts)
         phi = np.random.uniform(0,2*np.pi,Npts)
-        sin_t = np.sqrt((1.-cos_t**2))
+        sin_t = np.sqrt((1.-cos_t*cos_t))
 
-        output_pos = np.zeros(Npts*3).reshape(Npts,3)
-        output_pos[:,0] = sin_t * np.cos(phi)
-        output_pos[:,1] = sin_t * np.sin(phi)
-        output_pos[:,2] = cos_t
-
-        return output_pos
+        pos[:,0] = sin_t * np.cos(phi)
+        pos[:,1] = sin_t * np.sin(phi)
+        pos[:,2] = cos_t
 
     def mc_radii(self, *args):
         """ args is a tuple of profile parameter arrays. In the simplest case, 
@@ -118,11 +113,20 @@ class GalProfModel(object):
         rho = np.random.random(len(args[0]))
         return self.get_scaled_radii_from_func_table(rho, *args)
 
-    def mc_pos(self, mock_galaxies, gal_type_slice = slice(0, None)):
+    def mc_pos(self, mock_galaxies):
 
         if isinstance(self.halo_prof_model, hpc.TrivialProfile) is True:
             return 0
         else:
+            # get the appropriate slice
+            gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
+            # get angles
+            Ngals = gal_type_slice.stop - gal_type_slice.start
+            getattr(mock_galaxies, 'pos')[gal_type_slice] = self.mc_angles(Ngals)
+            # digitize parameters
+            # get radii
+            # multiply radii by angles
+            # return result
             pass
 
         Npts = len(gals.halo_rvir)
