@@ -49,6 +49,14 @@ class GalProfModel(object):
             self.spatial_bias_model.update_param_dict(new_param_dict)
             self.param_dict = self.spatial_bias_model.param_dict
 
+    def _set_prof_params(self):
+        self.halo_prof_param_keys = (
+            self.halo_prof_model.halo_prof_func_dict.keys()
+            )
+        self.gal_prof_param_keys = (
+            [defaults.galprop_prefix+key for key in self.halo_prof_param_keys]
+            )
+
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
         self.halo_prof_model.build_inv_cumu_lookup_table(
@@ -86,7 +94,14 @@ class GalProfModel(object):
         return occuhelp.call_func_table(
             self.cumu_inv_func_table, rho, func_table_indices)
 
-    def mc_angles(self, pos):
+    def mc_radii(self, profile_params):
+        """ args is a tuple of profile parameter arrays. In the simplest case, 
+        this is a one-element tuple of concentration values. 
+        """
+        rho = np.random.random(len(profile_params))
+        return self.get_scaled_radii_from_func_table(rho, profile_params)
+
+    def mc_angles(self, Npts):
         """ Returns Npts random points on the unit sphere. 
 
         Parameters 
@@ -97,7 +112,7 @@ class GalProfModel(object):
 
         """
 
-        Npts = len(pos[:,0])
+        pos = np.zeros(Npts*3).reshape(Npts,3)
         cos_t = np.random.uniform(-1.,1.,Npts)
         phi = np.random.uniform(0,2*np.pi,Npts)
         sin_t = np.sqrt((1.-cos_t*cos_t))
@@ -106,12 +121,7 @@ class GalProfModel(object):
         pos[:,1] = sin_t * np.sin(phi)
         pos[:,2] = cos_t
 
-    def mc_radii(self, *args):
-        """ args is a tuple of profile parameter arrays. In the simplest case, 
-        this is a one-element tuple of concentration values. 
-        """
-        rho = np.random.random(len(args[0]))
-        return self.get_scaled_radii_from_func_table(rho, *args)
+        return pos
 
     def mc_pos(self, mock_galaxies):
 
@@ -120,18 +130,19 @@ class GalProfModel(object):
         else:
             # get the appropriate slice
             gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
+            pos = getattr(mock_galaxies, 'pos')[gal_type_slice]
             # get angles
-            Ngals = gal_type_slice.stop - gal_type_slice.start
-            getattr(mock_galaxies, 'pos')[gal_type_slice] = self.mc_angles(Ngals)
-            # digitize parameters
-            # get radii
-            # multiply radii by angles
-            # return result
-            pass
+            Ngals = len(pos[:,0])
+            pos = self.mc_angles(Ngals)
 
-        Npts = len(gals.halo_rvir)
-        angles = self.mc_angles(Npts)
-        radii = None # need to know what the concentration attribute name is
+            # get radii
+            # NOTE THE HARD-CODING OF A SINGLE HALO PROFILE PARAMETER
+            profile_param_key = self.gal_prof_param_keys[0]
+            scaled_mc_radii = self.mc_radii(getattr(mock_galaxies, profile_param_key)[gal_type_slice])
+            # multiply radii by angles 
+            for idim in range(3): pos[:,idim] *= scaled_mc_radii
+
+        return pos
 
 
 

@@ -138,11 +138,11 @@ class HodModel(object):
             defaults.host_haloprop_prefix + 
             defaults.haloprop_key_dict['halo_boundary']
             )
-        output_pos *= getattr(mock_galaxies.halo_boundary_attr_name)[gal_type_slice]
+        output_pos *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
 
         # Re-center the positions by the host halo location
         halo_pos_attr_name = defaults.host_haloprop_prefix+'pos'
-        output_pos += getattr(mock_galaxies.halo_pos_attr_name)[gal_type_slice]
+        output_pos += getattr(mock_galaxies, halo_pos_attr_name)[gal_type_slice]
 
         return output_pos
 

@@ -317,7 +317,7 @@ class SpatialBias(object):
             prim_haloprop_key = mock_galaxies.model.prim_haloprop_key
 
             return mock_galaxies[prim_haloprop_key], mock_galaxies[halo_prof_param_key]
-            
+
         else:
             raise SyntaxError("get_modified_prof_params was called with "
                 " incorrect inputs. Method accepts a positional argument that is an array "
@@ -421,7 +421,6 @@ class SpatialBias(object):
 
     def _set_prof_params(self):
 
-        self.prof_param_keys = self.abcissa_dict.keys()
         self.halo_prof_param_keys = self.abcissa_dict.keys()
         self.gal_prof_param_keys = (
             [self._get_gal_prof_param_key(key) for key in self.halo_prof_param_keys]
