@@ -196,8 +196,8 @@ class HodMockFactory(object):
 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
-        self.coords = occuhelp.enforce_periodicity_of_box(
-            self.coords, self.snapshot.Lbox)
+        self.pos = occuhelp.enforce_periodicity_of_box(
+            self.pos, self.snapshot.Lbox)
 
     def _allocate_memory(self):
         """ Method determines how many galaxies of each type 
