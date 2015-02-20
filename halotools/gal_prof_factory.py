@@ -78,13 +78,7 @@ class GalProfModel(object):
     def set_prof_param_table_dict(self,input_dict=None):
         self.halo_prof_model.set_prof_param_table_dict(input_dict)
         self.prof_param_table_dict = self.halo_prof_model.prof_param_table_dict
-
-    def density_profile(self, *args):
-        return self.halo_prof_model.density_profile(*args)
-
-    def cumulative_mass_PDF(self, *args):
-        return self.halo_prof_model.cumulative_mass_PDF(*args)
-
+        
     def get_prof_table_indices(self, params):
         return np.digitize(params, self.cumu_inv_param_table)
 
@@ -144,6 +138,14 @@ class GalProfModel(object):
 
         return pos
 
+#################
+### Include the following two methods for completeness
+    def density_profile(self, *args):
+        return self.halo_prof_model.density_profile(*args)
+
+    def cumulative_mass_PDF(self, *args):
+        return self.halo_prof_model.cumulative_mass_PDF(*args)
+#################
 
 
 
