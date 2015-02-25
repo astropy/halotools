@@ -13,6 +13,7 @@ __all__=['add_group_property','add_members_property','group_by',\
          'new_members_property','new_group_property']
 
 import numpy as np
+from numpy.lib.recfunctions import append_fields
 
 def add_group_property(members, group_key, new_field_name, function, keys, groups=None):
     """
@@ -56,13 +57,16 @@ def add_group_property(members, group_key, new_field_name, function, keys, group
         if key not in member_keys:
             raise ValueError("function input key '{0}' not in members array".format(key))
     
-    new_prop = new_group_property(members, grouping_key, funcobj, *prop_keys)
+    new_prop = new_group_property(members, grouping_key, funcobj, prop_keys)
     
     #append new field to groups array
     groups.appendfield(new_field_name)
     groups[new_field_name]=new_prop
     
-    return groups
+    if groups==None:
+        return groups
+    else:
+        groups = append_fields(groups,new_field_name,new_prop)
 
 
 def add_members_property(members, group_key, new_field_name, function, keys):
@@ -107,8 +111,7 @@ def add_members_property(members, group_key, new_field_name, function, keys):
     new_prop = new_members_property(members, grouping_key, funcobj, prop_keys)
     
     #append new field to members array
-    members.appendfield(new_field_name)
-    members[new_field_name]=new_prop
+    members = append_fields(members,new_field_name,new_prop)
     
     return members
 
@@ -147,18 +150,20 @@ def group_by(members, keys, function=None, append_as_GroupID=False):
         if key not in member_keys:
             raise ValueError("function input key '{0}' not in members array".format(key))
     
-    GroupIDs=np.empty((len(members),len(keys)))
     if function==None:
+        #get an array with each grouping key value per object
+        GroupIDs=np.empty((len(members),len(keys)))
         for i,key in enumerate(keys):
             GroupIDs[:,i] = members[key]
+        #get the unique rows in the resulting array
         unique_rows, foo, inverse_inds = _unique_rows(GroupIDs)
+        #get the group ID for each object
         GroupIDs = np.arange(0,len(unique_rows))[inverse_inds]
         
-    
-    if append_as_GroupID==False: return GroupIDs
+    if append_as_GroupID==False: return GroupIDs #return array with group IDs
     else:
-        members.appendfield('GroupID')
-        members['GroupID']=GroupIDs
+        #append new field with group IDs to members and return members
+        members = append_fields(members,'GroupID',GroupIDs)
         return members
 
 
@@ -194,7 +199,7 @@ def binned_aggregation_group_property(members, binned_prop_key, bins, function, 
     
     GroupIDs = np.digitize(members[binned_prop_key],bins=bins)
     
-    new_prop = new_group_property(members, None, funcobj, *prop_keys, GroupIDs=GroupIDs)
+    new_prop = new_group_property(members, None, funcobj, prop_keys, GroupIDs=GroupIDs)
     
     real_bins = [[bins[i],bins[i+1]] for i in range(0,len(bins)-1)]
     return real_bins, new_prop
@@ -234,41 +239,7 @@ def binned_aggregation_members_property(members, binned_prop_key, bins, function
     
     new_prop = new_members_property(members, None, funcobj, prop_keys, GroupIDs=GroupIDs)
     
-
-def _get_aggregation_function(name):
-    """
-    return common functions given a string argument
-    """
-
-
-def _unique_rows(x):
-    """
-    ==========
-    parameters
-    ==========
-    x: np.ndarray
-        2-dimensional array
-    
-    =======
-    returns
-    =======
-    unique_rows: array
-        the unique rows of A
-    
-    inds: array
-        indicies into x[inds,:] which return array with unique_rows
-    
-    inverse_inds: array
-        indicies into unique_rows[:,inds] which returns x
-    """
-    x = np.require(x, requirements='C')
-    if x.ndim != 2:
-        raise ValueError("array must be 2-dimensional")
-
-    y = np.unique(x.view([('', x.dtype)]*x.shape[1]),
-                  return_index=True, return_inverse=True)
-
-    return (y[0].view(x.dtype).reshape((-1, x.shape[1]), order='C'),) + y[1:]
+    return new_prop
 
 
 def new_members_property(x, funcobj, grouping_key, prop_keys, GroupIDs=None):
@@ -319,3 +290,66 @@ def new_group_property(x, funcobj, grouping_key, prop_keys, GroupIDs=None):
         i+=1
     
     return result
+
+
+def _get_aggregation_function(name):
+    """
+    return common functions given a string argument
+    """
+    
+    available_functions = ['N_members','mean','rank','inverse_rank','sum','std','dist','broadcast','frac']
+    if name not in available_functions:
+        print('preprogamed available functions are {0}'.format(available_functions))
+        rasie ValueError('function: {0} not available.'.format(name))
+
+    from scipy.stats import rankdata
+
+    if name=='N_members': return lambda x: len(x)
+    if name=='mean': return lambda x, key: np.mean(x[key])
+    if name=='sum': return lambda x, key: np.sum(x[key])
+    if name=='std': return lambda x, key: np.std(x[key])
+    if name=='rank':return lambda x, key: rankdata(x[key])-1
+    if name=='inverse_rank':return lambda x, key: rankdata(-x[key])-1
+    if name=='dist':
+        def fun(x, key, bins, normalize=True):
+            return np.histogram(x[key], bins=bins, density=normalize)[0]
+        return fun
+    if name=='frac':
+        def fun(x, key, bool_filter):
+            return np.sum(bool_filter(x[key]))/len(x)
+        return fun
+    if name=='broadcast':
+        def fun(x, key, bkey, bool_filter):
+            bcaster = bool_filter(x[bkey])
+            return x[key][bcaster]
+        return fun
+    
+
+def _unique_rows(x):
+    """
+    ==========
+    parameters
+    ==========
+    x: np.ndarray
+        2-dimensional array
+    
+    =======
+    returns
+    =======
+    unique_rows: array
+        the unique rows of A
+    
+    inds: array
+        indicies into x[inds,:] which return array with unique_rows
+    
+    inverse_inds: array
+        indicies into unique_rows[:,inds] which returns x
+    """
+    x = np.require(x, requirements='C')
+    if x.ndim != 2:
+        raise ValueError("array must be 2-dimensional")
+
+    y = np.unique(x.view([('', x.dtype)]*x.shape[1]),
+                  return_index=True, return_inverse=True)
+
+    return (y[0].view(x.dtype).reshape((-1, x.shape[1]), order='C'),) + y[1:]
