@@ -47,9 +47,9 @@ def add_group_property(members, group_key, new_field_name, function, keys, group
         record array with new group property appended.
     """
     
-    members = members.astype(np.recarray)
+    members = members.view(np.recarray)
     
-    if type(function) is string:
+    if type(function) is 'string':
         function = _get_aggregation_function(function)
     
     #check to see if keys are fields in members array
@@ -60,7 +60,7 @@ def add_group_property(members, group_key, new_field_name, function, keys, group
         if key not in member_keys:
             raise ValueError("function input key '{0}' not in members array".format(key))
     
-    new_prop = new_group_property(members, grouping_key, funcobj, prop_keys)
+    new_prop = new_group_property(members, function, group_key, keys)
     
     #append new field to groups array
     groups.appendfield(new_field_name)
@@ -101,9 +101,9 @@ def add_members_property(members, group_key, new_field_name, function, keys):
         record array with new group property appended.
     """
     
-    members = members.astype(np.recarray)
+    members = members.view(np.recarray)
     
-    if type(function) is string:
+    if type(function) is 'string':
         function = _get_aggregation_function(function)
     
     #check to see if keys are fields in members array
@@ -113,8 +113,8 @@ def add_members_property(members, group_key, new_field_name, function, keys):
     for key in keys:
         if key not in member_keys:
             raise ValueError("function input key '{0}' not in members array".format(key))
-    
-    new_prop = new_members_property(members, grouping_key, funcobj, prop_keys)
+
+    new_prop = new_members_property(members, function, group_key, keys)
     
     #append new field to members array
     members = append_fields(members,new_field_name,new_prop)
@@ -245,7 +245,7 @@ def binned_aggregation_members_property(members, binned_prop_key, bins, function
 
 def new_members_property(x, funcobj, grouping_key, prop_keys, GroupIDs=None):
     
-    if GroupID ==None:
+    if GroupIDs == None:
         GroupIDs = x[grouping_key]
     
     # Initialize the output array
@@ -301,7 +301,7 @@ def _get_aggregation_function(name):
     available_functions = ['N_members','mean','rank','inverse_rank','sum','std','dist','broadcast','frac']
     if name not in available_functions:
         print('preprogamed available functions are {0}'.format(available_functions))
-        rasie ValueError('function: {0} not available.'.format(name))
+        raise ValueError('function: {0} not available.'.format(name))
 
     from scipy.stats import rankdata
 
@@ -324,7 +324,24 @@ def _get_aggregation_function(name):
             bcaster = bool_filter(x[bkey])
             return x[key][bcaster]
         return fun
+
+
+def _get_bool_filters(name):
+    """
+    Define some useful boolean filter functions
+    """
+    def bool_range(x,key,min_val,max_val):
+        return (x[key]>min_val) & (x[key]<max_val)
     
+    def bool_val(x,key,val):
+        return (x[key]==val)
+    
+    def bool_gt(x,key,val):
+        return (x[key]>val)
+    
+    def bool_lt(x,key,val):
+        return (x[key]<val)
+
 
 def _unique_rows(x):
     """
