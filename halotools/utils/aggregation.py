@@ -27,11 +27,14 @@ def add_group_property(members, group_key, new_field_name, function, keys, group
     
     group_key: string
         key string into members which defines groups
+    
+    new_field_name: string
+        name of new field to be added to groups array
         
     function: function object or string
         function used to calculate group property.
         
-    keys:
+    keys: list
        key string(s) into members that function takes as inputs
     
     groups: array_like, optional
@@ -81,11 +84,14 @@ def add_members_property(members, group_key, new_field_name, function, keys):
     
     group_key: string
         key string into members which defines groups
+    
+    new_field_name: string
+        name of new field to be added to members array
         
     function: function object
         function used to calculate group property
         
-    keys:
+    keys: list
        key string(s) into members that function takes as inputs
     
     =======
@@ -126,14 +132,15 @@ def group_by(members, keys, function=None, append_as_GroupID=False):
     members: numpy.recarray
         record array with one row per object
     
-    keys: string(s)
+    keys: list
         key string(s) into members which defines groups
     
     function: function object
         function used to calculate group property which takes keys as argument(s)
     
-    append_as_GroupID: default is False
+    append_as_GroupID: bool
         If True, return members array with new field 'GroupID' with result
+        If False, return array of length the same as members with group IDs
         
     =======
     returns
@@ -185,11 +192,8 @@ def binned_aggregation_group_property(members, binned_prop_key, bins, function, 
     function: function object or string
         function used to calculate group property.
         
-    keys:
+    keys: list
        key string(s) into members that function takes as inputs
-    
-    groups: array_like, optional
-        record array of group properties.  must contains a "GroupID" field.
     
     =======
     returns
@@ -225,9 +229,6 @@ def binned_aggregation_members_property(members, binned_prop_key, bins, function
         
     keys:
        key string(s) into members that function takes as inputs
-    
-    groups: array_like, optional
-        record array of group properties.  must contains a "GroupID" field.
     
     =======
     returns

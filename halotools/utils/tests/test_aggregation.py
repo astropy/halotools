@@ -34,3 +34,9 @@ def test_group_by():
     #there will be 4 groups with tags 0,1,2,3
     assert np.all(np.unique(result)==[0,1,2,3])
     assert len(result)==100
+    
+    print(data)
+    result = group_by(data, keys=['x','y'], function=None, append_as_GroupID=True)
+    #there will be a new field, GroupID, with 4 groups with tags 0,1,2,3
+    assert np.all(np.unique(result['GroupID'])==[0,1,2,3])
+    assert len(result)==100
