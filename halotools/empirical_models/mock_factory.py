@@ -10,7 +10,7 @@ Currently only composite HOD models are supported.
 
 import numpy as np
 import occupation_helpers as occuhelp
-import defaults
+import model_defaults
 
 class HodMockFactory(object):
     """ The constructor of this class takes 
@@ -31,7 +31,7 @@ class HodMockFactory(object):
 
         self.additional_haloprops = additional_haloprops
         # Make sure all the default haloprops are included
-        self.additional_haloprops.extend(defaults.haloprop_list) 
+        self.additional_haloprops.extend(model_defaults.haloprop_list) 
         # Remove any possibly redundant items
         self.additional_haloprops = list(set(self.additional_haloprops))
 
@@ -113,7 +113,7 @@ class HodMockFactory(object):
             prof_param_table_dict=prof_param_table_dict)
 
 
-    def _get_gal_types(self, testmode=defaults.testmode):
+    def _get_gal_types(self, testmode=model_defaults.testmode):
         """ Internal bookkeeping method used to conveniently bind the gal_types of a 
         composite model, and their occupation bounds, to the mock object. 
 
@@ -166,7 +166,7 @@ class HodMockFactory(object):
 
             # Bind all relevant host halo properties to the mock
             for halocatkey in self.additional_haloprops:
-                galcatkey = defaults.host_haloprop_prefix+halocatkey
+                galcatkey = model_defaults.host_haloprop_prefix+halocatkey
                 getattr(self, galcatkey)[gal_type_slice] = np.repeat(
                     self.halos[halocatkey], self._occupation[gal_type])
 
@@ -250,7 +250,7 @@ class HodMockFactory(object):
         # Allocate memory for all additional halo properties, 
         # including profile parameters of the halos such as 'halo_NFWmodel_conc'
         for halocatkey in self.additional_haloprops:
-            galpropkey = defaults.host_haloprop_prefix+halocatkey
+            galpropkey = model_defaults.host_haloprop_prefix+halocatkey
             example_entry = self.halos[halocatkey][0]
             _allocate_ndarray_attr(self, galpropkey, example_entry)
 
