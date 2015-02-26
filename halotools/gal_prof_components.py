@@ -505,7 +505,7 @@ class SpatialBias(object):
         return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
 
     def _get_gal_prof_param_key(self, halo_prof_param_key):
-        return defaults.galprop_prefix+'_'+halo_prof_param_key
+        return defaults.galprop_prefix+halo_prof_param_key
 
 
 

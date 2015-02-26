@@ -57,7 +57,6 @@ class GalProfModel(object):
             [defaults.galprop_prefix+key for key in self.halo_prof_param_keys]
             )
 
-
     def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
         self.halo_prof_model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)
