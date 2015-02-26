@@ -5,7 +5,7 @@ Module containing some commonly used composite HOD models.
 
 """
 
-import defaults
+import model_defaults
 import hod_components as hoc
 
 
@@ -14,7 +14,7 @@ def Kravtsov04(**kwargs):
 	if 'threshold' in kwargs.keys():
 		threshold = kwargs['threshold']
 	else:
-		threshold = defaults.default_luminosity_threshold
+		threshold = model_defaults.default_luminosity_threshold
 
 	cen_model_dict = {}
 	cen_key = 'centrals'
