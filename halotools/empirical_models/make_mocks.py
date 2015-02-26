@@ -16,7 +16,9 @@ import numpy as np
 from scipy.interpolate import interp1d as interp1d
 from scipy.stats import poisson
 
-import defaults
+from ..sim_manager import sim_defaults
+import model_defaults
+
 import os
 from copy import copy
 from collections import Counter

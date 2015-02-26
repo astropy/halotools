@@ -18,7 +18,9 @@ import numpy as np
 from scipy.special import erf 
 from scipy.stats import poisson
 from scipy.optimize import brentq
-import defaults
+
+import model_defaults
+from ..sim_manager import sim_defaults
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty

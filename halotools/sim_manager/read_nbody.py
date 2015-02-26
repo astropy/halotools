@@ -19,7 +19,7 @@ import numpy as np
 
 import configuration
 import os, sys, warnings, urllib2
-import defaults
+import sim_defaults
 
 
 class processed_snapshot(object):
@@ -28,9 +28,9 @@ class processed_snapshot(object):
     """
 
     def __init__(self,
-        simname=defaults.default_simulation_name,
-        scale_factor=defaults.default_scale_factor,
-        halo_finder=defaults.default_halo_finder,
+        simname=sim_defaults.default_simulation_name,
+        scale_factor=sim_defaults.default_scale_factor,
+        halo_finder=sim_defaults.default_halo_finder,
         download_yn=True):
 
         self.simulation_name = simname
@@ -130,14 +130,14 @@ class Catalog_Manager(object):
         }
 
         self.default_halo_catalog_filename = (
-            defaults.default_simulation_name+'_a'+
-            str(np.round(defaults.default_scale_factor,4))+'_'+
-            defaults.default_halo_finder+'_halos.fits')
+            sim_defaults.default_simulation_name+'_a'+
+            str(np.round(sim_defaults.default_scale_factor,4))+'_'+
+            sim_defaults.default_halo_finder+'_halos.fits')
 
         self.default_particle_catalog_filename = (
-            defaults.default_simulation_name+'_a'+
-            str(np.round(defaults.default_scale_factor,4))+'_'+
-            self.numptcl_to_string(defaults.default_numptcl)+'_particles.fits')
+            sim_defaults.default_simulation_name+'_a'+
+            str(np.round(sim_defaults.default_scale_factor,4))+'_'+
+            self.numptcl_to_string(sim_defaults.default_numptcl)+'_particles.fits')
 
 
     def retrieve_catalog_filenames_from_url(self,url,catalog_type='halos'):
@@ -169,7 +169,7 @@ class Catalog_Manager(object):
 
         ##################
         ### SLAC url case
-        if url==defaults.behroozi_web_location:
+        if url==sim_defaults.behroozi_web_location:
             ### Set naming conventions of the files hosted at SLAC
             if (catalog_type == 'halo') or (catalog_type=='halos'): 
                 expected_filename_prefix = 'hlist_'
@@ -184,7 +184,7 @@ class Catalog_Manager(object):
                     file_list.append(a['href'])
         ##################
         ### APH url case (simpler, since only two default catalogs are hosted here)
-        elif url==defaults.aph_web_location:
+        elif url==sim_defaults.aph_web_location:
             ### Set naming conventions of the files hosted at Yale
             if (catalog_type == 'halo') or (catalog_type=='halos'): 
                 expected_filename_suffix = 'halos.fits'
@@ -299,8 +299,8 @@ class Catalog_Manager(object):
 
     def find_nearest_snapshot_in_cache(self,catalog_type,
         scale_factor=None,redshift=None,
-        simname=defaults.default_simulation_name,
-        halo_finder = defaults.default_halo_finder):
+        simname=sim_defaults.default_simulation_name,
+        halo_finder = sim_defaults.default_halo_finder):
 
         """ Identify the catalog in the cache directory with the 
         closest redshift to the requested redshift.
@@ -358,7 +358,7 @@ class Catalog_Manager(object):
 
         # Warn the user if the nearest scale factor differs by more than the 
         # tolerance value set in defaults module
-        adiff_tol = defaults.scale_factor_difference_tol
+        adiff_tol = sim_defaults.scale_factor_difference_tol
         adiff = np.abs(nearest_snapshot - scale_factor)
         if adiff > adiff_tol:
             msg = "Closest match to desired snapshot has a scale factor of "+str(nearest_snapshot)
@@ -403,8 +403,8 @@ class Catalog_Manager(object):
         return output_string
 
     def load_catalog(self,
-        dirname=defaults.halo_catalog_dirname,filename=None,
-        download_yn=False,url=defaults.aph_web_location):
+        dirname=sim_defaults.halo_catalog_dirname,filename=None,
+        download_yn=False,url=sim_defaults.aph_web_location):
         """ Use the astropy fits reader to load the halo or particle catalog into memory.
 
         Parameters 
@@ -466,7 +466,7 @@ class Catalog_Manager(object):
         download default particle and halo catalogs from Yale website.
         """
 
-        url = defaults.aph_web_location
+        url = sim_defaults.aph_web_location
 
         ### Download halo catalogs
         catalog_type = 'halos'
