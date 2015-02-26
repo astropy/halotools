@@ -9,8 +9,8 @@ Very simple set of sanity checks on make_mocks module. Highly incomplete.
 import numpy as np
 from ..halo_occupation import Zheng07_HOD_Model
 from ..make_mocks import HOD_mock
-from ..read_nbody import Catalog_Manager
-from ..read_nbody import processed_snapshot
+
+from ...sim_manager.read_nbody import Catalog_Manager
 import os
 
 """
