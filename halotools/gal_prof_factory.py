@@ -131,7 +131,8 @@ class GalProfModel(object):
             # get radii
             # NOTE THE HARD-CODING OF A SINGLE HALO PROFILE PARAMETER
             profile_param_key = self.gal_prof_param_keys[0]
-            scaled_mc_radii = self.mc_radii(getattr(mock_galaxies, profile_param_key)[gal_type_slice])
+            scaled_mc_radii = self.mc_radii(
+                getattr(mock_galaxies, profile_param_key)[gal_type_slice])
             # multiply radii by angles 
             for idim in range(3): pos[:,idim] *= scaled_mc_radii
 
