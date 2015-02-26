@@ -10,7 +10,7 @@ __all__=['solve_for_polynomial_coefficients','format_parameter_keys']
 
 import numpy as np
 from copy import copy
-from utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as aph_len
 
 from scipy.interpolate import UnivariateSpline as spline
 

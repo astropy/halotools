@@ -14,9 +14,9 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
-from utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
-import defaults
+import model_defaults
 
 from functools import partial
 
@@ -97,19 +97,22 @@ class SpatialBias(object):
             If input_prof_params is passed to the constructor, 
             input_abcissa_dict and input_ordinates_dict should not be passed, and 
             the abcissa and ordinates defining the modulation of the halo profile parameters 
-            will be set according to the default_profile_dict dict in `~halotools.defaults`
+            will be set according to the default_profile_dict, 
+            located in `~halotools.empirical_models.model_defaults`
 
         input_abcissa_dict : dictionary, optional 
             Dictionary whose keys are halo profile parameters and values 
             are the abcissa used to define the profile parameter modulating function. 
-            Default values are set according to default_profile_dict in `~halotools.defaults`
+            Default values are set according to default_profile_dict, 
+            located in `~halotools.empirical_models.model_defaults`
             If input_abcissa_dict is passed to the constructor, 
             input_ordinates_dict must also be passed, and the input_prof_params list must not.
 
         input_ordinates_dict : dictionary, optional 
             Dictionary whose keys are halo profile parameters and values 
             are the ordinates used to define the profile parameter modulating function. 
-            Default values are set according to default_profile_dict in `~halotools.defaults`
+            Default values are set according to default_profile_dict, 
+            located in `~halotools.empirical_models.model_defaults`
             If input_ordinates_dict is passed to the constructor, 
             input_abcissa_dict must also be passed, and the input_prof_params list must not.
 
@@ -407,8 +410,10 @@ class SpatialBias(object):
 
         if input_prof_params is not []:
             for prof_param_key in input_prof_params:
-                self.abcissa_dict[prof_param_key] = defaults.default_profile_dict['profile_abcissa']
-                self.ordinates_dict[prof_param_key] = defaults.default_profile_dict['profile_ordinates']
+                self.abcissa_dict[prof_param_key] = (
+                    model_defaults.default_profile_dict['profile_abcissa'])
+                self.ordinates_dict[prof_param_key] = (
+                    model_defaults.default_profile_dict['profile_ordinates'])
         else:
             self.abcissa_dict = input_abcissa_dict
             self.ordinates_dict = input_ordinates_dict
@@ -505,7 +510,7 @@ class SpatialBias(object):
         return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
 
     def _get_gal_prof_param_key(self, halo_prof_param_key):
-        return defaults.galprop_prefix+halo_prof_param_key
+        return model_defaults.galprop_prefix+halo_prof_param_key
 
 
 
