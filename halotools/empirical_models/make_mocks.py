@@ -9,7 +9,7 @@ Class design is built around future MCMC applications. """
 
 __all__= ['enforce_periodicity_of_box','HOD_mock']
 
-import read_nbody
+from ..sim_manager import read_nbody
 import halo_occupation as ho
 import numpy as np
 
@@ -68,9 +68,10 @@ class HOD_mock(object):
     Parameters
     ----------
     simulation_data : optional
-        simulation_data is an instance of the `~halotools.read_nbody.simulation` class 
-        defined in the `~halotools.read_nbody` module. If unspecified, 
-        the halo catalog specified in `~halotools.defaults` will be chosen. 
+        simulation_data is an instance of 
+        the `~halotools.sim_manager.read_nbody.simulation` class 
+        defined in the `~halotools.sim_manager.read_nbody` module. If unspecified, 
+        the halo catalog specified in `~halotools.sim_manager.sim_defaults` will be chosen. 
 
     halo_occupation_model : optional 
         halo_occupation_model is any subclass of the abstract class 
@@ -103,17 +104,17 @@ class HOD_mock(object):
     """
 
     def __init__(self,simulation_data=None,
-        simname = defaults.default_simulation_name,
-        scale_factor=defaults.default_scale_factor,
-        halo_finder=defaults.default_halo_finder,
+        simname = sim_defaults.default_simulation_name,
+        scale_factor=sim_defaults.default_scale_factor,
+        halo_finder=sim_defaults.default_halo_finder,
         halo_occupation_model=ho.vdB03_Quenching_Model,
-        threshold = defaults.default_luminosity_threshold,
+        threshold = model_defaults.default_luminosity_threshold,
         seed=None,create_galaxies_table=True):
 
         # If no simulation_data object is passed to the constructor, 
         # the default simulation will be chosen
         # Currently this set to be Bolshoi at z=0, 
-        # as specified in the defaults module
+        # as specified in the sim_defaults module
         if simulation_data is None:
             simulation_data = read_nbody.processed_snapshot(
                 simname,scale_factor,halo_finder)
@@ -201,9 +202,9 @@ class HOD_mock(object):
 
         #Set up the grid used to tabulate NFW profiles
         #This will be used to assign halo-centric distances to the satellites
-        Npts_concen = defaults.default_Npts_concen_array
+        Npts_concen = model_defaults.default_Npts_concen_array
         concentration_array = np.linspace(self._concen.min(),self._concen.max(),Npts_concen)
-        Npts_radius = defaults.default_Npts_radius_array        
+        Npts_radius = model_defaults.default_Npts_radius_array        
         radius_array = np.linspace(0.,1.,Npts_radius)
         
         self._cumulative_nfw_PDF = []
@@ -498,7 +499,7 @@ class HOD_mock(object):
         # NOTE: need to cut at zero, otherwise poisson bails
         # BUG IN SCIPY: poisson.rvs bails if there are zeroes in a numpy array
         test = Prob_sat <= 0
-        Prob_sat[test] = defaults.default_tiny_poisson_fluctuation
+        Prob_sat[test] = model_defaults.default_tiny_poisson_fluctuation
 
         num_nsat_array = poisson.rvs(Prob_sat)
 
