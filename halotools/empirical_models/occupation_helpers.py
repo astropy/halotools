@@ -191,8 +191,14 @@ def enforce_periodicity_of_box(coords, box_length):
         but with periodic boundary conditions enforced
 
     """
-    periodic_coords = np.where(coords > box_length, coords - box_length, coords)
-    periodic_coords = np.where(coords < 0, coords + box_length, coords)
+    # First correct negative coordinates
+    periodic_coords = np.where(coords > box_length, 
+        coords - box_length, coords)
+
+    # Now correct coordinates that are too large
+    periodic_coords = np.where(periodic_coords < 0, 
+        periodic_coords + box_length, periodic_coords)
+    
     return periodic_coords
 
 
