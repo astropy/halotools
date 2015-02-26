@@ -20,7 +20,7 @@ from scipy.stats import poisson
 from scipy.optimize import brentq
 
 import model_defaults
-from ..sim_manager import sim_defaults
+#from ..sim_manager import sim_model_defaults
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -260,7 +260,7 @@ class Zheng07_HOD_Model(HOD_Model):
         If specified, input value must agree with 
         one of the thresholds used in Zheng07 to fit HODs: 
         [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-        Default value is -20, specified in the `~halotools.defaults` module.
+        Default value is -20, specified in the `~halotools.model_defaults` module.
 
     Notes
     -----
@@ -276,8 +276,8 @@ class Zheng07_HOD_Model(HOD_Model):
 
         self.threshold = threshold
         if self.threshold==None:
-            warnings.warn("HOD threshold unspecified: setting to value defined in defaults.py")
-            self.threshold = defaults.default_luminosity_threshold
+            warnings.warn("HOD threshold unspecified: setting to value defined in model_defaults.py")
+            self.threshold = model_defaults.default_luminosity_threshold
 
         self.publication.extend(['arXiv:0703457'])
 
@@ -486,7 +486,7 @@ class Leauthaud11_SHMR_Model(HOD_Model):
             self.parameter_dict = self.published_parameters(threshold)
             
         if threshold is None:
-            self.threshold = defaults.default_stellar_mass_threshold
+            self.threshold = model_defaults.default_stellar_mass_threshold
             
         self.require_correct_keys()
 
@@ -681,7 +681,7 @@ class Leauthaud11_SHMR_Model(HOD_Model):
         # Check to see whether a luminosity threshold has been specified
         if threshold is None:
             warnings.warn("stellar mass threshold unspecified: setting to default value")
-            self.threshold = defaults.default_stellar_mass_threshold
+            self.threshold = model_defaults.default_stellar_mass_threshold
 
         parameter_dict = {
             'm1':12.725,
@@ -703,7 +703,7 @@ class Leauthaud11_SHMR_Model(HOD_Model):
         this method is used to enforce that the set of keys is in accord 
         with the set of keys required by the model. 
         """
-        correct_set_of_keys = set(self.published_parameters(threshold = defaults.default_stellar_mass_threshold).keys()) 
+        correct_set_of_keys = set(self.published_parameters(threshold = model_defaults.default_stellar_mass_threshold).keys()) 
         if set(self.parameter_dict.keys()) != correct_set_of_keys:
             raise TypeError("Set of keys of input parameter_dict do not match the set of keys required by the model")
         pass
@@ -1533,7 +1533,7 @@ class Assembias_HOD_Model(HOD_Model):
     def halo_type_calculator(self, 
         primary_halo_property, secondary_halo_property,
         halo_type_fraction_function,
-        bin_spacing = defaults.default_halo_type_calculator_spacing):
+        bin_spacing = model_defaults.default_halo_type_calculator_spacing):
         """ Determines the assembly bias type of the input halos, as pertains to centrals.
 
         Method bins the input halos by the primary halo property :math:`p`, splits each bin 
@@ -1562,7 +1562,7 @@ class Assembias_HOD_Model(HOD_Model):
         # is presumed to be a logarithmic quantity
         # Therefore, be careful if not using logMvir
         minimum = primary_halo_property.min()
-        maximum = primary_halo_property.max() + defaults.default_bin_max_epsilon
+        maximum = primary_halo_property.max() + model_defaults.default_bin_max_epsilon
         Nbins = int(round((maximum-minimum)/bin_spacing))
         primary_halo_property_bins = np.linspace(minimum,maximum,num=Nbins)
 
@@ -1657,7 +1657,7 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembias_HOD_Model):
         self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
 
         if assembias_parameter_dict == None:
-            self.assembias_parameter_dict = defaults.default_satcen_parameters
+            self.assembias_parameter_dict = model_defaults.default_satcen_parameters
         else:
             # If the user supplies a dictionary of assembly bias parameters, 
             # require that the set of keys is correct
@@ -1765,7 +1765,7 @@ class Satcen_Correlation_Polynomial_HOD_Model(Assembias_HOD_Model):
 
     def require_correct_keys(self,assembias_parameter_dict):
         # What is the purpose of using "set" here? The .keys() method never returns duplicates
-        correct_set_of_satcen_keys = set(defaults.default_satcen_parameters.keys())
+        correct_set_of_satcen_keys = set(model_defaults.default_satcen_parameters.keys())
         if set(assembias_parameter_dict.keys()) != correct_set_of_satcen_keys:
             raise TypeError("Set of keys of input assembias_parameter_dict"
             " does not match the set of keys required by the model." 
@@ -1784,10 +1784,10 @@ class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
 
     def __init__(self,baseline_hod_model=Zheng07_HOD_Model,
             baseline_hod_parameter_dict=None,
-            threshold=defaults.default_luminosity_threshold,
+            threshold=model_defaults.default_luminosity_threshold,
             assembias_parameter_dict=None,
-            secondary_halo_property_centrals_key=defaults.default_assembias_key,
-            secondary_halo_property_satellites_key=defaults.default_assembias_key):
+            secondary_halo_property_centrals_key=model_defaults.default_assembias_key,
+            secondary_halo_property_satellites_key=model_defaults.default_assembias_key):
 
 
         baseline_hod_model_instance = (
@@ -1817,7 +1817,7 @@ class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
         self.baseline_hod_parameter_dict = self._baseline_hod_model.parameter_dict
 
         if assembias_parameter_dict == None:
-            self.assembias_parameter_dict = defaults.default_occupation_assembias_parameters
+            self.assembias_parameter_dict = model_defaults.default_occupation_assembias_parameters
         else:
             # If the user supplies a dictionary of assembly bias parameters, 
             # require that the set of keys is correct
@@ -1881,8 +1881,8 @@ class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
         """
         # In this model, centrals exhibit no assembly bias
         # So simply set the halo type1 fraction to unity for centrals
-        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
-        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        abcissa = model_defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = model_defaults.default_halo_type_split['halo_type_split_ordinates']
         output_fraction = self.unconstrained_polynomial_model(
             abcissa,ordinates,primary_halo_property)
         test_negative = (output_fraction < 0)
@@ -1900,8 +1900,8 @@ class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
 
          """
 
-        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
-        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        abcissa = model_defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = model_defaults.default_halo_type_split['halo_type_split_ordinates']
         output_fraction = self.unconstrained_polynomial_model(
             abcissa,ordinates,primary_halo_property)
         test_negative = (output_fraction < 0)
@@ -1935,7 +1935,7 @@ class Polynomial_Assembias_HOD_Model(Assembias_HOD_Model):
         return self.unconstrained_polynomial_model(abcissa,ordinates,primary_halo_property)
 
     def require_correct_keys(self,assembias_parameter_dict):
-        correct_set_of_assembias_keys = set(defaults.default_occupation_assembias_parameters.keys())
+        correct_set_of_assembias_keys = set(model_defaults.default_occupation_assembias_parameters.keys())
         if set(assembias_parameter_dict.keys()) != correct_set_of_assembias_keys:
             raise TypeError("Set of keys of input assembias_parameter_dict"
             " does not match the set of keys required by the model." 
@@ -2052,10 +2052,10 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         # the dictionary storing the quenching model parameters. 
         # If a quenching parameter dictionary is passed to the constructor,
         # concatenate that passed dictionary with the existing hod_model dictionary.
-        # Otherwise, choose the default quenching model parameter set in defaults.py 
+        # Otherwise, choose the default quenching model parameter set in model_defaults.py 
         # This should be more defensive. Fine for now.
         if quenching_parameter_dict is None:
-            self.quenching_parameter_dict = defaults.default_quenching_parameters
+            self.quenching_parameter_dict = model_defaults.default_quenching_parameters
         else:
             # If the user supplies a dictionary of quenching parameters, 
             # require that the set of keys is correct
@@ -2247,7 +2247,7 @@ class vdB03_Quenching_Model(HOD_Quenching_Model):
         return mean_quenched_fractions
 
     def require_correct_keys(self,quenching_parameter_dict):
-        correct_set_of_quenching_keys = set(defaults.default_quenching_parameters.keys())
+        correct_set_of_quenching_keys = set(model_defaults.default_quenching_parameters.keys())
         if set(quenching_parameter_dict.keys()) != correct_set_of_quenching_keys:
             raise TypeError("Set of keys of input quenching_parameter_dict"
             " does not match the set of keys required by the model." 
@@ -2855,10 +2855,10 @@ class Polynomial_Assembias_HOD_Quenching_Model(Assembias_HOD_Quenching_Model):
         baseline_hod_quenching_parameter_dict=None,
         baseline_hod_model=Zheng07_HOD_Model,
         baseline_hod_parameter_dict=None,
-        threshold=defaults.default_luminosity_threshold,
+        threshold=model_defaults.default_luminosity_threshold,
         occupation_assembias_parameter_dict=None,quenching_assembias_parameter_dict=None,
-        secondary_halo_property_centrals_key=defaults.default_assembias_key,
-        secondary_halo_property_satellites_key=defaults.default_assembias_key):
+        secondary_halo_property_centrals_key=model_defaults.default_assembias_key,
+        secondary_halo_property_satellites_key=model_defaults.default_assembias_key):
 
         baseline_hod_quenching_model_instance = (
             baseline_hod_quenching_model(baseline_hod_model=baseline_hod_model,
@@ -2892,12 +2892,12 @@ class Polynomial_Assembias_HOD_Quenching_Model(Assembias_HOD_Quenching_Model):
 
 
         if occupation_assembias_parameter_dict == None:
-            self.occupation_assembias_parameter_dict = defaults.default_occupation_assembias_parameters
+            self.occupation_assembias_parameter_dict = model_defaults.default_occupation_assembias_parameters
         else:
             self.occupation_assembias_parameter_dict = occupation_assembias_parameter_dict
 
         if quenching_assembias_parameter_dict == None:
-            self.quenching_assembias_parameter_dict = defaults.default_quenching_assembias_parameters
+            self.quenching_assembias_parameter_dict = model_defaults.default_quenching_assembias_parameters
         else:
             self.quenching_assembias_parameter_dict = quenching_assembias_parameter_dict
 
@@ -2921,8 +2921,8 @@ class Polynomial_Assembias_HOD_Quenching_Model(Assembias_HOD_Quenching_Model):
         """ If the init constructor is passed an input parameter dictionary, 
         verify that the keys are correct."""
 
-        correct_set_of_occupation_keys = defaults.default_occupation_assembias_parameters.keys()
-        correct_set_of_quenching_keys = defaults.default_quenching_assembias_parameters.keys()
+        correct_set_of_occupation_keys = model_defaults.default_occupation_assembias_parameters.keys()
+        correct_set_of_quenching_keys = model_defaults.default_quenching_assembias_parameters.keys()
         correct_set_of_keys = correct_set_of_occupation_keys + correct_set_of_quenching_keys
         if set(assembias_parameter_dict.keys()) != set(correct_set_of_keys):
             raise TypeError("Set of keys of input assembias_parameter_dict"
@@ -2989,8 +2989,8 @@ class Polynomial_Assembias_HOD_Quenching_Model(Assembias_HOD_Quenching_Model):
         """
         # In this model, centrals exhibit no assembly bias
         # So simply set the halo type1 fraction to unity for centrals
-        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
-        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        abcissa = model_defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = model_defaults.default_halo_type_split['halo_type_split_ordinates']
         output_fraction = self.unconstrained_polynomial_model(
             abcissa,ordinates,primary_halo_property)
         test_negative = (output_fraction < 0)
@@ -3008,8 +3008,8 @@ class Polynomial_Assembias_HOD_Quenching_Model(Assembias_HOD_Quenching_Model):
 
          """
 
-        abcissa = defaults.default_halo_type_split['halo_type_split_abcissa']
-        ordinates = defaults.default_halo_type_split['halo_type_split_ordinates']
+        abcissa = model_defaults.default_halo_type_split['halo_type_split_abcissa']
+        ordinates = model_defaults.default_halo_type_split['halo_type_split_ordinates']
         output_fraction = self.unconstrained_polynomial_model(
             abcissa,ordinates,primary_halo_property)
         test_negative = (output_fraction < 0)

@@ -17,14 +17,16 @@ from scipy.interpolate import UnivariateSpline as spline
 
 import functools
 
-from utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
-import defaults
+
+from ..sim_manager import sim_defaults
 
 import astropy.cosmology as cosmology
 from astropy import units as u
 
-import defaults, halo_prof_param_components
+import model_defaults
+import halo_prof_param_components
 
 
 ##################################################################################
@@ -50,7 +52,7 @@ class HaloProfileModel(object):
     virial mass definition for standard LCDM cosmological parameter values.
 
     The first characters of any string used as a key 
-    for a halo profile parameter must be host_haloprop_prefix, set in `~halotools.defaults`, 
+    for a halo profile parameter must be host_haloprop_prefix, set in `~halotools.model_defaults`, 
     or else the resulting class will not correctly interface with the mock factory. 
     The two dictionaries using these keys are 
     prof_param_table_dict and halo_prof_func_dict, which are set by set_prof_param_table_dict and 
@@ -58,7 +60,7 @@ class HaloProfileModel(object):
     """
 
     def __init__(self, cosmology, redshift, prof_param_keys, 
-        prim_haloprop_key=defaults.haloprop_key_dict['prim_haloprop']):
+        prim_haloprop_key=model_defaults.haloprop_key_dict['prim_haloprop']):
         """
         Parameters 
         ----------
@@ -70,7 +72,7 @@ class HaloProfileModel(object):
         prim_haloprop_key : string, optional
             This string controls which column of the halo_table 
             is used as the primary halo property governing the 
-            radial profile. Default is set in `halotools.defaults`. 
+            radial profile. Default is set in `halotools.model_defaults`. 
         """
 
         self.redshift = redshift
@@ -160,9 +162,9 @@ class TrivialProfile(HaloProfileModel):
     """ Profile of central galaxies residing at exactly the halo center. 
     """
     def __init__(self, 
-        cosmology=defaults.default_cosmology, redshift=defaults.default_redshift,
+        cosmology=sim_defaults.default_cosmology, redshift=sim_defaults.default_redshift,
         build_inv_cumu_table=True, prof_param_table_dict=None,
-        prim_haloprop_key=defaults.haloprop_key_dict['prim_haloprop']):
+        prim_haloprop_key=model_defaults.haloprop_key_dict['prim_haloprop']):
 
         self.model_nickname = 'TrivialProfile'
 
@@ -203,10 +205,10 @@ class NFWProfile(HaloProfileModel):
     """
 
     def __init__(self, 
-        cosmology=defaults.default_cosmology, redshift=defaults.default_redshift,
+        cosmology=sim_defaults.default_cosmology, redshift=sim_defaults.default_redshift,
         build_inv_cumu_table=True, prof_param_table_dict=None,
-        prim_haloprop_key=defaults.haloprop_key_dict['prim_haloprop'],
-        conc_mass_relation_key = defaults.conc_mass_relation_key):
+        prim_haloprop_key=model_defaults.haloprop_key_dict['prim_haloprop'],
+        conc_mass_relation_key = model_defaults.conc_mass_relation_key):
         """
         Parameters 
         ----------
@@ -360,9 +362,9 @@ class NFWProfile(HaloProfileModel):
 
         cmin, cmax, dconc = self.prof_param_table_dict[self._conc_parname]
 
-        Npts_radius = defaults.default_Npts_radius_array  
-        minrad = defaults.default_min_rad 
-        maxrad = defaults.default_max_rad 
+        Npts_radius = model_defaults.default_Npts_radius_array  
+        minrad = model_defaults.default_min_rad 
+        maxrad = model_defaults.default_max_rad 
         radius_array = np.linspace(minrad,maxrad,Npts_radius)
 
         Npts_concen = int(np.round((cmax-cmin)/dconc))
@@ -422,7 +424,7 @@ class NFWProfile(HaloProfileModel):
             The entries of each tuple give the minimum parameter 
             value of the table to be built, the 
             maximum value, and the linear spacing.
-            If None, default behavior is set in `halotools.defaults` module. 
+            If None, default behavior is set in `halotools.model_defaults` module. 
 
         Notes 
         ----- 
@@ -432,9 +434,9 @@ class NFWProfile(HaloProfileModel):
         """
 
         if input_dict is None:
-            cmin = defaults.min_permitted_conc
-            cmax = defaults.max_permitted_conc
-            dconc = defaults.default_dconc
+            cmin = model_defaults.min_permitted_conc
+            cmax = model_defaults.max_permitted_conc
+            dconc = model_defaults.default_dconc
             self.prof_param_table_dict = (
                 {self._conc_parname:(cmin, cmax, dconc)}
                 )

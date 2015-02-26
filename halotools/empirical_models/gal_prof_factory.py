@@ -9,8 +9,8 @@ galaxy profiles from a set of components.
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
-import defaults
-from utils.array_utils import array_like_length as aph_len
+import model_defaults
+from ..utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
 from functools import partial
 import halo_prof_components as hpc
@@ -54,7 +54,7 @@ class GalProfModel(object):
             self.halo_prof_model.halo_prof_func_dict.keys()
             )
         self.gal_prof_param_keys = (
-            [defaults.galprop_prefix+key for key in self.halo_prof_param_keys]
+            [model_defaults.galprop_prefix+key for key in self.halo_prof_param_keys]
             )
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):

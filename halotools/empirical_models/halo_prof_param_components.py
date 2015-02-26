@@ -11,20 +11,22 @@ halo property and *any* profile parameter.
 """
 
 import numpy as np
-import defaults
+import model_defaults
+from ..sim_manager import sim_defaults
+import model_defaults
 
 class ConcMass(object):
     """ Container class for commonly used concentration-mass 
     relations in the literature. 
     """
 
-    def __init__(self, cosmology=defaults.default_cosmology, 
-        redshift = defaults.default_redshift):
+    def __init__(self, cosmology=sim_defaults.default_cosmology, 
+        redshift = sim_defaults.default_redshift):
 
         self.cosmology = cosmology
         self.redshift = redshift
 
-    def conc_mass(self, mass, model=defaults.conc_mass_relation_key, **kwargs):
+    def conc_mass(self, mass, model=model_defaults.conc_mass_relation_key, **kwargs):
         """ Method used to evaluate the mean NFW concentration as a function of 
         halo mass. 
 
@@ -41,7 +43,7 @@ class ConcMass(object):
 
         redshift : float or array_like, optional keyword argument
             If redshift is an array, must be same length as mass. 
-            If no redshift keyword is passed, defaults.default_redshift will be chosen. 
+            If no redshift keyword is passed, model_defaults.default_redshift will be chosen. 
 
         """
 
