@@ -11,7 +11,7 @@ __all__ = ['HodModel']
 from functools import partial
 import numpy as np
 import occupation_helpers as occuhelp
-import defaults
+import model_defaults
 
 
 
@@ -28,7 +28,7 @@ class HodModel(object):
     """
 
     def __init__(self, halo_prof_model, model_blueprint, 
-        haloprop_key_dict=defaults.haloprop_key_dict):
+        haloprop_key_dict=model_defaults.haloprop_key_dict):
         """ The methods of this class derive their behavior from other, external classes, 
         passed in the form of the model_blueprint, a dictionary whose keys 
         are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
@@ -86,7 +86,7 @@ class HodModel(object):
             # column name of mock_galaxies containing the profile parameter values 
             # We are calling the component SpatialBias model, 
             # so there should be no 'halo_' prefix
-            halo_prof_param_key = gal_prof_param_key[len(defaults.galprop_prefix):]
+            halo_prof_param_key = gal_prof_param_key[len(model_defaults.galprop_prefix):]
             result = self.method_name(halo_prof_param_key, 
                 getattr(mock_galaxies, self.prim_haloprop_key)[gal_type_slice],
                 getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
@@ -97,8 +97,8 @@ class HodModel(object):
             # We are accessing the existing column of mock_galaxies,
             # so in this case there should be a 'halo_' prefix 
             halo_prof_param_key = (
-                defaults.host_haloprop_prefix + 
-                gal_prof_param_key[len(defaults.galprop_prefix):]
+                model_defaults.host_haloprop_prefix + 
+                gal_prof_param_key[len(model_defaults.galprop_prefix):]
                 )
             return getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
 
@@ -135,13 +135,13 @@ class HodModel(object):
 
         # Re-scale the halo-centric distance by the halo boundary
         halo_boundary_attr_name = (
-            defaults.host_haloprop_prefix + 
-            defaults.haloprop_key_dict['halo_boundary']
+            model_defaults.host_haloprop_prefix + 
+            model_defaults.haloprop_key_dict['halo_boundary']
             )
         output_pos *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
 
         # Re-center the positions by the host halo location
-        halo_pos_attr_name = defaults.host_haloprop_prefix+'pos'
+        halo_pos_attr_name = model_defaults.host_haloprop_prefix+'pos'
         output_pos += getattr(mock_galaxies, halo_pos_attr_name)[gal_type_slice]
 
         return output_pos
@@ -182,7 +182,7 @@ class HodModel(object):
 
         # Finally, create a convenience list of galaxy profile parameter keys
         # This list is identical to self.halo_prof_func_dict.keys(), 
-        # but pre-pended by defaults.galprop_prefix
+        # but pre-pended by model_defaults.galprop_prefix
         self._set_gal_prof_params()
 
 
@@ -393,7 +393,7 @@ class HodModel(object):
     def _set_gal_prof_params(self):
         self.gal_prof_param_keys = []
         for key in self.halo_prof_func_dict.keys():
-            galkey = defaults.galprop_prefix+key
+            galkey = model_defaults.galprop_prefix+key
             self.gal_prof_param_keys.append(galkey)
 
 
