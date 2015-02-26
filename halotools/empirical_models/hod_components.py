@@ -18,8 +18,8 @@ from scipy.stats import poisson
 from scipy.optimize import brentq
 from scipy.interpolate import UnivariateSpline as spline
 
-import defaults
-from utils.array_utils import array_like_length as aph_len
+import model_defaults
+from ..utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp
 
 from astropy.extern import six
@@ -66,8 +66,8 @@ class Kravtsov04Cens(OccupationComponent):
     """
 
     def __init__(self,input_param_dict=None,
-        haloprop_key_dict=defaults.haloprop_key_dict,
-        threshold=defaults.default_luminosity_threshold,
+        haloprop_key_dict=model_defaults.haloprop_key_dict,
+        threshold=model_defaults.default_luminosity_threshold,
         gal_type='centrals'):
         """
         Parameters 
@@ -85,7 +85,7 @@ class Kravtsov04Cens(OccupationComponent):
             If specified, input value must agree with 
             one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-            Default value is specified in the `~halotools.defaults` module.
+            Default value is specified in the `~halotools.model_defaults` module.
 
         gal_type : string, optional
             Sets the key value used by `~halotools.hod_designer` and 
@@ -228,8 +228,8 @@ class Kravtsov04Sats(OccupationComponent):
     """
 
     def __init__(self,input_param_dict=None,
-        haloprop_key_dict=defaults.haloprop_key_dict,
-        threshold=defaults.default_luminosity_threshold,
+        haloprop_key_dict=model_defaults.haloprop_key_dict,
+        threshold=model_defaults.default_luminosity_threshold,
         gal_type='satellites',
         central_occupation_model=None, input_central_param_dict=None):
         """
@@ -248,7 +248,7 @@ class Kravtsov04Sats(OccupationComponent):
             If specified, input value must agree with 
             one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-            Default value is specified in the `~halotools.defaults` module.
+            Default value is specified in the `~halotools.model_defaults` module.
 
         gal_type : string, optional
             Sets the key value used by `~halotools.hod_designer` and 
@@ -388,7 +388,7 @@ class Kravtsov04Sats(OccupationComponent):
         # The scipy built-in Poisson number generator raises an exception 
         # if its input is zero, so here we impose a simple workaround
         expectation_values = np.where(expectation_values <=0, 
-            defaults.default_tiny_poisson_fluctuation, expectation_values)
+            model_defaults.default_tiny_poisson_fluctuation, expectation_values)
 
         mc_abundance = poisson.rvs(expectation_values)
 
@@ -467,7 +467,7 @@ class vdB03Quiescence(object):
 
     """
 
-    def __init__(self, gal_type, param_dict=defaults.default_quiescence_dict, 
+    def __init__(self, gal_type, param_dict=model_defaults.default_quiescence_dict, 
         interpol_method='spline',input_spline_degree=3):
         """ 
         Parameters 
@@ -480,7 +480,7 @@ class vdB03Quiescence(object):
         param_dict : dictionary, optional 
             Dictionary specifying what the quiescent fraction should be 
             at a set of input values of the primary halo property. 
-            Default values are set in `halotools.defaults`. 
+            Default values are set in `halotools.model_defaults`. 
 
         interpol_method : string, optional 
             Keyword specifying how `mean_quiescence_fraction` 
@@ -502,7 +502,7 @@ class vdB03Quiescence(object):
 
         self.param_dict = param_dict
         # Put param_dict keys in standard form
-        correct_keys = defaults.default_quiescence_dict.keys()
+        correct_keys = model_defaults.default_quiescence_dict.keys()
         self.param_dict = occuhelp.format_parameter_keys(
             self.param_dict,correct_keys,self.gal_type)
         self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
