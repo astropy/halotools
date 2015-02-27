@@ -113,26 +113,15 @@ class HodMockFactory(object):
             prof_param_table_dict=prof_param_table_dict)
 
 
-    def _get_gal_types(self, testmode=model_defaults.testmode):
-        """ Internal bookkeeping method used to conveniently bind the gal_types of a 
-        composite model, and their occupation bounds, to the mock object. 
-
-        This method identifies all gal_type strings used in the composite model, 
-        and creates an array of those strings, ordered such that gal_types with 
-        unity-bounded occupations (e.g., centrals) appear first. 
+    def _get_gal_types(self):
+        """ Assumes the gal_type list bound to the model has already been 
+        sorted according to the occupation bounds. 
         """
+
+        sorted_gal_type_list = self.model.gal_types
 
         occupation_bound = np.array([self.model.occupation_bound[gal_type] 
             for gal_type in self.model.gal_types])
-
-        if testmode==True:
-            if (set(occupation_bound) != {1, float("inf")}):
-                raise ValueError("The only supported finite occupation bound is unity,"
-                    " otherwise it must be set to infinity")
-
-        sorted_idx = np.argsort(occupation_bound)
-        occupation_bound = occupation_bound[sorted_idx]
-        sorted_gal_type_list = self.model.gal_types[sorted_idx]
 
         return sorted_gal_type_list, occupation_bound
 

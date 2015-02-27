@@ -27,8 +27,7 @@ class HodModel(object):
 
     """
 
-    def __init__(self, halo_prof_model, model_blueprint, 
-        haloprop_key_dict=model_defaults.haloprop_key_dict):
+    def __init__(self, model_blueprint):
         """ The methods of this class derive their behavior from other, external classes, 
         passed in the form of the model_blueprint, a dictionary whose keys 
         are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
@@ -41,11 +40,11 @@ class HodModel(object):
         """
 
         # Bind the model-building instructions to the composite model
-        self.halo_prof_model = halo_prof_model
         self.model_blueprint = model_blueprint
 
-        occuhelp.enforce_required_haloprops(haloprop_key_dict)
-        self.haloprop_key_dict = haloprop_key_dict
+        # Determine the halo properties governing the galaxy population properties
+        self.haloprop_key_dict = return_haloprop_dict(self.model_blueprint)
+        occuhelp.enforce_required_haloprops(self.haloprop_key_dict)
         self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
         if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
             self.sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
@@ -62,12 +61,19 @@ class HodModel(object):
         self.publications = self.build_publication_list(
             self.model_blueprint)
 
-    def set_gal_types(self):
-        """ Method creates attributes for the type of galaxies in the model 
-        and the upper bound on their per-halo abundance. 
-        """
 
-        self.gal_types = self.model_blueprint.keys()
+    def set_gal_types(self):
+        gal_types = self.model_blueprint.keys()
+
+        occupation_bounds = []
+        for gal_type in gal_types:
+            model = self.model_blueprint[gal_type]['occupation']
+            occupation_bounds.append(model.occupation_bound)
+
+        sorted_idx = np.argsort(occupation_bounds)
+        gal_types = gal_types[sorted_idx]
+        self.gal_types = gal_types
+
         self.occupation_bound = {}
         for gal_type in self.gal_types:
             self.occupation_bound[gal_type] = (
@@ -396,6 +402,39 @@ class HodModel(object):
             galkey = model_defaults.galprop_prefix+key
             self.gal_prof_param_keys.append(galkey)
 
+
+def return_haloprop_dict(model_blueprint):
+
+    prim_haloprop_list = []
+    sec_haloprop_list = []
+    
+    no_prim_haloprop_msg = "For gal_type %s and feature %s, no primary haloprop detected"
+
+    for gal_type in model_blueprint.keys():
+        for feature in model_blueprint[gal_type]:
+
+            if 'prim_haloprop' in feature.haloprop_key_dict.keys():
+                prim_haloprop_list.append(feature.haloprop_key_dict['prim_haloprop'])
+            else:
+                print(no_prim_haloprop_msg % (gal_type, feature))
+
+            if 'sec_haloprop' in feature.haloprop_key_dict.keys():
+                sec_haloprop_list.append(feature.haloprop_key_dict['sec_haloprop'])
+
+    if len(set(prim_haloprop_list)) == 0:
+        raise KeyError("No component feature of any gal_type had a prim_haloprop")
+    elif len(set(prim_haloprop_list)) > 1:
+        raise KeyError("Distinct prim_haloprop choices for different feature"
+            " is not supported")
+
+    if len(set(sec_haloprop_list)) > 1:
+        raise KeyError("Distinct prim_haloprop choices for different feature"
+            " is not supported")
+
+    output_dict = {}
+    output_dict['prim_haloprop'] = prim_haloprop_list[0]
+    if sec_haloprop_list != []:
+        output_dict['sec_haloprop'] = sec_haloprop_list[0]
 
 
 
