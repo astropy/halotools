@@ -43,26 +43,33 @@ class HodModel(object):
         self.model_blueprint = model_blueprint
 
         # Determine the halo properties governing the galaxy population properties
+        self.__set_haloprops()
+
+        # Create attributes for galaxy types and their occupation bounds
+        self._set_gal_types()
+
+        # Build the composite model parameter dictionary
+        self.param_dict = self._set_init_param_dict()
+
+        # Determine the functions that will be used
+        # to map halo profile parameters onto halos
+        self._set_halo_prof_func_dict()
+
+        # Create a set of methods with special names 
+        # that will be called by the mock factory 
+        self._set_primary_behaviors()
+
+        self.publications = self._build_publication_list()
+
+    def _set_haloprops(self):
+
         self.haloprop_key_dict = return_haloprop_dict(self.model_blueprint)
         occuhelp.enforce_required_haloprops(self.haloprop_key_dict)
         self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
         if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
             self.sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
 
-        # Create attributes for galaxy types and their occupation bounds
-        self.set_gal_types()
-
-        # Build the composite model parameter dictionary by retrieving 
-        # the relevant items from the component model dictionaries. 
-        self.param_dict = self.set_param_dict(self.model_blueprint)
-
-        self.set_halo_prof_func_dict()
-
-        self.publications = self.build_publication_list(
-            self.model_blueprint)
-
-
-    def set_gal_types(self):
+    def _set_gal_types(self):
         gal_types = self.model_blueprint.keys()
 
         occupation_bounds = []
@@ -108,7 +115,7 @@ class HodModel(object):
                 )
             return getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
 
-    def set_primary_behaviors(self):
+    def _set_primary_behaviors(self):
 
         for gal_type in self.gal_types:
 
@@ -153,7 +160,7 @@ class HodModel(object):
         return output_pos
 
 
-    def set_halo_prof_func_dict(self):
+    def _set_halo_prof_func_dict(self):
         """ Method to derive the halo profile parameter function dictionary 
         from a collection of galaxies. 
 
@@ -333,7 +340,7 @@ class HodModel(object):
                 " and a mock galaxy population - pick one")
 
 
-    def set_param_dict(self,model_blueprint):
+    def _set_init_param_dict(self):
         """ Method to build a dictionary of parameters for the composite model 
         by retrieving all the parameters of the component models. 
 
@@ -356,7 +363,7 @@ class HodModel(object):
         self.param_dict = {}
 
         # Loop over all galaxy types in the composite model
-        for gal_type_dict in model_blueprint.values():
+        for gal_type_dict in self.model_blueprint.values():
             # For each galaxy type, loop over its features
             for model_instance in gal_type_dict.values():
 
@@ -371,7 +378,7 @@ class HodModel(object):
     def update_param_dict(self, new_param_dict):
         pass
 
-    def build_publication_list(self, model_blueprint):
+    def _build_publication_list(self):
         """ Method to build a list of publications 
         associated with each component model. 
 
@@ -389,7 +396,8 @@ class HodModel(object):
         pub_list = []
 
         # Loop over all galaxy types in the composite model
-        for gal_type_dict in model_blueprint.values():
+        for gal_type_dict in self.model_blueprint.values():
+            
             # For each galaxy type, loop over its features
             for model_instance in gal_type_dict.values():
                 pub_list.extend(model_instance.publications)
@@ -402,6 +410,8 @@ class HodModel(object):
             galkey = model_defaults.galprop_prefix+key
             self.gal_prof_param_keys.append(galkey)
 
+
+##########################################
 
 def return_haloprop_dict(model_blueprint):
 
