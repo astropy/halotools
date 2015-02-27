@@ -75,7 +75,7 @@ class SpatialBias(object):
     """
 
     def __init__(self, gal_type, halo_prof_model, 
-        input_prof_params=[], input_abcissa_dict={}, input_ordinates_dict={}, 
+        input_prof_params='all', input_abcissa_dict={}, input_ordinates_dict={}, 
         interpol_method='spline',input_spline_degree=3, 
         multiplicative_bias = True):
         """ 
@@ -378,8 +378,9 @@ class SpatialBias(object):
         return abcissa, ordinates
 
     def update_param_dict(self, new_param_dict):
-        for key in self.param_dict.keys():
-            self.param_dict[key] = new_param_dict[key]
+        self.param_dict = {key:new_param_dict[key] for key, value in self.param_dict.iteritems()}
+        #for key in self.param_dict.keys():
+        #    self.param_dict[key] = new_param_dict[key]
 
     def set_param_dict(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
@@ -402,7 +403,10 @@ class SpatialBias(object):
             on that halo profile parameter. 
         """
 
-        input_prof_params = list(input_prof_params)
+        if input_prof_params=='all':
+            input_prof_params = self.halo_prof_model.prof_param_keys
+        else:
+            input_prof_params = list(input_prof_params)
         self._test_sensible_inputs(input_prof_params, input_abcissa_dict, input_ordinates_dict)
 
         self.abcissa_dict={}
