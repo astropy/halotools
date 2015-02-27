@@ -14,6 +14,7 @@ from ..utils.array_utils import array_like_length as aph_len
 
 from scipy.interpolate import UnivariateSpline as spline
 
+import model_defaults
 
 def solve_for_polynomial_coefficients(abcissa,ordinates):
     """ Solves for coefficients of the unique, 
@@ -358,7 +359,7 @@ def call_func_table(func_table, abcissa, func_indices):
     return out
 
 def enforce_required_haloprops(haloprop_dict):
-    required_prop_set = set(model_defaults.required_haloprops) - {'sec_haloprop'}
+    required_prop_set = set(model_defaults.haloprop_key_dict) - {'sec_haloprop'}
     if not required_prop_set.issubset(set(haloprop_dict)):
         raise KeyError("haloprop_key_dict must, at minimum, contain keys "
             "'prim_haloprop' and 'halo_boundary'")

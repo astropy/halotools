@@ -43,7 +43,7 @@ class HodModel(object):
         self.model_blueprint = model_blueprint
 
         # Determine the halo properties governing the galaxy population properties
-        self.__set_haloprops()
+        self._set_haloprops()
 
         # Create attributes for galaxy types and their occupation bounds
         self._set_gal_types()
@@ -119,8 +119,12 @@ class HodModel(object):
 
         for gal_type in self.gal_types:
 
-            # Set a method used to compute each profile parameter
+            # Set a method used to compute galaxy profile parameters
             gal_prof_model = self.model_blueprint[gal_type]['profile']
+
+            # we will loop over gal_prof_model.gal_prof_func_dict
+            # This dictionary only contains keys for biased profile parameters
+            # Thus there will be no new methods created for unbiased profile parameters
             for gal_prof_param_key, gal_prof_param_func in (
                 gal_prof_model.gal_prof_func_dict.iteritems()):
                 new_method_name = gal_prof_param_key+'_'+gal_type
@@ -176,11 +180,11 @@ class HodModel(object):
         tmp_key_correspondence = {}
         for gal_type in self.gal_types:
             gal_prof_model = self.model_blueprint[gal_type]['profile']
-            halo_prof_func_dict = gal_prof_model.halo_prof_model.halo_prof_func_dict
-            for key in halo_prof_func_dict.keys():
+            tmp_halo_prof_func_dict = gal_prof_model.halo_prof_model.halo_prof_func_dict
+            for key in tmp_halo_prof_func_dict.keys():
                 if key not in self.halo_prof_func_dict.keys():
                     # Set the profile function for this parameter
-                    self.halo_prof_func_dict[key] = halo_prof_func_dict[key]
+                    self.halo_prof_func_dict[key] = tmp_halo_prof_func_dict[key]
                     # Bookkeeping device to manage potential key repetition
                     tmp_key_correspondence[key] = gal_type
                 else:
@@ -197,6 +201,12 @@ class HodModel(object):
         # This list is identical to self.halo_prof_func_dict.keys(), 
         # but pre-pended by model_defaults.galprop_prefix
         self._set_gal_prof_params()
+
+    def _set_gal_prof_params(self):
+        self.gal_prof_param_keys = []
+        for key in self.halo_prof_func_dict.keys():
+            galkey = model_defaults.galprop_prefix+key
+            self.gal_prof_param_keys.append(galkey)
 
 
     def set_prof_param_table_dict(self,input_dict=None):
@@ -397,18 +407,13 @@ class HodModel(object):
 
         # Loop over all galaxy types in the composite model
         for gal_type_dict in self.model_blueprint.values():
-            
+
             # For each galaxy type, loop over its features
             for model_instance in gal_type_dict.values():
                 pub_list.extend(model_instance.publications)
 
         return list(set(pub_list))
 
-    def _set_gal_prof_params(self):
-        self.gal_prof_param_keys = []
-        for key in self.halo_prof_func_dict.keys():
-            galkey = model_defaults.galprop_prefix+key
-            self.gal_prof_param_keys.append(galkey)
 
 
 ##########################################
@@ -417,8 +422,10 @@ def return_haloprop_dict(model_blueprint):
 
     prim_haloprop_list = []
     sec_haloprop_list = []
+    halo_boundary_list = []
     
     no_prim_haloprop_msg = "For gal_type %s and feature %s, no primary haloprop detected"
+    no_halo_boundary_msg = "For gal_type %s, no primary haloprop detected for profile model"
 
     for gal_type in model_blueprint.keys():
         for feature in model_blueprint[gal_type]:
@@ -431,10 +438,19 @@ def return_haloprop_dict(model_blueprint):
             if 'sec_haloprop' in feature.haloprop_key_dict.keys():
                 sec_haloprop_list.append(feature.haloprop_key_dict['sec_haloprop'])
 
+            if 'halo_boundary' in feature.haloprop_key_dict.keys():
+                halo_boundary_list.append(feature.haloprop_key_dict['halo_boundary'])
+
     if len(set(prim_haloprop_list)) == 0:
         raise KeyError("No component feature of any gal_type had a prim_haloprop")
     elif len(set(prim_haloprop_list)) > 1:
         raise KeyError("Distinct prim_haloprop choices for different feature"
+            " is not supported")
+
+    if len(set(halo_boundary_list)) == 0:
+        raise KeyError("No component feature of any gal_type had a halo_boundary")
+    elif len(set(halo_boundary_list)) > 1:
+        raise KeyError("Distinct halo_boundary choices for different gal_types"
             " is not supported")
 
     if len(set(sec_haloprop_list)) > 1:
@@ -443,6 +459,7 @@ def return_haloprop_dict(model_blueprint):
 
     output_dict = {}
     output_dict['prim_haloprop'] = prim_haloprop_list[0]
+    output_dict['halo_boundary'] = halo_boundary_list[0]
     if sec_haloprop_list != []:
         output_dict['sec_haloprop'] = sec_haloprop_list[0]
 

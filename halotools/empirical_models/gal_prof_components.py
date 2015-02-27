@@ -22,42 +22,6 @@ from functools import partial
 
 ##################################################################################
 
-class IsotropicSats(object):
-    """ Classical satellite profile. """
-
-    def __init__(self, gal_type):
-        self.gal_type = gal_type
-
-    def mc_angles(self,coords):
-        """
-        Generate a list of Ngals random points on the unit sphere. 
-        The coords array is passed as input to save memory, 
-        speeding up satellite position assignment when building mocks.
-
-        """
-        Ngals = aph_len(coords[:,0])
-        cos_t = np.random.uniform(-1.,1.,Ngals)
-        phi = np.random.uniform(0,2*np.pi,Ngals)
-        sin_t = np.sqrt((1.-(cos_t*cos_t)))
-        
-        coords[:,0] = sin_t * np.cos(phi)
-        coords[:,1] = sin_t * np.sin(phi)
-        coords[:,2] = cos_t
-
-        return coords
-
-    def mc_coords(self,coords,inv_cumu_prof_func,system_center,host_Rvir):
-        Ngals = aph_len(coords[:,0])
-        random_cumu_prof_vals = np.random.random(Ngals)
-
-        r_random = inv_cumu_prof_func(random_cumu_prof_vals)*host_Rvir
-
-        coords *= r_random.reshape(Ngals,1)
-        coords += system_center.reshape(1,3)
-
-        return coords
-
-
 ##################################################################################
 class SpatialBias(object):
     """ Classical model for the spatial bias of galaxies. 
@@ -177,6 +141,9 @@ class SpatialBias(object):
         # for each halo profile parameter being modulated. 
         # The following few lines accomplish that specificity, and define self.prim_func_dict.
         self.prim_func_dict = {}
+
+        # self.halo_prof_param_keys is a list set in self._set_prof_params
+        # Only keys of biased profile parameters appear in the list
         for halokey in self.halo_prof_param_keys:
             galkey = self._get_gal_prof_param_key(halokey)
             new_method_name = galkey
