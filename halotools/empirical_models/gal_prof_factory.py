@@ -27,12 +27,15 @@ class GalProfModel(object):
         self.halo_prof_model = halo_prof_model
         self.cosmology = self.halo_prof_model.cosmology
         self.redshift = self.halo_prof_model.redshift
+        self.haloprop_key_dict = self.halo_prof_model.haloprop_key_dict
 
         self.spatial_bias_model = spatial_bias_model
 
         self.set_param_dict()
 
         self.set_gal_prof_func_dict()
+
+        self.publications = []
 
     def set_param_dict(self):
 

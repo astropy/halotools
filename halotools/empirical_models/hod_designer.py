@@ -26,8 +26,8 @@ class HodModelDesigner(object):
 	The blueprint created by `HodModelDesigner` is in the form of a dictionary. 
 	The keys of this dictionary give the name of the gal_type population, 
 	the values of the dictionary are themselves dictionaries giving a 
-	correspondence between the type of behavior, e.g., 'occupation_model' or 
-	'quiescence_model', and the class instance used to govern that behavior. 
+	correspondence between the type of behavior, e.g., 'occupation' or 
+	'quiescence', and the class instance used to govern that behavior. 
 
 	For clarity, consider a specific, simple example. 
 	The blueprint dictionary is {'centrals':central_dict}. 

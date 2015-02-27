@@ -32,7 +32,7 @@ class HodModel(object):
         passed in the form of the model_blueprint, a dictionary whose keys 
         are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
         The values of the model_blueprint are themselves dictionaries whose keys  
-        specify the type of model being passed, e.g., 'occupation_model', and values 
+        specify the type of model being passed, e.g., 'occupation', and values 
         are instances of that type of model. The model_blueprint dictionary is built by 
         the hod_designer interface. The input halo_prof_model is an instance of the class 
         governing the assumed profile of the underlying halos. 
@@ -49,7 +49,7 @@ class HodModel(object):
         self._set_gal_types()
 
         # Build the composite model parameter dictionary
-        self.param_dict = self._set_init_param_dict()
+        self._set_init_param_dict()
 
         # Determine the functions that will be used
         # to map halo profile parameters onto halos
@@ -64,6 +64,8 @@ class HodModel(object):
     def _set_haloprops(self):
 
         self.haloprop_key_dict = return_haloprop_dict(self.model_blueprint)
+        print self.haloprop_key_dict
+
         occuhelp.enforce_required_haloprops(self.haloprop_key_dict)
         self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
         if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
@@ -78,13 +80,13 @@ class HodModel(object):
             occupation_bounds.append(model.occupation_bound)
 
         sorted_idx = np.argsort(occupation_bounds)
-        gal_types = gal_types[sorted_idx]
+        gal_types = list(np.array(gal_types)[sorted_idx])
         self.gal_types = gal_types
 
         self.occupation_bound = {}
         for gal_type in self.gal_types:
             self.occupation_bound[gal_type] = (
-                self.model_blueprint[gal_type]['occupation_model'].occupation_bound)
+                self.model_blueprint[gal_type]['occupation'].occupation_bound)
 
     def gal_prof_param(self, gal_type, gal_prof_param_key, mock_galaxies):
         """ If the galaxy profile model has gal_prof_param_key as a biased parameter, 
@@ -428,15 +430,15 @@ def return_haloprop_dict(model_blueprint):
     no_halo_boundary_msg = "For gal_type %s, no primary haloprop detected for profile model"
 
     for gal_type in model_blueprint.keys():
-        for feature in model_blueprint[gal_type]:
+        for feature in model_blueprint[gal_type].values():
 
-            if 'prim_haloprop' in feature.haloprop_key_dict.keys():
-                prim_haloprop_list.append(feature.haloprop_key_dict['prim_haloprop'])
+            if 'prim_haloprop_key' in feature.haloprop_key_dict.keys():
+                prim_haloprop_list.append(feature.haloprop_key_dict['prim_haloprop_key'])
             else:
                 print(no_prim_haloprop_msg % (gal_type, feature))
 
-            if 'sec_haloprop' in feature.haloprop_key_dict.keys():
-                sec_haloprop_list.append(feature.haloprop_key_dict['sec_haloprop'])
+            if 'sec_haloprop_key' in feature.haloprop_key_dict.keys():
+                sec_haloprop_list.append(feature.haloprop_key_dict['sec_haloprop_key'])
 
             if 'halo_boundary' in feature.haloprop_key_dict.keys():
                 halo_boundary_list.append(feature.haloprop_key_dict['halo_boundary'])
@@ -458,10 +460,12 @@ def return_haloprop_dict(model_blueprint):
             " is not supported")
 
     output_dict = {}
-    output_dict['prim_haloprop'] = prim_haloprop_list[0]
+    output_dict['prim_haloprop_key'] = prim_haloprop_list[0]
     output_dict['halo_boundary'] = halo_boundary_list[0]
     if sec_haloprop_list != []:
-        output_dict['sec_haloprop'] = sec_haloprop_list[0]
+        output_dict['sec_haloprop_key'] = sec_haloprop_list[0]
+
+    return output_dict
 
 
 

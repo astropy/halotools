@@ -143,13 +143,13 @@ class HodMockFactory(object):
                 self._occupation[gal_type].sum())
 
             # Set the value of the primary halo property
-            getattr(self, 'prim_haloprop')[gal_type_slice] = np.repeat(
+            getattr(self, 'prim_haloprop_key')[gal_type_slice] = np.repeat(
                 self.halos[self.prim_haloprop_key], 
                 self._occupation[gal_type])
 
             # Set the value of the secondary halo property, if relevant
             if hasattr(self.model, 'sec_haloprop_key'):
-                getattr(self, 'sec_haloprop')[gal_type_slice] = np.repeat(
+                getattr(self, 'sec_haloprop_key')[gal_type_slice] = np.repeat(
                     self.halos[self.sec_haloprop_key], 
                     self._occupation[gal_type])
 
@@ -250,9 +250,9 @@ class HodMockFactory(object):
             _allocate_ndarray_attr(self, galcatkey, example_entry)
 
         _allocate_ndarray_attr(self, 'gal_type', 0)
-        _allocate_ndarray_attr(self, 'prim_haloprop', 0)
+        _allocate_ndarray_attr(self, 'prim_haloprop_key', 0)
         if hasattr(self.model,'sec_haloprop_key'):
-            _allocate_ndarray_attr(self, 'sec_haloprop', 0)
+            _allocate_ndarray_attr(self, 'sec_haloprop_key', 0)
 
         _allocate_ndarray_attr(self, 'pos', [0,0,0])
 

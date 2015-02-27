@@ -102,6 +102,8 @@ class Kravtsov04Cens(OccupationComponent):
 
         self.param_dict = self._get_param_dict(input_param_dict)
 
+        self.publications = []
+
 
     def _get_param_dict(self, input_param_dict):
 
@@ -273,6 +275,8 @@ class Kravtsov04Sats(OccupationComponent):
 
         self._set_central_behavior(
             central_occupation_model, input_central_param_dict)
+
+        self.publications = []
 
     def _get_param_dict(self, input_param_dict):
 

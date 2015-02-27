@@ -40,7 +40,8 @@ def Kravtsov04(**kwargs):
 	sat_model_dict['occupation'] = dark_side_sat_model
 	# Build the profile model
 	halo_profile_model_sats = hpc.NFWProfile()
-	sat_model_dict['profile'] = halo_profile_model_sats
+	sat_profile = gpf.GalProfModel(sat_key, halo_profile_model_sats)
+	sat_model_dict['profile'] = sat_profile
 
 
 	model_blueprint = {

@@ -60,7 +60,7 @@ class HaloProfileModel(object):
     """
 
     def __init__(self, cosmology, redshift, prof_param_keys, 
-        prim_haloprop_key=model_defaults.haloprop_key_dict['prim_haloprop']):
+        haloprop_key_dict=model_defaults.haloprop_key_dict):
         """
         Parameters 
         ----------
@@ -77,7 +77,8 @@ class HaloProfileModel(object):
 
         self.redshift = redshift
         self.cosmology = cosmology
-        self.prim_haloprop_key = prim_haloprop_key
+        self.haloprop_key_dict = haloprop_key_dict
+        self.prim_haloprop_key = haloprop_key_dict['prim_haloprop_key']
 
         self.prof_param_keys = list(prof_param_keys)
 
@@ -164,16 +165,16 @@ class TrivialProfile(HaloProfileModel):
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, redshift=sim_defaults.default_redshift,
         build_inv_cumu_table=True, prof_param_table_dict=None,
-        prim_haloprop_key=model_defaults.haloprop_key_dict['prim_haloprop']):
+        haloprop_key_dict=model_defaults.haloprop_key_dict):
 
         self.model_nickname = 'TrivialProfile'
 
         # Call the init constructor of the super-class, 
-        # whose only purpose is to bind cosmology, redshift, prim_haloprop_key, 
+        # whose only purpose is to bind cosmology, redshift, haloprop_key_dict, 
         # and a list of prof_param_keys to the NFWProfile instance. 
         empty_list = []
         HaloProfileModel.__init__(self, 
-            cosmology, redshift, empty_list, prim_haloprop_key)
+            cosmology, redshift, empty_list, haloprop_key_dict)
 
         empty_dict = {}
         self.set_halo_prof_func_dict(empty_dict)
@@ -207,7 +208,7 @@ class NFWProfile(HaloProfileModel):
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, redshift=sim_defaults.default_redshift,
         build_inv_cumu_table=True, prof_param_table_dict=None,
-        prim_haloprop_key=model_defaults.haloprop_key_dict['prim_haloprop'],
+        haloprop_key_dict=model_defaults.haloprop_key_dict,
         conc_mass_relation_key = model_defaults.conc_mass_relation_key):
         """
         Parameters 
@@ -236,7 +237,7 @@ class NFWProfile(HaloProfileModel):
         # whose only purpose is to bind cosmology, redshift, prim_haloprop_key, 
         # and a list of prof_param_keys to the NFWProfile instance. 
         HaloProfileModel.__init__(self, 
-            cosmology, redshift, [self._conc_parname], prim_haloprop_key)
+            cosmology, redshift, [self._conc_parname], haloprop_key_dict)
 
         conc_mass_func = self.get_conc_mass_model(conc_mass_relation_key)
         # Now bundle this function into self.halo_prof_func_dict
