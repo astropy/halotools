@@ -367,7 +367,6 @@ def _unique_rows(x):
     if x.ndim != 2:
         raise ValueError("array must be 2-dimensional")
 
-    y = np.unique(x.view([('', x.dtype)]*x.shape[1]),
-                  return_index=True, return_inverse=True)
+    y = np.unique(x.view([('',x.dtype)]*x.shape[1]),return_index=True,return_inverse=True)
 
     return (y[0].view(x.dtype).reshape((-1, x.shape[1]), order='C'),) + y[1:]
