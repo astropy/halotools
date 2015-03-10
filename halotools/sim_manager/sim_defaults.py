@@ -25,7 +25,7 @@ aph_web_location = 'http://www.astro.yale.edu/aphearin/Data_files/'
 behroozi_web_location = 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
 
 # Convenience strings for the directory locations of the default catalogs (probably unnecessary)
-halo_catalog_dirname = configuration.get_catalogs_dir('halos')
+halo_catalog_dirname = configuration.get_catalogs_dir('subhalos')
 particle_catalog_dirname = configuration.get_catalogs_dir('particles')
 
 default_redshift = 0.0
