@@ -11,6 +11,8 @@ import gal_prof_factory as gpf
 import halo_prof_components as hpc
 import gal_prof_components as gpc
 
+__all__ = ["Kravtsov04"]
+
 
 def Kravtsov04(**kwargs):
 

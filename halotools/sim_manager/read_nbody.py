@@ -248,9 +248,6 @@ class Catalog_Manager(object):
         # Identify all catalogs currently stored in the cache directory
         available_catalogs = np.array(
             configuration.list_of_catalogs_in_cache(catalog_type=catalog_type))
-        print 'Printing all files listed in cache'
-        print available_catalogs
-        print ''
 
         ######### 
         # Define a simple string manipulating function that will be used to 
@@ -329,7 +326,6 @@ class Catalog_Manager(object):
         # Identify all catalogs currently stored in the cache directory
         available_catalogs = np.array(
             configuration.list_of_catalogs_in_cache(catalog_type=catalog_type))
-        print available_catalogs
 
         #########
         # The file_mask array will determine which of the available catalogs 
@@ -344,26 +340,18 @@ class Catalog_Manager(object):
                 if c[-len(catalog_type)-len(extension):] != last_characters_of_filename:
                     file_mask[ii]=False
 
-        print 'check1'
-        print file_mask
-        # Impose simulation name restriction
+       # Impose simulation name restriction
         if simname != None:
             first_characters_of_filename = simname
             for ii,c in enumerate(available_catalogs):
                 if (c[0:len(simname)] != first_characters_of_filename) or (c[len(simname)] != '_'):
                     file_mask[ii]=False
 
-        #print 'check2'
-        #print file_mask
-
         # Impose halo finder restriction
         if halo_finder != None:
             for ii,c in enumerate(available_catalogs):
                 if c[-11-len(halo_finder):-11] != halo_finder:
                     file_mask[ii]=False
-        #########
-        #print 'check3'
-        #print file_mask
         relevant_catalogs = available_catalogs[file_mask]
 
         return relevant_catalogs
@@ -517,11 +505,6 @@ class Catalog_Manager(object):
             else:
                 raise KeyError("Must supply catalog_type to be either "
                     "'particles' or 'subhalos'")
-
-        print ''
-        print 'trying to load the following filename:'
-        print filename
-        print ''
 
         if os.path.isfile(os.path.join(dirname,filename)):
             catalog = Table.read(os.path.join(dirname,filename),path='data')

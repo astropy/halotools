@@ -13,7 +13,7 @@ import numpy as np
 import occupation_helpers as occuhelp
 import model_defaults
 
-
+__all__ = ["HodModel"]
 
 class HodModel(object):
     """ Composite HOD model object. 

@@ -12,6 +12,9 @@ import numpy as np
 import occupation_helpers as occuhelp
 import model_defaults
 
+
+__all__ = ["HodMockFactory"]
+
 class HodMockFactory(object):
     """ The constructor of this class takes 
     a snapshot and a composite model as input, 
