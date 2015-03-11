@@ -121,6 +121,12 @@ class HodModel(object):
 
         for gal_type in self.gal_types:
 
+            # Set the method used to compute per-halo gal_type abundance
+            new_method_name = 'mc_occupation_'+gal_type
+            occupation_model = self.model_blueprint[gal_type]['occupation']
+            new_method_behavior = occupation_model.mc_occupation
+            setattr(self, new_method_name, new_method_behavior)
+
             # Set a method used to compute galaxy profile parameters
             gal_prof_model = self.model_blueprint[gal_type]['profile']
 
@@ -146,9 +152,9 @@ class HodModel(object):
 
         """
         gal_prof_model = self.model_blueprint[gal_type]['profile']
-        component_behavior = getattr(gal_prof_model, 'mc_pos')
+        mc_pos_function = getattr(gal_prof_model, 'mc_pos')
 
-        output_pos = component_behavior(mock_galaxies)
+        output_pos = mc_pos_function(mock_galaxies)
 
         gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
 
@@ -278,18 +284,6 @@ class HodModel(object):
                 gal_prof_model.halo_prof_model.cumu_inv_func_table)
             self.cumu_inv_param_table_dict[key] = (
                 gal_prof_model.halo_prof_model.cumu_inv_param_table)
-
-
-    def component_behavior(self, gal_type, colname, *args, **kwargs):
-
-        relevant_data = self.retrieve_relevant_haloprops(
-            gal_type, colname, *args, **kwargs)
-
-        component_model_function = getattr(self, colname='_'+gal_type)
-
-        return component_model_function(*relevant_data, 
-            input_param_dict=self.param_dict)
-
 
     def retrieve_relevant_haloprops(self, gal_type, component_key, 
         *args, **kwargs):
