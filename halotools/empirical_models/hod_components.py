@@ -203,10 +203,9 @@ class Kravtsov04Cens(OccupationComponent):
         else:
             param_dict = kwargs['input_param_dict']
 
-        logM = np.log10(self.retrieve_haloprops(*args, **kwargs))
+        halo_mass = self.retrieve_haloprops(*args, **kwargs)
 
-        mc_generator = np.random.uniform(0, 1, aph_len(logM))
-        mc_abundance = np.where(mc_generator < self.mean_occupation(logM, 
+        mc_abundance = np.where(mc_generator < self.mean_occupation(halo_mass, 
             input_param_dict = param_dict), 1, 0)
 
         return mc_abundance
