@@ -221,10 +221,7 @@ class HodMockFactory(object):
             self._occupation[gal_type] = (
                 getattr(self.model, occupation_func_name)(
                     gal_type, self.halos))
-#
-            #self.model.mc_occupation(
-                #gal_type, self.halos))
-#
+
             # Now use the above result to set up the indexing scheme
             self._total_abundance[gal_type] = (
                 self._occupation[gal_type].sum()

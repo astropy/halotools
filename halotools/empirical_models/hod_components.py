@@ -120,7 +120,7 @@ class Kravtsov04Cens(OccupationComponent):
         return output_param_dict
 
 
-    def mean_occupation(self, logM, input_param_dict=None):
+    def mean_occupation(self, logM, **kwargs):
         """ Expected number of central galaxies in a halo of mass logM.
         See Equation 2 of arXiv:0703457.
 
@@ -128,6 +128,8 @@ class Kravtsov04Cens(OccupationComponent):
         ----------        
         logM : array 
             array of :math:`log_{10}(M)` of halos in catalog
+
+        input_param_dict : dict, optional
 
         Returns
         -------
@@ -143,10 +145,12 @@ class Kravtsov04Cens(OccupationComponent):
         log_{10}M_{min}}{\\sigma_{log_{10}M}} \\right) \\right)`
 
         """
-        if input_param_dict is None:
+        if 'input_param_dict' not in kwargs.keys():
             param_dict = self.param_dict 
         else:
-            param_dict = input_param_dict
+            param_dict = kwargs['input_param_dict']
+
+        print param_dict
 
         logM = np.array(logM)
 
@@ -156,7 +160,7 @@ class Kravtsov04Cens(OccupationComponent):
 
         return mean_ncen
 
-    def mc_occupation(self, logM, input_param_dict=None):
+    def mc_occupation(self, logM, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 
         Parameters
@@ -170,10 +174,10 @@ class Kravtsov04Cens(OccupationComponent):
             array of length len(logM) giving the number of self.gal_type galaxies in the halos. 
     
         """
-        if input_param_dict is None:
+        if 'input_param_dict' not in kwargs.keys():
             param_dict = self.param_dict 
         else:
-            param_dict = input_param_dict
+            param_dict = kwargs['input_param_dict']
 
         mc_generator = np.random.uniform(0, 1, aph_len(logM))
         mc_abundance = np.where(mc_generator < self.mean_occupation(logM, 
@@ -233,7 +237,8 @@ class Kravtsov04Sats(OccupationComponent):
         haloprop_key_dict=model_defaults.haloprop_key_dict,
         threshold=model_defaults.default_luminosity_threshold,
         gal_type='satellites',
-        central_occupation_model=None, input_central_param_dict=None):
+        central_occupation_model=None, 
+        input_central_param_dict=None):
         """
         Parameters 
         ----------
@@ -296,7 +301,8 @@ class Kravtsov04Sats(OccupationComponent):
         return output_param_dict
 
 
-    def _set_central_behavior(self, central_occupation_model, input_central_param_dict):
+    def _set_central_behavior(self, 
+        central_occupation_model, input_central_param_dict):
 
         self.central_occupation_model = central_occupation_model
         
@@ -310,7 +316,7 @@ class Kravtsov04Sats(OccupationComponent):
                     input_central_param_dict)
                 )
 
-    def mean_occupation(self,logM, input_param_dict=None, input_central_param_dict=None):
+    def mean_occupation(self,logM, **kwargs):
         """Expected number of satellite galaxies in a halo of mass logM.
         See Equation 5 of arXiv:0703457.
 
@@ -319,10 +325,9 @@ class Kravtsov04Sats(OccupationComponent):
         logM : array 
             array of :math:`log_{10}(M)` of halos in catalog
 
-        halo_type : array 
-            array of halo types. Entirely ignored in this model. 
-            Included as a passed variable purely for consistency 
-            between the way this function is called by different models.
+        input_param_dict : dict, optional
+
+        input_central_param_dict : dict, optional
 
         Returns
         -------
@@ -333,15 +338,16 @@ class Kravtsov04Sats(OccupationComponent):
 
 
         """
-        if input_param_dict is None:
+        if 'input_param_dict' not in kwargs.keys():
             param_dict = self.param_dict 
         else:
-            param_dict = input_param_dict
+            param_dict = kwargs['input_param_dict']
 
-        if input_central_param_dict is None:
-            central_param_dict = self.central_param_dict
+        if 'input_central_param_dict' not in kwargs.keys():
+            central_param_dict = self.central_param_dict 
         else:
-            central_param_dict = input_central_param_dict
+            central_param_dict = kwargs['input_central_param_dict']
+
 
         logM = np.array(logM)
         halo_mass = 10.**logM
@@ -369,7 +375,7 @@ class Kravtsov04Sats(OccupationComponent):
         return mean_nsat
 
 
-    def mc_occupation(self, logM, input_param_dict=None, input_central_param_dict=None):
+    def mc_occupation(self, logM, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
         Assumes gal_type galaxies obey Poisson statistics. 
 
@@ -378,12 +384,27 @@ class Kravtsov04Sats(OccupationComponent):
         logM : array 
             array of :math:`log_{10}(M)` of halos in catalog
 
+        input_param_dict : dict, optional
+
+        input_central_param_dict : dict, optional
+
         Returns
         -------
         mc_abundance : array
             array of length len(logM) giving the number of self.gal_type galaxies in the halos. 
     
         """
+
+        if 'input_param_dict' not in kwargs.keys():
+            param_dict = self.param_dict 
+        else:
+            param_dict = kwargs['input_param_dict']
+
+        if 'input_central_param_dict' not in kwargs.keys():
+            central_param_dict = self.central_param_dict 
+        else:
+            central_param_dict = kwargs['input_central_param_dict']
+
 
         expectation_values = self.mean_occupation(logM, 
             input_param_dict=input_param_dict, 
