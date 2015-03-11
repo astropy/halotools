@@ -36,9 +36,7 @@ default_cosmology = cosmology.WMAP5
 # the code will issue a warning.
 scale_factor_difference_tol = 0.05
 
-
-
-
+Num_ptcl_requirement = 300
 
 
 

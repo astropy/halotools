@@ -64,7 +64,6 @@ class HodModel(object):
     def _set_haloprops(self):
 
         self.haloprop_key_dict = return_haloprop_dict(self.model_blueprint)
-        print self.haloprop_key_dict
 
         occuhelp.enforce_required_haloprops(self.haloprop_key_dict)
         self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']

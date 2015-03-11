@@ -11,7 +11,7 @@ Currently only composite HOD models are supported.
 import numpy as np
 import occupation_helpers as occuhelp
 import model_defaults
-
+from ..sim_manager import sim_defaults
 
 __all__ = ["HodMockFactory"]
 
@@ -56,6 +56,16 @@ class HodMockFactory(object):
         and building lookup tables associated with the halo profile. 
         """
 
+        #### Make cuts on halo catalog
+        # select host halos only
+        host_halo_cut = (self.halos['upid']==-1)
+        self.halos = self.halos[host_halo_cut]
+        # make mvir completeness cut
+        cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
+        mass_cut = (self.halos['mvir'] > cutoff_mvir)
+        self.halos = self.halos[mass_cut]
+        #
+
         for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
             self.halos[new_haloprop_key] = new_haloprop_func(self.halos)
             self.additional_haloprops.append(new_haloprop_key)
@@ -77,7 +87,7 @@ class HodMockFactory(object):
 
         # Create a list of galaxy profile parameter keys, 
         # one for each halo profile parameter key
-        self._set_gal_prof_params()
+        self.model._set_gal_prof_params()
 
         self.build_halo_prof_lookup_tables()
 
