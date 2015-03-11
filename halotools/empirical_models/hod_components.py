@@ -431,9 +431,10 @@ class Kravtsov04Sats(OccupationComponent):
         else:
             central_param_dict = kwargs['input_central_param_dict']
 
-        logM = np.log10(self.retrieve_haloprops(*args, **kwargs))
+        halo_mass = self.retrieve_haloprops(*args, **kwargs)
+        logM = np.log10(halo_mass)
 
-        expectation_values = self.mean_occupation(logM, 
+        expectation_values = self.mean_occupation(halo_mass, 
             input_param_dict=param_dict, 
             input_central_param_dict=central_param_dict)
 

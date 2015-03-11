@@ -214,7 +214,7 @@ class HodMockFactory(object):
         self._gal_type_indices = {}
         first_galaxy_index = 0
         for gal_type in self.gal_types:
-            print("Working on gal_type %s" % gal_type)
+            #print("Working on gal_type %s" % gal_type)
             #
             occupation_func_name = 'mc_occupation_'+gal_type
             occupation_func = getattr(self.model, occupation_func_name)
