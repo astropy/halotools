@@ -54,6 +54,7 @@ class HodModel(object):
         # Determine the functions that will be used
         # to map halo profile parameters onto halos
         self._set_halo_prof_func_dict()
+        self._set_prof_param_table_dict()
 
         # Create a set of methods with special names 
         # that will be called by the mock factory 
@@ -210,7 +211,7 @@ class HodModel(object):
             self.gal_prof_param_keys.append(galkey)
 
 
-    def set_prof_param_table_dict(self,input_dict=None):
+    def _set_prof_param_table_dict(self,input_dict=None):
 
         # Set all profile parameter table dictionaries. 
         # Also set which builder function will be used by the composite 
@@ -258,7 +259,7 @@ class HodModel(object):
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
 
-        self.set_prof_param_table_dict(prof_param_table_dict)
+        self._set_prof_param_table_dict(prof_param_table_dict)
 
         self.cumu_inv_func_table_dict = {}
         self.cumu_inv_param_table_dict = {}

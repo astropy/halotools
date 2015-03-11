@@ -56,6 +56,7 @@ class HodMockFactory(object):
         and building lookup tables associated with the halo profile. 
         """
 
+        #############
         #### Make cuts on halo catalog
         # select host halos only
         host_halo_cut = (self.halos['upid']==-1)
@@ -64,7 +65,7 @@ class HodMockFactory(object):
         cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
         mass_cut = (self.halos['mvir'] > cutoff_mvir)
         self.halos = self.halos[mass_cut]
-        #
+        #############
 
         for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
             self.halos[new_haloprop_key] = new_haloprop_func(self.halos)
@@ -104,10 +105,10 @@ class HodMockFactory(object):
                 dpar = self.model.prof_param_table_dict[key][2]
                 halocat_parmin = self.halos[key].min() - dpar
                 model_parmin = self.model.prof_param_table_dict[key][0]
-                parmin = np.min(halocat_parmin,model_parmin)
+                parmin = np.min([halocat_parmin,model_parmin])
                 halocat_parmax = self.halos[key].max() + dpar
                 model_parmax = self.model.prof_param_table_dict[key][1]
-                parmax = np.max(halocat_parmax,model_parmax)
+                parmax = np.max([halocat_parmax,model_parmax])
                 prof_param_table_dict[key] = (parmin, parmax, dpar)
 
         # Now over-write prof_param_table_dict with 
