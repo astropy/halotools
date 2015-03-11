@@ -359,16 +359,20 @@ def call_func_table(func_table, abcissa, func_indices):
     return out
 
 def enforce_required_haloprops(haloprop_dict):
-    required_prop_set = set(model_defaults.haloprop_key_dict) - {'sec_haloprop_key'}
+    required_prop_set = set(model_defaults.haloprop_key_dict)
     provided_prop_set = set(haloprop_dict)
     if not required_prop_set.issubset(provided_prop_set):
         raise KeyError("haloprop_key_dict must, at minimum, contain keys "
             "'prim_haloprop_key' and 'halo_boundary'")
 
 
-
-
-
+def count_haloprops(haloprop_dict):
+    trigger = 'haloprop_key'
+    num_props = 0
+    for key in haloprop_dict.keys():
+        if key[-len(trigger):]==trigger:
+            num_props += 1
+    return num_props
 
 
 

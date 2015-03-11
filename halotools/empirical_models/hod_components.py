@@ -40,6 +40,12 @@ class OccupationComponent(object):
 
         occuhelp.enforce_required_haloprops(haloprop_key_dict)
         self.haloprop_key_dict = haloprop_key_dict
+
+        self.num_haloprops = occuhelp.count_haloprops(self.haloprop_key_dict)
+        if self.num_haloprops > 2:
+            raise SyntaxError("An OccupationComponent class instance can "
+                "use only one or two halo properties, "
+                "received %i" % self.num_haloprops)
         
         self.threshold = threshold
         self.occupation_bound = occupation_bound
@@ -57,6 +63,24 @@ class OccupationComponent(object):
     def _set_primary_function_dict(self):
         self.prim_func_dict = {None : self.mc_occupation}
         self.additional_methods_to_inherit = [self.mean_occupation]
+
+    def retrieve_haloprops(self, *args, **kwargs):
+
+        if 'halos' in kwargs.keys():
+            if self.num_haloprops==1:
+                return kwargs['halos'][self.haloprop_key_dict['prim_haloprop_key']]
+            else:
+                return (
+                    kwargs['halos'][self.haloprop_key_dict['prim_haloprop_key']],
+                    kwargs['halos'][self.haloprop_key_dict['sec_haloprop_key']] 
+                    )
+        else:
+            if self.num_haloprops==1:
+                return args[0]
+            else:
+                return args[0], args[1]
+
+
 
 
 class Kravtsov04Cens(OccupationComponent):
@@ -120,14 +144,16 @@ class Kravtsov04Cens(OccupationComponent):
         return output_param_dict
 
 
-    def mean_occupation(self, logM, **kwargs):
+    def mean_occupation(self, *args, **kwargs):
         """ Expected number of central galaxies in a halo of mass logM.
         See Equation 2 of arXiv:0703457.
 
         Parameters
         ----------        
-        logM : array 
+        logM : array, optional
             array of :math:`log_{10}(M)` of halos in catalog
+
+        halos : table, optional
 
         input_param_dict : dict, optional
 
@@ -150,9 +176,7 @@ class Kravtsov04Cens(OccupationComponent):
         else:
             param_dict = kwargs['input_param_dict']
 
-        print param_dict
-
-        logM = np.array(logM)
+        logM = np.log10(self.retrieve_haloprops(*args, **kwargs))
 
         mean_ncen = 0.5*(1.0 + erf(
             (logM - param_dict[self.logMmin_key])
@@ -160,7 +184,7 @@ class Kravtsov04Cens(OccupationComponent):
 
         return mean_ncen
 
-    def mc_occupation(self, logM, **kwargs):
+    def mc_occupation(self, *args, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 
         Parameters
@@ -178,6 +202,8 @@ class Kravtsov04Cens(OccupationComponent):
             param_dict = self.param_dict 
         else:
             param_dict = kwargs['input_param_dict']
+
+        logM = np.log10(self.retrieve_haloprops(*args, **kwargs))
 
         mc_generator = np.random.uniform(0, 1, aph_len(logM))
         mc_abundance = np.where(mc_generator < self.mean_occupation(logM, 
@@ -305,6 +331,7 @@ class Kravtsov04Sats(OccupationComponent):
         central_occupation_model, input_central_param_dict):
 
         self.central_occupation_model = central_occupation_model
+        self.central_param_dict = input_central_param_dict
         
         if self.central_occupation_model is not None:
             # Test thresholds of centrals and satellites are equal
@@ -316,7 +343,7 @@ class Kravtsov04Sats(OccupationComponent):
                     input_central_param_dict)
                 )
 
-    def mean_occupation(self,logM, **kwargs):
+    def mean_occupation(self, *args, **kwargs):
         """Expected number of satellite galaxies in a halo of mass logM.
         See Equation 5 of arXiv:0703457.
 
@@ -348,8 +375,7 @@ class Kravtsov04Sats(OccupationComponent):
         else:
             central_param_dict = kwargs['input_central_param_dict']
 
-
-        logM = np.array(logM)
+        logM = np.log10(self.retrieve_haloprops(*args, **kwargs))
         halo_mass = 10.**logM
 
         M0 = 10.**param_dict[self.logM0_key]
@@ -375,7 +401,7 @@ class Kravtsov04Sats(OccupationComponent):
         return mean_nsat
 
 
-    def mc_occupation(self, logM, **kwargs):
+    def mc_occupation(self, *args, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
         Assumes gal_type galaxies obey Poisson statistics. 
 
@@ -405,10 +431,11 @@ class Kravtsov04Sats(OccupationComponent):
         else:
             central_param_dict = kwargs['input_central_param_dict']
 
+        logM = np.log10(self.retrieve_haloprops(*args, **kwargs))
 
         expectation_values = self.mean_occupation(logM, 
-            input_param_dict=input_param_dict, 
-            input_central_param_dict=input_central_param_dict)
+            input_param_dict=param_dict, 
+            input_central_param_dict=central_param_dict)
 
         # The scipy built-in Poisson number generator raises an exception 
         # if its input is zero, so here we impose a simple workaround
