@@ -154,18 +154,18 @@ class HodMockFactory(object):
 
             # Set the value of the gal_type string
             getattr(self, 'gal_type')[gal_type_slice] = np.repeat(gal_type, 
-                self._total_abundance[gal_type])
+                self._total_abundance[gal_type],axis=0)
 
             # Set the value of the primary halo property
             getattr(self, 'prim_haloprop_key')[gal_type_slice] = np.repeat(
                 self.halos[self.model.prim_haloprop_key], 
-                self._occupation[gal_type])
+                self._occupation[gal_type],axis=0)
 
             # Set the value of the secondary halo property, if relevant
             if hasattr(self.model, 'sec_haloprop_key'):
                 getattr(self, 'sec_haloprop_key')[gal_type_slice] = np.repeat(
                     self.halos[self.model.sec_haloprop_key], 
-                    self._occupation[gal_type])
+                    self._occupation[gal_type],axis=0)
 
             # Bind all relevant host halo properties to the mock
             for halocatkey in self.additional_haloprops:
