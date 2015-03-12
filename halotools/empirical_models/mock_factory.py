@@ -158,20 +158,21 @@ class HodMockFactory(object):
 
             # Set the value of the primary halo property
             getattr(self, 'prim_haloprop_key')[gal_type_slice] = np.repeat(
-                self.halos[self.prim_haloprop_key], 
+                self.halos[self.model.prim_haloprop_key], 
                 self._occupation[gal_type])
 
             # Set the value of the secondary halo property, if relevant
             if hasattr(self.model, 'sec_haloprop_key'):
                 getattr(self, 'sec_haloprop_key')[gal_type_slice] = np.repeat(
-                    self.halos[self.sec_haloprop_key], 
+                    self.halos[self.model.sec_haloprop_key], 
                     self._occupation[gal_type])
 
             # Bind all relevant host halo properties to the mock
             for halocatkey in self.additional_haloprops:
                 galcatkey = model_defaults.host_haloprop_prefix+halocatkey
+                print halocatkey
                 getattr(self, galcatkey)[gal_type_slice] = np.repeat(
-                    self.halos[halocatkey], self._occupation[gal_type])
+                    self.halos[halocatkey], self._occupation[gal_type], axis=0)
 
             # Call the SFR model, if relevant for this model
             if hasattr(self.model, 'sfr_model'):
