@@ -15,7 +15,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
-import functools
+from functools import partial
 
 from ..utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
@@ -464,7 +464,7 @@ class NFWProfile(HaloProfileModel):
         # We want to call the specific function where the 'model' keyword argument 
         # is fixed to the conc-mass relation we want. 
         # For this, we use Python's functools
-        conc_mass_func = functools.partial(
+        conc_mass_func = partial(
             conc_mass_model_instance.conc_mass, model=conc_mass_relation_key)
 
         return conc_mass_func

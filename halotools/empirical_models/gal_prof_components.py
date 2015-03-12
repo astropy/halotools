@@ -147,10 +147,7 @@ class SpatialBias(object):
         for halokey in self.halo_prof_param_keys:
             galkey = self._get_gal_prof_param_key(halokey)
             new_method_name = galkey
-            function = (
-                partial(self.get_modulated_prof_params,
-                    prof_param_key = halokey)
-                )
+            function = partial(self.get_modulated_prof_params, halokey)
             setattr(self, new_method_name, function)
             self.prim_func_dict[galkey] = function
         

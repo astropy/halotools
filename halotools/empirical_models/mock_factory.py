@@ -170,7 +170,6 @@ class HodMockFactory(object):
             # Bind all relevant host halo properties to the mock
             for halocatkey in self.additional_haloprops:
                 galcatkey = model_defaults.host_haloprop_prefix+halocatkey
-                print halocatkey
                 getattr(self, galcatkey)[gal_type_slice] = np.repeat(
                     self.halos[halocatkey], self._occupation[gal_type], axis=0)
 

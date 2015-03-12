@@ -143,7 +143,7 @@ class HodModel(object):
             new_method_behavior = partial(self.mc_pos, gal_type = gal_type)
             setattr(self, new_method_name, new_method_behavior)
 
-    def mc_pos(self, gal_type, mock_galaxies):
+    def mc_pos(self, mock_galaxies, gal_type):
         """ Method used to generate Monte Carlo realizations of galaxy positions. 
 
         Identical to component model version from which the behavior derives, 
