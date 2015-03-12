@@ -88,7 +88,12 @@ class GalProfModel(object):
         self.prof_param_table_dict = self.halo_prof_model.prof_param_table_dict
         
     def get_prof_table_indices(self, params):
-        return np.digitize(params, self.cumu_inv_param_table)
+        print type(self.cumu_inv_param_table[0])
+        print "\n"
+        print type(params[0])
+        print "\n"
+        result = np.digitize(params, self.cumu_inv_param_table)
+        return result
 
     def get_scaled_radii_from_func_table(self, rho, profile_params):
         func_table_indices = self.get_prof_table_indices(profile_params)
@@ -145,7 +150,7 @@ class GalProfModel(object):
             # NOTE THE HARD-CODING OF A SINGLE HALO PROFILE PARAMETER
             profile_param_key = self.gal_prof_param_keys[0]
             scaled_mc_radii = self.mc_radii(
-                getattr(mock_galaxies, profile_param_key)[gal_type_slice])
+                getattr(mock_galaxies, profile_param_key)[gal_type_slice])            
             # multiply radii by angles 
             for idim in range(3): pos[:,idim] *= scaled_mc_radii
 

@@ -247,11 +247,18 @@ class HodMockFactory(object):
             example_entry : array_like 
                 Used to define the shape of attribute
             """
+            if (type(example_entry) != str) & (type(example_entry) != np.string_):
+                example_type = type(np.array(example_entry).flatten()[0])
+            else:
+                print "string type case for memory allocation, printing example_entry"
+                print example_entry
+                example_type = object
+
             example_shape = list(np.shape(example_entry))
             example_shape.insert(0, self.Ngals)
             total_entries = np.product(example_shape)
             setattr(self, propname, 
-                np.zeros(total_entries,dtype=object).reshape(example_shape))
+                np.zeros(total_entries,dtype=example_type).reshape(example_shape))
 
         # Allocate memory for all additional halo properties, 
         # including profile parameters of the halos such as 'halo_NFWmodel_conc'
@@ -263,15 +270,15 @@ class HodMockFactory(object):
         # Separately allocate memory for the values of the (possibly biased)
         # galaxy profile parameters such as 'gal_NFWmodel_conc'
         for galcatkey in self.model.gal_prof_param_keys:
-            example_entry = 0
+            example_entry = 0.
             _allocate_ndarray_attr(self, galcatkey, example_entry)
 
-        _allocate_ndarray_attr(self, 'gal_type', 0)
-        _allocate_ndarray_attr(self, 'prim_haloprop_key', 0)
+        _allocate_ndarray_attr(self, 'gal_type', self.gal_types[0])
+        _allocate_ndarray_attr(self, 'prim_haloprop_key', 0.)
         if hasattr(self.model,'sec_haloprop_key'):
-            _allocate_ndarray_attr(self, 'sec_haloprop_key', 0)
+            _allocate_ndarray_attr(self, 'sec_haloprop_key', 0.)
 
-        _allocate_ndarray_attr(self, 'pos', [0,0,0])
+        _allocate_ndarray_attr(self, 'pos', [0.,0.,0.])
 
 
 
