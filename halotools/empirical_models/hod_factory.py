@@ -156,7 +156,7 @@ class HodModel(object):
 
         output_pos = mc_pos_function(mock_galaxies)
         print "\n"
-        print "Check 1: printing shape of output_pos"
+        print("Check 1: printing shape of output_pos for %s" % gal_type)
         print np.shape(output_pos)
 
         gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
@@ -170,7 +170,7 @@ class HodModel(object):
         for idim in range(3): 
             output_pos[:,idim] *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
         print "\n"
-        print "Check 2: printing shape of output_pos"
+        print("Check 2: printing shape of output_pos for %s" % gal_type)
         print np.shape(output_pos)
 
         # Re-center the positions by the host halo location

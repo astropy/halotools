@@ -20,7 +20,7 @@ import gal_prof_components as gpc
 class GalProfModel(object):
 
     def __init__(self, gal_type, halo_prof_model,
-        spatial_bias_model = None,
+        spatial_bias_model = None,build_inv_cumu_table=True,
         ):
 
         self.gal_type = gal_type
@@ -34,6 +34,12 @@ class GalProfModel(object):
         self.set_param_dict()
 
         self.set_gal_prof_func_dict()
+
+        self._set_prof_params()
+
+        if build_inv_cumu_table is True:
+            self.build_inv_cumu_lookup_table(
+                prof_param_table_dict=self.prof_param_table_dict)
 
         self.publications = []
 
