@@ -154,7 +154,7 @@ class HodMockFactory(object):
 
             # Set the value of the gal_type string
             getattr(self, 'gal_type')[gal_type_slice] = np.repeat(gal_type, 
-                self._occupation[gal_type].sum())
+                self._total_abundance[gal_type])
 
             # Set the value of the primary halo property
             getattr(self, 'prim_haloprop_key')[gal_type_slice] = np.repeat(
@@ -251,7 +251,7 @@ class HodMockFactory(object):
             example_shape.insert(0, self.Ngals)
             total_entries = np.product(example_shape)
             setattr(self, propname, 
-                np.zeros(total_entries).reshape(example_shape))
+                np.zeros(total_entries,dtype=object).reshape(example_shape))
 
         # Allocate memory for all additional halo properties, 
         # including profile parameters of the halos such as 'halo_NFWmodel_conc'
