@@ -150,6 +150,22 @@ class HaloProfileModel(object):
             " provide a dictionary with keys giving the names of the halo profile parameters, "
             " and values being the functions used to map parameter values onto halos")
 
+    @abstractmethod
+    def set_prof_param_table_dict(self,input_dict):
+        raise NotImplementedError("All halo profile models must"
+            " provide a (possibly trivial) dictionary prof_param_table_dict. Each key "
+            " corresponds to a halo profile parameter, and each value is "
+            " an array of values governing how that parameter should be discretized "
+            " by the lookup table builder.")
+
+    def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
+
+        self.cumu_inv_func_table_dict = {}
+        self.cumu_inv_func_table = np.array([],dtype=object)
+
+        self.cumu_inv_param_table_dict = {}
+        self.cumu_inv_param_table = np.array([],dtype=object)
+
     def get_param_key(self, model_nickname, param_nickname):
         param_key = model_nickname+'_'+param_nickname
         return param_key
@@ -179,6 +195,7 @@ class TrivialProfile(HaloProfileModel):
         empty_dict = {}
         self.set_halo_prof_func_dict(empty_dict)
         self.set_prof_param_table_dict(empty_dict)
+        self.build_inv_cumu_lookup_table(empty_dict)
 
         self.publication = empty_list
 
@@ -207,7 +224,7 @@ class NFWProfile(HaloProfileModel):
 
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, redshift=sim_defaults.default_redshift,
-        build_inv_cumu_table=True, prof_param_table_dict=None,
+        build_inv_cumu_table=True, prof_param_table_dict={},
         haloprop_key_dict=model_defaults.haloprop_key_dict,
         conc_mass_relation_key = model_defaults.conc_mass_relation_key):
         """
@@ -332,7 +349,7 @@ class NFWProfile(HaloProfileModel):
         """
         return self.g(c) / self.g(r*c)
 
-    def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
+    def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
         """ Method used to create a lookup table of inverse cumulative mass 
         profile functions. Used by mock factories such as `~halotools.mock_factory` 
         to rapidly generate Monte Carlo realizations of satellite profiles. 
@@ -407,7 +424,7 @@ class NFWProfile(HaloProfileModel):
 
         self.halo_prof_func_dict = input_dict
 
-    def set_prof_param_table_dict(self,input_dict=None):
+    def set_prof_param_table_dict(self,input_dict={}):
         """ Method sets the value of the prof_param_table_dict attribute. 
         The prof_param_table_dict attribute is a dictionary 
         used in the set up of a gridded correspondence between 
@@ -434,7 +451,7 @@ class NFWProfile(HaloProfileModel):
 
         """
 
-        if input_dict is None:
+        if input_dict == {}:
             cmin = model_defaults.min_permitted_conc
             cmax = model_defaults.max_permitted_conc
             dconc = model_defaults.default_dconc
