@@ -46,6 +46,8 @@ class HodMockFactory(object):
         # such as 'NFWmodel_conc'. Also build all necessary lookup tables.
         self.process_halo_catalog()
 
+        self._is_allocated = False
+
         if populate==True: self.populate()
 
 
@@ -144,7 +146,8 @@ class HodMockFactory(object):
         sprinkle mock galaxies into halos. 
         """
 
-        self._allocate_memory()
+        if self._is_allocated == False:
+            self._allocate_memory()
 
         # Loop over all gal_types in the model 
         for gal_type in self.gal_types:
@@ -199,6 +202,7 @@ class HodMockFactory(object):
 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
+        print "Satellite positions are super-duper buggy!"
         self.pos = occuhelp.enforce_periodicity_of_box(
             self.pos, self.snapshot.Lbox)
 
@@ -234,6 +238,7 @@ class HodMockFactory(object):
             first_galaxy_index = last_galaxy_index
 
         self.Ngals = np.sum(self._total_abundance.values())
+        self._is_allocated = True
 
         def _allocate_ndarray_attr(self, propname, example_entry):
             """ Private method of _allocate_memory used to create an empty 
