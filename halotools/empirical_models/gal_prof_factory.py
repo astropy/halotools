@@ -120,13 +120,17 @@ class GalProfModel(object):
         return pos
 
     def mc_pos(self, mock_galaxies):
+        # get the appropriate slice
+        gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
+        pos = getattr(mock_galaxies, 'pos')[gal_type_slice]
+
+        print "\n"
+        print("Check 0: printing shape of output_pos for %s galaxies" % self.gal_type)
+        print np.shape(pos)
 
         if isinstance(self.halo_prof_model, hpc.TrivialProfile) is True:
-            return 0
+            return np.zeros_like(pos)
         else:
-            # get the appropriate slice
-            gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
-            pos = getattr(mock_galaxies, 'pos')[gal_type_slice]
             # get angles
             Ngals = len(pos[:,0])
             pos = self.mc_angles(Ngals)

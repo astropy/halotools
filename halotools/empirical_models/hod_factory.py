@@ -147,14 +147,17 @@ class HodModel(object):
         """ Method used to generate Monte Carlo realizations of galaxy positions. 
 
         Identical to component model version from which the behavior derives, 
-        only this method re-centers the output of the component model 
-        to the halo location, and re-scales the halo-centric distance by the halo radius.
+        only this method re-scales the halo-centric distance by the halo radius, 
+        and re-centers the re-scaled output of the component model to the halo position.
 
         """
         gal_prof_model = self.model_blueprint[gal_type]['profile']
         mc_pos_function = getattr(gal_prof_model, 'mc_pos')
 
         output_pos = mc_pos_function(mock_galaxies)
+        print "\n"
+        print "Check 1: printing shape of output_pos"
+        print np.shape(output_pos)
 
         gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
 
@@ -163,7 +166,12 @@ class HodModel(object):
             model_defaults.host_haloprop_prefix + 
             model_defaults.haloprop_key_dict['halo_boundary']
             )
-        output_pos *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
+
+        for idim in range(3): 
+            output_pos[:,idim] *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
+        print "\n"
+        print "Check 2: printing shape of output_pos"
+        print np.shape(output_pos)
 
         # Re-center the positions by the host halo location
         halo_pos_attr_name = model_defaults.host_haloprop_prefix+'pos'
