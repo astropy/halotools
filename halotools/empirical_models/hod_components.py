@@ -205,6 +205,9 @@ class Kravtsov04Cens(OccupationComponent):
 
         halo_mass = self.retrieve_haloprops(*args, **kwargs)
 
+        if 'seed' in kwargs.keys():
+            np.random.seed(seed=kwargs['seed'])
+
         mc_generator = np.random.random(aph_len(halo_mass))
         mc_abundance = np.where(mc_generator < self.mean_occupation(halo_mass, 
             input_param_dict = param_dict), 1, 0)
