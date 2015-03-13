@@ -37,15 +37,6 @@ def test_Kravtsov04_blueprint():
 		assert isinstance(gal_type_blueprint['profile'], 
 			gal_prof_factory.GalProfModel)
 
-		component_occ = gal_type_blueprint['occupation']
-		assert component_occ.gal_type == gal_type
-		correct_haloprops = {'halo_boundary', 'prim_haloprop_key'}
-		assert set(component_occ.haloprop_key_dict.keys()) == correct_haloprops
-		assert component_occ.num_haloprops == 1
-		assert (component_occ.occupation_bound == 1) or (component_occ.occupation_bound == float("inf"))
-		assert (component_occ.prim_func_dict.keys() == [None])
-		assert hasattr(component_occ, 'mc_occupation')
-		assert hasattr(component_occ, 'mean_occupation')
 
 		# Test the profile model component
 		component_prof = gal_type_blueprint['profile']
