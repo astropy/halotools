@@ -6,16 +6,14 @@ composite HOD models from a set of components.
 
 """
 
-__all__ = ['HodModel']
+__all__ = ['HodModelFactory']
 
 from functools import partial
 import numpy as np
 import occupation_helpers as occuhelp
 import model_defaults
 
-__all__ = ["HodModel"]
-
-class HodModel(object):
+class HodModelFactory(object):
     """ Composite HOD model object. 
     The primary methods are for assigning the mean occupation of a galaxy population 
     to a halo, the intra-halo radial profile of that population, and the 
@@ -155,9 +153,6 @@ class HodModel(object):
         mc_pos_function = getattr(gal_prof_model, 'mc_pos')
 
         output_pos = mc_pos_function(mock_galaxies)
-        print "\n"
-        print("Check 1: printing shape of output_pos for %s" % gal_type)
-        print np.shape(output_pos)
 
         gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
 
@@ -169,9 +164,6 @@ class HodModel(object):
 
         for idim in range(3): 
             output_pos[:,idim] *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
-        print "\n"
-        print("Check 2: printing shape of output_pos for %s" % gal_type)
-        print np.shape(output_pos)
 
         # Re-center the positions by the host halo location
         halo_pos_attr_name = model_defaults.host_haloprop_prefix+'pos'

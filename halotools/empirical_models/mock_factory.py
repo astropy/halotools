@@ -202,7 +202,6 @@ class HodMockFactory(object):
 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
-        print "Satellite positions are super-duper buggy!"
         self.pos = occuhelp.enforce_periodicity_of_box(
             self.pos, self.snapshot.Lbox)
 
@@ -255,8 +254,6 @@ class HodMockFactory(object):
             if (type(example_entry) != str) & (type(example_entry) != np.string_):
                 example_type = type(np.array(example_entry).flatten()[0])
             else:
-                print "string type case for memory allocation, printing example_entry"
-                print example_entry
                 example_type = object
 
             example_shape = list(np.shape(example_entry))

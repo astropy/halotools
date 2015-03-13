@@ -88,10 +88,6 @@ class GalProfModel(object):
         self.prof_param_table_dict = self.halo_prof_model.prof_param_table_dict
         
     def get_prof_table_indices(self, params):
-        print type(self.cumu_inv_param_table[0])
-        print "\n"
-        print type(params[0])
-        print "\n"
         result = np.digitize(params, self.cumu_inv_param_table)
         return result
 
@@ -134,10 +130,6 @@ class GalProfModel(object):
         # get the appropriate slice
         gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
         pos = getattr(mock_galaxies, 'pos')[gal_type_slice]
-
-        print "\n"
-        print("Check 0: printing shape of output_pos for %s galaxies" % self.gal_type)
-        print np.shape(pos)
 
         if isinstance(self.halo_prof_model, hpc.TrivialProfile) is True:
             return np.zeros_like(pos)
