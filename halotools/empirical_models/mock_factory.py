@@ -145,7 +145,6 @@ class HodMockFactory(object):
         """ Method used to call the composite models to 
         sprinkle mock galaxies into halos. 
         """
-
         if self._is_allocated == False:
             self._allocate_memory()
 
@@ -237,7 +236,6 @@ class HodMockFactory(object):
             first_galaxy_index = last_galaxy_index
 
         self.Ngals = np.sum(self._total_abundance.values())
-        self._is_allocated = True
 
         def _allocate_ndarray_attr(self, propname, example_entry):
             """ Private method of _allocate_memory used to create an empty 
@@ -281,6 +279,8 @@ class HodMockFactory(object):
             _allocate_ndarray_attr(self, 'sec_haloprop_key', 0.)
 
         _allocate_ndarray_attr(self, 'pos', [0.,0.,0.])
+
+        self._is_allocated = True
 
 
 
