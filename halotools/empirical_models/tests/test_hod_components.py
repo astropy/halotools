@@ -64,10 +64,10 @@ def test_Kravtsov04Cens():
 		expected_result = 0.0
 		np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-3, atol=1.e-3)
 
-	default_model = hod_components.Kravtsov04Cens()
-	test_attributes(default_model)
-	test_mean_occupation(default_model)
-	test_mc_occupation(default_model)
+	#default_model = hod_components.Kravtsov04Cens()
+	#test_attributes(default_model)
+	#test_mean_occupation(default_model)
+	#test_mc_occupation(default_model)
 
 	
 
