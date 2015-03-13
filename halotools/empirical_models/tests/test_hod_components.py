@@ -79,7 +79,6 @@ def test_Kravtsov04Cens():
 		mcocc_from_halos = model.mc_occupation(halos=halo_catalog,seed=43)
 		assert np.all(mcocc_from_array == mcocc_from_halos)
 
-
 	### First test the model with all default settings
 	default_model = hod_components.Kravtsov04Cens()
 	test_attributes(default_model)
