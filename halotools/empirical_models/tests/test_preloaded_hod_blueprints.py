@@ -1,7 +1,12 @@
 #!/usr/bin/env python
+
+import numpy as np
+
 from .. import preloaded_hod_blueprints
 from .. import model_defaults
-import numpy as np
+from .. import hod_components
+from .. import gal_prof_factory
+
 
 def get_gal_type_model(blueprint, gal_type):
 	return blueprint[gal_type]
@@ -26,7 +31,12 @@ def test_Kravtsov04_blueprint():
 		gal_type_blueprint = get_gal_type_model(default_blueprint, gal_type)
 		assert set(gal_type_blueprint.keys()) == {'profile', 'occupation'}
 
-		# Test the occupation model component
+		# Test that the component models are subclasses of the correct abstract base class
+		assert isinstance(gal_type_blueprint['occupation'], 
+			hod_components.OccupationComponent)
+		assert isinstance(gal_type_blueprint['profile'], 
+			gal_prof_factory.GalProfModel)
+
 		component_occ = gal_type_blueprint['occupation']
 		assert component_occ.gal_type == gal_type
 		correct_haloprops = {'halo_boundary', 'prim_haloprop_key'}
