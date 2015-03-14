@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 """
+This module contains various component features used by 
+HOD-style models of the galaxy-halo connection. For example, 
+the `~halotools.empirical_models.Kravtsov04Cens` class 
+governs the occupation statistics of a centrals-like population, 
+and so has a ``mean_occupation`` method. 
 
-This module contains functions and classes 
-providing mappings between halos and the abundance and properties of 
-galaxies residing in those halos. The classes serve primarily 
-as components used by `halotools.hod_factory` and 
-`halotools.hod_designer`, which act together to compose 
-the behavior of the components into composite models. 
+A common use for these objects is to bundle them together to make a 
+composite galaxy model, with multiple populations having their 
+own occupation statistics and profiles. The classes in this module 
+can be passed to the `~halotools.empirical_models.hod_factory`, 
+and you will be returned a model object that can directly populate 
+simulations with mock galaxies. See the tutorials on these models 
+for further details on their use. 
 """
 
-__all__ = ['Kravtsov04Cens','Kravtsov04Sats','vdB03Quiescence']
+__all__ = ['Kravtsov04Cens','Kravtsov04Sats']
 
 
 import numpy as np
