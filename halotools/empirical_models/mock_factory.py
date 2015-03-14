@@ -24,7 +24,10 @@ class HodMockFactory(object):
     Parameters 
     ----------
     snapshot : object 
-        Halo catalog and its metadata, processed by `~halotools.sim_manager`
+        Halo catalog and its metadata, processed by `~halotools.sim_manager.processed_snapshot`
+
+    composite_model : object 
+        Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`
     """
 
     def __init__(self, snapshot, composite_model, 

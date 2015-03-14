@@ -11,7 +11,7 @@ trends of dark matter halos.
 .. _cat_manage:
 
 Catalog management 
---------------------
+==================
 
 Halotools provides bookeeping tools to keep track 
 of a potentially large amount of simulated data, 
@@ -32,7 +32,7 @@ with Halotools.
 .. _lss_analysis:
 
 Studying structure formation with N-body simulations
-------------------------------------------------------------
+====================================================
 
 Dark matter simulations of cosmological structure formation 
 are interesting in their own right,
@@ -40,3 +40,8 @@ and halotools provides modules that you can use to study them.
 For example, suppose you are interested in the following question: 
 how does the tidal environment of a dark matter halo 
 impact its mass accretion rate? 
+
+Reference/API
+=============
+
+.. automodapi:: halotools.sim_manager
