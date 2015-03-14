@@ -16,10 +16,15 @@ from ..sim_manager import sim_defaults
 __all__ = ["HodMockFactory"]
 
 class HodMockFactory(object):
-    """ The constructor of this class takes 
-    a snapshot and a composite model as input, 
-    and returns a Monte Carlo realization of the composite model 
-    painted onto the input snapshot. 
+    """ The HOD Mock Factory takes a simulation snapshot and 
+    any HOD-style model as input, 
+    and returns a collection of mock galaxies 
+    that have been populated into the simulation based on the model. 
+
+    Parameters 
+    ----------
+    snapshot : object 
+        Halo catalog and its metadata, processed by `~halotools.sim_manager`
     """
 
     def __init__(self, snapshot, composite_model, 

@@ -5,6 +5,8 @@
 Building models of the Galaxy-Halo connection
 *********************************************
 
+.. currentmodule:: halotools.empirical_models
+
 Halotools provides a broad range of options for 
 studying the connection between galaxies and 
 their dark matter halos. The package comes pre-loaded 
@@ -33,14 +35,9 @@ This simple call with no arguments builds an
 instance of a model based on the formulation of the HOD introduced in 
 Kravtsov, et al. (2004), with default settings to use 
 best-fit parameter values taken from the literature. 
-There are several optional keyword arguments 
-that allow you to toggle between different galaxy samples built by 
-the Kravtsov04 class. For example, 
-
-	>>> kravtsov04 = preloaded_hod_blueprints.Kravtsov04(luminosity_threshold=-18, redshift_space=True, colors='sdss')
-
-For a complete listing of the optional features supported 
-by this pre-built model, see the Kravtsov04 documentation `~halotools.empirical_models`.
+For a complete listing of the optional features supported by this pre-built model, 
+see the `~halotools.empirical_models.preloaded_hod_blueprints.Kravtsov04` 
+documentation `~halotools.empirical_models`.
 
 .. _list_of_default_models: 
 
@@ -53,7 +50,6 @@ List of pre-loaded models
 * Kravtsov13, direct abundance matching
 * Behroozi13, assembly history model based on abundance matching 
 * Tinker13, similar to Leauthaud11, but with quenched and star-forming designations 
-
 
 Composing your own galaxy-halo model
 ====================================
@@ -76,15 +72,16 @@ in a way that is determined by the parameter values of the model.
 Here we give a few examples of how to build a composite model blueprint. 
 First, a very simple one based on direct abundance matching. 
 
-	>>> galaxies = {model='Hearin13', sm_threshold=9.75}
+	>>> galaxies = {model='Kravtsov13', sm_threshold=9.75}
 
 	>>> centrals = {model='Leauthaud11', sm_threshold=10.5, redshift=0.4}
 	>>> orphans = {model='Jiang15'}
 
 
+Reference/API
+=============
 
-
-
+.. automodapi:: halotools.empirical_models
 
 
 
