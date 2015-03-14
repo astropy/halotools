@@ -9,6 +9,8 @@ from .. import gal_prof_factory
 from astropy.table import Table
 from copy import copy
 
+__all__ = ['test_Kravtsov04Cens']
+
 
 def test_Kravtsov04Cens():
 

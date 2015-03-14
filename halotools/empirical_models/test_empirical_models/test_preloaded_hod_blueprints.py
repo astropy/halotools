@@ -7,6 +7,8 @@ from .. import model_defaults
 from .. import hod_components
 from .. import gal_prof_factory
 
+__all__ = ['test_Kravtsov04_blueprint']
+
 
 def get_gal_type_model(blueprint, gal_type):
 	return blueprint[gal_type]
