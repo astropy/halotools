@@ -40,7 +40,7 @@ the Kravtsov04 class. For example,
 	>>> kravtsov04 = preloaded_hod_blueprints.Kravtsov04(luminosity_threshold=-18, redshift_space=True, colors='sdss')
 
 For a complete listing of the optional features supported 
-by this pre-built model, see the Kravtsov04 documentation.
+by this pre-built model, see the Kravtsov04 documentation `~halotools.empirical_models`.
 
 .. _list_of_default_models: 
 

@@ -15,6 +15,22 @@ __all__ = ["Kravtsov04"]
 
 
 def Kravtsov04(**kwargs):
+	""" Simplest pre-loaded HOD model. There are two populations, 
+	centrals and satellites, with occupation statistics and intra-halo 
+	phase space distributions based on Kravtsov et al. (2004). 
+
+	Parameters 
+	----------
+	threshold : float, optional 
+		Luminosity threshold of the galaxy sample being modeled. 
+
+	Returns 
+	-------
+	model_blueprint : dict 
+		Dictionary containing instructions for how to build the model. 
+		When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
+		the factory returns the Kravtsov04 model object. 
+	"""
 
 	if 'threshold' in kwargs.keys():
 		threshold = kwargs['threshold']
