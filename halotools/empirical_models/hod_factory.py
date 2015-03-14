@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-
 Module containing the primary class used to build 
-composite HOD models from a set of components. 
-
+composite HOD-style models from a set of components. 
 """
 
 __all__ = ['HodModelFactory']
@@ -14,14 +12,20 @@ import occupation_helpers as occuhelp
 import model_defaults
 
 class HodModelFactory(object):
-    """ Composite HOD model object. 
-    The primary methods are for assigning the mean occupation of a galaxy population 
+    """ This is the composite HOD model object that can be used to generate 
+    mock galaxy populations. The primary methods are for assigning 
+    the mean occupation of a galaxy population 
     to a halo, the intra-halo radial profile of that population, and the 
     accompanying methods to generate Monte Carlo realizations of those methods. 
 
-    All behavior is derived from external classes passed to the constructor via 
-    model_blueprint, which serves as a set of instructions for how the 
-    composite model is to be built from the components. 
+    All behavior is derived from external classes passed to the constructor, 
+    so this HOD Model Factory does nothing more than compose these external 
+    behaviors into a standardized form that talks to the rest of the package. 
+    The way this works is the Model Factory gets passed a dictionary that serves as 
+    a blueprint for how to build the model. The building of that dictionary is done 
+    elsewhere, by the `~halotools.empirical_models.hod_designer` class. So this class 
+    receives these blueprint dictionaries as input, and returns a model object 
+    that can directly populate simulations with mock populations. 
 
     """
 
@@ -31,8 +35,7 @@ class HodModelFactory(object):
         are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
         The values of the model_blueprint are themselves dictionaries whose keys  
         specify the type of model being passed, e.g., 'occupation', and values 
-        are instances of that type of model. The model_blueprint dictionary is built by 
-        the hod_designer interface. The input halo_prof_model is an instance of the class 
+        are class instances of that type of model. The input halo_prof_model is an instance of the class 
         governing the assumed profile of the underlying halos. 
 
         """
@@ -46,7 +49,7 @@ class HodModelFactory(object):
         # Create attributes for galaxy types and their occupation bounds
         self._set_gal_types()
 
-        # Build the composite model parameter dictionary
+        # Build the composite model dictionary, whose keys are parameters of our model
         self._set_init_param_dict()
 
         # Determine the functions that will be used
@@ -54,7 +57,7 @@ class HodModelFactory(object):
         self._set_halo_prof_func_dict()
         self._set_prof_param_table_dict()
 
-        # Create a set of methods with special names 
+        # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
         self._set_primary_behaviors()
 
@@ -116,6 +119,12 @@ class HodModelFactory(object):
             return getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
 
     def _set_primary_behaviors(self):
+        """ This function creates a bunch of new methods that it binds to ``self``. 
+        These methods are given standardized names, for generic communication with 
+        the rest of the package, particularly the *Mock Factory*. 
+        The behaviors of these methods are defined elsewhere; 
+        here we just create a link to those external behaviors. 
+        """
 
         for gal_type in self.gal_types:
 
