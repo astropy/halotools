@@ -36,9 +36,9 @@ import warnings
 class OccupationComponent(object):
     """ Abstract super class of any occupation model. 
     Functionality is mostly trivial. 
-    The sole function of the super class is to 
+    The sole purpose of the super class is to 
     standardize the attributes and methods 
-    required of any occupation model component. 
+    required of any HOD-style occupation model component. 
     """
     def __init__(self, gal_type, haloprop_key_dict, 
         threshold, occupation_bound):
@@ -64,6 +64,9 @@ class OccupationComponent(object):
 
     @abstractmethod
     def mc_occupation(self):
+        """ Primary method used to generate Monte Carlo realizations 
+        of an occupation model. 
+        """
         pass
 
     def _set_primary_function_dict(self):
@@ -71,6 +74,12 @@ class OccupationComponent(object):
         self.additional_methods_to_inherit = [self.mean_occupation]
 
     def retrieve_haloprops(self, *args, **kwargs):
+        """ Interface used to pass the correct numpy array to `mc_occupation`. 
+
+        Many methods need to behave properly whether they are passed a numpy array, 
+        or a data table. This method identifies what has been passed, and returns 
+        the correct numpy array. 
+        """
 
         if 'halos' in kwargs.keys():
             if self.num_haloprops==1:
@@ -93,6 +102,18 @@ class Kravtsov04Cens(OccupationComponent):
     """ Erf function model for the occupation statistics of central galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
+    There can be one and only one central galaxy per halo, 
+    so to compute :math:`\\langle N_{\mathrm{cen}}(M_{\mathrm{halo}}) \\rangle_{>M_{\\ast}}` , 
+    the mean number of centrals bigger than some stellar mass residing 
+    in a halo of some virial mass, we just need to integrate :math:`P( M_{\\ast} | M_{\\mathrm{halo}})` , 
+    the probability that a halo of a given mass hosts a central bigger than some stellar mass
+
+    :math:`\\langle N_{\\mathrm{cen}}( M_{\\rm halo} )\\rangle_{>M_{\\ast}} = 
+    \\int_{M_{\\ast}}^{\\infty}\\mathrm{d}M'_{\\ast}P( M'_{\\ast} | M_{\mathrm{halo}})`
+
+    The stellar-to-halo-mass PDF is commonly assumed to be log-normal, 
+    in which case the mean occupation function is just an ``erf`` function, 
+    as assumed by the `Kravtsov04Cens` model. 
     """
 
     def __init__(self,input_param_dict=None,
@@ -104,22 +125,23 @@ class Kravtsov04Cens(OccupationComponent):
         ----------
         input_param_dict : dictionary, optional.
             Contains values for the parameters specifying the model.
-            Dictionary keys are 'logMmin_cen' and 'sigma_logM'
+            Dictionary keys are 'logMmin_cen' and 'sigma_logM'. 
 
-            Their best-fit parameter values provided in Table 1 of 
-            Zheng et al. (2007) are pre-loaded into this class, and 
-            can be accessed via the `published_parameters` method.
+            If ``input_param_dict`` is not passed, 
+            the best-fit parameter values provided in Table 1 of 
+            Zheng et al. (2007) are chosen. 
+            See the `get_published_parameters` method for details. 
 
         threshold : float, optional.
             Luminosity threshold of the mock galaxy sample. 
             If specified, input value must agree with 
             one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-            Default value is specified in the `~halotools.model_defaults` module.
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         gal_type : string, optional
-            Sets the key value used by `~halotools.hod_designer` and 
-            `~halotools.hod_factory` to access the behavior of the methods 
+            Sets the key value used by `~halotools.empirical_models.hod_designer` and 
+            `~halotools.empirical_models.hod_factory` to access the behavior of the methods 
             of this class. 
 
         """
