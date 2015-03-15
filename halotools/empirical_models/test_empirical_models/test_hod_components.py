@@ -39,7 +39,6 @@ def test_Kravtsov04Cens():
 
 		assert model.num_haloprops == 1
 		assert model.occupation_bound == 1
-		assert model.prim_func_dict.keys() == [None]
 
 	def test_mean_occupation(model):
 

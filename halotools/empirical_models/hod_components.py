@@ -55,8 +55,6 @@ class OccupationComponent(object):
         
         self.threshold = threshold
         self.occupation_bound = occupation_bound
-
-        self._set_primary_function_dict()
         
     @abstractmethod
     def _get_param_dict(self):
@@ -74,13 +72,6 @@ class OccupationComponent(object):
         of an occupation model. 
         """
         pass
-
-    def _set_primary_function_dict(self):
-        """ The primary function dict is the standardized container for how 
-        the outside world, particularly the mock factory, interfaces with the model. 
-        """
-        self.prim_func_dict = {None : self.mc_occupation}
-        self.additional_methods_to_inherit = [self.mean_occupation]
 
     def retrieve_haloprops(self, *args, **kwargs):
         """ Interface used to pass the correct numpy array to `mc_occupation`. 
