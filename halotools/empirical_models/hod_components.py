@@ -127,7 +127,8 @@ class Kravtsov04Cens(OccupationComponent):
         ----------
         input_param_dict : dictionary, optional.
             Contains values for the parameters specifying the model.
-            Dictionary keys are 'logMmin_cen' and 'sigma_logM'. 
+            Dictionary keys should have names like 
+            'logMmin_centrals' and 'sigma_logM_centrals'.
 
             If ``input_param_dict`` is not passed, 
             the best-fit parameter values provided in Table 1 of 
@@ -264,7 +265,7 @@ class Kravtsov04Cens(OccupationComponent):
         return mc_abundance
 
 
-    def get_published_parameters(self,threshold):
+    def get_published_parameters(self, threshold, publication='Zheng07'):
         """
         Best-fit HOD parameters from Table 1 of Zheng et al. 2007.
 
@@ -284,25 +285,32 @@ class Kravtsov04Cens(OccupationComponent):
 
         """
 
-        #Load tabulated data from Zheng et al. 2007, Table 1
-        logMmin_array = [11.35,11.46,11.6,11.75,12.02,12.3,12.79,13.38,14.22]
-        sigma_logM_array = [0.25,0.24,0.26,0.28,0.26,0.21,0.39,0.51,0.77]
-        # define the luminosity thresholds corresponding to the above data
-        threshold_array = np.arange(-22,-17.5,0.5)
-        threshold_array = threshold_array[::-1]
+        def get_zheng07_params(threshold):
+            #Load tabulated data from Zheng et al. 2007, Table 1
+            logMmin_array = [11.35,11.46,11.6,11.75,12.02,12.3,12.79,13.38,14.22]
+            sigma_logM_array = [0.25,0.24,0.26,0.28,0.26,0.21,0.39,0.51,0.77]
+            # define the luminosity thresholds corresponding to the above data
+            threshold_array = np.arange(-22,-17.5,0.5)
+            threshold_array = threshold_array[::-1]
 
-        threshold_index = np.where(threshold_array==threshold)[0]
-        if len(threshold_index)==1:
-            param_dict = {
-            self.logMmin_key : logMmin_array[threshold_index[0]],
-            self.sigma_logM_key : sigma_logM_array[threshold_index[0]]
-            }
+            threshold_index = np.where(threshold_array==threshold)[0]
+            if len(threshold_index)==1:
+                param_dict = {
+                self.logMmin_key : logMmin_array[threshold_index[0]],
+                self.sigma_logM_key : sigma_logM_array[threshold_index[0]]
+                }
+            else:
+                raise ValueError("Input luminosity threshold "
+                    "does not match any of the Table 1 values of "
+                    "Zheng et al. 2007 (arXiv:0703457)")
+
+            return param_dict
+
+        if publication in ['zheng07', 'Zheng07', 'Zheng_etal07', 'zheng_etal07','zheng2007','Zheng2007']:
+            param_dict = get_zheng07_params(threshold)
+            return param_dict
         else:
-            raise ValueError("Input luminosity threshold "
-                "does not match any of the Table 1 values of "
-                "Zheng et al. 2007 (arXiv:0703457)")
-
-        return param_dict
+            raise KeyError("For Kravtsov04Cens, only supported best-fit models are currently Zheng et al. 2007")
 
 
 class Kravtsov04Sats(OccupationComponent):
