@@ -17,7 +17,7 @@ for further details on their use.
 
 __all__ = ['Kravtsov04Cens','Kravtsov04Sats']
 
-
+from copy import copy
 import numpy as np
 from scipy.special import erf 
 from scipy.stats import poisson
@@ -328,32 +328,37 @@ class Kravtsov04Sats(OccupationComponent):
         """
         Parameters 
         ----------
-        param_dict : dictionary, optional.
+        input_param_dict : dictionary, optional.
             Contains values for the parameters specifying the model.
-            Dictionary keys are 'logMmin_cen' and 'sigma_logM'
+            Dictionary keys are 'logM0_satellites', 'logM1_satellites' 
+            and 'alpha_satellites'. 
 
-            Their best-fit parameter values provided in Table 1 of 
-            Zheng et al. (2007) are pre-loaded into this class, and 
-            can be accessed via the `published_parameters` method.
+            If no input_param_dict is passed, 
+            the best-fit parameter values provided in Table 1 of 
+            Zheng et al. (2007) are chosen.
 
         threshold : float, optional.
             Luminosity threshold of the mock galaxy sample. 
             If specified, input value must agree with 
             one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-            Default value is specified in the `~halotools.model_defaults` module.
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         gal_type : string, optional
-            Sets the key value used by `~halotools.hod_designer` and 
-            `~halotools.hod_factory` to access the behavior of the methods 
+            Sets the key value used by `~halotools.empirical_models.hod_designer` and 
+            `~halotools.empirical_models.hod_factory` to access the behavior of the methods 
             of this class. 
 
         central_occupation_model : occupation model instance, optional
             If present, the mean occupation method of this model will 
             be multiplied by the value of central_occupation_model at each mass, 
-            as in Zheng et al. 2007.
-            Default is None.
+            as in Zheng et al. 2007, so that 
+            :math:`\\langle N_{\mathrm{sat}}|M\\rangle\\Rightarrow\\langle N_{\mathrm{sat}}|M\\rangle\\times\\langle N_{\mathrm{cen}}|M\\rangle`
 
+        input_central_param_dict : dict, optional
+            parameter dictionary of the input central occupation model. 
+            If absent, the default best-fit parameter values 
+            of the input threshold will be chosen. 
         """
 
         occupation_bound = float("inf")
@@ -409,12 +414,19 @@ class Kravtsov04Sats(OccupationComponent):
 
         Parameters
         ----------
-        logM : array 
-            array of :math:`log_{10}(M)` of halos in catalog
+        halo_mass : array, optional
+            array of :math:`M_{\\mathrm{vir}}`-like variable of halos in catalog
+
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
 
         input_param_dict : dict, optional
+            dictionary of parameters governing the model. If not passed, 
+            values bound to ``self`` will be chosen. 
 
         input_central_param_dict : dict, optional
+            dictionary of parameters governing the central occupation model. 
+            If not passed, values bound to ``self`` will be chosen. 
 
         Returns
         -------
@@ -454,8 +466,11 @@ class Kravtsov04Sats(OccupationComponent):
         # If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
         if self.central_occupation_model is not None:
+            # Explicitly include test in suite so that this reference assignment 
+            # doesn't influence above calculation
+            kwargs['input_param_dict'] = central_param_dict 
             mean_ncen = self.central_occupation_model.mean_occupation(
-                logM, input_param_dict=central_param_dict)
+                *args, **kwargs)
             mean_nsat = np.where(mean_nsat > 0, mean_nsat*mean_ncen, mean_nsat)
 
         return mean_nsat
