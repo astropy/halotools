@@ -112,7 +112,7 @@ class Kravtsov04Cens(OccupationComponent):
     \\int_{M_{\\ast}}^{\\infty}\\mathrm{d}M'_{\\ast}P( M'_{\\ast} | M_{\mathrm{halo}})`
 
     The `Kravtsov04Cens` model assumes the stellar-to-halo-mass 
-    PDF is commonly assumed to be log-normal, 
+    PDF is log-normal, 
     in which case the mean occupation function is just an ``erf`` function, 
     as in the `mean_occupation` method. 
 

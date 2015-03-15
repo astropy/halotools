@@ -13,6 +13,22 @@ __all__ = ['test_Kravtsov04Cens']
 
 
 def test_Kravtsov04Cens():
+	""" Function to test 
+	`~halotools.empirical_models.Kravtsov04Cens`. 
+	Here's a brief summary of the tests performed: 
+
+		* The basic metadata of the model is correct, e.g., ``self.occupation_bound = 1`` 
+
+		* The `mean_occupation` function is bounded by zero and unity for the full range of reasonable input masses, :math:`0 <= \\langle N_{\mathrm{cen}}(M) \\rangle <=1` for :math:`\\log_{10}M/M_{\odot} \\in [10, 16]`
+
+		* The `mean_occupation` function increases monotonically for the full range of reasonable input masses, :math:`\\langle N_{\mathrm{cen}}(M_{2}) \\rangle > \\langle N_{\mathrm{cen}}(M_{1}) \\rangle` for :math:`M_{2}>M_{1}`
+
+		* The model correctly navigates having either array or halo catalog arguments, and returns the identical result regardless of how the inputs are bundled
+
+		* The `mean_occupation` function scales properly as a function of variations in :math:`\\sigma_{\\mathrm{log}M}`, and also variations in :math:`\\log M_{\mathrm{min}}`, for both low and high halo masses. 
+
+
+	"""
 
 	def test_attributes(model, gal_type='centrals'):
 		assert isinstance(model, hod_components.OccupationComponent)

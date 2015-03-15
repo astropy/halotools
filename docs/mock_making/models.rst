@@ -9,13 +9,14 @@ Building models of the Galaxy-Halo connection
 
 Halotools provides a broad range of options for 
 studying the connection between galaxies and 
-their dark matter halos. The package comes pre-loaded 
-with a small collection of specific models with default 
-settings tuned to provide reasonably realistic mock 
-universes. 
-Once you have any model in hand, 
-it's straightforward to toggle its parameters, and/or swap out 
-individual features to create a companion model. 
+their dark matter halos. These options fall into 
+one of three categories. First, the package comes pre-loaded 
+with a small collection of specific models 
+very similar to those in the published literature, 
+including default values to the best-fit published values. 
+Second, once you have any model in hand, 
+it's straightforward to toggle the model parameters, and/or swap out 
+individual features to create companion models. 
 Finally, for the most flexibility, 
 there are modules allowing you create a composite model by 
 composing the behavior of a set of component models. 
@@ -34,7 +35,7 @@ memory with a single line of code.
 This simple call with no arguments builds an 
 instance of a model based on the formulation of the HOD introduced in 
 Kravtsov, et al. (2004), with default settings to use 
-best-fit parameter values taken from the literature. 
+best-fit parameter values taken from the subsequent literature. 
 For a complete listing of the optional features supported by this pre-built model, 
 see the `~halotools.empirical_models.preloaded_hod_blueprints.Kravtsov04` 
 documentation `~halotools.empirical_models`.
