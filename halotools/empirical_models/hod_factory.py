@@ -294,19 +294,13 @@ class HodModelFactory(object):
             self.cumu_inv_param_table_dict[key] = (
                 gal_prof_model.halo_prof_model.cumu_inv_param_table)
 
-    def retrieve_relevant_haloprops(self, gal_type, component_key, 
-        *args, **kwargs):
+    def retrieve_relevant_haloprops(self, gal_type, *args, **kwargs):
         """ Method returning the arrays that need to be passed 
         to a component model in order to access its behavior. 
 
         Parameters 
         ----------
         gal_type : string 
-
-        component_key : string 
-            Key used to access the behavior of the component model. 
-            component_key must be an element prim_func_dict.keys(), 
-            a dictionary bound to every component model. 
 
         prim_haloprop : array_like, optional positional argument
 

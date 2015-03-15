@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np 
-from .. import preloaded_hod_models
+from .. import preloaded_hod_blueprints
 from .. import hod_factory
 from .. import mock_factory
 from ...sim_manager import read_nbody

@@ -8,7 +8,7 @@ and so has a ``mean_occupation`` method.
 
 A common use for these objects is to bundle them together to make a 
 composite galaxy model, with multiple populations having their 
-own occupation statistics and profiles. The classes in this module 
+own occupation statistics and profiles. Instances of classes in this module 
 can be passed to the `~halotools.empirical_models.hod_factory`, 
 and you will be returned a model object that can directly populate 
 simulations with mock galaxies. See the tutorials on these models 
@@ -60,6 +60,12 @@ class OccupationComponent(object):
         
     @abstractmethod
     def _get_param_dict(self):
+        """ Builds the parameter dictionary, whose keys are names of MCMC parameters, 
+        and values are used in `mc_occupation` and `mean_occupation`. 
+        Dictionary qarameter names will have the `gal_type` string with a leading underscore. 
+        This protects against the case where multiple populations might share some 
+        component behavior. 
+        """
         pass
 
     @abstractmethod
@@ -70,6 +76,9 @@ class OccupationComponent(object):
         pass
 
     def _set_primary_function_dict(self):
+        """ The primary function dict is the standardized container for how 
+        the outside world, particularly the mock factory, interfaces with the model. 
+        """
         self.prim_func_dict = {None : self.mc_occupation}
         self.additional_methods_to_inherit = [self.mean_occupation]
 
@@ -94,8 +103,6 @@ class OccupationComponent(object):
                 return args[0]
             else:
                 return args[0], args[1]
-
-
 
 
 class Kravtsov04Cens(OccupationComponent):
