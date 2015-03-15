@@ -111,9 +111,10 @@ class Kravtsov04Cens(OccupationComponent):
     :math:`\\langle N_{\\mathrm{cen}}( M_{\\rm halo} )\\rangle_{>M_{\\ast}} = 
     \\int_{M_{\\ast}}^{\\infty}\\mathrm{d}M'_{\\ast}P( M'_{\\ast} | M_{\mathrm{halo}})`
 
-    The stellar-to-halo-mass PDF is commonly assumed to be log-normal, 
+    The `Kravtsov04Cens` model assumes the stellar-to-halo-mass 
+    PDF is commonly assumed to be log-normal, 
     in which case the mean occupation function is just an ``erf`` function, 
-    as assumed by the `Kravtsov04Cens` model. 
+    as in the `mean_occupation` method. 
     """
 
     def __init__(self,input_param_dict=None,
@@ -173,30 +174,36 @@ class Kravtsov04Cens(OccupationComponent):
 
 
     def mean_occupation(self, *args, **kwargs):
-        """ Expected number of central galaxies in a halo of mass logM.
+        """ Expected number of central galaxies in a halo of mass halo_mass.
         See Equation 2 of arXiv:0703457.
 
         Parameters
         ----------        
-        logM : array, optional
-            array of :math:`log_{10}(M)` of halos in catalog
+        halo_mass : array, optional positional argument
+            array of :math:`M_{\\mathrm{vir}}` of halos in catalog
 
-        halos : table, optional
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
 
         input_param_dict : dict, optional
+            dictionary of parameters governing the model. If not passed, 
+            values bound to ``self`` will be chosen. 
 
         Returns
         -------
         mean_ncen : array
-    
-        Notes
-        -------
-        Mean number of central galaxies in a host halo of the specified mass. 
+            Mean number of central galaxies in the halo of the input mass. 
 
-        :math:`\\langle N_{cen} \\rangle_{M} = 
+        Notes 
+        -----
+
+        The `mean_occupation` method computes the following function: 
+
+        :math:`\\langle N_{\\mathrm{cen}} \\rangle_{M} = 
         \\frac{1}{2}\\left( 1 + 
-        erf\\left( \\frac{log_{10}M - 
+        \\mathrm{erf}\\left( \\frac{log_{10}M - 
         log_{10}M_{min}}{\\sigma_{log_{10}M}} \\right) \\right)`
+
 
         """
         if 'input_param_dict' not in kwargs.keys():
@@ -217,13 +224,17 @@ class Kravtsov04Cens(OccupationComponent):
 
         Parameters
         ----------        
-        logM : array 
-            array of :math:`log_{10}(M)` of halos in catalog
+        halo_mass : array, optional positional argument
+            array of :math:`M_{\\mathrm{vir}}` of halos in catalog
+
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
 
         Returns
         -------
         mc_abundance : array
-            array of length len(logM) giving the number of self.gal_type galaxies in the halos. 
+            array of length *len(halo_mass)* giving 
+            the number of ``self.gal_type`` galaxies per input halo. 
     
         """
         if 'input_param_dict' not in kwargs.keys():
@@ -235,6 +246,8 @@ class Kravtsov04Cens(OccupationComponent):
 
         if 'seed' in kwargs.keys():
             np.random.seed(seed=kwargs['seed'])
+        else:
+            np.random.seed(seed=None)
 
         mc_generator = np.random.random(aph_len(halo_mass))
         mc_abundance = np.where(mc_generator < self.mean_occupation(halo_mass, 
