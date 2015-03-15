@@ -115,6 +115,9 @@ class Kravtsov04Cens(OccupationComponent):
     PDF is commonly assumed to be log-normal, 
     in which case the mean occupation function is just an ``erf`` function, 
     as in the `mean_occupation` method. 
+
+    The test suite for this model is documented at 
+    `~halotools.empirical_models.test_empirical_models.test_Kravtsov04Cens`
     """
 
     def __init__(self,input_param_dict=None,
@@ -159,6 +162,9 @@ class Kravtsov04Cens(OccupationComponent):
 
 
     def _get_param_dict(self, input_param_dict):
+        """ Private method used to retrieve the 
+        dictionary governing the parameters of the model. 
+        """
 
         self.logMmin_key = 'logMmin_'+self.gal_type
         self.sigma_logM_key = 'sigma_logM_'+self.gal_type
@@ -204,7 +210,6 @@ class Kravtsov04Cens(OccupationComponent):
         \\mathrm{erf}\\left( \\frac{log_{10}M - 
         log_{10}M_{min}}{\\sigma_{log_{10}M}} \\right) \\right)`
 
-
         """
         if 'input_param_dict' not in kwargs.keys():
             param_dict = self.param_dict 
@@ -222,6 +227,10 @@ class Kravtsov04Cens(OccupationComponent):
     def mc_occupation(self, *args, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 
+        Assumes a nearest integer distribution for the central occupation function, 
+        where the first moment is governed by `mean_occupation`, 
+        and the per-halo occupations are bounded by unity. 
+
         Parameters
         ----------        
         halo_mass : array, optional positional argument
@@ -233,8 +242,9 @@ class Kravtsov04Cens(OccupationComponent):
         Returns
         -------
         mc_abundance : array
-            array of length *len(halo_mass)* giving 
-            the number of ``self.gal_type`` galaxies per input halo. 
+            array with same length as input *halo_mass*,  
+            returning the number of central galaxies in each input halo. 
+            Values will be either 0 or 1. 
     
         """
         if 'input_param_dict' not in kwargs.keys():
