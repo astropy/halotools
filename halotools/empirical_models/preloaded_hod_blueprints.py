@@ -15,9 +15,13 @@ __all__ = ["Kravtsov04"]
 
 
 def Kravtsov04(**kwargs):
-	""" Simplest pre-loaded HOD model. There are two populations, 
-	centrals and satellites, with occupation statistics and intra-halo 
-	phase space distributions based on Kravtsov et al. (2004). 
+	""" Blueprint for the simplest pre-loaded HOD model. 
+	There are two populations, 
+	centrals and satellites, with occupation statistics, 
+	positions and velocities based on Kravtsov et al. (2004). 
+
+	Documentation of the test suite of this blueprint can be found at 
+	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04`
 
 	Parameters 
 	----------
