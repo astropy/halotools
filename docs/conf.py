@@ -89,6 +89,12 @@ release = package.__version__
 # -- Options for HTML output ---------------------------------------------------
 
 # A NOTE ON HTML THEMES
+html_theme_options = {
+    'logotext1': 'halo',  # white,  semi-bold
+    'logotext2': 'tools',  # red, light
+    'logotext3': ':docs'   # white,  light
+    }
+
 # The global astropy configuration uses a custom theme, 'bootstrap-astropy',
 # which is installed along with astropy. A different theme can be used or
 # the options for this theme can be modified by overriding some of the
