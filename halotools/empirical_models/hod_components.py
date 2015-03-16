@@ -57,7 +57,7 @@ class OccupationComponent(object):
         self.occupation_bound = occupation_bound
         
     @abstractmethod
-    def _get_param_dict(self):
+    def _set_param_dict(self):
         """ Builds the parameter dictionary, whose keys are names of MCMC parameters, 
         and values are used in `mc_occupation` and `mean_occupation`. 
         Dictionary qarameter names will have the `gal_type` string with a leading underscore. 
@@ -155,12 +155,12 @@ class Kravtsov04Cens(OccupationComponent):
         OccupationComponent.__init__(self, gal_type, haloprop_key_dict, 
             threshold, occupation_bound)
 
-        self.param_dict = self._get_param_dict(input_param_dict)
+        self._set_param_dict(input_param_dict)
 
         self.publications = []
 
 
-    def _get_param_dict(self, input_param_dict):
+    def _set_param_dict(self, input_param_dict):
         """ Private method used to retrieve the 
         dictionary governing the parameters of the model. 
         """
@@ -175,7 +175,7 @@ class Kravtsov04Cens(OccupationComponent):
         else:
             output_param_dict = self.get_published_parameters(self.threshold)
 
-        return output_param_dict
+        self.param_dict = output_param_dict
 
 
     def mean_occupation(self, *args, **kwargs):
@@ -323,8 +323,7 @@ class Kravtsov04Sats(OccupationComponent):
         haloprop_key_dict=model_defaults.haloprop_key_dict,
         threshold=model_defaults.default_luminosity_threshold,
         gal_type='satellites',
-        central_occupation_model=None, 
-        input_central_param_dict=None):
+        central_occupation_model=None):
         """
         Parameters 
         ----------
@@ -354,11 +353,6 @@ class Kravtsov04Sats(OccupationComponent):
             be multiplied by the value of central_occupation_model at each mass, 
             as in Zheng et al. 2007, so that 
             :math:`\\langle N_{\mathrm{sat}}|M\\rangle\\Rightarrow\\langle N_{\mathrm{sat}}|M\\rangle\\times\\langle N_{\mathrm{cen}}|M\\rangle`
-
-        input_central_param_dict : dict, optional
-            parameter dictionary of the input central occupation model. 
-            If absent, the default best-fit parameter values 
-            of the input threshold will be chosen. 
         """
 
         occupation_bound = float("inf")
@@ -367,14 +361,13 @@ class Kravtsov04Sats(OccupationComponent):
         OccupationComponent.__init__(self, gal_type, haloprop_key_dict, 
             threshold, occupation_bound)
 
-        self.param_dict = self._get_param_dict(input_param_dict)
+        self._set_param_dict(input_param_dict)
 
-        self._set_central_behavior(
-            central_occupation_model, input_central_param_dict)
+        self._set_central_behavior(central_occupation_model)
 
         self.publications = []
 
-    def _get_param_dict(self, input_param_dict):
+    def _set_param_dict(self, input_param_dict):
 
         # set attribute names for the keys so that the methods know 
         # how to evaluate their functions
@@ -389,14 +382,11 @@ class Kravtsov04Sats(OccupationComponent):
         else:
             output_param_dict = self.get_published_parameters(self.threshold)
 
-        return output_param_dict
+        self.param_dict = output_param_dict
 
-
-    def _set_central_behavior(self, 
-        central_occupation_model, input_central_param_dict):
+    def _set_central_behavior(self, central_occupation_model):
 
         self.central_occupation_model = central_occupation_model
-        self.central_param_dict = input_central_param_dict
         
         if self.central_occupation_model is not None:
             if not isinstance(self.central_occupation_model, OccupationComponent):
@@ -409,15 +399,6 @@ class Kravtsov04Sats(OccupationComponent):
                         self.central_occupation_model.__name__+", " + 
                     "rather than an instance of that class. ")
                 raise SyntaxError(msg)
-
-            if input_central_param_dict is None:
-                self.central_param_dict = self.central_occupation_model.param_dict
-            else:
-                self.central_occupation_model.param_dict = (
-                    self.central_occupation_model._get_param_dict(
-                        input_central_param_dict)
-                    )
-            
 
             # Test thresholds of centrals and satellites are equal
             if self.threshold != self.central_occupation_model.threshold:
@@ -440,10 +421,6 @@ class Kravtsov04Sats(OccupationComponent):
             dictionary of parameters governing the model. If not passed, 
             values bound to ``self`` will be chosen. 
 
-        input_central_param_dict : dict, optional
-            dictionary of parameters governing the central occupation model. 
-            If not passed, values bound to ``self`` will be chosen. 
-
         Returns
         -------
         mean_nsat : float or array
@@ -457,11 +434,6 @@ class Kravtsov04Sats(OccupationComponent):
             param_dict = self.param_dict 
         else:
             param_dict = kwargs['input_param_dict']
-
-        if 'input_central_param_dict' not in kwargs.keys():
-            central_param_dict = self.central_param_dict 
-        else:
-            central_param_dict = kwargs['input_central_param_dict']
 
         halo_mass = self.retrieve_haloprops(*args, **kwargs)
         logM = np.log10(halo_mass)
@@ -482,9 +454,6 @@ class Kravtsov04Sats(OccupationComponent):
         # If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
         if self.central_occupation_model is not None:
-            # Explicitly include test in suite so that this reference assignment 
-            # doesn't influence above calculation
-            kwargs['input_param_dict'] = central_param_dict 
             mean_ncen = self.central_occupation_model.mean_occupation(
                 *args, **kwargs)
             mean_nsat = np.where(mean_nsat > 0, mean_nsat*mean_ncen, mean_nsat)
@@ -503,8 +472,6 @@ class Kravtsov04Sats(OccupationComponent):
 
         input_param_dict : dict, optional
 
-        input_central_param_dict : dict, optional
-
         Returns
         -------
         mc_abundance : array
@@ -517,17 +484,11 @@ class Kravtsov04Sats(OccupationComponent):
         else:
             param_dict = kwargs['input_param_dict']
 
-        if 'input_central_param_dict' not in kwargs.keys():
-            central_param_dict = self.central_param_dict 
-        else:
-            central_param_dict = kwargs['input_central_param_dict']
-
         halo_mass = self.retrieve_haloprops(*args, **kwargs)
         logM = np.log10(halo_mass)
 
         expectation_values = self.mean_occupation(halo_mass, 
-            input_param_dict=param_dict, 
-            input_central_param_dict=central_param_dict)
+            input_param_dict=param_dict)
 
         # The scipy built-in Poisson number generator raises an exception 
         # if its input is zero, so here we impose a simple workaround
