@@ -304,6 +304,29 @@ def test_Kravtsov04Sats():
 	assert fracdiff_highmass < 0
 	assert fracdiff_highmass > fracdiff_midmass
 
+	######## Check scaling with central parameters
+	default_cens = hod_components.Kravtsov04Cens()
+	default_satmodel_with_cens = hod_components.Kravtsov04Sats(central_occupation_model = default_cens)
+
+	### logMmin
+	cen_model2_dict = copy(default_cens.param_dict)
+	cen_model2_dict[default_cens.logMmin_key] += np.log10(2.)
+	cen_model2 = hod_components.Kravtsov04Cens(input_param_dict = cen_model2_dict)
+	model2 = hod_components.Kravtsov04Sats(central_occupation_model = cen_model2)
+
+	### Changing the central model should have a large effect at low mass
+	midmass = 10.**default_cens.param_dict[default_cens.logMmin_key]
+	assert default_satmodel_with_cens.mean_occupation(midmass) > model2.mean_occupation(midmass)
+	### And there should be zero effect at high mass
+	highmass = 1e15
+	assert default_satmodel_with_cens.mean_occupation(highmass) == model2.mean_occupation(highmass)
+
+	# Verify that directly changing the param_dict of the bound central model 
+	# correctly propagates through to the satellite occupation
+	nsat_orig = default_satmodel_with_cens.mean_occupation(midmass)
+	default_satmodel_with_cens.central_occupation_model.param_dict[default_satmodel_with_cens.central_occupation_model.logMmin_key] += np.log10(2)
+	nsat_new = default_satmodel_with_cens.mean_occupation(midmass)
+	assert nsat_new < nsat_orig
 
 
 
