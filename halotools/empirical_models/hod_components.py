@@ -103,17 +103,41 @@ class OccupationComponent(object):
 
 
 class Kravtsov04Cens(OccupationComponent):
-    """ Erf function model for the occupation statistics of central galaxies, 
+    """ ``Erf`` function model for the occupation statistics of central galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
-    There can be one and only one central galaxy per halo, 
-    so to compute :math:`\\langle N_{\mathrm{cen}}(M_{\mathrm{halo}}) \\rangle_{>M_{\\ast}}` , 
-    the mean number of centrals bigger than some stellar mass residing 
-    in a halo of some virial mass, we just need to integrate :math:`P( M_{\\ast} | M_{\\mathrm{halo}})` , 
-    the probability that a halo of a given mass hosts a central bigger than some stellar mass
+    Parameters 
+    ----------
+    input_param_dict : dict, optional.
+        Contains values for the parameters specifying the model.
+        Dictionary keys should have names like 
+        ``logMmin_centrals`` and ``sigma_logM_centrals``.
 
-    :math:`\\langle N_{\\mathrm{cen}}( M_{\\rm halo} )\\rangle_{>M_{\\ast}} = 
-    \\int_{M_{\\ast}}^{\\infty}\\mathrm{d}M'_{\\ast}P( M'_{\\ast} | M_{\mathrm{halo}})`
+        If ``input_param_dict`` is not passed, 
+        the best-fit parameter values provided in Table 1 of 
+        Zheng et al. (2007) are chosen. 
+        See the `get_published_parameters` method for details. 
+
+    threshold : float, optional.
+        Luminosity threshold of the mock galaxy sample. 
+        If specified, input value must agree with 
+        one of the thresholds used in Zheng07 to fit HODs: 
+        [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    gal_type : string, optional
+        Sets the key value used to access the behavior of the methods of this class. 
+
+    Notes 
+    -----
+    There can be one and only one central galaxy per halo, 
+    so to compute :math:`\\langle N_{\mathrm{cen}}(M_{\mathrm{halo}}) \\rangle_{>L}` , 
+    the mean number of centrals brighter than some luminosity residing 
+    in a halo of some virial mass, we just need to integrate :math:`P( L | M_{\\mathrm{halo}})` , 
+    the probability that a halo of a given mass hosts a central brighter than L
+
+    :math:`\\langle N_{\\mathrm{cen}}( M_{\\rm halo} )\\rangle_{>L} = 
+    \\int_{L}^{\\infty}\\mathrm{d}L'P( L' | M_{\mathrm{halo}})`
 
     The `Kravtsov04Cens` model assumes the stellar-to-halo-mass 
     PDF is log-normal, 
@@ -129,29 +153,6 @@ class Kravtsov04Cens(OccupationComponent):
         threshold=model_defaults.default_luminosity_threshold,
         gal_type='centrals'):
         """
-        Parameters 
-        ----------
-        input_param_dict : dictionary, optional.
-            Contains values for the parameters specifying the model.
-            Dictionary keys should have names like 
-            'logMmin_centrals' and 'sigma_logM_centrals'.
-
-            If ``input_param_dict`` is not passed, 
-            the best-fit parameter values provided in Table 1 of 
-            Zheng et al. (2007) are chosen. 
-            See the `get_published_parameters` method for details. 
-
-        threshold : float, optional.
-            Luminosity threshold of the mock galaxy sample. 
-            If specified, input value must agree with 
-            one of the thresholds used in Zheng07 to fit HODs: 
-            [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
-
-        gal_type : string, optional
-            Sets the key value used by `~halotools.empirical_models.hod_designer` and 
-            `~halotools.empirical_models.hod_factory` to access the behavior of the methods 
-            of this class. 
 
         """
 
@@ -212,8 +213,8 @@ class Kravtsov04Cens(OccupationComponent):
 
         :math:`\\langle N_{\\mathrm{cen}} \\rangle_{M} = 
         \\frac{1}{2}\\left( 1 + 
-        \\mathrm{erf}\\left( \\frac{log_{10}M - 
-        log_{10}M_{min}}{\\sigma_{log_{10}M}} \\right) \\right)`
+        \\mathrm{erf}\\left( \\frac{\\log_{10}M - 
+        \\log_{10}M_{min}}{\\sigma_{\\log_{10}M}} \\right) \\right)`
 
         """
         if 'input_param_dict' not in kwargs.keys():
@@ -337,8 +338,8 @@ class Kravtsov04Sats(OccupationComponent):
         ----------
         input_param_dict : dictionary, optional.
             Contains values for the parameters specifying the model.
-            Dictionary keys are 'logM0_satellites', 'logM1_satellites' 
-            and 'alpha_satellites'. 
+            Dictionary keys are ``logM0_satellites``, ``logM1_satellites``
+            and ``alpha_satellites``. 
 
             If no input_param_dict is passed, 
             the best-fit parameter values provided in Table 1 of 
@@ -352,12 +353,12 @@ class Kravtsov04Sats(OccupationComponent):
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         gal_type : string, optional
-            Sets the key value used by `~halotools.empirical_models.hod_designer` and 
-            `~halotools.empirical_models.hod_factory` to access the behavior of the methods 
+            Sets the key value used to access the behavior of the methods 
             of this class. 
 
         central_occupation_model : occupation model instance, optional
-            If present, the mean occupation method of this model will 
+            If using, must be an instance of a sub-class of `~halotools.empirical_models.OccupationComponent`. 
+            If using, the mean occupation method of this model will 
             be multiplied by the value of central_occupation_model at each mass, 
             as in Zheng et al. 2007, so that 
             :math:`\\langle N_{\mathrm{sat}}|M\\rangle\\Rightarrow\\langle N_{\mathrm{sat}}|M\\rangle\\times\\langle N_{\mathrm{cen}}|M\\rangle`
@@ -434,8 +435,13 @@ class Kravtsov04Sats(OccupationComponent):
         mean_nsat : float or array
             Mean number of satellite galaxies in a host halo of the specified mass. 
 
-        :math:`\\langle N_{sat} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha} \\langle N_{cen} \\rangle_{M}`
+        :math:`\\langle N_{\\mathrm{sat}} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha} \\langle N_{\\mathrm{cen}} \\rangle_{M}`
 
+        or 
+
+        :math:`\\langle N_{\\mathrm{sat}} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha}`, 
+
+        depending on whether a central model was passed to the constructor. 
 
         """
         if 'input_param_dict' not in kwargs.keys():
@@ -475,15 +481,20 @@ class Kravtsov04Sats(OccupationComponent):
 
         Parameters
         ----------        
-        logM : array 
-            array of :math:`log_{10}(M)` of halos in catalog
+        halo_mass : array, optional
+            array of :math:`M_{\\mathrm{vir}}`-like variable of halos in catalog
+
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
 
         input_param_dict : dict, optional
+            dictionary of parameters governing the model. If not passed, 
+            values bound to ``self`` will be chosen. 
 
         Returns
         -------
         mc_abundance : array
-            array of length len(logM) giving the number of self.gal_type galaxies in the halos. 
+            array giving the number of satellite-type galaxies per input halo. 
     
         """
 

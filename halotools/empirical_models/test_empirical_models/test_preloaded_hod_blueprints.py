@@ -18,7 +18,8 @@ def get_component_models(gal_type_blueprint,feature_key):
 
 
 def test_Kravtsov04_blueprint():
-	""" Suite of tests to check the self-consistency of the Kravtsov04_blueprint 
+	""" Suite of tests to check the self-consistency of 
+	`~halotools.empirical_models.Kravtsov04_blueprint`
 	and its component models. 
 
 	Bullet-point overview of the tests peformed is as follows:

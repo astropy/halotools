@@ -12,33 +12,30 @@ import occupation_helpers as occuhelp
 import model_defaults
 
 class HodModelFactory(object):
-    """ This is the composite HOD model object that can be used to generate 
-    mock galaxy populations. The primary methods are for assigning 
-    the mean occupation of a galaxy population 
-    to a halo, the intra-halo radial profile of that population, and the 
-    accompanying methods to generate Monte Carlo realizations of those methods. 
+    """ Factory-style object used to generate 
+    mock galaxy populations. Takes a composite model blueprint as input, 
+    and returns a composite model object as output. The returned model object 
+    can directly populate simulations with mock galaxy populations. 
 
-    All behavior is derived from external classes passed to the constructor, 
-    so this HOD Model Factory does nothing more than compose these external 
+    All behavior is derived from external classes bound up in the blueprint, 
+    so `HodModelFactory` does nothing more than compose these external 
     behaviors into a standardized form that talks to the rest of the package. 
-    The way this works is the Model Factory gets passed a dictionary that serves as 
-    a blueprint for how to build the model. The building of that dictionary is done 
-    elsewhere, by the `~halotools.empirical_models.hod_designer` class. So this class 
-    receives these blueprint dictionaries as input, and returns a model object 
-    that can directly populate simulations with mock populations. 
+    The building of the blueprint is done elsewhere. Pre-loaded blueprints 
+    can be found in `~halotools.empirical_models.preloaded_hod_blueprints`, 
+    or you can also design your own from scratch. 
+
+    Parameters 
+    ----------
+    model_blueprint : dict 
+        Dictionary keys of model_blueprint are the galaxy types found in the halos, 
+        e.g., ``centrals``, ``satellites``, ``orphans``, etc. 
+        Dictionary values of model_blueprint are themselves dictionaries whose keys 
+        specify the type of model being passed, e.g., ``occupation``, and values 
+        are class instances of that type of model.
 
     """
 
     def __init__(self, model_blueprint):
-        """ The methods of this class derive their behavior from other, external classes, 
-        passed in the form of the model_blueprint, a dictionary whose keys 
-        are the galaxy types found in the halos, e.g., 'centrals', 'satellites', 'orphans', etc.
-        The values of the model_blueprint are themselves dictionaries whose keys  
-        specify the type of model being passed, e.g., 'occupation', and values 
-        are class instances of that type of model. The input halo_prof_model is an instance of the class 
-        governing the assumed profile of the underlying halos. 
-
-        """
 
         # Bind the model-building instructions to the composite model
         self.model_blueprint = model_blueprint
