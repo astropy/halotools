@@ -128,16 +128,23 @@ class HodModelFactory(object):
 
         for gal_type in self.gal_types:
 
-            # Set the method used to compute per-halo gal_type abundance
+            # Set the method used to Monte Carlo realizations of per-halo gal_type abundance
             new_method_name = 'mc_occupation_'+gal_type
             occupation_model = self.model_blueprint[gal_type]['occupation']
-            new_method_behavior = occupation_model.mc_occupation
+            new_method_behavior = partial(occupation_model.mc_occupation, 
+                input_param_dict = self.param_dict)
             setattr(self, new_method_name, new_method_behavior)
 
-            # Set a method used to compute galaxy profile parameters
+            # Also inherit the mean abundance, for convenience
+            new_method_name = 'mean_occupation_'+gal_type
+            new_method_behavior = partial(occupation_model.mean_occupation, 
+                input_param_dict = self.param_dict)
+            setattr(self, new_method_name, new_method_behavior)
+
+            # Now move on to galaxy profiles
             gal_prof_model = self.model_blueprint[gal_type]['profile']
 
-            # we will loop over gal_prof_model.gal_prof_func_dict
+            # We will loop over gal_prof_model.gal_prof_func_dict
             # This dictionary only contains keys for biased profile parameters
             # Thus there will be no new methods created for unbiased profile parameters
             for gal_prof_param_key, gal_prof_param_func in (

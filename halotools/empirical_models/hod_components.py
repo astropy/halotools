@@ -73,6 +73,12 @@ class OccupationComponent(object):
         """
         pass
 
+    @abstractmethod
+    def mean_occupation(self):
+        """ Method giving the first moment of the occupation distribution. 
+        """
+        pass
+
     def retrieve_haloprops(self, *args, **kwargs):
         """ Interface used to pass the correct numpy array to `mc_occupation`. 
 
