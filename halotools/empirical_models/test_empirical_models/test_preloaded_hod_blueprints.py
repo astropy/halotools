@@ -18,7 +18,7 @@ def get_component_models(gal_type_blueprint,feature_key):
 
 
 def test_Kravtsov04_blueprint():
-	""" Suite of tests to check the self-consistency of the Kravtsov04 blueprint 
+	""" Suite of tests to check the self-consistency of the Kravtsov04_blueprint 
 	and its component models. 
 
 	Bullet-point overview of the tests peformed is as follows:
@@ -36,20 +36,20 @@ def test_Kravtsov04_blueprint():
 	`~halotools.empirical_models.hod_components.Kravtsov04Sats`, 
 	all further testing is relegated to 
 	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04Cens` and 
-	``sats``. 
+	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04Sats`. 
 
 	Examples 
 	--------
 	>>> from halotools.empirical_models import preloaded_hod_blueprints
-	>>> blueprint  = preloaded_hod_blueprints.Kravtsov04(threshold = -21)
+	>>> blueprint  = preloaded_hod_blueprints.Kravtsov04_blueprint(threshold = -21)
 
 	"""
-	default_blueprint = preloaded_hod_blueprints.Kravtsov04()
+	default_blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint()
 	assert set(default_blueprint.keys()) == {'satellites','centrals'} 
 
 	# Check thresholds are being self-consistently set
 	for threshold in np.arange(-22, -17.5, 0.5):
-		temp_blueprint = preloaded_hod_blueprints.Kravtsov04(threshold=threshold)
+		temp_blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint(threshold=threshold)
 		assert (
 			temp_blueprint['satellites']['occupation'].threshold ==
 			temp_blueprint['centrals']['occupation'].threshold 

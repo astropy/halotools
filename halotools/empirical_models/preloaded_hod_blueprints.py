@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-Module containing some commonly used composite HOD models.
+Module containing some commonly used composite HOD model blueprints.
 
 """
 
@@ -11,17 +11,17 @@ import gal_prof_factory as gpf
 import halo_prof_components as hpc
 import gal_prof_components as gpc
 
-__all__ = ["Kravtsov04"]
+__all__ = ["Kravtsov04_blueprint"]
 
 
-def Kravtsov04(**kwargs):
+def Kravtsov04_blueprint(**kwargs):
 	""" Blueprint for the simplest pre-loaded HOD model. 
 	There are two populations, 
 	centrals and satellites, with occupation statistics, 
 	positions and velocities based on Kravtsov et al. (2004). 
 
 	Documentation of the test suite of this blueprint can be found at 
-	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04`
+	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04_blueprint`
 
 	Parameters 
 	----------
@@ -38,8 +38,8 @@ def Kravtsov04(**kwargs):
 	Examples 
 	--------
 	>>> from halotools.empirical_models import preloaded_hod_blueprints
-	>>> blueprint = preloaded_hod_blueprints.Kravtsov04()
-	>>> blueprint  = preloaded_hod_blueprints.Kravtsov04(threshold = -19)
+	>>> blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint()
+	>>> blueprint  = preloaded_hod_blueprints.Kravtsov04_blueprint(threshold = -19)
 	"""
 
 	if 'threshold' in kwargs.keys():

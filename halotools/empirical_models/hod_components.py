@@ -55,7 +55,7 @@ class OccupationComponent(object):
         
         self.threshold = threshold
         self.occupation_bound = occupation_bound
-        
+
     @abstractmethod
     def _set_param_dict(self):
         """ Builds the parameter dictionary, whose keys are names of MCMC parameters, 
@@ -322,6 +322,8 @@ class Kravtsov04Cens(OccupationComponent):
 class Kravtsov04Sats(OccupationComponent):
     """ Power law model for the occupation statistics of satellite galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
+
+    :math:`\\langle N_{sat} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha}`
 
     """
 

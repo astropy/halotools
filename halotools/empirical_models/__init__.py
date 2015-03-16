@@ -5,5 +5,5 @@ from __future__ import (absolute_import, division, print_function,
 
 from .mock_factory import *
 from .hod_factory import *
-from .preloaded_hod_blueprints import *
+from .preloaded_models import *
 from .hod_components import *
