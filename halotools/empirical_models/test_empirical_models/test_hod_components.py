@@ -160,8 +160,6 @@ def test_Kravtsov04Cens():
 	# to a new instantiatino with the same parameters
 	assert updated_defocc_lowmass == occ3_lowmass
 	assert updated_defocc_highmass == occ3_highmass
-
-
 	
 
 def test_Kravtsov04Sats():
@@ -227,13 +225,12 @@ def test_Kravtsov04Sats():
 		satmodel_cens = hod_components.Kravtsov04Sats(central_occupation_model=cenmodel)
 
 		Npts = 1e2 
-		masses = np.logspace(10, 15)
+		masses = np.logspace(10, 15, Npts)
 		mean_occ_satmodel_nocens = satmodel_nocens.mean_occupation(masses)
 		mean_occ_satmodel_cens = satmodel_cens.mean_occupation(masses)
 		assert np.all(mean_occ_satmodel_cens <= mean_occ_satmodel_nocens)
 		mean_occ_cens = cenmodel.mean_occupation(masses)
 		assert np.all(mean_occ_satmodel_cens == mean_occ_satmodel_nocens*mean_occ_cens)
-
 
 	### First test the model with all default settings
 	default_model = hod_components.Kravtsov04Sats()
@@ -248,6 +245,76 @@ def test_Kravtsov04Sats():
 		test_mean_occupation(thresh_model)
 
 	test_ncen_inheritance()
+
+	### Check that models scale reasonably with different param_dict values
+	default_dict = default_model.param_dict
+
+	###### power law slope ######
+	# Increase steepness of high-mass-end power law
+	model2_dict = copy(default_dict)
+	model2_dict[default_model.alpha_key] *= 1.25
+	model2 = hod_components.Kravtsov04Sats(input_param_dict = model2_dict)
+
+	logmass = model2.param_dict[model2.logM1_key] + np.log10(5)
+	mass = 10.**logmass
+	assert model2.mean_occupation(mass) > default_model.mean_occupation(mass)
+
+	Npts = 1e3
+	masses = np.ones(Npts)*mass
+	assert model2.mc_occupation(masses,seed=43).mean() > default_model.mc_occupation(masses,seed=43).mean()
+
+	default_model.param_dict[default_model.alpha_key] = model2.param_dict[model2.alpha_key]
+	assert model2.mc_occupation(masses,seed=43).mean() == default_model.mc_occupation(masses,seed=43).mean()
+
+	###### Increase in M0 ######
+	model2_dict = copy(default_dict)
+	model2_dict[default_model.logM0_key] += np.log10(2)
+	model2 = hod_components.Kravtsov04Sats(input_param_dict = model2_dict)
+
+	# At very low mass, both models should have zero satellites 
+	lowmass = 1e10
+	assert model2.mean_occupation(lowmass) == default_model.mean_occupation(lowmass)	
+	# At intermediate masses, there should be fewer satellites for larger M0
+	midmass = 1e12
+	assert model2.mean_occupation(midmass) < default_model.mean_occupation(midmass)
+	# At high masses, the difference should be negligible
+	highmass = 1e15
+	np.testing.assert_allclose(
+		model2.mean_occupation(highmass) , 
+		default_model.mean_occupation(highmass), 
+		rtol=1e-3, atol=1.e-3)
+
+	###### Increase in M1 ######
+	model2_dict = copy(default_dict)
+	model2_dict[default_model.logM0_key] += np.log10(2)
+	model2 = hod_components.Kravtsov04Sats(input_param_dict = model2_dict)
+
+	# At very low mass, both models should have zero satellites 
+	lowmass = 1e10
+	assert model2.mean_occupation(lowmass) == default_model.mean_occupation(lowmass)	
+	# At intermediate masses, there should be fewer satellites for larger M1
+	midmass = 1e12
+	fracdiff_midmass = ((model2.mean_occupation(midmass) - default_model.mean_occupation(midmass)) / 
+		default_model.mean_occupation(midmass))
+	assert fracdiff_midmass < 0
+	# At high masses, the difference should persist, and be fractionally greater 
+	highmass = 1e14
+	fracdiff_highmass = ((model2.mean_occupation(highmass) - default_model.mean_occupation(highmass)) / 
+		default_model.mean_occupation(highmass))
+	assert fracdiff_highmass < 0
+	assert fracdiff_highmass > fracdiff_midmass
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
