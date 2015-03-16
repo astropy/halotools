@@ -17,13 +17,6 @@ Halotools provides bookeeping tools to keep track
 of a potentially large amount of simulated data, 
 and also your various reductions of that data. 
 
-	>>> from  halotools import catalog_manager as catman
-	>>> print(catalog_manager.available_simulations)
-	>>> bolshoi_snap = catman.retrieve_halos('bolshoi', z=0)
-	>>> bolshoi_snap.galaxies.show()
-	>>> bolshoi_snaplistf = catman.retrieve_particles('bolshoi', z=[0.02,0.25,0.5,0.8])
-	>>> bolshoi_particles_z0 = catman.retrieve_particles('bolshoi_z0')
-
 Those lines show that you can retrieve processed snapshot data 
 from one of the built-in simulations with just one line of code. 
 See :ref:`simulation_list` for more information about what simulations come pre-packaged 

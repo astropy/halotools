@@ -15,9 +15,6 @@ The simplest way to build a mock galaxy population
 is to just use the default pre-loaded model, 
 and call its populate method. 
 
-	>>> from halotools import make_mocks
-	>>> mock = make_mocks.default_mock
-
 Halotools installs to use abundance matching 
 as the default model, and the redshift-zero 
 snapshot of Bolshoi as the default simulation. 
