@@ -49,7 +49,7 @@ halotools/check_mock.py
 halotools/cfcm/*
 halotools/cxcf/*
 
-testmodels.ipynb
+*.ipynb
 .ipynb_checkpoints/*
 */.ipynb_checkpoints/*
 */*/.ipynb_checkpoints/*

@@ -9,7 +9,7 @@ from .. import gal_prof_factory
 from astropy.table import Table
 from copy import copy
 
-__all__ = ['test_Kravtsov04Cens']
+__all__ = ['test_Kravtsov04Cens','test_Kravtsov04Sats']
 
 
 def test_Kravtsov04Cens():
@@ -164,11 +164,90 @@ def test_Kravtsov04Cens():
 
 	
 
+def test_Kravtsov04Sats():
+	""" Function to test 
+	`~halotools.empirical_models.Kravtsov04Sats`. 
+	Here's a brief summary of the tests performed: 
+
+		* The basic metadata of the model is correct, e.g., ``self.occupation_bound = 1`` 
+
+		* The `mean_occupation` function is bounded by zero and unity for the full range of reasonable input masses, :math:`0 <= \\langle N_{\mathrm{cen}}(M) \\rangle <=1` for :math:`\\log_{10}M/M_{\odot} \\in [10, 16]`
+
+		* The `mean_occupation` function increases monotonically for the full range of reasonable input masses, :math:`\\langle N_{\mathrm{cen}}(M_{2}) \\rangle > \\langle N_{\mathrm{cen}}(M_{1}) \\rangle` for :math:`M_{2}>M_{1}`
+
+		* The model correctly navigates having either array or halo catalog arguments, and returns the identical result regardless of how the inputs are bundled
+
+		* The `mean_occupation` function scales properly as a function of variations in :math:`\\sigma_{\\mathrm{log}M}`, and also variations in :math:`\\log M_{\mathrm{min}}`, for both low and high halo masses. 
 
 
+	"""
+
+	def test_attributes(model, gal_type='satellites'):
+		assert isinstance(model, hod_components.OccupationComponent)
+		assert model.gal_type == gal_type
+
+		correct_haloprops = {'halo_boundary', 'prim_haloprop_key'}
+		assert set(model.haloprop_key_dict.keys()) == correct_haloprops
+
+		assert model.num_haloprops == 1
+		assert model.occupation_bound == float("inf")
+
+	def test_mean_occupation(model):
+
+		assert hasattr(model, 'mean_occupation')
+
+		mvir_array = np.logspace(10, 16, 10)
+		mean_occ = model.mean_occupation(mvir_array) 
+
+		# Check that the range is in [0,1]
+		assert np.all(mean_occ >= 0)
+		# The mean occupation should be monotonically increasing
+		assert np.all(np.diff(mean_occ) >= 0)
+
+	def test_mc_occupation(model):
+
+		### Check the Monte Carlo realization method
+		assert hasattr(model, 'mc_occupation')
+
+		model.param_dict[model.alpha_key] = 1
+		model.param_dict[model.logM0_key] = 11.25
+		model.param_dict[model.logM1_key] = model.param_dict[model.logM0_key] + np.log10(20.)
+
+		Npts = 1e3
+		masses = np.ones(Npts)*10.**model.param_dict[model.logM1_key]
+		mc_occ = model.mc_occupation(masses, seed=43)
+		# We chose a specific seed that has been pre-tested, 
+		# so we should always get the same result
+		expected_result = 1.0
+		np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
+
+	def test_ncen_inheritance():
+		satmodel_nocens = hod_components.Kravtsov04Sats()
+		cenmodel = hod_components.Kravtsov04Cens()
+		satmodel_cens = hod_components.Kravtsov04Sats(central_occupation_model=cenmodel)
+
+		Npts = 1e2 
+		masses = np.logspace(10, 15)
+		mean_occ_satmodel_nocens = satmodel_nocens.mean_occupation(masses)
+		mean_occ_satmodel_cens = satmodel_cens.mean_occupation(masses)
+		assert np.all(mean_occ_satmodel_cens <= mean_occ_satmodel_nocens)
+		mean_occ_cens = cenmodel.mean_occupation(masses)
+		assert np.all(mean_occ_satmodel_cens == mean_occ_satmodel_nocens*mean_occ_cens)
 
 
+	### First test the model with all default settings
+	default_model = hod_components.Kravtsov04Sats()
+	test_attributes(default_model)
+	test_mean_occupation(default_model)
+	test_mc_occupation(default_model)
 
+	### Now test the various threshold settings
+	for threshold in np.arange(-22, -17.5, 0.5):
+		thresh_model = hod_components.Kravtsov04Sats(threshold = threshold,gal_type='sats')
+		test_attributes(thresh_model,gal_type='sats')
+		test_mean_occupation(thresh_model)
+
+	test_ncen_inheritance()
 
 
 

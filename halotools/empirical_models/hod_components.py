@@ -15,7 +15,7 @@ simulations with mock galaxies. See the tutorials on these models
 for further details on their use. 
 """
 
-__all__ = ['Kravtsov04Cens','Kravtsov04Sats']
+__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats']
 
 from copy import copy
 import numpy as np
@@ -399,14 +399,30 @@ class Kravtsov04Sats(OccupationComponent):
         self.central_param_dict = input_central_param_dict
         
         if self.central_occupation_model is not None:
+            if not isinstance(self.central_occupation_model, OccupationComponent):
+                msg = ("When passing a central_occupation_model to " + 
+                    "the Kravtsov04Sats constructor, \n you must pass an instance of " + 
+                    "an OccupationComponent.")
+                if issubclass(self.central_occupation_model, OccupationComponent):
+                    msg = (msg + 
+                        "\n Instead, the Kravtsov04Sats received the actual class " + 
+                        self.central_occupation_model.__name__+", " + 
+                    "rather than an instance of that class. ")
+                raise SyntaxError(msg)
+
+            if input_central_param_dict is None:
+                self.central_param_dict = self.central_occupation_model.param_dict
+            else:
+                self.central_occupation_model.param_dict = (
+                    self.central_occupation_model._get_param_dict(
+                        input_central_param_dict)
+                    )
+            
+
             # Test thresholds of centrals and satellites are equal
             if self.threshold != self.central_occupation_model.threshold:
                 warnings.warn("Satellite and Central luminosity tresholds do not match")
             #
-            self.central_param_dict = (
-                self.central_occupation_model._get_param_dict(
-                    input_central_param_dict)
-                )
 
     def mean_occupation(self, *args, **kwargs):
         """Expected number of satellite galaxies in a halo of mass logM.
@@ -517,6 +533,11 @@ class Kravtsov04Sats(OccupationComponent):
         # if its input is zero, so here we impose a simple workaround
         expectation_values = np.where(expectation_values <=0, 
             model_defaults.default_tiny_poisson_fluctuation, expectation_values)
+
+        if 'seed' in kwargs.keys():
+            np.random.seed(seed=kwargs['seed'])
+        else:
+            np.random.seed(seed=None)
 
         mc_abundance = poisson.rvs(expectation_values)
 
