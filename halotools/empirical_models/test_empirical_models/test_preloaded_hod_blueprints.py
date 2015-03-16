@@ -38,6 +38,11 @@ def test_Kravtsov04_blueprint():
 	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04Cens` and 
 	``sats``. 
 
+	Examples 
+	--------
+	>>> from halotools.empirical_models import preloaded_hod_blueprints
+	>>> blueprint  = preloaded_hod_blueprints.Kravtsov04(threshold = -21)
+
 	"""
 	default_blueprint = preloaded_hod_blueprints.Kravtsov04()
 	assert set(default_blueprint.keys()) == {'satellites','centrals'} 

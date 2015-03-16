@@ -34,6 +34,12 @@ def Kravtsov04(**kwargs):
 		Dictionary containing instructions for how to build the model. 
 		When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
 		the factory returns the Kravtsov04 model object. 
+
+	Examples 
+	--------
+	>>> from halotools.empirical_models import preloaded_hod_blueprints
+	>>> blueprint = preloaded_hod_blueprints.Kravtsov04()
+	>>> blueprint  = preloaded_hod_blueprints.Kravtsov04(threshold = -19)
 	"""
 
 	if 'threshold' in kwargs.keys():
