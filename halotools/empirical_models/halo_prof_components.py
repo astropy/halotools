@@ -260,6 +260,10 @@ class TrivialProfile(HaloProfileModel):
 
     redshift : float 
 
+    Notes 
+    -----
+    Testing done by `~halotools.empirical_models.test_empirical_models.test_TrivialProfile`
+
     """
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, 
