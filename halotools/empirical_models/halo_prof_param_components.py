@@ -15,9 +15,19 @@ import model_defaults
 from ..sim_manager import sim_defaults
 import model_defaults
 
+__all__ = ['ConcMass']
+
 class ConcMass(object):
     """ Container class for commonly used concentration-mass 
     relations in the literature. 
+
+    For all models, cosmology-dependent quantities such as peak height 
+    are solved for using the Astropy `~astropy.cosmology` sub-package. 
+
+    Currently supported fitting functions include:
+
+        * `dutton_maccio14_conc_mass`
+
     """
 
     def __init__(self, cosmology=sim_defaults.default_cosmology, 
@@ -60,7 +70,7 @@ class ConcMass(object):
 
     def dutton_maccio14_conc_mass(self, mass, z):
         """ Power-law fit to the concentration-mass relation from 
-        Dutton & Maccio 2014, MNRAS 441, 3359, arXiv:1402.7073.
+        Equations 12 & 13 of Dutton & Maccio 2014, arXiv:1402.7073.
 
         Parameters 
         ----------
@@ -79,6 +89,15 @@ class ConcMass(object):
         This model was only calibrated for the Planck 1-year cosmology.
 
         Model assumes that halo mass definition is Mvir.
+
+        :math:`a = 0.537 + (1.025 - 0.537)\\exp(-0.718z^{1.08})`
+
+        :math:`b = -0.097 + 0.024z`
+
+        :math:`M_{0} = 10^{12}M_{\odot}/h`
+
+        :math:`\\log_{10}c(M) = a + b\\log_{10}(M / M_{0})`
+
         """
 
         a = 0.537 + (1.025 - 0.537) * np.exp(-0.718 * z**1.08)

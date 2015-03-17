@@ -9,6 +9,14 @@ from .. import halo_prof_param_components
 from astropy import cosmology
 
 def test_ConcMass():
+	""" Test the `~halotools.empirical_models.halo_prof_param_components.ConcMass` module. 
+	Summary of tests is as follows: 
+	
+		* Returned concentrations satisfy :math:`0 < c < 100` for the full range of reasonable masses
+
+		* The :math:`c(M)` relation is monotonic over the full range of reasonable masses
+
+	"""
 	default_model = halo_prof_param_components.ConcMass()
 	assert isinstance(default_model.cosmology, cosmology.FlatLambdaCDM)
 

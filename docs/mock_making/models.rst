@@ -37,7 +37,7 @@ instance of a model based on the formulation of the HOD introduced in
 Kravtsov, et al. (2004), with default settings to use 
 best-fit parameter values taken from the subsequent literature. 
 For a complete listing of the optional features supported by this pre-built model, 
-see the `~halotools.empirical_models.preloaded_hod_blueprints.Kravtsov04` 
+see the `~halotools.empirical_models.Kravtsov04_blueprint` 
 documentation `~halotools.empirical_models`.
 
 .. _list_of_default_models: 

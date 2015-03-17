@@ -9,3 +9,4 @@ from .preloaded_models import *
 from .preloaded_hod_blueprints import *
 from .hod_components import *
 from .model_defaults import *
+from .halo_prof_param_components import *
