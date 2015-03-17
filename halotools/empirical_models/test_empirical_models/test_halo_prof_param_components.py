@@ -18,6 +18,7 @@ def test_ConcMass():
 
 	"""
 	default_model = halo_prof_param_components.ConcMass()
+	assert hasattr(default_model, 'cosmology')
 	assert isinstance(default_model.cosmology, cosmology.FlatLambdaCDM)
 
 	Npts = 1e3
