@@ -57,6 +57,7 @@ class HaloProfileModel(object):
         dictionary values are strings providing the column name 
         used to extract the relevant data from a halo catalog, e.g., ``mvir``. 
         Used by the methods `set_prof_param_table_dict` and `set_halo_prof_func_dict`. 
+        Default choice is set in `~halotools.empirical_models.model_defaults`. 
 
     Notes 
     -----
@@ -247,11 +248,31 @@ class HaloProfileModel(object):
 
 class TrivialProfile(HaloProfileModel):
     """ Profile of central galaxies residing at exactly the halo center. 
+
+    Parameters 
+    ----------
+    cosmology : object 
+        astropy cosmology object
+
+    redshift : float 
+
+    prof_param_keys : string, or list of strings
+        Provides the names of the halo profile parameters of the model. 
+        String entries are typically an underscore-concatenation 
+        of the model nickname and parameter nickname, e.g., ``NFWmodel_conc``. 
+
+    haloprop_key_dict : dict, optional
+        Dictionary determining the halo properties used by the model. 
+        Dictionary keys are, e.g., ``prim_haloprop_key``; 
+        dictionary values are strings providing the column name 
+        used to extract the relevant data from a halo catalog, e.g., ``mvir``. 
+        Used by the methods `set_prof_param_table_dict` and `set_halo_prof_func_dict`. 
+        Default choice is set in `~halotools.empirical_models.model_defaults`. 
+
     """
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, 
         redshift=sim_defaults.default_redshift,
-        build_inv_cumu_table=True, prof_param_table_dict=None,
         haloprop_key_dict=model_defaults.haloprop_key_dict):
 
         self.model_nickname = 'TrivialProfile'
