@@ -57,7 +57,7 @@ class HaloProfileModel(object):
         dictionary values are strings providing the column name 
         used to extract the relevant data from a halo catalog, e.g., ``mvir``. 
         Used by the methods `set_prof_param_table_dict` and `set_halo_prof_func_dict`. 
-        Default choice is set in `~halotools.empirical_models.model_defaults`. 
+        Default is an empty dict. 
 
     Notes 
     -----
@@ -279,7 +279,27 @@ class TrivialProfile(HaloProfileModel):
 
         self.publication = []
 
-    def density_profile(self, r, *args):
+    def density_profile(self, x, *args):
+        """ Trivial density profile function, modeled to be a delta function. 
+
+        :math:`\\rho(x=0) = 1`
+
+        :math:`\\rho(x>0) = 0`
+
+        Parameters 
+        ----------
+        x : array_like 
+            Value of the radius at which density profile is to be evaluated. 
+            Should be scaled by the halo boundary, 
+            so that :math:`x \equiv r / R_{\\mathrm{halo}}`, and 
+            :math:`0 < x < 1`
+
+        Returns 
+        -------
+        rho : array_like 
+            Dark matter density evaluated at each value of the input array x. 
+
+        """
         return np.where(r == 0, 1, 0)
 
     def set_halo_prof_func_dict(self,input_dict):
