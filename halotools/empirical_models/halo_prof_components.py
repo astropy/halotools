@@ -192,14 +192,55 @@ class HaloProfileModel(object):
             "(possibly trivial) dictionary prof_param_table_dict.")
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
+        """ Method used to create a lookup table of inverse cumulative mass 
+        profile functions. 
 
+        `build_inv_cumu_lookup_table` does not return anything. 
+        Instead, when called, the class instance will have two new attributes: 
+
+            * ``cumu_inv_param_table``, an array (or arrays) of discretized profile parameter values.
+
+            * ``cumu_inv_func_table``, an array of inverse cumulative density profile function objects, :math:`P( <x | p)`, associated with each point in the grid of profile parameters. 
+
+        The function objects in the ``cumu_inv_func_table`` lookup table are computed 
+        by `cumulative_mass_PDF`. 
+
+        Parameters 
+        ----------
+        prof_param_table_dict : dict, optional
+            Dictionary created by `set_prof_param_table_dict` 
+            providing instructions for how to generate a grid of 
+            values for each halo profile parameter. 
+            Default is an empty dict. 
+
+        Notes 
+        ----- 
+        Used by mock factories such as `~halotools.empirical_models.HodMockFactory` 
+        to rapidly generate Monte Carlo realizations of intra-halo positions. 
+
+        """
         self.cumu_inv_func_table_dict = {}
         self.cumu_inv_func_table = np.array([],dtype=object)
 
         self.cumu_inv_param_table_dict = {}
         self.cumu_inv_param_table = np.array([],dtype=object)
 
-    def get_param_key(self, model_nickname, param_nickname):
+    def _get_param_key(self, model_nickname, param_nickname):
+        """ Trivial function providing standardized names for halo profile parameters. 
+
+        Parameters 
+        ----------
+        model_nickname : string 
+            Each sub-class of `HaloProfileModel` has a nickname, e.g., ``NFWmodel``. 
+
+        param_nickname : string 
+            Each profile parameter has a nickname, e.g., ``conc``. 
+
+        Returns 
+        -------
+        param_key : string 
+            Underscore-concatenation of the two inputs, e.g., ``NFWmodel_conc``. 
+        """
         param_key = model_nickname+'_'+param_nickname
         return param_key
 
@@ -287,7 +328,7 @@ class NFWProfile(HaloProfileModel):
         # Call a method inherited from the super-class 
         # to assign a string that will be used to 
         # name the concentration parameter assigned to the halo catalog
-        self._conc_parname = self.get_param_key(self.model_nickname, 'conc')
+        self._conc_parname = self._get_param_key(self.model_nickname, 'conc')
 
         # Call the init constructor of the super-class, 
         # whose only purpose is to bind cosmology, redshift, prim_haloprop_key, 
@@ -389,28 +430,7 @@ class NFWProfile(HaloProfileModel):
         return self.g(c) / self.g(r*c)
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
-        """ Method used to create a lookup table of inverse cumulative mass 
-        profile functions. Used by mock factories such as `~halotools.mock_factory` 
-        to rapidly generate Monte Carlo realizations of satellite profiles. 
-
-        Parameters 
-        ----------
-        prof_param_table_dict : dict, optional
-            Dictionary providing instructions for how to generate a grid of 
-            values for each halo profile parameter. Keys of this dictionary 
-            are the profile parameter names; each value is a 3-element tuple 
-            giving the minimum parameter value of the table to be built, the 
-            maximum value, and the linear spacing. Default is None, 
-            in which case the `NFWProfile.set_prof_param_table_dict` method 
-            will control the grid values. 
-
-            This method does not return anything. Instead, when called 
-            the NFWProfile model instance will have two new attributes: 
-            cumu_inv_param_table and cumu_inv_func_table. 
-            The former is an array of NFW concentration parameter values, 
-            the latter is an array of inverse cumulative density profile 
-            function objects :math:`P^{NFW}( <r | c)` associated with 
-            each concentration in the table. 
+        """
         """
 
         #Set up the grid used to tabulate inverse cumulative NFW mass profiles
@@ -450,7 +470,7 @@ class NFWProfile(HaloProfileModel):
         ----------
         input_dict : dict 
             Each key corresponds to the name of a halo profile parameter, 
-            e.g., 'halo_NFW_conc', which are set by the get_param_key 
+            e.g., 'halo_NFW_conc', which are set by the _get_param_key 
             method if the super-class. The value attached to each key is a function object 
             providing the mapping between halos and the halo profile parameter, 
             such as a concentration-mass function. 
