@@ -458,8 +458,6 @@ def return_haloprop_dict(model_blueprint):
 
             if 'prim_haloprop_key' in feature.haloprop_key_dict.keys():
                 prim_haloprop_list.append(feature.haloprop_key_dict['prim_haloprop_key'])
-            else:
-                print(no_prim_haloprop_msg % (gal_type, feature))
 
             if 'sec_haloprop_key' in feature.haloprop_key_dict.keys():
                 sec_haloprop_list.append(feature.haloprop_key_dict['sec_haloprop_key'])

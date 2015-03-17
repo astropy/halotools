@@ -69,12 +69,12 @@ class HaloProfileModel(object):
     """
 
     def __init__(self, cosmology, redshift, prof_param_keys, 
-        haloprop_key_dict=model_defaults.haloprop_key_dict):
+        haloprop_key_dict={}):
 
         self.redshift = redshift
         self.cosmology = cosmology
         self.haloprop_key_dict = haloprop_key_dict
-        self.prim_haloprop_key = haloprop_key_dict['prim_haloprop_key']
+        #self.prim_haloprop_key = haloprop_key_dict['prim_haloprop_key']
 
         self.prof_param_keys = list(prof_param_keys)
 
@@ -256,40 +256,28 @@ class TrivialProfile(HaloProfileModel):
 
     redshift : float 
 
-    prof_param_keys : string, or list of strings
-        Provides the names of the halo profile parameters of the model. 
-        String entries are typically an underscore-concatenation 
-        of the model nickname and parameter nickname, e.g., ``NFWmodel_conc``. 
-
-    haloprop_key_dict : dict, optional
-        Dictionary determining the halo properties used by the model. 
-        Dictionary keys are, e.g., ``prim_haloprop_key``; 
-        dictionary values are strings providing the column name 
-        used to extract the relevant data from a halo catalog, e.g., ``mvir``. 
-        Used by the methods `set_prof_param_table_dict` and `set_halo_prof_func_dict`. 
-        Default choice is set in `~halotools.empirical_models.model_defaults`. 
-
     """
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, 
-        redshift=sim_defaults.default_redshift,
-        haloprop_key_dict=model_defaults.haloprop_key_dict):
+        redshift=sim_defaults.default_redshift):
 
         self.model_nickname = 'TrivialProfile'
+
+        haloprop_key_dict = {}
+        prof_param_keys = []
 
         # Call the init constructor of the super-class, 
         # whose only purpose is to bind cosmology, redshift, haloprop_key_dict, 
         # and a list of prof_param_keys to the NFWProfile instance. 
-        empty_list = []
         HaloProfileModel.__init__(self, 
-            cosmology, redshift, empty_list, haloprop_key_dict)
+            cosmology, redshift, prof_param_keys, haloprop_key_dict)
 
         empty_dict = {}
         self.set_halo_prof_func_dict(empty_dict)
         self.set_prof_param_table_dict(empty_dict)
         self.build_inv_cumu_lookup_table(empty_dict)
 
-        self.publication = empty_list
+        self.publication = []
 
     def density_profile(self, r, *args):
         return np.where(r == 0, 1, 0)
