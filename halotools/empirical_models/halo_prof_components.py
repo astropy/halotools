@@ -247,7 +247,11 @@ class HaloProfileModel(object):
 
 
 class TrivialProfile(HaloProfileModel):
-    """ Profile of central galaxies residing at exactly the halo center. 
+    """ Profile of dark matter halos with all their mass 
+    concentrated at exactly the halo center. 
+
+    Primarily used as a dummy class to assign 
+    positions to central-type galaxies. 
 
     Parameters 
     ----------
@@ -279,8 +283,8 @@ class TrivialProfile(HaloProfileModel):
 
         self.publication = []
 
-    def density_profile(self, x, *args):
-        """ Trivial density profile function, modeled to be a delta function. 
+    def density_profile(self, x):
+        """ Trivial density profile function. 
 
         :math:`\\rho(x=0) = 1`
 
@@ -303,12 +307,31 @@ class TrivialProfile(HaloProfileModel):
         return np.where(r == 0, 1, 0)
 
     def set_halo_prof_func_dict(self,input_dict):
+        """ Trivial method binding the empty dictionary ``halo_prof_func_dict`` 
+        to the class instance. 
+
+        Method is required of any `HaloProfileModel` sub-class. 
+        For `TrivialProfile`, the ``halo_prof_func_dict`` is empty because in this case 
+        there are no profile parameters that need to be mapped onto halos. 
+        """
         self.halo_prof_func_dict = input_dict
 
     def set_prof_param_table_dict(self,input_dict):
+        """ Trivial method binding the empty dictionary 
+        ``prof_param_table_dict`` to the class instance. 
+
+        Method is required of any `HaloProfileModel` sub-class. 
+        For `TrivialProfile`, the ``prof_param_table_dict`` is empty 
+        because in this case there are no profile parameters 
+        for which a lookup table needs to be built. 
+        """
         self.prof_param_table_dict = input_dict
 
-    def cumulative_mass_PDF(self, x, *args):
+    def cumulative_mass_PDF(self, x):
+        """ Trivial function returning unity for any input. 
+
+        Method is required of any `HaloProfileModel` sub-class.         
+        """
         return 1
 
 
