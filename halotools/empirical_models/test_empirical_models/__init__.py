@@ -4,3 +4,4 @@ from __future__ import (absolute_import, division, print_function,
 
 from .test_hod_components import *
 from .test_preloaded_hod_blueprints import *
+from .test_halo_prof_param_components import *
