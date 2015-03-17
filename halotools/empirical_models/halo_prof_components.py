@@ -179,7 +179,8 @@ class TrivialProfile(HaloProfileModel):
     """ Profile of central galaxies residing at exactly the halo center. 
     """
     def __init__(self, 
-        cosmology=sim_defaults.default_cosmology, redshift=sim_defaults.default_redshift,
+        cosmology=sim_defaults.default_cosmology, 
+        redshift=sim_defaults.default_redshift,
         build_inv_cumu_table=True, prof_param_table_dict=None,
         haloprop_key_dict=model_defaults.haloprop_key_dict):
 
@@ -218,12 +219,16 @@ class NFWProfile(HaloProfileModel):
     For development purposes, object is temporarily hard-coded to only use  
     the Dutton & Maccio 2014 concentration-mass relation pertaining to 
     a virial mass definition of a dark matter halo. This should eventually be 
-    generalized to allow for other concentration-mass relations, including those 
-    that are dependent on cosmology, such as Diemer & Kravtsov 2014. 
+    generalized to allow for cosmology-dependent concentration-mass relations, 
+    such as Bhattacharya et al. (2013), and Diemer & Kravtsov (2014). 
+
+    For a review of basic properties of the NFW profile, 
+    see for example Lokas & Mamon (2000), arXiv:0002395. 
     """
 
     def __init__(self, 
-        cosmology=sim_defaults.default_cosmology, redshift=sim_defaults.default_redshift,
+        cosmology=sim_defaults.default_cosmology, 
+        redshift=sim_defaults.default_redshift,
         build_inv_cumu_table=True, prof_param_table_dict={},
         haloprop_key_dict=model_defaults.haloprop_key_dict,
         conc_mass_relation_key = model_defaults.conc_mass_relation_key):
