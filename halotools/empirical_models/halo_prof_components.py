@@ -244,10 +244,6 @@ class HaloProfileModel(object):
         param_key = model_nickname+'_'+param_nickname
         return param_key
 
-    def cumulative_mass_PDF(self, x, *args):
-        return 1
-
-
 
 class TrivialProfile(HaloProfileModel):
     """ Profile of central galaxies residing at exactly the halo center. 
@@ -283,6 +279,8 @@ class TrivialProfile(HaloProfileModel):
     def set_prof_param_table_dict(self,input_dict):
         self.prof_param_table_dict = input_dict
 
+    def cumulative_mass_PDF(self, x, *args):
+        return 1
 
 
 class NFWProfile(HaloProfileModel):
