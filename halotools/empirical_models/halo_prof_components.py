@@ -7,7 +7,7 @@ of mock galaxies.
 
 """
 
-__all__ = ['HaloProfileModel','NFWProfile']
+__all__ = ['HaloProfileModel','TrivialProfile','NFWProfile']
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -35,9 +35,9 @@ import halo_prof_param_components
 @six.add_metaclass(ABCMeta)
 class HaloProfileModel(object):
     """ Container class for any halo profile model. This is an abstract class, 
-    and cannot itself be instantiated. Rather, HaloProfileModel provides a 
+    and cannot itself be instantiated. Rather, `HaloProfileModel` provides a 
     blueprint for any radial profile component model used by the 
-    empirical model factories such as `halotools.hod_factory`. 
+    empirical model factories such as `~halotools.empirical_models.hod_factory`. 
 
     Parameters 
     ----------
@@ -46,34 +46,29 @@ class HaloProfileModel(object):
 
     redshift : float 
 
+    prof_param_keys : string, or list of strings
+        Provides the names of the halo profile parameters of the model. 
+        String entries are typically an underscore-concatenation 
+        of the model nickname and parameter nickname, e.g., ``NFWmodel_conc``. 
+
+    haloprop_key_dict : dict, optional
+        Dictionary determining the halo properties used by the model. 
+        Dictionary keys are, e.g., ``prim_haloprop_key``; 
+        dictionary values are strings providing the column name 
+        used to extract the relevant data from a halo catalog, e.g., ``mvir``. 
+        Used by the methods `set_prof_param_table_dict` and `set_halo_prof_func_dict`. 
+
     Notes 
     -----
-    For development purposes, object is temporarily hard-coded to only use z=0 Bryan & Norman 
-    virial mass definition for standard LCDM cosmological parameter values.
+    For development purposes, `HaloProfileModel` is temporarily 
+    hard-coded to only use z=0 Bryan & Norman (1998)
+    virial mass definition fitting function 
+    for standard LCDM cosmological parameter values.
 
-    The first characters of any string used as a key 
-    for a halo profile parameter must be host_haloprop_prefix, set in `~halotools.model_defaults`, 
-    or else the resulting class will not correctly interface with the mock factory. 
-    The two dictionaries using these keys are 
-    prof_param_table_dict and halo_prof_func_dict, which are set by set_prof_param_table_dict and 
-    set_halo_prof_func_dict, respectively. 
     """
 
     def __init__(self, cosmology, redshift, prof_param_keys, 
         haloprop_key_dict=model_defaults.haloprop_key_dict):
-        """
-        Parameters 
-        ----------
-        cosmology : object 
-            astropy cosmology object
-
-        redshift : float 
-
-        prim_haloprop_key : string, optional
-            This string controls which column of the halo_table 
-            is used as the primary halo property governing the 
-            radial profile. Default is set in `halotools.model_defaults`. 
-        """
 
         self.redshift = redshift
         self.cosmology = cosmology
@@ -250,6 +245,7 @@ class NFWProfile(HaloProfileModel):
         """
 
         self.model_nickname = 'NFWmodel'
+
         # Call a method inherited from the super-class 
         # to assign a string that will be used to 
         # name the concentration parameter assigned to the halo catalog

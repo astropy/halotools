@@ -422,6 +422,27 @@ class HodModelFactory(object):
 ##########################################
 
 def return_haloprop_dict(model_blueprint):
+    """ Method searches a model_blueprint for all halo properties used by 
+    any model, and returns a standard-form dictionary of the results. 
+
+    Parameters 
+    ----------
+    model_blueprint : dict 
+        Blueprint used by `~halotools.empirical_models.HodModelFactory` to 
+        build a composite model. 
+
+    Returns 
+    -------
+    output_dict : dict 
+        Keys are `prim_haloprop_key`, `sec_haloprop_key` and `halo_boundary`. 
+        Values are the strings giving the corresponding key in the halo catalog 
+        containing the relevant data. 
+
+    Notes 
+    -----
+    Used to set composite-model-wide values for the primary and secondary halo properties. 
+
+    """
 
     prim_haloprop_list = []
     sec_haloprop_list = []
@@ -430,6 +451,8 @@ def return_haloprop_dict(model_blueprint):
     no_prim_haloprop_msg = "For gal_type %s and feature %s, no primary haloprop detected"
     no_halo_boundary_msg = "For gal_type %s, no primary haloprop detected for profile model"
 
+    # Build a list of all halo properties used by any component model, 
+    # issuing warnings where necessary
     for gal_type in model_blueprint.keys():
         for feature in model_blueprint[gal_type].values():
 
@@ -444,6 +467,7 @@ def return_haloprop_dict(model_blueprint):
             if 'halo_boundary' in feature.haloprop_key_dict.keys():
                 halo_boundary_list.append(feature.haloprop_key_dict['halo_boundary'])
 
+    # Run a bunch of tests on the each list of halo properties
     if len(set(prim_haloprop_list)) == 0:
         raise KeyError("No component feature of any gal_type had a prim_haloprop")
     elif len(set(prim_haloprop_list)) > 1:
