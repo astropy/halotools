@@ -5,7 +5,10 @@ Modules performing small, commonly used tasks throughout the package.
 
 """
 
-__all__ = ['initialize_numpy_array']
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+__all__ = ['array_like_length']
 
 import numpy as np
 
