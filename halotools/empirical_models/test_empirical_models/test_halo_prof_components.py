@@ -57,6 +57,7 @@ def test_NFWProfile():
 	assert type(profile_model.cumu_inv_param_table) == np.ndarray
 	assert np.all(profile_model.cumu_inv_param_table > 0)
 	assert np.all(profile_model.cumu_inv_param_table < 1000)
+	assert len(profile_model.cumu_inv_param_table) >= 10
 
 
 	assert type(profile_model.cumu_inv_func_table) == np.ndarray

@@ -350,6 +350,23 @@ class NFWProfile(HaloProfileModel):
     redshift : float, optional
         Default redshift is 0.
 
+    prof_param_table_dict : dictionary, optional 
+        Dictionary governing how the `build_inv_cumu_lookup_table` method 
+        discretizes the concentration parameter when building the profile lookup table. 
+
+        The ``prof_param_table_dict`` dictionary has a single key giving the 
+        concentration parameter name, ``NFWmodel_conc``. 
+        The value bound to this key is a 3-element tuple; 
+        the tuple entries provide, respectively, the min, max, and linear 
+        spacing used to discretize halo concentration. 
+
+        The `set_prof_param_table_dict` method binds this dictionary to 
+        the class instance; if no ``prof_param_table_dict`` argument 
+        is passed to the constructor, 
+        the discretization will be determined by the default settings in 
+        the `~halotools.empirical_models.model_defaults` module.  
+
+
     Notes 
     -----
     For development purposes, object is temporarily hard-coded to only use  
