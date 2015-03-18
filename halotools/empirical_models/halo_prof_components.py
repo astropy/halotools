@@ -74,7 +74,6 @@ class HaloProfileModel(object):
         self.redshift = redshift
         self.cosmology = cosmology
         self.haloprop_key_dict = haloprop_key_dict
-        #self.prim_haloprop_key = haloprop_key_dict['prim_haloprop_key']
 
         self.prof_param_keys = list(prof_param_keys)
 

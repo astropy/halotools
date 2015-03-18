@@ -77,6 +77,7 @@ class HodMockFactory(object):
         self.halos = self.halos[mass_cut]
         #############
 
+        ### Create new columns of the halo catalog, if applicable
         for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
             self.halos[new_haloprop_key] = new_haloprop_func(self.halos)
             self.additional_haloprops.append(new_haloprop_key)

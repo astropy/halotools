@@ -128,13 +128,14 @@ class SpatialBias(object):
 
         self.multiplicative_bias = multiplicative_bias
 
-        # The following call to set_param_dict primarily does two things:
+        # The following call to _set_param_dict primarily does two things:
         # 1. Creates attributes self.abcissa_dict and self.ordinates_dict, 
         # each with one key per biased galaxy profile parameter
         # 2. Creates an attribute self.param_dict. This is the dictionary 
         # that actually governs the behavior of the model. Its keys have names 
         # such as 'NFWmodel_conc_biasfunc_par1_satellites'
-        self.set_param_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
+        self._set_param_dict(
+            input_prof_params,input_abcissa_dict,input_ordinates_dict)
 
         # Create the following two convenience lists:
         # self.halo_prof_param_keys and self.gal_prof_param_keys. 
@@ -365,7 +366,7 @@ class SpatialBias(object):
         for key in self.param_dict.keys():
             self.param_dict[key] = new_param_dict[key]
 
-    def set_param_dict(self, 
+    def _set_param_dict(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
         """ Method used to set up dictionaries governing the behavior of the 
         profile modulating function. 
@@ -420,7 +421,7 @@ class SpatialBias(object):
 
     def _test_sensible_inputs(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
-        """ Private method to verify that `set_param_dict` was passed 
+        """ Private method to verify that `_set_param_dict` was passed 
         a reasonable set of inputs. 
         """
 
