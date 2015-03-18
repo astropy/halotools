@@ -5,8 +5,8 @@
 Overview of simulation analysis tools 
 ****************************************
 
-Halotools can be used to study the assembly history and environmental 
-trends of dark matter halos. 
+Halotools can be used to study the assembly history, environmental 
+trends, and internal structure of dark matter halos. 
 
 .. _cat_manage:
 
