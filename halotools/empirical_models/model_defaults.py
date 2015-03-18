@@ -1,22 +1,14 @@
-
 """
-Module expressing various default values of halotools. 
+Module expressing various default settings of 
+the empirical models sub-package. 
 
 All hard-coding should be restricted to this module, whenever possible.
 """
 
-#from __future__ import (absolute_import, division, print_function,
-#                        unicode_literals)
-import os, sys, configuration
+import os, sys
 import numpy as np
 
-### Default halo catalog (used in read_nbody)
-# The following parameters are used by the 
-# simulation object in the read_nbody module
-default_simulation_name = 'bolshoi'
-default_halo_finder = 'rockstar'
-default_scale_factor = 1.0003
-default_numptcl = 2.0e5
+from astropy import cosmology
 
 # Default thresholds for mocks
 default_luminosity_threshold = -20
@@ -36,14 +28,15 @@ default_tiny_poisson_fluctuation = 1.e-20
 # slightly larger than the largest value of x, this never happens.
 default_bin_max_epsilon = 1.e-5
 
-# Number of bins to use in the digitization of the NFW radial profile. 
-# Used by HOD_Mock object in make_mocks module.
+# Number of bins to use in the lookup table attached to the NFWProfile. 
+# Used primarily by HODMockFactory.
 min_permitted_conc = 1.0
 max_permitted_conc = 25.0
 default_dconc = 0.02
 default_Npts_radius_array = 101
 default_min_rad = 0.0001
 default_max_rad = 1.0
+conc_mass_relation_key = 'dutton_maccio14'
 
 ### Default values specifying traditional quenching model
 # Used by models in the halo_occupation module
@@ -93,31 +86,26 @@ default_halo_type_calculator_spacing=0.1
 # Set the default secondary halo parameter used to generate assembly bias
 default_assembias_key = 'vmax'
 
-# URLs of websites hosting catalogs used by the package
-aph_web_location = 'http://www.astro.yale.edu/aphearin/Data_files/'
-behroozi_web_location = 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
 
-# Convenience strings for the directory locations of the default catalogs (probably unnecessary)
-halo_catalog_dirname = configuration.get_catalogs_dir('halos')
-particle_catalog_dirname = configuration.get_catalogs_dir('particles')
 
-# If the user requests a certain snapshot for halos or particles, 
-# and the nearest available snapshot differs by more than the following amount, 
-# the code will issue a warning.
-scale_factor_difference_tol = 0.05
 
 # At minimum, the following halo and galaxy properties 
 # will be bound to each mock galaxy 
 host_haloprop_prefix = 'halo_'
+galprop_prefix = 'gal_'
 haloprop_list = ['id', 'pos', 'vel', 'mvir', 'rvir']
 galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 
+haloprop_key_dict = {'prim_haloprop_key':'mvir', 'halo_boundary':'rvir'}
+
+assembias_haloprop_key_dict = {
+    'prim_haloprop_key':'mvir', 
+    'halo_boundary':'rvir',
+    'sec_haloprop_key':'vmax'
+    }
 
 
-testmode = False
 
-
-haloprop_key_dict = {'prim_haloprop':'Mvir'}
 
 
 
