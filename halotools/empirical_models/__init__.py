@@ -11,3 +11,4 @@ from .hod_components import *
 from .halo_prof_param_components import *
 from .halo_prof_components import *
 from .model_defaults import *
+from .gal_prof_components import *

@@ -8,6 +8,8 @@ by composing the behavior of the components.
 
 """
 
+__all__ = ['SpatialBias']
+
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
@@ -24,17 +26,18 @@ from functools import partial
 
 ##################################################################################
 class SpatialBias(object):
-    """ Classical model for the spatial bias of galaxies. 
-    Class provides methods to allow the profile parameters 
-    governing the galaxy's radial profile to systematically differ from 
-    the profile parameters of their host halo. 
+    """ Classical method to model how the radial profile of a galaxy population 
+    can systematically differ from the profile of the underlying dark matter halo. 
+    Accomplished by keeping the form of the profile fixed, 
+    but allowing for halo and galaxy profile parameters to be distinct. 
 
     Traditionally applied to the NFW case, where the only profile parameter is 
     halo concentration, and the galaxy concentration is a mass-independent 
     scalar multiple of its dark matter halo profile, so that 
-    :math:`c_{\\mathrm{gal}} = F*c_{\\mathrm{halo}}`. 
+    :math:`c_{\\mathrm{gal}} = F\\times c_{\\mathrm{halo}}`. 
     That traditional model is a special case of this class, 
-    which encompasses halo-dependence to the multiplicatively biased parameters, 
+    which encompasses possible dependence of 
+    the multiplicative bias on whatever the primary halo property is, 
     as well as support for any arbitrary profile model with any number of parameters. 
     """
 
@@ -45,13 +48,17 @@ class SpatialBias(object):
         """ 
         Parameters 
         ----------
-        gal_type : string, optional
-            Used to set the key value of the galaxy population being modeled.  
+        gal_type : string
+            Name of the galaxy population being modeled, 
+            e.g., ``satellites`` or ``orphans``.  
 
         halo_prof_model : object 
-            `~halotools.HaloProfileModel` class instance. Determines the 
-            underlying dark matter halo profile to which gal_type galaxies respond.
-            Used *only* to verify that the parameters set to be modulated are 
+            `~halotools.empirical_models.HaloProfileModel` sub-class instance. 
+            Determines the underlying dark matter halo profile 
+            to which gal_type galaxies respond.
+            
+            Used *only* to ensure self-consistency between the galaxy and halo profiles, 
+            accomplished by verifying that the parameters set to be modulated are 
             actually parameters of the underlying halo profile. 
 
         input_prof_params : array_like, optional

@@ -126,7 +126,8 @@ class Kravtsov04Cens(OccupationComponent):
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
     gal_type : string, optional
-        Sets the key value used to access the behavior of the methods of this class. 
+        Name of the galaxy population being modeled, e.g., ``cens`. 
+        Default setting is ``centrals``.  
 
     Notes 
     -----
@@ -353,8 +354,8 @@ class Kravtsov04Sats(OccupationComponent):
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         gal_type : string, optional
-            Sets the key value used to access the behavior of the methods 
-            of this class. 
+            Name of the galaxy population being modeled, e.g., ``sats``. 
+            Default setting is ``satellites``. 
 
         central_occupation_model : occupation model instance, optional
             If using, must be an instance of a sub-class of `~halotools.empirical_models.OccupationComponent`. 
