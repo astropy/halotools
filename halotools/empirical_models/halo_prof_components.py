@@ -366,6 +366,25 @@ class NFWProfile(HaloProfileModel):
         the discretization will be determined by the default settings in 
         the `~halotools.empirical_models.model_defaults` module.  
 
+    haloprop_key_dict : dict, optional
+        Dictionary determining the halo properties used by the model. 
+        Dictionary keys must include ``prim_haloprop_key`` 
+        and ``halo_boundary``. 
+        Dictionary values are strings providing the column name 
+        used to extract the relevant data from a halo catalog, 
+        e.g., ``mvir`` and ``rvir``. 
+        ``haloprop_key_dict`` is used by the methods 
+        `set_prof_param_table_dict` and `set_halo_prof_func_dict`. 
+        Default values are set in `~halotools.empirical_models.model_defaults`. 
+
+    conc_mass_relation_key : string, optional 
+        String specifying which concentration-mass relation is used to paint model 
+        concentrations onto simulated halos. Passed to the 
+        `~halotools.empirical_models.halo_prof_param_components.ConcMass.conc_mass` 
+        method of the `~halotools.empirical_models.halo_prof_param_components.ConcMass` 
+        container class that stores the :math:`c(M)` supported relations. 
+        Default string/model is set in `~halotools.empirical_models.model_defaults`.
+
 
     Notes 
     -----

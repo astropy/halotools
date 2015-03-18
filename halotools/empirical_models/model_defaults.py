@@ -28,14 +28,15 @@ default_tiny_poisson_fluctuation = 1.e-20
 # slightly larger than the largest value of x, this never happens.
 default_bin_max_epsilon = 1.e-5
 
-# Number of bins to use in the digitization of the NFW radial profile. 
-# Used by HOD_Mock object in make_mocks module.
+# Number of bins to use in the lookup table attached to the NFWProfile. 
+# Used primarily by HODMockFactory.
 min_permitted_conc = 1.0
 max_permitted_conc = 25.0
 default_dconc = 0.02
 default_Npts_radius_array = 101
 default_min_rad = 0.0001
 default_max_rad = 1.0
+conc_mass_relation_key = 'dutton_maccio14'
 
 ### Default values specifying traditional quenching model
 # Used by models in the halo_occupation module
@@ -103,7 +104,6 @@ assembias_haloprop_key_dict = {
     'sec_haloprop_key':'vmax'
     }
 
-conc_mass_relation_key = 'dutton_maccio14'
 
 
 
