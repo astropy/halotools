@@ -17,8 +17,8 @@ User Documentation
 ******************
 
 
-**Halotools overview**
-----------------------
+**Halotools Overview**
+----------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -27,19 +27,26 @@ User Documentation
    install
    getting_started
 
-**Mock-making tools**
+**Mock-Making Tools**
 ----------------------
 
 .. toctree::
    :maxdepth: 1
 
-   mock_making/overview
    mock_making/quickstart_guide
-   mock_making/simulations
-   mock_making/models
-   mock_making/mock_population
+   mock_making/overview
 
-**Simulation analysis tools**
+**Model-Building Tools**
+-------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   model_building/quickstart_guide
+   model_building/models
+
+
+**Simulation Analysis Tools**
 --------------------------------------------
 
 .. toctree::
@@ -64,9 +71,10 @@ User Documentation
 Developer Documentation
 ***********************
 
-The developer documentation contains instructions for how to contribute to
-halotools, as well as coding, documentation, and testing guidelines.
-
+The developer documentation contains guidlines for how to contribute to
+Halotools. This includes instructions for how to build new science 
+features into the package, as well as how to effectively co-develop 
+the publicly available code base with other Halotools contributors. 
 
 
 

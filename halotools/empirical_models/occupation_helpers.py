@@ -10,10 +10,11 @@ __all__=['solve_for_polynomial_coefficients','format_parameter_keys']
 
 import numpy as np
 from copy import copy
-from utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as aph_len
 
 from scipy.interpolate import UnivariateSpline as spline
 
+import model_defaults
 
 def solve_for_polynomial_coefficients(abcissa,ordinates):
     """ Solves for coefficients of the unique, 
@@ -191,8 +192,14 @@ def enforce_periodicity_of_box(coords, box_length):
         but with periodic boundary conditions enforced
 
     """
-    periodic_coords = np.where(coords > box_length, coords - box_length, coords)
-    periodic_coords = np.where(coords < 0, coords + box_length, coords)
+    # First correct negative coordinates
+    periodic_coords = np.where(coords > box_length, 
+        coords - box_length, coords)
+
+    # Now correct coordinates that are too large
+    periodic_coords = np.where(periodic_coords < 0, 
+        periodic_coords + box_length, periodic_coords)
+    
     return periodic_coords
 
 
@@ -318,10 +325,54 @@ def aph_spline(table_abcissa, table_ordinates, k=0):
         spline_function = spline(table_abcissa, table_ordinates, k=k)
         return spline_function
 
+def call_func_table(func_table, abcissa, func_indices):
+    """ Returns the output of an array of functions evaluated at a set of input points 
+    if the indices of required functions is known. 
+
+    Parameters 
+    ----------
+    func_table : array_like 
+        Length k array of function objects
+
+    abcissa : array_like 
+        Length Npts array of points at which to evaluate the functions. 
+
+    func_indices : array_like 
+        Length Npts array providing the indices to use to choose which function 
+        operates on each abcissa element. Thus func_indices is an array of integers 
+        ranging between 0 and k-1. 
+
+    Returns 
+    -------
+    out : array_like 
+        Length Npts array giving the evaluation of the appropriate function on each 
+        abcissa element. 
+
+    """
+    func_argsort = func_indices.argsort()
+    func_ranges = list(np.searchsorted(func_indices[func_argsort], range(len(func_table))))
+    func_ranges.append(None)
+    out = np.zeros_like(abcissa)
+    for f, start, end in zip(func_table, func_ranges, func_ranges[1:]):
+        ix = func_argsort[start:end]
+        out[ix] = f(abcissa[ix])
+    return out
+
+def enforce_required_haloprops(haloprop_dict):
+    required_prop_set = set(model_defaults.haloprop_key_dict)
+    provided_prop_set = set(haloprop_dict)
+    if not required_prop_set.issubset(provided_prop_set):
+        raise KeyError("haloprop_key_dict must, at minimum, contain keys "
+            "'prim_haloprop_key' and 'halo_boundary'")
 
 
-
-
+def count_haloprops(haloprop_dict):
+    trigger = 'haloprop_key'
+    num_props = 0
+    for key in haloprop_dict.keys():
+        if key[-len(trigger):]==trigger:
+            num_props += 1
+    return num_props
 
 
 
