@@ -17,8 +17,8 @@ User Documentation
 ******************
 
 
-**Halotools overview**
-----------------------
+**Halotools Overview**
+----------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -27,7 +27,7 @@ User Documentation
    install
    getting_started
 
-**Mock-making tools**
+**Mock-Making Tools**
 ----------------------
 
 .. toctree::
@@ -35,9 +35,18 @@ User Documentation
 
    mock_making/quickstart_guide
    mock_making/overview
-   mock_making/models
 
-**Simulation analysis tools**
+**Model-Building Tools**
+-------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   model_building/quickstart_guide
+   model_building/models
+
+
+**Simulation Analysis Tools**
 --------------------------------------------
 
 .. toctree::
