@@ -3,7 +3,7 @@ from .. import halo_prof_components as hpc
 from astropy import cosmology
 import numpy as np
 
-__all__ = ['test_NFWProfile','test_TrivialProfile']
+__all__ = ['test_TrivialProfile','test_NFWProfile']
 
 def test_TrivialProfile():
 	""" Simple tests of `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
@@ -23,28 +23,52 @@ def test_TrivialProfile():
 
 		* ``haloprop_key_dict``
 	"""
-	trivial = hpc.TrivialProfile()
+	profile_model = hpc.TrivialProfile()
 
-	assert hasattr(trivial, 'cosmology')
-	assert isinstance(trivial.cosmology, cosmology.FlatLambdaCDM)
+	assert hasattr(profile_model, 'cosmology')
+	assert isinstance(profile_model.cosmology, cosmology.FlatLambdaCDM)
 
-	assert type(trivial.cumu_inv_func_table) == np.ndarray
-	assert list(trivial.cumu_inv_func_table) == []
+	assert type(profile_model.cumu_inv_func_table) == np.ndarray
+	assert list(profile_model.cumu_inv_func_table) == []
 
-	assert trivial.cumu_inv_func_table_dict == {}
+	assert profile_model.cumu_inv_func_table_dict == {}
 
-	assert type(trivial.cumu_inv_param_table) == np.ndarray
-	assert list(trivial.cumu_inv_param_table) == []
+	assert type(profile_model.cumu_inv_param_table) == np.ndarray
+	assert list(profile_model.cumu_inv_param_table) == []
 
-	assert trivial.cumu_inv_param_table_dict == {}
+	assert profile_model.cumu_inv_param_table_dict == {}
 
-	assert trivial.halo_prof_func_dict == {}
+	assert profile_model.halo_prof_func_dict == {}
 
-	assert trivial.haloprop_key_dict == {}
+	assert profile_model.haloprop_key_dict == {}
 
-	trivial.build_inv_cumu_lookup_table()
+	profile_model.build_inv_cumu_lookup_table()
 
 
 def test_NFWProfile():
-	nfw = hpc.NFWProfile()
-	assert nfw._conc_parname == 'NFWmodel_conc'
+	profile_model = hpc.NFWProfile()
+
+	assert hasattr(profile_model, 'cosmology')
+	assert isinstance(profile_model.cosmology, cosmology.FlatLambdaCDM)
+
+	assert type(profile_model.cumu_inv_param_table) == np.ndarray
+	assert np.all(profile_model.cumu_inv_param_table > 0)
+	assert np.all(profile_model.cumu_inv_param_table < 1000)
+
+
+	assert type(profile_model.cumu_inv_func_table) == np.ndarray
+
+	assert profile_model._conc_parname == 'NFWmodel_conc'
+
+
+
+
+
+
+
+
+
+
+
+
+

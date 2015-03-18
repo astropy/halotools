@@ -342,6 +342,21 @@ class TrivialProfile(HaloProfileModel):
 class NFWProfile(HaloProfileModel):
     """ NFW halo profile, based on Navarro, Frenk, and White (1999).
 
+    Parameters 
+    ----------
+    cosmology : object, optional
+        astropy cosmology object. Default cosmology is WMAP5. 
+
+    redshift : float, optional
+        Default redshift is 0.
+
+    build_inv_cumu_table : bool, optional
+        If True, upon instantiation the __init__ constructor 
+        will build a sequence of interpolation lookup tables 
+        providing a mapping between :math:`x = r / R_{\\mathrm{vir}}` 
+        and the unit-normalized cumulative mass profile function 
+        :math:`\\rho_{NFW}(x | c)`. 
+
     Notes 
     -----
     For development purposes, object is temporarily hard-coded to only use  
@@ -360,22 +375,6 @@ class NFWProfile(HaloProfileModel):
         build_inv_cumu_table=True, prof_param_table_dict={},
         haloprop_key_dict=model_defaults.haloprop_key_dict,
         conc_mass_relation_key = model_defaults.conc_mass_relation_key):
-        """
-        Parameters 
-        ----------
-        cosmology : object, optional
-            astropy cosmology object. Default cosmology is WMAP5. 
-
-        redshift : float, optional
-            Default redshift is 0.
-
-        build_inv_cumu_table : bool, optional
-            If True, upon instantiation the __init__ constructor 
-            will build a sequence of interpolation lookup tables 
-            providing a mapping between :math:`x = r / R_{\\mathrm{vir}}` 
-            and the unit-normalized cumulative mass profile function 
-            :math:`\\rho_{NFW}(x | c)`. 
-        """
 
         self.model_nickname = 'NFWmodel'
 
