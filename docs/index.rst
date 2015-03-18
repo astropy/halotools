@@ -33,11 +33,9 @@ User Documentation
 .. toctree::
    :maxdepth: 1
 
-   mock_making/overview
    mock_making/quickstart_guide
-   mock_making/simulations
+   mock_making/overview
    mock_making/models
-   mock_making/mock_population
 
 **Simulation analysis tools**
 --------------------------------------------
