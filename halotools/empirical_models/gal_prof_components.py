@@ -72,40 +72,53 @@ class SpatialBias(object):
             located in `~halotools.empirical_models.model_defaults`
 
         input_abcissa_dict : dictionary, optional 
-            Dictionary whose keys are halo profile parameters and values 
+            Dictionary whose keys are halo profile parameter names and values 
             are the abcissa used to define the profile parameter modulating function. 
-            Default values are set according to default_profile_dict, 
-            located in `~halotools.empirical_models.model_defaults`
-            If input_abcissa_dict is passed to the constructor, 
-            input_ordinates_dict must also be passed, and the input_prof_params list must not.
+            See the Notes section below for examples. 
+
+            Default values are set according to ``default_profile_dict``, 
+            located in `~halotools.empirical_models.model_defaults`. 
+            Default interpretation of the abcissa values is as the base-10 logarithm 
+            of whatever is being used for the primary halo property. 
+
+            If `input_abcissa_dict` is passed to the constructor, 
+            `input_ordinates_dict` must also be passed, and the `input_prof_params` list must not.
 
         input_ordinates_dict : dictionary, optional 
-            Dictionary whose keys are halo profile parameters and values 
+            Dictionary whose keys are halo profile parameter names and values 
             are the ordinates used to define the profile parameter modulating function. 
-            Default values are set according to default_profile_dict, 
-            located in `~halotools.empirical_models.model_defaults`
-            If input_ordinates_dict is passed to the constructor, 
-            input_abcissa_dict must also be passed, and the input_prof_params list must not.
+            See the Notes section below for examples. 
+
+            Default values are set according to ``default_profile_dict``, 
+            located in `~halotools.empirical_models.model_defaults`. 
+
+            If `input_abcissa_dict` is passed to the constructor, 
+            `input_ordinates_dict` must also be passed, and the `input_prof_params` list must not.
 
         interpol_method : string, optional 
-            Keyword specifying the method used to interpolate continuous behavior of the function  
-            `radprof_modfunc` from only knowledge of its values at a finite 
-            number of points. The default spline option interpolates 
+            Keyword specifying the method used to interpolate 
+            continuous behavior of the function  `radprof_modfunc` from 
+            only knowledge of its values at the finite 
+            number of points in the abcissa. 
+
+            The default option, ``spline``, interpolates 
             the model's abcissa and ordinates. The polynomial option uses the unique, 
-            degree N polynomial passing through (abcissa, ordinates), 
-            where N = len(abcissa) = len(ordinates). 
+            degree *N* polynomial passing through (abcissa, ordinates), 
+            where :math:`N = \\mathrm{len}(abcissa) = \\mathrm{len}(ordinates)`. 
 
         input_spline_degree : int, optional
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, 
-            nor exceed the maximum value of 5 supported by scipy. 
+            Degree of the spline interpolation for the case where 
+            the chosen interpol_method is `spline`. 
+
+            If there are *k* abcissa values specifying the model, input_spline_degree 
+            is ensured to never exceed *k-1*, 
+            nor exceed the maximum value of *5* supported by scipy. 
 
         multiplicative_bias : boolean, optional 
-            If True (the default setting), the galaxy profile parameters are set to be the 
-            multiplication of radprof_modfunc and the underlying halo profile parameter. 
-            If False, the galaxy profile parameters will be the actual value 
-            returned by radprof_modfunc. 
+            If *True* (the default setting), the galaxy profile parameters are set to be the 
+            multiplication of `radprof_modfunc` and the underlying halo profile parameter. 
+            If *False*, the galaxy profile parameters will be the actual value 
+            returned by `radprof_modfunc`. 
 
         """
 
