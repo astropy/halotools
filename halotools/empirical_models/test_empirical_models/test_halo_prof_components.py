@@ -46,6 +46,9 @@ def test_TrivialProfile():
 
 
 def test_NFWProfile():
+	""" Tests of `~halotools.empirical_models.halo_prof_components.NFWProfile`. 
+	"""
+
 	profile_model = hpc.NFWProfile()
 
 	assert hasattr(profile_model, 'cosmology')

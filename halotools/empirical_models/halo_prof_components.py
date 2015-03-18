@@ -256,7 +256,7 @@ class TrivialProfile(HaloProfileModel):
     Parameters 
     ----------
     cosmology : object 
-        astropy cosmology object
+        Astropy cosmology object. Default cosmology is WMAP5. 
 
     redshift : float 
 
@@ -345,17 +345,10 @@ class NFWProfile(HaloProfileModel):
     Parameters 
     ----------
     cosmology : object, optional
-        astropy cosmology object. Default cosmology is WMAP5. 
+        Astropy cosmology object. Default cosmology is WMAP5. 
 
     redshift : float, optional
         Default redshift is 0.
-
-    build_inv_cumu_table : bool, optional
-        If True, upon instantiation the __init__ constructor 
-        will build a sequence of interpolation lookup tables 
-        providing a mapping between :math:`x = r / R_{\\mathrm{vir}}` 
-        and the unit-normalized cumulative mass profile function 
-        :math:`\\rho_{NFW}(x | c)`. 
 
     Notes 
     -----
@@ -372,7 +365,7 @@ class NFWProfile(HaloProfileModel):
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, 
         redshift=sim_defaults.default_redshift,
-        build_inv_cumu_table=True, prof_param_table_dict={},
+        prof_param_table_dict={},
         haloprop_key_dict=model_defaults.haloprop_key_dict,
         conc_mass_relation_key = model_defaults.conc_mass_relation_key):
 
@@ -399,9 +392,8 @@ class NFWProfile(HaloProfileModel):
 
         self.publication = ['arXiv:9611107','arXiv:1402.7073']
 
-        if build_inv_cumu_table is True:
-            self.build_inv_cumu_lookup_table(
-                prof_param_table_dict=self.prof_param_table_dict)
+        self.build_inv_cumu_lookup_table(
+            prof_param_table_dict=self.prof_param_table_dict)
 
 
     def g(self, x):
