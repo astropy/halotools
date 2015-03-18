@@ -2,7 +2,17 @@
 from .. import halo_prof_components as hpc
 from .. import gal_prof_components as gpc
 
-def test_nfw_spatial_bias_instance():
+__all__ = ['test_NFWProfile_SpatialBias']
+
+def test_NFWProfile_SpatialBias():
+	""" Function testing the implementation of a spatially biased NFW profile. 
+
+	Specifically, `test_NFWProfile_SpatialBias` tests how 
+	`~halotools.empirical_models.gal_prof_components.SpatialBias` 
+	performs when operating on 
+	`~halotools.empirical_models.halo_prof_components.NFWProfile`
+
+	"""
 	nfw = hpc.NFWProfile()
 	gal_type = 'sats'
 	biased_prof_param_list = nfw.prof_param_keys
