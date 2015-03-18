@@ -8,150 +8,170 @@ by composing the behavior of the components.
 
 """
 
+__all__ = ['SpatialBias']
+
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
-from utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
-import defaults
+import model_defaults
+
+from functools import partial
 
 ##################################################################################
 
-class TrivialCenProfile(object):
-    """ Profile assigning central galaxies to reside at exactly the halo center."""
-
-    def __init__(self, gal_type):
-        self.gal_type = gal_type
-
-    def mc_coords(self, *args,**kwargs):
-
-        too_many_args = (occuhelp.aph_len(args) > 0) & ('mock_galaxies' in kwargs.keys())
-        if too_many_args == True:
-            raise TypeError("TrivialCenProfile can be passed an array, or a mock, but not both")
-
-        # If we are running in testmode, require that all galaxies 
-        # passed to mc_coords are actually the same type
-        runtest = ( (defaults.testmode == True) & 
-            ('mock_galaxies' in kwargs.keys()) )
-        if runtest == True:
-            assert np.all(mock_galaxies.gal_type == self.gal_type)
-        ###
-
-        return 0
-
 ##################################################################################
-
-class IsotropicSats(object):
-    """ Classical satellite profile. """
-
-    def __init__(self, gal_type):
-        self.gal_type = gal_type
-
-    def mc_angles(self,coords):
-        """
-        Generate a list of Ngals random points on the unit sphere. 
-        The coords array is passed as input to save memory, 
-        speeding up satellite position assignment when building mocks.
-
-        """
-        Ngals = aph_len(coords[:,0])
-        cos_t = np.random.uniform(-1.,1.,Ngals)
-        phi = np.random.uniform(0,2*np.pi,Ngals)
-        sin_t = np.sqrt((1.-(cos_t*cos_t)))
-        
-        coords[:,0] = sin_t * np.cos(phi)
-        coords[:,1] = sin_t * np.sin(phi)
-        coords[:,2] = cos_t
-
-        return coords
-
-    def mc_coords(self,coords,inv_cumu_prof_func,system_center,host_Rvir):
-        Ngals = aph_len(coords[:,0])
-        random_cumu_prof_vals = np.random.random(Ngals)
-
-        r_random = inv_cumu_prof_func(random_cumu_prof_vals)*host_Rvir
-
-        coords *= r_random.reshape(Ngals,1)
-        coords += system_center.reshape(1,3)
-
-        return coords
-
-
-##################################################################################
-class RadProfBias(object):
-    """ Conventional model for the spatial bias of satellite galaxies. 
-    The profile parameters governing the satellite distribution are set to be 
-    a scalar multiple of the profile parameters of their host halo. 
+class SpatialBias(object):
+    """ Classical method to model how the radial profile of a galaxy population 
+    can systematically differ from the profile of the underlying dark matter halo. 
+    Accomplished by keeping the form of the profile fixed, 
+    but allowing for halo and galaxy profile parameters to be distinct. 
 
     Traditionally applied to the NFW case, where the only profile parameter is 
-    halo concentration, and the scalar multiple is mass-independent, so that 
-    :math:`c_{\\mathrm{gal}} = F*c_{\\mathrm{halo}}`. 
+    halo concentration, and the galaxy concentration is a mass-independent 
+    scalar multiple of its dark matter halo profile, so that 
+    :math:`c_{\\mathrm{gal}} = F\\times c_{\\mathrm{halo}}`. 
     That traditional model is a special case of this class, 
-    which encompasses halo-dependence to the multiplicatively biased parameters, 
-    as well as support for any profile model with any number of parameters. 
+    which encompasses possible dependence of 
+    the multiplicative bias on whatever the primary halo property is, 
+    as well as support for any arbitrary profile model with any number of parameters. 
     """
 
     def __init__(self, gal_type, halo_prof_model, 
-        input_prof_params=[], input_abcissa_dict={}, input_ordinates_dict={}, 
-        interpol_method='spline',input_spline_degree=3):
+        input_prof_params='all', input_abcissa_dict={}, input_ordinates_dict={}, 
+        interpol_method='spline',input_spline_degree=3, 
+        multiplicative_bias = True):
         """ 
         Parameters 
         ----------
-        gal_type : string, optional
-            Used to set the key value of the galaxy population being modeled.  
+        gal_type : string
+            Name of the galaxy population being modeled, 
+            e.g., ``satellites`` or ``orphans``.  
 
         halo_prof_model : object 
-            `~halotools.HaloProfileModel` class instance. Determines the 
-            underlying dark matter halo profile to which gal_type galaxies respond.
+            `~halotools.empirical_models.HaloProfileModel` sub-class instance. 
+            Determines the underlying dark matter halo profile 
+            to which gal_type galaxies respond.
+            
+            Used *only* to ensure self-consistency between the galaxy and halo profiles, 
+            accomplished by verifying that the parameters set to be modulated are 
+            actually parameters of the underlying halo profile. 
 
         input_prof_params : array_like, optional
-            String array specifying the halo profile parameters to be modulated. 
-            Values of this array must equal one of halo_prof_model.param_keys, e.g., 'halo_NFW_conc'.
+            Array of strings specifying the halo profile parameters to be modulated. 
+            Values of this array must equal one of 
+            halo_prof_model.prof_param_keys, e.g., 'halo_NFW_conc'.
             If input_prof_params is passed to the constructor, 
             input_abcissa_dict and input_ordinates_dict should not be passed, and 
             the abcissa and ordinates defining the modulation of the halo profile parameters 
-            will be set according to the default_profile_dict dict in `~halotools.defaults`
+            will be set according to the default_profile_dict, 
+            located in `~halotools.empirical_models.model_defaults`
 
         input_abcissa_dict : dictionary, optional 
-            Dictionary whose keys are halo profile parameters and values 
+            Dictionary whose keys are halo profile parameter names and values 
             are the abcissa used to define the profile parameter modulating function. 
-            Default values are set according to default_profile_dict in `~halotools.defaults`
-            If input_abcissa_dict is passed to the constructor, 
-            input_ordinates_dict must also be passed, and the input_prof_params list must not.
+            See the Notes section below for examples. 
+
+            Default values are set according to ``default_profile_dict``, 
+            located in `~halotools.empirical_models.model_defaults`. 
+            Default interpretation of the abcissa values is as the base-10 logarithm 
+            of whatever is being used for the primary halo property. 
+
+            If `input_abcissa_dict` is passed to the constructor, 
+            `input_ordinates_dict` must also be passed, and the `input_prof_params` list must not.
 
         input_ordinates_dict : dictionary, optional 
-            Dictionary whose keys are halo profile parameters and values 
+            Dictionary whose keys are halo profile parameter names and values 
             are the ordinates used to define the profile parameter modulating function. 
-            Default values are set according to default_profile_dict in `~halotools.defaults`
-            If input_ordinates_dict is passed to the constructor, 
-            input_abcissa_dict must also be passed, and the input_prof_params list must not.
+            See the Notes section below for examples. 
+
+            Default values are set according to ``default_profile_dict``, 
+            located in `~halotools.empirical_models.model_defaults`. 
+
+            If `input_abcissa_dict` is passed to the constructor, 
+            `input_ordinates_dict` must also be passed, and the `input_prof_params` list must not.
 
         interpol_method : string, optional 
-            Keyword specifying the method used to interpolate continuous behavior of the function  
-            `radprof_modfunc` from only knowledge of its values at a finite 
-            number of points. The default spline option interpolates 
+            Keyword specifying the method used to interpolate 
+            continuous behavior of the function  `radprof_modfunc` from 
+            only knowledge of its values at the finite 
+            number of points in the abcissa. 
+
+            The default option, ``spline``, interpolates 
             the model's abcissa and ordinates. The polynomial option uses the unique, 
-            degree N polynomial passing through (abcissa, ordinates), 
-            where N = len(abcissa) = len(ordinates). 
+            degree *N* polynomial passing through (abcissa, ordinates), 
+            where :math:`N = \\mathrm{len}(abcissa) = \\mathrm{len}(ordinates)`. 
 
         input_spline_degree : int, optional
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, 
-            nor exceed the maximum value of 5 supported by scipy. 
+            Degree of the spline interpolation for the case where 
+            the chosen interpol_method is `spline`. 
+
+            If there are *k* abcissa values specifying the model, input_spline_degree 
+            is ensured to never exceed *k-1*, 
+            nor exceed the maximum value of *5* supported by scipy. 
+
+        multiplicative_bias : boolean, optional 
+            If *True* (the default setting), the galaxy profile parameters are set to be the 
+            multiplication of `radprof_modfunc` and the underlying halo profile parameter. 
+            If *False*, the galaxy profile parameters will be the actual value 
+            returned by `radprof_modfunc`. 
 
         """
 
+        # Bind the inputs to the instance
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
 
-        self.set_param_dict(input_prof_params,input_abcissa_dict,input_ordinates_dict)
+        self.multiplicative_bias = multiplicative_bias
 
+        # The following call to _set_param_dict primarily does two things:
+        # 1. Creates attributes self.abcissa_dict and self.ordinates_dict, 
+        # each with one key per biased galaxy profile parameter
+        # 2. Creates an attribute self.param_dict. This is the dictionary 
+        # that actually governs the behavior of the model. Its keys have names 
+        # such as 'NFWmodel_conc_biasfunc_par1_satellites'
+        self._set_param_dict(
+            input_prof_params,input_abcissa_dict,input_ordinates_dict)
+
+        # Create the following two convenience lists:
+        # self.halo_prof_param_keys and self.gal_prof_param_keys. 
+        # halo_prof_param_keys has entries such as 'NFWmodel_conc'. 
+        # These keys are simply the keys of self.abcissa_dict, 
+        # so that ONLY SPATIALLY BIASED PARAMETERS ARE IN THE LIST. 
+        # gal_prof_param_keys is identical to halo_prof_param_keys, 
+        # but each entry has been prepended with 'gal_'. 
+        self._set_prof_params()
+
+        # Configure the settings of scipy's spline interpolation routine
         self._setup_interpol(interpol_method, input_spline_degree)
 
+        self._set_prim_func_dict()
+
+
+    def _set_prim_func_dict(self):
+
+        # The primary method of this class is get_modulated_prof_params, which 
+        # derives its behavior from radprof_modfunc. Both of these methods are 
+        # written to be totally generic. But model instances will be clearer 
+        # if the primary methods have easy-to-interpret names. Moreover, 
+        # we need to have separate attribute names for the methods in prim_func_dict 
+        # for each halo profile parameter being modulated. 
+        # The following few lines accomplish that specificity, and define self.prim_func_dict.
+        self.prim_func_dict = {}
+
+        # self.halo_prof_param_keys is a list set in self._set_prof_params
+        # Only keys of biased profile parameters appear in the list
+        for halokey in self.halo_prof_param_keys:
+            galkey = self._get_gal_prof_param_key(halokey)
+            new_method_name = galkey
+            function = partial(self.get_modulated_prof_params, halokey)
+            setattr(self, new_method_name, function)
+            self.prim_func_dict[galkey] = function
+        
 
     def get_modulated_prof_params(self, prof_param_key, *args, **kwargs):
         """ Primary method used by the outside world. 
@@ -180,73 +200,23 @@ class RadProfBias(object):
 
         """
 
+        # Create a new dictionary key to conveniently pass 
+        # 'prof_param_key' to _retrieve_input_halo_data via **kwargs
         kwargs['prof_param_key'] = prof_param_key
         input_prim_haloprops, input_halo_prof_params = (
             self._retrieve_input_halo_data(*args, **kwargs)
             )
 
-        multiplicative_modulation = (
+        parameter_modulation = (
             self.radprof_modfunc(prof_param_key, input_prim_haloprops)
             )
 
-        output_prof_params = multiplicative_modulation*input_halo_prof_params
+        if self.multiplicative_bias==True:
+            output_prof_params = parameter_modulation*input_halo_prof_params
+        else:
+            output_prof_params = parameter_modulation
 
         return output_prof_params
-
-
-    def _retrieve_input_halo_data(self, *args, **kwargs):
-        """ Private method to retrieve an array of the primary halo property (e.g., Mvir), 
-        and an array of the halo profile parameter values, associated with 
-        the mock galaxies. Mostly used for convenient API. This method allows 
-        us to pass either two input arrays, or an entire mock galaxy population, 
-        to get_modulated_prof_params. 
-
-        Parameters 
-        ----------
-        input_prim_haloprops : array_like, optional positional argument
-            Array of the primary halo property of the mock galaxies.
-
-        input_halo_prof_params : array_like, optional positional argument
-            Array of the underlying dark matter halo profile 
-            parameters of the mock galaxies.
-
-        mock_galaxies : object, optional keyword argument 
-
-        prof_param_key : string, optional keyword argument
-            Used to access the correct halo profile parameter. 
-
-        Returns 
-        ------- 
-        input_halo_prof_params : array_like
-
-        """
-
-        ###
-        if occuhelp.aph_len(args) > 0:
-            # We were passed an array of profile parameters, 
-            # so we should not have also been passed a galaxy sample
-            if 'mock_galaxies' in kwargs.keys():
-                raise TypeError("RadProfBias can be passed an array, "
-                    "or a mock, but not both")
-            input_prim_haloprops = args[0]
-            input_halo_prof_params = args[1]
-
-        elif (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()):
-            # We were passed a collection of galaxies
-            mock_galaxies = kwargs['mock_galaxies']
-            halo_prof_param_key = kwargs['prof_param_key']
-            prim_haloprop_key = mock_galaxies.model.prim_haloprop_key
-            input_prim_haloprops = mock_galaxies[prim_haloprop_key]
-            input_halo_prof_params = mock_galaxies[halo_prof_param_key]
-        else:
-            raise SyntaxError("get_modified_prof_params was called with "
-                " incorrect inputs. Method accepts a positional argument that is an array "
-                "storing the initial profile parameters to be modulated, "
-                "or alternatively a mock galaxy object with the same array"
-                " stored in the mock_galaxies.prof_param_keys attribute")
-
-        return input_prim_haloprops, input_halo_prof_params
-
 
     def radprof_modfunc(self,profile_parameter_key,input_abcissa):
         """
@@ -292,6 +262,58 @@ class RadProfBias(object):
 
         return output_profile_modulation
 
+    def _retrieve_input_halo_data(self, *args, **kwargs):
+        """ Private method to retrieve an array of the primary halo property (e.g., Mvir), 
+        and an array of the halo profile parameter values, associated with 
+        the mock galaxies. Mostly used for convenient API. This method allows 
+        us to pass either two input arrays, or an entire mock galaxy population, 
+        to get_modulated_prof_params. 
+
+        Parameters 
+        ----------
+        input_prim_haloprops : array_like, optional positional argument
+            Array of the primary halo property of the mock galaxies.
+
+        input_halo_prof_params : array_like, optional positional argument
+            Array of the underlying dark matter halo profile 
+            parameters of the mock galaxies.
+
+        mock_galaxies : object, optional keyword argument 
+
+        prof_param_key : string, optional keyword argument
+            Used to access the correct halo profile parameter. 
+
+        Returns 
+        ------- 
+        input_halo_prof_params : array_like
+
+        """
+
+        ###
+        if occuhelp.aph_len(args) > 0:
+            # We were passed an array of profile parameters, 
+            # so we should not have also been passed a galaxy sample
+            if 'mock_galaxies' in kwargs.keys():
+                raise TypeError("SpatialBias can be passed an array, "
+                    "or a mock, but not both")
+            return args[0], args[1]
+
+        elif (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()):
+            # We were passed a collection of galaxies
+            mock_galaxies = kwargs['mock_galaxies']
+            halo_prof_param_key = kwargs['prof_param_key']
+            prim_haloprop_key = mock_galaxies.model.prim_haloprop_key
+
+            return mock_galaxies[prim_haloprop_key], mock_galaxies[halo_prof_param_key]
+
+        else:
+            raise SyntaxError("get_modified_prof_params was called with "
+                " incorrect inputs. Method accepts a positional argument that is an array "
+                "storing the initial profile parameters to be modulated, "
+                "or alternatively a mock galaxy object with the same array"
+                " stored in the mock_galaxies.prof_param_keys attribute")
+
+
     def _retrieve_model_abcissa_ordinates(self, profile_parameter_key):
         """ Private method used to make API convenient. 
         Used to pass the correct (abcissa, ordinates) pair to radprof_modfunc. 
@@ -318,7 +340,7 @@ class RadProfBias(object):
         all model parameters varied by an MCMC walker have their values stored 
         in a param_dict dictionary. Thus the ordinate values 
         that actually govern the behavior of `get_modulated_prof_params` 
-        must be stored in RadProfBias.param_dict, and when those values 
+        must be stored in SpatialBias.param_dict, and when those values 
         are updated the behavior of `get_modulated_prof_params` needs to vary accordingly. 
         The primary purpose of this private method is to produce that behavior. 
         """
@@ -337,11 +359,14 @@ class RadProfBias(object):
             key_ipar = self._get_parameter_key(profile_parameter_key, ipar)
             value_ipar = self.param_dict[key_ipar]
             ordinates.extend([value_ipar])
-
  
         return abcissa, ordinates
 
-    def set_param_dict(self, 
+    def update_param_dict(self, new_param_dict):
+        for key in self.param_dict.keys():
+            self.param_dict[key] = new_param_dict[key]
+
+    def _set_param_dict(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
         """ Method used to set up dictionaries governing the behavior of the 
         profile modulating function. 
@@ -362,7 +387,10 @@ class RadProfBias(object):
             on that halo profile parameter. 
         """
 
-        input_prof_params = list(input_prof_params)
+        if input_prof_params=='all':
+            input_prof_params = self.halo_prof_model.prof_param_keys
+        else:
+            input_prof_params = list(input_prof_params)
         self._test_sensible_inputs(input_prof_params, input_abcissa_dict, input_ordinates_dict)
 
         self.abcissa_dict={}
@@ -370,8 +398,10 @@ class RadProfBias(object):
 
         if input_prof_params is not []:
             for prof_param_key in input_prof_params:
-                self.abcissa_dict[prof_param_key] = defaults.default_profile_dict['profile_abcissa']
-                self.ordinates_dict[prof_param_key] = defaults.default_profile_dict['profile_ordinates']
+                self.abcissa_dict[prof_param_key] = (
+                    model_defaults.default_profile_dict['profile_abcissa'])
+                self.ordinates_dict[prof_param_key] = (
+                    model_defaults.default_profile_dict['profile_ordinates'])
         else:
             self.abcissa_dict = input_abcissa_dict
             self.ordinates_dict = input_ordinates_dict
@@ -382,15 +412,16 @@ class RadProfBias(object):
                 key = self._get_parameter_key(prof_param_key, ii)
                 self.param_dict[key] = val
 
-        self.param_keys = self.abcissa_dict.keys()
+    def _set_prof_params(self):
 
-    def get_gal_prof_param_key(self, prof_param_key):
-        key = 'gal_'+prof_param_key[len(defaults.host_haloprop_prefix):]
-        return key
+        self.halo_prof_param_keys = self.abcissa_dict.keys()
+        self.gal_prof_param_keys = (
+            [self._get_gal_prof_param_key(key) for key in self.halo_prof_param_keys]
+            )
 
     def _test_sensible_inputs(self, 
         input_prof_params, input_abcissa_dict, input_ordinates_dict):
-        """ Private method to verify that `set_param_dict` was passed 
+        """ Private method to verify that `_set_param_dict` was passed 
         a reasonable set of inputs. 
         """
 
@@ -405,11 +436,17 @@ class RadProfBias(object):
             except:
                 raise SyntaxError("If passing input_prof_params to the constructor,"
                     " do not pass input_ordinates_dict")
-            try:
-                assert set(input_prof_params).issubset(
-                    set(self.halo_prof_model.param_keys))
-            except:
-                raise SyntaxError("Entries of input_prof_params must be keys of halo_prof_model")
+            if self.multiplicative_bias==True:
+                try:
+                    input_keyset = set(input_prof_params)
+                    halo_keyset = set(self.halo_prof_model.prof_param_keys)
+                    assert input_keyset.issubset(halo_keyset)
+                except:
+                    errant_key = list(input_keyset-halo_keyset)[0]
+                    raise SyntaxError("If multiplicative_bias is True, "
+                        " input_prof_params must be keys of halo_prof_model\n"
+                        "For input_prof_param %s, found no matching key "
+                        " in the halo_prof_model" % errant_key) 
         else:
             try:
                 assert input_abcissa_dict != {}
@@ -428,6 +465,7 @@ class RadProfBias(object):
 
         if interpol_method not in ['spline', 'polynomial']:
             raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
+
         self.interpol_method = interpol_method
 
         def _setup_spline(self):
@@ -458,6 +496,10 @@ class RadProfBias(object):
         `radprof_modfunc`. 
         """
         return profile_parameter_key+'_biasfunc_par'+str(ipar+1)+'_'+self.gal_type
+
+    def _get_gal_prof_param_key(self, halo_prof_param_key):
+        return model_defaults.galprop_prefix+halo_prof_param_key
+
 
 
 

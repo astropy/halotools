@@ -44,7 +44,7 @@ def get_catalogs_dir(catalog_type):
     Parameters
     ----------
     catalog_type : string 
-        String giving the type of catalog. Should be 'particles' or 'halos'.
+        String giving the type of catalog. Should be 'particles' or 'subhalos'.
 
     Returns
     -------
@@ -52,12 +52,12 @@ def get_catalogs_dir(catalog_type):
         Path to the halotools directory storing processed halo catalogs.
 
     """
-    if (catalog_type=='halo') or (catalog_type=='halos') or (catalog_type==None):
+    if (catalog_type=='subhalos') or (catalog_type=='subhalo') or (catalog_type==None):
         subdir_name = 'halo_catalogs'
     elif (catalog_type=='particle') or (catalog_type=='particles'):
         subdir_name = 'particle_catalogs'
     else:
-        raise TypeError("Input catalog_type must be either 'halos' or 'particles'")
+        raise TypeError("Input catalog_type must be either 'subhalos' or 'particles'")
 
     dirname = os.path.join(get_halotools_cache_dir(), subdir_name)
 
@@ -104,14 +104,14 @@ def get_local_filename_from_remote_url(remote_url):
 
     return local_filename
 
-def list_of_catalogs_in_cache(catalog_type='halos'):
+def list_of_catalogs_in_cache(catalog_type='subhalos'):
     """ Returns a list of strings of filenames pointing to every 
     catalog currently in the cache directory.
 
     Parameters
     ----------
     catalog_type : string, optional
-        String giving the type of catalog. Should be 'particles' or 'halos'.
+        String giving the type of catalog. Should be 'particles' or 'subhalos'.
 
     Returns
     -------
