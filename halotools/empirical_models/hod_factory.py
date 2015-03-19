@@ -53,10 +53,6 @@ class HodModelFactory(object):
         # Build the composite model dictionary, whose keys are parameters of our model
         self._set_init_param_dict()
 
-        # Determine how to discretize halo profile parameter values 
-        # Used to build lookup tables 
-        self._set_prof_param_table_dict()
-
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
         self._set_primary_behaviors()
@@ -237,73 +233,12 @@ class HodModelFactory(object):
         return output_halo_prof_func_dict
 
 
-    def _set_prof_param_table_dict(self,input_dict=None):
-
-        # Set all profile parameter table dictionaries. 
-        # Also set which builder function will be used by the composite 
-        # method build_inv_cumu_lookup_table
-
-        # At the end, if passed an input_dict,
-        # we will use it to over-write with the keys present in input_dict
-
-        self.prof_param_table_dict = {}
-        #self.prof_param_table_builder_dict = {}
-        self._gal_type_prof_param_key_correspondence = {}
+    def build_halo_prof_lookup_tables(self, prof_param_table_dict={}):
 
         for gal_type in self.gal_types:
-            gal_prof_model = self.model_blueprint[gal_type]['profile']
-            prof_param_table_dict = gal_prof_model.halo_prof_model.prof_param_table_dict
-            for key in prof_param_table_dict.keys():
-                if key not in self.prof_param_table_dict.keys():
-                    # Set the gridding scheme for this parameter
-                    self.prof_param_table_dict[key] = prof_param_table_dict[key]
-                    # Set the table builder function for this parameter
-                    #self.prof_param_table_builder_dict[key] = (
-                    #    gal_prof_model.halo_prof_model.build_inv_cumu_lookup_table
-                    #    )
-                    # Bookkeeping device to manage potential key repetition
-                    self._gal_type_prof_param_key_correspondence[key] = gal_type
-                else:
-                    msg = "The halo profile parameter %s\n"
-                    "appears in the halo profile model associated with both\n"
-                    "%s and %s. \nIgnoring the %s model and using the %s model\n"
-                    "to build prof_param_table_dict %s"
-                    ignored_gal_type = gal_type
-                    relevant_gal_type = self._gal_type_prof_param_key_correspondence[key]
-                    print(msg % (key, ignored_gal_type, relevant_gal_type, 
-                        ignored_gal_type, relevant_gal_type, key))
- 
-        # Finally, use input_dict to overwrite table values, if applicable
-        if input_dict != None:
-            for key, table in input_dict.iteritems():
-                if type(table) is not tuple:
-                    raise TypeError("input_dict must have tuples for values")
-                if len(table) is not 3:
-                    raise TypeError("Length of input_dict tuple must be 3")
-                self.prof_param_table_dict[key] = table
+            halo_prof_model = self.model_blueprint[gal_type]['profile'].halo_prof_model
+            halo_prof_model.build_inv_cumu_lookup_table(prof_param_table_dict)
 
-
-    def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
-
-        self._set_prof_param_table_dict(prof_param_table_dict)
-
-        self.cumu_inv_func_table_dict = {}
-        self.cumu_inv_param_table_dict = {}
-
-        for key in self.prof_param_table_dict.keys():
-            gal_type = self._gal_type_prof_param_key_correspondence[key]
-            gal_prof_model = self.model_blueprint[gal_type]['profile']
-            builder = gal_prof_model.halo_prof_model.build_inv_cumu_lookup_table
-
-            if key in prof_param_table_dict.keys():
-                builder(prof_param_table_dict)
-            else:
-                builder()
-
-            self.cumu_inv_func_table_dict[key] = (
-                gal_prof_model.halo_prof_model.cumu_inv_func_table)
-            self.cumu_inv_param_table_dict[key] = (
-                gal_prof_model.halo_prof_model.cumu_inv_param_table)
 
     def retrieve_relevant_haloprops(self, gal_type, *args, **kwargs):
         """ Method returning the arrays that need to be passed 

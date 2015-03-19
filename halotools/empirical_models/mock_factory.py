@@ -108,15 +108,25 @@ class HodMockFactory(object):
        # is defined by a tuple (xlow, xhigh, dx) in prof_param_table_dict, 
        # whose keys are the name of the halo profile parameter being discretized
         prof_param_table_dict={}
-        for key in self.model.halo_prof_func_dict.keys():
-            dpar = self.model.prof_param_table_dict[key][2]
-            halocat_parmin = self.halos[key].min() - dpar
-            model_parmin = self.model.prof_param_table_dict[key][0]
-            parmin = np.min([halocat_parmin,model_parmin])
-            halocat_parmax = self.halos[key].max() + dpar
-            model_parmax = self.model.prof_param_table_dict[key][1]
-            parmax = np.max([halocat_parmax,model_parmax])
-            prof_param_table_dict[key] = (parmin, parmax, dpar)
+
+        for gal_type in self.gal_types:
+            gal_prof_model = self.model.model_blueprint[gal_type]['profile']
+
+            for key in gal_prof_model.halo_prof_func_dict.keys():
+                halocatkey = model_defaults.host_haloprop_prefix + key
+
+                model_parmin = gal_prof_model.prof_param_table_dict[key][0]
+                model_parmax = gal_prof_model.prof_param_table_dict[key][1]
+                dpar = gal_prof_model.prof_param_table_dict[key][2]
+
+                halocat_parmin = self.halos[halocatkey].min() - dpar
+                halocat_parmax = self.halos[halocatkey].max() + dpar
+
+                parmin = np.min([halocat_parmin,model_parmin])
+                parmax = np.max([halocat_parmax,model_parmax])
+
+                prof_param_table_dict[key] = (parmin, parmax, dpar)
+
 
         # Now over-write prof_param_table_dict with 
         # input_prof_param_table_dict, if applicable
@@ -130,7 +140,7 @@ class HodMockFactory(object):
         # 1. cumu_inv_param_table, an array of concentration bin boundaries, and 
         # 2. cumu_inv_func_table, an array of profile function objects, 
         # one function for each element of cumu_inv_param_table
-        self.model.build_inv_cumu_lookup_table(
+        self.model.build_halo_prof_lookup_tables(
             prof_param_table_dict=prof_param_table_dict)
 
 

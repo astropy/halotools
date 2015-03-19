@@ -561,23 +561,24 @@ class NFWProfile(HaloProfileModel):
 
     def _set_prof_param_table_dict(self,input_dict={}):
         """ Method sets the value of the prof_param_table_dict attribute. 
+
         The prof_param_table_dict attribute is a dictionary 
         used in the set up of a gridded correspondence between 
         halo profile properties and inverse cumulative function objects. 
-        This grid is used by mock factories such as `halotools.mock_factory` 
+        This grid is used by mock factories such as `halotools.empirical_models.mock_factory` 
         to rapidly generate Monte Carlo realizations of satellite profiles. 
 
         Parameters 
         ----------
         input_dict : dict, optional
-            Each key corresponds to the name of a halo profile parameter, 
-            e.g., 'halo_NFW_conc'. Each value is a 3-element tuple used 
-            to govern how that parameter is gridded up by 
-            `NFWProfile.build_inv_cumu_lookup_table`. 
-            The entries of each tuple give the minimum parameter 
+            All keys other than ``NFWmodel_conc`` will be ignored. 
+            The value bound to the ``NFWmodel_conc`` key must be a 3-element tuple,
+            which will be used to govern how halo concentration is discretized. 
+            The entries of the tuple give the minimum parameter 
             value of the table to be built, the 
-            maximum value, and the linear spacing.
-            If None, default behavior is set in `halotools.model_defaults` module. 
+            maximum value, and the linear spacing, respectively. 
+            If an empty dict, or if no ``NFWmodel_conc`` is present, 
+            default behavior is set in `halotools.empirical_models.model_defaults` module. 
 
         Notes 
         ----- 
@@ -586,25 +587,27 @@ class NFWProfile(HaloProfileModel):
 
         """
 
-        if input_dict == {}:
-            cmin = model_defaults.min_permitted_conc
-            cmax = model_defaults.max_permitted_conc
-            dconc = model_defaults.default_dconc
-            self.prof_param_table_dict = (
-                {self._conc_parname:(cmin, cmax, dconc)}
-                )
-        else:
-            # Run some consistency checks on  
-            # input_dict before binding it to the model instance
-            if set(input_dict.keys()) != {self._conc_parname}:
-                raise KeyError("The only permitted key of prof_param_table_dict "
-                    " in the NFWProfile model is %s" % self._conc_parname)
-            if not isinstance(input_dict[self._conc_parname], tuple):
-                raise TypeError("Values of prof_param_table_dict must be a tuple")
-            if len(input_dict[self._conc_parname]) != 3:
-                raise TypeError("Tuple value of prof_param_table_dict " 
-                    "must have exactly 3 elements")
-            self.prof_param_table_dict = input_dict
+        # First declare the what prof_param_table_dict will be 
+        # in the absence of any input_dict
+        cmin = model_defaults.min_permitted_conc
+        cmax = model_defaults.max_permitted_conc
+        dconc = model_defaults.default_dconc
+        self.prof_param_table_dict = {self._conc_parname:(cmin, cmax, dconc)}
+
+        for key in self.prof_param_table_dict.keys():
+
+            if key in input_dict.keys():
+                if not isinstance(input_dict[key], tuple):
+                    raise TypeError("Values of input_dict passed to "
+                        "_set_prof_param_table_dict must be a tuple")
+
+                if len(input_dict[key]) != 3:
+                    raise TypeError("Tuple value of "
+                        "input_dict passed to _set_prof_param_table_dict" 
+                        "must have exactly 3 elements")
+
+                self.prof_param_table_dict[key] = input_dict[key]
+
 
     def _get_conc_mass_model(self, conc_mass_relation_key):
 
