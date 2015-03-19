@@ -52,12 +52,10 @@ class GalProfModel(object):
         self.redshift = self.halo_prof_model.redshift
         self.spatial_bias_model = spatial_bias_model
 
-        # If using a spatial bias model, 
-        # self.param_dict = self.spatial_bias_model.param_dict
-        # Otherwise, self.param_dict = {}
+        # Bind param_dict to the class instance 
+        # param_dict contains the parameters of the model 
+        # for which posteriors can be computed in a likelihood analysis.
         self._initialize_param_dict()
-
-        self._set_prof_params()
 
         self.set_prof_param_table_dict()
 
@@ -87,9 +85,12 @@ class GalProfModel(object):
     def _initialize_param_dict(self):
         """ Method binding param_dict to the class instance. 
 
-        If using a SpatialBias model, ``param_dict`` will be derived 
-        directly from the SpatialBias class instance. Otherwise, 
-        ``param_dict`` will be an empty dictionary. 
+        If galaxy profile parameters are biased relative to the 
+        dark matter halo, ``param_dict`` will be derived 
+        directly from the instance of 
+        `~halotools.empirical_models.gal_prof_components.SpatialBias` 
+        bound to `GalProfModel`. 
+        Otherwise, ``param_dict`` will be an empty dictionary. 
         """
 
         if self.spatial_bias_model == None:
@@ -105,14 +106,6 @@ class GalProfModel(object):
             self.spatial_bias_model.update_param_dict(new_param_dict)
             self.param_dict = self.spatial_bias_model.param_dict
 
-    def _set_prof_params(self):
-
-        self.halo_prof_param_keys = (
-            self.halo_prof_model.halo_prof_func_dict.keys()
-            )
-        self.gal_prof_param_keys = (
-            [model_defaults.galprop_prefix+key for key in self.halo_prof_param_keys]
-            )
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
         self.halo_prof_model.build_inv_cumu_lookup_table(
@@ -239,7 +232,7 @@ class GalProfModel(object):
 
             # get radii
             # NOTE THE HARD-CODING OF A SINGLE HALO PROFILE PARAMETER
-            profile_param_key = self.gal_prof_param_keys[0]
+            profile_param_key = self.gal_prof_func_dict.keys()[0]
             scaled_mc_radii = self.mc_radii(
                 getattr(mock_galaxies, profile_param_key)[gal_type_slice])            
             # multiply radii by angles 

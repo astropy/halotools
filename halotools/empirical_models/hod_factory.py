@@ -234,18 +234,8 @@ class HodModelFactory(object):
                     print(msg % (key, ignored_gal_type, relevant_gal_type, 
                         ignored_gal_type, relevant_gal_type, key))
 
-        # Finally, create a convenience list of galaxy profile parameter keys
-        # This list is identical to self.halo_prof_func_dict.keys(), 
-        # but pre-pended by model_defaults.galprop_prefix
-        self._set_gal_prof_params()
 
         return output_halo_prof_func_dict
-
-    def _set_gal_prof_params(self):
-        self.gal_prof_param_keys = []
-        for key in self.halo_prof_func_dict.keys():
-            galkey = model_defaults.galprop_prefix+key
-            self.gal_prof_param_keys.append(galkey)
 
 
     def _set_prof_param_table_dict(self,input_dict=None):
