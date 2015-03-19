@@ -199,36 +199,23 @@ class HodModelFactory(object):
     @property 
     def halo_prof_func_dict(self):
         """ Method to derive the halo profile parameter function dictionary 
-        from a collection of galaxies. 
+        from a collection of component models. 
 
         Notes 
         -----
         If there are multiple instances of the same underlying 
-        halo profile model, such as would happen if 
-        there are two satellite-like populations with NFW profiles, 
-        only one will be used and a warning will be issued. 
+        halo profile model, a profile function is chosen essentially at random. 
+        This is innocuous, since the multiple instances have already been ensured 
+        to provide consistent profile parameter functions. 
+
         """
         output_halo_prof_func_dict = {}
-        tmp_key_correspondence = {}
-        for gal_type in self.gal_types:
-            gal_prof_model = self.model_blueprint[gal_type]['profile']
-            tmp_halo_prof_func_dict = gal_prof_model.halo_prof_model.halo_prof_func_dict
-            for key in tmp_halo_prof_func_dict.keys():
-                if key not in output_halo_prof_func_dict.keys():
-                    # Set the profile function for this parameter
-                    output_halo_prof_func_dict[key] = tmp_halo_prof_func_dict[key]
-                    # Bookkeeping device to manage potential key repetition
-                    tmp_key_correspondence[key] = gal_type
-                else:
-                    msg = "The halo profile parameter function %s\n"
-                    "appears in the halo profile model associated with both\n"
-                    "%s and %s. \nIgnoring the %s model and using the %s model\n"
-                    "to compute the new halo catalog column %s"
-                    ignored_gal_type = gal_type
-                    relevant_gal_type = tmp_key_correspondence[key]
-                    print(msg % (key, ignored_gal_type, relevant_gal_type, 
-                        ignored_gal_type, relevant_gal_type, key))
 
+        for gal_type in self.gal_types:
+            halo_prof_model = self.model_blueprint[gal_type]['profile'].halo_prof_model
+
+            for key, func in halo_prof_model.halo_prof_func_dict.iteritems():
+                output_halo_prof_func_dict[key] = func
 
         return output_halo_prof_func_dict
 
