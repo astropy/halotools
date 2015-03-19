@@ -56,7 +56,7 @@ class HaloProfileModel(object):
         Dictionary keys are, e.g., ``prim_haloprop_key``; 
         dictionary values are strings providing the column name 
         used to extract the relevant data from a halo catalog, e.g., ``mvir``. 
-        Used by the methods `set_prof_param_table_dict` and `set_halo_prof_func_dict`. 
+        Used by the method `set_prof_param_table_dict`. 
         Default is an empty dict. 
 
     Notes 
@@ -280,7 +280,6 @@ class TrivialProfile(HaloProfileModel):
             cosmology, redshift, prof_param_keys, haloprop_key_dict)
 
         empty_dict = {}
-        #self.set_halo_prof_func_dict(empty_dict)
         self.set_prof_param_table_dict(empty_dict)
         self.build_inv_cumu_lookup_table(empty_dict)
 
@@ -374,8 +373,8 @@ class NFWProfile(HaloProfileModel):
         Dictionary values are strings providing the column name 
         used to extract the relevant data from a halo catalog, 
         e.g., ``mvir`` and ``rvir``. 
-        ``haloprop_key_dict`` is used by the methods 
-        `set_prof_param_table_dict` and `set_halo_prof_func_dict`. 
+        ``haloprop_key_dict`` is used by the method 
+        `set_prof_param_table_dict`. 
         Default values are set in `~halotools.empirical_models.model_defaults`. 
 
     conc_mass_relation_key : string, optional 

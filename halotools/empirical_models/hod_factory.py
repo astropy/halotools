@@ -51,7 +51,7 @@ class HodModelFactory(object):
 
         # Determine the functions that will be used
         # to map halo profile parameters onto halos
-        self._set_halo_prof_func_dict()
+        #self._set_halo_prof_func_dict()
         self._set_prof_param_table_dict()
 
         # Create a set of bound methods with specific names 
@@ -191,7 +191,8 @@ class HodModelFactory(object):
         return output_pos
 
 
-    def _set_halo_prof_func_dict(self):
+    @property 
+    def halo_prof_func_dict(self):
         """ Method to derive the halo profile parameter function dictionary 
         from a collection of galaxies. 
 
@@ -202,16 +203,15 @@ class HodModelFactory(object):
         there are two satellite-like populations with NFW profiles, 
         only one will be used and a warning will be issued. 
         """
-
-        self.halo_prof_func_dict = {}
+        output_halo_prof_func_dict = {}
         tmp_key_correspondence = {}
         for gal_type in self.gal_types:
             gal_prof_model = self.model_blueprint[gal_type]['profile']
             tmp_halo_prof_func_dict = gal_prof_model.halo_prof_model.halo_prof_func_dict
             for key in tmp_halo_prof_func_dict.keys():
-                if key not in self.halo_prof_func_dict.keys():
+                if key not in output_halo_prof_func_dict.keys():
                     # Set the profile function for this parameter
-                    self.halo_prof_func_dict[key] = tmp_halo_prof_func_dict[key]
+                    output_halo_prof_func_dict[key] = tmp_halo_prof_func_dict[key]
                     # Bookkeeping device to manage potential key repetition
                     tmp_key_correspondence[key] = gal_type
                 else:
@@ -228,6 +228,8 @@ class HodModelFactory(object):
         # This list is identical to self.halo_prof_func_dict.keys(), 
         # but pre-pended by model_defaults.galprop_prefix
         self._set_gal_prof_params()
+
+        return output_halo_prof_func_dict
 
     def _set_gal_prof_params(self):
         self.gal_prof_param_keys = []

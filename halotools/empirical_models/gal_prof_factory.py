@@ -68,16 +68,17 @@ class GalProfModel(object):
 
     @property 
     def haloprop_key_dict(self):
-        """ Dictionary determining the halo properties used by the model.
-        The `haloprop_key_dict` bound to `GalProfModel` derives entirely from 
-        the `haloprop_key_dict` bound to ``self.halo_prof_model``. 
-
+        """ Dictionary determining the halo properties used by the model (e.g., ``mvir``).
         `haloprop_key_dict` dictionary keys are, e.g., ``prim_haloprop_key``; 
         dictionary values are strings providing the column name 
         used to extract the relevant data from a halo catalog, e.g., ``mvir``.
 
         Notes 
         ----- 
+        The `haloprop_key_dict` bound to `GalProfModel` derives entirely from 
+        the `~halotools.empirical_models.HaloProfileModel.haloprop_key_dict` attribute 
+        bound to `~halotools.empirical_models.HaloProfileModel`. 
+
         Implemented as a read-only getter method via the ``@property`` decorator syntax. 
 
         """
@@ -126,18 +127,20 @@ class GalProfModel(object):
         """ Dictionary used as a container for 
         the functions that map galaxy profile parameter values onto dark matter halos. 
 
-        Each dict key of ``gal_prof_func_dict`` corresponds to 
-        the name of a halo profile parameter, but pre-pended by 'gal_', 
-        e.g., 'gal_NFWmodel_conc'. 
+        Each dict key of `gal_prof_func_dict` corresponds to 
+        the name of a halo profile parameter, but pre-pended by ``gal_``, 
+        e.g., ``gal_NFWmodel_conc``. 
         Each dict value attached is a function object
-        providing the mapping between gal_type galaxies and their halo profile parameter. 
+        providing the mapping between ``gal_type`` galaxies 
+        and their halo profile parameter. 
         For example, for the case of an underlying NFW profile, 
         the function object would just be some concentration-mass function. 
 
         Galaxy profile parameters may systematically differ from their underlying 
-        dark matter halo profile parameters, a phenomenon generically referred to 
-        as 'spatial bias'. This is why the gal_prof_func_dict has different keys than 
-        the halo_prof_func_dict. 
+        dark matter halo profile parameters, a phenomenon governed by the 
+        `~halotools.empirical_models.SpatialBias` class. 
+        The possibility of spatial bias is why the 
+        `gal_prof_func_dict` has different keys than the `halo_prof_func_dict`. 
 
         Notes 
         ----- 
@@ -156,22 +159,9 @@ class GalProfModel(object):
 
         return output_dict
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def set_halo_prof_func_dict(self, input_dict):
-        self.halo_prof_model.set_halo_prof_func_dict(input_dict)
+    @property 
+    def halo_prof_func_dict(self):
+        return self.halo_prof_model.halo_prof_func_dict()
 
     def set_prof_param_table_dict(self,input_dict={}):
         self.halo_prof_model.set_prof_param_table_dict(input_dict)
