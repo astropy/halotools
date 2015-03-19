@@ -41,7 +41,11 @@ class HodModelFactory(object):
         self.model_blueprint = model_blueprint
 
         # Determine the halo properties governing the galaxy population properties
-        self._set_haloprops()
+        occuhelp.enforce_required_haloprops(self.haloprop_key_dict)
+
+        self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
+        if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
+            self.sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
 
         # Create attributes for galaxy types and their occupation bounds
         self._set_gal_types()
@@ -60,16 +64,27 @@ class HodModelFactory(object):
 
         self.publications = self._build_publication_list()
 
-    def _set_haloprops(self):
 
-        self.haloprop_key_dict = return_haloprop_dict(self.model_blueprint)
+    @property 
+    def haloprop_key_dict(self):
+        """ Dictionary defining the halo properties 
+        that regulate galaxy occupation statistics. 
 
-        occuhelp.enforce_required_haloprops(self.haloprop_key_dict)
-        self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
-        if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
-            self.sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
+        Dict keys always include ``prim_haloprop_key`` and ``halo_boundary``, 
+        whose default settings are defined in `~halotools.empirical_models.model_defaults`. 
+        Models with assembly bias will include a ``sec_haloprop_key`` key. 
+        Dict values are strings used to access the appropriate column of a halo catalog, 
+        e.g., ``mvir``. 
+        """
+
+        return return_haloprop_dict(self.model_blueprint)
 
     def _set_gal_types(self):
+        """ Private method binding the ``gal_types`` list attribute,
+        and the ``occupation_bound`` attribute, to the class instance. 
+        List is sequenced in ascending order of the occupation bound. 
+        """
+
         gal_types = self.model_blueprint.keys()
 
         occupation_bounds = []
@@ -85,6 +100,7 @@ class HodModelFactory(object):
         for gal_type in self.gal_types:
             self.occupation_bound[gal_type] = (
                 self.model_blueprint[gal_type]['occupation'].occupation_bound)
+
 
     def gal_prof_param(self, gal_type, gal_prof_param_key, mock_galaxies):
         """ If the galaxy profile model has gal_prof_param_key as a biased parameter, 
@@ -138,24 +154,18 @@ class HodModelFactory(object):
                 input_param_dict = self.param_dict)
             setattr(self, new_method_name, new_method_behavior)
 
-            # Now move on to galaxy profiles
+            ### Now move on to galaxy profiles
             gal_prof_model = self.model_blueprint[gal_type]['profile']
 
-            # We will loop over gal_prof_model.gal_prof_func_dict
-            # This dictionary only contains keys for biased profile parameters
-            # Thus there will be no new methods created for unbiased profile parameters
-            for halo_prof_parm in gal_prof_model.halo_prof_param_keys:
-                new_method_name = (
-                    model_defaults.galprop_prefix + '_')
+            # Create a new method for each galaxy profile parameters of each gal_type
+            for gal_prof_param, gal_prof_func in (
+                gal_prof_model.gal_prof_func_dict.iteritems()):
 
+                new_method_name = gal_prof_param + '_' + gal_type
+                new_method_behavior = gal_prof_func
+                setattr(self, new_method_name, new_method_behavior)
 
-            ### OLD METHOD
-            #for gal_prof_param_key, gal_prof_param_func in (
-            #    gal_prof_model.gal_prof_func_dict.iteritems()):
-            #    new_method_name = gal_prof_param_key+'_'+gal_type
-            #    new_method_behavior = gal_prof_param_func
-            #    setattr(self, new_method_name, new_method_behavior)
-
+            ### Create a method to assign positions to each gal_type
             new_method_name = 'pos_'+gal_type
             new_method_behavior = partial(self.mc_pos, gal_type = gal_type)
             setattr(self, new_method_name, new_method_behavior)
@@ -395,9 +405,6 @@ class HodModelFactory(object):
                     model_instance.param_dict.items() + 
                     self.param_dict.items()
                     )
-
-    def update_param_dict(self, new_param_dict):
-        pass
 
     def _build_publication_list(self):
         """ Method to build a list of publications 

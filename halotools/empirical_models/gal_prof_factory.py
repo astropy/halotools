@@ -161,7 +161,26 @@ class GalProfModel(object):
 
     @property 
     def halo_prof_func_dict(self):
-        return self.halo_prof_model.halo_prof_func_dict()
+        """ Dictionary used as a container for 
+        the functions that map profile parameter values onto dark matter halos. 
+
+        Each dict key of ``halo_prof_func_dict`` corresponds to 
+        the name of a halo profile parameter, e.g., 'NFWmodel_conc'. 
+        The dict value attached to each dict key is a function object
+        providing the mapping between halos and the halo profile parameter, 
+        such as a concentration-mass function. 
+
+        Notes 
+        ----- 
+        Implemented as a read-only getter method via the ``@property`` decorator syntax. 
+
+        The `halo_prof_func_dict` bound to `GalProfModel` 
+        is not defined within the `GalProfModel` class, but instead is defined in the getter method 
+        `~halotools.empirical_models.halo_prof_components.halo_prof_func_dict.HaloProfileModel.halo_prof_func_dict`
+        of `~halotools.empirical_models.halo_prof_components.halo_prof_func_dict.HaloProfileModel`. 
+        """
+
+        return self.halo_prof_model.halo_prof_func_dict
 
     def set_prof_param_table_dict(self,input_dict={}):
         self.halo_prof_model.set_prof_param_table_dict(input_dict)
