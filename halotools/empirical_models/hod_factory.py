@@ -144,11 +144,17 @@ class HodModelFactory(object):
             # We will loop over gal_prof_model.gal_prof_func_dict
             # This dictionary only contains keys for biased profile parameters
             # Thus there will be no new methods created for unbiased profile parameters
-            for gal_prof_param_key, gal_prof_param_func in (
-                gal_prof_model.gal_prof_func_dict.iteritems()):
-                new_method_name = gal_prof_param_key+'_'+gal_type
-                new_method_behavior = gal_prof_param_func
-                setattr(self, new_method_name, new_method_behavior)
+            for halo_prof_parm in gal_prof_model.halo_prof_param_keys:
+                new_method_name = (
+                    model_defaults.galprop_prefix + '_')
+
+
+            ### OLD METHOD
+            #for gal_prof_param_key, gal_prof_param_func in (
+            #    gal_prof_model.gal_prof_func_dict.iteritems()):
+            #    new_method_name = gal_prof_param_key+'_'+gal_type
+            #    new_method_behavior = gal_prof_param_func
+            #    setattr(self, new_method_name, new_method_behavior)
 
             new_method_name = 'pos_'+gal_type
             new_method_behavior = partial(self.mc_pos, gal_type = gal_type)
@@ -493,27 +499,6 @@ def return_haloprop_dict(model_blueprint):
 
 
 
-
-""" # Not sure whether this is worth doing
-
-    def _create_convenience_attributes(self):
-
-        for gal_type, gal_type_dict in self.model_blueprint.iteritems():
-            for component_key, component_instance in gal_type_dict.iteritems():
-                # First create a convenience method for each entry in 
-                # the primary function dictionary
-                for method in component_instance.prim_func_dict.values():
-                    method_name = method.__name__+'_'+component_instance.gal_type
-                    setattr(self, method_name, method)
-                # If the component has additional methods 
-                # we'd like convenience attributes for, create those too.
-                if hasattr(component_instance, 'additional_methods_to_inherit'):
-                    convenience_methods = component_instance.additional_methods_to_inherit
-                for method in convenience_methods:
-                    method_name = method.__name__+'_'+component_instance.gal_type
-                    setattr(self, method_name, method)
-
-"""
 
 
 

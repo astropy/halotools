@@ -30,20 +30,32 @@ class GalProfModel(object):
     and mock factories such as `~halotools.empirical_models.HodMockFactory`. 
     """
 
-    def __init__(self, gal_type, halo_prof_model,
-        spatial_bias_model = None):
+    def __init__(self, gal_type, halo_prof_model, spatial_bias_model = None):
+        """
+        Parameters 
+        ----------
+        gal_type : string 
+            Name of the galaxy population being modeled, e.g., ``sats``. 
 
+        halo_prof_model : object 
+            Instance of a concrete sub-class of 
+            `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
+
+        spatial_bias_model : object, optional
+            Instance of the class `~halotools.empirical_models.gal_prof_components.SpatialBias`. 
+        """
+
+        # Bind the inputs to the instance 
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
         self.cosmology = self.halo_prof_model.cosmology
         self.redshift = self.halo_prof_model.redshift
-        self.haloprop_key_dict = self.halo_prof_model.haloprop_key_dict
-
         self.spatial_bias_model = spatial_bias_model
 
-        self._set_param_dict()
-
-        self._set_gal_prof_func_dict()
+        # If using a spatial bias model, 
+        # self.param_dict = self.spatial_bias_model.param_dict
+        # Otherwise, self.param_dict = {}
+        self._initialize_param_dict()
 
         self._set_prof_params()
 
@@ -54,7 +66,30 @@ class GalProfModel(object):
 
         self.publications = []
 
-    def _set_param_dict(self):
+    @property 
+    def haloprop_key_dict(self):
+        """ Dictionary determining the halo properties used by the model.
+        The `haloprop_key_dict` bound to `GalProfModel` derives entirely from 
+        the `haloprop_key_dict` bound to ``self.halo_prof_model``. 
+
+        `haloprop_key_dict` dictionary keys are, e.g., ``prim_haloprop_key``; 
+        dictionary values are strings providing the column name 
+        used to extract the relevant data from a halo catalog, e.g., ``mvir``.
+
+        Notes 
+        ----- 
+        Implemented as a read-only getter method via the ``@property`` decorator syntax. 
+
+        """
+        return self.halo_prof_model.haloprop_key_dict
+
+    def _initialize_param_dict(self):
+        """ Method binding param_dict to the class instance. 
+
+        If using a SpatialBias model, ``param_dict`` will be derived 
+        directly from the SpatialBias class instance. Otherwise, 
+        ``param_dict`` will be an empty dictionary. 
+        """
 
         if self.spatial_bias_model == None:
             self.param_dict = {}
@@ -70,6 +105,7 @@ class GalProfModel(object):
             self.param_dict = self.spatial_bias_model.param_dict
 
     def _set_prof_params(self):
+
         self.halo_prof_param_keys = (
             self.halo_prof_model.halo_prof_func_dict.keys()
             )
@@ -85,11 +121,54 @@ class GalProfModel(object):
         self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
         self.cumu_inv_param_table = self.halo_prof_model.cumu_inv_param_table
 
-    def _set_gal_prof_func_dict(self):
+    @property 
+    def gal_prof_func_dict(self):
+        """ Dictionary used as a container for 
+        the functions that map galaxy profile parameter values onto dark matter halos. 
+
+        Each dict key of ``gal_prof_func_dict`` corresponds to 
+        the name of a halo profile parameter, but pre-pended by 'gal_', 
+        e.g., 'gal_NFWmodel_conc'. 
+        Each dict value attached is a function object
+        providing the mapping between gal_type galaxies and their halo profile parameter. 
+        For example, for the case of an underlying NFW profile, 
+        the function object would just be some concentration-mass function. 
+
+        Galaxy profile parameters may systematically differ from their underlying 
+        dark matter halo profile parameters, a phenomenon generically referred to 
+        as 'spatial bias'. This is why the gal_prof_func_dict has different keys than 
+        the halo_prof_func_dict. 
+
+        Notes 
+        ----- 
+        Implemented as a read-only getter method via the ``@property`` decorator syntax. 
+        """
+        output_dict = {}
         if self.spatial_bias_model == None:
-            self.gal_prof_func_dict = {}
+
+            halo_prof_dict = self.halo_prof_model.halo_prof_func_dict
+            for key, func in halo_prof_dict.iteritems():
+                newkey = model_defaults.galprop_prefix + key
+                output_dict[newkey] = func
+
         else:
-            self.gal_prof_func_dict = self.spatial_bias_model.prim_func_dict
+            raise SyntaxError("Never finished integrating SpatialBias into galaxy profile factory")
+
+        return output_dict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def set_halo_prof_func_dict(self, input_dict):
         self.halo_prof_model.set_halo_prof_func_dict(input_dict)

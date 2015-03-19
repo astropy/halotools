@@ -125,8 +125,8 @@ class HaloProfileModel(object):
         raise NotImplementedError("All sub-classes of HaloProfileModel "
             "must include a cumulative_mass_PDF method")
 
-    @abstractmethod
-    def set_halo_prof_func_dict(self, input_dict):
+    @abstractproperty
+    def halo_prof_func_dict(self):
         """ Required method specifying the mapping between halos 
         and their profile parameters. 
 
@@ -161,8 +161,8 @@ class HaloProfileModel(object):
 
         """
         raise NotImplementedError("All subclasses of HaloProfileModel must"
-            " provide a set_halo_prof_func_dict method. \n"
-            "This method creates dictionary with dict keys"
+            " provide a halo_prof_func_dict attribute. \n"
+            "This attribute is a dictionary with dict keys"
             " giving the names of the halo profile parameters, "
             " and dict values being the functions used to map "
             "profile parameter values onto halos")
@@ -280,7 +280,7 @@ class TrivialProfile(HaloProfileModel):
             cosmology, redshift, prof_param_keys, haloprop_key_dict)
 
         empty_dict = {}
-        self.set_halo_prof_func_dict(empty_dict)
+        #self.set_halo_prof_func_dict(empty_dict)
         self.set_prof_param_table_dict(empty_dict)
         self.build_inv_cumu_lookup_table(empty_dict)
 
@@ -309,7 +309,8 @@ class TrivialProfile(HaloProfileModel):
         """
         return np.where(r == 0, 1, 0)
 
-    def set_halo_prof_func_dict(self,input_dict):
+    @property
+    def halo_prof_func_dict(self):
         """ Trivial method binding the empty dictionary ``halo_prof_func_dict`` 
         to the class instance. 
 
@@ -317,7 +318,8 @@ class TrivialProfile(HaloProfileModel):
         For `TrivialProfile`, the ``halo_prof_func_dict`` is empty because in this case 
         there are no profile parameters that need to be mapped onto halos. 
         """
-        self.halo_prof_func_dict = input_dict
+        return {}
+        #self.halo_prof_func_dict = input_dict
 
     def set_prof_param_table_dict(self,input_dict):
         """ Trivial method binding the empty dictionary 
@@ -417,9 +419,7 @@ class NFWProfile(HaloProfileModel):
         HaloProfileModel.__init__(self, 
             cosmology, redshift, [self._conc_parname], haloprop_key_dict)
 
-        conc_mass_func = self.get_conc_mass_model(conc_mass_relation_key)
-        # Now bundle this function into self.halo_prof_func_dict
-        self.set_halo_prof_func_dict({self._conc_parname:conc_mass_func})
+        self._conc_mass_func = self._get_conc_mass_model(conc_mass_relation_key)
 
         # Build a table stored in the dictionary prof_param_table_dict 
         # that dictates how to discretize the profile parameters
@@ -542,26 +542,23 @@ class NFWProfile(HaloProfileModel):
         self.cumu_inv_func_table = np.array(cumu_inv_funcs)
         self.cumu_inv_param_table = conc_array
 
-    def set_halo_prof_func_dict(self, input_dict):
-        """ Trivial required method whose sole design purpose is to 
-        standardize the interface of halo profile models. 
+    @property 
+    def halo_prof_func_dict(self):
+        """ Dictionary used as a container for 
+        the functions that map profile parameter values onto dark matter halos. 
 
-        Parameters 
-        ----------
-        input_dict : dict 
-            Each key corresponds to the name of a halo profile parameter, 
-            e.g., 'halo_NFW_conc', which are set by the _get_param_key 
-            method if the super-class. The value attached to each key is a function object 
-            providing the mapping between halos and the halo profile parameter, 
-            such as a concentration-mass function. 
+        Each dict key of ``halo_prof_func_dict`` corresponds to 
+        the name of a halo profile parameter, e.g., 'NFWmodel_conc'. 
+        The dict value attached to each dict key is a function object
+        providing the mapping between halos and the halo profile parameter, 
+        such as a concentration-mass function. 
 
         Notes 
         ----- 
-        Method does not return anything. Instead, input_dict is bound to 
-        the NFWProfile instance with the attribute name halo_prof_func_dict. 
+        Implemented as a read-only getter method via the ``@property`` decorator syntax. 
         """
+        return {self._conc_parname : self._conc_mass_func}
 
-        self.halo_prof_func_dict = input_dict
 
     def set_prof_param_table_dict(self,input_dict={}):
         """ Method sets the value of the prof_param_table_dict attribute. 
@@ -610,7 +607,7 @@ class NFWProfile(HaloProfileModel):
                     "must have exactly 3 elements")
             self.prof_param_table_dict = input_dict
 
-    def get_conc_mass_model(self, conc_mass_relation_key):
+    def _get_conc_mass_model(self, conc_mass_relation_key):
 
         # Instantiate the container class for concentration-mass relations, 
         # defined in the external module halo_prof_param_components
