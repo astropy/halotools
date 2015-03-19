@@ -56,7 +56,7 @@ class HaloProfileModel(object):
         Dictionary keys are, e.g., ``prim_haloprop_key``; 
         dictionary values are strings providing the column name 
         used to extract the relevant data from a halo catalog, e.g., ``mvir``. 
-        Used by the method `set_prof_param_table_dict`. 
+        Used by the method `_set_prof_param_table_dict`. 
         Default is an empty dict. 
 
     Notes 
@@ -168,7 +168,7 @@ class HaloProfileModel(object):
             "profile parameter values onto halos")
 
     @abstractmethod
-    def set_prof_param_table_dict(self,input_dict):
+    def _set_prof_param_table_dict(self,input_dict):
         """ Required method providing instructions for how to discretize 
         halo profile parameter values. 
 
@@ -188,7 +188,7 @@ class HaloProfileModel(object):
 
         """ 
         raise NotImplementedError("All subclasses of HaloProfileModel must"
-            " provide a set_prof_param_table_dict method used to create a "
+            " provide a _set_prof_param_table_dict method used to create a "
             "(possibly trivial) dictionary prof_param_table_dict.")
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
@@ -208,7 +208,7 @@ class HaloProfileModel(object):
         Parameters 
         ----------
         prof_param_table_dict : dict, optional
-            Dictionary created by `set_prof_param_table_dict` 
+            Dictionary created by `_set_prof_param_table_dict` 
             providing instructions for how to generate a grid of 
             values for each halo profile parameter. 
             Default is an empty dict. 
@@ -280,7 +280,7 @@ class TrivialProfile(HaloProfileModel):
             cosmology, redshift, prof_param_keys, haloprop_key_dict)
 
         empty_dict = {}
-        self.set_prof_param_table_dict(empty_dict)
+        self._set_prof_param_table_dict(empty_dict)
         self.build_inv_cumu_lookup_table(empty_dict)
 
         self.publication = []
@@ -320,7 +320,7 @@ class TrivialProfile(HaloProfileModel):
         return {}
         #self.halo_prof_func_dict = input_dict
 
-    def set_prof_param_table_dict(self,input_dict):
+    def _set_prof_param_table_dict(self,input_dict):
         """ Trivial method binding the empty dictionary 
         ``prof_param_table_dict`` to the class instance. 
 
@@ -360,7 +360,7 @@ class NFWProfile(HaloProfileModel):
         the tuple entries provide, respectively, the min, max, and linear 
         spacing used to discretize halo concentration. 
 
-        The `set_prof_param_table_dict` method binds this dictionary to 
+        The `_set_prof_param_table_dict` method binds this dictionary to 
         the class instance; if no ``prof_param_table_dict`` argument 
         is passed to the constructor, 
         the discretization will be determined by the default settings in 
@@ -374,7 +374,7 @@ class NFWProfile(HaloProfileModel):
         used to extract the relevant data from a halo catalog, 
         e.g., ``mvir`` and ``rvir``. 
         ``haloprop_key_dict`` is used by the method 
-        `set_prof_param_table_dict`. 
+        `_set_prof_param_table_dict`. 
         Default values are set in `~halotools.empirical_models.model_defaults`. 
 
     conc_mass_relation_key : string, optional 
@@ -422,7 +422,7 @@ class NFWProfile(HaloProfileModel):
 
         # Build a table stored in the dictionary prof_param_table_dict 
         # that dictates how to discretize the profile parameters
-        self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
+        self._set_prof_param_table_dict(input_dict=prof_param_table_dict)
 
         self.publication = ['arXiv:9611107','arXiv:1402.7073']
 
@@ -514,7 +514,7 @@ class NFWProfile(HaloProfileModel):
 
         #Set up the grid used to tabulate inverse cumulative NFW mass profiles
         #This will be used to assign halo-centric distances to the satellites
-        self.set_prof_param_table_dict(prof_param_table_dict)
+        self._set_prof_param_table_dict(prof_param_table_dict)
 
         cmin, cmax, dconc = self.prof_param_table_dict[self._conc_parname]
 
@@ -559,7 +559,7 @@ class NFWProfile(HaloProfileModel):
         return {self._conc_parname : self._conc_mass_func}
 
 
-    def set_prof_param_table_dict(self,input_dict={}):
+    def _set_prof_param_table_dict(self,input_dict={}):
         """ Method sets the value of the prof_param_table_dict attribute. 
         The prof_param_table_dict attribute is a dictionary 
         used in the set up of a gridded correspondence between 

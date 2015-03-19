@@ -175,9 +175,58 @@ class GalProfModel(object):
 
         return self.halo_prof_model.halo_prof_func_dict
 
-    def set_prof_param_table_dict(self,input_dict={}):
-        self.halo_prof_model.set_prof_param_table_dict(input_dict)
-        self.prof_param_table_dict = self.halo_prof_model.prof_param_table_dict
+    def _set_prof_param_table_dict(self,input_dict={}):
+        """ Dictionary attribute providing instructions for how to discretize 
+        halo profile parameter values. 
+
+        After calling this method, 
+        the `~halotools.empirical_models.halo_prof_components.HaloProfileModel` 
+        sub-class instance bound to `GalProfModel` gets a 
+        ``prof_param_table_dict`` attribute that is a dictionary. 
+        Each dict key of ``prof_param_table_dict`` 
+        is a profile parameter name, e.g., ``NFWmodel_conc``. 
+        Each dict value is a 3-element tuple; 
+        the tuple entries provide, respectively, the min, max, and linear 
+        spacing used to discretize the profile parameter. 
+        This discretization is used by `build_inv_cumu_lookup_table` to 
+        create a lookup table associated with `HaloProfileModel`. 
+
+        Notes 
+        -----
+        The ``prof_param_table_dict`` dictionary can be empty, 
+        as is the case for `TrivialProfile`. 
+
+        The behavior of `_set_prof_param_table_dict` is derived entirely from 
+        `~halotools.empirical_models.halo_prof_components.HaloProfileModel`, 
+        or one of its sub-classes. 
+
+        """ 
+        self.halo_prof_model._set_prof_param_table_dict(input_dict)
+
+    @property 
+    def prof_param_table_dict(self):
+        """ Dictionary attribute providing instructions for how to discretize 
+        halo profile parameter values. 
+
+        Each dict key of ``prof_param_table_dict`` 
+        is a profile parameter name, e.g., ``NFWmodel_conc``. 
+        Each dict value is a 3-element tuple; 
+        the tuple entries provide, respectively, the min, max, and linear 
+        spacing used to discretize the profile parameter. 
+
+        Notes 
+        -----
+        This discretization is used by `build_inv_cumu_lookup_table` to 
+        create a lookup table associated with `HaloProfileModel`. 
+
+        The ``prof_param_table_dict`` dictionary can be empty, 
+        as is the case for 
+        `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
+
+        Keys and values are set by the `_set_prof_param_table_dict` method. 
+
+        """ 
+        return self.halo_prof_model.prof_param_table_dict
         
     def get_prof_table_indices(self, params):
         result = np.digitize(params, self.cumu_inv_param_table)
