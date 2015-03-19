@@ -6,6 +6,8 @@ galaxy profiles from a set of components.
 
 """
 
+__all__ = ['GalProfModel']
+
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
@@ -18,6 +20,15 @@ import gal_prof_components as gpc
 
 
 class GalProfModel(object):
+    """ Container class for the intra-halo position and velocity profile 
+    of a galaxy population. 
+
+    This class derives the vast majority of its 
+    behavior from external functions and classes. 
+    The main purpose of the `GalProfModel` class is to provide a standardized 
+    interface for model factories such as `~halotools.empirical_models.HodModelFactory` 
+    and mock factories such as `~halotools.empirical_models.HodMockFactory`. 
+    """
 
     def __init__(self, gal_type, halo_prof_model,
         spatial_bias_model = None):
@@ -30,9 +41,9 @@ class GalProfModel(object):
 
         self.spatial_bias_model = spatial_bias_model
 
-        self.set_param_dict()
+        self._set_param_dict()
 
-        self.set_gal_prof_func_dict()
+        self._set_gal_prof_func_dict()
 
         self._set_prof_params()
 
@@ -43,7 +54,7 @@ class GalProfModel(object):
 
         self.publications = []
 
-    def set_param_dict(self):
+    def _set_param_dict(self):
 
         if self.spatial_bias_model == None:
             self.param_dict = {}
@@ -74,7 +85,7 @@ class GalProfModel(object):
         self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
         self.cumu_inv_param_table = self.halo_prof_model.cumu_inv_param_table
 
-    def set_gal_prof_func_dict(self):
+    def _set_gal_prof_func_dict(self):
         if self.spatial_bias_model == None:
             self.gal_prof_func_dict = {}
         else:

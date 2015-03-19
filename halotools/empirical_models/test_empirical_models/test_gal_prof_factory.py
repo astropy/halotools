@@ -13,13 +13,15 @@ def test_unbiased_trivial():
 
 	assert isinstance(cen_prof.halo_prof_model, hpc.TrivialProfile)
 
-	assert hasattr(cen_prof, 'cosmology')
 	assert isinstance(cen_prof.cosmology, cosmology.FlatLambdaCDM)
-	assert hasattr(cen_prof, 'redshift')
+
 	assert 0 <= cen_prof.redshift <= 100
 
-	assert hasattr(cen_prof,'haloprop_key_dict')
 	assert cen_prof.haloprop_key_dict == {}
 
 	assert hasattr(cen_prof,'spatial_bias_model')
+
+	assert cen_prof.param_dict == {}
+
+	assert cen_prof.gal_prof_func_dict == {}
 
