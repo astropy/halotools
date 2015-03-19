@@ -57,7 +57,7 @@ class GalProfModel(object):
         # for which posteriors can be computed in a likelihood analysis.
         self._initialize_param_dict()
 
-        self.set_prof_param_table_dict()
+        self._set_prof_param_table_dict()
 
         self.build_inv_cumu_lookup_table(
             prof_param_table_dict=self.prof_param_table_dict)
@@ -111,7 +111,6 @@ class GalProfModel(object):
         self.halo_prof_model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)
 
-        self.prof_param_table_dict = self.halo_prof_model.prof_param_table_dict
         self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
         self.cumu_inv_param_table = self.halo_prof_model.cumu_inv_param_table
 
