@@ -53,9 +53,8 @@ class HodModelFactory(object):
         # Build the composite model dictionary, whose keys are parameters of our model
         self._set_init_param_dict()
 
-        # Determine the functions that will be used
-        # to map halo profile parameters onto halos
-        #self._set_halo_prof_func_dict()
+        # Determine how to discretize halo profile parameter values 
+        # Used to build lookup tables 
         self._set_prof_param_table_dict()
 
         # Create a set of bound methods with specific names 
