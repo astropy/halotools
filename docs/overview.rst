@@ -2,7 +2,10 @@
 Halotools Overview
 ************************
 
-Here we’ll give a qualitative description of the motivation and functionality of Halotools in broad strokes. You can get a more detailed picture of the package from the rest of the documentation. 
+Here we’ll give a qualitative description of the motivation and functionality of Halotools in broad strokes. You can get a more detailed picture of the package from the rest of the :ref:`user-docs`. 
+
+Halotools is a fully open-source project, and is the product of many scientists collaborating across numerous universities. If you are interested in contributing to Halotools, see the :ref:`developer-docs`. 
+
 
 Studying Cosmological Models of Structure Formation 
 ======================================================================
