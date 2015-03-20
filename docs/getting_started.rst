@@ -29,6 +29,8 @@ import any Halotools functionality using ``*``, for example::
 Getting started with subpackages
 ================================
 
+Although the different sub-packages of Halotools are woven together for the science aims of the package (see :ref:`halotools_overview` for a sketch of the primary science targets), individually the sub-packages have very different functionality. 
+
 For instructions on how to get started with making mocks, 
 see :ref:`mock_making_quickstart`. 
 To learn how to build a customized model that includes the 

@@ -1,3 +1,5 @@
+.. _halotools_overview:
+
 ************************
 Halotools Overview
 ************************
