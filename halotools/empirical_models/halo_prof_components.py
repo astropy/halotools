@@ -276,8 +276,12 @@ class TrivialProfile(HaloProfileModel):
         # Call the init constructor of the super-class, 
         # whose only purpose is to bind cosmology, redshift, haloprop_key_dict, 
         # and a list of prof_param_keys to the NFWProfile instance. 
-        HaloProfileModel.__init__(self, 
+
+        super(TrivialProfile, self).__init__(
             cosmology, redshift, prof_param_keys, haloprop_key_dict)
+        # Old syntax,  now abandoned, replaced by above
+        #HaloProfileModel.__init__(self, 
+        #    cosmology, redshift, prof_param_keys, haloprop_key_dict)
 
         empty_dict = {}
         self._set_prof_param_table_dict(empty_dict)
@@ -318,7 +322,6 @@ class TrivialProfile(HaloProfileModel):
         there are no profile parameters that need to be mapped onto halos. 
         """
         return {}
-        #self.halo_prof_func_dict = input_dict
 
     def _set_prof_param_table_dict(self,input_dict):
         """ Trivial method binding the empty dictionary 
@@ -415,8 +418,12 @@ class NFWProfile(HaloProfileModel):
         # Call the init constructor of the super-class, 
         # whose only purpose is to bind cosmology, redshift, prim_haloprop_key, 
         # and a list of prof_param_keys to the NFWProfile instance. 
-        HaloProfileModel.__init__(self, 
+        super(NFWProfile, self).__init__(
             cosmology, redshift, [self._conc_parname], haloprop_key_dict)
+        
+        # Old syntax, now abandoned, in favor of previous line
+        #HaloProfileModel.__init__(self, 
+        #    cosmology, redshift, [self._conc_parname], haloprop_key_dict)
 
         self._conc_mass_func = self._get_conc_mass_model(conc_mass_relation_key)
 
