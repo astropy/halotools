@@ -20,13 +20,13 @@ import gal_prof_components as gpc
 
 
 class GalProfModel(object):
-    """ Container class for the intra-halo position and velocity profile 
-    of a galaxy population. 
+    """ Container class for the intra-halo spatial profile of a galaxy population. 
 
     This class derives the vast majority of its 
     behavior from external functions and classes. 
     The main purpose of the `GalProfModel` class is to provide a standardized 
-    interface for model factories such as `~halotools.empirical_models.HodModelFactory` 
+    interface for the rest of the package, particularly model factories such as 
+    `~halotools.empirical_models.HodModelFactory` 
     and mock factories such as `~halotools.empirical_models.HodMockFactory`. 
     """
 
@@ -35,7 +35,8 @@ class GalProfModel(object):
         Parameters 
         ----------
         gal_type : string 
-            Name of the galaxy population being modeled, e.g., ``sats``. 
+            User-supplied name of the galaxy population being modeled, 
+            e.g., ``sats`` or ``orphans``. 
 
         halo_prof_model : object 
             Instance of a concrete sub-class of 
@@ -43,6 +44,7 @@ class GalProfModel(object):
 
         spatial_bias_model : object, optional
             Instance of the class `~halotools.empirical_models.gal_prof_components.SpatialBias`. 
+            Default is None. 
         """
 
         # Bind the inputs to the instance 
@@ -83,29 +85,23 @@ class GalProfModel(object):
         return self.halo_prof_model.haloprop_key_dict
 
     def _initialize_param_dict(self):
-        """ Method binding param_dict to the class instance. 
+        """ Method binding ``param_dict`` to the class instance. 
 
         If galaxy profile parameters are biased relative to the 
         dark matter halo, ``param_dict`` will be derived 
         directly from the instance of 
         `~halotools.empirical_models.gal_prof_components.SpatialBias` 
         bound to `GalProfModel`. 
-        Otherwise, ``param_dict`` will be an empty dictionary. 
+        If the galaxy profile is unbiased, 
+        then the galaxies exactly trace the potential well of their host halo; 
+        in such a case there are no free parameters, 
+        and so ``param_dict`` will be an empty dictionary. 
         """
 
         if self.spatial_bias_model == None:
             self.param_dict = {}
         else:
             self.param_dict = self.spatial_bias_model.param_dict
-
-    def update_param_dict(self, new_param_dict):
-
-        if self.spatial_bias_model == None:
-            pass
-        else:
-            self.spatial_bias_model.update_param_dict(new_param_dict)
-            self.param_dict = self.spatial_bias_model.param_dict
-
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
         self.halo_prof_model.build_inv_cumu_lookup_table(
