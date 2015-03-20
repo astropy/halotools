@@ -103,8 +103,8 @@ class GalProfModel(object):
         else:
             self.param_dict = self.spatial_bias_model.param_dict
 
-    def build_inv_cumu_lookup_table(self, prof_param_table_dict=None):
-        
+    def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
+
         self.halo_prof_model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)
 
