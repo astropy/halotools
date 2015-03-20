@@ -6,17 +6,28 @@ Importing Halotools
 ===================
 
 After installing halotools (see :ref:`step_by_step_install` for detailed instructions), 
-you can open up a python terminal and load the entire package by:
+you can open up a python terminal and load the entire package by::
 
     >>> import halotools
 
 However, most of the functionality of halotools is divvied into 
 sub-packages, and so it is better to load only the sub-package 
-that you need for your application. For example, if you were interested in 
-building a mock galaxy distribution based on some model, you'd want to 
-import the model-building sub-package:
+that you need for your application. You can do this with the following syntax::
 
-    >>> from halotools import empirical_models
+    >>> from halotools import some_subpackage  # doctest: +SKIP
+
+For example, if you were interested in reading/processing a N-body simulation, 
+you'd want to import the Simulation Manager sub-package:
+
+    >>> from halotools import sim_manager
+
+Note that for clarity, and to avoid any issues, we recommend that you **never**
+import any Halotools functionality using ``*``, for example::
+
+    >>> from halotools.sim_manager import *  # NOT recommended
+
+Getting started with subpackages
+================================
 
 For instructions on how to get started with making mocks, 
 see :ref:`mock_making_quickstart`. 
