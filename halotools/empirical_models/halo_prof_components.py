@@ -181,6 +181,23 @@ class HaloProfileModel(object):
         This discretization is used by `build_inv_cumu_lookup_table` to 
         create a lookup table associated with `HaloProfileModel`. 
 
+        Parameters 
+        ----------
+        input_dict : dict, optional
+            Passed dictionary used to manually determine how to discretize 
+            a halo profile parameter. 
+            All keys other than those in ``self.prof_param_table_dict`` will be ignored. 
+            The value bound to each key must be a 3-element tuple,
+            which will be used to govern how the halo profile parameter is discretized. 
+            The entries of the tuple give the minimum parameter 
+            value of the table to be built, the 
+            maximum value, and the linear spacing, respectively. 
+            If an empty dict, 
+            and for the keys of ``self.prof_param_table_dict`` 
+            with no match in  ``input_dict``, the default discretization will be chosen,   
+            which is set in the `halotools.empirical_models.model_defaults` module. 
+
+
         Notes 
         -----
         The ``prof_param_table_dict`` dictionary can be empty, 
@@ -420,7 +437,7 @@ class NFWProfile(HaloProfileModel):
         # and a list of prof_param_keys to the NFWProfile instance. 
         super(NFWProfile, self).__init__(
             cosmology, redshift, [self._conc_parname], haloprop_key_dict)
-        
+
         # Old syntax, now abandoned, in favor of previous line
         #HaloProfileModel.__init__(self, 
         #    cosmology, redshift, [self._conc_parname], haloprop_key_dict)
@@ -519,8 +536,7 @@ class NFWProfile(HaloProfileModel):
         """
         """
 
-        #Set up the grid used to tabulate inverse cumulative NFW mass profiles
-        #This will be used to assign halo-centric distances to the satellites
+        # Set up the grid of discrete concentration parameter values 
         self._set_prof_param_table_dict(prof_param_table_dict)
 
         cmin, cmax, dconc = self.prof_param_table_dict[self._conc_parname]
@@ -578,14 +594,16 @@ class NFWProfile(HaloProfileModel):
         Parameters 
         ----------
         input_dict : dict, optional
-            All keys other than ``NFWmodel_conc`` will be ignored. 
-            The value bound to the ``NFWmodel_conc`` key must be a 3-element tuple,
+            Passed dictionary used to manually determine how to discretize 
+            a halo profile parameter. 
+            All dict keys of ``input_dict`` besides ``NFWmodel_conc`` will be ignored. 
+            The dict value bound to the ``NFWmodel_conc`` key must be a 3-element tuple,
             which will be used to govern how halo concentration is discretized. 
             The entries of the tuple give the minimum parameter 
             value of the table to be built, the 
             maximum value, and the linear spacing, respectively. 
-            If an empty dict, or if no ``NFWmodel_conc`` is present, 
-            default behavior is set in `halotools.empirical_models.model_defaults` module. 
+            If an empty dict, or if no ``NFWmodel_conc`` key is present, 
+            default behavior is set in the `halotools.empirical_models.model_defaults` module. 
 
         Notes 
         ----- 
