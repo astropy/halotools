@@ -440,10 +440,6 @@ class NFWProfile(HaloProfileModel):
         super(NFWProfile, self).__init__(
             cosmology, redshift, [self._conc_parname], haloprop_key_dict)
 
-        # Old syntax, now abandoned, in favor of previous line
-        #HaloProfileModel.__init__(self, 
-        #    cosmology, redshift, [self._conc_parname], haloprop_key_dict)
-
         self._conc_mass_func = self._get_conc_mass_model(conc_mass_relation_key)
 
         self.build_inv_cumu_lookup_table(
