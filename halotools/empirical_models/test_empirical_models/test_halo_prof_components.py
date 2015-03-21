@@ -28,13 +28,13 @@ def test_TrivialProfile():
 	assert hasattr(profile_model, 'cosmology')
 	assert isinstance(profile_model.cosmology, cosmology.FlatLambdaCDM)
 
-	assert type(profile_model.cumu_inv_func_table) == np.ndarray
-	assert list(profile_model.cumu_inv_func_table) == []
+	#assert type(profile_model.cumu_inv_func_table) == np.ndarray
+	#assert list(profile_model.cumu_inv_func_table) == []
 
 	assert profile_model.cumu_inv_func_table_dict == {}
 
-	assert type(profile_model.cumu_inv_param_table) == np.ndarray
-	assert list(profile_model.cumu_inv_param_table) == []
+	#assert type(profile_model.cumu_inv_param_table) == np.ndarray
+	#assert list(profile_model.cumu_inv_param_table) == []
 
 	assert profile_model.cumu_inv_param_table_dict == {}
 
@@ -54,13 +54,13 @@ def test_NFWProfile():
 	assert hasattr(profile_model, 'cosmology')
 	assert isinstance(profile_model.cosmology, cosmology.FlatLambdaCDM)
 
-	assert type(profile_model.cumu_inv_param_table) == np.ndarray
-	assert np.all(profile_model.cumu_inv_param_table > 0)
-	assert np.all(profile_model.cumu_inv_param_table < 1000)
-	assert len(profile_model.cumu_inv_param_table) >= 10
+	assert type(profile_model.cumu_inv_param_table_dict) == dict
+	assert np.all(profile_model.cumu_inv_param_table_dict[profile_model._conc_parname] > 0)
+	assert np.all(profile_model.cumu_inv_param_table_dict[profile_model._conc_parname] < 1000)
+	assert len(profile_model.cumu_inv_param_table_dict[profile_model._conc_parname]) >= 10
 
 
-	assert type(profile_model.cumu_inv_func_table) == np.ndarray
+	assert type(profile_model.cumu_inv_func_table_dict) == dict
 
 	assert profile_model._conc_parname == 'NFWmodel_conc'
 

@@ -108,8 +108,8 @@ class GalProfModel(object):
         self.halo_prof_model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)
 
-        self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
-        self.cumu_inv_param_table = self.halo_prof_model.cumu_inv_param_table
+        self.cumu_inv_func_table_dict = self.halo_prof_model.cumu_inv_func_table_dict
+        self.cumu_inv_param_table_dict = self.halo_prof_model.cumu_inv_param_table_dict
 
     @property 
     def gal_prof_func_dict(self):

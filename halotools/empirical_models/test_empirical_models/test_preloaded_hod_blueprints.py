@@ -71,8 +71,6 @@ def test_Kravtsov04_blueprint():
 		component_prof = gal_type_blueprint['profile']
 		assert component_prof.gal_type == gal_type
 		assert set(component_prof.gal_prof_func_dict.keys()).issubset(['gal_NFWmodel_conc'])
-		assert np.all(component_prof.cumu_inv_param_table > 0)
-		assert np.all(component_prof.cumu_inv_param_table < 105)
 
 
 

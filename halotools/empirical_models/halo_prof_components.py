@@ -236,11 +236,13 @@ class HaloProfileModel(object):
         to rapidly generate Monte Carlo realizations of intra-halo positions. 
 
         """
+        self._set_prof_param_table_dict(prof_param_table_dict)
+
         self.cumu_inv_func_table_dict = {}
-        self.cumu_inv_func_table = np.array([],dtype=object)
+        #self.cumu_inv_func_table = np.array([],dtype=object)
 
         self.cumu_inv_param_table_dict = {}
-        self.cumu_inv_param_table = np.array([],dtype=object)
+        #self.cumu_inv_param_table = np.array([],dtype=object)
 
     def _get_param_key(self, model_nickname, param_nickname):
         """ Trivial function providing standardized names for halo profile parameters. 
@@ -301,7 +303,7 @@ class TrivialProfile(HaloProfileModel):
         #    cosmology, redshift, prof_param_keys, haloprop_key_dict)
 
         empty_dict = {}
-        self._set_prof_param_table_dict(empty_dict)
+        #self._set_prof_param_table_dict(empty_dict)
         self.build_inv_cumu_lookup_table(empty_dict)
 
         self.publication = []
@@ -444,15 +446,10 @@ class NFWProfile(HaloProfileModel):
 
         self._conc_mass_func = self._get_conc_mass_model(conc_mass_relation_key)
 
-        # Build a table stored in the dictionary prof_param_table_dict 
-        # that dictates how to discretize the profile parameters
-        self._set_prof_param_table_dict(input_dict=prof_param_table_dict)
+        self.build_inv_cumu_lookup_table(
+            prof_param_table_dict=prof_param_table_dict)
 
         self.publication = ['arXiv:9611107','arXiv:1402.7073']
-
-        self.build_inv_cumu_lookup_table(
-            prof_param_table_dict=self.prof_param_table_dict)
-
 
     def g(self, x):
         """ Convenience function used to evaluate the profile. 
@@ -561,8 +558,15 @@ class NFWProfile(HaloProfileModel):
         for c in conc_array:
             cumu_inv_funcs.append(
                 spline(self.cumulative_mass_PDF(radius_array,c),radius_array))
-        self.cumu_inv_func_table = np.array(cumu_inv_funcs)
-        self.cumu_inv_param_table = conc_array
+
+        self.cumu_inv_func_table_dict = {}
+        self.cumu_inv_func_table_dict[self._conc_parname] = np.array(cumu_inv_funcs)
+
+        self.cumu_inv_param_table_dict = {}
+        self.cumu_inv_param_table_dict[self._conc_parname] = conc_array
+
+        #self.cumu_inv_func_table = np.array(cumu_inv_funcs)
+        #self.cumu_inv_param_table = conc_array
 
     @property 
     def halo_prof_func_dict(self):
