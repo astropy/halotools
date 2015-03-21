@@ -12,14 +12,19 @@ import occupation_helpers as occuhelp
 import model_defaults
 
 class HodModelFactory(object):
-    """ Factory-style object used to generate 
-    mock galaxy populations. Takes a composite model blueprint as input, 
-    and returns a composite model object as output. The returned model object 
-    can directly populate simulations with mock galaxy populations. 
+    """ Class used to build HOD-style models of the galaxy-halo connection. 
 
-    All behavior is derived from external classes bound up in the blueprint, 
-    so `HodModelFactory` does nothing more than compose these external 
-    behaviors into a standardized form that talks to the rest of the package. 
+    Can be thought of as a factory that takes an HOD model blueprint as input, 
+    and generates an HOD Model object. The returned object can be used directly to 
+    populate a simulation with a Monte Carlo realization of the model. 
+
+    All behavior is derived from external classes bound up in the input blueprint. 
+    So `HodModelFactory` does nothing more than compose these external 
+    behaviors together into a composite model. 
+    The primary purpose is to provide a standardized model object 
+    that interfaces consistently with the rest of the package, 
+    regardless of the features of the model. 
+
     The building of the blueprint is done elsewhere. Pre-loaded blueprints 
     can be found in `~halotools.empirical_models.preloaded_hod_blueprints`, 
     or you can also design your own from scratch. 
