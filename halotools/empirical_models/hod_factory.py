@@ -226,7 +226,6 @@ class HodModelFactory(object):
             halo_prof_model = self.model_blueprint[gal_type]['profile'].halo_prof_model
             halo_prof_model.build_inv_cumu_lookup_table(prof_param_table_dict)
 
-
     def retrieve_relevant_haloprops(self, gal_type, *args, **kwargs):
         """ Method returning the arrays that need to be passed 
         to a component model in order to access its behavior. 
