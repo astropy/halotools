@@ -172,7 +172,7 @@ class GalProfModel(object):
         return self.halo_prof_model.halo_prof_func_dict
 
     def _set_prof_param_table_dict(self,input_dict={}):
-        """ Dictionary attribute providing instructions for how to discretize 
+        """ Create dictionary attribute providing instructions for how to discretize 
         halo profile parameter values. 
 
         After calling this method, 
