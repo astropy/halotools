@@ -32,11 +32,11 @@ class HodModelFactory(object):
     Parameters 
     ----------
     model_blueprint : dict 
-        Dictionary keys of model_blueprint are the galaxy types found in the halos, 
-        e.g., ``centrals``, ``satellites``, ``orphans``, etc. 
-        Dictionary values of model_blueprint are themselves dictionaries whose keys 
-        specify the type of model being passed, e.g., ``occupation``, and values 
-        are class instances of that type of model.
+        Dictionary keys of ``model_blueprint`` are the names of the types of galaxies 
+        found in the halos, e.g., ``centrals``, ``satellites``, ``orphans``, etc. 
+        Dictionary values of ``model_blueprint`` are themselves dictionaries whose keys 
+        specify the type of model being passed, e.g., ``occupation``, 
+        and values are class instances of that type of model.
 
     """
 

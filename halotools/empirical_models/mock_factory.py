@@ -16,18 +16,28 @@ from ..sim_manager import sim_defaults
 __all__ = ["HodMockFactory"]
 
 class HodMockFactory(object):
-    """ The HOD Mock Factory takes a simulation snapshot and 
-    any HOD-style model as input, 
-    and returns a collection of mock galaxies 
-    that have been populated into the simulation based on the model. 
+    """ Class responsible for populating a simulation with a 
+    population of mock galaxies. 
+
+    Can be thought of as a factory that takes a model  
+    and simulation snapshot as input, 
+    and generates a mock galaxy population. 
+    The returned collection of galaxies possesses whatever 
+    properties were requested by the model, such as 3-D position,  
+    central/satellite designation, star-formation rate, etc. 
 
     Parameters 
     ----------
     snapshot : object 
-        Halo catalog and its metadata, processed by `~halotools.sim_manager.processed_snapshot`
+        Object containing the halo catalog and its metadata, 
+        produced by `~halotools.sim_manager.processed_snapshot`
 
     composite_model : object 
         Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`
+        Whatever the features of the model, the ``composite_model`` object 
+        created by the HOD model factory contains all the instructions 
+        needed to produce a Monte Carlo realization of the model with 
+        `HodMockFactory`. 
     """
 
     def __init__(self, snapshot, composite_model, 
@@ -62,7 +72,7 @@ class HodMockFactory(object):
     def process_halo_catalog(self):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. This processing includes identifying the 
-        catalog columns that will be used to construct the mock, 
+        catalog columns that will be used by the model to create the mock, 
         and building lookup tables associated with the halo profile. 
         """
 
@@ -102,6 +112,17 @@ class HodMockFactory(object):
 
 
     def build_halo_prof_lookup_tables(self, input_prof_param_table_dict={}):
+        """ Method calling the `~halotools.empirical_models.HaloProfileModel` 
+        component models to build lookup tables of halo profiles. 
+
+        Each ``gal_type`` galaxy has its own associated 
+        `~halotools.empirical_models.HaloProfileModel` governing the profile if 
+        its underlying dark matter halo. The `build_halo_prof_lookup_tables` 
+        method calls each of those component models one by one, requesting 
+        each of them to build their own lookup table. Care is taken to ensure 
+        that each lookup table spans the necessary range of parameters required 
+        by the halo catalog being populated. 
+        """
 
        # Compute the halo profile lookup table, ensuring that the min/max 
        # range spanned by the halo catalog is covered. The grid of parameters 
@@ -145,8 +166,14 @@ class HodMockFactory(object):
 
 
     def _get_gal_types(self):
-        """ Assumes the gal_type list bound to the model has already been 
-        sorted according to the occupation bounds. 
+        """ Return a list of strings, one for each ``gal_type`` in the model. 
+
+        Notes 
+        -----
+        Assumes the gal_type list bound to the model 
+        has already been sorted according to the occupation bounds, 
+        as is standard practice by the 
+        `~halotools.empirical_models.HodModelFactory`. 
         """
 
         sorted_gal_type_list = self.model.gal_types
@@ -157,34 +184,43 @@ class HodMockFactory(object):
         return sorted_gal_type_list, occupation_bound
 
     def populate(self):
-        """ Method used to call the composite models to 
-        sprinkle mock galaxies into halos. 
+        """ Method populating halos with mock galaxies. 
         """
         if self._is_allocated == False:
             self._allocate_memory()
 
         # Loop over all gal_types in the model 
         for gal_type in self.gal_types:
+
             # Retrieve the indices of our pre-allocated arrays 
             # that store the info pertaining to gal_type galaxies
             gal_type_slice = self._gal_type_indices[gal_type]
+            # gal_type_slice is a slice object
 
-            # Set the value of the gal_type string
+            # For the gal_type_slice indices of 
+            # the pre-allocated array self.gal_type, 
+            # set each string-type entry equal to the gal_type string
             getattr(self, 'gal_type')[gal_type_slice] = np.repeat(gal_type, 
                 self._total_abundance[gal_type],axis=0)
 
-            # Set the value of the primary halo property
+            # Store the values of the primary halo property  
+            # into the gal_type_slice indices of  
+            # the array that has been pre-allocated for this purpose
             getattr(self, 'prim_haloprop_key')[gal_type_slice] = np.repeat(
                 self.halos[self.model.prim_haloprop_key], 
                 self._occupation[gal_type],axis=0)
 
-            # Set the value of the secondary halo property, if relevant
+            # If the model uses a secondary halo property, 
+            # store the values of the secondary halo property  
+            # into the gal_type_slice indices of  
+            # the array that has been pre-allocated for this purpose
             if hasattr(self.model, 'sec_haloprop_key'):
                 getattr(self, 'sec_haloprop_key')[gal_type_slice] = np.repeat(
                     self.halos[self.model.sec_haloprop_key], 
                     self._occupation[gal_type],axis=0)
 
-            # Bind all relevant host halo properties to the mock
+            # Store all other relevant host halo properties into their 
+            # appropriate pre-allocated array 
             for halocatkey in self.additional_haloprops:
                 galcatkey = model_defaults.host_haloprop_prefix+halocatkey
                 getattr(self, galcatkey)[gal_type_slice] = np.repeat(
@@ -220,11 +256,13 @@ class HodMockFactory(object):
             self.pos, self.snapshot.Lbox)
 
     def _allocate_memory(self):
-        """ Method determines how many galaxies of each type 
-        will populate the mock realization, initializes 
-        various arrays to store mock catalog data, 
-        and creates internal self._gal_type_indices attribute 
-        for bookkeeping purposes. 
+        """ Method allocates the memory for all the numpy arrays 
+        that will store the information about the mock. 
+        These arrays are bound directly to the mock object. 
+
+        The main bookkeeping devices generated by this method are 
+        ``_occupation`` and ``_gal_type_indices``. 
+
         """
         self._occupation = {}
         self._total_abundance = {}
@@ -253,8 +291,8 @@ class HodMockFactory(object):
         self.Ngals = np.sum(self._total_abundance.values())
 
         def _allocate_ndarray_attr(self, propname, example_entry):
-            """ Private method of _allocate_memory used to create an empty 
-            ndarray of the appropriate shape and bind it to the mock instance. 
+            """ Private method of `_allocate_memory` used to create an empty 
+            ndarray of the appropriate shape and dtype, and bind it to the mock instance. 
 
             Parameters 
             ----------
