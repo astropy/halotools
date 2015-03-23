@@ -49,5 +49,10 @@ halotools/check_mock.py
 halotools/cfcm/*
 halotools/cxcf/*
 
+*.ipynb
+.ipynb_checkpoints/*
+*/.ipynb_checkpoints/*
+*/*/.ipynb_checkpoints/*
+
 # Mac OSX
 .DS_Store
