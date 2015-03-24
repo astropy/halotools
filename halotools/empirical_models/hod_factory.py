@@ -157,6 +157,26 @@ class HodModelFactory(object):
 
 
     def _get_gal_prof_param(self, gal_prof_param, gal_type, *args, **kwargs):
+        """ Private method used by `_set_primary_behaviors` to assign (possibly biased) 
+        profile parameters to mock galaxies. 
+
+        Parameters 
+        ----------
+        gal_prof_param : string 
+            Name of the galaxy profile parameter. 
+            Must be equal to one of the halo profile parameter names, 
+            prepended by 'gal_', e.g., 'gal_NFWmodel_conc'. 
+
+        gal_type : string 
+            Name of the galaxy population. 
+
+        prim_haloprop : optional positional argument 
+
+        sec_haloprop : optional positional argument 
+
+        mock_galaxies : optional keyword argument 
+
+        """
 
         gal_prof_model = self.model_blueprint[gal_type]['profile']
         
