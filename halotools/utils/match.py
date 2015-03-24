@@ -3,6 +3,10 @@
 #Duncan Campbell
 #January 19, 2015
 #Yale University
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+__all__ = ['match']
 
 
 import numpy as np
@@ -17,7 +21,7 @@ def main():
     y = np.random.permutation(x)
     match_into_y, matched_y = match(x,y)
     
-    print np.all(x[match_into_y]==y[matched_y])
+    print(np.all(x[match_into_y]==y[matched_y]))
 
 
 def match(x,y):
