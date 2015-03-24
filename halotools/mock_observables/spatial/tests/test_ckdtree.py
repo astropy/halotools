@@ -532,4 +532,3 @@ def test_sparse_distance_matrix():
     print(np.abs(diff)<epsilon)
     
     assert (np.abs(diff)>epsilon).nnz==0
-
