@@ -1,0 +1,12 @@
+build:
+python setup.py build_ext -i
+
+example use of function:
+>>>import sinha_pair_counter_wrapper
+>>>import numpy as np
+>>>bins = np.logspace(.7, 3, num=10)
+>>>Lbox = 25000.0
+>>>Npts1 = 1040
+>>>Npts2 =1070
+>>>points1 = np.random.uniform(0, 25000.0, Npts1*3).reshape(Npts1,3)
+>>>a= sinha_pair_counter_wrapper.cy_countpairs(Lbox, bins, points1)
