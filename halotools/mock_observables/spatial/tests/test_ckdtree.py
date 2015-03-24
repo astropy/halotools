@@ -345,7 +345,7 @@ def test_wcount_neighbors_double_weights_functionality():
     epsilon = np.float64(sys.float_info[8])
     
     #user defined function
-    from ..kdtrees.weighting_functions import Function
+    from ..kdtrees.ckdtree import Function
     class MyFunction(Function):
         def evaluate(self, x, y, a, b):
             return x*y
@@ -384,7 +384,7 @@ def test_wcount_neighbors_custom_double_weights_functionality():
     epsilon = np.float64(sys.float_info[8])
     
     #user defined function
-    from ..kdtrees.weighting_functions import Function
+    from ..kdtrees.ckdtree import Function
     class MyFunction(Function):
         def evaluate(self, x, y, a, b):
             return x*y
@@ -428,7 +428,7 @@ def test_wcount_neighbors_custom_2D_double_weights_functionality():
     epsilon = np.float64(sys.float_info[8])
     
     #user defined function
-    from ..kdtrees.weighting_functions import Function
+    from ..kdtrees.ckdtree import Function
     class MyFunction(Function):
         def evaluate(self, x, y, a, b):
             if a==0: return 1
@@ -470,7 +470,7 @@ def test_wcount_neighbors_custom_2D_double_weights_pbcs():
     epsilon = np.float64(sys.float_info[8])
     
     #user defined function
-    from ..kdtrees.weighting_functions import Function
+    from ..kdtrees.ckdtree import Function
     class MyFunction(Function):
         def evaluate(self, x, y, a, b):
             if a==0: return 1
@@ -532,4 +532,3 @@ def test_sparse_distance_matrix():
     print(np.abs(diff)<epsilon)
     
     assert (np.abs(diff)>epsilon).nnz==0
-
