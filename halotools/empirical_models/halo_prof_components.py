@@ -239,10 +239,8 @@ class HaloProfileModel(object):
         self._set_prof_param_table_dict(prof_param_table_dict)
 
         self.cumu_inv_func_table_dict = {}
-        #self.cumu_inv_func_table = np.array([],dtype=object)
 
         self.cumu_inv_param_table_dict = {}
-        #self.cumu_inv_param_table = np.array([],dtype=object)
 
     def _get_param_key(self, model_nickname, param_nickname):
         """ Trivial function providing standardized names for halo profile parameters. 

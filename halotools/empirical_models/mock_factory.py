@@ -232,9 +232,12 @@ class HodMockFactory(object):
                 pass
 
             # Call the galaxy profile components
-            for gal_prof_param_key in self.model.gal_prof_func_dict.keys():
+            for gal_prof_param_key in self.model.gal_prof_param_list:
+
+                gal_prof_param_method_name = gal_prof_param_key+'_'+gal_type
+
                 getattr(self, gal_prof_param_key)[gal_type_slice] = (
-                    self.model.gal_prof_param(gal_type, gal_prof_param_key, self)
+                    getattr(self.model, gal_prof_param_method_name)(self)
                     )
 
             # Assign positions 
@@ -322,7 +325,7 @@ class HodMockFactory(object):
 
         # Separately allocate memory for the values of the (possibly biased)
         # galaxy profile parameters such as 'gal_NFWmodel_conc'
-        for galcatkey in self.model.gal_prof_func_dict.keys():
+        for galcatkey in self.model.gal_prof_param_list:
             example_entry = 0.
             _allocate_ndarray_attr(self, galcatkey, example_entry)
 

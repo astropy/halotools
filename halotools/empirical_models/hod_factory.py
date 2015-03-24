@@ -102,34 +102,19 @@ class HodModelFactory(object):
                 self.model_blueprint[gal_type]['occupation'].occupation_bound)
 
 
-    def gal_prof_param(self, gal_type, gal_prof_param_key, mock_galaxies):
-        """ If the galaxy profile model has gal_prof_param_key as a biased parameter, 
-        call the galaxy profile model. Otherwise, return the value of the halo profile parameter. 
+    @property 
+    def gal_prof_param_list(self):
+        """ List of all galaxy profile parameters used by the composite model. 
         """
 
-        gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
+        output_list = []
+        for gal_type in self.gal_types:
+            gal_prof_model = self.model_blueprint[gal_type]['profile']
+            output_list.extend(gal_prof_model.gal_prof_func_dict.keys())
+        output_list = list(set(output_list))
 
-        method_name = gal_prof_param_key+'_'+gal_type            
+        return output_list
 
-        if hasattr(self, method_name):
-            # column name of mock_galaxies containing the profile parameter values 
-            # We are calling the component SpatialBias model, 
-            # so there should be no 'halo_' prefix
-            halo_prof_param_key = gal_prof_param_key[len(model_defaults.galprop_prefix):]
-            result = self.method_name(halo_prof_param_key, 
-                getattr(mock_galaxies, self.prim_haloprop_key)[gal_type_slice],
-                getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
-                )
-            return result
-        else:
-            # column name of mock_galaxies containing the profile parameter values 
-            # We are accessing the existing column of mock_galaxies,
-            # so in this case there should be a 'halo_' prefix 
-            halo_prof_param_key = (
-                model_defaults.host_haloprop_prefix + 
-                gal_prof_param_key[len(model_defaults.galprop_prefix):]
-                )
-            return getattr(mock_galaxies, halo_prof_param_key)[gal_type_slice]
 
     def _set_primary_behaviors(self):
         """ This function creates a bunch of new methods that it binds to ``self``. 
@@ -141,7 +126,7 @@ class HodModelFactory(object):
 
         for gal_type in self.gal_types:
 
-            # Set the method used to Monte Carlo realizations of per-halo gal_type abundance
+            # Set the method used to return Monte Carlo realizations of per-halo gal_type abundance
             new_method_name = 'mc_occupation_'+gal_type
             occupation_model = self.model_blueprint[gal_type]['occupation']
             new_method_behavior = partial(occupation_model.mc_occupation, 
@@ -157,18 +142,40 @@ class HodModelFactory(object):
             ### Now move on to galaxy profiles
             gal_prof_model = self.model_blueprint[gal_type]['profile']
 
-            # Create a new method for each galaxy profile parameters of each gal_type
-            for gal_prof_param, gal_prof_func in (
-                gal_prof_model.gal_prof_func_dict.iteritems()):
-
+            # Create a new method for each galaxy profile parameter
+            for gal_prof_param in self.gal_prof_param_list:
                 new_method_name = gal_prof_param + '_' + gal_type
-                new_method_behavior = gal_prof_func
+                new_method_behavior = partial(self._get_gal_prof_param, 
+                    gal_prof_param, gal_type)
                 setattr(self, new_method_name, new_method_behavior)
+
 
             ### Create a method to assign positions to each gal_type
             new_method_name = 'pos_'+gal_type
             new_method_behavior = partial(self.mc_pos, gal_type = gal_type)
             setattr(self, new_method_name, new_method_behavior)
+
+
+    def _get_gal_prof_param(self, gal_prof_param, gal_type, *args, **kwargs):
+
+        gal_prof_model = self.model_blueprint[gal_type]['profile']
+        
+        if gal_prof_param not in gal_prof_model.gal_prof_func_dict.keys():
+
+            if 'mock_galaxies' in kwargs.keys():
+                gal_type_slice = kwargs['mock_galaxies']._gal_type_indices[gal_type]
+                halo_prof_param_key = (model_defaults.host_haloprop_prefix + 
+                    gal_prof_param[model_defaults[len(galprop_prefix):]]
+                    )
+                return getattr(kwargs['mock_galaxies'], halo_prof_param_key)[gal_type_slice]
+            else:
+                return None
+
+        else:
+
+            halo_prop_list = self.retrieve_relevant_haloprops(gal_type, *args, **kwargs)
+            return gal_prof_model.gal_prof_func_dict[gal_prof_param](*halo_prop_list)
+
 
     def mc_pos(self, mock_galaxies, gal_type):
         """ Method used to generate Monte Carlo realizations of galaxy positions. 
