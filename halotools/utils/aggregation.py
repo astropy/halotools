@@ -86,7 +86,7 @@ def add_members_property(members, group_key, new_field_name, function, keys):
         key string into members which defines groups
     
     new_field_name: string
-        name of new field to be added to members array
+        name of new field to be added to members array if it does not exist
         
     function: function object
         function used to calculate group property
@@ -116,8 +116,11 @@ def add_members_property(members, group_key, new_field_name, function, keys):
 
     new_prop = new_members_property(members, function, group_key, keys)
     
-    #append new field to members array
-    members = append_fields(members,new_field_name,new_prop)
+    #check to see if new property field exists.
+    if new_field_name in members.dtype.names:
+        members[new_field_name] = new_prop
+    else: # if not, append new field to members array
+        members = append_fields(members,new_field_name,new_prop)
     
     return members
 
