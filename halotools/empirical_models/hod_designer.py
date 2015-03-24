@@ -26,8 +26,8 @@ class HodModelDesigner(object):
 	The blueprint created by `HodModelDesigner` is in the form of a dictionary. 
 	The keys of this dictionary give the name of the gal_type population, 
 	the values of the dictionary are themselves dictionaries giving a 
-	correspondence between the type of behavior, e.g., 'occupation_model' or 
-	'quiescence_model', and the class instance used to govern that behavior. 
+	correspondence between the type of behavior, e.g., 'occupation' or 
+	'quiescence', and the class instance used to govern that behavior. 
 
 	For clarity, consider a specific, simple example. 
 	The blueprint dictionary is {'centrals':central_dict}. 
@@ -48,7 +48,7 @@ class HodModelDesigner(object):
 	for the HOD factory to understand. 
 	In particular, the prime function of this class 
 	is to bundle a set of input component models into a 
-	component_model_dict, which is a dictionary 
+	model_blueprint, which is a dictionary 
 	containing a set of instructions to pass to the HOD factory. 
 	"""
 
@@ -61,15 +61,6 @@ class HodModelDesigner(object):
 		# to ensure that they are always passed the same underlying halo 
 		# profile model
 
-		# class instances need an attribute _example_attr_dict 
-		# that provides keys for all relevant galaxy properties, 
-		# such as 'stellar_mass', 'luminosity', 'quenched', etc., 
-		# and values will be used to provide the information 
-		# about the shape of the attribute
-		# this should inherit example entries also from, 
-		# for example, the halo profile model, so that the 
-		# composite model directly knows the shape information 
-		# of the halo_prof_model parameters. 
 		
 		pass
 

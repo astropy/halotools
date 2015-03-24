@@ -3,4 +3,9 @@
 # This sub-module is destined for common non-package specific utility
 # functions that will ultimately be merged into `astropy.utils`
 
-__all__=['match', 'spherical_geometry']
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+from .match import *
+from .spherical_geometry import *
+from .array_utils import *
