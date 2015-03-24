@@ -1,3 +1,6 @@
+#Duncan Campbell
+#March 2015
+#Yale University
 
 """
 functions to support 'grouped' array calculations; aggregation operations.  There are two 
@@ -15,7 +18,7 @@ __all__=['add_group_property','add_members_property','group_by',\
 import numpy as np
 from numpy.lib.recfunctions import append_fields
 
-def add_group_property(members, group_key, new_field_name, function, keys, groups=None):
+def add_group_property(members, new_field_name, function, group_key=None, groups=None):
     """
     Add a new group property.
     
@@ -25,54 +28,67 @@ def add_group_property(members, group_key, new_field_name, function, keys, group
     members: numpy.recarray
         record array with one row per object
     
-    group_key: string
-        key string into members which defines groups
-    
     new_field_name: string
         name of new field to be added to groups array
         
     function: function object or string
         function used to calculate group property.
-        
-    keys: list
-       key string(s) into members that function takes as inputs
+    
+    group_key: string, optional
+        key string into members which defines groups
     
     groups: array_like, optional
-        record array of group properties.  must contains a "GroupID" field.
+        record array of group properties.  members and groups must contains a "GroupID" 
+        field.
     
     =======
     returns
     =======
     groups: numpy.recarray
         record array with new group property appended.
+    
+    notes: one of either group_key, or groups must be provided.
     """
     
     members = members.view(np.recarray)
     
-    if type(function) is 'string':
-        function = _get_aggregation_function(function)
+    if (group_key==None) & (groups==None):
+        raise ValueError("one of 'group_key' or 'groups' must be privided.")
     
-    #check to see if keys are fields in members array
-    member_keys = set(members.dtype.names)
-    if group_key not in member_keys:
-        raise ValueError("grouping key not in members array")
-    for key in keys:
-        if key not in member_keys:
-            raise ValueError("function input key '{0}' not in members array".format(key))
-    
-    new_prop = new_group_property(members, function, group_key, keys)
-    
-    #append new field to groups array
-    groups.appendfield(new_field_name)
-    groups[new_field_name]=new_prop
+    if groups!=None:
+        if not 'GroupID' in set(groups.dtype.names):
+            raise ValueError("groups array must have a 'GroupID' field.")
+        else: GroupID=groups['GroupID']
     
     if groups==None:
-        return groups
+        GroupIDs = group_by(members, group_key)
     else:
+        GroupIDs = members['GroupID']
+    
+    if group_key!=None:
+        #check to see if keys are fields in members array
+        member_keys = set(members.dtype.names)
+        if group_key not in member_keys:
+            raise ValueError("grouping key not in members array")
+    
+    new_prop, ID = new_group_property(members, function, group_key, GroupIDs = GroupIDs)
+    
+    print(new_prop, ID)
+    
+    if groups==None:
+        dtype=np.dtype([('GroupID',np.int),(new_field_name,new_prop.dtype)])
+        groups=np.empty((len(new_prop),),dtype=dtype)
+        groups['GroupID'] = ID
+        groups[new_field_name] = new_prop
+    else:
+        inds1, inds2 = np.match(ID,groups['GroupID'])
+        new_prop=new_prop[inds]
         groups = append_fields(groups,new_field_name,new_prop)
+    
+    return groups
 
 
-def add_members_property(members, group_key, new_field_name, function, keys):
+def add_members_property(members, group_key, new_field_name, function):
     """
     Add a new group property to members.
     
@@ -90,9 +106,6 @@ def add_members_property(members, group_key, new_field_name, function, keys):
         
     function: function object
         function used to calculate group property
-        
-    keys: list
-       key string(s) into members that function takes as inputs
     
     =======
     returns
@@ -103,18 +116,12 @@ def add_members_property(members, group_key, new_field_name, function, keys):
     
     members = members.view(np.recarray)
     
-    if type(function) is 'string':
-        function = _get_aggregation_function(function)
-    
     #check to see if keys are fields in members array
     member_keys = set(members.dtype.names)
     if group_key not in member_keys:
         raise ValueError("grouping key not in members array")
-    for key in keys:
-        if key not in member_keys:
-            raise ValueError("function input key '{0}' not in members array".format(key))
 
-    new_prop = new_members_property(members, function, group_key, keys)
+    new_prop = new_members_property(members, function, group_key)
     
     #check to see if new property field exists.
     if new_field_name in members.dtype.names:
@@ -125,7 +132,7 @@ def add_members_property(members, group_key, new_field_name, function, keys):
     return members
 
 
-def group_by(members, keys, function=None, append_as_GroupID=False):
+def group_by(members, keys=None, function=None, append_as_GroupID=False):
     """
     Return group IDs of members given a grouping criteria.
     
@@ -135,11 +142,11 @@ def group_by(members, keys, function=None, append_as_GroupID=False):
     members: numpy.recarray
         record array with one row per object
     
-    keys: list
+    keys: list, optional
         key string(s) into members which defines groups
     
-    function: function object
-        function used to calculate group property which takes keys as argument(s)
+    function: function object, optional
+        function on members used to calculate group property
     
     append_as_GroupID: bool
         If True, return members array with new field 'GroupID' with result
@@ -150,16 +157,24 @@ def group_by(members, keys, function=None, append_as_GroupID=False):
     =======
     new_prop: numpy.array
         array of new properties for each entry in members
+        
+    notes: either 'keys', or 'function' argument must be given. If keys are passed in,
+    then the objects are grouped using the keys.  Otherwise, 'function' is used.
     """
+    
+    if (keys==None) & (function==None):
+        raise ValueError("one of 'keys' or 'function' must be specified.")
     
     members = members.view(np.recarray)
     
     #check to see if keys are fields in members array
-    member_keys = set(members.dtype.names)
-    for key in keys:
-        if key not in member_keys:
-            raise ValueError("function input key '{0}' not in members array".format(key))
+    if keys!=None:
+        member_keys = set(members.dtype.names)
+        for key in keys:
+            if key not in member_keys:
+                raise ValueError("key '{0}' not in members array".format(key))
     
+    #if there is no function, assign groups by unique combination of keys
     if function==None:
         #get an array with each grouping key value per object
         GroupIDs=np.empty((len(members),len(keys)))
@@ -169,7 +184,14 @@ def group_by(members, keys, function=None, append_as_GroupID=False):
         unique_rows, foo, inverse_inds = _unique_rows(GroupIDs)
         #get the group ID for each object
         GroupIDs = np.arange(0,len(unique_rows))[inverse_inds]
-        
+    
+    #if a function is supplied, use the function output to assign groups
+    if function!=None:
+        vals = function(members)
+        unique_vals, inverse_inds = np.unique(vals, return_inverse=True)
+        GroupIDs = np.arange(0,len(unique_vals),1).astype(int)
+        GroupIDs = group_IDs[inverse_inds]
+    
     if append_as_GroupID==False: return GroupIDs #return array with group IDs
     else:
         #append new field with group IDs to members and return members
@@ -177,7 +199,7 @@ def group_by(members, keys, function=None, append_as_GroupID=False):
         return members
 
 
-def binned_aggregation_group_property(members, binned_prop_key, bins, function, keys):
+def binned_aggregation_group_property(members, binned_prop_key, bins, function):
     """
     Group objects by binned_prop_key and calculate a quantity by bin
     
@@ -194,9 +216,6 @@ def binned_aggregation_group_property(members, binned_prop_key, bins, function, 
         
     function: function object or string
         function used to calculate group property.
-        
-    keys: list
-       key string(s) into members that function takes as inputs
     
     =======
     returns
@@ -206,13 +225,13 @@ def binned_aggregation_group_property(members, binned_prop_key, bins, function, 
     
     GroupIDs = np.digitize(members[binned_prop_key],bins=bins)
     
-    new_prop = new_group_property(members, None, funcobj, prop_keys, GroupIDs=GroupIDs)
+    new_prop = new_group_property(members, function, None, GroupIDs=GroupIDs)[0]
     
     real_bins = [[bins[i],bins[i+1]] for i in range(0,len(bins)-1)]
     return real_bins, new_prop
 
 
-def binned_aggregation_members_property(members, binned_prop_key, bins, function, keys):
+def binned_aggregation_members_property(members, binned_prop_key, bins, function):
     """
     Group objects by binned_prop_key and calculate a quantity by bin
     
@@ -229,9 +248,6 @@ def binned_aggregation_members_property(members, binned_prop_key, bins, function
         
     function: function object or string
         function used to calculate group property.
-        
-    keys:
-       key string(s) into members that function takes as inputs
     
     =======
     returns
@@ -241,12 +257,13 @@ def binned_aggregation_members_property(members, binned_prop_key, bins, function
     
     GroupIDs = np.digitize(members[binned_prop_key],bins=bins)
     
-    new_prop = new_members_property(members, None, funcobj, prop_keys, GroupIDs=GroupIDs)
+    new_prop = new_members_property(members, function, None, GroupIDs=GroupIDs)
     
-    return new_prop
+    real_bins = [[bins[i],bins[i+1]] for i in range(0,len(bins)-1)]
+    return real_bins, new_prop
 
 
-def new_members_property(x, funcobj, grouping_key, prop_keys, GroupIDs=None):
+def new_members_property(x, funcobj, grouping_key, GroupIDs=None):
     
     if GroupIDs == None:
         GroupIDs = x[grouping_key]
@@ -265,14 +282,14 @@ def new_members_property(x, funcobj, grouping_key, prop_keys, GroupIDs=None):
     # Identify the indices of the sorted array corresponding to group # igroup
     for igrp_idx1, igrp_idx2 in zip(uniqueID_indices, uniqueID_indices[1:]):
         idx_igrp = idx_groupsort[igrp_idx1:igrp_idx2]
-        result[idx_igrp] = funcobj(x[idx_igrp],*prop_keys)
+        result[idx_igrp] = funcobj(x[idx_igrp])
     
     return result
 
 
-def new_group_property(x, funcobj, grouping_key, prop_keys, GroupIDs=None):
+def new_group_property(x, funcobj, grouping_key, GroupIDs=None):
         
-    if GroupID ==None:
+    if GroupIDs == None:
         GroupIDs = x[grouping_key]
     
     # Calculate the array of indices that sorts the entire array by the desired key
@@ -290,60 +307,10 @@ def new_group_property(x, funcobj, grouping_key, prop_keys, GroupIDs=None):
     i=0
     for igrp_idx1, igrp_idx2 in zip(uniqueID_indices, uniqueID_indices[1:]):
         idx_igrp = idx_groupsort[igrp_idx1:igrp_idx2]
-        result[i] = funcobj(x[idx_igrp],*prop_keys)
+        result[i] = funcobj(x[idx_igrp])
         i+=1
     
-    return result
-
-
-def _get_aggregation_function(name):
-    """
-    return common functions given a string argument
-    """
-    
-    available_functions = ['N_members','mean','rank','inverse_rank','sum','std','dist','broadcast','frac']
-    if name not in available_functions:
-        print('preprogamed available functions are {0}'.format(available_functions))
-        raise ValueError('function: {0} not available.'.format(name))
-
-    from scipy.stats import rankdata
-
-    if name=='N_members': return lambda x: len(x)
-    if name=='mean': return lambda x, key: np.mean(x[key])
-    if name=='sum': return lambda x, key: np.sum(x[key])
-    if name=='std': return lambda x, key: np.std(x[key])
-    if name=='rank':return lambda x, key: rankdata(x[key])-1
-    if name=='inverse_rank':return lambda x, key: rankdata(-x[key])-1
-    if name=='dist':
-        def fun(x, key, bins, normalize=True):
-            return np.histogram(x[key], bins=bins, density=normalize)[0]
-        return fun
-    if name=='frac':
-        def fun(x, key, bool_filter):
-            return np.sum(bool_filter(x[key]))/len(x)
-        return fun
-    if name=='broadcast':
-        def fun(x, key, bkey, bool_filter):
-            bcaster = bool_filter(x[bkey])
-            return x[key][bcaster]
-        return fun
-
-
-def _get_bool_filters(name):
-    """
-    Define some useful boolean filter functions
-    """
-    def bool_range(x,key,min_val,max_val):
-        return (x[key]>min_val) & (x[key]<max_val)
-    
-    def bool_val(x,key,val):
-        return (x[key]==val)
-    
-    def bool_gt(x,key,val):
-        return (x[key]>val)
-    
-    def bool_lt(x,key,val):
-        return (x[key]<val)
+    return result, uniqueIDs
 
 
 def _unique_rows(x):
