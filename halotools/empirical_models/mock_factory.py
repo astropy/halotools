@@ -106,7 +106,7 @@ class HodMockFactory(object):
         for new_haloprop_key, prof_param_func in function_dict.iteritems():
             self.halos[new_haloprop_key] = prof_param_func(self.halos[self.prim_haloprop_key])
             self.additional_haloprops.append(new_haloprop_key)
-
+            
 
         self.build_halo_prof_lookup_tables()
 
@@ -134,14 +134,15 @@ class HodMockFactory(object):
             gal_prof_model = self.model.model_blueprint[gal_type]['profile']
 
             for key in gal_prof_model.halo_prof_func_dict.keys():
-                halocatkey = model_defaults.host_haloprop_prefix + key
+
+                #halocatkey = model_defaults.host_haloprop_prefix + key
 
                 model_parmin = gal_prof_model.prof_param_table_dict[key][0]
                 model_parmax = gal_prof_model.prof_param_table_dict[key][1]
                 dpar = gal_prof_model.prof_param_table_dict[key][2]
 
-                halocat_parmin = self.halos[halocatkey].min() - dpar
-                halocat_parmax = self.halos[halocatkey].max() + dpar
+                halocat_parmin = self.halos[key].min() - dpar
+                halocat_parmax = self.halos[key].max() + dpar
 
                 parmin = np.min([halocat_parmin,model_parmin])
                 parmax = np.max([halocat_parmax,model_parmax])
