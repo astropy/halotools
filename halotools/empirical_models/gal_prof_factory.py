@@ -130,6 +130,8 @@ class GalProfModel(object):
         `~halotools.empirical_models.SpatialBias` class. 
         The possibility of spatial bias is why the 
         `gal_prof_func_dict` has different keys than the `halo_prof_func_dict`. 
+        For profile parameters that are unbiased, the function object in 
+        `gal_prof_func_dict` is identical to the function object in `halo_prof_func_dict`. 
 
         Notes 
         ----- 

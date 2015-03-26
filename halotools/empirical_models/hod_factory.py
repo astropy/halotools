@@ -143,7 +143,7 @@ class HodModelFactory(object):
             gal_prof_model = self.model_blueprint[gal_type]['profile']
 
             # Create a new method for each galaxy profile parameter
-            for gal_prof_param in self.gal_prof_param_list:
+            for gal_prof_param in gal_prof_model.gal_prof_func_dict.keys():
                 new_method_name = gal_prof_param + '_' + gal_type
                 new_method_behavior = partial(self._get_gal_prof_param, 
                     gal_prof_param, gal_type)
@@ -164,8 +164,10 @@ class HodModelFactory(object):
         ----------
         gal_prof_param : string 
             Name of the galaxy profile parameter. 
-            Must be equal to one of the halo profile parameter names, 
-            prepended by 'gal_', e.g., 'gal_NFWmodel_conc'. 
+            Must be equal to one of the galaxy profile parameter names.
+            For example, if the input ``gal_type`` pertains to 
+            a satellite-like population tracing a (possibly biased) NFW profile, 
+            then ``gal_prof_param`` would be ``gal_NFWmodel_conc``. 
 
         gal_type : string 
             Name of the galaxy population. 
