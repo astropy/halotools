@@ -16,6 +16,7 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
 from functools import partial
+from itertools import product
 
 from ..utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
@@ -208,7 +209,8 @@ class HaloProfileModel(object):
             " provide a _set_prof_param_table_dict method used to create a "
             "(possibly trivial) dictionary prof_param_table_dict.")
 
-    def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
+    def build_inv_cumu_lookup_table(self, prof_param_table_dict={}, 
+        profile_table_radius_array_dict = model_defaults.profile_table_radius_array_dict):
         """ Method used to create a lookup table of inverse cumulative mass 
         profile functions. 
 
@@ -236,11 +238,38 @@ class HaloProfileModel(object):
         to rapidly generate Monte Carlo realizations of intra-halo positions. 
 
         """
+        
         self._set_prof_param_table_dict(prof_param_table_dict)
 
-        self.cumu_inv_func_table_dict = {}
+        npts_radius = profile_table_radius_array_dict['npts']
+        rmin = profile_table_radius_array_dict['rmin']
+        rmax = profile_table_radius_array_dict['rmax']
+        radius_array = np.linspace(rmin,rmax,npts_radius)
 
         self.cumu_inv_param_table_dict = {}
+        param_array_list = []
+        for prof_param_key in self.prof_param_keys:
+            parmin, parmax, dpar = self.prof_param_table_dict[prof_param_key]
+            npts_par = int(np.round((parmax-parmin)/dpar))
+            param_array = np.linspace(parmin,parmax,npts_par)
+            param_array_list.append(param_array)
+            self.cumu_inv_param_table_dict[prof_param_key] = param_array
+
+        
+        # Using the itertools product method requires 
+        # special handling of the length-zero edge case
+        if len(param_array_list) == 0:
+            self.cumu_inv_func_table = np.array([])
+        else:
+            func_table = []
+            for items in product(*param_array_list):
+                funcobj = spline(self.cumulative_mass_PDF(radius_array,*items),radius_array)
+                func_table.append(funcobj)
+
+            param_array_dimensions = [len(param_array) for param_array in param_array_list]
+            func_table = np.array(func_table).reshape(param_array_dimensions)
+            self.cumu_inv_func_table = func_table
+
 
     def _get_param_key(self, model_nickname, param_nickname):
         """ Trivial function providing standardized names for halo profile parameters. 
@@ -295,10 +324,8 @@ class TrivialProfile(HaloProfileModel):
         # and a list of prof_param_keys to the NFWProfile instance. 
 
         super(TrivialProfile, self).__init__(
-            cosmology, redshift, prof_param_keys, haloprop_key_dict)
-        # Old syntax,  now abandoned, replaced by above
-        #HaloProfileModel.__init__(self, 
-        #    cosmology, redshift, prof_param_keys, haloprop_key_dict)
+            cosmology, redshift, prof_param_keys, 
+            haloprop_key_dict=haloprop_key_dict)
 
         empty_dict = {}
         #self._set_prof_param_table_dict(empty_dict)
@@ -436,7 +463,7 @@ class NFWProfile(HaloProfileModel):
         # whose only purpose is to bind cosmology, redshift, prim_haloprop_key, 
         # and a list of prof_param_keys to the NFWProfile instance. 
         super(NFWProfile, self).__init__(
-            cosmology, redshift, [self._conc_parname], haloprop_key_dict)
+            cosmology, redshift, [self._conc_parname], haloprop_key_dict=haloprop_key_dict)
 
         self._conc_mass_func = self._get_conc_mass_model(conc_mass_relation_key)
 
@@ -501,7 +528,7 @@ class NFWProfile(HaloProfileModel):
         denominator = (c*r)*(1.0 + c*r)*(1.0 + c*r)
         return numerator / denominator
 
-    def cumulative_mass_PDF(self, r, c):
+    def cumulative_mass_PDF(self, r, *args):
         """ Cumulative probability distribution of the NFW profile, 
         :math:`P^{NFW}( <r | c)`. 
 
@@ -512,7 +539,8 @@ class NFWProfile(HaloProfileModel):
             Should be scaled by the halo boundary, so that :math:`0 < r < 1`
 
         c : array_like 
-            Concentration specifying the halo profile. If an array, should be of the same length 
+            Concentration specifying the halo profile. 
+            If an array, should be of the same length 
             as the input r. 
 
         Returns 
@@ -521,46 +549,12 @@ class NFWProfile(HaloProfileModel):
             :math:`P^{NFW}(<r | c) = g(c) / g(c*r)`. 
 
         """
-        return self.g(c) / self.g(r*c)
+        if len(args)==0:
+            raise SyntaxError("Must pass array of concentrations to cumulative_mass_PDF. \n"
+                "Only received array of radii.")
+        else:
+            return self.g(args[0]) / self.g(r*args[0])
 
-    def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
-        """
-        """
-
-        # Set up the grid of discrete concentration parameter values 
-        self._set_prof_param_table_dict(prof_param_table_dict)
-
-        cmin, cmax, dconc = self.prof_param_table_dict[self._conc_parname]
-
-        Npts_radius = model_defaults.default_Npts_radius_array  
-        minrad = model_defaults.default_min_rad 
-        maxrad = model_defaults.default_max_rad 
-        radius_array = np.linspace(minrad,maxrad,Npts_radius)
-
-        Npts_concen = int(np.round((cmax-cmin)/dconc))
-        conc_array = np.linspace(cmin,cmax,Npts_concen)
-
-        # After executing the following lines, 
-        # self.cumu_inv_func_table will be an array of functions 
-        # bound to the NFW profile instance.
-        # The elements of this array are functions giving spline interpolations of the 
-        # inverse cumulative mass of halos with different NFW concentrations.
-        # Each function takes a scalar y in [0,1] as input, 
-        # and outputs the x = r/Rvir corresponding to Prob_NFW( x < r/Rvir ) = y. 
-        # Thus each array element is a function object. 
-        cumu_inv_funcs = []
-        for c in conc_array:
-            cumu_inv_funcs.append(
-                spline(self.cumulative_mass_PDF(radius_array,c),radius_array))
-
-        self.cumu_inv_func_table_dict = {}
-        self.cumu_inv_func_table_dict[self._conc_parname] = np.array(cumu_inv_funcs)
-
-        self.cumu_inv_param_table_dict = {}
-        self.cumu_inv_param_table_dict[self._conc_parname] = conc_array
-
-        #self.cumu_inv_func_table = np.array(cumu_inv_funcs)
-        #self.cumu_inv_param_table = conc_array
 
     @property 
     def halo_prof_func_dict(self):

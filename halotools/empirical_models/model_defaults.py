@@ -33,9 +33,15 @@ default_bin_max_epsilon = 1.e-5
 min_permitted_conc = 1.0
 max_permitted_conc = 25.0
 default_dconc = 0.02
+
 default_Npts_radius_array = 101
 default_min_rad = 0.0001
 default_max_rad = 1.0
+profile_table_radius_array_dict = {
+    'rmin' : default_min_rad, 
+    'rmax' : default_max_rad, 
+    'npts' : default_Npts_radius_array
+}
 conc_mass_relation_key = 'dutton_maccio14'
 
 ### Default values specifying traditional quenching model
