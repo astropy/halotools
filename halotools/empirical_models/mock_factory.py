@@ -64,8 +64,6 @@ class HodMockFactory(object):
         # such as 'NFWmodel_conc'. Also build all necessary lookup tables.
         self.process_halo_catalog()
 
-        self._is_allocated = False
-
         if populate==True: self.populate()
 
 
@@ -106,7 +104,7 @@ class HodMockFactory(object):
         for new_haloprop_key, prof_param_func in function_dict.iteritems():
             self.halos[new_haloprop_key] = prof_param_func(self.halos[self.prim_haloprop_key])
             self.additional_haloprops.append(new_haloprop_key)
-            
+
 
         self.build_halo_prof_lookup_tables()
 
@@ -187,8 +185,7 @@ class HodMockFactory(object):
     def populate(self):
         """ Method populating halos with mock galaxies. 
         """
-        if self._is_allocated == False:
-            self._allocate_memory()
+        self._allocate_memory()
 
         # Loop over all gal_types in the model 
         for gal_type in self.gal_types:
@@ -334,8 +331,6 @@ class HodMockFactory(object):
             _allocate_ndarray_attr(self, self.model.sec_haloprop_key, 0.)
 
         _allocate_ndarray_attr(self, 'pos', [0.,0.,0.])
-
-        self._is_allocated = True
 
 
 

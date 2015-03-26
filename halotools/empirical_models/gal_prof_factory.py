@@ -225,23 +225,40 @@ class GalProfModel(object):
 
         """ 
         return self.halo_prof_model.prof_param_table_dict
-        
-    def get_prof_table_indices(self, params):
+
+    def get_ditigized_prof_param_indices(self, params):
         result = np.digitize(params, self.cumu_inv_param_table)
         return result
 
-    def get_scaled_radii_from_func_table(self, rho, profile_params):
-        func_table_indices = self.get_prof_table_indices(profile_params)
-        prof_func_array = self.cumu_inv_func_table[func_table_indices]
+    def get_scaled_radii_from_func_table(self, rho, *args):
+
+        func_table_indices_list = (
+            [self.get_ditigized_prof_param_indices(profile_param) for 
+            profile_param in args]
+            )
+
+        prof_func_array = self.cumu_inv_func_table[func_table_indices_list]
         return occuhelp.call_func_table(
             self.cumu_inv_func_table, rho, func_table_indices)
 
-    def mc_radii(self, profile_params):
+    def mc_radii(self, *args):
         """ args is a tuple of profile parameter arrays. In the simplest case, 
         this is a one-element tuple of concentration values. 
         """
-        rho = np.random.random(len(profile_params))
-        return self.get_scaled_radii_from_func_table(rho, profile_params)
+        rho = np.random.random(len(args[0]))
+
+        digitized_param_list = []
+        for param_index, param_key in enumerate(self.halo_prof_model.prof_param_keys):
+            digitized_params = np.digitize(args[param_index], 
+                self.cumu_inv_param_table_dict[param_key])
+            digitized_param_list.append(digitized_params)
+
+        func_table_indices = (
+            self.halo_prof_model.func_table_indices[digitized_param_list]
+            )
+
+        return occuhelp.call_func_table(
+            self.cumu_inv_func_table, rho, func_table_indices)
 
     def mc_angles(self, Npts):
         """ Returns Npts random points on the unit sphere. 
@@ -278,10 +295,14 @@ class GalProfModel(object):
             pos = self.mc_angles(Ngals)
 
             # get radii
-            # NOTE THE HARD-CODING OF A SINGLE HALO PROFILE PARAMETER
-            profile_param_key = self.gal_prof_func_dict.keys()[0]
-            scaled_mc_radii = self.mc_radii(
-                getattr(mock_galaxies, profile_param_key)[gal_type_slice])            
+            profile_params = (
+                [getattr(mock_galaxies, 
+                    model_defaults.host_haloprop_prefix+profile_param_key)[gal_type_slice] 
+                for profile_param_key in self.halo_prof_model.prof_param_keys]
+                )
+
+            scaled_mc_radii = self.mc_radii(*profile_params) 
+
             # multiply radii by angles 
             for idim in range(3): pos[:,idim] *= scaled_mc_radii
 

@@ -269,6 +269,11 @@ class HaloProfileModel(object):
             param_array_dimensions = [len(param_array) for param_array in param_array_list]
             func_table = np.array(func_table).reshape(param_array_dimensions)
             self.cumu_inv_func_table = func_table
+            func_table_indices = (
+                np.arange(np.prod(param_array_dimensions)).reshape(param_array_dimensions)
+                )
+            self.func_table_indices = func_table_indices
+
 
 
     def _get_param_key(self, model_nickname, param_nickname):
