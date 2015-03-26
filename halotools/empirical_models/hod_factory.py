@@ -181,22 +181,10 @@ class HodModelFactory(object):
         """
 
         gal_prof_model = self.model_blueprint[gal_type]['profile']
-        
-        if gal_prof_param not in gal_prof_model.gal_prof_func_dict.keys():
+        gal_prof_param_func = gal_prof_model.gal_prof_func_dict[gal_prof_param]
 
-            if 'mock_galaxies' in kwargs.keys():
-                gal_type_slice = kwargs['mock_galaxies']._gal_type_indices[gal_type]
-                halo_prof_param_key = (model_defaults.host_haloprop_prefix + 
-                    gal_prof_param[model_defaults[len(galprop_prefix):]]
-                    )
-                return getattr(kwargs['mock_galaxies'], halo_prof_param_key)[gal_type_slice]
-            else:
-                return None
-
-        else:
-
-            halo_prop_list = self.retrieve_relevant_haloprops(gal_type, *args, **kwargs)
-            return gal_prof_model.gal_prof_func_dict[gal_prof_param](*halo_prop_list)
+        return gal_prof_param_func(
+            *self.retrieve_relevant_haloprops(gal_type, *args, **kwargs))
 
 
     def mc_pos(self, mock_galaxies, gal_type):
@@ -286,25 +274,28 @@ class HodModelFactory(object):
             mock = kwargs['mock_galaxies']
 
             prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
-            # We were passed the full mock, but this function call only pertains to the slice of 
+
+            # We were passed the full mock, 
+            # but this function call only pertains to the slice of 
             # the arrays that correspond to gal_type galaxies. 
-            # We save time by having pre-computed the relevant slice. 
             gal_type_slice = mock._gal_type_indices[gal_type]
             prim_haloprop = getattr(mock, prim_haloprop_key)[gal_type_slice]
+
             # Now pack the prim_haloprop array into a 1-element list
             output_columns = [prim_haloprop]
+
             # If there is a secondary halo property used by this component model, 
-            # repeat the above retrieval and extend the list. 
+            # repeat the above retrieval and append to the list. 
             if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
                 sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
                 sec_haloprop = getattr(mock, sec_haloprop_key)[gal_type_slice]
-                output_columns.extend([sec_haloprop])
+                output_columns.append([sec_haloprop])
 
             return output_columns
 
         elif ( (occuhelp.aph_len(args) > 0) & ('mock_galaxies' not in kwargs.keys()) ):
             # In this case, we were directly passed the relevant arrays
-            return list(args)
+            return args
         ###
         ### Now address the cases where we were passed insensible arguments
         elif ( (occuhelp.aph_len(args) == 0) & ('mock_galaxies' not in kwargs.keys()) ):
