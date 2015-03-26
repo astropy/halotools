@@ -156,6 +156,26 @@ class HodModelFactory(object):
             setattr(self, new_method_name, new_method_behavior)
 
 
+        def composite_gal_prof_param_func(gal_prof_param, gal_type, *args, **kwargs):
+
+            method_name = gal_prof_param+'_'+gal_type
+
+            if hasattr(self, method_name):
+                method_behavior = getattr(self, method_name)
+            else:
+                halo_prof_param_func_key = (
+                    gal_prof_param[len(model_defaults.galprop_prefix):]
+                    )
+                method_behavior = self.halo_prof_func_dict[halo_prof_param_func_key]
+
+            return method_behavior(*self.retrieve_relevant_haloprops(
+                gal_type, *args, **kwargs))
+
+        for gal_prof_param in self.gal_prof_param_list:
+            func = partial(composite_gal_prof_param_func, gal_prof_param)
+            setattr(self, gal_prof_param, func)
+
+
     def _get_gal_prof_param(self, gal_prof_param, gal_type, *args, **kwargs):
         """ Private method used by `_set_primary_behaviors` to assign (possibly biased) 
         profile parameters to mock galaxies. 

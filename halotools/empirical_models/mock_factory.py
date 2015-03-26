@@ -206,7 +206,7 @@ class HodMockFactory(object):
             # Store the values of the primary halo property  
             # into the gal_type_slice indices of  
             # the array that has been pre-allocated for this purpose
-            getattr(self, 'prim_haloprop_key')[gal_type_slice] = np.repeat(
+            getattr(self, self.model.prim_haloprop_key)[gal_type_slice] = np.repeat(
                 self.halos[self.model.prim_haloprop_key], 
                 self._occupation[gal_type],axis=0)
 
@@ -215,7 +215,7 @@ class HodMockFactory(object):
             # into the gal_type_slice indices of  
             # the array that has been pre-allocated for this purpose
             if hasattr(self.model, 'sec_haloprop_key'):
-                getattr(self, 'sec_haloprop_key')[gal_type_slice] = np.repeat(
+                getattr(self, self.model.sec_haloprop_key)[gal_type_slice] = np.repeat(
                     self.halos[self.model.sec_haloprop_key], 
                     self._occupation[gal_type],axis=0)
 
@@ -228,16 +228,14 @@ class HodMockFactory(object):
 
             # Call the SFR model, if relevant for this model
             if hasattr(self.model, 'sfr_model'):
-                # Code this up later
+                # Not implemented yet
                 pass
 
             # Call the galaxy profile components
             for gal_prof_param_key in self.model.gal_prof_param_list:
 
-                gal_prof_param_method_name = gal_prof_param_key+'_'+gal_type
-
                 getattr(self, gal_prof_param_key)[gal_type_slice] = (
-                    getattr(self.model, gal_prof_param_method_name)(self)
+                    getattr(self.model, gal_prof_param_key)(gal_type, mock_galaxies=self)
                     )
 
             # Assign positions 
@@ -330,9 +328,9 @@ class HodMockFactory(object):
             _allocate_ndarray_attr(self, galcatkey, example_entry)
 
         _allocate_ndarray_attr(self, 'gal_type', self.gal_types[0])
-        _allocate_ndarray_attr(self, 'prim_haloprop_key', 0.)
+        _allocate_ndarray_attr(self, self.model.prim_haloprop_key, 0.)
         if hasattr(self.model,'sec_haloprop_key'):
-            _allocate_ndarray_attr(self, 'sec_haloprop_key', 0.)
+            _allocate_ndarray_attr(self, self.model.sec_haloprop_key, 0.)
 
         _allocate_ndarray_attr(self, 'pos', [0.,0.,0.])
 
