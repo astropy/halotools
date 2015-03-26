@@ -119,7 +119,7 @@ class HodModelFactory(object):
     def _set_primary_behaviors(self):
         """ This function creates a bunch of new methods that it binds to ``self``. 
         These methods are given standardized names, for generic communication with 
-        the rest of the package, particularly the *Mock Factory*. 
+        the rest of the package, particularly the `HodMockFactory`. 
         The behaviors of these methods are defined elsewhere; 
         here we just create a link to those external behaviors. 
         """
