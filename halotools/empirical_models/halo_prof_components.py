@@ -325,6 +325,19 @@ class TrivialProfile(HaloProfileModel):
     -----
     Testing done by `~halotools.empirical_models.test_empirical_models.test_TrivialProfile`
 
+    Examples 
+    --------
+    You can load a trivial profile model with the default settings simply by calling 
+    the class constructor with no arguments:
+
+    >>> trivial_halo_prof_model = TrivialProfile()
+
+    Use the keyword arguments for ``cosmology`` and ``redshift`` to load profiles 
+    with alternative settings:
+
+    >>> from astropy.cosmology import Planck13
+    >>> trivial_halo_prof_model = TrivialProfile(cosmology = Planck13, redshift = 0.5)
+
     """
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, 
@@ -457,6 +470,18 @@ class NFWProfile(HaloProfileModel):
 
     For a review of basic properties of the NFW profile, 
     see for example Lokas & Mamon (2000), arXiv:0002395. 
+
+    Examples 
+    --------
+    You can load a NFW profile model with the default settings simply by calling 
+    the class constructor with no arguments:
+
+    >>> nfw_halo_prof_model = NFWProfile()
+
+    For an NFW profile with an alternative cosmology and redshift:
+
+    >>> from astropy.cosmology import WMAP9
+    >>> nfw_halo_prof_model = NFWProfile(cosmology = WMAP9, redshift = 2)
     """
 
     def __init__(self, 
@@ -562,7 +587,22 @@ class NFWProfile(HaloProfileModel):
         cumulative_PDF : array_like
             :math:`P_{\\mathrm{NFW}}(<r | c) = g(c) / g(c*r)`. 
 
+        Examples 
+        --------
+        To evaluate the cumulative PDF for a single profile: 
+
+        >>> nfw_halo_prof_model = NFWProfile()
+        >>> Npts = 100
+        >>> radius = np.logspace(-2, 0, Npts)
+        >>> conc = 8
+        >>> cumulative_prob = nfw_halo_prof_model.cumulative_mass_PDF(radius, conc)
+
+        Or, to evaluate the cumulative PDF for profiles with a range of concentrations:
+
+        >>> conc_array = np.linspace(1, 25, Npts)
+        >>> cumulative_prob = nfw_halo_prof_model.cumulative_mass_PDF(radius, conc_array)
         """
+        
         if len(args)==0:
             raise SyntaxError("Must pass array of concentrations to cumulative_mass_PDF. \n"
                 "Only received array of radii.")
