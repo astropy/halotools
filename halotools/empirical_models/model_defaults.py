@@ -99,7 +99,7 @@ default_assembias_key = 'vmax'
 # will be bound to each mock galaxy 
 host_haloprop_prefix = 'halo_'
 galprop_prefix = 'gal_'
-haloprop_list = ['id', 'pos', 'vel', 'mvir', 'rvir']
+haloprop_list = ['haloid', 'pos', 'vel', 'mvir', 'rvir']
 galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 
 haloprop_key_dict = {'prim_haloprop_key':'mvir', 'halo_boundary':'rvir'}
