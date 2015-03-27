@@ -32,7 +32,7 @@ default_bin_max_epsilon = 1.e-5
 # Used primarily by HODMockFactory.
 min_permitted_conc = 0.1
 max_permitted_conc = 30.0
-default_dconc = 0.05
+default_dconc = 0.025
 
 default_Npts_radius_array = 101
 default_lograd_min = -4

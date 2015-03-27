@@ -255,7 +255,6 @@ class HaloProfileModel(object):
             param_array = np.linspace(parmin,parmax,npts_par)
             param_array_list.append(param_array)
             self.cumu_inv_param_table_dict[prof_param_key] = param_array
-
         
         # Using the itertools product method requires 
         # special handling of the length-zero edge case
