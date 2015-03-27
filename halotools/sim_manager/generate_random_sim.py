@@ -11,10 +11,40 @@ import numpy as np
 __all__ = ['FakeSim']
 
 class FakeSim(object):
+	""" Fake simulation data used in the test suite of `~halotools.empirical_models`. 
 
-	def __init__(self, 
-		num_massbins = 6, num_halos_per_massbin = int(1e3), num_ptcl = int(1e3), 
-		seed = 43):
+	The `FakeSim` object has all the attributes required by 
+	Mock Factories such as `~halotools.empirical_models.HodMockFactory` to 
+	create a mock galaxy population. 
+	The columns of the `halos` and `particles` attributes of `FakeSim` 
+	are generated with ``np.random``. Thus mock catalogs built into `FakeSim` 
+	will not have physically realistic spatial distributions, mass functions, etc.
+	All the same, `FakeSim` is quite useful for testing purposes, 
+	as it permits the testing of `~halotools.sim_manager` and `~halotools.empirical_models` 
+	to be completely decoupled. Default behavior is to use a fixed seed in the random 
+	number generation, so that an identical instance of `FakeSim` is created with each call. 
+	"""
+
+	def __init__(self, num_massbins = 6, num_halos_per_massbin = int(1e3), 
+		num_ptcl = int(1e3), seed = 43):
+		"""
+		Parameters 
+		----------
+		num_massbins : int, optional 
+			Number of distinct masses that will appear in the halo catalog. 
+			Default is 6.
+
+		num_halos_per_massbin : int, optional 
+			Default is 1000
+
+		num_ptcl : int, optional
+			Number of dark matter particles. Default is 1000. 
+
+		seed : int, optional 
+			Random number seed used to generate the fake halos and particles. 
+			Default is 43.
+		"""
+
 
 		self.Lbox = 250.0
 		self.particle_mass = 1.e8
@@ -29,6 +59,9 @@ class FakeSim(object):
 
 	@property 
 	def halos(self):
+		""" Astropy Table of randomly generated 
+		dark matter halos. 
+		"""
 
 		np.random.seed(self.seed)
 
@@ -69,6 +102,9 @@ class FakeSim(object):
 
 	@property 
 	def particles(self):
+		""" Astropy Table of randomly generated 
+		dark matter particles. 
+		"""
 
 		np.random.seed(self.seed)
 		pos = np.random.uniform(
