@@ -6,7 +6,7 @@ galaxy profiles from a set of components.
 
 """
 
-__all__ = ['GalProfModel']
+__all__ = ['GalProfFactory']
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
@@ -19,15 +19,19 @@ import halo_prof_components as hpc
 import gal_prof_components as gpc
 
 
-class GalProfModel(object):
-    """ Container class for the intra-halo spatial profile of a galaxy population. 
+class GalProfFactory(object):
+    """ Class modeling the way galaxies are distributed 
+    within their halos. 
 
-    This class derives most of its 
+    `GalProfFactory` can be thought of as a factory that produces 
+    model objects for the intra-halo distribution of galaxies.  
+    `GalProfFactory` derives most of its 
     behavior from external functions and classes. 
-    The main purpose of the `GalProfModel` class is to provide a standardized 
+    The main purpose of the `GalProfFactory` class is to provide a standardized 
     interface for the rest of the package, particularly model factories such as 
     `~halotools.empirical_models.HodModelFactory`, 
     and mock factories such as `~halotools.empirical_models.HodMockFactory`. 
+
     """
 
     def __init__(self, gal_type, halo_prof_model, spatial_bias_model = None):
@@ -73,7 +77,7 @@ class GalProfModel(object):
 
         Notes 
         ----- 
-        The `haloprop_key_dict` bound to `GalProfModel` derives entirely from 
+        The `haloprop_key_dict` bound to `GalProfFactory` derives entirely from 
         the `~halotools.empirical_models.HaloProfileModel.haloprop_key_dict` attribute 
         bound to `~halotools.empirical_models.HaloProfileModel`. 
 
@@ -89,7 +93,7 @@ class GalProfModel(object):
         dark matter halo, ``param_dict`` will be derived 
         directly from the instance of 
         `~halotools.empirical_models.gal_prof_components.SpatialBias` 
-        bound to `GalProfModel`. 
+        bound to `GalProfFactory`. 
         If the galaxy profile is unbiased, 
         then the galaxies exactly trace the potential well of their host halo; 
         in such a case there are no free parameters, 
@@ -165,8 +169,8 @@ class GalProfModel(object):
         ----- 
         Implemented as a read-only getter method via the ``@property`` decorator syntax. 
 
-        The `halo_prof_func_dict` bound to `GalProfModel` 
-        is not defined within the `GalProfModel` class, but instead is defined in the getter method 
+        The `halo_prof_func_dict` bound to `GalProfFactory` 
+        is not defined within the `GalProfFactory` class, but instead is defined in the getter method 
         `~halotools.empirical_models.halo_prof_components.halo_prof_func_dict.HaloProfileModel.halo_prof_func_dict`
         of `~halotools.empirical_models.halo_prof_components.halo_prof_func_dict.HaloProfileModel`. 
         """
@@ -179,7 +183,7 @@ class GalProfModel(object):
 
         After calling this method, 
         the `~halotools.empirical_models.halo_prof_components.HaloProfileModel` 
-        sub-class instance bound to `GalProfModel` gets a 
+        sub-class instance bound to `GalProfFactory` gets a 
         ``prof_param_table_dict`` attribute that is a dictionary. 
         Each dict key of ``prof_param_table_dict`` 
         is a profile parameter name, e.g., ``NFWmodel_conc``. 
