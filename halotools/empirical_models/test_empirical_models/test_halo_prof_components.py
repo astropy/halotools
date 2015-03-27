@@ -2,6 +2,7 @@
 from .. import halo_prof_components as hpc
 from astropy import cosmology
 import numpy as np
+from copy import copy
 
 __all__ = ['test_TrivialProfile','test_NFWProfile']
 
@@ -58,43 +59,52 @@ def test_TrivialProfile():
 
 		* ``haloprop_key_dict``
 	"""
+
+	# Check that the initialized attributes are correct
 	model_instance = hpc.TrivialProfile()
-	
-	assert len(model_instance.cumu_inv_func_table) == 0
-
-	assert model_instance.cumu_inv_param_table_dict == {}
-
 	assert model_instance.halo_prof_func_dict == {}
-
 	assert model_instance.haloprop_key_dict == {}
-
+	
+	# Check that the lookup table attributes are correct
 	model_instance.build_inv_cumu_lookup_table()
+	assert len(model_instance.cumu_inv_func_table) == 0
+	assert model_instance.cumu_inv_param_table_dict == {}
+	assert len(model_instance.func_table_indices) == 0
 
 
 def test_NFWProfile():
 	""" Tests of `~halotools.empirical_models.halo_prof_components.NFWProfile`. 
 	"""
 
+	# Check that the initialized attributes are correct
 	model_instance = hpc.NFWProfile()
-
 	assert hasattr(model_instance, 'cosmology')
 	assert isinstance(model_instance.cosmology, cosmology.FlatLambdaCDM)
+	assert model_instance._conc_parname == 'NFWmodel_conc'
 
-	assert type(model_instance.cumu_inv_param_table_dict) == dict
+	# Check that the lookup table attributes are correct
+	model_instance.build_inv_cumu_lookup_table()
 	assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] > 0)
 	assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] < 1000)
 	assert len(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname]) >= 10
+	assert (len(model_instance.cumu_inv_func_table) == 
+		len(model_instance.func_table_indices) )
 
-
-	assert type(model_instance.cumu_inv_func_table) == np.ndarray
-
-	assert model_instance._conc_parname == 'NFWmodel_conc'
-
-	input_dict = model_instance.prof_param_table_dict
+	# The lookup table should adjust properly when passed an input_dict
+	input_dict = copy(model_instance.prof_param_table_dict)
 	input_dict[model_instance._conc_parname] = (1.0, 25.0, 0.04)
 	model_instance._set_prof_param_table_dict(input_dict)
 	assert model_instance.prof_param_table_dict == input_dict
-
+	input_dict[model_instance._conc_parname] = (2.0, 20.0, 0.03)
+	assert model_instance.prof_param_table_dict != input_dict
+	model_instance.build_inv_cumu_lookup_table(
+		prof_param_table_dict=input_dict)
+	assert model_instance.prof_param_table_dict == input_dict
+	dict_persistence_check = copy(model_instance.prof_param_table_dict)
+	input_dict['some_irrelevant_key'] = 4
+	model_instance.build_inv_cumu_lookup_table(
+		prof_param_table_dict=input_dict)
+	assert dict_persistence_check == model_instance.prof_param_table_dict
 
 
 
