@@ -226,21 +226,6 @@ class GalProfModel(object):
         """ 
         return self.halo_prof_model.prof_param_table_dict
 
-    def get_ditigized_prof_param_indices(self, params):
-        result = np.digitize(params, self.cumu_inv_param_table)
-        return result
-
-    def get_scaled_radii_from_func_table(self, rho, *args):
-
-        func_table_indices_list = (
-            [self.get_ditigized_prof_param_indices(profile_param) for 
-            profile_param in args]
-            )
-
-        prof_func_array = self.cumu_inv_func_table[func_table_indices_list]
-        return occuhelp.call_func_table(
-            self.cumu_inv_func_table, rho, func_table_indices)
-
     def mc_radii(self, *args):
         """ args is a tuple of profile parameter arrays. In the simplest case, 
         this is a one-element tuple of concentration values. 
@@ -257,8 +242,8 @@ class GalProfModel(object):
             self.halo_prof_model.func_table_indices[digitized_param_list]
             )
 
-        return occuhelp.call_func_table(
-            self.cumu_inv_func_table, rho, func_table_indices)
+        return 10.**occuhelp.call_func_table(
+            self.cumu_inv_func_table, np.log10(rho), func_table_indices)
 
     def mc_angles(self, Npts):
         """ Returns Npts random points on the unit sphere. 

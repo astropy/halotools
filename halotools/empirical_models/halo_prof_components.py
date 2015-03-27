@@ -13,7 +13,9 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 import numpy as np
-from scipy.interpolate import UnivariateSpline as spline
+
+from scipy.interpolate import InterpolatedUnivariateSpline as spline
+#from scipy.interpolate import UnivariateSpline as spline
 
 from functools import partial
 from itertools import product
@@ -263,7 +265,10 @@ class HaloProfileModel(object):
         else:
             func_table = []
             for items in product(*param_array_list):
-                funcobj = spline(self.cumulative_mass_PDF(radius_array,*items),radius_array)
+                table_ordinates = self.cumulative_mass_PDF(radius_array,*items)
+                log_table_ordinates = np.log10(table_ordinates)
+                funcobj = spline(log_table_ordinates, logradius_array, k=4)
+                #funcobj = spline(self.cumulative_mass_PDF(radius_array,*items),radius_array)
                 func_table.append(funcobj)
 
             param_array_dimensions = [len(param_array) for param_array in param_array_list]
