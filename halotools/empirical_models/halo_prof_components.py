@@ -237,12 +237,12 @@ class HaloProfileModel(object):
 
         Notes 
         ----- 
-        Used by mock factories such as `~halotools.empirical_models.HodMockFactory` 
-        to rapidly generate Monte Carlo realizations of intra-halo positions. 
 
-        As tested in `~halotools.empirical_models.test_empirical_models.test_halo_prof_components`, 
-        errors due to interpolation from the lookup table are below 0.1 percent at all 
-        relevant radii and concentration. 
+            * Used by mock factories such as `~halotools.empirical_models.HodMockFactory` to rapidly generate Monte Carlo realizations of intra-halo positions. 
+
+            * As tested in `~halotools.empirical_models.test_empirical_models.test_halo_prof_components`, for the case of a `~halotools.empirical_models.NFWProfile`, errors due to interpolation from the lookup table are below 0.1 percent at all relevant radii and concentration. 
+
+            * The interpolation is done in log-space. Thus each function object stored in ``cumu_inv_func_table`` operates on :math:`\\log_{10}\\mathrm{P}`, and returns :math:`\\log_{10}r`, where :math:`\\mathrm{P} = \\mathrm{P}_{\\mathrm{NFW}}( < r | c )`, computed by the `cumulative_mass_PDF` method. 
 
         """
         
@@ -482,6 +482,7 @@ class NFWProfile(HaloProfileModel):
 
     >>> from astropy.cosmology import WMAP9
     >>> nfw_halo_prof_model = NFWProfile(cosmology = WMAP9, redshift = 2)
+
     """
 
     def __init__(self, 
@@ -602,7 +603,7 @@ class NFWProfile(HaloProfileModel):
         >>> conc_array = np.linspace(1, 25, Npts)
         >>> cumulative_prob = nfw_halo_prof_model.cumulative_mass_PDF(radius, conc_array)
         """
-        
+
         if len(args)==0:
             raise SyntaxError("Must pass array of concentrations to cumulative_mass_PDF. \n"
                 "Only received array of radii.")

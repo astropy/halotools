@@ -4,9 +4,12 @@ from astropy import cosmology
 import numpy as np
 from copy import copy
 
-__all__ = ['test_TrivialProfile','test_NFWProfile']
+__all__ = ['test_HaloProfileModel', 'test_TrivialProfile','test_NFWProfile']
 
 def test_HaloProfileModel():
+    """ Method testing the abstract base class 
+    `~halotools.empirical_models.HaloProfileModel`. 
+    """
     prof_model_list = hpc.__all__
     parent_class = hpc.HaloProfileModel
 
@@ -42,7 +45,7 @@ def test_HaloProfileModel():
 
 
 def test_TrivialProfile():
-    """ Simple tests of `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
+    """ Tests of `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
 
     Mostly this function checks that the each of the following attributes is present, 
     and is an empty array, list, or dictionary:
