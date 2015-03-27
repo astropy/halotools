@@ -258,6 +258,7 @@ class HaloProfileModel(object):
         # special handling of the length-zero edge case
         if len(param_array_list) == 0:
             self.cumu_inv_func_table = np.array([])
+            self.func_table_indices = np.array([])
         else:
             func_table = []
             for items in product(*param_array_list):
@@ -325,13 +326,11 @@ class TrivialProfile(HaloProfileModel):
         # Call the init constructor of the super-class, 
         # whose only purpose is to bind cosmology, redshift, haloprop_key_dict, 
         # and a list of prof_param_keys to the NFWProfile instance. 
-
         super(TrivialProfile, self).__init__(
             cosmology, redshift, prof_param_keys, 
             haloprop_key_dict=haloprop_key_dict)
 
         empty_dict = {}
-        #self._set_prof_param_table_dict(empty_dict)
         self.build_inv_cumu_lookup_table(empty_dict)
 
         self.publication = []

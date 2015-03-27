@@ -24,19 +24,20 @@ def test_HaloProfileModel():
 		assert hasattr(model_instance, 'cosmology')
 		assert isinstance(model_instance.cosmology, cosmology.FlatLambdaCDM)
 
-		assert hasattr(model_instance, 'cumu_inv_func_table')
-		assert type(model_instance.cumu_inv_func_table) == np.ndarray
-
-		assert hasattr(model_instance, 'cumu_inv_param_table_dict')
-		assert type(model_instance.cumu_inv_param_table_dict) == dict
+		assert hasattr(model_instance, '_set_prof_param_table_dict')
+		input_dict = {}
+		model_instance._set_prof_param_table_dict(input_dict)
+		input_dict = model_instance.prof_param_table_dict
+		model_instance._set_prof_param_table_dict(input_dict)
 
 		assert hasattr(model_instance, 'build_inv_cumu_lookup_table')
 		model_instance.build_inv_cumu_lookup_table()
-
-
-
-
-
+		assert hasattr(model_instance, 'cumu_inv_func_table')
+		assert type(model_instance.cumu_inv_func_table) == np.ndarray
+		assert hasattr(model_instance, 'cumu_inv_param_table_dict')
+		assert type(model_instance.cumu_inv_param_table_dict) == dict
+		assert hasattr(model_instance, 'func_table_indices')
+		assert type(model_instance.func_table_indices) == np.ndarray
 
 
 def test_TrivialProfile():
@@ -57,37 +58,44 @@ def test_TrivialProfile():
 
 		* ``haloprop_key_dict``
 	"""
-	profile_model = hpc.TrivialProfile()
+	model_instance = hpc.TrivialProfile()
 	
-	assert len(profile_model.cumu_inv_func_table) == 0
+	assert len(model_instance.cumu_inv_func_table) == 0
 
-	assert profile_model.cumu_inv_param_table_dict == {}
+	assert model_instance.cumu_inv_param_table_dict == {}
 
-	assert profile_model.halo_prof_func_dict == {}
+	assert model_instance.halo_prof_func_dict == {}
 
-	assert profile_model.haloprop_key_dict == {}
+	assert model_instance.haloprop_key_dict == {}
 
-	profile_model.build_inv_cumu_lookup_table()
+	model_instance.build_inv_cumu_lookup_table()
 
 
 def test_NFWProfile():
 	""" Tests of `~halotools.empirical_models.halo_prof_components.NFWProfile`. 
 	"""
 
-	profile_model = hpc.NFWProfile()
+	model_instance = hpc.NFWProfile()
 
-	assert hasattr(profile_model, 'cosmology')
-	assert isinstance(profile_model.cosmology, cosmology.FlatLambdaCDM)
+	assert hasattr(model_instance, 'cosmology')
+	assert isinstance(model_instance.cosmology, cosmology.FlatLambdaCDM)
 
-	assert type(profile_model.cumu_inv_param_table_dict) == dict
-	assert np.all(profile_model.cumu_inv_param_table_dict[profile_model._conc_parname] > 0)
-	assert np.all(profile_model.cumu_inv_param_table_dict[profile_model._conc_parname] < 1000)
-	assert len(profile_model.cumu_inv_param_table_dict[profile_model._conc_parname]) >= 10
+	assert type(model_instance.cumu_inv_param_table_dict) == dict
+	assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] > 0)
+	assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] < 1000)
+	assert len(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname]) >= 10
 
 
-	assert type(profile_model.cumu_inv_func_table) == np.ndarray
+	assert type(model_instance.cumu_inv_func_table) == np.ndarray
 
-	assert profile_model._conc_parname == 'NFWmodel_conc'
+	assert model_instance._conc_parname == 'NFWmodel_conc'
+
+	input_dict = model_instance.prof_param_table_dict
+	input_dict[model_instance._conc_parname] = (1.0, 25.0, 0.04)
+	model_instance._set_prof_param_table_dict(input_dict)
+	assert model_instance.prof_param_table_dict == input_dict
+
+
 
 
 
