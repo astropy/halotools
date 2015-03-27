@@ -35,9 +35,11 @@ import halo_prof_param_components
 
 @six.add_metaclass(ABCMeta)
 class HaloProfileModel(object):
-    """ Container class for any halo profile model. This is an abstract class, 
-    and cannot itself be instantiated. Rather, `HaloProfileModel` provides a 
-    blueprint for any radial profile component model used by the 
+    """ Container class for any halo profile model. 
+
+    This is an abstract class, and cannot itself be instantiated. 
+    Rather, `HaloProfileModel` provides a 
+    template for any radial profile component model used by the 
     empirical model factories such as `~halotools.empirical_models.hod_factory`. 
 
     Parameters 
@@ -90,10 +92,9 @@ class HaloProfileModel(object):
             so that :math:`x \equiv r / R_{\\mathrm{halo}}`, and 
             :math:`0 < x < 1`
 
-        args : array_like 
+        input_params : array_like 
             Parameters specifying the halo profile. 
-            If an array, should be of the same length 
-            as the input x. 
+            Should have the same length as the input x. 
 
         Returns 
         -------
@@ -113,10 +114,9 @@ class HaloProfileModel(object):
             Value of the radius at which density profile is to be evaluated. 
             Should be scaled by the halo boundary, as in `density_profile`. 
 
-        args : array_like 
+        input_params : array_like 
             Parameters specifying the halo profile. 
-            If an array, should be of the same length 
-            as the input x. 
+            Should have the same length as the input x. 
 
         Returns 
         -------
@@ -128,11 +128,10 @@ class HaloProfileModel(object):
 
     @abstractproperty
     def halo_prof_func_dict(self):
-        """ Required method specifying the mapping between halos 
-        and their profile parameters. 
+        """ Required dictionary attribute containing function objects 
+        that specify the mapping between halos and their profile parameters. 
 
-        After calling this method, the class instance has a 
-        ``halo_prof_func_dict`` attribute that is a dictionary. 
+        `halo_prof_func_dict` is a dictionary. 
         Each key of this dictionary is a profile parameter name, e.g., ``NFWmodel_conc``. 
         Each value of this dictionary is a function object; 
         these function objects take 
@@ -145,17 +144,15 @@ class HaloProfileModel(object):
         -----
         The ``halo_prof_func_dict`` dictionary can be empty, as is the case for `TrivialProfile`. 
 
-        The implementation of this function is completely trivial; its only behavior is 
-        to bind the ``halo_prof_func_dict`` dictionary to the 
-        `HaloProfileModel` instance. 
         This dictionary standardizes the way composite models access 
-        the profile parameter mappings, including cases of 
+        the profile parameter mappings. This standardization is necessary 
+        so that composite models can use a uniform syntax to handle cases of 
         user-defined :math:`c(M)`-type relations whose method names 
         are not known in advance. 
 
         When instances of `HaloProfileModel` are called by the mock factories 
         such as `~halotools.empirical_models.HodMockFactory`, 
-        each dictionary key of ``halo_prof_func_dict`` will correspond 
+        each dictionary key of `halo_prof_func_dict` will correspond 
         to the name of a new column for the halo catalog 
         that will be created by the mock factory 
         during the pre-processing of the halo catalog.
@@ -187,17 +184,18 @@ class HaloProfileModel(object):
         input_dict : dict, optional
             Passed dictionary used to manually determine how to discretize 
             a halo profile parameter. 
-            All keys other than those in ``self.prof_param_table_dict`` will be ignored. 
+            All keys of ``input_dict`` other than those already in 
+            ``self.prof_param_table_dict`` will be ignored. 
             The value bound to each key must be a 3-element tuple,
             which will be used to govern how the halo profile parameter is discretized. 
             The entries of the tuple give the minimum parameter 
             value of the table to be built, the 
-            maximum value, and the linear spacing, respectively. 
-            If an empty dict, 
-            and for the keys of ``self.prof_param_table_dict`` 
-            with no match in  ``input_dict``, the default discretization will be chosen,   
+            maximum value, and the linear parameter spacing, respectively. 
+            If ``input_dict`` is an empty dict, 
+            the default discretization will be chosen, 
             which is set in the `halotools.empirical_models.model_defaults` module. 
-
+            The same applies for the keys of ``self.prof_param_table_dict`` 
+            with no match in ``input_dict``.   
 
         Notes 
         -----
