@@ -513,14 +513,15 @@ class NFWProfile(HaloProfileModel):
         -------
         rho_s : array_like 
             Profile normalization 
-            :math:`\\rho_{s}^{NFW} = \\frac{1}{3}\\Delta_{vir}c^{3}g(c)\\bar{\\rho}_{m}`
+            :math:`\\rho_{\\mathrm{s}} = \\frac{1}{3}\\Delta_{\\mathrm{vir}}c^{3}g(c)\\bar{\\rho}_{\\mathrm{m}}`
 
         """
         return (self.delta_vir/3.)*c*c*c*self.g(c)*self.cosmic_matter_density
 
     def density_profile(self, r, c):
-        """ Mass density profile given by 
-        :math:`\\rho^{NFW}(r | c) = \\rho_{s}^{NFW} / cr(1+cr)^{2}`
+        """ NFW profile density. 
+
+        :math:`\\rho_{\\mathrm{NFW}}(r | c) = \\rho_{\\mathrm{s}} / cr(1+cr)^{2}`
 
         Parameters 
         ----------
@@ -536,15 +537,14 @@ class NFWProfile(HaloProfileModel):
         Returns 
         -------
         result : array_like 
-            NFW density profile :math:`\\rho^{NFW}(r | c)`.
+            NFW density profile :math:`\\rho_{\\mathrm{NFW}}(r | c)`.
         """
         numerator = self.rho_s(c)
         denominator = (c*r)*(1.0 + c*r)*(1.0 + c*r)
         return numerator / denominator
 
     def cumulative_mass_PDF(self, r, *args):
-        """ Cumulative probability distribution of the NFW profile, 
-        :math:`P^{NFW}( <r | c)`. 
+        """ Cumulative probability distribution of the NFW profile. 
 
         Parameters 
         ----------
@@ -560,7 +560,7 @@ class NFWProfile(HaloProfileModel):
         Returns 
         -------
         cumulative_PDF : array_like
-            :math:`P^{NFW}(<r | c) = g(c) / g(c*r)`. 
+            :math:`P_{\\mathrm{NFW}}(<r | c) = g(c) / g(c*r)`. 
 
         """
         if len(args)==0:
