@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-
-halotools.halo_prof_components contains the classes and functions 
-used by galaxy occupation models to control the intra-halo position 
-of mock galaxies. 
-
+This module contains the classes and functions 
+used by galaxy occupation models to control the 
+intra-halo position of mock galaxies. 
 """
 
 __all__ = ['HaloProfileModel','TrivialProfile','NFWProfile']

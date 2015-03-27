@@ -22,11 +22,11 @@ import gal_prof_components as gpc
 class GalProfModel(object):
     """ Container class for the intra-halo spatial profile of a galaxy population. 
 
-    This class derives the vast majority of its 
+    This class derives most of its 
     behavior from external functions and classes. 
     The main purpose of the `GalProfModel` class is to provide a standardized 
     interface for the rest of the package, particularly model factories such as 
-    `~halotools.empirical_models.HodModelFactory` 
+    `~halotools.empirical_models.HodModelFactory`, 
     and mock factories such as `~halotools.empirical_models.HodMockFactory`. 
     """
 

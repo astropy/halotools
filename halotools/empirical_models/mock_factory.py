@@ -14,6 +14,7 @@ import model_defaults
 from ..sim_manager import sim_defaults
 
 __all__ = ["HodMockFactory"]
+__author__ = ['Andrew Hearin']
 
 class HodMockFactory(object):
     """ Class responsible for populating a simulation with a 

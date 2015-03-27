@@ -5,6 +5,7 @@ composite HOD-style models from a set of components.
 """
 
 __all__ = ['HodModelFactory']
+__author__ = ['Andrew Hearin']
 
 from functools import partial
 import numpy as np
