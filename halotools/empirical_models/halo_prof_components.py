@@ -215,11 +215,14 @@ class HaloProfileModel(object):
         profile functions. 
 
         `build_inv_cumu_lookup_table` does not return anything. 
-        Instead, when called, the class instance will have two new attributes: 
+        Instead, when called, the class instance will have three 
+        (not necessarily newly created) attributes: 
 
-            * ``cumu_inv_param_table``, an array (or arrays) of discretized profile parameter values.
+            * ``cumu_inv_param_table_dict``, a dictionary with one key per profile parameter, whose values is an array of discrete values of that parameter. 
 
             * ``cumu_inv_func_table``, an array of inverse cumulative density profile function objects, :math:`P( <x | p)`, associated with each point in the grid of profile parameters. 
+
+            * ``func_table_indices``, an array used to access the appropriate profile function object based on the discretized profile parameters
 
         The function objects in the ``cumu_inv_func_table`` lookup table are computed 
         by `cumulative_mass_PDF`. 
@@ -236,6 +239,10 @@ class HaloProfileModel(object):
         ----- 
         Used by mock factories such as `~halotools.empirical_models.HodMockFactory` 
         to rapidly generate Monte Carlo realizations of intra-halo positions. 
+
+        As tested in `~halotools.empirical_models.test_empirical_models.test_halo_prof_components`, 
+        errors due to interpolation from the lookup table are below 0.1 percent at all 
+        relevant radii and concentration. 
 
         """
         
@@ -643,6 +650,21 @@ class NFWProfile(HaloProfileModel):
 
 
     def _get_conc_mass_model(self, conc_mass_relation_key):
+        """ Returns function object used compute concentrations. 
+
+        Parameters 
+        ----------
+        conc_mass_relation_key : string
+            Used to select which model to use to paint concentrations 
+            onto dark matter halos. 
+
+        Returns 
+        -------
+        conc_mass_func : function object 
+            When evaluated at a set of input masses, conc_mass_func 
+            returns the mean concentration according to the model 
+            corresponding to the input conc_mass_relation_key. 
+        """
 
         # Instantiate the container class for concentration-mass relations, 
         # defined in the external module halo_prof_param_components
