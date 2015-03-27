@@ -240,9 +240,9 @@ class HaloProfileModel(object):
         self._set_prof_param_table_dict(prof_param_table_dict)
 
         npts_radius = profile_table_radius_array_dict['npts']
-        rmin = profile_table_radius_array_dict['rmin']
-        rmax = profile_table_radius_array_dict['rmax']
-        radius_array = np.linspace(rmin,rmax,npts_radius)
+        logrmin = profile_table_radius_array_dict['logrmin']
+        logrmax = profile_table_radius_array_dict['logrmax']
+        radius_array = np.logspace(logrmin,logrmax,npts_radius)
         logradius_array = np.log10(radius_array)
 
         self.cumu_inv_param_table_dict = {}

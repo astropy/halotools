@@ -35,11 +35,11 @@ max_permitted_conc = 25.0
 default_dconc = 0.02
 
 default_Npts_radius_array = 101
-default_min_rad = 0.0001
-default_max_rad = 1.0
+default_lograd_min = -4
+default_lograd_max = 0
 profile_table_radius_array_dict = {
-    'rmin' : default_min_rad, 
-    'rmax' : default_max_rad, 
+    'logrmin' : default_lograd_min, 
+    'logrmax' : default_lograd_max, 
     'npts' : default_Npts_radius_array
 }
 conc_mass_relation_key = 'dutton_maccio14'
