@@ -106,6 +106,9 @@ def test_NFWProfile():
 		prof_param_table_dict=input_dict)
 	assert dict_persistence_check == model_instance.prof_param_table_dict
 
+	# Verify accuracy of lookup table
+	
+
 
 
 

@@ -243,6 +243,7 @@ class HaloProfileModel(object):
         rmin = profile_table_radius_array_dict['rmin']
         rmax = profile_table_radius_array_dict['rmax']
         radius_array = np.linspace(rmin,rmax,npts_radius)
+        logradius_array = np.log10(radius_array)
 
         self.cumu_inv_param_table_dict = {}
         param_array_list = []
@@ -555,7 +556,16 @@ class NFWProfile(HaloProfileModel):
             raise SyntaxError("Must pass array of concentrations to cumulative_mass_PDF. \n"
                 "Only received array of radii.")
         else:
-            return self.g(args[0]) / self.g(r*args[0])
+            if aph_len(args[0]) == 1:
+                c = np.ones(len(r))*args[0]
+                return self.g(c) / self.g(r*c)
+            elif (aph_len(args[0]) > 1) & (aph_len(args[0]) != aph_len(r)):
+                raise ValueError("If passing an array of concentrations to "
+                    "cumulative_mass_PDF, the array must have the same length "
+                    "as the array of radial positions")
+            else:
+                c = args[0]
+                return self.g(c) / self.g(r*c)
 
 
     @property 
