@@ -67,6 +67,17 @@ class FakeSim(object):
 
 		return Table(d)
 
+	@property 
+	def particles(self):
+
+		np.random.seed(self.seed)
+		pos = np.random.uniform(
+			0, self.Lbox, self.num_ptcl*3).reshape(self.num_ptcl, 3)
+		d = {'pos': pos}
+
+		return Table(d)
+
+
 
 	
 
