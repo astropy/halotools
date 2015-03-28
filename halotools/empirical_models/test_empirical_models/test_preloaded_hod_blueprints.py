@@ -64,7 +64,7 @@ def test_Kravtsov04_blueprint():
 		assert isinstance(gal_type_blueprint['occupation'], 
 			hod_components.OccupationComponent)
 		assert isinstance(gal_type_blueprint['profile'], 
-			gal_prof_factory.GalProfModel)
+			gal_prof_factory.GalProfFactory)
 
 
 		# Test the profile model component

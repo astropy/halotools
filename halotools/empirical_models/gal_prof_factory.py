@@ -231,8 +231,24 @@ class GalProfFactory(object):
         return self.halo_prof_model.prof_param_table_dict
 
     def mc_radii(self, *args):
-        """ args is a tuple of profile parameter arrays. In the simplest case, 
-        this is a one-element tuple of concentration values. 
+        """ Method to generate Monte Carlo realizations of the profile model. 
+
+        Parameters 
+        ----------
+        param_array : array_like, optional position argument(s)
+            Array or arrays containing the input profile parameters. 
+            In the simplest case, this is a single array of 
+            NFW concentration values. 
+            There should be an input ``param_array`` 
+            for every parameter in the profile model, 
+            all of the same length. 
+
+        Returns 
+        -------
+        r : array 
+            Contains the radial position of galaxies within their halos, 
+            scaled by the size of the halo's boundary, 
+            so that :math:`0 < r < 1`. 
         """
         rho = np.random.random(len(args[0]))
 

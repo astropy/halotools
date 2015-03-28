@@ -8,7 +8,7 @@ def test_unbiased_trivial():
 	trivial_prof = hpc.TrivialProfile()
 	gal_type = 'cens'
 
-	cen_prof = gpf.GalProfModel(gal_type, trivial_prof)
+	cen_prof = gpf.GalProfFactory(gal_type, trivial_prof)
 	assert cen_prof.gal_type == gal_type
 
 	assert isinstance(cen_prof.halo_prof_model, hpc.TrivialProfile)
