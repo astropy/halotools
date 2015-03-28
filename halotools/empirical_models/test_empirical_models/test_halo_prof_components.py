@@ -28,11 +28,11 @@ def test_HaloProfileModel():
         assert hasattr(model_instance, 'cosmology')
         assert isinstance(model_instance.cosmology, cosmology.FlatLambdaCDM)
 
-        assert hasattr(model_instance, '_set_prof_param_table_dict')
+        assert hasattr(model_instance, 'set_prof_param_table_dict')
         input_dict = {}
-        model_instance._set_prof_param_table_dict(input_dict)
+        model_instance.set_prof_param_table_dict(input_dict)
         input_dict = model_instance.prof_param_table_dict
-        model_instance._set_prof_param_table_dict(input_dict)
+        model_instance.set_prof_param_table_dict(input_dict)
 
         assert hasattr(model_instance, 'build_inv_cumu_lookup_table')
         model_instance.build_inv_cumu_lookup_table()
@@ -127,7 +127,7 @@ def test_NFWProfile():
     # The lookup table should adjust properly when passed an input_dict
     input_dict = copy(model_instance.prof_param_table_dict)
     input_dict[model_instance._conc_parname] = (1.0, 25.0, 0.04)
-    model_instance._set_prof_param_table_dict(input_dict)
+    model_instance.set_prof_param_table_dict(input_dict)
     assert model_instance.prof_param_table_dict == input_dict
     input_dict[model_instance._conc_parname] = (2.0, 20.0, 0.03)
     assert model_instance.prof_param_table_dict != input_dict

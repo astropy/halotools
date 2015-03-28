@@ -59,7 +59,7 @@ class HaloProfileModel(object):
         Dictionary keys are, e.g., ``prim_haloprop_key``; 
         dictionary values are strings providing the column name 
         used to extract the relevant data from a halo catalog, e.g., ``mvir``. 
-        Used by the method `_set_prof_param_table_dict`. 
+        Used by the method `set_prof_param_table_dict`. 
         Default is an empty dict. 
 
     Notes 
@@ -166,7 +166,7 @@ class HaloProfileModel(object):
             "profile parameter values onto halos")
 
     @abstractmethod
-    def _set_prof_param_table_dict(self,input_dict):
+    def set_prof_param_table_dict(self,input_dict):
         """ Required method providing instructions for how to discretize 
         halo profile parameter values. 
 
@@ -204,7 +204,7 @@ class HaloProfileModel(object):
 
         """ 
         raise NotImplementedError("All subclasses of HaloProfileModel must"
-            " provide a _set_prof_param_table_dict method used to create a "
+            " provide a set_prof_param_table_dict method used to create a "
             "(possibly trivial) dictionary prof_param_table_dict.")
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict={}, 
@@ -228,7 +228,7 @@ class HaloProfileModel(object):
         Parameters 
         ----------
         prof_param_table_dict : dict, optional
-            Dictionary created by `_set_prof_param_table_dict` 
+            Dictionary created by `set_prof_param_table_dict` 
             providing instructions for how to generate a grid of 
             values for each halo profile parameter. 
             Default is an empty dict. 
@@ -244,7 +244,7 @@ class HaloProfileModel(object):
 
         """
         
-        self._set_prof_param_table_dict(prof_param_table_dict)
+        self.set_prof_param_table_dict(prof_param_table_dict)
 
         npts_radius = profile_table_radius_array_dict['npts']
         logrmin = profile_table_radius_array_dict['logrmin']
@@ -392,7 +392,7 @@ class TrivialProfile(HaloProfileModel):
         """
         return {}
 
-    def _set_prof_param_table_dict(self,input_dict):
+    def set_prof_param_table_dict(self,input_dict):
         """ Trivial method binding the empty dictionary 
         ``prof_param_table_dict`` to the class instance. 
 
@@ -432,7 +432,7 @@ class NFWProfile(HaloProfileModel):
         the tuple entries provide, respectively, the min, max, and linear 
         spacing used to discretize halo concentration. 
 
-        The `_set_prof_param_table_dict` method binds this dictionary to 
+        The `set_prof_param_table_dict` method binds this dictionary to 
         the class instance; if no ``prof_param_table_dict`` argument 
         is passed to the constructor, 
         the discretization will be determined by the default settings in 
@@ -446,7 +446,7 @@ class NFWProfile(HaloProfileModel):
         used to extract the relevant data from a halo catalog, 
         e.g., ``mvir`` and ``rvir``. 
         ``haloprop_key_dict`` is used by the method 
-        `_set_prof_param_table_dict`. 
+        `set_prof_param_table_dict`. 
         Default values are set in `~halotools.empirical_models.model_defaults`. 
 
     conc_mass_relation_key : string, optional 
@@ -636,7 +636,7 @@ class NFWProfile(HaloProfileModel):
         return {self._conc_parname : self._conc_mass_func}
 
 
-    def _set_prof_param_table_dict(self,input_dict={}):
+    def set_prof_param_table_dict(self,input_dict={}):
         """ Method sets the value of the prof_param_table_dict attribute. 
 
         The prof_param_table_dict attribute is a dictionary 
@@ -678,11 +678,11 @@ class NFWProfile(HaloProfileModel):
             if key in input_dict.keys():
                 if not isinstance(input_dict[key], tuple):
                     raise TypeError("Values of input_dict passed to "
-                        "_set_prof_param_table_dict must be a tuple")
+                        "set_prof_param_table_dict must be a tuple")
 
                 if len(input_dict[key]) != 3:
                     raise TypeError("Tuple value of "
-                        "input_dict passed to _set_prof_param_table_dict" 
+                        "input_dict passed to set_prof_param_table_dict" 
                         "must have exactly 3 elements")
 
                 self.prof_param_table_dict[key] = input_dict[key]

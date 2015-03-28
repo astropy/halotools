@@ -15,7 +15,8 @@ import model_defaults
 from ..utils.array_utils import array_like_length as aph_len
 import occupation_helpers as occuhelp 
 from functools import partial
-import halo_prof_components as hpc
+
+import halo_prof_components
 import gal_prof_components as gpc
 
 
@@ -49,18 +50,36 @@ class GalProfFactory(object):
         spatial_bias_model : object, optional
             Instance of the class `~halotools.empirical_models.gal_prof_components.SpatialBias`. 
             Default is None. 
+
+        Examples 
+        --------
+        To build a centrals-like population, with galaxies residing at exactly 
+        the halo center:
+
+        >>> halo_prof_model = halo_prof_components.TrivialProfile()
+        >>> gal_type_nickname = 'centrals'
+        >>> gal_prof_model = GalProfFactory(gal_type_nickname, halo_prof_model)
+
+        For a satellite-type population distributed according to the NFW profile of the parent halo:
+
+        >>> halo_prof_model = halo_prof_components.NFWProfile()
+        >>> gal_type_nickname = 'sats'
+        >>> gal_prof_model = GalProfFactory(gal_type_nickname, halo_prof_model)
+
         """
 
         # Bind the inputs to the instance 
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
+        self.spatial_bias_model = spatial_bias_model
+
+        # Create convenience attributes deriving from halo_prof_model
         self.cosmology = self.halo_prof_model.cosmology
         self.redshift = self.halo_prof_model.redshift
-        self.spatial_bias_model = spatial_bias_model
 
         # Bind param_dict to the class instance 
         # param_dict contains the parameters of the model 
-        # for which posteriors can be computed in a likelihood analysis.
+        # for which posteriors can be inferred using a likelihood analysis.
         self._initialize_param_dict()
 
         self.build_inv_cumu_lookup_table(
@@ -93,7 +112,7 @@ class GalProfFactory(object):
         dark matter halo, ``param_dict`` will be derived 
         directly from the instance of 
         `~halotools.empirical_models.gal_prof_components.SpatialBias` 
-        bound to `GalProfFactory`. 
+        bound to ``self``. 
         If the galaxy profile is unbiased, 
         then the galaxies exactly trace the potential well of their host halo; 
         in such a case there are no free parameters, 
@@ -106,8 +125,27 @@ class GalProfFactory(object):
             self.param_dict = self.spatial_bias_model.param_dict
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict={}):
+        """ Method building a lookup table used to 
+        rapidly generate Monte Carlo realizations of radial positions 
+        within the halo. 
 
-        self._set_prof_param_table_dict(input_dict=prof_param_table_dict)
+        Parameters 
+        ----------
+        prof_param_table_dict : dict, optional
+            Dictionary determining how the profile parameters are discretized 
+            during the building of the lookup table. If no ``prof_param_table_dict`` 
+            is passed, default values for the discretization will be chosen. 
+            See `set_prof_param_table_dict` for details. 
+
+        Notes 
+        -----
+        All of the behavior of this method is derived from 
+        ``self.halo_prof_model``. For further documentation about 
+        how this method works, see the 
+        `~halotools.empirical_models.HaloProfileModel.build_inv_cumu_lookup_table`
+        method of the `~halotools.empirical_models.HaloProfileModel` class. 
+        """
+        self.set_prof_param_table_dict(input_dict=prof_param_table_dict)
 
         self.halo_prof_model.build_inv_cumu_lookup_table(
             prof_param_table_dict=prof_param_table_dict)
@@ -140,6 +178,17 @@ class GalProfFactory(object):
         Notes 
         ----- 
         Implemented as a read-only getter method via the ``@property`` decorator syntax. 
+
+        The purpose of `gal_prof_func_dict` is primarily for use by the 
+        `~halotools.empirical_models.mock_factory` module. For example, through the use of 
+        `gal_prof_func_dict`, the `~halotools.empirical_models.mock_factory.HodMockFactory` 
+        can create a ``gal_NFWmodel_conc`` attribute for the mock, 
+        without knowing the name of the concentration-mass function used in the assignment, 
+        nor knowledge of the ``gal_NFWmodel_conc`` keyword. 
+        This is one of the tricks that permits   
+        `~halotools.empirical_models.mock_factory.HodMockFactory` to call 
+        its component models using a uniform syntax, regardless of the complexity 
+        of the underlying model. 
         """
         output_dict = {}
         if self.spatial_bias_model == None:
@@ -177,7 +226,7 @@ class GalProfFactory(object):
 
         return self.halo_prof_model.halo_prof_func_dict
 
-    def _set_prof_param_table_dict(self,input_dict={}):
+    def set_prof_param_table_dict(self,input_dict={}):
         """ Create dictionary attribute providing instructions for how to discretize 
         halo profile parameter values. 
 
@@ -198,12 +247,12 @@ class GalProfFactory(object):
         The ``prof_param_table_dict`` dictionary can be empty, 
         as is the case for `TrivialProfile`. 
 
-        The behavior of `_set_prof_param_table_dict` is derived entirely from 
+        The behavior of `set_prof_param_table_dict` is derived entirely from 
         `~halotools.empirical_models.halo_prof_components.HaloProfileModel`, 
         or one of its sub-classes. 
 
         """ 
-        self.halo_prof_model._set_prof_param_table_dict(input_dict)
+        self.halo_prof_model.set_prof_param_table_dict(input_dict)
 
     @property 
     def prof_param_table_dict(self):
@@ -225,7 +274,7 @@ class GalProfFactory(object):
         as is the case for 
         `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
 
-        Keys and values are set by the `_set_prof_param_table_dict` method. 
+        Keys and values are set by the `set_prof_param_table_dict` method. 
 
         """ 
         return self.halo_prof_model.prof_param_table_dict
@@ -292,7 +341,8 @@ class GalProfFactory(object):
         gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
         pos = getattr(mock_galaxies, 'pos')[gal_type_slice]
 
-        if isinstance(self.halo_prof_model, hpc.TrivialProfile) is True:
+        if isinstance(self.halo_prof_model, 
+            halo_prof_components.TrivialProfile) is True:
             return np.zeros_like(pos)
         else:
             # get angles
