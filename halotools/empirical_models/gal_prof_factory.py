@@ -344,51 +344,76 @@ class GalProfFactory(object):
         return 10.**occuhelp.call_func_table(
             self.cumu_inv_func_table, np.log10(rho), func_table_indices)
 
-    def mc_angles(self, Npts):
+    def mc_angles(self, Npts, **kwargs):
         """ Returns Npts random points on the unit sphere. 
 
         Parameters 
         ----------
+        Npts : int 
+            Number of 3d points to generate
+
+        seed : int, optional keyword argument
+            Random number seed. Default is None. 
+
+        Returns 
+        -------
         pos : array_like  
             Array with shape (Npts, 3) of points. 
-            Method over-writes this array with points on the unit sphere. 
 
         """
 
-        pos = np.zeros(Npts*3).reshape(Npts,3)
+        if 'seed' in kwargs.keys(): 
+            np.random.seed(kwargs['seed'])
+
         cos_t = np.random.uniform(-1.,1.,Npts)
         phi = np.random.uniform(0,2*np.pi,Npts)
         sin_t = np.sqrt((1.-cos_t*cos_t))
 
+        pos = np.zeros(Npts*3).reshape(Npts,3)
         pos[:,0] = sin_t * np.cos(phi)
         pos[:,1] = sin_t * np.sin(phi)
         pos[:,2] = cos_t
 
         return pos
 
-    def mc_pos(self, mock_galaxies):
-        # get the appropriate slice
+    def mc_pos(self, mock_galaxies, **kwargs):
+        """ Method to generate random, three-dimensional, 
+        halo-centric positions of galaxies. 
+
+        Parameters 
+        ----------
+        mock_galaxies : object 
+            Instance of `~halotools.empirical_models.HodMockFactory` 
+
+        seed : int, optional keyword argument 
+            Random number seed used in Monte Carlo realization
+        """
+
+        # get the appropriate slice for the gal_type of this component model
         gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
         pos = getattr(mock_galaxies, 'pos')[gal_type_slice]
 
+        # For the case of a trivial profile model, return the trivial result
         if isinstance(self.halo_prof_model, 
             halo_prof_components.TrivialProfile) is True:
             return np.zeros_like(pos)
         else:
             # get angles
             Ngals = len(pos[:,0])
-            pos = self.mc_angles(Ngals)
+            pos = self.mc_angles(Ngals, **kwargs)
 
-            # get radii
+            # extract all relevant profile parameters from the mock
             profile_params = (
                 [getattr(mock_galaxies, 
                     model_defaults.host_haloprop_prefix+profile_param_key)[gal_type_slice] 
                 for profile_param_key in self.halo_prof_model.prof_param_keys]
                 )
 
-            scaled_mc_radii = self.mc_radii(*profile_params) 
+            # Get the radial positions of the gal_type galaxies
+            scaled_mc_radii = self.mc_radii(*profile_params, **kwargs) 
 
-            # multiply radii by angles 
+            # multiply the random radial positions by the random points on the unit sphere 
+            # to get random three-dimensional positions
             for idim in range(3): pos[:,idim] *= scaled_mc_radii
 
         return pos
