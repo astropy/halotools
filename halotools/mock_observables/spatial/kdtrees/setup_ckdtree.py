@@ -14,7 +14,6 @@ extra_compile_args=["-O3"]
 
 setup(
   name = 'ckdtree app',
-  #ext_modules = cythonize("ckdtree.pyx"),
   cmdclass = {'build_ext': build_ext},
   include_dirs=[numpy.get_include()],
   ext_modules = ext_modules
