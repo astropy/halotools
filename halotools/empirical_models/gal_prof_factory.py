@@ -220,8 +220,8 @@ class GalProfFactory(object):
 
         The `halo_prof_func_dict` bound to `GalProfFactory` 
         is not defined within the `GalProfFactory` class, but instead is defined in the getter method 
-        `~halotools.empirical_models.halo_prof_components.halo_prof_func_dict.HaloProfileModel.halo_prof_func_dict`
-        of `~halotools.empirical_models.halo_prof_components.halo_prof_func_dict.HaloProfileModel`. 
+        `~halotools.empirical_models.halo_prof_components.HaloProfileModel.halo_prof_func_dict`
+        of `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
         """
 
         return self.halo_prof_model.halo_prof_func_dict
@@ -279,38 +279,68 @@ class GalProfFactory(object):
         """ 
         return self.halo_prof_model.prof_param_table_dict
 
-    def mc_radii(self, *args):
+    def mc_radii(self, *args, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
         ----------
         param_array : array_like, optional position argument(s)
-            Array or arrays containing the input profile parameters. 
+            Array or arrays of length *Ngals* containing the input profile parameters. 
             In the simplest case, this is a single array of 
             NFW concentration values. 
             There should be an input ``param_array`` 
             for every parameter in the profile model, 
             all of the same length. 
 
+        seed : int, optional keyword argument
+            Random number seed used to generate Monte Carlo realization. 
+            Default is None. 
+
         Returns 
         -------
         r : array 
-            Contains the radial position of galaxies within their halos, 
+            Length-*Ngals* array containing the 
+            radial position of galaxies within their halos, 
             scaled by the size of the halo's boundary, 
             so that :math:`0 < r < 1`. 
         """
+        # Draw random values for the cumulative mass PDF 
+        # at the position of the satellites
+        if 'seed' in kwargs.keys(): 
+            np.random.seed(kwargs['seed'])
         rho = np.random.random(len(args[0]))
+        # These will be turned into random radial positions 
+        # via the method of transformation of random variables
 
+        # Discretize each profile parameter for every galaxy
+        # Store the collection of arrays in digitized_param_list 
         digitized_param_list = []
         for param_index, param_key in enumerate(self.halo_prof_model.prof_param_keys):
             digitized_params = np.digitize(args[param_index], 
                 self.cumu_inv_param_table_dict[param_key])
             digitized_param_list.append(digitized_params)
+        # Each element of digitized_param_list is an array. 
+        # The i^th element of each array contains the bin index of 
+        # the discretized profile parameter array. 
+        # So if self.cumu_inv_param_table_dict[concentration] = [4, 5, 6, 7,...], 
+        # and the i^th entry of the the first array in param_array is 6.7, 
+        # then the i^th entry of the 
+        # first array in digitized_param_list will be 2
 
+        # Now we have a collection of arrays storing indices of individual 
+        # profile parameters, (A_0, A_1, A_2, ...), (B_0, B_1, B_2, ...), etc. 
+        # For the combination of profile parameters (A_0, B_0, ...), we need 
+        # the profile function object f_0, which we need to then evaluate 
+        # on the randomly generated rho[0], and likewise for 
+        # A_i, B_i, ...), f_i, and rho[i]. 
+        # First determine the index in the profile function table 
+        # where the relevant function object is stored:
         func_table_indices = (
             self.halo_prof_model.func_table_indices[digitized_param_list]
             )
-
+        # Now we have an array of function objects, and we need to evaluate 
+        # the i^th funcobj on the i^th element of rho. 
+        # Call the occupation_helpers module to access generic code for doing this 
         return 10.**occuhelp.call_func_table(
             self.cumu_inv_func_table, np.log10(rho), func_table_indices)
 
