@@ -28,20 +28,21 @@ class HodModelFactory(object):
 
     The building of the blueprint is done elsewhere. Pre-loaded blueprints 
     can be found in `~halotools.empirical_models.preloaded_hod_blueprints`, 
-    or you can also design your own from scratch. 
-
-    Parameters 
-    ----------
-    model_blueprint : dict 
-        Dictionary keys of ``model_blueprint`` are the names of the types of galaxies 
-        found in the halos, e.g., ``centrals``, ``satellites``, ``orphans``, etc. 
-        Dictionary values of ``model_blueprint`` are themselves dictionaries whose keys 
-        specify the type of model being passed, e.g., ``occupation``, 
-        and values are class instances of that type of model.
+    or you can also design your own from scratch.  
 
     """
 
     def __init__(self, model_blueprint):
+        """
+        Parameters
+        ----------
+        model_blueprint : dict 
+            Dictionary keys of ``model_blueprint`` are the names of the types of galaxies 
+            found in the halos, e.g., ``centrals``, ``satellites``, ``orphans``, etc. 
+            Dictionary values of ``model_blueprint`` are themselves dictionaries whose keys 
+            specify the type of model being passed, e.g., ``occupation``, 
+            and values are class instances of that type of model.
+        """
 
         # Bind the model-building instructions to the composite model
         self.model_blueprint = model_blueprint
