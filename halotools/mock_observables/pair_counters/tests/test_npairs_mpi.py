@@ -4,7 +4,14 @@
 from __future__ import division, print_function
 import numpy as np
 import sys
-from mpi4py import MPI
+
+HAS_MPI = False
+try:
+    from mpi4py import MPI
+    HAS_MPI == True
+except ImportError:
+    pass
+
 from halotools.mock_observables.pair_counters.mpipairs import npairs, wnpairs, jnpairs
 
 #import simple pair counter to compare results

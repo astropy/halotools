@@ -279,7 +279,7 @@ class GalProfFactory(object):
         """ 
         return self.halo_prof_model.prof_param_table_dict
 
-    def mc_radii(self, *args, **kwargs):
+    def mc_radii(self, *args):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
@@ -306,8 +306,7 @@ class GalProfFactory(object):
         """
         # Draw random values for the cumulative mass PDF 
         # at the position of the satellites
-        if 'seed' in kwargs.keys(): 
-            np.random.seed(kwargs['seed'])
+        
         rho = np.random.random(len(args[0]))
         # These will be turned into random radial positions 
         # via the method of transformation of random variables
@@ -344,7 +343,7 @@ class GalProfFactory(object):
         return 10.**occuhelp.call_func_table(
             self.cumu_inv_func_table, np.log10(rho), func_table_indices)
 
-    def mc_angles(self, Npts, **kwargs):
+    def mc_angles(self, Npts):
         """ Returns Npts random points on the unit sphere. 
 
         Parameters 
@@ -361,10 +360,7 @@ class GalProfFactory(object):
             Array with shape (Npts, 3) of points. 
 
         """
-
-        if 'seed' in kwargs.keys(): 
-            np.random.seed(kwargs['seed'])
-
+        
         cos_t = np.random.uniform(-1.,1.,Npts)
         phi = np.random.uniform(0,2*np.pi,Npts)
         sin_t = np.sqrt((1.-cos_t*cos_t))
@@ -374,9 +370,11 @@ class GalProfFactory(object):
         pos[:,1] = sin_t * np.sin(phi)
         pos[:,2] = cos_t
 
+        print "mean of z-pos = "+str(cos_t.mean())
+
         return pos
 
-    def mc_pos(self, mock_galaxies, **kwargs):
+    def mc_pos(self, mock_galaxies):
         """ Method to generate random, three-dimensional, 
         halo-centric positions of galaxies. 
 
@@ -388,7 +386,6 @@ class GalProfFactory(object):
         seed : int, optional keyword argument 
             Random number seed used in Monte Carlo realization
         """
-
         # get the appropriate slice for the gal_type of this component model
         gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
         pos = getattr(mock_galaxies, 'pos')[gal_type_slice]
@@ -400,7 +397,8 @@ class GalProfFactory(object):
         else:
             # get angles
             Ngals = len(pos[:,0])
-            pos = self.mc_angles(Ngals, **kwargs)
+            pos = self.mc_angles(Ngals)
+            print "Check 2: mean of z-pos = "+str(pos[:,2].mean())
 
             # extract all relevant profile parameters from the mock
             profile_params = (
@@ -410,11 +408,15 @@ class GalProfFactory(object):
                 )
 
             # Get the radial positions of the gal_type galaxies
-            scaled_mc_radii = self.mc_radii(*profile_params, **kwargs) 
+            scaled_mc_radii = self.mc_radii(*profile_params) 
 
             # multiply the random radial positions by the random points on the unit sphere 
             # to get random three-dimensional positions
+            print "Check 3: mean of z-pos = "+str(pos[:,2].mean())
+
             for idim in range(3): pos[:,idim] *= scaled_mc_radii
+           
+            print "Check 4: mean of z-pos = "+str(pos[:,2].mean())
 
         return pos
 
