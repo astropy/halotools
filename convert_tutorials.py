@@ -13,12 +13,10 @@ def rewrite_first_line(fname):
     lines = f.readlines()
     f.close()
     line = lines[1]
-    print("changing line %s" %line)
     line = lines[1]
     line = line.replace('-','_')
     line = line.replace('\n', ':')
     line = '.. _'+line
-    print("line is now %s" % line)
     lines[1] = line
     lines.insert(2, '\n')
     f = open(fname,'w')
@@ -39,7 +37,6 @@ def add_asterisk_header(fname):
     lines = f.readlines()
     f.close()
     title = lines[3]
-    print("Title = %s" %title)
     asterisks = get_asterisks_line(title)
     lines.insert(4, asterisks)
     lines.insert(3, asterisks)
