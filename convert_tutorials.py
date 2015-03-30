@@ -21,7 +21,6 @@ def rewrite_first_line(fname):
     print("line is now %s" % line)
     lines[1] = line
     lines.insert(2, '\n')
-    #lines[1] = lines[1]+'\n'
     f = open(fname,'w')
     for line in lines:
         f.write(line)
@@ -29,6 +28,13 @@ def rewrite_first_line(fname):
 
 
 def add_asterisk_header(fname):
+
+    def get_asterisks_line(header):
+        asterisks=''
+        for ii in range(len(header)):
+            asterisks+='*'
+        return asterisks+'\n'
+
     f = open(fname, 'r')
     lines = f.readlines()
     f.close()
@@ -51,19 +57,6 @@ def get_list_of_tutorials(relative_dirname):
         )
     return tutorial_list
 
-def file_prepend_line(filename, line_to_prepend):
-    f = fileinput.input(filename, inplace=1)
-    for xline in f:
-        if f.isfirstline():
-            print line_to_prepend.rstrip('\r\n') + '\n' + xline,
-        else:
-            print xline,
-
-def get_asterisks_line(header):
-    asterisks=''
-    for ii in range(len(header)):
-        asterisks+='*'
-    return asterisks+'\n'
 
 def test_ipynb(fname, enforce_pass=True):
     """Function to use in a test suite to 
