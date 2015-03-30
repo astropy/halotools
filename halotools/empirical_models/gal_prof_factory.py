@@ -418,14 +418,61 @@ class GalProfFactory(object):
 
         return pos
 
-#################
-### Include the following two methods for completeness
+
     def density_profile(self, *args):
+        """ Density profile of the underlying dark matter halo. 
+
+        Parameters 
+        ----------
+        x : array_like 
+            Value of the radius at which density profile is to be evaluated. 
+            Should be scaled by the halo boundary, 
+            so that :math:`x \equiv r / R_{\\mathrm{halo}}`, and 
+            :math:`0 < x < 1`
+
+        input_params : array_like 
+            Parameters specifying the halo profile. 
+            Should have the same length as the input x. 
+
+        Returns 
+        -------
+        rho : array_like 
+            Dark matter density evaluated at each value of the input array x. 
+
+        Notes 
+        -----
+        This behavior is derived purely from the relevant sub-class of 
+        `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
+        """
         return self.halo_prof_model.density_profile(*args)
 
     def cumulative_mass_PDF(self, *args):
+        """ The cumulative PDF of the underlying dark matter halo mass profile. 
+
+        Parameters 
+        ----------
+        x : array_like 
+            Value of the radius at which density profile is to be evaluated. 
+            Should be scaled by the halo boundary, as in `density_profile`. 
+
+        input_params : array_like 
+            Parameters specifying the halo profile. 
+            Should have the same length as the input x. 
+
+        Returns 
+        -------
+        cumu_mass_PDF : array_like 
+            Cumulative fraction of dark matter mass interior to input x. 
+
+        Notes 
+        -----
+        This behavior is derived purely from the relevant sub-class of 
+        `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
+        """
         return self.halo_prof_model.cumulative_mass_PDF(*args)
-#################
+
+
+
 
 
 
