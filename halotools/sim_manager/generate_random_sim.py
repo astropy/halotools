@@ -44,8 +44,6 @@ class FakeSim(object):
 			Random number seed used to generate the fake halos and particles. 
 			Default is 43.
 		"""
-
-
 		self.Lbox = 250.0
 		self.particle_mass = 1.e8
 		self.simulation_name = 'fake'
@@ -112,8 +110,6 @@ class FakeSim(object):
 		d = {'pos': pos}
 
 		return Table(d)
-
-
 
 	
 
