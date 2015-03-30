@@ -14,10 +14,9 @@ extra_compile_args=["-O3"]
 
 setup(
   name = 'cpairs app',
-  #ext_modules = cythonize("cpairs.pyx"),
+  ext_modules = ext_modules,
   cmdclass = {'build_ext': build_ext},
-  include_dirs=[numpy.get_include()],
-  ext_modules = ext_modules
+  include_dirs=[numpy.get_include()]
 )
 
 #to compile code type:
