@@ -18,7 +18,6 @@ def Kravtsov04(**kwargs):
 	Satellite occupation statistics are given by a Poisson distribution 
 	with first moment given by a power law that has been truncated at the low-mass end. 
 
-
 	Under the hood, this model is built from a set of component models whose 
 	behavior is coded up elsewhere. The behavior of the central occupations 
 	derives from the `~halotools.empirical_models.hod_components.Kravtsov04Cens` class, while for 
@@ -27,6 +26,21 @@ def Kravtsov04(**kwargs):
 	This composite model was built by the `~halotools.empirical_models.hod_factory.HodModelFactory`, 
 	which followed the instructions contained in 
 	`~halotools.empirical_models.Kravtsov04_blueprint`. 
+
+	Parameters 
+	----------
+	threshold : float, optional keyword argument
+		Luminosity threshold of the galaxy sample being modeled. 
+
+	Returns 
+	-------
+	model : object 
+		Instance of `~halotools.empirical_models.hod_factory.HodModelFactory`
+
+	Examples 
+	--------
+	>>> model = Kravtsov04()
+	>>> model = Kravtsov04(luminosity = -20.5)
 
 	"""
 	blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint(**kwargs)

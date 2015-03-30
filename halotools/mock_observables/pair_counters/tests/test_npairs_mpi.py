@@ -5,12 +5,14 @@ from __future__ import division, print_function
 import numpy as np
 import sys
 
+from halotools.mock_observables.pair_counters.mpipairs import npairs, wnpairs, jnpairs
+
+mpi4py_installed = False
 try: 
     from mpi4py import MPI
     mpi4py_installed = True
 except ImportError:
-    print("mpi4py package unavailable.  MPI pair counter tests not possible.")
-    mpi4py_installed = False
+    pass
 
 from halotools.mock_observables.pair_counters.mpipairs import npairs, wnpairs, jnpairs
 #import simple pair counter to compare results

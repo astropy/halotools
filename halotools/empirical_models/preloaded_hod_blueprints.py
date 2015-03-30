@@ -56,7 +56,7 @@ def Kravtsov04_blueprint(**kwargs):
 	cen_model_dict['occupation'] = dark_side_cen_model
 	# Build the profile model
 	halo_profile_model_cens = hpc.TrivialProfile()
-	cen_profile = gpf.GalProfModel(cen_key, halo_profile_model_cens)
+	cen_profile = gpf.GalProfFactory(cen_key, halo_profile_model_cens)
 	cen_model_dict['profile'] = cen_profile
 
 	### Build model for satellites
@@ -68,7 +68,7 @@ def Kravtsov04_blueprint(**kwargs):
 	sat_model_dict['occupation'] = dark_side_sat_model
 	# Build the profile model
 	halo_profile_model_sats = hpc.NFWProfile()
-	sat_profile = gpf.GalProfModel(sat_key, halo_profile_model_sats)
+	sat_profile = gpf.GalProfFactory(sat_key, halo_profile_model_sats)
 	sat_model_dict['profile'] = sat_profile
 
 

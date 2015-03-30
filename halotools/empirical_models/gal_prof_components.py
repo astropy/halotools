@@ -149,20 +149,14 @@ class SpatialBias(object):
         # Configure the settings of scipy's spline interpolation routine
         self._setup_interpol(interpol_method, input_spline_degree)
 
-        self._set_prim_func_dict()
+        self._set_primary_behaviors()
 
 
-    def _set_prim_func_dict(self):
-
-        # The primary method of this class is get_modulated_prof_params, which 
-        # derives its behavior from radprof_modfunc. Both of these methods are 
-        # written to be totally generic. But model instances will be clearer 
-        # if the primary methods have easy-to-interpret names. Moreover, 
-        # we need to have separate attribute names for the methods in prim_func_dict 
-        # for each halo profile parameter being modulated. 
-        # The following few lines accomplish that specificity, and define self.prim_func_dict.
-        self.prim_func_dict = {}
-
+    def _set_primary_behaviors(self):
+        """ Bind new methods to the `SpatialBias` instance that 
+        will be used as the primary functions assigning biased 
+        profile parameters to the gal_type population.  
+        """
         # self.halo_prof_param_keys is a list set in self._set_prof_params
         # Only keys of biased profile parameters appear in the list
         for halokey in self.halo_prof_param_keys:
@@ -170,9 +164,7 @@ class SpatialBias(object):
             new_method_name = galkey
             function = partial(self.get_modulated_prof_params, halokey)
             setattr(self, new_method_name, function)
-            self.prim_func_dict[galkey] = function
         
-
     def get_modulated_prof_params(self, prof_param_key, *args, **kwargs):
         """ Primary method used by the outside world. 
         Used to assign new values of halo profile parameters to gal_type galaxies. 
