@@ -31,7 +31,7 @@ class processed_snapshot(object):
         simname=sim_defaults.default_simulation_name,
         scale_factor=sim_defaults.default_scale_factor,
         halo_finder=sim_defaults.default_halo_finder,
-        download_yn=True):
+        download_yn=True, **kwargs):
 
         self.simulation_name = simname
         self.scale_factor = scale_factor

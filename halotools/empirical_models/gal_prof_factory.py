@@ -384,7 +384,7 @@ class GalProfFactory(object):
         pos[:,1] = sin_t * np.sin(phi)
         pos[:,2] = cos_t
 
-        print "mean of z-pos = "+str(cos_t.mean())
+        #print "mean of z-pos = "+str(cos_t.mean())
 
         return pos
 
@@ -412,7 +412,7 @@ class GalProfFactory(object):
             # get angles
             Ngals = len(pos[:,0])
             pos = self.mc_angles(Ngals)
-            print "Check 2: mean of z-pos = "+str(pos[:,2].mean())
+            #print "Check 2: mean of z-pos = "+str(pos[:,2].mean())
 
             # extract all relevant profile parameters from the mock
             profile_params = (
@@ -426,11 +426,11 @@ class GalProfFactory(object):
 
             # multiply the random radial positions by the random points on the unit sphere 
             # to get random three-dimensional positions
-            print "Check 3: mean of z-pos = "+str(pos[:,2].mean())
+            #print "Check 3: mean of z-pos = "+str(pos[:,2].mean())
 
             for idim in range(3): pos[:,idim] *= scaled_mc_radii
            
-            print "Check 4: mean of z-pos = "+str(pos[:,2].mean())
+            #print "Check 4: mean of z-pos = "+str(pos[:,2].mean())
 
         return pos
 
