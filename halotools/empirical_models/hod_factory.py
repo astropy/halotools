@@ -435,8 +435,8 @@ class HodModelFactory(object):
             halo_prof_model.build_inv_cumu_lookup_table(prof_param_table_dict)
 
     def retrieve_relevant_haloprops(self, gal_type, *args, **kwargs):
-        """ Method returning the arrays that need to be passed 
-        to a component model in order to access its behavior. 
+        """ Method returning the array of halo properties 
+        that need to be passed to a component model. 
 
         Parameters 
         ----------
@@ -452,6 +452,12 @@ class HodModelFactory(object):
         -------
         result : list 
             List of arrays of the relevant halo properties
+
+        Notes 
+        -----
+        The purpose is primarily driven by user convenience, so that users can 
+        use the same model object to study the same model behavior 
+        analytically, or using a collection of mock galaxies. 
 
         """
 
