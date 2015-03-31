@@ -384,13 +384,21 @@ class HodModelFactory(object):
 
     @property 
     def halo_prof_func_dict(self):
-        """ Method to derive the halo profile parameter function dictionary 
-        from a collection of component models. 
+        """ Method to derive the halo profile parameter function 
+        dictionary from a collection of component models. 
+
+        Returns 
+        -------
+        halo_prof_func_dict : dictionary 
+            Dictionary storing function objects that specify 
+            the mapping between halos and their profile parameters. For details, see the 
+            `~halotools.empirical_models.halo_prof_components.HaloProfileModel.halo_prof_func_dict` 
+            method of `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
 
         Notes 
         -----
-        If there are multiple instances of the same underlying 
-        halo profile model, a profile function is chosen essentially at random. 
+        If there are multiple instances of the same underlying halo profile model, 
+        a profile function is effectively chosen at random. 
         This is innocuous, since the multiple instances have already been ensured 
         to provide consistent profile parameter functions. 
 
@@ -407,6 +415,20 @@ class HodModelFactory(object):
 
 
     def build_halo_prof_lookup_tables(self, prof_param_table_dict={}):
+        """ Method to create a lookup table 
+        used to generate Monte Carlo realizations of 
+        radial profiles of galaxies. 
+
+        Parameters 
+        ---------- 
+        prof_param_table_dict : dict, optional
+            Dictionary providing instructions for how to generate a grid of 
+            values for each halo profile parameter. 
+            Default is an empty dict. For details, see the 
+            `~halotools.empirical_models.halo_prof_components.HaloProfileModel.set_prof_param_table_dict`
+            method of `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
+
+        """
 
         for gal_type in self.gal_types:
             halo_prof_model = self.model_blueprint[gal_type]['profile'].halo_prof_model
@@ -511,7 +533,7 @@ class HodModelFactory(object):
         """ Reset all values of the current ``param_dict`` to the values 
         the class was instantiated with. 
 
-        Primary behaviors need to be reset as well, as this is how the 
+        Primary behaviors are reset as well, as this is how the 
         inherited behaviors get bound to the values in ``param_dict``. 
         """
         self._set_init_param_dict()
