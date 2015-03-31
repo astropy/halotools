@@ -106,6 +106,7 @@ class HodModelFactory(object):
             model = self.model_blueprint[gal_type]['occupation']
             occupation_bounds.append(model.occupation_bound)
 
+        # Lists have been created. Now sort them and then bind the sorted lists to the instance. 
         sorted_idx = np.argsort(occupation_bounds)
         gal_types = list(np.array(gal_types)[sorted_idx])
         self.gal_types = gal_types
@@ -118,7 +119,13 @@ class HodModelFactory(object):
 
     @property 
     def gal_prof_param_list(self):
-        """ List of all galaxy profile parameters used by the composite model. 
+        """ List of all galaxy profile parameters used by the composite model.
+
+        Notes 
+        -----
+        Each entry in the list is a string corresponding to a 
+        halo profile parameter, but pre-pended by ``gal_``, 
+        e.g., ``gal_NFWmodel_conc``.   
         """
 
         output_list = []
@@ -131,23 +138,33 @@ class HodModelFactory(object):
 
 
     def _set_primary_behaviors(self):
-        """ This function creates a bunch of new methods that it binds to ``self``. 
-        These methods are given standardized names, for generic communication with 
-        the rest of the package, particularly the `HodMockFactory`. 
-        The behaviors of these methods are defined elsewhere; 
-        here we just create a link to those external behaviors. 
+        """ Creates names and behaviors for the primary methods of `HodModelFactory` 
+        that will be used by the outside world.  
+
+        Notes 
+        -----
+        The new methods created here are given standardized names, 
+        for consistent communication with the rest of the package. 
+        This consistency is particularly important for mock-making, 
+        so that the `HodMockFactory` can always call the same functions 
+        regardless of the complexity of the model. 
+
+        The behaviors of the methods created here are defined elsewhere; 
+        `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
         for gal_type in self.gal_types:
 
-            # Set the method used to return Monte Carlo realizations of per-halo gal_type abundance
+            # Set the method used to return Monte Carlo realizations 
+            # of per-halo gal_type abundance
             new_method_name = 'mc_occupation_'+gal_type
             occupation_model = self.model_blueprint[gal_type]['occupation']
             new_method_behavior = partial(occupation_model.mc_occupation, 
                 input_param_dict = self.param_dict)
             setattr(self, new_method_name, new_method_behavior)
 
-            # Also inherit the mean abundance, for convenience
+            # For convenience, also inherit  
+            # the first moment of the occupation distribution 
             new_method_name = 'mean_occupation_'+gal_type
             new_method_behavior = partial(occupation_model.mean_occupation, 
                 input_param_dict = self.param_dict)
@@ -157,6 +174,7 @@ class HodModelFactory(object):
             gal_prof_model = self.model_blueprint[gal_type]['profile']
 
             # Create a new method for each galaxy profile parameter
+            # See docstring of _get_gal_prof_param for how this works
             for gal_prof_param in gal_prof_model.gal_prof_func_dict.keys():
                 new_method_name = gal_prof_param + '_' + gal_type
                 new_method_behavior = partial(self._get_gal_prof_param, 
@@ -206,16 +224,50 @@ class HodModelFactory(object):
         gal_type : string 
             Name of the galaxy population. 
 
-        prim_haloprop : optional positional argument 
+        prim_haloprop : array_like, optional positional argument 
+            See Notes section. 
 
-        sec_haloprop : optional positional argument 
+        sec_haloprop : array_like, optional positional argument 
+            See Notes section. 
 
-        mock_galaxies : optional keyword argument 
+        mock_galaxies : object, optional keyword argument 
+            See Notes section. 
+
+        input_param_dict : optional keyword argument 
+
+        Returns
+        -------
+        gal_prof_param_func : function object 
+            Function used to map values of ``gal_prof_param`` onto 
+            ``gal_type`` galaxies. 
+
+        Notes 
+        -----
+        Must pass either ``prim_haloprop``, or ``mock_galaxies``, but not both, 
+        and not neither. If model has assembly-biased spatial positions, 
+        and if not passing ``mock_galaxies``, but pass both 
+        ``prim_haloprop`` and ``sec_haloprop``. 
+
+        `_get_gal_prof_param` is used exclusively by `_set_primary_behaviors`, 
+        which calls `_get_gal_prof_param` by passing it *only* the following 
+        two positional arguments: ``gal_prof_param`` and ``gal_type``. 
+        Thus the input of the function object returned by `_get_gal_prof_param` 
+        only takes halos as input; these input halos can be passed 
+        either as arrays or as a collection of mock galaxies. 
+        The output of the function object returned by `_get_gal_prof_param` 
+        is an array of profile parameter values ``gal_prof_param`` relevant to 
+        ``gal_type`` galaxies. 
 
         """
+        if 'input_param_dict' in kwargs.keys():
+            input_param_dict = kwargs['input_param_dict']
+        else:
+            input_param_dict = {}
 
         gal_prof_model = self.model_blueprint[gal_type]['profile']
-        gal_prof_param_func = gal_prof_model.gal_prof_func_dict[gal_prof_param]
+        gal_prof_param_func = partial(
+            gal_prof_model.gal_prof_func_dict[gal_prof_param], 
+            input_param_dict = input_param_dict)
 
         return gal_prof_param_func(
             *self.retrieve_relevant_haloprops(gal_type, *args, **kwargs))
