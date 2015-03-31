@@ -186,7 +186,7 @@ class HodMockFactory(object):
     def populate(self):
         """ Method populating halos with mock galaxies. 
         """
-        self._allocate_memory()
+        self.allocate_memory()
 
         # Loop over all gal_types in the model 
         for gal_type in self.gal_types:
@@ -255,7 +255,7 @@ class HodMockFactory(object):
         self.pos = occuhelp.enforce_periodicity_of_box(
             self.pos, self.snapshot.Lbox)
 
-    def _allocate_memory(self):
+    def allocate_memory(self):
         """ Method allocates the memory for all the numpy arrays 
         that will store the information about the mock. 
         These arrays are bound directly to the mock object. 
@@ -291,7 +291,7 @@ class HodMockFactory(object):
         self.Ngals = np.sum(self._total_abundance.values())
 
         def _allocate_ndarray_attr(self, propname, example_entry):
-            """ Private method of `_allocate_memory` used to create an empty 
+            """ Private method of `allocate_memory` used to create an empty 
             ndarray of the appropriate shape and dtype, and bind it to the mock instance. 
 
             Parameters 

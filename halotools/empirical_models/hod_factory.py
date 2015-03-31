@@ -175,20 +175,72 @@ class HodModelFactory(object):
 
             # Create a new method for each galaxy profile parameter
             # See docstring of _get_gal_prof_param for how this works
+            # These methods are *not* called by the mock factory
+            # See the docstring of composite_gal_prof_param_func 
+            # for how the mock factory calls profile models
             for gal_prof_param in gal_prof_model.gal_prof_func_dict.keys():
                 new_method_name = gal_prof_param + '_' + gal_type
                 new_method_behavior = partial(self._get_gal_prof_param, 
                     gal_prof_param, gal_type)
                 setattr(self, new_method_name, new_method_behavior)
 
-
-            ### Create a method to assign positions to each gal_type
+            ### Create a method to assign Monte Carlo-realized 
+            # positions to each gal_type
             new_method_name = 'pos_'+gal_type
             new_method_behavior = partial(self.mc_pos, gal_type = gal_type)
             setattr(self, new_method_name, new_method_behavior)
 
 
         def composite_gal_prof_param_func(gal_prof_param, gal_type, *args, **kwargs):
+            """ Method used to create the function called by the mock factory 
+            when assigning profile parameters to galaxy populations. 
+
+            Parameters 
+            ----------
+            gal_prof_param : string 
+                Name of the galaxy profile parameter. 
+                Must be equal to one of the galaxy profile parameter names.
+                Unlike `_get_gal_prof_param`, ``gal_prof_param`` need not 
+                be a profile parameter of the input ``gal_type``. See Notes section. 
+
+            gal_type : string 
+                Name of the galaxy population. 
+
+            prim_haloprop : array_like, optional positional argument. 
+                See Notes section. 
+
+            sec_haloprop : array_like, optional positional argument. 
+                See Notes section. 
+
+            mock_galaxies : object, optional keyword argument 
+                See Notes section. 
+
+            Returns 
+            -------
+            gal_prof_param_func : object
+                Function object called by 
+                `~halotools.empirical_models.mock_factory.HodMockFactory` 
+                to map galaxy profile parameters onto mock galaxies. 
+
+            Notes 
+            -----
+            The `composite_gal_prof_param_func` is nested within the namespace 
+            of `_set_primary_behaviors`, and so it can only be called 
+            by `_set_primary_behaviors`. 
+
+            The `_set_primary_behaviors` makes a partial call to this function 
+            by passing it only ``gal_prof_param`` as input. In particular, 
+            none of the ``mock_galaxies`` inputs are passed. Thus the returned 
+            function object takes galaxies as inputs; 
+            these inputs can be passed either as arrays or as a collection of mock galaxies. 
+            The output of the returned function object is an array of galaxy profile 
+            parameters. 
+
+                * Case 1 - ``gal_type`` galaxies have no associated ``gal_prof_param``: the corresonding property of the halo catalog is returned. 
+            
+                * Case 2 - ``gal_type`` *do* have an associated ``gal_prof_param``: the appropriate `GalProfFactory` is called. This behavior has already been set by the `_set_primary_behaviors` call to `_get_gal_prof_param`. 
+
+            """
 
             method_name = gal_prof_param+'_'+gal_type
 
@@ -203,6 +255,10 @@ class HodModelFactory(object):
             return method_behavior(*self.retrieve_relevant_haloprops(
                 gal_type, *args, **kwargs))
 
+        # Use functools.partial to create a new method of HodModelFactory 
+        # by calling composite_gal_prof_param_func, defined above. 
+        # See the docstring of composite_gal_prof_param_func 
+        # for a description of how this works. 
         for gal_prof_param in self.gal_prof_param_list:
             func = partial(composite_gal_prof_param_func, gal_prof_param)
             setattr(self, gal_prof_param, func)
@@ -252,11 +308,11 @@ class HodModelFactory(object):
         which calls `_get_gal_prof_param` by passing it *only* the following 
         two positional arguments: ``gal_prof_param`` and ``gal_type``. 
         Thus the input of the function object returned by `_get_gal_prof_param` 
-        only takes halos as input; these input halos can be passed 
-        either as arrays or as a collection of mock galaxies. 
+        only takes ``mock_galaxies`` as input; 
+        these inputs can be passed either as arrays or as a collection of mock galaxies. 
         The output of the function object returned by `_get_gal_prof_param` 
-        is an array of profile parameter values ``gal_prof_param`` relevant to 
-        ``gal_type`` galaxies. 
+        is the array of profile parameter values ``gal_prof_param`` 
+        that pertain to ``gal_type`` galaxies. 
 
         """
         if 'input_param_dict' in kwargs.keys():
@@ -279,6 +335,28 @@ class HodModelFactory(object):
         Identical to component model version from which the behavior derives, 
         only this method re-scales the halo-centric distance by the halo radius, 
         and re-centers the re-scaled output of the component model to the halo position.
+
+        Parameters 
+        ----------
+        mock_galaxies : object 
+            Collection of mock galaxies created by 
+            `~halotools.empirical_models.mock_factory.HodMockFactory`. 
+
+        gal_type : string 
+            Name of the galaxy population. 
+
+        Returns 
+        -------
+        output_pos : array_like 
+            Array with shape (Ngals, 3), where Ngals is the number of 
+            ``gal_type`` gals in the ``mock_galaxies``. 
+
+        Notes 
+        -----
+        This method is not directly called by 
+        `~halotools.empirical_models.mock_factory.HodMockFactory`. 
+        Instead, the `_set_primary_behaviors` method calls functools.partial 
+        to create a ``mc_pos_gal_type`` method for each ``gal_type`` in the model. 
 
         """
         gal_prof_model = self.model_blueprint[gal_type]['profile']
