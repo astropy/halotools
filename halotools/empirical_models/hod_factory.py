@@ -14,6 +14,10 @@ from copy import copy
 from . import occupation_helpers as occuhelp
 from . import model_defaults
 from . import mock_factory
+from . import preloaded_hod_blueprints
+from ..sim_manager.read_nbody import processed_snapshot
+from ..sim_manager.generate_random_sim import FakeSim
+
 
 class HodModelFactory(object):
     """ Class used to build HOD-style models of the galaxy-halo connection. 
@@ -38,9 +42,24 @@ class HodModelFactory(object):
     
         * The following tutorial, :ref:`custom_hod_model_building_tutorial`, shows how you can build your own, customizing it based on the science you are interested in.  
 
+    Examples 
+    --------
+    The simplest way to build an HOD-style model is to use one of the pre-loaded blueprints. 
+    Let's use `Kravtsov04` as a simple example:
+
+    >>> blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint()
+    >>> model = HodModelFactory(blueprint)
+
+    Now let's populate a simulation using our newly created model object. 
+    The `~halotools.sim_manager` sub-package contains methods that let you choose from a 
+    range of publicly available N-body simulations into which you can sprinkle mock galaxies 
+    with your model. For these demonstration purposes, we'll use a fake simulation: 
+
+    >>> fake_snapshot = FakeSim()
+    >>> model.populate_mock(snapshot = fake_snapshot)
     """
 
-    def __init__(self, model_blueprint):
+    def __init__(self, model_blueprint, **kwargs):
         """
         Parameters
         ----------
@@ -52,14 +71,13 @@ class HodModelFactory(object):
             specify the type of model component, e.g., ``occupation``, 
             and values are class instances of that type of model. 
             See :ref:`custom_hod_model_building_tutorial` for further details. 
+
         """
 
         # Bind the model-building instructions to the composite model
         self.model_blueprint = model_blueprint
 
-        # Demand that we have been given the minimum number of halo properties 
         occuhelp.enforce_required_haloprops(self.haloprop_key_dict)
-
         self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
         if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
             self.sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
@@ -75,6 +93,41 @@ class HodModelFactory(object):
         self._set_primary_behaviors()
 
         self.publications = self._build_publication_list()
+
+
+    def populate_mock(self, **kwargs):
+        """ Method used to populate a simulation using the model. 
+
+        After calling this method, ``self`` will have a new ``mock`` attribute, 
+        which is an instance of `~halotools.empirical_models.mock_factory.HodMockFactory`. 
+
+        Parameters 
+        ----------
+        snapshot : object, optional keyword argument
+            Class instance of `~halotools.sim_manager.processed_snapshot`. 
+            This object contains the halo catalog and its metadata.  
+
+        kwargs : additional optional keyword arguments 
+            Any keyword of either 
+            `~halotools.sim_manager.read_nbody.processed_snapshot` or 
+            `~halotools.empirical_models.mock_factory.HodMockFactory` is supported. 
+        """
+
+        if hasattr(self, 'mock'):
+            self.mock.populate()
+        else:
+            if 'snapshot' in kwargs.keys():
+                snapshot = kwargs['snapshot']
+                # we need to delete the 'snapshot' keyword 
+                # or else the call to mock_factory below 
+                # will pass multiple snapshot arguments
+                del kwargs['snapshot']
+            else:
+                snapshot = processed_snapshot(**kwargs)
+
+            mock_factory = self.model_blueprint['mock_factory']
+            mock = mock_factory(snapshot, self, **kwargs)
+            self.mock = mock
 
 
     @property 

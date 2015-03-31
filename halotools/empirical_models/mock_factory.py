@@ -43,7 +43,7 @@ class HodMockFactory(object):
 
     def __init__(self, snapshot, composite_model, 
         bundle_into_table=True, populate=True,
-        additional_haloprops=[], new_haloprop_func_dict={}):
+        additional_haloprops=[], new_haloprop_func_dict={}, **kwargs):
 
         # Bind the inputs to the mock object
         self.snapshot = snapshot
