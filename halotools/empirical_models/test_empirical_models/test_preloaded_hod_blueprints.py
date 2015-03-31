@@ -46,7 +46,7 @@ def test_Kravtsov04_blueprint():
 
 	"""
 	default_blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint()
-	assert set(default_blueprint.keys()) == {'satellites','centrals'} 
+	assert {'satellites','centrals'}.issubset(set(default_blueprint.keys()))
 
 	# Check thresholds are being self-consistently set
 	for threshold in np.arange(-22, -17.5, 0.5):
@@ -56,7 +56,8 @@ def test_Kravtsov04_blueprint():
 			temp_blueprint['centrals']['occupation'].threshold 
 			)
 
-	for gal_type in default_blueprint.keys():
+	gal_type_list = [key for key in default_blueprint.keys() if key != 'mock_factory']
+	for gal_type in gal_type_list:
 		gal_type_blueprint = get_gal_type_model(default_blueprint, gal_type)
 		assert set(gal_type_blueprint.keys()) == {'profile', 'occupation'}
 

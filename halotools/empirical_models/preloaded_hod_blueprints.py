@@ -5,11 +5,12 @@ Module containing some commonly used composite HOD model blueprints.
 
 """
 
-import model_defaults
-import hod_components as hoc
-import gal_prof_factory as gpf
-import halo_prof_components as hpc
-import gal_prof_components as gpc
+from . import model_defaults
+from . import hod_components as hoc
+from . import gal_prof_factory as gpf
+from . import halo_prof_components as hpc
+from . import gal_prof_components as gpc
+from . import mock_factory
 
 __all__ = ['Kravtsov04_blueprint']
 
@@ -71,10 +72,10 @@ def Kravtsov04_blueprint(**kwargs):
 	sat_profile = gpf.GalProfFactory(sat_key, halo_profile_model_sats)
 	sat_model_dict['profile'] = sat_profile
 
-
 	model_blueprint = {
 		dark_side_cen_model.gal_type : cen_model_dict,
-		dark_side_sat_model.gal_type : sat_model_dict
+		dark_side_sat_model.gal_type : sat_model_dict, 
+		'mock_factory' : mock_factory.HodMockFactory
 		}
 
 	return model_blueprint
