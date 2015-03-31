@@ -9,6 +9,8 @@ __author__ = ['Andrew Hearin']
 
 from functools import partial
 import numpy as np
+from copy import copy
+
 from . import occupation_helpers as occuhelp
 from . import model_defaults
 from . import mock_factory
@@ -43,17 +45,19 @@ class HodModelFactory(object):
         Parameters
         ----------
         model_blueprint : dict 
-            Dictionary keys of ``model_blueprint`` are the names of the types of galaxies 
+            The main dictionary keys of ``model_blueprint`` are the names of the types of galaxies 
             found in the halos, e.g., ``centrals``, ``satellites``, ``orphans``, etc. 
-            Dictionary values of ``model_blueprint`` are themselves dictionaries whose keys 
-            specify the type of model being passed, e.g., ``occupation``, 
-            and values are class instances of that type of model.
+            The dictionary value associated with each ``gal_type`` key 
+            is itself a dictionary whose keys 
+            specify the type of model component, e.g., ``occupation``, 
+            and values are class instances of that type of model. 
+            See :ref:`custom_hod_model_building_tutorial` for further details. 
         """
 
         # Bind the model-building instructions to the composite model
         self.model_blueprint = model_blueprint
 
-        # Determine the halo properties governing the galaxy population properties
+        # Demand that we have been given the minimum number of halo properties 
         occuhelp.enforce_required_haloprops(self.haloprop_key_dict)
 
         self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
@@ -90,7 +94,9 @@ class HodModelFactory(object):
     def _set_gal_types(self):
         """ Private method binding the ``gal_types`` list attribute,
         and the ``occupation_bound`` attribute, to the class instance. 
-        List is sequenced in ascending order of the occupation bound. 
+
+        The ``self.gal_types`` list is sequenced 
+        in ascending order of the occupation bound. 
         """
 
         gal_types = [key for key in self.model_blueprint.keys() if key is not 'mock_factory']
@@ -335,22 +341,21 @@ class HodModelFactory(object):
 
 
     def _set_init_param_dict(self):
-        """ Method to build a dictionary of parameters for the composite model 
-        by retrieving all the parameters of the component models. 
+        """ Method used to build a dictionary of parameters for the composite model. 
 
-        In MCMC applications, the output_dict items define the 
+        Accomplished by retrieving all the parameters of the component models. 
+        Method returns nothing, but binds ``param_dict`` to the class instance. 
+
+        Notes 
+        -----
+        In MCMC applications, the items of ``param_dict`` define the 
         parameter set explored by the likelihood engine. 
-        Changing the values of the parameters in param_dict 
+        Changing the values of the parameters in ``param_dict`` 
         will propagate to the behavior of the component models. 
-        Note, though, that the param_dict attributes attached to the component model 
-        instances themselves will not be changed. 
 
-        Parameters 
-        ----------
-        model_blueprint : dict 
-            Dictionary passed to the HOD factory __init__ constructor 
-            that is used to provide instructions for how to build a 
-            composite model from a set of components. 
+        Each component model has its own ``param_dict`` bound to it. 
+        When changing the values of ``param_dict`` bound to `HodModelFactory`, 
+        the corresponding values of the component model ``param_dict`` will *not* change.  
 
         """
 
@@ -369,6 +374,18 @@ class HodModelFactory(object):
                     model_instance.param_dict.items() + 
                     self.param_dict.items()
                     )
+
+        self._init_param_dict = copy(self.param_dict)
+
+    def restore_init_param_dict(self):
+        """ Reset all values of the current ``param_dict`` to the values 
+        the class was instantiated with. 
+
+        Primary behaviors need to be reset as well, as this is how the 
+        inherited behaviors get bound to the values in ``param_dict``. 
+        """
+        self._set_init_param_dict()
+        self._set_primary_behaviors()
 
     def _build_publication_list(self):
         """ Method to build a list of publications 
