@@ -9,8 +9,9 @@ __author__ = ['Andrew Hearin']
 
 from functools import partial
 import numpy as np
-import occupation_helpers as occuhelp
-import model_defaults
+from . import occupation_helpers as occuhelp
+from . import model_defaults
+from . import mock_factory
 
 class HodModelFactory(object):
     """ Class used to build HOD-style models of the galaxy-halo connection. 
@@ -19,16 +20,21 @@ class HodModelFactory(object):
     and generates an HOD Model object. The returned object can be used directly to 
     populate a simulation with a Monte Carlo realization of the model. 
 
-    All behavior is derived from external classes bound up in the input blueprint. 
-    So `HodModelFactory` does nothing more than compose these external 
+    Most behavior is derived from external classes bound up in the input ``model_blueprint``. 
+    So the purpose of `HodModelFactory` is mostly to compose these external 
     behaviors together into a composite model. 
-    The primary purpose is to provide a standardized model object 
+    The aim is to provide a standardized model object 
     that interfaces consistently with the rest of the package, 
     regardless of the features of the model. 
 
-    The building of the blueprint is done elsewhere. Pre-loaded blueprints 
-    can be found in `~halotools.empirical_models.preloaded_hod_blueprints`, 
-    or you can also design your own from scratch.  
+    Notes 
+    -----
+    There are two main options for creating HOD-style blueprints 
+    that can be passed to this class:
+
+        * You can use one of the pre-computed blueprint found in `~halotools.empirical_models.preloaded_hod_blueprints` 
+    
+        * The following tutorial, :ref:`custom_hod_model_building_tutorial`, shows how you can build your own, customizing it based on the science you are interested in.  
 
     """
 
@@ -87,7 +93,7 @@ class HodModelFactory(object):
         List is sequenced in ascending order of the occupation bound. 
         """
 
-        gal_types = self.model_blueprint.keys()
+        gal_types = [key for key in self.model_blueprint.keys() if key is not 'mock_factory']
 
         occupation_bounds = []
         for gal_type in gal_types:
@@ -351,7 +357,8 @@ class HodModelFactory(object):
         self.param_dict = {}
 
         # Loop over all galaxy types in the composite model
-        for gal_type_dict in self.model_blueprint.values():
+        for gal_type in self.gal_types:
+            gal_type_dict = self.model_blueprint[gal_type]
             # For each galaxy type, loop over its features
             for model_instance in gal_type_dict.values():
 
@@ -381,7 +388,8 @@ class HodModelFactory(object):
         pub_list = []
 
         # Loop over all galaxy types in the composite model
-        for gal_type_dict in self.model_blueprint.values():
+        for gal_type in self.gal_types:
+            gal_type_dict = self.model_blueprint[gal_type]
 
             # For each galaxy type, loop over its features
             for model_instance in gal_type_dict.values():
@@ -425,7 +433,8 @@ def return_haloprop_dict(model_blueprint):
 
     # Build a list of all halo properties used by any component model, 
     # issuing warnings where necessary
-    for gal_type in model_blueprint.keys():
+    all_gal_types = [key for key in model_blueprint.keys() if key != 'mock_factory']
+    for gal_type in all_gal_types:
         for feature in model_blueprint[gal_type].values():
 
             if 'prim_haloprop_key' in feature.haloprop_key_dict.keys():
