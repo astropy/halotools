@@ -40,7 +40,7 @@ class HaloProfileModel(object):
     This is an abstract class, and cannot itself be instantiated. 
     Rather, `HaloProfileModel` provides a 
     template for any radial profile component model used by the 
-    empirical model factories such as `~halotools.empirical_models.hod_factory`. 
+    empirical model factories such as `~halotools.empirical_models.HodModelFactory`. 
 
     Parameters 
     ----------
