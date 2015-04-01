@@ -11,8 +11,9 @@ Currently only composite HOD models are supported.
 import numpy as np
 from astropy.table import Table 
 
-import occupation_helpers as occuhelp
-import model_defaults
+from . import occupation_helpers as occuhelp
+from . import model_defaults
+
 from ..sim_manager import sim_defaults
 
 __all__ = ["HodMockFactory"]
