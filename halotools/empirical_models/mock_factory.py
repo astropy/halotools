@@ -79,6 +79,10 @@ class HodMockFactory(object):
         self.model = composite_model
         self.create_astropy_table = create_astropy_table
 
+        self.prim_haloprop_key = self.model.prim_haloprop_key
+        if hasattr(self.model,'sec_haloprop_key'): 
+            self.sec_haloprop_key = self.model.sec_haloprop_key
+
         self.additional_haloprops = additional_haloprops
         # Make sure all the default haloprops are included
         self.additional_haloprops.extend(model_defaults.haloprop_list) 
@@ -100,40 +104,32 @@ class HodMockFactory(object):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. This processing includes identifying the 
         catalog columns that will be used by the model to create the mock, 
-        and building lookup tables associated with the halo profile. 
+        building lookup tables associated with the halo profile, 
+        and possibly creating new halo properties. 
         """
 
-        #############
-        #### Make cuts on halo catalog
-        # select host halos only
+        #Make cuts on halo catalog
+        # select host halos only, since this is an HOD-style model
         host_halo_cut = (self.halos['upid']==-1)
         self.halos = self.halos[host_halo_cut]
         # make mvir completeness cut
         cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
         mass_cut = (self.halos['mvir'] > cutoff_mvir)
         self.halos = self.halos[mass_cut]
-        #############
 
         ### Create new columns of the halo catalog, if applicable
         for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
             self.halos[new_haloprop_key] = new_haloprop_func(self.halos)
             self.additional_haloprops.append(new_haloprop_key)
 
-        self.prim_haloprop_key = self.model.prim_haloprop_key
-        if hasattr(self.model,'sec_haloprop_key'): 
-            self.sec_haloprop_key = self.model.sec_haloprop_key
-
-        # Create new halo catalog columns associated with each 
-        # parameter of the halo profile model, e.g., 'NFWmodel_conc'. 
-        # The names of the new columns are the keys of the 
-        # composite model's halo_prof_func_dict dictionary; 
-        # each key's value is the function object that operates 
-        # on the halos to create the new columns 
+        # Create new columns for the halo catalog associated with each 
+        # parameter of each halo profile model, e.g., 'NFWmodel_conc'. 
+        # New column names are the keys of the halo_prof_func_dict dictionary; 
+        # new column values are computed by the function objects in halo_prof_func_dict 
         function_dict = self.model.halo_prof_func_dict
         for new_haloprop_key, prof_param_func in function_dict.iteritems():
             self.halos[new_haloprop_key] = prof_param_func(self.halos[self.prim_haloprop_key])
             self.additional_haloprops.append(new_haloprop_key)
-
 
         self.build_halo_prof_lookup_tables()
 
@@ -149,20 +145,29 @@ class HodMockFactory(object):
         each of them to build their own lookup table. Care is taken to ensure 
         that each lookup table spans the necessary range of parameters required 
         by the halo catalog being populated. 
+
+        Parameters 
+        ----------
+        input_prof_param_table_dict : dict, optional 
+            Each dict key of ``input_prof_param_table_dict`` should be 
+            a profile parameter name, e.g., ``NFWmodel_conc``. 
+            Each dict value is a 3-element tuple; 
+            the tuple entries provide, respectively, the min, max, and linear 
+            spacing used to discretize the profile parameter. 
+            This discretization is used by the 
+            `~halotools.empirical_models.HaloProfModel.build_inv_cumu_lookup_table` 
+            method of the  `~halotools.empirical_models.HaloProfModel` class 
+            to create a lookup table associated with the profile parameter.
+            If no ``input_prof_param_table_dict`` is passed, the component 
+            models will determine how their parameters are discretized. 
         """
 
-       # Compute the halo profile lookup table, ensuring that the min/max 
-       # range spanned by the halo catalog is covered. The grid of parameters 
-       # is defined by a tuple (xlow, xhigh, dx) in prof_param_table_dict, 
-       # whose keys are the name of the halo profile parameter being discretized
         prof_param_table_dict={}
 
         for gal_type in self.gal_types:
             gal_prof_model = self.model.model_blueprint[gal_type]['profile']
 
             for key in gal_prof_model.halo_prof_func_dict.keys():
-
-                #halocatkey = model_defaults.host_haloprop_prefix + key
 
                 model_parmin = gal_prof_model.prof_param_table_dict[key][0]
                 model_parmax = gal_prof_model.prof_param_table_dict[key][1]
@@ -176,25 +181,27 @@ class HodMockFactory(object):
 
                 prof_param_table_dict[key] = (parmin, parmax, dpar)
 
-
         # Now over-write prof_param_table_dict with 
         # input_prof_param_table_dict, if applicable
         for key, value in input_prof_param_table_dict.iteritems():
             prof_param_table_dict[key] = value
 
-        # Calling the following method will create new attributes of
-        # self.model that can be used to discretize halo profiles.
-        # Taking NFWProfile class as an example, the line of code that follows 
-        # will create two new attributes of self.model:
-        # 1. cumu_inv_param_table, an array of concentration bin boundaries, and 
-        # 2. cumu_inv_func_table, an array of profile function objects, 
-        # one function for each element of cumu_inv_param_table
+        # Parameter discretization choices have been made. Now build the tables. 
         self.model.build_halo_prof_lookup_tables(
             prof_param_table_dict=prof_param_table_dict)
 
 
     def _get_gal_types(self):
-        """ Return a list of strings, one for each ``gal_type`` in the model. 
+        """ Return a list of galaxy types and their per-halo occupation bounds. 
+
+        Returns 
+        -------
+        sorted_gal_type_list : list of strings 
+            Each entry is a string of the nickname of each ``gal_type`` in the model. 
+
+        occupation_bound : array of integers
+            Each entry gives the maximum per-halo occupation of the corresponding 
+            ``gal_type`` galaxy. 
 
         Notes 
         -----
@@ -213,6 +220,27 @@ class HodMockFactory(object):
 
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
+
+        Workhorse method of `HodMockFactory`. First, 
+        `allocate_memory` is called to bind empty arrays to ``self``, 
+        into which mock galaxy properties will be stored. 
+        For every ``gal_type``, each of its component models are called 
+        to assign properties to the galaxies; assignment proceeds by 
+        filling the empty arrays created by `allocate_memory`. 
+        Optionally, the resulting collection of arrays 
+        can be bundled into an Astropy Table, for convenience; 
+        for MCMC applications, this bundling may impact performance, 
+        and is not recommended. 
+
+        Parameters 
+        ----------
+        create_astropy_table : boolean, optional 
+            If True, the `bundle_into_table` method will be called 
+            at the end of executing `populate`. If False, 
+            `bundle_into_table` method will not be called. 
+            If ``create_astropy_table`` is not passed at all, 
+            the behavior will be determined by ``self.create_astropy_table``, 
+            set during instantation by the class constructor. 
         """
         self.allocate_memory()
 
