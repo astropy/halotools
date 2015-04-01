@@ -70,6 +70,12 @@ class HodMockFactory(object):
             property of their host halo. The corresponding mock galaxy attribute name 
             will be pre-pended by ``halo_``. 
 
+        Notes 
+        -----
+        Docs for the test suite for mocks made from 
+        any pre-loaded HOD-style models can be seen at 
+        `~halotools.empirical_models.test_empirical_models.test_preloaded_hod_mocks`. 
+
         """
 
         # Bind the inputs to the mock object
