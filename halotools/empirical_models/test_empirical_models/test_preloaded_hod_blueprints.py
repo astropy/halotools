@@ -6,6 +6,7 @@ from .. import preloaded_hod_blueprints
 from .. import model_defaults
 from .. import hod_components
 from .. import gal_prof_factory
+from .. import halo_prof_components
 
 __all__ = ['test_Kravtsov04_blueprint']
 
@@ -64,14 +65,18 @@ def test_Kravtsov04_blueprint():
 		# Test that the component models are subclasses of the correct abstract base class
 		assert isinstance(gal_type_blueprint['occupation'], 
 			hod_components.OccupationComponent)
-		assert isinstance(gal_type_blueprint['profile'], 
-			gal_prof_factory.GalProfFactory)
+
+		assert (
+			isinstance(gal_type_blueprint['profile'], gal_prof_factory.GalProfFactory) or 
+			isinstance(gal_type_blueprint['profile'], halo_prof_components.HaloProfileModel)
+			)
 
 
 		# Test the profile model component
-		component_prof = gal_type_blueprint['profile']
-		assert component_prof.gal_type == gal_type
-		assert set(component_prof.gal_prof_func_dict.keys()).issubset(['gal_NFWmodel_conc'])
+		if isinstance(gal_type_blueprint['profile'], gal_prof_factory.GalProfFactory):
+			component_prof = gal_type_blueprint['profile']
+			assert component_prof.gal_type == gal_type
+			assert set(component_prof.gal_prof_func_dict.keys()).issubset(['gal_NFWmodel_conc'])
 
 
 

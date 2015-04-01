@@ -58,7 +58,7 @@ def Kravtsov04_blueprint(**kwargs):
 	# Build the profile model
 	halo_profile_model_cens = hpc.TrivialProfile()
 	cen_profile = gpf.GalProfFactory(cen_key, halo_profile_model_cens)
-	cen_model_dict['profile'] = cen_profile
+	cen_model_dict['profile'] = halo_profile_model_cens
 
 	### Build model for satellites
 	sat_key = 'satellites'
