@@ -40,11 +40,11 @@ def Kravtsov04(**kwargs):
 	Examples 
 	--------
 	>>> model = Kravtsov04()
-	>>> model = Kravtsov04(luminosity = -20.5)
+	>>> model = Kravtsov04(threshold = -20.5)
 
 	"""
 	blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint(**kwargs)
-	return hod_factory.HodModelFactory(blueprint)
+	return hod_factory.HodModelFactory(blueprint, **kwargs)
 
 
 

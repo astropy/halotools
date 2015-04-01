@@ -11,6 +11,9 @@ from ..preloaded_models import Kravtsov04
 
 from astropy import cosmology
 
+
+__all__ = ['test_unbiased_trivial', 'test_unbiased_nfw']
+
 def test_unbiased_trivial():
 	trivial_prof = hpc.TrivialProfile()
 	gal_type = 'centrals'
