@@ -26,26 +26,50 @@ class HodMockFactory(object):
     and simulation snapshot as input, 
     and generates a mock galaxy population. 
     The returned collection of galaxies possesses whatever 
-    properties were requested by the model, such as 3-D position,  
+    attributes were requested by the model, such as 3-D position,  
     central/satellite designation, star-formation rate, etc. 
 
-    Parameters 
-    ----------
-    snapshot : object 
-        Object containing the halo catalog and its metadata, 
-        produced by `~halotools.sim_manager.processed_snapshot`
-
-    composite_model : object 
-        Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`
-        Whatever the features of the model, the ``composite_model`` object 
-        created by the HOD model factory contains all the instructions 
-        needed to produce a Monte Carlo realization of the model with 
-        `HodMockFactory`. 
     """
 
     def __init__(self, snapshot, composite_model, 
         create_astropy_table=False, populate=True,
         additional_haloprops=[], new_haloprop_func_dict={}, **kwargs):
+        """
+        Parameters 
+        ----------
+        snapshot : object 
+            Object containing the halo catalog and its metadata, 
+            produced by `~halotools.sim_manager.read_nbody.processed_snapshot`
+
+        composite_model : object 
+            Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`. 
+            Whatever the features of the model, the ``composite_model`` object 
+            created by the HOD model factory contains all the instructions 
+            needed to produce a Monte Carlo realization of the model with `HodMockFactory`. 
+
+        create_astropy_table : bool, optional keyword argument 
+            If False (the default option), mock galaxy properties must be accessed 
+            as attributes of the class instance, e.g., ``self.halo_mvir``. 
+            If True, the class instance will have a ``galaxy_table`` attribute that is 
+            an Astropy Table object; in this case, 
+            galaxy properties can be accessed as columns of the table, 
+            e.g., ``self.galaxy_table['halo_mvir']``. 
+
+        additional_haloprops : list of strings, optional 
+            Each entry in this list must be a column key of the halo catalog. 
+            For each entry, mock galaxies will have an attribute storing this 
+            property of their host halo. The corresponding mock galaxy attribute name 
+            will be pre-pended by ``halo_``. 
+
+        new_haloprop_func_dict : dictionary of function objects, optional 
+            Dictionary keys will be the names of newly created columns 
+            of the halo catalog; dictionary values are functions that operate on 
+            the halo catalog to produce the new halo property. 
+            For each entry, mock galaxies will have an attribute storing this 
+            property of their host halo. The corresponding mock galaxy attribute name 
+            will be pre-pended by ``halo_``. 
+
+        """
 
         # Bind the inputs to the mock object
         self.snapshot = snapshot
