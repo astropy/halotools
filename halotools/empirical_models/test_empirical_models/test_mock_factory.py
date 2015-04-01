@@ -4,13 +4,11 @@ import numpy as np
 from .. import preloaded_models
 from .. import hod_factory
 from .. import mock_factory
-from ...sim_manager import read_nbody
+from .. import preloaded_models
+from ...sim_manager.generate_random_sim import FakeSim
 
-"""
+
 def test_kravtsov04_mock():
-	default_sim = read_nbody.processed_snapshot()
-	kravtsov_model = preloaded_models.Kravtsov04()
-	mock = mock_factory.HodMockFactory(
-		default_sim, kravtsov_model, 
-		populate=False)
-"""
+	k = preloaded_models.Kravtsov04(threshold = -20)
+	sim = FakeSim()
+	mock = mock_factory.HodMockFactory(sim, k)

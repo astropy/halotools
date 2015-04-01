@@ -9,6 +9,8 @@ Currently only composite HOD models are supported.
 """
 
 import numpy as np
+from astropy.table import Table 
+
 import occupation_helpers as occuhelp
 import model_defaults
 from ..sim_manager import sim_defaults
@@ -42,7 +44,7 @@ class HodMockFactory(object):
     """
 
     def __init__(self, snapshot, composite_model, 
-        bundle_into_table=True, populate=True,
+        create_astropy_table=False, populate=True,
         additional_haloprops=[], new_haloprop_func_dict={}, **kwargs):
 
         # Bind the inputs to the mock object
@@ -50,6 +52,7 @@ class HodMockFactory(object):
         self.halos = snapshot.halos
         self.particles = snapshot.particles
         self.model = composite_model
+        self.create_astropy_table = create_astropy_table
 
         self.additional_haloprops = additional_haloprops
         # Make sure all the default haloprops are included
@@ -183,7 +186,7 @@ class HodMockFactory(object):
 
         return sorted_gal_type_list, occupation_bound
 
-    def populate(self):
+    def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
         """
         self.allocate_memory()
@@ -255,6 +258,22 @@ class HodMockFactory(object):
         self.pos = occuhelp.enforce_periodicity_of_box(
             self.pos, self.snapshot.Lbox)
 
+        # Bundle the results into an Astropy Table, if requested
+        if 'create_astropy_table' in kwargs.keys():
+            create_astropy_table = kwargs['create_astropy_table']
+        else:
+            create_astropy_table = self.create_astropy_table
+        if create_astropy_table == True:
+            self.bundle_into_table()
+
+
+    def bundle_into_table(self):
+        """ Method to create an Astropy Table containing the mock galaxies. 
+        """
+        galaxy_dict = {name : getattr(self, name) for name in self._mock_galaxy_props}
+        self.galaxy_table = Table(galaxy_dict)
+
+
     def allocate_memory(self):
         """ Method allocates the memory for all the numpy arrays 
         that will store the information about the mock. 
@@ -312,9 +331,11 @@ class HodMockFactory(object):
             total_entries = np.product(example_shape)
             setattr(self, propname, 
                 np.zeros(total_entries,dtype=example_type).reshape(example_shape))
+            self._mock_galaxy_props.append(propname)
 
         # Allocate memory for all additional halo properties, 
         # including profile parameters of the halos such as 'halo_NFWmodel_conc'
+        self._mock_galaxy_props = []
         for halocatkey in self.additional_haloprops:
             galpropkey = model_defaults.host_haloprop_prefix+halocatkey
             example_entry = self.halos[halocatkey][0]
