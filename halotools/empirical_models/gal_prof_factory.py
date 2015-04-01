@@ -154,7 +154,7 @@ class GalProfFactory(object):
         self.cumu_inv_param_table_dict = self.halo_prof_model.cumu_inv_param_table_dict
 
     @property 
-    def gal_prof_func_dict(self):
+    def gal_prof_func_dict(self, **kwargs):
         """ Dictionary used as a container for 
         the functions that map galaxy profile parameter values onto dark matter halos. 
 
@@ -175,6 +175,18 @@ class GalProfFactory(object):
         For profile parameters that are unbiased, the function object in 
         `gal_prof_func_dict` is identical to the function object in `halo_prof_func_dict`. 
 
+        Parameters 
+        ----------
+        input_param_dict : dict, optional 
+            Contains values for the parameters specifying the model.
+            Dict keys should correspond to keys used by 
+            `~halotools.empirical_models.gal_prof_components.SpatialBias`; 
+            all other keys of ``input_param_dict`` will be ignored. 
+            In the event that ``input_param_dict`` is not passed, **and** if using a 
+            `~halotools.empirical_models.gal_prof_components.SpatialBias` model, 
+            then default values set in `~halotools.empirical_models.model_defaults` 
+            will be chosen for how galaxy profile parameters are biased.
+
         Notes 
         ----- 
         Implemented as a read-only getter method via the ``@property`` decorator syntax. 
@@ -193,13 +205,15 @@ class GalProfFactory(object):
         output_dict = {}
         if self.spatial_bias_model == None:
 
-            halo_prof_dict = self.halo_prof_model.halo_prof_func_dict
+            halo_prof_dict = self.halo_prof_func_dict
             for key, func in halo_prof_dict.iteritems():
                 newkey = model_defaults.galprop_prefix + key
                 output_dict[newkey] = func
 
         else:
             raise SyntaxError("Never finished integrating SpatialBias into galaxy profile factory")
+            # When implementing, remember to propagate keyword argument input_param_dict
+            # so that the model factories will behave properly
 
         return output_dict
 
@@ -370,7 +384,7 @@ class GalProfFactory(object):
         pos[:,1] = sin_t * np.sin(phi)
         pos[:,2] = cos_t
 
-        print "mean of z-pos = "+str(cos_t.mean())
+        #print "mean of z-pos = "+str(cos_t.mean())
 
         return pos
 
@@ -398,7 +412,7 @@ class GalProfFactory(object):
             # get angles
             Ngals = len(pos[:,0])
             pos = self.mc_angles(Ngals)
-            print "Check 2: mean of z-pos = "+str(pos[:,2].mean())
+            #print "Check 2: mean of z-pos = "+str(pos[:,2].mean())
 
             # extract all relevant profile parameters from the mock
             profile_params = (
@@ -412,11 +426,11 @@ class GalProfFactory(object):
 
             # multiply the random radial positions by the random points on the unit sphere 
             # to get random three-dimensional positions
-            print "Check 3: mean of z-pos = "+str(pos[:,2].mean())
+            #print "Check 3: mean of z-pos = "+str(pos[:,2].mean())
 
             for idim in range(3): pos[:,idim] *= scaled_mc_radii
            
-            print "Check 4: mean of z-pos = "+str(pos[:,2].mean())
+            #print "Check 4: mean of z-pos = "+str(pos[:,2].mean())
 
         return pos
 

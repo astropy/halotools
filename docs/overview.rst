@@ -1,8 +1,8 @@
 .. _halotools_overview:
 
-************************
-Halotools Overview
-************************
+***************************
+Halotools Science Overview
+***************************
 
 Here we’ll give a qualitative description of the motivation and functionality of Halotools in broad strokes. You can get a more detailed picture of the package from the rest of the :ref:`user-docs`. 
 
