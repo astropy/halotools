@@ -15,6 +15,9 @@ from . import occupation_helpers as occuhelp
 from . import model_defaults
 from . import mock_factory
 from . import preloaded_hod_blueprints
+from . import gal_prof_factory
+from . import halo_prof_components
+
 from ..sim_manager.read_nbody import processed_snapshot
 from ..sim_manager.generate_random_sim import FakeSim
 
@@ -59,33 +62,39 @@ class HodModelFactory(object):
     >>> model.populate_mock(snapshot = fake_snapshot)
     """
 
-    def __init__(self, model_blueprint, **kwargs):
+    def __init__(self, input_model_blueprint, **kwargs):
         """
         Parameters
         ----------
-        model_blueprint : dict 
-            The main dictionary keys of ``model_blueprint`` are the names of the types of galaxies 
-            found in the halos, e.g., ``centrals``, ``satellites``, ``orphans``, etc. 
+        input_model_blueprint : dict 
+            The main dictionary keys of ``input_model_blueprint`` 
+            are the names of the types of galaxies 
+            found in the halos, 
+            e.g., ``centrals``, ``satellites``, ``orphans``, etc. 
             The dictionary value associated with each ``gal_type`` key 
             is itself a dictionary whose keys 
             specify the type of model component, e.g., ``occupation``, 
             and values are class instances of that type of model. 
+            The `interpret_input_model_blueprint` translates 
+            ``input_model_blueprint`` into ``self.model_blueprint``.
             See :ref:`custom_hod_model_building_tutorial` for further details. 
 
         """
 
         # Bind the model-building instructions to the composite model
-        self.model_blueprint = model_blueprint
+        self._input_model_blueprint = input_model_blueprint
+
+        # Create attributes for galaxy types and their occupation bounds
+        self._set_gal_types()
+        self.model_blueprint = self.interpret_input_model_blueprint()
 
         occuhelp.enforce_required_haloprops(self.haloprop_key_dict)
         self.prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
         if 'sec_haloprop_key' in self.haloprop_key_dict.keys():
             self.sec_haloprop_key = self.haloprop_key_dict['sec_haloprop_key']
 
-        # Create attributes for galaxy types and their occupation bounds
-        self._set_gal_types()
-
-        # Build the composite model dictionary, whose keys are parameters of our model
+        # Build the composite model dictionary, 
+        # whose keys are parameters of our model
         self._set_init_param_dict()
 
         # Create a set of bound methods with specific names 
@@ -93,6 +102,39 @@ class HodModelFactory(object):
         self._set_primary_behaviors()
 
         self.publications = self._build_publication_list()
+
+
+    def interpret_input_model_blueprint(self):
+        """ Method to interpret the ``input_model_blueprint`` 
+        passed to the constructor into ``self.model_blueprint``: 
+        the set of instructions that are actually used 
+        by `HodModelFactory` to create the model. 
+
+        Notes 
+        ----- 
+        In order for `HodModelFactory` to build a composite model object, 
+        each galaxy's ``profile`` key of the ``model_blueprint`` 
+        must be an instance of the 
+        `~halotools.empirical_models.GalProfFactory` class. 
+        However, if the user instead passed an instance of 
+        `~halotools.empirical_models.HaloProfileModel`, there is no 
+        ambiguity in what is desired: a profile model with parameters 
+        that are unbiased with respect to the dark matter halo. 
+        So the `interpret_input_model_blueprint` method translates 
+        all such instances into `~halotools.empirical_models.GalProfFactory` instances, 
+        and returns the appropriately modified blueprint, saving the user 
+        a little rigamarole. 
+        """
+
+        model_blueprint = copy(self._input_model_blueprint)
+        for gal_type in self.gal_types:
+            input_prof_model = model_blueprint[gal_type]['profile']
+            if isinstance(input_prof_model, halo_prof_components.HaloProfileModel):
+                prof_model = gal_prof_factory.GalProfFactory(
+                    gal_type, input_prof_model)
+                model_blueprint[gal_type]['profile'] = prof_model
+
+        return model_blueprint 
 
 
     def populate_mock(self, **kwargs):
@@ -152,11 +194,11 @@ class HodModelFactory(object):
         in ascending order of the occupation bound. 
         """
 
-        gal_types = [key for key in self.model_blueprint.keys() if key is not 'mock_factory']
+        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factory']
 
         occupation_bounds = []
         for gal_type in gal_types:
-            model = self.model_blueprint[gal_type]['occupation']
+            model = self._input_model_blueprint[gal_type]['occupation']
             occupation_bounds.append(model.occupation_bound)
 
         # Lists have been created. Now sort them and then bind the sorted lists to the instance. 
@@ -167,7 +209,7 @@ class HodModelFactory(object):
         self.occupation_bound = {}
         for gal_type in self.gal_types:
             self.occupation_bound[gal_type] = (
-                self.model_blueprint[gal_type]['occupation'].occupation_bound)
+                self._input_model_blueprint[gal_type]['occupation'].occupation_bound)
 
 
     @property 
