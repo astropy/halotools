@@ -134,6 +134,9 @@ class HodModelFactory(object):
                     gal_type, input_prof_model)
                 model_blueprint[gal_type]['profile'] = prof_model
 
+        if 'mock_factory' not in model_blueprint.keys():
+            model_blueprint['mock_factory'] = mock_factory.HodMockFactory
+
         return model_blueprint 
 
 

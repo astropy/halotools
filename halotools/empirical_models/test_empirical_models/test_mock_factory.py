@@ -30,14 +30,14 @@ def test_preloaded_hod_mocks():
 
     # If factory is called with default settings, 
     # mock attributes should include/exclude:
-        expected_attr_list = ['Ngals', 'gal_NFWmodel_conc','halo_NFWmodel_conc','prim_haloprop_key']
-        excluded_attr_list = ['galaxy_table', 'halo_conc']
+        expected_attr_list = ['Ngals', 'gal_NFWmodel_conc','halo_NFWmodel_conc','prim_haloprop_key','galaxy_table']
+        excluded_attr_list = ['halo_conc']
         mock1 = mock_factory.HodMockFactory(sim, model)
         for attr in expected_attr_list:
             assert hasattr(mock1, attr)
         for attr in excluded_attr_list:
             assert hasattr(mock1, attr) is False
-        assert mock1.create_astropy_table == False
+        assert mock1.create_astropy_table == True
 
         mock1.build_halo_prof_lookup_tables()
         mock1.bundle_into_table()

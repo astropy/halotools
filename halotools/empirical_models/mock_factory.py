@@ -33,7 +33,7 @@ class HodMockFactory(object):
     """
 
     def __init__(self, snapshot, composite_model, 
-        create_astropy_table=False, populate=True,
+        create_astropy_table=True, populate=True,
         additional_haloprops=[], new_haloprop_func_dict={}, **kwargs):
         """
         Parameters 
