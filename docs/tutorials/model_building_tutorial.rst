@@ -33,10 +33,9 @@ Build a satellite population
     occupation_model = models.hod_components.Kravtsov04Sats(threshold = -19)
     
     halo_prof_model = models.halo_prof_components.NFWProfile()
-    gal_prof_model = models.gal_prof_factory.GalProfFactory(sat_nickname, halo_prof_model)
     
     satellite_component_dict = {'occupation' : occupation_model, 
-                                'profile' : gal_prof_model}
+                                'profile' : halo_prof_model}
 
 Build a central population
 --------------------------
@@ -48,10 +47,9 @@ Build a central population
     occupation_model = models.hod_components.Kravtsov04Cens(threshold = -19)
     
     halo_prof_model = models.halo_prof_components.TrivialProfile()
-    gal_prof_model = models.gal_prof_factory.GalProfFactory(cen_nickname, halo_prof_model)
     
     central_component_dict = {'occupation' : occupation_model, 
-                                'profile' : gal_prof_model}
+                                'profile' : halo_prof_model}
 
 Bundle the populations together into a composite model blueprint
 ----------------------------------------------------------------
@@ -65,10 +63,36 @@ composite model object
                             sat_nickname : satellite_component_dict
                             }
 
-Pass the blueprint to the HodModelFactory, which knows what to do with it
--------------------------------------------------------------------------
+Pass the blueprint to the Model Factory, which knows what to do
+---------------------------------------------------------------
 
 .. code:: python
 
-    my_model_object = models.HodModelFactory(composite_model_blueprint)
+    my_model = models.HodModelFactory(composite_model_blueprint)
+
+Now that you have built a model, it's easy to use it to rapidly generate
+a mock galaxy population. Whether you've built a very simple, or very
+complex mock, the above and below syntax is always the same:
+
+.. code:: python
+
+    my_model.populate_mock()
+
+Let's take a quick look at what we've got:
+
+.. code:: python
+
+    print(my_model.mock.galaxy_table[0:5])
+
+
+.. parsed-literal::
+
+    halo_haloid          halo_pos [3]          ... gal_NFWmodel_conc gal_type
+    ----------- ------------------------------ ... ----------------- --------
+     3060299659 35.7249908447 .. 17.7129898071 ...     6.45777867233     cens
+     3060313505  45.2089195251 .. 39.911239624 ...     6.47874642155     cens
+     3058441127 21.8120098114 .. 9.54759025574 ...     6.68856074462     cens
+     3058442008 26.1803398132 .. 6.51834011078 ...     6.79585452177     cens
+     3058452897 1.74397003651 .. 17.8251895905 ...     6.88196980011     cens
+
 
