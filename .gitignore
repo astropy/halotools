@@ -41,13 +41,6 @@ distribute-*.tar.gz
 # Other
 .*.swp
 *~
-halotools/experimental_testing.py
-halotools/plots/*
-halotools/syntax_checks.py
-halotools/CATALOGS/*.fits
-halotools/check_mock.py
-halotools/cfcm/*
-halotools/cxcf/*
 
 *.ipynb
 .ipynb_checkpoints/*
