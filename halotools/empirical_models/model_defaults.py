@@ -30,12 +30,18 @@ default_bin_max_epsilon = 1.e-5
 
 # Number of bins to use in the lookup table attached to the NFWProfile. 
 # Used primarily by HODMockFactory.
-min_permitted_conc = 1.0
-max_permitted_conc = 25.0
-default_dconc = 0.02
+min_permitted_conc = 0.1
+max_permitted_conc = 30.0
+default_dconc = 0.025
+
 default_Npts_radius_array = 101
-default_min_rad = 0.0001
-default_max_rad = 1.0
+default_lograd_min = -4
+default_lograd_max = 0
+profile_table_radius_array_dict = {
+    'logrmin' : default_lograd_min, 
+    'logrmax' : default_lograd_max, 
+    'npts' : default_Npts_radius_array
+}
 conc_mass_relation_key = 'dutton_maccio14'
 
 ### Default values specifying traditional quenching model
@@ -93,7 +99,7 @@ default_assembias_key = 'vmax'
 # will be bound to each mock galaxy 
 host_haloprop_prefix = 'halo_'
 galprop_prefix = 'gal_'
-haloprop_list = ['id', 'pos', 'vel', 'mvir', 'rvir']
+haloprop_list = ['haloid', 'pos', 'vel', 'mvir', 'rvir']
 galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 
 haloprop_key_dict = {'prim_haloprop_key':'mvir', 'halo_boundary':'rvir'}

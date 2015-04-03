@@ -64,6 +64,7 @@ User Documentation
    :maxdepth: 1
 
    tutorials/example_tutorial
+   tutorials/model_building_tutorial
 
 .. _developer-docs:
 

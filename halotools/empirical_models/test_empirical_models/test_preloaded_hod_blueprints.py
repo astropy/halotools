@@ -6,6 +6,7 @@ from .. import preloaded_hod_blueprints
 from .. import model_defaults
 from .. import hod_components
 from .. import gal_prof_factory
+from .. import halo_prof_components
 
 __all__ = ['test_Kravtsov04_blueprint']
 
@@ -46,7 +47,7 @@ def test_Kravtsov04_blueprint():
 
 	"""
 	default_blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint()
-	assert set(default_blueprint.keys()) == {'satellites','centrals'} 
+	assert {'satellites','centrals'}.issubset(set(default_blueprint.keys()))
 
 	# Check thresholds are being self-consistently set
 	for threshold in np.arange(-22, -17.5, 0.5):
@@ -56,23 +57,26 @@ def test_Kravtsov04_blueprint():
 			temp_blueprint['centrals']['occupation'].threshold 
 			)
 
-	for gal_type in default_blueprint.keys():
+	gal_type_list = [key for key in default_blueprint.keys() if key != 'mock_factory']
+	for gal_type in gal_type_list:
 		gal_type_blueprint = get_gal_type_model(default_blueprint, gal_type)
 		assert set(gal_type_blueprint.keys()) == {'profile', 'occupation'}
 
 		# Test that the component models are subclasses of the correct abstract base class
 		assert isinstance(gal_type_blueprint['occupation'], 
 			hod_components.OccupationComponent)
-		assert isinstance(gal_type_blueprint['profile'], 
-			gal_prof_factory.GalProfModel)
+
+		assert (
+			isinstance(gal_type_blueprint['profile'], gal_prof_factory.GalProfFactory) or 
+			isinstance(gal_type_blueprint['profile'], halo_prof_components.HaloProfileModel)
+			)
 
 
 		# Test the profile model component
-		component_prof = gal_type_blueprint['profile']
-		assert component_prof.gal_type == gal_type
-		assert set(component_prof.gal_prof_param_keys).issubset(['gal_NFWmodel_conc'])
-		assert np.all(component_prof.cumu_inv_param_table > 0)
-		assert np.all(component_prof.cumu_inv_param_table < 105)
+		if isinstance(gal_type_blueprint['profile'], gal_prof_factory.GalProfFactory):
+			component_prof = gal_type_blueprint['profile']
+			assert component_prof.gal_type == gal_type
+			assert set(component_prof.gal_prof_func_dict.keys()).issubset(['gal_NFWmodel_conc'])
 
 
 
