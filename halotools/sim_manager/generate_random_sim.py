@@ -8,7 +8,7 @@ used to test the `~halotools.empirical_models` modules.
 from astropy.table import Table
 import numpy as np
 
-__all__ = ['FakeSim']
+__all__ = ['FakeSim', 'FakeMock']
 
 class FakeSim(object):
 	""" Fake simulation data used in the test suite of `~halotools.empirical_models`. 
@@ -124,8 +124,15 @@ class FakeMock(object):
 			Random number seed used to generate the fake halos and particles. 
 			Default is 43.
 
-		"""
+		Examples 
+		--------
+		>>> mock = FakeMock()
+		>>> central_gals = mock.galaxy_table[mock.gal_type == 'centrals']
+		>>> quenched_gals = mock.galaxy_table[mock.ssfr < -11]
+		>>> quenched_orphan_mask = (mock.gal_type == 'orphans') & (mock.ssfr < -11)
+		>>> quenched_orphan_gals = mock.galaxy_table[quenched_orphan_mask]
 
+		"""
 		self.snapshot = FakeSim()
 		self.halos = self.snapshot.halos
 		self.particles = self.snapshot.particles
