@@ -126,11 +126,54 @@ class FakeMock(object):
 
 		Examples 
 		--------
+		Instantiating a randomly generated mock is simple: 
+
 		>>> mock = FakeMock()
-		>>> central_gals = mock.galaxy_table[mock.gal_type == 'centrals']
-		>>> quenched_gals = mock.galaxy_table[mock.ssfr < -11]
-		>>> quenched_orphan_mask = (mock.gal_type == 'orphans') & (mock.ssfr < -11)
-		>>> quenched_orphan_gals = mock.galaxy_table[quenched_orphan_mask]
+
+		The `FakeMock` object has all of the same basic structure as the 
+		object produced by mock factories such as 
+		`~halotools.empirical_models.HodMockFactory`. So you can access 
+		the properties of the mock galaxies either as attributes or as 
+		keys of the galaxy table. 
+
+		For example, you can access the specific star-formation rates 
+		of the mock via the ``ssfr`` mock attribute:
+
+		>>> ssfr_array = mock.ssfr
+
+		Or, alternatively, you can use the ``galaxy_table``:
+
+		>>> ssfr_array = mock.galaxy_table['ssfr']
+
+		The reason for having two different access methods is that 
+		there is some overhead computational cost of working with an 
+		Astropy `~astropy.table.Table`, 
+		so for MCMC applications the mock galaxy data is not 
+		bundled into a table. But tables are quite convenient to work with, 
+		so the ``galaxy_table`` option is available for less 
+		computationally intensive applications. 
+
+		Below are a few examples of how you might access various 
+		subsets of the galaxy population. For demonstration purposes, 
+		we will mix freely between the two different modes of 
+		galaxy property access:
+
+			* To select the population of *centrals*: 
+				>>> central_gals = mock.galaxy_table[mock.gal_type == 'centrals']
+
+				``central_gals`` is an Astropy `~astropy.table.Table` object, 
+				so we can only access its attributes via column keys:
+
+				>>> central_mstar = central_gals['ssfr']
+
+			* To select the *cluster* population: 
+
+				>>> cluster_gals = mock.galaxy_table[mock.halo_mvir > 1.e14]
+				>>> cluster_ssfr = cluster_gals['ssfr']
+
+			* To select the *quenched orphans*:
+				>>> boolean_filter = (mock.gal_type == 'orphans') & (mock.ssfr < -11)
+				>>> quenched_orphan_gals = mock.galaxy_table[boolean_filter]
 
 		"""
 		self.snapshot = FakeSim()
@@ -146,7 +189,7 @@ class FakeMock(object):
 
 	@property 
 	def galaxy_table(self):
-		""" Astropy Table storing mock galaxy data. 
+		""" Astropy `~astropy.table.Table` object storing fake mock galaxy data. 
 		"""
 
 		d = {'gal_type' : self.gal_type, 
