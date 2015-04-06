@@ -29,7 +29,7 @@ def get_halotools_cache_dir():
             os.mkdir(halotools_cache_dir)
         except OSError as e:
             if not os.path.exists(halotools_cache_dir):
-                raise
+                raise IOError("Unable to create a cache directory for Halotools catalogs")
     elif not os.path.isdir(halotools_cache_dir):
         msg = 'Data cache directory {0} is not a directory'
         raise IOError(msg.format(halotools_cache_dir))
@@ -37,25 +37,44 @@ def get_halotools_cache_dir():
     return halotools_cache_dir
 
 
-def get_catalogs_dir(catalog_type):
+def get_catalogs_dir(catalog_type=None):
     """ Find the path to the halotools cache directory. 
     If the directory doesn't exist, make it, then return the path. 
 
     Parameters
     ----------
-    catalog_type : string 
-        String giving the type of catalog. Should be 'particles' or 'subhalos'.
+    catalog_type : string, optional
+        String giving the type of catalog. 
+        Should be 'particles', 'subhalos', or 'raw_halos'. 
+        Default is 'subhalos'. 
 
     Returns
     -------
     dirname : str
-        Path to the halotools directory storing processed halo catalogs.
+        Path to the halotools directory storing simulation data.
 
     """
-    if (catalog_type=='subhalos') or (catalog_type=='subhalo') or (catalog_type==None):
+    acceptable_halos_arguments = (
+        [None, 'subhalos', 'subhalo', 'halo', 'halos', 
+        'halo_catalogs', 'subhalo_catalogs', 'subhalo_catalog', 'halo_catalog',
+        'halos_catalogs', 'subhalos_catalogs', 'subhalos_catalog', 'halos_catalog']
+        )
+    acceptable_particles_arguments = (
+        ['particle', 'particles', 'particle_catalog', 'particle_catalogs', 
+        'particles_catalog', 'particles_catalogs']
+        )
+    acceptable_raw_halos_arguments = (
+        ['raw_halos', 'raw_subhalos', 'raw_halo', 'raw_subhalo', 
+        'raw_halos_catalog', 'raw_subhalos_catalog', 'raw_halo_catalog', 'raw_subhalo_catalog', 
+        'raw_halos_catalogs', 'raw_subhalos_catalogs', 'raw_halo_catalogs', 'raw_subhalo_catalogs']
+        )
+
+    if catalog_type in acceptable_halos_arguments:
         subdir_name = 'halo_catalogs'
-    elif (catalog_type=='particle') or (catalog_type=='particles'):
+    elif catalog_type in acceptable_particles_arguments:
         subdir_name = 'particle_catalogs'
+    elif catalog_type in acceptable_raw_halos_arguments:
+        subdir_name = 'raw_halo_catalogs'
     else:
         raise TypeError("Input catalog_type must be either 'subhalos' or 'particles'")
 
@@ -66,7 +85,7 @@ def get_catalogs_dir(catalog_type):
             os.mkdir(dirname)
         except OSError as e:
             if not os.path.exists(dirname):
-                raise
+                raise IOError("No path exists for the requested catalog")
     elif not os.path.isdir(dirname):
         msg = 'Data cache directory {0} is not a directory'
         raise IOError(msg.format(dirname))
