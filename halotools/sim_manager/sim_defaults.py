@@ -40,7 +40,9 @@ Num_ptcl_requirement = 300
 
 raw_halocat_url = {
 	'bolshoi': 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/', 
-	'multidark': 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
+	'bolshoi_bdm': 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/', 
+	'multidark': 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/', 
+	'consuelo': 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
 }
 
 
