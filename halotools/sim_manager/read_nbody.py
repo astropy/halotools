@@ -176,6 +176,40 @@ class Catalog_Manager(object):
         scale_factor = 1./(1+redshift)
         url = sim_defaults.raw_halocat_url[simname]
 
+    def _find_closest_raw_halocat(self, hlist_fname_list, redshift):
+        """  
+        """
+
+        # First create a list of floats storing the scale factors of each hlist file
+        hlist_prefix = 'hlist_'
+        file_ext = '.list.gz'
+        scale_factor_list = []
+        for fname in hlist_fname_list:
+            scale_factor = float(fname[len(hlist_prefix):-len(file_ext)])
+        scale_factor_list.append(scale_factor)
+
+        # convert to numpy arrays
+        scale_factor_list = np.array(scale_factor_list)
+        hlist_fname_list = np.array(hlist_fname_list)
+
+        idx_sorted = np.argsort(scale_factor_list)
+        scale_factor_list = scale_factor_list[idx_sorted]
+        hlist_fname_list = hlist_fname_list[idx_sorted]
+
+        input_scale_factor = (1./(1.+redshift))
+        idx = np.searchsorted(scale_factor_list, input_scale_factor)
+        if input_scale_factor in scale_factor_list:
+            exactly_matching_fname = scale_factor_list[idx]
+            return [exactly_matching_fname]
+        else:
+            if idx == 0:
+                return [scale_factor_list[idx], None]
+            elif idx == len(scale_factor_list):
+                return [None, scale_factor_list[-1]]
+            else:
+                return [scale_factor_list[idx-1],scale_factor_list[idx]]
+
+
 
     def retrieve_available_raw_halocats(self, simname):
         """ Method returns all available snapshots for the input simulation. 
@@ -190,7 +224,7 @@ class Catalog_Manager(object):
         -------
         file_list : list 
             List of all raw catalogs available for the requested simulation. 
-            
+
         """
         if simname in sim_defaults.raw_halocat_url.keys():
             url = sim_defaults.raw_halocat_url[simname]
