@@ -21,6 +21,20 @@ import configuration
 import os, sys, warnings, urllib2
 import sim_defaults
 
+HAS_SOUP = False
+try:
+    from bs4 import BeautifulSoup
+    HAS_SOUP = True
+except:
+    pass
+
+HAS_REQUESTS = False
+try:
+    import requests
+    HAS_REQUESTS = True
+except:
+    pass
+
 
 class processed_snapshot(object):
     """ Class containing halo and particle data taken from 
@@ -139,6 +153,61 @@ class Catalog_Manager(object):
             sim_defaults.default_simulation_name+'_a'+
             str(np.round(sim_defaults.default_scale_factor,4))+
             '_particles.fits')
+
+
+    def download_raw_halocat(self, simname, redshift):
+        """ Method to download publicly available halo catalog from web location. 
+
+        Parameters 
+        ----------
+        simname : string 
+            Nickname of the simulation. Must match one of the keys in 
+            the ``raw_halocat_url`` dictionary stored in the ``sim_defaults`` module. 
+
+        redshift : float 
+            Redshift of the requested snapshot. Must match one of the 
+            available snapshots, or a prompt will be issued providing the nearest 
+            available snapshots to choose from. 
+        """
+        if HAS_SOUP == False:
+            print("Must have BeautifulSoup installed to use Halotools Catalog Manager")
+            return 
+
+        scale_factor = 1./(1+redshift)
+        url = sim_defaults.raw_halocat_url[simname]
+
+
+    def retrieve_available_raw_halocats(self, simname):
+        """ Method returns all available snapshots for the input simulation. 
+
+        Parameters 
+        ----------
+        simname : string 
+            Nickname of the simulation. Must match one of the keys in 
+            the ``raw_halocat_url`` dictionary stored in the ``sim_defaults`` module. 
+
+        Returns 
+        -------
+        file_list : list 
+            List of all raw catalogs available for the requested simulation. 
+            
+        """
+        if simname in sim_defaults.raw_halocat_url.keys():
+            url = sim_defaults.raw_halocat_url[simname]
+        else:
+            raise KeyError("Input simname does not correspond to "
+                "any of the simulations stored in sim_defaults.raw_halocat_url")
+
+        soup = BeautifulSoup(requests.get(url).text)
+        expected_filename_prefix = 'hlist_'
+        file_list = []
+        for a in soup.find_all('a'):
+            link = a['href']
+            if link[0:len(expected_filename_prefix)]==expected_filename_prefix:
+                file_list.append(a['href'])
+
+        return file_list
+
 
 
     def retrieve_catalog_filenames_from_url(self,url,catalog_type='subhalos'):

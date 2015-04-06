@@ -38,6 +38,11 @@ scale_factor_difference_tol = 0.05
 
 Num_ptcl_requirement = 300
 
+raw_halocat_url = {
+	'bolshoi': 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/', 
+	'multidark': 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
+}
+
 
 
 
