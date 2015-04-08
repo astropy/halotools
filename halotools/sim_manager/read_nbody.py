@@ -209,7 +209,7 @@ class Catalog_Manager(object):
             else:
                 return [scale_factor_list[idx-1],scale_factor_list[idx]]
 
-    def get_scale_factor_from_rockstar_fname(self, fname):
+    def get_scale_factor_from_hlist_fname(self, fname):
         """ Method extracts the portion of the Rockstar hlist fname 
         that contains the scale factor of the snapshot. 
 
@@ -234,7 +234,7 @@ class Catalog_Manager(object):
         --------
         >>> catman = Catalog_Manager()
         >>> fname = 'hlist_0.06630.list.gz'
-        >>> scale_factor_string = catman.get_scale_factor_from_rockstar_fname(fname)
+        >>> scale_factor_string = catman.get_scale_factor_from_hlist_fname(fname)
 
         """
         first_index = fname.index('_')+1
