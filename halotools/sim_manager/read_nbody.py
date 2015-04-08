@@ -209,7 +209,38 @@ class Catalog_Manager(object):
             else:
                 return [scale_factor_list[idx-1],scale_factor_list[idx]]
 
+    def get_scale_factor_from_rockstar_fname(self, fname):
+        """ Method extracts the portion of the Rockstar hlist fname 
+        that contains the scale factor of the snapshot. 
 
+        Parameters 
+        ----------
+        fname : string 
+            Filename of the hlist. 
+
+        Returns 
+        -------
+        The substring specifying the scale factor of the snapshot. 
+
+        Notes 
+        -----
+        Assumes that the relevant substring always immediately follows 
+        the first incidence of an underscore, and terminates immediately 
+        preceding the second decimal. These assumptions are valid for 
+        all catalogs currently on the hipacc website, including 
+        'bolshoi', 'bolshoi_bdm', 'consuelo', and 'multidark'. 
+
+        Examples
+        --------
+        >>> catman = Catalog_Manager()
+        >>> fname = 'hlist_0.06630.list.gz'
+        >>> scale_factor_string = catman.get_scale_factor_from_rockstar_fname(fname)
+
+        """
+        first_index = fname.index('_')+1
+        last_index = fname.index('.', fname.index('.')+1)
+        scale_factor_string = fname[first_index:last_index]
+        return scale_factor_string
 
     def retrieve_available_raw_halocats(self, simname):
         """ Method returns all available snapshots for the input simulation. 
