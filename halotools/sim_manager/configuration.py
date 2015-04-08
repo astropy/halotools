@@ -3,7 +3,7 @@
 various files used throughout the halotools package. 
 """
 
-__all__=['get_halotools_cache_dir','get_catalogs_dir',
+__all__ = ['get_halotools_cache_dir','get_catalogs_dir',
 'get_local_filename_from_remote_url','list_of_catalogs_in_cache']
 
 

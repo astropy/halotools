@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys, urllib
 
-__all__ = ['file_len', 'get_file_from_url']
+__all__ = ['file_len', 'download_file_from_url']
 
 def file_len(fname):
     with open(fname) as f:
@@ -10,7 +10,7 @@ def file_len(fname):
     return i + 1    
     
 
-def get_file_from_url(url, fname):
+def download_file_from_url(url, fname):
     """ Function to download a file from the web to a specific location, 
     and print a progress bar along the way. 
 

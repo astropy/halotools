@@ -15,11 +15,12 @@ from astropy.utils.data import get_readable_fileobj
 from astropy.utils.data import _get_download_cache_locs as get_download_cache_locs
 from astropy.utils.data import _open_shelve as open_shelve
 
+from . import configuration
 from ..utils.array_utils import find_idx_nearest_val
+from ..utils.io_utils import download_file_from_url
 
 import numpy as np
 
-import configuration
 import os, sys, warnings, urllib2
 import sim_defaults
 
@@ -194,7 +195,12 @@ class Catalog_Manager(object):
             print(msg % (simname, dz_tol, input_redshift, redshift_of_closest_match))
 
         url = sim_defaults.raw_halocat_url[simname]+closest_snapshot_fname
-        return url
+
+        raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
+        output_fname = os.path.join(raw_halocat_cache_dir, closest_snapshot_fname)
+
+        download_file_from_url(url, output_fname)
+        
 
     def find_closest_raw_halocat(self, simname, input_redshift):
         """ Method searches the url where the ``simname`` halo catalogs are stored, 
