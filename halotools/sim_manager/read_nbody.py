@@ -15,6 +15,8 @@ from astropy.utils.data import get_readable_fileobj
 from astropy.utils.data import _get_download_cache_locs as get_download_cache_locs
 from astropy.utils.data import _open_shelve as open_shelve
 
+from ..utils.array_utils import find_idx_nearest_val
+
 import numpy as np
 
 import configuration
@@ -155,7 +157,7 @@ class Catalog_Manager(object):
             '_particles.fits')
 
 
-    def download_raw_halocat(self, simname, redshift):
+    def download_raw_halocat(self, simname, input_redshift, dz_tol=0.1):
         """ Method to download publicly available halo catalog from web location. 
 
         Parameters 
@@ -164,7 +166,7 @@ class Catalog_Manager(object):
             Nickname of the simulation. Must match one of the keys in 
             the ``raw_halocat_url`` dictionary stored in the ``sim_defaults`` module. 
 
-        redshift : float 
+        input_redshift : float 
             Redshift of the requested snapshot. Must match one of the 
             available snapshots, or a prompt will be issued providing the nearest 
             available snapshots to choose from. 
@@ -173,43 +175,61 @@ class Catalog_Manager(object):
             print("Must have BeautifulSoup installed to use Halotools Catalog Manager")
             return 
 
-        scale_factor = 1./(1+redshift)
-        url = sim_defaults.raw_halocat_url[simname]
+        closest_snapshot_fname = self.find_closest_raw_halocat(simname, input_redshift)
+        scale_factor_of_closest_match = float(
+            self.get_scale_factor_substring_from_hlist_fname(
+            closest_snapshot_fname))
+        redshift_of_closest_match = (1./scale_factor_of_closest_match) - 1
 
-    def _find_closest_raw_halocat(self, hlist_fname_list, redshift):
-        """  
+        if abs(redshift_of_closest_match - input_redshift) > dz_tol:
+            msg = (
+                "No raw %s halo catalog has \na redshift within %.2f " + 
+                "of the input_redshift = %.2f.\n Closest redshift for these catalogs is %.2f"
+                )
+            print(msg % (simname, dz_tol, input_redshift, redshift_of_closest_match))
+
+        url = sim_defaults.raw_halocat_url[simname]+closest_snapshot_fname
+        return url
+
+    def find_closest_raw_halocat(self, simname, input_redshift):
+        """ Method searches the url where the ``simname`` halo catalogs are stored, 
+        and returns the filename of the closest matching snapshot to ``input_redshift``. 
+
+        Parameters 
+        ----------
+        simname : string 
+            Nickname of the simulation. Must match one of the keys in 
+            the ``raw_halocat_url`` dictionary stored in the ``sim_defaults`` module. 
+
+        input_redshift : float
+            Redshift of the requested snapshot.
+
+        Returns
+        -------
+        output_fname : string 
+            Filename of the closest matching snapshot. 
         """
 
+        filename_list = self.retrieve_available_raw_halocats(simname)
+
         # First create a list of floats storing the scale factors of each hlist file
-        hlist_prefix = 'hlist_'
-        file_ext = '.list.gz'
         scale_factor_list = []
-        for fname in hlist_fname_list:
-            scale_factor = float(fname[len(hlist_prefix):-len(file_ext)])
-        scale_factor_list.append(scale_factor)
-
-        # convert to numpy arrays
+        for fname in filename_list:
+            scale_factor = float(self.get_scale_factor_substring_from_hlist_fname(fname))
+            scale_factor_list.append(scale_factor)
         scale_factor_list = np.array(scale_factor_list)
-        hlist_fname_list = np.array(hlist_fname_list)
 
-        idx_sorted = np.argsort(scale_factor_list)
-        scale_factor_list = scale_factor_list[idx_sorted]
-        hlist_fname_list = hlist_fname_list[idx_sorted]
+        input_scale_factor = 1./(1. + input_redshift)
+        idx_closest_catalog = find_idx_nearest_val(scale_factor_list, input_scale_factor)
+        closest_scale_factor = scale_factor_list[idx_closest_catalog]
+        closest_redshift = (1./closest_scale_factor) - 1
 
-        input_scale_factor = (1./(1.+redshift))
-        idx = np.searchsorted(scale_factor_list, input_scale_factor)
-        if input_scale_factor in scale_factor_list:
-            exactly_matching_fname = scale_factor_list[idx]
-            return [exactly_matching_fname]
-        else:
-            if idx == 0:
-                return [scale_factor_list[idx], None]
-            elif idx == len(scale_factor_list):
-                return [None, scale_factor_list[-1]]
-            else:
-                return [scale_factor_list[idx-1],scale_factor_list[idx]]
+        output_fname = filename_list[idx_closest_catalog]
 
-    def get_scale_factor_from_hlist_fname(self, fname):
+        return output_fname
+
+
+    def get_scale_factor_substring_from_hlist_fname(self, fname):
         """ Method extracts the portion of the Rockstar hlist fname 
         that contains the scale factor of the snapshot. 
 
@@ -234,7 +254,7 @@ class Catalog_Manager(object):
         --------
         >>> catman = Catalog_Manager()
         >>> fname = 'hlist_0.06630.list.gz'
-        >>> scale_factor_string = catman.get_scale_factor_from_hlist_fname(fname)
+        >>> scale_factor_string = catman.get_scale_factor_substring_from_hlist_fname(fname)
 
         """
         first_index = fname.index('_')+1
@@ -255,6 +275,10 @@ class Catalog_Manager(object):
         -------
         file_list : list 
             List of all raw catalogs available for the requested simulation. 
+
+        Notes 
+        ----- 
+        Method assumes that the first characters of any halo catalog filename are 'hlist_'. 
 
         """
         if simname in sim_defaults.raw_halocat_url.keys():
