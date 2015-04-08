@@ -303,8 +303,6 @@ class Catalog_Manager(object):
 
         return file_list
 
-
-
     def retrieve_catalog_filenames_from_url(self,url,catalog_type='subhalos'):
         """ Get the full list of filenames available at the provided url.
 
