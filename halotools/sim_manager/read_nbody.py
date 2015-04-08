@@ -170,7 +170,12 @@ class Catalog_Manager(object):
             Redshift of the requested snapshot. Must match one of the 
             available snapshots, or a prompt will be issued providing the nearest 
             available snapshots to choose from. 
+
+        dz_tol : float, optional
+            Tolerance value determining how close the requested redshift must be to 
+            some available snapshot before issuing a warning. Default value is 0.1. 
         """
+
         if HAS_SOUP == False:
             print("Must have BeautifulSoup installed to use Halotools Catalog Manager")
             return 
@@ -240,7 +245,8 @@ class Catalog_Manager(object):
 
         Returns 
         -------
-        The substring specifying the scale factor of the snapshot. 
+        scale_factor_substring : string 
+            The substring specifying the scale factor of the snapshot. 
 
         Notes 
         -----
@@ -259,8 +265,8 @@ class Catalog_Manager(object):
         """
         first_index = fname.index('_')+1
         last_index = fname.index('.', fname.index('.')+1)
-        scale_factor_string = fname[first_index:last_index]
-        return scale_factor_string
+        scale_factor_substring = fname[first_index:last_index]
+        return scale_factor_substring
 
     def retrieve_available_raw_halocats(self, simname):
         """ Method returns all available snapshots for the input simulation. 
@@ -274,7 +280,7 @@ class Catalog_Manager(object):
         Returns 
         -------
         file_list : list 
-            List of all raw catalogs available for the requested simulation. 
+            List of strings of all raw catalogs available for the requested simulation. 
 
         Notes 
         ----- 
