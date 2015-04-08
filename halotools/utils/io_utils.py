@@ -25,6 +25,9 @@ def download_file_from_url(url, fname):
         ``/Users/username/dirname/possibly_new_filename.txt``
     """
 
+    print("\n... Downloading data from the following location: \n%s\n" % url)
+    print(" ... Saving the data with the following filename: \n%s\n" % fname) 
+
     def reporthook(a,b,c): 
         print "% 3.1f%% of %d bytes\r" % (min(100, float(a * b) / c * 100), c),
         sys.stdout.flush()

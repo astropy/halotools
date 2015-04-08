@@ -197,10 +197,15 @@ class Catalog_Manager(object):
         url = sim_defaults.raw_halocat_url[simname]+closest_snapshot_fname
 
         raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
-        output_fname = os.path.join(raw_halocat_cache_dir, closest_snapshot_fname)
+        simname_raw_halocat_cache_dir = os.path.join(raw_halocat_cache_dir, simname)
+        if not os.path.exists(simname_raw_halocat_cache_dir):
+            print("Creating subdirectory %s to store %s halo catalogs" % 
+                (simname_raw_halocat_cache_dir, simname))
+            os.mkdir(simname_raw_halocat_cache_dir)
+        output_fname = os.path.join(simname_raw_halocat_cache_dir, closest_snapshot_fname)
 
         download_file_from_url(url, output_fname)
-        
+
 
     def find_closest_raw_halocat(self, simname, input_redshift):
         """ Method searches the url where the ``simname`` halo catalogs are stored, 
