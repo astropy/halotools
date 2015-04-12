@@ -206,6 +206,10 @@ class Catalog_Manager(object):
 
         download_file_from_url(url, output_fname)
 
+        if output_fname['-3:'] == '.gz':
+            unzip_command = 'gunzip '+output_fname
+            os.system(unzip_command)
+
 
     def find_closest_raw_halocat(self, simname, input_redshift):
         """ Method searches the url where the ``simname`` halo catalogs are stored, 
