@@ -3,10 +3,10 @@
 from __future__ import division, print_function
 import numpy as np
 import sys
-from ..two_point_functions import two_point_correlation_function
-from ..two_point_functions import angular_two_point_correlation_function
-from ..two_point_functions import two_point_correlation_function_jackknife
-from ..two_point_functions import Delta_Sigma
+from halotools.mock_observables.two_point_functions import two_point_correlation_function
+from halotools.mock_observables.two_point_functions import angular_two_point_correlation_function
+from halotools.mock_observables.two_point_functions import two_point_correlation_function_jackknife
+from halotools.mock_observables.two_point_functions import Delta_Sigma
 
 ####two point correlation function########################################################
 def test_TPCF_auto():

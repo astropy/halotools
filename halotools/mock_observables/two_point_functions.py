@@ -25,6 +25,9 @@ try: from pair_counters.mpipairs import npairs, wnpairs, specific_wnpairs, jnpai
 except ImportError:
     print("MPI functionality not available.")
     from pair_counters.kdpairs import npairs, wnpairs, specific_wnpairs, jnpairs
+try: from pair_counters.sinha_pairs import countpairs as npairs
+except ImportError:
+    print("sinha pair counting functionality not available.")
 
 ####define wrapper functions for pair counters to facilitate parallelization##############
 #straight pair counter
