@@ -152,7 +152,7 @@ def read_halocat(fname, input_column_info, input_halo_cuts=None,
 
     def get_builtin(name):
         """ Simple internal function to extract the appropriate method 
-        to convert a string. 
+        to convert a string to the desired numerical type. 
         """
         t = getattr(builtins, name)
         if isinstance(t, type):
