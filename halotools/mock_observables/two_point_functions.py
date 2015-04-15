@@ -451,6 +451,8 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period, PBCs, k, N_threads, do_RR, do_DR, comm)
     if rank==0: print('done counting pairs') 
     
+    print(D1D1)
+    
     if np.all(sample2==sample1):
         xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
