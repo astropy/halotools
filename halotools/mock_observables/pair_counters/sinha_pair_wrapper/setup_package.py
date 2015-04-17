@@ -3,10 +3,10 @@ import os
 
 PATH_TO_WRAPPER = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ["sinha_pairs.pyx", "source/countpairs.c", "source/gridlink.c", "source/utils.c"]
-
+THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():
-    name = "halotools.mock_observables.pair_counters.sinha_pairs"
+    name = THIS_PKG_NAME + "." + SOURCES[0].replace('.pyx', '')
     sources = [os.path.join(PATH_TO_WRAPPER, srcfn) for srcfn in SOURCES]
     include_dirs = [os.path.join(PATH_TO_WRAPPER, 'include')]
     libraries = []
