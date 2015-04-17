@@ -2,7 +2,7 @@ from distutils.extension import Extension
 import os
 
 PATH_TO_WRAPPER = os.path.relpath(os.path.dirname(__file__))
-SOURCES = ["sinha_pairs.pyx", "source/countpairs.c", "source/gridlink.c", "source/utils.c"]
+SOURCES = ["sinha_pairs_wrapper.pyx", "source/countpairs.c", "source/gridlink.c", "source/utils.c"]
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():
