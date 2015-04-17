@@ -8,7 +8,7 @@ SOURCES = ["sinha_pairs.pyx", "source/countpairs.c", "source/gridlink.c", "sourc
 def get_extensions():
     name = "halotools.mock_observables.pair_counters.sinha_pairs"
     sources = [os.path.join(PATH_TO_WRAPPER, srcfn) for srcfn in SOURCES]
-    include_dirs = [PATH_TO_WRAPPER+'include/']
+    include_dirs = [os.path.join(PATH_TO_WRAPPER, 'include')]
     libraries = []
     extra_compile_args = ["-DPERIODIC", "-DDOUBLE_PREC"]
 
@@ -16,8 +16,7 @@ def get_extensions():
                   sources=sources,
                   include_dirs=include_dirs,
                   libraries=libraries,
-                  extra_compile_args=extra_compile_args,
-                  extra_link_args=extra_link_args)
+                  extra_compile_args=extra_compile_args)
                  ]
 
     return extensions
