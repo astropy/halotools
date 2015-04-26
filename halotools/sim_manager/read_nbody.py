@@ -159,7 +159,8 @@ class Catalog_Manager(object):
 
 
     def download_raw_halocat(self, simname, input_redshift, dz_tol=0.1):
-        """ Method to download publicly available halo catalog from web location. 
+        """ Method to download publicly available ascii data of 
+        raw halo catalog from web location. 
 
         Parameters 
         ----------
@@ -183,7 +184,7 @@ class Catalog_Manager(object):
 
         closest_snapshot_fname = self.find_closest_raw_halocat(simname, input_redshift)
         scale_factor_of_closest_match = float(
-            self.get_scale_factor_substring_from_hlist_fname(
+            self.get_scale_factor_substring(
             closest_snapshot_fname))
         redshift_of_closest_match = (1./scale_factor_of_closest_match) - 1
 
@@ -235,21 +236,22 @@ class Catalog_Manager(object):
         # First create a list of floats storing the scale factors of each hlist file
         scale_factor_list = []
         for fname in filename_list:
-            scale_factor = float(self.get_scale_factor_substring_from_hlist_fname(fname))
+            scale_factor = float(self.get_scale_factor_substring(fname))
             scale_factor_list.append(scale_factor)
         scale_factor_list = np.array(scale_factor_list)
 
+        # Now use the array utils module to determine 
+        # which scale factor is the closest
         input_scale_factor = 1./(1. + input_redshift)
         idx_closest_catalog = find_idx_nearest_val(scale_factor_list, input_scale_factor)
         closest_scale_factor = scale_factor_list[idx_closest_catalog]
-        closest_redshift = (1./closest_scale_factor) - 1
 
         output_fname = filename_list[idx_closest_catalog]
 
         return output_fname
 
 
-    def get_scale_factor_substring_from_hlist_fname(self, fname):
+    def get_scale_factor_substring(self, fname):
         """ Method extracts the portion of the Rockstar hlist fname 
         that contains the scale factor of the snapshot. 
 
@@ -275,7 +277,7 @@ class Catalog_Manager(object):
         --------
         >>> catman = Catalog_Manager()
         >>> fname = 'hlist_0.06630.list.gz'
-        >>> scale_factor_string = catman.get_scale_factor_substring_from_hlist_fname(fname)
+        >>> scale_factor_string = catman.get_scale_factor_substring(fname)
 
         """
         first_index = fname.index('_')+1
