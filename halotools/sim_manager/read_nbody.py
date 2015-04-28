@@ -4,7 +4,7 @@ Methods and classes to load halo and particle catalogs into memory.
 
 """
 
-__all__=['processed_snapshot','Catalog_Manager']
+__all__=['ProcessedSnapshot','Catalog_Manager']
 
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
@@ -39,7 +39,7 @@ except:
     pass
 
 
-class processed_snapshot(object):
+class ProcessedSnapshot(object):
     """ Class containing halo and particle data taken from 
     a single snapshot of some Nbody simulation.
     """
