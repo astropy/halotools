@@ -232,13 +232,14 @@ class CatalogManager(object):
         if input_fname[-3:] == '.gz':
             unzip_command = 'gunzip '+raw_halocat_full_fname
             os.system(unzip_command)
+            raw_halocat_full_fname = raw_halocat_full_fname[:-3]
             manually_decompressed = True
 
 
 
 
         if manually_decompressed == True:
-            rezip_command = 'gzip '+raw_halocat_full_fname[:-3]
+            rezip_command = 'gzip '+raw_halocat_full_fname
             os.system(rezip_command)
 
     def retrieve_closest_raw_halocat_fname_in_cache(
