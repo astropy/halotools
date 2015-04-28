@@ -209,39 +209,51 @@ class CatalogManager(object):
 
         download_file_from_url(url, output_fname)
 
-    def process_raw_halocat(self, 
-        simname, input_redshift, cuts, output_version_name, 
+    def process_raw_halocat(self, input_fname, cuts, output_version_name, 
         save_to_cache = False):
         """ Method reads in a raw halo catalog, makes the desired cuts, 
         and stores the reduced catalog as an hdf5 file in the halo catalog 
         cache directory.
         """
 
+        # First determine the simname from input_fname
+        idx1 = len(input_fname) - input_fname[::-1].index('/') - 1
+        temp_substring = input_fname[:idx1]
+        idx2 = len(temp_substring) - temp_substring[::-1].index('/') - 1
+        simname = temp_substring[idx2+1:]
 
-        file_list = self.retrieve_raw_halocat_fnames_in_cache(simname)
-        closest_snapshot_fname = self.find_closest_raw_halocat(
-            file_list, input_redshift)
         raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
         simname_raw_halocat_cache_dir = os.path.join(raw_halocat_cache_dir, simname)
-        raw_halocat_full_fname = os.path.join(simname_raw_halocat_cache_dir, closest_snapshot_fname)
-        print("Processing halo catalog with "
-            "the following filename:\n %s" %raw_halocat_full_fname)
+        raw_halocat_full_fname = os.path.join(simname_raw_halocat_cache_dir, input_fname)
+        print("\nProcessing halo catalog with "
+            "the following filename:\n %s \n" %raw_halocat_full_fname)
 
         manually_decompressed = False
-        if closest_snapshot_fname[-3:] == '.gz':
+        if input_fname[-3:] == '.gz':
             unzip_command = 'gunzip '+raw_halocat_full_fname
-            #os.system(unzip_command)
+            os.system(unzip_command)
             manually_decompressed = True
 
-#        if output_fname['-3:'] == '.gz':
-#            unzip_command = 'gunzip '+output_fname
-#            os.system(unzip_command)
 
-        
+
 
         if manually_decompressed == True:
-            rezip_command = 'tar -cvf '+raw_halocat_full_fname
-            #os.system(rezip_command)
+            rezip_command = 'gzip '+raw_halocat_full_fname[:-3]
+            os.system(rezip_command)
+
+    def retrieve_closest_raw_halocat_fname_in_cache(
+        self, simname, input_redshift):
+
+        filename_list = self.retrieve_raw_halocat_fnames_in_cache(simname)
+        closest_fname = self.find_closest_raw_halocat(
+            filename_list, input_redshift)
+
+        halocat_dirname = configuration.get_catalogs_dir('raw_halos')
+        simname_halocat_dirname = os.path.join(halocat_dirname, simname)
+        output_full_fname = os.path.join(simname_halocat_dirname, closest_fname)
+
+        return output_full_fname
+
 
     def retrieve_raw_halocat_fnames_in_cache(self, simname):
         """ Method returns all snapshots for the input simulation 
