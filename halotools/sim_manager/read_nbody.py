@@ -4,7 +4,7 @@ Methods and classes to load halo and particle catalogs into memory.
 
 """
 
-__all__=['ProcessedSnapshot','Catalog_Manager']
+__all__=['ProcessedSnapshot','CatalogManager']
 
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
@@ -56,8 +56,8 @@ class ProcessedSnapshot(object):
 
         self.download_yn = download_yn
 
-        catman = Catalog_Manager()
-        self.catalog_manager = catman
+        catman = CatalogManager()
+        self.CatalogManager = catman
 
         Lbox, mp, softening = catman.get_simulation_properties(self.simulation_name)
         self.Lbox = Lbox
@@ -110,7 +110,7 @@ class ProcessedSnapshot(object):
         """
 
         catalog_type = 'particles'
-        particles = self.catalog_manager.load_catalog(catalog_type,
+        particles = self.CatalogManager.load_catalog(catalog_type,
             dirname = self.particle_catalog_dirname,
             filename=self.particle_catalog_filename,
             download_yn = self.download_yn)
@@ -127,7 +127,7 @@ class ProcessedSnapshot(object):
 
         """
         catalog_type = 'subhalos'
-        halos = self.catalog_manager.load_catalog(catalog_type,
+        halos = self.CatalogManager.load_catalog(catalog_type,
             dirname = self.halo_catalog_dirname,
             filename=self.halo_catalog_filename,
             download_yn = self.download_yn)
@@ -136,7 +136,7 @@ class ProcessedSnapshot(object):
 
 ###################################################################################################
 
-class Catalog_Manager(object):
+class CatalogManager(object):
     """ Container class for managing I/O of halo & particle catalogs.
     """
 
@@ -275,7 +275,7 @@ class Catalog_Manager(object):
 
         Examples
         --------
-        >>> catman = Catalog_Manager()
+        >>> catman = CatalogManager()
         >>> fname = 'hlist_0.06630.list.gz'
         >>> scale_factor_string = catman.get_scale_factor_substring(fname)
 
@@ -301,7 +301,7 @@ class Catalog_Manager(object):
 
         Notes 
         ----- 
-        Method assumes that the first characters of any halo catalog filename are 'hlist_'. 
+        Method assumes that the first characters of any halo catalog filename are `hlist_`. 
 
         """
         if simname in sim_defaults.raw_halocat_url.keys():
