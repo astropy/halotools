@@ -10,7 +10,9 @@ import numpy as np
 
 from astropy import cosmology
 
-import configuration
+raw_halocat_cache_dir = 'pkg_default'
+processed_halocat_cache_dir = 'pkg_default'
+particles_cache_dir = 'pkg_default'
 
 ### Default halo catalog (used in read_nbody)
 # The following parameters are used by the 
@@ -25,8 +27,8 @@ aph_web_location = 'http://www.astro.yale.edu/aphearin/Data_files/'
 behroozi_web_location = 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
 
 # Convenience strings for the directory locations of the default catalogs (probably unnecessary)
-halo_catalog_dirname = configuration.get_catalogs_dir('subhalos')
-particle_catalog_dirname = configuration.get_catalogs_dir('particles')
+#halo_catalog_dirname = configuration.get_catalogs_dir('subhalos')
+#particle_catalog_dirname = configuration.get_catalogs_dir('particles')
 
 default_redshift = 0.0
 default_cosmology = cosmology.WMAP5

@@ -11,6 +11,8 @@ import os
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 import warnings
 
+from . import sim_defaults
+
 def get_halotools_cache_dir():
     """ Find the path to the halotools cache directory. 
     If the directory doesn't exist, make it, then return the path. 
@@ -37,7 +39,7 @@ def get_halotools_cache_dir():
     return halotools_cache_dir
 
 
-def get_catalogs_dir(catalog_type=None):
+def get_catalogs_dir(catalog_type):
     """ Find the path to the halotools cache directory. 
     If the directory doesn't exist, make it, then return the path. 
 
@@ -46,7 +48,6 @@ def get_catalogs_dir(catalog_type=None):
     catalog_type : string, optional
         String giving the type of catalog. 
         Should be 'particles', 'subhalos', or 'raw_halos'. 
-        Default is 'subhalos'. 
 
     Returns
     -------
@@ -55,7 +56,7 @@ def get_catalogs_dir(catalog_type=None):
 
     """
     acceptable_halos_arguments = (
-        [None, 'subhalos', 'subhalo', 'halo', 'halos', 
+        ['subhalos', 'subhalo', 'halo', 'halos', 
         'halo_catalogs', 'subhalo_catalogs', 'subhalo_catalog', 'halo_catalog',
         'halos_catalogs', 'subhalos_catalogs', 'subhalos_catalog', 'halos_catalog']
         )
@@ -71,26 +72,40 @@ def get_catalogs_dir(catalog_type=None):
 
     if catalog_type in acceptable_halos_arguments:
         subdir_name = 'halo_catalogs'
+        default_cache_dir = sim_defaults.processed_halocat_cache_dir
     elif catalog_type in acceptable_particles_arguments:
         subdir_name = 'particle_catalogs'
+        default_cache_dir = sim_defaults.particles_cache_dir
     elif catalog_type in acceptable_raw_halos_arguments:
         subdir_name = 'raw_halo_catalogs'
+        default_cache_dir = sim_defaults.raw_halocat_cache_dir
     else:
         raise TypeError("Input catalog_type must be either 'subhalos' or 'particles'")
 
-    dirname = os.path.join(get_halotools_cache_dir(), subdir_name)
+    # Check to see whether we are using the package default or user-provided cache directory
+    if default_cache_dir != 'pkg_default':
+        # Default cache dir has been over-ridden
+        # Check to make sure that the provided dirname is actually a directory
+        if not os.path.isdir(default_cache_dir):
+            errmsg = 'Cache dirname ' + default_cache_dir + 'stored in '
+            'sim_defaults module is not a directory'
+            raise IOError(errmsg)
+        else:
+            return default_cache_dir
+    else:
+        # Use the cache directory provided by the package
+        dirname = os.path.join(get_halotools_cache_dir(), subdir_name)
+        if not os.path.exists(dirname):
+            try:
+                os.mkdir(dirname)
+            except OSError as e:
+                if not os.path.exists(dirname):
+                    raise IOError("No path exists for the requested catalog")
+        elif not os.path.isdir(dirname):
+            msg = 'Data cache directory {0} is not a directory'
+            raise IOError(msg.format(dirname))
 
-    if not os.path.exists(dirname):
-        try:
-            os.mkdir(dirname)
-        except OSError as e:
-            if not os.path.exists(dirname):
-                raise IOError("No path exists for the requested catalog")
-    elif not os.path.isdir(dirname):
-        msg = 'Data cache directory {0} is not a directory'
-        raise IOError(msg.format(dirname))
-
-    return dirname
+        return dirname
 
 def get_local_filename_from_remote_url(remote_url):
     """
