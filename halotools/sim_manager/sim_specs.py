@@ -310,6 +310,66 @@ class BolshoiPlRockstar(HaloCatSpecs):
 
 		return d
 
+class BolshoiBDMRockstar(HaloCatSpecs):
+
+	def __init__(self):
+
+		bolshoi = Bolshoi()
+		super(BolshoiBDMRockstar, self).__init__(bolshoi)
+
+	@property 
+	def halocat_column_info(self):
+		d = {
+		'scale': (0, 'int'), 
+		'haloid': (1, 'int'), 
+		'scale_desc': (2, 'int'), 
+		'haloid_desc': (3, 'int'), 
+		'num_prog': (4, 'int'), 
+		'pid': (5, 'int'), 
+		'upid': (6, 'int'), 
+		'pid_desc': (7, 'int'), 
+		'phantom': (8, 'int'), 
+		'mvir_sam': (9, 'float'), 
+		'mvir': (10, 'float'),
+		'rvir': (11, 'float'), 
+		'rs': (12, 'float'), 
+		'vrms': (13, 'float'), 
+		'mmp': (14, 'int'), 
+		'scale_lastmm': (15, 'float'), 
+		'vmax': (16, 'float'), 
+		'x': (17, 'float'),  
+		'y': (18, 'float'),  
+		'z': (19, 'float'),  
+		'vx': (20, 'float'),  
+		'vy': (21, 'float'),  
+		'vz': (22, 'float'),  
+		'jx': (23, 'float'),
+		'jy': (24, 'float'),
+		'jz': (25, 'float'),
+		'spin': (26, 'float'), 
+		'haloid_breadth_first': (27, 'int'),
+		'haloid_depth_first': (28, 'int'),
+		'haloid_tree_root': (29, 'int'),
+		'haloid_orig': (30, 'int'),
+		'snap_num': (31, 'int'),
+		'haloid_next_coprog_depthfirst': (32, 'int'), 
+		'haloid_last_prog_depthfirst': (33, 'int'), 
+		'xoff': (34, 'float'), 
+		'2K/Ep-1': (35, 'float'), 
+		'Rrms': (36, 'float'), 
+		'b_to_a': (37, 'float'), 
+		'c_to_a': (38, 'float'), 
+		'axisA_x': (39, 'float'), 
+		'axisA_y': (40, 'float'), 
+		'axisA_z': (41, 'float'), 
+		'macc': (42, 'float'), 
+		'mpeak': (43, 'float'), 
+		'vacc': (44, 'float'), 
+		'vpeak': (45, 'float'), 
+		}
+
+		return d
+
 class MultiDarkRockstar(HaloCatSpecs):
 
 	def __init__(self):
