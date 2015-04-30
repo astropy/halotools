@@ -3,8 +3,7 @@
 various files used throughout the halotools package. 
 """
 
-__all__ = ['get_halotools_cache_dir','get_catalogs_dir',
-'get_local_filename_from_remote_url','list_of_catalogs_in_cache']
+__all__ = ['get_halotools_cache_dir','get_catalogs_dir','list_of_catalogs_in_cache']
 
 
 import os
@@ -107,36 +106,6 @@ def get_catalogs_dir(catalog_type):
 
         return dirname
 
-def get_local_filename_from_remote_url(remote_url):
-    """
-    Helper function used to test whether catalog data has already been 
-    downloaded and stored in the astropy cache directory.
-
-    Parameters
-    ----------
-    remote_url : string 
-        String giving the url of the catalog to be downloaded.
-
-    Returns
-    -------
-    local_filename : string
-        String giving the filename where the catalog is stored locally.
-        The directory will be the default astropy cache download directory.
-        If None, then there is no catalog present in the local cache directory 
-        that corresponds to the input remote_url.
-
-    """
-
-    url_key = remote_url
-
-    dldir, urlmapfn = get_download_cache_locs()
-    with open_shelve(urlmapfn, True) as url2hash:
-        if url_key in url2hash:
-            local_filename = url2hash[url_key]
-        else:
-            local_filename = None
-
-    return local_filename
 
 def list_of_catalogs_in_cache(catalog_type='subhalos'):
     """ Returns a list of strings of filenames pointing to every 

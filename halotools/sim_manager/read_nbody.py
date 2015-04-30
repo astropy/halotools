@@ -158,7 +158,8 @@ class CatalogManager(object):
             '_particles.fits')
 
 
-    def download_raw_halocat(self, simname, input_redshift, dz_tol=0.1):
+    def download_raw_halocat(self, simname, input_redshift, 
+        dz_tol=0.1, download_loc='halotools_cache', overwrite=False):
         """ Method to download publicly available ascii data of 
         raw halo catalog from web location. 
 
@@ -182,6 +183,8 @@ class CatalogManager(object):
             print("Must have BeautifulSoup installed to use Halotools Catalog Manager")
             return 
 
+        # Check the url for the (unprocessed) halo catalog 
+        # that most closely matches the requested redshift
         list_of_available_sims = self.retrieve_available_raw_halocats(simname)
         closest_snapshot_fname = self.find_closest_raw_halocat(
             list_of_available_sims, input_redshift)
@@ -193,21 +196,54 @@ class CatalogManager(object):
         if abs(redshift_of_closest_match - input_redshift) > dz_tol:
             msg = (
                 "No raw %s halo catalog has \na redshift within %.2f " + 
-                "of the input_redshift = %.2f.\n Closest redshift for these catalogs is %.2f"
+                "of the input_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
                 )
             print(msg % (simname, dz_tol, input_redshift, redshift_of_closest_match))
+            return 
 
         url = sim_defaults.raw_halocat_url[simname]+closest_snapshot_fname
 
-        raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
-        simname_raw_halocat_cache_dir = os.path.join(raw_halocat_cache_dir, simname)
-        if not os.path.exists(simname_raw_halocat_cache_dir):
-            print("Creating subdirectory %s to store %s halo catalogs" % 
-                (simname_raw_halocat_cache_dir, simname))
-            os.mkdir(simname_raw_halocat_cache_dir)
-        output_fname = os.path.join(simname_raw_halocat_cache_dir, closest_snapshot_fname)
+        if download_loc != 'halotools_cache':
+            # We were given an explicit path to store the catalog
+            # Check that this path actually exists, and if so, use it 
+            if not os.path.exists(download_loc):
+                raise IOError("Input directory name %s for download location"
+                    "of raw halo catalog does not exist" % download_loc)
+            else:
+                output_fname = os.path.join(download_loc, closest_snapshot_fname)
+        else:
+            # We were not given an explicit path, so use the default Halotools cache dir
+            raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
+            simname_raw_halocat_cache_dir = os.path.join(raw_halocat_cache_dir, simname)
+            if not os.path.exists(simname_raw_halocat_cache_dir):
+                print("Creating subdirectory %s to store %s halo catalogs" % 
+                    (simname_raw_halocat_cache_dir, simname)) 
+                os.mkdir(simname_raw_halocat_cache_dir)
+            output_fname = os.path.join(simname_raw_halocat_cache_dir, closest_snapshot_fname)
+
+        if os.path.isfile(output_fname):
+            if overwrite==True:
+                warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
+            else:
+                raise IOError("Filename %s already exists in download location. \n"
+                    "If you really want to overwrite the file, \n"
+                    "you must call this function again with the "
+                    "keyword argument `overwrite` set to `True`")
 
         download_file_from_url(url, output_fname)
+
+
+    def determine_halocat_cache_dir(self, simname, fname, download_loc, preferred_loc):
+        """ Method determines whether to use the halotools cache directory 
+        or an alternative location. 
+        """
+        # First retrieve the list of previously used external sources
+
+        # Next search this list for fname
+
+        pass
+
+        
 
     def process_raw_halocat(self, input_fname, cuts, output_version_name, 
         save_to_cache = False):
