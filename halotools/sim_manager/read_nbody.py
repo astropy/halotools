@@ -221,6 +221,7 @@ class CatalogManager(object):
                     "of raw halo catalog does not exist" % download_loc)
             else:
                 output_fname = os.path.join(download_loc, closest_snapshot_fname)
+                self.append_list_of_previously_used_dirnames(download_loc)
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
             raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
@@ -241,6 +242,53 @@ class CatalogManager(object):
                     "keyword argument `overwrite` set to `True`")
 
         download_file_from_url(url, output_fname)
+
+    def append_list_of_previously_used_dirnames(self, dirname, catalog_type):
+        """ Method determines whether the input `dirname` is a new location 
+        that has not been used before to store halo catalogs, and updates the 
+        package memory as necessary.
+        """
+        if not os.path.exists(dirname):
+            warnings.warn("Cannot append a non-existent path %s \n"
+                "to Halotools memory of preferred user cache directory locations")
+            return
+
+        cache_memory_loc = configuration.get_catalogs_dir(catalog_type)
+        fname = catalog_type+'_'+sim_defaults.cache_memory_fname_suffix
+        full_fname = os.path.join(cache_memory_loc, fname)
+
+        # If the cache memory file does not already exist, 
+        # issue a warning, create it, and add the header
+        if not os.path.isfile(full_fname):
+            warnings.warn("Creating the following file: \n %s \n "
+                "This file is used to store Halotools' memory\n"
+                "of user-preferred locations for data of type %s" % 
+                (full_fname, catalog_type)
+                )
+            with open(full_fname, 'w') as f:
+                header_line1 = (
+                    "# This file lists all previously used locations storing "
+                    "catalogs of the following type: "+catalog_type+"\n"
+                    )
+                header_line2 = ("# Halotools uses this file "
+                    "to automatically detect a previously used disk\n")
+                f.write(header_line1)
+                f.write(header_line2)
+
+        add_new_fname = False
+        with open(full_fname, 'r') as f:
+            l = f.readlines()
+            if dirname not in l:
+                add_new_fname = True
+
+        if add_new_fname == True:
+            with open(full_fname, 'a') as f:
+                f.write(dirname)
+
+
+
+
+
 
 
     def determine_halocat_cache_dir(self, simname, fname, download_loc, preferred_loc):
