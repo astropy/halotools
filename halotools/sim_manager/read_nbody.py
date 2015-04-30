@@ -177,6 +177,16 @@ class CatalogManager(object):
         dz_tol : float, optional
             Tolerance value determining how close the requested redshift must be to 
             some available snapshot before issuing a warning. Default value is 0.1. 
+
+        download_loc : string, optional
+            Determines where the raw halo catalog will be stored. Default is the 
+            halotools cache directory. Any value besides 'halotools_cache' 
+            will be interpreted as an absolute path of the file being downloaded.
+
+        overwrite : boolean, optional
+            If a file with the same filename already exists 
+            in the requested download location, the `overwrite` boolean determines 
+            whether or not to overwrite the file. Default is False. 
         """
 
         if HAS_SOUP == False:
