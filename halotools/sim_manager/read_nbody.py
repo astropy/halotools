@@ -228,27 +228,16 @@ class CatalogManager(object):
                 self.update_list_of_previously_used_dirnames(download_loc)
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
-            raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
+            cache_dirname = configuration.get_catalogs_dir('raw_halos', 
+                simname=simname, halo_finder=halo_finder)
 
-            simname_raw_halocat_cache_dir = os.path.join(raw_halocat_cache_dir, simname)
-            if not os.path.exists(simname_raw_halocat_cache_dir):
-                print("Creating subdirectory %s to store halo catalogs for simulation %s" % 
-                    (simname_raw_halocat_cache_dir, simname)) 
-                os.mkdir(simname_raw_halocat_cache_dir)
-
-            catname_raw_halocat_cache_dir = os.path.join(simname_raw_halocat_cache_dir, halo_finder)
-            if not os.path.exists(catname_raw_halocat_cache_dir):
-                print("Creating subdirectory %s to store %s halo catalogs for %s simulation" % 
-                    (catname_raw_halocat_cache_dir, halo_finder, simname)) 
-                os.mkdir(catname_raw_halocat_cache_dir)
-
-            output_fname = os.path.join(catname_raw_halocat_cache_dir, closest_snapshot_fname)
+            output_fname = os.path.join(cache_dirname, closest_snapshot_fname)
 
         if os.path.isfile(output_fname):
             if overwrite==True:
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
             else:
-                raise IOError("The following filename already exists in download location: \n%s\n"
+                raise IOError("The following filename already exists: \n%s\n"
                     "If you really want to overwrite the file, \n"
                     "you must call this function again with the "
                     "keyword argument `overwrite` set to `True`" % output_fname)
@@ -320,8 +309,8 @@ class CatalogManager(object):
             return
 
         cache_memory_loc = configuration.get_catalogs_dir(catalog_type)
-        cache_memory_fname = catalog_type+'_'+sim_defaults.cache_memory_fname_suffix
-        cache_memory_full_fname = os.path.join(cache_memory_loc, cache_memory_fname)
+        cache_memory_full_fname = os.path.join(cache_memory_loc, 
+            sim_defaults.cache_memory_fname)
         # If the cache memory file does not already exist, 
         # issue a warning, create it, and add the header
         if not os.path.isfile(cache_memory_full_fname):
@@ -344,25 +333,28 @@ class CatalogManager(object):
         with open(cache_memory_full_fname, 'r') as f:
             lines = f.readlines()
             for line in lines:
-                existing_fname, existing_simname = line.strip()[0], line.strip()[1]
-                if input_full_fname == existing_fname:
-                    add_new_simloc = False
-                    if existing_simname != input_simname:
-                        msg = ("There already exists filename:\n%s\n "
-                            "The existing file pertains to the %s simulation,\n"
-                            "but you requested the cache memory to update this file \n"
-                            "to correspond to the %s simulation.\n" 
-                            "Take care that this was intentional.")
+                if line[0] != '#':
+                    existing_fname, existing_simname = line.strip()[0], line.strip()[1]
+                    if input_full_fname == existing_fname:
+                        add_new_simloc = False
+                        if existing_simname != input_simname:
+                            msg = ("There already exists filename:\n%s\n "
+                                "The existing file pertains to the %s simulation,\n"
+                                "but you requested the cache memory to update this file \n"
+                                "to correspond to the %s simulation.\n" 
+                                "Take care that this was intentional.")
 
-                        warnings.warn(msg % (existing_fname, existing_simname, input_simname))
+                            warnings.warn(msg % (existing_fname, existing_simname, input_simname))
+                else:
+                    pass
 
         if add_new_simloc == True:
             with open(cache_memory_full_fname, 'a') as f:
                 f.write(input_full_fname + '  ' + input_simname)
 
 
-    def process_raw_halocat(self, input_fname, cuts, output_version_name, 
-        save_to_cache = False):
+    def process_raw_halocat(self, input_fname, simname, halo_finder, 
+        cuts, output_version_name):
         """ Method reads in a raw halo catalog, makes the desired cuts, 
         and stores the reduced catalog as an hdf5 file in the halo catalog 
         cache directory.
@@ -404,9 +396,9 @@ class CatalogManager(object):
         if closest_fname == None:
             return None
 
-        halocat_dirname = configuration.get_catalogs_dir('raw_halos')
-        simname_halocat_dirname = os.path.join(halocat_dirname, simname)
-        output_full_fname = os.path.join(simname_halocat_dirname, closest_fname)
+        dirname = configuration.get_catalogs_dir('raw_halos', 
+            simname=simname, halo_finder=halo_finder)
+        output_full_fname = os.path.join(dirname, closest_fname)
 
         return output_full_fname
 
@@ -991,7 +983,7 @@ class CatalogManager(object):
     def clear_cache_memory(self, catalog_type):
 
         cache_memory_loc = configuration.get_catalogs_dir(catalog_type)
-        cache_memory_fname = catalog_type+'_'+sim_defaults.cache_memory_fname_suffix
+        cache_memory_fname = catalog_type+'_'+sim_defaults.cache_memory_fname
         cache_memory_full_fname = os.path.join(cache_memory_loc, cache_memory_fname)
         if os.path.exists(cache_memory_full_fname):
             os.system("rm "+cache_memory_full_fname)
