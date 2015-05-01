@@ -320,9 +320,8 @@ class CatalogManager(object):
         supported_halocat_classes = []
         for clname in class_list:
             clobj = getattr(sim_specs, clname)
-            clinst = clobj()
-            if (isinstance(clinst, parent_class)):
-                supported_halocat_classes.append(clinst)
+            if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
+                supported_halocat_classes.append(clobj())
 
         halocat_reader = None
         for reader in supported_halocat_classes:
@@ -338,62 +337,6 @@ class CatalogManager(object):
             return halocat_reader
 
  
-    def update_list_of_previously_used_dirnames(self, 
-        catalog_type, input_full_fname, input_simname):
-        """ Method determines whether the input `dirname` is a new location 
-        that has not been used before to store halo catalogs, and updates the 
-        package memory as necessary.
-        """
-        dirname = os.path.dirname(input_full_fname)
-        if not os.path.exists(dirname):
-            warnings.warn("Cannot append a non-existent path %s \n"
-                "to Halotools memory of preferred user cache directory locations")
-            return
-
-        cache_memory_loc = configuration.get_catalogs_dir(catalog_type)
-        cache_memory_full_fname = os.path.join(cache_memory_loc, 
-            sim_defaults.cache_memory_fname)
-        # If the cache memory file does not already exist, 
-        # issue a warning, create it, and add the header
-        if not os.path.isfile(cache_memory_full_fname):
-            warnings.warn("Creating the following file: \n %s \n "
-                "This file is used to store Halotools' memory\n"
-                "of user-preferred locations for data of type %s" % 
-                (cache_memory_full_fname, catalog_type)
-                )
-            with open(cache_memory_full_fname, 'w') as f:
-                header_line1 = (
-                    "# This file lists all previously used locations storing "
-                    "catalogs of the following type: "+catalog_type+"\n"
-                    )
-                header_line2 = ("# Halotools uses this file "
-                    "to automatically detect a previously used disk\n")
-                f.write(header_line1)
-                f.write(header_line2)
-
-        add_new_simloc = True
-        with open(cache_memory_full_fname, 'r') as f:
-            lines = f.readlines()
-            for line in lines:
-                if line[0] != '#':
-                    existing_fname, existing_simname = line.strip()[0], line.strip()[1]
-                    if input_full_fname == existing_fname:
-                        add_new_simloc = False
-                        if existing_simname != input_simname:
-                            msg = ("There already exists filename:\n%s\n "
-                                "The existing file pertains to the %s simulation,\n"
-                                "but you requested the cache memory to update this file \n"
-                                "to correspond to the %s simulation.\n" 
-                                "Take care that this was intentional.")
-
-                            warnings.warn(msg % (existing_fname, existing_simname, input_simname))
-                else:
-                    pass
-
-        if add_new_simloc == True:
-            with open(cache_memory_full_fname, 'a') as f:
-                f.write(input_full_fname + '  ' + input_simname)
-
 
     def process_raw_halocat(self, input_fname, simname, halo_finder, 
         cuts, output_version_name):
@@ -662,6 +605,63 @@ class CatalogManager(object):
 
         return file_list
         ##################
+
+    def update_list_of_previously_used_dirnames(self, 
+        catalog_type, input_full_fname, input_simname):
+        """ Method determines whether the input `dirname` is a new location 
+        that has not been used before to store halo catalogs, and updates the 
+        package memory as necessary.
+        """
+        dirname = os.path.dirname(input_full_fname)
+        if not os.path.exists(dirname):
+            warnings.warn("Cannot append a non-existent path %s \n"
+                "to Halotools memory of preferred user cache directory locations")
+            return
+
+        cache_memory_loc = configuration.get_catalogs_dir(catalog_type)
+        cache_memory_full_fname = os.path.join(cache_memory_loc, 
+            sim_defaults.cache_memory_fname)
+        # If the cache memory file does not already exist, 
+        # issue a warning, create it, and add the header
+        if not os.path.isfile(cache_memory_full_fname):
+            warnings.warn("Creating the following file: \n %s \n "
+                "This file is used to store Halotools' memory\n"
+                "of user-preferred locations for data of type %s" % 
+                (cache_memory_full_fname, catalog_type)
+                )
+            with open(cache_memory_full_fname, 'w') as f:
+                header_line1 = (
+                    "# This file lists all previously used locations storing "
+                    "catalogs of the following type: "+catalog_type+"\n"
+                    )
+                header_line2 = ("# Halotools uses this file "
+                    "to automatically detect a previously used disk\n")
+                f.write(header_line1)
+                f.write(header_line2)
+
+        add_new_simloc = True
+        with open(cache_memory_full_fname, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                if line[0] != '#':
+                    existing_fname, existing_simname = line.strip()[0], line.strip()[1]
+                    if input_full_fname == existing_fname:
+                        add_new_simloc = False
+                        if existing_simname != input_simname:
+                            msg = ("There already exists filename:\n%s\n "
+                                "The existing file pertains to the %s simulation,\n"
+                                "but you requested the cache memory to update this file \n"
+                                "to correspond to the %s simulation.\n" 
+                                "Take care that this was intentional.")
+
+                            warnings.warn(msg % (existing_fname, existing_simname, input_simname))
+                else:
+                    pass
+
+        if add_new_simloc == True:
+            with open(cache_memory_full_fname, 'a') as f:
+                f.write(input_full_fname + '  ' + input_simname)
+
 
     def get_simulation_properties(self,simname):
         """ Return a few characteristics of the input simulation.
