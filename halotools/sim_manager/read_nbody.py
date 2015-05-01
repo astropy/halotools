@@ -221,7 +221,7 @@ class CatalogManager(object):
                     "of raw halo catalog does not exist" % download_loc)
             else:
                 output_fname = os.path.join(download_loc, closest_snapshot_fname)
-                self.append_list_of_previously_used_dirnames(download_loc)
+                self.update_list_of_previously_used_dirnames(download_loc)
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
             raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
@@ -243,29 +243,75 @@ class CatalogManager(object):
 
         download_file_from_url(url, output_fname)
 
-    def append_list_of_previously_used_dirnames(self, dirname, catalog_type):
+
+    def locate_raw_halocat(self, **kwargs):
+        """ Return full path to the requested raw halo catalog. 
+
+        Parameters 
+        ----------
+        fname : string, optional keyword argument 
+            Absolute pathname to the raw halo catalog. 
+            If not passed, must pass simname and redshift 
+            keyword arguments.
+
+        simname : string, optional keyword argument 
+            Nickname of the simulation, e.g., `bolshoi`. 
+
+        redshift : float, optional keyword argument 
+            Redshift of the requested snapshot.
+
+        Returns 
+        -------
+        halocat_fname : string 
+            Absolute path to raw halo catalog
+
+        Notes 
+        -----
+        If `fname`, `simname`, and `redshift` arguments are all supplied, 
+        method will return `fname`. 
+
+        """
+
+        # First check that we were provided sufficient inputs
+        if ('fname' not in kwargs.keys()):
+            if ('simname' not in kwargs.keys()) or ('redshift' not in kwargs.keys()):
+                msg = ("If not passing an absolute filename to locate_raw_halocat,\n"
+                    "must pass both a simname and a redshift")
+                raise IOError(msg)
+
+        if 'fname' in kwargs.keys():
+            return kwargs['fname']
+        else:
+            return self.full_fname_closest_raw_halocat_in_cache(
+                kwargs['simname'], kwargs['redshift'])
+
+    def get_raw_halocat_reader(self, simname):
+        pass
+ 
+    def update_list_of_previously_used_dirnames(self, 
+        catalog_type, input_full_fname, input_simname):
         """ Method determines whether the input `dirname` is a new location 
         that has not been used before to store halo catalogs, and updates the 
         package memory as necessary.
         """
+        dirname = os.path.dirname(input_full_fname)
         if not os.path.exists(dirname):
             warnings.warn("Cannot append a non-existent path %s \n"
                 "to Halotools memory of preferred user cache directory locations")
             return
 
         cache_memory_loc = configuration.get_catalogs_dir(catalog_type)
-        fname = catalog_type+'_'+sim_defaults.cache_memory_fname_suffix
-        full_fname = os.path.join(cache_memory_loc, fname)
-
+        cache_memory_fname = catalog_type+'_'+sim_defaults.cache_memory_fname_suffix
+        cache_memory_full_fname = os.path.join(cache_memory_loc, cache_memory_fname)
         # If the cache memory file does not already exist, 
         # issue a warning, create it, and add the header
-        if not os.path.isfile(full_fname):
+        if not os.path.isfile(cache_memory_full_fname):
             warnings.warn("Creating the following file: \n %s \n "
                 "This file is used to store Halotools' memory\n"
                 "of user-preferred locations for data of type %s" % 
-                (full_fname, catalog_type)
+                (cache_memory_full_fname, catalog_type)
                 )
-            with open(full_fname, 'w') as f:
+            with open(cache_memory_full_fname, 'w') as f:
                 header_line1 = (
                     "# This file lists all previously used locations storing "
                     "catalogs of the following type: "+catalog_type+"\n"
@@ -275,33 +321,29 @@ class CatalogManager(object):
                 f.write(header_line1)
                 f.write(header_line2)
 
-        add_new_fname = False
-        with open(full_fname, 'r') as f:
-            l = f.readlines()
-            if dirname not in l:
-                add_new_fname = True
+        add_new_simloc = True
+        with open(cache_memory_full_fname, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                existing_fname, existing_simname = line.strip()[0], line.strip()[1]
+                if input_full_fname == existing_fname:
+                    add_new_simloc = False
+                    if existing_simname != input_simname:
+                        msg = ("There already exists filename:\n%s\n "
+                            "The existing file pertains to the %s simulation,\n"
+                            "but you requested the cache memory to update this file \n"
+                            "to correspond to the %s simulation.\n" 
+                            "Take care that this was intentional.")
 
-        if add_new_fname == True:
-            with open(full_fname, 'a') as f:
-                f.write(dirname)
+                        warnings.warn(msg % (existing_fname, existing_simname, input_simname))
+
+        if add_new_simloc == True:
+            with open(cache_memory_full_fname, 'a') as f:
+                f.write(input_full_fname + '  ' + input_simname)
 
 
 
-
-
-
-
-    def determine_halocat_cache_dir(self, simname, fname, download_loc, preferred_loc):
-        """ Method determines whether to use the halotools cache directory 
-        or an alternative location. 
-        """
-        # First retrieve the list of previously used external sources
-
-        # Next search this list for fname
-
-        pass
-
-        
+       
 
     def process_raw_halocat(self, input_fname, cuts, output_version_name, 
         save_to_cache = False):
@@ -330,18 +372,21 @@ class CatalogManager(object):
             manually_decompressed = True
 
 
-
+        ### HALOCAT PROCESSING LINES HERE###
 
         if manually_decompressed == True:
             rezip_command = 'gzip '+raw_halocat_full_fname
             os.system(rezip_command)
 
-    def retrieve_closest_raw_halocat_fname_in_cache(
+    def full_fname_closest_raw_halocat_in_cache(
         self, simname, input_redshift):
 
         filename_list = self.retrieve_raw_halocat_fnames_in_cache(simname)
         closest_fname = self.find_closest_raw_halocat(
             filename_list, input_redshift)
+        if closest_fname == None:
+            print("There are no cached halo catalogs for simname %s" % simname)
+            return None
 
         halocat_dirname = configuration.get_catalogs_dir('raw_halos')
         simname_halocat_dirname = os.path.join(halocat_dirname, simname)
@@ -367,13 +412,18 @@ class CatalogManager(object):
         """
         catalog_dirname = configuration.get_catalogs_dir('raw_halos')
         simname_raw_halocat_cache_dir = os.path.join(catalog_dirname, simname)
+        if not os.path.exists(simname_raw_halocat_cache_dir):
+            print("No raw halo catalogs exist in cache for simname %s" % simname)
+            return
 
         file_list = (
             [ f for f in os.listdir(simname_raw_halocat_cache_dir) 
             if os.path.isfile(os.path.join(simname_raw_halocat_cache_dir,f)) ]
             )
 
-        return file_list
+        full_fname_list = [os.path.join(simname_raw_halocat_cache_dir, f) for f in file_list]
+
+        return full_fname_list
 
 
     def find_closest_raw_halocat(self, filename_list, input_redshift):
@@ -394,6 +444,9 @@ class CatalogManager(object):
             Filename of the closest matching snapshot. 
         """
 
+        if len(filename_list)==0:
+            return None
+
         # First create a list of floats storing the scale factors of each hlist file
         scale_factor_list = []
         for fname in filename_list:
@@ -405,6 +458,7 @@ class CatalogManager(object):
         # which scale factor is the closest
         input_scale_factor = 1./(1. + input_redshift)
         idx_closest_catalog = find_idx_nearest_val(scale_factor_list, input_scale_factor)
+
         closest_scale_factor = scale_factor_list[idx_closest_catalog]
 
         output_fname = filename_list[idx_closest_catalog]
@@ -907,6 +961,16 @@ class CatalogManager(object):
             output = open(output_filename,'wb')
             output.write(fileobj.read())
             output.close()
+
+    def clear_cache_memory(self, catalog_type):
+
+        cache_memory_loc = configuration.get_catalogs_dir(catalog_type)
+        cache_memory_fname = catalog_type+'_'+sim_defaults.cache_memory_fname_suffix
+        cache_memory_full_fname = os.path.join(cache_memory_loc, cache_memory_fname)
+        if os.path.exists(cache_memory_full_fname):
+            os.system("rm "+cache_memory_full_fname)
+
+
 
 
 ###################################################################################################

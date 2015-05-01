@@ -60,6 +60,9 @@ def find_idx_nearest_val(array, value):
     -------
     idx_nearest : int
     """
+    if len(array) == 0:
+        return None
+
     idx_sorted = np.argsort(array)
     sorted_array = np.array(array[idx_sorted])
     idx = np.searchsorted(sorted_array, value, side="left")
