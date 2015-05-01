@@ -159,7 +159,7 @@ class CatalogManager(object):
             '_particles.fits')
 
 
-    def download_raw_halocat(self, simname, input_redshift, 
+    def download_raw_halocat(self, simname, halo_finder, input_redshift, 
         dz_tol=0.1, download_loc='halotools_cache', overwrite=False):
         """ Method to download publicly available ascii data of 
         raw halo catalog from web location. 
@@ -167,8 +167,10 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string 
-            Nickname of the simulation. Must match one of the keys in 
-            the ``raw_halocat_url`` dictionary stored in the ``sim_defaults`` module. 
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string 
+            Nickname of the halo-finder, e.g. `rockstar`. 
 
         input_redshift : float 
             Redshift of the requested snapshot. Must match one of the 
@@ -196,7 +198,7 @@ class CatalogManager(object):
 
         # Check the url for the (unprocessed) halo catalog 
         # that most closely matches the requested redshift
-        list_of_available_sims = self.retrieve_available_raw_halocats(simname)
+        list_of_available_sims = self.retrieve_available_raw_halocats(simname, halo_finder)
         closest_snapshot_fname = self.find_closest_raw_halocat(
             list_of_available_sims, input_redshift)
         scale_factor_of_closest_match = float(
@@ -212,7 +214,8 @@ class CatalogManager(object):
             print(msg % (simname, dz_tol, input_redshift, redshift_of_closest_match))
             return 
 
-        url = sim_defaults.raw_halocat_url[simname]+closest_snapshot_fname
+        key = simname+'_'+halo_finder
+        url = sim_defaults.raw_halocat_url[key]+closest_snapshot_fname
 
         if download_loc != 'halotools_cache':
             # We were given an explicit path to store the catalog
@@ -226,21 +229,29 @@ class CatalogManager(object):
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
             raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
+
             simname_raw_halocat_cache_dir = os.path.join(raw_halocat_cache_dir, simname)
             if not os.path.exists(simname_raw_halocat_cache_dir):
-                print("Creating subdirectory %s to store %s halo catalogs" % 
+                print("Creating subdirectory %s to store halo catalogs for simulation %s" % 
                     (simname_raw_halocat_cache_dir, simname)) 
                 os.mkdir(simname_raw_halocat_cache_dir)
-            output_fname = os.path.join(simname_raw_halocat_cache_dir, closest_snapshot_fname)
+
+            catname_raw_halocat_cache_dir = os.path.join(simname_raw_halocat_cache_dir, halo_finder)
+            if not os.path.exists(catname_raw_halocat_cache_dir):
+                print("Creating subdirectory %s to store %s halo catalogs for %s simulation" % 
+                    (catname_raw_halocat_cache_dir, halo_finder, simname)) 
+                os.mkdir(catname_raw_halocat_cache_dir)
+
+            output_fname = os.path.join(catname_raw_halocat_cache_dir, closest_snapshot_fname)
 
         if os.path.isfile(output_fname):
             if overwrite==True:
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
             else:
-                raise IOError("Filename %s already exists in download location. \n"
+                raise IOError("The following filename already exists in download location: \n%s\n"
                     "If you really want to overwrite the file, \n"
                     "you must call this function again with the "
-                    "keyword argument `overwrite` set to `True`")
+                    "keyword argument `overwrite` set to `True`" % output_fname)
 
         download_file_from_url(url, output_fname)
 
@@ -499,15 +510,18 @@ class CatalogManager(object):
         scale_factor_substring = fname[first_index:last_index]
         return scale_factor_substring
 
-    def retrieve_available_raw_halocats(self, simname):
+    def retrieve_available_raw_halocats(self, simname, halo_finder):
         """ Method returns all snapshots for the input simulation 
         that are available at the host url. 
 
         Parameters 
         ----------
         simname : string 
-            Nickname of the simulation. Must match one of the keys in 
-            the ``raw_halocat_url`` dictionary stored in the ``sim_defaults`` module. 
+            Nickname of the simulation, e.g., `bolshoi`. 
+
+        halo_finder : string 
+            Nickname of the halo-finder that generated the catalog, 
+            e.g., `rockstar`. 
 
         Returns 
         -------
@@ -519,11 +533,12 @@ class CatalogManager(object):
         Method assumes that the first characters of any halo catalog filename are `hlist_`. 
 
         """
-        if simname in sim_defaults.raw_halocat_url.keys():
-            url = sim_defaults.raw_halocat_url[simname]
+        key = simname + '_' + halo_finder
+        if key in sim_defaults.raw_halocat_url.keys():
+            url = sim_defaults.raw_halocat_url[key]
         else:
-            raise KeyError("Input simname does not correspond to "
-                "any of the simulations stored in sim_defaults.raw_halocat_url")
+            raise KeyError("Input simname + halo-finder does not correspond to "
+                "any of the catalogs stored in sim_defaults.raw_halocat_url")
 
         soup = BeautifulSoup(requests.get(url).text)
         expected_filename_prefix = 'hlist_'
