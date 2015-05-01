@@ -5,7 +5,11 @@ from astropy.extern import six
 
 from astropy import cosmology
 
-__all__ = ['SimulationSpecs', 'Bolshoi']
+__all__ = (
+	['SimulationSpecs', 'Bolshoi', 'BolshoiPl', 'MultiDark', 'Consuelo', 
+	'HaloCatSpecs', 'BolshoiRockstar', 'BolshoiPlRockstar', 
+	'BolshoiBdm', 'MultiDarkRockstar', 'ConsuleoRockstar']
+	)
 
 
 ######################################################
@@ -17,6 +21,9 @@ class SimulationSpecs(object):
 	""" Abstract base class for any object used as a container for 
 	simulation specs. 
 	"""
+
+	def __init__(self, simname):
+		self.simname = simname
 
 	@abstractproperty
 	def Lbox(self):
@@ -53,6 +60,9 @@ class SimulationSpecs(object):
 
 class Bolshoi(SimulationSpecs):
 
+	def __init__(self):
+		super(Bolshoi, self).__init__('bolshoi')
+
 	@property
 	def Lbox(self):
 		return 250.0
@@ -70,6 +80,9 @@ class Bolshoi(SimulationSpecs):
 		return cosmology.WMAP5
 
 class BolshoiPl(SimulationSpecs):
+
+	def __init__(self):
+		super(BolshoiPl, self).__init__('bolshoipl')
 
 	@property
 	def Lbox(self):
@@ -89,6 +102,9 @@ class BolshoiPl(SimulationSpecs):
 
 class MultiDark(SimulationSpecs):
 
+	def __init__(self):
+		super(MultiDark, self).__init__('multidark')
+
 	@property
 	def Lbox(self):
 		return 1000.0
@@ -106,6 +122,9 @@ class MultiDark(SimulationSpecs):
 		return cosmology.WMAP5
 
 class Consuelo(SimulationSpecs):
+
+	def __init__(self):
+		super(Consuelo, self).__init__('consuelo')
 
 	@property
 	def Lbox(self):
@@ -130,8 +149,11 @@ class Consuelo(SimulationSpecs):
 @six.add_metaclass(ABCMeta)
 class HaloCatSpecs(object):
 
-	def __init__(self, simobj):
+	def __init__(self, simobj, halo_finder):
 		self.simulation = simobj
+		self.simname = self.simulation.simname
+
+		self.halo_finder = halo_finder
 
 	@abstractproperty
 	def halocat_column_info(self):
@@ -143,7 +165,7 @@ class BolshoiRockstar(HaloCatSpecs):
 	def __init__(self):
 
 		bolshoi = Bolshoi()
-		super(BolshoiRockstar, self).__init__(bolshoi)
+		super(BolshoiRockstar, self).__init__(bolshoi, 'rockstar')
 
 	@property 
 	def halocat_column_info(self):
@@ -229,7 +251,7 @@ class BolshoiPlRockstar(HaloCatSpecs):
 	def __init__(self):
 
 		bolshoiPl = BolshoiPl()
-		super(BolshoiPlRockstar, self).__init__(bolshoiPl)
+		super(BolshoiPlRockstar, self).__init__(bolshoiPl, 'rockstar')
 
 	@property 
 	def halocat_column_info(self):
@@ -310,12 +332,12 @@ class BolshoiPlRockstar(HaloCatSpecs):
 
 		return d
 
-class BolshoiBDMRockstar(HaloCatSpecs):
+class BolshoiBdm(HaloCatSpecs):
 
 	def __init__(self):
 
 		bolshoi = Bolshoi()
-		super(BolshoiBDMRockstar, self).__init__(bolshoi)
+		super(BolshoiBdm, self).__init__(bolshoi, 'bdm')
 
 	@property 
 	def halocat_column_info(self):
@@ -375,7 +397,7 @@ class MultiDarkRockstar(HaloCatSpecs):
 	def __init__(self):
 
 		multidark = MultiDark()
-		super(MultiDarkRockstar, self).__init__(multidark)
+		super(MultiDarkRockstar, self).__init__(multidark, 'rockstar')
 
 
 	@property 
@@ -450,7 +472,7 @@ class ConsuleoRockstar(HaloCatSpecs):
 	def __init__(self):
 
 		consuelo = Consuelo()
-		super(ConsuleoRockstar, self).__init__(consuelo)
+		super(ConsuleoRockstar, self).__init__(consuelo, 'rockstar')
 
 
 	@property 
