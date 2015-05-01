@@ -38,7 +38,7 @@ def get_halotools_cache_dir():
     return halotools_cache_dir
 
 
-def get_catalogs_dir(catalog_type):
+def get_catalogs_dir(catalog_type, **kwargs):
     """ Find the path to the halotools cache directory. 
     If the directory doesn't exist, make it, then return the path. 
 
@@ -47,6 +47,12 @@ def get_catalogs_dir(catalog_type):
     catalog_type : string, optional
         String giving the type of catalog. 
         Should be 'particles', 'subhalos', or 'raw_halos'. 
+
+    simname : string, optional keyword argument 
+        Nickname of the simulation, e.g., `bolshoi`. 
+
+    halo_finder : string, optional keyword argument 
+        Nickname of the halo-finder, e.g., `rockstar` or `bdm`. 
 
     Returns
     -------
@@ -81,6 +87,19 @@ def get_catalogs_dir(catalog_type):
     else:
         raise TypeError("Input catalog_type must be either 'subhalos' or 'particles'")
 
+
+    def defensively_create_dir(dirname):
+        if not os.path.exists(dirname):
+            try:
+                os.mkdir(dirname)
+            except OSError as e:
+                if not os.path.exists(dirname):
+                    raise IOError("OS Error during creation of path %s" % dirname)
+        elif not os.path.isdir(dirname):
+            msg = 'Pathname {0} is not a directory'
+            raise IOError(msg.format(dirname))
+
+
     # Check to see whether we are using the package default or user-provided cache directory
     if default_cache_dir != 'pkg_default':
         # Default cache dir has been over-ridden
@@ -93,18 +112,19 @@ def get_catalogs_dir(catalog_type):
             return default_cache_dir
     else:
         # Use the cache directory provided by the package
-        dirname = os.path.join(get_halotools_cache_dir(), subdir_name)
-        if not os.path.exists(dirname):
-            try:
-                os.mkdir(dirname)
-            except OSError as e:
-                if not os.path.exists(dirname):
-                    raise IOError("No path exists for the requested catalog")
-        elif not os.path.isdir(dirname):
-            msg = 'Data cache directory {0} is not a directory'
-            raise IOError(msg.format(dirname))
-
-        return dirname
+        catalog_type_dirname = os.path.join(get_halotools_cache_dir(), subdir_name)
+        defensively_create_dir(catalog_type_dirname)
+        if 'simname' not in kwargs.keys():
+            return catalog_type_dirname
+        else:
+            simname_dirname = os.path.join(catalog_type_dirname, kwargs['simname'])
+            defensively_create_dir(simname_dirname)
+            if 'halo_finder' not in kwargs.keys():
+                return simname_dirname
+            else:
+                halo_finder_dirname = os.path.join(simname_dirname, kwargs['halo_finder'])
+                defensively_create_dir(halo_finder_dirname)
+                return halo_finder_dirname
 
 
 def list_of_catalogs_in_cache(catalog_type='subhalos'):
