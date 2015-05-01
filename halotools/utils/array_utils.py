@@ -39,6 +39,8 @@ def array_like_length(x):
     line of code that replaces the default python len() function with sensible behavior.
     """
 
+    if x == None:
+        return 0
     try:
         array_length = len(x)
     except TypeError:
