@@ -9,21 +9,8 @@ __all__=['ProcessedSnapshot','CatalogManager']
 #from __future__ import (absolute_import, division, print_function,
 #                        unicode_literals)
 
-from astropy.io import fits as fits
-from astropy.table import Table
-from astropy.utils.data import get_readable_fileobj
-from astropy.utils.data import _get_download_cache_locs as get_download_cache_locs
-from astropy.utils.data import _open_shelve as open_shelve
-
-from . import configuration
-from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import array_like_length as aph_len
-from ..utils.io_utils import download_file_from_url
-
 import numpy as np
-
 import os, sys, warnings, urllib2
-import sim_defaults
 
 HAS_SOUP = False
 try:
@@ -38,6 +25,21 @@ try:
     HAS_REQUESTS = True
 except:
     pass
+
+from astropy.io import fits as fits
+from astropy.table import Table
+from astropy.utils.data import get_readable_fileobj
+from astropy.utils.data import _get_download_cache_locs as get_download_cache_locs
+from astropy.utils.data import _open_shelve as open_shelve
+
+from . import configuration
+from . import sim_specs
+from . import sim_defaults
+
+from ..utils.array_utils import find_idx_nearest_val
+from ..utils.array_utils import array_like_length as aph_len
+from ..utils.io_utils import download_file_from_url
+
 
 
 class ProcessedSnapshot(object):
@@ -293,8 +295,48 @@ class CatalogManager(object):
             return self.full_fname_closest_raw_halocat_in_cache(
                 kwargs['simname'], halo_finder, kwargs['redshift'])
 
-    def get_raw_halocat_reader(self, simname):
-        pass
+    def get_raw_halocat_reader(self, simname, halo_finder):
+        """ Find and return the class instance that will be used to 
+        convert raw ASCII halo catalog data into a reduced binary.
+
+        Parameters 
+        ----------
+        simname : string 
+            Nickname of the simulation, e.g., `bolshoi`. 
+
+        halo_finder : string
+            Nickname of the halo-finder, e.g., `rockstar` or `bdm`.
+
+        Returns 
+        -------
+        halocat_reader : object 
+            Class instance of `~halotools.sim_manager.sim_specs.HaloCatSpecs`. 
+            Used to read ascii data in the specific format of the 
+            `simname` simulation and `halo_finder` halos. 
+        """
+        class_list = sim_specs.__all__
+        parent_class = sim_specs.HaloCatSpecs
+
+        supported_halocat_classes = []
+        for clname in class_list:
+            clobj = getattr(sim_specs, clname)
+            clinst = clobj()
+            if (isinstance(clinst, parent_class)):
+                supported_halocat_classes.append(clinst)
+
+        halocat_reader = None
+        for reader in supported_halocat_classes:
+            if (reader.simname == simname) & (reader.halo_finder == halo_finder):
+                halocat_reader = reader
+        if halocat_reader==None:
+            print("No reader class found for %s simulation and %s halo-finder\n"
+                "If you want to use Halotools to convert a raw halo catalog into a binary, \n"
+                "you must either use an existing reader class or write your own\n" 
+                % simname, halo_finder)
+            return None
+        else:
+            return halocat_reader
+
  
     def update_list_of_previously_used_dirnames(self, 
         catalog_type, input_full_fname, input_simname):
