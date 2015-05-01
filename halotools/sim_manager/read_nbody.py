@@ -17,6 +17,7 @@ from astropy.utils.data import _open_shelve as open_shelve
 
 from . import configuration
 from ..utils.array_utils import find_idx_nearest_val
+from ..utils.array_utils import array_like_length as aph_len
 from ..utils.io_utils import download_file_from_url
 
 import numpy as np
@@ -243,7 +244,6 @@ class CatalogManager(object):
 
         download_file_from_url(url, output_fname)
 
-
     def locate_raw_halocat(self, **kwargs):
         """ Return full path to the requested raw halo catalog. 
 
@@ -342,9 +342,6 @@ class CatalogManager(object):
                 f.write(input_full_fname + '  ' + input_simname)
 
 
-
-       
-
     def process_raw_halocat(self, input_fname, cuts, output_version_name, 
         save_to_cache = False):
         """ Method reads in a raw halo catalog, makes the desired cuts, 
@@ -381,11 +378,11 @@ class CatalogManager(object):
     def full_fname_closest_raw_halocat_in_cache(
         self, simname, input_redshift):
 
-        filename_list = self.retrieve_raw_halocat_fnames_in_cache(simname)
+        filename_list = self.full_fnames_all_raw_halocats_in_cache(simname)
+
         closest_fname = self.find_closest_raw_halocat(
             filename_list, input_redshift)
         if closest_fname == None:
-            print("There are no cached halo catalogs for simname %s" % simname)
             return None
 
         halocat_dirname = configuration.get_catalogs_dir('raw_halos')
@@ -395,7 +392,7 @@ class CatalogManager(object):
         return output_full_fname
 
 
-    def retrieve_raw_halocat_fnames_in_cache(self, simname):
+    def full_fnames_all_raw_halocats_in_cache(self, simname):
         """ Method returns all snapshots for the input simulation 
         that are available in the cache directory. 
 
@@ -444,13 +441,15 @@ class CatalogManager(object):
             Filename of the closest matching snapshot. 
         """
 
-        if len(filename_list)==0:
+        if aph_len(filename_list)==0:
             return None
 
         # First create a list of floats storing the scale factors of each hlist file
         scale_factor_list = []
-        for fname in filename_list:
-            scale_factor = float(self.get_scale_factor_substring(fname))
+        for full_fname in filename_list:
+            fname = os.path.basename(full_fname)
+            scale_factor_substring = self.get_scale_factor_substring(fname)
+            scale_factor = float(scale_factor_substring)
             scale_factor_list.append(scale_factor)
         scale_factor_list = np.array(scale_factor_list)
 
