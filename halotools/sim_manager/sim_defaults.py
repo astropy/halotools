@@ -11,7 +11,7 @@ import numpy as np
 from astropy import cosmology
 
 
-cache_memory_fname_suffix = 'cache_memory.txt'
+cache_memory_fname = 'cache_memory.txt'
 
 raw_halocat_cache_dir = 'pkg_default'
 processed_halocat_cache_dir = 'pkg_default'
