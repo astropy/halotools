@@ -268,6 +268,10 @@ class CatalogManager(object):
         simname : string, optional keyword argument 
             Nickname of the simulation, e.g., `bolshoi`. 
 
+        halo_finder : string, optional keyword argument 
+            Nickname of the halo-finder, e.g., `rockstar` or `bdm`.
+            Default is `rockstar`.  
+
         redshift : float, optional keyword argument 
             Redshift of the requested snapshot.
 
@@ -293,8 +297,12 @@ class CatalogManager(object):
         if 'fname' in kwargs.keys():
             return kwargs['fname']
         else:
+            if 'halo_finder' not in kwargs.keys():
+                halo_finder = sim_defaults.default_halo_finder
+            else:
+                halo_finder = kwargs['halo_finder']
             return self.full_fname_closest_raw_halocat_in_cache(
-                kwargs['simname'], kwargs['redshift'])
+                kwargs['simname'], halo_finder, kwargs['redshift'])
 
     def get_raw_halocat_reader(self, simname):
         pass
@@ -387,9 +395,9 @@ class CatalogManager(object):
             os.system(rezip_command)
 
     def full_fname_closest_raw_halocat_in_cache(
-        self, simname, input_redshift):
+        self, simname, halo_finder, input_redshift):
 
-        filename_list = self.full_fnames_all_raw_halocats_in_cache(simname)
+        filename_list = self.full_fnames_all_raw_halocats_in_cache(simname, halo_finder)
 
         closest_fname = self.find_closest_raw_halocat(
             filename_list, input_redshift)
@@ -403,7 +411,7 @@ class CatalogManager(object):
         return output_full_fname
 
 
-    def full_fnames_all_raw_halocats_in_cache(self, simname):
+    def full_fnames_all_raw_halocats_in_cache(self, simname, halo_finder):
         """ Method returns all snapshots for the input simulation 
         that are available in the cache directory. 
 
@@ -423,13 +431,17 @@ class CatalogManager(object):
         if not os.path.exists(simname_raw_halocat_cache_dir):
             print("No raw halo catalogs exist in cache for simname %s" % simname)
             return
+        catname_raw_halocat_cache_dir = os.path.join(simname_raw_halocat_cache_dir, halo_finder)
+        if not os.path.exists(catname_raw_halocat_cache_dir):
+            print("No %s simulation raw halo catalogs exist for halo-finder %s" % halo_finder)
+            return
 
         file_list = (
-            [ f for f in os.listdir(simname_raw_halocat_cache_dir) 
-            if os.path.isfile(os.path.join(simname_raw_halocat_cache_dir,f)) ]
+            [ f for f in os.listdir(catname_raw_halocat_cache_dir) 
+            if os.path.isfile(os.path.join(catname_raw_halocat_cache_dir,f)) ]
             )
 
-        full_fname_list = [os.path.join(simname_raw_halocat_cache_dir, f) for f in file_list]
+        full_fname_list = [os.path.join(catname_raw_halocat_cache_dir, f) for f in file_list]
 
         return full_fname_list
 
