@@ -44,10 +44,10 @@ scale_factor_difference_tol = 0.05
 Num_ptcl_requirement = 300
 
 raw_halocat_url = {
-	'bolshoi': 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/', 
+	'bolshoi_rockstar': 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/', 
 	'bolshoi_bdm': 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/', 
-	'multidark': 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/', 
-	'consuelo': 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
+	'multidark_rockstar': 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/', 
+	'consuelo_rockstar': 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
 }
 
 
