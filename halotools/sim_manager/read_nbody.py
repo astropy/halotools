@@ -336,8 +336,6 @@ class CatalogManager(object):
         else:
             return halocat_reader
 
- 
-
     def process_raw_halocat(self, input_fname, simname, halo_finder, 
         cuts, output_version_name):
         """ Method reads in a raw halo catalog, makes the desired cuts, 
