@@ -9,10 +9,11 @@ except ImportError:
 
 class RockstarReader(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, input_fname):
 
-    def file_len(self, fname):
+        self.fname = self.unzip_ascii(input_fname)
+
+    def file_len(self):
         """ Compute the number of all rows in fname
 
         Parameters 
@@ -24,13 +25,13 @@ class RockstarReader(object):
         Nrows : int
      
         """
-        with open(fname) as f:
+        with open(self.fname) as f:
             for i, l in enumerate(f):
                 pass
         Nrows = i + 1
         return Nrows
 
-    def header_len(self, fname,header_char='#'):
+    def header_len(self,header_char='#'):
         """ Compute the number of header rows in fname. 
 
         Parameters 
@@ -51,7 +52,7 @@ class RockstarReader(object):
 
         """
         Nheader = 0
-        with open(fname) as f:
+        with open(self.fname) as f:
             for i, l in enumerate(f):
                 if ( (l[0:len(header_char)]==header_char) or (l=="\n") ):
                     Nheader += 1
@@ -60,7 +61,7 @@ class RockstarReader(object):
 
         return Nheader
 
-    def get_header(self, fname, Nrows_header_total=None):
+    def get_header(self, Nrows_header_total=None):
         """ Return the header as a list of strings, 
         one entry per header row. 
 
@@ -79,10 +80,10 @@ class RockstarReader(object):
         """
 
         if Nrows_header_total==None:
-            Nrows_header_total = header_len(fname)
+            Nrows_header_total = header_len(self.fname)
 
         output = []
-        with open(fname) as f:
+        with open(self.fname) as f:
             for i in range(Nrows_header_total):
                 line = f.readline().strip()
                 output.append(line)
@@ -90,13 +91,25 @@ class RockstarReader(object):
         return output
 
     def unzip_ascii(self, fname):
+        """ If the input fname has file extension `.gz`, 
+        then the method uses `gunzip` to decompress it, 
+        and returns the input fname truncated to exclude 
+        the `.gz` extension. If the input fname does not 
+        end in `.gz`, method does nothing besides return 
+        the input fname. 
+        """
         if fname[-3:]=='.gz':
             os.system("gunzip "+fname)
+            return fname[:-3]
+        else:
+            return fname
 
     def rezip_ascii(self, fname):
-        if fname[-3:]=='.gz':
-            fname = fname[:-3]
+        """ Recompresses the halo catalog ascii data, 
+        and returns the input filename appended with `.gz`.  
+        """
         os.system("gzip "+fname)
+        return fname+'.gz'
 
 
     def read_halocat(self, fname, input_column_info, input_halo_cuts=None,
