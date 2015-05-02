@@ -80,7 +80,9 @@ class RockstarReader(object):
         """
 
         if Nrows_header_total==None:
-            Nrows_header_total = header_len(self.fname)
+            Nrows_header_total = self.header_len(self.fname)
+
+        print("Reading the first %i lines of the ascii file" % Nrows_header_total)
 
         output = []
         with open(self.fname) as f:
