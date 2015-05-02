@@ -11,7 +11,7 @@ class RockstarReader(object):
 
     def __init__(self, input_fname):
 
-        self.fname = self.unzip_ascii(input_fname)
+        self.fname = self._unzip_ascii(input_fname)
 
     def file_len(self):
         """ Compute the number of all rows in fname
@@ -90,7 +90,7 @@ class RockstarReader(object):
 
         return output
 
-    def unzip_ascii(self, fname):
+    def _unzip_ascii(self, fname):
         """ If the input fname has file extension `.gz`, 
         then the method uses `gunzip` to decompress it, 
         and returns the input fname truncated to exclude 
@@ -104,7 +104,7 @@ class RockstarReader(object):
         else:
             return fname
 
-    def rezip_ascii(self, fname):
+    def _rezip_ascii(self, fname):
         """ Recompresses the halo catalog ascii data, 
         and returns the input filename appended with `.gz`.  
         """
