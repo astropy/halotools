@@ -43,6 +43,7 @@ scale_factor_difference_tol = 0.05
 
 Num_ptcl_requirement = 300
 
+
 raw_halocat_url = {
 	'bolshoi_rockstar': 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/', 
 	'bolshoipl_rockstar': 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/', 
@@ -50,7 +51,6 @@ raw_halocat_url = {
 	'multidark_rockstar': 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/', 
 	'consuelo_rockstar': 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
 }
-
 
 
 

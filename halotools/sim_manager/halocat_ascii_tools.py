@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-import sim_specs 
+from . import sim_specs, sim_defaults
 
 
 class RockstarReader(object):
@@ -18,6 +18,12 @@ class RockstarReader(object):
         self.catobj = catobj
 
         self.halocat_reader = self.get_raw_halocat_reader()
+
+    def default_mpeak_cut(self, x):
+        return x['mpeak'] > ( 
+            self.catobj.simulation.particle_mass*
+            sim_defaults.Num_ptcl_requirement)
+
 
     def get_raw_halocat_reader(self):
         """ Find and return the class instance that will be used to 
@@ -157,10 +163,43 @@ class RockstarReader(object):
         return fname+'.gz'
 
 
-    def reader(self, dt, cut, Nchunks = 1000):
+    def read_halocat(self, **kwargs):
         """ Reads fname in chunks and returns a structured array
         after applying cuts.
+
+        Parameters 
+        ----------
+        cut : function object, optional keyword argument
+            Function used to determine whether a row of the raw 
+            halo catalog is included in the reduced binary. 
+            Input of the `cut` function must be a structured array 
+            with some subset of the field names of the 
+            halo catalog dtype. Output of the `cut` function must 
+            be a boolean array of length equal to the length of the 
+            input structured array. 
+
+        nchunks : int, optional keyword argument
+            `read_halocat` reads and processes ascii 
+            in chunks at a time, both to improve performance and 
+            so that the entire raw halo catalog need not fit in memory 
+            in order to process it. The total number of chunks to use 
+            can be specified with the `nchunks` argument. Default is 1000. 
+
         """
+
+        if 'cut' in kwargs.keys():
+            cut = kwargs['cut']
+        else:
+            cut = lambda x : np.ones(len(x), dtype=bool)
+            cut.__doc__ = "Trivial function that always returns True"
+
+        if 'nchunks' in kwargs.keys():
+            Nchunks = kwargs['nchunks']
+        else:
+            Nchunks = 1000
+
+        dt = self.halocat_reader.halocat_column_info
+
 
         file_length = self.file_len(self.fname)
         chunksize = file_length / Nchunks
