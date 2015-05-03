@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
 
@@ -256,7 +258,7 @@ class BolshoiPlRockstar(HaloCatSpecs):
 
 	@property 
 	def halocat_column_info(self):
-		
+
 		dt = np.dtype([
 			('scale', 'f4'), 
 			('haloid', 'i8'), 

@@ -3,42 +3,59 @@ import os
 
 from . import sim_specs, sim_defaults
 
+__all__ = ['RockstarReader']
 
 class RockstarReader(object):
 
-    def __init__(self, input_fname, catobj):
+    def __init__(self, input_fname, **kwargs):
 
         if not os.path.isfile(input_fname):
             raise IOError("Input filename %s is not a file" % input_fname)
         self.fname = self._unzip_ascii(input_fname)
 
-        if not isistance(catobj, sim_specs.HaloCatSpecs):
-            raise IOError("Input catalog object %s "
-                "must be a subclass of HaloCatSpecs" % catobj.__name__)
-        self.catobj = catobj
+        if 'simobj' in kwargs.keys():
+            simobj = kwargs['simobj']
+            if not isistance(simobj, sim_specs.HaloCatSpecs):
+                raise IOError("Input catalog object %s "
+                    "must be a subclass of HaloCatSpecs" % simobj.__name__)
+            self.simobj = simobj
+        elif ('simname' in kwargs.keys()) & ('halo_finder' in kwargs.keys()):
+            self.simname = kwargs['simname']
+            self.halo_finder = kwargs['halo_finder']
+            self.simobj = self.get_simobj(self.simname, self.halo_finder)
+        else:
+            raise IOError("Must either pass `simobj` keyword "
+                "to the `RockstarReader` constructor,\n"
+                "or both `simname` and `halo_finder` keywords")
 
-        self.halocat_reader = self.get_raw_halocat_reader()
 
     def default_mpeak_cut(self, x):
+
         return x['mpeak'] > ( 
-            self.catobj.simulation.particle_mass*
+            self.simobj.simulation.particle_mass*
             sim_defaults.Num_ptcl_requirement)
 
 
-    def get_raw_halocat_reader(self):
+    def get_simobj(self, simname, halo_finder):
         """ Find and return the class instance that will be used to 
         convert raw ASCII halo catalog data into a reduced binary.
 
+        Parameters 
+        ----------
+        simname : string 
+            Nickname of the simulation, e.g., `bolshoi`. 
+
+        halo_finder : string 
+            Nickname of the halo-finder that generated the catalog, 
+            e.g., `rockstar`. 
+
         Returns 
         -------
-        halocat_reader : object 
+        simobj : object 
             Class instance of `~halotools.sim_manager.sim_specs.HaloCatSpecs`. 
             Used to read ascii data in the specific format of the 
             `simname` simulation and `halo_finder` halos. 
         """
-        simname = self.catobj.simname
-        halo_finder = self.catobj.halo_finder
-
         class_list = sim_specs.__all__
         parent_class = sim_specs.HaloCatSpecs
 
@@ -48,18 +65,18 @@ class RockstarReader(object):
             if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
                 supported_halocat_classes.append(clobj())
 
-        halocat_reader = None
-        for reader in supported_halocat_classes:
-            if (reader.simname == simname) & (reader.halo_finder == halo_finder):
-                halocat_reader = reader
-        if halocat_reader==None:
-            print("No reader class found for %s simulation and %s halo-finder\n"
+        simobj = None
+        for sim in supported_halocat_classes:
+            if (sim.simname == simname) & (sim.halo_finder == halo_finder):
+                simobj = sim
+        if simobj==None:
+            print("No simulation class found for %s simulation and %s halo-finder\n"
                 "If you want to use Halotools to convert a raw halo catalog into a binary, \n"
                 "you must either use an existing reader class or write your own\n" 
                 % simname, halo_finder)
             return None
         else:
-            return halocat_reader
+            return simobj
 
 
     def file_len(self):
@@ -176,7 +193,8 @@ class RockstarReader(object):
             with some subset of the field names of the 
             halo catalog dtype. Output of the `cut` function must 
             be a boolean array of length equal to the length of the 
-            input structured array. 
+            input structured array. Default is to make a cut on 
+            `mpeak` at 300 particles, using `default_mpeak_cut` method. 
 
         nchunks : int, optional keyword argument
             `read_halocat` reads and processes ascii 
@@ -190,18 +208,16 @@ class RockstarReader(object):
         if 'cut' in kwargs.keys():
             cut = kwargs['cut']
         else:
-            cut = lambda x : np.ones(len(x), dtype=bool)
-            cut.__doc__ = "Trivial function that always returns True"
+            cut = self.default_mpeak_cut
 
         if 'nchunks' in kwargs.keys():
             Nchunks = kwargs['nchunks']
         else:
             Nchunks = 1000
 
-        dt = self.halocat_reader.halocat_column_info
+        dt = self.simobj.halocat_column_info
 
-
-        file_length = self.file_len(self.fname)
+        file_length = self.file_len()
         chunksize = file_length / Nchunks
         chunk = []
         container = []
