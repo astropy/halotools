@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-from . sim_specs import HaloCatSpecs
+import sim_specs 
 
 
 class RockstarReader(object):
@@ -12,10 +12,49 @@ class RockstarReader(object):
             raise IOError("Input filename %s is not a file" % input_fname)
         self.fname = self._unzip_ascii(input_fname)
 
-        if not isistance(catobj, HaloCatSpecs):
+        if not isistance(catobj, sim_specs.HaloCatSpecs):
             raise IOError("Input catalog object %s "
                 "must be a subclass of HaloCatSpecs" % catobj.__name__)
         self.catobj = catobj
+
+        self.halocat_reader = self.get_raw_halocat_reader()
+
+    def get_raw_halocat_reader(self):
+        """ Find and return the class instance that will be used to 
+        convert raw ASCII halo catalog data into a reduced binary.
+
+        Returns 
+        -------
+        halocat_reader : object 
+            Class instance of `~halotools.sim_manager.sim_specs.HaloCatSpecs`. 
+            Used to read ascii data in the specific format of the 
+            `simname` simulation and `halo_finder` halos. 
+        """
+        simname = self.catobj.simname
+        halo_finder = self.catobj.halo_finder
+
+        class_list = sim_specs.__all__
+        parent_class = sim_specs.HaloCatSpecs
+
+        supported_halocat_classes = []
+        for clname in class_list:
+            clobj = getattr(sim_specs, clname)
+            if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
+                supported_halocat_classes.append(clobj())
+
+        halocat_reader = None
+        for reader in supported_halocat_classes:
+            if (reader.simname == simname) & (reader.halo_finder == halo_finder):
+                halocat_reader = reader
+        if halocat_reader==None:
+            print("No reader class found for %s simulation and %s halo-finder\n"
+                "If you want to use Halotools to convert a raw halo catalog into a binary, \n"
+                "you must either use an existing reader class or write your own\n" 
+                % simname, halo_finder)
+            return None
+        else:
+            return halocat_reader
+
 
     def file_len(self):
         """ Compute the number of all rows in fname
