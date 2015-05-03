@@ -3,7 +3,10 @@
 various files used throughout the halotools package. 
 """
 
-__all__ = ['get_halotools_cache_dir','get_catalogs_dir','list_of_catalogs_in_cache']
+__all__ = (
+    ['get_halotools_cache_dir','get_catalogs_dir',
+    'list_of_catalogs_in_cache', 'infer_simulation_from_fname']
+    )
 
 
 import os
@@ -151,7 +154,20 @@ def list_of_catalogs_in_cache(catalog_type='subhalos'):
 
     return [ f.encode('utf-8') for f in listdir(catalog_path) if isfile(join(catalog_path,f)) ]
 
+def infer_simulation_from_fname(fname):
 
+    halocat_path = os.path.dirname(fname)
+    halotools_cache_dir = get_halotools_cache_dir()
+    subdir_list = [x[0] for x in os.walk(halotools_cache_dir)]
+    if halocat_path not in subdir_list:
+        print("Input fname is not a subdirectory of "
+            "the Halotools cache: \n cannot infer simulations from external sources")
+        return None
+    else:
+        halo_finder = os.path.basename(halocat_path)
+        simulation_path = os.path.abspath(os.path.join(halocat_path, os.pardir))
+        simname = os.path.basename(simulation_path)
+        return simname, halo_finder
 
 
 
