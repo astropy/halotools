@@ -337,31 +337,11 @@ class CatalogManager(object):
 
         """
 
-        # First determine the simname from input_fname
-        idx1 = len(input_fname) - input_fname[::-1].index('/') - 1
-        temp_substring = input_fname[:idx1]
-        idx2 = len(temp_substring) - temp_substring[::-1].index('/') - 1
-        simname = temp_substring[idx2+1:]
+        reader = RockstarReader(input_fname, simname=simname, halo_finder=halo_finder)
+        arr = reader.read_halocat(cut=cuts)
+        reader._compress_ascii()
 
-        raw_halocat_cache_dir = configuration.get_catalogs_dir('raw_halo_catalog')
-        simname_raw_halocat_cache_dir = os.path.join(raw_halocat_cache_dir, simname)
-        raw_halocat_full_fname = os.path.join(simname_raw_halocat_cache_dir, input_fname)
-        print("\nProcessing halo catalog with "
-            "the following filename:\n %s \n" %raw_halocat_full_fname)
-
-        manually_decompressed = False
-        if input_fname[-3:] == '.gz':
-            unzip_command = 'gunzip '+raw_halocat_full_fname
-            os.system(unzip_command)
-            raw_halocat_full_fname = raw_halocat_full_fname[:-3]
-            manually_decompressed = True
-
-
-        ### HALOCAT PROCESSING LINES HERE###
-
-        if manually_decompressed == True:
-            rezip_command = 'gzip '+raw_halocat_full_fname
-            os.system(rezip_command)
+        return arr
 
     def full_fname_closest_raw_halocat_in_cache(
         self, simname, halo_finder, input_redshift):
@@ -752,7 +732,8 @@ class RockstarReader(object):
 
         if not os.path.isfile(input_fname):
             raise IOError("Input filename %s is not a file" % input_fname)
-        self.fname = self._unzip_ascii(input_fname)
+        self.fname = input_fname
+        self._uncompress_ascii()
 
         if 'simobj' in kwargs.keys():
             simobj = kwargs['simobj']
@@ -899,7 +880,7 @@ class RockstarReader(object):
 
         return output
 
-    def _unzip_ascii(self, fname):
+    def _uncompress_ascii(self):
         """ If the input fname has file extension `.gz`, 
         then the method uses `gunzip` to decompress it, 
         and returns the input fname truncated to exclude 
@@ -907,18 +888,23 @@ class RockstarReader(object):
         end in `.gz`, method does nothing besides return 
         the input fname. 
         """
-        if fname[-3:]=='.gz':
-            os.system("gunzip "+fname)
-            return fname[:-3]
+        if self.fname[-3:]=='.gz':
+            print("...uncompressing ASCII data")
+            os.system("gunzip "+self.fname)
+            self.fname = self.fname[:-3]
         else:
-            return fname
+            pass
 
-    def _rezip_ascii(self, fname):
+    def _compress_ascii(self):
         """ Recompresses the halo catalog ascii data, 
         and returns the input filename appended with `.gz`.  
         """
-        os.system("gzip "+fname)
-        return fname+'.gz'
+        if self.fname[-3:]!='.gz':
+            print("...compressing ASCII data")
+            os.system("gzip "+self.fname)
+            self.fname = self.fname + '.gz'
+        else:
+            pass
 
 
     def read_halocat(self, **kwargs):
