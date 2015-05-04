@@ -4,8 +4,7 @@ various files used throughout the halotools package.
 """
 
 __all__ = (
-    ['get_halotools_cache_dir','get_catalogs_dir',
-    'list_of_catalogs_in_cache', 'infer_simulation_from_fname']
+    ['get_halotools_cache_dir','get_catalogs_dir','infer_simulation_from_fname']
     )
 
 
@@ -129,30 +128,6 @@ def get_catalogs_dir(catalog_type, **kwargs):
                 defensively_create_dir(halo_finder_dirname)
                 return halo_finder_dirname
 
-
-def list_of_catalogs_in_cache(catalog_type='subhalos'):
-    """ Returns a list of strings of filenames pointing to every 
-    catalog currently in the cache directory.
-
-    Parameters
-    ----------
-    catalog_type : string, optional
-        String giving the type of catalog. Should be 'particles' or 'subhalos'.
-
-    Returns
-    -------
-    file_list : array_like
-        List of strings. Each entry corresponds to a filename of a catalog in 
-        the cache directory.
-
-    """
-
-    from os import listdir
-    from os.path import isfile, join
-
-    catalog_path = get_catalogs_dir(catalog_type)
-
-    return [ f.encode('utf-8') for f in listdir(catalog_path) if isfile(join(catalog_path,f)) ]
 
 def infer_simulation_from_fname(fname):
 
