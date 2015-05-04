@@ -224,7 +224,7 @@ class CatalogManager(object):
             # Check the default location url for the halo catalog 
             # that most closely matches the requested redshift
             list_of_available_snapshots = self.retrieve_available_raw_halocats(simname, halo_finder)
-            closest_snapshot_fname = self.find_closest_raw_halocat(
+            closest_snapshot_fname = self.find_closest_halocat(
                 list_of_available_snapshots, input_redshift)
             scale_factor_of_closest_match = float(
                 self.get_scale_factor_substring(closest_snapshot_fname)
@@ -421,9 +421,10 @@ class CatalogManager(object):
     def full_fname_closest_raw_halocat_in_cache(
         self, simname, halo_finder, input_redshift):
 
-        filename_list = self.full_fnames_all_raw_halocats_in_cache(simname, halo_finder)
+        filename_list = self.full_fnames_in_cache(
+            'raw_halos', simname=simname, halo_finder=halo_finder)
 
-        closest_fname = self.find_closest_raw_halocat(
+        closest_fname = self.find_closest_halocat(
             filename_list, input_redshift)
         if closest_fname == None:
             return None
@@ -435,12 +436,16 @@ class CatalogManager(object):
         return output_full_fname
 
 
-    def full_fnames_all_raw_halocats_in_cache(self, **kwargs):
+    def full_fnames_in_cache(self, catalog_type, **kwargs):
         """ Method returns the filenames of all snapshots 
         in the Halotools cache directory that match the input specifications. 
 
         Parameters 
         ----------
+        catalog_type : string
+            String giving the type of catalog. 
+            Should be 'particles', 'halos', or 'raw_halos'. 
+
         simname : string, optional
             Nickname of the simulation, e.g. `bolshoi`. 
 
@@ -460,14 +465,14 @@ class CatalogManager(object):
                     file_list.append(os.path.join(path,name))
             return file_list
 
-        catalog_dirname = configuration.get_catalogs_dir('raw_halos', **kwargs)
+        catalog_dirname = configuration.get_catalogs_dir(catalog_type, **kwargs)
 
         return find_files(catalog_dirname)
 
 
-    def find_closest_raw_halocat(self, filename_list, input_redshift):
-        """ Method searches the url where the ``simname`` halo catalogs are stored, 
-        and returns the filename of the closest matching snapshot to ``input_redshift``. 
+    def find_closest_halocat(self, filename_list, input_redshift):
+        """ Method searches `filename_list` and returns the filename 
+        of the closest matching snapshot to ``input_redshift``. 
 
         Parameters 
         ----------
@@ -682,6 +687,11 @@ class CatalogManager(object):
             softening = 1.0
 
         return Lbox, particle_mass, softening 
+
+    def load_halo_catalog(self, **kwargs):
+
+        simname = kwargs['simname']
+        halo_finder = kwargs['halo_finder']
 
 
     def load_catalog(self,catalog_type,
