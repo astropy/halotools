@@ -46,7 +46,7 @@ def get_catalogs_dir(catalog_type, **kwargs):
 
     Parameters
     ----------
-    catalog_type : string, optional
+    catalog_type : string
         String giving the type of catalog. 
         Should be 'particles', 'subhalos', or 'raw_halos'. 
 

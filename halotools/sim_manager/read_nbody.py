@@ -11,6 +11,7 @@ __all__=['ProcessedSnapshot','CatalogManager', 'RockstarReader']
 
 import numpy as np
 import os, sys, warnings, urllib2, fnmatch
+import pickle
 
 HAS_SOUP = False
 try:
@@ -25,6 +26,14 @@ try:
     HAS_REQUESTS = True
 except:
     pass
+
+HAS_H5PY = False
+try:
+    import h5py
+    HAS_H5PY = True
+except:
+    pass
+
 
 from astropy.io import fits as fits
 from astropy.table import Table
@@ -310,7 +319,7 @@ class CatalogManager(object):
                 kwargs['simname'], halo_finder, kwargs['redshift'])
 
 
-    def process_raw_halocat(self, input_fname, simname, halo_finder, cuts):
+    def process_raw_halocat(self, input_fname, simname, halo_finder, cuts_funcobj):
         """ Method reads in raw halo catalog ASCII data, makes the desired cuts, 
         and returns a numpy structured array of the rows passing the cuts. 
 
@@ -325,9 +334,9 @@ class CatalogManager(object):
         halo_finder : string 
             Nickname of the halo-finder, e.g., `rockstar`. 
 
-        cuts : function object
+        cuts_funcobj : function object
             Function used to apply cuts to the rows of the ASCII data. 
-            `cuts` should accept a length-Nrows numpy structured array as input, 
+            `cuts_funcobj` should accept a length-Nrows numpy structured array as input, 
             and return a length-Nrows boolean array.
 
         Returns 
@@ -338,10 +347,41 @@ class CatalogManager(object):
         """
 
         reader = RockstarReader(input_fname, simname=simname, halo_finder=halo_finder)
-        arr = reader.read_halocat(cut=cuts)
+        arr = reader.read_halocat(cuts_funcobj=cuts_funcobj)
         reader._compress_ascii()
 
         return arr
+
+    def store_processed_halocat(self, catalog, uncut_catalog_fname, simname, halo_finder, 
+        cuts_funcobj, version_name, overwrite=False, **kwargs):
+
+        if HAS_H5PY==False:
+            raise ImportError("Must have h5py installed to use the "
+                "store_processed_halocat method")
+            return 
+
+        if 'output_loc' in kwargs.keys():
+            output_loc = kwargs['output_loc']
+        else:
+            output_loc = configuration.get_catalogs_dir(
+                'halos', simname=simname, halo_finder=halo_finder)
+
+        uncut_catalog_fname = os.path.basename(uncut_catalog_fname)
+        if uncut_catalog_fname[-3:] == '.gz':
+            uncut_catalog_fname = uncut_catalog_fname[:-3]
+
+        output_fname = uncut_catalog_fname + '.' + version_name + '.hdf5'
+        output_full_fname = os.path.join(output_loc, output_fname)
+        t = Table(catalog)
+        print("Storing reduced halo catalog in the following location:\n" + 
+            output_full_fname)
+        t.write(output_full_fname, path='halos', overwrite=overwrite)
+
+        f = h5py.File(output_full_fname)
+        pickled_cuts_funcobj = pickle.dumps(cuts_funcobj, protocol = 0)
+        f.attrs['halocat_exact_cuts'] = pickled_cuts_funcobj
+        f.close()
+
 
     def full_fname_closest_raw_halocat_in_cache(
         self, simname, halo_finder, input_redshift):
@@ -913,7 +953,7 @@ class RockstarReader(object):
 
         Parameters 
         ----------
-        cut : function object, optional keyword argument
+        cuts_funcobj : function object, optional keyword argument
             Function used to determine whether a row of the raw 
             halo catalog is included in the reduced binary. 
             Input of the `cut` function must be a structured array 
@@ -932,10 +972,10 @@ class RockstarReader(object):
 
         """
 
-        if 'cut' in kwargs.keys():
-            cut = kwargs['cut']
+        if 'cuts_funcobj' in kwargs.keys():
+            cuts_funcobj = kwargs['cuts_funcobj']
         else:
-            cut = self.default_mpeak_cut
+            cuts_funcobj = self.default_mpeak_cut
 
         if 'nchunks' in kwargs.keys():
             Nchunks = kwargs['nchunks']
@@ -957,11 +997,11 @@ class RockstarReader(object):
         
             if (linenum % chunksize == 0) & (linenum > 0):        
                 a = np.array(chunk, dtype = dt)
-                container.append(a[cut(a)])
+                container.append(a[cuts_funcobj(a)])
                 chunk = []
     #Now for the final chunk missed by the above syntax
         a = np.array(chunk, dtype = dt)
-        container.append(a[cut(a)])
+        container.append(a[cuts_funcobj(a)])
 
     # Bundle up all array chunks into a single array
         for chunk in container:
