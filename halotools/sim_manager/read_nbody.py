@@ -161,8 +161,7 @@ class CatalogManager(object):
             '_particles.fits')
 
 
-    def download_raw_halocat(self, simname, halo_finder, input_redshift, 
-        dz_tol=0.1, download_loc='halotools_cache', overwrite=False):
+    def download_raw_halocat(self, simname, halo_finder, input_redshift, **kwargs):
         """ Method to download publicly available ascii data of 
         raw halo catalog from web location. 
 
@@ -184,9 +183,14 @@ class CatalogManager(object):
             some available snapshot before issuing a warning. Default value is 0.1. 
 
         download_loc : string, optional
-            Determines where the raw halo catalog will be stored. Default is the 
-            halotools cache directory. Any value besides 'halotools_cache' 
-            will be interpreted as an absolute path of the file being downloaded.
+            Absolute pathname of where the raw halo catalog will be stored. 
+            Default is the halotools cache directory. 
+
+        url : string, optional
+            Web location of the halo catalog. Default behavior is for Halotools to use 
+            pre-determined locations for the supported catalogs. If providing a url, 
+            you must specify the full web location and filename, 
+            e.g., `www.some.url/some.fname.dat`. 
 
         overwrite : boolean, optional
             If a file with the same filename already exists 
@@ -198,28 +202,37 @@ class CatalogManager(object):
             print("Must have BeautifulSoup installed to use Halotools Catalog Manager")
             return 
 
-        # Check the url for the (unprocessed) halo catalog 
-        # that most closely matches the requested redshift
-        list_of_available_sims = self.retrieve_available_raw_halocats(simname, halo_finder)
-        closest_snapshot_fname = self.find_closest_raw_halocat(
-            list_of_available_sims, input_redshift)
-        scale_factor_of_closest_match = float(
-            self.get_scale_factor_substring(
-            closest_snapshot_fname))
-        redshift_of_closest_match = (1./scale_factor_of_closest_match) - 1
+        if 'dz_tol' in kwargs.keys():
+            dz_tol = kwargs['dz_tol']
+        else:
+            dz_tol = 0.1
 
-        if abs(redshift_of_closest_match - input_redshift) > dz_tol:
-            msg = (
-                "No raw %s halo catalog has \na redshift within %.2f " + 
-                "of the input_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+        if 'url' in kwargs.keys():
+            url = kwargs['url']
+        else:
+            # Check the default location url for the halo catalog 
+            # that most closely matches the requested redshift
+            list_of_available_snapshots = self.retrieve_available_raw_halocats(simname, halo_finder)
+            closest_snapshot_fname = self.find_closest_raw_halocat(
+                list_of_available_snapshots, input_redshift)
+            scale_factor_of_closest_match = float(
+                self.get_scale_factor_substring(closest_snapshot_fname)
                 )
-            print(msg % (simname, dz_tol, input_redshift, redshift_of_closest_match))
-            return 
+            redshift_of_closest_match = (1./scale_factor_of_closest_match) - 1
+            if abs(redshift_of_closest_match - input_redshift) > dz_tol:
+                msg = (
+                    "No raw %s halo catalog has \na redshift within %.2f " + 
+                    "of the input_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                    )
+                print(msg % (simname, dz_tol, input_redshift, redshift_of_closest_match))
+                return 
+            else:
+                key = simname+'_'+halo_finder
+                url = sim_defaults.raw_halocat_url[key]+closest_snapshot_fname
 
-        key = simname+'_'+halo_finder
-        url = sim_defaults.raw_halocat_url[key]+closest_snapshot_fname
 
-        if download_loc != 'halotools_cache':
+        if 'download_loc' in kwargs.keys():
+            download_loc = kwargs['download_loc']
             # We were given an explicit path to store the catalog
             # Check that this path actually exists, and if so, use it 
             if not os.path.exists(download_loc):
@@ -232,11 +245,10 @@ class CatalogManager(object):
             # We were not given an explicit path, so use the default Halotools cache dir
             cache_dirname = configuration.get_catalogs_dir('raw_halos', 
                 simname=simname, halo_finder=halo_finder)
-
             output_fname = os.path.join(cache_dirname, closest_snapshot_fname)
 
         if os.path.isfile(output_fname):
-            if overwrite==True:
+            if ('overwrite' in kwargs.keys()) & (kwargs['overwrite'] ==True):
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
             else:
                 raise IOError("The following filename already exists: \n%s\n"
