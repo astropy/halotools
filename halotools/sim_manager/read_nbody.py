@@ -10,7 +10,7 @@ __all__=['ProcessedSnapshot','CatalogManager']
 #                        unicode_literals)
 
 import numpy as np
-import os, sys, warnings, urllib2
+import os, sys, warnings, urllib2, fnmatch
 
 HAS_SOUP = False
 try:
@@ -456,23 +456,34 @@ class CatalogManager(object):
         scale_factor_substring = fname[first_index:last_index]
         return scale_factor_substring
 
-    def retrieve_available_raw_halocats(self, simname, halo_finder):
-        """ Method returns all snapshots for the input simulation 
+    def retrieve_available_raw_halocats(self, simname, halo_finder, file_pattern = '*hlist_*'):
+        """ Method searches the appropriate web location and 
+        returns a list of the filenames of all relevant 
+        raw halo catalogs that are available for download. 
+
         that are available at the host url. 
 
         Parameters 
         ----------
         simname : string 
-            Nickname of the simulation, e.g., `bolshoi`. 
+            Nickname of the simulation, e.g., `bolshoi` or `bolshoipl`. 
 
         halo_finder : string 
             Nickname of the halo-finder that generated the catalog, 
-            e.g., `rockstar`. 
+            e.g., `rockstar` or `bdm`. 
+
+        file_pattern : string, optional 
+            String used to filter the list of filenames at the url so that 
+            only files matching the requested pattern are returned. 
+            Syntax is the same as running a grep search on a regular expression, 
+            e.g., file_pattern = `*my_filter*`. Default is set to `*hlist_*`.
+            Should be set to an empty string if no filtering is desired.  
 
         Returns 
         -------
-        file_list : list 
-            List of strings of all raw catalogs available for the requested simulation. 
+        output : list 
+            List of strings of all raw halo catalogs available for download 
+            for the requested simulation. 
 
         Notes 
         ----- 
@@ -490,11 +501,14 @@ class CatalogManager(object):
         expected_filename_prefix = 'hlist_'
         file_list = []
         for a in soup.find_all('a'):
-            link = a['href']
-            if link[0:len(expected_filename_prefix)]==expected_filename_prefix:
-                file_list.append(a['href'])
+            file_list.append(a['href'])
 
-        return file_list
+        if file_pattern != '':
+            output = fnmatch.filter(file_list, file_pattern)
+        else:
+            output = file_list
+
+        return output
 
     def retrieve_catalog_filenames_from_url(self,url,catalog_type='subhalos'):
         """ Get the full list of filenames available at the provided url.
