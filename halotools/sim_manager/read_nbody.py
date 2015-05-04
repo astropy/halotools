@@ -354,6 +354,34 @@ class CatalogManager(object):
 
     def store_processed_halocat(self, catalog, uncut_catalog_fname, simname, halo_finder, 
         cuts_funcobj, version_name, overwrite=False, **kwargs):
+        """
+        Method stores an hdf5 binary of the reduced halo catalog. 
+
+        Parameters 
+        ----------
+        catalog : structured array 
+            Numpy array of halo data. 
+
+        uncut_catalog_fname : string 
+            Filename of the location of the uncut halo catalog ASCII data. 
+
+        simname : string 
+            Nickname of the simulation, e.g., `bolshoi`. 
+
+        halo_finder : string 
+            Nickname of the halo-finder, e.g., `rockstar`. 
+
+        cuts_funcobj : function object 
+            Function used to apply cuts to the original halo catalog. 
+
+        version_name : string 
+            String that will be appended to `uncut_catalog_fname` to create a new 
+            filename for the cut halo catalog. 
+
+        overwrite : bool, optional 
+            If True, and if there exists a catalog with the same filename in the 
+            output location, the existing catalog will be overwritten. Default is False.  
+        """
 
         if HAS_H5PY==False:
             raise ImportError("Must have h5py installed to use the "
