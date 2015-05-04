@@ -357,39 +357,40 @@ class CatalogManager(object):
         return output_full_fname
 
 
-    def full_fnames_all_raw_halocats_in_cache(self, simname, halo_finder):
-        """ Method returns all snapshots for the input simulation 
-        that are available in the cache directory. 
+    def full_fnames_all_raw_halocats_in_cache(self, **kwargs):
+        """ Method returns the filenames of all snapshots 
+        in the Halotools cache directory that match the input specifications. 
 
         Parameters 
         ----------
-        simname : string 
-            Nickname of the simulation. Must match one of the keys in 
-            the ``raw_halocat_url`` dictionary stored in the ``sim_defaults`` module. 
+        simname : string, optional
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. `rockstar`. 
 
         Returns 
         -------
         file_list : list 
             List of strings of all raw catalogs in the cache directory. 
         """
-        catalog_dirname = configuration.get_catalogs_dir('raw_halos')
-        simname_raw_halocat_cache_dir = os.path.join(catalog_dirname, simname)
-        if not os.path.exists(simname_raw_halocat_cache_dir):
-            print("No raw halo catalogs exist in cache for simname %s" % simname)
-            return
-        catname_raw_halocat_cache_dir = os.path.join(simname_raw_halocat_cache_dir, halo_finder)
-        if not os.path.exists(catname_raw_halocat_cache_dir):
-            print("No %s simulation raw halo catalogs exist for halo-finder %s" % halo_finder)
-            return
+        
+        def find_files(catalog_dirname):
+            file_list = []
+            for path, dirlist, filelist in os.walk(catalog_dirname):
+                for name in fnmatch.filter(filelist,'*hlist_*'):
+                    file_list.append(os.path.join(path,name))
+            return file_list
 
-        file_list = (
-            [ f for f in os.listdir(catname_raw_halocat_cache_dir) 
-            if os.path.isfile(os.path.join(catname_raw_halocat_cache_dir,f)) ]
-            )
+        catalog_dirname = configuration.get_catalogs_dir('raw_halos', **kwargs)
 
-        full_fname_list = [os.path.join(catname_raw_halocat_cache_dir, f) for f in file_list]
+#        file_list = (
+#            [ f for f in os.listdir(catname_raw_halocat_cache_dir) 
+#            if os.path.isfile(os.path.join(catname_raw_halocat_cache_dir,f)) ]
+#            )
+#        full_fname_list = [os.path.join(catname_raw_halocat_cache_dir, f) for f in file_list]
 
-        return full_fname_list
+        return find_files(catalog_dirname)
 
 
     def find_closest_raw_halocat(self, filename_list, input_redshift):
