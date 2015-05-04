@@ -381,6 +381,11 @@ class CatalogManager(object):
         overwrite : bool, optional 
             If True, and if there exists a catalog with the same filename in the 
             output location, the existing catalog will be overwritten. Default is False.  
+
+        Returns 
+        -------
+        output_full_fname : string 
+            Filename (including absolute path) to the output hdf5 file. 
         """
 
         if HAS_H5PY==False:
@@ -409,6 +414,8 @@ class CatalogManager(object):
         pickled_cuts_funcobj = pickle.dumps(cuts_funcobj, protocol = 0)
         f.attrs['halocat_exact_cuts'] = pickled_cuts_funcobj
         f.close()
+
+        return output_full_fname
 
 
     def full_fname_closest_raw_halocat_in_cache(
