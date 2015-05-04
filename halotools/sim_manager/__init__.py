@@ -5,4 +5,3 @@ from __future__ import (absolute_import, division, print_function,
 from .read_nbody import *
 from .generate_random_sim import *
 from .configuration import *
-from .halocat_ascii_tools import *

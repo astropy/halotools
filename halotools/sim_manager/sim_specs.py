@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from . import sim_defaults 
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
 
@@ -12,6 +14,8 @@ __all__ = (
 	'HaloCatSpecs', 'BolshoiRockstar', 'BolshoiPlRockstar', 
 	'BolshoiBdm', 'MultiDarkRockstar', 'ConsuleoRockstar']
 	)
+
+
 
 
 ######################################################
