@@ -309,11 +309,31 @@ class CatalogManager(object):
             return self.full_fname_closest_raw_halocat_in_cache(
                 kwargs['simname'], halo_finder, kwargs['redshift'])
 
-    def process_raw_halocat(self, input_fname, simname, halo_finder, 
-        cuts, output_version_name):
-        """ Method reads in a raw halo catalog, makes the desired cuts, 
-        and stores the reduced catalog as an hdf5 file in the halo catalog 
-        cache directory.
+    def process_raw_halocat(self, input_fname, simname, halo_finder, cuts):
+        """ Method reads in raw halo catalog ASCII data, makes the desired cuts, 
+        and returns a numpy structured array of the rows passing the cuts. 
+
+        Parameters 
+        ----------
+        input_fname : string 
+            filename (including absolute path) where the ASCII data are stored. 
+
+        simname : string 
+            nickname of the simulation, e.g., `bolshoipl`. 
+
+        halo_finder : string 
+            Nickname of the halo-finder, e.g., `rockstar`. 
+
+        cuts : function object
+            Function used to apply cuts to the rows of the ASCII data. 
+            `cuts` should accept a length-Nrows numpy structured array as input, 
+            and return a length-Nrows boolean array.
+
+        Returns 
+        -------
+        arr : array 
+            Structured numpy array storing all rows passing the cuts. 
+        
         """
 
         # First determine the simname from input_fname
