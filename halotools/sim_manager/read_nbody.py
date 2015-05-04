@@ -315,7 +315,7 @@ class CatalogManager(object):
                 halo_finder = sim_defaults.default_halo_finder
             else:
                 halo_finder = kwargs['halo_finder']
-            return self.full_fname_closest_raw_halocat_in_cache(
+            return self.full_fname_closest_halocat_in_cache('raw_halos', 
                 kwargs['simname'], halo_finder, kwargs['redshift'])
 
 
@@ -418,23 +418,22 @@ class CatalogManager(object):
         return output_full_fname
 
 
-    def full_fname_closest_raw_halocat_in_cache(
-        self, simname, halo_finder, input_redshift):
+    def full_fname_closest_halocat_in_cache(
+        self, catalog_type, simname, halo_finder, input_redshift):
 
         filename_list = self.full_fnames_in_cache(
-            'raw_halos', simname=simname, halo_finder=halo_finder)
+            catalog_type, simname=simname, halo_finder=halo_finder)
 
         closest_fname = self.find_closest_halocat(
             filename_list, input_redshift)
         if closest_fname == None:
             return None
 
-        dirname = configuration.get_catalogs_dir('raw_halos', 
+        dirname = configuration.get_catalogs_dir(catalog_type, 
             simname=simname, halo_finder=halo_finder)
         output_full_fname = os.path.join(dirname, closest_fname)
 
         return output_full_fname
-
 
     def full_fnames_in_cache(self, catalog_type, **kwargs):
         """ Method returns the filenames of all snapshots 
@@ -692,6 +691,12 @@ class CatalogManager(object):
 
         simname = kwargs['simname']
         halo_finder = kwargs['halo_finder']
+        redshift = kwargs['redshift']
+
+        fname = self.full_fname_closest_halocat_in_cache(
+            'halos', simname, halo_finder, redshift)
+
+        return Table.read(fname, path='halos')
 
 
     def load_catalog(self,catalog_type,
