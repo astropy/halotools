@@ -270,6 +270,7 @@ class CatalogManager(object):
             List of strings storing the filenames of all available halo catalogs. 
 
         """
+
         halocat_obj = get_halocat_obj(simname, halo_finder)
 
         if location == 'web':
@@ -286,10 +287,13 @@ class CatalogManager(object):
 
             fname_list = []
             for (dirpath, dirnames, filenames) in os.walk(dirname):
-                fname_list.extend(filenames)
+                matching_fnames = fnmatch.filter(filenames, halocat_obj.halocat_fname_pattern)
+                for f in matching_fnames:
+                    fname_list.append(os.path.join(dirname,f))
             return fname_list
 
-    def download_raw_halocat(self, simname, halo_finder, input_redshift, **kwargs):
+    def download_raw_halocat(self, simname, halo_finder, input_redshift, 
+        overwrite = False, **kwargs):
         """ Method to download publicly available ascii data of 
         raw halo catalog from web location. 
 
@@ -356,16 +360,28 @@ class CatalogManager(object):
                     "of raw halo catalog does not exist" % download_loc)
             else:
                 output_fname = os.path.join(download_loc, closest_snapshot_fname)
-                self.update_list_of_previously_used_dirnames(download_loc)
+                #self.update_list_of_previously_used_dirnames(download_loc)
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
             cache_dirname = configuration.get_catalogs_dir('raw_halos', 
                 simname=simname, halo_finder=halo_finder)
-            output_fname = os.path.join(cache_dirname, closest_snapshot_fname)
+            download_loc = cache_dirname
+            output_fname = os.path.join(download_loc, closest_snapshot_fname)
 
-        if os.path.isfile(output_fname):
-            if ('overwrite' in kwargs.keys()) & (kwargs['overwrite'] ==True):
+        existing_catalogs = self.available_snapshots(
+            download_loc, 'raw_halos',simname, halo_finder)
+        if output_fname[-3:] == '.gz':
+            file_pattern = '*'+os.path.basename(output_fname[:-3])+'*'
+        else:
+            file_pattern = '*'+os.path.basename(output_fname)+'*'
+        matching_catalogs = fnmatch.filter(existing_catalogs, file_pattern)
+
+        if len(matching_catalogs) > 0:
+            if overwrite ==True:
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
+                for file_to_delete in matching_catalogs:
+                    fname_to_delete = os.path.join(download_loc, file_to_delete)
+                    os.system("rm "+fname_to_delete)
             else:
                 raise IOError("The following filename already exists: \n%s\n"
                     "If you really want to overwrite the file, \n"
@@ -374,59 +390,7 @@ class CatalogManager(object):
 
         download_file_from_url(url, output_fname)
 
-    def locate_raw_halocat(self, **kwargs):
-        """ Return full path to the requested raw halo catalog. 
-
-        Parameters 
-        ----------
-        fname : string, optional keyword argument 
-            Absolute pathname to the raw halo catalog. 
-            If not passed, must pass simname and redshift 
-            keyword arguments.
-
-        simname : string, optional keyword argument 
-            Nickname of the simulation, e.g., `bolshoi`. 
-
-        halo_finder : string, optional keyword argument 
-            Nickname of the halo-finder, e.g., `rockstar` or `bdm`.
-            Default is `rockstar`.  
-
-        redshift : float, optional keyword argument 
-            Redshift of the requested snapshot.
-
-        Returns 
-        -------
-        halocat_fname : string 
-            Absolute path to raw halo catalog
-
-        Notes 
-        -----
-        If `fname`, `simname`, and `redshift` arguments are all supplied, 
-        method will return `fname`. 
-
-        """
-
-        # First check that we were provided sufficient inputs
-        if ('fname' not in kwargs.keys()):
-            if ('redshift' not in kwargs.keys()):
-                msg = ("If not passing an absolute filename to locate_raw_halocat,\n"
-                    "must at least pass a redshift")
-                raise IOError(msg)
-
-        if 'fname' in kwargs.keys():
-            return kwargs['fname']
-        else:
-            if 'halo_finder' not in kwargs.keys():
-                halo_finder = sim_defaults.default_halo_finder
-            else:
-                halo_finder = kwargs['halo_finder']
-            if 'simname' not in kwargs.keys():
-                simname = sim_defaults.default_simulation_name
-            else:
-                simname = kwargs['simname']
-            return self.full_fname_closest_halocat_in_cache('raw_halos', 
-                simname, halo_finder, kwargs['redshift'])
-
+        return output_fname
 
     def process_raw_halocat(self, input_fname, simname, halo_finder, cuts_funcobj):
         """ Method reads in raw halo catalog ASCII data, makes the desired cuts, 
@@ -538,10 +502,10 @@ class CatalogManager(object):
             String giving the type of catalog. 
             Should be `halos`, or `raw_halos`. 
 
-        simname : string, optional
+        simname : string
             Nickname of the simulation, e.g. `bolshoi`. 
 
-        halo_finder : string, optional
+        halo_finder : string
             Nickname of the halo-finder, e.g. `rockstar`. 
 
         Returns 
@@ -551,101 +515,20 @@ class CatalogManager(object):
             including absolute path. 
         """
 
-        filename_list = self.full_fnames_in_cache(
-            catalog_type, simname=simname, halo_finder=halo_finder)
+        filename_list = self.available_snapshots('cache', 
+            catalog_type, simname, halo_finder)
+        
         halocat_obj = get_halocat_obj(simname, halo_finder)
 
         closest_fname = halocat_obj.closest_halocat(
             filename_list, input_redshift, return_redshift=False)
+
         if closest_fname == None:
             print("No halo catalogs found in cache for simname = %s "
                 " and halo-finder = %s" % (simname, halo_finder))
             return None
         else:
             return closest_fname
-
-    def full_fnames_in_cache(self, catalog_type, **kwargs):
-        """ Method returns the filenames of all snapshots 
-        in the Halotools cache directory that match the input specifications. 
-
-        Parameters 
-        ----------
-        catalog_type : string
-            String giving the type of catalog. 
-            Should be 'particles', 'halos', or 'raw_halos'. 
-
-        simname : string, optional
-            Nickname of the simulation, e.g. `bolshoi`. 
-
-        halo_finder : string, optional
-            Nickname of the halo-finder, e.g. `rockstar`. 
-
-        Returns 
-        -------
-        file_list : list 
-            List of strings of all raw catalogs in the cache directory. 
-        """
-        
-        def find_files(catalog_dirname):
-            file_list = []
-            for path, dirlist, filelist in os.walk(catalog_dirname):
-                for name in fnmatch.filter(filelist,'*hlist_*'):
-                    file_list.append(os.path.join(path,name))
-            return file_list
-
-        catalog_dirname = configuration.get_catalogs_dir(catalog_type, **kwargs)
-
-        return find_files(catalog_dirname)
-
-
-    def find_closest_halocat(self, simname, halo_finder, filename_list, input_redshift):
-        """ Method searches `filename_list` and returns the filename 
-        of the closest matching snapshot to ``input_redshift``. 
-
-        Parameters 
-        ----------
-        simname : string 
-            Nickname of the simulation, e.g. `bolshoi`. 
-
-        halo_finder : string 
-            Nickname of the halo-finder, e.g. `rockstar`. 
-
-        filename_list : list of strings
-            Each entry of the list must be a filename of the type generated by Rockstar. 
-
-        input_redshift : float
-            Redshift of the requested snapshot.
-
-        Returns
-        -------
-        output_fname : string 
-            Filename of the closest matching snapshot. 
-        """
-
-        if aph_len(filename_list)==0:
-            return None
-
-        halocat_obj = get_halocat_obj(simname, halo_finder)
-
-        # First create a list of floats storing the scale factors of each hlist file
-        scale_factor_list = []
-        for full_fname in filename_list:
-            fname = os.path.basename(full_fname)
-            scale_factor_substring = halocat_obj.get_scale_factor_substring(fname)
-            scale_factor = float(scale_factor_substring)
-            scale_factor_list.append(scale_factor)
-        scale_factor_list = np.array(scale_factor_list)
-
-        # Now use the array utils module to determine 
-        # which scale factor is the closest
-        input_scale_factor = 1./(1. + input_redshift)
-        idx_closest_catalog = find_idx_nearest_val(scale_factor_list, input_scale_factor)
-
-        closest_scale_factor = scale_factor_list[idx_closest_catalog]
-
-        output_fname = filename_list[idx_closest_catalog]
-
-        return output_fname
 
     def update_list_of_previously_used_dirnames(self, 
         catalog_type, input_full_fname, input_simname):
