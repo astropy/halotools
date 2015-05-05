@@ -4,7 +4,8 @@ import ctypes
 from libc.stdlib cimport malloc, free
 import numpy as np
 
-#data1, data2, rbins, period=None
+__all__ = ['countpairs']
+
 def countpairs(points1, points2, bins, period):
 	"""Lbox, bins, points1, points2=None"""
 	len_points1 = len(points1)
