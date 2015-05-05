@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import os, sys, warnings, urllib2, fnmatch
 
 HAS_SOUP = False
 try:
@@ -16,11 +17,11 @@ try:
 except:
     pass
 
-import fnmatch
 
 from . import sim_defaults 
 
 from ..utils.array_utils import find_idx_nearest_val
+from ..utils.array_utils import array_like_length as aph_len
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
