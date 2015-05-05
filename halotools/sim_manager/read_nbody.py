@@ -770,13 +770,25 @@ class RockstarReader(object):
                 "or both `simname` and `halo_finder` keywords")
 
 
-    def default_mpeak_cut(self, x):
+    def default_halocat_cut(self, x):
+        """ Function used to provide a simple cut on a raw halo catalog, 
+        such that only rows with :math:`M_{\\rm peak} > 300m_{\\rm p}` 
+        pass the cut. 
+
+        Parameters 
+        ----------
+        x : array 
+            Length-Nhalos structured numpy array, presumed to have a field called `mpeak`. 
+
+        Returns 
+        -------
+        result : array
+            Length-Nhalos boolean array serving as a mask. 
+        """
 
         return x['mpeak'] > ( 
             self.simobj.simulation.particle_mass*
             sim_defaults.Num_ptcl_requirement)
-
-
 
     def get_halocat_fname_pattern(self, simname, halo_finder):
         simobj = get_halocat_obj(simname, halo_finder)
@@ -902,7 +914,7 @@ class RockstarReader(object):
             halo catalog dtype. Output of the `cut` function must 
             be a boolean array of length equal to the length of the 
             input structured array. Default is to make a cut on 
-            `mpeak` at 300 particles, using `default_mpeak_cut` method. 
+            `mpeak` at 300 particles, using `default_halocat_cut` method. 
 
         nchunks : int, optional keyword argument
             `read_halocat` reads and processes ascii 
@@ -916,7 +928,7 @@ class RockstarReader(object):
         if 'cuts_funcobj' in kwargs.keys():
             cuts_funcobj = kwargs['cuts_funcobj']
         else:
-            cuts_funcobj = self.default_mpeak_cut
+            cuts_funcobj = self.default_halocat_cut
 
         if 'nchunks' in kwargs.keys():
             Nchunks = kwargs['nchunks']
