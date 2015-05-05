@@ -211,7 +211,30 @@ class CatalogManager(object):
             str(np.round(sim_defaults.default_scale_factor,4))+
             '_particles.fits')
 
-    def available_halocats(self, location, catalog_type, **kwargs):
+    @property 
+    def available_halocats(self):
+        """ Return a list of the names of all halo catalogs supported by Halotools. 
+
+        Returns 
+        -------
+        supported_halocat_classes : list
+            List of strings of the class names of all sub-classes of 
+            `~halotools.sim_manager.HaloCat`.  
+
+        """
+        class_list = sim_specs.__all__
+        parent_class = sim_specs.HaloCat
+
+        supported_halocat_classes = []
+        for clname in class_list:
+            clobj = getattr(sim_specs, clname)
+            if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
+                supported_halocat_classes.append(clobj.__name__)
+
+        return supported_halocat_classes
+
+
+    def available_snapshots(self, location, catalog_type, simname, halo_finder):
         """
         Parameters 
         ----------
@@ -241,17 +264,30 @@ class CatalogManager(object):
             Default is None, in which case halo catalogs pertaining to all 
             halo-finders stored in `location` will be returned. 
 
-        input_redshift : float, optional
-            Redshift of the desired snapshot. 
-            Default is None, in which case halo catalogs pertaining to all 
-            redshifts stored in `location` will be returned. 
+        Returns 
+        -------
+        fname_list : list 
+            List of strings storing the filenames of all available halo catalogs. 
 
-        dz_tol : float, optional
-            Tolerance value determining how close the requested redshift must be to 
-            the desired `input_redshift`. Default value is 0.1. 
         """
+        halocat_obj = get_halocat_obj(simname, halo_finder)
 
-        pass
+        if location == 'web':
+            return halocat_obj.available_halocats
+        else:
+            if location == 'cache':
+                dirname = configuration.get_catalogs_dir(
+                    catalog_type, simname=simname, halo_finder=halo_finder)
+            else:
+                dirname = location
+                if not os.path.exists(dirname):
+                    raise IOError("The following location passed as `location`"
+                        " is not a directory:\n %s" % dirname)
+
+            fname_list = []
+            for (dirpath, dirnames, filenames) in os.walk(dirname):
+                fname_list.extend(filenames)
+            return fname_list
 
     def download_raw_halocat(self, simname, halo_finder, input_redshift, **kwargs):
         """ Method to download publicly available ascii data of 
