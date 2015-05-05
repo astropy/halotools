@@ -11,7 +11,7 @@ from astropy import cosmology
 
 __all__ = (
 	['SimulationSpecs', 'Bolshoi', 'BolshoiPl', 'MultiDark', 'Consuelo', 
-	'HaloCatSpecs', 'BolshoiRockstar', 'BolshoiPlRockstar', 
+	'HaloCat', 'BolshoiRockstar', 'BolshoiPlRockstar', 
 	'BolshoiBdm', 'MultiDarkRockstar', 'ConsuleoRockstar']
 	)
 
@@ -153,7 +153,7 @@ class Consuelo(SimulationSpecs):
 ######################################################
 
 @six.add_metaclass(ABCMeta)
-class HaloCatSpecs(object):
+class HaloCat(object):
 
 	def __init__(self, simobj, halo_finder):
 		self.simulation = simobj
@@ -169,7 +169,8 @@ class HaloCatSpecs(object):
 	def halocat_fname_pattern(self):
 		pass
 
-class BolshoiRockstar(HaloCatSpecs):
+
+class BolshoiRockstar(HaloCat):
 
 	def __init__(self):
 
@@ -264,7 +265,7 @@ class BolshoiRockstar(HaloCatSpecs):
 
 		return dt
 
-class BolshoiPlRockstar(HaloCatSpecs):
+class BolshoiPlRockstar(HaloCat):
 
 	def __init__(self):
 
@@ -359,7 +360,7 @@ class BolshoiPlRockstar(HaloCatSpecs):
 
 		return dt
 
-class BolshoiBdm(HaloCatSpecs):
+class BolshoiBdm(HaloCat):
 
 	def __init__(self):
 
@@ -427,7 +428,7 @@ class BolshoiBdm(HaloCatSpecs):
 
 		return d
 
-class MultiDarkRockstar(HaloCatSpecs):
+class MultiDarkRockstar(HaloCat):
 
 	def __init__(self):
 
@@ -509,7 +510,7 @@ class MultiDarkRockstar(HaloCatSpecs):
 
 
 
-class ConsuleoRockstar(HaloCatSpecs):
+class ConsuleoRockstar(HaloCat):
 
 	def __init__(self):
 
