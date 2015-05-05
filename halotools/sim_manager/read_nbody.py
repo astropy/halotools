@@ -303,9 +303,9 @@ class CatalogManager(object):
 
         # First check that we were provided sufficient inputs
         if ('fname' not in kwargs.keys()):
-            if ('simname' not in kwargs.keys()) or ('redshift' not in kwargs.keys()):
+            if ('redshift' not in kwargs.keys()):
                 msg = ("If not passing an absolute filename to locate_raw_halocat,\n"
-                    "must pass both a simname and a redshift")
+                    "must at least pass a redshift")
                 raise IOError(msg)
 
         if 'fname' in kwargs.keys():
@@ -315,8 +315,12 @@ class CatalogManager(object):
                 halo_finder = sim_defaults.default_halo_finder
             else:
                 halo_finder = kwargs['halo_finder']
+            if 'simname' not in kwargs.keys():
+                simname = sim_defaults.default_simulation_name
+            else:
+                simname = kwargs['simname']
             return self.full_fname_closest_halocat_in_cache('raw_halos', 
-                kwargs['simname'], halo_finder, kwargs['redshift'])
+                simname, halo_finder, kwargs['redshift'])
 
 
     def process_raw_halocat(self, input_fname, simname, halo_finder, cuts_funcobj):
@@ -890,6 +894,9 @@ class RockstarReader(object):
         else:
             return simobj
 
+    def get_halocat_fname_pattern(self, simname, halo_finder):
+        simobj = self.get_simobj(simname, halo_finder)
+        return simobj.halocat_fname_pattern
 
     def file_len(self):
         """ Compute the number of all rows in fname

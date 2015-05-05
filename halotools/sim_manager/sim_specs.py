@@ -165,6 +165,9 @@ class HaloCatSpecs(object):
 	def halocat_column_info(self):
 		pass
 
+	@abstractproperty
+	def halocat_fname_pattern(self):
+		pass
 
 class BolshoiRockstar(HaloCatSpecs):
 
@@ -172,6 +175,14 @@ class BolshoiRockstar(HaloCatSpecs):
 
 		bolshoi = Bolshoi()
 		super(BolshoiRockstar, self).__init__(bolshoi, 'rockstar')
+
+	@property 
+	def raw_halocat_web_location(self):
+		return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
+
+	@property 
+	def halocat_fname_pattern(self):
+		return '*hlist_*'
 
 	@property 
 	def halocat_column_info(self):
@@ -261,6 +272,14 @@ class BolshoiPlRockstar(HaloCatSpecs):
 		super(BolshoiPlRockstar, self).__init__(bolshoiPl, 'rockstar')
 
 	@property 
+	def raw_halocat_web_location(self):
+		return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/'
+
+	@property 
+	def halocat_fname_pattern(self):
+		return '*hlist_*'
+
+	@property 
 	def halocat_column_info(self):
 
 		dt = np.dtype([
@@ -348,6 +367,14 @@ class BolshoiBdm(HaloCatSpecs):
 		super(BolshoiBdm, self).__init__(bolshoi, 'bdm')
 
 	@property 
+	def raw_halocat_web_location(self):
+		return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/'
+
+	@property 
+	def halocat_fname_pattern(self):
+		return '*hlist_*'
+
+	@property 
 	def halocat_column_info(self):
 		d = {
 		'scale': (0, 'int'), 
@@ -407,6 +434,13 @@ class MultiDarkRockstar(HaloCatSpecs):
 		multidark = MultiDark()
 		super(MultiDarkRockstar, self).__init__(multidark, 'rockstar')
 
+	@property 
+	def raw_halocat_web_location(self):
+		return 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
+
+	@property 
+	def halocat_fname_pattern(self):
+		return '*hlist_*'
 
 	@property 
 	def halocat_column_info(self):
@@ -482,6 +516,13 @@ class ConsuleoRockstar(HaloCatSpecs):
 		consuelo = Consuelo()
 		super(ConsuleoRockstar, self).__init__(consuelo, 'rockstar')
 
+	@property 
+	def web_location(self):
+		return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
+
+	@property 
+	def halocat_fname_pattern(self):
+		return '*hlist_*'
 
 	@property 
 	def halocat_column_info(self):
