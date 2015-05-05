@@ -490,7 +490,6 @@ class CatalogManager(object):
 
         return output_full_fname
 
-
     def closest_halocat_in_cache(
         self, catalog_type, simname, halo_finder, input_redshift):
         """ Search the cache directory for the closest snapshot matching the 
