@@ -2,6 +2,22 @@
 
 import numpy as np
 
+HAS_SOUP = False
+try:
+    from bs4 import BeautifulSoup
+    HAS_SOUP = True
+except:
+    pass
+
+HAS_REQUESTS = False
+try:
+    import requests
+    HAS_REQUESTS = True
+except:
+    pass
+
+import fnmatch
+
 from . import sim_defaults 
 
 from ..utils.array_utils import find_idx_nearest_val
