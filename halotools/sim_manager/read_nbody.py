@@ -211,6 +211,47 @@ class CatalogManager(object):
             str(np.round(sim_defaults.default_scale_factor,4))+
             '_particles.fits')
 
+    def available_halocats(self, location, catalog_type, **kwargs):
+        """
+        Parameters 
+        ----------
+        location : string 
+            Specifies the web or disk location to search for halo catalogs. 
+            Optional values for `location` are:
+
+                *  `web`
+
+                * `cache`
+
+                * a full pathname such as `/full/path/to/my/personal/halocats/`. 
+
+        catalog_type : string 
+            If you want the original, unprocessed ASCII data produced by Rockstar, 
+            then `catalog_type` should be set to `raw_halos`. 
+            If you instead want a previously processed catalog that has been 
+            converted into a fast-loading binary, set `catalog_type` to `halos`. 
+
+        simname : string, optional 
+            Nickname of the simulation, e.g. `bolshoi`. 
+            Default is None, in which case halo catalogs pertaining to all 
+            simulations stored in `location` will be returned. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. `rockstar`. 
+            Default is None, in which case halo catalogs pertaining to all 
+            halo-finders stored in `location` will be returned. 
+
+        input_redshift : float, optional
+            Redshift of the desired snapshot. 
+            Default is None, in which case halo catalogs pertaining to all 
+            redshifts stored in `location` will be returned. 
+
+        dz_tol : float, optional
+            Tolerance value determining how close the requested redshift must be to 
+            the desired `input_redshift`. Default value is 0.1. 
+        """
+
+        pass
 
     def download_raw_halocat(self, simname, halo_finder, input_redshift, **kwargs):
         """ Method to download publicly available ascii data of 
