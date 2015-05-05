@@ -253,17 +253,12 @@ class CatalogManager(object):
             dz_tol = 0.1
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
-
-        list_of_available_snapshots = (
-            self.retrieve_available_raw_halocats(simname, halo_finder)
+        list_of_available_snapshots = halocat_obj.available_halocats
+        closest_snapshot_fname, redshift_of_closest_match = (
+            halocat_obj.closest_halocat(
+            list_of_available_snapshots, input_redshift)
             )
-        closest_snapshot_fname = self.find_closest_halocat(
-            simname, halo_finder, list_of_available_snapshots, input_redshift)
 
-        scale_factor_of_closest_match = float(
-            halocat_obj.get_scale_factor_substring(closest_snapshot_fname)
-            )
-        redshift_of_closest_match = (1./scale_factor_of_closest_match) - 1
         if abs(redshift_of_closest_match - input_redshift) > dz_tol:
             msg = (
                 "No raw %s halo catalog has \na redshift within %.2f " + 
@@ -455,22 +450,42 @@ class CatalogManager(object):
         return output_full_fname
 
 
-    def full_fname_closest_halocat_in_cache(
+    def closest_halocat_in_cache(
         self, catalog_type, simname, halo_finder, input_redshift):
+        """ Search the cache directory for the closest snapshot matching the 
+        input specs. 
+
+        Parameters 
+        ----------
+        catalog_type : string
+            String giving the type of catalog. 
+            Should be `halos`, or `raw_halos`. 
+
+        simname : string, optional
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. `rockstar`. 
+
+        Returns 
+        -------
+        closest_fname : string 
+            Filename of the closest matching halo catalog, 
+            including absolute path. 
+        """
 
         filename_list = self.full_fnames_in_cache(
             catalog_type, simname=simname, halo_finder=halo_finder)
+        halocat_obj = get_halocat_obj(simname, halo_finder)
 
-        closest_fname = self.find_closest_halocat(
-            simname, halo_finder, filename_list, input_redshift)
+        closest_fname = halocat_obj.closest_halocat(
+            filename_list, input_redshift, return_redshift=False)
         if closest_fname == None:
+            print("No halo catalogs found in cache for simname = %s "
+                " and halo-finder = %s" % (simname, halo_finder))
             return None
-
-        dirname = configuration.get_catalogs_dir(catalog_type, 
-            simname=simname, halo_finder=halo_finder)
-        output_full_fname = os.path.join(dirname, closest_fname)
-
-        return output_full_fname
+        else:
+            return closest_fname
 
     def full_fnames_in_cache(self, catalog_type, **kwargs):
         """ Method returns the filenames of all snapshots 
@@ -554,101 +569,6 @@ class CatalogManager(object):
         output_fname = filename_list[idx_closest_catalog]
 
         return output_fname
-
-
-    def get_scale_factor_substring(self, fname):
-        """ Method extracts the portion of the Rockstar hlist fname 
-        that contains the scale factor of the snapshot. 
-
-        Parameters 
-        ----------
-        fname : string 
-            Filename of the hlist. 
-
-        Returns 
-        -------
-        scale_factor_substring : string 
-            The substring specifying the scale factor of the snapshot. 
-
-        Notes 
-        -----
-        Assumes that the relevant substring always immediately follows 
-        the first incidence of an underscore, and terminates immediately 
-        preceding the second decimal. These assumptions are valid for 
-        all catalogs currently on the hipacc website, including 
-        'bolshoi', 'bolshoi_bdm', 'consuelo', and 'multidark'. 
-
-        Examples
-        --------
-        >>> catman = CatalogManager()
-        >>> fname = 'hlist_0.06630.list.gz'
-        >>> scale_factor_string = catman.get_scale_factor_substring(fname)
-
-        """
-        first_index = fname.index('_')+1
-        last_index = fname.index('.', fname.index('.')+1)
-        scale_factor_substring = fname[first_index:last_index]
-        return scale_factor_substring
-
-    def retrieve_available_raw_halocats(self, simname, halo_finder):
-        """ Method searches the appropriate web location and 
-        returns a list of the filenames of all relevant 
-        raw halo catalogs that are available for download. 
-
-        that are available at the host url. 
-
-        Parameters 
-        ----------
-        simname : string 
-            Nickname of the simulation, e.g., `bolshoi` or `bolshoipl`. 
-
-        halo_finder : string 
-            Nickname of the halo-finder that generated the catalog, 
-            e.g., `rockstar` or `bdm`. 
-
-        file_pattern : string, optional 
-            String used to filter the list of filenames at the url so that 
-            only files matching the requested pattern are returned. 
-            Syntax is the same as running a grep search on a regular expression, 
-            e.g., file_pattern = `*my_filter*`. Default is set to `*hlist_*`.
-            Should be set to an empty string if no filtering is desired.  
-
-        Returns 
-        -------
-        output : list 
-            List of strings of all raw halo catalogs available for download 
-            for the requested simulation. 
-
-        Notes 
-        ----- 
-        Method assumes that the first characters of any halo catalog filename are `hlist_`. 
-
-        """
-
-        halocat_obj = get_halocat_obj(simname, halo_finder)
-        if halocat_obj is None:
-            print("No matching halo catalog objects in sim_specs for "
-                "simname = %s and halo_finder = %s" (simname, halo_finder))
-            return
-        try:
-            url = halocat_obj.raw_halocat_web_location
-        except AttributeError:
-            print("For simname = %s and halo_finder = %s, \n"
-                "HaloCat Object defined in sim_specs module\n"
-            "does not have the required raw_halocat_web_location attribute" 
-            % (simname, halo_finder))
-
-        soup = BeautifulSoup(requests.get(url).text)
-        file_pattern = halocat_obj.halocat_fname_pattern
-
-        file_list = []
-        for a in soup.find_all('a'):
-            file_list.append(a['href'])
-
-        output = fnmatch.filter(file_list, file_pattern)
-
-        return output
-
 
     def update_list_of_previously_used_dirnames(self, 
         catalog_type, input_full_fname, input_simname):
