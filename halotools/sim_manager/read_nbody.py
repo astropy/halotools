@@ -41,14 +41,54 @@ from astropy.utils.data import get_readable_fileobj
 from astropy.utils.data import _get_download_cache_locs as get_download_cache_locs
 from astropy.utils.data import _open_shelve as open_shelve
 
-from . import configuration
-from . import sim_specs
-from . import sim_defaults
+from . import configuration, sim_specs, sim_defaults
 
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import array_like_length as aph_len
 from ..utils.io_utils import download_file_from_url
 
+
+def get_halocat_obj(simname, halo_finder):
+    """ Find and return the class instance that will be used to 
+    convert raw ASCII halo catalog data into a reduced binary.
+
+    Parameters 
+    ----------
+    simname : string 
+        Nickname of the simulation, e.g., `bolshoi`. 
+
+    halo_finder : string 
+        Nickname of the halo-finder that generated the catalog, 
+        e.g., `rockstar`. 
+
+    Returns 
+    -------
+    simobj : object 
+        Class instance of `~halotools.sim_manager.sim_specs.HaloCat`. 
+        Used to read ascii data in the specific format of the 
+        `simname` simulation and `halo_finder` halos. 
+    """
+    class_list = sim_specs.__all__
+    parent_class = sim_specs.HaloCat
+
+    supported_halocat_classes = []
+    for clname in class_list:
+        clobj = getattr(sim_specs, clname)
+        if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
+            supported_halocat_classes.append(clobj())
+
+    simobj = None
+    for sim in supported_halocat_classes:
+        if (sim.simname == simname) & (sim.halo_finder == halo_finder):
+            simobj = sim
+    if simobj==None:
+        print("No simulation class found for %s simulation and %s halo-finder\n"
+            "If you want to use Halotools to convert a raw halo catalog into a binary, \n"
+            "you must either use an existing reader class or write your own\n" 
+            % simname, halo_finder)
+        return None
+    else:
+        return simobj
 
 
 class ProcessedSnapshot(object):
@@ -549,7 +589,7 @@ class CatalogManager(object):
         scale_factor_substring = fname[first_index:last_index]
         return scale_factor_substring
 
-    def retrieve_available_raw_halocats(self, simname, halo_finder, file_pattern = '*hlist_*'):
+    def retrieve_available_raw_halocats(self, simname, halo_finder):
         """ Method searches the appropriate web location and 
         returns a list of the filenames of all relevant 
         raw halo catalogs that are available for download. 
@@ -583,23 +623,28 @@ class CatalogManager(object):
         Method assumes that the first characters of any halo catalog filename are `hlist_`. 
 
         """
-        key = simname + '_' + halo_finder
-        if key in sim_defaults.raw_halocat_url.keys():
-            url = sim_defaults.raw_halocat_url[key]
-        else:
-            raise KeyError("Input simname + halo-finder does not correspond to "
-                "any of the catalogs stored in sim_defaults.raw_halocat_url")
+
+        halocat_obj = get_halocat_obj(simname, halo_finder)
+        if halocat_obj is None:
+            print("No matching halo catalog objects in sim_specs for "
+                "simname = %s and halo_finder = %s" (simname, halo_finder))
+            return
+        try:
+            url = halocat_obj.raw_halocat_web_location
+        except AttributeError:
+            print("For simname = %s and halo_finder = %s, \n"
+                "HaloCat Object defined in sim_specs module\n"
+            "does not have the required raw_halocat_web_location attribute" 
+            % (simname, halo_finder))
 
         soup = BeautifulSoup(requests.get(url).text)
-        expected_filename_prefix = 'hlist_'
+        file_pattern = halocat_obj.halocat_fname_pattern
+
         file_list = []
         for a in soup.find_all('a'):
             file_list.append(a['href'])
 
-        if file_pattern != '':
-            output = fnmatch.filter(file_list, file_pattern)
-        else:
-            output = file_list
+        output = fnmatch.filter(file_list, file_pattern)
 
         return output
 
@@ -831,14 +876,14 @@ class RockstarReader(object):
 
         if 'simobj' in kwargs.keys():
             simobj = kwargs['simobj']
-            if not isistance(simobj, sim_specs.HaloCatSpecs):
+            if not isistance(simobj, sim_specs.HaloCat):
                 raise IOError("Input catalog object %s "
-                    "must be a subclass of HaloCatSpecs" % simobj.__name__)
+                    "must be a subclass of HaloCat" % simobj.__name__)
             self.simobj = simobj
         elif ('simname' in kwargs.keys()) & ('halo_finder' in kwargs.keys()):
             self.simname = kwargs['simname']
             self.halo_finder = kwargs['halo_finder']
-            self.simobj = self.get_simobj(self.simname, self.halo_finder)
+            self.simobj = get_halocat_obj(self.simname, self.halo_finder)
         else:
             raise IOError("Must either pass `simobj` keyword "
                 "to the `RockstarReader` constructor,\n"
@@ -852,50 +897,9 @@ class RockstarReader(object):
             sim_defaults.Num_ptcl_requirement)
 
 
-    def get_simobj(self, simname, halo_finder):
-        """ Find and return the class instance that will be used to 
-        convert raw ASCII halo catalog data into a reduced binary.
-
-        Parameters 
-        ----------
-        simname : string 
-            Nickname of the simulation, e.g., `bolshoi`. 
-
-        halo_finder : string 
-            Nickname of the halo-finder that generated the catalog, 
-            e.g., `rockstar`. 
-
-        Returns 
-        -------
-        simobj : object 
-            Class instance of `~halotools.sim_manager.sim_specs.HaloCatSpecs`. 
-            Used to read ascii data in the specific format of the 
-            `simname` simulation and `halo_finder` halos. 
-        """
-        class_list = sim_specs.__all__
-        parent_class = sim_specs.HaloCatSpecs
-
-        supported_halocat_classes = []
-        for clname in class_list:
-            clobj = getattr(sim_specs, clname)
-            if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
-                supported_halocat_classes.append(clobj())
-
-        simobj = None
-        for sim in supported_halocat_classes:
-            if (sim.simname == simname) & (sim.halo_finder == halo_finder):
-                simobj = sim
-        if simobj==None:
-            print("No simulation class found for %s simulation and %s halo-finder\n"
-                "If you want to use Halotools to convert a raw halo catalog into a binary, \n"
-                "you must either use an existing reader class or write your own\n" 
-                % simname, halo_finder)
-            return None
-        else:
-            return simobj
 
     def get_halocat_fname_pattern(self, simname, halo_finder):
-        simobj = self.get_simobj(simname, halo_finder)
+        simobj = get_halocat_obj(simname, halo_finder)
         return simobj.halocat_fname_pattern
 
     def file_len(self):
