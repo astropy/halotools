@@ -88,9 +88,9 @@ def countpairs(points1, points2, bins, period):
 	for i in range(len_bins):
 		paircounts.append(c_paircounts[i])
 	free(c_paircounts)
-	if autocorr == 1:
-		paircounts[0] = len_points1
 	paircounts = np.cumsum(paircounts)
+	if autocorr == 1:
+		paircounts[0] += len_points1
 	return paircounts
 
 
