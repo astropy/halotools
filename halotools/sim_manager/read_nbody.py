@@ -41,7 +41,7 @@ from astropy.utils.data import get_readable_fileobj
 from astropy.utils.data import _get_download_cache_locs as get_download_cache_locs
 from astropy.utils.data import _open_shelve as open_shelve
 
-from . import configuration, sim_specs, sim_defaults
+from . import cache_config, supported_sims, sim_defaults
 
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import array_like_length as aph_len
@@ -64,16 +64,16 @@ def get_halocat_obj(simname, halo_finder):
     Returns 
     -------
     simobj : object 
-        Class instance of `~halotools.sim_manager.sim_specs.HaloCat`. 
+        Class instance of `~halotools.sim_manager.supported_sims.HaloCat`. 
         Used to read ascii data in the specific format of the 
         `simname` simulation and `halo_finder` halos. 
     """
-    class_list = sim_specs.__all__
-    parent_class = sim_specs.HaloCat
+    class_list = supported_sims.__all__
+    parent_class = supported_sims.HaloCat
 
     supported_halocat_classes = []
     for clname in class_list:
-        clobj = getattr(sim_specs, clname)
+        clobj = getattr(supported_sims, clname)
         if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
             supported_halocat_classes.append(clobj())
 
@@ -87,7 +87,7 @@ def get_halocat_obj(simname, halo_finder):
             "or you tried to use an unsupported halo catalog. \n"
             "If you want to use Halotools to manage and process halo catalogs, \n"
             "then you must either use an existing reader class "
-            "defined in the sim_specs module, \nor you must write your own reader class.\n" 
+            "defined in the supported_sims module, \nor you must write your own reader class.\n" 
             % (simname, halo_finder))
         return None
     else:
@@ -150,12 +150,12 @@ class CatalogManager(object):
             `~halotools.sim_manager.HaloCat`. 
 
         """
-        class_list = sim_specs.__all__
-        parent_class = sim_specs.HaloCat
+        class_list = supported_sims.__all__
+        parent_class = supported_sims.HaloCat
 
         supported_halocat_classes = []
         for clname in class_list:
-            clobj = getattr(sim_specs, clname)
+            clobj = getattr(supported_sims, clname)
             if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
                 supported_halocat_classes.append(clobj.__name__)
 
@@ -207,7 +207,7 @@ class CatalogManager(object):
             return halocat_obj.raw_halocats_available_for_download
         else:
             if location == 'cache':
-                dirname = configuration.get_catalogs_dir(
+                dirname = cache_config.get_catalogs_dir(
                     catalog_type, simname=simname, halo_finder=halo_finder)
             else:
                 dirname = location
@@ -291,7 +291,7 @@ class CatalogManager(object):
                 output_fname = os.path.join(download_loc, closest_snapshot_fname)
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
-            cache_dirname = configuration.get_catalogs_dir('raw_halos', 
+            cache_dirname = cache_config.get_catalogs_dir('raw_halos', 
                 simname=simname, halo_finder=halo_finder)
             download_loc = cache_dirname
             output_fname = os.path.join(download_loc, closest_snapshot_fname)
@@ -407,7 +407,7 @@ class CatalogManager(object):
             return 
 
         if output_loc == 'halotools_cache':
-            output_loc = configuration.get_catalogs_dir(
+            output_loc = cache_config.get_catalogs_dir(
                 'halos', simname=reader.simname, halo_finder=reader.halo_finder)
         else:
             if not os.path.exists(output_loc):
@@ -583,7 +583,7 @@ class CatalogManager(object):
                 ###
                 remote_filename = os.path.join(url,filename)
                 fileobj = urllib2.urlopen(remote_filename)
-                output_directory = configuration.get_catalogs_dir(catalog_type)
+                output_directory = cache_config.get_catalogs_dir(catalog_type)
                 output_filename = os.path.join(output_directory,filename)
                 output = open(output_filename,'wb')
                 output.write(fileobj.read())
