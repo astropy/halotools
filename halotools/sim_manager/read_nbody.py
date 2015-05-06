@@ -99,97 +99,36 @@ class ProcessedSnapshot(object):
     a single snapshot of some Nbody simulation.
     """
 
-    def __init__(self,
-        simname=sim_defaults.default_simulation_name,
-        scale_factor=sim_defaults.default_scale_factor,
+    def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder,
-        download_yn=True, **kwargs):
+        redshift = sim_defaults.default_redshift):
 
-        self.simulation_name = simname
-        self.scale_factor = scale_factor
+        self.simname = simname
         self.halo_finder = halo_finder
 
-        self.download_yn = download_yn
+        self.catman = CatalogManager()
+        result = self.catman.closest_halocat_in_cache(
+            'halos', self.simname, self.halo_finder, redshift, 
+            return_redshift=True)
 
-        catman = CatalogManager()
-        self.CatalogManager = catman
+        if result is None:
+            raise IOError("No processed halo catalogs found in cache "
+                " for simname = %s and halo-finder = %s" % (simname, halo_finder))
+        else:
+            self.fname, self.redshift = result[0], result[1]
 
-        Lbox, mp, softening = catman.get_simulation_properties(self.simulation_name)
-        self.Lbox = Lbox
-        self.particle_mass = mp
-        self.softening_length = softening
+        self.halocat_obj = get_halocat_obj(simname, halo_finder)
+        self.Lbox = self.halocat_obj.simulation.Lbox
+        self.particle_mass = self.halocat_obj.simulation.particle_mass
+        self.softening_length = self.halocat_obj.simulation.softening_length
+        self.cosmology = self.halocat_obj.simulation.cosmology
 
-        ### OBSOLETE NOW - MUST BE REWRITTEN ###
-        halo_catalog_filename,closest_scale_factor = (
-            catman.find_nearest_snapshot_in_cache('subhalos',
-                scale_factor = self.scale_factor,
-                simname=self.simulation_name,
-                halo_finder=self.halo_finder)
-            )
+        self.particles = None
+        self.halos = self.catman.load_halo_catalog(
+            simname = self.simname, 
+            halo_finder = self.halo_finder, 
+            redshift = self.redshift)
 
-        # If there are no matching halo catalogs in cache,
-        # set the halo catalog to the default halo catalog
-        if (halo_catalog_filename==None) or (closest_scale_factor != self.scale_factor):
-            halo_catalog_filename = catman.default_halo_catalog_filename
-            # Download the catalog, if desired
-            if download_yn==True:
-                catman.download_all_default_catalogs()
-
-        self.halo_catalog_filename = halo_catalog_filename
-        self.halo_catalog_dirname = configuration.get_catalogs_dir('subhalos')
-
-        ### OBSOLETE NOW - MUST BE REWRITTEN ###
-        particle_catalog_filename,closest_scale_factor = (
-            catman.find_nearest_snapshot_in_cache('particles',
-                scale_factor = self.scale_factor,
-                simname=self.simulation_name,
-                halo_finder=self.halo_finder)
-            )
-
-        # If there are no matching particle catalogs in cache,
-        # set the particle catalog to the default particle catalog
-        if (particle_catalog_filename==None) or (closest_scale_factor != self.scale_factor):
-            particle_catalog_filename = catman.default_particle_catalog_filename
-            # Download the catalog, if desired
-            if download_yn==True:
-                catman.download_all_default_catalogs()
-
-        self.particle_catalog_filename = particle_catalog_filename
-        self.particle_catalog_dirname = configuration.get_catalogs_dir('particles')
-
-    @property
-    def particles(self):
-        """ Method to load simulation particle data into memory. 
-
-        The property decorator syntax allows this method to be called 
-        as if it is an attribute.
-
-        """
-
-        catalog_type = 'particles'
-        particles = self.CatalogManager.load_catalog(catalog_type,
-            dirname = self.particle_catalog_dirname,
-            filename=self.particle_catalog_filename,
-            download_yn = self.download_yn)
-
-        return particles
-
-
-    @property
-    def halos(self):
-        """ Method to load simulation halo catalog into memory. 
-
-        The property decorator syntax allows this method to be called 
-        as if it is an attribute.
-
-        """
-        catalog_type = 'subhalos'
-        halos = self.CatalogManager.load_catalog(catalog_type,
-            dirname = self.halo_catalog_dirname,
-            filename=self.halo_catalog_filename,
-            download_yn = self.download_yn)
-
-        return halos
 
 ###################################################################################################
 
@@ -198,21 +137,7 @@ class CatalogManager(object):
     """
 
     def __init__(self):
-        self.slac_urls = {'bolshoi_halos' : 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/',
-        'bolshoi_bdm_halos' : 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/',
-        'multidark_halos' : 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/',
-        'consuelo_halos' : 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
-        }
-
-        self.default_halo_catalog_filename = (
-            sim_defaults.default_simulation_name+'_a'+
-            str(np.round(sim_defaults.default_scale_factor,4))+'_'+
-            sim_defaults.default_halo_finder+'_subhalos.hdf5')
-
-        self.default_particle_catalog_filename = (
-            sim_defaults.default_simulation_name+'_a'+
-            str(np.round(sim_defaults.default_scale_factor,4))+
-            '_particles.fits')
+        pass
 
     @property 
     def available_halocat_objs(self):
@@ -527,11 +452,13 @@ class CatalogManager(object):
         input_redshift : float
             Desired redshift of the snapshot. 
 
-        Returns 
+        Returns
         -------
-        closest_fname : string 
-            Filename of the closest matching halo catalog, 
-            including absolute path. 
+        output_fname : string 
+            Filename of the closest matching snapshot. 
+
+        redshift : float 
+            Value of the redshift of the snapshot
         """
 
         filename_list = self.available_snapshots('cache', 
@@ -540,57 +467,59 @@ class CatalogManager(object):
             return None
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
+        print("Printing filename list")
+        for f in filename_list:
+            print f
+        result = halocat_obj.closest_halocat(filename_list, input_redshift)
 
-        closest_fname = halocat_obj.closest_halocat(
-            filename_list, input_redshift, return_redshift=False)
-
-        if closest_fname == None:
+        if result == None:
             print("No halo catalogs found in cache for simname = %s "
                 " and halo-finder = %s" % (simname, halo_finder))
             return None
         else:
-            return closest_fname
+            return result[0], result[1]
 
-    def get_simulation_properties(self,simname):
-        """ Return a few characteristics of the input simulation.
+
+    def load_halo_catalog(self, **kwargs):
+        """ Method returns an Astropy Table object of halos 
+        that have been stored as a processed binary hdf5 file. 
 
         Parameters 
         ----------
-        simname : string 
-            Specifies the simulation of interest, e.g., 'bolshoi'.
+        fname : string, optional 
+            Filename (including absolute path) where the hdf5 file is stored. 
+
+        simname : string
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string
+            Nickname of the halo-finder, e.g. `rockstar`. 
+
+        redshift : float
+            Redshift of the desired snapshot. 
 
         Returns 
         -------
-        Lbox : float 
-            Box size in Mpc/h.
-
-        particle_mass : float 
-            Particle mass in Msun/h.
-
-        softening : float 
-            Softening length in kpc/h.
-
+        t : table 
+            Astropy Table object storing the halo catalog data. 
         """
 
-        Lbox, particle_mass, softening = None, None, None
+        if 'fname' in kwargs.keys():
+            return Table.read(kwargs['fname'], path='halos')
+        else:
+            simname = kwargs['simname']
+            halo_finder = kwargs['halo_finder']
+            redshift = kwargs['redshift']
 
-        if (simname=='bolshoi'):
-            Lbox = 250.0
-            particle_mass = 1.35e8
-            softening = 1.0
-
-        return Lbox, particle_mass, softening 
-
-    def load_halo_catalog(self, **kwargs):
-
-        simname = kwargs['simname']
-        halo_finder = kwargs['halo_finder']
-        redshift = kwargs['redshift']
-
-        fname = self.full_fname_closest_halocat_in_cache(
-            'halos', simname, halo_finder, redshift)
-
-        return Table.read(fname, path='halos')
+            result = self.closest_halocat_in_cache(
+                'halos', simname, halo_finder, redshift)
+            if fname == None:
+                return None
+            else:
+                fname, z = result[0], result[1]
+                print("Loading z = %.2f halo catalog "
+                    "with the following absolute path: \n%s\n" % (z, fname))
+                return Table.read(fname, path='halos')
 
 
     def load_catalog(self,catalog_type,
@@ -670,33 +599,8 @@ class CatalogManager(object):
         download default particle and halo catalogs from Yale website.
         """
 
-        url = sim_defaults.aph_web_location
+        pass
 
-        ### Download halo catalogs
-        catalog_type = 'subhalos'
-        output_directory = configuration.get_catalogs_dir(catalog_type)
-        filename = self.default_halo_catalog_filename
-        remote_filename = os.path.join(url,filename)
-        if not os.path.isfile(os.path.join(output_directory,filename)):
-            warnings.warn("Downloading default halo catalog")
-            fileobj = urllib2.urlopen(remote_filename)
-            output_filename = os.path.join(output_directory,filename)
-            output = open(output_filename,'wb')
-            output.write(fileobj.read())
-            output.close()
-
-        ### Download particle catalogs
-        catalog_type = 'particles'
-        output_directory = configuration.get_catalogs_dir(catalog_type)
-        filename = self.default_particle_catalog_filename
-        remote_filename = os.path.join(url,filename)
-        if not os.path.isfile(os.path.join(output_directory,filename)):
-            warnings.warn("Downloading default particle catalog")
-            fileobj = urllib2.urlopen(remote_filename)
-            output_filename = os.path.join(output_directory,filename)
-            output = open(output_filename,'wb')
-            output.write(fileobj.read())
-            output.close()
 
 
 

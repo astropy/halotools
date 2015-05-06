@@ -204,7 +204,7 @@ class HaloCat(object):
 
         return output
 
-    def closest_halocat(self, filename_list, input_redshift, return_redshift = True):
+    def closest_halocat(self, filename_list, input_redshift):
         """ Method searches `filename_list` and returns the filename 
         of the closest matching snapshot to ``input_redshift``. 
 
@@ -217,12 +217,6 @@ class HaloCat(object):
 
         input_redshift : float
             Redshift of the requested snapshot.
-
-        return_redshift : boolean, optional 
-            If False, method will only return the `output_fname` string. 
-            If True, method will return `output_fname` and 
-            the redshift associated with this snapshot. 
-            Default is True.
 
         Returns
         -------
@@ -253,12 +247,8 @@ class HaloCat(object):
         closest_scale_factor = scale_factor_list[idx_closest_catalog]
         output_fname = filename_list[idx_closest_catalog]
 
-        if return_redshift == True:
-            redshift = (1./closest_scale_factor) - 1
-            return output_fname, redshift
-        else:
-            return output_fname
-
+        redshift = (1./closest_scale_factor) - 1
+        return os.path.abspath(output_fname), redshift
 
     @abstractproperty
     def halocat_column_info(self):
