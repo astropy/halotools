@@ -82,10 +82,13 @@ def get_halocat_obj(simname, halo_finder):
         if (sim.simname == simname) & (sim.halo_finder == halo_finder):
             simobj = sim
     if simobj==None:
-        print("No simulation class found for %s simulation and %s halo-finder\n"
-            "If you want to use Halotools to convert a raw halo catalog into a binary, \n"
-            "you must either use an existing reader class or write your own\n" 
-            % simname, halo_finder)
+        print("No simulation class found for %s simulation and %s halo-finder.\n"
+            "Either there was a typo in specifying the simname and/or halo-finder,\n"
+            "or you tried to use an unsupported halo catalog. \n"
+            "If you want to use Halotools to manage and process halo catalogs, \n"
+            "then you must either use an existing reader class "
+            "defined in the sim_specs module, \nor you must write your own reader class.\n" 
+            % (simname, halo_finder))
         return None
     else:
         return simobj
@@ -212,7 +215,7 @@ class CatalogManager(object):
             '_particles.fits')
 
     @property 
-    def available_halocats(self):
+    def available_halocat_objs(self):
         """ Return a list of the names of all halo catalogs supported by Halotools. 
 
         Returns 
@@ -272,9 +275,11 @@ class CatalogManager(object):
         """
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
+        if halocat_obj is None:
+            return None
 
         if location == 'web':
-            return halocat_obj.available_halocats
+            return halocat_obj.raw_halocats_available_for_download
         else:
             if location == 'cache':
                 dirname = configuration.get_catalogs_dir(
@@ -334,7 +339,7 @@ class CatalogManager(object):
             dz_tol = 0.1
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
-        list_of_available_snapshots = halocat_obj.available_halocats
+        list_of_available_snapshots = halocat_obj.raw_halocats_available_for_download
         closest_snapshot_fname, redshift_of_closest_match = (
             halocat_obj.closest_halocat(
             list_of_available_snapshots, input_redshift)
@@ -519,6 +524,9 @@ class CatalogManager(object):
         halo_finder : string
             Nickname of the halo-finder, e.g. `rockstar`. 
 
+        input_redshift : float
+            Desired redshift of the snapshot. 
+
         Returns 
         -------
         closest_fname : string 
@@ -528,7 +536,9 @@ class CatalogManager(object):
 
         filename_list = self.available_snapshots('cache', 
             catalog_type, simname, halo_finder)
-        
+        if filename_list is None:
+            return None
+
         halocat_obj = get_halocat_obj(simname, halo_finder)
 
         closest_fname = halocat_obj.closest_halocat(
