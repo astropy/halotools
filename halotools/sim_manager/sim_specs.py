@@ -179,7 +179,7 @@ class HaloCat(object):
         self.halo_finder = halo_finder
 
     @property 
-    def available_halocats(self):
+    def raw_halocats_available_for_download(self):
         """ Method searches the appropriate web location and 
         returns a list of the filenames of all relevant 
         raw halo catalogs that are available for download. 
