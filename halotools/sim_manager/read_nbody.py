@@ -219,7 +219,7 @@ class CatalogManager(object):
         -------
         supported_halocat_classes : list
             List of strings of the class names of all sub-classes of 
-            `~halotools.sim_manager.HaloCat`.  
+            `~halotools.sim_manager.HaloCat`. 
 
         """
         class_list = sim_specs.__all__
@@ -254,12 +254,12 @@ class CatalogManager(object):
             If you instead want a previously processed catalog that has been 
             converted into a fast-loading binary, set `catalog_type` to `halos`. 
 
-        simname : string, optional 
+        simname : string 
             Nickname of the simulation, e.g. `bolshoi`. 
             Default is None, in which case halo catalogs pertaining to all 
             simulations stored in `location` will be returned. 
 
-        halo_finder : string, optional
+        halo_finder : string
             Nickname of the halo-finder, e.g. `rockstar`. 
             Default is None, in which case halo catalogs pertaining to all 
             halo-finders stored in `location` will be returned. 
@@ -392,7 +392,7 @@ class CatalogManager(object):
 
         return output_fname
 
-    def process_raw_halocat(self, input_fname, simname, halo_finder, cuts_funcobj):
+    def process_raw_halocat(self, input_fname, simname, halo_finder, **kwargs):
         """ Method reads in raw halo catalog ASCII data, makes the desired cuts, 
         and returns a numpy structured array of the rows passing the cuts. 
 
@@ -419,14 +419,15 @@ class CatalogManager(object):
 
         """
 
-        reader = RockstarReader(input_fname, simname=simname, halo_finder=halo_finder)
-        arr = reader.read_halocat(cuts_funcobj=cuts_funcobj)
+        reader = RockstarReader(input_fname, 
+            simname=simname, halo_finder=halo_finder, **kwargs)
+        arr = reader.read_halocat(**kwargs)
         reader._compress_ascii()
 
         return arr
 
     def store_processed_halocat(self, catalog, uncut_catalog_fname, simname, halo_finder, 
-        cuts_funcobj, version_name, overwrite=False, **kwargs):
+        version_name, overwrite=False, **kwargs):
         """
         Method stores an hdf5 binary of the reduced halo catalog. 
 
@@ -451,6 +452,9 @@ class CatalogManager(object):
             String that will be appended to `uncut_catalog_fname` to create a new 
             filename for the cut halo catalog. 
 
+        output_loc : string, optional
+            Location to store catalog on disk. 
+
         overwrite : bool, optional 
             If True, and if there exists a catalog with the same filename in the 
             output location, the existing catalog will be overwritten. Default is False.  
@@ -460,6 +464,12 @@ class CatalogManager(object):
         output_full_fname : string 
             Filename (including absolute path) to the output hdf5 file. 
         """
+
+        reader = RockstarReader(input_fname, simname=simname, halo_finder=halo_finder)
+        if 'cuts_funcobj' not in kwargs.keys():
+            cuts_funcobj = reader.default_halocat_cut
+        else:
+            cuts_funcobj = kwargs['cuts_funcobj']
 
         if HAS_H5PY==False:
             raise ImportError("Must have h5py installed to use the "
