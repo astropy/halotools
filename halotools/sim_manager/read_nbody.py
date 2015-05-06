@@ -348,7 +348,6 @@ class CatalogManager(object):
             print(msg % (simname, dz_tol, input_redshift, redshift_of_closest_match))
             return 
 
-        # Find most closely matching halo catalog
         url = halocat_obj.raw_halocat_web_location + closest_snapshot_fname
 
         if 'download_loc' in kwargs.keys():
@@ -360,7 +359,6 @@ class CatalogManager(object):
                     "of raw halo catalog does not exist" % download_loc)
             else:
                 output_fname = os.path.join(download_loc, closest_snapshot_fname)
-                #self.update_list_of_previously_used_dirnames(download_loc)
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
             cache_dirname = configuration.get_catalogs_dir('raw_halos', 
@@ -368,8 +366,10 @@ class CatalogManager(object):
             download_loc = cache_dirname
             output_fname = os.path.join(download_loc, closest_snapshot_fname)
 
+        # Check whether there are existing catalogs matching the file pattern 
+        # that is about to be downloaded
         existing_catalogs = self.available_snapshots(
-            download_loc, 'raw_halos',simname, halo_finder)
+            download_loc, 'raw_halos', simname, halo_finder)
         if output_fname[-3:] == '.gz':
             file_pattern = '*'+os.path.basename(output_fname[:-3])+'*'
         else:
@@ -407,27 +407,39 @@ class CatalogManager(object):
         halo_finder : string 
             Nickname of the halo-finder, e.g., `rockstar`. 
 
-        cuts_funcobj : function object
+        cuts_funcobj : function object, optional
             Function used to apply cuts to the rows of the ASCII data. 
             `cuts_funcobj` should accept a length-Nrows numpy structured array as input, 
-            and return a length-Nrows boolean array.
+            and return a length-Nrows boolean array. Default cut is set by 
+            `~halotools.sim_manager.RockstarReader.default_halocat_cut`. 
 
         Returns 
         -------
         arr : array 
             Structured numpy array storing all rows passing the cuts. 
 
-        """
+        reader_obj : object 
+            Class instance of the reader used to process the raw halo data. 
+            If you want to use the `store_processed_halocat` method, 
+            it will be necessary to pass this object as an argument; this 
+            requirement is used to ensure consistent bookkeeping.  
 
+        """
         reader = RockstarReader(input_fname, 
             simname=simname, halo_finder=halo_finder, **kwargs)
+
+        if 'cuts_funcobj' in kwargs.keys():
+            self.cuts_funcobj = kwargs['cuts_funcobj']
+        else:
+            self.cuts_funcobj = reader.default_halocat_cut
+            kwargs['cuts_funcobj'] = self.cuts_funcobj
+
         arr = reader.read_halocat(**kwargs)
         reader._compress_ascii()
 
-        return arr
+        return arr, reader
 
-    def store_processed_halocat(self, catalog, uncut_catalog_fname, simname, halo_finder, 
-        version_name, overwrite=False, **kwargs):
+    def store_processed_halocat(self, catalog, reader, version_name, overwrite=False, **kwargs):
         """
         Method stores an hdf5 binary of the reduced halo catalog. 
 
@@ -435,25 +447,19 @@ class CatalogManager(object):
         ----------
         catalog : structured array 
             Numpy array of halo data. 
+            Returned as the first output of `process_raw_halocat`. 
 
-        uncut_catalog_fname : string 
-            Filename of the location of the uncut halo catalog ASCII data. 
-
-        simname : string 
-            Nickname of the simulation, e.g., `bolshoi`. 
-
-        halo_finder : string 
-            Nickname of the halo-finder, e.g., `rockstar`. 
-
-        cuts_funcobj : function object 
-            Function used to apply cuts to the original halo catalog. 
+        reader : object 
+            Class instance of the reader used to reduce the raw ASCII data into 
+            a structured numpy array. Returned as the second output of `process_raw_halocat`. 
 
         version_name : string 
-            String that will be appended to `uncut_catalog_fname` to create a new 
+            String that will be appended to `orig_catalog_fname` to create a new 
             filename for the cut halo catalog. 
 
         output_loc : string, optional
-            Location to store catalog on disk. 
+            Location to store catalog on disk. Default is Halotools cache directory. 
+            (File sizes of processed binaries typically vary from 100Mb-1Gb). 
 
         overwrite : bool, optional 
             If True, and if there exists a catalog with the same filename in the 
@@ -465,28 +471,24 @@ class CatalogManager(object):
             Filename (including absolute path) to the output hdf5 file. 
         """
 
-        reader = RockstarReader(input_fname, simname=simname, halo_finder=halo_finder)
-        if 'cuts_funcobj' not in kwargs.keys():
-            cuts_funcobj = reader.default_halocat_cut
-        else:
-            cuts_funcobj = kwargs['cuts_funcobj']
-
         if HAS_H5PY==False:
             raise ImportError("Must have h5py installed to use the "
                 "store_processed_halocat method")
             return 
 
-        if 'output_loc' in kwargs.keys():
-            output_loc = kwargs['output_loc']
-        else:
+        if output_loc == 'halotools_cache':
             output_loc = configuration.get_catalogs_dir(
-                'halos', simname=simname, halo_finder=halo_finder)
+                'halos', simname=reader.simname, halo_finder=reader.halo_finder)
+        else:
+            if not os.path.exists(output_loc):
+                raise IOError("The store_processed_halocat method was passed the following output_loc argument: \n%s\n"
+                    "This path does not exist. ")
 
-        uncut_catalog_fname = os.path.basename(uncut_catalog_fname)
-        if uncut_catalog_fname[-3:] == '.gz':
-            uncut_catalog_fname = uncut_catalog_fname[:-3]
+        orig_catalog_fname = os.path.basename(reader.fname)
+        if orig_catalog_fname[-3:] == '.gz':
+            orig_catalog_fname = orig_catalog_fname[:-3]
 
-        output_fname = uncut_catalog_fname + '.' + version_name + '.hdf5'
+        output_fname = orig_catalog_fname + '.' + version_name + '.hdf5'
         output_full_fname = os.path.join(output_loc, output_fname)
         t = Table(catalog)
         print("Storing reduced halo catalog in the following location:\n" + 
@@ -494,7 +496,7 @@ class CatalogManager(object):
         t.write(output_full_fname, path='halos', overwrite=overwrite)
 
         f = h5py.File(output_full_fname)
-        pickled_cuts_funcobj = pickle.dumps(cuts_funcobj, protocol = 0)
+        pickled_cuts_funcobj = pickle.dumps(reader.cuts_funcobj, protocol = 0)
         f.attrs['halocat_exact_cuts'] = pickled_cuts_funcobj
         f.close()
 
@@ -757,28 +759,14 @@ class CatalogManager(object):
 ###################################################################################################
 class RockstarReader(object):
 
-    def __init__(self, input_fname, **kwargs):
+    def __init__(self, input_fname, simname, halo_finder, **kwargs):
 
         if not os.path.isfile(input_fname):
             raise IOError("Input filename %s is not a file" % input_fname)
         self.fname = input_fname
         self._uncompress_ascii()
-
-        if 'simobj' in kwargs.keys():
-            simobj = kwargs['simobj']
-            if not isistance(simobj, sim_specs.HaloCat):
-                raise IOError("Input catalog object %s "
-                    "must be a subclass of HaloCat" % simobj.__name__)
-            self.simobj = simobj
-        elif ('simname' in kwargs.keys()) & ('halo_finder' in kwargs.keys()):
-            self.simname = kwargs['simname']
-            self.halo_finder = kwargs['halo_finder']
-            self.simobj = get_halocat_obj(self.simname, self.halo_finder)
-        else:
-            raise IOError("Must either pass `simobj` keyword "
-                "to the `RockstarReader` constructor,\n"
-                "or both `simname` and `halo_finder` keywords")
-
+        self.simname = simname
+        self.halo_finder = halo_finder
 
     def default_halocat_cut(self, x):
         """ Function used to provide a simple cut on a raw halo catalog, 
@@ -936,9 +924,9 @@ class RockstarReader(object):
         """
 
         if 'cuts_funcobj' in kwargs.keys():
-            cuts_funcobj = kwargs['cuts_funcobj']
+            self.cuts_funcobj = kwargs['cuts_funcobj']
         else:
-            cuts_funcobj = self.default_halocat_cut
+            self.cuts_funcobj = self.default_halocat_cut
 
         if 'nchunks' in kwargs.keys():
             Nchunks = kwargs['nchunks']
@@ -960,11 +948,11 @@ class RockstarReader(object):
         
             if (linenum % chunksize == 0) & (linenum > 0):        
                 a = np.array(chunk, dtype = dt)
-                container.append(a[cuts_funcobj(a)])
+                container.append(a[self.cuts_funcobj(a)])
                 chunk = []
     #Now for the final chunk missed by the above syntax
         a = np.array(chunk, dtype = dt)
-        container.append(a[cuts_funcobj(a)])
+        container.append(a[self.cuts_funcobj(a)])
 
     # Bundle up all array chunks into a single array
         for chunk in container:
