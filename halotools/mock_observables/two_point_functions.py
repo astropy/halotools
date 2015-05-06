@@ -25,6 +25,9 @@ try: from pair_counters.mpipairs import npairs, wnpairs, specific_wnpairs, jnpai
 except ImportError:
     print("MPI functionality not available.")
     from pair_counters.kdpairs import npairs, wnpairs, specific_wnpairs, jnpairs
+try: from pair_counters.sinha_pairs import countpairs as npairs
+except ImportError:
+    print("sinha pair counting functionality not available.")
 
 ####define wrapper functions for pair counters to facilitate parallelization##############
 #straight pair counter
@@ -447,6 +450,8 @@ def two_point_correlation_function(sample1, rbins, sample2 = None, randoms=None,
     if rank==0: print('counting random pairs...')
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period, PBCs, k, N_threads, do_RR, do_DR, comm)
     if rank==0: print('done counting pairs') 
+    
+    print(D1D1)
     
     if np.all(sample2==sample1):
         xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)

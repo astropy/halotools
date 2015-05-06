@@ -1,5 +1,5 @@
 This folder contains a kdtree object written in cython. It is a heavily modified version 
-of the scipy.spatial.ckdtree object. Credits for the code are given in the comments.
+of the scipy.spatial.ckdtree object.
 
 The code must be compiled. This is accomplished by typing into the terminal:
     python setup_ckdtree.py build_ext --inplace
