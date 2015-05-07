@@ -140,26 +140,31 @@ class CatalogManager(object):
         pass
 
     @property 
-    def available_halocat_objs(self):
-        """ Return a list of the names of all halo catalogs supported by Halotools. 
+    def available_halocats(self):
+        """ Return a list of the names of all
+         simulations and halo catalogs supported by Halotools. 
 
         Returns 
         -------
-        supported_halocat_classes : list
-            List of strings of the class names of all sub-classes of 
-            `~halotools.sim_manager.HaloCat`. 
+        supported_halocats : list
+            List of 2-element tuples. Both tuple entries are strings. 
+            The first tuple element gives the nickname of a simulation 
+            supported by Halotools, e.g., `bolshoi`; 
+            the second tuple element gives the name of a halo-finder 
+            supported for that simulation, e.g., `rockstar`. 
 
         """
         class_list = supported_sims.__all__
         parent_class = supported_sims.HaloCat
 
-        supported_halocat_classes = []
+        supported_halocats = []
         for clname in class_list:
             clobj = getattr(supported_sims, clname)
             if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
-                supported_halocat_classes.append(clobj.__name__)
+                clinst = clobj()
+                supported_halocats.append((clinst.simname, clinst.halo_finder) )
 
-        return supported_halocat_classes
+        return supported_halocats
 
 
     def available_snapshots(self, location, catalog_type, simname, halo_finder):
@@ -475,6 +480,60 @@ class CatalogManager(object):
             return None
         else:
             return result[0], result[1]
+
+    def closest_halocat(
+        self, location, catalog_type, simname, halo_finder, input_redshift):
+        """ Search the cache directory for the closest snapshot matching the 
+        input specs. 
+
+        Parameters 
+        ----------
+        location : string 
+            Specifies the web or disk location to search for halo catalogs. 
+            Optional values for `location` are:
+
+                *  `web`
+
+                * `cache`
+
+                * a full pathname such as `/full/path/to/my/personal/halocats/`. 
+
+        catalog_type : string
+            String giving the type of catalog. 
+            Should be `halos`, or `raw_halos`. 
+
+        simname : string
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string
+            Nickname of the halo-finder, e.g. `rockstar`. 
+
+        input_redshift : float
+            Desired redshift of the snapshot. 
+
+        Returns
+        -------
+        output_fname : string 
+            Filename of the closest matching snapshot. 
+
+        redshift : float 
+            Value of the redshift of the snapshot
+        """
+        filename_list = self.available_snapshots(
+            location, catalog_type, simname, halo_finder)
+        if filename_list is None:
+            return None
+
+        halocat_obj = get_halocat_obj(simname, halo_finder)
+        result = halocat_obj.closest_halocat(filename_list, input_redshift)
+
+        if result == None:
+            print("No halo catalogs found in cache for simname = %s "
+                " and halo-finder = %s" % (simname, halo_finder))
+            return None
+        else:
+            return result[0], result[1]
+
 
 
     def load_halo_catalog(self, **kwargs):
