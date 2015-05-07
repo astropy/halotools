@@ -9,7 +9,7 @@ Objects and methods for 2D and 3D shapes
 from __future__ import division, print_function
 import math
 import numpy as np
-from distances import euclidean_distance
+from .distances import euclidean_distance
 
 __all__=['polygon2D','circle','face','polygon3D','sphere','cylinder','inside_volume']
 
