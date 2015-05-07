@@ -7,7 +7,6 @@ __all__ = (
     ['get_halotools_cache_dir','get_catalogs_dir']
     )
 
-
 import os
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 import warnings
