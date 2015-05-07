@@ -497,7 +497,9 @@ class CatalogManager(object):
                 raise IOError("For web locations, the only supported catalog_type are: "
                     "%s, %s, or %s" % ('raw_halos', 'halos', 'particles'))
         elif location=='cache':
-            dirname = cache_config.get_catalogs_dir(catalog_type, simname, halo_finder)
+            dirname = cache_config.get_catalogs_dir(
+                catalog_type, 
+                simname=simname, halo_finder=halo_finder)
         else:
             dirname = location
             if not os.path.exists(dirname):
