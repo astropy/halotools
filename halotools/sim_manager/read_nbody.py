@@ -467,9 +467,6 @@ class CatalogManager(object):
             return None
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
-        print("Printing filename list")
-        for f in filename_list:
-            print f
         result = halocat_obj.closest_halocat(filename_list, input_redshift)
 
         if result == None:
