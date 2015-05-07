@@ -628,7 +628,7 @@ class ConsuleoRockstar(HaloCat):
         super(ConsuleoRockstar, self).__init__(consuelo, 'rockstar')
 
     @property 
-    def web_location(self):
+    def raw_halocat_web_location(self):
         return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
 
     @property 
