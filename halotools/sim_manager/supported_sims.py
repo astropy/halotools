@@ -248,7 +248,7 @@ class HaloCat(object):
         output_fname = filename_list[idx_closest_catalog]
 
         redshift = (1./closest_scale_factor) - 1
-        return os.path.abspath(output_fname), redshift
+        return os.path.basename(output_fname), redshift
 
     @abstractproperty
     def halocat_column_info(self):
