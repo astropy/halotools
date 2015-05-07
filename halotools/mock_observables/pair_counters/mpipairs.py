@@ -13,7 +13,7 @@ except ImportError:
     print("mpi4py module not available.  MPI functionality will not work.")
     mpi4py_installed=False
 import numpy as np
-from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree 
+from..spatial.kdtrees.ckdtree import cKDTree 
 
 def main():
     '''
