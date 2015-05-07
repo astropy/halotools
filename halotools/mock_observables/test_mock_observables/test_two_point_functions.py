@@ -8,6 +8,13 @@ from ..two_point_functions import angular_two_point_correlation_function
 from ..two_point_functions import two_point_correlation_function_jackknife
 from ..two_point_functions import Delta_Sigma
 
+__all__=['test_TPCF_auto', 'test_TPCF_estimator', 'test_TPCF_sample_size_limit',\
+         'test_TPCF_randoms', 'test_TPCF_period_API',\
+         'test_two_point_correlation_function_jackknife',\
+         'test_two_point_correlation_function_jackknife_threading',
+         'test_angular_TPCF_auto', 'test_angular_TPCF_cross', \
+         'test_delta_sigma']
+
 ####two point correlation function########################################################
 def test_TPCF_auto():
 
