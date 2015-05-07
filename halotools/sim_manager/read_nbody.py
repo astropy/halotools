@@ -12,6 +12,7 @@ __all__=['ProcessedSnapshot','CatalogManager', 'RockstarReader']
 import numpy as np
 import os, sys, warnings, urllib2, fnmatch
 import pickle
+from time import time
 
 HAS_SOUP = False
 try:
@@ -745,6 +746,7 @@ class RockstarReader(object):
         self._uncompress_ascii()
         self.simname = simname
         self.halo_finder = halo_finder
+        self.halocat_obj = get_halocat_obj(simname, halo_finder)
 
     def default_halocat_cut(self, x):
         """ Function used to provide a simple cut on a raw halo catalog, 
@@ -763,12 +765,8 @@ class RockstarReader(object):
         """
 
         return x['mpeak'] > ( 
-            self.simobj.simulation.particle_mass*
+            self.halocat_obj.simulation.particle_mass*
             sim_defaults.Num_ptcl_requirement)
-
-    def get_halocat_fname_pattern(self, simname, halo_finder):
-        simobj = get_halocat_obj(simname, halo_finder)
-        return simobj.halocat_fname_pattern
 
     def file_len(self):
         """ Compute the number of all rows in fname
@@ -869,7 +867,7 @@ class RockstarReader(object):
         and returns the input filename appended with `.gz`.  
         """
         if self.fname[-3:]!='.gz':
-            print("...compressing ASCII data")
+            print("...re-compressing ASCII data")
             os.system("gzip "+self.fname)
             self.fname = self.fname + '.gz'
         else:
@@ -900,6 +898,7 @@ class RockstarReader(object):
             can be specified with the `nchunks` argument. Default is 1000. 
 
         """
+        start = time()
 
         if 'cuts_funcobj' in kwargs.keys():
             self.cuts_funcobj = kwargs['cuts_funcobj']
@@ -911,12 +910,28 @@ class RockstarReader(object):
         else:
             Nchunks = 1000
 
-        dt = self.simobj.halocat_column_info
+        dt = self.halocat_obj.halocat_column_info
 
         file_length = self.file_len()
+        header_length = self.header_len()
         chunksize = file_length / Nchunks
+        if chunksize == 0:
+            chunksize = file_length # data will now never be chunked
+            Nchunks = 1
+
+
+        print("\n\n\n\n...Processing ASCII data of file: \n%s\n " % self.fname)
+        print(" Total number of rows in file = %i" % file_length)
+        print(" Number of rows in detected header = %i \n" % header_length)
+        if Nchunks==1:
+            print("Reading catalog in a single chunk of size %i\n" % chunksize)
+        else:
+            print("...Reading catalog in %i chunks, each with %i rows\n" % (Nchunks, chunksize))
+
+        chunk_counter = 0
         chunk = []
         container = []
+        iout = np.round(Nchunks / 10.).astype(int)
         for linenum, line in enumerate(open(self.fname)):
             if line[0] == '#':
                 pass
@@ -924,7 +939,12 @@ class RockstarReader(object):
                 parsed_line = line.strip().split()
                 chunk.append(tuple(parsed_line))  
         
-            if (linenum % chunksize == 0) & (linenum > 0):        
+            if (linenum % chunksize == 0) & (linenum > 0):
+
+                chunk_counter += 1
+                if (chunk_counter % iout)==0:
+                    print("... working on chunk # %i of %i\n" % (chunk_counter, Nchunks))
+
                 a = np.array(chunk, dtype = dt)
                 container.append(a[self.cuts_funcobj(a)])
                 chunk = []
@@ -939,6 +959,11 @@ class RockstarReader(object):
             except NameError:
                 output = np.array(chunk) 
                 
+
+        end = time()
+        runtime = (end-start)/60.
+        print("\n Total runtime to read in ASCII = %.1f minutes" % runtime)
+
         return output
 
 

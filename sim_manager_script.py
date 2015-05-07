@@ -31,8 +31,10 @@ all_cached_files = catman.all_halocats_in_cache('halos')
 
 #############################################################################
 ####### CHECK THAT RAW HALO CATALOG DOWNLOADS GO TO CACHE #######
-desired_redshift = 11.5
-simname = 'bolshoi'
+desired_redshift = 10
+simname = 'multidark'
+#halo_finder = 'bdm'
+
 closest_cat_on_web = catman.closest_halocat('web', 'raw_halos', simname, halo_finder, desired_redshift)
 print("\nFor simname = %s and redshift = %.2f, " % (simname, desired_redshift))
 print("Closest halocat available for download: \n%s\n" % closest_cat_on_web[0])
@@ -50,6 +52,13 @@ if closest_cat_in_cache[0] != is_in_cache:
 	print("closest_halocat method failed to detect the following catalog: \n%s\n" % is_in_cache)
 
 
+#############################################################################
+halocat_fname = is_in_cache
+arr, reader = catman.process_raw_halocat(halocat_fname, simname, halo_finder)
+
+
+
+#############################################################################
 
 #############################################################################
 ####### CHECK THE HALOCAT_OBJ PROPERTIES #######
