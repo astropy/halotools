@@ -6,6 +6,8 @@ import numpy as np
 from ..sinha_pairs import countpairs
 from ..cpairs import npairs
 
+__all__=['test_countpairs']
+
 def test_countpairs():
 
     N = 1000
