@@ -513,6 +513,31 @@ class CatalogManager(object):
 
 
     def all_halocats_in_cache(self, catalog_type, **kwargs):
+        """ Return a list of all filenames (including absolute path) 
+        of halo catalogs in the cache directory. 
+
+        Parameters 
+        ----------
+        catalog_type : string
+            String giving the type of catalog. 
+            Should be `halos`, or `raw_halos`. 
+
+        simname : string, optional 
+            Nickname of the simulation, e.g. `bolshoi`. 
+            If not None, only the simname cache subdirectory 
+            will be searched. 
+
+        halo_finder : string, optional 
+            Nickname of the halo-finder, e.g. `rockstar`. 
+            If not None, only the simname/halo_finder 
+            cache subdirectory will be searched. 
+
+        Returns 
+        -------
+        all_cached_files : list 
+            List of strings containing the filenames. 
+
+        """
 
         rootdir = cache_config.get_catalogs_dir(catalog_type, **kwargs)
 
