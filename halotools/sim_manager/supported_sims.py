@@ -616,7 +616,11 @@ class MultiDarkRockstar(HaloCat):
             ('dmvir_dt_inst', 'f4'), 
             ('dmvir_dt_100myr', 'f4'), 
             ('dmvir_dt_tdyn', 'f4'), 
-            ('dmvir_dt_2dtyn', 'f4')
+            ('dmvir_dt_2dtyn', 'f4'),
+            ('dmvir_dt_3dtyn', 'f4'),
+            ('dmvir_dt_4dtyn', 'f4'),
+            ('dmvir_dt_tdyn_tdyn', 'f4'),
+            ('dmvir_dt_2tdyn_tdyn', 'f4')
             ])
         return dt
 

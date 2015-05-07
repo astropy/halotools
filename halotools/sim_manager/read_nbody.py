@@ -945,10 +945,24 @@ class RockstarReader(object):
                 if (chunk_counter % iout)==0:
                     print("... working on chunk # %i of %i\n" % (chunk_counter, Nchunks))
 
-                a = np.array(chunk, dtype = dt)
+                try:
+                    a = np.array(chunk, dtype = dt)
+                except ValueError:
+                    Nfields = len(dt.fields)
+                    print("Number of fields in np.dtype = %i" % Nfields)
+                    Ncolumns = []
+                    for elt in chunk:
+                        if len(elt) not in Ncolumns:
+                            Ncolumns.append(len(elt))
+                    print("Number of columns in chunk = ")
+                    for ncols in Ncolumns:
+                        print ncols
+                    print chunk[-1]
+                    raise ValueError("Number of columns does not match length of dtype")
+
                 container.append(a[self.cuts_funcobj(a)])
                 chunk = []
-    #Now for the final chunk missed by the above syntax
+
         a = np.array(chunk, dtype = dt)
         container.append(a[self.cuts_funcobj(a)])
 
