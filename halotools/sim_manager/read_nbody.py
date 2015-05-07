@@ -303,15 +303,10 @@ class CatalogManager(object):
 
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
-        existing_catalogs = self.available_snapshots(
-            download_loc, 'raw_halos', simname, halo_finder)
-        if output_fname[-3:] == '.gz':
-            file_pattern = '*'+os.path.basename(output_fname[:-3])+'*'
-        else:
-            file_pattern = '*'+os.path.basename(output_fname)+'*'
-        matching_catalogs = fnmatch.filter(existing_catalogs, file_pattern)
+        is_in_cache = self.check_for_existing_halocat(
+            download_loc, output_fname, 'raw_halos', simname, halo_finder)
 
-        if len(matching_catalogs) > 0:
+        if is_in_cache != False:
             if overwrite ==True:
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
                 for file_to_delete in matching_catalogs:
@@ -320,8 +315,8 @@ class CatalogManager(object):
             else:
                 raise IOError("The following filename already exists: \n%s\n"
                     "If you really want to overwrite the file, \n"
-                    "you must call this function again with the "
-                    "keyword argument `overwrite` set to `True`" % output_fname)
+                    "you must call the download_file_from_url function again \n"
+                    "with the keyword argument `overwrite` set to `True`" % output_fname)
 
         download_file_from_url(url, output_fname)
 
@@ -547,6 +542,72 @@ class CatalogManager(object):
                 all_cached_files.append(os.path.join(path, fname))
 
         return all_cached_files
+
+    def check_for_existing_halocat(self, 
+            location, fname, catalog_type, simname, halo_finder):
+        """ Method searches the appropriate location in the 
+        cache directory for the input fname, and returns a boolean for whether the 
+        file is already in cache. 
+
+        Parameters 
+        ----------
+        location : string 
+            Specifies the web or disk location to search for halo catalogs. 
+            Optional values for `location` are:
+
+                *  `web`
+
+                * `cache`
+
+                * a full pathname such as `/full/path/to/my/personal/halocats/`. 
+
+        fname : string 
+            Name of the file being searched for. 
+
+        catalog_type : string
+            String giving the type of catalog. 
+            Should be `halos`, or `raw_halos`. 
+
+        simname : string, optional 
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string, optional 
+            Nickname of the halo-finder, e.g. `rockstar`. 
+
+        Returns 
+        -------
+        is_in_cache : bool 
+            Boolean specifying whether the input fname 
+            is in the Halotools cache directory. 
+        """
+
+        # Check whether there are existing catalogs matching the file pattern 
+        # that is about to be downloaded
+        existing_catalogs = self.available_snapshots(
+            location, catalog_type, simname, halo_finder)
+
+        if fname[-3:] == '.gz':
+            file_pattern = '*'+os.path.basename(fname[:-3])+'*'
+        else:
+            file_pattern = '*'+os.path.basename(fname)+'*'
+        matching_catalogs = fnmatch.filter(existing_catalogs, file_pattern)
+
+        if len(matching_catalogs) == 0:
+            return False
+        elif len(matching_catalogs) == 1:
+            return matching_catalogs[0]
+        elif len(matching_catalogs) == 2:
+            length_matching_catalogs = [len(s) for s in matching_catalogs]
+            idx_sorted = np.argsort(length_matching_catalogs)
+            sorted_matching_catalogs = list(np.array(matching_catalogs)[idx_sorted])
+            fname1, fname2 = sorted_matching_catalogs
+            if fname2[:-3] == fname1:
+                warnings.warn("For filename:\n%s,\n"
+                "both the file and its uncompressed version appear "
+                "in the cache directory. " % fname2)
+            return sorted_matching_catalogs[1]
+        else:
+            raise IOError("More than 1 matching catalog found in cache directory")
 
 
     def load_halo_catalog(self, **kwargs):
