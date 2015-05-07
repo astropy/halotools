@@ -4,6 +4,9 @@ from ..geometry import face, polygon3D, sphere, polygon2D, circle, cylinder
 import numpy as np
 import math
 
+__all__['test_square', 'test_cube', 'test_circle', 'test_sphere', 'test_face',\
+        'test_cylinder', 'test_cylinder_periodic']
+
 def test_square():
     v1 = (0,0)
     v2 = (1,0)
