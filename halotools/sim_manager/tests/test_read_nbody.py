@@ -6,7 +6,7 @@ from .. import read_nbody
 __all__ = ['test_catalog_manager']
 
 def test_catalog_manager():
-	pass
+	catman = read_nbody.CatalogManager()
 
 
 
