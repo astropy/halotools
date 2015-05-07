@@ -18,7 +18,7 @@ available_cats_in_cache = catman.available_snapshots('cache', 'raw_halos', simna
 
 location = 'web'
 catalog_type = 'raw_halos'
-desired_redshift = 0.5
+desired_redshift = 1
 closest_cat = catman.closest_halocat(location, catalog_type, simname, halo_finder, desired_redshift)
 print closest_cat
 

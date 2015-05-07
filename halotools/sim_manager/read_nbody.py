@@ -526,13 +526,32 @@ class CatalogManager(object):
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
         result = halocat_obj.closest_halocat(filename_list, input_redshift)
-
         if result == None:
             print("No halo catalogs found in cache for simname = %s "
                 " and halo-finder = %s" % (simname, halo_finder))
             return None
+
+        if location=='web':
+            if catalog_type == 'raw_halos':
+                dirname = halocat_obj.raw_halocat_web_location
+            elif (catalog_type == 'halos') or (catalog_type == 'particles'):
+                dirname = sim_defaults.processed_halocats_webloc
+            else:
+                raise IOError("For web locations, the only supported catalog_type are: "
+                    "%s, %s, or %s" % ('raw_halos', 'halos', 'particles'))
+        elif location=='cache':
+            dirname = cache_config.get_catalogs_dir(catalog_type, simname, halo_finder)
         else:
-            return result[0], result[1]
+            dirname = location
+            if not os.path.exists(dirname):
+                raise IOError("The closest_halocat method was passed "
+                    "the following explicit dirname:\n%s\n"
+                    "This location must be a directory on your local disk, \n"
+                    "but no such location was detected")
+
+        absolute_fname = os.path.join(dirname, result[0])
+
+        return absolute_fname, result[1]
 
 
 
@@ -580,7 +599,7 @@ class CatalogManager(object):
 
     def load_catalog(self,catalog_type,
         dirname=None,filename=None,
-        download_yn=False,url=sim_defaults.aph_web_location):
+        download_yn=False,url=sim_defaults.processed_halocats_webloc):
         """ Use the astropy reader to load the halo or particle catalog into memory.
 
         Parameters 
