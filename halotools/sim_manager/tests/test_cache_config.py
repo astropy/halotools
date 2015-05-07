@@ -2,7 +2,7 @@
 import numpy as np
 import os
 import unittest
-import pytest
+from astropy.tests.helper import pytest
 
 from .. import cache_config
 
