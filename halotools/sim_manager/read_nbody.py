@@ -436,7 +436,6 @@ class CatalogManager(object):
         f.close()
 
         return output_full_fname
-
  
     def closest_halocat(
         self, location, catalog_type, simname, halo_finder, input_redshift):
@@ -512,6 +511,17 @@ class CatalogManager(object):
 
         return absolute_fname, result[1]
 
+
+    def all_halocats_in_cache(self, catalog_type, **kwargs):
+
+        rootdir = cache_config.get_catalogs_dir(catalog_type, **kwargs)
+
+        all_cached_files = []
+        for path, dirlist, filelist in os.walk(rootdir):
+            for fname in filelist:
+                all_cached_files.append(os.path.join(path, fname))
+
+        return all_cached_files
 
 
     def load_halo_catalog(self, **kwargs):
