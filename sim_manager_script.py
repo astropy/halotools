@@ -20,7 +20,10 @@ location = 'web'
 catalog_type = 'raw_halos'
 desired_redshift = 1
 closest_cat = catman.closest_halocat(location, catalog_type, simname, halo_finder, desired_redshift)
-print closest_cat
+print("\n Closest matching catalog on the web = \n%s\n " % closest_cat[0])
+location = 'cache'
+closest_cat = catman.closest_halocat(location, catalog_type, simname, halo_finder, desired_redshift)
+print("\n Closest matching catalog in cache = \n%s\n " % closest_cat[0])
 
 ########################################################
 
