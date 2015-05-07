@@ -7,6 +7,7 @@ from ..two_point_functions import two_point_correlation_function
 from ..two_point_functions import angular_two_point_correlation_function
 from ..two_point_functions import two_point_correlation_function_jackknife
 from ..two_point_functions import Delta_Sigma
+from ...utils import spherical_geometry as sg
 
 __all__=['test_TPCF_auto', 'test_TPCF_estimator', 'test_TPCF_sample_size_limit',\
          'test_TPCF_randoms', 'test_TPCF_period_API',\
@@ -175,8 +176,6 @@ def test_two_point_correlation_function_jackknife_threading():
 ####two point angular correlation function################################################
 def test_angular_TPCF_auto():
 
-    import halotools.utils.spherical_geometry as sg
-
     N1=100
     N2=100
     Nran = 1000
@@ -195,8 +194,6 @@ def test_angular_TPCF_auto():
 
 
 def test_angular_TPCF_cross():
-
-    import halotools.utils.spherical_geometry as sg
 
     N1=100
     N2=100
