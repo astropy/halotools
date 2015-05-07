@@ -9,14 +9,14 @@ from astropy.utils.data import get_pkg_data_fileobj
 from .. import read_nbody, cache_config
 
 
-__all__ = ['test_closest_halocat_in_cache', 'test_available_snapshots_in_cache', 'TestDummyClass']
+__all__ = ['test_closest_halocat', 'test_available_snapshots_in_cache', 'TestDummyClass']
 
 
 
-def test_closest_halocat_in_cache():
+def test_closest_halocat():
 	catman = read_nbody.CatalogManager()
-   	f = catman.closest_halocat_in_cache(
-   		'halos', 'bolshoi', 'rockstar', 100)
+   	f = catman.closest_halocat(
+   		'cache', 'halos', 'bolshoi', 'rockstar', 100)
    	#assert f != None
    	#assert f[0] == u'/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.09630.list.mpeak.gt.2e9.hdf5'
 

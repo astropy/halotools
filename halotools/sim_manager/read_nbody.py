@@ -107,9 +107,9 @@ class ProcessedSnapshot(object):
         self.halo_finder = halo_finder
 
         self.catman = CatalogManager()
-        result = self.catman.closest_halocat_in_cache(
-            'halos', self.simname, self.halo_finder, redshift, 
-            return_redshift=True)
+        result = self.catman.closest_halocat(
+            'cache', 'halos', self.simname, self.halo_finder, redshift
+            )
 
         if result is None:
             raise IOError("No processed halo catalogs found in cache "
@@ -437,50 +437,7 @@ class CatalogManager(object):
 
         return output_full_fname
 
-    def closest_halocat_in_cache(
-        self, catalog_type, simname, halo_finder, input_redshift):
-        """ Search the cache directory for the closest snapshot matching the 
-        input specs. 
-
-        Parameters 
-        ----------
-        catalog_type : string
-            String giving the type of catalog. 
-            Should be `halos`, or `raw_halos`. 
-
-        simname : string
-            Nickname of the simulation, e.g. `bolshoi`. 
-
-        halo_finder : string
-            Nickname of the halo-finder, e.g. `rockstar`. 
-
-        input_redshift : float
-            Desired redshift of the snapshot. 
-
-        Returns
-        -------
-        output_fname : string 
-            Filename of the closest matching snapshot. 
-
-        redshift : float 
-            Value of the redshift of the snapshot
-        """
-
-        filename_list = self.available_snapshots('cache', 
-            catalog_type, simname, halo_finder)
-        if filename_list is None:
-            return None
-
-        halocat_obj = get_halocat_obj(simname, halo_finder)
-        result = halocat_obj.closest_halocat(filename_list, input_redshift)
-
-        if result == None:
-            print("No halo catalogs found in cache for simname = %s "
-                " and halo-finder = %s" % (simname, halo_finder))
-            return None
-        else:
-            return result[0], result[1]
-
+ 
     def closest_halocat(
         self, location, catalog_type, simname, halo_finder, input_redshift):
         """ Search the cache directory for the closest snapshot matching the 
@@ -586,8 +543,8 @@ class CatalogManager(object):
             halo_finder = kwargs['halo_finder']
             redshift = kwargs['redshift']
 
-            result = self.closest_halocat_in_cache(
-                'halos', simname, halo_finder, redshift)
+            result = self.closest_halocat(
+                'cache', 'halos', simname, halo_finder, redshift)
             if fname == None:
                 return None
             else:
