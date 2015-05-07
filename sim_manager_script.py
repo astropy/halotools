@@ -31,7 +31,7 @@ all_cached_files = catman.all_halocats_in_cache('halos')
 
 #############################################################################
 ####### CHECK THAT RAW HALO CATALOG DOWNLOADS GO TO CACHE #######
-desired_redshift = 10
+desired_redshift = 6
 simname = 'multidark'
 #halo_finder = 'bdm'
 
