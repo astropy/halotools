@@ -178,6 +178,17 @@ class HaloCat(object):
 
         self.halo_finder = halo_finder
 
+    @abstractproperty
+    def original_data_source(self):
+        """ String specifying the source of the original, 
+        unprocessed halo catalog. For all halo catalogs 
+        officially supported by Halotools, this will be a 
+        publicly available web location. However, the 
+        `~halotools.sim_manager` sub-package provides user-support 
+        for proprietary simulations and catalogs. 
+        """
+        pass
+
     @property 
     def raw_halocats_available_for_download(self):
         """ Method searches the appropriate web location and 
@@ -313,6 +324,10 @@ class BolshoiRockstar(HaloCat):
     def raw_halocat_web_location(self):
         return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
 
+    @property
+    def original_data_source(self):
+        return self.raw_halocat_web_location
+
     @property 
     def halocat_fname_pattern(self):
         return '*hlist_*'
@@ -408,6 +423,10 @@ class BolshoiPlRockstar(HaloCat):
     def raw_halocat_web_location(self):
         return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/'
 
+    @property
+    def original_data_source(self):
+        return self.raw_halocat_web_location
+
     @property 
     def halocat_fname_pattern(self):
         return '*hlist_*'
@@ -501,6 +520,10 @@ class BolshoiBdm(HaloCat):
     def raw_halocat_web_location(self):
         return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/'
 
+    @property
+    def original_data_source(self):
+        return self.raw_halocat_web_location
+
     @property 
     def halocat_fname_pattern(self):
         return '*hlist_*'
@@ -567,6 +590,10 @@ class MultiDarkRockstar(HaloCat):
     @property 
     def raw_halocat_web_location(self):
         return 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
+
+    @property
+    def original_data_source(self):
+        return self.raw_halocat_web_location
 
     @property 
     def halocat_fname_pattern(self):
@@ -660,6 +687,10 @@ class ConsuleoRockstar(HaloCat):
     @property 
     def raw_halocat_web_location(self):
         return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
+
+    @property
+    def original_data_source(self):
+        return self.raw_halocat_web_location
 
     @property 
     def halocat_fname_pattern(self):

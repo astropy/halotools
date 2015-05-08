@@ -13,6 +13,7 @@ import numpy as np
 import os, sys, warnings, urllib2, fnmatch
 import pickle
 from time import time
+import datetime
 
 HAS_SOUP = False
 try:
@@ -389,9 +390,13 @@ class CatalogManager(object):
 
         return arr, reader
 
-    def store_processed_halocat(self, catalog, reader, version_name, overwrite=False, **kwargs):
+    def store_processed_halocat(self, catalog, reader, version_name, **kwargs):
         """
-        Method stores an hdf5 binary of the reduced halo catalog. 
+        Method stores an hdf5 binary of the reduced halo catalog to the desired location. 
+        The resulting hdf5 file includes metadata 
+        describing the source of the original halo catalog, the exact cuts that 
+        were used to reduce the original catalog, the timestamp the reduced catalog was 
+        originally processed, plus any optionally provided notes. 
 
         Parameters 
         ----------
@@ -427,13 +432,21 @@ class CatalogManager(object):
                 "store_processed_halocat method")
             return 
 
-        if output_loc == 'halotools_cache':
+        ###############
+        ### Interpret optional inputs 
+        if output_loc == 'cache':
             output_loc = cache_config.get_catalogs_dir(
                 'halos', simname=reader.simname, halo_finder=reader.halo_finder)
         else:
             if not os.path.exists(output_loc):
                 raise IOError("The store_processed_halocat method was passed the following output_loc argument: \n%s\n"
                     "This path does not exist. ")
+
+        if 'overwrite' in kwargs.keys():
+            overwrite = kwargs['overwrite']
+        else:
+            overwrite = False
+        ###############
 
         orig_catalog_fname = os.path.basename(reader.fname)
         if orig_catalog_fname[-3:] == '.gz':
@@ -446,9 +459,16 @@ class CatalogManager(object):
             output_full_fname)
         t.write(output_full_fname, path='halos', overwrite=overwrite)
 
+        ### Add metadata to the hdf5 file
         f = h5py.File(output_full_fname)
+
         pickled_cuts_funcobj = pickle.dumps(reader.cuts_funcobj, protocol = 0)
         f.attrs['halocat_exact_cuts'] = pickled_cuts_funcobj
+
+        time_right_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        f.attrs['time_of_original_reduction'] = time_right_now
+
+        
         f.close()
 
         return output_full_fname
