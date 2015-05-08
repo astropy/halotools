@@ -975,8 +975,13 @@ class RockstarReader(object):
                 
 
         end = time()
-        runtime = (end-start)/60.
-        print("\n Total runtime to read in ASCII = %.1f minutes" % runtime)
+        runtime = (end-start)
+        if runtime > 60:
+            runtime = runtime/60.
+            msg = "\n Total runtime to read in ASCII = %.1f minutes\n"
+        else:
+            msg = "\n Total runtime to read in ASCII = %.1f seconds\n"
+        print(msg % runtime)
 
         return output
 
