@@ -31,8 +31,6 @@ closest_cat_in_cache = catman.closest_halocat(location, catalog_type, simname, h
 print("\n Closest matching catalog on external disk = \n%s\n " % closest_cat_in_cache[0])
 
 
-
-
 """
 #############################################################################
 # CHECK THE CONVENIENCE FUNCTION ALL_HALOCATS_IN_CACHE
@@ -90,23 +88,44 @@ if closest_cat_in_cache[0] != is_in_cache:
 
 
 #############################################################################
-####### CHECK THAT WE CAN PROCESS ANY RAW HALO CATALOG INTO AN ARRAY #######
+####### CHECK THAT WE CAN PROCESS AND STORE ANY RAW HALO CATALOG INTO AN ARRAY #######
 print("\n\n Processing raw halo catalog found in cache\n\n")
 halocat_fname = is_in_cache
-arr, reader = catman.process_raw_halocat(halocat_fname, simname, halo_finder)
 
-print("\n\n Processing raw halo catalog found on disk\n\n")
-halocat_fname = is_on_disk
-arr, reader = catman.process_raw_halocat(halocat_fname, simname, halo_finder)
+def some_other_cut(x):
+	return x['mpeak'] > 5.e5
+arr, reader = catman.process_raw_halocat(halocat_fname, simname, halo_finder, cuts_funcobj=some_other_cut)
+
+### Store the catalog
+version_name = 'default.mpeak.cut'
+notes = {'cuts_description': 'I passed no cuts_funcobj argument, so I just used whatever the defaults were. '}
+output_full_fname = catman.store_processed_halocat(arr, reader, version_name, 
+	notes = notes, overwrite=True, cuts_funcobj=some_other_cut)
+
+import h5py
+f = h5py.File(output_full_fname)
+print f.attrs.keys()
+ps = f.attrs['halocat_exact_cuts']
+import pickle
+cutting_function = pickle.loads(f.attrs['halocat_exact_cuts'])
+
+
+f.close()
+#rr = sim_manager.RockstarReader(halocat_fname, simname, halo_finder)
+
+
+#print("\n\n Processing raw halo catalog found on disk\n\n")
+#halocat_fname = is_on_disk
+#arr, reader = catman.process_raw_halocat(halocat_fname, simname, halo_finder)
 
 
 #############################################################################
 
 #############################################################################
 ####### CHECK THE HALOCAT_OBJ PROPERTIES #######
-halocat_obj = sim_manager.read_nbody.get_halocat_obj(simname, halo_finder)
-webloc = halocat_obj.raw_halocat_web_location
-
+#halocat_obj = sim_manager.read_nbody.get_halocat_obj(simname, halo_finder)
+#original_loc = halocat_obj.original_data_source
+#print("Original data source for %s %s = \n%s\n" % (simname, halo_finder, original_loc))
 
 
 
