@@ -111,12 +111,6 @@ cutting_function = pickle.loads(f.attrs['halocat_exact_cuts'])
 
 
 f.close()
-#rr = sim_manager.RockstarReader(halocat_fname, simname, halo_finder)
-
-
-#print("\n\n Processing raw halo catalog found on disk\n\n")
-#halocat_fname = is_on_disk
-#arr, reader = catman.process_raw_halocat(halocat_fname, simname, halo_finder)
 
 
 #############################################################################
