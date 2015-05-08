@@ -213,7 +213,7 @@ class HaloCat(object):
 
         return output
 
-    def closest_halocat(self, filename_list, input_redshift):
+    def closest_halocat(self, filename_list, input_redshift, **kwargs):
         """ Method searches `filename_list` and returns the filename 
         of the closest matching snapshot to ``input_redshift``. 
 
@@ -227,11 +227,15 @@ class HaloCat(object):
         input_redshift : float
             Redshift of the requested snapshot.
 
+        version_name : string, optional
+            For cases where multiple versions of the same halo catalog 
+            are stored in the input `filename_list`, a matching 
+            version name must be supplied to disambiguate. 
+
         Returns
         -------
         output_fname : list 
-            List of strings of the filenames 
-            with the closest matching redshift. 
+            String of the filenames with the closest matching redshift. 
 
         redshift : float 
             Value of the redshift of the snapshot
@@ -266,10 +270,50 @@ class HaloCat(object):
         # the following behavior will return *all* 
         # filenames in the list which store snapshots 
         # at the most closely matching redshift
-        file_pattern = '*'+self.get_scale_factor_substring(output_fname)+'*'
+        scale_factor_substring = self.get_scale_factor_substring(os.path.basename(output_fname))
+        file_pattern = '*'+scale_factor_substring+'*'
         all_matching_fnames = fnmatch.filter(filename_list, file_pattern)
-        output = [os.path.basename(fname) for fname in all_matching_fnames]
+        fnames_with_matching_scale_factor = [os.path.basename(fname) for fname in all_matching_fnames]
 
+        # If necessary, disambiguate by using the input version_name
+        if len(fnames_with_matching_scale_factor) == 0:
+            raise SyntaxError("No matching filenames found. "
+                "This indicates a bug in Halotools, not your usage of the package")
+        elif len(fnames_with_matching_scale_factor) == 1:
+            output_fname = fnames_with_matching_scale_factor[0]
+        elif len(fnames_with_matching_scale_factor) > 1:
+            if 'version_name' not in kwargs.keys():
+                print("\nPrinting all filenames with scale factor = %s:\n" % scale_factor_substring)
+                for f in fnames_with_matching_scale_factor:
+                    print(f)
+                print ("\n")
+                raise KeyError("Multiple versions the halo catalog "
+                    " were found for scale factor = %s.\n"
+                    "In such a case, you must disambiguate by providing"
+                    " a string value for keyword argument version_name" 
+                    % scale_factor_substring)
+            else:
+                version_name = kwargs['version_name']
+                version_name_file_pattern = '*'+version_name+'*'
+                should_be_unique_fname = fnmatch.filter(
+                    fnames_with_matching_scale_factor, version_name_file_pattern)
+                if len(should_be_unique_fname) == 0:
+                    print("\nPrinting all filenames with scale factor = %s:\n" % scale_factor_substring)
+                    for f in fnames_with_matching_scale_factor:
+                        print(f)
+                    raise KeyError("\nInput version_name = %s.\n"
+                        "This does not correspond to any of the version names "
+                        "of halo catalogs with scale factor = %s:\n" 
+                        % (version_name, scale_factor_substring))
+                elif len(should_be_unique_fname)==1:
+                    output_fname = should_be_unique_fname[0]
+                else:
+                    print("\nPrinting all filenames with scale factor = %s:\n" % scale_factor_substring)
+                    for f in fnames_with_matching_scale_factor:
+                        print(f)
+                    raise KeyError("\nInput version_name = %s.\n"
+                        "This substring appears in more than one of the "
+                        "input fnames" % version_name)
 
         redshift = (1./closest_scale_factor) - 1
         return os.path.basename(output_fname), redshift
