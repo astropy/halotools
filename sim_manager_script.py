@@ -94,13 +94,14 @@ halocat_fname = is_in_cache
 
 def some_other_cut(x):
 	return x['mpeak'] > 5.e5
-arr, reader = catman.process_raw_halocat(halocat_fname, simname, halo_finder, cuts_funcobj=some_other_cut)
+
+arr, reader = catman.process_raw_halocat(halocat_fname, simname, halo_finder)
 
 ### Store the catalog
-version_name = 'default.mpeak.cut'
+version_name = 'mpeak.gt.2e9'
 notes = {'cuts_description': 'I passed no cuts_funcobj argument, so I just used whatever the defaults were. '}
 output_full_fname = catman.store_processed_halocat(arr, reader, version_name, 
-	notes = notes, overwrite=True, cuts_funcobj=some_other_cut)
+	notes = notes, overwrite=True)
 
 import h5py
 f = h5py.File(output_full_fname)
@@ -114,6 +115,39 @@ f.close()
 
 
 #############################################################################
+
+
+#dummylist = catman.all_halocats_in_cache('halos', simname='bolshoi', halo_finder='rockstar')
+
+dummylist = catman.available_snapshots('cache', 'halos', simname, halo_finder)
+print("\n")
+for f in dummylist:
+	print os.path.basename(f)
+print("\n")
+
+halocat_obj = sim_manager.read_nbody.get_halocat_obj(simname, halo_finder)
+print("Closest halocat = \n")
+print(halocat_obj.closest_halocat(dummylist, 11.77))
+print("\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #############################################################################
 ####### CHECK THE HALOCAT_OBJ PROPERTIES #######
