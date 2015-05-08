@@ -390,7 +390,7 @@ class CatalogManager(object):
 
         return arr, reader
 
-    def store_processed_halocat(self, catalog, reader, version_name, **kwargs):
+    def store_processed_halocat(self, catalog, reader_obj, version_name, **kwargs):
         """
         Method stores an hdf5 binary of the reduced halo catalog to the desired location. 
         The resulting hdf5 file includes metadata 
@@ -421,6 +421,13 @@ class CatalogManager(object):
             If True, and if there exists a catalog with the same filename in the 
             output location, the existing catalog will be overwritten. Default is False. 
 
+        cuts_funcobj : function object, optional
+            Function used to apply cuts to the rows of the ASCII data. 
+            `cuts_funcobj` should accept a structured array as input, 
+            and return a boolean array of the same length. 
+            If None, default cut is set by 
+            `~halotools.sim_manager.RockstarReader.default_halocat_cut`. 
+
         notes : dict, optional 
             Additional notes that will be appended to the stored hdf5 file as metadata. 
             Each dict key of `notes` will be a metadata attribute of the hdf5 file, accessible 
@@ -447,8 +454,8 @@ class CatalogManager(object):
             output_loc = 'cache'
 
         if output_loc == 'cache':
-            output_loc = cache_config.get_catalogs_dir(
-                'halos', simname=reader.simname, halo_finder=reader.halo_finder)
+            output_loc = cache_config.get_catalogs_dir('halos', 
+                simname=reader_obj.simname, halo_finder=reader_obj.halo_finder)
         else:
             if not os.path.exists(output_loc):
                 raise IOError("The store_processed_halocat method was passed the following output_loc argument: \n%s\n"
@@ -471,7 +478,7 @@ class CatalogManager(object):
                     "attached to keys in the input notes dictionary")
         ##############################
 
-        orig_catalog_fname = os.path.basename(reader.fname)
+        orig_catalog_fname = os.path.basename(reader_obj.fname)
         if orig_catalog_fname[-3:] == '.gz':
             orig_catalog_fname = orig_catalog_fname[:-3]
 
@@ -482,21 +489,56 @@ class CatalogManager(object):
             output_full_fname)
         t.write(output_full_fname, path='halos', overwrite=overwrite)
 
+        #################################
+
+        def get_pickled_cuts_funcobj(reader_instance, **kwargs):
+
+            if 'cuts_funcobj' in kwargs.keys():
+                if kwargs['cuts_funcobj'] == 'nocut':
+                    cuts_funcobj = 'No cuts were applied: all rows of the original catalog were kept'
+                    if reader_instance._cuts_description != 'nocut':
+                        raise SyntaxError("\nThe store_processed_halocat method was supplied with "
+                            "keyword argument cuts_funcobj = 'nocut',\n"
+                            "but this is inconsistent with the input supplied to the reader_obj\n")
+                else:
+                    if not callable(kwargs['cuts_funcobj']):
+                        raise TypeError("The input cuts_funcobj must be a callable function")
+                    else:
+                        cuts_funcobj = kwargs['cuts_funcobj']
+                    if reader_instance._cuts_description != 'User-supplied cuts_funcobj':
+                        raise SyntaxError("\nThe store_processed_halocat method was supplied with "
+                            "a function object for the keyword argument cuts_funcobj,\n"
+                            "but this is inconsistent with the input supplied to the reader_obj\n")
+
+            else:
+                reader_name = reader_instance.__class__.__name__
+                cuts_funcobj = ("Halo catalog cuts were made using "
+                    "the default_halocat_cut method of "+reader_name)
+                if reader_instance._cuts_description != 'Default cut set by default_halocat_cut':
+                    raise SyntaxError("\nThe store_processed_halocat method was not supplied with "
+                        "a function object for the keyword argument cuts_funcobj.\n"
+                        "This is inconsistent with the input supplied to the reader_obj\n")
+
+            return cuts_funcobj
+
         ### Add metadata to the hdf5 file
         f = h5py.File(output_full_fname)
 
-        pickled_cuts_funcobj = pickle.dumps(reader.cuts_funcobj, protocol = 0)
+        # Function object used to cut the original halo catalog
+        cuts_funcobj = get_pickled_cuts_funcobj(reader_obj, **kwargs)
+        pickled_cuts_funcobj = pickle.dumps(cuts_funcobj, protocol = 0)
         f.attrs['halocat_exact_cuts'] = pickled_cuts_funcobj
 
         time_right_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         f.attrs['time_of_original_reduction'] = time_right_now
 
-        f.attrs['original_data_source'] = reader.halocat_obj.original_data_source
+        f.attrs['original_data_source'] = reader_obj.halocat_obj.original_data_source
 
         for note_key, note in notes.iteritems():
             f.attrs[note_key] = note
 
         f.close()
+        #################################
 
         return output_full_fname
  
@@ -805,12 +847,30 @@ class RockstarReader(object):
     def __init__(self, input_fname, simname, halo_finder, **kwargs):
 
         if not os.path.isfile(input_fname):
-            raise IOError("Input filename %s is not a file" % input_fname)
+            if not os.path.isfile(input_fname[:-3]):
+                raise IOError("Input filename %s is not a file" % input_fname)
+                
         self.fname = input_fname
         self._uncompress_ascii()
         self.simname = simname
         self.halo_finder = halo_finder
         self.halocat_obj = get_halocat_obj(simname, halo_finder)
+
+        if 'cuts_funcobj' in kwargs.keys():
+            if kwargs['cuts_funcobj'] == 'nocut':
+                g = lambda x : np.ones(len(x), dtype=bool)
+                self.cuts_funcobj = g
+                self._cuts_description = 'nocut'
+            else:
+                if callable(kwargs['cuts_funcobj']):
+                    self.cuts_funcobj = kwargs['cuts_funcobj']
+                    self._cuts_description = 'User-supplied cuts_funcobj'
+                else:
+                    raise TypeError("The input cuts_funcobj must be a callable function")
+                    
+        else:
+            self.cuts_funcobj = self.default_halocat_cut
+            self._cuts_description = 'Default cut set by default_halocat_cut'
 
     def default_halocat_cut(self, x):
         """ Function used to provide a simple cut on a raw halo catalog, 
@@ -964,10 +1024,10 @@ class RockstarReader(object):
         """
         start = time()
 
-        if 'cuts_funcobj' in kwargs.keys():
-            self.cuts_funcobj = kwargs['cuts_funcobj']
-        else:
-            self.cuts_funcobj = self.default_halocat_cut
+        #if 'cuts_funcobj' in kwargs.keys():
+        #    self.cuts_funcobj = kwargs['cuts_funcobj']
+        #else:
+        #    self.cuts_funcobj = self.default_halocat_cut
 
         if 'nchunks' in kwargs.keys():
             Nchunks = kwargs['nchunks']
