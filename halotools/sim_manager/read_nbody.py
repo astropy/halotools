@@ -64,7 +64,7 @@ def get_halocat_obj(simname, halo_finder):
 
     Returns 
     -------
-    simobj : object 
+    halocat_obj : object 
         Class instance of `~halotools.sim_manager.supported_sims.HaloCat`. 
         Used to read ascii data in the specific format of the 
         `simname` simulation and `halo_finder` halos. 
@@ -78,11 +78,11 @@ def get_halocat_obj(simname, halo_finder):
         if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
             supported_halocat_classes.append(clobj())
 
-    simobj = None
-    for sim in supported_halocat_classes:
-        if (sim.simname == simname) & (sim.halo_finder == halo_finder):
-            simobj = sim
-    if simobj==None:
+    halocat_obj = None
+    for halocat in supported_halocat_classes:
+        if (halocat.simname == simname) & (halocat.halo_finder == halo_finder):
+            halocat_obj = halocat
+    if halocat_obj==None:
         print("No simulation class found for %s simulation and %s halo-finder.\n"
             "Either there was a typo in specifying the simname and/or halo-finder,\n"
             "or you tried to use an unsupported halo catalog. \n"
@@ -92,7 +92,7 @@ def get_halocat_obj(simname, halo_finder):
             % (simname, halo_finder))
         return None
     else:
-        return simobj
+        return halocat_obj
 
 
 class ProcessedSnapshot(object):
@@ -170,17 +170,19 @@ class CatalogManager(object):
 
     def available_snapshots(self, location, catalog_type, simname, halo_finder):
         """
+        Return a list of the snapshots that are stored at the input location. 
+
         Parameters 
         ----------
         location : string 
             Specifies the web or disk location to search for halo catalogs. 
             Optional values for `location` are:
 
-                *  `web`
+                *  `web` - default web location defined by `~halotools.sim_manager.HaloCat` instance. 
 
-                * `cache`
+                * `cache` - Halotools cache location defined in `~halotools.sim_manager.cache_config`
 
-                * a full pathname such as `/full/path/to/my/personal/halocats/`. 
+                * a full pathname such as `/explicit/full/path/to/my/personal/halocats/`. 
 
         catalog_type : string 
             If you want the original, unprocessed ASCII data produced by Rockstar, 
@@ -201,7 +203,9 @@ class CatalogManager(object):
         Returns 
         -------
         fname_list : list 
-            List of strings storing the filenames of all available halo catalogs. 
+            List of strings storing the filenames 
+            (including absolute path) of all halo catalogs stored 
+            at the input location. 
 
         """
 
@@ -257,7 +261,14 @@ class CatalogManager(object):
         overwrite : boolean, optional
             If a file with the same filename already exists 
             in the requested download location, the `overwrite` boolean determines 
-            whether or not to overwrite the file. Default is False. 
+            whether or not to overwrite the file. Default is False, in which case 
+            no download will occur if a pre-existing file is detected. 
+
+        Returns 
+        -------
+        output_fname : string  
+            Filename (including absolute path) of the location of the downloaded 
+            halo catalog.  
         """
 
         if HAS_SOUP == False:
@@ -340,20 +351,28 @@ class CatalogManager(object):
 
         cuts_funcobj : function object, optional
             Function used to apply cuts to the rows of the ASCII data. 
-            `cuts_funcobj` should accept a length-Nrows numpy structured array as input, 
-            and return a length-Nrows boolean array. Default cut is set by 
+            `cuts_funcobj` should accept a structured array as input, 
+            and return a boolean array of the same length. 
+            If None, default cut is set by 
             `~halotools.sim_manager.RockstarReader.default_halocat_cut`. 
 
         Returns 
         -------
         arr : array 
             Structured numpy array storing all rows passing the cuts. 
+            Column names of `arr` are determined by the 
+            `~halotools.sim_manager.HaloCat.halocat_column_info` method of the 
+            appropriate class instance of 
+            `~halotools.sim_manager.HaloCat`. 
 
         reader_obj : object 
-            Class instance of the reader used to process the raw halo data. 
-            If you want to use the `store_processed_halocat` method, 
-            it will be necessary to pass this object as an argument; this 
-            requirement is used to ensure consistent bookkeeping.  
+            Class instance of the reader used to process the raw halo data, e.g., 
+            `~halotools.sim_manager.RockstarReader`. 
+            If you want to use the `store_processed_halocat` method of this class 
+            to manage the bookkeeping for the processed catalog, 
+            it will be necessary to pass `reader_obj` as an input argument 
+            to `store_processed_halocat`; 
+            this requirement is used to ensure consistent bookkeeping.  
 
         """
         reader = RockstarReader(input_fname, 

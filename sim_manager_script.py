@@ -78,11 +78,6 @@ if is_on_disk == False:
 	print ("\n")
 
 
-
-
-
-
-
 if is_in_cache == False:
 	print("\n... downloading file...\n")
 	catman.download_raw_halocat(simname, halo_finder, closest_cat_on_web[1], overwrite = False)
