@@ -410,12 +410,13 @@ class CatalogManager(object):
             Returned as the second output of `process_raw_halocat`. 
 
         version_name : string 
-            String that will be appended to `orig_catalog_fname` to create a new 
-            filename for the cut halo catalog. 
+            String that will be appended to the original halo catalog filename
+            to create a new filename for the cut halo catalog. 
 
         output_loc : string, optional
             Location to store catalog on disk. Default is Halotools cache directory. 
-            (File sizes of processed binaries typically vary from 100Mb-1Gb). 
+            (File sizes of the Halotools-supported 
+            processed binaries typically vary from 100Mb-1Gb, depending on the cuts). 
 
         overwrite : bool, optional 
             If True, and if there exists a catalog with the same filename in the 
@@ -427,6 +428,9 @@ class CatalogManager(object):
             and return a boolean array of the same length. 
             If None, default cut is set by 
             `~halotools.sim_manager.RockstarReader.default_halocat_cut`. 
+            The `store_processed_halocat` method will raise an exception if this 
+            `cuts_funcobj` differs from the `cuts_funcobj` originally passed 
+            to `reader_obj`. 
 
         notes : dict, optional 
             Additional notes that will be appended to the stored hdf5 file as metadata. 
