@@ -229,10 +229,11 @@ class HaloCat(object):
 
         Returns
         -------
-        output_fname : string 
-            Filename of the closest matching snapshot. 
+        output_fname : list 
+            List of strings of the filenames 
+            with the closest matching redshift. 
 
-        redshift : float, optional 
+        redshift : float 
             Value of the redshift of the snapshot
         """
 
@@ -255,6 +256,20 @@ class HaloCat(object):
             scale_factor_list, input_scale_factor)
         closest_scale_factor = scale_factor_list[idx_closest_catalog]
         output_fname = filename_list[idx_closest_catalog]
+
+        # At this point, we have found a single filename 
+        # storing a halo catalog with the most closely matching redshift
+        # However, there may be cases where there are multiple versions of a 
+        # snapshot in a given location (e.g., the same halo catalog 
+        # with different cuts applied). 
+        # To robustly handle such cases, 
+        # the following behavior will return *all* 
+        # filenames in the list which store snapshots 
+        # at the most closely matching redshift
+        file_pattern = '*'+self.get_scale_factor_substring(output_fname)+'*'
+        all_matching_fnames = fnmatch.filter(filename_list, file_pattern)
+        output = [os.path.basename(fname) for fname in all_matching_fnames]
+
 
         redshift = (1./closest_scale_factor) - 1
         return os.path.basename(output_fname), redshift

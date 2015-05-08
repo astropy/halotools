@@ -599,8 +599,9 @@ class CatalogManager(object):
         if location=='web':
             if catalog_type == 'raw_halos':
                 dirname = halocat_obj.raw_halocat_web_location
-            elif (catalog_type == 'halos') or (catalog_type == 'particles'):
-                dirname = sim_defaults.processed_halocats_webloc
+            elif (catalog_type == 'halos'):
+                dirname = cache_config.processed_halocats_web_location(
+                    simname=simname, halo_finder=halo_finder)
             else:
                 raise IOError("For web locations, the only supported catalog_type are: "
                     "%s, %s, or %s" % ('raw_halos', 'halos', 'particles'))
