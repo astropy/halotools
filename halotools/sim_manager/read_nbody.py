@@ -399,9 +399,10 @@ class CatalogManager(object):
             Numpy array of halo data. 
             Returned as the first output of `process_raw_halocat`. 
 
-        reader : object 
+        reader_obj : object 
             Class instance of the reader used to reduce the raw ASCII data into 
-            a structured numpy array. Returned as the second output of `process_raw_halocat`. 
+            a structured numpy array, e.g., `~halotools.sim_manager.RockstarReader`. 
+            Returned as the second output of `process_raw_halocat`. 
 
         version_name : string 
             String that will be appended to `orig_catalog_fname` to create a new 
