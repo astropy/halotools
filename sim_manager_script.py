@@ -116,9 +116,6 @@ f.close()
 
 #############################################################################
 
-
-#dummylist = catman.all_halocats_in_cache('halos', simname='bolshoi', halo_finder='rockstar')
-
 dummylist = catman.available_snapshots('cache', 'halos', simname, halo_finder)
 print("\n")
 for f in dummylist:
@@ -127,7 +124,7 @@ print("\n")
 
 halocat_obj = sim_manager.read_nbody.get_halocat_obj(simname, halo_finder)
 print("Closest halocat = \n")
-print(halocat_obj.closest_halocat(dummylist, 11.77))
+print(halocat_obj.closest_halocat(dummylist, 11.77, version_name='mpeak.gt.2e9'))
 print("\n")
 
 
