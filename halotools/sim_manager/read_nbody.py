@@ -462,7 +462,8 @@ class CatalogManager(object):
                 simname=reader_obj.simname, halo_finder=reader_obj.halo_finder)
         else:
             if not os.path.exists(output_loc):
-                raise IOError("The store_processed_halocat method was passed the following output_loc argument: \n%s\n"
+                raise IOError("The store_processed_halocat method "
+                    "was passed the following output_loc argument: \n%s\n"
                     "This path does not exist. ")
 
         ### overwrite preference ###
