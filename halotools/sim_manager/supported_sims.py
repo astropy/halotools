@@ -184,8 +184,6 @@ class HaloCat(object):
         returns a list of the filenames of all relevant 
         raw halo catalogs that are available for download. 
 
-        that are available at the host url. 
-
         Returns 
         -------
         output : list 
@@ -252,10 +250,28 @@ class HaloCat(object):
 
     @abstractproperty
     def halocat_column_info(self):
+        """ Method used to define how to interpret the columns of 
+        raw ASCII halo catalog data. 
+
+        Returns 
+        -------
+        dt : numpy dtype
+            Numpy dtype object. Each entry is a tuple 
+            corresponding to a single column of the ASCII 
+            halo catalog. Like all dtype objects, the tuples have 
+            just two elements: a field and a data type. 
+            The field is a string defining the name of the property 
+            stored in the colunmn. The data type can be any type 
+            supported by Numpy, e.g., `f4`, `i8`, etc. 
+
+        """
         pass
 
     @abstractproperty
     def halocat_fname_pattern(self):
+        """ String pattern that will be used to identify halo catalog filenames 
+        associated with this simulation and halo-finder. 
+        """
         pass
 
     def get_scale_factor_substring(self, fname):
