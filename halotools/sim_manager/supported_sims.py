@@ -607,7 +607,14 @@ class MultiDarkRockstar(HaloCat):
             ('axisA_x', 'f4'), 
             ('axisA_y', 'f4'), 
             ('axisA_z', 'f4'), 
+            ('b_to_a_500c', 'f4'), 
+            ('c_to_a_500c', 'f4'), 
+            ('axisA_x_500c', 'f4'), 
+            ('axisA_y_500c', 'f4'), 
+            ('axisA_z_500c', 'f4'), 
             ('t_by_u', 'f4'), 
+            ('mass_pe_behroozi', 'f4'), 
+            ('mass_pe_diemer', 'f4'), 
             ('macc', 'f4'), 
             ('mpeak', 'f4'), 
             ('vacc', 'f4'), 
@@ -616,11 +623,14 @@ class MultiDarkRockstar(HaloCat):
             ('dmvir_dt_inst', 'f4'), 
             ('dmvir_dt_100myr', 'f4'), 
             ('dmvir_dt_tdyn', 'f4'), 
-            ('dmvir_dt_2dtyn', 'f4'),
-            ('dmvir_dt_3dtyn', 'f4'),
-            ('dmvir_dt_4dtyn', 'f4'),
-            ('dmvir_dt_tdyn_tdyn', 'f4'),
-            ('dmvir_dt_2tdyn_tdyn', 'f4')
+            ('dmvir_dt_2dtyn', 'f4'), 
+            ('dmvir_dt_mpeak', 'f4'), 
+            ('scale_mpeak', 'f4'), 
+            ('scale_lastacc', 'f4'), 
+            ('scale_firstacc', 'f4'), 
+            ('mvir_firstacc', 'f4'), 
+            ('vmax_firstacc', 'f4'), 
+            ('vmax_mpeak', 'f4')
             ])
         return dt
 
