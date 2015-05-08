@@ -419,7 +419,12 @@ class CatalogManager(object):
 
         overwrite : bool, optional 
             If True, and if there exists a catalog with the same filename in the 
-            output location, the existing catalog will be overwritten. Default is False.  
+            output location, the existing catalog will be overwritten. Default is False. 
+
+        notes : dict, optional 
+            Additional notes that will be appended to the stored hdf5 file as metadata. 
+            Each dict key of `notes` will be a metadata attribute of the hdf5 file, accessible 
+            via hdf5_fileobj.attrs[key]. The value attached to each key can be any string. 
 
         Returns 
         -------
@@ -432,8 +437,15 @@ class CatalogManager(object):
                 "store_processed_halocat method")
             return 
 
-        ###############
+        ##############################
         ### Interpret optional inputs 
+
+        ### output location ###
+        if 'output_loc' in kwargs.keys():
+            output_loc = kwargs['output_loc']
+        else:
+            output_loc = 'cache'
+
         if output_loc == 'cache':
             output_loc = cache_config.get_catalogs_dir(
                 'halos', simname=reader.simname, halo_finder=reader.halo_finder)
@@ -442,11 +454,22 @@ class CatalogManager(object):
                 raise IOError("The store_processed_halocat method was passed the following output_loc argument: \n%s\n"
                     "This path does not exist. ")
 
+        ### overwrite preference ###
         if 'overwrite' in kwargs.keys():
             overwrite = kwargs['overwrite']
         else:
             overwrite = False
-        ###############
+
+        ### notes to attach to output hdf5 as metadata ###
+        if 'notes' in kwargs.keys():
+            notes = kwargs['notes']
+        else:
+            notes = {}
+        for key, value in notes.iteritems():
+            if type(value) != str:
+                raise ValueError("Strings are the only permissible data types of values "
+                    "attached to keys in the input notes dictionary")
+        ##############################
 
         orig_catalog_fname = os.path.basename(reader.fname)
         if orig_catalog_fname[-3:] == '.gz':
@@ -468,7 +491,11 @@ class CatalogManager(object):
         time_right_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         f.attrs['time_of_original_reduction'] = time_right_now
 
-        
+        f.attrs['original_data_source'] = reader.halocat_obj.original_data_source
+
+        for note_key, note in notes.iteritems():
+            f.attrs[note_key] = note
+
         f.close()
 
         return output_full_fname
@@ -771,9 +798,6 @@ class CatalogManager(object):
         """
 
         pass
-
-
-
 
 ###################################################################################################
 class RockstarReader(object):
