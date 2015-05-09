@@ -253,7 +253,13 @@ class HaloCat(object):
                 catlist.append(os.path.join(halocatdir, a['href']))
 
         file_pattern = '*halotools.official.version*'
-        output = fnmatch.filter(catlist, file_pattern)
+        all_halocats = fnmatch.filter(catlist, file_pattern)
+
+        file_pattern = '*'+self.simname+'/'+self.halo_finder+'*'
+        output = fnmatch.filter(all_halocats, file_pattern)
+
+#        file_pattern = '*'+self.halo_finder+'*'
+#        output = fnmatch.filter(simname_halocats, file_pattern)
 
         return output
 

@@ -774,11 +774,19 @@ class CatalogManager(object):
             dz_tol = 0.1
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
-        list_of_available_snapshots = halocat_obj.raw_halocats_available_for_download
+        list_of_available_snapshots = halocat_obj.preprocessed_halocats_available_for_download
         closest_snapshot_fname, redshift_of_closest_match = (
             halocat_obj.closest_halocat(
             list_of_available_snapshots, input_redshift)
             )
+        
+        if abs(redshift_of_closest_match - input_redshift) > dz_tol:
+            msg = (
+                "No raw %s halo catalog has \na redshift within %.2f " + 
+                "of the input_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                )
+            print(msg % (simname, dz_tol, input_redshift, redshift_of_closest_match))
+            return 
 
 
     def load_halo_catalog(self, **kwargs):
