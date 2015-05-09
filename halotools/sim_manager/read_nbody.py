@@ -725,6 +725,62 @@ class CatalogManager(object):
             raise IOError("More than 1 matching catalog found in cache directory")
 
 
+    def download_preprocessed_halo_catalog(self, simname, halo_finder, input_redshift, 
+        overwrite = False, **kwargs):
+        """ Method to download publicly available ascii data of 
+        raw halo catalog from web location. 
+
+        Parameters 
+        ----------
+        simname : string 
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string 
+            Nickname of the halo-finder, e.g. `rockstar`. 
+
+        input_redshift : float 
+            Redshift of the requested snapshot. Must match one of the 
+            available snapshots, or a prompt will be issued providing the nearest 
+            available snapshots to choose from. 
+
+        dz_tol : float, optional
+            Tolerance value determining how close the requested redshift must be to 
+            some available snapshot before issuing a warning. Default value is 0.1. 
+
+        download_loc : string, optional
+            Absolute pathname of where the raw halo catalog will be stored. 
+            Default is the halotools cache directory. 
+
+        overwrite : boolean, optional
+            If a file with the same filename already exists 
+            in the requested download location, the `overwrite` boolean determines 
+            whether or not to overwrite the file. Default is False, in which case 
+            no download will occur if a pre-existing file is detected. 
+
+        Returns 
+        -------
+        output_fname : string  
+            Filename (including absolute path) of the location of the downloaded 
+            halo catalog.  
+        """
+
+        if HAS_SOUP == False:
+            print("Must have BeautifulSoup installed to use Halotools Catalog Manager")
+            return 
+
+        if 'dz_tol' in kwargs.keys():
+            dz_tol = kwargs['dz_tol']
+        else:
+            dz_tol = 0.1
+
+        halocat_obj = get_halocat_obj(simname, halo_finder)
+        list_of_available_snapshots = halocat_obj.raw_halocats_available_for_download
+        closest_snapshot_fname, redshift_of_closest_match = (
+            halocat_obj.closest_halocat(
+            list_of_available_snapshots, input_redshift)
+            )
+
+
     def load_halo_catalog(self, **kwargs):
         """ Method returns an Astropy Table object of halos 
         that have been stored as a processed binary hdf5 file. 
