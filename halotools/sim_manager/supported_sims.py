@@ -204,14 +204,12 @@ class HaloCat(object):
             for this simulation and halo-finder. 
 
         """
-        url = os.path.join(
-            os.path.join(self.processed_halocats_webloc, self.simname), 
-            self.halo_finder)
+        url = self.raw_halocat_web_location
 
         soup = BeautifulSoup(requests.get(url).text)
         file_list = []
         for a in soup.find_all('a'):
-            file_list.append(a['href'])
+            file_list.append(os.path.join(url, a['href']))
 
         file_pattern = self.halocat_fname_pattern
         output = fnmatch.filter(file_list, file_pattern)
@@ -256,7 +254,6 @@ class HaloCat(object):
 
         file_pattern = '*halotools.official.version*'
         output = fnmatch.filter(catlist, file_pattern)
-
 
         return output
 
