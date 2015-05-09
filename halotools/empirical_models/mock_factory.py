@@ -40,7 +40,7 @@ class HodMockFactory(object):
         ----------
         snapshot : object 
             Object containing the halo catalog and its metadata, 
-            produced by `~halotools.sim_manager.read_nbody.processed_snapshot`
+            produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
 
         composite_model : object 
             Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`. 
