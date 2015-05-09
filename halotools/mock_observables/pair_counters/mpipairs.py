@@ -6,6 +6,10 @@
 #calculate number of pairs with separations given in bins.
 
 from __future__ import division, print_function
+import sys
+import os
+from astropy.io import ascii
+from astropy.table import Table
 try: 
     from mpi4py import MPI
     mpi4py_installed=True
@@ -13,19 +17,17 @@ except ImportError:
     print("mpi4py module not available.  MPI functionality will not work.")
     mpi4py_installed=False
 import numpy as np
-from..spatial.kdtrees.ckdtree import cKDTree 
+from ..spatial.kdtrees.ckdtree import cKDTree 
 
 def main():
-    '''
+    """
     example:
     mpirun -np 4 python mpipairs.py output.dat input1.dat input2.dat
     
     Input files should be formatted as N rows of k columns for N k dimensional points.  
         column headers are ok.  e.g. x y z.  If points have weights attached, these must 
         be in a column with a header label 'w'.  In this case, there will be k+1 columns.
-    '''
-    import sys
-    import os
+    """
     
     if mpi4py_installed==True:
         comm = MPI.COMM_WORLD
@@ -52,8 +54,6 @@ def main():
     else:
         raise ValueError('Please provide a fielpath to save output and two data files to read.')
     
-    from astropy.io import ascii
-    from astropy.table import Table
     data_1 = ascii.read(filename_1)
     data_2 = ascii.read(filename_2)
     
