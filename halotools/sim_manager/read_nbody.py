@@ -833,13 +833,13 @@ class CatalogManager(object):
         fname : string, optional 
             Filename (including absolute path) where the hdf5 file is stored. 
 
-        simname : string
+        simname : string, optional 
             Nickname of the simulation, e.g. `bolshoi`. 
 
-        halo_finder : string
+        halo_finder : string, optional 
             Nickname of the halo-finder, e.g. `rockstar`. 
 
-        redshift : float
+        redshift : float, optional 
             Redshift of the desired snapshot. 
 
         Returns 
@@ -857,7 +857,7 @@ class CatalogManager(object):
 
             result = self.closest_halocat(
                 'cache', 'halos', simname, halo_finder, redshift)
-            if fname == None:
+            if result == None:
                 return None
             else:
                 fname, z = result[0], result[1]
