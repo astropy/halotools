@@ -17,6 +17,8 @@ try:
 except:
     pass
 
+import posixpath
+import urlparse
 
 from . import sim_defaults 
 
@@ -202,7 +204,10 @@ class HaloCat(object):
             for this simulation and halo-finder. 
 
         """
-        url = self.raw_halocat_web_location
+        url = os.path.join(
+            os.path.join(self.processed_halocats_webloc, self.simname), 
+            self.halo_finder)
+
         soup = BeautifulSoup(requests.get(url).text)
         file_list = []
         for a in soup.find_all('a'):
@@ -212,6 +217,49 @@ class HaloCat(object):
         output = fnmatch.filter(file_list, file_pattern)
 
         return output
+
+    @property 
+    def preprocessed_halocats_available_for_download(self):
+        """ Method searches the appropriate web location and 
+        returns a list of the filenames of all reduced  
+        halo catalog binaries processed by Halotools 
+        that are available for download. 
+
+        Returns 
+        -------
+        output : list 
+            List of strings of all halo catalogs available for download 
+            for this simulation and halo-finder. 
+
+        """
+        baseurl = sim_defaults.processed_halocats_webloc
+        soup = BeautifulSoup(requests.get(baseurl).text)
+        simloclist = []
+        for a in soup.find_all('a', href=True):
+            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+            if dirpath and dirpath[0] != '/':
+                simloclist.append(os.path.join(baseurl, dirpath))
+
+        halocatloclist = []
+        for simloc in simloclist:
+            soup = BeautifulSoup(requests.get(simloc).text)
+            for a in soup.find_all('a', href=True):
+                dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+                if dirpath and dirpath[0] != '/':
+                    halocatloclist.append(os.path.join(simloc, dirpath))
+
+        catlist = []
+        for halocatdir in halocatloclist:
+            soup = BeautifulSoup(requests.get(halocatdir).text)
+            for a in soup.find_all('a'):
+                catlist.append(os.path.join(halocatdir, a['href']))
+
+        file_pattern = '*halotools.official.version*'
+        output = fnmatch.filter(catlist, file_pattern)
+
+
+        return output
+
 
     def closest_halocat(self, filename_list, input_redshift, **kwargs):
         """ Method searches `filename_list` and returns the filename 
