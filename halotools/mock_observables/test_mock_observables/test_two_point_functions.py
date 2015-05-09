@@ -12,13 +12,13 @@ from ...utils import spherical_geometry as sg
 __all__=['test_TPCF_auto', 'test_TPCF_estimator', 'test_TPCF_sample_size_limit',\
          'test_TPCF_randoms', 'test_TPCF_period_API',\
          'test_two_point_correlation_function_jackknife',\
-         'test_two_point_correlation_function_jackknife_threading',
-         'test_angular_TPCF_auto', 'test_angular_TPCF_cross', \
+         'test_two_point_correlation_function_jackknife_threading',\
+         'test_angular_TPCF_auto', 'test_angular_TPCF_cross',\
          'test_delta_sigma']
 
 ####two point correlation function########################################################
-def test_TPCF_auto():
 
+def test_TPCF_auto():
     sample1 = np.random.random((100,3))
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
@@ -30,7 +30,6 @@ def test_TPCF_auto():
                                             randoms=randoms, period = None, 
                                             max_sample_size=int(1e4), estimator='Natural')
     assert result.ndim == 1, "More than one correlation function returned erroneously."
-
 
 def test_TPCF_estimator():
 
@@ -73,8 +72,8 @@ def test_TPCF_sample_size_limit():
     rbins = np.linspace(0,0.5,5)
     
     result_1 = two_point_correlation_function(sample1, rbins, sample2 = sample2, 
-                                            randoms=randoms, period = None, 
-                                            max_sample_size=int(1e2), estimator='Natural')
+                                              randoms=randoms, period = None, 
+                                              max_sample_size=int(1e2), estimator='Natural')
     
     assert len(result_1)==3, "One or more correlation functions returned erroneously."
 
@@ -85,7 +84,7 @@ def test_TPCF_randoms():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1,1,1])
-    rbins = np.linspace(0,0.5,5)
+    rbins = np.linspace(0,0.4,5)
     
     #No PBCs w/ randoms
     result_1 = two_point_correlation_function(sample1, rbins, sample2 = sample2, 
@@ -119,7 +118,7 @@ def test_TPCF_period_API():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1,1,1])
-    rbins = np.linspace(0,0.5,5)
+    rbins = np.linspace(0,0.4,5)
     
     result_1 = two_point_correlation_function(sample1, rbins, sample2 = sample2, 
                                             randoms=randoms, period = period, 
@@ -226,5 +225,4 @@ def test_delta_sigma():
     
     pass
 ##########################################################################################
-
 
