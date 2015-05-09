@@ -13,7 +13,7 @@ Functions that compute two-point statistics of a mock galaxy catalog.
 from __future__ import division
 import sys
 
-__all__=['two_point_correlation_function','two_point_correlation_function_jackknife',
+__all__=['two_point_correlation_function','two_point_correlation_function_jackknife',\
          'angular_two_point_correlation_function','Delta_Sigma']
 
 ####import modules########################################################################
@@ -23,10 +23,8 @@ from multiprocessing import Pool
 try: from .pair_counters.mpipairs import npairs, wnpairs, specific_wnpairs, jnpairs
 except ImportError:
     print("MPI functionality not available.")
-    from .pair_counters.kdpairs import npairs, wnpairs, specific_wnpairs, jnpairs
-try: from .pair_counters.sinha_pairs import countpairs as npairs
-except ImportError:
-    print("sinha pair counting functionality not available.")
+    from .pair_counters.kdpairs import wnpairs, specific_wnpairs, jnpairs
+from .pair_counters.sinha_pairs import npairs
 from .spatial import geometry
 from .spatial.geometry import inside_volume
 from .spatial.geometry import cylinder

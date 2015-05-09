@@ -8,7 +8,6 @@ from ..observables import get_sun_mag, luminosity_function, HOD, CLF, CSMF
 __all__ = ['test']
 
 def test():
-    
-    pass
+    assert True==True
 
 
