@@ -5,3 +5,4 @@ from __future__ import (absolute_import, division, print_function,
 from .read_nbody import *
 from .generate_random_sim import *
 from .cache_config import *
+from .supported_sims import *
