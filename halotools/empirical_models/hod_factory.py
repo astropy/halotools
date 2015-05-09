@@ -18,7 +18,7 @@ from . import preloaded_hod_blueprints
 from . import gal_prof_factory
 from . import halo_prof_components
 
-from ..sim_manager.read_nbody import processed_snapshot
+from ..sim_manager.read_nbody import ProcessedSnapshot
 from ..sim_manager.generate_random_sim import FakeSim
 
 
@@ -149,12 +149,12 @@ class HodModelFactory(object):
         Parameters 
         ----------
         snapshot : object, optional keyword argument
-            Class instance of `~halotools.sim_manager.processed_snapshot`. 
+            Class instance of `~halotools.sim_manager.ProcessedSnapshot`. 
             This object contains the halo catalog and its metadata.  
 
         kwargs : additional optional keyword arguments 
             Any keyword of either 
-            `~halotools.sim_manager.read_nbody.processed_snapshot` or 
+            `~halotools.sim_manager.read_nbody.ProcessedSnapshot` or 
             `~halotools.empirical_models.mock_factory.HodMockFactory` is supported. 
         """
 
@@ -168,7 +168,7 @@ class HodModelFactory(object):
                 # will pass multiple snapshot arguments
                 del kwargs['snapshot']
             else:
-                snapshot = processed_snapshot(**kwargs)
+                snapshot = ProcessedSnapshot(**kwargs)
 
             mock_factory = self.model_blueprint['mock_factory']
             mock = mock_factory(snapshot, self, **kwargs)
