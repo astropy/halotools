@@ -46,7 +46,7 @@ class FakeSim(object):
 		"""
 		self.Lbox = 250.0
 		self.particle_mass = 1.e8
-		self.simulation_name = 'fake'
+		self.simname = 'fake'
 
 		self.seed = seed
 
@@ -198,7 +198,8 @@ class FakeMock(object):
 			'halo_pos' : self.halo_pos,
 			'halo_zhalf' : self.halo_zhalf, 
 			'mstar' : self.mstar, 
-			'ssfr' : self.ssfr
+			'ssfr' : self.ssfr, 
+			'pos': self.pos
 		}
 
 		return Table(d)
@@ -249,6 +250,7 @@ class FakeMock(object):
 		self.num_gals = self.num_centrals + self.num_satellites + self.num_orphans 
 		self.mstar = np.random.uniform(8, 12, self.num_gals)
 		self.ssfr = np.random.uniform(-12, -9, self.num_gals)
+		self.pos = np.random.uniform(0, self.snapshot.Lbox, self.num_gals*3).reshape(self.num_gals, 3)
 
 
 

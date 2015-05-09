@@ -9,3 +9,4 @@ from __future__ import (absolute_import, division, print_function,
 from .match import *
 from .spherical_geometry import *
 from .array_utils import *
+from .io_utils import *
