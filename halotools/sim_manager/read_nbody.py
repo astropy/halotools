@@ -322,13 +322,10 @@ class CatalogManager(object):
         if is_in_cache != False:
             if overwrite ==True:
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
-                for file_to_delete in matching_catalogs:
-                    fname_to_delete = os.path.join(download_loc, file_to_delete)
-                    os.system("rm "+fname_to_delete)
             else:
-                raise IOError("The following filename already exists: \n%s\n"
+                raise IOError("The following filename already exists: \n\n%s\n\n"
                     "If you really want to overwrite the file, \n"
-                    "you must call the download_file_from_url function again \n"
+                    "you must call the same function again \n"
                     "with the keyword argument `overwrite` set to `True`" % output_fname)
 
         download_file_from_url(url, output_fname)
@@ -779,7 +776,7 @@ class CatalogManager(object):
             halocat_obj.closest_halocat(
             list_of_available_snapshots, input_redshift)
             )
-        
+
         if abs(redshift_of_closest_match - input_redshift) > dz_tol:
             msg = (
                 "No raw %s halo catalog has \na redshift within %.2f " + 
@@ -788,6 +785,44 @@ class CatalogManager(object):
             print(msg % (simname, dz_tol, input_redshift, redshift_of_closest_match))
             return 
 
+        webloc = os.path.join(
+            os.path.join(
+                sim_defaults.processed_halocats_webloc, simname), halo_finder)
+        url = os.path.join(webloc, closest_snapshot_fname)
+
+        if 'download_loc' in kwargs.keys():
+            download_loc = kwargs['download_loc']
+            # We were given an explicit path to store the catalog
+            # Check that this path actually exists, and if so, use it 
+            if not os.path.exists(download_loc):
+                raise IOError("Input directory name %s for download location"
+                    "of raw halo catalog does not exist" % download_loc)
+            else:
+                output_fname = os.path.join(download_loc, closest_snapshot_fname)
+        else:
+            # We were not given an explicit path, so use the default Halotools cache dir
+            cache_dirname = cache_config.get_catalogs_dir('halos', 
+                simname=simname, halo_finder=halo_finder)
+            download_loc = cache_dirname
+            output_fname = os.path.join(download_loc, closest_snapshot_fname)
+
+        # Check whether there are existing catalogs matching the file pattern 
+        # that is about to be downloaded
+        is_in_cache = self.check_for_existing_halocat(
+            download_loc, closest_snapshot_fname, 'halos', simname, halo_finder)
+
+        if is_in_cache != False:
+            if overwrite ==True:
+                warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
+            else:
+                raise IOError("The following filename already exists: \n\n%s\n\n"
+                    "If you really want to overwrite the file, \n"
+                    "you must call the same function again \n"
+                    "with the keyword argument `overwrite` set to `True`" % output_fname)
+
+        download_file_from_url(url, output_fname)
+
+        return output_fname
 
     def load_halo_catalog(self, **kwargs):
         """ Method returns an Astropy Table object of halos 
