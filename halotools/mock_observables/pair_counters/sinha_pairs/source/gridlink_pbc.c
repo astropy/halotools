@@ -10,9 +10,9 @@
 
 #define MEMORY_INCREASE_FAC   1.2
 
-double get_binsize(const double xmin,const double xmax, const double rmax, const int refine_factor, const int max_ncells, int *nlattice)  __attribute__((warn_unused_result));
+double get_binsize_pbc(const double xmin,const double xmax, const double rmax, const int refine_factor, const int max_ncells, int *nlattice)  __attribute__((warn_unused_result));
 
-double get_binsize(const double xmin,const double xmax, const double rmax, const int refine_factor, const int max_ncells, int *nlattice)
+double get_binsize_pbc(const double xmin,const double xmax, const double rmax, const int refine_factor, const int max_ncells, int *nlattice)
 {
   double xdiff = xmax-xmin;
   int nmesh=(int)(refine_factor*xdiff/rmax) ;
@@ -29,7 +29,7 @@ double get_binsize(const double xmin,const double xmax, const double rmax, const
   return xbinsize;
 }
 
-cellarray * gridlink(const int np,
+cellarray * gridlink_pbc(const int np,
            const DOUBLE *x,const DOUBLE *y,const DOUBLE *z,
            const DOUBLE xmin, const DOUBLE xmax,
            const DOUBLE ymin, const DOUBLE ymax,
@@ -54,9 +54,9 @@ cellarray * gridlink(const int np,
   struct timeval t0,t1;
   gettimeofday(&t0,NULL);
 
-  xbinsize = get_binsize(xmin,xmax,rmax,xbin_refine_factor, NLATMAX, &nmesh_x);
-  ybinsize = get_binsize(ymin,ymax,rmax,ybin_refine_factor, NLATMAX, &nmesh_y);
-  zbinsize = get_binsize(zmin,zmax,rmax,zbin_refine_factor, NLATMAX, &nmesh_z);
+  xbinsize = get_binsize_pbc(xmin,xmax,rmax,xbin_refine_factor, NLATMAX, &nmesh_x);
+  ybinsize = get_binsize_pbc(ymin,ymax,rmax,ybin_refine_factor, NLATMAX, &nmesh_y);
+  zbinsize = get_binsize_pbc(zmin,zmax,rmax,zbin_refine_factor, NLATMAX, &nmesh_z);
   
   totncells = (int64_t) nmesh_x * (int64_t) nmesh_y * (int64_t) nmesh_z;
 
