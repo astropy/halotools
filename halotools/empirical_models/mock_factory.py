@@ -309,8 +309,6 @@ class HodMockFactory(object):
                 getattr(self, 'y')[gal_type_slice], 
                 getattr(self, 'z')[gal_type_slice]) = getattr(self.model, pos_method_name)(self)
                 
-                
-
             # Assign velocities, if relevant for this model
             if hasattr(self.model, 'vel'):
                 pass
