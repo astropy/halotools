@@ -79,10 +79,12 @@ class FakeSim(object):
 		conc = np.random.uniform(4, 15, self.num_halos)
 		zhalf = np.random.uniform(0, 10, self.num_halos)
 
-		pos = np.random.uniform(
-			0, self.Lbox, self.num_halos*3).reshape(self.num_halos, 3)
-		vel = np.random.uniform(
-			-500, 500, self.num_halos*3).reshape(self.num_halos, 3)
+		x = np.random.uniform(0, self.Lbox, self.num_halos)
+		y = np.random.uniform(0, self.Lbox, self.num_halos)
+		z = np.random.uniform(0, self.Lbox, self.num_halos)
+		vx = np.random.uniform(-500, 500, self.num_halos)
+		vy = np.random.uniform(-500, 500, self.num_halos)
+		vz = np.random.uniform(-500, 500, self.num_halos)
 
 		d = {
 			'haloid': haloid, 
@@ -92,8 +94,12 @@ class FakeSim(object):
 			'conc': conc, 
 			'zhalf': zhalf, 
 			'vmax': vmax, 
-			'pos': pos, 
-			'vel': vel
+			'x': x, 
+			'y': y, 
+			'z': z, 
+			'vx': vx, 
+			'vy': vy, 
+			'vz': vz
 			}
 
 		return Table(d)
@@ -105,9 +111,10 @@ class FakeSim(object):
 		"""
 
 		np.random.seed(self.seed)
-		pos = np.random.uniform(
-			0, self.Lbox, self.num_ptcl*3).reshape(self.num_ptcl, 3)
-		d = {'pos': pos}
+		x = np.random.uniform(0, self.Lbox, self.num_ptcl)
+		y = np.random.uniform(0, self.Lbox, self.num_ptcl)
+		z = np.random.uniform(0, self.Lbox, self.num_ptcl)
+		d = {'x': x, 'y': y, 'z':z}
 
 		return Table(d)
 
@@ -195,11 +202,15 @@ class FakeMock(object):
 		d = {'gal_type' : self.gal_type, 
 			'halo_mvir' : self.halo_mvir, 
 			'halo_haloid' : self.halo_haloid, 
-			'halo_pos' : self.halo_pos,
+			'halo_x' : self.x,
+			'halo_y' : self.y,
+			'halo_z' : self.z,
 			'halo_zhalf' : self.halo_zhalf, 
 			'mstar' : self.mstar, 
 			'ssfr' : self.ssfr, 
-			'pos': self.pos
+			'x': self.x, 
+			'y': self.y, 
+			'z': self.z
 		}
 
 		return Table(d)
@@ -214,7 +225,9 @@ class FakeMock(object):
 		central_nickname_array = np.repeat('centrals', self.num_centrals)
 		central_halo_mvir = np.repeat(self.halos['mvir'], central_occupations)
 		central_halo_haloid = np.repeat(self.halos['haloid'], central_occupations)
-		central_halo_pos = np.repeat(self.halos['pos'], central_occupations, axis=0)
+		central_halo_x = np.repeat(self.halos['x'], central_occupations, axis=0)
+		central_halo_y = np.repeat(self.halos['y'], central_occupations, axis=0)
+		central_halo_z = np.repeat(self.halos['z'], central_occupations, axis=0)
 		central_halo_zhalf = np.repeat(self.halos['zhalf'], central_occupations)
 
 		satellite_occupations = np.random.random_integers(0,3,self.snapshot.num_halos)
@@ -222,14 +235,18 @@ class FakeMock(object):
 		satellite_nickname_array = np.repeat('satellites', self.num_satellites)
 		satellite_halo_mvir = np.repeat(self.halos['mvir'], satellite_occupations)
 		satellite_halo_haloid = np.repeat(self.halos['haloid'], satellite_occupations)
-		satellite_halo_pos = np.repeat(self.halos['pos'], satellite_occupations, axis=0)
+		satellite_halo_x = np.repeat(self.halos['x'], satellite_occupations, axis=0)
+		satellite_halo_y = np.repeat(self.halos['y'], satellite_occupations, axis=0)
+		satellite_halo_z = np.repeat(self.halos['z'], satellite_occupations, axis=0)
 		satellite_halo_zhalf = np.repeat(self.halos['zhalf'], satellite_occupations)
 
 		censat_occ = np.append(central_occupations, satellite_occupations)
 		censat_galtype = np.append(central_nickname_array, satellite_nickname_array)
 		censat_halo_mvir = np.append(central_halo_mvir, satellite_halo_mvir)
 		censat_halo_haloid = np.append(central_halo_haloid, satellite_halo_haloid)
-		censat_halo_pos = np.append(central_halo_pos, satellite_halo_pos, axis=0)
+		censat_halo_x = np.append(central_halo_x, satellite_halo_x, axis=0)
+		censat_halo_y = np.append(central_halo_y, satellite_halo_y, axis=0)
+		censat_halo_z = np.append(central_halo_z, satellite_halo_z, axis=0)
 		censat_halo_zhalf = np.append(central_halo_zhalf, satellite_halo_zhalf)
 
 		orphan_occupations = np.random.random_integers(0,3,self.snapshot.num_halos)
@@ -237,21 +254,27 @@ class FakeMock(object):
 		orphan_nickname_array = np.repeat('orphans', self.num_orphans)
 		orphan_halo_mvir = np.repeat(self.halos['mvir'], orphan_occupations)
 		orphan_halo_haloid = np.repeat(self.halos['haloid'], orphan_occupations)
-		orphan_halo_pos = np.repeat(self.halos['pos'], orphan_occupations, axis=0)
+		orphan_halo_x = np.repeat(self.halos['x'], orphan_occupations, axis=0)
+		orphan_halo_y = np.repeat(self.halos['y'], orphan_occupations, axis=0)
+		orphan_halo_z = np.repeat(self.halos['z'], orphan_occupations, axis=0)
 		orphan_halo_zhalf = np.repeat(self.halos['zhalf'], orphan_occupations)
 
 		self._occupation = np.append(censat_occ, orphan_occupations)
 		self.gal_type = np.append(censat_galtype, orphan_nickname_array)
 		self.halo_mvir = np.append(censat_halo_mvir, orphan_halo_mvir)
 		self.halo_haloid = np.append(censat_halo_haloid, orphan_halo_haloid).astype(int)
-		self.halo_pos = np.append(censat_halo_pos, orphan_halo_pos, axis=0)
+		self.halo_x = np.append(censat_halo_x, orphan_halo_x, axis=0)
+		self.halo_y = np.append(censat_halo_y, orphan_halo_y, axis=0)
+		self.halo_z = np.append(censat_halo_z, orphan_halo_z, axis=0)
 		self.halo_zhalf = np.append(censat_halo_zhalf, orphan_halo_zhalf)
 
 		self.num_gals = self.num_centrals + self.num_satellites + self.num_orphans 
 		self.mstar = np.random.uniform(8, 12, self.num_gals)
 		self.ssfr = np.random.uniform(-12, -9, self.num_gals)
-		self.pos = np.random.uniform(0, self.snapshot.Lbox, self.num_gals*3).reshape(self.num_gals, 3)
 
+		self.x = np.random.uniform(0, self.snapshot.Lbox, self.num_gals)
+		self.y = np.random.uniform(0, self.snapshot.Lbox, self.num_gals)
+		self.z = np.random.uniform(0, self.snapshot.Lbox, self.num_gals)
 
 
 

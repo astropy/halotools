@@ -370,8 +370,8 @@ class GalProfFactory(object):
 
         Returns 
         -------
-        pos : array_like  
-            Array with shape (Npts, 3) of points. 
+        x, y, z : array_like  
+            Length-Npts arrays of the coordinate positions. 
 
         """
         
@@ -379,14 +379,11 @@ class GalProfFactory(object):
         phi = np.random.uniform(0,2*np.pi,Npts)
         sin_t = np.sqrt((1.-cos_t*cos_t))
 
-        pos = np.zeros(Npts*3).reshape(Npts,3)
-        pos[:,0] = sin_t * np.cos(phi)
-        pos[:,1] = sin_t * np.sin(phi)
-        pos[:,2] = cos_t
+        x = sin_t * np.cos(phi)
+        y = sin_t * np.sin(phi)
+        z = cos_t
 
-        #print "mean of z-pos = "+str(cos_t.mean())
-
-        return pos
+        return x, y, z
 
     def mc_pos(self, mock_galaxies):
         """ Method to generate random, three-dimensional, 
@@ -402,17 +399,18 @@ class GalProfFactory(object):
         """
         # get the appropriate slice for the gal_type of this component model
         gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
-        pos = getattr(mock_galaxies, 'pos')[gal_type_slice]
+        x = getattr(mock_galaxies, 'x')[gal_type_slice]
+        y = getattr(mock_galaxies, 'y')[gal_type_slice]
+        z = getattr(mock_galaxies, 'z')[gal_type_slice]
 
         # For the case of a trivial profile model, return the trivial result
         if isinstance(self.halo_prof_model, 
             halo_prof_components.TrivialProfile) is True:
-            return np.zeros_like(pos)
+            return np.zeros_like(x), np.zeros_like(y), np.zeros_like(z)
         else:
             # get angles
-            Ngals = len(pos[:,0])
-            pos = self.mc_angles(Ngals)
-            #print "Check 2: mean of z-pos = "+str(pos[:,2].mean())
+            Ngals = len(x)
+            x, y, z = self.mc_angles(Ngals)
 
             # extract all relevant profile parameters from the mock
             profile_params = (
@@ -426,13 +424,11 @@ class GalProfFactory(object):
 
             # multiply the random radial positions by the random points on the unit sphere 
             # to get random three-dimensional positions
-            #print "Check 3: mean of z-pos = "+str(pos[:,2].mean())
-
-            for idim in range(3): pos[:,idim] *= scaled_mc_radii
+            x *= scaled_mc_radii
+            y *= scaled_mc_radii
+            z *= scaled_mc_radii
            
-            #print "Check 4: mean of z-pos = "+str(pos[:,2].mean())
-
-        return pos
+        return x, y, z
 
 
     def density_profile(self, *args):
