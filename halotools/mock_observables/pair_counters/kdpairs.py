@@ -7,7 +7,7 @@
 
 
 from __future__ import division, print_function
-from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
+from ..spatial.kdtrees.ckdtree import cKDTree
 import numpy as np
 
 __all__=['npairs','wnpairs','pairs']

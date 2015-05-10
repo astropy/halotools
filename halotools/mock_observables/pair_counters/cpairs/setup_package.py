@@ -1,16 +1,17 @@
 from distutils.extension import Extension
+import numpy
 import os
 
 PATH_TO_WRAPPER = os.path.relpath(os.path.dirname(__file__))
-SOURCES = ["sinha_pairs_wrapper.pyx", "source/countpairs_pbc.c","source/countpairs_nopbc.c", "source/gridlink_pbc.c","source/gridlink_nopbc.c", "source/utils.c"]
+SOURCES = ['cpairs.pyx']
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():
     name = THIS_PKG_NAME + "." + SOURCES[0].replace('.pyx', '')
     sources = [os.path.join(PATH_TO_WRAPPER, srcfn) for srcfn in SOURCES]
-    include_dirs = [os.path.join(PATH_TO_WRAPPER, 'include')]
+    include_dirs = [numpy.get_include()]
     libraries = []
-    extra_compile_args = ["-DDOUBLE_PREC"]
+    extra_compile_args = ["-O3"]
 
     extensions = [Extension(name=name,
                   sources=sources,

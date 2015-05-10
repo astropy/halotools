@@ -9,7 +9,9 @@ Objects and methods for 2D and 3D shapes
 from __future__ import division, print_function
 import math
 import numpy as np
-from distances import euclidean_distance
+from .distances import euclidean_distance
+from .distances import projected_distance
+from .kdtrees.ckdtree import cKDTree
 
 __all__=['polygon2D','circle','face','polygon3D','sphere','cylinder','inside_volume']
 
@@ -298,8 +300,6 @@ class cylinder(volume):
             period = np.asarray(period).astype("float64")
         if period.shape[0]!=3: raise ValueError('period must be None or have shape (3,)')
         
-        from halotools.mock_observables.spatial.distances import projected_distance
-        
         #need to repeat this in order to use distance calculation
         center = np.tile(self.center,(N,1))
         normal = np.tile(self.normal,(N,1))
@@ -332,7 +332,6 @@ def inside_volume(shapes, points, period=None):
         list of arrays of points inside each shape
     N_points_in_shapes: np.array
     """
-    from halotools.mock_observables.spatial.kdtrees.ckdtree import cKDTree
     
     #check input
     if type(points) is not cKDTree:

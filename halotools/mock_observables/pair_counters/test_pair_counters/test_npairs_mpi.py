@@ -18,6 +18,9 @@ from ..mpipairs import npairs, wnpairs, jnpairs
 from ..pairs import npairs as comp_npairs
 from ..pairs import wnpairs as comp_wnpairs
 
+__all__ = ['test_npairs', 'test_npairs_speed', 'test_wnpairs', 'test_wnpairs_speed',\
+           'test_jnpairs', 'test_jnpairs_speed']
+
 """
 This script tests the functionality of npairs_mpi.py
 """
