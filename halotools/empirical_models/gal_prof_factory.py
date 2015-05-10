@@ -119,7 +119,7 @@ class GalProfFactory(object):
         and so ``param_dict`` will be an empty dictionary. 
         """
 
-        if self.spatial_bias_model == None:
+        if self.spatial_bias_model is None:
             self.param_dict = {}
         else:
             self.param_dict = self.spatial_bias_model.param_dict
@@ -203,7 +203,7 @@ class GalProfFactory(object):
         of the underlying model. 
         """
         output_dict = {}
-        if self.spatial_bias_model == None:
+        if self.spatial_bias_model is None:
 
             halo_prof_dict = self.halo_prof_func_dict
             for key, func in halo_prof_dict.iteritems():
