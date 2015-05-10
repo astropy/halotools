@@ -55,7 +55,7 @@ def get_list_of_tutorials(relative_dirname):
     return tutorial_list
 
 
-def test_ipynb(fname, enforce_pass=True):
+def test_ipynb(fname):
     """Function to use in a test suite to 
     verify that an IPython Notebook 
     executes without raising an exception.
@@ -99,18 +99,17 @@ def test_ipynb(fname, enforce_pass=True):
 #   err will be an empty string if the program runs without 
 #   raising any exceptions
     _, err = s.communicate()  
-    if enforce_pass is True:
-        assert err==''
 
     # The script version of the .ipynb file 
     # is no longer necessary, so delete it
     system("rm -rf "+fname+".py")
 
-    if err == '':
-        return 'pass'
-    else:
-        print("error msg = \n"+err)
-        return 'fail'
+#    if err == '':
+#        return 'pass'
+#    else:
+#        print("error msg = \n"+err)
+#        return 'fail'
+    return err
 
 
 ########################################################
@@ -130,9 +129,9 @@ def main():
             system(command)
 
             # Check to see whether this notebook raises an exception
-            fname_test = test_ipynb(fname, enforce_pass=False)
+            fname_test = test_ipynb(fname)
 
-            if fname_test=='pass':
+            if (fname_test=='') or ('FutureWarning' in fname_test):
                 # convert the notebook to rst for inclusion in the docs
                 conversion_string = "ipython nbconvert --to rst "+fname
                 c=system(conversion_string)
@@ -144,6 +143,7 @@ def main():
                 system("mv "+rst_fname+" "+tutorial_loc)
 
             else:
+                print("error msg = %s " % fname_test )
                 failure_list.append(fname)
 
         if failure_list==[]:
