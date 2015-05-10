@@ -584,12 +584,12 @@ class CatalogManager(object):
         """
         filename_list = self.available_snapshots(
             location, catalog_type, simname, halo_finder)
-        if filename_list is None:
+        if aph_len(filename_list) == 0:
             return None
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
         result = halocat_obj.closest_halocat(filename_list, input_redshift)
-        if result == None:
+        if aph_len(result) == 0:
             print("No halo catalogs found in cache for simname = %s "
                 " and halo-finder = %s" % (simname, halo_finder))
             return None
@@ -857,7 +857,7 @@ class CatalogManager(object):
 
             result = self.closest_halocat(
                 'cache', 'halos', simname, halo_finder, redshift)
-            if result == None:
+            if aph_len(result) == 0:
                 return None
             else:
                 fname, z = result[0], result[1]
