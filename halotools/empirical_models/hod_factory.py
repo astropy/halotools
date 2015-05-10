@@ -445,9 +445,9 @@ class HodModelFactory(object):
 
         Returns 
         -------
-        output_pos : array_like 
-            Array with shape (Ngals, 3), where Ngals is the number of 
-            ``gal_type`` gals in the ``mock_galaxies``. 
+        x, y, z : array_like 
+            Length-Ngals arrays of coordinate positions, 
+            where Ngals is the number of ``gal_type`` gals in the ``mock_galaxies``. 
 
         Notes 
         -----
