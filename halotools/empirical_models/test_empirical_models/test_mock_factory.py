@@ -42,8 +42,13 @@ def test_preloaded_hod_mocks():
         mock1.build_halo_prof_lookup_tables()
         mock1.bundle_into_table()
         assert hasattr(mock1, 'galaxy_table')
-        assert np.all(mock1.pos > 0)
-        assert np.all(mock1.pos < mock1.snapshot.Lbox)
+        assert np.all(mock1.x > 0)
+        assert np.all(mock1.y > 0)
+        assert np.all(mock1.z > 0)
+        assert np.all(mock1.x < mock1.snapshot.Lbox)
+        assert np.all(mock1.y < mock1.snapshot.Lbox)
+        assert np.all(mock1.z < mock1.snapshot.Lbox)
+
         assert np.all(mock1.halo_NFWmodel_conc > 0.5)
         assert np.all(mock1.halo_NFWmodel_conc < 25.0)
 
