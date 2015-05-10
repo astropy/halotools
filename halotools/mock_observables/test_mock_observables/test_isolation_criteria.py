@@ -4,6 +4,7 @@ from __future__ import division, print_function
 import numpy as np
 from ..isolation_criteria import isolatoion_criterion
 
+__all__ = ['test_isolation_criterion_API']
 
 ####isolation criteria####################################################################
 def test_isolation_criterion_API():
