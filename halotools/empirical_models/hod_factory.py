@@ -445,9 +445,9 @@ class HodModelFactory(object):
 
         Returns 
         -------
-        output_pos : array_like 
-            Array with shape (Ngals, 3), where Ngals is the number of 
-            ``gal_type`` gals in the ``mock_galaxies``. 
+        x, y, z : array_like 
+            Length-Ngals arrays of coordinate positions, 
+            where Ngals is the number of ``gal_type`` gals in the ``mock_galaxies``. 
 
         Notes 
         -----
@@ -460,7 +460,7 @@ class HodModelFactory(object):
         gal_prof_model = self.model_blueprint[gal_type]['profile']
         mc_pos_function = getattr(gal_prof_model, 'mc_pos')
 
-        output_pos = mc_pos_function(mock_galaxies)
+        x, y, z = mc_pos_function(mock_galaxies)
 
         gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
 
@@ -470,14 +470,20 @@ class HodModelFactory(object):
             model_defaults.haloprop_key_dict['halo_boundary']
             )
 
-        for idim in range(3): 
-            output_pos[:,idim] *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
+        x *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
+        y *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
+        z *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
 
         # Re-center the positions by the host halo location
-        halo_pos_attr_name = model_defaults.host_haloprop_prefix+'pos'
-        output_pos += getattr(mock_galaxies, halo_pos_attr_name)[gal_type_slice]
+        halo_xpos_attr_name = model_defaults.host_haloprop_prefix+'x'
+        halo_ypos_attr_name = model_defaults.host_haloprop_prefix+'y'
+        halo_zpos_attr_name = model_defaults.host_haloprop_prefix+'z'
 
-        return output_pos
+        x += getattr(mock_galaxies, halo_xpos_attr_name)[gal_type_slice]
+        y += getattr(mock_galaxies, halo_ypos_attr_name)[gal_type_slice]
+        z += getattr(mock_galaxies, halo_zpos_attr_name)[gal_type_slice]
+
+        return x, y, z
 
 
     @property 
