@@ -10,6 +10,8 @@ from ..distances import projected_distance
 
 import numpy as np
 
+__all__=['test_euclidean_distance', 'test_angular_distance', 'test_projected_distance']
+
 def test_euclidean_distance():
 
     x1 = np.array([0.0,0.0,0.0])

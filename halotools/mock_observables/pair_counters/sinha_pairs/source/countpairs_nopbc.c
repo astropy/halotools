@@ -25,7 +25,7 @@
 #endif
 
 
-void countpairs(const int ND1, const double * const X1, const double * const Y1, const double  * const Z1,
+void countpairs_nopbc(const int ND1, const double * const X1, const double * const Y1, const double  * const Z1,
 				const int ND2, const double * const X2, const double * const Y2, const double  * const Z2,
 				const double xmin, const double xmax,
 				const double ymin, const double ymax,
@@ -62,22 +62,17 @@ void countpairs(const int ND1, const double * const X1, const double * const Y1,
   /*---Create 3-D lattice--------------------------------------*/
   int nmesh_x=0,nmesh_y=0,nmesh_z=0;
 		
-  cellarray *lattice1 = gridlink(ND1, X1, Y1, Z1, xmin, xmax, ymin, ymax, zmin, zmax, rpmax, bin_refine_factor, bin_refine_factor, bin_refine_factor, &nmesh_x, &nmesh_y, &nmesh_z);
+  cellarray *lattice1 = gridlink_nopbc(ND1, X1, Y1, Z1, xmin, xmax, ymin, ymax, zmin, zmax, rpmax, bin_refine_factor, bin_refine_factor, bin_refine_factor, &nmesh_x, &nmesh_y, &nmesh_z);
   cellarray *lattice2 = NULL;
   if(autocorr==0) {
 	int ngrid2_x=0,ngrid2_y=0,ngrid2_z=0;
-	lattice2 = gridlink(ND2, X2, Y2, Z2, xmin, xmax, ymin, ymax, zmin, zmax, rpmax, bin_refine_factor, bin_refine_factor, bin_refine_factor, &ngrid2_x, &ngrid2_y, &ngrid2_z);
+	lattice2 = gridlink_nopbc(ND2, X2, Y2, Z2, xmin, xmax, ymin, ymax, zmin, zmax, rpmax, bin_refine_factor, bin_refine_factor, bin_refine_factor, &ngrid2_x, &ngrid2_y, &ngrid2_z);
 	assert(nmesh_x == ngrid2_x && "Both lattices have the same number of X bins");
 	assert(nmesh_y == ngrid2_y && "Both lattices have the same number of Y bins");
 	assert(nmesh_z == ngrid2_z && "Both lattices have the same number of Z bins");
   } else {
 	  lattice2 = lattice1;
   }
-#ifdef PERIODIC
-	const DOUBLE xdiff = (xmax-xmin);
-	const DOUBLE ydiff = (ymax-ymin);
-	const DOUBLE zdiff = (zmax-zmin);
-#endif	
 
 #ifndef USE_OMP
 	unsigned int npairs[nrpbin];	
@@ -149,55 +144,25 @@ void countpairs(const int ND1, const double * const X1, const double * const Y1,
 		  int iy = (icell - iz - ix*nmesh_z*nmesh_y)/nmesh_z ;
 		  assert( ((iz + nmesh_z*iy + nmesh_z*nmesh_y*ix) == icell) && "Index reconstruction is wrong");
 		  for(int iix=-bin_refine_factor;iix<=bin_refine_factor;iix++){
-				int iiix;
-#ifdef PERIODIC
-				DOUBLE off_xwrap=0.0;
-				if(ix + iix >= nmesh_x) {
-				  off_xwrap = -xdiff;
-				} else if (ix + iix < 0) {
-				  off_xwrap = xdiff;
-				}
-				iiix=(ix+iix+nmesh_x)%nmesh_x;
-#else	  
+				int iiix; 
 				iiix = iix+ix;
 				if(iiix < 0 || iiix >= nmesh_x) {
 				  continue;
 				}
-#endif	  
 				
 				for(int iiy=-bin_refine_factor;iiy<=bin_refine_factor;iiy++){
 				  int iiiy;
-#ifdef PERIODIC
-				  DOUBLE off_ywrap = 0.0;
-				  if(iy + iiy >= nmesh_y) {
-						off_ywrap = -ydiff;
-				  } else if (iy + iiy < 0) {
-						off_ywrap = ydiff;
-				  }
-				  iiiy=(iy+iiy+nmesh_y)%nmesh_y;
-#else	  
 				  iiiy = iiy+iy;
 				  if(iiiy < 0 || iiiy >= nmesh_y) {
 						continue;
-				  }
-#endif	  
+				  } 
 				  
 				  for(int iiz=-bin_refine_factor;iiz<=bin_refine_factor;iiz++){
 						int iiiz;
-#ifdef PERIODIC
-						DOUBLE off_zwrap = 0.0;
-						if(iz + iiz >= nmesh_z) {
-							off_zwrap = -zdiff;
-						} else if (iz + iiz < 0) {
-							off_zwrap = zdiff;
-						}
-						iiiz=(iz+iiz+nmesh_z)%nmesh_z;
-#else	  
 						iiiz = iiz+iz;
 						if(iiiz < 0 || iiiz >= nmesh_z) {
 							continue;
 						}
-#endif	  
 						assert(iiix >= 0 && iiix < nmesh_x && iiiy >= 0 && iiiy < nmesh_y && iiiz >= 0 && iiiz < nmesh_z && "Checking that the second pointer is in range");
 						int64_t index2 = iiix*nmesh_y*nmesh_z + iiiy*nmesh_z + iiiz;
 						cellarray * second = &(lattice2[index2]);
@@ -215,11 +180,6 @@ void countpairs(const int ND1, const double * const X1, const double * const Y1,
 							DOUBLE x1pos=x1[i];
 							DOUBLE y1pos=y1[i];
 							DOUBLE z1pos=z1[i];
-#ifdef PERIODIC
-							x1pos += off_xwrap;
-							y1pos += off_ywrap;
-							z1pos += off_zwrap;
-#endif		
 					  
 #ifndef USE_AVX
 							for(int j=0;j<second->nelements;j+=BLOCK_SIZE) {

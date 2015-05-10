@@ -13,6 +13,19 @@ import numpy as np
 import sys
 
 
+__all__=['test_initialization', 'test_count_neighbors', 'test_count_neighbors_periodic',\
+         'test_count_neighbors_approximation', 'test_query_pairs',\
+         'test_query_pairs_periodic', 'test_query_ball_tree',\
+         'test_query_ball_tree_periodic', 'test_query_ball_point',\
+         'test_query_ball_point_periodic', 'test_query_ball_point_wcounts',\
+         'test_query', 'test_query_periodic', 'test_wcount_neighbors_periodic',\
+         'test_wcount_neighbors_large', 'test_wcount_neighbors_double_weights',\
+         'test_wcount_neighbors_double_weights_functionality',\
+         'test_wcount_neighbors_custom_double_weights_functionality',\
+         'test_wcount_neighbors_custom_2D_double_weights_functionality',\
+         'test_wcount_neighbors_custom_2D_double_weights_pbcs',\
+         'test_sparse_distance_matrix']
+
 """
 This script contains code to test the functionality of ckdtree.pyx 
 """
