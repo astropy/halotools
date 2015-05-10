@@ -83,7 +83,7 @@ def get_halocat_obj(simname, halo_finder):
     for halocat in supported_halocat_classes:
         if (halocat.simname == simname) & (halocat.halo_finder == halo_finder):
             halocat_obj = halocat
-    if halocat_obj==None:
+    if halocat_obj is None:
         print("No simulation class found for %s simulation and %s halo-finder.\n"
             "Either there was a typo in specifying the simname and/or halo-finder,\n"
             "or you tried to use an unsupported halo catalog. \n"
@@ -893,7 +893,7 @@ class CatalogManager(object):
             Data structure located at the input filename.
 
         """
-        if filename==None:
+        if filename is None:
             if catalog_type=='subhalos':
                 filename = self.default_halo_catalog_filename
             elif catalog_type=='particles':
@@ -901,7 +901,7 @@ class CatalogManager(object):
             else:
                 raise KeyError("Must supply catalog_type to be either "
                     "'particles' or 'subhalos'")
-        if dirname==None:
+        if dirname is None:
             if catalog_type=='subhalos':
                 dirname = self.halo_catalog_dirname
             elif catalog_type=='particles':
@@ -1062,7 +1062,7 @@ class RockstarReader(object):
 
         """
 
-        if Nrows_header_total==None:
+        if Nrows_header_total is None:
             Nrows_header_total = self.header_len(self.fname)
 
         print("Reading the first %i lines of the ascii file" % Nrows_header_total)

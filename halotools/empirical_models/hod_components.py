@@ -177,7 +177,7 @@ class Kravtsov04Cens(OccupationComponent):
         self.sigma_logM_key = 'sigma_logM_'+self.gal_type
 
         correct_keys = [self.logMmin_key, self.sigma_logM_key]
-        if input_param_dict != None:
+        if input_param_dict is not None:
             occuhelp.test_correct_keys(input_param_dict, correct_keys)
             output_param_dict = input_param_dict
         else:
@@ -386,7 +386,7 @@ class Kravtsov04Sats(OccupationComponent):
         self.alpha_key = 'alpha_'+self.gal_type
 
         correct_keys = [self.logM0_key, self.logM1_key, self.alpha_key]
-        if input_param_dict != None:
+        if input_param_dict is not None:
             occuhelp.test_correct_keys(input_param_dict, correct_keys)
             output_param_dict = input_param_dict
         else:
