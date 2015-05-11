@@ -31,19 +31,28 @@ Getting started with subpackages
 
 Although the different sub-packages of Halotools are woven together for the science aims of the package (see :ref:`halotools_overview` for a sketch of the primary science targets), individually the sub-packages have very different functionality. You can learn about how to work with the package as a whole from the tutorials that appear throughout the :ref:`user-docs`. 
 
+Building models and making mocks
+------------------------------------
+
 To get started with building models and making mocks, you can import the empirical modeling sub-package::
 
 >>> from halotools import empirical_models 
 
-A complete reference to all the classes and functions in this sub-package can be found at `~halotools.empirical_models`. For an outline of how to generate mock galaxy catalogs, see :ref:`mock_making_quickstart`. To learn how to use the empirical modeling sub-package to build a customized structure formation model that includes the features you are interested in studying, see :ref:`model_building`. 
+For an outline of how to generate mock galaxy catalogs, see :ref:`mock_making_quickstart`. 
 
-Halotools comes with a halo/merger tree catalog management tool that 
-makes it easy to swap back and forth between simulations, 
-and link halos to their assembly histories. 
+To learn how to build a customized model that is tailored to your interests, see :ref:`model_building`. 
+
+Downlaoding and processing simulations
+---------------------------------------
+
+The Halotools ``sim_manager`` sub-package  
+makes it easy to download halo catalogs, process them into fast-loading binaries, 
+store them in a cache directory of your choosing, and swap back and forth between 
+different simulations using a single line of code. 
 
 	>>> from halotools import sim_manager
 
-The complete Reference/API of the simulation manager sub-package is documented at `~halotools.sim_manager`. You can find an overview of this sub-package at :ref:`sim_analysis`. 
+You can find an overview of this sub-package at :ref:`sim_analysis`. 
 
 
 
