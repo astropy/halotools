@@ -83,7 +83,7 @@ def get_halocat_obj(simname, halo_finder):
     for halocat in supported_halocat_classes:
         if (halocat.simname == simname) & (halocat.halo_finder == halo_finder):
             halocat_obj = halocat
-    if halocat_obj==None:
+    if halocat_obj is None:
         print("No simulation class found for %s simulation and %s halo-finder.\n"
             "Either there was a typo in specifying the simname and/or halo-finder,\n"
             "or you tried to use an unsupported halo catalog. \n"
@@ -584,12 +584,12 @@ class CatalogManager(object):
         """
         filename_list = self.available_snapshots(
             location, catalog_type, simname, halo_finder)
-        if filename_list is None:
+        if aph_len(filename_list) == 0:
             return None
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
         result = halocat_obj.closest_halocat(filename_list, input_redshift)
-        if result == None:
+        if aph_len(result) == 0:
             print("No halo catalogs found in cache for simname = %s "
                 " and halo-finder = %s" % (simname, halo_finder))
             return None
@@ -820,7 +820,11 @@ class CatalogManager(object):
                     "you must call the same function again \n"
                     "with the keyword argument `overwrite` set to `True`" % output_fname)
 
+        start = time()
         download_file_from_url(url, output_fname)
+        end = time()
+        runtime = end - start
+        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
 
         return output_fname
 
@@ -857,7 +861,7 @@ class CatalogManager(object):
 
             result = self.closest_halocat(
                 'cache', 'halos', simname, halo_finder, redshift)
-            if result == None:
+            if aph_len(result) == 0:
                 return None
             else:
                 fname, z = result[0], result[1]
@@ -893,7 +897,7 @@ class CatalogManager(object):
             Data structure located at the input filename.
 
         """
-        if filename==None:
+        if filename is None:
             if catalog_type=='subhalos':
                 filename = self.default_halo_catalog_filename
             elif catalog_type=='particles':
@@ -901,7 +905,7 @@ class CatalogManager(object):
             else:
                 raise KeyError("Must supply catalog_type to be either "
                     "'particles' or 'subhalos'")
-        if dirname==None:
+        if dirname is None:
             if catalog_type=='subhalos':
                 dirname = self.halo_catalog_dirname
             elif catalog_type=='particles':
@@ -1062,7 +1066,7 @@ class RockstarReader(object):
 
         """
 
-        if Nrows_header_total==None:
+        if Nrows_header_total is None:
             Nrows_header_total = self.header_len(self.fname)
 
         print("Reading the first %i lines of the ascii file" % Nrows_header_total)

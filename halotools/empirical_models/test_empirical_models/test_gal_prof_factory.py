@@ -39,8 +39,10 @@ def test_unbiased_trivial():
 	composite_model = Kravtsov04()
 	mock = HodMockFactory(snapshot, composite_model)
 
-	trivial_result = cen_prof.mc_pos(mock)
-	assert np.all(trivial_result == 0)
+	x, y, z = cen_prof.mc_pos(mock)
+	assert np.all(x == 0)
+	assert np.all(y == 0)
+	assert np.all(z == 0)
 
 def test_unbiased_nfw():
 	nfw_prof = hpc.NFWProfile()
@@ -67,12 +69,14 @@ def test_unbiased_nfw():
 	assert high_conc_radii.mean() < satellite_radii.mean() < low_conc_radii.mean()
 
 	# verify that all mc_angles points are on the unit sphere
-	unit_sphere_pts = sat_prof.mc_angles(1000)
+	x, y, z = sat_prof.mc_angles(1000)
+	unit_sphere_pts = np.array([x, y, z]).T
 	norms = np.linalg.norm(unit_sphere_pts, axis=1)
 	assert np.allclose(norms, 1)
 
 	# verify that all mc_pos points are inside the unit sphere
-	satellite_pos = sat_prof.mc_pos(mock)
+	satellite_xpos, satellite_ypos, satellite_zpos = sat_prof.mc_pos(mock)
+	satellite_pos = np.array([satellite_xpos, satellite_ypos, satellite_zpos]).T
 	assert np.all(np.linalg.norm(satellite_pos, axis=1) <= 1)
 
 

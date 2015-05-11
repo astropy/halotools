@@ -13,7 +13,7 @@ Here are some markdown comments.
 
 .. code:: python
 
-    example_mock = 7
+    example_mock = 77777
 
 Here is a new section heading
 -----------------------------

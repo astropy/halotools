@@ -301,21 +301,23 @@ class HodMockFactory(object):
 
             # Assign positions 
             # This function is called differently than other galaxy properties, 
-            # since 'pos' is an attribute of any galaxy-halo model
+            # since 'x', 'y', and 'z' is an attribute of any galaxy-halo model
             # and any gal_type, without exception
             pos_method_name = 'pos_'+gal_type
-            getattr(self, 'pos')[gal_type_slice] = (
-                getattr(self.model, pos_method_name)(self)
-                )
 
+            (getattr(self, 'x')[gal_type_slice], 
+                getattr(self, 'y')[gal_type_slice], 
+                getattr(self, 'z')[gal_type_slice]) = getattr(self.model, pos_method_name)(self)
+                
             # Assign velocities, if relevant for this model
             if hasattr(self.model, 'vel'):
                 pass
 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
-        self.pos = occuhelp.enforce_periodicity_of_box(
-            self.pos, self.snapshot.Lbox)
+        self.x = occuhelp.enforce_periodicity_of_box(self.x, self.snapshot.Lbox)
+        self.y = occuhelp.enforce_periodicity_of_box(self.y, self.snapshot.Lbox)
+        self.z = occuhelp.enforce_periodicity_of_box(self.z, self.snapshot.Lbox)
 
         # Bundle the results into an Astropy Table, if requested
         if 'create_astropy_table' in kwargs.keys():
@@ -411,7 +413,9 @@ class HodMockFactory(object):
         if hasattr(self.model,'sec_haloprop_key'):
             _allocate_ndarray_attr(self, self.model.sec_haloprop_key, 0.)
 
-        _allocate_ndarray_attr(self, 'pos', [0.,0.,0.])
+        _allocate_ndarray_attr(self, 'x', 0. )
+        _allocate_ndarray_attr(self, 'y', 0. )
+        _allocate_ndarray_attr(self, 'z', 0. )
 
 
 

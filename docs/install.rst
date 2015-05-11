@@ -2,8 +2,38 @@
 Package Installation
 ************************
 
-Requirements
+.. _step_by_step_install:
+
+Installing Halotools
+====================
+
+There are two simple options for how to install Halotools on your machine. In both cases, once you install the package you will be able to import the Halotools package from a Python terminal running from any location on your machine.
+
+Using pip
+-------------
+
+The following install option is not yet available - coming soon!
+
+Installing Halotools can be accomplished with `pip <http://www.pip-installer.org/en/latest/>`_ with a single line of code executed at terminal::
+
+	pip install halotools
+
+If you use pip to install Halotools, the package dependencies (see below) will be handled automatically. 
+
+Building from source 
+--------------------------
+
+The other option for installing Halotools is to clone the source code from github and call the setup file::
+
+	git clone https://github.com/astropy/halotools.git
+	cd halotools
+	python setup.py install
+
+Dependencies
 ============
+
+Core Dependencies
+---------------------
 
 Halotools is built upon the following core dependencies:
 
@@ -15,27 +45,27 @@ Halotools is built upon the following core dependencies:
 
 - `Astropy`_: 1.0 or later
 
+All of the above come pre-installed with a modern python distribution such as Anaconda. In addition to the above, Halotools also requires the h5py package for fast I/O of large simulated datasets.
+
+- `h5py <http://h5py.org/>`_: 2.5 or later
+
+Use pip to install h5py and the other core packages, as necessary. 
+
+
+Optional Dependencies
+---------------------
+
 Halotools also depends on other packages for optional features and enhanced performance:
 
-- `h5py <http://h5py.org/>`_: For fast I/O of large simulated datasets.
+- `mpi4py <http://mpi4py.scipy.org/>`_: For parallelizing MCMCs and various expensive simulation analyses.
 
-- `mpi4py <http://mpi4py.scipy.org/>`_: For parallelizing calculations such as MCMCs and various expensive simulation analyses.
+- `numba <http://numba.pydata.org/>`_: For speeding up calculations using vectorization and just-in-time compiling. 
 
-However, note that these only need to be installed if those particular features
-are needed. Halotools will import even if these dependencies are not installed.
+- `BeautifulSoup <http://www.crummy.com/software/BeautifulSoup/>`_: For crawling the web for halo catalogs. 
+
+For each item in the list above, you only need to install the package if you wish to use the associated feature/enhancement. Halotools will import even if these dependencies are not installed. All optional and core packages can be installed with pip. 
 
 
-.. _step_by_step_install:
-
-Installing Halotools
-====================
-
-Using pip
--------------
-
-Installing Halotools can be accomplished with `pip <http://www.pip-installer.org/en/latest/>`_ with a single line of code executed at terminal:
-
-	coming soon!
 
 
 
