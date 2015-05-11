@@ -17,8 +17,15 @@ raw ASCII data, choose your own cuts, and produce and manage your own binaries.
 Using pre-processed binary files
 ====================================
 
-If you followed the :ref:`first_steps` section of the documentation, 
+If you followed the instructions given in :ref:`first_steps` 
+in the :ref:`getting_started` section of the documentation, 
 then you already have at least one pre-processed binary halo catalog in your cache. 
+If you haven't done that yet, you'll find it easier to follow these instructions if you 
+go ahead and do that now. 
+
+
+>>> from halotools import sim_manager
+>>> default_snapshot = sim_manager.ProcessedSnapshot() # doctest: +SKIP
 
 
 
