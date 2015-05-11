@@ -820,7 +820,11 @@ class CatalogManager(object):
                     "you must call the same function again \n"
                     "with the keyword argument `overwrite` set to `True`" % output_fname)
 
+        start = time()
         download_file_from_url(url, output_fname)
+        end = time()
+        runtime = end - start
+        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
 
         return output_fname
 
