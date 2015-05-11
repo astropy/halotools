@@ -16,16 +16,6 @@ that you need for your application. You can do this with the following syntax::
 
     >>> from halotools import some_subpackage  # doctest: +SKIP
 
-For example, if you were interested in reading/processing a N-body simulation, 
-you'd want to import the Simulation Manager sub-package:
-
-    >>> from halotools import sim_manager
-
-Note that for clarity, and to avoid any issues, we recommend that you **never**
-import any Halotools functionality using ``*``, for example::
-
-    >>> from halotools.sim_manager import *  # NOT recommended
-
 First steps with Halotools
 ================================
 
@@ -46,13 +36,27 @@ Downloading the default halo catalog
 
 Once you have installed Halotools and verified that you can import it,
 likely the first thing you will want to do is to download the default 
-halo catalog so that you can quickly get up and running. 
+halo catalog so that you can quickly get up and running. You can accomplish 
+this by navigating to the root directory of the package and running the initial 
+download script::
 
+	python scripts/download_initial_halocat
+
+Running this script will set up the Halotools cache directory system on your local machine, 
+and then download the default halo catalog to the cache, 
+storing the catalog as a pre-processed binary file. The default catalog is ~400Mb, and if 
+you are on a fast university connection the download time should be less than a minute. 
+
+If you want to start playing with this catalog right away:
+
+>>> from halotools import sim_manager
+>>> default_snapshot = sim_manager.ProcessedSnapshot() # doctest: +SKIP
+>>> print(default_snapshot.halos[0:9]) # doctest: +SKIP
 
 Getting started with subpackages
 ================================
 
-Although the different sub-packages of Halotools are woven together for the science aims of the package (see :ref:`halotools_overview` for a sketch of the primary science targets), individually the sub-packages have very different functionality. You can learn about how to work with the package as a whole from the tutorials that appear throughout the :ref:`user-docs`. 
+Although the different sub-packages of Halotools are woven together for the science aims of the package (see :ref:`halotools_overview`), individually the sub-packages have very different functionality. 
 
 Downloading and processing simulations
 ---------------------------------------

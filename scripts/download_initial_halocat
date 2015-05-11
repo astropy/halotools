@@ -10,6 +10,6 @@ redshift = sim_manager.sim_defaults.default_redshift
 
 catman = sim_manager.read_nbody.CatalogManager()
 
-catman.download_preprocessed_halo_catalog(simname, halo_finder, redshift, overwrite=True)
+catman.download_preprocessed_halo_catalog(simname, halo_finder, redshift)
 
 
