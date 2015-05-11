@@ -53,8 +53,7 @@ User Documentation
    :maxdepth: 1
 
    managing_catalogs/index
-   managing_catalogs/sim_manager_step_by_step
-   managing_catalogs/sim_manager_api
+   managing_catalogs/supported_sim_list
 
 **Tutorials**
 --------------------------------------------

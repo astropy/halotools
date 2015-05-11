@@ -5,7 +5,7 @@ Managing simulation data (`halotools.sim_manager`)
 **********************************************************************
 
 **Overview**
-----------------------------
+======================
 
 One of the most tedious tasks of simulation analysis 
 is simply file management. Halo catalogs are very large, 
@@ -30,12 +30,27 @@ The features supported by the ``sim_manager`` include:
 	* Loading the reduced catalogs into memory with a single, simple line of python code. 
 
 **Beginner's instructions**
-----------------------------
+============================================
 
 For beginner's instructions in using the ``sim_manager`` sub-package, see :ref:`sim_manager_step_by_step`. 
 
 **Reference/API**
-----------------------------
+======================
 
 For comprehensive documentation of every class, method, and function in the ``sim_manager`` sub-package, see :ref:`sim_manager_api`. 
+
+
+Using ``sim_manager``
+======================
+
+.. toctree::
+   :maxdepth: 1
+
+   sim_manager_api.rst
+   sim_manager_step_by_step.rst
+   alternate_catalogs.rst
+
+
+
+
 
