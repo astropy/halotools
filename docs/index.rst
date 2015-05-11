@@ -53,6 +53,8 @@ User Documentation
    :maxdepth: 1
 
    managing_catalogs/overview
+   managing_catalogs/sim_manager_step_by_step
+   managing_catalogs/sim_manager_api
 
 **Tutorials**
 --------------------------------------------
