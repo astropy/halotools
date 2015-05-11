@@ -42,7 +42,12 @@ For an outline of how to generate mock galaxy catalogs, see :ref:`mock_making_qu
 
 To learn how to build a customized model that is tailored to your interests, see :ref:`model_building`. 
 
-Downlaoding and processing simulations
+Making mock observations 
+-------------------------
+
+The ``mock_observables`` sub-package provides a virtual observatory for your synthetic galaxy population. 
+
+Downloading and processing simulations
 ---------------------------------------
 
 The Halotools ``sim_manager`` sub-package  
