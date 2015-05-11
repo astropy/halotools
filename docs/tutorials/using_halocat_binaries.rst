@@ -46,7 +46,30 @@ The data structure behind the scenes of the ``halos`` attribute of
 ``default_snapshot`` is an Astropy Table. We'll give a few simple
 examples illustrating how to manipulate Astropy Tables below, but for
 more detailed information about this data structure, see
-``astropy.table.Table``.
+``astropy.table``.
+
+The ``default_snapshot`` also has the halo catalog and simulation
+metadata bound to it. Here are a few examples:
+
+.. code:: python
+
+    print("Simulation name = %s " % default_snapshot.simname)
+    print("Halo-finder = %s " % default_snapshot.halo_finder)
+    print("Snapshot redshift = %.1f " % default_snapshot.redshift)
+    print("Simulation spatial resolution = %.1f kpc/h" % default_snapshot.softening_length)
 
 
+.. parsed-literal::
+
+    Simulation name = bolshoi 
+    Halo-finder = rockstar 
+    Snapshot redshift = -0.0 
+    Simulation spatial resolution = 1.0 kpc/h
+
+
+Downloading other pre-processed snapshots
+=========================================
+
+Up until now, you have been working with the default snapshot downloaded
+by the startup script ``download_initial_halocat``.
 
