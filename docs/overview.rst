@@ -44,7 +44,7 @@ Direct mock population is the linchpin of this program. With Halotools, syntheti
 Structure Formation
 ==========================================
 
-Halotools provides fast, easy-to-use Python code to analyze cosmological simulations. There is end-to-end support for downloading publicly available “raw” catalogs of simulated data, reducing the (quite large) catalogs to memory-mapped binary files, managing the cache of simulations, and studying the data with a variety of common analysis techniques. You can learn how to get started with Halotools' simulation analysis tools by reading the :ref:`sim_analysis`. 
+Halotools provides fast, easy-to-use Python code to analyze cosmological simulations. There is end-to-end support for downloading publicly available “raw” catalogs of simulated data, reducing the (quite large) catalogs to memory-mapped binary files, managing the cache of simulations, and studying the data with a variety of common analysis techniques. 
 
 Here are a few examples of questions about cosmological structure formation you can use Halotools to explore:
 

@@ -68,7 +68,7 @@ different simulations using a single line of code.
 
 	>>> from halotools import sim_manager
 
-You can find an overview of this sub-package at :ref:`sim_analysis`. 
+You can find an overview of this sub-package at :ref:`cat_manage`. 
 
 
 Building models and making mocks
