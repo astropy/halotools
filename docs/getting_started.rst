@@ -1,3 +1,5 @@
+.. _getting_started:
+
 ******************************
 Getting Started with Halotools
 ******************************
@@ -17,6 +19,7 @@ that you need for your application. You can do this with the following syntax::
     >>> from halotools import some_subpackage  # doctest: +SKIP
 
 .. _first_steps:
+
 First steps with Halotools
 ================================
 
@@ -32,6 +35,7 @@ soup-to-nuts testing of all sub-packages. This typically takes less than a minut
 At the end, you will see a short summary of the outcome of the test suite. 
 
 .. _download_default_halos:
+
 Downloading the default halo catalog
 -------------------------------------
 
