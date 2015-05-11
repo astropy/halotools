@@ -34,6 +34,10 @@ The features supported by the ``sim_manager`` include:
 
 For beginner's instructions in using the ``sim_manager`` sub-package, see :ref:`sim_manager_step_by_step`. 
 
+**List of supported simulations**
+============================================
+To see what catalogs Halotools is pre-configured to work with, see :ref:`supported_sim_list`. If you have your own catalog you would like to work with instead, see the :ref:`using_your_own_catalog`. 
+
 **Reference/API**
 ======================
 
