@@ -46,16 +46,14 @@ User Documentation
    model_building/models
 
 
-**Simulation Analysis Tools**
+**Managing Halo Catalogs**
 --------------------------------------------
 
 .. toctree::
    :maxdepth: 1
 
-   sim_analysis/overview
-   sim_analysis/halo_catalogs
-   sim_analysis/halo_analysis
-   sim_analysis/merger_trees
+   managing_catalogs/index
+   managing_catalogs/supported_sim_list
 
 **Tutorials**
 --------------------------------------------

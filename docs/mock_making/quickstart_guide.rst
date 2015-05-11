@@ -17,8 +17,7 @@ snapshot of Bolshoi as the default simulation.
 You can configure your choice for the default 
 mock in defaults.py. Just set the values of 
 defaults.default_simulation to your preferred 
-snapshot; you can read which simulations come 
-packaged with halotools here :ref:`simulation_list`. 
+snapshot.  
 The options for defaults.default_model 
 are those listed at :ref:`list_of_default_models`
 
