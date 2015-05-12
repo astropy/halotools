@@ -113,7 +113,7 @@ supported by the package:
 Each simulation/halo-finder combination is actually composed of a
 collection of many, many publicly available snapshots. To see which
 snapshots have been pre-processed, we'll use the
-`~halotools.sim_manger.CatalogManager.available_redshifts` method
+`~halotools.sim_manager.CatalogManager.available_redshifts` method
 of the `~halotools.sim_manager.CatalogManager`:
 
 .. code:: python
