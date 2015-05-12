@@ -52,11 +52,37 @@ def correct_docs_hyperlinks(fname):
         line = line.replace('--`', '')
         return line
 
+    def find_reflink_substrings(line):
+        reflink_substr = ':ref:``'
+
+        first_idx_list = []
+        if reflink_substr in line:
+            idx = line.find(reflink_substr)
+            while idx > -1:
+                first_idx_list.append(idx)
+                idx = line.find(reflink_substr, idx+1)
+
+        strlist = []
+        for idx in first_idx_list:
+            last_idx = line.find('``', idx + len(reflink_substr))
+            strlist.append(line[idx:last_idx+2])
+
+        return strlist
+
+    def correct_reflinks(line):
+        incorrect_substrings = find_reflink_substrings(line)
+        if incorrect_substrings != []:
+            for s in incorrect_substrings:
+                correct_substr = s.replace('``', '`')
+                line = line.replace(s, correct_substr)
+        return line
+
     with open(fname, 'r') as f:
         lines = f.readlines()
 
     for i, line in enumerate(lines):
         line = correct_dashes(line)
+        line = correct_reflinks(line)
         lines[i] = line
 
     with open(fname, 'w') as f:

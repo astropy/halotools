@@ -7,7 +7,7 @@ Tutorial on managing pre-processed halo catalogs
 
 If you are following this tutorial, you should first have downloaded the
 default Halotools catalog by following the instructions given in the
-:ref:``first_steps`` section of the documentation. Follow those
+:ref:`first_steps` section of the documentation. Follow those
 instructions now if you have not done so already.
 
 Working with the default pre-processed snapshot
@@ -201,7 +201,7 @@ mention here. The first is
 which checks your cache for an existing catalog. And the second is
 `~halotools.sim_manager.CatalogManager.all_halocats_in_cache`,
 which lists all cached catalogs of a given type. Refer to the
-:ref:``sim_manager_api`` section of the documentation to see how to call
+:ref:`sim_manager_api` section of the documentation to see how to call
 these and other methods of the
 `~halotools.sim_manager.CatalogManager`.
 
