@@ -5,12 +5,22 @@
 Tutorial on managing pre-processed halo catalogs
 *************************************************
 
+If you are following this tutorial, you should first have downloaded the
+default Halotools catalog by following the instructions given in the
+:ref:``first_steps`` section of the documentation. Follow those
+instructions now if you have not done so already.
+
+Working with the default pre-processed snapshot
+-----------------------------------------------
+
+To get warmed up, let's see how to work with the default snapshot
+provided by Halotools. After importing the
+`~halotools.sim_manager` sub-package, you can load the default
+snapshot into memory with a single line of code:
+
 .. code:: python
 
     from halotools import sim_manager
-
-.. code:: python
-
     default_snapshot = sim_manager.ProcessedSnapshot()
 
 
@@ -23,9 +33,13 @@ Tutorial on managing pre-processed halo catalogs
 
 The `~halotools.sim_manager.ProcessedSnapshot` is the primary
 class you will use when working with halo catalogs. When you instantiate
-this class, as in the second line of code above, Halotools searches for
-the relevant halo catalog and attaches the the halos to the snapshot
-object in the form of the ``halos`` attribute:
+this class, as in the second line of code above, Halotools first
+searches for the relevant halo catalog in your cache directory. Since
+you called `~halotools.sim_manager.ProcessedSnapshot` with no
+arguments, the default snapshot is chosen.
+
+The halo catalog is attached to the snapshot object in the form of the
+``halos`` attribute:
 
 .. code:: python
 
@@ -148,7 +162,8 @@ download the catalog. If you are following this tutorial for the first
 time, the download would proceed.
 
 Now that your z=2 catalog is in cache, you can load it into memory just
-as before by using `~halotools.sim_manager.ProcessedSnapshot`:
+as before by using the `~halotools.sim_manager.ProcessedSnapshot`
+method:
 
 .. code:: python
 
@@ -161,4 +176,32 @@ as before by using `~halotools.sim_manager.ProcessedSnapshot`:
     /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
     
 
+
+Concluding notes
+----------------
+
+If you anticipate studying how your science targets depend on redshift,
+cosmology, or halo-finding, you may find it useful to use the
+`~halotools.sim_manager.CatalogManager.download_all_default_catalogs``
+method. This will download the following pre-processed snapshots to your
+cache directory:
+
+::
+
+    * Rockstar-based Bolshoi halos at z = 0, 0.5, 1, and 2
+    * BDM-based Bolshoi halos at z=0
+    * Rockstar-based Bolshoi-Planck halos at z=0
+
+These catalogs will occupy a total of ~3Gb of disk space on your
+machine.
+
+There are two other convenience methods that are worthy of special
+mention here. The first is
+`~halotools.sim_manager.CatalogManager.check_for_existing_halocat`,
+which checks your cache for an existing catalog. And the second is
+`~halotools.sim_manager.CatalogManager.all_halocats_in_cache`,
+which lists all cached catalogs of a given type. Refer to the
+:ref:``sim_manager_api`` section of the documentation to see how to call
+these and other methods of the
+`~halotools.sim_manager.CatalogManager`.
 
