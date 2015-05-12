@@ -61,8 +61,7 @@ User Documentation
 .. toctree::
    :maxdepth: 1
 
-   tutorials/example_tutorial
-   tutorials/model_building_tutorial
+   tutorials/index
 
 .. _developer-docs:
 
