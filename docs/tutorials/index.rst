@@ -12,6 +12,7 @@ Managing simulations
    :maxdepth: 1
 
    using_halocat_binaries.rst
+   raw_halocats.rst
 
 Building cosmological models
 ====================================
