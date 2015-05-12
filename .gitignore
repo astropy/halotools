@@ -42,6 +42,7 @@ distribute-*.tar.gz
 .*.swp
 *~
 
+Untitled*.ipynb
 .ipynb_checkpoints/*
 */.ipynb_checkpoints/*
 */*/.ipynb_checkpoints/*
