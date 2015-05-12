@@ -4,6 +4,7 @@
 Test the distance functions in distance.py
 """
 
+"""
 from ..distances import euclidean_distance
 from ..distances import angular_distance
 from ..distances import projected_distance
@@ -47,3 +48,6 @@ def test_projected_distance():
     
     assert d_para==1, "incorrect parallel distance measure."
     assert d_perp==0, "incorrect parallel distance measure."
+
+
+    """

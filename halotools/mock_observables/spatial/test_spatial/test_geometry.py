@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+"""
 from ..geometry import face, polygon3D, sphere, polygon2D, circle, cylinder
 import numpy as np
 import math
@@ -91,6 +91,6 @@ def test_cylinder_periodic():
     assert np.all(cyl.inside(test_point, period=period)==False), "inside calculation incorrect"
     
     
-    
+    """
     
     

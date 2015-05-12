@@ -7,5 +7,5 @@ spatial is a sub-package designed to calculate spatial quantities.
 
 __all__=['geometry', 'distances', 'kdtrees']
 
-from .geometry import *
-from .distances import *
+#from .geometry import *
+#from .distances import *
