@@ -45,6 +45,19 @@ def add_asterisk_header(fname):
         f.write(line)
     f.close()
 
+def correct_docs_hyperlinks(fname):
+    with open(fname, 'r') as f:
+        lines = f.readlines()
+
+    for i, line in enumerate(lines):
+        line = line.replace('``--', '`')
+        line = line.replace('--``', '`')
+        lines[i] = line
+
+    with open(fname, 'w') as f:
+        for line in lines:
+            f.write(line)
+
 def get_list_of_tutorials(relative_dirname):
     tutorial_tag = '.ipynb'
     tutorial_list = (
@@ -139,6 +152,7 @@ def main():
                 rst_fname = fname[:-len('.ipynb')]+'.rst'
                 add_asterisk_header(rst_fname)
                 rewrite_first_line(rst_fname)
+                correct_docs_hyperlinks(rst_fname)
                 system("rm "+fname)
                 system("mv "+rst_fname+" "+tutorial_loc)
 
@@ -155,7 +169,7 @@ def main():
             print("The following notebooks were not converted to rst "
                 "because they raise an exception:")
             for failure in failure_list:
-                print(failure+".ipynb\n")
+                print(failure+"\n")
             print("\n")
 
             
