@@ -50,13 +50,14 @@ def correct_docs_hyperlinks(fname):
         lines = f.readlines()
 
     for i, line in enumerate(lines):
-        line = line.replace('``--', '`')
-        line = line.replace('--``', '`')
+        line = line.replace('`--', '')
+        line = line.replace('--`', '')
         lines[i] = line
 
     with open(fname, 'w') as f:
         for line in lines:
             f.write(line)
+
 
 def get_list_of_tutorials(relative_dirname):
     tutorial_tag = '.ipynb'

@@ -1028,11 +1028,33 @@ class CatalogManager(object):
 
 
     def download_all_default_catalogs(self):
-        """ If not already in cache, 
-        download default particle and halo catalogs from Yale website.
-        """
+        """ Convenience method used to download all pre-processed halo catalogs 
+        that are not already in the cache directory.
 
-        pass
+        Returns 
+        -------
+        new_downloads : list 
+            List of strings of all newly-downloaded filenames. 
+        """
+        location = 'web'
+        catalog_type = 'halos'
+
+        new_downloads = []
+        halocat_list = self.available_halocats
+        for simname, halo_finder in halocat_list:
+            halocat_obj = get_halocat_obj(simname, halo_finder)
+            urls = self.available_snapshots(location, catalog_type, simname, halo_finder)
+            for url in urls:
+                fname = os.path.basename(url)
+                scale_factor_substr = halocat_obj.get_scale_factor_substring(fname)
+                a = float(scale_factor_substr)
+                z = (1/a) - 1
+                result = self.download_preprocessed_halo_catalog(simname, halo_finder, z)
+                if result is not None:
+                    new_downloads.append(result)
+
+        return new_downloads
+
 
 ###################################################################################################
 class RockstarReader(object):
