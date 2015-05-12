@@ -46,12 +46,17 @@ def add_asterisk_header(fname):
     f.close()
 
 def correct_docs_hyperlinks(fname):
+
+    def correct_dashes(line):
+        line = line.replace('`--', '')
+        line = line.replace('--`', '')
+        return line
+
     with open(fname, 'r') as f:
         lines = f.readlines()
 
     for i, line in enumerate(lines):
-        line = line.replace('`--', '')
-        line = line.replace('--`', '')
+        line = correct_dashes(line)
         lines[i] = line
 
     with open(fname, 'w') as f:
