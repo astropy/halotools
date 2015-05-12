@@ -104,6 +104,28 @@ class ProcessedSnapshot(object):
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder,
         redshift = sim_defaults.default_redshift):
+        """
+        Parameters 
+        ----------
+        simname : string, optional 
+            Nickname of the simulation, e.g. `bolshoi`. 
+            If no simname is specified, the default choice is set 
+            by the ``default_simname`` string stored in 
+            the `sim_defaults` module.
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. `rockstar`. 
+            If no halo_finder is specified, the default choice is set 
+            by the ``default_halo_finder`` string stored in 
+            the `sim_defaults` module.
+
+        redshift : float, optional 
+            Redshift of the desired snapshot. 
+            If no redshift is specified, the default choice is set 
+            by the ``default_redshift`` string stored in 
+            the `sim_defaults` module.
+
+        """
 
         self.simname = simname
         self.halo_finder = halo_finder
@@ -215,7 +237,10 @@ class CatalogManager(object):
             return None
 
         if location == 'web':
-            return halocat_obj.raw_halocats_available_for_download
+            if catalog_type == 'raw_halos':
+                return halocat_obj.raw_halocats_available_for_download
+            elif catalog_type == 'halos':
+                return halocat_obj.preprocessed_halocats_available_for_download
         else:
             if location == 'cache':
                 dirname = cache_config.get_catalogs_dir(
@@ -232,6 +257,62 @@ class CatalogManager(object):
                 for f in matching_fnames:
                     fname_list.append(os.path.join(dirname,f))
             return fname_list
+
+    def available_redshifts(self, location, catalog_type, simname, halo_finder):
+        """
+        Return a list of the redshifts that are stored at the input location. 
+
+        Parameters 
+        ----------
+        location : string 
+            Specifies the web or disk location to search for halo catalogs. 
+            Optional values for `location` are:
+
+                *  `web` - default web location defined by `~halotools.sim_manager.HaloCat` instance. 
+
+                * `cache` - Halotools cache location defined in `~halotools.sim_manager.cache_config`
+
+                * a full pathname such as `/explicit/full/path/to/my/personal/halocats/`. 
+
+        catalog_type : string 
+            If you want the original, unprocessed ASCII data produced by Rockstar, 
+            then `catalog_type` should be set to `raw_halos`. 
+            If you instead want a previously processed catalog that has been 
+            converted into a fast-loading binary, set `catalog_type` to `halos`. 
+
+        simname : string 
+            Nickname of the simulation, e.g. `bolshoi`. 
+            Default is None, in which case halo catalogs pertaining to all 
+            simulations stored in `location` will be returned. 
+
+        halo_finder : string
+            Nickname of the halo-finder, e.g. `rockstar`. 
+            Default is None, in which case halo catalogs pertaining to all 
+            halo-finders stored in `location` will be returned. 
+
+        Returns 
+        -------
+        redshift_list : list 
+            List of redshifts of all halo catalogs stored 
+            at the input location. 
+
+        """
+
+        halocat_obj = get_halocat_obj(simname, halo_finder)
+        if halocat_obj is None:
+            return None
+
+        snapshot_list = self.available_snapshots(location, catalog_type, simname, halo_finder)
+        redshift_list = []
+        for full_fname in snapshot_list:
+            fname = os.path.basename(full_fname)
+            scale_factor_substr = halocat_obj.get_scale_factor_substring(fname)
+            a = float(scale_factor_substr)
+            z = (1/a) - 1
+            redshift_list.append(z)
+
+        return redshift_list
+
 
     def download_raw_halocat(self, simname, halo_finder, input_redshift, 
         overwrite = False, **kwargs):
@@ -323,10 +404,12 @@ class CatalogManager(object):
             if overwrite ==True:
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
             else:
-                raise IOError("The following filename already exists: \n\n%s\n\n"
+                msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
                     "If you really want to overwrite the file, \n"
                     "you must call the same function again \n"
-                    "with the keyword argument `overwrite` set to `True`" % output_fname)
+                    "with the keyword argument `overwrite` set to `True`")
+                print(msg % output_fname)
+                return None
 
         download_file_from_url(url, output_fname)
 
@@ -815,10 +898,12 @@ class CatalogManager(object):
             if overwrite ==True:
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
             else:
-                raise IOError("The following filename already exists: \n\n%s\n\n"
+                msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
                     "If you really want to overwrite the file, \n"
                     "you must call the same function again \n"
-                    "with the keyword argument `overwrite` set to `True`" % output_fname)
+                    "with the keyword argument `overwrite` set to `True`")
+                print(msg % output_fname)
+                return None
 
         start = time()
         download_file_from_url(url, output_fname)

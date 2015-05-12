@@ -1,9 +1,9 @@
 
 .. _using_halocat_binaries:
 
-*************************************
-Managing pre-processed halo catalogs
-*************************************
+*************************************************
+Tutorial on managing pre-processed halo catalogs
+*************************************************
 
 .. code:: python
 
@@ -56,7 +56,6 @@ metadata bound to it. Here are a few examples:
     print("Simulation name = %s " % default_snapshot.simname)
     print("Halo-finder = %s " % default_snapshot.halo_finder)
     print("Snapshot redshift = %.1f " % default_snapshot.redshift)
-    print("Simulation spatial resolution = %.1f kpc/h" % default_snapshot.softening_length)
 
 
 .. parsed-literal::
@@ -64,12 +63,102 @@ metadata bound to it. Here are a few examples:
     Simulation name = bolshoi 
     Halo-finder = rockstar 
     Snapshot redshift = -0.0 
-    Simulation spatial resolution = 1.0 kpc/h
 
 
 Downloading other pre-processed snapshots
 =========================================
 
 Up until now, you have been working with the default snapshot downloaded
-by the startup script ``download_initial_halocat``.
+by the startup script ``download_initial_halocat``. However, the
+Halotools team also provides other pre-processed snapshots to choose
+from. To see which ones, you need to use the Catalog Manager:
+
+.. code:: python
+
+    catman = sim_manager.CatalogManager()
+
+First, let's take a look at which combinations and halo-finders are
+supported by the package:
+
+.. code:: python
+
+    halocat_list = catman.available_halocats
+    for simname, halo_finder in halocat_list:
+        print(simname, halo_finder)
+        
+
+.. parsed-literal::
+
+    ('bolshoi', 'rockstar')
+    ('bolshoipl', 'rockstar')
+    ('bolshoi', 'bdm')
+    ('multidark', 'rockstar')
+    ('consuelo', 'rockstar')
+
+
+Each simulation/halo-finder combination is actually composed of a
+collection of many, many publicly available snapshots. To see which
+snapshots have been pre-processed, we'll use the
+`~halotools.sim_manger.CatalogManager.available_redshifts` method
+of the `~halotools.sim_manager.CatalogManager`:
+
+.. code:: python
+
+    location = 'web'
+    catalog_type = 'halos'
+    simname = 'bolshoi'
+    halo_finder = 'rockstar'
+    redshift_list = catman.available_redshifts(location, catalog_type, simname, halo_finder)
+    for z in redshift_list:
+        print("z = %.2f " % z)
+        
+
+.. parsed-literal::
+
+    z = 2.03 
+    z = 0.98 
+    z = 0.49 
+    z = -0.00 
+
+
+So for this combination of simulation/halo-finder, we have four options
+to choose from for our pre-processed snapshot. To download the z=2
+snapshot:
+
+.. code:: python
+
+    desired_redshift = 2.03
+    catman.download_preprocessed_halo_catalog(simname, halo_finder, desired_redshift)
+
+
+.. parsed-literal::
+
+    The following filename already exists in your cache directory: 
+    
+    /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
+    
+    If you really want to overwrite the file, 
+    you must call the same function again 
+    with the keyword argument `overwrite` set to `True`
+
+
+In this case, Halotools detected that the pre-processed halo catalog was
+actually already stored in my cache directory, so there was no need to
+download the catalog. If you are following this tutorial for the first
+time, the download would proceed.
+
+Now that your z=2 catalog is in cache, you can load it into memory just
+as before by using `~halotools.sim_manager.ProcessedSnapshot`:
+
+.. code:: python
+
+    z2_snapshot = sim_manager.ProcessedSnapshot(simname, halo_finder, desired_redshift)
+
+
+.. parsed-literal::
+
+    Loading z = 2.03 halo catalog with the following absolute path: 
+    /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
+    
+
 
