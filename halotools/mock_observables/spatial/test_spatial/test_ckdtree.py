@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+"""
 #import modules
 from __future__ import division
 from ..kdtrees.ckdtree import cKDTree
@@ -11,7 +12,7 @@ from halotools.mock_observables.pair_counters.cpairs import pairwise_distances
 #other modules
 import numpy as np
 import sys
-
+"""
 
 __all__=['test_initialization', 'test_count_neighbors', 'test_count_neighbors_periodic',\
          'test_count_neighbors_approximation', 'test_query_pairs',\
@@ -30,7 +31,7 @@ __all__=['test_initialization', 'test_count_neighbors', 'test_count_neighbors_pe
 This script contains code to test the functionality of ckdtree.pyx 
 """
 
-
+"""
 ##########################################################################################
 #tests for initialization
 ##########################################################################################
@@ -545,3 +546,6 @@ def test_sparse_distance_matrix():
     print(np.abs(diff)<epsilon)
     
     assert (np.abs(diff)>epsilon).nnz==0
+
+
+    """
