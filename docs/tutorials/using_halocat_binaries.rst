@@ -182,7 +182,7 @@ Concluding notes
 
 If you anticipate studying how your science targets depend on redshift,
 cosmology, or halo-finding, you may find it useful to use the
-`~halotools.sim_manager.CatalogManager.download_all_default_catalogs``
+`~halotools.sim_manager.CatalogManager.download_all_default_catalogs`
 method. This will download the following pre-processed snapshots to your
 cache directory:
 
