@@ -398,7 +398,8 @@ class CatalogManager(object):
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
         is_in_cache = self.check_for_existing_halocat(
-            download_loc, output_fname, 'raw_halos', simname, halo_finder)
+            download_loc, 'raw_halos', fname=output_fname, 
+            simname=simname, halo_finder=halo_finder)
 
         if is_in_cache != False:
             if overwrite ==True:
@@ -738,8 +739,7 @@ class CatalogManager(object):
 
         return all_cached_files
 
-    def check_for_existing_halocat(self, 
-            location, fname, catalog_type, simname, halo_finder):
+    def check_for_existing_halocat(self, location, catalog_type, **kwargs):
         """ Method searches the appropriate location in the 
         cache directory for the input fname, and returns a boolean for whether the 
         file is already in cache. 
@@ -756,18 +756,28 @@ class CatalogManager(object):
 
                 * a full pathname such as `/full/path/to/my/personal/halocats/`. 
 
-        fname : string 
-            Name of the file being searched for. 
-
         catalog_type : string
             String giving the type of catalog. 
             Should be `halos`, or `raw_halos`. 
 
+        fname : string, optional 
+            Filenmae (including absolute path) of the catalog being searched for. 
+
         simname : string, optional 
             Nickname of the simulation, e.g. `bolshoi`. 
+            Must be specified if no `fname` keyword argument is given. 
 
         halo_finder : string, optional 
             Nickname of the halo-finder, e.g. `rockstar`. 
+            Must be specified if no `fname` keyword argument is given. 
+
+        redshift : float, optional 
+            Redshift of the snapshot being searched for. 
+            Must be specified if no `fname` keyword argument is given. 
+
+        dz_tol : float, optional
+            Tolerance value determining how close the requested redshift must be to 
+            the closest available snapshot to be considered a match. Default value is 0.1. 
 
         Returns 
         -------
@@ -776,33 +786,69 @@ class CatalogManager(object):
             is in the Halotools cache directory. 
         """
 
+        if 'fname' in kwargs.keys():
+            fname = kwargs['fname']
+            dirname = os.path.dirname(fname)
+
+            potential_matches = []
+            for path, dirlist, filelist in os.walk(dirname):
+                for f in filelist:
+                    if path == dirname:
+                        potential_matches.append(os.path.join(path, f))
+            if fname[-3:] == '.gz':
+                file_pattern = '*'+os.path.basename(fname[:-3])+'*'
+            else:
+                file_pattern = '*'+os.path.basename(fname)+'*'
+            matching_catalogs = fnmatch.filter(potential_matches, file_pattern)
+
+            if len(matching_catalogs) == 0:
+                return False
+            elif len(matching_catalogs) == 1:
+                return os.path.abspath(matching_catalogs[0])
+            elif len(matching_catalogs) == 2:
+                length_matching_catalogs = [len(s) for s in matching_catalogs]
+                idx_sorted = np.argsort(length_matching_catalogs)
+                sorted_matching_catalogs = list(np.array(matching_catalogs)[idx_sorted])
+                fname1, fname2 = sorted_matching_catalogs
+                if fname2[:-3] == fname1:
+                    warnings.warn("For filename:\n%s,\n"
+                    "both the file and its uncompressed version appear "
+                    "in the cache directory. " % fname2)
+                return os.path.abspath(sorted_matching_catalogs[1])
+            else:
+                raise IOError("More than 1 matching catalog found in cache directory")
+
+        else:
+            if (
+                ('simname' not in kwargs.keys()) or 
+                ('halo_finder' not in kwargs.keys()) or 
+                ('redshift' not in kwargs.keys()) ):
+                raise IOError("If the 'fname' keyword argument is not passed to "
+                    "check_for_existing_halocat, then you must pass "
+                    "'simname', 'halo_finder', and 'redshift' keyword arguments")
+            else:
+                simname = kwargs['simname']
+                halo_finder = kwargs['halo_finder']
+                redshift = kwargs['redshift']
+                if 'dz_tol' in kwargs.keys():
+                    dz_tol = kwargs['dz_tol']
+                else:
+                    dz_tol = 0.1
+
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
-        existing_catalogs = self.available_snapshots(
-            location, catalog_type, simname, halo_finder)
+        closest_cat, closest_redshift = self.closest_halocat(
+            location, catalog_type, simname, halo_finder, redshift)
 
-        if fname[-3:] == '.gz':
-            file_pattern = '*'+os.path.basename(fname[:-3])+'*'
-        else:
-            file_pattern = '*'+os.path.basename(fname)+'*'
-        matching_catalogs = fnmatch.filter(existing_catalogs, file_pattern)
-
-        if len(matching_catalogs) == 0:
+        if abs(closest_redshift - redshift) > dz_tol:
+            msg = (
+                "No raw %s halo catalog has \na redshift within %.2f " + 
+                "of the input_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                )
+            print(msg % (simname, dz_tol, redshift, closest_redshift))
             return False
-        elif len(matching_catalogs) == 1:
-            return matching_catalogs[0]
-        elif len(matching_catalogs) == 2:
-            length_matching_catalogs = [len(s) for s in matching_catalogs]
-            idx_sorted = np.argsort(length_matching_catalogs)
-            sorted_matching_catalogs = list(np.array(matching_catalogs)[idx_sorted])
-            fname1, fname2 = sorted_matching_catalogs
-            if fname2[:-3] == fname1:
-                warnings.warn("For filename:\n%s,\n"
-                "both the file and its uncompressed version appear "
-                "in the cache directory. " % fname2)
-            return sorted_matching_catalogs[1]
         else:
-            raise IOError("More than 1 matching catalog found in cache directory")
+            return os.path.abspath(closest_cat)
 
 
     def download_preprocessed_halo_catalog(self, simname, halo_finder, input_redshift, 
@@ -892,7 +938,8 @@ class CatalogManager(object):
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
         is_in_cache = self.check_for_existing_halocat(
-            download_loc, closest_snapshot_fname, 'halos', simname, halo_finder)
+            download_loc, 'halos', 
+            fname=closest_snapshot_fname, simname=simname, halo_finder=halo_finder)
 
         if is_in_cache != False:
             if overwrite ==True:
