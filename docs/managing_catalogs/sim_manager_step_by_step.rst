@@ -21,13 +21,7 @@ If you followed the instructions given in :ref:`first_steps`
 in the :ref:`getting_started` section of the documentation, 
 then you already have at least one pre-processed binary halo catalog in your cache. 
 If you haven't done that yet, you'll find it easier to follow these instructions if you 
-go ahead and do that now. 
-
-
->>> from halotools import sim_manager
->>> default_snapshot = sim_manager.ProcessedSnapshot() # doctest: +SKIP
-
-
+go ahead and do that before navigating to :ref:`using_halocat_binaries`. 
 
 
 .. _using_raw_halocats:
@@ -35,4 +29,5 @@ go ahead and do that now.
 Starting from scratch with raw ASCII
 =======================================
 
+If you would like to learn how to start from scratch with raw ASCII data from one of the  halo catalogs supported by Halotools, then navigate to :ref:`raw_halocats_tutorial`. Before doing so, you will likely find it useful to first read the :ref:`using_halocat_binaries`. 
 
