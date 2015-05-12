@@ -21,11 +21,11 @@ Managing pre-processed halo catalogs
     
 
 
-The ``~halotools.sim_manager.ProcessedSnapshot`` is the primary class
-you will use when working with halo catalogs. When you instantiate this
-class, as in the second line of code above, Halotools searches for the
-relevant halo catalog and attaches the the halos to the snapshot object
-in the form of the ``halos`` attribute:
+The `~halotools.sim_manager.ProcessedSnapshot` is the primary
+class you will use when working with halo catalogs. When you instantiate
+this class, as in the second line of code above, Halotools searches for
+the relevant halo catalog and attaches the the halos to the snapshot
+object in the form of the ``halos`` attribute:
 
 .. code:: python
 
@@ -46,7 +46,7 @@ The data structure behind the scenes of the ``halos`` attribute of
 ``default_snapshot`` is an Astropy Table. We'll give a few simple
 examples illustrating how to manipulate Astropy Tables below, but for
 more detailed information about this data structure, see
-``astropy.table``.
+`astropy.table`.
 
 The ``default_snapshot`` also has the halo catalog and simulation
 metadata bound to it. Here are a few examples:
