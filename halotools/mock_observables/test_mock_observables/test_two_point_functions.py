@@ -9,6 +9,7 @@ from ..two_point_functions import two_point_correlation_function_jackknife
 from ..two_point_functions import Delta_Sigma
 from ...utils import spherical_geometry as sg
 
+"""
 __all__=['test_TPCF_auto', 'test_TPCF_estimator', 'test_TPCF_sample_size_limit',\
          'test_TPCF_randoms', 'test_TPCF_period_API',\
          'test_two_point_correlation_function_jackknife',\
@@ -225,4 +226,4 @@ def test_delta_sigma():
     
     pass
 ##########################################################################################
-
+"""

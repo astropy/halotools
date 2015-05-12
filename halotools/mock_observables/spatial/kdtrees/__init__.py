@@ -1,3 +1,3 @@
 __all__=["ckdtree"]
 
-from ckdtree import *
+#from ckdtree import *

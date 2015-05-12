@@ -2,6 +2,7 @@ from distutils.extension import Extension
 import numpy
 import os
 
+"""
 PATH_TO_WRAPPER = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ["ckdtree.pyx"]
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
@@ -21,3 +22,4 @@ def get_extensions():
                  ]
 
     return extensions
+    """
