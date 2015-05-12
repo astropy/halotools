@@ -4,9 +4,9 @@
 Halotools Science Overview
 ***************************
 
-Here we’ll give a qualitative description of the motivation and functionality of Halotools in broad strokes. You can get a more detailed picture of the package from the rest of the :ref:`user-docs`. 
+In this section of the documentation we’ll give a qualitative description of the motivation and functionality of Halotools in broad strokes. You can get a more detailed picture of the package from the rest of the :ref:`user-docs`. 
 
-Halotools is a fully open-source project, and is the product of many scientists collaborating across numerous universities. If you are interested in contributing to Halotools, or in learning more about how the package works under the hood, see the :ref:`developer-docs`. 
+Halotools is a fully open-source project, and is the product of many scientists collaborating across numerous universities. If you are interested in contributing to Halotools, and/or in learning more about how the package works under the hood, see the :ref:`tutorial_list` and :ref:`developer-docs`. 
 
 Core Science Aim
 =====================
@@ -15,11 +15,11 @@ The core science aim of Halotools is to provide a generalized platform to build 
 
 	**Simplicity:** Building a model, generating a synthetic galaxy population, and making mock observations can be accomplished in just a few lines of easy-to-read python code. 
 
-	**Extensibility:** Model components can easily be swapped in and out, so that you can construct quite complex models by composing a collection of simple features. 
+	**Modularity:** Model components can easily be swapped in and out, so that you can construct quite complex models by composing a collection of simple features written in independent modules.  
 
-	**Performance:** The interface has been heavily optimized with MCMC-type applications in mind; generating model predictions such as galaxy clustering and lensing typically only takes a few seconds on a modern laptop. 
+	**Performance:** Under the hood, the interface is heavily optimized with MCMC-type applications in mind; generating model predictions such as galaxy clustering and lensing typically only takes a few seconds on a modern laptop. 
 
-For convenience, Halotools comes pre-loaded with traditional models such as the HOD, CLF, and the many variants of abundance matching. The package also includes numerous new classes of previously unexplored models, and a range of flexible templates for building and testing models based on your own ideas about cosmological structure formation. In the sections below we elaborate on these features and their science applications. 
+For convenience, Halotools comes pre-loaded with traditional models such as the HOD, CLF, and the many variants of abundance matching. The package also includes numerous new classes of previously unexplored models, and a range of flexible templates for building and testing models based on your own ideas about galaxies. In the sections below we elaborate on the three branches of astrophysics that Halotools is designed to study.
 
 Cosmology 
 =====================
@@ -30,13 +30,13 @@ The Halotools approach is to directly populate simulated dark matter halos with 
 
 	**Model sophistication:** With Halotools, your models are not limited by restrictive-but-common assumptions such as that a halo's total mass is its only physically relevant property. You can connect galaxies to halos in whatever manner you wish. 
 
-	**Systematic rigor:** Because Halotools uses simulations *directly,* by comparing parameter inferences deriving from fitting functions you can rigorously test the assumptions of traditional methods and quantify systematics in terms of the your science target of interest. 
+	**Systematic rigor:** Because Halotools uses simulations *directly,* by comparing parameter inferences deriving from fitting functions you can rigorously test the assumptions of traditional methods and quantify systematics in terms of your science target of interest. 
 
 
 Galaxy Evolution 
 =====================
 
-Historically, it has been challenging to form a clear connection between the predictions made by hydrodynamical simulations, traditional semi-analytical models, and cosmological models such as the HOD. One of the chief goals of Halotools is to provide a bridge between these complementary approaches to modeling galaxy evolution. 
+Historically, it has been challenging to form a clear connection between the predictions made by 1. hydrodynamical simulations, 2. traditional semi-analytical models, and 3. cosmological models such as the HOD. One of the chief goals of Halotools is to provide a bridge between these complementary approaches to modeling galaxy evolution. 
 
 Direct mock population is the linchpin of this program. With Halotools, synthetic realizations of cosmological models can be built directly into any simulated box, permitting both statistical and halo-by-halo comparisons. By successively introducing model features in such comparisons, it becomes possible to ask very targeted questions about how a feature of one galaxy evolution model manifests in the language of another. We will expand on various aspects of this program throughout the Halotools documentation. 
 
@@ -48,10 +48,10 @@ Halotools provides fast, easy-to-use Python code to analyze cosmological simulat
 
 Here are a few examples of questions about cosmological structure formation you can use Halotools to explore:
 
-	* What does the velocity structure look like around a Milky Way-type halo? 
+	* What are the infall and orbital histories of satellites of a Milky Way-type halo? 
 
 	* How does a halo's large-scale environment impact its dark matter accretion rate?
 
-	* What information can we extract about a halo’s assembly history from its present-day internal structure?
+	* What information about a halo’s assembly history is contained in its present-day internal structure?
 
 
