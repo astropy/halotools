@@ -121,9 +121,6 @@ def correct_docs_hyperlinks(fname):
         for line in lines:
             f.write(line)
 
-
-
-
 def test_ipynb(fname):
     """Function to use in a test suite to 
     verify that an IPython Notebook 
@@ -178,6 +175,22 @@ def test_ipynb(fname):
     return err
 
 
+def prepare_system_for_tutorial(fname):
+
+    if 'raw_halocats.' in os.path.basename(fname):
+        print("\n ...Preparing system for %s" % fname)
+        cachedir = '/Users/aphearin/.astropy/cache/halotools'
+        dirname = os.path.join(cachedir, 'raw_halo_catalogs/multidark/rockstar')
+        full_fname = os.path.join(dirname, 'hlist_0.08820.list.gz')
+        if os.path.isfile(full_fname):
+            print("Deleting high-z multidark catalog %s\n" % full_fname)
+            command = "rm " + full_fname
+            os.system(command)
+    else:
+        pass
+
+
+
 ########################################################
 ########### MAIN ###########
 
@@ -197,6 +210,7 @@ def main(args):
 
         command = "cp "+fname+" ./"
         os.system(command)
+        prepare_system_for_tutorial(base_fname)
 
         # Check to see whether this notebook raises an exception
         fname_test = test_ipynb(base_fname)
