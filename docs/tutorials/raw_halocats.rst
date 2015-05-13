@@ -98,20 +98,50 @@ returned.
 .. code:: python
 
     check_location = 'cache'
-    catman.check_for_existing_halocat('cache', catalog_type, 
+    test_already_exists = catman.check_for_existing_halocat('cache', catalog_type, 
                                       simname=simname, halo_finder=halo_finder, 
                                       redshift=desired_redshift)
+    print(test_already_exists)
+    downloaded_fname = test_already_exists
+
+.. parsed-literal::
+
+    /Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/multidark/rockstar/hlist_0.08820.list.gz
 
 
+Success! We're now in business with a newly downloaded halo catalog.
+
+Processing the raw halo catalog into a reduced binary
+-----------------------------------------------------
+
+ASCII data is a relatively slow file format to load into memory,
+particularly for large files such as halo catalogs. So in this section
+we'll describe how to convert a raw halo catalong into a fast-loading
+HDF5 file, and store it in your cache directory for future use.
+
+.. code:: python
+
+    result = catman.process_raw_halocat(downloaded_fname, simname, halo_finder, 
+                                        store_result=True, overwrite=True, 
+                                        version_name='dummy', cuts_funcobj='nocut')
 
 
 .. parsed-literal::
 
-    u'/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/multidark/rockstar/hlist_0.08820.list.gz'
-
-
-
-Processing the raw halo catalog into a reduced binary
------------------------------------------------------
+    ...uncompressing ASCII data
+    
+    ...Processing ASCII data of file: 
+    /Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/multidark/rockstar/hlist_0.08820.list
+     
+     Total number of rows in file = 90
+     Number of rows in detected header = 57 
+    
+    Reading catalog in a single chunk of size 90
+    
+    Total runtime to read in ASCII = 0.0 seconds
+    
+    ...re-compressing ASCII data
+    Storing reduced halo catalog in the following location:
+    /Users/aphearin/.astropy/cache/halotools/halo_catalogs/multidark/rockstar/hlist_0.08820.list.dummy.hdf5
 
 

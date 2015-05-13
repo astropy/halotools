@@ -438,6 +438,13 @@ class CatalogManager(object):
             If None, default cut is set by 
             `~halotools.sim_manager.RockstarReader.default_halocat_cut`. 
 
+        store_result : bool, optional
+            Determines whether the resulting structured array is stored to 
+            an hdf5 file on disk. Default is False. If True, you must 
+            at least pass the `version_name` keyword argument. 
+            See the `store_processed_halocat` method for the other optional 
+            keywords you may use when setting `store_result` to True. 
+
         Returns 
         -------
         arr : array 
@@ -460,16 +467,34 @@ class CatalogManager(object):
         reader = RockstarReader(input_fname, 
             simname=simname, halo_finder=halo_finder, **kwargs)
 
-        if 'cuts_funcobj' in kwargs.keys():
-            self.cuts_funcobj = kwargs['cuts_funcobj']
-        else:
-            self.cuts_funcobj = reader.default_halocat_cut
-            kwargs['cuts_funcobj'] = self.cuts_funcobj
+#        if 'cuts_funcobj' not in kwargs.keys():
+#            self.cuts_funcobj = kwargs['cuts_funcobj']
+#        else:
+#            self.cuts_funcobj = reader.default_halocat_cut
+#            kwargs['cuts_funcobj'] = self.cuts_funcobj
 
         arr = reader.read_halocat(**kwargs)
         reader._compress_ascii()
 
-        return arr, reader
+        ### Calculation complete
+        ### Now store the result, if applicable
+        if 'store_result' in kwargs.keys():
+            store_result = kwargs['store_result']
+        else:
+            store_result = False
+
+        if store_result is True:
+            if 'version_name' not in kwargs.keys():
+                raise KeyError("If keyword argument store_result is True, "
+                    "must also pass version_name keyword argument")
+            else:
+                version_name = kwargs['version_name']
+                del kwargs['version_name']
+                self.store_processed_halocat(
+                    arr, reader, version_name, **kwargs)
+            return arr, reader
+        else:
+            return arr, reader
 
     def store_processed_halocat(self, catalog, reader_obj, version_name, **kwargs):
         """
@@ -1290,11 +1315,6 @@ class RockstarReader(object):
         """
         start = time()
 
-        #if 'cuts_funcobj' in kwargs.keys():
-        #    self.cuts_funcobj = kwargs['cuts_funcobj']
-        #else:
-        #    self.cuts_funcobj = self.default_halocat_cut
-
         if 'nchunks' in kwargs.keys():
             Nchunks = kwargs['nchunks']
         else:
@@ -1310,7 +1330,7 @@ class RockstarReader(object):
             Nchunks = 1
 
 
-        print("\n\n\n\n...Processing ASCII data of file: \n%s\n " % self.fname)
+        print("\n...Processing ASCII data of file: \n%s\n " % self.fname)
         print(" Total number of rows in file = %i" % file_length)
         print(" Number of rows in detected header = %i \n" % header_length)
         if Nchunks==1:
@@ -1368,9 +1388,9 @@ class RockstarReader(object):
         runtime = (end-start)
         if runtime > 60:
             runtime = runtime/60.
-            msg = "\n Total runtime to read in ASCII = %.1f minutes\n"
+            msg = "Total runtime to read in ASCII = %.1f minutes\n"
         else:
-            msg = "\n Total runtime to read in ASCII = %.1f seconds\n"
+            msg = "Total runtime to read in ASCII = %.1f seconds\n"
         print(msg % runtime)
 
         return output
