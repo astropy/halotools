@@ -147,6 +147,7 @@ snapshot:
 
 
 
+
 .. parsed-literal::
 
     u'/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5'
@@ -155,36 +156,11 @@ snapshot:
 
 .. code:: python
 
-    #from halotools.sim_manager import cache_config
-    #cache_dirname = cache_config.get_catalogs_dir('halos', 
-    #                                              simname=simname, halo_finder=halo_finder)
-    #catman.check_for_existing_halocat(cache_dirname, 'halos', 
-    #                                  fname=os.path.basename(closest_snapshot_fname), 
-    #                                  simname=simname, halo_finder=halo_finder)
-
-.. code:: python
-
     catman.download_preprocessed_halo_catalog(simname, halo_finder, desired_redshift)
 
 
 .. parsed-literal::
 
-    
-    \closest_snapshot_fname = 
-    
-    hlist_0.33030.list.halotools.official.version.hdf5
-    
-    \download_loc = 
-    
-    cache
-    
-     fname: 
-    
-    hlist_0.33030.list.halotools.official.version.hdf5
-    
-    is_in_cache = 
-    
-    /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
     The following filename already exists in your cache directory: 
     
     /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
@@ -192,19 +168,6 @@ snapshot:
     If you really want to overwrite the file, 
     you must call the same function again 
     with the keyword argument `overwrite` set to `True`
-
-
-.. code:: python
-
-    print catman.check_for_existing_halocat('cache', 'halos', simname, halo_finder,
-                                      fname='hlist_0.33030.list.halotools.official.version.hdf5')
-    print catman.check_for_existing_halocat('cache', 'halos', 
-                                      simname, halo_finder, redshift=desired_redshift)
-
-.. parsed-literal::
-
-    /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
-    /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
 
 
 In this case, Halotools detected that the pre-processed halo catalog was
