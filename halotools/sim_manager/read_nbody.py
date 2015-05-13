@@ -398,8 +398,8 @@ class CatalogManager(object):
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
         is_in_cache = self.check_for_existing_halocat(
-            download_loc, 'raw_halos', fname=output_fname, 
-            simname=simname, halo_finder=halo_finder)
+            download_loc, 'raw_halos', simname, halo_finder, 
+            fname=output_fname)
 
         if is_in_cache != False:
             if overwrite ==True:
@@ -739,7 +739,8 @@ class CatalogManager(object):
 
         return all_cached_files
 
-    def check_for_existing_halocat(self, location, catalog_type, **kwargs):
+    def check_for_existing_halocat(self, location, catalog_type, 
+        simname, halo_finder, **kwargs):
         """ Method searches the appropriate location in the 
         cache directory for the input fname, and returns a boolean for whether the 
         file is already in cache. 
@@ -750,26 +751,24 @@ class CatalogManager(object):
             Specifies the web or disk location to search for halo catalogs. 
             Optional values for `location` are:
 
-                *  `web`
-
                 * `cache`
 
-                * a full pathname such as `/full/path/to/my/personal/halocats/`. 
+                * pathname, either absolute or relative.  
 
         catalog_type : string
             String giving the type of catalog. 
             Should be `halos`, or `raw_halos`. 
 
-        fname : string, optional 
-            Filenmae (including absolute path) of the catalog being searched for. 
-
-        simname : string, optional 
+        simname : string 
             Nickname of the simulation, e.g. `bolshoi`. 
             Must be specified if no `fname` keyword argument is given. 
 
-        halo_finder : string, optional 
+        halo_finder : string 
             Nickname of the halo-finder, e.g. `rockstar`. 
             Must be specified if no `fname` keyword argument is given. 
+
+        fname : string, optional 
+            Filename (including absolute path) of the catalog being searched for. 
 
         redshift : float, optional 
             Redshift of the snapshot being searched for. 
@@ -786,9 +785,14 @@ class CatalogManager(object):
             is in the Halotools cache directory. 
         """
 
+        if location == 'cache':
+            dirname = cache_config.get_catalogs_dir(catalog_type, 
+                simname=simname, halo_finder=halo_finder)
+        else:
+            dirname = os.path.abspath(location)
+
         if 'fname' in kwargs.keys():
             fname = kwargs['fname']
-            dirname = os.path.dirname(fname)
 
             potential_matches = []
             for path, dirlist, filelist in os.walk(dirname):
@@ -819,16 +823,11 @@ class CatalogManager(object):
                 raise IOError("More than 1 matching catalog found in cache directory")
 
         else:
-            if (
-                ('simname' not in kwargs.keys()) or 
-                ('halo_finder' not in kwargs.keys()) or 
-                ('redshift' not in kwargs.keys()) ):
+            if 'redshift' not in kwargs.keys():
                 raise IOError("If the 'fname' keyword argument is not passed to "
                     "check_for_existing_halocat, then you must pass "
-                    "'simname', 'halo_finder', and 'redshift' keyword arguments")
+                    "the 'redshift' keyword argument")
             else:
-                simname = kwargs['simname']
-                halo_finder = kwargs['halo_finder']
                 redshift = kwargs['redshift']
                 if 'dz_tol' in kwargs.keys():
                     dz_tol = kwargs['dz_tol']
@@ -852,7 +851,7 @@ class CatalogManager(object):
 
 
     def download_preprocessed_halo_catalog(self, simname, halo_finder, input_redshift, 
-        overwrite = False, **kwargs):
+        **kwargs):
         """ Method to download publicly available ascii data of 
         raw halo catalog from web location. 
 
@@ -899,6 +898,11 @@ class CatalogManager(object):
         else:
             dz_tol = 0.1
 
+        if 'overwrite' in kwargs.keys():
+            overwrite = kwargs['overwrite']
+        else:
+            overwrite = False
+
         halocat_obj = get_halocat_obj(simname, halo_finder)
         list_of_available_snapshots = halocat_obj.preprocessed_halocats_available_for_download
         closest_snapshot_fname, redshift_of_closest_match = (
@@ -932,17 +936,17 @@ class CatalogManager(object):
             # We were not given an explicit path, so use the default Halotools cache dir
             cache_dirname = cache_config.get_catalogs_dir('halos', 
                 simname=simname, halo_finder=halo_finder)
-            download_loc = cache_dirname
-            output_fname = os.path.join(download_loc, closest_snapshot_fname)
+            output_fname = os.path.join(cache_dirname, closest_snapshot_fname)
+            download_loc = 'cache'
 
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
         is_in_cache = self.check_for_existing_halocat(
-            download_loc, 'halos', 
-            fname=closest_snapshot_fname, simname=simname, halo_finder=halo_finder)
+            download_loc, 'halos', simname, halo_finder, 
+            fname=os.path.basename(closest_snapshot_fname))
 
         if is_in_cache != False:
-            if overwrite ==True:
+            if overwrite == True:
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
             else:
                 msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
@@ -956,8 +960,8 @@ class CatalogManager(object):
             start = time()
             download_file_from_url(url, output_fname)
             end = time()
-            runtime = end - start
-            print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+            runtime = (end - start)/60.
+            print("\nTotal runtime to download snapshot = %.1f minutes\n" % runtime)
             return output_fname
 
     def load_halo_catalog(self, **kwargs):
