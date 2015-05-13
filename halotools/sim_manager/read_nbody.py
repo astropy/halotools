@@ -952,13 +952,13 @@ class CatalogManager(object):
                 print(msg % output_fname)
                 return None
 
-        start = time()
-        download_file_from_url(url, output_fname)
-        end = time()
-        runtime = end - start
-        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
-
-        return output_fname
+        else:
+            start = time()
+            download_file_from_url(url, output_fname)
+            end = time()
+            runtime = end - start
+            print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+            return output_fname
 
     def load_halo_catalog(self, **kwargs):
         """ Method returns an Astropy Table object of halos 

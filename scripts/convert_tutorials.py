@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os import system
-from os import listdir
-from os.path import isfile, join
+import os
+import sys
 
 from subprocess import PIPE,Popen
 import fileinput
@@ -93,8 +92,8 @@ def correct_docs_hyperlinks(fname):
 def get_list_of_tutorials(relative_dirname):
     tutorial_tag = '.ipynb'
     tutorial_list = (
-        [f for f in listdir(relative_dirname) if 
-        isfile(join(relative_dirname,f)) & 
+        [f for f in os.listdir(relative_dirname) if 
+        os.path.isfile(os.path.join(relative_dirname,f)) & 
         (f[-len(tutorial_tag):] == tutorial_tag)]
         )
     return tutorial_list
@@ -135,7 +134,7 @@ def test_ipynb(fname):
 #   convert the notebook to a python script
 #   conversion_string = "ipython nbconvert --to python "+fname+".ipynb"
     conversion_string = "ipython nbconvert --to python "+fname
-    c=system(conversion_string)
+    c=os.system(conversion_string)
 
 #   Use subprocess.Popen to spawn a subprocess 
 #   that executes the tutorial script
@@ -147,13 +146,8 @@ def test_ipynb(fname):
 
     # The script version of the .ipynb file 
     # is no longer necessary, so delete it
-    system("rm -rf "+fname+".py")
+    os.system("rm -rf "+fname+".py")
 
-#    if err == '':
-#        return 'pass'
-#    else:
-#        print("error msg = \n"+err)
-#        return 'fail'
     return err
 
 
@@ -171,7 +165,7 @@ def main():
         failure_list = []
         for fname in tutorial_list:
             command = "cp "+tutorial_loc+fname+" ./"
-            system(command)
+            os.system(command)
 
             # Check to see whether this notebook raises an exception
             fname_test = test_ipynb(fname)
@@ -179,14 +173,14 @@ def main():
             if (fname_test=='') or ('FutureWarning' in fname_test):
                 # convert the notebook to rst for inclusion in the docs
                 conversion_string = "ipython nbconvert --to rst "+fname
-                c=system(conversion_string)
+                c=os.system(conversion_string)
 
                 rst_fname = fname[:-len('.ipynb')]+'.rst'
                 add_asterisk_header(rst_fname)
                 rewrite_first_line(rst_fname)
                 correct_docs_hyperlinks(rst_fname)
-                system("rm "+fname)
-                system("mv "+rst_fname+" "+tutorial_loc)
+                os.system("rm "+fname)
+                os.system("mv "+rst_fname+" "+tutorial_loc)
 
             else:
                 print("error msg = %s " % fname_test )
