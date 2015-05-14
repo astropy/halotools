@@ -80,14 +80,14 @@ directory:
 
 .. parsed-literal::
 
+    The following filename already exists in your cache directory: 
     
-    ... Downloading data from the following location: 
-    http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/hlist_0.08820.list.gz
-    
-     ... Saving the data with the following filename: 
     /Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/multidark/rockstar/hlist_0.08820.list.gz
     
-     100.0% of 8051 bytes
+    If you really want to overwrite the file, 
+    you must call the same function again 
+    with the keyword argument `overwrite` set to `True`
+
 
 The highest-redshift Rockstar catalog for Multidark is now in your cache
 directory. You can verify this using the
@@ -291,5 +291,72 @@ iv)  The function is stand-alone, and not a bound instance method of
     Total runtime to read in ASCII = 0.0 seconds
     
     ...re-compressing ASCII data
+
+
+3. Making your catalogs self-expressive with metadata
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Finally, you also have the option to attach notes to the halo catalogs
+you produce in the form of metadata bound to the hdf5 file. This allows
+your halo catalogs to self-express exactly how they were generated. Here
+is a simple example of how to do this by passing a python dictionary as
+the ``notes`` keyword argument:
+
+.. code:: python
+
+    my_catalog_notes = {'used_in_paper': 'This is the version of the reduced halo catalog I used in arXiv:1234.56789', 
+                        'super_funky_dr_john_track': 'https://www.youtube.com/watch?v=kEVulFZ_Eh4'}
+    
+    result = catman.process_raw_halocat(downloaded_fname, simname, halo_finder, 
+                                        store_result=True, overwrite=True, 
+                                        version_name='dummy', cuts_funcobj='nocut', 
+                                        notes=my_catalog_notes)
+
+
+.. parsed-literal::
+
+    ...uncompressing ASCII data
+    
+    ...Processing ASCII data of file: 
+    /Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/multidark/rockstar/hlist_0.08820.list
+     
+     Total number of rows in file = 90
+     Number of rows in detected header = 57 
+    
+    Reading catalog in a single chunk of size 90
+    
+    Total runtime to read in ASCII = 0.0 seconds
+    
+    ...re-compressing ASCII data
+    Storing reduced halo catalog in the following location:
+    /Users/aphearin/.astropy/cache/halotools/halo_catalogs/multidark/rockstar/hlist_0.08820.list.dummy.hdf5
+
+
+Now let's load our newly processed catalog to inspect our notes
+
+.. code:: python
+
+    s = sim_manager.ProcessedSnapshot(simname=simname, halo_finder=halo_finder, redshift=desired_redshift, version_name='dummy')
+
+.. parsed-literal::
+
+    Loading halo catalog with the following absolute path: 
+    /Users/aphearin/.astropy/cache/halotools/halo_catalogs/multidark/rockstar/hlist_0.08820.list.dummy.hdf5
+    
+
+
+.. code:: python
+
+    print("Note 1:\n %s\n " % s.used_in_paper)
+    print("Note 2:\n %s\n " % s.super_funky_dr_john_track)
+
+.. parsed-literal::
+
+    Note 1:
+     This is the version of the reduced halo catalog I used in arXiv:1234.56789
+     
+    Note 2:
+     https://www.youtube.com/watch?v=kEVulFZ_Eh4
+     
 
 
