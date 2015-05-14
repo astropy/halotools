@@ -153,7 +153,7 @@ class ProcessedSnapshot(object):
             simname = self.simname, 
             halo_finder = self.halo_finder, 
             redshift = self.redshift)
-        
+
         self._bind_halocat_metadata()
 
     def _bind_halocat_metadata(self):
@@ -455,6 +455,15 @@ class CatalogManager(object):
             at least pass the `version_name` keyword argument. 
             See the `store_processed_halocat` method for the other optional 
             keywords you may use when setting `store_result` to True. 
+
+        notes : dict, optional 
+            If you are storing the result as an hdf5 file, 
+            the `notes` keyword argument give you the option to give 
+            a qualitative description of how the catalog was produce. 
+            `notes` should be a python dictionary. Each dict key of `notes` 
+            will be stored hdf5 file as metadata, and will be the name of an 
+            attribute of the corresponding `ProcessedSnapshot` object. 
+            The value attached to each key can be any string. 
 
         Returns 
         -------
