@@ -1,12 +1,44 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os import system
-from os import listdir
-from os.path import isfile, join
+import os
+import sys
+import fnmatch
 
 from subprocess import PIPE,Popen
 import fileinput
+
+tutorials_root = './docs/tutorials'
+
+def get_tutlist(tut):
+
+    if os.path.isfile(tut) is True:
+        return [tut]
+    elif os.path.isdir(tut) is True:
+        rootdir = tut
+    else:
+        raise IOError("Command-line argument to convert_tutorials "
+            "must either be a dirname or an existing file.\n"
+            "Received %s " % tut)
+
+    candidate_tutorials = []
+    for path, dirlist, filelist in os.walk(rootdir):
+        for fname in filelist:
+            candidate_tutorials.append(os.path.join(path, fname))
+
+    file_pattern = '*.ipynb'
+    tutlist = fnmatch.filter(candidate_tutorials, file_pattern)
+    return tutlist
+
+def get_list_of_tutorials(relative_dirname):
+    tutorial_tag = '.ipynb'
+    tutorial_list = (
+        [f for f in os.listdir(relative_dirname) if 
+        os.path.isfile(os.path.join(relative_dirname,f)) & 
+        (f[-len(tutorial_tag):] == tutorial_tag)]
+        )
+    return tutorial_list
+
 
 def rewrite_first_line(fname):
     f = open(fname, 'r')
@@ -89,17 +121,6 @@ def correct_docs_hyperlinks(fname):
         for line in lines:
             f.write(line)
 
-
-def get_list_of_tutorials(relative_dirname):
-    tutorial_tag = '.ipynb'
-    tutorial_list = (
-        [f for f in listdir(relative_dirname) if 
-        isfile(join(relative_dirname,f)) & 
-        (f[-len(tutorial_tag):] == tutorial_tag)]
-        )
-    return tutorial_list
-
-
 def test_ipynb(fname):
     """Function to use in a test suite to 
     verify that an IPython Notebook 
@@ -129,13 +150,15 @@ def test_ipynb(fname):
 
     """ 
 
+    fname = os.path.basename(fname)
     if fname[-6:]=='.ipynb':
         fname = fname[0:-6]
+
 
 #   convert the notebook to a python script
 #   conversion_string = "ipython nbconvert --to python "+fname+".ipynb"
     conversion_string = "ipython nbconvert --to python "+fname
-    c=system(conversion_string)
+    c=os.system(conversion_string)
 
 #   Use subprocess.Popen to spawn a subprocess 
 #   that executes the tutorial script
@@ -147,62 +170,78 @@ def test_ipynb(fname):
 
     # The script version of the .ipynb file 
     # is no longer necessary, so delete it
-    system("rm -rf "+fname+".py")
+    os.system("rm -rf "+fname+".py")
 
-#    if err == '':
-#        return 'pass'
-#    else:
-#        print("error msg = \n"+err)
-#        return 'fail'
     return err
+
+
+def prepare_system_for_tutorial(fname):
+
+    if 'raw_halocats.' in os.path.basename(fname):
+        print("\n ...Preparing system for %s" % fname)
+        cachedir = '/Users/aphearin/.astropy/cache/halotools'
+        dirname = os.path.join(cachedir, 'raw_halo_catalogs/multidark/rockstar')
+        full_fname = os.path.join(dirname, 'hlist_0.08820.list.gz')
+        if os.path.isfile(full_fname):
+            print("Deleting high-z multidark catalog %s\n" % full_fname)
+            command = "rm " + full_fname
+            os.system(command)
+    else:
+        pass
+
 
 
 ########################################################
 ########### MAIN ###########
 
-def main():
+def main(args):
+    if len(args)==1:
+        arg = tutorials_root
+    else:
+        arg = args[1]
 
-    tutorial_dir_list = ['./docs/tutorials/']
+    tutorial_list = get_tutlist(arg)
 
-    for tutorial_loc in tutorial_dir_list:
+    failure_list = []
+    for fname in tutorial_list:
 
-        tutorial_list = get_list_of_tutorials(tutorial_loc)
+        base_fname = os.path.basename(fname)
+        tutorial_loc = os.path.dirname(fname)
 
-        failure_list = []
-        for fname in tutorial_list:
-            command = "cp "+tutorial_loc+fname+" ./"
-            system(command)
+        command = "cp "+fname+" ./"
+        os.system(command)
+        prepare_system_for_tutorial(base_fname)
 
-            # Check to see whether this notebook raises an exception
-            fname_test = test_ipynb(fname)
+        # Check to see whether this notebook raises an exception
+        fname_test = test_ipynb(base_fname)
 
-            if (fname_test=='') or ('FutureWarning' in fname_test):
-                # convert the notebook to rst for inclusion in the docs
-                conversion_string = "ipython nbconvert --to rst "+fname
-                c=system(conversion_string)
+        if (fname_test=='') or ('FutureWarning' in fname_test):
+            # convert the notebook to rst for inclusion in the docs
+            conversion_string = "ipython nbconvert --to rst "+base_fname
+            c=os.system(conversion_string)
 
-                rst_fname = fname[:-len('.ipynb')]+'.rst'
-                add_asterisk_header(rst_fname)
-                rewrite_first_line(rst_fname)
-                correct_docs_hyperlinks(rst_fname)
-                system("rm "+fname)
-                system("mv "+rst_fname+" "+tutorial_loc)
+            rst_fname = base_fname[:-len('.ipynb')]+'.rst'
+            add_asterisk_header(rst_fname)
+            rewrite_first_line(rst_fname)
+            correct_docs_hyperlinks(rst_fname)
+            os.system("rm "+base_fname)
+            os.system("mv "+rst_fname+" "+tutorial_loc)
 
-            else:
-                print("error msg = %s " % fname_test )
-                failure_list.append(fname)
-
-        if failure_list==[]:
-            print("\n")
-            print("Each notebook executes without raising an exception")
-            print("\n")
         else:
-            print("\n")
-            print("The following notebooks were not converted to rst "
-                "because they raise an exception:")
-            for failure in failure_list:
-                print(failure+"\n")
-            print("\n")
+            print("error msg = %s " % fname_test )
+            failure_list.append(fname)
+
+    if failure_list==[]:
+        print("\n")
+        print("Each notebook executes without raising an exception")
+        print("\n")
+    else:
+        print("\n")
+        print("The following notebooks were not converted to rst "
+            "because they raise an exception:")
+        for failure in failure_list:
+            print(failure+"\n")
+        print("\n")
 
             
 ########################################################
@@ -214,4 +253,4 @@ def main():
 ### Trigger
 ############################
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
