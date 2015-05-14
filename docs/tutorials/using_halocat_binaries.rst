@@ -26,7 +26,7 @@ snapshot into memory with a single line of code:
 
 .. parsed-literal::
 
-    Loading z = -0.00 halo catalog with the following absolute path: 
+    Loading halo catalog with the following absolute path: 
     /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_1.00030.list.halotools.official.version.hdf5
     
 
@@ -78,6 +78,28 @@ metadata bound to it. Here are a few examples:
     Halo-finder = rockstar 
     Snapshot redshift = -0.0 
 
+
+There is also metadata describing details of how the catalog was
+produced:
+
+.. code:: python
+
+    print("Source of original data = %s " % default_snapshot.original_data_source)
+    print("Time of original reduction = %s " % default_snapshot.time_of_original_reduction)
+    print("Description of applied cuts = \n%s " % default_snapshot.cuts_description)
+
+
+.. parsed-literal::
+
+    Source of original data = http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/ 
+    Time of original reduction = 2015-05-08 17:49:14 
+    Description of applied cuts = 
+    The only cut on the original catalog made by  the default_halocat_cut method of RockstarReader is to throw out all (sub)halos with Mpeak < 300 particles 
+
+
+This metadata is also bound to the hdf5 files themselves, so that both
+the `~halotools.sim_manager.ProcessedSnapshot` and the binary file
+itself are self-expressive regarding exactly how they were generated.
 
 Downloading other pre-processed snapshots
 =========================================
@@ -142,6 +164,20 @@ snapshot:
 .. code:: python
 
     desired_redshift = 2.03
+    catman.check_for_existing_halocat('cache', 'halos', simname, halo_finder, 
+                                      redshift=desired_redshift)
+
+
+
+
+.. parsed-literal::
+
+    u'/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5'
+
+
+
+.. code:: python
+
     catman.download_preprocessed_halo_catalog(simname, halo_finder, desired_redshift)
 
 
@@ -172,7 +208,7 @@ method:
 
 .. parsed-literal::
 
-    Loading z = 2.03 halo catalog with the following absolute path: 
+    Loading halo catalog with the following absolute path: 
     /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
     
 
