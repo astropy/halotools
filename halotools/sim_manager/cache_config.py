@@ -15,7 +15,8 @@ from . import sim_defaults
 from . import supported_sims
 
 def get_halotools_cache_dir():
-    """ Find the path to the halotools cache directory. 
+    """ Find the path to the root halotools cache directory. 
+
     If the directory doesn't exist, make it, then return the path. 
 
     Returns
@@ -106,7 +107,9 @@ def cache_subdir_for_halo_finder(parentdir, simname, halo_finder):
 
 
 def get_catalogs_dir(catalog_type, **kwargs):
-    """ Find the path to the halotools cache directory. 
+    """ Find the path to the subdirectory of the halotools cache directory 
+    where `catalog_type` are stored. 
+    
     If the directory doesn't exist, make it, then return the path. 
 
     Parameters
