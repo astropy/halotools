@@ -193,7 +193,7 @@ class CatalogManager(object):
 
     def available_snapshots(self, location, catalog_type, simname, halo_finder):
         """
-        Return a list of the snapshots that are stored at the input location. 
+        Return a list of the filenames of all snapshots that are stored at the input location. 
 
         Parameters 
         ----------
@@ -317,7 +317,7 @@ class CatalogManager(object):
     def download_raw_halocat(self, simname, halo_finder, input_redshift, 
         overwrite = False, **kwargs):
         """ Method to download publicly available ascii data of 
-        raw halo catalog from web location. 
+        a specific raw halo catalog from its web location. 
 
         Parameters 
         ----------
@@ -418,7 +418,8 @@ class CatalogManager(object):
 
     def process_raw_halocat(self, input_fname, simname, halo_finder, **kwargs):
         """ Method reads in raw halo catalog ASCII data, makes the desired cuts, 
-        and returns a numpy structured array of the rows passing the cuts. 
+        returns a numpy structured array of the rows passing the cuts, and optionally 
+        stores the result as an hdf5 file in the cache directory. 
 
         Parameters 
         ----------
@@ -805,9 +806,9 @@ class CatalogManager(object):
 
         Returns 
         -------
-        is_in_cache : bool 
-            Boolean specifying whether the input fname 
-            is in the Halotools cache directory. 
+        is_in_cache : bool or string
+            If no match is found, returns False. If a matching is found, 
+            the filename (including absolute path) is returned. 
         """
 
         if location == 'cache':
@@ -877,8 +878,8 @@ class CatalogManager(object):
 
     def download_preprocessed_halo_catalog(self, simname, halo_finder, input_redshift, 
         **kwargs):
-        """ Method to download publicly available ascii data of 
-        raw halo catalog from web location. 
+        """ Method to download one of the pre-processed binary files 
+        storing a reduced halo catalog.  
 
         Parameters 
         ----------
@@ -1030,79 +1031,6 @@ class CatalogManager(object):
                     "with the following absolute path: \n%s\n" % (z, fname))
                 return Table.read(fname, path='halos')
 
-
-    def load_catalog(self,catalog_type,
-        dirname=None,filename=None,
-        download_yn=False,url=sim_defaults.processed_halocats_webloc):
-        """ Use the astropy reader to load the halo or particle catalog into memory.
-
-        Parameters 
-        ----------
-        dirname : string 
-            Name of directory where filename is stored.
-
-        filename : string 
-            Name of file being loaded into memory. 
-
-        download_yn : boolean, optional
-            If set to True, and if filename is not already stored in the cache directory, 
-            method will attempt to download the file from the provided url. If there is no corresponding 
-            file at the input url, an exception will be raised.
-
-        url : string 
-            Web location from which to download the catalog if it is not present in the cache directory.
-
-        Returns 
-        -------
-        catalog : object
-            Data structure located at the input filename.
-
-        """
-        if filename is None:
-            if catalog_type=='subhalos':
-                filename = self.default_halo_catalog_filename
-            elif catalog_type=='particles':
-                filename = self.default_particle_catalog_filename
-            else:
-                raise KeyError("Must supply catalog_type to be either "
-                    "'particles' or 'subhalos'")
-        if dirname is None:
-            if catalog_type=='subhalos':
-                dirname = self.halo_catalog_dirname
-            elif catalog_type=='particles':
-                dirname = self.particle_catalog_dirname
-            else:
-                raise KeyError("Must supply catalog_type to be either "
-                    "'particles' or 'subhalos'")
-
-        if os.path.isfile(os.path.join(dirname,filename)):
-            catalog = Table.read(os.path.join(dirname,filename),path='data')
-        else:
-            ### Requested filename is not in cache, and external download is not requested
-            if download_yn==False:
-                return None
-            else:
-                # Download one of the default catalogs hosted at Yale
-                if filename==self.default_halo_catalog_filename:
-                    catalog_type='subhalos'
-                if filename==self.default_particle_catalog_filename:
-                    catalog_type='particles'
-                else:
-                    raise IOError("Input filename does not match one of the provided default catalogs")
-                ###
-                remote_filename = os.path.join(url,filename)
-                fileobj = urllib2.urlopen(remote_filename)
-                output_directory = cache_config.get_catalogs_dir(catalog_type)
-                output_filename = os.path.join(output_directory,filename)
-                output = open(output_filename,'wb')
-                output.write(fileobj.read())
-                output.close()
-                hdulist = fits.open(output_filename)
-                catalog = Table(hdulist[1].data)
-
-        return catalog
-
-
     def download_all_default_catalogs(self):
         """ Convenience method used to download all pre-processed halo catalogs 
         that are not already in the cache directory.
@@ -1134,8 +1062,35 @@ class CatalogManager(object):
 
 ###################################################################################################
 class RockstarReader(object):
+    """ Class containing methods used to read raw ASCII data of Rockstar hlist files. 
+
+    Each new raw halo catalog must be processed with its own instance of this class. 
+    """
 
     def __init__(self, input_fname, simname, halo_finder, **kwargs):
+        """
+        Parameters 
+        -----------
+        input_fname : string 
+            Name of the file (including absolute path) to be processed. 
+
+        simname : string 
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string 
+            Nickname of the halo-finder, e.g. `rockstar`. 
+
+        cuts_funcobj : function object, optional
+            Function used to apply cuts to the rows of the ASCII data. 
+            `cuts_funcobj` should accept a structured array as input, 
+            and return a boolean array of the same length. 
+            If None, default cut is set by `default_halocat_cut`. 
+            If set to the string ``nocut``, all rows will be kept. 
+            The `cuts_funcobj` must be a callable function defined 
+            within the namespace of the `RockstarReader` instance, and 
+            it must be a stand-alone function, not a bound method of 
+            some other class.  
+        """
 
         if not os.path.isfile(input_fname):
             if not os.path.isfile(input_fname[:-3]):
@@ -1184,7 +1139,7 @@ class RockstarReader(object):
             sim_defaults.Num_ptcl_requirement)
 
     def file_len(self):
-        """ Compute the number of all rows in fname
+        """ Compute the number of all rows in the raw halo catalog. 
 
         Parameters 
         ----------
@@ -1202,7 +1157,7 @@ class RockstarReader(object):
         return Nrows
 
     def header_len(self,header_char='#'):
-        """ Compute the number of header rows in fname. 
+        """ Compute the number of header rows in the raw halo catalog. 
 
         Parameters 
         ----------
@@ -1290,7 +1245,7 @@ class RockstarReader(object):
 
 
     def read_halocat(self, **kwargs):
-        """ Reads fname in chunks and returns a structured array
+        """ Reads the raw halo catalog in chunks and returns a structured array
         after applying cuts.
 
         Parameters 
@@ -1298,12 +1253,12 @@ class RockstarReader(object):
         cuts_funcobj : function object, optional keyword argument
             Function used to determine whether a row of the raw 
             halo catalog is included in the reduced binary. 
-            Input of the `cut` function must be a structured array 
+            Input of the `cuts_funcobj1 must be a structured array 
             with some subset of the field names of the 
-            halo catalog dtype. Output of the `cut` function must 
+            halo catalog. Output of the `cuts_funcobj` must 
             be a boolean array of length equal to the length of the 
-            input structured array. Default is to make a cut on 
-            `mpeak` at 300 particles, using `default_halocat_cut` method. 
+            input structured array. 
+            Default is set by the `default_halocat_cut` method. 
 
         nchunks : int, optional keyword argument
             `read_halocat` reads and processes ascii 
