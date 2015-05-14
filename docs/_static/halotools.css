@@ -1,0 +1,5 @@
+@import url("bootstrap-astropy.css");
+
+div.topbar {
+  background-image: url("dm-splatting-large.png");
+}
