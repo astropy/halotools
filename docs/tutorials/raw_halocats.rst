@@ -119,9 +119,9 @@ particularly for large files such as halo catalogs. So in this section
 we'll describe how to convert a raw halo catalong into a fast-loading
 HDF5 file, and store it in your cache directory for future use.
 
-The primary method of the `-~halotools.sim_manager.CatalogManager`
+The primary method of the `~halotools.sim_manager.CatalogManager`
 class that you will use is
-`-~halotools.sim_manager.CatalogManager.process_raw_halocat`. This
+`~halotools.sim_manager.CatalogManager.process_raw_halocat`. This
 method does three things: 1. Reads the raw halo catalog ASCII either
 from the cache or an alternative location 2. Optionally makes
 customizable cuts on the rows of the halo catalog, returning a numpy
@@ -129,8 +129,7 @@ structured array 3. Optionally stores the cut catalog into cache, or
 another directory location of your choosing
 
 Let's use the Multidark file we just downloaded to see how
-`-~halotools.sim_manager.CatalogManager.process_raw_halocat`
-works.
+`~halotools.sim_manager.CatalogManager.process_raw_halocat` works.
 
 .. code:: python
 
@@ -162,16 +161,18 @@ Although this particular file processes almost instantly, this is not
 the case for much larger catalogs, and so Halotools issues messages
 describing the status of the reduction along the way.
 
-The first required argument passed to
-`-~halotools.sim_manager.CatalogManager.process_raw_halocat` is
-simply the filename that the method should use to look for the ASCII
-data. The second two arguments, ``simname`` and ``halo_finder``, tell
-Halotools how to interpret the columns of data in the file.
+In the above call to
+`~halotools.sim_manager.CatalogManager.process_raw_halocat`, there
+were three required positional arguments. The first is simply the
+filename (including absolute path) that the method should use to look
+for the ASCII data. The second two arguments, ``simname`` and
+``halo_finder``, tell Halotools how to interpret the columns of data in
+the file.
 
 Under the hood, the ``simname`` and ``halo_finder`` trigger Halotools to
 look for a `~halotools.sim_manager.HaloCat` object with matching
 ``simname`` and ``halo_finder``. If you want to use
-`-~halotools.sim_manager.CatalogManager` to process your halo
+`~halotools.sim_manager.CatalogManager` to process your halo
 catalogs, you must either choose one of the supported combinations of
 simulation/halo-finder, or write your own
 `~halotools.sim_manager.HaloCat` object. This latter option is
@@ -181,4 +182,36 @@ main component of the work in using your own simulation is simply
 writing a ``dtype`` that specifies the keyname and data type for each
 column in your ASCII data.
 
+Processing options
+------------------
+
+Now let's unpack the remaining arguments to get a sense of what options
+you have for how your ASCII data is processed.
+
+1. Storing the processed catalog in cache
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Setting ``store_result`` to ``True`` triggers Halotools to create an
+HDF5 file for the processed halo catalog and place it in your cache
+directory. If you choose this option, you must also specify a
+``version_name`` that will be used to create a unique filename for the
+hdf5 file.
+
+If a matching halo catalog with the same version name already exists in
+the cache directory, then Halotools will not overwrite the existing
+catalog unless you explicitly set the optional ``overwrite`` keyword
+argument to ``True``.
+
+If you set ``store_result`` to ``False``, or simply omit this keyword
+argument, Halotools will not create an hdf5 file. In either case, the
+`~halotools.sim_manager.CatalogManager.process_raw_halocat` method
+will return two things:
+
+::
+
+    1. A structured numpy array containing the processed halo catalog
+    2. The instance of the ~halotools.sim_manager.RockstarReader object used to read the catalog.
+
+2. Specifying your catalog cuts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
