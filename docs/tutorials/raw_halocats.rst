@@ -119,6 +119,19 @@ particularly for large files such as halo catalogs. So in this section
 we'll describe how to convert a raw halo catalong into a fast-loading
 HDF5 file, and store it in your cache directory for future use.
 
+The primary method of the `-~halotools.sim_manager.CatalogManager`
+class that you will use is
+`-~halotools.sim_manager.CatalogManager.process_raw_halocat`. This
+method does three things: 1. Reads the raw halo catalog ASCII either
+from the cache or an alternative location 2. Optionally makes
+customizable cuts on the rows of the halo catalog, returning a numpy
+structured array 3. Optionally stores the cut catalog into cache, or
+another directory location of your choosing
+
+Let's use the Multidark file we just downloaded to see how
+`-~halotools.sim_manager.CatalogManager.process_raw_halocat`
+works.
+
 .. code:: python
 
     result = catman.process_raw_halocat(downloaded_fname, simname, halo_finder, 
@@ -143,5 +156,29 @@ HDF5 file, and store it in your cache directory for future use.
     ...re-compressing ASCII data
     Storing reduced halo catalog in the following location:
     /Users/aphearin/.astropy/cache/halotools/halo_catalogs/multidark/rockstar/hlist_0.08820.list.dummy.hdf5
+
+
+Although this particular file processes almost instantly, this is not
+the case for much larger catalogs, and so Halotools issues messages
+describing the status of the reduction along the way.
+
+The first required argument passed to
+`-~halotools.sim_manager.CatalogManager.process_raw_halocat` is
+simply the filename that the method should use to look for the ASCII
+data. The second two arguments, ``simname`` and ``halo_finder``, tell
+Halotools how to interpret the columns of data in the file.
+
+Under the hood, the ``simname`` and ``halo_finder`` trigger Halotools to
+look for a `~halotools.sim_manager.HaloCat` object with matching
+``simname`` and ``halo_finder``. If you want to use
+`-~halotools.sim_manager.CatalogManager` to process your halo
+catalogs, you must either choose one of the supported combinations of
+simulation/halo-finder, or write your own
+`~halotools.sim_manager.HaloCat` object. This latter option is
+quite straightforward, as the class pattern can be simply matched
+against the existing `~halotools.sim_manager.HaloCat` objects; the
+main component of the work in using your own simulation is simply
+writing a ``dtype`` that specifies the keyname and data type for each
+column in your ASCII data.
 
 
