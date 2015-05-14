@@ -33,6 +33,7 @@ to take a look at what options we have for the catalogs:
 
     for simname, halo_finder in catman.available_halocats:
         print(simname, halo_finder)
+        
 
 .. parsed-literal::
 
@@ -79,14 +80,14 @@ directory:
 
 .. parsed-literal::
 
-    The following filename already exists in your cache directory: 
     
+    ... Downloading data from the following location: 
+    http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/hlist_0.08820.list.gz
+    
+     ... Saving the data with the following filename: 
     /Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/multidark/rockstar/hlist_0.08820.list.gz
     
-    If you really want to overwrite the file, 
-    you must call the same function again 
-    with the keyword argument `overwrite` set to `True`
-
+     100.0% of 8051 bytes
 
 The highest-redshift Rockstar catalog for Multidark is now in your cache
 directory. You can verify this using the
@@ -103,6 +104,7 @@ returned.
                                       redshift=desired_redshift)
     print(test_already_exists)
     downloaded_fname = test_already_exists
+
 
 .. parsed-literal::
 
@@ -207,10 +209,9 @@ argument, Halotools will not create an hdf5 file. In either case, the
 `~halotools.sim_manager.CatalogManager.process_raw_halocat` method
 will return two things:
 
-::
-
-    1. A structured numpy array containing the processed halo catalog
-    2. The instance of the ~halotools.sim_manager.RockstarReader object used to read the catalog.
+1. A structured numpy array containing the processed halo catalog
+2. The instance of the `~halotools.sim_manager.RockstarReader`
+   object used to read the catalog.
 
 2. Specifying your catalog cuts
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -228,13 +229,19 @@ This way, you do not need to have enough memory on your machine to load
 the entire uncut catalog - all you need is enough memory to store the
 post-processed catalog.
 
-::
+Option 1: **Default cut**. If you do not pass the ``cuts_funcobj``
+keyword argument to the
+`~halotools.sim_manager.CatalogManager.process_raw_halocat`
+method, default cuts will be chosen for you. These default cuts are
+specified by the `~halotools.sim_manager.RockstarReader` method of
+the `~halotools.sim_manager.RockstarReader`. The current default
+cut is to throw out any halo or subhalo that never had more than 300
+particles at any point in its past history.
 
-    Option 1: **Default cut**. If you do not pass the ``cuts_funcobj`` keyword argument to the ~halotools.sim_manager.CatalogManager.process_raw_halocat method, default cuts will be chosen for you. These default cuts are specified by the ~halotools.sim_manager.RockstarReader method of the ~halotools.sim_manager.RockstarReader. The current default cut is to throw out any halo or subhalo that never had more than 300 particles at any point in its past history. 
-
-::
-
-    Option 2: **No cut**. If you set the ``cuts_funcobj`` keyword argument to the string ``nocut``, then the ~halotools.sim_manager.CatalogManager.process_raw_halocat method will keep all rows. 
+Option 2: **No cut**. If you set the ``cuts_funcobj`` keyword argument
+to the string ``nocut``, then the
+`~halotools.sim_manager.CatalogManager.process_raw_halocat` method
+will keep all rows.
 
 Note that for most science applications, the default 300-particle cut is
 reasonably conservative. For many science targets, more stringent
@@ -245,13 +252,20 @@ file, and so it is not recommended that you use the ``nocut`` option
 unless you are confident that relaxing the 300-particle cut is a
 necessity.
 
-::
+Option 3: **Custom cut**. By passing a python function object to
+``cuts_funcobj``, you have the freedom to make any cuts you like. We'll
+give an example of this usage below. The only requirements on the
+function object are as follows:
 
-    Option 3: **Custom cut**. By passing a python function object to ``cuts_funcobj``, you have the freedom to make any cuts you like. We'll give an example of this usage below. The only requirements on the function object are as follows:
-        i) The input is a numpy structured array with the same column names as the halo catalog, or fewer. 
-        ii) The output is a boolean array of the same length as the input array.
-        iii) The function is a callable object from the namespace in which ~halotools.sim_manager.CatalogManager.process_raw_halocat is called
-        iv) The function is stand-alone, and not a bound instance method of some other object.
+i)   The input is a numpy structured array with the same column names as
+     the halo catalog, or fewer.
+ii)  The output is a boolean array of the same length as the input
+     array.
+iii) The function is a callable object from the namespace in which
+     `~halotools.sim_manager.CatalogManager.process_raw_halocat`
+     is called
+iv)  The function is stand-alone, and not a bound instance method of
+     some other object.
 
 .. code:: python
 
@@ -259,8 +273,7 @@ necessity.
         return x['vmax'] > 200
 .. code:: python
 
-    custom_cut_halos, reader_obj = catman.process_raw_halocat(downloaded_fname, simname, halo_finder, 
-                                        store_result=False, cuts_funcobj=example_custom_cut)
+    custom_cut_halos, reader_obj = catman.process_raw_halocat(downloaded_fname, simname, halo_finder, store_result=False, cuts_funcobj=example_custom_cut)
 
 
 .. parsed-literal::
