@@ -97,6 +97,10 @@ produced:
     The only cut on the original catalog made by  the default_halocat_cut method of RockstarReader is to throw out all (sub)halos with Mpeak < 300 particles 
 
 
+This metadata is also bound to the hdf5 files themselves, so that both
+the `~halotools.sim_manager.ProcessedSnapshot` and the binary file
+itself are self-expressive regarding exactly how they were generated.
+
 Downloading other pre-processed snapshots
 =========================================
 
@@ -204,7 +208,7 @@ method:
 
 .. parsed-literal::
 
-    Loading z = 2.03 halo catalog with the following absolute path: 
+    Loading halo catalog with the following absolute path: 
     /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
     
 

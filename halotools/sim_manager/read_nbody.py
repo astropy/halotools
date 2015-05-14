@@ -103,7 +103,7 @@ class ProcessedSnapshot(object):
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder,
-        redshift = sim_defaults.default_redshift):
+        redshift = sim_defaults.default_redshift, **kwargs):
         """
         Parameters 
         ----------
@@ -125,6 +125,11 @@ class ProcessedSnapshot(object):
             by the ``default_redshift`` string stored in 
             the `sim_defaults` module.
 
+        version_name : string, optional
+            For cases where multiple versions of the same halo catalog 
+            are stored in the cache, 
+            a matching version name must be supplied to disambiguate. 
+
         """
 
         self.simname = simname
@@ -132,7 +137,8 @@ class ProcessedSnapshot(object):
 
         self.catman = CatalogManager()
         result = self.catman.closest_halocat(
-            'cache', 'halos', self.simname, self.halo_finder, redshift
+            'cache', 'halos', self.simname, self.halo_finder, redshift, 
+            **kwargs
             )
 
         if result is None:
@@ -152,14 +158,18 @@ class ProcessedSnapshot(object):
             fname=self.halocat_fname, 
             simname = self.simname, 
             halo_finder = self.halo_finder, 
-            redshift = self.redshift)
+            redshift = self.redshift, **kwargs)
 
         self._bind_halocat_metadata()
 
     def _bind_halocat_metadata(self):
         f = h5py.File(self.halocat_fname)
         for key in f.attrs.keys():
-            setattr(self, key, f.attrs[key])
+            if type(f.attrs[key])==str:
+                setattr(self, key, f.attrs[key])
+            elif type(f.attrs[key])==dict:
+                for dict_key in f.attrs[key]:
+                    setattr(self, dict_key, f.attrs[key][dict_key])
         f.close()
 
 
@@ -674,7 +684,8 @@ class CatalogManager(object):
         return output_full_fname
  
     def closest_halocat(
-        self, location, catalog_type, simname, halo_finder, input_redshift):
+        self, location, catalog_type, simname, halo_finder, input_redshift, 
+        **kwargs):
         """ Search the cache directory for the closest snapshot matching the 
         input specs. 
 
@@ -703,6 +714,11 @@ class CatalogManager(object):
         input_redshift : float
             Desired redshift of the snapshot. 
 
+        version_name : string, optional
+            For cases where multiple versions of the same halo catalog 
+            are stored in the cache, 
+            a matching version name must be supplied to disambiguate. 
+
         Returns
         -------
         output_fname : string 
@@ -717,7 +733,8 @@ class CatalogManager(object):
             return None
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
-        result = halocat_obj.closest_halocat(filename_list, input_redshift)
+        result = halocat_obj.closest_halocat(filename_list, input_redshift, 
+            **kwargs)
         if aph_len(result) == 0:
             print("No halo catalogs found in cache for simname = %s "
                 " and halo-finder = %s" % (simname, halo_finder))

@@ -329,7 +329,8 @@ class HaloCat(object):
         # If necessary, disambiguate by using the input version_name
         if len(fnames_with_matching_scale_factor) == 0:
             raise SyntaxError("No matching filenames found. "
-                "This indicates a bug in Halotools, not your usage of the package")
+                "This indicates a bug in Halotools, not your usage of the package. "
+                "Please raise an Issue on Github, or email a member of the Halotools team.")
         elif len(fnames_with_matching_scale_factor) == 1:
             output_fname = fnames_with_matching_scale_factor[0]
         elif len(fnames_with_matching_scale_factor) > 1:
@@ -345,7 +346,7 @@ class HaloCat(object):
                     % scale_factor_substring)
             else:
                 version_name = kwargs['version_name']
-                version_name_file_pattern = '*'+version_name+'*'
+                version_name_file_pattern = '*.list.'+version_name+'.hdf5'
                 should_be_unique_fname = fnmatch.filter(
                     fnames_with_matching_scale_factor, version_name_file_pattern)
                 if len(should_be_unique_fname) == 0:
