@@ -139,7 +139,7 @@ class ProcessedSnapshot(object):
             raise IOError("No processed halo catalogs found in cache "
                 " for simname = %s and halo-finder = %s" % (simname, halo_finder))
         else:
-            self.fname, self.redshift = result[0], result[1]
+            self.halocat_fname, self.redshift = result[0], result[1]
 
         self.halocat_obj = get_halocat_obj(simname, halo_finder)
         self.Lbox = self.halocat_obj.simulation.Lbox
@@ -149,9 +149,19 @@ class ProcessedSnapshot(object):
 
         self.particles = None
         self.halos = self.catman.load_halo_catalog(
+            fname=self.halocat_fname, 
             simname = self.simname, 
             halo_finder = self.halo_finder, 
             redshift = self.redshift)
+        
+        self._bind_halocat_metadata()
+
+    def _bind_halocat_metadata(self):
+        f = h5py.File(self.halocat_fname)
+        for key in f.attrs.keys():
+            setattr(self, key, f.attrs[key])
+        f.close()
+
 
 
 ###################################################################################################
@@ -1015,6 +1025,8 @@ class CatalogManager(object):
         """
 
         if 'fname' in kwargs.keys():
+            print("Loading halo catalog "
+                "with the following absolute path: \n%s\n" % kwargs['fname'])
             return Table.read(kwargs['fname'], path='halos')
         else:
             simname = kwargs['simname']

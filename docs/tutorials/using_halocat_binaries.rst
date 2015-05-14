@@ -79,6 +79,15 @@ metadata bound to it. Here are a few examples:
     Snapshot redshift = -0.0 
 
 
+There is also metadata describing details of how the catalog was
+produced:
+
+.. code:: python
+
+    print("Source of original data = %s " % default_snapshot.original_data_source)
+    print("Time of original reduction = %s " % default_snapshot.time_of_original_reduction)
+    print("Description of applied cuts = \n%s " % default_snapshot.cuts_description)
+
 Downloading other pre-processed snapshots
 =========================================
 
