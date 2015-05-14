@@ -84,8 +84,8 @@ class SimulationSpecs(object):
 
 
 class Bolshoi(SimulationSpecs):
-    """ Cosmological N-body simulation with Lbox = 250 Mpc/h and 
-    particle mass of ~1e8 Msun/h. 
+    """ Cosmological N-body simulation of WMAP5 cosmology 
+    with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h. 
 
     For a detailed description of the 
     simulation specs, see http://www.cosmosim.org/cms/simulations/multidark-project/bolshoi. 
@@ -111,7 +111,8 @@ class Bolshoi(SimulationSpecs):
         return cosmology.WMAP5
 
 class BolshoiPl(SimulationSpecs):
-    """ Cosmological N-body simulation with Lbox = 250 Mpc/h and 
+    """ Cosmological N-body simulation of Planck 2013 cosmology 
+    with Lbox = 250 Mpc/h and 
     particle mass of ~1e8 Msun/h. 
 
     For a detailed description of the 
@@ -138,8 +139,8 @@ class BolshoiPl(SimulationSpecs):
         return cosmology.Planck13
 
 class MultiDark(SimulationSpecs):
-    """ Cosmological N-body simulation with Lbox = 1Gpc/h and 
-    particle mass of ~1e10 Msun/h. 
+    """ Cosmological N-body simulation of WMAP5 cosmology 
+    with Lbox = 1Gpc/h and particle mass of ~1e10 Msun/h. 
 
     For a detailed description of the 
     simulation specs, see http://www.cosmosim.org/cms/simulations/multidark-project/mdr1. 
@@ -165,8 +166,8 @@ class MultiDark(SimulationSpecs):
         return cosmology.WMAP5
 
 class Consuelo(SimulationSpecs):
-    """ Cosmological N-body simulation with Lbox = 400 Mpc/h and 
-    particle mass of ~1e9 Msun/h. 
+    """ Cosmological N-body simulation of WMAP5-like cosmology 
+    with Lbox = 400 Mpc/h and particle mass of ~1e9 Msun/h. 
 
     For a detailed description of the 
     simulation specs, see http://lss.phy.vanderbilt.edu/lasdamas/simulations.html. 
