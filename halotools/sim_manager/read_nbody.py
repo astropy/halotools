@@ -103,7 +103,7 @@ class ProcessedSnapshot(object):
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder,
-        redshift = sim_defaults.default_redshift):
+        redshift = sim_defaults.default_redshift, **kwargs):
         """
         Parameters 
         ----------
@@ -125,6 +125,11 @@ class ProcessedSnapshot(object):
             by the ``default_redshift`` string stored in 
             the `sim_defaults` module.
 
+        version_name : string, optional
+            For cases where multiple versions of the same halo catalog 
+            are stored in the cache, 
+            a matching version name must be supplied to disambiguate. 
+
         """
 
         self.simname = simname
@@ -132,14 +137,15 @@ class ProcessedSnapshot(object):
 
         self.catman = CatalogManager()
         result = self.catman.closest_halocat(
-            'cache', 'halos', self.simname, self.halo_finder, redshift
+            'cache', 'halos', self.simname, self.halo_finder, redshift, 
+            **kwargs
             )
 
         if result is None:
             raise IOError("No processed halo catalogs found in cache "
                 " for simname = %s and halo-finder = %s" % (simname, halo_finder))
         else:
-            self.fname, self.redshift = result[0], result[1]
+            self.halocat_fname, self.redshift = result[0], result[1]
 
         self.halocat_obj = get_halocat_obj(simname, halo_finder)
         self.Lbox = self.halocat_obj.simulation.Lbox
@@ -149,9 +155,23 @@ class ProcessedSnapshot(object):
 
         self.particles = None
         self.halos = self.catman.load_halo_catalog(
+            fname=self.halocat_fname, 
             simname = self.simname, 
             halo_finder = self.halo_finder, 
-            redshift = self.redshift)
+            redshift = self.redshift, **kwargs)
+
+        self._bind_halocat_metadata()
+
+    def _bind_halocat_metadata(self):
+        f = h5py.File(self.halocat_fname)
+        for key in f.attrs.keys():
+            if type(f.attrs[key])==str:
+                setattr(self, key, f.attrs[key])
+            elif type(f.attrs[key])==dict:
+                for dict_key in f.attrs[key]:
+                    setattr(self, dict_key, f.attrs[key][dict_key])
+        f.close()
+
 
 
 ###################################################################################################
@@ -193,7 +213,7 @@ class CatalogManager(object):
 
     def available_snapshots(self, location, catalog_type, simname, halo_finder):
         """
-        Return a list of the snapshots that are stored at the input location. 
+        Return a list of the filenames of all snapshots that are stored at the input location. 
 
         Parameters 
         ----------
@@ -317,7 +337,7 @@ class CatalogManager(object):
     def download_raw_halocat(self, simname, halo_finder, input_redshift, 
         overwrite = False, **kwargs):
         """ Method to download publicly available ascii data of 
-        raw halo catalog from web location. 
+        a specific raw halo catalog from its web location. 
 
         Parameters 
         ----------
@@ -398,8 +418,8 @@ class CatalogManager(object):
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
         is_in_cache = self.check_for_existing_halocat(
-            download_loc, 'raw_halos', fname=output_fname, 
-            simname=simname, halo_finder=halo_finder)
+            download_loc, 'raw_halos', simname, halo_finder, 
+            fname=output_fname)
 
         if is_in_cache != False:
             if overwrite ==True:
@@ -418,7 +438,8 @@ class CatalogManager(object):
 
     def process_raw_halocat(self, input_fname, simname, halo_finder, **kwargs):
         """ Method reads in raw halo catalog ASCII data, makes the desired cuts, 
-        and returns a numpy structured array of the rows passing the cuts. 
+        returns a numpy structured array of the rows passing the cuts, and optionally 
+        stores the result as an hdf5 file in the cache directory. 
 
         Parameters 
         ----------
@@ -437,6 +458,22 @@ class CatalogManager(object):
             and return a boolean array of the same length. 
             If None, default cut is set by 
             `~halotools.sim_manager.RockstarReader.default_halocat_cut`. 
+
+        store_result : bool, optional
+            Determines whether the resulting structured array is stored to 
+            an hdf5 file on disk. Default is False. If True, you must 
+            at least pass the `version_name` keyword argument. 
+            See the `store_processed_halocat` method for the other optional 
+            keywords you may use when setting `store_result` to True. 
+
+        notes : dict, optional 
+            If you are storing the result as an hdf5 file, 
+            the `notes` keyword argument give you the option to give 
+            a qualitative description of how the catalog was produce. 
+            `notes` should be a python dictionary. Each dict key of `notes` 
+            will be stored hdf5 file as metadata, and will be the name of an 
+            attribute of the corresponding `ProcessedSnapshot` object. 
+            The value attached to each key can be any string. 
 
         Returns 
         -------
@@ -460,16 +497,34 @@ class CatalogManager(object):
         reader = RockstarReader(input_fname, 
             simname=simname, halo_finder=halo_finder, **kwargs)
 
-        if 'cuts_funcobj' in kwargs.keys():
-            self.cuts_funcobj = kwargs['cuts_funcobj']
-        else:
-            self.cuts_funcobj = reader.default_halocat_cut
-            kwargs['cuts_funcobj'] = self.cuts_funcobj
+#        if 'cuts_funcobj' not in kwargs.keys():
+#            self.cuts_funcobj = kwargs['cuts_funcobj']
+#        else:
+#            self.cuts_funcobj = reader.default_halocat_cut
+#            kwargs['cuts_funcobj'] = self.cuts_funcobj
 
         arr = reader.read_halocat(**kwargs)
         reader._compress_ascii()
 
-        return arr, reader
+        ### Calculation complete
+        ### Now store the result, if applicable
+        if 'store_result' in kwargs.keys():
+            store_result = kwargs['store_result']
+        else:
+            store_result = False
+
+        if store_result is True:
+            if 'version_name' not in kwargs.keys():
+                raise KeyError("If keyword argument store_result is True, "
+                    "must also pass version_name keyword argument")
+            else:
+                version_name = kwargs['version_name']
+                del kwargs['version_name']
+                self.store_processed_halocat(
+                    arr, reader, version_name, **kwargs)
+            return arr, reader
+        else:
+            return arr, reader
 
     def store_processed_halocat(self, catalog, reader_obj, version_name, **kwargs):
         """
@@ -629,7 +684,8 @@ class CatalogManager(object):
         return output_full_fname
  
     def closest_halocat(
-        self, location, catalog_type, simname, halo_finder, input_redshift):
+        self, location, catalog_type, simname, halo_finder, input_redshift, 
+        **kwargs):
         """ Search the cache directory for the closest snapshot matching the 
         input specs. 
 
@@ -658,6 +714,11 @@ class CatalogManager(object):
         input_redshift : float
             Desired redshift of the snapshot. 
 
+        version_name : string, optional
+            For cases where multiple versions of the same halo catalog 
+            are stored in the cache, 
+            a matching version name must be supplied to disambiguate. 
+
         Returns
         -------
         output_fname : string 
@@ -672,7 +733,8 @@ class CatalogManager(object):
             return None
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
-        result = halocat_obj.closest_halocat(filename_list, input_redshift)
+        result = halocat_obj.closest_halocat(filename_list, input_redshift, 
+            **kwargs)
         if aph_len(result) == 0:
             print("No halo catalogs found in cache for simname = %s "
                 " and halo-finder = %s" % (simname, halo_finder))
@@ -739,7 +801,8 @@ class CatalogManager(object):
 
         return all_cached_files
 
-    def check_for_existing_halocat(self, location, catalog_type, **kwargs):
+    def check_for_existing_halocat(self, location, catalog_type, 
+        simname, halo_finder, **kwargs):
         """ Method searches the appropriate location in the 
         cache directory for the input fname, and returns a boolean for whether the 
         file is already in cache. 
@@ -750,26 +813,24 @@ class CatalogManager(object):
             Specifies the web or disk location to search for halo catalogs. 
             Optional values for `location` are:
 
-                *  `web`
-
                 * `cache`
 
-                * a full pathname such as `/full/path/to/my/personal/halocats/`. 
+                * pathname, either absolute or relative.  
 
         catalog_type : string
             String giving the type of catalog. 
             Should be `halos`, or `raw_halos`. 
 
-        fname : string, optional 
-            Filenmae (including absolute path) of the catalog being searched for. 
-
-        simname : string, optional 
+        simname : string 
             Nickname of the simulation, e.g. `bolshoi`. 
             Must be specified if no `fname` keyword argument is given. 
 
-        halo_finder : string, optional 
+        halo_finder : string 
             Nickname of the halo-finder, e.g. `rockstar`. 
             Must be specified if no `fname` keyword argument is given. 
+
+        fname : string, optional 
+            Filename (including absolute path) of the catalog being searched for. 
 
         redshift : float, optional 
             Redshift of the snapshot being searched for. 
@@ -781,14 +842,19 @@ class CatalogManager(object):
 
         Returns 
         -------
-        is_in_cache : bool 
-            Boolean specifying whether the input fname 
-            is in the Halotools cache directory. 
+        is_in_cache : bool or string
+            If no match is found, returns False. If a matching is found, 
+            the filename (including absolute path) is returned. 
         """
+
+        if location == 'cache':
+            dirname = cache_config.get_catalogs_dir(catalog_type, 
+                simname=simname, halo_finder=halo_finder)
+        else:
+            dirname = os.path.abspath(location)
 
         if 'fname' in kwargs.keys():
             fname = kwargs['fname']
-            dirname = os.path.dirname(fname)
 
             potential_matches = []
             for path, dirlist, filelist in os.walk(dirname):
@@ -819,16 +885,11 @@ class CatalogManager(object):
                 raise IOError("More than 1 matching catalog found in cache directory")
 
         else:
-            if (
-                ('simname' not in kwargs.keys()) or 
-                ('halo_finder' not in kwargs.keys()) or 
-                ('redshift' not in kwargs.keys()) ):
+            if 'redshift' not in kwargs.keys():
                 raise IOError("If the 'fname' keyword argument is not passed to "
                     "check_for_existing_halocat, then you must pass "
-                    "'simname', 'halo_finder', and 'redshift' keyword arguments")
+                    "the 'redshift' keyword argument")
             else:
-                simname = kwargs['simname']
-                halo_finder = kwargs['halo_finder']
                 redshift = kwargs['redshift']
                 if 'dz_tol' in kwargs.keys():
                     dz_tol = kwargs['dz_tol']
@@ -852,9 +913,9 @@ class CatalogManager(object):
 
 
     def download_preprocessed_halo_catalog(self, simname, halo_finder, input_redshift, 
-        overwrite = False, **kwargs):
-        """ Method to download publicly available ascii data of 
-        raw halo catalog from web location. 
+        **kwargs):
+        """ Method to download one of the pre-processed binary files 
+        storing a reduced halo catalog.  
 
         Parameters 
         ----------
@@ -899,6 +960,11 @@ class CatalogManager(object):
         else:
             dz_tol = 0.1
 
+        if 'overwrite' in kwargs.keys():
+            overwrite = kwargs['overwrite']
+        else:
+            overwrite = False
+
         halocat_obj = get_halocat_obj(simname, halo_finder)
         list_of_available_snapshots = halocat_obj.preprocessed_halocats_available_for_download
         closest_snapshot_fname, redshift_of_closest_match = (
@@ -932,17 +998,17 @@ class CatalogManager(object):
             # We were not given an explicit path, so use the default Halotools cache dir
             cache_dirname = cache_config.get_catalogs_dir('halos', 
                 simname=simname, halo_finder=halo_finder)
-            download_loc = cache_dirname
-            output_fname = os.path.join(download_loc, closest_snapshot_fname)
+            output_fname = os.path.join(cache_dirname, closest_snapshot_fname)
+            download_loc = 'cache'
 
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
         is_in_cache = self.check_for_existing_halocat(
-            download_loc, 'halos', 
-            fname=closest_snapshot_fname, simname=simname, halo_finder=halo_finder)
+            download_loc, 'halos', simname, halo_finder, 
+            fname=os.path.basename(closest_snapshot_fname))
 
         if is_in_cache != False:
-            if overwrite ==True:
+            if overwrite == True:
                 warnings.warn("Downloading halo catalog and overwriting existing file %s" % output_fname)
             else:
                 msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
@@ -952,13 +1018,13 @@ class CatalogManager(object):
                 print(msg % output_fname)
                 return None
 
-        start = time()
-        download_file_from_url(url, output_fname)
-        end = time()
-        runtime = end - start
-        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
-
-        return output_fname
+        else:
+            start = time()
+            download_file_from_url(url, output_fname)
+            end = time()
+            runtime = (end - start)/60.
+            print("\nTotal runtime to download snapshot = %.1f minutes\n" % runtime)
+            return output_fname
 
     def load_halo_catalog(self, **kwargs):
         """ Method returns an Astropy Table object of halos 
@@ -985,6 +1051,8 @@ class CatalogManager(object):
         """
 
         if 'fname' in kwargs.keys():
+            print("Loading halo catalog "
+                "with the following absolute path: \n%s\n" % kwargs['fname'])
             return Table.read(kwargs['fname'], path='halos')
         else:
             simname = kwargs['simname']
@@ -1000,79 +1068,6 @@ class CatalogManager(object):
                 print("Loading z = %.2f halo catalog "
                     "with the following absolute path: \n%s\n" % (z, fname))
                 return Table.read(fname, path='halos')
-
-
-    def load_catalog(self,catalog_type,
-        dirname=None,filename=None,
-        download_yn=False,url=sim_defaults.processed_halocats_webloc):
-        """ Use the astropy reader to load the halo or particle catalog into memory.
-
-        Parameters 
-        ----------
-        dirname : string 
-            Name of directory where filename is stored.
-
-        filename : string 
-            Name of file being loaded into memory. 
-
-        download_yn : boolean, optional
-            If set to True, and if filename is not already stored in the cache directory, 
-            method will attempt to download the file from the provided url. If there is no corresponding 
-            file at the input url, an exception will be raised.
-
-        url : string 
-            Web location from which to download the catalog if it is not present in the cache directory.
-
-        Returns 
-        -------
-        catalog : object
-            Data structure located at the input filename.
-
-        """
-        if filename is None:
-            if catalog_type=='subhalos':
-                filename = self.default_halo_catalog_filename
-            elif catalog_type=='particles':
-                filename = self.default_particle_catalog_filename
-            else:
-                raise KeyError("Must supply catalog_type to be either "
-                    "'particles' or 'subhalos'")
-        if dirname is None:
-            if catalog_type=='subhalos':
-                dirname = self.halo_catalog_dirname
-            elif catalog_type=='particles':
-                dirname = self.particle_catalog_dirname
-            else:
-                raise KeyError("Must supply catalog_type to be either "
-                    "'particles' or 'subhalos'")
-
-        if os.path.isfile(os.path.join(dirname,filename)):
-            catalog = Table.read(os.path.join(dirname,filename),path='data')
-        else:
-            ### Requested filename is not in cache, and external download is not requested
-            if download_yn==False:
-                return None
-            else:
-                # Download one of the default catalogs hosted at Yale
-                if filename==self.default_halo_catalog_filename:
-                    catalog_type='subhalos'
-                if filename==self.default_particle_catalog_filename:
-                    catalog_type='particles'
-                else:
-                    raise IOError("Input filename does not match one of the provided default catalogs")
-                ###
-                remote_filename = os.path.join(url,filename)
-                fileobj = urllib2.urlopen(remote_filename)
-                output_directory = cache_config.get_catalogs_dir(catalog_type)
-                output_filename = os.path.join(output_directory,filename)
-                output = open(output_filename,'wb')
-                output.write(fileobj.read())
-                output.close()
-                hdulist = fits.open(output_filename)
-                catalog = Table(hdulist[1].data)
-
-        return catalog
-
 
     def download_all_default_catalogs(self):
         """ Convenience method used to download all pre-processed halo catalogs 
@@ -1105,8 +1100,35 @@ class CatalogManager(object):
 
 ###################################################################################################
 class RockstarReader(object):
+    """ Class containing methods used to read raw ASCII data of Rockstar hlist files. 
+
+    Each new raw halo catalog must be processed with its own instance of this class. 
+    """
 
     def __init__(self, input_fname, simname, halo_finder, **kwargs):
+        """
+        Parameters 
+        -----------
+        input_fname : string 
+            Name of the file (including absolute path) to be processed. 
+
+        simname : string 
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string 
+            Nickname of the halo-finder, e.g. `rockstar`. 
+
+        cuts_funcobj : function object, optional
+            Function used to apply cuts to the rows of the ASCII data. 
+            `cuts_funcobj` should accept a structured array as input, 
+            and return a boolean array of the same length. 
+            If None, default cut is set by `default_halocat_cut`. 
+            If set to the string ``nocut``, all rows will be kept. 
+            The `cuts_funcobj` must be a callable function defined 
+            within the namespace of the `RockstarReader` instance, and 
+            it must be a stand-alone function, not a bound method of 
+            some other class.  
+        """
 
         if not os.path.isfile(input_fname):
             if not os.path.isfile(input_fname[:-3]):
@@ -1155,7 +1177,7 @@ class RockstarReader(object):
             sim_defaults.Num_ptcl_requirement)
 
     def file_len(self):
-        """ Compute the number of all rows in fname
+        """ Compute the number of all rows in the raw halo catalog. 
 
         Parameters 
         ----------
@@ -1173,7 +1195,7 @@ class RockstarReader(object):
         return Nrows
 
     def header_len(self,header_char='#'):
-        """ Compute the number of header rows in fname. 
+        """ Compute the number of header rows in the raw halo catalog. 
 
         Parameters 
         ----------
@@ -1261,7 +1283,7 @@ class RockstarReader(object):
 
 
     def read_halocat(self, **kwargs):
-        """ Reads fname in chunks and returns a structured array
+        """ Reads the raw halo catalog in chunks and returns a structured array
         after applying cuts.
 
         Parameters 
@@ -1269,12 +1291,12 @@ class RockstarReader(object):
         cuts_funcobj : function object, optional keyword argument
             Function used to determine whether a row of the raw 
             halo catalog is included in the reduced binary. 
-            Input of the `cut` function must be a structured array 
+            Input of the `cuts_funcobj1 must be a structured array 
             with some subset of the field names of the 
-            halo catalog dtype. Output of the `cut` function must 
+            halo catalog. Output of the `cuts_funcobj` must 
             be a boolean array of length equal to the length of the 
-            input structured array. Default is to make a cut on 
-            `mpeak` at 300 particles, using `default_halocat_cut` method. 
+            input structured array. 
+            Default is set by the `default_halocat_cut` method. 
 
         nchunks : int, optional keyword argument
             `read_halocat` reads and processes ascii 
@@ -1285,11 +1307,6 @@ class RockstarReader(object):
 
         """
         start = time()
-
-        #if 'cuts_funcobj' in kwargs.keys():
-        #    self.cuts_funcobj = kwargs['cuts_funcobj']
-        #else:
-        #    self.cuts_funcobj = self.default_halocat_cut
 
         if 'nchunks' in kwargs.keys():
             Nchunks = kwargs['nchunks']
@@ -1306,7 +1323,7 @@ class RockstarReader(object):
             Nchunks = 1
 
 
-        print("\n\n\n\n...Processing ASCII data of file: \n%s\n " % self.fname)
+        print("\n...Processing ASCII data of file: \n%s\n " % self.fname)
         print(" Total number of rows in file = %i" % file_length)
         print(" Number of rows in detected header = %i \n" % header_length)
         if Nchunks==1:
@@ -1364,9 +1381,9 @@ class RockstarReader(object):
         runtime = (end-start)
         if runtime > 60:
             runtime = runtime/60.
-            msg = "\n Total runtime to read in ASCII = %.1f minutes\n"
+            msg = "Total runtime to read in ASCII = %.1f minutes\n"
         else:
-            msg = "\n Total runtime to read in ASCII = %.1f seconds\n"
+            msg = "Total runtime to read in ASCII = %.1f seconds\n"
         print(msg % runtime)
 
         return output

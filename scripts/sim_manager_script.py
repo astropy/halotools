@@ -58,13 +58,15 @@ print("\nFor simname = %s and redshift = %.2f, " % (simname, desired_redshift))
 print("Closest halocat available for download: \n%s\n" % closest_cat_on_web[0])
 
 ### Check the cache
-is_in_cache = catman.check_for_existing_halocat('cache', catalog_type, fname=closest_cat_on_web[0], 
-	simname=simname, halo_finder=halo_finder)
+is_in_cache = catman.check_for_existing_halocat('cache', catalog_type, 
+	simname, halo_finder, fname=closest_cat_on_web[0])
 print("Is the file already in cache?\n %r \n" % is_in_cache)
 
 ### Check the external disk
-is_on_disk = catman.check_for_existing_halocat(disk_location, catalog_type, fname=closest_cat_on_web[0], 
-	simname=simname, halo_finder=halo_finder)
+is_on_disk = catman.check_for_existing_halocat(disk_location, catalog_type, 
+	simname, halo_finder, 
+	fname=closest_cat_on_web[0])
+
 print("Is the file stored on disk?\n %r \n" % is_on_disk)
 if is_on_disk == False:
 	output_fname = catman.download_raw_halocat(simname, halo_finder, closest_cat_on_web[1], 
@@ -73,8 +75,8 @@ if is_on_disk == False:
 	print("\n This fname should agree with: \n%s\n" % closest_cat_on_web[0])
 	print("Can we detect this newly downloaded file on disk?\n")
 	is_on_disk = catman.check_for_existing_halocat(
-		disk_location, catalog_type, fname=closest_cat_on_web[0], 
-		simname=simname, halo_finder=halo_finder)
+		disk_location, catalog_type, simname, halo_finder, 
+		fname=closest_cat_on_web[0])
 	print is_on_disk
 	print ("\n")
 
@@ -82,8 +84,8 @@ if is_on_disk == False:
 if is_in_cache == False:
 	print("\n... downloading file...\n")
 	catman.download_raw_halocat(simname, halo_finder, closest_cat_on_web[1], overwrite = False)
-	is_in_cache = catman.check_for_existing_halocat('cache', catalog_type, fname=closest_cat_on_web[0], 
-		simname=simname, halo_finder=halo_finder)
+	is_in_cache = catman.check_for_existing_halocat('cache', catalog_type, 
+		simname, halo_finder, fname=closest_cat_on_web[0])
 	print("Is the file now in cache? %r " % is_in_cache)
 
 closest_cat_in_cache = catman.closest_halocat('cache', catalog_type, simname, halo_finder, desired_redshift)
