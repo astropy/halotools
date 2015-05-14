@@ -84,6 +84,12 @@ class SimulationSpecs(object):
 
 
 class Bolshoi(SimulationSpecs):
+    """ Cosmological N-body simulation with Lbox = 250 Mpc/h and 
+    particle mass of ~1e8 Msun/h. 
+
+    For a detailed description of the 
+    simulation specs, see http://www.cosmosim.org/cms/simulations/multidark-project/bolshoi. 
+    """
 
     def __init__(self):
         super(Bolshoi, self).__init__('bolshoi')
@@ -105,6 +111,12 @@ class Bolshoi(SimulationSpecs):
         return cosmology.WMAP5
 
 class BolshoiPl(SimulationSpecs):
+    """ Cosmological N-body simulation with Lbox = 250 Mpc/h and 
+    particle mass of ~1e8 Msun/h. 
+
+    For a detailed description of the 
+    simulation specs, see http://www.cosmosim.org/cms/simulations/bolshoip-project/bolshoip/. 
+    """
 
     def __init__(self):
         super(BolshoiPl, self).__init__('bolshoipl')
@@ -126,6 +138,12 @@ class BolshoiPl(SimulationSpecs):
         return cosmology.Planck13
 
 class MultiDark(SimulationSpecs):
+    """ Cosmological N-body simulation with Lbox = 1Gpc/h and 
+    particle mass of ~1e10 Msun/h. 
+
+    For a detailed description of the 
+    simulation specs, see http://www.cosmosim.org/cms/simulations/multidark-project/mdr1. 
+    """
 
     def __init__(self):
         super(MultiDark, self).__init__('multidark')
@@ -147,6 +165,12 @@ class MultiDark(SimulationSpecs):
         return cosmology.WMAP5
 
 class Consuelo(SimulationSpecs):
+    """ Cosmological N-body simulation with Lbox = 400 Mpc/h and 
+    particle mass of ~1e9 Msun/h. 
+
+    For a detailed description of the 
+    simulation specs, see http://lss.phy.vanderbilt.edu/lasdamas/simulations.html. 
+    """
 
     def __init__(self):
         super(Consuelo, self).__init__('consuelo')
@@ -173,6 +197,12 @@ class Consuelo(SimulationSpecs):
 
 @six.add_metaclass(ABCMeta)
 class HaloCat(object):
+    """ Abstract container class for any halo catalog object. 
+
+    Concrete instances of this class are used to standardize the 
+    specs of a simulation, how its associated 
+    raw ASCII data is read, etc. 
+    """
 
     def __init__(self, simobj, halo_finder):
         self.simulation = simobj
@@ -425,6 +455,8 @@ class HaloCat(object):
         return scale_factor_substring
 
 class BolshoiRockstar(HaloCat):
+    """ Rockstar-based halo catalog for the Bolshoi simulation. 
+    """
 
     def __init__(self):
 
@@ -524,6 +556,8 @@ class BolshoiRockstar(HaloCat):
         return dt
 
 class BolshoiPlRockstar(HaloCat):
+    """ Rockstar-based halo catalog for the Bolshoi-Planck simulation. 
+    """
 
     def __init__(self):
 
@@ -621,6 +655,8 @@ class BolshoiPlRockstar(HaloCat):
         return dt
 
 class BolshoiBdm(HaloCat):
+    """ BDM-based halo catalog for the Bolshoi simulation. 
+    """
 
     def __init__(self):
 
@@ -692,6 +728,8 @@ class BolshoiBdm(HaloCat):
         return dt
 
 class MultiDarkRockstar(HaloCat):
+    """ Rockstar-based halo catalog for the Multidark simulation. 
+    """
 
     def __init__(self):
 
@@ -789,6 +827,8 @@ class MultiDarkRockstar(HaloCat):
         return dt
 
 class ConsuleoRockstar(HaloCat):
+    """ Rockstar-based halo catalog for the Consuelo simulation. 
+    """
 
     def __init__(self):
 
