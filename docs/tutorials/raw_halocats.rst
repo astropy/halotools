@@ -80,14 +80,14 @@ directory:
 
 .. parsed-literal::
 
-    The following filename already exists in your cache directory: 
     
+    ... Downloading data from the following location: 
+    http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/hlist_0.08820.list.gz
+    
+     ... Saving the data with the following filename: 
     /Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/multidark/rockstar/hlist_0.08820.list.gz
     
-    If you really want to overwrite the file, 
-    you must call the same function again 
-    with the keyword argument `overwrite` set to `True`
-
+     100.0% of 8051 bytes
 
 The highest-redshift Rockstar catalog for Multidark is now in your cache
 directory. You can verify this using the
