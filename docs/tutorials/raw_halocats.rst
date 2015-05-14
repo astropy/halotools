@@ -215,3 +215,68 @@ will return two things:
 2. Specifying your catalog cuts
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The ``cuts_funcobj`` keyword argument gives you the option to make any
+cuts you like when reducing the raw halo catalog. Whatever cuts you
+choose to make, as described below Halotools provides you with a
+bookkeeping device to automatically keep track of the exact cuts you
+used when creating a reduced binary file.
+
+Whatever cuts you choose, the
+`~halotools.sim_manager.CatalogManager.process_raw_halocat` method
+applies the cuts as the raw ASCII is being read in a series of chunks.
+This way, you do not need to have enough memory on your machine to load
+the entire uncut catalog - all you need is enough memory to store the
+post-processed catalog.
+
+::
+
+    Option 1: **Default cut**. If you do not pass the ``cuts_funcobj`` keyword argument to the ~halotools.sim_manager.CatalogManager.process_raw_halocat method, default cuts will be chosen for you. These default cuts are specified by the ~halotools.sim_manager.RockstarReader method of the ~halotools.sim_manager.RockstarReader. The current default cut is to throw out any halo or subhalo that never had more than 300 particles at any point in its past history. 
+
+::
+
+    Option 2: **No cut**. If you set the ``cuts_funcobj`` keyword argument to the string ``nocut``, then the ~halotools.sim_manager.CatalogManager.process_raw_halocat method will keep all rows. 
+
+Note that for most science applications, the default 300-particle cut is
+reasonably conservative. For many science targets, more stringent
+completeness requirements are appropriate, in which case the additional
+cuts can be applied post-processing with a boolean mask. However, this
+simple cut alone dramatically reduces the size of the resulting binary
+file, and so it is not recommended that you use the ``nocut`` option
+unless you are confident that relaxing the 300-particle cut is a
+necessity.
+
+::
+
+    Option 3: **Custom cut**. By passing a python function object to ``cuts_funcobj``, you have the freedom to make any cuts you like. We'll give an example of this usage below. The only requirements on the function object are as follows:
+        i) The input is a numpy structured array with the same column names as the halo catalog, or fewer. 
+        ii) The output is a boolean array of the same length as the input array.
+        iii) The function is a callable object from the namespace in which ~halotools.sim_manager.CatalogManager.process_raw_halocat is called
+        iv) The function is stand-alone, and not a bound instance method of some other object.
+
+.. code:: python
+
+    def example_custom_cut(x):
+        return x['vmax'] > 200
+.. code:: python
+
+    custom_cut_halos, reader_obj = catman.process_raw_halocat(downloaded_fname, simname, halo_finder, 
+                                        store_result=False, cuts_funcobj=example_custom_cut)
+
+
+.. parsed-literal::
+
+    ...uncompressing ASCII data
+    
+    ...Processing ASCII data of file: 
+    /Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/multidark/rockstar/hlist_0.08820.list
+     
+     Total number of rows in file = 90
+     Number of rows in detected header = 57 
+    
+    Reading catalog in a single chunk of size 90
+    
+    Total runtime to read in ASCII = 0.0 seconds
+    
+    ...re-compressing ASCII data
+
+
