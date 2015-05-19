@@ -74,14 +74,11 @@ Halotools. This includes instructions for how to build new science
 features into the package, as well as how to effectively co-develop
 the publicly available code base with other Halotools contributors.
 
+.. toctree::
+   :maxdepth: 1
 
-*************
-Banner Credit
-*************
-
-Special thanks to Ralf Kaehler and the Kavli Institute for Particle Astrophysics and Cosmology (KIPAC) for the use of the visualization of an n-body simulation that is used in the top banner of these documentation pages.
-
-
+   development/contributors
+ 
 
 
 
