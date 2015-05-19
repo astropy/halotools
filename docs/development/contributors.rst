@@ -29,6 +29,7 @@ Core Package Contributors
 * John Parejko
 * Manodeep Sinha
 * Kevin Tan
+* Erik Tollerud
 * Doug Watson
 
 Other Credits
