@@ -169,21 +169,6 @@ class AltHodModelFactory(object):
             mock = mock_factory(snapshot, self, **kwargs)
             self.mock = mock
 
-
-    @property 
-    def haloprop_key_dict(self):
-        """ Dictionary defining the halo properties 
-        that regulate galaxy occupation statistics. 
-
-        Dict keys always include ``prim_haloprop_key`` and ``halo_boundary``, 
-        whose default settings are defined in `~halotools.empirical_models.model_defaults`. 
-        Models with assembly bias will include a ``sec_haloprop_key`` key. 
-        Dict values are strings used to access the appropriate column of a halo catalog, 
-        e.g., ``mvir``. 
-        """
-
-        return return_haloprop_dict(self.model_blueprint)
-
     def _set_gal_types(self):
         """ Private method binding the ``gal_types`` list attribute,
         and the ``occupation_bound`` attribute, to the class instance. 
