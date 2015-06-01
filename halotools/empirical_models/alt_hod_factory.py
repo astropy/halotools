@@ -45,21 +45,6 @@ class AltHodModelFactory(object):
     
         * The following tutorial, :ref:`custom_hod_model_building_tutorial`, shows how you can build your own, customizing it based on the science you are interested in.  
 
-    Examples 
-    --------
-    The simplest way to build an HOD-style model is to use one of the pre-loaded blueprints. 
-    Let's use `Kravtsov04` as a simple example:
-
-    >>> blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint()
-    >>> model = HodModelFactory(blueprint)
-
-    Now let's populate a simulation using our newly created model object. 
-    The `~halotools.sim_manager` sub-package contains methods that let you choose from a 
-    range of publicly available N-body simulations into which you can sprinkle mock galaxies 
-    with your model. For these demonstration purposes, we'll use a fake simulation: 
-
-    >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot)
     """
 
     def __init__(self, input_model_blueprint, **kwargs):
