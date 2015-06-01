@@ -190,11 +190,14 @@ class Kravtsov04Cens(OccupationComponent):
 
         Parameters
         ----------        
-        halo_mass : array, optional positional argument
+        mass : array, optional keyword argument
             array of :math:`M_{\\mathrm{vir}}` of halos in catalog
 
         halos : object, optional keyword argument 
             Data table storing halo catalog. 
+
+        galaxy_table : object, optional keyword argument 
+            Data table storing mock galaxy catalog. 
 
         input_param_dict : dict, optional
             dictionary of parameters governing the model. If not passed, 
@@ -248,11 +251,22 @@ class Kravtsov04Cens(OccupationComponent):
 
         Parameters
         ----------        
-        halo_mass : array, optional positional argument
+        mass : array, optional keyword argument
             array of :math:`M_{\\mathrm{vir}}` of halos in catalog
 
         halos : object, optional keyword argument 
             Data table storing halo catalog. 
+
+        galaxy_table : object, optional keyword argument 
+            Data table storing mock galaxy catalog. 
+
+        input_param_dict : dict, optional keyword argument
+            dictionary of parameters governing the model. If not passed, 
+            values bound to ``self`` will be chosen. 
+
+        seed : int, optional keyword argument
+            Random number seed used by the ``mc_generator``. Default is None. 
+            Used exclusively to make deterministic testing possible. 
 
         Returns
         -------
