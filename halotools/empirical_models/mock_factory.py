@@ -16,10 +16,10 @@ from . import model_defaults
 
 from ..sim_manager import sim_defaults
 
-__all__ = ["AltHodMockFactory"]
+__all__ = ["HodMockFactory"]
 __author__ = ['Andrew Hearin']
 
-class AltHodMockFactory(object):
+class HodMockFactory(object):
     """ Class responsible for populating a simulation with a 
     population of mock galaxies. 
 
