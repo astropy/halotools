@@ -81,7 +81,7 @@ class AltHodMockFactory(object):
                 raise KeyError("There already exists a halo property with the name %s\n" 
                     "However, the composite model attempted to create a new halo property "
                     "with that name by using the new_haloprop_func_dict" % new_haloprop_key)
-            self.halos[new_haloprop_key] = new_haloprop_func(self.halos)
+            self.halos[new_haloprop_key] = new_haloprop_func(halos=self.halos)
             self.additional_haloprops.append(new_haloprop_key)
 
         # Create new columns for the halo catalog associated with each 
@@ -90,7 +90,7 @@ class AltHodMockFactory(object):
         # new column values are computed by the function objects in halo_prof_func_dict 
         function_dict = self.model.halo_prof_func_dict
         for new_haloprop_key, prof_param_func in function_dict.iteritems():
-            self.halos[new_haloprop_key] = prof_param_func(self.halos[self.prim_haloprop_key])
+            self.halos[new_haloprop_key] = prof_param_func(halos=self.halos)
             self.additional_haloprops.append(new_haloprop_key)
 
         self.build_halo_prof_lookup_tables()
