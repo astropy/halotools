@@ -4,7 +4,7 @@ Module containing the primary class used to build
 composite HOD-style models from a set of components. 
 """
 
-__all__ = ['AltHodModelFactory']
+__all__ = ['HodModelFactory']
 __author__ = ['Andrew Hearin']
 
 from functools import partial
@@ -22,7 +22,7 @@ from ..sim_manager.read_nbody import ProcessedSnapshot
 from ..sim_manager.generate_random_sim import FakeSim
 
 
-class AltHodModelFactory(object):
+class HodModelFactory(object):
     """ Class used to build HOD-style models of the galaxy-halo connection. 
 
     Can be thought of as a factory that takes an HOD model blueprint as input, 
