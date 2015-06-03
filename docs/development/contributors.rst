@@ -31,6 +31,7 @@ Core Package Contributors
 * Kevin Tan
 * Erik Tollerud
 * Doug Watson
+* Andrew Zentner
 
 Other Credits
 =============
