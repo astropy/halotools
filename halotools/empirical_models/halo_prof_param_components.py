@@ -69,6 +69,9 @@ class ConcMass(object):
             mass = kwargs['mass']
         elif 'halos' in kwargs.keys():
             mass = kwargs['halos'][self.prim_haloprop_key]
+        elif 'galaxy_table' in kwargs.keys():
+            halo_mass_key = model_defaults.host_haloprop_prefix + self.prim_haloprop_key
+            mass = kwargs['galaxy_table'][halo_mass_key]
 
         if 'model' not in kwargs.keys():
             model = model_defaults.conc_mass_relation_key

@@ -77,12 +77,12 @@ class HodModelFactory(object):
         # whose keys are parameters of our model
         self._set_init_param_dict()
 
+        # Build up and bind several lists from the component models
+        self._build_composite_lists()
+
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
         self._set_primary_behaviors()
-
-        self.publications = self._build_publication_list()
-
 
     def interpret_input_model_blueprint(self):
         """ Method to interpret the ``input_model_blueprint`` 
@@ -237,14 +237,12 @@ class HodModelFactory(object):
             gal_prof_model = self.model_blueprint[gal_type]['profile']
 
             # Create a new method for each galaxy profile parameter
-            # See docstring of _get_gal_prof_param for how this works
             # These methods are *not* called by the mock factory
             # See the docstring of composite_gal_prof_param_func 
             # for how the mock factory calls profile models
-            for gal_prof_param in gal_prof_model.gal_prof_func_dict.keys():
+            for gal_prof_param, func in gal_prof_model.gal_prof_func_dict.iteritems():
                 new_method_name = gal_prof_param + '_' + gal_type
-                new_method_behavior = partial(self._get_gal_prof_param, 
-                    gal_prof_param, gal_type)
+                new_method_behavior = func
                 setattr(self, new_method_name, new_method_behavior)
 
             ### Create a method to assign Monte Carlo-realized 
@@ -254,7 +252,7 @@ class HodModelFactory(object):
             setattr(self, new_method_name, new_method_behavior)
 
 
-        def composite_gal_prof_param_func(gal_prof_param, gal_type, *args, **kwargs):
+        def composite_gal_prof_param_func(gal_prof_param, **kwargs):
             """ Method used to create the function called by the mock factory 
             when assigning profile parameters to galaxy populations. 
 
@@ -263,8 +261,8 @@ class HodModelFactory(object):
             gal_prof_param : string 
                 Name of the galaxy profile parameter. 
                 Must be equal to one of the galaxy profile parameter names.
-                Unlike `_get_gal_prof_param`, ``gal_prof_param`` need not 
-                be a profile parameter of the input ``gal_type``. See Notes section. 
+                gal_prof_param need not be a profile parameter 
+                of the input ``gal_type``. See Notes section. 
 
             gal_type : string 
                 Name of the galaxy population. 
@@ -301,10 +299,11 @@ class HodModelFactory(object):
 
                 * Case 1 - ``gal_type`` galaxies have no associated ``gal_prof_param``: the corresonding property of the halo catalog is returned. 
             
-                * Case 2 - ``gal_type`` *do* have an associated ``gal_prof_param``: the appropriate `GalProfFactory` is called. This behavior has already been set by the `_set_primary_behaviors` call to `_get_gal_prof_param`. 
+                * Case 2 - ``gal_type`` *do* have an associated ``gal_prof_param``: the appropriate `GalProfFactory` is called. 
 
             """
 
+            gal_type = kwargs['gal_type']
             method_name = gal_prof_param+'_'+gal_type
 
             if hasattr(self, method_name):
@@ -315,8 +314,8 @@ class HodModelFactory(object):
                     )
                 method_behavior = self.halo_prof_func_dict[halo_prof_param_func_key]
 
-            return method_behavior(*self.retrieve_relevant_haloprops(
-                gal_type, *args, **kwargs))
+#            return method_behavior(gal_type, **kwargs)
+            return method_behavior(**kwargs)
 
         # Use functools.partial to create a new method of HodModelFactory 
         # by calling composite_gal_prof_param_func, defined above. 
@@ -327,72 +326,7 @@ class HodModelFactory(object):
             setattr(self, gal_prof_param, func)
 
 
-    def _get_gal_prof_param(self, gal_prof_param, gal_type, *args, **kwargs):
-        """ Private method used by `_set_primary_behaviors` to assign (possibly biased) 
-        profile parameters to mock galaxies. 
-
-        Parameters 
-        ----------
-        gal_prof_param : string 
-            Name of the galaxy profile parameter. 
-            Must be equal to one of the galaxy profile parameter names.
-            For example, if the input ``gal_type`` pertains to 
-            a satellite-like population tracing a (possibly biased) NFW profile, 
-            then ``gal_prof_param`` would be ``gal_NFWmodel_conc``. 
-
-        gal_type : string 
-            Name of the galaxy population. 
-
-        prim_haloprop : array_like, optional positional argument 
-            See Notes section. 
-
-        sec_haloprop : array_like, optional positional argument 
-            See Notes section. 
-
-        mock_galaxies : object, optional keyword argument 
-            See Notes section. 
-
-        input_param_dict : optional keyword argument 
-
-        Returns
-        -------
-        gal_prof_param_func : function object 
-            Function used to map values of ``gal_prof_param`` onto 
-            ``gal_type`` galaxies. 
-
-        Notes 
-        -----
-        Must pass either ``prim_haloprop``, or ``mock_galaxies``, but not both, 
-        and not neither. If model has assembly-biased spatial positions, 
-        and if not passing ``mock_galaxies``, but pass both 
-        ``prim_haloprop`` and ``sec_haloprop``. 
-
-        `_get_gal_prof_param` is used exclusively by `_set_primary_behaviors`, 
-        which calls `_get_gal_prof_param` by passing it *only* the following 
-        two positional arguments: ``gal_prof_param`` and ``gal_type``. 
-        Thus the input of the function object returned by `_get_gal_prof_param` 
-        only takes ``mock_galaxies`` as input; 
-        these inputs can be passed either as arrays or as a collection of mock galaxies. 
-        The output of the function object returned by `_get_gal_prof_param` 
-        is the array of profile parameter values ``gal_prof_param`` 
-        that pertain to ``gal_type`` galaxies. 
-
-        """
-        if 'input_param_dict' in kwargs.keys():
-            input_param_dict = kwargs['input_param_dict']
-        else:
-            input_param_dict = {}
-
-        gal_prof_model = self.model_blueprint[gal_type]['profile']
-        gal_prof_param_func = partial(
-            gal_prof_model.gal_prof_func_dict[gal_prof_param], 
-            input_param_dict = input_param_dict)
-
-        return gal_prof_param_func(
-            *self.retrieve_relevant_haloprops(gal_type, *args, **kwargs))
-
-
-    def mc_pos(self, mock_galaxies, gal_type):
+    def mc_pos(self, mock_obj, **kwargs):
         """ Method used to generate Monte Carlo realizations of galaxy positions. 
 
         Identical to component model version from which the behavior derives, 
@@ -401,9 +335,8 @@ class HodModelFactory(object):
 
         Parameters 
         ----------
-        mock_galaxies : object 
-            Collection of mock galaxies created by 
-            `~halotools.empirical_models.mock_factory.HodMockFactory`. 
+        mock_obj : object 
+            Instance of `~halotools.empirical_models.mock_factory.HodMockFactory`. 
 
         gal_type : string 
             Name of the galaxy population. 
@@ -412,7 +345,7 @@ class HodModelFactory(object):
         -------
         x, y, z : array_like 
             Length-Ngals arrays of coordinate positions, 
-            where Ngals is the number of ``gal_type`` gals in the ``mock_galaxies``. 
+            where Ngals is the number of ``gal_type`` gals in the ``mock_obj``. 
 
         Notes 
         -----
@@ -422,31 +355,35 @@ class HodModelFactory(object):
         to create a ``mc_pos_gal_type`` method for each ``gal_type`` in the model. 
 
         """
+        gal_type = kwargs['gal_type']
         gal_prof_model = self.model_blueprint[gal_type]['profile']
-        mc_pos_function = getattr(gal_prof_model, 'mc_pos')
+        x, y, z = gal_prof_model.mc_pos(mock_obj)
 
-        x, y, z = mc_pos_function(mock_galaxies)
-
-        gal_type_slice = mock_galaxies._gal_type_indices[gal_type]
+        gal_type_slice = mock_obj._gal_type_indices[gal_type]
 
         # Re-scale the halo-centric distance by the halo boundary
-        halo_boundary_attr_name = (
-            model_defaults.host_haloprop_prefix + 
-            model_defaults.haloprop_key_dict['halo_boundary']
-            )
+        if 'halo_boundary' in gal_prof_model.haloprop_key_dict.keys():
+            halo_boundary_attr_name = (model_defaults.host_haloprop_prefix + 
+                gal_prof_model.haloprop_key_dict['halo_boundary']
+                )
+        else:
+            halo_boundary_attr_name = (
+                model_defaults.host_haloprop_prefix + 
+                model_defaults.haloprop_key_dict['halo_boundary']
+                )
 
-        x *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
-        y *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
-        z *= getattr(mock_galaxies, halo_boundary_attr_name)[gal_type_slice]
+        x *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]
+        y *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]
+        z *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]
 
         # Re-center the positions by the host halo location
         halo_xpos_attr_name = model_defaults.host_haloprop_prefix+'x'
         halo_ypos_attr_name = model_defaults.host_haloprop_prefix+'y'
         halo_zpos_attr_name = model_defaults.host_haloprop_prefix+'z'
 
-        x += getattr(mock_galaxies, halo_xpos_attr_name)[gal_type_slice]
-        y += getattr(mock_galaxies, halo_ypos_attr_name)[gal_type_slice]
-        z += getattr(mock_galaxies, halo_zpos_attr_name)[gal_type_slice]
+        x += mock_obj.galaxy_table[halo_xpos_attr_name][gal_type_slice]
+        y += mock_obj.galaxy_table[halo_ypos_attr_name][gal_type_slice]
+        z += mock_obj.galaxy_table[halo_zpos_attr_name][gal_type_slice]
 
         return x, y, z
 
@@ -554,33 +491,50 @@ class HodModelFactory(object):
         self._set_init_param_dict()
         self._set_primary_behaviors()
 
-    def _build_publication_list(self):
-        """ Method to build a list of publications 
-        associated with each component model. 
-
-        Parameters 
-        ----------
-        model_blueprint : dict 
-            Dictionary passed to the HOD factory __init__ constructor 
-            that is used to provide instructions for how to build a 
-            composite model from a set of components. 
-
-        Returns 
-        -------
-        pub_list : array_like 
+    def _build_composite_lists(self):
+        """ A composite model has several lists that are built up from 
+        the components: ``haloprop_list``, ``publications``, and 
+        ``new_haloprop_func_dict``. 
         """
+
+        haloprop_list = []
         pub_list = []
+        new_haloprop_func_dict = {}
 
-        # Loop over all galaxy types in the composite model
         for gal_type in self.gal_types:
-            gal_type_dict = self.model_blueprint[gal_type]
+            component_dict = self.model_blueprint[gal_type]
+            for component_key in component_dict.keys():
+                component_model = component_dict[component_key]
 
-            # For each galaxy type, loop over its features
-            for model_instance in gal_type_dict.values():
-                if hasattr(model_instance, 'publications'):
-                    pub_list.extend(model_instance.publications)
+                # haloprop keys
+                if hasattr(component_model, 'prim_haloprop_key'):
+                    haloprop_list.append(component_model.prim_haloprop_key)
+                if hasattr(component_model, 'sec_haloprop_key'):
+                    haloprop_list.append(component_model.sec_haloprop_key)
 
-        return list(set(pub_list))
+                # Reference list
+                if hasattr(component_model, 'publications'):
+                    pub_list.extend(component_model.publications)
+
+                # Haloprop function dictionaries
+                if hasattr(component_model, 'new_haloprop_func_dict'):
+                    dict_intersection = set(new_haloprop_func_dict).intersection(
+                        set(component_model.new_haloprop_func_dict))
+                    if dict_intersection == set():
+                        new_haloprop_func_dict = (
+                            new_haloprop_func_dict.items() + 
+                            component_model.new_haloprop_func_dict.items()
+                            )
+                    else:
+                        example_repeated_element = list(dict_intersection)[0]
+                        raise KeyError("The composite model received multiple "
+                            "component models with a new_haloprop_func_dict that use "
+                            "the %s key" % example_repeated_element)
+
+        self.haloprop_list = list(set(haloprop_list))
+        self.publications = list(set(pub_list))
+        self.new_haloprop_func_dict = new_haloprop_func_dict
+
 
 ##########################################
 
