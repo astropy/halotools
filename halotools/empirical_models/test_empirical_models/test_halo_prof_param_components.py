@@ -23,7 +23,7 @@ def test_ConcMass():
 
 	Npts = 1e3
 	mass = np.logspace(10, 15, Npts)
-	conc = default_model.conc_mass(mass)
+	conc = default_model.conc_mass(mass=mass)
 	assert np.all(conc > 1)
 	assert np.all(conc < 100)
 	assert np.all(np.diff(conc) < 0)

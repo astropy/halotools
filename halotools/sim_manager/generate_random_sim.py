@@ -77,6 +77,7 @@ class FakeSim(object):
 		vmax = np.repeat(10.**logvmaxbins, self.num_halos_per_massbin, axis=0)
 
 		conc = np.random.uniform(4, 15, self.num_halos)
+		rs = rvir/conc
 		zhalf = np.random.uniform(0, 10, self.num_halos)
 
 		x = np.random.uniform(0, self.Lbox, self.num_halos)
@@ -91,7 +92,7 @@ class FakeSim(object):
 			'upid': upid, 
 			'mvir': mvir, 
 			'rvir': rvir, 
-			'conc': conc, 
+			'rs': rs, 
 			'zhalf': zhalf, 
 			'vmax': vmax, 
 			'x': x, 

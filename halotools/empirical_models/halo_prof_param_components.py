@@ -31,12 +31,15 @@ class ConcMass(object):
     """
 
     def __init__(self, cosmology=sim_defaults.default_cosmology, 
-        redshift = sim_defaults.default_redshift):
+        redshift = sim_defaults.default_redshift, 
+        prim_haloprop_key = model_defaults.prim_haloprop_key):
 
         self.cosmology = cosmology
         self.redshift = redshift
+        self.prim_haloprop_key = prim_haloprop_key
 
-    def conc_mass(self, mass, model=model_defaults.conc_mass_relation_key, **kwargs):
+#    def conc_mass(self, mass, model=model_defaults.conc_mass_relation_key, **kwargs):
+    def conc_mass(self, **kwargs):
         """ Method used to evaluate the mean NFW concentration as a function of 
         halo mass. 
 
@@ -62,10 +65,24 @@ class ConcMass(object):
         else:
             z = self.redshift
 
+        if 'mass' in kwargs.keys():
+            mass = kwargs['mass']
+        elif 'halos' in kwargs.keys():
+            mass = kwargs['halos'][self.prim_haloprop_key]
+        elif 'galaxy_table' in kwargs.keys():
+            halo_mass_key = model_defaults.host_haloprop_prefix + self.prim_haloprop_key
+            mass = kwargs['galaxy_table'][halo_mass_key]
+
+        if 'model' not in kwargs.keys():
+            model = model_defaults.conc_mass_relation_key
+        else:
+            model = kwargs['model']
+
         if model == 'dutton_maccio14':
             return self.dutton_maccio14_conc_mass(mass, z)
         else:
-            raise KeyError("input conc-mass model is not supported")
+            raise KeyError("Input conc-mass model is not supported. "
+                "The only currently supported conc-mass model is dutton_maccio14")
 
 
     def dutton_maccio14_conc_mass(self, mass, z):
