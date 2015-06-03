@@ -12,13 +12,7 @@ There are two simple options for how to install Halotools on your machine. In bo
 Using pip
 -------------
 
-The following install option is not yet available - coming soon!
-
-Installing Halotools can be accomplished with `pip <http://www.pip-installer.org/en/latest/>`_ with a single line of code executed at terminal::
-
-	pip install halotools
-
-If you use pip to install Halotools, the package dependencies (see below) will be handled automatically. 
+The pip install option is not yet available - coming soon!
 
 Building from source 
 --------------------------
@@ -27,10 +21,15 @@ The other option for installing Halotools is to clone the source code from githu
 
 	git clone https://github.com/astropy/halotools.git
 	cd halotools
+	python setup.py build
 	python setup.py install
 
 Dependencies
 ============
+
+Whether you installed the code with pip or using setup.py, all of the package dependencies 
+will be automatically handled for you. However, if you did not install the code with 
+either of the above two methods, then you will need to be aware of the following dependencies.
 
 Core Dependencies
 ---------------------
@@ -44,6 +43,10 @@ Halotools is built upon the following core dependencies:
 - `Scipy <http://www.scipy.org/>`_: 0.15 or later
 
 - `Astropy`_: 1.0 or later
+
+- `BeautifulSoup <http://www.crummy.com/software/BeautifulSoup/>`_: For crawling the web for halo catalogs. 
+
+- `Requests <http://docs.python-requests.org/en/latest/>`_: Also for crawling the web for halo catalogs. 
 
 All of the above come pre-installed with a modern python distribution such as Anaconda. In addition to the above, Halotools also requires the h5py package for fast I/O of large simulated datasets.
 
@@ -61,9 +64,7 @@ Halotools also depends on other packages for optional features and enhanced perf
 
 - `numba <http://numba.pydata.org/>`_: For speeding up calculations using vectorization and just-in-time compiling. 
 
-- `BeautifulSoup <http://www.crummy.com/software/BeautifulSoup/>`_: For crawling the web for halo catalogs. 
-
-For each item in the list above, you only need to install the package if you wish to use the associated feature/enhancement. Halotools will import even if these dependencies are not installed. All optional and core packages can be installed with pip. 
+For each item in the list above, you only need to install the package if you wish to use the associated feature/enhancement. Halotools will import even if these dependencies are not installed. All optional and core dependencies can be installed with pip. 
 
 
 
