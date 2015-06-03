@@ -58,6 +58,15 @@ class HodMockFactory(object):
 
         self.galaxy_table = Table()
 
+        if 'populate' in kwargs.keys():
+            populate = kwargs['populate']
+        else:
+            populate = True
+        if populate is True:
+            self.populate()
+        
+
+
     def process_halo_catalog(self):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. This processing includes identifying the 
@@ -186,7 +195,7 @@ class HodMockFactory(object):
                 self.galaxy_table[gal_prof_param_key][gal_type_slice] = (
                     getattr(self.model, gal_prof_param_key)(
                         gal_type=gal_type, 
-                        galaxy_table=self.galaxy_table)
+                        galaxy_table=self.galaxy_table[gal_type_slice])
                     )
 
             # Assign positions 
@@ -199,8 +208,7 @@ class HodMockFactory(object):
             self.galaxy_table['y'][gal_type_slice], \
             self.galaxy_table['z'][gal_type_slice] = (
                 getattr(self.model, pos_method_name)(
-                    galaxy_table = self.galaxy_table, 
-                    gal_type_indices = self._gal_type_indices)
+                    self, gal_type = gal_type)
                 )
                 
         # Positions are now assigned to all populations. 
