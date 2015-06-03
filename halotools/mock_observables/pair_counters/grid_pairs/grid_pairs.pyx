@@ -2,6 +2,8 @@
 # cython: profile=True
 
 from __future__ import print_function, division
+__all__ = ['npairs', 'xy_z_npairs']
+
 import sys
 import numpy as np
 cimport cython
@@ -11,7 +13,7 @@ from libc.math cimport fabs, fmin
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def npairs(data1, data2, rbins, Lbox=[1.0,1.0,1.0], period=None):
+def npairs(data1, data2, rbins, Lbox=None, period=None):
     """
     Calculate the number of pairs with separations less than or equal to rbins[i].
     
@@ -29,8 +31,8 @@ def npairs(data1, data2, rbins, Lbox=[1.0,1.0,1.0], period=None):
         numpy array of boundaries defining the bins in which pairs are counted. 
         len(rbins) = Nrbins + 1.
     
-    Lbox: array_like
-        length of box sides.
+    Lbox: array_like, optional
+        length of cube sides which encloses data1 and data2.
     
     period: array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
@@ -44,26 +46,67 @@ def npairs(data1, data2, rbins, Lbox=[1.0,1.0,1.0], period=None):
     """
     
     #process input
-    Lbox = np.array(Lbox)
+    data1 = np.array(data1)
+    data2 = np.array(data2)
     rbins = np.array(rbins)
+    if np.all(period==np.inf): period=None
+    
+    #enforce shape requirements on input
+    if (np.shape(data1)[1]!=3) | (data1.ndim>2):
+        raise ValueError("data1 must be of shape (N,3)")
+    if (np.shape(data2)[1]!=3) | (data2.ndim>2):
+        raise ValueError("data2 must be of shape (N,3)")
+    if rbins.ndim != 1:
+        raise ValueError("rbins must be a 1D array")
+    
+    #process Lbox parameter
+    if (Lbox is None) & (period is None): 
+        data1, data2, Lbox = _enclose_in_box(data1, data2)
+    elif (Lbox is None) & (period is not None):
+        Lbox = period
+    elif np.shape(Lbox)==():
+        Lbox = np.array([Lbox]*3)
+    elif np.shape(Lbox)==(1,):
+        Lbox = np.array([Lbox[0]]*3)
+    else: Lbox = np.array(Lbox)
+    if np.shape(Lbox) != (3,):
+        raise ValueError("Lbox must be an array of length 3, or number indicating the \
+                          length of one side of a cube")
     
     #are we working with periodic boundary conditions (PBCs)?
     if period is None: 
         PBCs = False
-    elif period == True:
+    elif np.shape(period) == (3,):
+        if np.any(period!=Lbox):
+            raise ValueError("period must == Lbox") 
+    elif np.shape(period) == (1,):
+        period = np.array([period[0]]*3)
+        if np.any(period!=Lbox):
+            raise ValueError("period must == Lbox") 
+    elif isinstance(period, (int, long, float, complex)):
+        period = np.array([period]*3)
+        if np.any(period!=Lbox):
+            raise ValueError("period must == Lbox") 
+    elif (period == True) & (Lbox is not None):
         PBCs = True
         period = Lbox
+    elif (period == True) & (Lbox is None):
+        raise ValueError("If period is set to True, Lbox must be defined.")
     else: PBCs=True
     
+    #check to see we dont count pairs more than once
     if (PBCs==True) & np.any(np.max(rbins)>Lbox/2.0):
-        raise ValueError('grid_pairs pair counter cannot count pairs with seperations\
+        raise ValueError('cannot count pairs with seperations \
                           larger than Lbox/2 with PBCs')
     
     #c definitions
     cdef int nbins = len(rbins)
-    cdef np.ndarray[np.float64_t, ndim=1] crbins = np.ascontiguousarray(rbins,dtype=np.float64)
-    cdef np.ndarray[np.float64_t, ndim=1] cperiod = np.ascontiguousarray(period,dtype=np.float64)
-    cdef np.ndarray[np.int_t, ndim=1] counts = np.zeros((nbins,), dtype=np.int)
+    cdef np.ndarray[np.float64_t, ndim=1] crbins = \
+        np.ascontiguousarray(rbins,dtype=np.float64)
+    cdef np.ndarray[np.float64_t, ndim=1] cperiod = \
+        np.ascontiguousarray(period,dtype=np.float64)
+    cdef np.ndarray[np.int_t, ndim=1] counts = \
+        np.zeros((nbins,), dtype=np.int)
     
     #build grids for data1 and data2
     cell_size = np.array([np.max(rbins)]*3)
@@ -74,6 +117,7 @@ def npairs(data1, data2, rbins, Lbox=[1.0,1.0,1.0], period=None):
     crbins = crbins**2.0
     
     #print come information
+    print("running grid pairs with {0} by {1} points".format(len(data1),len(data2)))
     print("cell size= {0}".format(grid1.dL))
     print("number of cells = {0}".format(np.prod(grid1.num_divs)))
     print("PBCs= {0}".format(PBCs))
@@ -197,18 +241,58 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=[1.0,1.0,1.0], period=None)
     """
     
     #process input
-    Lbox = np.array(Lbox)
+    data1 = np.array(data1)
+    data2 = np.array(data2)
     rp_bins = np.array(rp_bins)
     pi_bins = np.array(pi_bins)
+    if np.all(period==np.inf): period=None
+    
+    #enforce shape requirements on input
+    if (np.shape(data1)[1]!=3) | (data1.ndim>2):
+        raise ValueError("data1 must be of shape (N,3)")
+    if (np.shape(data2)[1]!=3) | (data2.ndim>2):
+        raise ValueError("data2 must be of shape (N,3)")
+    if rp_bins.ndim != 1:
+        raise ValueError("rp_bins must be a 1D array")
+    if pi_bins.ndim != 1:
+        raise ValueError("pi_bins must be a 1D array")
+    
+    #process Lbox parameter
+    if (Lbox is None) & (period is None): 
+        data1, data2, Lbox = _enclose_in_box(data1, data2)
+    elif (Lbox is None) & (period is not None):
+        Lbox = period
+    elif np.shape(Lbox)==():
+        Lbox = np.array([Lbox]*3)
+    elif np.shape(Lbox)==(1,):
+        Lbox = np.array([Lbox[0]]*3)
+    else: Lbox = np.array(Lbox)
+    if np.shape(Lbox) != (3,):
+        raise ValueError("Lbox must be an array of length 3, or number indicating the \
+                          length of one side of a cube")
     
     #are we working with periodic boundary conditions (PBCs)?
     if period is None: 
-        PBCs=False
-    elif period == True:
+        PBCs = False
+    elif np.shape(period) == (3,):
+        if np.any(period!=Lbox):
+            raise ValueError("period must == Lbox") 
+    elif np.shape(period) == (1,):
+        period = np.array([period[0]]*3)
+        if np.any(period!=Lbox):
+            raise ValueError("period must == Lbox") 
+    elif isinstance(period, (int, long, float, complex)):
+        period = np.array([period]*3)
+        if np.any(period!=Lbox):
+            raise ValueError("period must == Lbox") 
+    elif (period == True) & (Lbox is not None):
         PBCs = True
         period = Lbox
+    elif (period == True) & (Lbox is None):
+        raise ValueError("If period is set to True, Lbox must be defined.")
     else: PBCs=True
     
+    #check to see we dont count pairs more than once    
     if (PBCs==True) & np.any(np.max(rp_bins)>Lbox[0:2]/2.0):
         raise ValueError('grid_pairs pair counter cannot count pairs with seperations\
                           larger than Lbox/2 with PBCs')
@@ -219,10 +303,14 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=[1.0,1.0,1.0], period=None)
     #c definitions
     cdef int nrp_bins = len(rp_bins)
     cdef int npi_bins = len(pi_bins)
-    cdef np.ndarray[np.float64_t, ndim=1] crp_bins = np.ascontiguousarray(rp_bins,dtype=np.float64)
-    cdef np.ndarray[np.float64_t, ndim=1] cpi_bins = np.ascontiguousarray(pi_bins,dtype=np.float64)
-    cdef np.ndarray[np.float64_t, ndim=1] cperiod = np.ascontiguousarray(period,dtype=np.float64)
-    cdef np.ndarray[np.int_t, ndim=2] counts = np.zeros((nrp_bins, npi_bins), dtype=np.int)
+    cdef np.ndarray[np.float64_t, ndim=1] crp_bins = \
+        np.ascontiguousarray(rp_bins,dtype=np.float64)
+    cdef np.ndarray[np.float64_t, ndim=1] cpi_bins = \
+        np.ascontiguousarray(pi_bins,dtype=np.float64)
+    cdef np.ndarray[np.float64_t, ndim=1] cperiod = \
+        np.ascontiguousarray(period,dtype=np.float64)
+    cdef np.ndarray[np.int_t, ndim=2] counts = \
+        np.zeros((nrp_bins, npi_bins), dtype=np.int)
     
     #build grids for data1 and data2
     cell_size = np.array([np.max(rp_bins),np.max(rp_bins),np.max(pi_bins)])
@@ -234,6 +322,7 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=[1.0,1.0,1.0], period=None)
     cpi_bins = cpi_bins**2.0
     
     #print come information
+    print("running grid pairs with {0} by {1} points".format(len(data1),len(data2)))
     print("cell size= {0}".format(grid1.dL))
     print("number of cells = {0}".format(np.prod(grid1.num_divs)))
     print("PBCs= {0}".format(PBCs))
@@ -402,7 +491,7 @@ cdef inline double periodic_perp_square_distance(np.float64_t x1, np.float64_t y
     dx = fabs(x1 - x2)
     dx = fmin(dx, period[0] - dx)
     dy = fabs(y1 - y2)
-    dx = fmin(dy, period[1] - dy)
+    dy= fmin(dy, period[1] - dy)
     return dx*dx+dy*dy
 
 
@@ -504,6 +593,14 @@ class cube_grid():
         ix = np.floor(x/self.dL[0]).astype(int)
         iy = np.floor(y/self.dL[1]).astype(int)
         iz = np.floor(z/self.dL[2]).astype(int)
+        
+        #take care of points right on the boundary
+        inds = np.where(ix>=self.num_divs[0])[0]
+        ix[inds]= self.num_divs[0]-1
+        inds = np.where(iy>=self.num_divs[1])[0]
+        iy[inds]= self.num_divs[1]-1
+        inds = np.where(iz>=self.num_divs[2])[0]
+        iz[inds]= self.num_divs[2]-1
 
         particle_indices = np.ravel_multi_index((ix, iy, iz),\
                                                (self.num_divs[0],\
@@ -562,3 +659,25 @@ class cube_grid():
 
         return np.unique(np.ravel_multi_index((ixgen, iygen, izgen), 
             (self.num_divs[0], self.num_divs[1], self.num_divs[2])))
+
+
+def _enclose_in_box(data1, data2):
+    """
+    build axis aligned box which encloses all points. 
+    shift points so cube's origin is at 0,0,0.
+    """
+    xmin = np.min([np.min(data1[:,0]),np.min(data2[:,0])])
+    ymin = np.min([np.min(data1[:,1]),np.min(data2[:,1])])
+    zmin = np.min([np.min(data1[:,2]),np.min(data2[:,2])])
+    xmax = np.max([np.max(data1[:,0]),np.max(data2[:,0])])
+    ymax = np.max([np.max(data1[:,1]),np.max(data2[:,1])])
+    zmax = np.max([np.max(data1[:,2]),np.max(data2[:,2])])
+    xyzmin = np.min([xmin,ymin,zmin])
+    xyzmax = np.min([xmax,ymax,zmax])-xyzmin
+    data1 = data1-xyzmin
+    data2 = data2-xyzmin
+    Lbox = np.array([xyzmax]*3)
+    
+    return data1, data2, Lbox
+    
+    
