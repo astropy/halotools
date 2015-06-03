@@ -35,7 +35,7 @@ def npairs(data1, data2, rbins, Lbox=[1.0,1.0,1.0], period=None):
     period: array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-        If none, PBCs are set to infinity.
+        If none, PBCs are set to infinity.  If True, period is set to be Lbox
             
     Returns
     -------
@@ -49,7 +49,10 @@ def npairs(data1, data2, rbins, Lbox=[1.0,1.0,1.0], period=None):
     
     #are we working with periodic boundary conditions (PBCs)?
     if period is None: 
-        PBCs=False
+        PBCs = False
+    elif period == True:
+        PBCs = True
+        period = Lbox
     else: PBCs=True
     
     if (PBCs==True) & np.any(np.max(rbins)>Lbox/2.0):
@@ -185,7 +188,7 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=[1.0,1.0,1.0], period=None)
     period: array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-        If none, PBCs are set to infinity.
+        If none, PBCs are set to infinity. If True, period is set to be Lbox
             
     Returns
     -------
@@ -201,6 +204,9 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=[1.0,1.0,1.0], period=None)
     #are we working with periodic boundary conditions (PBCs)?
     if period is None: 
         PBCs=False
+    elif period == True:
+        PBCs = True
+        period = Lbox
     else: PBCs=True
     
     if (PBCs==True) & np.any(np.max(rp_bins)>Lbox[0:2]/2.0):
@@ -556,38 +562,3 @@ class cube_grid():
 
         return np.unique(np.ravel_multi_index((ixgen, iygen, izgen), 
             (self.num_divs[0], self.num_divs[1], self.num_divs[2])))
-
-
-def shift_subvolume(idim1, num_divs, Lbox):
-    """ For a 1d index idim1 of a subvolume, compute the 
-    1d indices of subvolumes that (may) need to be shifted 
-    in order to respect PBC distances. 
-    Parameters 
-    ----------
-    idim1 : int 
-        1d index of a subvolume
-    num_divs : int 
-        Number of divisions each dimension of the box 
-        has been divided into
-    Lbox : float 
-        Size of the box. Defines the periodic boundary condition. 
-    Returns 
-    -------
-    idim2_move : int 
-        1d index of the subvolume that needs to be shifted
-    dim2_move : float 
-        Distance by which the subvolume needs to be shifted, 
-        including sign. 
-    """
-
-    if idim1==0:
-        idim2_move = num_divs-1
-        dim2_move = -Lbox
-    elif idim1==num_divs-1:
-        idim2_move = 0
-        dim2_move = Lbox
-    else:
-        idim2_move = -1
-        dim2_move = 0
-
-    return idim2_move, dim2_move
