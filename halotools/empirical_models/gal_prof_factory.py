@@ -385,23 +385,23 @@ class GalProfFactory(object):
 
         return x, y, z
 
-    def mc_pos(self, mock_galaxies):
+    def mc_pos(self, mock_obj):
         """ Method to generate random, three-dimensional, 
         halo-centric positions of galaxies. 
 
         Parameters 
         ----------
-        mock_galaxies : object 
+        mock_obj : object 
             Instance of `~halotools.empirical_models.HodMockFactory` 
 
         seed : int, optional keyword argument 
             Random number seed used in Monte Carlo realization
         """
         # get the appropriate slice for the gal_type of this component model
-        gal_type_slice = mock_galaxies._gal_type_indices[self.gal_type]
-        x = getattr(mock_galaxies, 'x')[gal_type_slice]
-        y = getattr(mock_galaxies, 'y')[gal_type_slice]
-        z = getattr(mock_galaxies, 'z')[gal_type_slice]
+        gal_type_slice = mock_obj._gal_type_indices[self.gal_type]
+        x = mock_obj.galaxy_table['x'][gal_type_slice]
+        y = mock_obj.galaxy_table['y'][gal_type_slice]
+        z = mock_obj.galaxy_table['z'][gal_type_slice]
 
         # For the case of a trivial profile model, return the trivial result
         if isinstance(self.halo_prof_model, 
@@ -414,8 +414,7 @@ class GalProfFactory(object):
 
             # extract all relevant profile parameters from the mock
             profile_params = (
-                [getattr(mock_galaxies, 
-                    model_defaults.host_haloprop_prefix+profile_param_key)[gal_type_slice] 
+                [mock_obj.galaxy_table[model_defaults.host_haloprop_prefix+profile_param_key][gal_type_slice] 
                 for profile_param_key in self.halo_prof_model.prof_param_keys]
                 )
 
