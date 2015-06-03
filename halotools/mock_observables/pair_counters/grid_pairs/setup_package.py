@@ -4,6 +4,7 @@ from distutils.extension import Extension
 import numpy as np
 import os
 
+
 dir = os.path.dirname(__file__)
 if dir=='':
     dir='./'
