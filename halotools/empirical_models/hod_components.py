@@ -56,25 +56,74 @@ class OccupationComponent(object):
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
+        if 'param_dict' in kwargs.keys():
+            self.param_dict = kwargs['param_dict']
+        else:
+            self.param_dict = {}
 
-    @abstractmethod
-    def _set_param_dict(self):
-        """ Builds the parameter dictionary, whose keys are names of MCMC parameters, 
-        and values are used in `mc_occupation` and `mean_occupation`. 
-        Dictionary qarameter names will have the `gal_type` string with a leading underscore. 
-        This protects against the case where multiple populations might share some 
-        component behavior. 
-        """
-        raise NotImplementedError("All subclasses of OccupationComponent " 
-            "must implement a _set_param_dict method. ")
+    def mc_occupation(self, **kwargs):
+        """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
+        Assumes gal_type galaxies obey Poisson statistics. 
 
-    @abstractmethod
-    def mc_occupation(self):
-        """ Primary method used to generate Monte Carlo realizations 
-        of an occupation model. 
+        Parameters
+        ----------        
+        halo_mass : array, optional
+            array of :math:`M_{\\mathrm{vir}}`-like variable of halos in catalog
+
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
+
+        input_param_dict : dict, optional
+            dictionary of parameters governing the model. If not passed, 
+            values bound to ``self`` will be chosen. 
+
+        Returns
+        -------
+        mc_abundance : array
+            array giving the number of satellite-type galaxies per input halo. 
+    
         """
-        raise NotImplementedError("All subclasses of OccupationComponent " 
-            "must implement a mc_occupation method. ")
+
+        if 'input_param_dict' not in kwargs.keys():
+            param_dict = self.param_dict 
+        else:
+            param_dict = kwargs['input_param_dict']
+
+        if 'galaxy_table' in kwargs.keys():
+            mass = kwargs['galaxy_table'][self.prim_haloprop_key]
+        elif 'halos' in kwargs.keys():
+            mass = kwargs['halos'][self.prim_haloprop_key]
+        elif 'mass' in kwargs.keys():
+            mass = kwargs['mass']
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
+        else:
+            raise KeyError("Must pass one of the following keyword arguments to mc_occupation:\n"
+                "``halos``, ``mass``, ``prim_haloprop``, or ``galaxy_table``")
+ 
+        if 'seed' in kwargs.keys():
+            np.random.seed(seed=kwargs['seed'])
+        else:
+            np.random.seed(seed=None)
+
+        if self.occupation_bound == 1:
+            mc_generator = np.random.random(aph_len(mass))
+            mc_abundance = np.where(mc_generator < self.mean_occupation(**kwargs), 1, 0)
+            return mc_abundance
+
+        elif self.occupation_bound == float("inf"):
+            expectation_values = self.mean_occupation(**kwargs)
+            # The scipy built-in Poisson number generator raises an exception 
+            # if its input is zero, so here we impose a simple workaround
+            expectation_values = np.where(expectation_values <=0, 
+                model_defaults.default_tiny_poisson_fluctuation, expectation_values)
+
+            mc_abundance = poisson.rvs(expectation_values)
+            return mc_abundance
+        else:
+            raise KeyError("The only permissible values of occupation_bound for instances "
+                "of OccupationComponent are unity and infinity")
+
 
     @abstractmethod
     def mean_occupation(self):
@@ -161,12 +210,12 @@ class Kravtsov04Cens(OccupationComponent):
             input_param_dict = kwargs['input_param_dict']
         else:
             input_param_dict = None
-        self._set_param_dict(input_param_dict)
+        self._initialize_param_dict(input_param_dict)
 
         self.publications = []
 
 
-    def _set_param_dict(self, input_param_dict):
+    def _initialize_param_dict(self, input_param_dict):
         """ Private method used to retrieve the 
         dictionary governing the parameters of the model. 
         """
@@ -241,65 +290,6 @@ class Kravtsov04Cens(OccupationComponent):
             /param_dict[self.sigma_logM_key]))
 
         return mean_ncen
-
-    def mc_occupation(self, **kwargs):
-        """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
-
-        Assumes a nearest integer distribution for the central occupation function, 
-        where the first moment is governed by `mean_occupation`, 
-        and the per-halo occupations are bounded by unity. 
-
-        Parameters
-        ----------        
-        mass : array, optional keyword argument
-            array of :math:`M_{\\mathrm{vir}}` of halos in catalog
-
-        halos : object, optional keyword argument 
-            Data table storing halo catalog. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing mock galaxy catalog. 
-
-        input_param_dict : dict, optional keyword argument
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
-
-        seed : int, optional keyword argument
-            Random number seed used by the ``mc_generator``. Default is None. 
-            Used exclusively to make deterministic testing possible. 
-
-        Returns
-        -------
-        mc_abundance : array
-            array with same length as input *halo_mass*,  
-            returning the number of central galaxies in each input halo. 
-            Values will be either 0 or 1. 
-    
-        """
-        if 'input_param_dict' not in kwargs.keys():
-            param_dict = self.param_dict 
-        else:
-            param_dict = kwargs['input_param_dict']
-
-        if 'galaxy_table' in kwargs.keys():
-            mass = kwargs['galaxy_table'][self.prim_haloprop_key]
-        elif 'halos' in kwargs.keys():
-            mass = kwargs['halos'][self.prim_haloprop_key]
-        elif 'mass' in kwargs.keys():
-            mass = kwargs['mass']
-        else:
-            raise KeyError("Must pass one of the following keyword arguments to mc_occupation:\n"
-                "``halos``, ``mass``, or ``galaxy_table``")
- 
-        if 'seed' in kwargs.keys():
-            np.random.seed(seed=kwargs['seed'])
-        else:
-            np.random.seed(seed=None)
-
-        mc_generator = np.random.random(aph_len(mass))
-        mc_abundance = np.where(mc_generator < self.mean_occupation(**kwargs), 1, 0)
-
-        return mc_abundance
 
 
     def get_published_parameters(self, threshold, publication='Zheng07'):
@@ -416,7 +406,7 @@ class Kravtsov04Sats(OccupationComponent):
             input_param_dict = kwargs['input_param_dict']
         else:
             input_param_dict = None
-        self._set_param_dict(input_param_dict)
+        self._initialize_param_dict(input_param_dict)
 
         if 'central_occupation_model' in kwargs.keys():
             central_occupation_model = kwargs['central_occupation_model']
@@ -426,7 +416,7 @@ class Kravtsov04Sats(OccupationComponent):
 
         self.publications = []
 
-    def _set_param_dict(self, input_param_dict):
+    def _initialize_param_dict(self, input_param_dict):
 
         # set attribute names for the keys so that the methods know 
         # how to evaluate their functions
@@ -535,60 +525,6 @@ class Kravtsov04Sats(OccupationComponent):
         return mean_nsat
 
 
-    def mc_occupation(self, **kwargs):
-        """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
-        Assumes gal_type galaxies obey Poisson statistics. 
-
-        Parameters
-        ----------        
-        halo_mass : array, optional
-            array of :math:`M_{\\mathrm{vir}}`-like variable of halos in catalog
-
-        halos : object, optional keyword argument 
-            Data table storing halo catalog. 
-
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
-
-        Returns
-        -------
-        mc_abundance : array
-            array giving the number of satellite-type galaxies per input halo. 
-    
-        """
-
-        if 'input_param_dict' not in kwargs.keys():
-            param_dict = self.param_dict 
-        else:
-            param_dict = kwargs['input_param_dict']
-
-        if 'galaxy_table' in kwargs.keys():
-            mass = kwargs['galaxy_table'][self.prim_haloprop_key]
-        elif 'halos' in kwargs.keys():
-            mass = kwargs['halos'][self.prim_haloprop_key]
-        elif 'mass' in kwargs.keys():
-            mass = kwargs['mass']
-        else:
-            raise KeyError("Must pass one of the following keyword arguments to mc_occupation:\n"
-                "``halos``, ``mass``, or ``galaxy_table``")
- 
-        logM = np.log10(mass)
-
-        expectation_values = self.mean_occupation(**kwargs)
-        # The scipy built-in Poisson number generator raises an exception 
-        # if its input is zero, so here we impose a simple workaround
-        expectation_values = np.where(expectation_values <=0, 
-            model_defaults.default_tiny_poisson_fluctuation, expectation_values)
-
-        if 'seed' in kwargs.keys():
-            np.random.seed(seed=kwargs['seed'])
-        else:
-            np.random.seed(seed=None)
-
-        mc_abundance = poisson.rvs(expectation_values)
-
-        return mc_abundance
 
     def get_published_parameters(self, threshold, publication='Zheng07'):
         """
