@@ -19,7 +19,7 @@ __all__ = ['SmHmModel', 'Moster13SmHm', 'LogNormalScatterModel']
 
 @six.add_metaclass(ABCMeta)
 class SmHmModel(object):
-    """ Abstract container class used to provide a template 
+    """ Abstract container class used as a template 
     for how to build a stellar-to-halo-mass-style model.
 
     """
@@ -96,14 +96,14 @@ class SmHmModel(object):
 
 
         # Interpret the inputs to determine the appropriate array of masses
-        if 'mock_galaxies' in kwargs.keys():
-            kwargs['mass'] = kwargs['mock_galaxies'][self.prim_haloprop_key]
+        if 'galaxy_table' in kwargs.keys():
+            kwargs['mass'] = kwargs['galaxy_table'][self.prim_haloprop_key]
         elif 'mass' not in kwargs.keys():
             if 'halos' in kwargs.keys():
                 kwargs['mass'] = kwargs['halos'][self.prim_haloprop_key]
             else:
                 raise SyntaxError("You must either pass an input ``mass`` keyword, "
-                    "an input ``mock_galaxies`` keyword, "
+                    "an input ``galaxy_table`` keyword, "
                     " or an input ``halos`` keyword. \n Received none of these.")
 
         if 'include_scatter' in kwargs.keys():
