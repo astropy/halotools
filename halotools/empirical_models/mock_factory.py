@@ -69,8 +69,10 @@ class MockFactory(object):
         self.model = composite_model
         self.gal_types = self.model.gal_types
 
+        # Create a list of halo properties that will be inherited by the mock galaxies
         self.additional_haloprops = model_defaults.haloprop_list
-        self.additional_haloprops.extend(self.model.haloprop_list)
+        if hasattr(self.model, 'haloprop_list'):
+            self.additional_haloprops.extend(self.model.haloprop_list)
         if 'additional_haloprops' in kwargs.keys():
             if kwargs['additional_haloprops'] == 'all':
                 self.additional_haloprops.extend(self.halos.keys())
@@ -117,8 +119,6 @@ class HodMockFactory(MockFactory):
 
         self.process_halo_catalog()
 
-        self.galaxy_table = Table()
-
         if populate is True:
             self.populate()        
 
@@ -131,18 +131,21 @@ class HodMockFactory(MockFactory):
         and possibly creating new halo properties. 
         """
 
-        #Make cuts on halo catalog
-        # select host halos only, since this is an HOD-style model
+        ################ Make cuts on halo catalog ################
+        # Select host halos only, since this is an HOD-style model
         host_halo_cut = (self.halos['upid']==-1)
         self.halos = self.halos[host_halo_cut]
-        # make mvir completeness cut
+
+        # make a conservative mvir completeness cut 
+        # This can be relaxed by changing sim_defaults.Num_ptcl_requirement
         cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
         mass_cut = (self.halos['mvir'] > cutoff_mvir)
         self.halos = self.halos[mass_cut]
 
-        # Make any additional cut requested by the composite model
+        # Make any additional cuts requested by the composite model
         if hasattr(self.model, 'halocut_funcobj'):
             self.halos = self.model.halocut_funcobj(halos=self.halos)
+        ############################################################
 
         ### Create new columns of the halo catalog, if applicable
         for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
@@ -376,11 +379,6 @@ class SubhaloMockFactory(object):
 
         super(SubhaloMockFactory, self).__init__(snapshot, composite_model, **kwargs)
 
-        if 'halocut_funcobj' in kwargs.keys():
-            self.halocut_funcobj = kwargs['halocut_funcobj']
-
-        self.galaxy_table = Table() 
-
         # Pre-compute any additional halo properties required by the model
         self.process_halo_catalog()
         self.precompute_galprops()
@@ -393,15 +391,15 @@ class SubhaloMockFactory(object):
         the mock object. 
         """
 
-        #Make cuts on halo catalog
-        if hasattr(self, 'subhalo_cut_funcobj'):
-            mask = self.subhalo_cut_funcobj(self.halos)
-            self.halos = self.halos[mask]
+        # Make any cuts on the halo catalog requested by the composite model
+        if hasattr(self.model, 'halocut_funcobj'):
+            self.halos = self.model.halocut_funcobj(halos=self.halos)
 
         ### Create new columns of the halo catalog, if applicable
-        for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
-            self.halos[new_haloprop_key] = new_haloprop_func(self.halos)
-            self.additional_haloprops.append(new_haloprop_key)
+        if hasattr(self.model, 'new_haloprop_func_dict'):
+            for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
+                self.halos[new_haloprop_key] = new_haloprop_func(halos=self.halos)
+                self.additional_haloprops.append(new_haloprop_key)
 
 
     def precompute_galprops(self):
