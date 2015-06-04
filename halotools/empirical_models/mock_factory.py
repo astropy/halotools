@@ -67,7 +67,8 @@ class MockFactory(object):
         self.halos = snapshot.halos
         self.particles = snapshot.particles
         self.model = composite_model
-        self.gal_types = self.model.gal_types
+        if hasattr(self.model, 'gal_types'):
+            self.gal_types = self.model.gal_types
 
         # Create a list of halo properties that will be inherited by the mock galaxies
         self.additional_haloprops = model_defaults.haloprop_list
@@ -338,7 +339,7 @@ class HodMockFactory(MockFactory):
             self.galaxy_table[key] = np.zeros(self.Ngals, dtype = 'f4')
 
 
-class SubhaloMockFactory(object):
+class SubhaloMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a 
     population of mock galaxies.
 
@@ -391,7 +392,7 @@ class SubhaloMockFactory(object):
 
         ### Create new columns of the halo catalog, if applicable
         if hasattr(self.model, 'new_haloprop_func_dict'):
-            for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
+            for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
                 self.halos[new_haloprop_key] = new_haloprop_func(halos=self.halos)
                 self.additional_haloprops.append(new_haloprop_key)
 
