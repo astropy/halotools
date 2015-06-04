@@ -140,6 +140,10 @@ class HodMockFactory(MockFactory):
         mass_cut = (self.halos['mvir'] > cutoff_mvir)
         self.halos = self.halos[mass_cut]
 
+        # Make any additional cut requested by the composite model
+        if hasattr(self.model, 'halocut_funcobj'):
+            self.halos = self.model.halocut_funcobj(halos=self.halos)
+
         ### Create new columns of the halo catalog, if applicable
         for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
             if new_haloprop_key in self.halos.keys():
@@ -370,21 +374,7 @@ class SubhaloMockFactory(object):
 
         """
 
-        # Bind the inputs to the mock object
-        self.snapshot = snapshot
-        self.halos = snapshot.halos
-        self.particles = snapshot.particles
-        self.model = composite_model
-        self.gal_types = self.model.gal_types
-
-        self.additional_haloprops = model_defaults.haloprop_list
-        self.additional_haloprops.extend(self.model.haloprop_list)
-        if 'additional_haloprops' in kwargs.keys():
-            if kwargs['additional_haloprops'] == 'all':
-                self.additional_haloprops.extend(self.halos.keys())
-            else:
-                self.additional_haloprops.extend(kwargs['additional_haloprops'])
-        self.additional_haloprops = list(set(self.additional_haloprops))
+        super(SubhaloMockFactory, self).__init__(snapshot, composite_model, **kwargs)
 
         if 'halocut_funcobj' in kwargs.keys():
             self.halocut_funcobj = kwargs['halocut_funcobj']
