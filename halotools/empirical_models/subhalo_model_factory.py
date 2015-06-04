@@ -91,45 +91,66 @@ class SubhaloModelFactory(ModelFactory):
 
         super(SubhaloModelFactory, self).__init__(input_model_blueprint, **kwargs)
 
-        self.model_blueprint = self.interpret_input_model_blueprint()
+        self.model_blueprint, self.galprop_list = self._interpret_input_model_blueprint()
 
 
-    def interpret_input_model_blueprint(self):
+    def _interpret_input_model_blueprint(self):
 
         model_blueprint = copy(self._input_model_blueprint)
 
         if 'mock_factory' not in model_blueprint.keys():
             model_blueprint['mock_factory'] = mock_factory.SubhaloMockFactory
 
-        galprop_list = [key for key in model_blueprint.keys() if key is not 'mock_factory']
+        unordered_galprop_list = [key for key in model_blueprint.keys() if key is not 'mock_factory']
 
-        # If necessary, put the galprop_list into its proper order
+        # If necessary, put the unordered_galprop_list into its proper order
         # Note that this is only robust to the case of two-property composite models
         # For more complicated models, a smarter algorithm will be necessary, 
         # so we raise an exception to protect against that case
-        if aph_len(galprop_list) > 2:
+        if aph_len(unordered_galprop_list) > 2:
             raise KeyError("SubhaloModelFactory does not support assignment of "
                 "more than two galaxy properties")
 
         temp_required_galprop_dict = {}
-        for galprop in galprop_list:
+        for galprop in unordered_galprop_list:
             component_model = self.model_blueprint[galprop]
             if hasattr(component_model, 'required_galprops'):
                 temp_required_galprop_dict[galprop] = component_model.required_galprops
 
         if len(temp_required_galprop_dict) == 0:
-            self.galprop_list = galprop_list
+            galprop_list = unordered_galprop_list
             
         elif len(temp_required_galprop_dict) == 1:
-            self.galprop_list = temp_required_galprop_dict.values()[0]
-            self.galprop_list.extend(temp_required_galprop_dict.keys()[0])
+            galprop_list = temp_required_galprop_dict.values()[0]
+            galprop_list.extend(temp_required_galprop_dict.keys()[0])
         else:
             raise KeyError("Cannot resolve model interdependencies:\n"
                 "Both component models depend on each other simultaneously\n"
                 "This composite model cannot be decomposed in a sensible way")
 
-        return model_blueprint
+        return model_blueprint, galprop_list
 
+    def _set_primary_behaviors(self):
+        """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
+        that will be used by the outside world.  
+
+        Notes 
+        -----
+        The new methods created here are given standardized names, 
+        for consistent communication with the rest of the package. 
+        This consistency is particularly important for mock-making, 
+        so that the `SubhaloModelFactory` can always call the same functions 
+        regardless of the complexity of the model. 
+
+        The behaviors of the methods created here are defined elsewhere; 
+        `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
+        """
+
+        for galprop in self.galprop_list:
+            component_model = self.model_blueprint[galprop]
+            new_method_name = galprop + '_model_func'
+            new_method_behavior = component_model.__call__
+            setattr(self, new_method_name, new_method_behavior)
 
 
 
