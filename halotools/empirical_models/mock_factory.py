@@ -404,7 +404,6 @@ class SubhaloMockFactory(object):
 
     def precompute_galprops(self):
 
-        self.galaxy_table = Table()
         for key in self.additional_haloprops:
             newkey = model_defaults.host_haloprop_prefix + key
             self.galaxy_table[newkey] = self.halos[key]
@@ -414,6 +413,13 @@ class SubhaloMockFactory(object):
             oldkey = model_defaults.host_haloprop_prefix + newkey
             self.galaxy_table[newkey] = self.galaxy_table[oldkey]
 
+        for galprop in self.model.galprop_list:
+            component_model = self.model.model_blueprint[galprop]
+            if hasattr(component_model, 'gal_type_func'):
+                newkey = galprop + '_gal_type'
+                self.galaxy_table[newkey] = (
+                    component_model.gal_type_func(galaxy_table=self.galaxy_table)
+                    )
 
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
@@ -443,7 +449,7 @@ class SubhaloMockFactory(object):
             
             model_func_name = galprop_key + 'model_func'
             model_func = getattr(self.model, model_func_name)
-            self.galaxy_table[galprop_key] = model_func(mock_galaxies=self.galaxy_table)
+            self.galaxy_table[galprop_key] = model_func(galaxy_table=self.galaxy_table)
 
 
 
