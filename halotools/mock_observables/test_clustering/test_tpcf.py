@@ -3,7 +3,7 @@
 from __future__ import division, print_function
 import numpy as np
 import sys
-from ..tpcf import tpcf
+from ..clustering import tpcf
 
 __all__=['test_TPCF_auto', 'test_TPCF_estimator', 'test_TPCF_sample_size_limit',\
          'test_TPCF_randoms', 'test_TPCF_period_API']
