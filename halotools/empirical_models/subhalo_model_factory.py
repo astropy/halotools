@@ -19,7 +19,9 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from . import occupation_helpers as occuhelp
 from . import model_defaults
 from . import mock_factory
+
 from ..utils.array_utils import array_like_length as aph_len
+from ..sim_manager.read_nbody import ProcessedSnapshot
 
 @six.add_metaclass(ABCMeta)
 class ModelFactory(object):
@@ -93,6 +95,8 @@ class SubhaloModelFactory(ModelFactory):
 
         self.model_blueprint, self.galprop_list = self._interpret_input_model_blueprint()
 
+        self._set_primary_behaviors()
+
 
     def _interpret_input_model_blueprint(self):
 
@@ -113,7 +117,7 @@ class SubhaloModelFactory(ModelFactory):
 
         temp_required_galprop_dict = {}
         for galprop in unordered_galprop_list:
-            component_model = self.model_blueprint[galprop]
+            component_model = model_blueprint[galprop]
             if hasattr(component_model, 'required_galprops'):
                 temp_required_galprop_dict[galprop] = component_model.required_galprops
 

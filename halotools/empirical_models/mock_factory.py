@@ -417,18 +417,6 @@ class SubhaloMockFactory(object):
 
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
-
-        Workhorse method of `SubhaloMockFactory`. First, 
-        `allocate_memory` is called to bind empty arrays to ``self``, 
-        into which mock galaxy properties will be stored. 
-        For every ``gal_type``, each of its component models are called 
-        to assign properties to the galaxies; assignment proceeds by 
-        filling the empty arrays created by `allocate_memory`. 
-        Optionally, the resulting collection of arrays 
-        can be bundled into an Astropy Table, for convenience; 
-        for MCMC applications, this bundling may impact performance, 
-        and is not recommended. 
-
         """
         for galprop_key in self.model.galprop_list:
             
