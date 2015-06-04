@@ -5,12 +5,13 @@ This module exists for development purposes only -
 eventually its contents will be cannibalized by a general model factory module. 
 """
 
-__all__ = ['SubhaloModelFactory']
+__all__ = ['ModelFactory', 'SubhaloModelFactory']
 __author__ = ['Andrew Hearin']
 
 from functools import partial 
 
 import numpy as np
+from copy import copy
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -20,7 +21,51 @@ from . import model_defaults
 from . import mock_factory
 from ..utils.array_utils import array_like_length as aph_len
 
-class SubhaloModelFactory(object):
+@six.add_metaclass(ABCMeta)
+class ModelFactory(object):
+    """ Abstract container class used to build 
+    any composite model of the galaxy-halo connection. 
+    """
+
+    def __init__(self, input_model_blueprint, **kwargs):
+
+        # Bind the model-building instructions to the composite model
+        self._input_model_blueprint = input_model_blueprint
+
+    def populate_mock(self, **kwargs):
+        """ Method used to populate a simulation using the model. 
+
+        After calling this method, ``self`` will have a new ``mock`` attribute, 
+        which has a ``galaxy_table`` bound to it containing the Monte Carlo 
+        realization of the model. 
+
+        Parameters 
+        ----------
+        snapshot : object, optional keyword argument
+            Class instance of `~halotools.sim_manager.ProcessedSnapshot`. 
+            This object contains the halo catalog and its metadata.  
+
+        """
+
+        if hasattr(self, 'mock'):
+            self.mock.populate()
+        else:
+            if 'snapshot' in kwargs.keys():
+                snapshot = kwargs['snapshot']
+                # we need to delete the 'snapshot' keyword 
+                # or else the call to mock_factory below 
+                # will pass multiple snapshot arguments
+                del kwargs['snapshot']
+            else:
+                snapshot = ProcessedSnapshot(**kwargs)
+
+            mock_factory = self.model_blueprint['mock_factory']
+            mock = mock_factory(snapshot, self, **kwargs)
+            self.mock = mock
+
+
+
+class SubhaloModelFactory(ModelFactory):
     """ Class used to build any model of the galaxy-halo connection 
     in which there is a one-to-one correspondence between subhalos and galaxies.  
 
@@ -44,12 +89,64 @@ class SubhaloModelFactory(object):
 
         """
 
-        # Bind the model-building instructions to the composite model
-        self.model_blueprint = input_model_blueprint
+        super(SubhaloModelFactory, self).__init__(input_model_blueprint, **kwargs)
 
-        if 'mock_factory' not in self.model_blueprint.keys():
-            self.model_blueprint['mock_factory'] = mock_factory.SubhaloMockFactory
+        self.model_blueprint = self.interpret_input_model_blueprint()
 
-        galprop_key_list = [key for key in self.model_blueprint.keys() if key is not 'mock_factory']
-        self.galprop_keys = galprop_key_list
-        # galprop_keys should be an ordered list of strings of the properties to assign 
+
+    def interpret_input_model_blueprint(self):
+
+        model_blueprint = copy(self._input_model_blueprint)
+
+        if 'mock_factory' not in model_blueprint.keys():
+            model_blueprint['mock_factory'] = mock_factory.SubhaloMockFactory
+
+        galprop_list = [key for key in model_blueprint.keys() if key is not 'mock_factory']
+
+        # If necessary, put the galprop_list into its proper order
+        # Note that this is only robust to the case of two-property composite models
+        # For more complicated models, a smarter algorithm will be necessary, 
+        # so we raise an exception to protect against that case
+        if aph_len(galprop_list) > 2:
+            raise KeyError("SubhaloModelFactory does not support assignment of "
+                "more than two galaxy properties")
+
+        temp_required_galprop_dict = {}
+        for galprop in galprop_list:
+            component_model = self.model_blueprint[galprop]
+            if hasattr(component_model, 'required_galprops'):
+                temp_required_galprop_dict[galprop] = component_model.required_galprops
+
+        if len(temp_required_galprop_dict) == 0:
+            self.galprop_list = galprop_list
+            
+        elif len(temp_required_galprop_dict) == 1:
+            self.galprop_list = temp_required_galprop_dict.values()[0]
+            self.galprop_list.extend(temp_required_galprop_dict.keys()[0])
+        else:
+            raise KeyError("Cannot resolve model interdependencies:\n"
+                "Both component models depend on each other simultaneously\n"
+                "This composite model cannot be decomposed in a sensible way")
+
+        return model_blueprint
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
