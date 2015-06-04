@@ -364,16 +364,10 @@ class SubhaloMockFactory(object):
             property of their host halo. The corresponding mock galaxy attribute name 
             will be pre-pended by ``halo_``. 
 
-        subhalo_cut_funcobj : function object, optional 
+        halocut_funcobj : function object, optional 
             Function object used to place a cut on the input subhalo catalog. 
             Input must be a length-Nsubhalos structured numpy array or astropy table; 
             output must be a length-Nsubhalos boolean array that will be used as a mask. 
-
-        Notes 
-        -----
-        Docs for the test suite for mocks made from 
-        any pre-loaded HOD-style models can be seen at 
-        `~halotools.empirical_models.test_empirical_models.test_preloaded_hod_mocks`. 
 
         """
 
@@ -435,19 +429,10 @@ class SubhaloMockFactory(object):
         for MCMC applications, this bundling may impact performance, 
         and is not recommended. 
 
-        Parameters 
-        ----------
-        create_astropy_table : boolean, optional 
-            If True, the `bundle_into_table` method will be called 
-            at the end of executing `populate`. If False, 
-            `bundle_into_table` method will not be called. 
-            If ``create_astropy_table`` is not passed at all, 
-            the behavior will be determined by ``self.create_astropy_table``, 
-            set during instantation by the class constructor. 
         """
-        for galprop_key in self.model.galprop_keys:
+        for galprop_key in self.model.galprop_list:
             
-            model_func_name = galprop_key + 'model_func'
+            model_func_name = galprop_key + '_model_func'
             model_func = getattr(self.model, model_func_name)
             self.galaxy_table[galprop_key] = model_func(galaxy_table=self.galaxy_table)
 
