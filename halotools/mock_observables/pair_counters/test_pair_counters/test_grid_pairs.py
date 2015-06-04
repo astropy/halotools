@@ -2,7 +2,8 @@
 
 import numpy as np
 from ..pairs import npairs as simp_npairs
-from ..grid_pairs import npairs, xy_z_npairs
+from ..pairs import wnpairs as simp_wnpairs
+from ..grid_pairs import npairs, xy_z_npairs, wnpairs, xy_z_wnpairs, jnpairs
 from time import time
 import pstats, cProfile
 
@@ -124,5 +125,69 @@ def test_xy_z_npairs_periodic():
     assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
 
 
+def test_wnpairs_periodic():
+    
+    Npts = 1e3
+    Lbox = [1.0,1.0,1.0]
+    period = np.array(Lbox)
+    
+    x = np.random.uniform(0, Lbox[0], Npts)
+    y = np.random.uniform(0, Lbox[1], Npts)
+    z = np.random.uniform(0, Lbox[2], Npts)
+    data1 = np.vstack((x,y,z)).T
+    weights1 = np.random.random(Npts)
+    
+    rbins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
 
+    result = wnpairs(data1, data1, rbins, Lbox=Lbox, period=period, weights1=weights1, weights2=weights1)
+    
+    test_result = simp_wnpairs(data1, data1, rbins, period=period, weights1=weights1, weights2=weights1)
+
+    assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
+
+
+def test_wnpairs():
+    
+    Npts = 1e3
+    Lbox = [1.0,1.0,1.0]
+    period = np.array(Lbox)
+    
+    x = np.random.uniform(0, Lbox[0], Npts)
+    y = np.random.uniform(0, Lbox[1], Npts)
+    z = np.random.uniform(0, Lbox[2], Npts)
+    data1 = np.vstack((x,y,z)).T
+    weights1 = np.random.random(Npts)
+    
+    rbins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+
+    result = wnpairs(data1, data1, rbins, Lbox=Lbox, period=None, weights1=weights1, weights2=weights1)
+    
+    test_result = simp_wnpairs(data1, data1, rbins, period=None, weights1=weights1, weights2=weights1)
+
+    assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
+
+
+def test_jnpairs_periodic():
+    
+    Npts = 1e3
+    Lbox = [1.0,1.0,1.0]
+    period = np.array(Lbox)
+    
+    x = np.random.uniform(0, Lbox[0], Npts)
+    y = np.random.uniform(0, Lbox[1], Npts)
+    z = np.random.uniform(0, Lbox[2], Npts)
+    data1 = np.vstack((x,y,z)).T
+    weights1 = np.random.random(Npts)
+    jtags1 = np.sort(np.random.random_integers(1,10,size=Npts))
+    
+    rbins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+
+    result = jnpairs(data1, data1, rbins, Lbox=Lbox, period=period,\
+                     jtags1=jtags1, jtags2=jtags1, N_samples=10,\
+                     weights1=weights1, weights2=weights1)
+    
+    print(result)
+
+    assert result.ndim==2, 'result is the wrong dimension'
+    assert np.shape(result)==(11,6), 'result is the wrong shape'
 
