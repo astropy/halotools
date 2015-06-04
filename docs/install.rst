@@ -7,7 +7,7 @@ Package Installation
 Installing Halotools
 ====================
 
-There are two simple options for how to install Halotools on your machine. In both cases, once you install the package you will be able to import the Halotools package from a Python terminal running from any location on your machine.
+There are two simple options for how to install Halotools on your machine. In both cases, once you install the package you will be able to import the Halotools package from a python terminal running from any location on your machine.
 
 Using pip
 -------------

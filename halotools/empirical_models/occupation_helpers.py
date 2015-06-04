@@ -320,7 +320,7 @@ def aph_spline(table_abcissa, table_ordinates, k=0):
         if aph_len(table_ordinates) != 1:
             raise TypeError("In spline_degree=0 edge case, "
                 "table_abcissa and table_abcissa must be 1-element arrays")
-        return lambda x : table_ordinates[0]
+        return lambda x : np.zeros(aph_len(x)) + table_ordinates[0]
     else:
         spline_function = spline(table_abcissa, table_ordinates, k=k)
         return spline_function
