@@ -97,7 +97,7 @@ class SmHmModel(object):
 
         # Interpret the inputs to determine the appropriate array of masses
         if 'galaxy_table' in kwargs.keys():
-            kwargs['mass'] = kwargs['galaxy_table'][self.prim_haloprop_key]
+            kwargs['mass'] = kwargs['galaxy_table'][model_defaults.host_haloprop_prefix + self.prim_haloprop_key]
         elif 'mass' not in kwargs.keys():
             if 'halos' in kwargs.keys():
                 kwargs['mass'] = kwargs['halos'][self.prim_haloprop_key]

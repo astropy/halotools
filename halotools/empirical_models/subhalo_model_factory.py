@@ -94,6 +94,8 @@ class SubhaloModelFactory(ModelFactory):
         super(SubhaloModelFactory, self).__init__(input_model_blueprint, **kwargs)
 
         self.model_blueprint, self.galprop_list = self._interpret_input_model_blueprint()
+        
+        self._build_composite_lists()
 
         self._set_primary_behaviors()
 
@@ -155,6 +157,48 @@ class SubhaloModelFactory(ModelFactory):
             new_method_name = galprop + '_model_func'
             new_method_behavior = component_model.__call__
             setattr(self, new_method_name, new_method_behavior)
+
+    def _build_composite_lists(self):
+        """ A composite model has several lists that are built up from 
+        the components: ``haloprop_list``, ``publications``, and 
+        ``new_haloprop_func_dict``. 
+        """
+
+        haloprop_list = []
+        pub_list = []
+        new_haloprop_func_dict = {}
+
+        for galprop in self.galprop_list:
+            component_model = self.model_blueprint[galprop]
+
+            # haloprop keys
+            if hasattr(component_model, 'prim_haloprop_key'):
+                haloprop_list.append(component_model.prim_haloprop_key)
+            if hasattr(component_model, 'sec_haloprop_key'):
+                haloprop_list.append(component_model.sec_haloprop_key)
+
+            # Reference list
+            if hasattr(component_model, 'publications'):
+                pub_list.extend(component_model.publications)
+
+            # Haloprop function dictionaries
+            if hasattr(component_model, 'new_haloprop_func_dict'):
+                dict_intersection = set(new_haloprop_func_dict).intersection(
+                    set(component_model.new_haloprop_func_dict))
+                if dict_intersection == set():
+                    new_haloprop_func_dict = (
+                        new_haloprop_func_dict.items() + 
+                        component_model.new_haloprop_func_dict.items()
+                        )
+                else:
+                    example_repeated_element = list(dict_intersection)[0]
+                    raise KeyError("The composite model received multiple "
+                        "component models with a new_haloprop_func_dict that use "
+                        "the %s key" % example_repeated_element)
+
+        self.haloprop_list = list(set(haloprop_list))
+        self.publications = list(set(pub_list))
+        self.new_haloprop_func_dict = new_haloprop_func_dict
 
 
 
