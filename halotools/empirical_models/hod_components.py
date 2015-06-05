@@ -605,26 +605,23 @@ class vdB03Quiescence(object):
 
     """
 
-    def __init__(self, gal_type, param_dict=model_defaults.default_quiescence_dict, 
-        interpol_method='spline',input_spline_degree=3):
+#    def __init__(self, gal_type, param_dict=model_defaults.default_quiescence_dict, 
+#        interpol_method='spline',input_spline_degree=3):
+    def __init__(self, **kwargs):
         """ 
         Parameters 
         ----------
         gal_type : string, optional
-            Sets the key value used by `halotools.hod_designer` and 
-            `~halotools.hod_factory` to access the behavior of the methods 
-            of this class. 
+            Name of the galaxy population being modeled, e.g., 'centrals'. 
 
         param_dict : dictionary, optional 
             Dictionary specifying what the quiescent fraction should be 
             at a set of input values of the primary halo property. 
-            Default values are set in `halotools.model_defaults`. 
+            Default values are set in `halotools.empirical_models.model_defaults`. 
 
         interpol_method : string, optional 
             Keyword specifying how `mean_quiescence_fraction` 
-            evaluates input value of the primary halo property 
-            that differ from the small number of values 
-            in self.param_dict. 
+            evaluates input values of the primary halo property 
             The default spline option interpolates the 
             model's abcissa and ordinates. 
             The polynomial option uses the unique, degree N polynomial 
@@ -636,9 +633,9 @@ class vdB03Quiescence(object):
             is ensured to never exceed k-1, nor exceed 5. 
         """
 
-        self.gal_type = gal_type
+        self.gal_type = kwargs['gal_type']
 
-        self.param_dict = param_dict
+        self.param_dict = kwargs['param_dict']
         # Put param_dict keys in standard form
         correct_keys = model_defaults.default_quiescence_dict.keys()
         self.param_dict = occuhelp.format_parameter_keys(
