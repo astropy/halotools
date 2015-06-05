@@ -20,7 +20,7 @@ from . import occupation_helpers as occuhelp
 from . import model_defaults
 from . import mock_factory
 
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 from ..sim_manager.read_nbody import ProcessedSnapshot
 
 @six.add_metaclass(ABCMeta)
@@ -113,7 +113,7 @@ class SubhaloModelFactory(ModelFactory):
         # Note that this is only robust to the case of two-property composite models
         # For more complicated models, a smarter algorithm will be necessary, 
         # so we raise an exception to protect against that case
-        if aph_len(unordered_galprop_list) > 2:
+        if custom_len(unordered_galprop_list) > 2:
             raise KeyError("SubhaloModelFactory does not support assignment of "
                 "more than two galaxy properties")
 

@@ -23,7 +23,7 @@ import urlparse
 from . import sim_defaults 
 
 from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
@@ -323,7 +323,7 @@ class HaloCat(object):
             Value of the redshift of the snapshot
         """
 
-        if aph_len(filename_list)==0:
+        if custom_len(filename_list)==0:
             return None
 
         # First create a list of floats storing the scale factors of each hlist file

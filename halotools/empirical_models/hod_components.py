@@ -25,7 +25,7 @@ from scipy.optimize import brentq
 from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 import occupation_helpers as occuhelp
 
 from astropy.extern import six
@@ -107,7 +107,7 @@ class OccupationComponent(object):
             np.random.seed(seed=None)
 
         if self.occupation_bound == 1:
-            mc_generator = np.random.random(aph_len(mass))
+            mc_generator = np.random.random(custom_len(mass))
             mc_abundance = np.where(mc_generator < self.mean_occupation(**kwargs), 1, 0)
             return mc_abundance
 
@@ -611,17 +611,21 @@ class vdB03Quiescence(object):
         """ 
         Parameters 
         ----------
+        abcissa : array, keyword argument 
+            Values of the primary halo property at which the quiescent fraction is specified. 
+
+        ordinates : array, keyword argument 
+            Values of the quiescent fraction  when evaluated at the input abcissa. 
+
         gal_type : string, optional
             Name of the galaxy population being modeled, e.g., 'centrals'. 
-
-        param_dict : dictionary, optional 
-            Dictionary specifying what the quiescent fraction should be 
-            at a set of input values of the primary halo property. 
-            Default values are set in `halotools.empirical_models.model_defaults`. 
+            This is only necessary to specify in cases where 
+            the `vdB03Quiescence` instance is part of a composite model, 
+            with multiple population types. 
 
         interpol_method : string, optional 
             Keyword specifying how `mean_quiescence_fraction` 
-            evaluates input values of the primary halo property 
+            evaluates input values of the primary halo property. 
             The default spline option interpolates the 
             model's abcissa and ordinates. 
             The polynomial option uses the unique, degree N polynomial 
@@ -633,31 +637,46 @@ class vdB03Quiescence(object):
             is ensured to never exceed k-1, nor exceed 5. 
         """
 
-        self.gal_type = kwargs['gal_type']
+        if 'gal_type' in kwargs.keys():
+            self.gal_type = kwargs['gal_type']
+        else:
+            self.gal_type = None
 
-        self.param_dict = kwargs['param_dict']
+        abcissa = kwargs['abcissa']
+        ordinates = kwargs['ordinates']
+
         # Put param_dict keys in standard form
-        correct_keys = model_defaults.default_quiescence_dict.keys()
-        self.param_dict = occuhelp.format_parameter_keys(
-            self.param_dict,correct_keys,self.gal_type)
-        self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
-        self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
+        if self.gal_type is None:
+            self.abcissa_key = 'quiescence_abcissa'
+            self.ordinates_key = 'quiescence_ordinates'
+        else:
+            self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
+            self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
+
+        self.param_dict = self._build_param_dict()
 
         # Set the interpolation scheme 
-        if interpol_method not in ['spline', 'polynomial']:
-            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
-        self.interpol_method = interpol_method
+        if 'interpol_method' in kwargs.keys():
+            self.interpol_method = kwargs['interpol_method']
+        else:
+            self.interpol_method = 'spline'
+        if self.interpol_method not in ['spline', 'polynomial']:
+            raise KeyError("Input interpol_method must be 'polynomial' or 'spline'.")
 
         if self.interpol_method=='spline':
             scipy_maxdegree = 5
             self.spline_degree = np.min(
                 [scipy_maxdegree, input_spline_degree, 
-                aph_len(self.param_dict[self.abcissa_key])-1])
-            self.spline_function = occuhelp.aph_spline(
+                custom_len(self.param_dict[self.abcissa_key])-1])
+            self.spline_function = occuhelp.custom_spline(
                 self.param_dict[self.abcissa_key],
                 self.param_dict[self.ordinates_key],
                 k=self.spline_degree)
 
+    def _build_param_dict(self):
+        keys = [self.ordinates_key + '_param' + str(i+1) for i in range(custom_len(self.abcissa))]
+        values = self.ordinates
+        self.param_dict = {key:value for key, value in zip(keys, values)}
 
     def mean_quiescence_fraction(self,input_abcissa):
         """

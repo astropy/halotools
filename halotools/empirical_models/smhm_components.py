@@ -9,7 +9,7 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from. import model_defaults
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 from ..empirical_models import occupation_helpers as occuhelp
 from ..sim_manager import sim_defaults 
 
@@ -315,7 +315,7 @@ class LogNormalScatterModel(object):
         """ Private method used to configure the behavior of `radprof_modfunc`. 
         """        
         scipy_maxdegree = 5
-        degree_list = [scipy_maxdegree, aph_len(self.abcissa)-1]
+        degree_list = [scipy_maxdegree, custom_len(self.abcissa)-1]
         if 'input_spline_degree' in kwargs.keys():
             degree_list.append(kwargs['input_spline_degree'])
         self.spline_degree = np.min(degree_list)
