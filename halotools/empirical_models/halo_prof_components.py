@@ -18,7 +18,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from functools import partial
 from itertools import product
 
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 import occupation_helpers as occuhelp 
 
 from ..sim_manager import sim_defaults
@@ -606,10 +606,10 @@ class NFWProfile(HaloProfileModel):
             raise SyntaxError("Must pass array of concentrations to cumulative_mass_PDF. \n"
                 "Only received array of radii.")
         else:
-            if aph_len(args[0]) == 1:
+            if custom_len(args[0]) == 1:
                 c = np.ones(len(r))*args[0]
                 return self.g(c) / self.g(r*c)
-            elif (aph_len(args[0]) > 1) & (aph_len(args[0]) != aph_len(r)):
+            elif (custom_len(args[0]) > 1) & (custom_len(args[0]) != custom_len(r)):
                 raise ValueError("If passing an array of concentrations to "
                     "cumulative_mass_PDF, the array must have the same length "
                     "as the array of radial positions")
