@@ -15,7 +15,7 @@ simulations with mock galaxies. See the tutorials on these models
 for further details on their use. 
 """
 
-__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats']
+__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats', 'vdB03Quiescence']
 
 from copy import copy
 import numpy as np
@@ -642,8 +642,15 @@ class vdB03Quiescence(object):
         else:
             self.gal_type = None
 
-        abcissa = kwargs['abcissa']
-        ordinates = kwargs['ordinates']
+        if 'abcissa' in kwargs.keys():
+            self.abcissa = kwargs['abcissa']
+        else:
+            self.abcissa = [12, 15]
+
+        if 'ordinates' in kwargs.keys():
+            self.ordinates = kwargs['ordinates']
+        else:
+            self.ordinates = [0.25, 0.75]
 
         # Put param_dict keys in standard form
         if self.gal_type is None:
@@ -653,7 +660,7 @@ class vdB03Quiescence(object):
             self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
             self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
 
-        self.param_dict = self._build_param_dict()
+        self._build_param_dict()
 
         # Set the interpolation scheme 
         if 'interpol_method' in kwargs.keys():
@@ -664,18 +671,23 @@ class vdB03Quiescence(object):
             raise KeyError("Input interpol_method must be 'polynomial' or 'spline'.")
 
         if self.interpol_method=='spline':
+            if 'input_spline_degree' in kwargs.keys():
+                self._input_spine_degree = kwargs['input_spline_degree']
+            else:
+                self._input_spline_degree = 3
             scipy_maxdegree = 5
-            self.spline_degree = np.min(
-                [scipy_maxdegree, input_spline_degree, 
-                custom_len(self.param_dict[self.abcissa_key])-1])
+            self._spline_degree = np.min(
+                [scipy_maxdegree, self._input_spline_degree, 
+                custom_len(self.abcissa)-1])
             self.spline_function = occuhelp.custom_spline(
                 self.param_dict[self.abcissa_key],
                 self.param_dict[self.ordinates_key],
-                k=self.spline_degree)
+                k=self._spline_degree)
 
     def _build_param_dict(self):
         keys = [self.ordinates_key + '_param' + str(i+1) for i in range(custom_len(self.abcissa))]
         values = self.ordinates
+        print keys
         self.param_dict = {key:value for key, value in zip(keys, values)}
 
     def mean_quiescence_fraction(self,input_abcissa):

@@ -320,7 +320,7 @@ class LogNormalScatterModel(object):
             degree_list.append(kwargs['input_spline_degree'])
         self.spline_degree = np.min(degree_list)
 
-        self.spline_function = occuhelp.aph_spline(
+        self.spline_function = occuhelp.custom_spline(
             self.abcissa, self.ordinates, k=self.spline_degree)
 
     def _update_params(self, param_dict):

@@ -473,7 +473,7 @@ class SpatialBias(object):
                 [scipy_maxdegree, self.input_spline_degree, 
                 custom_len(self.abcissa_dict[prof_param_key])-1])
                     )
-                self.spline_function[prof_param_key] = occuhelp.aph_spline(
+                self.spline_function[prof_param_key] = occuhelp.custom_spline(
                     self.abcissa_dict[prof_param_key], 
                     self.ordinates_dict[prof_param_key], 
                     k=self.spline_degree[prof_param_key])
