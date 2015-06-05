@@ -16,7 +16,7 @@ from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
 
-def solve_for_polynomial_coefficients(abcissa,ordinates):
+def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
     minimum-degree polynomial that passes through 
     the input abcissa and attains values equal the input ordinates.  
@@ -34,7 +34,7 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
     -------
     polynomial_coefficients : array 
         Elements are the coefficients determining the polynomial. 
-        Element i of polynomial_coefficients gives the degree i coefficient.
+        Element i of polynomial_coefficients gives the degree i polynomial coefficient.
 
     Notes
     --------
@@ -47,9 +47,8 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
     ordinates when the polynomial is evaluated at the input abcissa.
     The coefficients of that unique polynomial are the output of the function. 
 
-    This function is used by many of the methods in this module. For example, suppose 
-    that a model in which the quenched fraction is 
-    :math:`F_{q}(logM = 12) = 0.25` and :math:`F_{q}(logM = 15) = 0.9`. 
+    As an example, suppose that a model in which the quenched fraction is 
+    :math:`F_{q}(logM_{\\mathrm{halo}} = 12) = 0.25` and :math:`F_{q}(logM_{\\mathrm{halo}} = 15) = 0.9`. 
     Then this function takes [12, 15] as the input abcissa, 
     [0.25, 0.9] as the input ordinates, 
     and returns the array :math:`[c_{0}, c_{1}]`. 
@@ -59,8 +58,7 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
     
     """
 
-    ones = np.zeros(len(abcissa)) + 1
-    columns = ones
+    columns = np.ones(len(abcissa))
     for i in np.arange(len(abcissa)-1):
         columns = np.append(columns,[abcissa**(i+1)])
     quenching_model_matrix = columns.reshape(
@@ -104,8 +102,6 @@ def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
         output_ordinates += coeff*input_abcissa**n
 
     return output_ordinates
-
-
 
 def format_parameter_keys(input_param_dict,correct_initial_keys,
     gal_type, key_prefix=None):

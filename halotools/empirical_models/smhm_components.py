@@ -20,7 +20,7 @@ __all__ = ['SmHmModel', 'Moster13SmHm', 'LogNormalScatterModel']
 @six.add_metaclass(ABCMeta)
 class SmHmModel(object):
     """ Abstract container class used as a template 
-    for how to build a stellar-to-halo-mass-style model.
+    for how to build a stellar-to-halo-mass_like-style model.
 
     """
 
@@ -63,25 +63,25 @@ class SmHmModel(object):
             )
 
     def __call__(self, **kwargs):
-        """ Return the stellar mass of a central galaxy that lives in a 
-        halo mass ``mass`` at the input ``redshift``. 
+        """ Return the stellar mass_like of a central galaxy that lives in a 
+        halo mass_like ``mass_like`` at the input ``redshift``. 
 
         Parameters 
         ----------
-        mass : array, optional keyword argument 
-            array of halo masses 
+        mass_like : array, optional keyword argument 
+            array of halo mass_likees 
 
         redshift : float, optional keyword argument
             Redshift of the halo hosting the galaxy. 
 
         halos : array or table, optional keyword argument
-            Data structure containing halos onto which stellar masses 
+            Data structure containing halos onto which stellar mass_likees 
             will be painted. Must contain a key that matches ``prim_haloprop_key``. 
 
         Returns 
         -------
         mstar : array_like 
-            Array containing stellar masses living in the input halos. 
+            Array containing stellar mass_likees living in the input halos. 
         """
 
         # Interpret the inputs to determine the appropriate redshift
@@ -95,14 +95,14 @@ class SmHmModel(object):
                 kwargs['redshift'] = sim_defaults.default_redshift
 
 
-        # Interpret the inputs to determine the appropriate array of masses
+        # Interpret the inputs to determine the appropriate array of mass_likees
         if 'galaxy_table' in kwargs.keys():
-            kwargs['mass'] = kwargs['galaxy_table'][model_defaults.host_haloprop_prefix + self.prim_haloprop_key]
-        elif 'mass' not in kwargs.keys():
+            kwargs['mass_like'] = kwargs['galaxy_table'][model_defaults.host_haloprop_prefix + self.prim_haloprop_key]
+        elif 'mass_like' not in kwargs.keys():
             if 'halos' in kwargs.keys():
-                kwargs['mass'] = kwargs['halos'][self.prim_haloprop_key]
+                kwargs['mass_like'] = kwargs['halos'][self.prim_haloprop_key]
             else:
-                raise SyntaxError("You must either pass an input ``mass`` keyword, "
+                raise SyntaxError("You must either pass an input ``mass_like`` keyword, "
                     "an input ``galaxy_table`` keyword, "
                     " or an input ``halos`` keyword. \n Received none of these.")
 
@@ -117,15 +117,15 @@ class SmHmModel(object):
             return mean_stellar_mass
         else:
             kwargs['param_dict'] = self.param_dict
-            log10mass_with_scatter = (
+            log10mass_like_with_scatter = (
                 np.log10(mean_stellar_mass) + 
                 self.scatter_model.scatter_realization(**kwargs)
                 )
-            return 10.**log10mass_with_scatter
+            return 10.**log10mass_like_with_scatter
 
 
 class Moster13SmHm(SmHmModel):
-    """ Stellar-to-halo-mass relation based on 
+    """ Stellar-to-halo-mass_like relation based on 
     Moster et al. (2013), arXiv:1205.5807. 
     """
 
@@ -135,7 +135,7 @@ class Moster13SmHm(SmHmModel):
         -----------
         prim_haloprop_key : string, optional keyword argument
             This string will be used to extract the relevant column of the 
-            halo catalog containing the mass-like variable that regulates stellar mass. 
+            halo catalog containing the mass_like-like variable that regulates stellar mass_like. 
 
         param_dict : dict, optional 
             Dictionary containing the values of the parameters of the desired model. 
@@ -148,13 +148,13 @@ class Moster13SmHm(SmHmModel):
         self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
 
     def mean_stellar_mass(self, **kwargs):
-        """ Return the stellar mass of a central galaxy that lives in a 
-        halo mass ``mass`` at the input ``redshift``. 
+        """ Return the stellar mass_like of a central galaxy that lives in a 
+        halo mass_like ``mass_like`` at the input ``redshift``. 
 
         Parameters 
         ----------
-        mass : array, keyword argument
-            array of halo masses
+        mass_like : array, keyword argument
+            array of halo mass_likees
 
         redshift : float, keyword argument
             Redshift of the halo hosting the galaxy
@@ -162,9 +162,9 @@ class Moster13SmHm(SmHmModel):
         Returns 
         -------
         mstar : array_like 
-            Array containing stellar masses living in the input halos. 
+            Array containing stellar mass_likees living in the input halos. 
         """
-        mass = kwargs['mass']
+        mass_like = kwargs['mass_like']
         redshift = kwargs['redshift']
         # compute the parameter values that apply to the input redshift
         a = 1./(1+redshift)
@@ -174,8 +174,8 @@ class Moster13SmHm(SmHmModel):
         gamma = self.param_dict['gamma10'] + self.param_dict['gamma11']*(1-a)
 
         # Calculate each term contributing to Eqn 2
-        norm = 2.*n*mass
-        m_by_m1 = mass/(10.**m1)
+        norm = 2.*n*mass_like
+        m_by_m1 = mass_like/(10.**m1)
         denom_term1 = m_by_m1**(-beta)
         denom_term2 = m_by_m1**gamma
 
@@ -207,7 +207,7 @@ class Moster13SmHm(SmHmModel):
 
 class LogNormalScatterModel(object):
     """ Simple model used to generate log-normal scatter 
-    in the stellar-to-halo-mass relation. 
+    in the stellar-to-halo-mass_like relation. 
 
     """
 
@@ -252,11 +252,11 @@ class LogNormalScatterModel(object):
 
         Parameters 
         ----------
-        mass : array, optional keyword argument 
-            array of halo masses 
+        mass_like : array, optional keyword argument 
+            array of halo mass_likees 
 
         halos : array or table, optional keyword argument
-            Data structure containing halos onto which stellar masses 
+            Data structure containing halos onto which stellar mass_likees 
             will be painted. Must contain a key that matches ``prim_haloprop_key``. 
 
         Returns 
@@ -265,16 +265,16 @@ class LogNormalScatterModel(object):
             Array containing the amount of log-normal scatter evaluated 
             at the input halos. 
         """
-        # Interpret the inputs to determine the appropriate array of masses
-        if 'mass' not in kwargs.keys():
+        # Interpret the inputs to determine the appropriate array of mass_likees
+        if 'mass_like' not in kwargs.keys():
             if 'halos' in kwargs.keys():
                 if not hasattr(self, 'prim_haloprop_key'):
                     raise SyntaxError("If you want to be able to pass "
                         " a halo catalog as input to the scatter model, "
                         "you must pass a `prim_haloprop_key` to the constructor")
-                kwargs['mass'] = kwargs['halos'][self.prim_haloprop_key]
+                kwargs['mass_like'] = kwargs['halos'][self.prim_haloprop_key]
             else:
-                raise SyntaxError("You must either pass an input ``mass`` keyword "
+                raise SyntaxError("You must either pass an input ``mass_like`` keyword "
                     " or an input ``halos`` keyword, received neither")
 
         if 'param_dict' in kwargs.keys():
@@ -282,7 +282,7 @@ class LogNormalScatterModel(object):
         else:
             self._update_params(self.param_dict)
 
-        return self.spline_function(np.log10(kwargs['mass']))
+        return self.spline_function(np.log10(kwargs['mass_like']))
 
     def scatter_realization(self, **kwargs):
         """ Return the amount of log-normal scatter that should be added 
@@ -290,11 +290,11 @@ class LogNormalScatterModel(object):
 
         Parameters 
         ----------
-        mass : array, optional keyword argument 
-            array of halo masses 
+        mass_like : array, optional keyword argument 
+            array of halo mass_likees 
 
         halos : array or table, optional keyword argument
-            Data structure containing halos onto which stellar masses 
+            Data structure containing halos onto which stellar mass_likees 
             will be painted. Must contain a key that matches ``prim_haloprop_key``. 
 
         Returns 
