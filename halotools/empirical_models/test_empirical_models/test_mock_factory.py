@@ -2,7 +2,7 @@
 
 import numpy as np 
 from .. import preloaded_models
-from .. import hod_factory
+from .. import model_factories
 from .. import mock_factory
 from .. import preloaded_models
 from ...sim_manager.generate_random_sim import FakeSim
@@ -62,7 +62,7 @@ def test_preloaded_hod_mocks():
     sim = FakeSim()
 
     hod_model_list = preloaded_models.__all__
-    parent_class = hod_factory.HodModelFactory
+    parent_class = model_factories.HodModelFactory
     # Create a list of all pre-loaded HOD models that we will test
     component_models_to_test = []
     for clname in hod_model_list:
