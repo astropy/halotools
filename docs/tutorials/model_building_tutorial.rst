@@ -24,7 +24,7 @@ To read about other styles of models you can build with Halotools, see
     from halotools import empirical_models as models
 
 Build a satellite population
-----------------------------
+============================
 
 .. code:: python
 
@@ -38,7 +38,7 @@ Build a satellite population
                                 'profile' : halo_prof_model}
 
 Build a central population
---------------------------
+==========================
 
 .. code:: python
 
@@ -52,7 +52,7 @@ Build a central population
                                 'profile' : halo_prof_model}
 
 Bundle the populations together into a composite model blueprint
-----------------------------------------------------------------
+================================================================
 
 This will serve as the blueprint used by the HodModelFactory to build a
 composite model object
@@ -64,7 +64,7 @@ composite model object
                             }
 
 Pass the blueprint to the Model Factory, which knows what to do
----------------------------------------------------------------
+===============================================================
 
 .. code:: python
 
