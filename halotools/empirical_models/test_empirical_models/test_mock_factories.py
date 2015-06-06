@@ -3,7 +3,7 @@
 import numpy as np 
 from .. import preloaded_models
 from .. import model_factories
-from .. import mock_factory
+from .. import mock_factories
 from .. import preloaded_models
 from ...sim_manager.generate_random_sim import FakeSim
 
@@ -30,7 +30,7 @@ def test_preloaded_hod_mocks():
 
     # If factory is called with default settings, 
     # mock attributes should include/exclude:
-        mock1 = mock_factory.HodMockFactory(sim, model)
+        mock1 = mock_factories.HodMockFactory(sim, model)
         assert hasattr(mock1, 'galaxy_table')
         expected_keys = ['x', 'y', 'z', 'halo_x', 'halo_NFWmodel_conc', 'halo_mvir']
         for key in expected_keys:
@@ -47,12 +47,12 @@ def test_preloaded_hod_mocks():
         assert np.all(mock1.galaxy_table['halo_NFWmodel_conc'] > 0.5)
         assert np.all(mock1.galaxy_table['halo_NFWmodel_conc'] < 25)
 
-        mock2 = mock_factory.HodMockFactory(sim, model, 
+        mock2 = mock_factories.HodMockFactory(sim, model, 
             additional_haloprops = ['zhalf'])
         assert 'halo_zhalf' in mock2.galaxy_table.keys()
 
         #func_dict = {'double_mvir' : lambda halos : 2.*halos['mvir']}
-        #mock4 = mock_factory.HodMockFactory(sim, model, 
+        #mock4 = mock_factories.HodMockFactory(sim, model, 
         #    new_haloprop_func_dict = func_dict)
         #assert 'double_mvir' in mock4.halos.keys()
         #assert hasattr(mock4, 'halo_double_mvir')

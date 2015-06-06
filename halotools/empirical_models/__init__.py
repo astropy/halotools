@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-from .mock_factory import *
+from .mock_factories import *
 from .model_factories import *
 from .preloaded_models import *
 from .preloaded_hod_blueprints import *

@@ -15,7 +15,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from . import occupation_helpers as occuhelp
 from . import model_defaults
-from . import mock_factory
+from . import mock_factories
 from . import preloaded_hod_blueprints
 from . import gal_prof_factory
 from . import halo_prof_components
@@ -57,14 +57,14 @@ class ModelFactory(object):
             if 'snapshot' in kwargs.keys():
                 snapshot = kwargs['snapshot']
                 # we need to delete the 'snapshot' keyword 
-                # or else the call to mock_factory below 
+                # or else the call to mock_factories below 
                 # will pass multiple snapshot arguments
                 del kwargs['snapshot']
             else:
                 snapshot = ProcessedSnapshot(**kwargs)
 
-            mock_factory = self.model_blueprint['mock_factory']
-            mock = mock_factory(snapshot, self, **kwargs)
+            mock_factories = self.model_blueprint['mock_factories']
+            mock = mock_factories(snapshot, self, **kwargs)
             self.mock = mock
 
 
@@ -105,10 +105,10 @@ class SubhaloModelFactory(ModelFactory):
 
         model_blueprint = copy(self._input_model_blueprint)
 
-        if 'mock_factory' not in model_blueprint.keys():
-            model_blueprint['mock_factory'] = mock_factory.SubhaloMockFactory
+        if 'mock_factories' not in model_blueprint.keys():
+            model_blueprint['mock_factories'] = mock_factories.SubhaloMockFactory
 
-        unordered_galprop_list = [key for key in model_blueprint.keys() if key is not 'mock_factory']
+        unordered_galprop_list = [key for key in model_blueprint.keys() if key is not 'mock_factories']
 
         # If necessary, put the unordered_galprop_list into its proper order
         # Note that this is only robust to the case of two-property composite models
@@ -294,8 +294,8 @@ class HodModelFactory(ModelFactory):
                     gal_type, input_prof_model)
                 model_blueprint[gal_type]['profile'] = prof_model
 
-        if 'mock_factory' not in model_blueprint.keys():
-            model_blueprint['mock_factory'] = mock_factory.HodMockFactory
+        if 'mock_factories' not in model_blueprint.keys():
+            model_blueprint['mock_factories'] = mock_factories.HodMockFactory
 
         return model_blueprint 
 
@@ -307,7 +307,7 @@ class HodModelFactory(ModelFactory):
         in ascending order of the occupation bound. 
         """
 
-        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factory']
+        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factories']
 
         occupation_bounds = []
         for gal_type in gal_types:
@@ -425,7 +425,7 @@ class HodModelFactory(ModelFactory):
             -------
             gal_prof_param_func : object
                 Function object called by 
-                `~halotools.empirical_models.mock_factory.HodMockFactory` 
+                `~halotools.empirical_models.mock_factories.HodMockFactory` 
                 to map galaxy profile parameters onto mock galaxies. 
 
             Notes 
@@ -481,7 +481,7 @@ class HodModelFactory(ModelFactory):
         Parameters 
         ----------
         mock_obj : object 
-            Instance of `~halotools.empirical_models.mock_factory.HodMockFactory`. 
+            Instance of `~halotools.empirical_models.mock_factories.HodMockFactory`. 
 
         gal_type : string 
             Name of the galaxy population. 
@@ -495,7 +495,7 @@ class HodModelFactory(ModelFactory):
         Notes 
         -----
         This method is not directly called by 
-        `~halotools.empirical_models.mock_factory.HodMockFactory`. 
+        `~halotools.empirical_models.mock_factories.HodMockFactory`. 
         Instead, the `_set_primary_behaviors` method calls functools.partial 
         to create a ``mc_pos_gal_type`` method for each ``gal_type`` in the model. 
 

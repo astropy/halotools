@@ -57,7 +57,7 @@ def test_Kravtsov04_blueprint():
 			temp_blueprint['centrals']['occupation'].threshold 
 			)
 
-	gal_type_list = [key for key in default_blueprint.keys() if key != 'mock_factory']
+	gal_type_list = [key for key in default_blueprint.keys() if key != 'mock_factories']
 	for gal_type in gal_type_list:
 		gal_type_blueprint = get_gal_type_model(default_blueprint, gal_type)
 		assert set(gal_type_blueprint.keys()) == {'profile', 'occupation'}

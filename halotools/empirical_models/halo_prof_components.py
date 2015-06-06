@@ -642,7 +642,7 @@ class NFWProfile(HaloProfileModel):
         The prof_param_table_dict attribute is a dictionary 
         used in the set up of a gridded correspondence between 
         halo profile properties and inverse cumulative function objects. 
-        This grid is used by mock factories such as `halotools.empirical_models.mock_factory` 
+        This grid is used by mock factories such as `halotools.empirical_models.mock_factories` 
         to rapidly generate Monte Carlo realizations of satellite profiles. 
 
         Parameters 
