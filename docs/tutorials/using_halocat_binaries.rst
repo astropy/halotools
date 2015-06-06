@@ -11,7 +11,7 @@ default Halotools catalog by following the instructions given in the
 instructions now if you have not done so already.
 
 Working with the default pre-processed snapshot
------------------------------------------------
+===============================================
 
 To get warmed up, let's see how to work with the default snapshot
 provided by Halotools. After importing the
@@ -214,7 +214,7 @@ method:
 
 
 Concluding notes
-----------------
+================
 
 If you anticipate studying how your science targets depend on redshift,
 cosmology, or halo-finding, you may find it useful to use the

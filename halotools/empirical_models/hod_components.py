@@ -9,14 +9,15 @@ and so has a ``mean_occupation`` method.
 A common use for these objects is to bundle them together to make a 
 composite galaxy model, with multiple populations having their 
 own occupation statistics and profiles. Instances of classes in this module 
-can be passed to the `~halotools.empirical_models.hod_factory`, 
+can be passed to the `~halotools.empirical_models.model_factories.HodModelFactory`, 
 and you will be returned a model object that can directly populate 
-simulations with mock galaxies. See the tutorials on these models 
+simulations with mock galaxies. See the tutorials on model-building 
 for further details on their use. 
 """
 
-__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats']
+__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats', 'BinaryGalpropInterpolModel']
 
+from functools import partial
 from copy import copy
 import numpy as np
 from scipy.special import erf 
@@ -25,7 +26,7 @@ from scipy.optimize import brentq
 from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 import occupation_helpers as occuhelp
 
 from astropy.extern import six
@@ -107,7 +108,7 @@ class OccupationComponent(object):
             np.random.seed(seed=None)
 
         if self.occupation_bound == 1:
-            mc_generator = np.random.random(aph_len(mass))
+            mc_generator = np.random.random(custom_len(mass))
             mc_abundance = np.where(mc_generator < self.mean_occupation(**kwargs), 1, 0)
             return mc_abundance
 
@@ -575,139 +576,258 @@ class Kravtsov04Sats(OccupationComponent):
             raise KeyError("For Kravtsov04Sats, only supported best-fit models are currently Zheng et al. 2007")
 
 
-class vdB03Quiescence(object):
+class BinaryGalpropInterpolModel(object):
     """
-    Traditional HOD-style model of galaxy quenching 
-    in which the expectation value for a binary SFR designation of the galaxy 
-    is purely determined by the primary halo property.
-    
-    Approach is adapted from van den Bosch et al. 2003. 
-    The parameters of this component model govern the value of the quiescent fraction 
-    at a particular set of masses. 
-    The class then uses an input `halotools.occupation_helpers` function 
-    to infer the quiescent fraction at values other than the input abcissa.
+    Component model for any binary-valued galaxy property 
+    whose assignment is determined by interpolating between points on a grid. 
 
-    Notes 
-    -----
-
-    In the construction sequence of a composite HOD model, 
-    if `halotools.hod_designer` uses this component model *after* 
-    using a central occupation component, then  
-    the resulting central galaxy stellar-to-halo mass relation 
-    will have no dependence on quenched/active designation. 
-    Employing this component *before* the occupation component allows 
-    for an explicit halo mass dependence in the central galaxy SMHM. 
-    Thus the sequence of the composition of the quiescence and occupation models 
-    determines whether the resulting composite model satisfies the following 
-    classical separability condition between stellar mass and star formation rate: 
-
-    :math:`P( M_{*}, \dot{M_{*}} | M_{h}) = P( M_{*} | M_{h})\\times P( \dot{M_{*}} | M_{h})`
+    One example of a model of this class could be used to help build is 
+    Tinker et al. (2013), arXiv:1308.2974. 
+    In this model, a galaxy is either active or quiescent, 
+    and the quiescent fraction is purely a function of halo mass, with
+    separate parameters for centrals and satellites. The value of the quiescent 
+    fraction is computed by interpolating between a grid of values of mass. 
+    `BinaryGalpropInterpolModel` is quite flexible, and can be used as a template for 
+    any binary-valued galaxy property whatsoever. See the examples below for usage instructions. 
 
     """
 
-    def __init__(self, gal_type, param_dict=model_defaults.default_quiescence_dict, 
-        interpol_method='spline',input_spline_degree=3):
+    def __init__(self,  logparam=True, interpol_method='spline', 
+        abcissa = [12, 15], ordinates = [0.25, 0.75], 
+        prim_haloprop_key = 'mvir', galprop_key = 'quiescent', **kwargs):
         """ 
         Parameters 
         ----------
-        gal_type : string, optional
-            Sets the key value used by `halotools.hod_designer` and 
-            `~halotools.hod_factory` to access the behavior of the methods 
-            of this class. 
+        galprop_key : array, optional keyword argument 
+            String giving the name of galaxy property being assigned a binary value. 
+            Default is 'quiescent'. 
 
-        param_dict : dictionary, optional 
-            Dictionary specifying what the quiescent fraction should be 
-            at a set of input values of the primary halo property. 
-            Default values are set in `halotools.model_defaults`. 
+        abcissa : array, optional keyword argument 
+            Values of the primary halo property at which the galprop fraction is specified. 
+            Default is [12, 15], in accord with the default True value for ``logparam``. 
 
-        interpol_method : string, optional 
-            Keyword specifying how `mean_quiescence_fraction` 
-            evaluates input value of the primary halo property 
-            that differ from the small number of values 
-            in self.param_dict. 
+        ordinates : array, optional keyword argument 
+            Values of the galprop fraction when evaluated at the input abcissa. 
+            Default is [0.25, 0.75]
+
+        logparam : bool, optional keyword argument
+            If set to True, the interpolation will be done 
+            in the base-10 logarithm of the primary halo property, 
+            rather than linearly. Default is True. 
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the key name used to access the primary halo property 
+            from an input halo or galaxy catalog. Default is 'mvir'. 
+
+        gal_type : string, optional keyword argument
+            Name of the galaxy population being modeled, e.g., 'centrals'. 
+            This is only necessary to specify in cases where 
+            the `BinaryGalpropInterpolModel` instance is part of a composite model, 
+            with multiple population types. Default is None. 
+
+        interpol_method : string, optional keyword argument 
+            Keyword specifying how `mean_galprop_fraction` 
+            evaluates input values of the primary halo property. 
             The default spline option interpolates the 
             model's abcissa and ordinates. 
             The polynomial option uses the unique, degree N polynomial 
             passing through the ordinates, where N is the number of supplied ordinates. 
 
-        input_spline_degree : int, optional
+        input_spline_degree : int, optional keyword argument
             Degree of the spline interpolation for the case of interpol_method='spline'. 
             If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
+            is ensured to never exceed k-1, nor exceed 5. Default is 3. 
+
+        Examples
+        -----------       
+        Suppose we wish to construct a model for whether a central galaxy is 
+        star-forming or quiescent. We want to set the quiescent fraction to 1/3 
+        for Milky Way-type centrals (:math:`M_{\\mathrm{vir}}=10^{12}M_{\odot}`), 
+        and 90% for massive cluster centrals (:math:`M_{\\mathrm{vir}}=10^{15}M_{\odot}`).
+
+        >>> abcissa, ordinates = [12, 15], [1/3., 0.9]
+        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_key='quiescent', abcissa=abcissa, ordinates=ordinates, prim_haloprop_key='mvir', gal_type='cens')
+
+        The ``cen_quiescent_model`` has a built-in method that computes the quiescent fraction 
+        as a function of mass:
+
+        >>> quiescent_frac = cen_quiescent_model.mean_quiescent_fraction(prim_haloprop=1e12)
+
+        There is also a built-in method to return a Monte Carlo realization of quiescent/star-forming galaxies:
+
+        >>> masses = np.logspace(10, 15, num=100)
+        >>> quiescent_realization = cen_quiescent_model.mc_quiescent(prim_haloprop=masses)
+
+        Now ``quiescent_realization`` is a boolean-valued array of the same length as ``masses``. 
+        Entries of ``quiescent_realization`` that are ``True`` correspond to central galaxies that are quiescent. 
+
+        Here is another example of how you could use `BinaryGalpropInterpolModel` 
+        to construct a simple model for satellite morphology, where the early- vs. late-type 
+        of the satellite depends on :math:`V_{\\mathrm{peak}}` value of the host halo
+
+        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_key='late_type', abcissa=abcissa, ordinates=ordinates, prim_haloprop_key='vpeak_host', gal_type='sats')
+        >>> vmax_array = np.logspace(2, 3, num=100)
+        >>> morphology_realization = sat_morphology_model.mc_late_type(prim_haloprop=vmax_array)
+
+        .. automethod:: _mean_galprop_fraction
+        .. automethod:: _mc_galprop
         """
 
-        self.gal_type = gal_type
+        self._interpol_method = interpol_method
+        self._logparam = logparam
+        self._abcissa = abcissa
+        self._ordinates = ordinates
+        self.prim_haloprop_key = prim_haloprop_key
+        self.galprop_key = galprop_key
+        setattr(self, self.galprop_key+'_abcissa', self._abcissa)
 
-        self.param_dict = param_dict
-        # Put param_dict keys in standard form
-        correct_keys = model_defaults.default_quiescence_dict.keys()
-        self.param_dict = occuhelp.format_parameter_keys(
-            self.param_dict,correct_keys,self.gal_type)
-        self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
-        self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
+        if 'gal_type' in kwargs.keys():
+            self.gal_type = kwargs['gal_type']
+            self._abcissa_key = self.galprop_key+'_abcissa_'+self.gal_type
+            self._ordinates_key_prefix = self.galprop_key+'_ordinates_'+self.gal_type
+        else:
+            self._abcissa_key = self.galprop_key+'_abcissa'
+            self._ordinates_key_prefix = self.galprop_key+'_ordinates'
 
-        # Set the interpolation scheme 
-        if interpol_method not in ['spline', 'polynomial']:
-            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
-        self.interpol_method = interpol_method
+        self._build_param_dict()
 
-        if self.interpol_method=='spline':
+        if self._interpol_method=='spline':
+            if 'input_spline_degree' in kwargs.keys():
+                self._input_spine_degree = kwargs['input_spline_degree']
+            else:
+                self._input_spline_degree = 3
             scipy_maxdegree = 5
-            self.spline_degree = np.min(
-                [scipy_maxdegree, input_spline_degree, 
-                aph_len(self.param_dict[self.abcissa_key])-1])
-            self.spline_function = occuhelp.aph_spline(
-                self.param_dict[self.abcissa_key],
-                self.param_dict[self.ordinates_key],
-                k=self.spline_degree)
+            self._spline_degree = np.min(
+                [scipy_maxdegree, self._input_spline_degree, 
+                custom_len(self._abcissa)-1])
 
+        setattr(self, 'mean_'+self.galprop_key+'_fraction', self._mean_galprop_fraction)
+        setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
 
-    def mean_quiescence_fraction(self,input_abcissa):
+    def _build_param_dict(self):
+
+        self._ordinates_keys = [self._ordinates_key_prefix + '_param' + str(i+1) for i in range(custom_len(self._abcissa))]
+        self.param_dict = {key:value for key, value in zip(self._ordinates_keys, self._ordinates)}
+
+    def _mean_galprop_fraction(self, **kwargs):
         """
-        Expected fraction of gal_type galaxies that are quiescent 
-        as a function of the primary halo property.
+        Expectation value of the galprop for galaxies living in the input halos.  
 
         Parameters 
         ----------
-        input_abcissa : array_like
-            array of primary halo property at which the quiescent fraction 
-            is being computed. 
+        mass_like : array_like, optional keyword argument
+            Array of primary halo property, e.g., `mvir`, 
+            at which the galprop fraction is being computed. 
+
+        prim_haloprop : array_like, optional keyword argument
+            Array of primary halo property, e.g., `mvir`, 
+            at which the galprop fraction is being computed. 
+            Functionality is equivalent to using the mass_like keyword argument. 
+
+        halos : table, optional keyword argument
+            Astropy Table containing a halo catalog. 
+            If the ``halos`` keyword argument is passed, 
+            ``self.prim_haloprop_key`` must be a column of the halo catalog. 
+
+        galaxy_table : table, optional keyword argument
+            Astropy Table containing a galaxy catalog. 
+            If the ``galaxy_table`` keyword argument is passed, 
+            ``self.prim_haloprop_key`` must be a column of the galaxy catalog. 
+
+        input_param_dict : dict, optional keyword argument 
+            If passed, the model will first update 
+            its param_dict with input_param_dict, altering the behavior of the model. 
 
         Returns 
         -------
-        mean_quiescence_fraction : array_like
-            Values of the quiescent fraction evaluated at input_abcissa. 
+        mean_galprop_fraction : array_like
+            Values of the galprop fraction evaluated at the input primary halo properties. 
 
-        Notes 
-        -----
-
-        Either assumes the quiescent fraction is a polynomial function 
-        of the primary halo property, or is interpolated from a grid. 
-        Either way, the behavior of this method is fully determined by 
-        its values at the model abcissa, as specified in param_dict. 
         """
 
-        model_abcissa = self.param_dict[self.abcissa_key]
-        model_ordinates = self.param_dict[self.ordinates_key]
+        # If requested, update the parameter dictionary defining the behavior of the model
+        if 'input_param_dict' in kwargs.keys():
+            input_param_dict = kwargs['input_param_dict']
+            for key in self.param_dict.keys():
+                if key in input_param_dict.keys():
+                    self.param_dict[key] = input_param_dict[key]
 
-        if self.interpol_method=='polynomial':
-            mean_quiescence_fraction = occuhelp.polynomial_from_table(
-                model_abcissa,model_ordinates,input_abcissa)
-        elif self.interpol_method=='spline':
-            mean_quiescence_fraction = self.spline_function(input_abcissa)
+        if 'mass_like' in kwargs.keys():
+            mass_like = kwargs['mass_like']
+        elif 'prim_haloprop' in kwargs.keys():
+            mass_like = kwargs['prim_haloprop']
+        elif 'halos' in kwargs.keys():
+            mass_like = kwargs['halos'][self.prim_haloprop_key]
+        elif 'galaxy_table' in kwargs.keys():
+            mass_like = kwargs['galaxy_table'][self.prim_haloprop_key]            
+        else:
+            raise KeyError("Must pass mean_galprop_fraction one of the "
+                "following keyword arguments:\n'mass_like', 'prim_haloprop', 'halos', or 'galaxy_table'\n"
+                "Received none of these.")
+
+        if self._logparam is True:
+            mass_like = np.log10(mass_like)
+
+        model_ordinates = [self.param_dict[ordinate_key] for ordinate_key in self._ordinates_keys]
+        if self._interpol_method=='polynomial':
+            mean_galprop_fraction = occuhelp.polynomial_from_table(
+                self._abcissa,model_ordinates,mass_like)
+        elif self._interpol_method=='spline':
+            spline_function = occuhelp.custom_spline(
+                self._abcissa,model_ordinates,
+                    k=self._spline_degree)
+            mean_galprop_fraction = spline_function(mass_like)
         else:
             raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
 
-        # Enforce boundary conditions of any Fraction function
-        test_negative = np.array(mean_quiescence_fraction<0)
-        test_exceeds_unity = np.array(mean_quiescence_fraction>1)
-        mean_quiescence_fraction[test_negative]=0
-        mean_quiescence_fraction[test_exceeds_unity]=1
+        # Enforce boundary conditions 
+        mean_galprop_fraction[mean_galprop_fraction<0]=0
+        mean_galprop_fraction[mean_galprop_fraction>1]=1
 
-        return mean_quiescence_fraction
+        return mean_galprop_fraction
 
+    def _mc_galprop(self, **kwargs):
+        """
+        Monte Carlo realization of the binary-valued galprop. 
 
+        Parameters 
+        ----------
+        mass_like : array_like, optional keyword argument
+            Array of primary halo property, e.g., `mvir`, 
+            at which the galprop fraction is being computed. 
 
+        prim_haloprop : array_like, optional keyword argument
+            Array of primary halo property, e.g., `mvir`, 
+            at which the galprop fraction is being computed. 
+            Functionality is equivalent to using the mass_like keyword argument. 
+
+        halos : table, optional keyword argument
+            Astropy Table containing a halo catalog. 
+            If the ``halos`` keyword argument is passed, 
+            ``self.prim_haloprop_key`` must be a column of the halo catalog. 
+
+        galaxy_table : table, optional keyword argument
+            Astropy Table containing a galaxy catalog. 
+            If the ``galaxy_table`` keyword argument is passed, 
+            ``self.prim_haloprop_key`` must be a column of the galaxy catalog. 
+
+        input_param_dict : dict, optional keyword argument 
+            If passed, the model will first update 
+            its param_dict with input_param_dict, altering the behavior of the model. 
+
+        Returns 
+        -------
+        mc_galprop_fraction : array_like
+            Boolean value of whether or not the mock galaxy is posses the galprop, 
+            where the Monte Carlo realization is drawn from a nearest-integer 
+            distribution determined by `_mean_galprop_fraction`. 
+
+        """
+        mean_galprop_fraction = self._mean_galprop_fraction(**kwargs)
+        mc_generator = np.random.random(custom_len(mean_galprop_fraction))
+        mc_galprop = np.zeros_like(mean_galprop_fraction, dtype=bool)
+        mc_galprop[mc_generator<mean_galprop_fraction] = True
+        return mc_galprop
 
 
 
