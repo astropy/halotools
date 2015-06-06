@@ -1,28 +1,209 @@
 # -*- coding: utf-8 -*-
 """
-Module containing the primary class used to build 
-composite HOD-style models from a set of components. 
+Module storing the various factories used to build galaxy-halo models. 
 """
 
-__all__ = ['HodModelFactory']
+__all__ = ['ModelFactory', 'SubhaloModelFactory', 'HodModelFactory']
 __author__ = ['Andrew Hearin']
 
-from functools import partial
 import numpy as np
 from copy import copy
+from functools import partial
+
+from astropy.extern import six
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 from . import occupation_helpers as occuhelp
 from . import model_defaults
-from . import mock_factory
+from . import mock_factories
 from . import preloaded_hod_blueprints
 from . import gal_prof_factory
 from . import halo_prof_components
 
 from ..sim_manager.read_nbody import ProcessedSnapshot
 from ..sim_manager.generate_random_sim import FakeSim
+from ..utils.array_utils import array_like_length as custom_len
 
 
-class HodModelFactory(object):
+@six.add_metaclass(ABCMeta)
+class ModelFactory(object):
+    """ Abstract container class used to build 
+    any composite model of the galaxy-halo connection. 
+    """
+
+    def __init__(self, input_model_blueprint, **kwargs):
+
+        # Bind the model-building instructions to the composite model
+        self._input_model_blueprint = input_model_blueprint
+
+    def populate_mock(self, **kwargs):
+        """ Method used to populate a simulation using the model. 
+
+        After calling this method, ``self`` will have a new ``mock`` attribute, 
+        which has a ``galaxy_table`` bound to it containing the Monte Carlo 
+        realization of the model. 
+
+        Parameters 
+        ----------
+        snapshot : object, optional keyword argument
+            Class instance of `~halotools.sim_manager.ProcessedSnapshot`. 
+            This object contains the halo catalog and its metadata.  
+
+        """
+
+        if hasattr(self, 'mock'):
+            self.mock.populate()
+        else:
+            if 'snapshot' in kwargs.keys():
+                snapshot = kwargs['snapshot']
+                # we need to delete the 'snapshot' keyword 
+                # or else the call to mock_factories below 
+                # will pass multiple snapshot arguments
+                del kwargs['snapshot']
+            else:
+                snapshot = ProcessedSnapshot(**kwargs)
+
+            mock_factories = self.model_blueprint['mock_factories']
+            mock = mock_factories(snapshot, self, **kwargs)
+            self.mock = mock
+
+
+class SubhaloModelFactory(ModelFactory):
+    """ Class used to build any model of the galaxy-halo connection 
+    in which there is a one-to-one correspondence between subhalos and galaxies.  
+
+    Can be thought of as a factory that takes a model blueprint as input, 
+    and generates a Subhalo Model object. The returned object can be used directly to 
+    populate a simulation with a Monte Carlo realization of the model. 
+    """
+
+    def __init__(self, input_model_blueprint, **kwargs):
+        """
+        Parameters
+        ----------
+        input_model_blueprint : dict 
+            The main dictionary keys of ``input_model_blueprint`` 
+            are ``galprop_key`` strings, the names of 
+            properties that will be assigned to galaxies 
+            e.g., ``stellar_mass``, ``sfr``, ``morphology``, etc. 
+            The dictionary value associated with each ``galprop_key``  
+            is a class instance of the type of model that 
+            maps that property onto subhalos. 
+
+        """
+
+        super(SubhaloModelFactory, self).__init__(input_model_blueprint, **kwargs)
+
+        self.model_blueprint, self.galprop_list = self._interpret_input_model_blueprint()
+        
+        self._build_composite_lists()
+
+        self._set_primary_behaviors()
+
+
+    def _interpret_input_model_blueprint(self):
+
+        model_blueprint = copy(self._input_model_blueprint)
+
+        if 'mock_factories' not in model_blueprint.keys():
+            model_blueprint['mock_factories'] = mock_factories.SubhaloMockFactory
+
+        unordered_galprop_list = [key for key in model_blueprint.keys() if key is not 'mock_factories']
+
+        # If necessary, put the unordered_galprop_list into its proper order
+        # Note that this is only robust to the case of two-property composite models
+        # For more complicated models, a smarter algorithm will be necessary, 
+        # so we raise an exception to protect against that case
+        if custom_len(unordered_galprop_list) > 2:
+            raise KeyError("SubhaloModelFactory does not support assignment of "
+                "more than two galaxy properties")
+
+        temp_required_galprop_dict = {}
+        for galprop in unordered_galprop_list:
+            component_model = model_blueprint[galprop]
+            if hasattr(component_model, 'required_galprops'):
+                temp_required_galprop_dict[galprop] = component_model.required_galprops
+
+        if len(temp_required_galprop_dict) == 0:
+            galprop_list = unordered_galprop_list
+            
+        elif len(temp_required_galprop_dict) == 1:
+            galprop_list = temp_required_galprop_dict.values()[0]
+            galprop_list.extend(temp_required_galprop_dict.keys()[0])
+        else:
+            raise KeyError("Cannot resolve model interdependencies:\n"
+                "Both component models depend on each other simultaneously\n"
+                "This composite model cannot be decomposed in a sensible way")
+
+        return model_blueprint, galprop_list
+
+    def _set_primary_behaviors(self):
+        """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
+        that will be used by the outside world.  
+
+        Notes 
+        -----
+        The new methods created here are given standardized names, 
+        for consistent communication with the rest of the package. 
+        This consistency is particularly important for mock-making, 
+        so that the `SubhaloModelFactory` can always call the same functions 
+        regardless of the complexity of the model. 
+
+        The behaviors of the methods created here are defined elsewhere; 
+        `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
+        """
+
+        for galprop in self.galprop_list:
+            component_model = self.model_blueprint[galprop]
+            new_method_name = galprop + '_model_func'
+            new_method_behavior = component_model.__call__
+            setattr(self, new_method_name, new_method_behavior)
+
+    def _build_composite_lists(self):
+        """ A composite model has several lists that are built up from 
+        the components: ``haloprop_list``, ``publications``, and 
+        ``new_haloprop_func_dict``. 
+        """
+
+        haloprop_list = []
+        pub_list = []
+        new_haloprop_func_dict = {}
+
+        for galprop in self.galprop_list:
+            component_model = self.model_blueprint[galprop]
+
+            # haloprop keys
+            if hasattr(component_model, 'prim_haloprop_key'):
+                haloprop_list.append(component_model.prim_haloprop_key)
+            if hasattr(component_model, 'sec_haloprop_key'):
+                haloprop_list.append(component_model.sec_haloprop_key)
+
+            # Reference list
+            if hasattr(component_model, 'publications'):
+                pub_list.extend(component_model.publications)
+
+            # Haloprop function dictionaries
+            if hasattr(component_model, 'new_haloprop_func_dict'):
+                dict_intersection = set(new_haloprop_func_dict).intersection(
+                    set(component_model.new_haloprop_func_dict))
+                if dict_intersection == set():
+                    new_haloprop_func_dict = (
+                        new_haloprop_func_dict.items() + 
+                        component_model.new_haloprop_func_dict.items()
+                        )
+                else:
+                    example_repeated_element = list(dict_intersection)[0]
+                    raise KeyError("The composite model received multiple "
+                        "component models with a new_haloprop_func_dict that use "
+                        "the %s key" % example_repeated_element)
+
+        self.haloprop_list = list(set(haloprop_list))
+        self.publications = list(set(pub_list))
+        self.new_haloprop_func_dict = new_haloprop_func_dict
+
+
+
+class HodModelFactory(ModelFactory):
     """ Class used to build HOD-style models of the galaxy-halo connection. 
 
     Can be thought of as a factory that takes an HOD model blueprint as input, 
@@ -66,8 +247,7 @@ class HodModelFactory(object):
 
         """
 
-        # Bind the model-building instructions to the composite model
-        self._input_model_blueprint = input_model_blueprint
+        super(HodModelFactory, self).__init__(input_model_blueprint, **kwargs)
 
         # Create attributes for galaxy types and their occupation bounds
         self._set_gal_types()
@@ -114,45 +294,10 @@ class HodModelFactory(object):
                     gal_type, input_prof_model)
                 model_blueprint[gal_type]['profile'] = prof_model
 
-        if 'mock_factory' not in model_blueprint.keys():
-            model_blueprint['mock_factory'] = mock_factory.HodMockFactory
+        if 'mock_factories' not in model_blueprint.keys():
+            model_blueprint['mock_factories'] = mock_factories.HodMockFactory
 
         return model_blueprint 
-
-
-    def populate_mock(self, **kwargs):
-        """ Method used to populate a simulation using the model. 
-
-        After calling this method, ``self`` will have a new ``mock`` attribute, 
-        which is an instance of `~halotools.empirical_models.mock_factory.HodMockFactory`. 
-
-        Parameters 
-        ----------
-        snapshot : object, optional keyword argument
-            Class instance of `~halotools.sim_manager.ProcessedSnapshot`. 
-            This object contains the halo catalog and its metadata.  
-
-        kwargs : additional optional keyword arguments 
-            Any keyword of either 
-            `~halotools.sim_manager.read_nbody.ProcessedSnapshot` or 
-            `~halotools.empirical_models.mock_factory.HodMockFactory` is supported. 
-        """
-
-        if hasattr(self, 'mock'):
-            self.mock.populate()
-        else:
-            if 'snapshot' in kwargs.keys():
-                snapshot = kwargs['snapshot']
-                # we need to delete the 'snapshot' keyword 
-                # or else the call to mock_factory below 
-                # will pass multiple snapshot arguments
-                del kwargs['snapshot']
-            else:
-                snapshot = ProcessedSnapshot(**kwargs)
-
-            mock_factory = self.model_blueprint['mock_factory']
-            mock = mock_factory(snapshot, self, **kwargs)
-            self.mock = mock
 
     def _set_gal_types(self):
         """ Private method binding the ``gal_types`` list attribute,
@@ -162,7 +307,7 @@ class HodModelFactory(object):
         in ascending order of the occupation bound. 
         """
 
-        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factory']
+        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factories']
 
         occupation_bounds = []
         for gal_type in gal_types:
@@ -280,7 +425,7 @@ class HodModelFactory(object):
             -------
             gal_prof_param_func : object
                 Function object called by 
-                `~halotools.empirical_models.mock_factory.HodMockFactory` 
+                `~halotools.empirical_models.mock_factories.HodMockFactory` 
                 to map galaxy profile parameters onto mock galaxies. 
 
             Notes 
@@ -336,7 +481,7 @@ class HodModelFactory(object):
         Parameters 
         ----------
         mock_obj : object 
-            Instance of `~halotools.empirical_models.mock_factory.HodMockFactory`. 
+            Instance of `~halotools.empirical_models.mock_factories.HodMockFactory`. 
 
         gal_type : string 
             Name of the galaxy population. 
@@ -350,7 +495,7 @@ class HodModelFactory(object):
         Notes 
         -----
         This method is not directly called by 
-        `~halotools.empirical_models.mock_factory.HodMockFactory`. 
+        `~halotools.empirical_models.mock_factories.HodMockFactory`. 
         Instead, the `_set_primary_behaviors` method calls functools.partial 
         to create a ``mc_pos_gal_type`` method for each ``gal_type`` in the model. 
 
@@ -537,6 +682,11 @@ class HodModelFactory(object):
 
 
 ##########################################
+
+
+
+
+
 
 
 

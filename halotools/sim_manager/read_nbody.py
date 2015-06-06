@@ -46,7 +46,7 @@ from astropy.utils.data import _open_shelve as open_shelve
 from . import cache_config, supported_sims, sim_defaults
 
 from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 from ..utils.io_utils import download_file_from_url
 
 
@@ -729,13 +729,13 @@ class CatalogManager(object):
         """
         filename_list = self.available_snapshots(
             location, catalog_type, simname, halo_finder)
-        if aph_len(filename_list) == 0:
+        if custom_len(filename_list) == 0:
             return None
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
         result = halocat_obj.closest_halocat(filename_list, input_redshift, 
             **kwargs)
-        if aph_len(result) == 0:
+        if custom_len(result) == 0:
             print("No halo catalogs found in cache for simname = %s "
                 " and halo-finder = %s" % (simname, halo_finder))
             return None
@@ -1061,7 +1061,7 @@ class CatalogManager(object):
 
             result = self.closest_halocat(
                 'cache', 'halos', simname, halo_finder, redshift)
-            if aph_len(result) == 0:
+            if custom_len(result) == 0:
                 return None
             else:
                 fname, z = result[0], result[1]

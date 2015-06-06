@@ -10,13 +10,13 @@ __all__=['solve_for_polynomial_coefficients','format_parameter_keys']
 
 import numpy as np
 from copy import copy
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 
 from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
 
-def solve_for_polynomial_coefficients(abcissa,ordinates):
+def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
     minimum-degree polynomial that passes through 
     the input abcissa and attains values equal the input ordinates.  
@@ -34,7 +34,7 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
     -------
     polynomial_coefficients : array 
         Elements are the coefficients determining the polynomial. 
-        Element i of polynomial_coefficients gives the degree i coefficient.
+        Element i of polynomial_coefficients gives the degree i polynomial coefficient.
 
     Notes
     --------
@@ -47,9 +47,8 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
     ordinates when the polynomial is evaluated at the input abcissa.
     The coefficients of that unique polynomial are the output of the function. 
 
-    This function is used by many of the methods in this module. For example, suppose 
-    that a model in which the quenched fraction is 
-    :math:`F_{q}(logM = 12) = 0.25` and :math:`F_{q}(logM = 15) = 0.9`. 
+    As an example, suppose that a model in which the quenched fraction is 
+    :math:`F_{q}(logM_{\\mathrm{halo}} = 12) = 0.25` and :math:`F_{q}(logM_{\\mathrm{halo}} = 15) = 0.9`. 
     Then this function takes [12, 15] as the input abcissa, 
     [0.25, 0.9] as the input ordinates, 
     and returns the array :math:`[c_{0}, c_{1}]`. 
@@ -59,8 +58,7 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
     
     """
 
-    ones = np.zeros(len(abcissa)) + 1
-    columns = ones
+    columns = np.ones(len(abcissa))
     for i in np.arange(len(abcissa)-1):
         columns = np.append(columns,[abcissa**(i+1)])
     quenching_model_matrix = columns.reshape(
@@ -98,14 +96,12 @@ def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
         input_abcissa = np.array(input_abcissa)
     coefficient_array = solve_for_polynomial_coefficients(
         table_abcissa,table_ordinates)
-    output_ordinates = np.zeros(aph_len(input_abcissa))
+    output_ordinates = np.zeros(custom_len(input_abcissa))
     # Use coefficients to compute values of the inflection function polynomial
     for n,coeff in enumerate(coefficient_array):
         output_ordinates += coeff*input_abcissa**n
 
     return output_ordinates
-
-
 
 def format_parameter_keys(input_param_dict,correct_initial_keys,
     gal_type, key_prefix=None):
@@ -236,22 +232,22 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
 
     """
 
-    if aph_len(abcissa) > 1:
+    if custom_len(abcissa) > 1:
         abcissa = np.array(abcissa)
-    if aph_len(values_inside_bins) > 1:
+    if custom_len(values_inside_bins) > 1:
         values_inside_bins = np.array(values_inside_bins)
         bin_midpoints = np.array(bin_midpoints)
 
     # If there are multiple abcissa bins, make sure they do not overlap
-    if aph_len(bin_midpoints)>1:
+    if custom_len(bin_midpoints)>1:
         midpoint_differences = np.diff(bin_midpoints)
         minimum_separation = midpoint_differences.min()
         if minimum_separation < bin_width:
             raise ValueError("Abcissa bins are not permitted to overlap")
 
-    output = np.zeros(aph_len(abcissa)) + value_outside_bins
+    output = np.zeros(custom_len(abcissa)) + value_outside_bins
 
-    if aph_len(bin_midpoints)==1:
+    if custom_len(bin_midpoints)==1:
         idx_abcissa_in_bin = np.where( 
             (abcissa >= bin_midpoints - bin_width/2.) & (abcissa < bin_midpoints + bin_width/2.) )[0]
         print(idx_abcissa_in_bin)
@@ -268,7 +264,7 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
     return output
 
 
-def aph_spline(table_abcissa, table_ordinates, k=0):
+def custom_spline(table_abcissa, table_ordinates, k=0):
     """ Simple workaround to replace scipy's silly convention 
     for treating the spline_degree=0 edge case. 
 
@@ -300,14 +296,14 @@ def aph_spline(table_abcissa, table_ordinates, k=0):
     """
 
 
-    if aph_len(table_abcissa) != aph_len(table_ordinates):
-        len_abcissa = aph_len(table_abcissa)
-        len_ordinates = aph_len(table_ordinates)
+    if custom_len(table_abcissa) != custom_len(table_ordinates):
+        len_abcissa = custom_len(table_abcissa)
+        len_ordinates = custom_len(table_ordinates)
         raise TypeError("table_abcissa and table_ordinates must have the same length \n"
             " len(table_abcissa) = %i and len(table_ordinates) = %i" % (len_abcissa, len_ordinates))
 
-    if k >= aph_len(table_abcissa):
-        len_abcissa = aph_len(table_abcissa)
+    if k >= custom_len(table_abcissa):
+        len_abcissa = custom_len(table_abcissa)
         raise ValueError("Input spline degree k = %i "
             "must be less than len(abcissa) = %i" % (k, len_abcissa))
 
@@ -317,10 +313,10 @@ def aph_spline(table_abcissa, table_ordinates, k=0):
     if k<0:
         raise ValueError("Spline degree must be non-negative")
     elif k==0:
-        if aph_len(table_ordinates) != 1:
+        if custom_len(table_ordinates) != 1:
             raise TypeError("In spline_degree=0 edge case, "
                 "table_abcissa and table_abcissa must be 1-element arrays")
-        return lambda x : table_ordinates[0]
+        return lambda x : np.zeros(custom_len(x)) + table_ordinates[0]
     else:
         spline_function = spline(table_abcissa, table_ordinates, k=k)
         return spline_function
