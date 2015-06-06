@@ -15,8 +15,9 @@ simulations with mock galaxies. See the tutorials on these models
 for further details on their use. 
 """
 
-__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats', 'vdB03Quiescence']
+__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats', 'BinaryGalpropTemplate']
 
+from functools import partial
 from copy import copy
 import numpy as np
 from scipy.special import erf 
@@ -575,7 +576,7 @@ class Kravtsov04Sats(OccupationComponent):
             raise KeyError("For Kravtsov04Sats, only supported best-fit models are currently Zheng et al. 2007")
 
 
-class vdB03Quiescence(object):
+class BinaryGalpropTemplate(object):
     """
     Traditional HOD-style model of galaxy quenching 
     in which the expectation value for a binary SFR designation of the galaxy 
@@ -605,72 +606,72 @@ class vdB03Quiescence(object):
 
     """
 
-#    def __init__(self, gal_type, param_dict=model_defaults.default_quiescence_dict, 
-#        interpol_method='spline',input_spline_degree=3):
-    def __init__(self, **kwargs):
+    def __init__(self,  logparam=True, abcissa = [12, 15], ordinates = [0.25, 0.75], interpol_method='spline',
+        prim_haloprop_key = 'mvir', galprop_key = 'quiescent', 
+        **kwargs):
         """ 
         Parameters 
         ----------
-        abcissa : array, keyword argument 
+        abcissa : array, optional keyword argument 
             Values of the primary halo property at which the quiescent fraction is specified. 
+            Default is [12, 15]
 
-        ordinates : array, keyword argument 
+        ordinates : array, optional keyword argument 
             Values of the quiescent fraction  when evaluated at the input abcissa. 
+            Default is [0.25, 0.75]
 
-        gal_type : string, optional
+        galprop_key : array, optional keyword argument 
+            String defining the type of galaxy property being assigned a binary value. 
+            Default is 'quiescent'. 
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the key name used to access the primary halo property 
+            from an input halo or galaxy catalog. Default is 'mvir'. 
+
+        gal_type : string, optional keyword argument
             Name of the galaxy population being modeled, e.g., 'centrals'. 
             This is only necessary to specify in cases where 
             the `vdB03Quiescence` instance is part of a composite model, 
             with multiple population types. 
 
-        interpol_method : string, optional 
-            Keyword specifying how `mean_quiescence_fraction` 
+        interpol_method : string, optional keyword argument 
+            Keyword specifying how `mean_galprop_fraction` 
             evaluates input values of the primary halo property. 
             The default spline option interpolates the 
             model's abcissa and ordinates. 
             The polynomial option uses the unique, degree N polynomial 
             passing through the ordinates, where N is the number of supplied ordinates. 
 
-        input_spline_degree : int, optional
+        logparam : bool, optional keyword argument
+            If set to True, the interpolation will be done 
+            in the base-10 logarithm of the halo property, rather than in the halo property. 
+            Default is True. 
+
+        input_spline_degree : int, optional keyword argument
             Degree of the spline interpolation for the case of interpol_method='spline'. 
             If there are k abcissa values specifying the model, input_spline_degree 
             is ensured to never exceed k-1, nor exceed 5. 
         """
 
+        self._interpol_method = interpol_method
+        self._logparam = logparam
+        self._abcissa = abcissa
+        self._ordinates = ordinates
+        self.prim_haloprop_key = prim_haloprop_key
+        self.galprop_key = galprop_key
+        setattr(self, self.galprop_key+'_abcissa', self._abcissa)
+
         if 'gal_type' in kwargs.keys():
             self.gal_type = kwargs['gal_type']
+            self._abcissa_key = self.galprop_key+'_abcissa_'+self.gal_type
+            self._ordinates_key_prefix = self.galprop_key+'_ordinates_'+self.gal_type
         else:
-            self.gal_type = None
-
-        if 'abcissa' in kwargs.keys():
-            self.abcissa = kwargs['abcissa']
-        else:
-            self.abcissa = [12, 15]
-
-        if 'ordinates' in kwargs.keys():
-            self.ordinates = kwargs['ordinates']
-        else:
-            self.ordinates = [0.25, 0.75]
-
-        # Put param_dict keys in standard form
-        if self.gal_type is None:
-            self.abcissa_key = 'quiescence_abcissa'
-            self.ordinates_key = 'quiescence_ordinates'
-        else:
-            self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
-            self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
+            self._abcissa_key = self.galprop_key+'_abcissa'
+            self._ordinates_key_prefix = self.galprop_key+'_ordinates'
 
         self._build_param_dict()
 
-        # Set the interpolation scheme 
-        if 'interpol_method' in kwargs.keys():
-            self.interpol_method = kwargs['interpol_method']
-        else:
-            self.interpol_method = 'spline'
-        if self.interpol_method not in ['spline', 'polynomial']:
-            raise KeyError("Input interpol_method must be 'polynomial' or 'spline'.")
-
-        if self.interpol_method=='spline':
+        if self._interpol_method=='spline':
             if 'input_spline_degree' in kwargs.keys():
                 self._input_spine_degree = kwargs['input_spline_degree']
             else:
@@ -678,64 +679,150 @@ class vdB03Quiescence(object):
             scipy_maxdegree = 5
             self._spline_degree = np.min(
                 [scipy_maxdegree, self._input_spline_degree, 
-                custom_len(self.abcissa)-1])
-            self.spline_function = occuhelp.custom_spline(
-                self.param_dict[self.abcissa_key],
-                self.param_dict[self.ordinates_key],
-                k=self._spline_degree)
+                custom_len(self._abcissa)-1])
+
+        setattr(self, 'mean_'+self.galprop_key+'_fraction', self._mean_galprop_fraction)
+        setattr(self, 'mc_'+self.galprop_key+'_fraction', self._mc_galprop_fraction)
 
     def _build_param_dict(self):
-        keys = [self.ordinates_key + '_param' + str(i+1) for i in range(custom_len(self.abcissa))]
-        values = self.ordinates
-        print keys
-        self.param_dict = {key:value for key, value in zip(keys, values)}
 
-    def mean_quiescence_fraction(self,input_abcissa):
+        self._ordinates_keys = [self._ordinates_key_prefix + '_param' + str(i+1) for i in range(custom_len(self._abcissa))]
+        self.param_dict = {key:value for key, value in zip(self._ordinates_keys, self._ordinates)}
+
+    def _mean_galprop_fraction(self, **kwargs):
         """
-        Expected fraction of gal_type galaxies that are quiescent 
-        as a function of the primary halo property.
+        Expected value for the galprop value of the galaxies living in the 
+        inpu thalos.  
 
         Parameters 
         ----------
-        input_abcissa : array_like
-            array of primary halo property at which the quiescent fraction 
-            is being computed. 
+        mass_like : array_like, optional keyword argument
+            Array of primary halo property, e.g., `mvir`, 
+            at which the quiescent fraction is being computed. 
+
+        prim_haloprop : array_like, optional keyword argument
+            Array of primary halo property, e.g., `mvir`, 
+            at which the quiescent fraction is being computed. 
+            Functionality is equivalent to using the mass_like keyword argument. 
+
+        halos : table, optional keyword argument
+            Astropy Table containing a halo catalog. 
+            If using a `halos` argument, you must also pass 
+            a ``prim_haloprop_key`` keyword 
+            argument either to this function, or to the constructor of 
+            vdB03Quiescence upon class instantiation. 
+
+        galaxy_table : table, optional keyword argument
+            Astropy Table containing a galaxy catalog. 
+            If using a `galaxy_tablef` argument, you must also pass 
+            a ``prim_haloprop_key`` keyword 
+            argument either to this function, or to the constructor of 
+            vdB03Quiescence upon class instantiation. 
+
+        input_param_dict : dict, optional keyword argument 
+            If passed, the vdB03Quiescence model will first update 
+            its param_dict with input_param_dict, altering the behavior of the model 
 
         Returns 
         -------
-        mean_quiescence_fraction : array_like
+        mean_galprop_fraction : array_like
             Values of the quiescent fraction evaluated at input_abcissa. 
 
         Notes 
         -----
-
         Either assumes the quiescent fraction is a polynomial function 
         of the primary halo property, or is interpolated from a grid. 
         Either way, the behavior of this method is fully determined by 
         its values at the model abcissa, as specified in param_dict. 
         """
 
-        model_abcissa = self.param_dict[self.abcissa_key]
-        model_ordinates = self.param_dict[self.ordinates_key]
+        # If requested, update the parameter dictionary defining the behavior of the model
+        if 'input_param_dict' in kwargs.keys():
+            input_param_dict = kwargs['input_param_dict']
+            for key in self.param_dict.keys():
+                if key in input_param_dict.keys():
+                    self.param_dict[key] = input_param_dict[key]
 
-        if self.interpol_method=='polynomial':
-            mean_quiescence_fraction = occuhelp.polynomial_from_table(
-                model_abcissa,model_ordinates,input_abcissa)
-        elif self.interpol_method=='spline':
-            mean_quiescence_fraction = self.spline_function(input_abcissa)
+        if 'mass_like' in kwargs.keys():
+            mass_like = kwargs['mass_like']
+        elif 'prim_haloprop' in kwargs.keys():
+            mass_like = kwargs['prim_haloprop']
+        elif 'halos' in kwargs.keys():
+            mass_like = kwargs['halos'][self.prim_haloprop_key]
+        elif 'galaxy_table' in kwargs.keys():
+            mass_like = kwargs['galaxy_table'][self.prim_haloprop_key]            
+        else:
+            raise KeyError("Must pass mean_galprop_fraction one of the "
+                "following keyword arguments:\n'mass_like', 'prim_haloprop', 'halos', or 'galaxy_table'\n"
+                "Received none of these.")
+
+        if self._logparam is True:
+            mass_like = np.log10(mass_like)
+
+        model_ordinates = [self.param_dict[ordinate_key] for ordinate_key in self._ordinates_keys]
+        if self._interpol_method=='polynomial':
+            mean_galprop_fraction = occuhelp.polynomial_from_table(
+                self._abcissa,model_ordinates,mass_like)
+        elif self._interpol_method=='spline':
+            spline_function = occuhelp.custom_spline(
+                self._abcissa,model_ordinates,
+                    k=self._spline_degree)
+            mean_galprop_fraction = spline_function(mass_like)
         else:
             raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
 
-        # Enforce boundary conditions of any Fraction function
-        test_negative = np.array(mean_quiescence_fraction<0)
-        test_exceeds_unity = np.array(mean_quiescence_fraction>1)
-        mean_quiescence_fraction[test_negative]=0
-        mean_quiescence_fraction[test_exceeds_unity]=1
+        # Enforce boundary conditions 
+        mean_galprop_fraction[mean_galprop_fraction<0]=0
+        mean_galprop_fraction[mean_galprop_fraction>1]=1
 
-        return mean_quiescence_fraction
+        return mean_galprop_fraction
 
+    def _mc_galprop_fraction(self, **kwargs):
+        """
+        Monte Carlo realization of the binary-valued galprop. 
 
+        Parameters 
+        ----------
+        mass_like : array_like, optional keyword argument
+            Array of primary halo property, e.g., `mvir`, 
+            at which the quiescent fraction is being computed. 
 
+        prim_haloprop : array_like, optional keyword argument
+            Array of primary halo property, e.g., `mvir`, 
+            at which the quiescent fraction is being computed. 
+            Functionality is equivalent to using the mass_like keyword argument. 
+
+        halos : table, optional keyword argument
+            Astropy Table containing a halo catalog. 
+            If using a `halos` argument, you must also pass 
+            a ``prim_haloprop_key`` keyword 
+            argument either to this function, or to the constructor of 
+            vdB03Quiescence upon class instantiation. 
+
+        galaxy_table : table, optional keyword argument
+            Astropy Table containing a galaxy catalog. 
+            If using a `galaxy_tablef` argument, you must also pass 
+            a ``prim_haloprop_key`` keyword 
+            argument either to this function, or to the constructor of 
+            vdB03Quiescence upon class instantiation. 
+
+        input_param_dict : dict, optional keyword argument 
+            If passed, the vdB03Quiescence model will first update 
+            its param_dict with input_param_dict, altering the behavior of the model 
+
+        Returns 
+        -------
+        mc_galprop_fraction : array_like
+            Boolean value of whether or not the mock galaxy is quiescent, 
+            where the Monte Carlo distribution is a nearest-integer 
+            distribution determined by `mean_galprop_fraction`. 
+
+        """
+        mean_galprop_fraction = self._mean_galprop_fraction(**kwargs)
+        mc_generator = np.random.random(custom_len(mean_galprop_fraction))
+        mc_galprop = np.zeros_like(mean_galprop_fraction, dtype=bool)
+        mc_galprop[mc_generator<mean_galprop_fraction] = True
+        return mc_galprop
 
 
 
