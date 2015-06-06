@@ -10,7 +10,7 @@ from . import hod_components as hoc
 from . import gal_prof_factory as gpf
 from . import halo_prof_components as hpc
 from . import gal_prof_components as gpc
-from . import mock_factory
+from . import mock_factories
 
 __all__ = ['Kravtsov04_blueprint']
 
@@ -75,7 +75,7 @@ def Kravtsov04_blueprint(**kwargs):
 	model_blueprint = {
 		dark_side_cen_model.gal_type : cen_model_dict,
 		dark_side_sat_model.gal_type : sat_model_dict, 
-		'mock_factory' : mock_factory.HodMockFactory
+		'mock_factories' : mock_factories.HodMockFactory
 		}
 
 	return model_blueprint
