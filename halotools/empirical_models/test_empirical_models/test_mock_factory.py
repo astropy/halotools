@@ -37,12 +37,12 @@ def test_preloaded_hod_mocks():
             assert key in mock1.galaxy_table.keys()
 
         mock1.build_halo_prof_lookup_tables()
-        assert np.all(mock1.galaxy_table['x'] > 0)
-        assert np.all(mock1.galaxy_table['y'] > 0)
-        assert np.all(mock1.galaxy_table['z'] > 0)
-        assert np.all(mock1.galaxy_table['x'] < mock1.snapshot.Lbox)
-        assert np.all(mock1.galaxy_table['y'] < mock1.snapshot.Lbox)
-        assert np.all(mock1.galaxy_table['z'] < mock1.snapshot.Lbox)
+        assert np.all(mock1.galaxy_table['x'] >= 0)
+        assert np.all(mock1.galaxy_table['y'] >= 0)
+        assert np.all(mock1.galaxy_table['z'] >= 0)
+        assert np.all(mock1.galaxy_table['x'] <= mock1.snapshot.Lbox)
+        assert np.all(mock1.galaxy_table['y'] <= mock1.snapshot.Lbox)
+        assert np.all(mock1.galaxy_table['z'] <= mock1.snapshot.Lbox)
 
         assert np.all(mock1.galaxy_table['halo_NFWmodel_conc'] > 0.5)
         assert np.all(mock1.galaxy_table['halo_NFWmodel_conc'] < 25)
