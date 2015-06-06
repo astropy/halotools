@@ -9,9 +9,9 @@ and so has a ``mean_occupation`` method.
 A common use for these objects is to bundle them together to make a 
 composite galaxy model, with multiple populations having their 
 own occupation statistics and profiles. Instances of classes in this module 
-can be passed to the `~halotools.empirical_models.hod_factory`, 
+can be passed to the `~halotools.empirical_models.model_factories.HodModelFactory`, 
 and you will be returned a model object that can directly populate 
-simulations with mock galaxies. See the tutorials on these models 
+simulations with mock galaxies. See the tutorials on model-building 
 for further details on their use. 
 """
 

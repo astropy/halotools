@@ -4,7 +4,7 @@
 Module containing some commonly used composite HOD models.
 
 """
-from . import hod_factory
+from . import model_factories
 from . import preloaded_hod_blueprints
 
 __all__ = ['Kravtsov04']
@@ -23,7 +23,7 @@ def Kravtsov04(**kwargs):
 	derives from the `~halotools.empirical_models.hod_components.Kravtsov04Cens` class, while for 
 	satellites the relevant class is `~halotools.empirical_models.hod_components.Kravtsov04Sats`. 
 
-	This composite model was built by the `~halotools.empirical_models.hod_factory.HodModelFactory`, 
+	This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
 	which followed the instructions contained in 
 	`~halotools.empirical_models.Kravtsov04_blueprint`. 
 
@@ -35,7 +35,7 @@ def Kravtsov04(**kwargs):
 	Returns 
 	-------
 	model : object 
-		Instance of `~halotools.empirical_models.hod_factory.HodModelFactory`
+		Instance of `~halotools.empirical_models.model_factories.HodModelFactory`
 
 	Examples 
 	--------
@@ -44,7 +44,7 @@ def Kravtsov04(**kwargs):
 
 	"""
 	blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint(**kwargs)
-	return hod_factory.HodModelFactory(blueprint, **kwargs)
+	return model_factories.HodModelFactory(blueprint, **kwargs)
 
 
 
