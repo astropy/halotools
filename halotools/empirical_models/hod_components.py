@@ -15,7 +15,7 @@ simulations with mock galaxies. See the tutorials on these models
 for further details on their use. 
 """
 
-__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats', 'BinaryGalpropTemplate']
+__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats', 'BinaryGalpropInterpolModel']
 
 from functools import partial
 from copy import copy
@@ -576,53 +576,44 @@ class Kravtsov04Sats(OccupationComponent):
             raise KeyError("For Kravtsov04Sats, only supported best-fit models are currently Zheng et al. 2007")
 
 
-class BinaryGalpropTemplate(object):
+class BinaryGalpropInterpolModel(object):
     """
-    Traditional HOD-style model of galaxy quenching 
-    in which the expectation value for a binary SFR designation of the galaxy 
-    is purely determined by the primary halo property.
-    
-    Approach is adapted from van den Bosch et al. 2003. 
-    The parameters of this component model govern the value of the quiescent fraction 
-    at a particular set of masses. 
-    The class then uses an input `halotools.occupation_helpers` function 
-    to infer the quiescent fraction at values other than the input abcissa.
+    Component model for any binary-valued galaxy property 
+    whose assignment is determined by interpolating between points on a grid. 
 
-    Notes 
-    -----
-
-    In the construction sequence of a composite HOD model, 
-    if `halotools.hod_designer` uses this component model *after* 
-    using a central occupation component, then  
-    the resulting central galaxy stellar-to-halo mass relation 
-    will have no dependence on quenched/active designation. 
-    Employing this component *before* the occupation component allows 
-    for an explicit halo mass dependence in the central galaxy SMHM. 
-    Thus the sequence of the composition of the quiescence and occupation models 
-    determines whether the resulting composite model satisfies the following 
-    classical separability condition between stellar mass and star formation rate: 
-
-    :math:`P( M_{*}, \dot{M_{*}} | M_{h}) = P( M_{*} | M_{h})\\times P( \dot{M_{*}} | M_{h})`
+    One example of a model of this class could be used to help build is 
+    Tinker et al. (2013), arXiv:1308.2974. 
+    In this model, a galaxy is either active or quiescent, 
+    and the quiescent fraction is purely a function of halo mass, with
+    separate parameters for centrals and satellites. The value of the quiescent 
+    fraction is computed by interpolating between a grid of values of mass. 
+    `BinaryGalpropInterpolModel` is quite flexible, and can be used as a template for 
+    any binary-valued galaxy property whatsoever. See the examples below for usage instructions. 
 
     """
 
-    def __init__(self,  logparam=True, abcissa = [12, 15], ordinates = [0.25, 0.75], interpol_method='spline',
-        prim_haloprop_key = 'mvir', galprop_key = 'quiescent', 
-        **kwargs):
+    def __init__(self,  logparam=True, interpol_method='spline', 
+        abcissa = [12, 15], ordinates = [0.25, 0.75], 
+        prim_haloprop_key = 'mvir', galprop_key = 'quiescent', **kwargs):
         """ 
         Parameters 
         ----------
+        galprop_key : array, optional keyword argument 
+            String giving the name of galaxy property being assigned a binary value. 
+            Default is 'quiescent'. 
+
         abcissa : array, optional keyword argument 
-            Values of the primary halo property at which the quiescent fraction is specified. 
-            Default is [12, 15]
+            Values of the primary halo property at which the galprop fraction is specified. 
+            Default is [12, 15], in accord with the default True value for ``logparam``. 
 
         ordinates : array, optional keyword argument 
-            Values of the quiescent fraction  when evaluated at the input abcissa. 
+            Values of the galprop fraction when evaluated at the input abcissa. 
             Default is [0.25, 0.75]
 
-        galprop_key : array, optional keyword argument 
-            String defining the type of galaxy property being assigned a binary value. 
-            Default is 'quiescent'. 
+        logparam : bool, optional keyword argument
+            If set to True, the interpolation will be done 
+            in the base-10 logarithm of the primary halo property, 
+            rather than linearly. Default is True. 
 
         prim_haloprop_key : string, optional keyword argument 
             String giving the key name used to access the primary halo property 
@@ -631,8 +622,8 @@ class BinaryGalpropTemplate(object):
         gal_type : string, optional keyword argument
             Name of the galaxy population being modeled, e.g., 'centrals'. 
             This is only necessary to specify in cases where 
-            the `vdB03Quiescence` instance is part of a composite model, 
-            with multiple population types. 
+            the `BinaryGalpropInterpolModel` instance is part of a composite model, 
+            with multiple population types. Default is None. 
 
         interpol_method : string, optional keyword argument 
             Keyword specifying how `mean_galprop_fraction` 
@@ -642,15 +633,44 @@ class BinaryGalpropTemplate(object):
             The polynomial option uses the unique, degree N polynomial 
             passing through the ordinates, where N is the number of supplied ordinates. 
 
-        logparam : bool, optional keyword argument
-            If set to True, the interpolation will be done 
-            in the base-10 logarithm of the halo property, rather than in the halo property. 
-            Default is True. 
-
         input_spline_degree : int, optional keyword argument
             Degree of the spline interpolation for the case of interpol_method='spline'. 
             If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
+            is ensured to never exceed k-1, nor exceed 5. Default is 3. 
+
+        Examples
+        -----------       
+        Suppose we wish to construct a model for whether a central galaxy is 
+        star-forming or quiescent. We want to set the quiescent fraction to 1/3 
+        for Milky Way-type centrals (:math:`M_{\\mathrm{vir}}=10^{12}M_{\odot}`), 
+        and 90% for massive cluster centrals (:math:`M_{\\mathrm{vir}}=10^{15}M_{\odot}`).
+
+        >>> abcissa, ordinates = [12, 15], [1/3., 0.9]
+        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_key='quiescent', abcissa=abcissa, ordinates=ordinates, prim_haloprop_key='mvir', gal_type='cens')
+
+        The ``cen_quiescent_model`` has a built-in method that computes the quiescent fraction 
+        as a function of mass:
+
+        >>> quiescent_frac = cen_quiescent_model.mean_quiescent_fraction(prim_haloprop=1e12)
+
+        There is also a built-in method to return a Monte Carlo realization of quiescent/star-forming galaxies:
+
+        >>> masses = np.logspace(10, 15, num=100)
+        >>> quiescent_realization = cen_quiescent_model.mc_quiescent(prim_haloprop=masses)
+
+        Now ``quiescent_realization`` is a boolean-valued array of the same length as ``masses``. 
+        Entries of ``quiescent_realization`` that are ``True`` correspond to central galaxies that are quiescent. 
+
+        Here is another example of how you could use `BinaryGalpropInterpolModel` 
+        to construct a simple model for satellite morphology, where the early- vs. late-type 
+        of the satellite depends on :math:`V_{\\mathrm{peak}}` value of the host halo
+
+        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_key='late_type', abcissa=abcissa, ordinates=ordinates, prim_haloprop_key='vpeak_host', gal_type='sats')
+        >>> vmax_array = np.logspace(2, 3, num=100)
+        >>> morphology_realization = sat_morphology_model.mc_late_type(prim_haloprop=vmax_array)
+
+        .. automethod:: _mean_galprop_fraction
+        .. automethod:: _mc_galprop
         """
 
         self._interpol_method = interpol_method
@@ -682,7 +702,7 @@ class BinaryGalpropTemplate(object):
                 custom_len(self._abcissa)-1])
 
         setattr(self, 'mean_'+self.galprop_key+'_fraction', self._mean_galprop_fraction)
-        setattr(self, 'mc_'+self.galprop_key+'_fraction', self._mc_galprop_fraction)
+        setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
 
     def _build_param_dict(self):
 
@@ -691,49 +711,38 @@ class BinaryGalpropTemplate(object):
 
     def _mean_galprop_fraction(self, **kwargs):
         """
-        Expected value for the galprop value of the galaxies living in the 
-        inpu thalos.  
+        Expectation value of the galprop for galaxies living in the input halos.  
 
         Parameters 
         ----------
         mass_like : array_like, optional keyword argument
             Array of primary halo property, e.g., `mvir`, 
-            at which the quiescent fraction is being computed. 
+            at which the galprop fraction is being computed. 
 
         prim_haloprop : array_like, optional keyword argument
             Array of primary halo property, e.g., `mvir`, 
-            at which the quiescent fraction is being computed. 
+            at which the galprop fraction is being computed. 
             Functionality is equivalent to using the mass_like keyword argument. 
 
         halos : table, optional keyword argument
             Astropy Table containing a halo catalog. 
-            If using a `halos` argument, you must also pass 
-            a ``prim_haloprop_key`` keyword 
-            argument either to this function, or to the constructor of 
-            vdB03Quiescence upon class instantiation. 
+            If the ``halos`` keyword argument is passed, 
+            ``self.prim_haloprop_key`` must be a column of the halo catalog. 
 
         galaxy_table : table, optional keyword argument
             Astropy Table containing a galaxy catalog. 
-            If using a `galaxy_tablef` argument, you must also pass 
-            a ``prim_haloprop_key`` keyword 
-            argument either to this function, or to the constructor of 
-            vdB03Quiescence upon class instantiation. 
+            If the ``galaxy_table`` keyword argument is passed, 
+            ``self.prim_haloprop_key`` must be a column of the galaxy catalog. 
 
         input_param_dict : dict, optional keyword argument 
-            If passed, the vdB03Quiescence model will first update 
-            its param_dict with input_param_dict, altering the behavior of the model 
+            If passed, the model will first update 
+            its param_dict with input_param_dict, altering the behavior of the model. 
 
         Returns 
         -------
         mean_galprop_fraction : array_like
-            Values of the quiescent fraction evaluated at input_abcissa. 
+            Values of the galprop fraction evaluated at the input primary halo properties. 
 
-        Notes 
-        -----
-        Either assumes the quiescent fraction is a polynomial function 
-        of the primary halo property, or is interpolated from a grid. 
-        Either way, the behavior of this method is fully determined by 
-        its values at the model abcissa, as specified in param_dict. 
         """
 
         # If requested, update the parameter dictionary defining the behavior of the model
@@ -777,7 +786,7 @@ class BinaryGalpropTemplate(object):
 
         return mean_galprop_fraction
 
-    def _mc_galprop_fraction(self, **kwargs):
+    def _mc_galprop(self, **kwargs):
         """
         Monte Carlo realization of the binary-valued galprop. 
 
@@ -785,37 +794,33 @@ class BinaryGalpropTemplate(object):
         ----------
         mass_like : array_like, optional keyword argument
             Array of primary halo property, e.g., `mvir`, 
-            at which the quiescent fraction is being computed. 
+            at which the galprop fraction is being computed. 
 
         prim_haloprop : array_like, optional keyword argument
             Array of primary halo property, e.g., `mvir`, 
-            at which the quiescent fraction is being computed. 
+            at which the galprop fraction is being computed. 
             Functionality is equivalent to using the mass_like keyword argument. 
 
         halos : table, optional keyword argument
             Astropy Table containing a halo catalog. 
-            If using a `halos` argument, you must also pass 
-            a ``prim_haloprop_key`` keyword 
-            argument either to this function, or to the constructor of 
-            vdB03Quiescence upon class instantiation. 
+            If the ``halos`` keyword argument is passed, 
+            ``self.prim_haloprop_key`` must be a column of the halo catalog. 
 
         galaxy_table : table, optional keyword argument
             Astropy Table containing a galaxy catalog. 
-            If using a `galaxy_tablef` argument, you must also pass 
-            a ``prim_haloprop_key`` keyword 
-            argument either to this function, or to the constructor of 
-            vdB03Quiescence upon class instantiation. 
+            If the ``galaxy_table`` keyword argument is passed, 
+            ``self.prim_haloprop_key`` must be a column of the galaxy catalog. 
 
         input_param_dict : dict, optional keyword argument 
-            If passed, the vdB03Quiescence model will first update 
-            its param_dict with input_param_dict, altering the behavior of the model 
+            If passed, the model will first update 
+            its param_dict with input_param_dict, altering the behavior of the model. 
 
         Returns 
         -------
         mc_galprop_fraction : array_like
-            Boolean value of whether or not the mock galaxy is quiescent, 
-            where the Monte Carlo distribution is a nearest-integer 
-            distribution determined by `mean_galprop_fraction`. 
+            Boolean value of whether or not the mock galaxy is posses the galprop, 
+            where the Monte Carlo realization is drawn from a nearest-integer 
+            distribution determined by `_mean_galprop_fraction`. 
 
         """
         mean_galprop_fraction = self._mean_galprop_fraction(**kwargs)
