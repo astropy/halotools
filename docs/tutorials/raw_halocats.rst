@@ -13,7 +13,7 @@ helpful to first read the :ref:`using_halocat_binaries`, so that you
 have a sense of what the end product will be like to work with.
 
 Downloading the raw halo catalog
---------------------------------
+================================
 
 The first thing we'll do is to load the Catalog Manager, which takes
 charge of handling all the bookkeeping of simulation files and
@@ -114,7 +114,7 @@ returned.
 Success! We're now in business with a newly downloaded halo catalog.
 
 Processing the raw halo catalog into a reduced binary
------------------------------------------------------
+=====================================================
 
 ASCII data is a relatively slow file format to load into memory,
 particularly for large files such as halo catalogs. So in this section
@@ -185,13 +185,13 @@ writing a ``dtype`` that specifies the keyname and data type for each
 column in your ASCII data.
 
 Processing options
-------------------
+==================
 
 Now let's unpack the remaining arguments to get a sense of what options
 you have for how your ASCII data is processed.
 
 1. Storing the processed catalog in cache
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=========================================
 
 Setting ``store_result`` to ``True`` triggers Halotools to create an
 HDF5 file for the processed halo catalog and place it in your cache
@@ -214,7 +214,7 @@ will return two things:
    object used to read the catalog.
 
 2. Specifying your catalog cuts
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===============================
 
 The ``cuts_funcobj`` keyword argument gives you the option to make any
 cuts you like when reducing the raw halo catalog. Whatever cuts you
@@ -294,7 +294,7 @@ iv)  The function is stand-alone, and not a bound instance method of
 
 
 3. Making your catalogs self-expressive with metadata
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=====================================================
 
 Finally, you also have the option to attach notes to the halo catalogs
 you produce in the form of metadata bound to the hdf5 file. This allows
