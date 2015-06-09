@@ -27,6 +27,8 @@ class SmHmModel(object):
     def __init__(self, **kwargs):
         """
         """
+        self.galprop_key = 'stellar_mass'
+        
         if 'prim_haloprop_key' in kwargs.keys():
             self.prim_haloprop_key = kwargs['prim_haloprop_key']
         else:
@@ -135,7 +137,9 @@ class Moster13SmHm(SmHmModel):
         -----------
         prim_haloprop_key : string, optional keyword argument
             This string will be used to extract the relevant column of the 
-            halo catalog containing the mass_like-like variable that regulates stellar mass_like. 
+            halo catalog containing the mass-like variable that regulates stellar mass. 
+            Default is set by ``default_smhm_haloprop`` in the 
+            `~halotools.empirical_models.model_defaults` module. 
 
         param_dict : dict, optional 
             Dictionary containing the values of the parameters of the desired model. 
