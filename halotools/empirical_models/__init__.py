@@ -13,3 +13,5 @@ from .halo_prof_components import *
 from .model_defaults import *
 from .gal_prof_components import *
 from .gal_prof_factory import *
+from .smhm_components import *
+from .sfr_components import *
