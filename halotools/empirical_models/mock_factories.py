@@ -47,18 +47,14 @@ class MockFactory(object):
             Each entry in this list must be a column key of the halo catalog. 
             For each entry, mock galaxies will have an attribute storing this 
             property of their host halo. The corresponding mock galaxy attribute name 
-            will be pre-pended by ``halo_``. 
+            will be pre-pended by ``halo_``. If ``additional_haloprops`` is set to 
+            the string value ``all``, 
+            the galaxy table will inherit every halo property in the catalog.  
 
         halocut_funcobj : function object, optional 
             Function object used to place a cut on the input subhalo catalog. 
             Input must be a length-Nsubhalos structured numpy array or astropy table; 
             output must be a length-Nsubhalos boolean array that will be used as a mask. 
-
-        Notes 
-        -----
-        Docs for the test suite for mocks made from 
-        any pre-loaded HOD-style models can be seen at 
-        `~halotools.empirical_models.test_empirical_models.test_preloaded_hod_mocks`. 
 
         """
 
@@ -111,6 +107,38 @@ class HodMockFactory(MockFactory):
     """
 
     def __init__(self, snapshot, composite_model, populate=True, **kwargs):
+        """
+        Parameters 
+        ----------
+        snapshot : object 
+            Object containing the halo catalog and its metadata, 
+            produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
+
+        composite_model : object 
+            Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`. 
+            Whatever the features of the model, the ``composite_model`` object 
+            created by the HOD model factory contains all the instructions 
+            needed to produce a Monte Carlo realization of the model with `HodMockFactory`. 
+
+        additional_haloprops : list of strings, optional 
+            Each entry in this list must be a column key of the halo catalog. 
+            For each entry, mock galaxies will have an attribute storing this 
+            property of their host halo. The corresponding mock galaxy attribute name 
+            will be pre-pended by ``halo_``. If ``additional_haloprops`` is set to 
+            the string value ``all``, 
+            the galaxy table will inherit every halo property in the catalog.  
+
+        halocut_funcobj : function object, optional 
+            Function object used to place a cut on the input subhalo catalog. 
+            Input must be a length-Nsubhalos structured numpy array or astropy table; 
+            output must be a length-Nsubhalos boolean array that will be used as a mask. 
+
+        populate : boolean, optional 
+            If set to ``False``, the class will perform all pre-processing tasks 
+            but will not call the ``composite_model`` to populate the ``galaxy_table`` 
+            with mock galaxies and their observable properties. Default is ``True``. 
+
+        """
 
         super(HodMockFactory, self).__init__(snapshot, composite_model, **kwargs)
 
@@ -363,12 +391,19 @@ class SubhaloMockFactory(MockFactory):
             Each entry in this list must be a column key of the halo catalog. 
             For each entry, mock galaxies will have an attribute storing this 
             property of their host halo. The corresponding mock galaxy attribute name 
-            will be pre-pended by ``halo_``. 
+            will be pre-pended by ``halo_``. If ``additional_haloprops`` is set to 
+            the string value ``all``, 
+            the galaxy table will inherit every halo property in the catalog.  
 
         halocut_funcobj : function object, optional 
             Function object used to place a cut on the input subhalo catalog. 
             Input must be a length-Nsubhalos structured numpy array or astropy table; 
             output must be a length-Nsubhalos boolean array that will be used as a mask. 
+
+        populate : boolean, optional 
+            If set to ``False``, the class will perform all pre-processing tasks 
+            but will not call the ``composite_model`` to populate the ``galaxy_table`` 
+            with mock galaxies and their observable properties. Default is ``True``. 
 
         """
 
@@ -407,6 +442,8 @@ class SubhaloMockFactory(MockFactory):
         for newkey in phase_space_keys:
             oldkey = model_defaults.host_haloprop_prefix + newkey
             self.galaxy_table[newkey] = self.galaxy_table[oldkey]
+
+        self.galaxy_table['galid'] = np.arange(len(self.galaxy_table))
 
         for galprop in self.model.galprop_list:
             component_model = self.model.model_blueprint[galprop]
