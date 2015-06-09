@@ -3,7 +3,7 @@
 
 """
 
-__all__ = ['BinaryGalpropInterpolModel']
+__all__ = ['BinaryGalpropModel', 'BinaryGalpropInterpolModel']
 
 from functools import partial
 from copy import copy
@@ -46,7 +46,6 @@ class BinaryGalpropModel(object):
             the `BinaryGalpropInterpolModel` instance is part of a composite model, 
             with multiple population types. Default is None. 
 
-        .. automethod:: _mc_galprop
         """
 
         if 'prim_haloprop_key' not in kwargs.keys():
@@ -217,7 +216,6 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         >>> morphology_realization = sat_morphology_model(prim_haloprop=vmax_array)
 
         .. automethod:: _mean_galprop_fraction
-        .. automethod:: _mc_galprop
         """
 
         galprop_key = kwargs['galprop_key']
