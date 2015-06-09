@@ -30,15 +30,17 @@ class BinaryGalpropModel(object):
         """ 
         Parameters 
         ----------
-        galprop_key : array, keyword argument 
+        galprop_key : array, required keyword argument 
             String giving the name of galaxy property being assigned a binary value. 
             Default is 'quiescent'. 
 
-        prim_haloprop_key : string, keyword argument 
+        prim_haloprop_key : string, optional keyword argument 
             String giving the key name used to access the primary halo property 
             from an input halo or galaxy catalog.  
+            Default is set by ``default_binary_galprop_haloprop`` in the 
+            `~halotools.empirical_models.model_defaults` module. 
 
-        gal_type : string, keyword argument
+        gal_type : string, optional keyword argument
             Name of the galaxy population being modeled, e.g., 'centrals'. 
             This is only necessary to specify in cases where 
             the `BinaryGalpropInterpolModel` instance is part of a composite model, 
@@ -47,14 +49,20 @@ class BinaryGalpropModel(object):
         .. automethod:: _mc_galprop
         """
 
-        self.prim_haloprop_key = kwargs['prim_haloprop_key']
+        if 'prim_haloprop_key' not in kwargs.keys():
+            self.prim_haloprop_key = model_defaults.default_binary_galprop_haloprop
+        else:
+            self.prim_haloprop_key = kwargs['prim_haloprop_key']
+
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
         self.galprop_key = kwargs['galprop_key']
-        self.gal_type = kwargs['gal_type']
 
-        setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
+        if 'gal_type' in kwargs.keys():
+            self.gal_type = kwargs['gal_type']
+
+        #setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
 
         # Enforce the requirement that sub-classes have been configured properly
         required_method_name = 'mean_'+self.galprop_key+'_fraction'
@@ -63,7 +71,7 @@ class BinaryGalpropModel(object):
                 "implement a method named %s " % required_method_name)
 
 
-    def _mc_galprop(self, **kwargs):
+    def __call__(self, **kwargs):
         """
         Monte Carlo realization of the binary-valued galprop. 
 
@@ -96,6 +104,17 @@ class BinaryGalpropModel(object):
             distribution determined by the user-defined `mean_galprop_fraction` method. 
 
         """
+        if 'galaxy_table' in kwargs.keys():
+            key = model_defaults.host_haloprop_prefix + self.prim_haloprop_key
+            kwargs['prim_haloprop'] = kwargs['galaxy_table'][key]
+            if hasattr(self, 'sec_haloprop_key'):
+                key = model_defaults.host_haloprop_prefix + self.sec_haloprop_key
+                kwargs['sec_haloprop'] = kwargs['galaxy_table'][key]
+        elif 'halos' in kwargs.keys():
+            kwargs['prim_haloprop'] = kwargs['halos'][self.prim_haloprop_key]
+            if hasattr(self, 'sec_haloprop_key'):
+                kwargs['sec_haloprop'] = kwargs['halos'][self.sec_haloprop_key]
+
         mean_func = getattr(self, 'mean_'+self.galprop_key+'_fraction')
         mean_galprop_fraction = mean_func(**kwargs)
         mc_generator = np.random.random(custom_len(mean_galprop_fraction))
@@ -128,15 +147,17 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         galprop_key : array, required keyword argument
             String giving the name of galaxy property being assigned a binary value. 
 
-        gal_type : string, required keyword argument
+        gal_type : string, optional keyword argument
             Name of the galaxy population being modeled, e.g., 'centrals'. 
             This is only necessary to specify in cases where 
             the `BinaryGalpropInterpolModel` instance is part of a composite model, 
             with multiple population types. Default is None. 
 
-        prim_haloprop_key : string, required keyword argument 
+        prim_haloprop_key : string, optional keyword argument 
             String giving the key name used to access the primary halo property 
-            from an input halo or galaxy catalog. Default is 'mvir'. 
+            from an input halo or galaxy catalog. 
+            Default is set by ``default_binary_galprop_haloprop`` in the 
+            `~halotools.empirical_models.model_defaults` module. 
 
         abcissa : array, optional keyword argument 
             Values of the primary halo property at which the galprop fraction is specified. 
@@ -182,7 +203,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         There is also a built-in method to return a Monte Carlo realization of quiescent/star-forming galaxies:
 
         >>> masses = np.logspace(10, 15, num=100)
-        >>> quiescent_realization = cen_quiescent_model.mc_quiescent(prim_haloprop=masses)
+        >>> quiescent_realization = cen_quiescent_model(prim_haloprop=masses)
 
         Now ``quiescent_realization`` is a boolean-valued array of the same length as ``masses``. 
         Entries of ``quiescent_realization`` that are ``True`` correspond to central galaxies that are quiescent. 
@@ -193,7 +214,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_key='late_type', abcissa=abcissa, ordinates=ordinates, prim_haloprop_key='vpeak_host', gal_type='sats')
         >>> vmax_array = np.logspace(2, 3, num=100)
-        >>> morphology_realization = sat_morphology_model.mc_late_type(prim_haloprop=vmax_array)
+        >>> morphology_realization = sat_morphology_model(prim_haloprop=vmax_array)
 
         .. automethod:: _mean_galprop_fraction
         .. automethod:: _mc_galprop
@@ -218,8 +239,13 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
                 [scipy_maxdegree, self._input_spline_degree, 
                 custom_len(self._abcissa)-1])
 
-        self._abcissa_key = self.galprop_key+'_abcissa_'+self.gal_type
-        self._ordinates_key_prefix = self.galprop_key+'_ordinates_'+self.gal_type
+        if hasattr(self, 'gal_type'):
+            self._abcissa_key = self.galprop_key+'_abcissa_'+self.gal_type
+            self._ordinates_key_prefix = self.galprop_key+'_ordinates_'+self.gal_type
+        else:
+            self._abcissa_key = self.galprop_key+'_abcissa'
+            self._ordinates_key_prefix = self.galprop_key+'_ordinates'
+
 
         self._build_param_dict()
 

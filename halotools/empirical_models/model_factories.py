@@ -63,8 +63,8 @@ class ModelFactory(object):
             else:
                 snapshot = ProcessedSnapshot(**kwargs)
 
-            mock_factories = self.model_blueprint['mock_factories']
-            mock = mock_factories(snapshot, self, **kwargs)
+            mock_factory = self.model_blueprint['mock_factory']
+            mock = mock_factory(snapshot, self, **kwargs)
             self.mock = mock
 
 
@@ -117,8 +117,8 @@ class SubhaloModelFactory(ModelFactory):
 
         model_blueprint = copy(self._input_model_blueprint)
 
-        if 'mock_factories' not in model_blueprint.keys():
-            model_blueprint['mock_factories'] = mock_factories.SubhaloMockFactory
+        if 'mock_factory' not in model_blueprint.keys():
+            model_blueprint['mock_factory'] = mock_factories.SubhaloMockFactory
 
         return model_blueprint
 
@@ -289,8 +289,8 @@ class HodModelFactory(ModelFactory):
                     gal_type, input_prof_model)
                 model_blueprint[gal_type]['profile'] = prof_model
 
-        if 'mock_factories' not in model_blueprint.keys():
-            model_blueprint['mock_factories'] = mock_factories.HodMockFactory
+        if 'mock_factory' not in model_blueprint.keys():
+            model_blueprint['mock_factory'] = mock_factories.HodMockFactory
 
         return model_blueprint 
 
@@ -302,7 +302,7 @@ class HodModelFactory(ModelFactory):
         in ascending order of the occupation bound. 
         """
 
-        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factories']
+        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factory']
 
         occupation_bounds = []
         for gal_type in gal_types:

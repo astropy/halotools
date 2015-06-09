@@ -96,6 +96,8 @@ default_assembias_key = 'vmax'
 default_smhm_scatter = 0.2
 default_smhm_haloprop = 'mpeak'
 
+default_binary_galprop_haloprop = 'mpeak'
+
 # At minimum, the following halo and galaxy properties 
 # will be bound to each mock galaxy 
 host_haloprop_prefix = 'halo_'
