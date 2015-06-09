@@ -75,7 +75,7 @@ def Kravtsov04_blueprint(**kwargs):
 	model_blueprint = {
 		dark_side_cen_model.gal_type : cen_model_dict,
 		dark_side_sat_model.gal_type : sat_model_dict, 
-		'mock_factories' : mock_factories.HodMockFactory
+		'mock_factory' : mock_factories.HodMockFactory
 		}
 
 	return model_blueprint

@@ -63,8 +63,8 @@ class ModelFactory(object):
             else:
                 snapshot = ProcessedSnapshot(**kwargs)
 
-            mock_factories = self.model_blueprint['mock_factories']
-            mock = mock_factories(snapshot, self, **kwargs)
+            mock_factory = self.model_blueprint['mock_factory']
+            mock = mock_factory(snapshot, self, **kwargs)
             self.mock = mock
 
 
@@ -90,13 +90,25 @@ class SubhaloModelFactory(ModelFactory):
             is a class instance of the type of model that 
             maps that property onto subhalos. 
 
+        galprop_sequence : list, optional
+            Some model components may have explicit dependence upon 
+            the value of some other galaxy model property. A classic 
+            example is if the stellar mass of a central galaxy has explicit 
+            dependence on whether or not the central is active or quiescent. 
+            In such a case, you must pass a list of the galaxy properties 
+            of the composite model; the first galprop in ``galprop_sequence`` 
+            will be assigned first by the ``mock_factory``; the second galprop 
+            in ``galprop_sequence`` will be assigned second, and its computation 
+            may depend on the first galprop, and so forth. Default behavior is 
+            to assume that no galprop has explicit dependence upon any other. 
+
         """
 
         super(SubhaloModelFactory, self).__init__(input_model_blueprint, **kwargs)
 
-        self.model_blueprint, self.galprop_list = self._interpret_input_model_blueprint()
+        self.model_blueprint = self._interpret_input_model_blueprint()
         
-        self._build_composite_lists()
+        self._build_composite_lists(**kwargs)
 
         self._set_primary_behaviors()
 
@@ -105,37 +117,10 @@ class SubhaloModelFactory(ModelFactory):
 
         model_blueprint = copy(self._input_model_blueprint)
 
-        if 'mock_factories' not in model_blueprint.keys():
-            model_blueprint['mock_factories'] = mock_factories.SubhaloMockFactory
+        if 'mock_factory' not in model_blueprint.keys():
+            model_blueprint['mock_factory'] = mock_factories.SubhaloMockFactory
 
-        unordered_galprop_list = [key for key in model_blueprint.keys() if key is not 'mock_factories']
-
-        # If necessary, put the unordered_galprop_list into its proper order
-        # Note that this is only robust to the case of two-property composite models
-        # For more complicated models, a smarter algorithm will be necessary, 
-        # so we raise an exception to protect against that case
-        if custom_len(unordered_galprop_list) > 2:
-            raise KeyError("SubhaloModelFactory does not support assignment of "
-                "more than two galaxy properties")
-
-        temp_required_galprop_dict = {}
-        for galprop in unordered_galprop_list:
-            component_model = model_blueprint[galprop]
-            if hasattr(component_model, 'required_galprops'):
-                temp_required_galprop_dict[galprop] = component_model.required_galprops
-
-        if len(temp_required_galprop_dict) == 0:
-            galprop_list = unordered_galprop_list
-            
-        elif len(temp_required_galprop_dict) == 1:
-            galprop_list = temp_required_galprop_dict.values()[0]
-            galprop_list.extend(temp_required_galprop_dict.keys()[0])
-        else:
-            raise KeyError("Cannot resolve model interdependencies:\n"
-                "Both component models depend on each other simultaneously\n"
-                "This composite model cannot be decomposed in a sensible way")
-
-        return model_blueprint, galprop_list
+        return model_blueprint
 
     def _set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
@@ -159,11 +144,21 @@ class SubhaloModelFactory(ModelFactory):
             new_method_behavior = component_model.__call__
             setattr(self, new_method_name, new_method_behavior)
 
-    def _build_composite_lists(self):
+    def _build_composite_lists(self, **kwargs):
         """ A composite model has several lists that are built up from 
         the components: ``haloprop_list``, ``publications``, and 
         ``new_haloprop_func_dict``. 
         """
+
+        unordered_galprop_list = [key for key in self.model_blueprint.keys() if key is not 'mock_factory']
+        if 'galprop_sequence' in kwargs.keys():
+            if set(kwargs['galprop_sequence']) != set(unordered_galprop_list):
+                raise KeyError("The input galprop_sequence keyword argument must "
+                    "have the same list of galprops as the input model blueprint")
+            else:
+                self.galprop_list = kwargs['galprop_sequence']
+        else:
+            self.galprop_list = unordered_galprop_list
 
         haloprop_list = []
         pub_list = []
@@ -294,8 +289,8 @@ class HodModelFactory(ModelFactory):
                     gal_type, input_prof_model)
                 model_blueprint[gal_type]['profile'] = prof_model
 
-        if 'mock_factories' not in model_blueprint.keys():
-            model_blueprint['mock_factories'] = mock_factories.HodMockFactory
+        if 'mock_factory' not in model_blueprint.keys():
+            model_blueprint['mock_factory'] = mock_factories.HodMockFactory
 
         return model_blueprint 
 
@@ -307,7 +302,7 @@ class HodModelFactory(ModelFactory):
         in ascending order of the occupation bound. 
         """
 
-        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factories']
+        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factory']
 
         occupation_bounds = []
         for gal_type in gal_types:
