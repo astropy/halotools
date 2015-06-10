@@ -57,8 +57,8 @@ class OccupationComponent(object):
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
-        if 'param_dict' in kwargs.keys():
-            self.param_dict = kwargs['param_dict']
+        if 'input_param_dict' in kwargs.keys():
+            self.param_dict = kwargs['input_param_dict']
         else:
             self.param_dict = {}
 
