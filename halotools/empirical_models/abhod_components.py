@@ -81,6 +81,9 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
             sec_haloprop_key=secondary_haloprop_key,
             param_dict=standard_cen_model.param_dict)
 
+        # secondary halo property percentile key
+        self.sec_haloprop_percentile_key=sec_haloprop_key+'_percentile'
+
         # add the assembly bias parameters to the param_dict so that they may 
         # be varied in an MCMC if needed.
         self.param_dict['ab_percentile']=ab_percentile
@@ -97,7 +100,6 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         """
         Parameters
         ----------
-        self
 
         Notes
         -----
@@ -129,8 +131,6 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         """
         Parameters
         ----------
-        self
-
         inp_halo_catalog : astropy table 
             stores halo catalog being used to make mock galaxy population
 
@@ -144,8 +144,7 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         """
         
         # new halo property
-        sec_haloprop_percentile_key=self.sec_haloprop_key+'_percentile'
-        inp_halo_catalog[sec_haloprop_percentile_key]=np.zeros_like(inp_halo_catalog[self.prim_haloprop_key])
+        inp_halo_catalog[self.sec_haloprop_percentile_key]=np.zeros_like(inp_halo_catalog[self.prim_haloprop_key])
 
         # arrange logarithmic bins on mass (or prim_haloprop_key)
         lg10_min_mass=np.log10(np.min(inp_halo_catalog[self.prim_haloprop_key]))-0.001
@@ -160,20 +159,107 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         inp_halo_catalog[bin_key]=in_mass_bin
 
         # sort on secondary property only with each mass bin
-        
+        for idummy in range(num_mass_bins):
+            indices_of_mass_bin=np.where(in_mass_bin=idummy)
 
+            # Find the indices that sort by the secondary property
+            ind_sorted=np.argsort(inp_halo_catalog[self.sec_haloprop_key][indices_of_mass_bin])
 
+            percentiles=np.zeros_like(inp_halo_catalog[self.sec_haloprop_key][indices_of_mass_bin])
+            percentiles[ind_sorted]=(np.arange(len(inp_halo_catalog[self.sec_haloprop_key][indices_of_mass_bin]))+1.0)/\
+                float(len(inp_halo_catalog[self.sec_haloprop_key][indices_of_mass_bin]))
+
+            #place the percentiles into the halo catalog
+            inp_halo_catalog[self.sec_haloprop_percentile_key]=1.0-percentiles
+
+        return None
 
 
 
 
 
     # compute mean halo occupation
-    def mean_occupation(self):
+    def mean_occupation(self,inp_halo_catalog,append_to_catalog=False):
         """
-        Method to compute mean halo occupation of halos in the halo catalog.
+        Parameters
+        ----------
+        inp_halo_catalog : astropy table
+            halo catalog that can be used to assign occupation based on 
+            the halo primary and secondary properties.
+        
+        append_to_catalog : boolean
+            If true, the mean occupation for the halo will be appended to the halo catalog. 
+            Default is false.
+
+        Notes
+        -----
+        Method to compute mean halo occupation of halos in the halo catalog. This includes 
+        assembly bias as follows. If self.param_dict['frac_dNmax']>=0, then we assume that 
+        self.param_dict['ab_percentile'] refers to the highest percentile 
+        and that the sign of the shift, deltangal, for those is positive. 
+        Otherwise, the sign of the shift, deltangal, is negative for the highest 
+        percentile. For example, if self.param_dict['frac_dNmax']=-0.4 and 
+        self.param_dict['ab_precentile']=0.20, then the highest 20% of the population 
+        according to sec_haloprop_key have a mean occupation that is lower than the 
+        average for all halos of that mass by 0.4.
         """
-        pass
+    
+        # get the baseline hod without any assembly bias
+        num_mean_noab=self.standard_mean_occupation(halos=inp_halo_catalog)
+
+        # get perturbation due to assembly bias. this proceeds as follows.
+        # if self.param_dict['frac_dNmax']>=0, then we assume that 
+        # self.param_dict['ab_percentile'] refers to the highest percentile 
+        # and that the sign of the shift, deltangal, for those is positive. 
+        # Otherwise, the sign of the shift, deltangal, is negative for the highest 
+        # percentile. For example, if self.param_dict['frac_dNmax']=-0.4 and 
+        # self.param_dict['ab_precentile']=0.20, then the highest 20% of the population 
+        # according to sec_haloprop_key have a mean occupation that is lower than the 
+        # average for all halos of that mass by 0.4.
+
+        if (self.param_dict['frac_dNmax']>=0.0):
+            # this is the case where the upper percentile has a positive perturbation
+            delta_max_1 = 1.0 - num_mean_noab
+            delta_max_2 = (1.0 - self.param_dict['ab_percentile'])*num_mean_noab/ \
+                self.param_dict['ab_percentile']
+            delta_n_upper_percentile=self.param_dict['frac_dNmax']*np.minimum(delta_max_1,delta_max_2)
+            delta_n_lower_percentile=-self.param_dict['ab_percentile']*delta_n_upper_percentile/ \
+                (1.0-self.param_dict['ab_percentile'])
+
+        else:
+            # this is the case where the upper percentile has a negative enhancement
+            delta_min_1=-num_mean_noab
+            delta_min_2=-(1.0-self.param_dict['ab_percentile'])*(1.0-num_mean_noab)/ \
+                self.param_dict['ab_percentile']
+            delta_n_upper_percentile=np.abs(self.param_dict['frac_dNmax'])* \
+                np.maximum(delta_min_1,delta_min_2)
+            delta_n_lower_percentile=-self.param_dict['ab_percentile']*delta_n_upper_percentile/ \
+                (1.0 - self.param_dict['ab_percentile'])
+
+        # Now we assign the shift, delta n, based upon the percentiles in the halo catalog.
+        delta_num_gal=np.zeros_like(inp_halo_catalog[self.prim_haloprop_key])
+        delta_num_gal=np.where(inp_halo_catalog[self.sec_haloprop_percentile_key]>=self.param_dict['ab_percentile'],
+            delta_n_upper_percentile,delta_n_lower_percentile)
+
+        num_gal=num_mean_noab+delta_num_gal
+
+        if (append_to_catalog):
+            # then append the mean occupation number to the halo catalog so that each 
+            # halo knows its mean occupation.
+            inp_halo_catalog['delta_num_gal']=delta_num_gal
+            inp_halo_catalog['ncen_mean']=num_mean_noab
+
+        return num_gal
+
+
+
+
+
+
+
+
+
+
 
     # routine to compute non-assembly biased mean occupation
     def standard_mean_occupation(self,*args):
