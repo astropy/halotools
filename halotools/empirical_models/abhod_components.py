@@ -82,14 +82,12 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
             param_dict=standard_cen_model.param_dict)
 
         # secondary halo property percentile key
-        self.sec_haloprop_percentile_key=sec_haloprop_key+'_percentile'
+        self.sec_haloprop_percentile_key=self.sec_haloprop_key+'_percentile'
 
         # add the assembly bias parameters to the param_dict so that they may 
         # be varied in an MCMC if needed.
         self.param_dict['ab_percentile']=ab_percentile
         self.param_dict['frac_dNmax']=frac_dNmax
-
-        print self.param_dict
 
         # check that these parameter values do not violate number conservation
         self.check_valid_ab_parameters()
@@ -127,7 +125,7 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
 
 
     # assign halos percentile values of the secondary halo property
-    def assign_halo_secondary_percentiles(self,inp_halo_catalog,num_mass_bins=35):
+    def assign_sec_haloprop_percentiles(self,inp_halo_catalog,num_mass_bins=35,append_mass_bins=True):
         """
         Parameters
         ----------
@@ -149,18 +147,23 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # arrange logarithmic bins on mass (or prim_haloprop_key)
         lg10_min_mass=np.log10(np.min(inp_halo_catalog[self.prim_haloprop_key]))-0.001
         lg10_max_mass=np.log10(np.max(inp_halo_catalog[self.prim_haloprop_key]))+0.001
-        mass_bins=np.logspace(lg10_min_mass,lg10_max_mass,num=num_mass_bins+1)
+        mass_bins=np.logspace(lg10_min_mass,lg10_max_mass,num=num_mass_bins)
 
         # digitize the masses so that we can access them bin-wise
         in_mass_bin=np.digitize(inp_halo_catalog[self.prim_haloprop_key],mass_bins)
 
         # store the mass bins for each halo so that bin membership is easily retrievable
-        bin_key=self.prim_haloprop_key+'_bin_index'
-        inp_halo_catalog[bin_key]=in_mass_bin
+        # if optional input argument append_mass_bins=False, then do not store the mass bin 
+        # information.
+        if (append_mass_bins):
+            bin_key=self.prim_haloprop_key+'_bin_index'
+            inp_halo_catalog[bin_key]=in_mass_bin
 
         # sort on secondary property only with each mass bin
+        # iterating to num_mass_bins+1 ensures that any halos that exceed the 
+        # maximum mass in the bins is accounted for.
         for idummy in range(num_mass_bins):
-            indices_of_mass_bin=np.where(in_mass_bin=idummy)
+            indices_of_mass_bin=np.where(in_mass_bin==idummy)
 
             # Find the indices that sort by the secondary property
             ind_sorted=np.argsort(inp_halo_catalog[self.sec_haloprop_key][indices_of_mass_bin])
@@ -169,8 +172,20 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
             percentiles[ind_sorted]=(np.arange(len(inp_halo_catalog[self.sec_haloprop_key][indices_of_mass_bin]))+1.0)/\
                 float(len(inp_halo_catalog[self.sec_haloprop_key][indices_of_mass_bin]))
 
-            #place the percentiles into the halo catalog
-            inp_halo_catalog[self.sec_haloprop_percentile_key]=1.0-percentiles
+            #print ' Percentiles have been assigned'
+            #print ' Bin number = ',idummy
+            #print ' Bin edges = ', mass_bins[idummy-1], ' - ', mass_bins[idummy],'   ...'
+            #print ' Number of halos in bin = ',len(indices_of_mass_bin[0])
+            #print ' indices_of_mass_bin = ',indices_of_mass_bin
+            #print ' masses in mass bin = ',inp_halo_catalog[self.prim_haloprop_key][indices_of_mass_bin],' \n *** \n'
+            #if not any(indices_of_mass_bin[0]):
+            #    print ' --- no halos make the cut here \n -------- '
+            #print ' Shape of percentiles is = ',np.shape(percentiles)
+            #print ' First few values are = ',percentiles[0:4],' \n'
+            #print ' ------------- * ------------------ \n \n'
+            
+            # place the percentiles into the catalog
+            inp_halo_catalog[self.sec_haloprop_percentile_key][indices_of_mass_bin]=1.0-percentiles
 
         return None
 
@@ -262,13 +277,19 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
 
 
     # routine to compute non-assembly biased mean occupation
-    def standard_mean_occupation(self,*args):
+    def standard_mean_occupation(self,**kwargs):
         """
+        Parameters
+        ----------
+        keyword arguments are those of the standard model that it 
+        inherits from.
+        Notes
+        -----
         Compute the mean occupation of halos WITHOUT assembly bias. 
         This will use the standard model instance that this is instantiated 
         with.
         """
-        return self.standard_cen_model.mean_occupation(*args)
+        return self.standard_cen_model.mean_occupation(**kwargs)
 
 
 
