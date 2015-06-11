@@ -8,7 +8,7 @@ Modules performing small, commonly used tasks throughout the package.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-__all__ = ['array_like_length', 'find_idx_nearest_val']
+__all__ = ['array_like_length', 'find_idx_nearest_val', 'randomly_downsample_data']
 
 import numpy as np
 
@@ -81,4 +81,37 @@ def find_idx_nearest_val(array, value):
         else:
             idx_nearest = idx_sorted[idx]
             return idx_nearest
+
+
+def randomly_downsample_data(array, num_downsample):
+    """ Method returns a length-num_downsample random downsampling of the input array.
+
+    Parameters 
+    ----------
+    array : array
+
+    num_downsample : int 
+        Size of the desired downsampled version of the data
+
+    Returns 
+    -------
+    downsampled_array : array or Astropy Table
+        Random downsampling of the input array
+    """
+
+    input_array_length = array_like_length(array) 
+    if num_downsample > input_array_length:
+        raise SyntaxError("Length of the desired downsampling = %i, "
+            "which exceeds input array length = %i " % (num_downsample, input_array_length))
+    else:
+        randomizer = np.random.random(input_array_length)
+        idx_sorted = np.argsort(randomizer)
+        return array[idx_sorted[0:num_downsample]]
+
+
+
+
+
+
+
 
