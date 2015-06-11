@@ -20,7 +20,7 @@ from . import model_defaults
 
 from ..sim_manager import sim_defaults
 
-__all__ = ["HodMockFactory"]
+__all__ = ['MockFactory', 'HodMockFactory', 'SubhaloMockFactory']
 __author__ = ['Andrew Hearin']
 
 @six.add_metaclass(ABCMeta)
