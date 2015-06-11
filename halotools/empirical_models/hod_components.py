@@ -15,11 +15,12 @@ simulations with mock galaxies. See the tutorials on model-building
 for further details on their use. 
 """
 
-__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats']
+__all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats', 'Leauthaud11Cens']
 
 from functools import partial
 from copy import copy
 import numpy as np
+import math
 from scipy.special import erf 
 from scipy.stats import poisson
 from scipy.optimize import brentq
@@ -28,6 +29,7 @@ from scipy.interpolate import UnivariateSpline as spline
 import model_defaults
 from ..utils.array_utils import array_like_length as custom_len
 import occupation_helpers as occuhelp
+from . import smhm_components
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -339,6 +341,111 @@ class Kravtsov04Cens(OccupationComponent):
             return param_dict
         else:
             raise KeyError("For Kravtsov04Cens, only supported best-fit models are currently Zheng et al. 2007")
+
+
+class Leauthaud11Cens(OccupationComponent):
+    """ HOD-style model for a central galaxy occupation that derives from 
+    a stellar-to-halo-mass relation. 
+    """
+    def __init__(self, smhm_model=smhm_components.Moster13SmHm, **kwargs):
+        """
+        """
+        occupation_bound = 1.0
+
+        if 'gal_type' in kwargs.keys():
+            gal_type = kwargs['gal_type']
+        else:
+            gal_type = 'centrals'
+
+        if 'threshold' in kwargs.keys():
+            threshold = kwargs['threshold']
+        else:
+            threshold = model_defaults.default_stellar_mass_threshold
+
+        if 'prim_haloprop_key' in kwargs.keys():
+            prim_haloprop_key = kwargs['prim_haloprop_key']
+        else:
+            prim_haloprop_key = model_defaults.prim_haloprop_key
+
+        # Call the super class constructor, which binds all the 
+        # arguments to the instance.  
+        super(Leauthaud11Cens, self).__init__(
+            gal_type, threshold, occupation_bound, 
+            prim_haloprop_key = prim_haloprop_key)
+
+        self.smhm_model = smhm_model(**kwargs)
+
+        if 'input_param_dict' in kwargs.keys():
+            input_param_dict = kwargs['input_param_dict']
+        else:
+            input_param_dict = None
+        self._initialize_param_dict(input_param_dict)
+
+        self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
+
+    def _initialize_param_dict(self, input_param_dict):
+        """ Private method used to retrieve the 
+        dictionary governing the parameters of the model. 
+        """
+
+        self.param_dict = {}
+        for key, value in self.smhm_model.param_dict.iteritems():
+            self.param_dict[key] = value
+
+
+    def mean_occupation(self, **kwargs):
+        """ Expected number of central galaxies in a halo of mass halo_mass.
+        See Equation 8 of arXiv:1103.2077.
+
+        Parameters
+        ----------        
+        prim_haloprop : array, optional keyword argument
+            array of masses of halos in the catalog
+
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
+
+        galaxy_table : object, optional keyword argument 
+            Data table storing mock galaxy catalog. 
+
+        input_param_dict : dict, optional
+            dictionary of parameters governing the model. If not passed, 
+            values bound to ``self`` will be chosen. 
+
+        Returns
+        -------
+        mean_ncen : array
+            Mean number of central galaxies in the halo of the input mass. 
+
+        Notes 
+        -----
+        Assumes constant scatter in the stellar-to-halo-mass relation. 
+        """
+
+        if 'input_param_dict' not in kwargs.keys():
+            param_dict = self.param_dict 
+        else:
+            param_dict = kwargs['input_param_dict']
+
+        if 'galaxy_table' in kwargs.keys():
+            mass = kwargs['galaxy_table'][self.prim_haloprop_key]
+        elif 'halos' in kwargs.keys():
+            mass = kwargs['halos'][self.prim_haloprop_key]
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
+        elif 'mass' in kwargs.keys():
+            mass = kwargs['mass']
+        else:
+            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
+                "``halos``, ``mass``, ``prim_haloprop``, or ``galaxy_table``")
+
+        logmstar = np.log10(self.smhm_model.mean_stellar_mass(mass_like=mass))
+        logscatter = math.sqrt(2)*self.smhm_model.scatter_model.mean_scatter(mass_like=mass)
+
+        mean_ncen = 0.5*(1.0 - 
+            erf((self.threshold - logmstar)/logscatter))
+
+        return mean_ncen
 
 
 class Kravtsov04Sats(OccupationComponent):
