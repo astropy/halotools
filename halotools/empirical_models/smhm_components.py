@@ -166,10 +166,16 @@ class Moster13SmHm(SmHmModel):
         Returns 
         -------
         mstar : array_like 
-            Array containing stellar mass_likees living in the input halos. 
+            Array containing stellar masses living in the input halos. 
         """
         mass_like = kwargs['mass_like']
-        redshift = kwargs['redshift']
+
+        if 'redshift' in kwargs.keys():
+            redshift = kwargs['redshift']
+        elif hasattr(self, 'redshift'):
+            redshift = self.redshift
+        else:
+            redshift = sim_defaults.default_redshift
         # compute the parameter values that apply to the input redshift
         a = 1./(1+redshift)
         m1 = self.param_dict['m10'] + self.param_dict['m11']*(1-a)
