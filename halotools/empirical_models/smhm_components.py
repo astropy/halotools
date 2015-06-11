@@ -73,17 +73,21 @@ class SmHmModel(object):
         mass_like : array, optional keyword argument 
             array of halo mass_likees 
 
+        halos : array or table, optional keyword argument
+            Data structure containing halos onto which stellar mass 
+            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
+
+        galaxy_table : array or table, optional keyword argument
+            Data structure containing halos onto which stellar mass 
+            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
+
         redshift : float, optional keyword argument
             Redshift of the halo hosting the galaxy. 
-
-        halos : array or table, optional keyword argument
-            Data structure containing halos onto which stellar mass_likees 
-            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
 
         Returns 
         -------
         mstar : array_like 
-            Array containing stellar mass_likees living in the input halos. 
+            Array containing stellar mass living in the input halos. 
         """
 
         # Interpret the inputs to determine the appropriate redshift
