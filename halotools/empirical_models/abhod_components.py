@@ -125,15 +125,22 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
 
 
     # assign halos percentile values of the secondary halo property
-    def assign_sec_haloprop_percentiles(self,inp_halo_catalog,num_mass_bins=35,append_mass_bins=True):
+    def assign_sec_haloprop_percentiles(self,
+        num_mass_bins=35,
+        append_mass_bins=False,
+        **kwargs):
         """
         Parameters
         ----------
-        inp_halo_catalog : astropy table 
-            stores halo catalog being used to make mock galaxy population
+        halos : astropy table 
+            a keyword argument that stores halo catalog being used to make mock galaxy population
 
         num_mass_bins : integer
             number of bins of mass within which to assign secondary property percentiles
+
+        append_mass_bins : if true, this will append the indices of the mass bins that are 
+            used to construct the percentiles. this makes reconstruction of the mass bins 
+            quick and easy if needed.
 
         Notes
         -----
@@ -141,6 +148,15 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         of the property in sec_haloprop_key to each halo.
         """
         
+        # check that the proper keys are given. 
+        # I'm using the if else structure rather than (if not in) structure
+        # because once other keys are implemented this will be more natural
+        if ('halos' in kwargs.keys() ):
+            inp_halo_catalog=kwargs['halos']
+        else:
+            raise KeyError("At this time, HeavisideCenAssemBiasModel assign_sec_haloprop_percentiles " 
+                "method can only accept the 'halos' keyword and this must be specified.")
+
         # new halo property
         inp_halo_catalog[self.sec_haloprop_percentile_key]=np.zeros_like(inp_halo_catalog[self.prim_haloprop_key])
 
@@ -194,12 +210,15 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
 
 
     # compute mean halo occupation
-    def mean_occupation(self,inp_halo_catalog,append_to_catalog=False):
+    def mean_occupation(self,
+        append_to_catalog=False,
+        **kwargs):
         """
         Parameters
         ----------
-        inp_halo_catalog : astropy table
-            halo catalog that can be used to assign occupation based on 
+        halos : astropy table
+            a keyword argument that gives a halo catalog that 
+            can be used to assign occupation based on 
             the halo primary and secondary properties.
         
         append_to_catalog : boolean
@@ -219,8 +238,22 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         average for all halos of that mass by 0.4.
         """
     
+        # check that the proper keys are given. 
+        # I'm using the if else structure rather than (if not in) structure
+        # because once other keys are implemented this will be more natural
+        if ('halos' in kwargs.keys() ):
+            inp_halo_catalog=kwargs['halos']
+        else:
+            raise KeyError("At this time, HeavisideCenAssemBiasModel mean_occupation method "
+                 "can only accept the 'halos' keyword and this must be specified.")
+
         # get the baseline hod without any assembly bias
         num_mean_noab=self.standard_mean_occupation(halos=inp_halo_catalog)
+
+        # if the necessary properties have not been computed for the halos, then compute them
+        if (self.sec_haloprop_percentile_key not in inp_halo_catalog.keys()):
+            print ' Secondary halo property percentiles not pre-computed, computing now.'
+            self.assign_sec_haloprop_percentiles(halos=inp_halo_catalog)
 
         # get perturbation due to assembly bias. this proceeds as follows.
         # if self.param_dict['frac_dNmax']>=0, then we assume that 
@@ -261,14 +294,46 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         if (append_to_catalog):
             # then append the mean occupation number to the halo catalog so that each 
             # halo knows its mean occupation.
-            inp_halo_catalog['delta_num_gal']=delta_num_gal
             inp_halo_catalog['ncen_mean']=num_mean_noab
 
         return num_gal
 
 
 
+    # compute an actual Monte Carlo realization of the occupation.
+    def mc_occupation(self,
+        append_to_catalog=False,
+        **kwargs):
+        """
+        Parameters
+        ----------
+        input_halo_catalog : astropy table containing the halo catalog
+            a keyword argument giving halo information necessary to compute the occupation.
 
+        append_to_catalog : boolean
+            if true, append to the halo catalog the MC realization for the galaxy number
+        
+        Notes
+        -----
+        Generate a Monte Carlo realization of the galaxy population in these halos.
+        """
+
+        # check that the proper keys are given. 
+        # I'm using the if else structure rather than (if not in) structure
+        # because once other keys are implemented this will be more natural
+        if ('halos' in kwargs.keys() ):
+            inp_halo_catalog=kwargs['halos']
+        else:
+            raise KeyError("At this time, HeavisideCenAssemBiasModel mc_occupation method "
+                 "can only accept the 'halos' keyword and this must be specified.")
+
+
+        num_realized=super(HeavisideCenAssemBiasModel,self).mc_occupation(halos=inp_halo_catalog)
+
+        if (append_to_catalog):
+            inp_halo_catalog['ncen_realized']=num_realized
+
+        return num_realized
 
 
 
