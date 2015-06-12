@@ -84,6 +84,9 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # secondary halo property percentile key
         self.sec_haloprop_percentile_key=self.sec_haloprop_key+'_percentile'
 
+        # key for haloprop bins
+        self.prim_haloprop_bin_key=self.prim_haloprop_key+'_bin_index'
+
         # add the assembly bias parameters to the param_dict so that they may 
         # be varied in an MCMC if needed.
         self.param_dict['ab_percentile']=ab_percentile
@@ -146,6 +149,11 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         -----
         Takes the input halo catalog and uses the assembly bias model to assign percentiles 
         of the property in sec_haloprop_key to each halo.
+
+        assign_sec_haloprop_percentiles(self,
+        num_mass_bins=35,
+        append_mass_bins=False,
+        **kwargs):
         """
         
         # check that the proper keys are given. 
@@ -172,8 +180,8 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # if optional input argument append_mass_bins=False, then do not store the mass bin 
         # information.
         if (append_mass_bins):
-            bin_key=self.prim_haloprop_key+'_bin_index'
-            inp_halo_catalog[bin_key]=in_mass_bin
+            print ' Appending Mass Bins to Halo Catalog.'
+            inp_halo_catalog[self.prim_haloprop_bin_key]=in_mass_bin
 
         # sort on secondary property only with each mass bin
         # iterating to num_mass_bins+1 ensures that any halos that exceed the 
@@ -201,7 +209,9 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
             #print ' ------------- * ------------------ \n \n'
             
             # place the percentiles into the catalog
-            inp_halo_catalog[self.sec_haloprop_percentile_key][indices_of_mass_bin]=1.0-percentiles
+            inp_halo_catalog[self.sec_haloprop_percentile_key][indices_of_mass_bin]=1.00-percentiles
+            
+        print 'Percentiles are assigned \n ***** \n ----- \n'
 
         return None
 
@@ -286,7 +296,8 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
 
         # Now we assign the shift, delta n, based upon the percentiles in the halo catalog.
         delta_num_gal=np.zeros_like(inp_halo_catalog[self.prim_haloprop_key])
-        delta_num_gal=np.where(inp_halo_catalog[self.sec_haloprop_percentile_key]>=self.param_dict['ab_percentile'],
+        delta_num_gal=np.where(
+            inp_halo_catalog[self.sec_haloprop_percentile_key]<=self.param_dict['ab_percentile'],
             delta_n_upper_percentile,delta_n_lower_percentile)
 
         num_gal=num_mean_noab+delta_num_gal
