@@ -12,7 +12,7 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 import occupation_helpers as occuhelp 
 from functools import partial
 
@@ -192,13 +192,13 @@ class GalProfFactory(object):
         Implemented as a read-only getter method via the ``@property`` decorator syntax. 
 
         The purpose of `gal_prof_func_dict` is primarily for use by the 
-        `~halotools.empirical_models.mock_factory` module. For example, through the use of 
-        `gal_prof_func_dict`, the `~halotools.empirical_models.mock_factory.HodMockFactory` 
+        `~halotools.empirical_models.mock_factories` module. For example, through the use of 
+        `gal_prof_func_dict`, the `~halotools.empirical_models.mock_factories.HodMockFactory` 
         can create a ``gal_NFWmodel_conc`` attribute for the mock, 
         without knowing the name of the concentration-mass function used in the assignment, 
         nor knowledge of the ``gal_NFWmodel_conc`` keyword. 
         This is one of the tricks that permits   
-        `~halotools.empirical_models.mock_factory.HodMockFactory` to call 
+        `~halotools.empirical_models.mock_factories.HodMockFactory` to call 
         its component models using a uniform syntax, regardless of the complexity 
         of the underlying model. 
         """

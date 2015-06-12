@@ -2,7 +2,7 @@
 
 import numpy as np 
 from .. import preloaded_models
-from .. import hod_factory
+from .. import model_factories
 
 __all__ = ['test_Kravtsov04_composite']
 
@@ -10,13 +10,13 @@ def test_Kravtsov04_composite():
 	""" Method to test the basic behavior of 
 	`~halotools.empirical_models.preloaded_models.Kravtsov04`, 
 	a specific pre-loaded model of 
-	`~halotools.empirical_models.hod_factory.HodModelFactory`. 
+	`~halotools.empirical_models.model_factories.HodModelFactory`. 
 
 	The suite includes the following tests:
 
 		* Changes to ``self.param_dict`` properly propagate through to occupation component models. 
 
-		* Default behavior is recovered after calling the `~halotools.empirical_models.hod_factory.HodModelFactory.restore_init_param_dict` method. 
+		* Default behavior is recovered after calling the `~halotools.empirical_models.model_factories.HodModelFactory.restore_init_param_dict` method. 
 	"""
 	model = preloaded_models.Kravtsov04(threshold = -18)
 

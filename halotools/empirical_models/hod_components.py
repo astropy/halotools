@@ -9,14 +9,15 @@ and so has a ``mean_occupation`` method.
 A common use for these objects is to bundle them together to make a 
 composite galaxy model, with multiple populations having their 
 own occupation statistics and profiles. Instances of classes in this module 
-can be passed to the `~halotools.empirical_models.hod_factory`, 
+can be passed to the `~halotools.empirical_models.model_factories.HodModelFactory`, 
 and you will be returned a model object that can directly populate 
-simulations with mock galaxies. See the tutorials on these models 
+simulations with mock galaxies. See the tutorials on model-building 
 for further details on their use. 
 """
 
 __all__ = ['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats']
 
+from functools import partial
 from copy import copy
 import numpy as np
 from scipy.special import erf 
@@ -25,7 +26,7 @@ from scipy.optimize import brentq
 from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 import occupation_helpers as occuhelp
 
 from astropy.extern import six
@@ -56,8 +57,8 @@ class OccupationComponent(object):
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
-        if 'param_dict' in kwargs.keys():
-            self.param_dict = kwargs['param_dict']
+        if 'input_param_dict' in kwargs.keys():
+            self.param_dict = kwargs['input_param_dict']
         else:
             self.param_dict = {}
 
@@ -107,7 +108,7 @@ class OccupationComponent(object):
             np.random.seed(seed=None)
 
         if self.occupation_bound == 1:
-            mc_generator = np.random.random(aph_len(mass))
+            mc_generator = np.random.random(custom_len(mass))
             mc_abundance = np.where(mc_generator < self.mean_occupation(**kwargs), 1, 0)
             return mc_abundance
 
@@ -573,149 +574,6 @@ class Kravtsov04Sats(OccupationComponent):
             return param_dict
         else:
             raise KeyError("For Kravtsov04Sats, only supported best-fit models are currently Zheng et al. 2007")
-
-
-class vdB03Quiescence(object):
-    """
-    Traditional HOD-style model of galaxy quenching 
-    in which the expectation value for a binary SFR designation of the galaxy 
-    is purely determined by the primary halo property.
-    
-    Approach is adapted from van den Bosch et al. 2003. 
-    The parameters of this component model govern the value of the quiescent fraction 
-    at a particular set of masses. 
-    The class then uses an input `halotools.occupation_helpers` function 
-    to infer the quiescent fraction at values other than the input abcissa.
-
-    Notes 
-    -----
-
-    In the construction sequence of a composite HOD model, 
-    if `halotools.hod_designer` uses this component model *after* 
-    using a central occupation component, then  
-    the resulting central galaxy stellar-to-halo mass relation 
-    will have no dependence on quenched/active designation. 
-    Employing this component *before* the occupation component allows 
-    for an explicit halo mass dependence in the central galaxy SMHM. 
-    Thus the sequence of the composition of the quiescence and occupation models 
-    determines whether the resulting composite model satisfies the following 
-    classical separability condition between stellar mass and star formation rate: 
-
-    :math:`P( M_{*}, \dot{M_{*}} | M_{h}) = P( M_{*} | M_{h})\\times P( \dot{M_{*}} | M_{h})`
-
-    """
-
-    def __init__(self, gal_type, param_dict=model_defaults.default_quiescence_dict, 
-        interpol_method='spline',input_spline_degree=3):
-        """ 
-        Parameters 
-        ----------
-        gal_type : string, optional
-            Sets the key value used by `halotools.hod_designer` and 
-            `~halotools.hod_factory` to access the behavior of the methods 
-            of this class. 
-
-        param_dict : dictionary, optional 
-            Dictionary specifying what the quiescent fraction should be 
-            at a set of input values of the primary halo property. 
-            Default values are set in `halotools.model_defaults`. 
-
-        interpol_method : string, optional 
-            Keyword specifying how `mean_quiescence_fraction` 
-            evaluates input value of the primary halo property 
-            that differ from the small number of values 
-            in self.param_dict. 
-            The default spline option interpolates the 
-            model's abcissa and ordinates. 
-            The polynomial option uses the unique, degree N polynomial 
-            passing through the ordinates, where N is the number of supplied ordinates. 
-
-        input_spline_degree : int, optional
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-        """
-
-        self.gal_type = gal_type
-
-        self.param_dict = param_dict
-        # Put param_dict keys in standard form
-        correct_keys = model_defaults.default_quiescence_dict.keys()
-        self.param_dict = occuhelp.format_parameter_keys(
-            self.param_dict,correct_keys,self.gal_type)
-        self.abcissa_key = 'quiescence_abcissa_'+self.gal_type
-        self.ordinates_key = 'quiescence_ordinates_'+self.gal_type
-
-        # Set the interpolation scheme 
-        if interpol_method not in ['spline', 'polynomial']:
-            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
-        self.interpol_method = interpol_method
-
-        if self.interpol_method=='spline':
-            scipy_maxdegree = 5
-            self.spline_degree = np.min(
-                [scipy_maxdegree, input_spline_degree, 
-                aph_len(self.param_dict[self.abcissa_key])-1])
-            self.spline_function = occuhelp.aph_spline(
-                self.param_dict[self.abcissa_key],
-                self.param_dict[self.ordinates_key],
-                k=self.spline_degree)
-
-
-    def mean_quiescence_fraction(self,input_abcissa):
-        """
-        Expected fraction of gal_type galaxies that are quiescent 
-        as a function of the primary halo property.
-
-        Parameters 
-        ----------
-        input_abcissa : array_like
-            array of primary halo property at which the quiescent fraction 
-            is being computed. 
-
-        Returns 
-        -------
-        mean_quiescence_fraction : array_like
-            Values of the quiescent fraction evaluated at input_abcissa. 
-
-        Notes 
-        -----
-
-        Either assumes the quiescent fraction is a polynomial function 
-        of the primary halo property, or is interpolated from a grid. 
-        Either way, the behavior of this method is fully determined by 
-        its values at the model abcissa, as specified in param_dict. 
-        """
-
-        model_abcissa = self.param_dict[self.abcissa_key]
-        model_ordinates = self.param_dict[self.ordinates_key]
-
-        if self.interpol_method=='polynomial':
-            mean_quiescence_fraction = occuhelp.polynomial_from_table(
-                model_abcissa,model_ordinates,input_abcissa)
-        elif self.interpol_method=='spline':
-            mean_quiescence_fraction = self.spline_function(input_abcissa)
-        else:
-            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
-
-        # Enforce boundary conditions of any Fraction function
-        test_negative = np.array(mean_quiescence_fraction<0)
-        test_exceeds_unity = np.array(mean_quiescence_fraction>1)
-        mean_quiescence_fraction[test_negative]=0
-        mean_quiescence_fraction[test_exceeds_unity]=1
-
-        return mean_quiescence_fraction
-
-
-
-
-
-
-
-
-
-
-
 
 
 
