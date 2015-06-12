@@ -9,6 +9,10 @@ Currently only composite HOD models are supported.
 """
 
 import numpy as np
+
+from astropy.extern import six
+from abc import ABCMeta, abstractmethod, abstractproperty
+
 from astropy.table import Table 
 
 from . import occupation_helpers as occuhelp
@@ -19,7 +23,77 @@ from ..sim_manager import sim_defaults
 __all__ = ["HodMockFactory"]
 __author__ = ['Andrew Hearin']
 
-class HodMockFactory(object):
+@six.add_metaclass(ABCMeta)
+class MockFactory(object):
+    """ Class responsible for populating a simulation with a 
+    population of mock galaxies.
+
+    """
+    def __init__(self, snapshot, composite_model, **kwargs):
+        """
+        Parameters 
+        ----------
+        snapshot : object 
+            Object containing the halo catalog and its metadata, 
+            produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
+
+        composite_model : object 
+            Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`. 
+            Whatever the features of the model, the ``composite_model`` object 
+            created by the HOD model factory contains all the instructions 
+            needed to produce a Monte Carlo realization of the model with `HodMockFactory`. 
+
+        additional_haloprops : list of strings, optional 
+            Each entry in this list must be a column key of the halo catalog. 
+            For each entry, mock galaxies will have an attribute storing this 
+            property of their host halo. The corresponding mock galaxy attribute name 
+            will be pre-pended by ``halo_``. If ``additional_haloprops`` is set to 
+            the string value ``all``, 
+            the galaxy table will inherit every halo property in the catalog.  
+
+        halocut_funcobj : function object, optional 
+            Function object used to place a cut on the input subhalo catalog. 
+            Input must be a length-Nsubhalos structured numpy array or astropy table; 
+            output must be a length-Nsubhalos boolean array that will be used as a mask. 
+
+        """
+
+        # Bind the inputs to the mock object
+        self.snapshot = snapshot
+        self.halos = snapshot.halos
+        self.particles = snapshot.particles
+        self.model = composite_model
+        if hasattr(self.model, 'gal_types'):
+            self.gal_types = self.model.gal_types
+
+        # Create a list of halo properties that will be inherited by the mock galaxies
+        self.additional_haloprops = model_defaults.haloprop_list
+        if hasattr(self.model, 'haloprop_list'):
+            self.additional_haloprops.extend(self.model.haloprop_list)
+        if 'additional_haloprops' in kwargs.keys():
+            if kwargs['additional_haloprops'] == 'all':
+                self.additional_haloprops.extend(self.halos.keys())
+            else:
+                self.additional_haloprops.extend(kwargs['additional_haloprops'])
+        self.additional_haloprops = list(set(self.additional_haloprops))
+
+        if 'halocut_funcobj' in kwargs.keys():
+            self.halocut_funcobj = kwargs['halocut_funcobj']
+
+        self.galaxy_table = Table() 
+
+    @abstractmethod
+    def populate(self, **kwargs):
+        """ Method populating halos with mock galaxies. 
+
+        The `populate` method of `MockFactory` 
+        has no implementation, it is simply a placeholder used for standardization. 
+        """
+        raise NotImplementedError("All subclasses of MockFactory"
+        " must include a populate method")
+
+
+class HodMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a 
     population of mock galaxies. 
 
@@ -32,39 +106,50 @@ class HodMockFactory(object):
 
     """
 
-    def __init__(self, snapshot, composite_model, **kwargs):
+    def __init__(self, snapshot, composite_model, populate=True, **kwargs):
+        """
+        Parameters 
+        ----------
+        snapshot : object 
+            Object containing the halo catalog and its metadata, 
+            produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
 
-        # Bind the inputs to the mock object
-        self.snapshot = snapshot
-        self.halos = snapshot.halos
-        self.particles = snapshot.particles
-        self.model = composite_model
+        composite_model : object 
+            Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`. 
+            Whatever the features of the model, the ``composite_model`` object 
+            created by the HOD model factory contains all the instructions 
+            needed to produce a Monte Carlo realization of the model with `HodMockFactory`. 
 
-        self.gal_types = self.model.gal_types
+        additional_haloprops : list of strings, optional 
+            Each entry in this list must be a column key of the halo catalog. 
+            For each entry, mock galaxies will have an attribute storing this 
+            property of their host halo. The corresponding mock galaxy attribute name 
+            will be pre-pended by ``halo_``. If ``additional_haloprops`` is set to 
+            the string value ``all``, 
+            the galaxy table will inherit every halo property in the catalog.  
+
+        halocut_funcobj : function object, optional 
+            Function object used to place a cut on the input subhalo catalog. 
+            Input must be a length-Nsubhalos structured numpy array or astropy table; 
+            output must be a length-Nsubhalos boolean array that will be used as a mask. 
+
+        populate : boolean, optional 
+            If set to ``False``, the class will perform all pre-processing tasks 
+            but will not call the ``composite_model`` to populate the ``galaxy_table`` 
+            with mock galaxies and their observable properties. Default is ``True``. 
+
+        """
+
+        super(HodMockFactory, self).__init__(snapshot, composite_model, **kwargs)
+
         occupation_bound = np.array([self.model.occupation_bound[gal_type] 
             for gal_type in self.model.gal_types])
         self._occupation_bounds = occupation_bound
 
-        self.additional_haloprops = model_defaults.haloprop_list
-        self.additional_haloprops.extend(self.model.haloprop_list)
-        if 'additional_haloprops' in kwargs.keys():
-            if kwargs['additional_haloprops'] == 'all':
-                self.additional_haloprops.extend(self.halos.keys())
-            else:
-                self.additional_haloprops.extend(kwargs['additional_haloprops'])
-        self.additional_haloprops = list(set(self.additional_haloprops))
-
         self.process_halo_catalog()
 
-        self.galaxy_table = Table()
-
-        if 'populate' in kwargs.keys():
-            populate = kwargs['populate']
-        else:
-            populate = True
         if populate is True:
-            self.populate()
-        
+            self.populate()        
 
 
     def process_halo_catalog(self):
@@ -75,14 +160,21 @@ class HodMockFactory(object):
         and possibly creating new halo properties. 
         """
 
-        #Make cuts on halo catalog
-        # select host halos only, since this is an HOD-style model
+        ################ Make cuts on halo catalog ################
+        # Select host halos only, since this is an HOD-style model
         host_halo_cut = (self.halos['upid']==-1)
         self.halos = self.halos[host_halo_cut]
-        # make mvir completeness cut
+
+        # make a conservative mvir completeness cut 
+        # This can be relaxed by changing sim_defaults.Num_ptcl_requirement
         cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
         mass_cut = (self.halos['mvir'] > cutoff_mvir)
         self.halos = self.halos[mass_cut]
+
+        # Make any additional cuts requested by the composite model
+        if hasattr(self.model, 'halocut_funcobj'):
+            self.halos = self.model.halocut_funcobj(halos=self.halos)
+        ############################################################
 
         ### Create new columns of the halo catalog, if applicable
         for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
@@ -274,6 +366,101 @@ class HodMockFactory(object):
         for key in phase_space_keys:
             self.galaxy_table[key] = np.zeros(self.Ngals, dtype = 'f4')
 
+
+class SubhaloMockFactory(MockFactory):
+    """ Class responsible for populating a simulation with a 
+    population of mock galaxies.
+
+    """
+
+    def __init__(self, snapshot, composite_model, populate=True, **kwargs):
+        """
+        Parameters 
+        ----------
+        snapshot : object 
+            Object containing the halo catalog and its metadata, 
+            produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
+
+        composite_model : object 
+            Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`. 
+            Whatever the features of the model, the ``composite_model`` object 
+            created by the HOD model factory contains all the instructions 
+            needed to produce a Monte Carlo realization of the model with `HodMockFactory`. 
+
+        additional_haloprops : list of strings, optional 
+            Each entry in this list must be a column key of the halo catalog. 
+            For each entry, mock galaxies will have an attribute storing this 
+            property of their host halo. The corresponding mock galaxy attribute name 
+            will be pre-pended by ``halo_``. If ``additional_haloprops`` is set to 
+            the string value ``all``, 
+            the galaxy table will inherit every halo property in the catalog.  
+
+        halocut_funcobj : function object, optional 
+            Function object used to place a cut on the input subhalo catalog. 
+            Input must be a length-Nsubhalos structured numpy array or astropy table; 
+            output must be a length-Nsubhalos boolean array that will be used as a mask. 
+
+        populate : boolean, optional 
+            If set to ``False``, the class will perform all pre-processing tasks 
+            but will not call the ``composite_model`` to populate the ``galaxy_table`` 
+            with mock galaxies and their observable properties. Default is ``True``. 
+
+        """
+
+        super(SubhaloMockFactory, self).__init__(snapshot, composite_model, **kwargs)
+
+        # Pre-compute any additional halo properties required by the model
+        self.process_halo_catalog()
+        self.precompute_galprops()
+
+        if populate is True:
+            self.populate()
+
+    def process_halo_catalog(self):
+        """ Method to pre-process a halo catalog upon instantiation of 
+        the mock object. 
+        """
+
+        # Make any cuts on the halo catalog requested by the composite model
+        if hasattr(self.model, 'halocut_funcobj'):
+            self.halos = self.model.halocut_funcobj(halos=self.halos)
+
+        ### Create new columns of the halo catalog, if applicable
+        if hasattr(self.model, 'new_haloprop_func_dict'):
+            for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
+                self.halos[new_haloprop_key] = new_haloprop_func(halos=self.halos)
+                self.additional_haloprops.append(new_haloprop_key)
+
+
+    def precompute_galprops(self):
+
+        for key in self.additional_haloprops:
+            newkey = model_defaults.host_haloprop_prefix + key
+            self.galaxy_table[newkey] = self.halos[key]
+
+        phase_space_keys = ['x', 'y', 'z', 'vx', 'vy', 'vz']
+        for newkey in phase_space_keys:
+            oldkey = model_defaults.host_haloprop_prefix + newkey
+            self.galaxy_table[newkey] = self.galaxy_table[oldkey]
+
+        self.galaxy_table['galid'] = np.arange(len(self.galaxy_table))
+
+        for galprop in self.model.galprop_list:
+            component_model = self.model.model_blueprint[galprop]
+            if hasattr(component_model, 'gal_type_func'):
+                newkey = galprop + '_gal_type'
+                self.galaxy_table[newkey] = (
+                    component_model.gal_type_func(galaxy_table=self.galaxy_table)
+                    )
+
+    def populate(self, **kwargs):
+        """ Method populating halos with mock galaxies. 
+        """
+        for galprop_key in self.model.galprop_list:
+            
+            model_func_name = galprop_key + '_model_func'
+            model_func = getattr(self.model, model_func_name)
+            self.galaxy_table[galprop_key] = model_func(galaxy_table=self.galaxy_table)
 
 
 
