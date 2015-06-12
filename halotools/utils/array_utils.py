@@ -97,6 +97,10 @@ def randomly_downsample_data(array, num_downsample):
     -------
     downsampled_array : array or Astropy Table
         Random downsampling of the input array
+
+    Call
+    ----
+    randomly_downsample_data(array, num_downsample)
     """
 
     input_array_length = array_like_length(array) 
