@@ -4,7 +4,7 @@ import numpy as np
 from .. import halo_prof_components as hpc
 from .. import gal_prof_components as gpc
 from .. import gal_prof_factory as gpf
-from ..mock_factory import HodMockFactory
+from ..mock_factories import HodMockFactory
 
 from ...sim_manager.generate_random_sim import FakeSim
 from ..preloaded_models import Kravtsov04

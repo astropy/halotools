@@ -16,7 +16,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 import occupation_helpers as occuhelp 
 import model_defaults
 
@@ -282,7 +282,7 @@ class SpatialBias(object):
         """
 
         ###
-        if occuhelp.aph_len(args) > 0:
+        if occuhelp.custom_len(args) > 0:
             # We were passed an array of profile parameters, 
             # so we should not have also been passed a galaxy sample
             if 'mock_galaxies' in kwargs.keys():
@@ -290,7 +290,7 @@ class SpatialBias(object):
                     "or a mock, but not both")
             return args[0], args[1]
 
-        elif (occuhelp.aph_len(args) == 0) & ('mock_galaxies' in kwargs.keys()):
+        elif (occuhelp.custom_len(args) == 0) & ('mock_galaxies' in kwargs.keys()):
             # We were passed a collection of galaxies
             mock_galaxies = kwargs['mock_galaxies']
             halo_prof_param_key = kwargs['prof_param_key']
@@ -471,9 +471,9 @@ class SpatialBias(object):
                 self.spline_degree[prof_param_key] = (
                     np.min(
                 [scipy_maxdegree, self.input_spline_degree, 
-                aph_len(self.abcissa_dict[prof_param_key])-1])
+                custom_len(self.abcissa_dict[prof_param_key])-1])
                     )
-                self.spline_function[prof_param_key] = occuhelp.aph_spline(
+                self.spline_function[prof_param_key] = occuhelp.custom_spline(
                     self.abcissa_dict[prof_param_key], 
                     self.ordinates_dict[prof_param_key], 
                     k=self.spline_degree[prof_param_key])
