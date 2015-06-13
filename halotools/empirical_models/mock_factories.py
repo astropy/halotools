@@ -101,8 +101,8 @@ class MockFactory(object):
 
         # Create a list of halo properties that will be inherited by the mock galaxies
         self.additional_haloprops = model_defaults.haloprop_list
-        if hasattr(self.model, 'haloprop_list'):
-            self.additional_haloprops.extend(self.model.haloprop_list)
+        if hasattr(self.model, '_haloprop_list'):
+            self.additional_haloprops.extend(self.model._haloprop_list)
         if 'additional_haloprops' in kwargs.keys():
             if kwargs['additional_haloprops'] == 'all':
                 self.additional_haloprops.extend(self.halos.keys())
