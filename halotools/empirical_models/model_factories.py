@@ -145,9 +145,8 @@ class SubhaloModelFactory(ModelFactory):
             setattr(self, new_method_name, new_method_behavior)
 
     def _build_composite_lists(self, **kwargs):
-        """ A composite model has several lists that are built up from 
-        the components: ``haloprop_list``, ``publications``, and 
-        ``new_haloprop_func_dict``. 
+        """ A composite model has several bookkeeping devices that are built up from 
+        the components: ``_haloprop_list``, ``publications``, and ``new_haloprop_func_dict``. 
         """
 
         unordered_galprop_list = [key for key in self.model_blueprint.keys() if key is not 'mock_factory']
@@ -192,7 +191,7 @@ class SubhaloModelFactory(ModelFactory):
                         "component models with a new_haloprop_func_dict that use "
                         "the %s key" % example_repeated_element)
 
-        self.haloprop_list = list(set(haloprop_list))
+        self._haloprop_list = list(set(haloprop_list))
         self.publications = list(set(pub_list))
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
@@ -633,7 +632,7 @@ class HodModelFactory(ModelFactory):
 
     def _build_composite_lists(self):
         """ A composite model has several lists that are built up from 
-        the components: ``haloprop_list``, ``publications``, and 
+        the components: ``_haloprop_list``, ``publications``, and 
         ``new_haloprop_func_dict``. 
         """
 
@@ -671,7 +670,7 @@ class HodModelFactory(ModelFactory):
                             "component models with a new_haloprop_func_dict that use "
                             "the %s key" % example_repeated_element)
 
-        self.haloprop_list = list(set(haloprop_list))
+        self._haloprop_list = list(set(haloprop_list))
         self.publications = list(set(pub_list))
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
