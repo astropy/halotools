@@ -54,7 +54,7 @@ class OccupationComponent(object):
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
 
-        sec_haloprop_key : string optional keyword argument
+        sec_haloprop_key : string, optional keyword argument
             String giving the column name of the secondary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Only pertains to galaxy populations with assembly-biased occupations. 
@@ -69,30 +69,8 @@ class OccupationComponent(object):
             The parameters stored in ``self.param_dict`` are the only ones that 
             will be varied in MCMC-type likelihood analyses. 
         """
-
-        if 'gal_type' in kwargs.keys():
-            self.gal_type = kwargs['gal_type']
-        else:
-            raise KeyError("All OccupationComponent sub-classes "
-                "must pass a gal_type keyword argument to the constructor \n")
-
-        if 'occupation_bound' in kwargs.keys():
-            self.occupation_bound = kwargs['occupation_bound']
-        else:
-            raise KeyError("All OccupationComponent sub-classes "
-                "must pass a gal_type keyword argument to the constructor \n")
-
-        if 'prim_haloprop_key' in kwargs.keys():
-            self.prim_haloprop_key = kwargs['prim_haloprop_key']
-        else:
-            raise KeyError("All OccupationComponent sub-classes "
-                "must pass a prim_haloprop_key keyword argument to the constructor \n")
-
-        if 'threshold' in kwargs.keys():
-            self.threshold = kwargs['threshold']
-        else:
-            raise KeyError("All OccupationComponent sub-classes "
-                "must pass a threshold keyword argument to the constructor \n")
+        required_kwargs = ['gal_type',  'threshold', 'occupation_bound', 'prim_haloprop_key']
+        occuhelp.enforce_required_kwargs(required_kwargs, self, **kwargs)
 
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']

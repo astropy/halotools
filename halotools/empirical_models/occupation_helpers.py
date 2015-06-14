@@ -370,8 +370,14 @@ def count_haloprops(haloprop_dict):
             num_props += 1
     return num_props
 
-
-
+def enforce_required_kwargs(required_kwargs, obj, **kwargs):
+    for key in required_kwargs:
+        if key in kwargs.keys():
+            setattr(obj, key, kwargs[key])
+        else:
+            class_name = obj.__class__.__name__
+            raise KeyError("``%s`` is a required keyword argument "
+                "to instantiate the %s class" (key, class_name))
 
 
 
