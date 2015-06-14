@@ -2,7 +2,7 @@
 """
 This module contains various component features used by 
 HOD-style models of the galaxy-halo connection. For example, 
-the `~halotools.empirical_models.Kravtsov04Cens` class 
+the `~halotools.empirical_models.Zheng07Cens` class 
 governs the occupation statistics of a centrals-like population, 
 and so has a ``mean_occupation`` method. 
 
@@ -15,7 +15,7 @@ simulations with mock galaxies. See the tutorials on model-building
 for further details on their use. 
 """
 
-__all__ = (['OccupationComponent','Kravtsov04Cens','Kravtsov04Sats', 
+__all__ = (['OccupationComponent','Zheng07Cens','Kravtsov04Sats', 
     'Leauthaud11Cens', 'Leauthaud11Sats']
     )
 
@@ -208,7 +208,7 @@ class OccupationComponent(object):
         raise NotImplementedError("All subclasses of OccupationComponent " 
             "must implement a mean_occupation method. ")
 
-class Kravtsov04Cens(OccupationComponent):
+class Zheng07Cens(OccupationComponent):
     """ ``Erf`` function model for the occupation statistics of central galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
@@ -246,13 +246,13 @@ class Kravtsov04Cens(OccupationComponent):
     :math:`\\langle N_{\\mathrm{cen}}( M_{\\rm halo} )\\rangle_{>L} = 
     \\int_{L}^{\\infty}\\mathrm{d}L'P( L' | M_{\mathrm{halo}})`
 
-    The `Kravtsov04Cens` model assumes the stellar-to-halo-mass 
+    The `Zheng07Cens` model assumes the stellar-to-halo-mass 
     PDF is log-normal, 
     in which case the mean occupation function is just an ``erf`` function, 
     as in the `mean_occupation` method. 
 
     The test suite for this model is documented at 
-    `~halotools.empirical_models.test_empirical_models.test_Kravtsov04Cens`
+    `~halotools.empirical_models.test_empirical_models.test_Zheng07Cens`
     """
 
     def __init__(self, **kwargs):
@@ -277,7 +277,7 @@ class Kravtsov04Cens(OccupationComponent):
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
-        super(Kravtsov04Cens, self).__init__(
+        super(Zheng07Cens, self).__init__(
             gal_type, threshold, occupation_bound, 
             prim_haloprop_key = prim_haloprop_key)
 
@@ -412,7 +412,7 @@ class Kravtsov04Cens(OccupationComponent):
             param_dict = get_zheng07_params(threshold)
             return param_dict
         else:
-            raise KeyError("For Kravtsov04Cens, only supported best-fit models are currently Zheng et al. 2007")
+            raise KeyError("For Zheng07Cens, only supported best-fit models are currently Zheng et al. 2007")
 
 
 class Leauthaud11Cens(OccupationComponent):

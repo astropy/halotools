@@ -34,10 +34,10 @@ def test_Kravtsov04_blueprint():
 	* Satellite profiles are NFW, central profiles are trival
 
 	Since the Kravtsov04 composite model derives all its behavior from 
-	`~halotools.empirical_models.hod_components.Kravtsov04Cens` and 
+	`~halotools.empirical_models.hod_components.Zheng07Cens` and 
 	`~halotools.empirical_models.hod_components.Kravtsov04Sats`, 
 	all further testing is relegated to 
-	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04Cens` and 
+	`~halotools.empirical_models.test_empirical_models.test_Zheng07Cens` and 
 	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04Sats`. 
 
 	Examples 
