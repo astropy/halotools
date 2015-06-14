@@ -15,6 +15,7 @@ from ..utils.array_utils import array_like_length as custom_len
 from ..sim_manager import sim_defaults 
 
 from warnings import warn
+from functools import partial
 
 __all__ = ['SmHmModel', 'Moster13SmHm', 'LogNormalScatterModel']
 
@@ -283,6 +284,12 @@ class SmHmModel(object):
 
         self._build_param_dict(**kwargs)
 
+        inherited_mean_scatter_method = partial(
+            self.scatter_model.mean_scatter, input_param_dict = self.param_dict)
+        setattr(self, 'mean_scatter', inherited_mean_scatter_method)
+        inherited_scatter_realization_method = partial(
+            self.scatter_model.scatter_realization, input_param_dict = self.param_dict)
+        setattr(self, 'scatter_realization', inherited_mean_scatter_method)
 
     def _build_param_dict(self, **kwargs):
 
@@ -404,7 +411,6 @@ class Moster13SmHm(SmHmModel):
         """
 
         super(Moster13SmHm, self).__init__(**kwargs)
-        #self._set_param_dict_key_attrs()
 
         self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
 
@@ -478,15 +484,6 @@ class Moster13SmHm(SmHmModel):
 
         mstar = norm / (denom_term1 + denom_term2)
         return mstar
-
-    def _update_param_dict(self, **kwargs):
-        """ Private method to update ``self.param_dict`` 
-        and propagate changes to ``self.smhm_model.param_dict``. 
-        """
-        occuhelp.update_param_dict(self, **kwargs)
-        for key, value in self.param_dict.iteritems():
-            if key in self.scatter_model.param_dict.keys():
-                self.scatter_model.param_dict[key] = value
 
     def retrieve_default_param_dict(self):
         """ Method returns a dictionary of all model parameters 

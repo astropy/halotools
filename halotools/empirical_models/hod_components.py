@@ -466,13 +466,6 @@ class Leauthaud11Cens(OccupationComponent):
         for key, value in self.smhm_model.param_dict.iteritems():
             self.param_dict[key] = value
 
-    def _update_param_dict(self, **kwargs):
-        """ Private method to update ``self.param_dict`` 
-        and propagate changes to ``self.smhm_model.param_dict``. 
-        """
-        occuhelp.update_param_dict(self, **kwargs)
-        self.smhm_model._update_param_dict(input_param_dict = self.param_dict)
-
     def mean_occupation(self, **kwargs):
         """ Expected number of central galaxies in a halo of mass halo_mass.
         See Equation 8 of arXiv:1103.2077.
@@ -501,12 +494,14 @@ class Leauthaud11Cens(OccupationComponent):
         -----
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
-        self._update_param_dict(**kwargs)
+        occuhelp.update_param_dict(self, **kwargs)
         if 'input_param_dict' in kwargs.keys():
             del kwargs['input_param_dict']
 
-        logmstar = np.log10(self.smhm_model.mean_stellar_mass(**kwargs))
-        logscatter = math.sqrt(2)*self.smhm_model.scatter_model.mean_scatter(**kwargs)
+        logmstar = np.log10(self.smhm_model.mean_stellar_mass(
+            input_param_dict = self.param_dict, **kwargs))
+        logscatter = math.sqrt(2)*self.smhm_model.mean_scatter(
+            input_param_dict = self.param_dict, **kwargs)
 
         mean_ncen = 0.5*(1.0 - 
             erf((self.threshold - logmstar)/logscatter))
