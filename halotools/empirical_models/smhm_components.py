@@ -49,6 +49,25 @@ class LogNormalScatterModel(object):
             Degree of the spline interpolation for the case of interpol_method='spline'. 
             If there are k abcissa values specifying the model, input_spline_degree 
             is ensured to never exceed k-1, nor exceed 5. 
+
+        Examples 
+        ---------
+        >>> scatter_model = LogNormalScatterModel()
+        >>> scatter_model = LogNormalScatterModel(prim_haloprop_key='mvir')
+
+        To implement variable scatter, we need to define the level 
+        of log-normal scatter at a set of control values 
+        of the primary halo property. Here we give an example of a model 
+        in which the scatter is 0.3 dex for Milky Way halos and 0.1 dex in cluster halos:
+
+        >>> scatter_abcissa = [12, 15]
+        >>> scatter_ordinates = [0.3, 0.1]
+        >>> scatter_model = LogNormalScatterModel(scatter_abcissa=scatter_abcissa, scatter_ordinates=scatter_ordinates)
+
+        You can also control the degree of the spline interpolation:
+
+        >>> scatter_model = LogNormalScatterModel(scatter_abcissa=scatter_abcissa, scatter_ordinates=scatter_ordinates, scatter_spline_degree=3)
+
         """
         default_scatter = model_defaults.default_smhm_scatter
         self.prim_haloprop_key = prim_haloprop_key
