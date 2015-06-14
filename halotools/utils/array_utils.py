@@ -37,6 +37,15 @@ def array_like_length(x):
     even though such an object formally counts as an Iterable, being an ndarray. 
     This nuisance is so ubiquitous that it's convenient to have a single 
     line of code that replaces the default python len() function with sensible behavior.
+
+    Examples 
+    --------
+    >>> x = np.zeros(5)
+    >>> xlen = array_like_length(x)
+    >>> y = 4
+    >>> ylen = array_like_length(y)
+    >>> z = None 
+    >>> zlen = array_like_length(z)
     """
 
     if x is None:
@@ -61,6 +70,13 @@ def find_idx_nearest_val(array, value):
     Returns 
     -------
     idx_nearest : int
+
+    Examples 
+    --------
+    >>> x = np.linspace(0, 1000, num=1e5)
+    >>> val = 45.5
+    >>> idx_nearest_val = find_idx_nearest_val(x, val)
+    >>> nearest_val = x[idx_nearest_val]
     """
     if len(array) == 0:
         return None
@@ -97,6 +113,12 @@ def randomly_downsample_data(array, num_downsample):
     -------
     downsampled_array : array or Astropy Table
         Random downsampling of the input array
+
+    Examples 
+    --------
+    >>> x = np.linspace(0, 1000, num=1e5)
+    >>> desired_sample_size = 1e3
+    >>> downsampled_x = randomly_downsample_data(x, desired_sample_size)
     """
 
     input_array_length = array_like_length(array) 
