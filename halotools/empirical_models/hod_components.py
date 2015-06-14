@@ -1,18 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 This module contains various component features used by 
-HOD-style models of the galaxy-halo connection. For example, 
-the `~halotools.empirical_models.Zheng07Cens` class 
-governs the occupation statistics of a centrals-like population, 
-and so has a ``mean_occupation`` method. 
+HOD-style models of the galaxy-halo connection. 
 
-A common use for these objects is to bundle them together to make a 
-composite galaxy model, with multiple populations having their 
-own occupation statistics and profiles. Instances of classes in this module 
-can be passed to the `~halotools.empirical_models.model_factories.HodModelFactory`, 
-and you will be returned a model object that can directly populate 
-simulations with mock galaxies. See the tutorials on model-building 
-for further details on their use. 
 """
 
 __all__ = (['OccupationComponent','Zheng07Cens','Kravtsov04Sats', 
@@ -39,39 +29,71 @@ import warnings
 
 @six.add_metaclass(ABCMeta)
 class OccupationComponent(object):
-    """ Abstract super class of any occupation model. 
+    """ Abstract base class of any occupation model. 
     Functionality is mostly trivial. 
-    The sole purpose of the super class is to 
+    The sole purpose of the base class is to 
     standardize the attributes and methods 
-    required of any HOD-style occupation model component. 
+    required of any HOD-style model for halo occupation statistics. 
     """
-    def __init__(self, gal_type, threshold, occupation_bound, **kwargs):
+    def __init__(self, **kwargs):
         """ 
         Parameters 
         ----------
-        gal_type : string
+        gal_type : string, keyword argument 
             Name of the galaxy population whose occupation statistics is being modeled. 
 
-        threshold : float 
+        threshold : float, keyword argument
             Threshold value defining the selection function of the galaxy population 
             being modeled. Typically refers to absolute magnitude or stellar mass. 
 
-        occupation_bound : float 
+        occupation_bound : float, keyword argument
             Upper bound on the number of gal_type galaxies per halo. 
             The only currently supported values are unity or infinity. 
+
+        prim_haloprop_key : string, keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+
+        sec_haloprop_key : string optional keyword argument
+            String giving the column name of the secondary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Only pertains to galaxy populations with assembly-biased occupations. 
+            Default is None. 
+
+        input_param_dict : dict, optional keyword argument
+            Dictionary containing values for the parameters specifying the model.
+            All dict keys must conclude with ``_gal_type`` that matches ``self.gal_type``, 
+            e.g., ``logMmin_centrals`` or ``alpha_satellites``.
+            If no input_param_dict is passed, ``self.param_dict`` will be 
+            initialized with an empty dictionary. 
+            The parameters stored in ``self.param_dict`` are the only ones that 
+            will be varied in MCMC-type likelihood analyses. 
         """
 
-        self.gal_type = gal_type
-        self.threshold = threshold
-        self.occupation_bound = occupation_bound
+        if 'gal_type' in kwargs.keys():
+            self.gal_type = kwargs['gal_type']
+        else:
+            raise KeyError("All OccupationComponent sub-classes "
+                "must pass a gal_type keyword argument to the constructor \n")
+
+        if 'occupation_bound' in kwargs.keys():
+            self.occupation_bound = kwargs['occupation_bound']
+        else:
+            raise KeyError("All OccupationComponent sub-classes "
+                "must pass a gal_type keyword argument to the constructor \n")
 
         if 'prim_haloprop_key' in kwargs.keys():
             self.prim_haloprop_key = kwargs['prim_haloprop_key']
         else:
             raise KeyError("All OccupationComponent sub-classes "
-                "must pass a prim_haloprop_key to the constructor \n"
-                "so that the mc_occupation and mean_occupation methods "
-                "know how to interpret a halo catalog input")
+                "must pass a prim_haloprop_key keyword argument to the constructor \n")
+
+        if 'threshold' in kwargs.keys():
+            self.threshold = kwargs['threshold']
+        else:
+            raise KeyError("All OccupationComponent sub-classes "
+                "must pass a threshold keyword argument to the constructor \n")
+
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
@@ -210,103 +232,80 @@ class OccupationComponent(object):
 
 class Zheng07Cens(OccupationComponent):
     """ ``Erf`` function model for the occupation statistics of central galaxies, 
-    introduced in Kravtsov et al. 2004, arXiv:0308519.
+    introduced in Zheng et al. 2005, arXiv:0408564. This implementation uses 
+    Zheng et al. 2007, arXiv:0703457, to assign fiducial parameter values. 
 
-    Parameters 
-    ----------
-    input_param_dict : dict, optional.
-        Contains values for the parameters specifying the model.
-        Dictionary keys should have names like 
-        ``logMmin_centrals`` and ``sigma_logM_centrals``.
-
-        If ``input_param_dict`` is not passed, 
-        the best-fit parameter values provided in Table 1 of 
-        Zheng et al. (2007) are chosen. 
-        See the `get_published_parameters` method for details. 
-
-    threshold : float, optional.
-        Luminosity threshold of the mock galaxy sample. 
-        If specified, input value must agree with 
-        one of the thresholds used in Zheng07 to fit HODs: 
-        [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
-        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
-
-    gal_type : string, optional
-        Name of the galaxy population being modeled, e.g., ``cens`. 
-        Default setting is ``centrals``.  
-
-    Notes 
-    -----
-    There can be one and only one central galaxy per halo, 
-    so to compute :math:`\\langle N_{\mathrm{cen}}(M_{\mathrm{halo}}) \\rangle_{>L}` , 
-    the mean number of centrals brighter than some luminosity residing 
-    in a halo of some virial mass, we just need to integrate :math:`P( L | M_{\\mathrm{halo}})` , 
-    the probability that a halo of a given mass hosts a central brighter than L
-
-    :math:`\\langle N_{\\mathrm{cen}}( M_{\\rm halo} )\\rangle_{>L} = 
-    \\int_{L}^{\\infty}\\mathrm{d}L'P( L' | M_{\mathrm{halo}})`
-
-    The `Zheng07Cens` model assumes the stellar-to-halo-mass 
-    PDF is log-normal, 
-    in which case the mean occupation function is just an ``erf`` function, 
-    as in the `mean_occupation` method. 
-
-    The test suite for this model is documented at 
-    `~halotools.empirical_models.test_empirical_models.test_Zheng07Cens`
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, 
+        gal_type='centrals', 
+        threshold=model_defaults.default_luminosity_threshold,
+        prim_haloprop_key=model_defaults.prim_haloprop_key,
+        **kwargs):
         """
+        Parameters 
+        ----------
+        input_param_dict : dict, optional.
+            Dictionary containing values for the parameters specifying the model.
+            All dict keys must conclude with ``_gal_type`` that matches ``self.gal_type``, 
+            e.g., ``logMmin_centrals`` or ``sigma_logM_centrals``.
+
+            If ``input_param_dict`` is not passed, 
+            the best-fit parameter values provided in Table 1 of 
+            Zheng et al. (2007) are chosen. 
+            See the `get_published_parameters` method for details. 
+
+            The parameters stored in ``self.param_dict`` are the only ones that 
+            will be varied in MCMC-type likelihood analyses. 
+
+        threshold : float, optional.
+            Luminosity threshold of the mock galaxy sample. 
+            If specified, input value must agree with 
+            one of the thresholds used in Zheng07 to fit HODs: 
+            [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        gal_type : string, optional
+            Name of the galaxy population being modeled. Default is ``centrals``.  
+
+        Notes 
+        -----
+        The test suite for this model is documented at 
+        `~halotools.empirical_models.test_empirical_models.test_Zheng07Cens`
         """
         occupation_bound = 1.0
 
-        if 'gal_type' in kwargs.keys():
-            gal_type = kwargs['gal_type']
-        else:
-            gal_type = 'centrals'
-
-        if 'threshold' in kwargs.keys():
-            threshold = kwargs['threshold']
-        else:
-            threshold = model_defaults.default_luminosity_threshold
-
-        if 'prim_haloprop_key' in kwargs.keys():
-            prim_haloprop_key = kwargs['prim_haloprop_key']
-        else:
-            prim_haloprop_key = model_defaults.prim_haloprop_key
-
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
-        super(Zheng07Cens, self).__init__(
-            gal_type, threshold, occupation_bound, 
-            prim_haloprop_key = prim_haloprop_key)
+        super(Zheng07Cens, self).__init__(gal_type=gal_type, 
+            threshold=threshold, occupation_bound=occupation_bound, 
+            prim_haloprop_key=prim_haloprop_key, 
+            **kwargs)
 
-        if 'input_param_dict' in kwargs.keys():
-            input_param_dict = kwargs['input_param_dict']
-        else:
-            input_param_dict = None
-        self._initialize_param_dict(input_param_dict)
+        self._initialize_param_dict(**kwargs)
 
         self.publications = []
 
 
-    def _initialize_param_dict(self, input_param_dict):
+    def _initialize_param_dict(self, **kwargs):
         """ Private method used to retrieve the 
         dictionary governing the parameters of the model. 
         """
+        if 'input_param_dict' in kwargs.keys():
+            input_param_dict = kwargs['input_param_dict']
+        else:
+            input_param_dict = {}
 
         self.logMmin_key = 'logMmin_'+self.gal_type
         self.sigma_logM_key = 'sigma_logM_'+self.gal_type
+        published_param_dict = self.get_published_parameters(self.threshold)
 
-        correct_keys = [self.logMmin_key, self.sigma_logM_key]
-        if input_param_dict is not None:
-            occuhelp.test_correct_keys(input_param_dict, correct_keys)
-            output_param_dict = input_param_dict
-        else:
-            output_param_dict = self.get_published_parameters(self.threshold)
-
-        self.param_dict = output_param_dict
-
+        model_keys = [self.logMmin_key, self.sigma_logM_key]
+        for key in model_keys:
+            if key in input_param_dict.keys():
+                self.param_dict[key] = input_param_dict[key]
+            else:
+                self.param_dict[key] = published_param_dict[key]
 
     def mean_occupation(self, **kwargs):
         """ Expected number of central galaxies in a halo of mass halo_mass.
@@ -419,43 +418,32 @@ class Leauthaud11Cens(OccupationComponent):
     """ HOD-style model for any central galaxy occupation that derives from 
     a stellar-to-halo-mass relation. 
     """
-    def __init__(self, smhm_model=smhm_components.Moster13SmHm, **kwargs):
+    def __init__(self, smhm_model=smhm_components.Moster13SmHm, 
+        gal_type = 'centrals', 
+        threshold = model_defaults.default_stellar_mass_threshold, 
+        prim_haloprop_key=model_defaults.prim_haloprop_key,
+        **kwargs):
         """
         """
         occupation_bound = 1.0
 
-        if 'gal_type' in kwargs.keys():
-            gal_type = kwargs['gal_type']
-        else:
-            gal_type = 'centrals'
-
-        if 'threshold' in kwargs.keys():
-            threshold = kwargs['threshold']
-        else:
-            threshold = model_defaults.default_stellar_mass_threshold
-
-        if 'prim_haloprop_key' in kwargs.keys():
-            prim_haloprop_key = kwargs['prim_haloprop_key']
-        else:
-            prim_haloprop_key = model_defaults.prim_haloprop_key
-
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Leauthaud11Cens, self).__init__(
-            gal_type, threshold, occupation_bound, 
-            prim_haloprop_key = prim_haloprop_key)
+            gal_type=gal_type, threshold=threshold, 
+            occupation_bound=occupation_bound, 
+            prim_haloprop_key = prim_haloprop_key, 
+            **kwargs)
 
-        self.smhm_model = smhm_model(**kwargs)
+        self.smhm_model = smhm_model(
+            gal_type=gal_type, prim_haloprop_key = prim_haloprop_key, 
+            **kwargs)
 
-        if 'input_param_dict' in kwargs.keys():
-            input_param_dict = kwargs['input_param_dict']
-        else:
-            input_param_dict = None
-        self._initialize_param_dict(input_param_dict)
+        self._initialize_param_dict()
 
         self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
 
-    def _initialize_param_dict(self, input_param_dict):
+    def _initialize_param_dict(self):
         """ Private method used to retrieve the 
         dictionary governing the parameters of the model. 
         """
@@ -511,7 +499,11 @@ class Kravtsov04Sats(OccupationComponent):
 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self,
+        gal_type='satellites', 
+        threshold=model_defaults.default_luminosity_threshold,
+        prim_haloprop_key=model_defaults.prim_haloprop_key,
+        **kwargs):
         """
         Parameters 
         ----------
@@ -544,63 +536,47 @@ class Kravtsov04Sats(OccupationComponent):
         """
         occupation_bound = float("inf")
 
-        if 'gal_type' in kwargs.keys():
-            gal_type = kwargs['gal_type']
-        else:
-            gal_type = 'satellites'
-
-        if 'threshold' in kwargs.keys():
-            threshold = kwargs['threshold']
-        else:
-            threshold = model_defaults.default_luminosity_threshold
-
-        if 'prim_haloprop_key' in kwargs.keys():
-            prim_haloprop_key = kwargs['prim_haloprop_key']
-        else:
-            prim_haloprop_key = model_defaults.prim_haloprop_key
-
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Kravtsov04Sats, self).__init__(
-            gal_type, threshold, occupation_bound, 
-            prim_haloprop_key = prim_haloprop_key)
+            gal_type=gal_type, threshold=threshold, 
+            occupation_bound=occupation_bound, 
+            prim_haloprop_key = prim_haloprop_key, 
+            **kwargs)
+
+        self._initialize_param_dict(**kwargs)
+
+        self._set_central_behavior(**kwargs)
+
+        self.publications = []
+
+    def _initialize_param_dict(self, **kwargs):
 
         if 'input_param_dict' in kwargs.keys():
             input_param_dict = kwargs['input_param_dict']
         else:
-            input_param_dict = None
-        self._initialize_param_dict(input_param_dict)
+            input_param_dict = {}
 
-        if 'central_occupation_model' in kwargs.keys():
-            central_occupation_model = kwargs['central_occupation_model']
-        else:
-            central_occupation_model = None
-        self._set_central_behavior(central_occupation_model)
-
-        self.publications = []
-
-    def _initialize_param_dict(self, input_param_dict):
-
-        # set attribute names for the keys so that the methods know 
-        # how to evaluate their functions
         self.logM0_key = 'logM0_'+self.gal_type
         self.logM1_key = 'logM1_'+self.gal_type
         self.alpha_key = 'alpha_'+self.gal_type
+        published_param_dict = self.get_published_parameters(self.threshold)
 
-        correct_keys = [self.logM0_key, self.logM1_key, self.alpha_key]
-        if input_param_dict is not None:
-            occuhelp.test_correct_keys(input_param_dict, correct_keys)
-            output_param_dict = input_param_dict
-        else:
-            output_param_dict = self.get_published_parameters(self.threshold)
+        model_keys = [self.logM0_key, self.logM1_key, self.alpha_key]
+        for key in model_keys:
+            if key in input_param_dict.keys():
+                self.param_dict[key] = input_param_dict[key]
+            else:
+                self.param_dict[key] = published_param_dict[key]
 
-        self.param_dict = output_param_dict
-
-    def _set_central_behavior(self, central_occupation_model):
+    def _set_central_behavior(self, **kwargs):
         """ Method ensures that the input central_occupation_model is sensible, 
         and then binds the result to the class instance. 
         """
-        self.central_occupation_model = central_occupation_model
+        if 'central_occupation_model' in kwargs.keys():
+            self.central_occupation_model = kwargs['central_occupation_model']
+        else:
+            self.central_occupation_model = None
         
         if self.central_occupation_model is not None:
             # Test that we were given a sensible input central_occupation_model 
