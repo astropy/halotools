@@ -610,13 +610,17 @@ class HodModelFactory(ModelFactory):
             # For each galaxy type, loop over its features
             for model_instance in gal_type_dict.values():
 
-                occuhelp.test_repeated_keys(
-                    self.param_dict, model_instance.param_dict)
+                intersection = set(self.param_dict) & set(model_instance.param_dict)
+                if intersection != set():
+                    repeated_key = list(intersection)[0]
+                    raise KeyError("The param_dict key %s appears in more "
+                        "than one component model" % repeated_key)
+                else:
 
-                self.param_dict = dict(
-                    model_instance.param_dict.items() + 
-                    self.param_dict.items()
-                    )
+                    self.param_dict = dict(
+                        model_instance.param_dict.items() + 
+                        self.param_dict.items()
+                        )
 
         self._init_param_dict = copy(self.param_dict)
 

@@ -191,11 +191,11 @@ class HodMockFactory(MockFactory):
         """
         Parameters 
         ----------
-        snapshot : object 
+        snapshot : object, keyword argument
             Object containing the halo catalog and other associated data.  
             Produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
 
-        model : object 
+        model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.HodModelFactory`. 
 
         additional_haloprops : list of strings, optional keyword argument  
@@ -459,11 +459,11 @@ class SubhaloMockFactory(MockFactory):
         """
         Parameters 
         ----------
-        snapshot : object 
+        snapshot : object, keyword argument 
             Object containing the halo catalog and other associated data.  
             Produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
 
-        model : object 
+        model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.SubhaloModelFactory`. 
 
         additional_haloprops : list of strings, optional keyword argument  

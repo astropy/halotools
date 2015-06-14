@@ -62,9 +62,10 @@ class OccupationComponent(object):
 
         input_param_dict : dict, optional keyword argument
             Dictionary containing values for the parameters specifying the model.
-            All dict keys must conclude with ``_gal_type`` that matches ``self.gal_type``, 
+            All dict keys must conclude with the substring 
+            ``_gal_type`` that matches ``self.gal_type``, 
             e.g., ``logMmin_centrals`` or ``alpha_satellites``.
-            If no input_param_dict is passed, ``self.param_dict`` will be 
+            If no ``input_param_dict`` is passed, ``self.param_dict`` will be 
             initialized with an empty dictionary. 
             The parameters stored in ``self.param_dict`` are the only ones that 
             will be varied in MCMC-type likelihood analyses. 
