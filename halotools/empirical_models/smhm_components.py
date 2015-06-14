@@ -20,7 +20,7 @@ __all__ = ['SmHmModel', 'Moster13SmHm', 'LogNormalScatterModel']
 
 class LogNormalScatterModel(object):
     """ Simple model used to generate log-normal scatter 
-    in the stellar-to-halo-mass_like relation. 
+    in a stellar-to-halo-mass type relation. 
 
     """
 
@@ -114,7 +114,6 @@ class LogNormalScatterModel(object):
             Array containing the amount of log-normal scatter evaluated 
             at the input halos. 
         """
-        # Interpret the inputs to determine the appropriate array of mass_likees
         # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
             key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
@@ -132,35 +131,52 @@ class LogNormalScatterModel(object):
 
         return self.spline_function(np.log10(mass))
 
-    def scatter_realization(self, **kwargs):
+    def scatter_realization(self, seed=None, **kwargs):
         """ Return the amount of log-normal scatter that should be added 
         to the galaxy property as a function of the input halos. 
 
         Parameters 
         ----------
-        mass_like : array, optional keyword argument 
-            array of halo mass_likees 
+        prim_haloprop : array, optional keyword argument
+            Array storing a mass-like variable that governs the occupation statistics. 
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
-        halos : array or table, optional keyword argument
-            Data structure containing halos onto which stellar mass_likees 
-            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
+
+        galaxy_table : object, optional keyword argument 
+            Data table storing mock galaxy catalog. 
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            keyword arguments must be passed. 
+
+        seed : int, optional keyword argument 
+            Random number seed. Default is None. 
 
         Returns 
         -------
         scatter : array_like 
-            Array containing the amount of log-normal scatter evaluated 
-            at the input halos. 
+            Array containing a random variable realization that should be summed 
+            with the galaxy property to add scatter.  
         """
 
         scatter_scale = self.mean_scatter(**kwargs)
 
-        if 'seed' in kwargs.keys():
-            np.random.seed(seed=kwargs['seed'])
+        np.random.seed(seed=seed)
             
         return np.random.normal(loc=0, scale=scatter_scale)
 
     def _setup_interpol(self, **kwargs):
-        """ Private method used to configure the behavior of the interpolating function. 
+        """ Private method used to initialize the behavior of the interpolating function. 
+
+        Parameters 
+        ----------
+        scatter_spline_degree : int, optional keyword argument
+            Degree of the spline interpolation for the case of interpol_method='spline'. 
+            If there are k abcissa values specifying the model, input_spline_degree 
+            is ensured to never exceed k-1, nor exceed 5. 
         """        
         scipy_maxdegree = 5
         degree_list = [scipy_maxdegree, custom_len(self.abcissa)-1]
@@ -172,6 +188,11 @@ class LogNormalScatterModel(object):
             self.abcissa, self.ordinates, k=self.spline_degree)
 
     def _update_interpol(self):
+        """ Private method that updates the interpolating functon used to 
+        define the level of scatter as a function of the input halos. 
+        If this method is not called after updating ``self.param_dict``, 
+        changes in ``self.param_dict`` will not alter the model behavior. 
+        """
         self.ordinates = (
             [self.param_dict[self._get_param_key(ipar)] 
             for ipar in range(len(self.abcissa))]
@@ -179,7 +200,8 @@ class LogNormalScatterModel(object):
         self._setup_interpol()
 
     def _initialize_param_dict(self):
-
+        """ Private method used to initialize ``self.param_dict``. 
+        """
         self.param_dict={}
         for ipar, val in enumerate(self.ordinates):
             key = self._get_param_key(ipar)
