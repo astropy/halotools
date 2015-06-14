@@ -46,6 +46,20 @@ class OccupationComponent(object):
     required of any HOD-style occupation model component. 
     """
     def __init__(self, gal_type, threshold, occupation_bound, **kwargs):
+        """ 
+        Parameters 
+        ----------
+        gal_type : string
+            Name of the galaxy population whose occupation statistics is being modeled. 
+
+        threshold : float 
+            Threshold value defining the selection function of the galaxy population 
+            being modeled. Typically refers to absolute magnitude or stellar mass. 
+
+        occupation_bound : float 
+            Upper bound on the number of gal_type galaxies per halo. 
+            The only currently supported values are unity or infinity. 
+        """
 
         self.gal_type = gal_type
         self.threshold = threshold
@@ -68,75 +82,131 @@ class OccupationComponent(object):
 
     def mc_occupation(self, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
-        Assumes gal_type galaxies obey Poisson statistics. 
 
         Parameters
         ----------        
-        halo_mass : array, optional
-            array of :math:`M_{\\mathrm{vir}}`-like variable of halos in catalog
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
         halos : object, optional keyword argument 
             Data table storing halo catalog. 
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
+        galaxy_table : object, optional keyword argument 
+            Data table storing galaxy catalog. 
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            keyword arguments must be passed. 
+
+        input_param_dict : dict, optional keyword argument 
+            Dictionary of parameters governing the model. 
+            If not passed, values bound to ``self`` will be chosen. 
+
+        seed : int, optional keyword argument 
+            Random number seed used to generate the Monte Carlo realization. 
+            Default is None. 
 
         Returns
         -------
         mc_abundance : array
-            array giving the number of satellite-type galaxies per input halo. 
-    
+            Integer array giving the number of galaxies in each of the input halos.     
+        """ 
+        expectation_values = self.mean_occupation(**kwargs)
+        if self.occupation_bound == 1:
+            return self._nearest_integer_distribution(expectation_values, **kwargs)
+        elif self.occupation_bound == float("inf"):
+            return self._poisson_distribution(expectation_values, **kwargs)
+        else:
+            raise KeyError("The only permissible values of occupation_bound for instances "
+                "of OccupationComponent are unity and infinity.")
+
+    def _nearest_integer_distribution(self, expectation_values, **kwargs):
+        """ Nearest-integer distribution used to draw Monte Carlo occupation statistics 
+        for central-like populations with only permissible galaxy per halo.
+
+        Parameters 
+        ----------
+        expectation_values : array
+            Array giving the first moment of the occupation distribution function. 
+
+        seed : int, optional keyword argument 
+            Random number seed used to generate the Monte Carlo realization. 
+            Default is None. 
+
+        Returns
+        -------
+        mc_abundance : array
+            Integer array giving the number of galaxies in each of the input halos. 
         """
-
-        if 'input_param_dict' not in kwargs.keys():
-            param_dict = self.param_dict 
-        else:
-            param_dict = kwargs['input_param_dict']
-
-        if 'galaxy_table' in kwargs.keys():
-            mass = kwargs['galaxy_table'][self.prim_haloprop_key]
-        elif 'halos' in kwargs.keys():
-            mass = kwargs['halos'][self.prim_haloprop_key]
-        elif 'mass' in kwargs.keys():
-            mass = kwargs['mass']
-        elif 'prim_haloprop' in kwargs.keys():
-            mass = kwargs['prim_haloprop']
-        else:
-            raise KeyError("Must pass one of the following keyword arguments to mc_occupation:\n"
-                "``halos``, ``mass``, ``prim_haloprop``, or ``galaxy_table``")
- 
         if 'seed' in kwargs.keys():
             np.random.seed(seed=kwargs['seed'])
         else:
             np.random.seed(seed=None)
+        mc_generator = np.random.random(custom_len(expectation_values))
+        return np.where(mc_generator < expectation_values, 1, 0)
 
-        if self.occupation_bound == 1:
-            mc_generator = np.random.random(custom_len(mass))
-            mc_abundance = np.where(mc_generator < self.mean_occupation(**kwargs), 1, 0)
-            return mc_abundance
+    def _poisson_distribution(self, expectation_values, **kwargs):
+        """ Poisson distribution used to draw Monte Carlo occupation statistics 
+        for satellite-like populations in which per-halo abundances are unbounded. 
 
-        elif self.occupation_bound == float("inf"):
-            expectation_values = self.mean_occupation(**kwargs)
-            # The scipy built-in Poisson number generator raises an exception 
-            # if its input is zero, so here we impose a simple workaround
-            expectation_values = np.where(expectation_values <=0, 
-                model_defaults.default_tiny_poisson_fluctuation, expectation_values)
+        Parameters 
+        ----------
+        expectation_values : array
+            Array giving the first moment of the occupation distribution function. 
 
-            mc_abundance = poisson.rvs(expectation_values)
-            return mc_abundance
+        seed : int, optional keyword argument 
+            Random number seed used to generate the Monte Carlo realization. 
+            Default is None. 
+
+        Returns
+        -------
+        mc_abundance : array
+            Integer array giving the number of galaxies in each of the input halos. 
+        """
+        if 'seed' in kwargs.keys():
+            np.random.seed(seed=kwargs['seed'])
         else:
-            raise KeyError("The only permissible values of occupation_bound for instances "
-                "of OccupationComponent are unity and infinity")
-
+            np.random.seed(seed=None)
+        # The scipy built-in Poisson number generator raises an exception 
+        # if its input is zero, so here we impose a simple workaround
+        expectation_values = np.where(expectation_values <=0, 
+            model_defaults.default_tiny_poisson_fluctuation, expectation_values)
+        return poisson.rvs(expectation_values)
 
     @abstractmethod
     def mean_occupation(self):
         """ Method giving the first moment of the occupation distribution. 
+
+        Parameters
+        ----------        
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
+
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
+
+        galaxy_table : object, optional keyword argument 
+            Data table storing galaxy catalog. 
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            keyword arguments must be passed. 
+
+        input_param_dict : dict, optional keyword argument 
+            Dictionary of parameters governing the model. 
+            If not passed, values bound to ``self`` will be chosen. 
+
+        Returns 
+        --------
+        expectation_values : array
+            Array giving the first moment of the occupation distribution function. 
         """
         raise NotImplementedError("All subclasses of OccupationComponent " 
             "must implement a mean_occupation method. ")
-
 
 class Kravtsov04Cens(OccupationComponent):
     """ ``Erf`` function model for the occupation statistics of central galaxies, 
