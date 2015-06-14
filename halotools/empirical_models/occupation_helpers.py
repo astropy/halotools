@@ -289,6 +289,26 @@ def call_func_table(func_table, abcissa, func_indices):
     return out
 
 def bind_required_kwargs(required_kwargs, obj, **kwargs):
+    """ Method binds each element of ``required_kwargs`` to 
+    the input object ``obj``, or raises and exception for cases 
+    where a mandatory keyword argument was not passed to the 
+    ``obj`` constructor.
+
+    Parameters 
+    ----------
+    required_kwargs : list 
+        List of strings of the keyword arguments that are required 
+        when instantiating the input ``obj``. 
+
+    obj : object 
+        The object being instantiated. 
+
+    Notes 
+    -----
+    The `bind_required_kwargs` method assumes that each 
+    required keyword argument should be bound to ``obj`` 
+    as attribute with the same name as the keyword. 
+    """
     for key in required_kwargs:
         if key in kwargs.keys():
             setattr(obj, key, kwargs[key])
@@ -297,7 +317,36 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
             raise KeyError("``%s`` is a required keyword argument "
                 "to instantiate the %s class" (key, class_name))
 
+def update_param_dict(obj, **kwargs):
+    """ Method used to update the ``param_dict`` attribute of the 
+    input ``obj`` according to ``input_param_dict``. 
 
+    The only items in ``obj.param_dict`` that will be updated 
+    are those with a matching key in ``input_param_dict``; 
+    all other keys in ``input_param_dict`` will be ignored. 
+
+    Parameters 
+    ----------
+    obj : object
+        Class instance whose ``param_dict`` is being updated. 
+
+    input_param_dict : dict, optional keyword argument 
+        Parameter dictionary used to update ``obj.param_dict``.
+        If no ``input_param_dict`` keyword argument is passed, 
+        method does nothing. 
+
+    """
+    if 'input_param_dict' not in kwargs.keys():
+        return 
+    else:
+        input_param_dict = kwargs['input_param_dict']
+
+    if not hasattr(obj, 'param_dict'):
+        raise AttributeError("Input ``obj`` must have a ``param_dict`` attribute")
+
+    for key in obj.param_dict.keys():
+        if key in input_param_dict.keys():
+            obj.param_dict[key] = input_param_dict[key]
 
 
 

@@ -631,7 +631,7 @@ class HodModelFactory(ModelFactory):
         Primary behaviors are reset as well, as this is how the 
         inherited behaviors get bound to the values in ``param_dict``. 
         """
-        self._set_init_param_dict()
+        self.param_dict = self._init_param_dict
         self._set_primary_behaviors()
 
     def _build_composite_lists(self):

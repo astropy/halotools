@@ -43,7 +43,7 @@ def test_Zheng07Cens():
 		assert hasattr(model, 'mean_occupation')
 
 		mvir_array = np.logspace(10, 16, 10)
-		mean_occ = model.mean_occupation(mass=mvir_array) 
+		mean_occ = model.mean_occupation(prim_haloprop=mvir_array) 
 
 		# Check that the range is in [0,1]
 		assert np.all(mean_occ<= 1)
@@ -61,21 +61,21 @@ def test_Zheng07Cens():
 		mvir_midpoint = 10.**model.param_dict[model.logMmin_key]
 		Npts = 1e3
 		masses = np.ones(Npts)*mvir_midpoint
-		mc_occ = model.mc_occupation(mass=masses, seed=43)
+		mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
 		assert set(mc_occ).issubset([0,1])
 		expected_result = 0.48599999
 		np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-5, atol=1.e-5)
 
 		# Now check that the model is ~ 1.0 when evaluated for a cluster
 		masses = np.ones(Npts)*5.e15
-		mc_occ = model.mc_occupation(mass=masses, seed=43)
+		mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
 		assert set(mc_occ).issubset([0,1])
 		expected_result = 1.0
 		np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
 
 		# Now check that the model is ~ 0.0 when evaluated for a tiny halo
 		masses = np.ones(Npts)*1.e10
-		mc_occ = model.mc_occupation(mass=masses, seed=43)
+		mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
 		assert set(mc_occ).issubset([0,1])
 		expected_result = 0.0
 		np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
@@ -86,11 +86,11 @@ def test_Zheng07Cens():
 		mvir_dict = {key:mvir_array}
 		halo_catalog = Table(mvir_dict)
 		# First test mean occupations
-		meanocc_from_array = model.mean_occupation(mass=mvir_array)
+		meanocc_from_array = model.mean_occupation(prim_haloprop=mvir_array)
 		meanocc_from_halos = model.mean_occupation(halos=halo_catalog)
 		assert np.all(meanocc_from_array == meanocc_from_halos)
 		# Now test Monte Carlo occupations
-		mcocc_from_array = model.mc_occupation(mass=mvir_array,seed=43)
+		mcocc_from_array = model.mc_occupation(prim_haloprop=mvir_array,seed=43)
 		mcocc_from_halos = model.mc_occupation(halos=halo_catalog,seed=43)
 		assert np.all(mcocc_from_array == mcocc_from_halos)
 
@@ -135,23 +135,23 @@ def test_Zheng07Cens():
 
 	### Now make sure the value of <Ncen> scales reasonably with the parameters
 	lowmass = (10.**default_model.param_dict[default_model.logMmin_key])/1.1
-	defocc_lowmass = default_model.mean_occupation(mass=lowmass)
-	occ2_lowmass = model2.mean_occupation(mass=lowmass)
-	occ3_lowmass = model3.mean_occupation(mass=lowmass)
+	defocc_lowmass = default_model.mean_occupation(prim_haloprop=lowmass)
+	occ2_lowmass = model2.mean_occupation(prim_haloprop=lowmass)
+	occ3_lowmass = model3.mean_occupation(prim_haloprop=lowmass)
 	assert occ3_lowmass > defocc_lowmass
 	assert defocc_lowmass > occ2_lowmass
 	#
 	highmass = (10.**default_model.param_dict[default_model.logMmin_key])*1.1
-	defocc_highmass = default_model.mean_occupation(mass=highmass)
-	occ2_highmass = model2.mean_occupation(mass=highmass)
-	occ3_highmass = model3.mean_occupation(mass=highmass)
+	defocc_highmass = default_model.mean_occupation(prim_haloprop=highmass)
+	occ2_highmass = model2.mean_occupation(prim_haloprop=highmass)
+	occ3_highmass = model3.mean_occupation(prim_haloprop=highmass)
 	assert defocc_highmass > occ3_highmass 
 	assert occ3_highmass > occ2_highmass
 	### Verify that directly changing model parameters 
 	# without a new instantiation also behaves properly
 	default_model.param_dict[default_model.sigma_logM_key] *= 2.
-	updated_defocc_lowmass = default_model.mean_occupation(mass=lowmass)
-	updated_defocc_highmass = default_model.mean_occupation(mass=highmass)
+	updated_defocc_lowmass = default_model.mean_occupation(prim_haloprop=lowmass)
+	updated_defocc_highmass = default_model.mean_occupation(prim_haloprop=highmass)
 	assert updated_defocc_lowmass > defocc_lowmass
 	assert updated_defocc_highmass < defocc_highmass
 	# Check that updating parameters produces identical behavior 
@@ -191,7 +191,7 @@ def test_Kravtsov04Sats():
 		assert hasattr(model, 'mean_occupation')
 
 		mvir_array = np.logspace(10, 16, 10)
-		mean_occ = model.mean_occupation(mass=mvir_array) 
+		mean_occ = model.mean_occupation(prim_haloprop=mvir_array) 
 
 		# Check that the range is in [0,1]
 		assert np.all(mean_occ >= 0)
@@ -209,7 +209,7 @@ def test_Kravtsov04Sats():
 
 		Npts = 1e3
 		masses = np.ones(Npts)*10.**model.param_dict[model.logM1_key]
-		mc_occ = model.mc_occupation(mass=masses, seed=43)
+		mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
 		# We chose a specific seed that has been pre-tested, 
 		# so we should always get the same result
 		expected_result = 1.0
@@ -222,10 +222,10 @@ def test_Kravtsov04Sats():
 
 		Npts = 1e2 
 		masses = np.logspace(10, 15, Npts)
-		mean_occ_satmodel_nocens = satmodel_nocens.mean_occupation(mass=masses)
-		mean_occ_satmodel_cens = satmodel_cens.mean_occupation(mass=masses)
+		mean_occ_satmodel_nocens = satmodel_nocens.mean_occupation(prim_haloprop=masses)
+		mean_occ_satmodel_cens = satmodel_cens.mean_occupation(prim_haloprop=masses)
 		assert np.all(mean_occ_satmodel_cens <= mean_occ_satmodel_nocens)
-		mean_occ_cens = cenmodel.mean_occupation(mass=masses)
+		mean_occ_cens = cenmodel.mean_occupation(prim_haloprop=masses)
 		assert np.all(mean_occ_satmodel_cens == mean_occ_satmodel_nocens*mean_occ_cens)
 
 	### First test the model with all default settings
@@ -253,14 +253,14 @@ def test_Kravtsov04Sats():
 
 	logmass = model2.param_dict[model2.logM1_key] + np.log10(5)
 	mass = 10.**logmass
-	assert model2.mean_occupation(mass=mass) > default_model.mean_occupation(mass=mass)
+	assert model2.mean_occupation(prim_haloprop=mass) > default_model.mean_occupation(prim_haloprop=mass)
 
 	Npts = 1e3
 	masses = np.ones(Npts)*mass
-	assert model2.mc_occupation(mass=masses,seed=43).mean() > default_model.mc_occupation(mass=masses,seed=43).mean()
+	assert model2.mc_occupation(prim_haloprop=masses,seed=43).mean() > default_model.mc_occupation(prim_haloprop=masses,seed=43).mean()
 
 	default_model.param_dict[default_model.alpha_key] = model2.param_dict[model2.alpha_key]
-	assert model2.mc_occupation(mass=masses,seed=43).mean() == default_model.mc_occupation(mass=masses,seed=43).mean()
+	assert model2.mc_occupation(prim_haloprop=masses,seed=43).mean() == default_model.mc_occupation(prim_haloprop=masses,seed=43).mean()
 
 	###### Increase in M0 ######
 	model2_dict = copy(default_dict)
@@ -269,15 +269,15 @@ def test_Kravtsov04Sats():
 
 	# At very low mass, both models should have zero satellites 
 	lowmass = 1e10
-	assert model2.mean_occupation(mass=lowmass) == default_model.mean_occupation(mass=lowmass)	
+	assert model2.mean_occupation(prim_haloprop=lowmass) == default_model.mean_occupation(prim_haloprop=lowmass)	
 	# At intermediate masses, there should be fewer satellites for larger M0
 	midmass = 1e12
-	assert model2.mean_occupation(mass=midmass) < default_model.mean_occupation(mass=midmass)
+	assert model2.mean_occupation(prim_haloprop=midmass) < default_model.mean_occupation(prim_haloprop=midmass)
 	# At high masses, the difference should be negligible
 	highmass = 1e15
 	np.testing.assert_allclose(
-		model2.mean_occupation(mass=highmass) , 
-		default_model.mean_occupation(mass=highmass), 
+		model2.mean_occupation(prim_haloprop=highmass) , 
+		default_model.mean_occupation(prim_haloprop=highmass), 
 		rtol=1e-3, atol=1.e-3)
 
 	###### Increase in M1 ######
@@ -287,16 +287,16 @@ def test_Kravtsov04Sats():
 
 	# At very low mass, both models should have zero satellites 
 	lowmass = 1e10
-	assert model2.mean_occupation(mass=lowmass) == default_model.mean_occupation(mass=lowmass)	
+	assert model2.mean_occupation(prim_haloprop=lowmass) == default_model.mean_occupation(prim_haloprop=lowmass)	
 	# At intermediate masses, there should be fewer satellites for larger M1
 	midmass = 1e12
-	fracdiff_midmass = ((model2.mean_occupation(mass=midmass) - default_model.mean_occupation(mass=midmass)) / 
-		default_model.mean_occupation(mass=midmass))
+	fracdiff_midmass = ((model2.mean_occupation(prim_haloprop=midmass) - default_model.mean_occupation(prim_haloprop=midmass)) / 
+		default_model.mean_occupation(prim_haloprop=midmass))
 	assert fracdiff_midmass < 0
 	# At high masses, the difference should persist, and be fractionally greater 
 	highmass = 1e14
-	fracdiff_highmass = ((model2.mean_occupation(mass=highmass) - default_model.mean_occupation(mass=highmass)) / 
-		default_model.mean_occupation(mass=highmass))
+	fracdiff_highmass = ((model2.mean_occupation(prim_haloprop=highmass) - default_model.mean_occupation(prim_haloprop=highmass)) / 
+		default_model.mean_occupation(prim_haloprop=highmass))
 	assert fracdiff_highmass < 0
 	assert fracdiff_highmass > fracdiff_midmass
 
@@ -312,16 +312,16 @@ def test_Kravtsov04Sats():
 
 	### Changing the central model should have a large effect at low mass
 	midmass = 10.**default_cens.param_dict[default_cens.logMmin_key]
-	assert default_satmodel_with_cens.mean_occupation(mass=midmass) > model2.mean_occupation(mass=midmass)
+	assert default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass) > model2.mean_occupation(prim_haloprop=midmass)
 	### And there should be zero effect at high mass
 	highmass = 1e15
-	assert default_satmodel_with_cens.mean_occupation(mass=highmass) == model2.mean_occupation(mass=highmass)
+	assert default_satmodel_with_cens.mean_occupation(prim_haloprop=highmass) == model2.mean_occupation(prim_haloprop=highmass)
 
 	# Verify that directly changing the param_dict of the bound central model 
 	# correctly propagates through to the satellite occupation
-	nsat_orig = default_satmodel_with_cens.mean_occupation(mass=midmass)
+	nsat_orig = default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass)
 	default_satmodel_with_cens.central_occupation_model.param_dict[default_satmodel_with_cens.central_occupation_model.logMmin_key] += np.log10(2)
-	nsat_new = default_satmodel_with_cens.mean_occupation(mass=midmass)
+	nsat_new = default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass)
 	assert nsat_new < nsat_orig
 
 

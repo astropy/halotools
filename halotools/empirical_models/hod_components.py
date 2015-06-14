@@ -142,9 +142,7 @@ class OccupationComponent(object):
             Integer array giving the number of galaxies in each of the input halos. 
         """
         np.random.seed(seed=seed)
-
         mc_generator = np.random.random(custom_len(first_occupation_moment))
-
         return np.where(mc_generator < first_occupation_moment, 1, 0)
 
     def _poisson_distribution(self, first_occupation_moment, seed=None, **kwargs):
@@ -166,12 +164,10 @@ class OccupationComponent(object):
             Integer array giving the number of galaxies in each of the input halos. 
         """
         np.random.seed(seed=seed)
-
         # The scipy built-in Poisson number generator raises an exception 
         # if its input is zero, so here we impose a simple workaround
         first_occupation_moment = np.where(first_occupation_moment <=0, 
             model_defaults.default_tiny_poisson_fluctuation, first_occupation_moment)
-
         return poisson.rvs(first_occupation_moment)
 
     @abstractmethod
@@ -222,28 +218,24 @@ class Zheng07Cens(OccupationComponent):
         """
         Parameters 
         ----------
-        input_param_dict : dict, optional.
-            Dictionary containing values for the parameters specifying the model.
-            All dict keys must conclude with ``_gal_type`` that matches ``self.gal_type``, 
-            e.g., ``logMmin_centrals`` or ``sigma_logM_centrals``.
+        gal_type : string, optional keyword argument
+            Name of the galaxy population being modeled. Default is ``centrals``.  
 
-            If ``input_param_dict`` is not passed, 
-            the best-fit parameter values provided in Table 1 of 
-            Zheng et al. (2007) are chosen. 
-            See the `get_published_parameters` method for details. 
-
-            The parameters stored in ``self.param_dict`` are the only ones that 
-            will be varied in MCMC-type likelihood analyses. 
-
-        threshold : float, optional.
-            Luminosity threshold of the mock galaxy sample. 
-            If specified, input value must agree with 
-            one of the thresholds used in Zheng07 to fit HODs: 
+        threshold : float, optional keyword argument
+            Luminosity threshold of the mock galaxy sample. If specified, 
+            input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        gal_type : string, optional
-            Name of the galaxy population being modeled. Default is ``centrals``.  
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        input_param_dict : dict, optional keyword argument. 
+            If ``input_param_dict`` is not passed, the best-fit parameter values 
+            provided in Table 1 of Zheng et al. (2007) are chosen. 
+            See the `get_published_parameters` method for details. 
 
         Notes 
         -----
@@ -261,7 +253,7 @@ class Zheng07Cens(OccupationComponent):
 
         self._initialize_param_dict(**kwargs)
 
-        self.publications = []
+        self.publications = ['arXiv:0408564', 'arXiv:0703457']
 
 
     def _initialize_param_dict(self, input_param_dict={}, **kwargs):
@@ -287,27 +279,32 @@ class Zheng07Cens(OccupationComponent):
 
         Parameters
         ----------        
-        mass : array, optional keyword argument
-            array of :math:`M_{\\mathrm{vir}}` of halos in catalog
+        prim_haloprop : array, optional keyword argument
+            Array storing a mass-like variable that governs the occupation statistics. 
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
         halos : object, optional keyword argument 
             Data table storing halo catalog. 
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
         galaxy_table : object, optional keyword argument 
             Data table storing mock galaxy catalog. 
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            keyword arguments must be passed. 
 
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
+        input_param_dict : dict, optional keyword argument 
+            Dictionary of parameters governing the model. 
+            If not passed, the values already bound to ``self`` will be used. 
 
         Returns
         -------
         mean_ncen : array
-            Mean number of central galaxies in the halo of the input mass. 
+            Mean number of central galaxies in the input halos. 
 
         Notes 
         -----
-
         The `mean_occupation` method computes the following function: 
 
         :math:`\\langle N_{\\mathrm{cen}} \\rangle_{M} = 
@@ -316,26 +313,27 @@ class Zheng07Cens(OccupationComponent):
         \\log_{10}M_{min}}{\\sigma_{\\log_{10}M}} \\right) \\right)`
 
         """
-        if 'input_param_dict' not in kwargs.keys():
-            param_dict = self.param_dict 
-        else:
-            param_dict = kwargs['input_param_dict']
-
+        # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
             mass = kwargs['galaxy_table'][self.prim_haloprop_key]
         elif 'halos' in kwargs.keys():
             mass = kwargs['halos'][self.prim_haloprop_key]
-        elif 'mass' in kwargs.keys():
-            mass = kwargs['mass']
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halos``, ``mass``, or ``galaxy_table``")
+                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+
+        occuhelp.update_param_dict(self, **kwargs)
+        #if 'input_param_dict' not in kwargs.keys():
+        #    param_dict = self.param_dict 
+        #else:
+        #    param_dict = kwargs['input_param_dict']
 
         logM = np.log10(mass)
-
         mean_ncen = 0.5*(1.0 + erf(
-            (logM - param_dict[self.logMmin_key])
-            /param_dict[self.sigma_logM_key]))
+            (logM - self.param_dict[self.logMmin_key])
+            /self.param_dict[self.sigma_logM_key]))
 
         return mean_ncen
 
@@ -569,16 +567,25 @@ class Kravtsov04Sats(OccupationComponent):
         See Equation 5 of arXiv:0703457.
 
         Parameters
-        ----------
-        halo_mass : array, optional
-            array of :math:`M_{\\mathrm{vir}}`-like variable of halos in catalog
+        ----------        
+        prim_haloprop : array, optional keyword argument
+            Array storing a mass-like variable that governs the occupation statistics. 
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
         halos : object, optional keyword argument 
             Data table storing halo catalog. 
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
+        galaxy_table : object, optional keyword argument 
+            Data table storing mock galaxy catalog. 
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            keyword arguments must be passed. 
+
+        input_param_dict : dict, optional keyword argument 
+            Dictionary of parameters governing the model. 
+            If not passed, the values already bound to ``self`` will be used. 
 
         Returns
         -------
@@ -594,20 +601,21 @@ class Kravtsov04Sats(OccupationComponent):
         depending on whether a central model was passed to the constructor. 
 
         """
-        if 'input_param_dict' not in kwargs.keys():
-            param_dict = self.param_dict 
-        else:
-            param_dict = kwargs['input_param_dict']
-
+        # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
             mass = kwargs['galaxy_table'][self.prim_haloprop_key]
         elif 'halos' in kwargs.keys():
             mass = kwargs['halos'][self.prim_haloprop_key]
-        elif 'mass' in kwargs.keys():
-            mass = kwargs['mass']
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halos``, ``mass``, or ``galaxy_table``")
+                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+
+        if 'input_param_dict' not in kwargs.keys():
+            param_dict = self.param_dict 
+        else:
+            param_dict = kwargs['input_param_dict']
 
         M0 = 10.**param_dict[self.logM0_key]
         M1 = 10.**param_dict[self.logM1_key]
