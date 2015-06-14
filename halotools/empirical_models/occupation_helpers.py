@@ -6,15 +6,15 @@ used by many of the hod model components.
 
 """
 
-__all__=['solve_for_polynomial_coefficients']
+__all__=['solve_for_polynomial_coefficients', 'polynomial_from_table', 'enforce_periodicity_of_box']
 
 import numpy as np
 from copy import copy
-from ..utils.array_utils import array_like_length as custom_len
 
 from scipy.interpolate import UnivariateSpline as spline
 
-import model_defaults
+from . import model_defaults
+from ..utils.array_utils import array_like_length as custom_len
 
 def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
@@ -291,6 +291,9 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
     the input object ``obj``, or raises and exception for cases 
     where a mandatory keyword argument was not passed to the 
     ``obj`` constructor.
+
+    Used throughout the package when a required keyword argument 
+    has no obvious default value. 
 
     Parameters 
     ----------

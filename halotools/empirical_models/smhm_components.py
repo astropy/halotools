@@ -17,6 +17,151 @@ from warnings import warn
 
 __all__ = ['SmHmModel', 'Moster13SmHm', 'LogNormalScatterModel']
 
+class LogNormalScatterModel(object):
+    """ Simple model used to generate log-normal scatter 
+    in the stellar-to-halo-mass_like relation. 
+
+    """
+
+    def __init__(self, 
+        prim_haloprop_key=model_defaults.default_smhm_haloprop, 
+        **kwargs):
+        """
+        Parameters 
+        ----------
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the level of scatter. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_abcissa : array_like, optional keyword argument 
+            Array of values giving the abcissa at which
+            the level of scatter will be specified by the input ordinates.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_ordinates : array_like, optional keyword argument 
+            Array of values defining the level of scatter at the input abcissa.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_spline_degree : int, optional keyword argument
+            Degree of the spline interpolation for the case of interpol_method='spline'. 
+            If there are k abcissa values specifying the model, input_spline_degree 
+            is ensured to never exceed k-1, nor exceed 5. 
+        """
+        default_scatter = model_defaults.default_smhm_scatter
+        self.prim_haloprop_key = prim_haloprop_key
+
+        if ('scatter_abcissa' in kwargs.keys()) and ('scatter_ordinates' in kwargs.keys()):
+            self.abcissa = kwargs['scatter_abcissa']
+            self.ordinates = kwargs['scatter_ordinates']
+        else:
+            self.abcissa = [12]
+            self.ordinates = [default_scatter]
+        self._initialize_param_dict()
+
+        self._setup_interpol(**kwargs)
+
+    def mean_scatter(self, **kwargs):
+        """ Return the amount of log-normal scatter that should be added 
+        to the galaxy property as a function of the input halos. 
+
+        Parameters 
+        ----------
+        mass_like : array, optional keyword argument 
+            array of halo mass_likees 
+
+        halos : array or table, optional keyword argument
+            Data structure containing halos onto which stellar mass_likees 
+            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
+
+        Returns 
+        -------
+        scatter : array_like 
+            Array containing the amount of log-normal scatter evaluated 
+            at the input halos. 
+        """
+        # Interpret the inputs to determine the appropriate array of mass_likees
+        if 'mass_like' not in kwargs.keys():
+            if 'halos' in kwargs.keys():
+                if not hasattr(self, 'prim_haloprop_key'):
+                    raise SyntaxError("If you want to be able to pass "
+                        " a halo catalog as input to the scatter model, "
+                        "you must pass a `prim_haloprop_key` to the constructor")
+                kwargs['mass_like'] = kwargs['halos'][self.prim_haloprop_key]
+            else:
+                raise SyntaxError("You must either pass an input ``mass_like`` keyword "
+                    " or an input ``halos`` keyword, received neither")
+
+        if 'param_dict' in kwargs.keys():
+            self._update_params(kwargs['param_dict'])
+        else:
+            self._update_params(self.param_dict)
+
+        return self.spline_function(np.log10(kwargs['mass_like']))
+
+    def scatter_realization(self, **kwargs):
+        """ Return the amount of log-normal scatter that should be added 
+        to the galaxy property as a function of the input halos. 
+
+        Parameters 
+        ----------
+        mass_like : array, optional keyword argument 
+            array of halo mass_likees 
+
+        halos : array or table, optional keyword argument
+            Data structure containing halos onto which stellar mass_likees 
+            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
+
+        Returns 
+        -------
+        scatter : array_like 
+            Array containing the amount of log-normal scatter evaluated 
+            at the input halos. 
+        """
+
+        scatter_scale = self.mean_scatter(**kwargs)
+
+        if 'seed' in kwargs.keys():
+            np.random.seed(seed=kwargs['seed'])
+            
+        return np.random.normal(loc=0, scale=scatter_scale)
+
+    def _setup_interpol(self, **kwargs):
+        """ Private method used to configure the behavior of the interpolating function. 
+        """        
+        scipy_maxdegree = 5
+        degree_list = [scipy_maxdegree, custom_len(self.abcissa)-1]
+        if 'scatter_spline_degree' in kwargs.keys():
+            degree_list.append(kwargs['scatter_spline_degree'])
+        self.spline_degree = np.min(degree_list)
+
+        self.spline_function = occuhelp.custom_spline(
+            self.abcissa, self.ordinates, k=self.spline_degree)
+
+    def _update_params(self, param_dict):
+        self.param_dict = param_dict
+        self.ordinates = (
+            [self.param_dict[self._get_param_key(ipar)] 
+            for ipar in range(len(self.abcissa))]
+            )
+        self._setup_interpol()
+
+    def _initialize_param_dict(self):
+
+        self.param_dict={}
+        for ipar, val in enumerate(self.ordinates):
+            key = self._get_param_key(ipar)
+            self.param_dict[key] = val
+
+    def _get_param_key(self, ipar):
+        """ Private method used to retrieve the key of self.param_dict 
+        that corresponds to the appropriately selected i^th ordinate 
+        defining the behavior of the scatter model. 
+        """
+        return 'scatter_model_param'+str(ipar+1)
+
 @six.add_metaclass(ABCMeta)
 class SmHmModel(object):
     """ Abstract container class used as a template 
@@ -24,32 +169,59 @@ class SmHmModel(object):
 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, 
+        prim_haloprop_key = model_defaults.default_smhm_haloprop, 
+        scatter_model = LogNormalScatterModel, 
+        **kwargs):
         """
+        Parameters 
+        ----------
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the level of scatter. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_model : object, optional keyword argument 
+            Class governing stochasticity of stellar mass. Default scatter is log-normal, 
+            implemented by the `LogNormalScatterModel` class. 
+
+        scatter_abcissa : array_like, optional keyword argument 
+            Array of values giving the abcissa at which
+            the level of scatter will be specified by the input ordinates.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_ordinates : array_like, optional keyword argument 
+            Array of values defining the level of scatter at the input abcissa.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_spline_degree : int, optional keyword argument
+            Degree of the spline interpolation for the case of interpol_method='spline'. 
+            If there are k abcissa values specifying the model, input_spline_degree 
+            is ensured to never exceed k-1, nor exceed 5. 
+
+        input_param_dict : dict, optional keyword argument
+            Dictionary containing values for the parameters specifying the model.
+
         """
         self.galprop_key = 'stellar_mass'
-        
-        if 'prim_haloprop_key' in kwargs.keys():
-            self.prim_haloprop_key = kwargs['prim_haloprop_key']
-        else:
-            self.prim_haloprop_key = model_defaults.default_smhm_haloprop
-            kwargs['prim_haloprop_key'] = model_defaults.default_smhm_haloprop
+        self.prim_haloprop_key = prim_haloprop_key
 
         if 'redshift' in kwargs.keys():
             self.redshift = kwargs['redshift']
 
-        if 'scatter_model' in kwargs.keys():
-            self.scatter_model = kwargs['scatter_model']
-        else:
-            self.scatter_model = LogNormalScatterModel(**kwargs)
+        self.scatter_model = scatter_model(
+            prim_haloprop_key=self.prim_haloprop_key, 
+            **kwargs)
 
         self._build_param_dict(**kwargs)
 
 
     def _build_param_dict(self, **kwargs):
 
-        if 'param_dict' in kwargs.keys():
-            smhm_param_dict = kwargs['param_dict']
+        if 'input_param_dict' in kwargs.keys():
+            smhm_param_dict = kwargs['input_param_dict']
         else:
             if hasattr(self, 'retrieve_default_param_dict'):
                 smhm_param_dict = self.retrieve_default_param_dict()
@@ -70,16 +242,20 @@ class SmHmModel(object):
 
         Parameters 
         ----------
-        mass_like : array, optional keyword argument 
-            array of halo mass_likees 
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable governing stellar mass. 
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
-        halos : array or table, optional keyword argument
-            Data structure containing halos onto which stellar mass 
-            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
-        galaxy_table : array or table, optional keyword argument
-            Data structure containing halos onto which stellar mass 
-            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
+        galaxy_table : object, optional keyword argument 
+            Data table storing galaxy catalog. 
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            keyword arguments must be passed. 
 
         redshift : float, optional keyword argument
             Redshift of the halo hosting the galaxy. 
@@ -217,150 +393,6 @@ class Moster13SmHm(SmHmModel):
         'gamma11': 0.329
         }
         return d
-
-
-class LogNormalScatterModel(object):
-    """ Simple model used to generate log-normal scatter 
-    in the stellar-to-halo-mass_like relation. 
-
-    """
-
-    def __init__(self, **kwargs):
-        """
-        Parameters 
-        ----------
-        abcissa : array_like, optional 
-            Array of values giving the abcissa at which
-            the level of scatter will be specified by the input ordinates.
-            Default behavior will result in constant scatter of 0.2. 
-
-        ordinates : array_like, optional 
-            Array of values defining the level of scatter at the input abcissa.
-            Default behavior will result in constant scatter of 0.2. 
-
-        input_spline_degree : int, optional
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-        """
-        default_scatter = model_defaults.default_smhm_scatter
-
-        if 'prim_haloprop_key' in kwargs.keys():
-            self.prim_haloprop_key = kwargs['prim_haloprop_key']
-        else:
-            self.prim_haloprop_key = model_defaults.default_smhm_haloprop
-
-        if ('abcissa' in kwargs.keys()) and ('ordinates' in kwargs.keys()):
-            self.abcissa = kwargs['abcissa']
-            self.ordinates = kwargs['ordinates']
-        else:
-            self.abcissa = [12]
-            self.ordinates = [default_scatter]
-        self._initialize_param_dict()
-
-        self._setup_interpol(**kwargs)
-
-    def mean_scatter(self, **kwargs):
-        """ Return the amount of log-normal scatter that should be added 
-        to the galaxy property as a function of the input halos. 
-
-        Parameters 
-        ----------
-        mass_like : array, optional keyword argument 
-            array of halo mass_likees 
-
-        halos : array or table, optional keyword argument
-            Data structure containing halos onto which stellar mass_likees 
-            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
-
-        Returns 
-        -------
-        scatter : array_like 
-            Array containing the amount of log-normal scatter evaluated 
-            at the input halos. 
-        """
-        # Interpret the inputs to determine the appropriate array of mass_likees
-        if 'mass_like' not in kwargs.keys():
-            if 'halos' in kwargs.keys():
-                if not hasattr(self, 'prim_haloprop_key'):
-                    raise SyntaxError("If you want to be able to pass "
-                        " a halo catalog as input to the scatter model, "
-                        "you must pass a `prim_haloprop_key` to the constructor")
-                kwargs['mass_like'] = kwargs['halos'][self.prim_haloprop_key]
-            else:
-                raise SyntaxError("You must either pass an input ``mass_like`` keyword "
-                    " or an input ``halos`` keyword, received neither")
-
-        if 'param_dict' in kwargs.keys():
-            self._update_params(kwargs['param_dict'])
-        else:
-            self._update_params(self.param_dict)
-
-        return self.spline_function(np.log10(kwargs['mass_like']))
-
-    def scatter_realization(self, **kwargs):
-        """ Return the amount of log-normal scatter that should be added 
-        to the galaxy property as a function of the input halos. 
-
-        Parameters 
-        ----------
-        mass_like : array, optional keyword argument 
-            array of halo mass_likees 
-
-        halos : array or table, optional keyword argument
-            Data structure containing halos onto which stellar mass_likees 
-            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
-
-        Returns 
-        -------
-        scatter : array_like 
-            Array containing the amount of log-normal scatter evaluated 
-            at the input halos. 
-        """
-
-        scatter_scale = self.mean_scatter(**kwargs)
-
-        if 'seed' in kwargs.keys():
-            np.random.seed(seed=kwargs['seed'])
-            
-        return np.random.normal(loc=0, scale=scatter_scale)
-
-    def _setup_interpol(self, **kwargs):
-        """ Private method used to configure the behavior of `radprof_modfunc`. 
-        """        
-        scipy_maxdegree = 5
-        degree_list = [scipy_maxdegree, custom_len(self.abcissa)-1]
-        if 'input_spline_degree' in kwargs.keys():
-            degree_list.append(kwargs['input_spline_degree'])
-        self.spline_degree = np.min(degree_list)
-
-        self.spline_function = occuhelp.custom_spline(
-            self.abcissa, self.ordinates, k=self.spline_degree)
-
-    def _update_params(self, param_dict):
-        self.param_dict = param_dict
-        self.ordinates = (
-            [self.param_dict[self._get_param_key(ipar)] 
-            for ipar in range(len(self.abcissa))]
-            )
-        self._setup_interpol()
-
-    def _initialize_param_dict(self):
-
-        self.param_dict={}
-        for ipar, val in enumerate(self.ordinates):
-            key = self._get_param_key(ipar)
-            self.param_dict[key] = val
-
-    def _get_param_key(self, ipar):
-        """ Private method used to retrieve the key of self.param_dict 
-        that corresponds to the appropriately selected i^th ordinate 
-        defining the behavior of the scatter model. 
-        """
-        return 'scatter_model_param'+str(ipar+1)
-
-
-
 
 
 
