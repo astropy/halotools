@@ -35,6 +35,9 @@ class LogNormalScatterModel(object):
             the level of scatter. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
+        gal_type : string, optional keyword argument 
+            Name of the galaxy population being modeled. Default is None. 
+
         scatter_abcissa : array_like, optional keyword argument 
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
@@ -79,6 +82,9 @@ class LogNormalScatterModel(object):
         else:
             self.abcissa = [12]
             self.ordinates = [default_scatter]
+
+        if 'gal_type' in kwargs.keys():
+            self.gal_type = kwargs['gal_type']
         self._initialize_param_dict()
 
         self._setup_interpol(**kwargs)
@@ -212,7 +218,10 @@ class LogNormalScatterModel(object):
         that corresponds to the appropriately selected i^th ordinate 
         defining the behavior of the scatter model. 
         """
-        return 'scatter_model_param'+str(ipar+1)
+        if hasattr(self, 'gal_type'):
+            return 'scatter_model_param'+str(ipar+1)+'_'+self.gal_type
+        else:
+            return 'scatter_model_param'+str(ipar+1)
 
 @six.add_metaclass(ABCMeta)
 class SmHmModel(object):
@@ -232,6 +241,9 @@ class SmHmModel(object):
             String giving the column name of the primary halo property governing 
             the level of scatter. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+        gal_type : string, optional keyword argument 
+            Name of the galaxy population being modeled. Default is None. 
 
         scatter_model : object, optional keyword argument 
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
@@ -266,6 +278,8 @@ class SmHmModel(object):
         self.scatter_model = scatter_model(
             prim_haloprop_key=self.prim_haloprop_key, 
             **kwargs)
+        if hasattr(self.scatter_model, 'gal_type'):
+            self.gal_type = self.scatter_model.gal_type
 
         self._build_param_dict(**kwargs)
 
@@ -390,6 +404,7 @@ class Moster13SmHm(SmHmModel):
         """
 
         super(Moster13SmHm, self).__init__(**kwargs)
+        #self._set_param_dict_key_attrs()
 
         self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
 
@@ -417,11 +432,17 @@ class Moster13SmHm(SmHmModel):
         redshift : float, keyword argument
             Redshift of the halo hosting the galaxy
 
+        input_param_dict : dict, optional
+            dictionary of parameters governing the model. If not passed, 
+            values bound to ``self`` will be chosen. 
+
         Returns 
         -------
         mstar : array_like 
             Array containing stellar masses living in the input halos. 
         """
+        occuhelp.update_param_dict(self, **kwargs)
+
         # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
             key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
@@ -443,10 +464,11 @@ class Moster13SmHm(SmHmModel):
 
         # compute the parameter values that apply to the input redshift
         a = 1./(1+redshift)
-        m1 = self.param_dict['m10'] + self.param_dict['m11']*(1-a)
-        n = self.param_dict['n10'] + self.param_dict['n11']*(1-a)
-        beta = self.param_dict['beta10'] + self.param_dict['beta11']*(1-a)
-        gamma = self.param_dict['gamma10'] + self.param_dict['gamma11']*(1-a)
+
+        m1 = self.param_dict[self._m10_key] + self.param_dict[self._m11_key]*(1-a)
+        n = self.param_dict[self._n10_key] + self.param_dict[self._n11_key]*(1-a)
+        beta = self.param_dict[self._beta10_key] + self.param_dict[self._beta11_key]*(1-a)
+        gamma = self.param_dict[self._gamma10_key] + self.param_dict[self._gamma11_key]*(1-a)
 
         # Calculate each term contributing to Eqn 2
         norm = 2.*n*mass
@@ -456,6 +478,15 @@ class Moster13SmHm(SmHmModel):
 
         mstar = norm / (denom_term1 + denom_term2)
         return mstar
+
+    def _update_param_dict(self, **kwargs):
+        """ Private method to update ``self.param_dict`` 
+        and propagate changes to ``self.smhm_model.param_dict``. 
+        """
+        occuhelp.update_param_dict(self, **kwargs)
+        for key, value in self.param_dict.iteritems():
+            if key in self.scatter_model.param_dict.keys():
+                self.scatter_model.param_dict[key] = value
 
     def retrieve_default_param_dict(self):
         """ Method returns a dictionary of all model parameters 
@@ -477,7 +508,24 @@ class Moster13SmHm(SmHmModel):
         'gamma10': 0.608, 
         'gamma11': 0.329
         }
+        self._set_param_dict_key_attrs(d)
+
+        if hasattr(self, 'gal_type'):
+            for oldkey in d.keys():
+                newkey = oldkey + '_'+self.gal_type
+                d[newkey] = d.pop(oldkey)
+
         return d
+
+    def _set_param_dict_key_attrs(self, uncorrected_dict):
+        for key in uncorrected_dict.keys():
+            attr_name = '_'+key+'_key'
+            if hasattr(self, 'gal_type'):
+                keyname = key + '_' + self.gal_type
+            else:
+                keyname = key
+            setattr(self, attr_name, keyname)
+
 
 
 
