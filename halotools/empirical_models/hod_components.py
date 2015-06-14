@@ -547,19 +547,36 @@ class Kravtsov04Sats(OccupationComponent):
             the mean occupation method of `Kravtsov04Sats` will 
             be multiplied by the value of central_occupation_model at each mass, 
             as in Zheng et al. 2007, so that 
-            :math:`\\langle N_{\mathrm{sat}}|M\\rangle\\Rightarrow\\langle N_{\mathrm{sat}}|M\\rangle\\times\\langle N_{\mathrm{cen}}|M\\rangle`
+            :math:`\\langle N_{\mathrm{sat}}\\rangle_{M}\\Rightarrow\\langle N_{\mathrm{sat}}\\rangle_{M}\\times\\langle N_{\mathrm{cen}}\\rangle_{M}`
 
         Examples 
         --------
         >>> sat_model = Kravtsov04Sats()
-        >>> sat_model = Kravtsov04Sats(prim_haloprop_key='m500c')
+        >>> sat_model = Kravtsov04Sats(gal_type='sats')
         >>> sat_model = Kravtsov04Sats(threshold = -21)
 
-        If you want to modulate satellite occupation statistics by a central occupation model, 
-        you must first build an instance of the central model:
+        The ``input_param_dict`` keyword argument can be used to build an alternate 
+        model from an existing instance. This feature has a variety of uses. For example, 
+        suppose you wish to study how the choice of halo mass definition impacts HOD predictions:
 
-        >>> cen_model_instance = Zheng07Cens()
-        >>> sat_model = Kravtsov04Sats(central_occupation_model=cen_model_instance)
+        >>> sat_model1 = Kravtsov04Sats(threshold = -19.5, prim_haloprop_key='m200b')
+        >>> sat_model1.param_dict['alpha_satellites'] = 1.05
+        >>> sat_model2 = Kravtsov04Sats(threshold = sat_model1.threshold, input_param_dict = sat_model1.param_dict, prim_haloprop_key='m500c')
+
+        A common convention in HOD modeling of satellite populations is for the first 
+        occupation moment of the satellites to be multiplied by the first central occupation 
+        moment. Coupling the ``input_param_dict`` and ``central_occupation_model`` 
+        keyword arguments allows you to study the impact of this choice:
+
+        >>> sat_model1 = Kravtsov04Sats(threshold=-18)
+        >>> cen_model_instance = Zheng07Cens(threshold = sat_model1.threshold)
+        >>> sat_model2 = Kravtsov04Sats(threshold = sat_model1.threshold, input_param_dict=sat_model1.param_dict, central_occupation_model=cen_model_instance)
+
+        Now ``sat_model1`` and ``sat_model2`` are identical in every respect, 
+        excepting only the following difference:
+
+        :math:`\\langle N_{\mathrm{sat}}\\rangle^{\mathrm{model 2}} = \\langle N_{\mathrm{cen}}\\rangle\\times\\langle N_{\mathrm{sat}}\\rangle^{\mathrm{model 1}}`
+
 
         Notes 
         -----
@@ -663,12 +680,11 @@ class Kravtsov04Sats(OccupationComponent):
 
         Examples 
         --------
-        >>> sat_model = Kravtsov04Sats()
-
         The `mean_occupation` method of all OccupationComponent instances supports 
         three different options for arguments. The first option is to directly 
         pass the array of the primary halo property: 
 
+        >>> sat_model = Kravtsov04Sats()
         >>> testmass = np.logspace(10, 15, num=50)
         >>> mean_nsat = sat_model.mean_occupation(prim_haloprop=testmass)
 
