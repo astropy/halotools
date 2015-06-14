@@ -370,7 +370,7 @@ def count_haloprops(haloprop_dict):
             num_props += 1
     return num_props
 
-def enforce_required_kwargs(required_kwargs, obj, **kwargs):
+def bind_required_kwargs(required_kwargs, obj, **kwargs):
     for key in required_kwargs:
         if key in kwargs.keys():
             setattr(obj, key, kwargs[key])
