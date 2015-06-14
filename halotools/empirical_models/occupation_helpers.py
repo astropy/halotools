@@ -228,8 +228,6 @@ def custom_spline(table_abcissa, table_ordinates, k=0):
     table_ordinates[0] for all values of the input abcissa. 
 
     """
-
-
     if custom_len(table_abcissa) != custom_len(table_ordinates):
         len_abcissa = custom_len(table_abcissa)
         len_ordinates = custom_len(table_ordinates)
@@ -333,8 +331,7 @@ def update_param_dict(obj, **kwargs):
     input_param_dict : dict, optional keyword argument 
         Parameter dictionary used to update ``obj.param_dict``.
         If no ``input_param_dict`` keyword argument is passed, 
-        method does nothing. 
-
+        the `update_param_dict` method does nothing. 
     """
     if 'input_param_dict' not in kwargs.keys():
         return 
