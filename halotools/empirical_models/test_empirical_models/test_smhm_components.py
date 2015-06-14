@@ -70,7 +70,7 @@ def test_LogNormalScatterModel_initialization():
 	input_abcissa = [12, 15]
 	input_ordinates = [0.3, 0.1]
 	scatter_model2 = smhm_components.LogNormalScatterModel(
-		abcissa = input_abcissa, ordinates = input_ordinates)
+		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
 
 	assert scatter_model2.abcissa == input_abcissa
 	assert scatter_model2.ordinates == input_ordinates
@@ -126,7 +126,7 @@ def test_LogNormalScatterModel_behavior():
 	input_abcissa = [12, 15]
 	input_ordinates = [0.3, 0.1]
 	scatter_model2 = smhm_components.LogNormalScatterModel(
-		abcissa = input_abcissa, ordinates = input_ordinates)
+		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
 
 	# Test the mean_scatter method of a non-trivial model at the first abcissa
 	scatter_array = scatter_model2.mean_scatter(mass_like = mass12)
