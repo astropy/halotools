@@ -18,10 +18,12 @@ from scipy.stats import poisson
 from scipy.optimize import brentq
 from scipy.interpolate import UnivariateSpline as spline
 
-import model_defaults
-from ..utils.array_utils import array_like_length as custom_len
-import occupation_helpers as occuhelp
+from . import model_defaults
+from . import occupation_helpers as occuhelp
 from . import smhm_components
+
+from ..utils.array_utils import array_like_length as custom_len
+from ..  import sim_manager
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -237,6 +239,12 @@ class Zheng07Cens(OccupationComponent):
             provided in Table 1 of Zheng et al. (2007) are chosen. 
             See the `get_published_parameters` method for details. 
 
+        Examples 
+        --------
+        >>> cen_model = Zheng07Cens()
+        >>> cen_model = Zheng07Cens(gal_type='cens', threshold=-19.5)
+        >>> cen_model = Zheng07Cens(prim_haloprop_key='m200b')
+
         Notes 
         -----
         The test suite for this model is documented at 
@@ -303,6 +311,32 @@ class Zheng07Cens(OccupationComponent):
         mean_ncen : array
             Mean number of central galaxies in the input halos. 
 
+        Examples 
+        --------
+        >>> cen_model = Zheng07Cens()
+
+        The `mean_occupation` method of all OccupationComponent instances supports 
+        three different options for arguments. The first option is to directly 
+        pass the array of the primary halo property: 
+
+        >>> testmass = np.logspace(10, 15, num=50)
+        >>> mean_ncen = cen_model.mean_occupation(prim_haloprop=testmass)
+
+        The second option is to pass `mean_occupation` a full halo catalog. 
+        In this case, the array storing the primary halo property will be selected 
+        by accessing the ``cen_model.prim_haloprop_key`` column of the input halo catalog. 
+        For illustration purposes, we'll use a fake halo catalog rather than a 
+        (much larger) full one:
+
+        >>> fake_sim = sim_manager.FakeSim()
+        >>> mean_ncen = cen_model.mean_occupation(halos=fake_sim.halos)
+
+        The third option is to pass a table storing a mock galaxy catalog. In this case, 
+        the syntax is the same as it is when passing a halo catalog:
+
+        >>> fake_mock = sim_manager.FakeMock()
+        >>> mean_ncen = cen_model.mean_occupation(galaxy_table=fake_mock.galaxy_table)
+
         Notes 
         -----
         The `mean_occupation` method computes the following function: 
@@ -315,7 +349,8 @@ class Zheng07Cens(OccupationComponent):
         """
         # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
-            mass = kwargs['galaxy_table'][self.prim_haloprop_key]
+            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
+            mass = kwargs['galaxy_table'][key]
         elif 'halos' in kwargs.keys():
             mass = kwargs['halos'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
@@ -346,15 +381,26 @@ class Zheng07Cens(OccupationComponent):
         ----------
 
         threshold : float
-            Luminosity threshold defining the SDSS sample to which Zheng et al. 
-            fit their HOD model. Must be agree with one of the published values: 
+            Luminosity threshold defining the SDSS sample 
+            to which Zheng et al. fit their HOD model. 
+            If the ``publication`` keyword argument is set to ``Zheng07``, 
+            then ``threshold`` must be agree with one of the published values: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+
+        publication : string, optional keyword argument 
+            String specifying the publication that will be used to set  
+            the values of ``param_dict``. Default is Zheng et al. (2007). 
 
         Returns 
         -------
         param_dict : dict
             Dictionary of model parameters whose values have been set to 
             agree with the values taken from Table 1 of Zheng et al. 2007.
+
+        Examples 
+        --------
+        >>> cen_model = Zheng07Cens()
+        >>> cen_model.param_dict = cen_model.get_published_parameters(cen_model.threshold)
 
         """
 
