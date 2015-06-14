@@ -360,10 +360,6 @@ class Zheng07Cens(OccupationComponent):
                 "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
         occuhelp.update_param_dict(self, **kwargs)
-        #if 'input_param_dict' not in kwargs.keys():
-        #    param_dict = self.param_dict 
-        #else:
-        #    param_dict = kwargs['input_param_dict']
 
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
@@ -526,32 +522,50 @@ class Kravtsov04Sats(OccupationComponent):
         """
         Parameters 
         ----------
-        input_param_dict : dictionary, optional.
-            Contains values for the parameters specifying the model.
-            Dictionary keys are ``logM0_satellites``, ``logM1_satellites``
-            and ``alpha_satellites``. 
+        gal_type : string, optional keyword argument
+            Name of the galaxy population being modeled. Default is ``satellites``.  
 
-            If no input_param_dict is passed, 
-            the best-fit parameter values provided in Table 1 of 
-            Zheng et al. (2007) are chosen.
-
-        threshold : float, optional.
-            Luminosity threshold of the mock galaxy sample. 
-            If specified, input value must agree with 
-            one of the thresholds used in Zheng07 to fit HODs: 
+        threshold : float, optional keyword argument
+            Luminosity threshold of the mock galaxy sample. If specified, 
+            input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        gal_type : string, optional
-            Name of the galaxy population being modeled, e.g., ``sats``. 
-            Default setting is ``satellites``. 
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        input_param_dict : dict, optional keyword argument. 
+            If ``input_param_dict`` is not passed, the best-fit parameter values 
+            provided in Table 1 of Zheng et al. (2007) are chosen. 
+            See the `get_published_parameters` method for details. 
 
         central_occupation_model : occupation model instance, optional
-            If using, must be an instance of a sub-class of `~halotools.empirical_models.OccupationComponent`. 
-            If using, the mean occupation method of this model will 
+            Must be an instance of a sub-class of `~halotools.empirical_models.OccupationComponent`. 
+            If a ``central_occupation_model`` is being used, 
+            the mean occupation method of `Kravtsov04Sats` will 
             be multiplied by the value of central_occupation_model at each mass, 
             as in Zheng et al. 2007, so that 
             :math:`\\langle N_{\mathrm{sat}}|M\\rangle\\Rightarrow\\langle N_{\mathrm{sat}}|M\\rangle\\times\\langle N_{\mathrm{cen}}|M\\rangle`
+
+        Examples 
+        --------
+        >>> sat_model = Kravtsov04Sats()
+        >>> sat_model = Kravtsov04Sats(prim_haloprop_key='m500c')
+        >>> sat_model = Kravtsov04Sats(threshold = -21)
+
+        If you want to modulate satellite occupation statistics by a central occupation model, 
+        you must first build an instance of the central model:
+
+        >>> cen_model_instance = Zheng07Cens()
+        >>> sat_model = Kravtsov04Sats(central_occupation_model=cen_model_instance)
+
+        Notes 
+        -----
+        The test suite for this model is documented at 
+        `~halotools.empirical_models.test_empirical_models.test_Kravtsov04Sats`
+
         """
         occupation_bound = float("inf")
 
@@ -568,9 +582,11 @@ class Kravtsov04Sats(OccupationComponent):
         self._check_consistent_central_behavior(central_occupation_model)
         self.central_occupation_model = central_occupation_model
 
-        self.publications = []
+        self.publications = ['arXiv:0308519', 'arXiv:0703457']
 
     def _initialize_param_dict(self, input_param_dict = {}, **kwargs):
+        """ Method stores default values into ``self.param_dict``. 
+        """
 
         input_param_dict = input_param_dict
 
@@ -587,8 +603,7 @@ class Kravtsov04Sats(OccupationComponent):
                 self.param_dict[key] = published_param_dict[key]
 
     def _check_consistent_central_behavior(self, central_occupation_model):
-        """ Method ensures that the input central_occupation_model is sensible, 
-        and then binds the result to the class instance. 
+        """ Method ensures that the input central_occupation_model is sensible.
         """        
         if central_occupation_model is not None:
             # Test that we were given a sensible input central_occupation_model 
@@ -646,10 +661,37 @@ class Kravtsov04Sats(OccupationComponent):
 
         depending on whether a central model was passed to the constructor. 
 
+        Examples 
+        --------
+        >>> sat_model = Kravtsov04Sats()
+
+        The `mean_occupation` method of all OccupationComponent instances supports 
+        three different options for arguments. The first option is to directly 
+        pass the array of the primary halo property: 
+
+        >>> testmass = np.logspace(10, 15, num=50)
+        >>> mean_nsat = sat_model.mean_occupation(prim_haloprop=testmass)
+
+        The second option is to pass `mean_occupation` a full halo catalog. 
+        In this case, the array storing the primary halo property will be selected 
+        by accessing the ``sat_model.prim_haloprop_key`` column of the input halo catalog. 
+        For illustration purposes, we'll use a fake halo catalog rather than a 
+        (much larger) full one:
+
+        >>> fake_sim = sim_manager.FakeSim()
+        >>> mean_nsat = sat_model.mean_occupation(halos=fake_sim.halos)
+
+        The third option is to pass a table storing a mock galaxy catalog. In this case, 
+        the syntax is the same as it is when passing a halo catalog:
+
+        >>> fake_mock = sim_manager.FakeMock()
+        >>> mean_nsat = sat_model.mean_occupation(galaxy_table=fake_mock.galaxy_table)
+
         """
         # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
-            mass = kwargs['galaxy_table'][self.prim_haloprop_key]
+            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
+            mass = kwargs['galaxy_table'][key]
         elif 'halos' in kwargs.keys():
             mass = kwargs['halos'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
@@ -658,13 +700,10 @@ class Kravtsov04Sats(OccupationComponent):
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
-        if 'input_param_dict' not in kwargs.keys():
-            param_dict = self.param_dict 
-        else:
-            param_dict = kwargs['input_param_dict']
+        occuhelp.update_param_dict(self, **kwargs)
 
-        M0 = 10.**param_dict[self.logM0_key]
-        M1 = 10.**param_dict[self.logM1_key]
+        M0 = 10.**self.param_dict[self.logM0_key]
+        M1 = 10.**self.param_dict[self.logM1_key]
 
         # Call to np.where raises a harmless RuntimeWarning exception if 
         # there are entries of input logM for which mean_nsat = 0
@@ -674,18 +713,15 @@ class Kravtsov04Sats(OccupationComponent):
             warnings.simplefilter("ignore", RuntimeWarning)
             # Simultaneously evaluate mean_nsat and impose the usual cutoff
             mean_nsat = np.where(mass - M0 > 0, 
-                ((mass - M0)/M1)**param_dict[self.alpha_key], 0)
+                ((mass - M0)/M1)**self.param_dict[self.alpha_key], 0)
 
         # If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
         if self.central_occupation_model is not None:
             mean_ncen = self.central_occupation_model.mean_occupation(**kwargs)
-            #mean_nsat = np.where(mean_nsat > 0, mean_nsat*mean_ncen, mean_nsat)
             mean_nsat *= mean_ncen
 
         return mean_nsat
-
-
 
     def get_published_parameters(self, threshold, publication='Zheng07'):
         """
@@ -693,19 +729,25 @@ class Kravtsov04Sats(OccupationComponent):
 
         Parameters 
         ----------
-
         threshold : float
-            Luminosity threshold defining the SDSS sample to which Zheng et al. 
-            fit their HOD model. Must be agree with one of the published values: 
+            Luminosity threshold of the mock galaxy sample. 
+            Input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+
+        publication : string, optional keyword argument 
+            String specifying the publication that will be used to set  
+            the values of ``param_dict``. Default is Zheng et al. (2007). 
 
         Returns 
         -------
-
         param_dict : dict
             Dictionary of model parameters whose values have been set to 
-            agree with the values taken from Table 1 of Zheng et al. 2007.
+            the values taken from Table 1 of Zheng et al. 2007.
 
+        Examples 
+        --------
+        >>> sat_model = Kravtsov04Sats()
+        >>> sat_model.param_dict = sat_model.get_published_parameters(sat_model.threshold)
         """
 
         def get_zheng07_params(threshold):
