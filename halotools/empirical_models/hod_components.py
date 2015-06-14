@@ -263,14 +263,11 @@ class Zheng07Cens(OccupationComponent):
         self.publications = []
 
 
-    def _initialize_param_dict(self, **kwargs):
+    def _initialize_param_dict(self, input_param_dict={}, **kwargs):
         """ Private method used to retrieve the 
         dictionary governing the parameters of the model. 
         """
-        if 'input_param_dict' in kwargs.keys():
-            input_param_dict = kwargs['input_param_dict']
-        else:
-            input_param_dict = {}
+        input_param_dict = input_param_dict
 
         self.logMmin_key = 'logMmin_'+self.gal_type
         self.sigma_logM_key = 'sigma_logM_'+self.gal_type
@@ -479,6 +476,7 @@ class Kravtsov04Sats(OccupationComponent):
         gal_type='satellites', 
         threshold=model_defaults.default_luminosity_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
+        central_occupation_model = None, 
         **kwargs):
         """
         Parameters 
@@ -522,16 +520,14 @@ class Kravtsov04Sats(OccupationComponent):
 
         self._initialize_param_dict(**kwargs)
 
-        self._set_central_behavior(**kwargs)
+        self._check_consistent_central_behavior(central_occupation_model)
+        self.central_occupation_model = central_occupation_model
 
         self.publications = []
 
-    def _initialize_param_dict(self, **kwargs):
+    def _initialize_param_dict(self, input_param_dict = {}, **kwargs):
 
-        if 'input_param_dict' in kwargs.keys():
-            input_param_dict = kwargs['input_param_dict']
-        else:
-            input_param_dict = {}
+        input_param_dict = input_param_dict
 
         self.logM0_key = 'logM0_'+self.gal_type
         self.logM1_key = 'logM1_'+self.gal_type
@@ -545,30 +541,25 @@ class Kravtsov04Sats(OccupationComponent):
             else:
                 self.param_dict[key] = published_param_dict[key]
 
-    def _set_central_behavior(self, **kwargs):
+    def _check_consistent_central_behavior(self, central_occupation_model):
         """ Method ensures that the input central_occupation_model is sensible, 
         and then binds the result to the class instance. 
-        """
-        if 'central_occupation_model' in kwargs.keys():
-            self.central_occupation_model = kwargs['central_occupation_model']
-        else:
-            self.central_occupation_model = None
-        
-        if self.central_occupation_model is not None:
+        """        
+        if central_occupation_model is not None:
             # Test that we were given a sensible input central_occupation_model 
-            if not isinstance(self.central_occupation_model, OccupationComponent):
+            if not isinstance(central_occupation_model, OccupationComponent):
                 msg = ("When passing a central_occupation_model to " + 
                     "the Kravtsov04Sats constructor, \n you must pass an instance of " + 
                     "an OccupationComponent.")
-                if issubclass(self.central_occupation_model, OccupationComponent):
+                if issubclass(central_occupation_model, OccupationComponent):
                     msg = (msg + 
                         "\n Instead, the Kravtsov04Sats received the actual class " + 
-                        self.central_occupation_model.__name__+", " + 
+                        central_occupation_model.__name__+", " + 
                     "rather than an instance of that class. ")
                 raise SyntaxError(msg)
 
             # Test if centrals and satellites thresholds are equal
-            if self.threshold != self.central_occupation_model.threshold:
+            if self.threshold != central_occupation_model.threshold:
                 warnings.warn("Satellite and Central luminosity tresholds do not match")
             #
 
