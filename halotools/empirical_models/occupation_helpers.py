@@ -6,7 +6,10 @@ used by many of the hod model components.
 
 """
 
-__all__=['solve_for_polynomial_coefficients', 'polynomial_from_table', 'enforce_periodicity_of_box']
+__all__ = (
+    ['solve_for_polynomial_coefficients', 'polynomial_from_table', 
+    'enforce_periodicity_of_box', 'update_param_dict']
+    )
 
 import numpy as np
 from copy import copy
