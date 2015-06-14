@@ -8,9 +8,10 @@ import numpy as np
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from. import model_defaults
+from . import model_defaults
+from . import occupation_helpers as occuhelp
+
 from ..utils.array_utils import array_like_length as custom_len
-from ..empirical_models import occupation_helpers as occuhelp
 from ..sim_manager import sim_defaults 
 
 from warnings import warn
@@ -88,12 +89,24 @@ class LogNormalScatterModel(object):
 
         Parameters 
         ----------
-        mass_like : array, optional keyword argument 
-            array of halo mass_likees 
+        prim_haloprop : array, optional keyword argument
+            Array storing a mass-like variable that governs the occupation statistics. 
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
-        halos : array or table, optional keyword argument
-            Data structure containing halos onto which stellar mass_likees 
-            will be painted. Must contain a key that matches ``prim_haloprop_key``. 
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
+
+        galaxy_table : object, optional keyword argument 
+            Data table storing mock galaxy catalog. 
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            keyword arguments must be passed. 
+
+        input_param_dict : dict, optional keyword argument 
+            Dictionary of parameters governing the model. 
+            If not passed, the values already bound to ``self`` will be used. 
 
         Returns 
         -------
@@ -102,23 +115,22 @@ class LogNormalScatterModel(object):
             at the input halos. 
         """
         # Interpret the inputs to determine the appropriate array of mass_likees
-        if 'mass_like' not in kwargs.keys():
-            if 'halos' in kwargs.keys():
-                if not hasattr(self, 'prim_haloprop_key'):
-                    raise SyntaxError("If you want to be able to pass "
-                        " a halo catalog as input to the scatter model, "
-                        "you must pass a `prim_haloprop_key` to the constructor")
-                kwargs['mass_like'] = kwargs['halos'][self.prim_haloprop_key]
-            else:
-                raise SyntaxError("You must either pass an input ``mass_like`` keyword "
-                    " or an input ``halos`` keyword, received neither")
-
-        if 'param_dict' in kwargs.keys():
-            self._update_params(kwargs['param_dict'])
+        # Retrieve the array storing the mass-like variable
+        if 'galaxy_table' in kwargs.keys():
+            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
+            mass = kwargs['galaxy_table'][key]
+        elif 'halos' in kwargs.keys():
+            mass = kwargs['halos'][self.prim_haloprop_key]
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
         else:
-            self._update_params(self.param_dict)
+            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
+                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
-        return self.spline_function(np.log10(kwargs['mass_like']))
+        occuhelp.update_param_dict(self, **kwargs)
+        self._update_interpol()
+
+        return self.spline_function(np.log10(mass))
 
     def scatter_realization(self, **kwargs):
         """ Return the amount of log-normal scatter that should be added 
@@ -159,8 +171,7 @@ class LogNormalScatterModel(object):
         self.spline_function = occuhelp.custom_spline(
             self.abcissa, self.ordinates, k=self.spline_degree)
 
-    def _update_params(self, param_dict):
-        self.param_dict = param_dict
+    def _update_interpol(self):
         self.ordinates = (
             [self.param_dict[self._get_param_key(ipar)] 
             for ipar in range(len(self.abcissa))]
