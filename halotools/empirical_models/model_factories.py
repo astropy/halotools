@@ -141,7 +141,8 @@ class SubhaloModelFactory(ModelFactory):
         for galprop in self.galprop_list:
             component_model = self.model_blueprint[galprop]
             new_method_name = galprop + '_model_func'
-            new_method_behavior = component_model.__call__
+            behavior_name = 'mc_'+galprop
+            new_method_behavior = getattr(component_model, behavior_name)
             setattr(self, new_method_name, new_method_behavior)
 
     def _build_composite_lists(self, **kwargs):

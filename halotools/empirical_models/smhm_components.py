@@ -236,7 +236,7 @@ class SmHmModel(object):
             scatter_param_dict.items()
             )
 
-    def __call__(self, **kwargs):
+    def mc_stellar_mass(self, include_scatter = True, **kwargs):
         """ Return the stellar mass_like of a central galaxy that lives in a 
         halo mass_like ``mass_like`` at the input ``redshift``. 
 
@@ -260,6 +260,15 @@ class SmHmModel(object):
         redshift : float, optional keyword argument
             Redshift of the halo hosting the galaxy. 
 
+        include_scatter : boolean, optional keyword argument 
+            Determines whether or not the scatter model is applied to add stochasticity 
+            to the stellar mass assignment. Default is True. 
+            If False, model is purely deterministic. 
+
+        input_param_dict : dict, optional keyword argument 
+            Dictionary of parameters governing the model. 
+            If not passed, the values already bound to ``self`` will be used. 
+
         Returns 
         -------
         mstar : array_like 
@@ -276,29 +285,11 @@ class SmHmModel(object):
                 "Choosing the default redshift z = %.2f\n" % sim_defaults.default_redshift)
                 kwargs['redshift'] = sim_defaults.default_redshift
 
-
-        # Interpret the inputs to determine the appropriate array of mass_likees
-        if 'galaxy_table' in kwargs.keys():
-            kwargs['mass_like'] = kwargs['galaxy_table'][model_defaults.host_haloprop_prefix + self.prim_haloprop_key]
-        elif 'mass_like' not in kwargs.keys():
-            if 'halos' in kwargs.keys():
-                kwargs['mass_like'] = kwargs['halos'][self.prim_haloprop_key]
-            else:
-                raise SyntaxError("You must either pass an input ``mass_like`` keyword, "
-                    "an input ``galaxy_table`` keyword, "
-                    " or an input ``halos`` keyword. \n Received none of these.")
-
-        if 'include_scatter' in kwargs.keys():
-            include_scatter = kwargs['include_scatter']
-        else:
-            include_scatter = True
-
         mean_stellar_mass = self.mean_stellar_mass(**kwargs)
 
         if include_scatter is False:
             return mean_stellar_mass
         else:
-            kwargs['param_dict'] = self.param_dict
             log10mass_like_with_scatter = (
                 np.log10(mean_stellar_mass) + 
                 self.scatter_model.scatter_realization(**kwargs)
@@ -314,15 +305,34 @@ class Moster13SmHm(SmHmModel):
     def __init__(self, **kwargs):
         """
         Parameters 
-        -----------
-        prim_haloprop_key : string, optional keyword argument
-            This string will be used to extract the relevant column of the 
-            halo catalog containing the mass-like variable that regulates stellar mass. 
-            Default is set by ``default_smhm_haloprop`` in the 
+        ----------
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the level of scatter. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_model : object, optional keyword argument 
+            Class governing stochasticity of stellar mass. Default scatter is log-normal, 
+            implemented by the `LogNormalScatterModel` class. 
+
+        scatter_abcissa : array_like, optional keyword argument 
+            Array of values giving the abcissa at which
+            the level of scatter will be specified by the input ordinates.
+            Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        param_dict : dict, optional 
-            Dictionary containing the values of the parameters of the desired model. 
+        scatter_ordinates : array_like, optional keyword argument 
+            Array of values defining the level of scatter at the input abcissa.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_spline_degree : int, optional keyword argument
+            Degree of the spline interpolation for the case of interpol_method='spline'. 
+            If there are k abcissa values specifying the model, input_spline_degree 
+            is ensured to never exceed k-1, nor exceed 5. 
+
+        input_param_dict : dict, optional keyword argument
+            Dictionary containing values for the parameters specifying the model.
             If none is passed, the `Moster13SmHm` instance will be initialized to 
             the best-fit values taken from Moster et al. (2013). 
         """
@@ -337,8 +347,20 @@ class Moster13SmHm(SmHmModel):
 
         Parameters 
         ----------
-        mass_like : array, keyword argument
-            array of halo mass_likees
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable governing stellar mass. 
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
+
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
+
+        galaxy_table : object, optional keyword argument 
+            Data table storing galaxy catalog. 
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            keyword arguments must be passed. 
 
         redshift : float, keyword argument
             Redshift of the halo hosting the galaxy
@@ -348,7 +370,17 @@ class Moster13SmHm(SmHmModel):
         mstar : array_like 
             Array containing stellar masses living in the input halos. 
         """
-        mass_like = kwargs['mass_like']
+        # Retrieve the array storing the mass-like variable
+        if 'galaxy_table' in kwargs.keys():
+            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
+            mass = kwargs['galaxy_table'][key]
+        elif 'halos' in kwargs.keys():
+            mass = kwargs['halos'][self.prim_haloprop_key]
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
+        else:
+            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
+                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
         if 'redshift' in kwargs.keys():
             redshift = kwargs['redshift']
@@ -356,6 +388,7 @@ class Moster13SmHm(SmHmModel):
             redshift = self.redshift
         else:
             redshift = sim_defaults.default_redshift
+
         # compute the parameter values that apply to the input redshift
         a = 1./(1+redshift)
         m1 = self.param_dict['m10'] + self.param_dict['m11']*(1-a)
@@ -364,8 +397,8 @@ class Moster13SmHm(SmHmModel):
         gamma = self.param_dict['gamma10'] + self.param_dict['gamma11']*(1-a)
 
         # Calculate each term contributing to Eqn 2
-        norm = 2.*n*mass_like
-        m_by_m1 = mass_like/(10.**m1)
+        norm = 2.*n*mass
+        m_by_m1 = mass/(10.**m1)
         denom_term1 = m_by_m1**(-beta)
         denom_term2 = m_by_m1**gamma
 
