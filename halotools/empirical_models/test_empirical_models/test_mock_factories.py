@@ -30,7 +30,7 @@ def test_preloaded_hod_mocks():
 
     # If factory is called with default settings, 
     # mock attributes should include/exclude:
-        mock1 = mock_factories.HodMockFactory(sim, model)
+        mock1 = mock_factories.HodMockFactory(snapshot=sim, model=model)
         assert hasattr(mock1, 'galaxy_table')
         expected_keys = ['x', 'y', 'z', 'halo_x', 'halo_NFWmodel_conc', 'halo_mvir']
         for key in expected_keys:
@@ -47,7 +47,7 @@ def test_preloaded_hod_mocks():
         assert np.all(mock1.galaxy_table['halo_NFWmodel_conc'] > 0.5)
         assert np.all(mock1.galaxy_table['halo_NFWmodel_conc'] < 25)
 
-        mock2 = mock_factories.HodMockFactory(sim, model, 
+        mock2 = mock_factories.HodMockFactory(snapshot=sim, model=model, 
             additional_haloprops = ['zhalf'])
         assert 'halo_zhalf' in mock2.galaxy_table.keys()
 

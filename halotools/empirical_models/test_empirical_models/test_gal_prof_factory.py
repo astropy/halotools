@@ -37,7 +37,7 @@ def test_unbiased_trivial():
 
 	snapshot = FakeSim()
 	composite_model = Kravtsov04()
-	mock = HodMockFactory(snapshot, composite_model)
+	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
 	x, y, z = cen_prof.mc_pos(mock)
 	assert np.all(x == 0)
@@ -52,7 +52,7 @@ def test_unbiased_nfw():
 
 	snapshot = FakeSim()
 	composite_model = Kravtsov04()
-	mock = HodMockFactory(snapshot, composite_model)
+	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
 	# Check that mc_radii gives reasonable results for FakeSim
 	satellite_boolean = mock.galaxy_table['gal_type'] == gal_type
