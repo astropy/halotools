@@ -70,7 +70,7 @@ class OccupationComponent(object):
             will be varied in MCMC-type likelihood analyses. 
         """
         required_kwargs = ['gal_type',  'threshold', 'occupation_bound', 'prim_haloprop_key']
-        occuhelp.enforce_required_kwargs(required_kwargs, self, **kwargs)
+        occuhelp.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
@@ -80,7 +80,7 @@ class OccupationComponent(object):
         else:
             self.param_dict = {}
 
-    def mc_occupation(self, **kwargs):
+    def mc_occupation(self, seed=None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 
         Parameters
@@ -113,22 +113,22 @@ class OccupationComponent(object):
         mc_abundance : array
             Integer array giving the number of galaxies in each of the input halos.     
         """ 
-        expectation_values = self.mean_occupation(**kwargs)
+        first_occupation_moment = self.mean_occupation(**kwargs)
         if self.occupation_bound == 1:
-            return self._nearest_integer_distribution(expectation_values, **kwargs)
+            return self._nearest_integer_distribution(first_occupation_moment, seed=seed, **kwargs)
         elif self.occupation_bound == float("inf"):
-            return self._poisson_distribution(expectation_values, **kwargs)
+            return self._poisson_distribution(first_occupation_moment, seed=seed, **kwargs)
         else:
             raise KeyError("The only permissible values of occupation_bound for instances "
                 "of OccupationComponent are unity and infinity.")
 
-    def _nearest_integer_distribution(self, expectation_values, **kwargs):
+    def _nearest_integer_distribution(self, first_occupation_moment, seed=None, **kwargs):
         """ Nearest-integer distribution used to draw Monte Carlo occupation statistics 
         for central-like populations with only permissible galaxy per halo.
 
         Parameters 
         ----------
-        expectation_values : array
+        first_occupation_moment : array
             Array giving the first moment of the occupation distribution function. 
 
         seed : int, optional keyword argument 
@@ -140,20 +140,19 @@ class OccupationComponent(object):
         mc_abundance : array
             Integer array giving the number of galaxies in each of the input halos. 
         """
-        if 'seed' in kwargs.keys():
-            np.random.seed(seed=kwargs['seed'])
-        else:
-            np.random.seed(seed=None)
-        mc_generator = np.random.random(custom_len(expectation_values))
-        return np.where(mc_generator < expectation_values, 1, 0)
+        np.random.seed(seed=seed)
 
-    def _poisson_distribution(self, expectation_values, **kwargs):
+        mc_generator = np.random.random(custom_len(first_occupation_moment))
+
+        return np.where(mc_generator < first_occupation_moment, 1, 0)
+
+    def _poisson_distribution(self, first_occupation_moment, seed=None, **kwargs):
         """ Poisson distribution used to draw Monte Carlo occupation statistics 
         for satellite-like populations in which per-halo abundances are unbounded. 
 
         Parameters 
         ----------
-        expectation_values : array
+        first_occupation_moment : array
             Array giving the first moment of the occupation distribution function. 
 
         seed : int, optional keyword argument 
@@ -165,15 +164,14 @@ class OccupationComponent(object):
         mc_abundance : array
             Integer array giving the number of galaxies in each of the input halos. 
         """
-        if 'seed' in kwargs.keys():
-            np.random.seed(seed=kwargs['seed'])
-        else:
-            np.random.seed(seed=None)
+        np.random.seed(seed=seed)
+
         # The scipy built-in Poisson number generator raises an exception 
         # if its input is zero, so here we impose a simple workaround
-        expectation_values = np.where(expectation_values <=0, 
-            model_defaults.default_tiny_poisson_fluctuation, expectation_values)
-        return poisson.rvs(expectation_values)
+        first_occupation_moment = np.where(first_occupation_moment <=0, 
+            model_defaults.default_tiny_poisson_fluctuation, first_occupation_moment)
+
+        return poisson.rvs(first_occupation_moment)
 
     @abstractmethod
     def mean_occupation(self):
@@ -202,7 +200,7 @@ class OccupationComponent(object):
 
         Returns 
         --------
-        expectation_values : array
+        first_occupation_moment : array
             Array giving the first moment of the occupation distribution function. 
         """
         raise NotImplementedError("All subclasses of OccupationComponent " 
