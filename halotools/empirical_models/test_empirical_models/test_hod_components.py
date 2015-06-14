@@ -9,12 +9,12 @@ from .. import gal_prof_factory
 from astropy.table import Table
 from copy import copy
 
-__all__ = ['test_Kravtsov04Cens','test_Kravtsov04Sats']
+__all__ = ['test_Zheng07Cens','test_Kravtsov04Sats']
 
 
-def test_Kravtsov04Cens():
+def test_Zheng07Cens():
 	""" Function to test 
-	`~halotools.empirical_models.Kravtsov04Cens`. 
+	`~halotools.empirical_models.Zheng07Cens`. 
 	Here's a brief summary of the tests performed: 
 
 		* The basic metadata of the model is correct, e.g., ``self.occupation_bound = 1`` 
@@ -95,7 +95,7 @@ def test_Kravtsov04Cens():
 		assert np.all(mcocc_from_array == mcocc_from_halos)
 
 	### First test the model with all default settings
-	default_model = hod_components.Kravtsov04Cens()
+	default_model = hod_components.Zheng07Cens()
 	test_attributes(default_model)
 	test_mean_occupation(default_model)
 	test_mc_occupation(default_model)
@@ -103,7 +103,7 @@ def test_Kravtsov04Cens():
 
 	### Now test the various threshold settings
 	for threshold in np.arange(-22, -17.5, 0.5):
-		thresh_model = hod_components.Kravtsov04Cens(threshold = threshold,gal_type='cens')
+		thresh_model = hod_components.Zheng07Cens(threshold = threshold,gal_type='cens')
 		test_attributes(thresh_model,gal_type='cens')
 		test_mean_occupation(thresh_model)
 		test_mc_occupation(thresh_model)
@@ -114,13 +114,13 @@ def test_Kravtsov04Cens():
 	# decreases <Ncen> at fixed mass, and so there should be fewer total centrals in <Ncen> < 1 regime
 	model2_dict = copy(default_dict)
 	model2_dict[default_model.logMmin_key] += np.log10(2.)
-	model2 = hod_components.Kravtsov04Cens(input_param_dict = model2_dict)
+	model2 = hod_components.Zheng07Cens(input_param_dict = model2_dict)
 	#
 	# Increase sigma_logM by a factor of 2: 
 	# broadens <Ncen> ==> more centrals in halos with Mvir < Mmin, no change whatsoever to mid-mass abundance 
 	model3_dict = copy(default_dict)
 	model3_dict[default_model.sigma_logM_key] *= 2.0
-	model3 = hod_components.Kravtsov04Cens(input_param_dict = model3_dict)
+	model3 = hod_components.Zheng07Cens(input_param_dict = model3_dict)
 	### First test to make sure models run ok
 	test_attributes(model2)
 	test_mean_occupation(model2)
@@ -217,7 +217,7 @@ def test_Kravtsov04Sats():
 
 	def test_ncen_inheritance():
 		satmodel_nocens = hod_components.Kravtsov04Sats()
-		cenmodel = hod_components.Kravtsov04Cens()
+		cenmodel = hod_components.Zheng07Cens()
 		satmodel_cens = hod_components.Kravtsov04Sats(central_occupation_model=cenmodel)
 
 		Npts = 1e2 
@@ -301,13 +301,13 @@ def test_Kravtsov04Sats():
 	assert fracdiff_highmass > fracdiff_midmass
 
 	######## Check scaling with central parameters
-	default_cens = hod_components.Kravtsov04Cens()
+	default_cens = hod_components.Zheng07Cens()
 	default_satmodel_with_cens = hod_components.Kravtsov04Sats(central_occupation_model = default_cens)
 
 	### logMmin
 	cen_model2_dict = copy(default_cens.param_dict)
 	cen_model2_dict[default_cens.logMmin_key] += np.log10(2.)
-	cen_model2 = hod_components.Kravtsov04Cens(input_param_dict = cen_model2_dict)
+	cen_model2 = hod_components.Zheng07Cens(input_param_dict = cen_model2_dict)
 	model2 = hod_components.Kravtsov04Sats(central_occupation_model = cen_model2)
 
 	### Changing the central model should have a large effect at low mass
