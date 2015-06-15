@@ -141,13 +141,13 @@ class SubhaloModelFactory(ModelFactory):
         for galprop in self.galprop_list:
             component_model = self.model_blueprint[galprop]
             new_method_name = galprop + '_model_func'
-            new_method_behavior = component_model.__call__
+            behavior_name = 'mc_'+galprop
+            new_method_behavior = getattr(component_model, behavior_name)
             setattr(self, new_method_name, new_method_behavior)
 
     def _build_composite_lists(self, **kwargs):
-        """ A composite model has several lists that are built up from 
-        the components: ``haloprop_list``, ``publications``, and 
-        ``new_haloprop_func_dict``. 
+        """ A composite model has several bookkeeping devices that are built up from 
+        the components: ``_haloprop_list``, ``publications``, and ``new_haloprop_func_dict``. 
         """
 
         unordered_galprop_list = [key for key in self.model_blueprint.keys() if key is not 'mock_factory']
@@ -192,7 +192,7 @@ class SubhaloModelFactory(ModelFactory):
                         "component models with a new_haloprop_func_dict that use "
                         "the %s key" % example_repeated_element)
 
-        self.haloprop_list = list(set(haloprop_list))
+        self._haloprop_list = list(set(haloprop_list))
         self.publications = list(set(pub_list))
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
@@ -611,13 +611,17 @@ class HodModelFactory(ModelFactory):
             # For each galaxy type, loop over its features
             for model_instance in gal_type_dict.values():
 
-                occuhelp.test_repeated_keys(
-                    self.param_dict, model_instance.param_dict)
+                intersection = set(self.param_dict) & set(model_instance.param_dict)
+                if intersection != set():
+                    repeated_key = list(intersection)[0]
+                    raise KeyError("The param_dict key %s appears in more "
+                        "than one component model" % repeated_key)
+                else:
 
-                self.param_dict = dict(
-                    model_instance.param_dict.items() + 
-                    self.param_dict.items()
-                    )
+                    self.param_dict = dict(
+                        model_instance.param_dict.items() + 
+                        self.param_dict.items()
+                        )
 
         self._init_param_dict = copy(self.param_dict)
 
@@ -628,12 +632,12 @@ class HodModelFactory(ModelFactory):
         Primary behaviors are reset as well, as this is how the 
         inherited behaviors get bound to the values in ``param_dict``. 
         """
-        self._set_init_param_dict()
+        self.param_dict = self._init_param_dict
         self._set_primary_behaviors()
 
     def _build_composite_lists(self):
         """ A composite model has several lists that are built up from 
-        the components: ``haloprop_list``, ``publications``, and 
+        the components: ``_haloprop_list``, ``publications``, and 
         ``new_haloprop_func_dict``. 
         """
 
@@ -671,7 +675,7 @@ class HodModelFactory(ModelFactory):
                             "component models with a new_haloprop_func_dict that use "
                             "the %s key" % example_repeated_element)
 
-        self.haloprop_list = list(set(haloprop_list))
+        self._haloprop_list = list(set(haloprop_list))
         self.publications = list(set(pub_list))
         self.new_haloprop_func_dict = new_haloprop_func_dict
 

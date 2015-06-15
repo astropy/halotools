@@ -6,15 +6,18 @@ used by many of the hod model components.
 
 """
 
-__all__=['solve_for_polynomial_coefficients','format_parameter_keys']
+__all__ = (
+    ['solve_for_polynomial_coefficients', 'polynomial_from_table', 
+    'enforce_periodicity_of_box', 'update_param_dict']
+    )
 
 import numpy as np
 from copy import copy
+
+from scipy.interpolate import InterpolatedUnivariateSpline as spline
+
+from . import model_defaults
 from ..utils.array_utils import array_like_length as custom_len
-
-from scipy.interpolate import UnivariateSpline as spline
-
-import model_defaults
 
 def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
@@ -103,71 +106,6 @@ def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
 
     return output_ordinates
 
-def format_parameter_keys(input_param_dict,correct_initial_keys,
-    gal_type, key_prefix=None):
-    """ Simple method that tests whether the input keys are correct, 
-    and if so, appends the key names with the galaxy type that they pertain to.
-
-    Parameters 
-    ----------
-    input_param_dict : dictionary
-        dictionary of parameters being used by the component model.
-
-    correct_initial_keys : list
-        list of strings providing the correct set of keys 
-        that input_param_dict should have. 
-
-    gal_type : string
-        Galaxy type of the population being modeled by the component model. 
-        This string will be appended to each key, with a leading underscore. 
-
-    key_prefix : string, optional
-        If not None, key_prefix will be prepended to 
-        each dictionary key with a trailing underscore.
-
-
-    Returns 
-    -------
-    output_param_dict : dictionary 
-        Provided that the keys of input_param_dict are correct, 
-        the output dictionary will be identical to the input, except 
-        now each key has the gal_type string appended to it. 
-    """
-
-    initial_keys = input_param_dict.keys()
-
-    # Check that the keys are correct
-    # They should only be incorrect in cases where param_dict 
-    # was passed to the initialization constructor
-    test_correct_keys(initial_keys, correct_initial_keys)
-#    if set(initial_keys) != set(correct_initial_keys):
-#        raise KeyError("The param_dict passed to the initialization "
-#            "constructor does not contain the expected keys")
-
-    output_param_dict = copy(input_param_dict)
-
-    key_suffix = '_'+gal_type
-    for old_key in initial_keys:
-        if key_prefix is not None:
-            new_key = key_prefix+'_'+old_key+key_suffix
-        else:
-            new_key = old_key+key_suffix
-        output_param_dict[new_key] = output_param_dict.pop(old_key)
-
-
-    return output_param_dict
-
-def test_correct_keys(input_keys,correct_keys):
-
-    if set(input_keys) != set(correct_keys):
-        raise KeyError("The param_dict passed to the initialization "
-            "constructor does not contain the expected keys")
-
-def test_repeated_keys(dict1, dict2):
-    intersection = set(dict1) & set(dict2)
-    assert intersection == set()
-
-
 def enforce_periodicity_of_box(coords, box_length):
     """ Function used to apply periodic boundary conditions 
     of the simulation, so that mock galaxies all lie in the range [0, Lbox].
@@ -202,9 +140,9 @@ def enforce_periodicity_of_box(coords, box_length):
 def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outside_bins, abcissa):
     """ Piecewise heaviside function. 
 
-    The output function values_inside_bins  
-    when evaluated at points within bin_width/2 of bin_midpoints. Otherwise, 
-    the output function returns value_outside_bins. 
+    The function returns values_inside_bins  
+    when evaluated at points within bin_width/2 of bin_midpoints. 
+    Otherwise, the output function returns value_outside_bins. 
 
     Parameters 
     ----------
@@ -253,7 +191,6 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
         print(idx_abcissa_in_bin)
         output[idx_abcissa_in_bin] = values_inside_bins
     else:
-        print("testing")
         for ii, x in enumerate(bin_midpoints):
             idx_abcissa_in_binii = np.where(
                 (abcissa >= bin_midpoints[ii] - bin_width/2.) & 
@@ -294,8 +231,6 @@ def custom_spline(table_abcissa, table_ordinates, k=0):
     table_ordinates[0] for all values of the input abcissa. 
 
     """
-
-
     if custom_len(table_abcissa) != custom_len(table_ordinates):
         len_abcissa = custom_len(table_abcissa)
         len_ordinates = custom_len(table_ordinates)
@@ -354,26 +289,67 @@ def call_func_table(func_table, abcissa, func_indices):
         out[ix] = f(abcissa[ix])
     return out
 
-def enforce_required_haloprops(haloprop_dict):
-    required_prop_set = set(model_defaults.haloprop_key_dict)
-    provided_prop_set = set(haloprop_dict)
-    if not required_prop_set.issubset(provided_prop_set):
-        raise KeyError("haloprop_key_dict must, at minimum, contain keys "
-            "'prim_haloprop_key' and 'halo_boundary'")
+def bind_required_kwargs(required_kwargs, obj, **kwargs):
+    """ Method binds each element of ``required_kwargs`` to 
+    the input object ``obj``, or raises and exception for cases 
+    where a mandatory keyword argument was not passed to the 
+    ``obj`` constructor.
 
+    Used throughout the package when a required keyword argument 
+    has no obvious default value. 
 
-def count_haloprops(haloprop_dict):
-    trigger = 'haloprop_key'
-    num_props = 0
-    for key in haloprop_dict.keys():
-        if key[-len(trigger):]==trigger:
-            num_props += 1
-    return num_props
+    Parameters 
+    ----------
+    required_kwargs : list 
+        List of strings of the keyword arguments that are required 
+        when instantiating the input ``obj``. 
 
+    obj : object 
+        The object being instantiated. 
 
+    Notes 
+    -----
+    The `bind_required_kwargs` method assumes that each 
+    required keyword argument should be bound to ``obj`` 
+    as attribute with the same name as the keyword. 
+    """
+    for key in required_kwargs:
+        if key in kwargs.keys():
+            setattr(obj, key, kwargs[key])
+        else:
+            class_name = obj.__class__.__name__
+            raise KeyError("``%s`` is a required keyword argument "
+                "to instantiate the %s class" (key, class_name))
 
+def update_param_dict(obj, **kwargs):
+    """ Method used to update the ``param_dict`` attribute of the 
+    input ``obj`` according to ``input_param_dict``. 
 
+    The only items in ``obj.param_dict`` that will be updated 
+    are those with a matching key in ``input_param_dict``; 
+    all other keys in ``input_param_dict`` will be ignored. 
 
+    Parameters 
+    ----------
+    obj : object
+        Class instance whose ``param_dict`` is being updated. 
+
+    input_param_dict : dict, optional keyword argument 
+        Parameter dictionary used to update ``obj.param_dict``.
+        If no ``input_param_dict`` keyword argument is passed, 
+        the `update_param_dict` method does nothing. 
+    """
+    if 'input_param_dict' not in kwargs.keys():
+        return 
+    else:
+        input_param_dict = kwargs['input_param_dict']
+
+    if not hasattr(obj, 'param_dict'):
+        raise AttributeError("Input ``obj`` must have a ``param_dict`` attribute")
+
+    for key in obj.param_dict.keys():
+        if key in input_param_dict.keys():
+            obj.param_dict[key] = input_param_dict[key]
 
 
 

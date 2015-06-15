@@ -70,7 +70,7 @@ def test_LogNormalScatterModel_initialization():
 	input_abcissa = [12, 15]
 	input_ordinates = [0.3, 0.1]
 	scatter_model2 = smhm_components.LogNormalScatterModel(
-		abcissa = input_abcissa, ordinates = input_ordinates)
+		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
 
 	assert scatter_model2.abcissa == input_abcissa
 	assert scatter_model2.ordinates == input_ordinates
@@ -107,15 +107,15 @@ def test_LogNormalScatterModel_behavior():
 	halos12 = Table(d)
 
 	# Test the mean_scatter method of the default model
-	scatter = default_scatter_model.mean_scatter(mass_like = testmass12)
+	scatter = default_scatter_model.mean_scatter(prim_haloprop = testmass12)
 	assert np.allclose(scatter, model_defaults.default_smhm_scatter)
-	scatter_array = default_scatter_model.mean_scatter(mass_like = mass12)
+	scatter_array = default_scatter_model.mean_scatter(prim_haloprop = mass12)
 	assert np.allclose(scatter_array, model_defaults.default_smhm_scatter)
 	scatter_array = default_scatter_model.mean_scatter(halos = halos12)
 	assert np.allclose(scatter_array, model_defaults.default_smhm_scatter)
 
 	# Test the scatter_realization method of the default model
-	scatter_realization = default_scatter_model.scatter_realization(seed=testing_seed, mass_like=mass12)
+	scatter_realization = default_scatter_model.scatter_realization(seed=testing_seed, prim_haloprop=mass12)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, model_defaults.default_smhm_scatter, decimal=2)
 	scatter_realization = default_scatter_model.scatter_realization(seed=testing_seed, halos=halos12)
@@ -126,16 +126,16 @@ def test_LogNormalScatterModel_behavior():
 	input_abcissa = [12, 15]
 	input_ordinates = [0.3, 0.1]
 	scatter_model2 = smhm_components.LogNormalScatterModel(
-		abcissa = input_abcissa, ordinates = input_ordinates)
+		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
 
 	# Test the mean_scatter method of a non-trivial model at the first abcissa
-	scatter_array = scatter_model2.mean_scatter(mass_like = mass12)
+	scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass12)
 	assert np.allclose(scatter_array, 0.3)
 	scatter_array = scatter_model2.mean_scatter(halos = halos12)
 	assert np.allclose(scatter_array, 0.3)
 
 	# Test the scatter_realization method of a non-trivial model at the first abcissa
-	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, mass_like=mass12)
+	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass12)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, 0.3, decimal=2)
 	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, halos=halos12)
@@ -150,13 +150,13 @@ def test_LogNormalScatterModel_behavior():
 	d = {masskey: mass15}
 	halos15 = Table(d)
 
-	scatter_array = scatter_model2.mean_scatter(mass_like = mass15)
+	scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass15)
 	assert np.allclose(scatter_array, 0.1)
 	scatter_array = scatter_model2.mean_scatter(halos = halos15)
 	assert np.allclose(scatter_array, 0.1)
 
 	# Test the scatter_realization method of a non-trivial model at the second abcissa
-	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, mass_like=mass15)
+	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass15)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, 0.1, decimal=2)
 	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, halos=halos15)
@@ -170,13 +170,13 @@ def test_LogNormalScatterModel_behavior():
 	d = {masskey: mass135}
 	halos135 = Table(d)
 
-	scatter_array = scatter_model2.mean_scatter(mass_like = mass135)
+	scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass135)
 	assert np.allclose(scatter_array, 0.2)
 	scatter_array = scatter_model2.mean_scatter(halos = halos135)
 	assert np.allclose(scatter_array, 0.2)
 
 	# Test the scatter_realization method of a non-trivial model at an intermediate value
-	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, mass_like=mass135)
+	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass135)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, 0.2, decimal=2)
 	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, halos=halos135)
@@ -187,21 +187,21 @@ def test_LogNormalScatterModel_behavior():
 	scatter_model2.param_dict['scatter_model_param2'] = 0.5
 
 	# Test the mean_scatter method of the updated non-trivial model 
-	scatter_array = scatter_model2.mean_scatter(mass_like = mass12)
+	scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass12)
 	assert np.allclose(scatter_array, 0.3)
-	scatter_array = scatter_model2.mean_scatter(mass_like = mass15)
+	scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass15)
 	assert np.allclose(scatter_array, 0.5)
-	scatter_array = scatter_model2.mean_scatter(mass_like = mass135)
+	scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass135)
 	assert np.allclose(scatter_array, 0.4)
 
 	# Test the scatter_realization method of the updated non-trivial model 
-	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, mass_like=mass15)
+	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass15)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, 0.5, decimal=2)
-	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, mass_like=mass135)
+	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass135)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, 0.4, decimal=2)
-	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, mass_like=mass12)
+	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop=mass12)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, 0.3, decimal=2)
 

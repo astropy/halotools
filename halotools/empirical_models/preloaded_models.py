@@ -20,7 +20,7 @@ def Kravtsov04(**kwargs):
 
 	Under the hood, this model is built from a set of component models whose 
 	behavior is coded up elsewhere. The behavior of the central occupations 
-	derives from the `~halotools.empirical_models.hod_components.Kravtsov04Cens` class, while for 
+	derives from the `~halotools.empirical_models.hod_components.Zheng07Cens` class, while for 
 	satellites the relevant class is `~halotools.empirical_models.hod_components.Kravtsov04Sats`. 
 
 	This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
