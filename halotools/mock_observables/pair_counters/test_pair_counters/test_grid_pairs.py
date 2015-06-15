@@ -3,7 +3,7 @@
 import numpy as np
 from ..pairs import npairs as simp_npairs
 from ..pairs import wnpairs as simp_wnpairs
-from ..grid_pairs import npairs, xy_z_npairs, wnpairs, xy_z_wnpairs, jnpairs
+from ..grid_pairs_wrapper import npairs, xy_z_npairs, wnpairs, xy_z_wnpairs, jnpairs, xy_z_jnpairs
 from time import time
 import pstats, cProfile
 
@@ -83,7 +83,6 @@ def test_npairs_speed():
 
 def test_xy_z_npairs_periodic():
     
-    Npts = 1e3
     Lbox = [1.0,1.0,1.0]
     period = np.array(Lbox)
     
@@ -97,6 +96,7 @@ def test_xy_z_npairs_periodic():
     result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
     binned_result = np.diff(np.diff(result,axis=1),axis=0)
     
+    print(result)
     assert np.all(binned_result==0), "pi seperated, 0 rp seperated incorrect"
     
     #two points separated along parallel direction, but have exactly 0 separation
@@ -191,3 +191,33 @@ def test_jnpairs_periodic():
     assert result.ndim==2, 'result is the wrong dimension'
     assert np.shape(result)==(11,6), 'result is the wrong shape'
 
+
+def test_xy_z_jnpairs_periodic():
+    
+    Npts=100
+    Lbox = [1.0,1.0,1.0]
+    period = np.array(Lbox)
+    
+    rp_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    pi_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    
+    x = np.random.uniform(0, Lbox[0], Npts)
+    y = np.random.uniform(0, Lbox[1], Npts)
+    z = np.random.uniform(0, Lbox[2], Npts)
+    data1 = np.vstack((x,y,z)).T
+    weights1 = np.random.random(Npts)
+    jtags1 = np.sort(np.random.random_integers(1, 10, size=Npts))
+
+    result = xy_z_jnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period, jtags1=jtags1, jtags2=jtags1, N_samples=10)
+    binned_result = np.diff(np.diff(result,axis=1),axis=0)
+    
+    result_compare = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
+    
+    print(np.shape(result))
+    assert np.shape(result)==(11,6,6), "shape xy_z jackknife pair counts of result is incorrect"
+    
+    assert np.all(result[0]==result_compare), "shape xy_z jackknife pair counts of result is incorrect"
+    
+    
+    
+    
