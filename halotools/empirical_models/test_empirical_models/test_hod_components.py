@@ -193,7 +193,7 @@ def test_Kravtsov04Sats():
 		mvir_array = np.logspace(10, 16, 10)
 		mean_occ = model.mean_occupation(prim_haloprop=mvir_array) 
 
-		# Check that the range is in [0,1]
+		# Check non-negative
 		assert np.all(mean_occ >= 0)
 		# The mean occupation should be monotonically increasing
 		assert np.all(np.diff(mean_occ) >= 0)
@@ -323,8 +323,6 @@ def test_Kravtsov04Sats():
 	default_satmodel_with_cens.central_occupation_model.param_dict[default_satmodel_with_cens.central_occupation_model.logMmin_key] += np.log10(2)
 	nsat_new = default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass)
 	assert nsat_new < nsat_orig
-
-
 
 
 

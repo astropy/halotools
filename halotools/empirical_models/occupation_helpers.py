@@ -14,7 +14,7 @@ __all__ = (
 import numpy as np
 from copy import copy
 
-from scipy.interpolate import UnivariateSpline as spline
+from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults
 from ..utils.array_utils import array_like_length as custom_len
