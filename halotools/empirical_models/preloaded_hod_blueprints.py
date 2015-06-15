@@ -52,7 +52,7 @@ def Kravtsov04_blueprint(**kwargs):
 	cen_key = 'centrals'
 	cen_model_dict = {}
 	# Build the occupation model
-	dark_side_cen_model = hoc.Kravtsov04Cens(gal_type=cen_key, 
+	dark_side_cen_model = hoc.Zheng07Cens(gal_type=cen_key, 
 		threshold = threshold)
 	cen_model_dict['occupation'] = dark_side_cen_model
 	# Build the profile model
