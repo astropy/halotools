@@ -859,6 +859,10 @@ class Leauthaud11Sats(OccupationComponent):
         redshift : float, optional keyword argument 
             Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
+        modulate_with_cenocc : bool, optional keyword argument 
+            If True, the first satellite moment will be multiplied by the 
+            the first central moment. Default is True. 
+
         scatter_model : object, optional keyword argument 
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
             implemented by the `~halotools.empirical_models.LogNormalScatterModel` class. 
@@ -877,6 +881,10 @@ class Leauthaud11Sats(OccupationComponent):
         input_param_dict : dict, optional keyword argument. 
             If ``input_param_dict`` is not passed, the best-fit parameter values 
             will be taken from the input ``smhm_model``. 
+
+        Examples 
+        --------
+        >>> sat_model = Leauthaud11Sats()
         """
 
         self.central_occupation_model = Leauthaud11Cens(
@@ -920,6 +928,11 @@ class Leauthaud11Sats(OccupationComponent):
         mean_ncen : array
             Mean number of central galaxies in the halo of the input mass. 
 
+        Examples 
+        --------
+        >>> sat_model = Leauthaud11Sats()
+        >>> mean_nsat = sat_model.mean_occupation(prim_haloprop = 1.e13)
+
         Notes 
         -----
         Assumes constant scatter in the stellar-to-halo-mass relation. 
@@ -949,7 +962,21 @@ class Leauthaud11Sats(OccupationComponent):
         return mean_nsat
 
     def _initialize_param_dict(self, **kwargs):
-        """
+        """ Set the initial values of ``self.param_dict`` according to 
+        the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the 
+        lowest redshift bin. 
+
+        Parameters 
+        ----------
+        input_param_dict : dict, optional
+            dictionary of parameters governing the model. If not passed, 
+            values bound to ``self`` will be chosen. 
+
+        Notes 
+        -----
+        These values are only for ballpark purposes, and are 
+        not self-consistent with arXiv:1104.0928, 
+        because a different stellar-to-halo-mass relation is used here. 
         """
         occuhelp.update_param_dict(self, **kwargs)
 
@@ -971,7 +998,13 @@ class Leauthaud11Sats(OccupationComponent):
 
 
     def _update_satellite_params(self, **kwargs):
-        """
+        """ Private method to update the model parameters. 
+
+        Parameters 
+        ----------
+        input_param_dict : dict, optional
+            dictionary of parameters governing the model. If not passed, 
+            values bound to ``self`` will be chosen. 
         """
         occuhelp.update_param_dict(self, **kwargs)
 
