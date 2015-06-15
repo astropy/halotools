@@ -16,7 +16,7 @@ import math
 from scipy.special import erf 
 from scipy.stats import poisson
 from scipy.optimize import brentq
-from scipy.interpolate import UnivariateSpline as spline
+from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults
 from . import occupation_helpers as occuhelp
@@ -438,6 +438,45 @@ class Leauthaud11Cens(OccupationComponent):
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         **kwargs):
         """
+        Parameters 
+        ----------
+        gal_type : string, optional keyword argument
+            Name of the galaxy population being modeled. Default is ``centrals``.  
+
+        threshold : float, optional keyword argument
+            Stellar mass threshold of the mock galaxy sample. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        smhm_model : object, optional keyword argument 
+            Sub-class of `~halotools.empirical_models.smhm_components.SmHmModel` governing 
+            the stellar-to-halo-mass relation 
+
+        redshift : float, optional keyword argument 
+            Redshift of the stellar-to-halo-mass relation. Default is 0. 
+
+        scatter_model : object, optional keyword argument 
+            Class governing stochasticity of stellar mass. Default scatter is log-normal, 
+            implemented by the `~halotools.empirical_models.LogNormalScatterModel` class. 
+
+        scatter_abcissa : array_like, optional keyword argument 
+            Array of values giving the abcissa at which
+            the level of scatter will be specified by the input ordinates.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_ordinates : array_like, optional keyword argument 
+            Array of values defining the level of scatter at the input abcissa.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        input_param_dict : dict, optional keyword argument. 
+            If ``input_param_dict`` is not passed, the best-fit parameter values 
+            will be taken from the input ``smhm_model``. 
         """
         occupation_bound = 1.0
 
@@ -452,19 +491,9 @@ class Leauthaud11Cens(OccupationComponent):
         self.smhm_model = smhm_model(
             gal_type=gal_type, prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
-
-        self._initialize_param_dict()
+        self.param_dict = self.smhm_model.param_dict
 
         self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
-
-    def _initialize_param_dict(self):
-        """ Private method used to retrieve the 
-        dictionary governing the parameters of the model. 
-        """
-
-        self.param_dict = {}
-        for key, value in self.smhm_model.param_dict.iteritems():
-            self.param_dict[key] = value
 
     def mean_occupation(self, **kwargs):
         """ Expected number of central galaxies in a halo of mass halo_mass.
@@ -799,57 +828,73 @@ class Kravtsov04Sats(OccupationComponent):
 
 
 class Leauthaud11Sats(OccupationComponent):
-    """ HOD-style model for any central galaxy occupation that derives from 
+    """ HOD-style model for any satellite galaxy occupation that derives from 
     a stellar-to-halo-mass relation. 
     """
-    def __init__(self, smhm_model=smhm_components.Moster13SmHm, **kwargs):
+    def __init__(self, smhm_model=smhm_components.Moster13SmHm, 
+        gal_type = 'satellites', 
+        threshold = model_defaults.default_stellar_mass_threshold, 
+        prim_haloprop_key=model_defaults.prim_haloprop_key,
+        modulate_with_cenocc = True, 
+        **kwargs):
         """
+        Parameters 
+        ----------
+        gal_type : string, optional keyword argument
+            Name of the galaxy population being modeled. Default is ``satellites``.  
+
+        threshold : float, optional keyword argument
+            Stellar mass threshold of the mock galaxy sample. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        smhm_model : object, optional keyword argument 
+            Sub-class of `~halotools.empirical_models.smhm_components.SmHmModel` governing 
+            the stellar-to-halo-mass relation 
+
+        redshift : float, optional keyword argument 
+            Redshift of the stellar-to-halo-mass relation. Default is 0. 
+
+        scatter_model : object, optional keyword argument 
+            Class governing stochasticity of stellar mass. Default scatter is log-normal, 
+            implemented by the `~halotools.empirical_models.LogNormalScatterModel` class. 
+
+        scatter_abcissa : array_like, optional keyword argument 
+            Array of values giving the abcissa at which
+            the level of scatter will be specified by the input ordinates.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_ordinates : array_like, optional keyword argument 
+            Array of values defining the level of scatter at the input abcissa.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        input_param_dict : dict, optional keyword argument. 
+            If ``input_param_dict`` is not passed, the best-fit parameter values 
+            will be taken from the input ``smhm_model``. 
         """
-        occupation_bound = 1.0
 
-        if 'gal_type' in kwargs.keys():
-            gal_type = kwargs['gal_type']
-        else:
-            gal_type = 'satellites'
+        self.central_occupation_model = Leauthaud11Cens(
+            gal_type='centrals', threshold=threshold,
+            prim_haloprop_key = prim_haloprop_key, smhm_model = smhm_model, 
+            **kwargs)
 
-        if 'threshold' in kwargs.keys():
-            threshold = kwargs['threshold']
-        else:
-            threshold = model_defaults.default_stellar_mass_threshold
-
-        if 'prim_haloprop_key' in kwargs.keys():
-            prim_haloprop_key = kwargs['prim_haloprop_key']
-        else:
-            prim_haloprop_key = model_defaults.prim_haloprop_key
-
-        # Call the super class constructor, which binds all the 
-        # arguments to the instance.  
         super(Leauthaud11Sats, self).__init__(
-            gal_type, threshold, occupation_bound, 
-            prim_haloprop_key = prim_haloprop_key)
+            gal_type=gal_type, threshold=threshold, 
+            occupation_bound=float("inf"), 
+            prim_haloprop_key = prim_haloprop_key, 
+            **kwargs)
 
-        self.smhm_model = smhm_model(**kwargs)
+        self._initialize_param_dict(**kwargs)
 
-        if 'central_occupation_model' in kwargs.keys():
-            self.central_occupation_model = kwargs['central_occupation_model'](**kwargs)
+        self.modulate_with_cenocc = modulate_with_cenocc
 
-        if 'input_param_dict' in kwargs.keys():
-            input_param_dict = kwargs['input_param_dict']
-        else:
-            input_param_dict = None
-        self._initialize_param_dict(input_param_dict)
-
-        self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
-
-    def _initialize_param_dict(self, input_param_dict):
-        """ Private method used to retrieve the 
-        dictionary governing the parameters of the model. 
-        """
-
-        self.param_dict = {}
-        for key, value in self.smhm_model.param_dict.iteritems():
-            self.param_dict[key] = value
-
+        self.publications = self.central_occupation_model.publications
 
     def mean_occupation(self, **kwargs):
         """ Expected number of central galaxies in a halo of mass halo_mass.
@@ -879,16 +924,82 @@ class Leauthaud11Sats(OccupationComponent):
         -----
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
+        self._update_satellite_params(**kwargs)
+
+        # Retrieve the array storing the mass-like variable
+        if 'galaxy_table' in kwargs.keys():
+            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
+            mass = kwargs['galaxy_table'][key]
+        elif 'halos' in kwargs.keys():
+            mass = kwargs['halos'][self.prim_haloprop_key]
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
+        else:
+            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
+                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
         mean_nsat = (
-            np.exp(-self.param_dict['mcut']/mass)*
-            (mass/self.param_dict['msat'])**self.param_dict['alpha']
+            np.exp(-self._mcut/mass)*
+            (mass/self._msat)**self.param_dict[self._alphasat_key]
             )
 
-        if hasattr(self, 'central_occupation_model'):
+        if self.modulate_with_cenocc is True:
             mean_nsat *= self.central_occupation_model.mean_occupation(**kwargs)
 
         return mean_nsat
+
+    def _initialize_param_dict(self, **kwargs):
+        """
+        """
+        occuhelp.update_param_dict(self, **kwargs)
+
+        self._msat_mcut_abcissa = np.logspace(9, 15, num=500)
+
+        self._bsat_key = 'bsat_'+self.gal_type
+        self._bcut_key = 'bcut_'+self.gal_type
+        self._betasat_key = 'betasat_'+self.gal_type
+        self._betacut_key = 'betacut_'+self.gal_type
+        self._alphasat_key = 'alphasat_'+self.gal_type
+
+        self.param_dict[self._alphasat_key] = 1.0
+        self.param_dict[self._bsat_key] = 10.62
+        self.param_dict[self._bcut_key] = 1.47
+        self.param_dict[self._betacut_key] = -0.13
+        self.param_dict[self._betasat_key] = 0.859
+
+        self._update_satellite_params(**kwargs)
+
+
+    def _update_satellite_params(self, **kwargs):
+        """
+        """
+        occuhelp.update_param_dict(self, **kwargs)
+
+        if 'input_param_dict' in kwargs.keys():
+            input_param_dict = kwargs['input_param_dict']
+        else:
+            input_param_dict = {}
+
+        # Tabulate the inverse stellar-to-halo-mass relation
+        ordinates = self.central_occupation_model.smhm_model.mean_stellar_mass(
+            prim_haloprop=self._msat_mcut_abcissa, 
+            input_param_dict = input_param_dict)
+        spline_function = spline(ordinates, self._msat_mcut_abcissa)
+
+        # Call the interpolater to compute the knee
+        knee = spline_function(10.**self.threshold)
+
+        self._msat = (
+            1.e12*self.param_dict[self._bsat_key]*
+            (knee / 1.e12)**self.param_dict[self._betasat_key])
+
+        self._mcut = (
+            1.e12*self.param_dict[self._bcut_key]*
+            (knee / 1.e12)**self.param_dict[self._betacut_key])
+
+
+
+
 
 
 

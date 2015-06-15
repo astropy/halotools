@@ -250,6 +250,9 @@ class SmHmModel(object):
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
             implemented by the `LogNormalScatterModel` class. 
 
+        redshift : float, optional keyword argument 
+            Redshift of the stellar-to-halo-mass relation. Default is 0. 
+
         scatter_abcissa : array_like, optional keyword argument 
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
