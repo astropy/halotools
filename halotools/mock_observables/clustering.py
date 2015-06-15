@@ -12,7 +12,7 @@ __all__=['tpcf','tpcf_jackknife','redshift_space_tpcf','wp']
 import sys
 import numpy as np
 from math import pi, gamma
-from .pair_counters.grid_pairs import npairs, xy_z_npairs, jnpairs
+from .pair_counters.grid_pairs_wrapper import npairs, xy_z_npairs, jnpairs
 ##########################################################################################
 
 def tpcf(sample1, rbins,
@@ -445,9 +445,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=[250.0,250.0,250.0], sa
     Nran = len(randoms)
     
     #check for input parameter consistency
-    if (period != None) & (np.max(rbins)>np.min(period)/2.0):
+    if (period is not None) & (np.max(rbins)>np.min(period)/2.0):
         raise ValueError('Cannot calculate for seperations larger than Lbox/2.')
-    if (sample2 != None) & (sample1.shape[-1]!=sample2.shape[-1]):
+    if (sample2 is not None) & (sample1.shape[-1]!=sample2.shape[-1]):
         raise ValueError('Sample 1 and sample 2 must have same dimension.')
     if estimator not in estimators: 
         raise ValueError('Must specify a supported estimator. Supported estimators are:{0}'

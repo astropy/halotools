@@ -10,9 +10,11 @@ __all__=['test_rs_tpcf_auto','test_rs_tpcf_auto_periodic','test_rs_tpcf_cross_pe
 ####two point correlation function########################################################
 
 def test_wp_auto():
-    sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
+    Npts=100
+    
+    sample1 = np.random.random((Npts,3))
+    sample2 = np.random.random((Npts,3))
+    randoms = np.random.random((Npts,3))
     period = np.array([1,1,1])
     rp_bins = np.linspace(0,0.5,5)
     pi_bins = np.linspace(0,0.5,5)
@@ -26,9 +28,11 @@ def test_wp_auto():
 
 
 def test_wp_auto_periodic():
-    sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
+    Npts=100
+    
+    sample1 = np.random.random((Npts,3))
+    sample2 = np.random.random((Npts,3))
+    randoms = np.random.random((Npts,3))
     period = np.array([1,1,1])
     rp_bins = np.linspace(0,0.5,5)
     pi_bins = np.linspace(0,0.5,5)
@@ -42,9 +46,11 @@ def test_wp_auto_periodic():
 
 
 def test_wp_cross_periodic():
-    sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
+    Npts=100
+    
+    sample1 = np.random.random((Npts,3))
+    sample2 = np.random.random((Npts,3))
+    randoms = np.random.random((Npts,3))
     period = np.array([1,1,1])
     rp_bins = np.linspace(0,0.5,5)
     pi_bins = np.linspace(0,0.5,5)

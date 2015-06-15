@@ -2,4 +2,4 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .grid_pairs import *
+from .grid_pairs_wrapper import *
