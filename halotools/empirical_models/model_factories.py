@@ -64,7 +64,7 @@ class ModelFactory(object):
                 snapshot = ProcessedSnapshot(**kwargs)
 
             mock_factory = self.model_blueprint['mock_factory']
-            mock = mock_factory(snapshot, self, **kwargs)
+            mock = mock_factory(snapshot=snapshot, model=self, **kwargs)
             self.mock = mock
 
 
