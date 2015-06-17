@@ -325,6 +325,9 @@ class PrimGalpropModel(object):
 
 
     def _build_param_dict(self, **kwargs):
+        """ Method combines the parameter dictionaries of the 
+        smhm model and the scatter model. 
+        """
 
         if 'input_param_dict' in kwargs.keys():
             smhm_param_dict = kwargs['input_param_dict']
@@ -332,8 +335,7 @@ class PrimGalpropModel(object):
             if hasattr(self, 'retrieve_default_param_dict'):
                 smhm_param_dict = self.retrieve_default_param_dict()
             else:
-                raise KeyError("If the class has no retrieve_default_param_dict method, "
-                    "you must pass ``input_param_dict`` as a keyword argument to the constructor")
+                smhm_param_dict = {}
 
         scatter_param_dict = self.scatter_model.param_dict
 
@@ -451,8 +453,8 @@ class Moster13SmHm(PrimGalpropModel):
         self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
 
     def mean_stellar_mass(self, **kwargs):
-        """ Return the stellar mass_like of a central galaxy that lives in a 
-        halo mass_like ``mass_like`` at the input ``redshift``. 
+        """ Return the stellar mass of a central galaxy as a function 
+        of the input halos.  
 
         Parameters 
         ----------
@@ -525,6 +527,11 @@ class Moster13SmHm(PrimGalpropModel):
         """ Method returns a dictionary of all model parameters 
         set to the values in Table 1 of Moster et al. (2013). 
 
+        If ``self`` has a ``gal_type``, then each dict key will 
+        be appended with the ``gal_type`` string. This is useful 
+        to protect composite models with multiple ``gal_types`` 
+        from having repeated keys. 
+        
         Returns 
         -------
         d : dict 
@@ -541,8 +548,18 @@ class Moster13SmHm(PrimGalpropModel):
         'gamma10': 0.608, 
         'gamma11': 0.329
         }
+        # If the Moster13SmHm model instance is part of a composite model 
+        # with multiple galaxy types, then the instance has a gal_type 
+        # attribute. Calling the _set_param_dict_key_attrs method 
+        # creates a set of (private) attributes that allow us to 
+        # access our param_dict in the same way regardless of whether the 
+        # composite model discriminates between gal_type.  
         self._set_param_dict_key_attrs(d)
 
+        # If the Moster13SmHm model instance is part of a composite model 
+        # with multiple galaxy types, then we rename the param_dict keys 
+        # to protect against possibly repeated 
+        # keys in the param_dict of our composite model. 
         if hasattr(self, 'gal_type'):
             for oldkey in d.keys():
                 newkey = oldkey + '_'+self.gal_type
@@ -551,6 +568,18 @@ class Moster13SmHm(PrimGalpropModel):
         return d
 
     def _set_param_dict_key_attrs(self, uncorrected_dict):
+        """ Method binds to ``self`` one new private attribute 
+        for each key of ``param_dict``. 
+        For cases where ``self`` has no ``gal_type``, each private attribute 
+        has the same name as its param_dict key. 
+        For cases where ``self`` does have a ``gal_type``, 
+        each private attribute has the same name as its param_dict key except 
+        for the ``gal_type`` substring has been stripped from param_dict key. 
+        This allows the `mean_stellar_mass` method to access the keys 
+        of ``param_dict`` keys in the same fashion regardless of whether 
+        ``self`` has a ``gal_type`` attribute, even though ``param_dict`` has
+        different key names in these two cases. 
+        """
         for key in uncorrected_dict.keys():
             attr_name = '_'+key+'_key'
             if hasattr(self, 'gal_type'):
