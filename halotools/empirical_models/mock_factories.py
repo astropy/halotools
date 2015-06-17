@@ -61,7 +61,7 @@ class MockFactory(object):
 
         new_haloprop_func_dict : function object, optional keyword argument 
             Dictionary of function objects used to create additional halo properties 
-            by `process_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
+            by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
             object that returns a length-N numpy array when passed a length-N Astropy table 
             via the ``halos`` keyword argument. 
@@ -230,7 +230,7 @@ class HodMockFactory(MockFactory):
 
         new_haloprop_func_dict : function object, optional keyword argument 
             Dictionary of function objects used to create additional halo properties 
-            by `process_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
+            by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
             object that returns a length-N numpy array when passed a length-N Astropy table 
             via the ``halos`` keyword argument. 
@@ -250,12 +250,12 @@ class HodMockFactory(MockFactory):
 
         super(HodMockFactory, self).__init__(populate=populate, **kwargs)
 
-        self.process_halo_catalog()
+        self.preprocess_halo_catalog()
 
         if populate is True:
             self.populate()
 
-    def process_halo_catalog(self):
+    def preprocess_halo_catalog(self):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. This pre-processing includes identifying the 
         catalog columns that will be used by the model to create the mock, 
@@ -510,7 +510,7 @@ class SubhaloMockFactory(MockFactory):
 
         new_haloprop_func_dict : function object, optional keyword argument 
             Dictionary of function objects used to create additional halo properties 
-            by `process_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
+            by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
             object that returns a length-N numpy array when passed a length-N Astropy table 
             via the ``halos`` keyword argument. 
@@ -531,13 +531,13 @@ class SubhaloMockFactory(MockFactory):
         super(SubhaloMockFactory, self).__init__(populate=populate, **kwargs)
 
         # Pre-compute any additional halo properties required by the model
-        self.process_halo_catalog()
+        self.prepreprocess_halo_catalog()
         self.precompute_galprops()
 
         if populate is True:
             self.populate()
 
-    def process_halo_catalog(self):
+    def preprocess_halo_catalog(self):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. 
         """
@@ -554,6 +554,9 @@ class SubhaloMockFactory(MockFactory):
 
 
     def precompute_galprops(self):
+        """ Method pre-processes the input subhalo catalog, and pre-computes 
+        all halo properties that will be inherited by the ``galaxy_table``. 
+        """
 
         for key in self.additional_haloprops:
             newkey = model_defaults.host_haloprop_prefix + key
@@ -575,11 +578,11 @@ class SubhaloMockFactory(MockFactory):
                     )
 
     def populate(self):
-        """ Method populating halos with mock galaxies. 
+        """ Method populating subhalos with mock galaxies. 
         """
         for galprop_key in self.model.galprop_list:
             
-            model_func_name = galprop_key + '_model_func'
+            model_func_name = 'mc_'+galprop_key
             model_func = getattr(self.model, model_func_name)
             self.galaxy_table[galprop_key] = model_func(galaxy_table=self.galaxy_table)
 
