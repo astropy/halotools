@@ -43,6 +43,19 @@ class BinaryGalpropModel(object):
         gal_type : string, optional keyword argument 
             Name of the galaxy population being modeled. Default is None. 
 
+        new_haloprop_func_dict : function object, optional keyword argument 
+            Dictionary of function objects used to create additional halo properties 
+            that may be needed by the model component. 
+            Used strictly by the `MockFactory` during call to the `process_halo_catalog` method. 
+            Each dict key of ``new_haloprop_func_dict`` will 
+            be the name of a new column of the halo catalog; each dict value is a function 
+            object that returns a length-N numpy array when passed a length-N Astropy table 
+            via the ``halos`` keyword argument. 
+            The input ``model`` model object has its own new_haloprop_func_dict; 
+            if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
+            contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
+            ``model``, and exception will be raised. 
+
         """
         required_kwargs = ['galprop_key']
         occuhelp.bind_required_kwargs(required_kwargs, self, **kwargs)
@@ -54,6 +67,9 @@ class BinaryGalpropModel(object):
 
         if 'gal_type' in kwargs.keys():
             self.gal_type = kwargs['gal_type']
+
+        if 'new_haloprop_func_dict' in kwargs.keys():
+            self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
         # Enforce the requirement that sub-classes have been configured properly
         required_method_name = 'mean_'+self.galprop_key+'_fraction'
@@ -100,7 +116,7 @@ class BinaryGalpropModel(object):
             of the galaxies living in the input halos. 
         """
         np.random.seed(seed=seed)
-        
+
         mean_func = getattr(self, 'mean_'+self.galprop_key+'_fraction')
         mean_galprop_fraction = mean_func(**kwargs)
         mc_generator = np.random.random(custom_len(mean_galprop_fraction))
