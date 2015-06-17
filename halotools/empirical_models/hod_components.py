@@ -460,7 +460,7 @@ class Leauthaud11Cens(OccupationComponent):
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         smhm_model : object, optional keyword argument 
-            Sub-class of `~halotools.empirical_models.smhm_components.SmHmModel` governing 
+            Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
             the stellar-to-halo-mass relation 
 
         redshift : float, optional keyword argument 
@@ -860,7 +860,7 @@ class Leauthaud11Sats(OccupationComponent):
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         smhm_model : object, optional keyword argument 
-            Sub-class of `~halotools.empirical_models.smhm_components.SmHmModel` governing 
+            Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
             the stellar-to-halo-mass relation 
 
         redshift : float, optional keyword argument 
