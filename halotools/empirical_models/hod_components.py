@@ -461,7 +461,7 @@ class Leauthaud11Cens(OccupationComponent):
 
         smhm_model : object, optional keyword argument 
             Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
-            the stellar-to-halo-mass relation 
+            the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
 
         redshift : float, optional keyword argument 
             Redshift of the stellar-to-halo-mass relation. Default is 0. 
