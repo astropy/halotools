@@ -71,6 +71,7 @@ class FakeSim(object):
 
 		massbins = np.logspace(10, 15, self.num_massbins)
 		mvir = np.repeat(massbins, self.num_halos_per_massbin, axis=0)
+		mpeak = np.repeat(massbins, self.num_halos_per_massbin, axis=0)
 		logrvirbins = (np.log10(massbins) - 15)/3.
 		rvir = np.repeat(10.**logrvirbins, self.num_halos_per_massbin, axis=0)
 		logvmaxbins = -4.25 + 0.5*(np.log10(massbins) - logrvirbins)
@@ -91,6 +92,7 @@ class FakeSim(object):
 			'haloid': haloid, 
 			'upid': upid, 
 			'mvir': mvir, 
+			'mpeak': mpeak, 
 			'rvir': rvir, 
 			'rs': rs, 
 			'zhalf': zhalf, 
@@ -202,6 +204,7 @@ class FakeMock(object):
 
 		d = {'gal_type' : self.gal_type, 
 			'halo_mvir' : self.halo_mvir, 
+			'halo_mpeak' : self.halo_mvir, 
 			'halo_haloid' : self.halo_haloid, 
 			'halo_x' : self.x,
 			'halo_y' : self.y,

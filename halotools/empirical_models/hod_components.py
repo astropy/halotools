@@ -83,6 +83,13 @@ class OccupationComponent(object):
         else:
             self.param_dict = {}
 
+        # Enforce the requirement that sub-classes have been configured properly
+        required_method_name = 'mean_occupation'
+        if not hasattr(self, required_method_name):
+            raise SyntaxError("Any sub-class of OccupationComponent must "
+                "implement a method named %s " % required_method_name)
+
+
     def mc_occupation(self, seed=None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 
@@ -453,8 +460,8 @@ class Leauthaud11Cens(OccupationComponent):
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         smhm_model : object, optional keyword argument 
-            Sub-class of `~halotools.empirical_models.smhm_components.SmHmModel` governing 
-            the stellar-to-halo-mass relation 
+            Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
+            the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
 
         redshift : float, optional keyword argument 
             Redshift of the stellar-to-halo-mass relation. Default is 0. 
@@ -853,7 +860,7 @@ class Leauthaud11Sats(OccupationComponent):
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         smhm_model : object, optional keyword argument 
-            Sub-class of `~halotools.empirical_models.smhm_components.SmHmModel` governing 
+            Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
             the stellar-to-halo-mass relation 
 
         redshift : float, optional keyword argument 
