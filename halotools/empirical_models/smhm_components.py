@@ -298,13 +298,17 @@ class SmHmModel(object):
             self.scatter_model.scatter_realization, input_param_dict = self.param_dict)
         setattr(self, 'scatter_realization', inherited_mean_scatter_method)
 
-        setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
-
         # Enforce the requirement that sub-classes have been configured properly
         required_method_name = 'mean_'+self.galprop_key
         if not hasattr(self, required_method_name):
             raise SyntaxError("Any sub-class of SmHmModel must "
                 "implement a method named %s " % required_method_name)
+
+        # If the sub-class did not implement their own Monte Carlo method mc_galprop, 
+        # then use _mc_galprop and give it the usual name
+        if not hasattr(self, 'mc_'+self.galprop_key):
+            setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
+
 
     def _build_param_dict(self, **kwargs):
 
