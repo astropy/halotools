@@ -138,12 +138,11 @@ class SubhaloModelFactory(ModelFactory):
         `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
-        for galprop in self.galprop_list:
-            component_model = self.model_blueprint[galprop]
-            new_method_name = galprop + '_model_func'
-            behavior_name = 'mc_'+galprop
-            new_method_behavior = getattr(component_model, behavior_name)
-            setattr(self, new_method_name, new_method_behavior)
+        for galprop_key in self.galprop_list:
+            component_model = self.model_blueprint[galprop_key]
+            behavior_name = 'mc_'+galprop_key
+            behavior_function = getattr(component_model, behavior_name)
+            setattr(self, behavior_name, behavior_function)
 
     def _build_composite_lists(self, **kwargs):
         """ A composite model has several bookkeeping devices that are built up from 
