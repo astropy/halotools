@@ -17,7 +17,7 @@ from ..sim_manager import sim_defaults
 from warnings import warn
 from functools import partial
 
-__all__ = ['SmHmModel', 'Moster13SmHm', 'LogNormalScatterModel']
+__all__ = ['PrimGalpropModel', 'Moster13SmHm', 'LogNormalScatterModel']
 
 class LogNormalScatterModel(object):
     """ Simple model used to generate log-normal scatter 
@@ -225,22 +225,25 @@ class LogNormalScatterModel(object):
             return 'scatter_model_param'+str(ipar+1)
 
 @six.add_metaclass(ABCMeta)
-class SmHmModel(object):
-    """ Abstract container class used as a template 
-    for how to build a stellar-to-halo-mass_like-style model.
-
+class PrimGalpropModel(object):
+    """ Abstract container class for models connecting halos to their primary
+    galaxy property, e.g., stellar mass or luminosity. 
     """
 
-    def __init__(self, 
+    def __init__(self, galprop_key = 'stellar_mass', 
         prim_haloprop_key = model_defaults.default_smhm_haloprop, 
         scatter_model = LogNormalScatterModel, 
         **kwargs):
         """
         Parameters 
         ----------
+        galprop_key : string, optional keyword argument 
+            Name of the galaxy property being assigned. Default is ``stellar mass``, 
+            though another common case may be ``luminosity``. 
+
         prim_haloprop_key : string, optional keyword argument 
             String giving the column name of the primary halo property governing 
-            the level of scatter. 
+            stellar mass.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
         gal_type : string, optional keyword argument 
@@ -272,12 +275,27 @@ class SmHmModel(object):
         input_param_dict : dict, optional keyword argument
             Dictionary containing values for the parameters specifying the model.
 
+        new_haloprop_func_dict : function object, optional keyword argument 
+            Dictionary of function objects used to create additional halo properties 
+            that may be needed by the model component. 
+            Used strictly by the `MockFactory` during call to the `process_halo_catalog` method. 
+            Each dict key of ``new_haloprop_func_dict`` will 
+            be the name of a new column of the halo catalog; each dict value is a function 
+            object that returns a length-N numpy array when passed a length-N Astropy table 
+            via the ``halos`` keyword argument. 
+            The input ``model`` model object has its own new_haloprop_func_dict; 
+            if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
+            contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
+            ``model``, and exception will be raised. 
         """
-        self.galprop_key = 'stellar_mass'
+        self.galprop_key = galprop_key
         self.prim_haloprop_key = prim_haloprop_key
 
         if 'redshift' in kwargs.keys():
             self.redshift = kwargs['redshift']
+
+        if 'new_haloprop_func_dict' in kwargs.keys():
+            self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
         self.scatter_model = scatter_model(
             prim_haloprop_key=self.prim_haloprop_key, 
@@ -294,7 +312,22 @@ class SmHmModel(object):
             self.scatter_model.scatter_realization, input_param_dict = self.param_dict)
         setattr(self, 'scatter_realization', inherited_mean_scatter_method)
 
+        # Enforce the requirement that sub-classes have been configured properly
+        required_method_name = 'mean_'+self.galprop_key
+        if not hasattr(self, required_method_name):
+            raise SyntaxError("Any sub-class of PrimGalpropModel must "
+                "implement a method named %s " % required_method_name)
+
+        # If the sub-class did not implement their own Monte Carlo method mc_galprop, 
+        # then use _mc_galprop and give it the usual name
+        if not hasattr(self, 'mc_'+self.galprop_key):
+            setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
+
+
     def _build_param_dict(self, **kwargs):
+        """ Method combines the parameter dictionaries of the 
+        smhm model and the scatter model. 
+        """
 
         if 'input_param_dict' in kwargs.keys():
             smhm_param_dict = kwargs['input_param_dict']
@@ -302,8 +335,7 @@ class SmHmModel(object):
             if hasattr(self, 'retrieve_default_param_dict'):
                 smhm_param_dict = self.retrieve_default_param_dict()
             else:
-                raise KeyError("If the class has no retrieve_default_param_dict method, "
-                    "you must pass param_dict as a keyword argument to the constructor")
+                smhm_param_dict = {}
 
         scatter_param_dict = self.scatter_model.param_dict
 
@@ -312,14 +344,13 @@ class SmHmModel(object):
             scatter_param_dict.items()
             )
 
-    def mc_stellar_mass(self, include_scatter = True, **kwargs):
-        """ Return the stellar mass_like of a central galaxy that lives in a 
-        halo mass_like ``mass_like`` at the input ``redshift``. 
+    def _mc_galprop(self, include_scatter = True, **kwargs):
+        """ Return the prim_galprop of the galaxies living in the input halos. 
 
         Parameters 
         ----------
         prim_haloprop : array, optional keyword argument 
-            Array of mass-like variable governing stellar mass. 
+            Array of mass-like variable governing the primary galaxy property. 
             If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
             keyword arguments must be passed. 
 
@@ -338,8 +369,9 @@ class SmHmModel(object):
 
         include_scatter : boolean, optional keyword argument 
             Determines whether or not the scatter model is applied to add stochasticity 
-            to the stellar mass assignment. Default is True. 
-            If False, model is purely deterministic. 
+            to the galaxy property assignment. Default is True. 
+            If False, model is purely deterministic, and the behavior is determined 
+            by the ``mean_galprop`` method of the sub-class. 
 
         input_param_dict : dict, optional keyword argument 
             Dictionary of parameters governing the model. 
@@ -347,8 +379,9 @@ class SmHmModel(object):
 
         Returns 
         -------
-        mstar : array_like 
-            Array containing stellar mass living in the input halos. 
+        prim_galprop : array_like 
+            Array storing the values of the primary galaxy property 
+            of the galaxies living in the input halos. 
         """
 
         # Interpret the inputs to determine the appropriate redshift
@@ -356,25 +389,26 @@ class SmHmModel(object):
             if hasattr(self, 'redshift'):
                 kwargs['redshift'] = self.redshift
             else:
-                warn("\nThe SmHmModel class was not instantiated with a redshift,\n"
+                warn("\nThe PrimGalpropModel class was not instantiated with a redshift,\n"
                 "nor was a redshift passed to the primary function call.\n"
                 "Choosing the default redshift z = %.2f\n" % sim_defaults.default_redshift)
                 kwargs['redshift'] = sim_defaults.default_redshift
 
-        mean_stellar_mass = self.mean_stellar_mass(**kwargs)
+        prim_galprop_func = getattr(self, 'mean_'+self.galprop_key)
+        galprop_first_moment = prim_galprop_func(**kwargs)
 
         if include_scatter is False:
-            return mean_stellar_mass
+            return galprop_first_moment
         else:
-            log10mass_like_with_scatter = (
-                np.log10(mean_stellar_mass) + 
+            log10_galprop_with_scatter = (
+                np.log10(galprop_first_moment) + 
                 self.scatter_model.scatter_realization(**kwargs)
                 )
-            return 10.**log10mass_like_with_scatter
+            return 10.**log10_galprop_with_scatter
 
 
-class Moster13SmHm(SmHmModel):
-    """ Stellar-to-halo-mass_like relation based on 
+class Moster13SmHm(PrimGalpropModel):
+    """ Stellar-to-halo-mass relation based on 
     Moster et al. (2013), arXiv:1205.5807. 
     """
 
@@ -384,7 +418,7 @@ class Moster13SmHm(SmHmModel):
         ----------
         prim_haloprop_key : string, optional keyword argument 
             String giving the column name of the primary halo property governing 
-            the level of scatter. 
+            stellar mass. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
         scatter_model : object, optional keyword argument 
@@ -413,13 +447,14 @@ class Moster13SmHm(SmHmModel):
             the best-fit values taken from Moster et al. (2013). 
         """
 
-        super(Moster13SmHm, self).__init__(**kwargs)
+        super(Moster13SmHm, self).__init__(
+            galprop_key='stellar_mass', **kwargs)
 
         self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
 
     def mean_stellar_mass(self, **kwargs):
-        """ Return the stellar mass_like of a central galaxy that lives in a 
-        halo mass_like ``mass_like`` at the input ``redshift``. 
+        """ Return the stellar mass of a central galaxy as a function 
+        of the input halos.  
 
         Parameters 
         ----------
@@ -492,6 +527,11 @@ class Moster13SmHm(SmHmModel):
         """ Method returns a dictionary of all model parameters 
         set to the values in Table 1 of Moster et al. (2013). 
 
+        If ``self`` has a ``gal_type``, then each dict key will 
+        be appended with the ``gal_type`` string. This is useful 
+        to protect composite models with multiple ``gal_types`` 
+        from having repeated keys. 
+        
         Returns 
         -------
         d : dict 
@@ -508,8 +548,18 @@ class Moster13SmHm(SmHmModel):
         'gamma10': 0.608, 
         'gamma11': 0.329
         }
+        # If the Moster13SmHm model instance is part of a composite model 
+        # with multiple galaxy types, then the instance has a gal_type 
+        # attribute. Calling the _set_param_dict_key_attrs method 
+        # creates a set of (private) attributes that allow us to 
+        # access our param_dict in the same way regardless of whether the 
+        # composite model discriminates between gal_type.  
         self._set_param_dict_key_attrs(d)
 
+        # If the Moster13SmHm model instance is part of a composite model 
+        # with multiple galaxy types, then we rename the param_dict keys 
+        # to protect against possibly repeated 
+        # keys in the param_dict of our composite model. 
         if hasattr(self, 'gal_type'):
             for oldkey in d.keys():
                 newkey = oldkey + '_'+self.gal_type
@@ -518,6 +568,18 @@ class Moster13SmHm(SmHmModel):
         return d
 
     def _set_param_dict_key_attrs(self, uncorrected_dict):
+        """ Method binds to ``self`` one new private attribute 
+        for each key of ``param_dict``. 
+        For cases where ``self`` has no ``gal_type``, each private attribute 
+        has the same name as its param_dict key. 
+        For cases where ``self`` does have a ``gal_type``, 
+        each private attribute has the same name as its param_dict key except 
+        for the ``gal_type`` substring has been stripped from param_dict key. 
+        This allows the `mean_stellar_mass` method to access the keys 
+        of ``param_dict`` keys in the same fashion regardless of whether 
+        ``self`` has a ``gal_type`` attribute, even though ``param_dict`` has
+        different key names in these two cases. 
+        """
         for key in uncorrected_dict.keys():
             attr_name = '_'+key+'_key'
             if hasattr(self, 'gal_type'):
@@ -526,6 +588,71 @@ class Moster13SmHm(SmHmModel):
                 keyname = key
             setattr(self, attr_name, keyname)
 
+class AbunMatchSmHm(PrimGalpropModel):
+    """ Stellar-to-halo-mass relation based on traditional abundance matching. 
+    """
+
+    def __init__(self, galaxy_abundance_abcissa, galaxy_abundance_ordinates, 
+        scatter_level = 0.2, **kwargs):
+        """
+        Parameters 
+        ----------
+        galprop_key : string, optional keyword argument 
+            Name of the galaxy property being assigned. Default is ``stellar mass``, 
+            though another common case may be ``luminosity``. 
+
+        galaxy_abundance_ordinates : array_like
+            Length-Ng array storing the comoving number density of galaxies 
+            The value ``galaxy_abundance_ordinates[i]`` gives the comoving number density 
+            of galaxies evaluated at the galaxy property stored in ``galaxy_abundance_abcissa[i]``. 
+            The most common two cases are where ``galaxy_abundance_abcissa`` stores either 
+            stellar mass or luminosity, in which case ``galaxy_abundance_ordinates`` would 
+            simply be the stellar mass function or the luminosity function, respectively. 
+
+        galaxy_abundance_abcissa : array_like
+            Length-Ng array storing the property of the galaxies for which the 
+            abundance has been tabulated. 
+             The value ``galaxy_abundance_ordinates[i]`` gives the comoving number density 
+            of galaxies evaluated at the galaxy property stored in ``galaxy_abundance_abcissa[i]``. 
+            The most common two cases are where ``galaxy_abundance_abcissa`` stores either 
+            stellar mass or luminosity, in which case ``galaxy_abundance_ordinates`` would 
+            simply be the stellar mass function or the luminosity function, respectively. 
+
+        subhalo_abundance_ordinates : array_like, optional keyword argument 
+            Length-Nh array storing the comoving number density of subhalos.
+            The value ``subhalo_abundance_ordinates[i]`` gives the comoving number density 
+            of subhalos of property ``subhalo_abundance_abcissa[i]``. 
+            If keyword arguments ``subhalo_abundance_ordinates`` 
+            and ``subhalo_abundance_abcissa`` are not passed, 
+            then keyword arguments ``prim_haloprop_key`` and ``halos`` must be passed. 
+
+        subhalo_abundance_abcissa : array_like, optional keyword argument 
+            Length-Nh array storing the stellar mass of subhalos. 
+            The value ``subhalo_abundance_ordinates[i]`` gives the comoving number density 
+            of subhalos of property ``subhalo_abundance_abcissa[i]``. 
+            If keyword arguments ``subhalo_abundance_ordinates`` 
+            and ``subhalo_abundance_abcissa`` are not passed, 
+            then keyword arguments ``prim_haloprop_key`` and ``halos`` must be passed. 
+
+        scatter_level : float, optional keyword argument 
+            Level of constant scatter in dex. Default is 0.2. 
+
+        input_param_dict : dict, optional keyword argument
+            Dictionary containing values for the parameters specifying the model.
+            If none is passed, the `Moster13SmHm` instance will be initialized to 
+            the best-fit values taken from Moster et al. (2013). 
+        """
+
+        kwargs['scatter_model'] = LogNormalScatterModel
+        kwargs['scatter_abcissa'] = [12]
+        kwargs['scatter_ordinates'] = [scatter_level]
+
+        super(AbunMatchSmHm, self).__init__(**kwargs)
+
+        self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
+
+    def mean_stellar_mass(self, **kwargs):
+        return None
 
 
 

@@ -103,7 +103,8 @@ class ProcessedSnapshot(object):
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder,
-        redshift = sim_defaults.default_redshift, **kwargs):
+        redshift = sim_defaults.default_redshift, verbose=False, 
+        **kwargs):
         """
         Parameters 
         ----------
@@ -129,6 +130,10 @@ class ProcessedSnapshot(object):
             For cases where multiple versions of the same halo catalog 
             are stored in the cache, 
             a matching version name must be supplied to disambiguate. 
+
+        verbose : bool, optional 
+            If True, a range of print statements will be issued as sanity checks 
+            on bookkeeping. Default is False. 
 
         """
 
@@ -158,7 +163,9 @@ class ProcessedSnapshot(object):
             fname=self.halocat_fname, 
             simname = self.simname, 
             halo_finder = self.halo_finder, 
-            redshift = self.redshift, **kwargs)
+            redshift = self.redshift, 
+            verbose=verbose, 
+            **kwargs)
 
         self._bind_halocat_metadata()
 
@@ -1026,7 +1033,7 @@ class CatalogManager(object):
             print("\nTotal runtime to download snapshot = %.1f minutes\n" % runtime)
             return output_fname
 
-    def load_halo_catalog(self, **kwargs):
+    def load_halo_catalog(self, verbose=False, **kwargs):
         """ Method returns an Astropy Table object of halos 
         that have been stored as a processed binary hdf5 file. 
 
@@ -1044,6 +1051,10 @@ class CatalogManager(object):
         redshift : float, optional 
             Redshift of the desired snapshot. 
 
+        verbose : bool, optional 
+            If True, a range of print statements will be issued as sanity checks 
+            on bookkeeping. Default is False. 
+
         Returns 
         -------
         t : table 
@@ -1051,8 +1062,9 @@ class CatalogManager(object):
         """
 
         if 'fname' in kwargs.keys():
-            print("Loading halo catalog "
-                "with the following absolute path: \n%s\n" % kwargs['fname'])
+            if verbose is True:
+                print("Loading halo catalog "
+                    "with the following absolute path: \n%s\n" % kwargs['fname'])
             return Table.read(kwargs['fname'], path='halos')
         else:
             simname = kwargs['simname']
@@ -1065,8 +1077,9 @@ class CatalogManager(object):
                 return None
             else:
                 fname, z = result[0], result[1]
-                print("Loading z = %.2f halo catalog "
-                    "with the following absolute path: \n%s\n" % (z, fname))
+                if verbose is True:
+                    print("Loading z = %.2f halo catalog "
+                        "with the following absolute path: \n%s\n" % (z, fname))
                 return Table.read(fname, path='halos')
 
     def download_all_default_catalogs(self):
