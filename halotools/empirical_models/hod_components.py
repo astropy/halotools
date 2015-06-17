@@ -83,6 +83,13 @@ class OccupationComponent(object):
         else:
             self.param_dict = {}
 
+        # Enforce the requirement that sub-classes have been configured properly
+        required_method_name = 'mean_occupation'
+        if not hasattr(self, required_method_name):
+            raise SyntaxError("Any sub-class of OccupationComponent must "
+                "implement a method named %s " % required_method_name)
+
+
     def mc_occupation(self, seed=None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 

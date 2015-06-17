@@ -298,6 +298,14 @@ class SmHmModel(object):
             self.scatter_model.scatter_realization, input_param_dict = self.param_dict)
         setattr(self, 'scatter_realization', inherited_mean_scatter_method)
 
+        setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
+
+        # Enforce the requirement that sub-classes have been configured properly
+        required_method_name = 'mean_'+self.galprop_key
+        if not hasattr(self, required_method_name):
+            raise SyntaxError("Any sub-class of SmHmModel must "
+                "implement a method named %s " % required_method_name)
+
     def _build_param_dict(self, **kwargs):
 
         if 'input_param_dict' in kwargs.keys():
@@ -316,14 +324,13 @@ class SmHmModel(object):
             scatter_param_dict.items()
             )
 
-    def mc_stellar_mass(self, include_scatter = True, **kwargs):
-        """ Return the stellar mass_like of a central galaxy that lives in a 
-        halo mass_like ``mass_like`` at the input ``redshift``. 
+    def _mc_galprop(self, include_scatter = True, **kwargs):
+        """ Return the prim_galprop of the galaxies living in the input halos. 
 
         Parameters 
         ----------
         prim_haloprop : array, optional keyword argument 
-            Array of mass-like variable governing stellar mass. 
+            Array of mass-like variable governing the primary galaxy property. 
             If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
             keyword arguments must be passed. 
 
@@ -342,8 +349,9 @@ class SmHmModel(object):
 
         include_scatter : boolean, optional keyword argument 
             Determines whether or not the scatter model is applied to add stochasticity 
-            to the stellar mass assignment. Default is True. 
-            If False, model is purely deterministic. 
+            to the galaxy property assignment. Default is True. 
+            If False, model is purely deterministic, and the behavior is determined 
+            by the ``mean_galprop`` method of the sub-class. 
 
         input_param_dict : dict, optional keyword argument 
             Dictionary of parameters governing the model. 
@@ -351,8 +359,9 @@ class SmHmModel(object):
 
         Returns 
         -------
-        mstar : array_like 
-            Array containing stellar mass living in the input halos. 
+        prim_galprop : array_like 
+            Array storing the values of the primary galaxy property 
+            of the galaxies living in the input halos. 
         """
 
         # Interpret the inputs to determine the appropriate redshift
@@ -365,30 +374,25 @@ class SmHmModel(object):
                 "Choosing the default redshift z = %.2f\n" % sim_defaults.default_redshift)
                 kwargs['redshift'] = sim_defaults.default_redshift
 
-        mean_stellar_mass = self.mean_stellar_mass(**kwargs)
+        prim_galprop_func = getattr(self, 'mean_'+self.galprop_key)
+        galprop_first_moment = prim_galprop_func(**kwargs)
 
         if include_scatter is False:
-            return mean_stellar_mass
+            return galprop_first_moment
         else:
-            log10mass_like_with_scatter = (
-                np.log10(mean_stellar_mass) + 
+            log10_galprop_with_scatter = (
+                np.log10(galprop_first_moment) + 
                 self.scatter_model.scatter_realization(**kwargs)
                 )
-            return 10.**log10mass_like_with_scatter
+            return 10.**log10_galprop_with_scatter
 
-    @abstractmethod
-    def mean_stellar_mass(self):
-        """ Method to compute the mean stellar mass as a function of the input halos. 
-        """
-        raise NotImplementedError("All subclasses of SmHmModel"
-        " must include a mean_stellar_mass method")
 
 class Moster13SmHm(SmHmModel):
     """ Stellar-to-halo-mass_like relation based on 
     Moster et al. (2013), arXiv:1205.5807. 
     """
 
-    def __init__(self, galprop_key='stellar_mass', **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters 
         ----------
@@ -423,7 +427,8 @@ class Moster13SmHm(SmHmModel):
             the best-fit values taken from Moster et al. (2013). 
         """
 
-        super(Moster13SmHm, self).__init__(**kwargs)
+        super(Moster13SmHm, self).__init__(
+            galprop_key='stellar_mass', **kwargs)
 
         self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
 

@@ -47,16 +47,11 @@ class BinaryGalpropModel(object):
             with multiple population types. Default is None. 
 
         """
-
-        if 'prim_haloprop_key' not in kwargs.keys():
-            self.prim_haloprop_key = model_defaults.default_binary_galprop_haloprop
-        else:
-            self.prim_haloprop_key = kwargs['prim_haloprop_key']
+        required_kwargs = ['galprop_key',  'prim_haloprop_key']
+        occuhelp.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
-
-        self.galprop_key = kwargs['galprop_key']
 
         if 'gal_type' in kwargs.keys():
             self.gal_type = kwargs['gal_type']
