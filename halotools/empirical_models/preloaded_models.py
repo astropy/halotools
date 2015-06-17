@@ -8,7 +8,9 @@ from . import model_factories
 from . import preloaded_subhalo_model_blueprints
 from . import preloaded_hod_blueprints
 
-__all__ = ['Kravtsov04']
+from .. import sim_manager
+
+__all__ = ['Kravtsov04', 'SmHmBinarySFR']
 
 def Kravtsov04(**kwargs):
     """ Simple HOD-style model based on Kravtsov et al. (2004). 
@@ -43,15 +45,30 @@ def Kravtsov04(**kwargs):
     >>> model = Kravtsov04()
     >>> model = Kravtsov04(threshold = -20.5)
 
+    To use our model to populate a simulation with mock galaxies, we only need to 
+    load a snapshot into memory and call the built-in ``populate_mock`` method. 
+    For illustration purposes, we'll use a small, fake simulation:
+
+    >>> fake_snapshot = sim_manager.FakeSim()
+    >>> model.populate_mock(snapshot = fake_snapshot)
+
     """
     blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint(**kwargs)
     return model_factories.HodModelFactory(blueprint, **kwargs)
 
-
-
 def SmHmBinarySFR(**kwargs):
-    """ Blueprint for a simple model assigning stellar mass and 
+    """ Blueprint for a very simple model assigning stellar mass and 
     quiescent/active designation to a subhalo catalog. 
+
+    Stellar masses are assigned according to a parameterized relation, 
+    Moster et al. (2013) by default. SFR designation is determined by 
+    interpolating between a set of input control points, with default 
+    behavior being a 25% quiescent fraction for galaxies 
+    residing in Milky Way halos, and 75% for cluster galaxies. 
+
+    Since `SmHmBinarySFR` does not discriminate between centrals and satellites 
+    in the SFR assignment, this model is physically unrealistic and is 
+    included here primarily for demonstration purposes. 
 
     Parameters 
     ----------
@@ -93,12 +110,25 @@ def SmHmBinarySFR(**kwargs):
     -------
     model : object 
         Instance of `~halotools.empirical_models.model_factories.SubhaloModelFactory`
+
+    Examples 
+    --------
+    >>> model = SmHmBinarySFR()
+    >>> model = SmHmBinarySFR(threshold = 10**10.5)
+
+    To use our model to populate a simulation with mock galaxies, we only need to 
+    load a snapshot into memory and call the built-in ``populate_mock`` method. 
+    For illustration purposes, we'll use a small, fake simulation:
+
+    >>> fake_snapshot = sim_manager.FakeSim()
+    >>> model.populate_mock(snapshot = fake_snapshot)
+
     """
 
     blueprint = preloaded_subhalo_model_blueprints.SmHmBinarySFR_blueprint(**kwargs)
 
     if 'threshold' in kwargs.keys():
-        galaxy_selection_func = lambda x: x['stellar_mass'] > threshold
+        galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
         model = model_factories.SubhaloModelFactory(blueprint, 
             galaxy_selection_func=galaxy_selection_func)
     else:
