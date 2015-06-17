@@ -17,7 +17,7 @@ from ..sim_manager import sim_defaults
 from warnings import warn
 from functools import partial
 
-__all__ = ['SmHmModel', 'Moster13SmHm', 'LogNormalScatterModel']
+__all__ = ['PrimGalpropModel', 'Moster13SmHm', 'LogNormalScatterModel']
 
 class LogNormalScatterModel(object):
     """ Simple model used to generate log-normal scatter 
@@ -225,10 +225,9 @@ class LogNormalScatterModel(object):
             return 'scatter_model_param'+str(ipar+1)
 
 @six.add_metaclass(ABCMeta)
-class SmHmModel(object):
-    """ Abstract container class used as a template 
-    for how to build a stellar-to-halo-mass_like-style model.
-
+class PrimGalpropModel(object):
+    """ Abstract container class for models connecting halos to their primary
+    galaxy property, e.g., stellar mass or luminosity. 
     """
 
     def __init__(self, galprop_key = 'stellar_mass', 
@@ -301,7 +300,7 @@ class SmHmModel(object):
         # Enforce the requirement that sub-classes have been configured properly
         required_method_name = 'mean_'+self.galprop_key
         if not hasattr(self, required_method_name):
-            raise SyntaxError("Any sub-class of SmHmModel must "
+            raise SyntaxError("Any sub-class of PrimGalpropModel must "
                 "implement a method named %s " % required_method_name)
 
         # If the sub-class did not implement their own Monte Carlo method mc_galprop, 
@@ -373,7 +372,7 @@ class SmHmModel(object):
             if hasattr(self, 'redshift'):
                 kwargs['redshift'] = self.redshift
             else:
-                warn("\nThe SmHmModel class was not instantiated with a redshift,\n"
+                warn("\nThe PrimGalpropModel class was not instantiated with a redshift,\n"
                 "nor was a redshift passed to the primary function call.\n"
                 "Choosing the default redshift z = %.2f\n" % sim_defaults.default_redshift)
                 kwargs['redshift'] = sim_defaults.default_redshift
@@ -391,8 +390,8 @@ class SmHmModel(object):
             return 10.**log10_galprop_with_scatter
 
 
-class Moster13SmHm(SmHmModel):
-    """ Stellar-to-halo-mass_like relation based on 
+class Moster13SmHm(PrimGalpropModel):
+    """ Stellar-to-halo-mass relation based on 
     Moster et al. (2013), arXiv:1205.5807. 
     """
 
@@ -545,7 +544,7 @@ class Moster13SmHm(SmHmModel):
                 keyname = key
             setattr(self, attr_name, keyname)
 
-class AbunMatchSmHm(SmHmModel):
+class AbunMatchSmHm(PrimGalpropModel):
     """ Stellar-to-halo-mass relation based on traditional abundance matching. 
     """
 
