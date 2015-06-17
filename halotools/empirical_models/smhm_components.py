@@ -231,13 +231,17 @@ class SmHmModel(object):
 
     """
 
-    def __init__(self, 
+    def __init__(self, galprop_key = 'stellar_mass', 
         prim_haloprop_key = model_defaults.default_smhm_haloprop, 
         scatter_model = LogNormalScatterModel, 
         **kwargs):
         """
         Parameters 
         ----------
+        galprop_key : string, optional keyword argument 
+            Name of the galaxy property being assigned. Default is ``stellar mass``, 
+            though another common case may be ``luminosity``. 
+
         prim_haloprop_key : string, optional keyword argument 
             String giving the column name of the primary halo property governing 
             stellar mass.  
@@ -273,7 +277,7 @@ class SmHmModel(object):
             Dictionary containing values for the parameters specifying the model.
 
         """
-        self.galprop_key = 'stellar_mass'
+        self.galprop_key = galprop_key
         self.prim_haloprop_key = prim_haloprop_key
 
         if 'redshift' in kwargs.keys():
@@ -384,7 +388,7 @@ class Moster13SmHm(SmHmModel):
     Moster et al. (2013), arXiv:1205.5807. 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, galprop_key='stellar_mass', **kwargs):
         """
         Parameters 
         ----------
@@ -536,20 +540,31 @@ class AbunMatchSmHm(SmHmModel):
     """ Stellar-to-halo-mass relation based on traditional abundance matching. 
     """
 
-    def __init__(self, galaxy_SMF_abcissa, galaxy_SMF_ordinates, 
+    def __init__(self, galaxy_abundance_abcissa, galaxy_abundance_ordinates, 
         scatter_level = 0.2, **kwargs):
         """
         Parameters 
         ----------
-        galaxy_SMF_ordinates : array_like
-            Length-Ng array storing the comoving number density of galaxies 
-            The value ``galaxy_SMF_ordinates[i]`` gives the comoving number density 
-            of galaxies of stellar mass ``galaxy_SMF_abcissa[i]``. 
+        galprop_key : string, optional keyword argument 
+            Name of the galaxy property being assigned. Default is ``stellar mass``, 
+            though another common case may be ``luminosity``. 
 
-        galaxy_SMF_abcissa : array_like
-            Length-Ng array storing the stellar mass of galaxies. 
-            The value ``galaxy_SMF_ordinates[i]`` gives the comoving number density 
-            of galaxies of stellar mass ``galaxy_SMF_abcissa[i]``. 
+        galaxy_abundance_ordinates : array_like
+            Length-Ng array storing the comoving number density of galaxies 
+            The value ``galaxy_abundance_ordinates[i]`` gives the comoving number density 
+            of galaxies evaluated at the galaxy property stored in ``galaxy_abundance_abcissa[i]``. 
+            The most common two cases are where ``galaxy_abundance_abcissa`` stores either 
+            stellar mass or luminosity, in which case ``galaxy_abundance_ordinates`` would 
+            simply be the stellar mass function or the luminosity function, respectively. 
+
+        galaxy_abundance_abcissa : array_like
+            Length-Ng array storing the property of the galaxies for which the 
+            abundance has been tabulated. 
+             The value ``galaxy_abundance_ordinates[i]`` gives the comoving number density 
+            of galaxies evaluated at the galaxy property stored in ``galaxy_abundance_abcissa[i]``. 
+            The most common two cases are where ``galaxy_abundance_abcissa`` stores either 
+            stellar mass or luminosity, in which case ``galaxy_abundance_ordinates`` would 
+            simply be the stellar mass function or the luminosity function, respectively. 
 
         subhalo_abundance_ordinates : array_like, optional keyword argument 
             Length-Nh array storing the comoving number density of subhalos.
@@ -566,19 +581,6 @@ class AbunMatchSmHm(SmHmModel):
             If keyword arguments ``subhalo_abundance_ordinates`` 
             and ``subhalo_abundance_abcissa`` are not passed, 
             then keyword arguments ``prim_haloprop_key`` and ``halos`` must be passed. 
-
-        subhalos : object, optional keyword argument 
-            Data table storing subhalo catalog. 
-            If keyword arguments ``subhalo_abundance_ordinates`` 
-            and ``subhalo_abundance_abcissa`` are not passed, 
-            then keyword arguments ``prim_haloprop_key`` and ``halos`` must be passed. 
-
-        prim_haloprop_key : string, optional keyword argument 
-            String giving the column name of the primary halo property. 
-            If keyword arguments ``prim_haloprop_key`` 
-            and ``subhalos`` are not passed, 
-            then keyword arguments ``subhalo_abundance_abcissa`` and 
-            ``subhalo_abundance_ordinates`` must be passed. 
 
         scatter_level : float, optional keyword argument 
             Level of constant scatter in dex. Default is 0.2. 
