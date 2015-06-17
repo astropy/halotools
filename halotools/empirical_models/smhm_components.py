@@ -240,7 +240,7 @@ class SmHmModel(object):
         ----------
         prim_haloprop_key : string, optional keyword argument 
             String giving the column name of the primary halo property governing 
-            the level of scatter. 
+            stellar mass.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
         gal_type : string, optional keyword argument 
@@ -303,7 +303,7 @@ class SmHmModel(object):
                 smhm_param_dict = self.retrieve_default_param_dict()
             else:
                 raise KeyError("If the class has no retrieve_default_param_dict method, "
-                    "you must pass param_dict as a keyword argument to the constructor")
+                    "you must pass ``input_param_dict`` as a keyword argument to the constructor")
 
         scatter_param_dict = self.scatter_model.param_dict
 
@@ -372,6 +372,12 @@ class SmHmModel(object):
                 )
             return 10.**log10mass_like_with_scatter
 
+    @abstractmethod
+    def mean_stellar_mass(self):
+        """ Method to compute the mean stellar mass as a function of the input halos. 
+        """
+        raise NotImplementedError("All subclasses of SmHmModel"
+        " must include a mean_stellar_mass method")
 
 class Moster13SmHm(SmHmModel):
     """ Stellar-to-halo-mass_like relation based on 
@@ -384,7 +390,7 @@ class Moster13SmHm(SmHmModel):
         ----------
         prim_haloprop_key : string, optional keyword argument 
             String giving the column name of the primary halo property governing 
-            the level of scatter. 
+            stellar mass. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
         scatter_model : object, optional keyword argument 
@@ -526,6 +532,73 @@ class Moster13SmHm(SmHmModel):
                 keyname = key
             setattr(self, attr_name, keyname)
 
+class AbunMatchSmHm(SmHmModel):
+    """ Stellar-to-halo-mass relation based on traditional abundance matching. 
+    """
+
+    def __init__(self, galaxy_SMF_abcissa, galaxy_SMF_ordinates, 
+        scatter_level = 0.2, **kwargs):
+        """
+        Parameters 
+        ----------
+        galaxy_SMF_ordinates : array_like
+            Length-Ng array storing the comoving number density of galaxies 
+            The value ``galaxy_SMF_ordinates[i]`` gives the comoving number density 
+            of galaxies of stellar mass ``galaxy_SMF_abcissa[i]``. 
+
+        galaxy_SMF_abcissa : array_like
+            Length-Ng array storing the stellar mass of galaxies. 
+            The value ``galaxy_SMF_ordinates[i]`` gives the comoving number density 
+            of galaxies of stellar mass ``galaxy_SMF_abcissa[i]``. 
+
+        subhalo_abundance_ordinates : array_like, optional keyword argument 
+            Length-Nh array storing the comoving number density of subhalos.
+            The value ``subhalo_abundance_ordinates[i]`` gives the comoving number density 
+            of subhalos of property ``subhalo_abundance_abcissa[i]``. 
+            If keyword arguments ``subhalo_abundance_ordinates`` 
+            and ``subhalo_abundance_abcissa`` are not passed, 
+            then keyword arguments ``prim_haloprop_key`` and ``halos`` must be passed. 
+
+        subhalo_abundance_abcissa : array_like, optional keyword argument 
+            Length-Nh array storing the stellar mass of subhalos. 
+            The value ``subhalo_abundance_ordinates[i]`` gives the comoving number density 
+            of subhalos of property ``subhalo_abundance_abcissa[i]``. 
+            If keyword arguments ``subhalo_abundance_ordinates`` 
+            and ``subhalo_abundance_abcissa`` are not passed, 
+            then keyword arguments ``prim_haloprop_key`` and ``halos`` must be passed. 
+
+        subhalos : object, optional keyword argument 
+            Data table storing subhalo catalog. 
+            If keyword arguments ``subhalo_abundance_ordinates`` 
+            and ``subhalo_abundance_abcissa`` are not passed, 
+            then keyword arguments ``prim_haloprop_key`` and ``halos`` must be passed. 
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property. 
+            If keyword arguments ``prim_haloprop_key`` 
+            and ``subhalos`` are not passed, 
+            then keyword arguments ``subhalo_abundance_abcissa`` and 
+            ``subhalo_abundance_ordinates`` must be passed. 
+
+        scatter_level : float, optional keyword argument 
+            Level of constant scatter in dex. Default is 0.2. 
+
+        input_param_dict : dict, optional keyword argument
+            Dictionary containing values for the parameters specifying the model.
+            If none is passed, the `Moster13SmHm` instance will be initialized to 
+            the best-fit values taken from Moster et al. (2013). 
+        """
+
+        kwargs['scatter_model'] = LogNormalScatterModel
+        kwargs['scatter_abcissa'] = [12]
+        kwargs['scatter_ordinates'] = [scatter_level]
+
+        super(AbunMatchSmHm, self).__init__(**kwargs)
+
+        self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
+
+    def mean_stellar_mass(self, **kwargs):
+        return None
 
 
 
