@@ -225,7 +225,7 @@ class LogNormalScatterModel(object):
             return 'scatter_model_param'+str(ipar+1)
 
 @six.add_metaclass(ABCMeta)
-class PrimGalpropModel(object):
+class PrimGalpropModel(occuhelp.GalPropModel):
     """ Abstract container class for models connecting halos to their primary
     galaxy property, e.g., stellar mass or luminosity. 
     """
@@ -322,6 +322,8 @@ class PrimGalpropModel(object):
         # then use _mc_galprop and give it the usual name
         if not hasattr(self, 'mc_'+self.galprop_key):
             setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
+
+        super(PrimGalpropModel, self).__init__(galprop_key=self.galprop_key)
 
 
     def _build_param_dict(self, **kwargs):

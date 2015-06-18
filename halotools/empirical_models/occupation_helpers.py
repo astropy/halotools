@@ -7,7 +7,7 @@ used by many of the hod model components.
 """
 
 __all__ = (
-    ['solve_for_polynomial_coefficients', 'polynomial_from_table', 
+    ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
     'enforce_periodicity_of_box', 'update_param_dict']
     )
 
@@ -18,6 +18,23 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults
 from ..utils.array_utils import array_like_length as custom_len
+
+from astropy.extern import six
+from abc import ABCMeta
+
+@six.add_metaclass(ABCMeta)
+class GalPropModel(object):
+    """ Abstact container class for any model of any galaxy property. 
+    """
+
+    def __init__(self, galprop_key):
+
+        # Enforce the requirement that sub-classes have been configured properly
+        required_method_name = 'mc_'+galprop_key
+        if not hasattr(self, required_method_name):
+            raise SyntaxError("Any sub-class of GalPropModel must "
+                "implement a method named %s " % required_method_name)
+
 
 def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
