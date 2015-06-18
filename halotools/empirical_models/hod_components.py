@@ -30,7 +30,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
 @six.add_metaclass(ABCMeta)
-class OccupationComponent(object):
+class OccupationComponent(occuhelp.GalPropModel):
     """ Abstract base class of any occupation model. 
     Functionality is mostly trivial. 
     The sole purpose of the base class is to 
@@ -72,6 +72,8 @@ class OccupationComponent(object):
             The parameters stored in ``self.param_dict`` are the only ones that 
             will be varied in MCMC-type likelihood analyses. 
         """
+        super(OccupationComponent, self).__init__(galprop_key='occupation')
+
         required_kwargs = ['gal_type',  'threshold', 'occupation_bound', 'prim_haloprop_key']
         occuhelp.bind_required_kwargs(required_kwargs, self, **kwargs)
 

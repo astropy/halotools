@@ -20,7 +20,7 @@ import warnings
 
 
 @six.add_metaclass(ABCMeta)
-class BinaryGalpropModel(object):
+class BinaryGalpropModel(occuhelp.GalPropModel):
     """
     Container class for any component model of a binary-valued galaxy property. 
 
@@ -78,6 +78,7 @@ class BinaryGalpropModel(object):
                 "implement a method named %s " % required_method_name)
 
         setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
+        super(BinaryGalpropModel, self).__init__(galprop_key=self.galprop_key)
 
 
     def _mc_galprop(self, seed=None, **kwargs):
