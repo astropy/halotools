@@ -20,7 +20,7 @@ import halo_prof_components
 import gal_prof_components as gpc
 
 
-class GalProfFactory(object):
+class GalProfFactory(model_helpers.GalPropModel):
     """ Class modeling the way galaxies are distributed 
     within their halos. 
 
@@ -68,6 +68,7 @@ class GalProfFactory(object):
 
         """
 
+        super(GalProfFactory, self).__init__(galprop_key='pos')
         # Bind the inputs to the instance 
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
