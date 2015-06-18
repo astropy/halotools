@@ -9,7 +9,7 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from . import model_defaults
-from . import occupation_helpers as occuhelp
+from . import model_helpers as occuhelp
 
 from ..utils.array_utils import array_like_length as custom_len
 from ..sim_manager import sim_defaults 

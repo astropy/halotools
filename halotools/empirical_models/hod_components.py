@@ -19,7 +19,7 @@ from scipy.optimize import brentq
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults
-from . import occupation_helpers as occuhelp
+from . import model_helpers as occuhelp
 from . import smhm_components
 
 from ..utils.array_utils import array_like_length as custom_len
