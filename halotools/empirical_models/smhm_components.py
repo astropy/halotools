@@ -9,7 +9,7 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from . import model_defaults
-from . import model_helpers as occuhelp
+from . import model_helpers as model_helpers
 
 from ..utils.array_utils import array_like_length as custom_len
 from ..sim_manager import sim_defaults 
@@ -133,7 +133,7 @@ class LogNormalScatterModel(object):
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
-        occuhelp.update_param_dict(self, **kwargs)
+        model_helpers.update_param_dict(self, **kwargs)
         self._update_interpol()
 
         return self.spline_function(np.log10(mass))
@@ -191,7 +191,7 @@ class LogNormalScatterModel(object):
             degree_list.append(kwargs['scatter_spline_degree'])
         self.spline_degree = np.min(degree_list)
 
-        self.spline_function = occuhelp.custom_spline(
+        self.spline_function = model_helpers.custom_spline(
             self.abcissa, self.ordinates, k=self.spline_degree)
 
     def _update_interpol(self):
@@ -225,7 +225,7 @@ class LogNormalScatterModel(object):
             return 'scatter_model_param'+str(ipar+1)
 
 @six.add_metaclass(ABCMeta)
-class PrimGalpropModel(occuhelp.GalPropModel):
+class PrimGalpropModel(model_helpers.GalPropModel):
     """ Abstract container class for models connecting halos to their primary
     galaxy property, e.g., stellar mass or luminosity. 
     """
@@ -487,7 +487,7 @@ class Moster13SmHm(PrimGalpropModel):
         mstar : array_like 
             Array containing stellar masses living in the input halos. 
         """
-        occuhelp.update_param_dict(self, **kwargs)
+        model_helpers.update_param_dict(self, **kwargs)
 
         # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():

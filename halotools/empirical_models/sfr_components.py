@@ -12,7 +12,7 @@ from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
 from ..utils.array_utils import array_like_length as custom_len
-import model_helpers as occuhelp
+import model_helpers as model_helpers
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -20,7 +20,7 @@ import warnings
 
 
 @six.add_metaclass(ABCMeta)
-class BinaryGalpropModel(occuhelp.GalPropModel):
+class BinaryGalpropModel(model_helpers.GalPropModel):
     """
     Container class for any component model of a binary-valued galaxy property. 
 
@@ -58,7 +58,7 @@ class BinaryGalpropModel(occuhelp.GalPropModel):
 
         """
         required_kwargs = ['galprop_key']
-        occuhelp.bind_required_kwargs(required_kwargs, self, **kwargs)
+        model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         self.prim_haloprop_key = prim_haloprop_key
 
@@ -290,7 +290,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             Values of the galprop fraction evaluated at the input primary halo properties. 
 
         """
-        occuhelp.update_param_dict(self, **kwargs)
+        model_helpers.update_param_dict(self, **kwargs)
 
         # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
@@ -312,10 +312,10 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         model_ordinates = [self.param_dict[ordinate_key] for ordinate_key in self._ordinates_keys]
         if self._interpol_method=='polynomial':
-            mean_galprop_fraction = occuhelp.polynomial_from_table(
+            mean_galprop_fraction = model_helpers.polynomial_from_table(
                 self._abcissa, model_ordinates, prim_haloprop)
         elif self._interpol_method=='spline':
-            spline_function = occuhelp.custom_spline(
+            spline_function = model_helpers.custom_spline(
                 self._abcissa, model_ordinates,
                     k=self._spline_degree)
             mean_galprop_fraction = spline_function(prim_haloprop)
