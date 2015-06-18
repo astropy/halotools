@@ -19,7 +19,7 @@ from scipy.optimize import brentq
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults
-from . import occupation_helpers as occuhelp
+from . import model_helpers as model_helpers
 from . import smhm_components
 
 from ..utils.array_utils import array_like_length as custom_len
@@ -30,7 +30,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
 @six.add_metaclass(ABCMeta)
-class OccupationComponent(object):
+class OccupationComponent(model_helpers.GalPropModel):
     """ Abstract base class of any occupation model. 
     Functionality is mostly trivial. 
     The sole purpose of the base class is to 
@@ -72,8 +72,10 @@ class OccupationComponent(object):
             The parameters stored in ``self.param_dict`` are the only ones that 
             will be varied in MCMC-type likelihood analyses. 
         """
+        super(OccupationComponent, self).__init__(galprop_key='occupation')
+
         required_kwargs = ['gal_type',  'threshold', 'occupation_bound', 'prim_haloprop_key']
-        occuhelp.bind_required_kwargs(required_kwargs, self, **kwargs)
+        model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
@@ -366,7 +368,7 @@ class Zheng07Cens(OccupationComponent):
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
-        occuhelp.update_param_dict(self, **kwargs)
+        model_helpers.update_param_dict(self, **kwargs)
 
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
@@ -530,7 +532,7 @@ class Leauthaud11Cens(OccupationComponent):
         -----
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
-        occuhelp.update_param_dict(self, **kwargs)
+        model_helpers.update_param_dict(self, **kwargs)
         if 'input_param_dict' in kwargs.keys():
             del kwargs['input_param_dict']
 
@@ -756,7 +758,7 @@ class Kravtsov04Sats(OccupationComponent):
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
-        occuhelp.update_param_dict(self, **kwargs)
+        model_helpers.update_param_dict(self, **kwargs)
 
         M0 = 10.**self.param_dict[self.logM0_key]
         M1 = 10.**self.param_dict[self.logM1_key]
@@ -985,7 +987,7 @@ class Leauthaud11Sats(OccupationComponent):
         not self-consistent with arXiv:1104.0928, 
         because a different stellar-to-halo-mass relation is used here. 
         """
-        occuhelp.update_param_dict(self, **kwargs)
+        model_helpers.update_param_dict(self, **kwargs)
 
         self._msat_mcut_abcissa = np.logspace(9, 15, num=500)
 
@@ -1013,7 +1015,7 @@ class Leauthaud11Sats(OccupationComponent):
             dictionary of parameters governing the model. If not passed, 
             values bound to ``self`` will be chosen. 
         """
-        occuhelp.update_param_dict(self, **kwargs)
+        model_helpers.update_param_dict(self, **kwargs)
 
         if 'input_param_dict' in kwargs.keys():
             input_param_dict = kwargs['input_param_dict']

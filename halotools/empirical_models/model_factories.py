@@ -13,7 +13,7 @@ from functools import partial
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-from . import occupation_helpers as occuhelp
+from . import model_helpers as model_helpers
 from . import model_defaults
 from . import mock_factories
 from . import preloaded_hod_blueprints
@@ -707,6 +707,7 @@ class HodModelFactory(ModelFactory):
 
 
 ##########################################
+
 
 
 
