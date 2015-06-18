@@ -13,7 +13,7 @@ from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
 from ..utils.array_utils import array_like_length as custom_len
-import occupation_helpers as occuhelp 
+import model_helpers as occuhelp 
 from functools import partial
 
 import halo_prof_components
@@ -353,7 +353,7 @@ class GalProfFactory(object):
             )
         # Now we have an array of function objects, and we need to evaluate 
         # the i^th funcobj on the i^th element of rho. 
-        # Call the occupation_helpers module to access generic code for doing this 
+        # Call the model_helpers module to access generic code for doing this 
         return 10.**occuhelp.call_func_table(
             self.cumu_inv_func_table, np.log10(rho), func_table_indices)
 

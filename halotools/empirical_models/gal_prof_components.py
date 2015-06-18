@@ -17,7 +17,7 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
 from ..utils.array_utils import array_like_length as custom_len
-import occupation_helpers as occuhelp 
+import model_helpers as occuhelp 
 import model_defaults
 
 from functools import partial

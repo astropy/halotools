@@ -12,7 +12,7 @@ from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
 from ..utils.array_utils import array_like_length as custom_len
-import occupation_helpers as occuhelp
+import model_helpers as occuhelp
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty

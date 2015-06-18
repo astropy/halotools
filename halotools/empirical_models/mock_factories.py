@@ -15,7 +15,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from astropy.table import Table 
 
-from . import occupation_helpers as occuhelp
+from . import model_helpers as occuhelp
 from . import model_defaults
 
 from ..sim_manager import sim_defaults
