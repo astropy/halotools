@@ -17,7 +17,7 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
 from ..utils.array_utils import array_like_length as custom_len
-import model_helpers as occuhelp 
+import model_helpers as model_helpers 
 import model_defaults
 
 from functools import partial
@@ -244,7 +244,7 @@ class SpatialBias(object):
             )
 
         if self.interpol_method=='polynomial':
-            output_profile_modulation = occuhelp.polynomial_from_table(
+            output_profile_modulation = model_helpers.polynomial_from_table(
                 model_abcissa,model_ordinates,input_abcissa)
         elif self.interpol_method=='spline':
             modulating_function = self.spline_function[profile_parameter_key]
@@ -282,7 +282,7 @@ class SpatialBias(object):
         """
 
         ###
-        if occuhelp.custom_len(args) > 0:
+        if model_helpers.custom_len(args) > 0:
             # We were passed an array of profile parameters, 
             # so we should not have also been passed a galaxy sample
             if 'mock_galaxies' in kwargs.keys():
@@ -290,7 +290,7 @@ class SpatialBias(object):
                     "or a mock, but not both")
             return args[0], args[1]
 
-        elif (occuhelp.custom_len(args) == 0) & ('mock_galaxies' in kwargs.keys()):
+        elif (model_helpers.custom_len(args) == 0) & ('mock_galaxies' in kwargs.keys()):
             # We were passed a collection of galaxies
             mock_galaxies = kwargs['mock_galaxies']
             halo_prof_param_key = kwargs['prof_param_key']
@@ -473,7 +473,7 @@ class SpatialBias(object):
                 [scipy_maxdegree, self.input_spline_degree, 
                 custom_len(self.abcissa_dict[prof_param_key])-1])
                     )
-                self.spline_function[prof_param_key] = occuhelp.custom_spline(
+                self.spline_function[prof_param_key] = model_helpers.custom_spline(
                     self.abcissa_dict[prof_param_key], 
                     self.ordinates_dict[prof_param_key], 
                     k=self.spline_degree[prof_param_key])
