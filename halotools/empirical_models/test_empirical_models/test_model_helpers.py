@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from .. import occupation_helpers as occuhelp 
+from .. import model_helpers as occuhelp 
 import numpy as np 
 
 def test_enforce_periodicity_of_box():

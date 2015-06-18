@@ -15,7 +15,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from astropy.table import Table 
 
-from . import occupation_helpers as occuhelp
+from . import model_helpers as model_helpers
 from . import model_defaults
 
 from ..sim_manager import sim_defaults
@@ -72,7 +72,7 @@ class MockFactory(object):
         """
 
         required_kwargs = ['snapshot', 'model']
-        occuhelp.bind_required_kwargs(required_kwargs, self, **kwargs)
+        model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         self.halos = self.snapshot.halos
         self.particles = self.snapshot.particles
@@ -387,11 +387,11 @@ class HodMockFactory(MockFactory):
                 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
-        self.galaxy_table['x'] = occuhelp.enforce_periodicity_of_box(
+        self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
             self.galaxy_table['x'], self.snapshot.Lbox)
-        self.galaxy_table['y'] = occuhelp.enforce_periodicity_of_box(
+        self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
             self.galaxy_table['y'], self.snapshot.Lbox)
-        self.galaxy_table['z'] = occuhelp.enforce_periodicity_of_box(
+        self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
             self.galaxy_table['z'], self.snapshot.Lbox)
 
         if hasattr(self.model, 'galaxy_selection_func'):
