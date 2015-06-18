@@ -85,6 +85,31 @@ class AbunMatchSmHm(PrimGalpropModel):
     def mean_stellar_mass(self, **kwargs):
         return None
 
+class ConditionalAbunMatch(model_helpers.GalPropModel):
+    """ Generally-written class to produce any CAM-style model of a galaxy property, 
+    such as age matching.  
+    """
+
+    def __init__(self, galprop_key, **kwargs):
+        """ 
+        """
+        setattr(self, 'mc_'+galprop_key, self._mc_galprop)
+        super(ConditionalAbunMatch, self).__init__(galprop_key=galprop_key)
+
+
+    def _mc_galprop(self, **kwargs):
+        return None
+
+
+
+
+
+
+
+
+
+
+
 
 
 
