@@ -119,6 +119,16 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         prim_galprop_bins : array 
             Array used to bin the input galaxy population by the 
             prim_galprop of the model. 
+
+        new_haloprop_func_dict : function object, optional keyword argument 
+            Dictionary of function objects used by the mock factory 
+            to create additional halo properties during a halo catalog pre-processing 
+            phase. Each dict key of ``new_haloprop_func_dict`` will 
+            be the name of a new column of the halo catalog that will be passed 
+            to methods of `ConditionalAbunMatch`; each dict value 
+            of ``new_haloprop_func_dict`` is a function object that returns 
+            a length-N numpy array when passed a length-N Astropy table 
+            via the ``halos`` keyword argument. 
         """
 
         required_kwargs = (
@@ -129,6 +139,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         super(ConditionalAbunMatch, self).__init__(galprop_key=self.galprop_key)
 
         self.build_one_point_lookup_table(**kwargs)
+
+        if 'new_haloprop_func_dict' in kwargs.keys():
+            self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
 
     def _mc_galprop(self, **kwargs):
