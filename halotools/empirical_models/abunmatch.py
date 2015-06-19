@@ -224,6 +224,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 # determine a realization galprop values for all 
                 # mock galaxies in the i^th prim_galprop bin
 
+
+                ### NEED TO FIGURE OUT NUMPY'S CONVENTION FOR 
+                ### NESTED FANCY INDEXING
                 result_bini = self.one_point_lookup_table[i](randoms_bini)
                 output_galprop[idx_sec_haloprop_sorted[idx_bini]] = result_bini
                 print output_galprop[idx_bini]
