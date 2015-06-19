@@ -93,9 +93,12 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         Parameters 
         ----------
         galprop_key : string, keyword argument
-            Name of the galaxy property being modeled. 
+            Column name of the galaxy property being modeled, e.g., color. 
 
         prim_galprop_key : string, keyword argument 
+            Column name storing the galaxy property used to define the 
+            conditional one-point statistics, e.g., stellar mass 
+            or luminosity. 
 
         galaxy_table : data table 
             Astropy Table object storing the input galaxy population.  
@@ -104,13 +107,14 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             of the `ConditionalAbunMatch` model. 
 
         correlation_strength : float or array, optional keyword argument 
-            Specifies the desired Spearmann rank-order correlation coefficient 
+            Specifies the absoluate value of the desired 
+            Spearmann rank-order correlation coefficient 
             between the secondary halo property and the galprop. 
             If a float, the correlation strength will be assumed constant 
             for all values of the prim_galprop. If an array, the i^th entry 
             specifies the correlation strength when prim_galprop equals  
-            ``prim_galprop_bins[i]``. Default is None, in which case 
-            zero scatter is assumed. 
+            ``prim_galprop_bins[i]``. 
+            Default is None, in which case zero scatter is assumed. 
 
         prim_galprop_bins : array 
             Array used to bin the input galaxy population by the 
