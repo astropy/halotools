@@ -97,7 +97,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
         prim_galprop_key : string, keyword argument 
 
-        input_galaxy_table : data table 
+        galaxy_table : data table 
             Astropy Table object storing the input galaxy population.  
             The conditional one-point functions of this population 
             will be used as inputs when building the primary behavior 
@@ -123,6 +123,8 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
         setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
         super(ConditionalAbunMatch, self).__init__(galprop_key=self.galprop_key)
+
+        self.build_one_point_lookup_table(**kwargs)
 
 
     def _mc_galprop(self, **kwargs):
@@ -194,18 +196,40 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         return output_galprop
 
 
-    def build_one_point_lookup_table(self, cumulative_prob):
+    def build_one_point_lookup_table(self, **kwargs):
         """
         Parameters 
         ----------
-        input_galaxy_table : data table 
+        galaxy_table : data table 
             Astropy Table object storing the input galaxy population.  
             The conditional one-point functions of this population 
             will be used as inputs when building the primary behavior 
             of the `ConditionalAbunMatch` model. 
-        """
 
-        pass
+        prim_galprop_bins : array 
+            Array used to bin the input galaxy population by the 
+            prim_galprop of the model. 
+
+        """
+        galaxy_table = kwargs['galaxy_table']
+        self.one_point_lookup_table = np.zeros(
+            len(galaxy_table))
+
+        binned_prim_galprop = np.digitize(
+            galaxy_table[self.prim_galprop_key], 
+            self.prim_galprop_bins)
+
+        for i in range(len(prim_galprop_bins)):
+            idx_bini = np.where(binned_prim_galprop == i)[0]
+            gals_bini = galaxy_table[idx_bini]
+            abcissa = np.arange(len(gals_bini))/float(len(gals_bini)-1)
+            ordinates = np.sort(gals_bini[self.galprop_key])
+            self.one_point_lookup_table[i] = (
+                model_helpers.custom_spline(abcissa, ordinates)
+                )
+
+
+
 
 
 
