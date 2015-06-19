@@ -6,6 +6,8 @@ and conditional abundance matching (CAM).
 """
 import numpy as np
 
+from scipy.stats import pearsonr
+
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
@@ -205,18 +207,22 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 idx_bini = kwargs['galaxy_table_slice_array'][i]
 
             if len(idx_bini) > 0:
-                # Determine the indices that would sort the mock galaxies 
-                # that are in the i^th prim_galprop bin
-                idx_bini_sorted = np.argsort(galaxy_table[idx_bini][self.sec_haloprop_key])
                 # Fetch the appropriate number of randoms
                 # for the i^th prim_galprop bin, and sort them
                 randoms_bini = all_randoms[idx_bini]
                 randoms_bini.sort()
                 # Draw monotonically increasing values of galprop
-                # and assign them to the appropriately sorted 
+                galprop_bini = self.one_point_lookup_table[i](randoms_bini)
+
+                # Determine the indices that would sort the mock galaxies 
+                # that are in the i^th prim_galprop bin
+                sec_haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
+                idx_bini_sorted = np.argsort(sec_haloprop_bini)
+
+                corr = pearsonr(galprop_bini, sec_haloprop_bini[idx_bini_sorted])
+                # Assign the final values to the appropriately sorted 
                 # subarray of output_galprop
-                output_galprop[idx_bini[idx_bini_sorted]] = (
-                    self.one_point_lookup_table[i](randoms_bini))
+                output_galprop[idx_bini[idx_bini_sorted]] = galprop_bini
 
         return output_galprop
 
