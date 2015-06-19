@@ -131,6 +131,8 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             via the ``halos`` keyword argument. 
         """
 
+        self.minimum_sampling = 50
+
         required_kwargs = (
             ['galprop_key', 'prim_galprop_key', 'prim_galprop_bins'])
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
@@ -141,6 +143,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
         if 'new_haloprop_func_dict' in kwargs.keys():
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
+
 
 
     def _mc_galprop(self, **kwargs):
@@ -231,22 +234,22 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         prim_galprop_bins = kwargs['prim_galprop_bins']
 
         self.one_point_lookup_table = np.zeros(
-            len(galaxy_table), dtype=object)
+            len(prim_galprop_bins)-1, dtype=object)
 
         binned_prim_galprop = np.digitize(
             galaxy_table[self.prim_galprop_key], 
             self.prim_galprop_bins)-1
 
-        for i in range(len(prim_galprop_bins)):
+        for i in range(len(self.one_point_lookup_table)):
             idx_bini = np.where(binned_prim_galprop == i)[0]
             gals_bini = galaxy_table[idx_bini]
             abcissa = np.arange(len(gals_bini))/float(len(gals_bini)-1)
             ordinates = np.sort(gals_bini[self.galprop_key])
-            print("abcissa length = %i" % len(abcissa))
 
-            self.one_point_lookup_table[i] = (
-                model_helpers.custom_spline(abcissa, ordinates, k=2)
-                )
+            if model_helpers.custom_len(gals_bini) > self.minimum_sampling:
+                self.one_point_lookup_table[i] = (
+                    model_helpers.custom_spline(abcissa, ordinates, k=2)
+                    )
 
 
 
