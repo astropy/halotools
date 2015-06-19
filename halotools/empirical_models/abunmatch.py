@@ -206,25 +206,27 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             else:
                 idx_bini = kwargs['galaxy_table_slice_array'][i]
 
-            print("Bin %i has %i galaxies" % (i, len(idx_bini)))
 
             if len(idx_bini) > 0:
+                sec_haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
+
+                print("Bin %i has %i galaxies" % (i, len(idx_bini)))
                 # Determine the indices that would sort the mock galaxies 
                 # within the i^th prim_galprop bin
-                idx_sorted = np.argsort(galaxy_table[idx_bini][self.sec_haloprop_key])
-
+                idx_sec_haloprop_sorted = np.argsort(sec_haloprop_bini)
                 # Fetch the appropriate number of randoms
                 # for the i^th prim_galprop bin, and sort them
                 randoms_bini = all_randoms[idx_bini]
+                #idx_randoms_bini_sorted = np.argsort(randoms_bini)
                 randoms_bini.sort()
 
                 # Use method of transformation of variables to 
                 # determine a realization galprop values for all 
                 # mock galaxies in the i^th prim_galprop bin
-#                output_galprop[idx_bini][idx_sorted] = (
-#                    self.one_point_lookup_table[i](randoms_bini)
-#                    )
-                output_galprop[idx_bini][idx_sorted] = 7
+
+                result_bini = self.one_point_lookup_table[i](randoms_bini)
+                output_galprop[idx_sec_haloprop_sorted[idx_bini]] = result_bini
+                print output_galprop[idx_bini]
 
 
         return output_galprop
