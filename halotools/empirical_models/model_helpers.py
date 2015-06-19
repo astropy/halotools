@@ -335,8 +335,11 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
             setattr(obj, key, kwargs[key])
         else:
             class_name = obj.__class__.__name__
-            raise KeyError("``%s`` is a required keyword argument "
-                "to instantiate the %s class" (key, class_name))
+            msg = (
+                key + ' is a required keyword argument ' + 
+                'to instantiate the '+class_name+' class'
+                )
+            raise KeyError(msg)
 
 def update_param_dict(obj, **kwargs):
     """ Method used to update the ``param_dict`` attribute of the 
