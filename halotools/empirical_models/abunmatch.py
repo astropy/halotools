@@ -101,6 +101,10 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             conditional one-point statistics, e.g., stellar mass 
             or luminosity. 
 
+        sec_haloprop_key : string, keyword argument 
+            Column name storing the halo property that will be correlated 
+            with galprop at fixed prim_galprop
+
         input_galaxy_table : data table 
             Astropy Table object storing the input galaxy population.  
             The conditional one-point functions of this population 
@@ -139,7 +143,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         self.minimum_sampling = minimum_sampling_requirement
 
         required_kwargs = (
-            ['galprop_key', 'prim_galprop_key', 'prim_galprop_bins'])
+            ['galprop_key', 'prim_galprop_key', 'prim_galprop_bins', 'sec_haloprop_key'])
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
         setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
         super(ConditionalAbunMatch, self).__init__(galprop_key=self.galprop_key)
@@ -188,12 +192,13 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 self.prim_galprop_bins)
 
         # All at once, draw all the randoms we will need
-        all_randoms = np.random.random(len(galaxy_table), seed=seed)
+        np.random.seed(seed=seed)
+        all_randoms = np.random.random(len(galaxy_table))
 
         # Initialize the output array
         output_galprop = np.zeros(len(galaxy_table))
 
-        for i, prim_galprop in enumerate(binned_prim_galprop):
+        for i in range(len(self.one_point_lookup_table)):
 
             # Determine the slice corresponding to the i^th prim_galprop bin
             if 'galaxy_table_slice_array' not in kwargs.keys():
@@ -201,21 +206,26 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             else:
                 idx_bini = kwargs['galaxy_table_slice_array'][i]
 
-            # Determine the indices that would sort the mock galaxies 
-            # within the i^th prim_galprop bin
-            idx_sorted = np.argsort(galaxy_table[idx_bini][self.sec_haloprop_key])
+            print("Bin %i has %i galaxies" % (i, len(idx_bini)))
 
-            # Fetch the appropriate number of randoms
-            # for the i^th prim_galprop bin, and sort them
-            randoms_bini = all_randoms[idx_bini]
-            randoms_bini.sort()
+            if len(idx_bini) > 0:
+                # Determine the indices that would sort the mock galaxies 
+                # within the i^th prim_galprop bin
+                idx_sorted = np.argsort(galaxy_table[idx_bini][self.sec_haloprop_key])
 
-            # Use method of transformation of variables to 
-            # determine a realization galprop values for all 
-            # mock galaxies in the i^th prim_galprop bin
-            output_galprop[idx_bini][idx_sorted] = (
-                self.one_point_lookup_table[i](cumulative_prob=randoms_bini)
-                )
+                # Fetch the appropriate number of randoms
+                # for the i^th prim_galprop bin, and sort them
+                randoms_bini = all_randoms[idx_bini]
+                randoms_bini.sort()
+
+                # Use method of transformation of variables to 
+                # determine a realization galprop values for all 
+                # mock galaxies in the i^th prim_galprop bin
+#                output_galprop[idx_bini][idx_sorted] = (
+#                    self.one_point_lookup_table[i](randoms_bini)
+#                    )
+                output_galprop[idx_bini][idx_sorted] = 7
+
 
         return output_galprop
 
