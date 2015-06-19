@@ -223,14 +223,15 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 idx_bini_sorted = self._return_sorting_array(
                     haloprop_bini, galprop_bini, 
                     1, randoms_scatter_implementation[idx_bini], 1)
+
                 # Assign the final values to the 
                 # appropriately sorted subarray of output_galprop
                 output_galprop[idx_bini[idx_bini_sorted]] = galprop_bini
 
         return output_galprop
 
-    def _return_sorting_array(self, haloprop, galprop, desired_correlation, 
-        randoms, tolerance):
+    def _return_sorting_array(self, haloprop, galprop, 
+        desired_correlation, randoms, tolerance):
 
         idx_sorted = np.argsort(haloprop)
         sorted_haloprop = haloprop[idx_sorted]
