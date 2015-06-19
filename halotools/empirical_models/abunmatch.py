@@ -241,7 +241,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             galaxy_table[self.prim_galprop_key], 
             self.prim_galprop_bins)-1
 
-        for i in range(len(self.one_point_lookup_table)-1):
+        for i in range(len(self.one_point_lookup_table)):
             idx_bini = np.where(binned_prim_galprop == i)[0]
             gals_bini = galaxy_table[idx_bini]
             abcissa = np.arange(len(gals_bini))/float(len(gals_bini)-1)
@@ -257,13 +257,12 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             self.one_point_lookup_table == 0)[0]
         filled_lookup_table_idx = np.where(
             self.one_point_lookup_table != 0)[0]
-
-        if len(unfilled_lookup_table_idx) > 0:
-            for idx in unfilled_lookup_table_idx:
-                closest_filled_idx_idx = array_utils.find_idx_nearest_val(
-                    filled_lookup_table_idx, idx)
-                closest_filled_idx = filled_lookup_table_idx[closest_filled_idx_idx]
-                self.one_point_lookup_table[idx] = self.one_point_lookup_table[closest_filled_idx]
+        for idx in unfilled_lookup_table_idx:
+            closest_filled_idx_idx = array_utils.find_idx_nearest_val(
+                filled_lookup_table_idx, idx)
+            closest_filled_idx = filled_lookup_table_idx[closest_filled_idx_idx]
+            self.one_point_lookup_table[idx] = (
+                self.one_point_lookup_table[closest_filled_idx])
 
 
 
