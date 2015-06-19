@@ -218,16 +218,20 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
                 # Determine the indices that would sort the mock galaxies 
                 # that are in the i^th prim_galprop bin
-                sec_haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
-                idx_bini_sorted = np.argsort(sec_haloprop_bini)
+                haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
+                idx_bini_sorted = np.argsort(haloprop_bini)
 
-                corr = pearsonr(galprop_bini, sec_haloprop_bini[idx_bini_sorted])
+                corr = pearsonr(galprop_bini, haloprop_bini[idx_bini_sorted])
 
                 # Assign the final values to the 
                 # appropriately sorted subarray of output_galprop
                 output_galprop[idx_bini[idx_bini_sorted]] = galprop_bini
 
         return output_galprop
+
+    def _implement_scatter(self, haloprop, galprop, randoms):
+
+        pass
 
     def build_one_point_lookup_table(self, **kwargs):
         """
