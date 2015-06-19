@@ -193,7 +193,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
         # All at once, draw all the randoms we will need
         np.random.seed(seed=seed)
-        all_randoms = np.random.random(len(galaxy_table))
+        all_randoms = np.random.random(len(galaxy_table)*2)
+        randoms_zero_scatter = all_randoms[0:len(galaxy_table)]
+        randoms_scatter_implementation = all_randoms[len(galaxy_table):]
 
         # Initialize the output array
         output_galprop = np.zeros(len(galaxy_table))
@@ -209,7 +211,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             if len(idx_bini) > 0:
                 # Fetch the appropriate number of randoms
                 # for the i^th prim_galprop bin, and sort them
-                randoms_bini = all_randoms[idx_bini]
+                randoms_bini = randoms_zero_scatter[idx_bini]
                 randoms_bini.sort()
                 # Draw monotonically increasing values of galprop
                 galprop_bini = self.one_point_lookup_table[i](randoms_bini)
@@ -220,8 +222,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 idx_bini_sorted = np.argsort(sec_haloprop_bini)
 
                 corr = pearsonr(galprop_bini, sec_haloprop_bini[idx_bini_sorted])
-                # Assign the final values to the appropriately sorted 
-                # subarray of output_galprop
+
+                # Assign the final values to the 
+                # appropriately sorted subarray of output_galprop
                 output_galprop[idx_bini[idx_bini_sorted]] = galprop_bini
 
         return output_galprop
