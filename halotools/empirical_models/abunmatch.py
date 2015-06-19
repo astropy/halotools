@@ -100,11 +100,15 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             conditional one-point statistics, e.g., stellar mass 
             or luminosity. 
 
-        galaxy_table : data table 
+        input_galaxy_table : data table 
             Astropy Table object storing the input galaxy population.  
             The conditional one-point functions of this population 
             will be used as inputs when building the primary behavior 
             of the `ConditionalAbunMatch` model. 
+
+        prim_galprop_bins : array 
+            Array used to bin the input galaxy population by the 
+            prim_galprop of the model. 
 
         correlation_strength : float or array, optional keyword argument 
             Specifies the absoluate value of the desired 
@@ -115,10 +119,6 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             specifies the correlation strength when prim_galprop equals  
             ``prim_galprop_bins[i]``. 
             Default is None, in which case zero scatter is assumed. 
-
-        prim_galprop_bins : array 
-            Array used to bin the input galaxy population by the 
-            prim_galprop of the model. 
 
         new_haloprop_func_dict : function object, optional keyword argument 
             Dictionary of function objects used by the mock factory 
@@ -132,8 +132,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         """
 
         required_kwargs = (
-            ['galprop_key', 'prim_galprop_key', 
-            'input_galaxy_table', 'prim_galprop_bins'])
+            ['galprop_key', 'prim_galprop_key', 'prim_galprop_bins'])
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
         setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
         super(ConditionalAbunMatch, self).__init__(galprop_key=self.galprop_key)
@@ -217,7 +216,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         """
         Parameters 
         ----------
-        galaxy_table : data table 
+        input_galaxy_table : data table 
             Astropy Table object storing the input galaxy population.  
             The conditional one-point functions of this population 
             will be used as inputs when building the primary behavior 
@@ -228,21 +227,25 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             prim_galprop of the model. 
 
         """
-        galaxy_table = kwargs['galaxy_table']
+        galaxy_table = kwargs['input_galaxy_table']
+        prim_galprop_bins = kwargs['prim_galprop_bins']
+
         self.one_point_lookup_table = np.zeros(
-            len(galaxy_table))
+            len(galaxy_table), dtype=object)
 
         binned_prim_galprop = np.digitize(
             galaxy_table[self.prim_galprop_key], 
-            self.prim_galprop_bins)
+            self.prim_galprop_bins)-1
 
         for i in range(len(prim_galprop_bins)):
             idx_bini = np.where(binned_prim_galprop == i)[0]
             gals_bini = galaxy_table[idx_bini]
             abcissa = np.arange(len(gals_bini))/float(len(gals_bini)-1)
             ordinates = np.sort(gals_bini[self.galprop_key])
+            print("abcissa length = %i" % len(abcissa))
+
             self.one_point_lookup_table[i] = (
-                model_helpers.custom_spline(abcissa, ordinates)
+                model_helpers.custom_spline(abcissa, ordinates, k=2)
                 )
 
 
