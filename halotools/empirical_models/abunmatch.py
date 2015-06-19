@@ -153,8 +153,6 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         if 'new_haloprop_func_dict' in kwargs.keys():
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
-
-
     def _mc_galprop(self, **kwargs):
         no_scatter_result = zero_scatter_relation(**kwargs)
         ### add scatter, if non-zero
@@ -206,34 +204,21 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             else:
                 idx_bini = kwargs['galaxy_table_slice_array'][i]
 
-
             if len(idx_bini) > 0:
-                sec_haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
-
-                print("Bin %i has %i galaxies" % (i, len(idx_bini)))
                 # Determine the indices that would sort the mock galaxies 
-                # within the i^th prim_galprop bin
-                idx_sec_haloprop_sorted = np.argsort(sec_haloprop_bini)
+                # that are in the i^th prim_galprop bin
+                idx_bini_sorted = np.argsort(galaxy_table[idx_bini][self.sec_haloprop_key])
                 # Fetch the appropriate number of randoms
                 # for the i^th prim_galprop bin, and sort them
                 randoms_bini = all_randoms[idx_bini]
-                #idx_randoms_bini_sorted = np.argsort(randoms_bini)
                 randoms_bini.sort()
-
-                # Use method of transformation of variables to 
-                # determine a realization galprop values for all 
-                # mock galaxies in the i^th prim_galprop bin
-
-
-                ### NEED TO FIGURE OUT NUMPY'S CONVENTION FOR 
-                ### NESTED FANCY INDEXING
-                result_bini = self.one_point_lookup_table[i](randoms_bini)
-                output_galprop[idx_sec_haloprop_sorted[idx_bini]] = result_bini
-                print output_galprop[idx_bini]
-
+                # Draw monotonically increasing values of galprop
+                # and assign them to the appropriately sorted 
+                # subarray of output_galprop
+                output_galprop[idx_bini[idx_bini_sorted]] = (
+                    self.one_point_lookup_table[i](randoms_bini))
 
         return output_galprop
-
 
     def build_one_point_lookup_table(self, **kwargs):
         """
