@@ -1,8 +1,16 @@
+# -*- coding: utf-8 -*-
+
+"""
+simple python brute force pair counting functions.  The primary purpose of these functions
+is as a sanity check on more complex pair counting techniques.  These functions should not
+be used on large data sets, as memory usage is very large, and runtimes can be very slow.
+"""
 
 from __future__ import division, print_function
 import numpy as np
 
 __all__=['npairs','wnpairs','pairs']
+__author__ = ['Duncan Campbell']
 
 
 def npairs(data1, data2, rbins, period=None):

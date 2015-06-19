@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
+
 """
-cell structure objected used for efficient pair counting.
+cell structure object used for efficient pairwise operations on simulation boxes.
 """
 
 import numpy as np
 
-class cube_grid():
+__all__=['rect_cuboid_cells']
+__author__ = ['Andrew Hearin, Duncan Campbell']
+
+class rect_cuboid_cells():
 
     def __init__(self, x, y, z, Lbox, cell_size):
         """
