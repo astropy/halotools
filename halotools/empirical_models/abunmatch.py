@@ -15,6 +15,7 @@ from .smhm_components import PrimGalpropModel
 
 from ..utils.array_utils import array_like_length as custom_len
 from ..sim_manager import sim_defaults 
+from ..utils import array_utils 
 
 from warnings import warn
 from functools import partial
@@ -240,7 +241,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             galaxy_table[self.prim_galprop_key], 
             self.prim_galprop_bins)-1
 
-        for i in range(len(self.one_point_lookup_table)):
+        for i in range(len(self.one_point_lookup_table)-1):
             idx_bini = np.where(binned_prim_galprop == i)[0]
             gals_bini = galaxy_table[idx_bini]
             abcissa = np.arange(len(gals_bini))/float(len(gals_bini)-1)
@@ -250,6 +251,19 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 self.one_point_lookup_table[i] = (
                     model_helpers.custom_spline(abcissa, ordinates, k=2)
                     )
+
+        # For all empty lookup tables, fill them with the nearest lookup table
+        unfilled_lookup_table_idx = np.where(
+            self.one_point_lookup_table == 0)[0]
+        filled_lookup_table_idx = np.where(
+            self.one_point_lookup_table != 0)[0]
+
+        if len(unfilled_lookup_table_idx) > 0:
+            for idx in unfilled_lookup_table_idx:
+                closest_filled_idx_idx = array_utils.find_idx_nearest_val(
+                    filled_lookup_table_idx, idx)
+                closest_filled_idx = filled_lookup_table_idx[closest_filled_idx_idx]
+                self.one_point_lookup_table[idx] = self.one_point_lookup_table[closest_filled_idx]
 
 
 
