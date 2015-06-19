@@ -89,7 +89,7 @@ class AbunMatchSmHm(PrimGalpropModel):
 class ConditionalAbunMatch(model_helpers.GalPropModel):
     """ Class to produce any CAM-style model of a galaxy property, such as age matching.  
     """
-    def __init__(self, **kwargs):
+    def __init__(self, minimum_sampling_requirement=100, **kwargs):
         """ 
         Parameters 
         ----------
@@ -121,6 +121,10 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             ``prim_galprop_bins[i]``. 
             Default is None, in which case zero scatter is assumed. 
 
+        minimum_sampling_requirement : int, optional
+            Minimum number of galaxies in the prim_galprop bin required to 
+            adequately sample the galprop PDF. Default is 100. 
+
         new_haloprop_func_dict : function object, optional keyword argument 
             Dictionary of function objects used by the mock factory 
             to create additional halo properties during a halo catalog pre-processing 
@@ -132,7 +136,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             via the ``halos`` keyword argument. 
         """
 
-        self.minimum_sampling = 50
+        self.minimum_sampling = minimum_sampling_requirement
 
         required_kwargs = (
             ['galprop_key', 'prim_galprop_key', 'prim_galprop_bins'])
@@ -235,19 +239,18 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         prim_galprop_bins = kwargs['prim_galprop_bins']
 
         self.one_point_lookup_table = np.zeros(
-            len(prim_galprop_bins)-1, dtype=object)
+            len(prim_galprop_bins)+1, dtype=object)
 
         binned_prim_galprop = np.digitize(
             galaxy_table[self.prim_galprop_key], 
-            self.prim_galprop_bins)-1
+            self.prim_galprop_bins)
 
         for i in range(len(self.one_point_lookup_table)):
             idx_bini = np.where(binned_prim_galprop == i)[0]
-            gals_bini = galaxy_table[idx_bini]
-            abcissa = np.arange(len(gals_bini))/float(len(gals_bini)-1)
-            ordinates = np.sort(gals_bini[self.galprop_key])
-
-            if model_helpers.custom_len(gals_bini) > self.minimum_sampling:
+            if model_helpers.custom_len(idx_bini) > self.minimum_sampling:
+                gals_bini = galaxy_table[idx_bini]
+                abcissa = np.arange(len(gals_bini))/float(len(gals_bini)-1)
+                ordinates = np.sort(gals_bini[self.galprop_key])
                 self.one_point_lookup_table[i] = (
                     model_helpers.custom_spline(abcissa, ordinates, k=2)
                     )
@@ -257,6 +260,13 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             self.one_point_lookup_table == 0)[0]
         filled_lookup_table_idx = np.where(
             self.one_point_lookup_table != 0)[0]
+
+        if len(unfilled_lookup_table_idx) > 0:
+            msg = ("When building the one-point lookup table from input_galaxy_table, " + 
+                "there were some bins of prim_galprop_bins that contained fewer than " + 
+                str(self.minimum_sampling)+ " galaxies. In such cases, the lookup table " + 
+                "of the nearest sufficiently populated bin will be chosen.")
+            warn(msg)
         for idx in unfilled_lookup_table_idx:
             closest_filled_idx_idx = array_utils.find_idx_nearest_val(
                 filled_lookup_table_idx, idx)
