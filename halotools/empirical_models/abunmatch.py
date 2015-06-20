@@ -206,6 +206,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         """
         self._set_correlation_strength()
         galaxy_table = kwargs['galaxy_table']
+        self.add_new_haloprops(galaxy_table)
 
         if 'galaxy_table_slice_array' not in kwargs.keys():
             binned_prim_galprop = np.digitize(
@@ -368,6 +369,16 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             self.correlation_strength[self.correlation_strength<0]=0
         else:
             pass
+
+    def add_new_haloprops(self, galaxy_table):
+        """ Method calls ``new_haloprop_func_dict`` to create new 
+        halo properties as columns to the mock catalog, if applicable. 
+        """
+        if hasattr(self, 'new_haloprop_func_dict'):
+            d = self.new_haloprop_func_dict
+            for key, func in d.iteritems():
+                if key not in galaxy_table.keys():
+                    galaxy_table[key] = func(galaxy_table=galaxy_table)
 
 
 
