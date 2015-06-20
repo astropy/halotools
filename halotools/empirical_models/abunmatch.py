@@ -214,28 +214,29 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 galprop_cumprob_bini = randoms_zero_scatter[idx_bini]
                 haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
 
-                galprop_bini, idx_test = self._return_sorting_array(
-                    haloprop_bini, galprop_cumprob_bini, i, 
+                idx_sorted_haloprop_bini = np.argsort(haloprop_bini)
+
+                galprop_bini = self._condition_matched_galprop(
+                    haloprop_bini[idx_sorted_haloprop_bini], 
+                    galprop_cumprob_bini, i, 
                     1, randoms_scatter_implementation[idx_bini], 1)
 
                 # Assign the final values to the 
                 # appropriately sorted subarray of output_galprop
-                output_galprop[idx_bini[idx_test]] = galprop_bini
+                output_galprop[idx_bini[idx_sorted_haloprop_bini]] = galprop_bini
 
         return output_galprop
 
-    def _return_sorting_array(self, haloprop, galprop_cumprob, ibin, 
+    def _condition_matched_galprop(self, sorted_haloprop, galprop_cumprob, ibin, 
         desired_correlation, randoms, tolerance):
 
-        idx_test = np.argsort(haloprop)
-
         additional_noise = np.random.random(len(galprop_cumprob))
-        new_randoms = galprop_cumprob + 2.*additional_noise
+        new_randoms = galprop_cumprob + 0.5*additional_noise
         idx_sorted = np.argsort(new_randoms)
         galprop_noscatter = (
             self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
 
-        return galprop_noscatter, idx_test
+        return galprop_noscatter
 
     def build_one_point_lookup_table(self, **kwargs):
         """
