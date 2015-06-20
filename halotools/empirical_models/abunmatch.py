@@ -355,8 +355,10 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             # Determine the slice corresponding to the i^th prim_galprop bin
             if 'galaxy_table_slice_array' not in kwargs.keys():
                 idx_bini = np.where(binned_prim_galprop==i)[0]
+                num_bini = len(idx_bini)
             else:
                 idx_bini = kwargs['galaxy_table_slice_array'][i]
+                num_bini = len(galaxy_table[idx_bini])
 
             if len(idx_bini) > 0:
                 # Fetch the appropriate number of randoms
@@ -387,7 +389,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             idx_sorted = np.argsort(new_randoms)
             galprop = (
                 self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
-            return abs(pearsonr(galprop, sorted_haloprop)[0]-self.correlation_strength[ibin])
+            return abs(pearsonr(galprop, sorted_haloprop)[0]-abs(self.correlation_strength[ibin]))
 
         if hasattr(self, 'correlation_strength'):
             result = minimize_scalar(compute_pearson_difference, tol=tol)
@@ -401,7 +403,10 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             galprop = (
                 self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
 
-        return galprop
+        if self.correlation_strength[ibin] < 0:
+            return galprop[::-1]
+        else:
+            return galprop
 
 
     def build_one_point_lookup_table(self, **kwargs):
@@ -482,8 +487,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
             self._param_dict_keys = ['correlation_param' + str(i+1) for i in range(len(correlation_strength))]
             self.param_dict = {key:value for key, value in zip(self._param_dict_keys, correlation_strength)}
-
-            self._set_correlation_strength()
+        else:
+            self.param_dict = {'correlation_param1': 1.0}
+        self._set_correlation_strength()
 
     def _set_correlation_strength(self):
         """ Method uses the current values in the param_dict to update the strength 
@@ -495,10 +501,10 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             ordinates = [self.param_dict['correlation_param'+str(i+1)] for i in range(len(abcissa))]
             correlation_strength_spline = model_helpers.custom_spline(abcissa, ordinates, k=custom_len(abcissa)-1)
             self.correlation_strength = correlation_strength_spline(self.prim_galprop_bins)
-            self.correlation_strength[self.correlation_strength>1]=1
-            self.correlation_strength[self.correlation_strength<0]=0
+            self.correlation_strength[self.correlation_strength > 1] = 1
+            self.correlation_strength[self.correlation_strength <- 1] = -1
         else:
-            pass
+            self.correlation_strength = np.repeat(self.param_dict['correlation_param1'], len(self.prim_galprop_bins))
 
     def add_new_haloprops(self, galaxy_table):
         """ Method calls ``new_haloprop_func_dict`` to create new 
