@@ -184,8 +184,19 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         """
         Parameters 
         ----------
-        galaxy_table : data table 
-            Astropy Table object storing the mock galaxy population.  
+        galaxy_table : data table, optional keyword argument 
+            Astropy Table object storing the mock galaxy population 
+            onto which values of ``self.galprop_key`` will be painted. 
+            If the ``galaxy_table`` keyword argument is not passed, 
+            then the ``halos`` keyword argument must be passed, 
+            but never both. 
+
+        halos : data table, optional keyword argument 
+            Astropy Table object storing the halo population 
+            onto which values of ``self.galprop_key`` will be painted. 
+            If the ``halos`` keyword argument is not passed, 
+            then the ``galaxy_table`` keyword argument must be passed, 
+            but never both. 
 
         galaxy_table_slice_array : array, optional keyword argument 
             Array of slice objects. The i^th entry of 
@@ -205,7 +216,21 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             and the galprop. 
         """
         self._set_correlation_strength()
-        galaxy_table = kwargs['galaxy_table']
+
+        if ('galaxy_table' in kwargs.keys()) & ('halos' in kwargs.keys()):
+            msg = ("The mc_"+self.galprop_key+" method accepts either " + 
+                "a halos keyword argument, or a galaxy_table keyword argument" + 
+                " but never both.")
+            raise KeyError(msg)
+        elif 'galaxy_table' in kwargs.keys():
+            galaxy_table = kwargs['galaxy_table']
+        elif 'halos' in kwargs.keys():
+            galaxy_table = kwargs['halos']
+        else:
+            msg = ("The mc_"+self.galprop_key+" requires either " + 
+                "a halos keyword argument, or a galaxy_table keyword argument")
+            raise KeyError(msg)
+
         self.add_new_haloprops(galaxy_table)
 
         if 'galaxy_table_slice_array' not in kwargs.keys():
