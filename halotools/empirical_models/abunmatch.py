@@ -96,60 +96,72 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         """ 
         Parameters 
         ----------
-        galprop_key : string, keyword argument
-            Column name of the galaxy property being modeled, e.g., color. 
-
-        prim_galprop_key : string, keyword argument 
-            Column name storing the galaxy property used to define the 
-            conditional one-point statistics, e.g., stellar mass 
-            or luminosity. 
-
-        sec_haloprop_key : string, keyword argument 
-            Column name storing the halo property that will be correlated 
-            with galprop at fixed prim_galprop
-
-        input_galaxy_table : data table 
+        input_galaxy_table : data table, required keyword argument 
             Astropy Table object storing the input galaxy population.  
             The conditional one-point functions of this population 
             will be used as inputs when building the primary behavior 
             of the `ConditionalAbunMatch` model. 
 
-        prim_galprop_bins : array 
-            Array used to bin the input galaxy population by the 
-            prim_galprop of the model. 
+        prim_galprop_key : string, required keyword argument 
+            Column name of ``input_galaxy_table`` storing 
+            the galaxy property used to define the 
+            conditional one-point statistics, e.g., ``stellar_mass`` 
+            or ``luminosity``. 
+
+        galprop_key : string, required keyword argument 
+            Column name of ``input_galaxy_table`` storing 
+            the galaxy property being modeled, 
+            e.g., ``gr_color`` or `ssfr``. 
+
+        sec_haloprop_key : string, required keyword argument 
+            Column name of the subhalo property that will be 
+            correlated with ``galprop_key`` at fixed ``prim_galprop_key``. 
+
+        prim_galprop_bins : array, required keyword argument 
+            Array used to bin ``input_galaxy_table`` by ``prim_galprop_key``. 
 
         correlation_strength : float or array, optional keyword argument 
             Specifies the absolute value of the desired 
             Spearmann rank-order correlation coefficient 
-            between the secondary halo property and the galprop. 
+            between ``sec_haloprop_key`` and ``galprop_key``. 
             If a float, the correlation strength will be assumed constant 
-            for all values of the prim_galprop. If an array, the i^th entry 
-            specifies the correlation strength when prim_galprop equals  
+            for all values of ``prim_galprop_key``. If an array, the i^th entry 
+            specifies the correlation strength when ``prim_galprop_key`` equals  
             ``prim_galprop_bins[i]``. 
             Default is None, in which case zero scatter is assumed. 
 
         correlation_strength_abcissa : float or array, optional keyword argument 
-            Specifies the value if the primary galaxy property at which 
-            the input correlation_strength applies. ``correlation_strength_abcissa`` 
+            Specifies the value of ``prim_galprop_key`` at which 
+            the input ``correlation_strength`` applies. ``correlation_strength_abcissa`` 
             need only be specified if a ``correlation_strength`` array is passed. 
 
         tol : float, optional keyword argument 
             Tolerance for the difference between the actual and desired 
-            correlation strength in each prim_galprop bin. Default is 0.01. 
+            correlation strength. Default is 0.01. 
 
-        minimum_sampling_requirement : int, optional
-            Minimum number of galaxies in the prim_galprop bin required to 
-            adequately sample the galprop PDF. Default is 100. 
+        minimum_sampling_requirement : int, optional keyword argument 
+            Minimum number of galaxies in the ``prim_galprop_key`` bin required to 
+            adequately sample the probability distribution of ``galprop_key`` at 
+            fixed ``prim_galprop_key``. Default is 100. 
+            For ``prim_galprop_key`` bins not meeting this requirement, 
+            the nearest ``prim_galprop_key`` bin of sufficient size 
+            will be used  to determine the conditional PDF. 
 
         new_haloprop_func_dict : function object, optional keyword argument 
             Dictionary of function objects used by the mock factory 
             to create additional halo properties during a halo catalog pre-processing 
-            phase. Each dict key of ``new_haloprop_func_dict`` will 
-            be the name of a new column of the halo catalog that will be passed 
-            to methods of `ConditionalAbunMatch`; each dict value 
-            of ``new_haloprop_func_dict`` is a function object that returns 
-            a length-N numpy array when passed a length-N Astropy table 
-            via the ``halos`` keyword argument. 
+            phase. This is useful for cases where the desired ``sec_haloprop_key`` 
+            does not appear in the input subhalo catalog. 
+            Each dict key of ``new_haloprop_func_dict`` will 
+            be the name of a new column of the halo catalog that will be 
+            created by `~halotools.empirical_models.SubhaloMockFactory` 
+            before calling the  methods of `ConditionalAbunMatch`; 
+            each dict value of ``new_haloprop_func_dict`` is a function object 
+            that returns a length-N numpy array when passed a 
+            length-N Astropy table via the ``halos`` keyword argument. 
+            By passing the ``new_haloprop_func_dict`` keyword argument, 
+            your newly created halo property will be guaranteed to exist, 
+            and can thus be optionally used as ``sec_haloprop_key``. 
         """
 
         self.minimum_sampling = minimum_sampling_requirement
