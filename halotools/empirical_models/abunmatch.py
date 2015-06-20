@@ -221,8 +221,8 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         between the galaxy and halo property. The level of scatter is defined by the 
         Pearson rank-order correlation coefficient, which can take on values between [-1, 1]. 
         In the example below, we will construct a CAM model for specific star-formation rate 
-        implementing a 50% correlation strength 
-        between ``zform`` and ``ssfr`` at fixed ``stellar_mass``:
+        implementing a positive correlation of 50% correlation strength 
+        between ``zhalf`` and ``ssfr`` at fixed ``stellar_mass``:
 
         >>> cam_constant_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = 0.5)
         >>> halos['ssfr'] = cam_constant_scatter.mc_ssfr(halos=halos)
@@ -244,7 +244,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         strength attains the values given by the ``correlation_strength`` array. 
 
         For example, suppose we wish to have 75% correlation strength at a stellar mass 
-        of :math:`10^{10}`, and a 25% correlation strength at a stellar mass of :math:`10^{11}`:
+        of :math:`10^{10}M_{\odot}`, and a 25% correlation strength at a stellar mass of :math:`10^{11}M_{\odot}` :
 
         >>> cam_variable_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = [0.75, 0.25], correlation_strength_abcissa = [1.e10, 1.e11])
         >>> halos['ssfr'] = cam_variable_scatter.mc_ssfr(halos=halos)
@@ -253,7 +253,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         each value of ``correlation_strength_abcissa``. We can modulate the scatter level 
         independently at each value of the abcissa by changing the values of ``param_dict``. 
         Here is an example of how to change the correlation strength at the second 
-        abciss value (in our case a stellar mass of :math:`10^{11}`):
+        abcissa value (in our case a stellar mass of :math:`10^{11}M_{\odot}`):
 
         >>> cam_variable_scatter.param_dict['correlation_param2'] = 0.5
         >>> halos['ssfr'] = cam_variable_scatter.mc_ssfr(halos=halos)
@@ -279,12 +279,13 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
     def _mc_galprop(self, seed=None, **kwargs):
         """
-        Private method used to conduct the conditional abundance matching. 
+        Private method controlling the primary algorithm behind the  
+        implementation of conditional abundance matching. 
         This method will be renamed according to ``self.galprop_key`` in the 
         instance of `ConditionalAbunMatch`. For example, 
-        if the property being modeled is ``gr_color``, then the `_mc_galprop` 
-        there will be a method named ``mc_gr_color`` bound to the 
-        `ConditionalAbunMatch` class instance. 
+        if the property being modeled is ``gr_color``, then the 
+        `_mc_galprop` function would instead be named ``mc_gr_color``, 
+        a bound method to the `ConditionalAbunMatch` class instance. 
 
         Parameters 
         ----------
@@ -405,6 +406,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
     def build_one_point_lookup_table(self, **kwargs):
         """
+        Method computes lookup tables of the cumulative ``galprop`` PDF 
+        defined by ``input_galaxy_table``. 
+
         Parameters 
         ----------
         input_galaxy_table : data table, required keyword argument 
