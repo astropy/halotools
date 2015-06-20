@@ -142,49 +142,27 @@ class FakeMock(object):
 
 		The `FakeMock` object has all of the same basic structure as the 
 		object produced by mock factories such as 
-		`~halotools.empirical_models.HodMockFactory`. So you can access 
-		the properties of the mock galaxies either as attributes or as 
-		keys of the galaxy table. 
-
-		For example, you can access the specific star-formation rates 
-		of the mock via the ``ssfr`` mock attribute:
-
-		>>> ssfr_array = mock.ssfr
-
-		Or, alternatively, you can use the ``galaxy_table``:
+		`~halotools.empirical_models.HodMockFactory`. You can access the 
+		collection of mock galaxies and their properties via ``mock.galaxy_table``:
 
 		>>> ssfr_array = mock.galaxy_table['ssfr']
 
-		The reason for having two different access methods is that 
-		there is some overhead computational cost of working with an 
-		Astropy `~astropy.table.Table`, 
-		so for MCMC applications the mock galaxy data is not 
-		bundled into a table. But tables are quite convenient to work with, 
-		so the ``galaxy_table`` option is available for less 
-		computationally intensive applications. 
-
-		Below are a few examples of how you might access various 
-		subsets of the galaxy population. For demonstration purposes, 
-		we will mix freely between the two different modes of 
-		galaxy property access:
+		Below are a couple of examples of how you might access various 
+		subsets of the galaxy population. 
 
 			* To select the population of *centrals*: 
-				>>> central_gals = mock.galaxy_table[mock.gal_type == 'centrals']
+				>>> central_mask = mock.galaxy_table['gal_type'] == 'centrals'
+				>>> central_gals = mock.galaxy_table[central_mask]
 
 				``central_gals`` is an Astropy `~astropy.table.Table` object, 
 				so we can only access its attributes via column keys:
 
-				>>> central_mstar = central_gals['ssfr']
+				>>> central_mstar = central_gals['stellar_mass']
 
 			* To select the *cluster* population: 
-
-				>>> cluster_gals = mock.galaxy_table[mock.halo_mvir > 1.e14]
+				>>> cluster_mask = mock.galaxy_table['halo_mvir'] > 1e14
+				>>> cluster_gals = mock.galaxy_table[cluster_mask]
 				>>> cluster_ssfr = cluster_gals['ssfr']
-
-			* To select the *quenched orphans*:
-				>>> boolean_filter = (mock.gal_type == 'orphans') & (mock.ssfr < -11)
-				>>> quenched_orphan_gals = mock.galaxy_table[boolean_filter]
-
 		"""
 		self.snapshot = FakeSim()
 		self.halos = self.snapshot.halos
@@ -196,29 +174,6 @@ class FakeMock(object):
 		self._occupation_bounds = [1, float('inf'), float('inf')]
 
 		self._set_fake_properties()
-
-	@property 
-	def galaxy_table(self):
-		""" Astropy `~astropy.table.Table` object storing fake mock galaxy data. 
-		"""
-
-		d = {'gal_type' : self.gal_type, 
-			'halo_mvir' : self.halo_mvir, 
-			'halo_mpeak' : self.halo_mvir, 
-			'halo_haloid' : self.halo_haloid, 
-			'halo_x' : self.x,
-			'halo_y' : self.y,
-			'halo_z' : self.z,
-			'halo_zhalf' : self.halo_zhalf, 
-			'mstar' : self.mstar, 
-			'ssfr' : self.ssfr, 
-			'x': self.x, 
-			'y': self.y, 
-			'z': self.z
-		}
-
-		return Table(d)
-
 	
 	def _set_fake_properties(self):
 
@@ -263,22 +218,61 @@ class FakeMock(object):
 		orphan_halo_z = np.repeat(self.halos['z'], orphan_occupations, axis=0)
 		orphan_halo_zhalf = np.repeat(self.halos['zhalf'], orphan_occupations)
 
-		self._occupation = np.append(censat_occ, orphan_occupations)
-		self.gal_type = np.append(censat_galtype, orphan_nickname_array)
-		self.halo_mvir = np.append(censat_halo_mvir, orphan_halo_mvir)
-		self.halo_haloid = np.append(censat_halo_haloid, orphan_halo_haloid).astype(int)
-		self.halo_x = np.append(censat_halo_x, orphan_halo_x, axis=0)
-		self.halo_y = np.append(censat_halo_y, orphan_halo_y, axis=0)
-		self.halo_z = np.append(censat_halo_z, orphan_halo_z, axis=0)
-		self.halo_zhalf = np.append(censat_halo_zhalf, orphan_halo_zhalf)
+		self.galaxy_table = Table()
 
-		self.num_gals = self.num_centrals + self.num_satellites + self.num_orphans 
-		self.mstar = np.random.uniform(8, 12, self.num_gals)
-		self.ssfr = np.random.uniform(-12, -9, self.num_gals)
+		#self._occupation = np.append(censat_occ, orphan_occupations)
+		self.galaxy_table['gal_type'] = np.append(
+			censat_galtype, orphan_nickname_array)
+		self.galaxy_table['halo_mvir'] = np.append(
+			censat_halo_mvir, orphan_halo_mvir)
+		self.galaxy_table['halo_haloid'] = np.append(
+			censat_halo_haloid, orphan_halo_haloid).astype(int)
+		self.galaxy_table['halo_x'] = np.append(censat_halo_x, orphan_halo_x, axis=0)
+		self.galaxy_table['halo_y'] = np.append(censat_halo_y, orphan_halo_y, axis=0)
+		self.galaxy_table['halo_z'] = np.append(censat_halo_z, orphan_halo_z, axis=0)
+		self.galaxy_table['halo_zhalf'] = np.append(censat_halo_zhalf, orphan_halo_zhalf)
 
-		self.x = np.random.uniform(0, self.snapshot.Lbox, self.num_gals)
-		self.y = np.random.uniform(0, self.snapshot.Lbox, self.num_gals)
-		self.z = np.random.uniform(0, self.snapshot.Lbox, self.num_gals)
+		num_gals = self.num_centrals + self.num_satellites + self.num_orphans 
+
+		self.galaxy_table['x'] = np.random.uniform(0, self.snapshot.Lbox, num_gals)
+		self.galaxy_table['y'] = np.random.uniform(0, self.snapshot.Lbox, num_gals)
+		self.galaxy_table['z'] = np.random.uniform(0, self.snapshot.Lbox, num_gals)
+
+		self.galaxy_table['stellar_mass'] = 10.**(np.random.power(2, size=num_gals)*3 + 9)
+
+		def get_colors(num_gals, red_fraction):
+		    num_red = np.round(num_gals*red_fraction).astype(int)
+		    num_blue = num_gals - num_red
+		    red_sequence = np.random.normal(loc=0.75, scale=0.15, size=num_red)
+		    blue_cloud = np.random.normal(loc=0, scale=0.3, size=num_blue)
+		    colors = np.append(red_sequence, blue_cloud)
+		    return colors
+
+		def get_ssfr(num_gals, red_fraction):
+		    num_red = np.round(num_gals*red_fraction).astype(int)
+		    num_blue = num_gals - num_red
+		    red_sequence = np.random.normal(loc=-11.5, scale=0.5, size=num_red)
+		    blue_cloud = np.random.normal(loc=-9.5, scale=0.5, size=num_blue)
+		    ssfr = np.append(red_sequence, blue_cloud)
+		    return ssfr
+
+		def get_bulge_to_disk_ratio(num_gals, disk_fraction):
+			bulge_mass = np.random.normal(loc=1, scale=0.5, size=num_gals)
+			num_disk = np.round(num_gals*disk_fraction).astype(int)
+			num_bulge = num_gals - num_disk
+			bulge = np.random.uniform(0.25, 1.5, num_bulge)
+			disk = np.random.uniform(0.75, 5, num_disk)
+			disk_mass = np.append(bulge, disk)
+			ratio = bulge_mass/disk_mass
+			ratio = np.where(ratio < 0.01, 1, ratio)
+			return ratio
+
+
+		sm_min = self.galaxy_table['stellar_mass'].min()-0.1
+		sm_max = self.galaxy_table['stellar_mass'].max()+0.1
+		sm_bins = np.logspace(np.log10(sm_min), np.log10(sm_max), 10)
+		self.galaxy_table['ssfr'] = np.random.uniform(-12, -9, num_gals)
+
 
 
 
