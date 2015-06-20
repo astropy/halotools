@@ -242,14 +242,14 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         idx_test = np.argsort(haloprop)
         #haloprop.sort()
 
-        idx_sorted = np.argsort(galprop_cumprob)
+        #idx_sorted = np.argsort(galprop_cumprob)
         additional_noise = np.random.random(len(galprop_cumprob))
-        new_randoms = galprop_cumprob + 0.15*additional_noise
-
-#        galprop_noscatter = (
-#            self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
+        new_randoms = galprop_cumprob + 2.*additional_noise
+        idx_sorted = np.argsort(new_randoms)
         galprop_noscatter = (
-            self.one_point_lookup_table[ibin](new_randoms[idx_sorted]))
+            self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
+#        galprop_noscatter = (
+#            self.one_point_lookup_table[ibin](new_randoms[idx_sorted]))
 
         corr = pearsonr(haloprop[idx_test], galprop_noscatter)[0]
         corrdiff = np.abs(corr - desired_correlation)
