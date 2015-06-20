@@ -192,6 +192,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             assumes there is no scatter between the sec_haloprop 
             and the galprop. 
         """
+        self._set_correlation_strength()
         galaxy_table = kwargs['galaxy_table']
 
         if 'galaxy_table_slice_array' not in kwargs.keys():
@@ -314,6 +315,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 self.one_point_lookup_table[closest_filled_idx])
 
     def _build_param_dict(self, **kwargs):
+        """ Method creates ``self.param_dict`` regulating the strength of 
+        the correlation between sec_haloprop and galprop at each value of prim_galprop.  
+        """
         
         if 'correlation_strength' in kwargs.keys():
 
@@ -335,9 +339,11 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
             self._set_correlation_strength()
 
-    def _set_correlation_strength(self, **kwargs):
+    def _set_correlation_strength(self):
+        """ Method uses the current values in the param_dict to update the strength 
+        of the correlation between sec_haloprop and galprop at each value of prim_galprop.  
+        """
 
-        model_helpers.update_param_dict(self, **kwargs)
         abcissa = self.correlation_strength_abcissa
         ordinates = [self.param_dict['correlation_param'+str(i+1)] for i in range(len(abcissa))]
         correlation_strength_spline = model_helpers.custom_spline(abcissa, ordinates)
