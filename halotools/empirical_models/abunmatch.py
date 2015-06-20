@@ -311,7 +311,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         # Initialize the output array
         output_galprop = np.zeros(len(galaxy_table))
 
-        for i in range(len(self.one_point_lookup_table)):
+        for i in range(len(self.one_point_lookup_table)-1):
 
             # Determine the slice corresponding to the i^th prim_galprop bin
             if 'galaxy_table_slice_array' not in kwargs.keys():

@@ -83,8 +83,16 @@ def test_cam_gr_color():
 		corr = spearmanr(mock_sm_range['gr_color'], mock_sm_range['halo_zhalf'])[0]
 		np.testing.assert_almost_equal(corr, desired_correlation, decimal=1)
 
+	def check_range(mock, data):
+		min_mock_galprop = mock.galaxy_table['gr_color'].min()
+		max_mock_galprop = mock.galaxy_table['gr_color'].max()
+		min_data_galprop = data.galaxy_table['gr_color'].min()
+		max_data_galprop = data.galaxy_table['gr_color'].max()
+		np.testing.assert_almost_equal(min_mock_galprop, min_data_galprop, decimal=0)
+		np.testing.assert_almost_equal(max_mock_galprop, max_data_galprop, decimal=0)
 
 	# Check no-scatter mock
+	check_range(fake_mock_noscatter, fake_data)
 	sm_low, sm_high = 1.e10, 5.e10
 	check_conditional_one_point(fake_mock_noscatter, fake_data, sm_low, sm_high)
 	check_spearmanr(fake_mock_noscatter, fake_data, sm_low, sm_high, 0.99)
@@ -93,6 +101,7 @@ def test_cam_gr_color():
 	check_spearmanr(fake_mock_noscatter, fake_data, sm_low, sm_high, 0.99)
 
 	# Check mock with 50% correlation strength
+	check_range(fake_mock_scatter_50, fake_data)
 	sm_low, sm_high = 1.e10, 5.e10
 	check_conditional_one_point(fake_mock_scatter_50, fake_data, sm_low, sm_high)
 	check_spearmanr(fake_mock_scatter_50, fake_data, sm_low, sm_high, 0.5)
@@ -101,6 +110,7 @@ def test_cam_gr_color():
 	check_spearmanr(fake_mock_scatter_50, fake_data, sm_low, sm_high, 0.5)
 
 	# Check mock with variable correlation strength
+	check_range(fake_mock_variable_scatter, fake_data)
 	sm_low, sm_high = 1.e10, 5.e10
 	check_conditional_one_point(fake_mock_variable_scatter, fake_data, sm_low, sm_high)
 	check_spearmanr(fake_mock_variable_scatter, fake_data, sm_low, sm_high, 0.34)
@@ -183,7 +193,17 @@ def test_cam_ssfr():
 		corr = spearmanr(mock_sm_range['ssfr'], mock_sm_range['halo_zhalf'])[0]
 		np.testing.assert_almost_equal(corr, desired_correlation, decimal=1)
 
+	def check_range(mock, data):
+		min_mock_galprop = mock.galaxy_table['ssfr'].min()
+		max_mock_galprop = mock.galaxy_table['ssfr'].max()
+		min_data_galprop = data.galaxy_table['ssfr'].min()
+		max_data_galprop = data.galaxy_table['ssfr'].max()
+		np.testing.assert_almost_equal(min_mock_galprop, min_data_galprop, decimal=0)
+		np.testing.assert_almost_equal(max_mock_galprop, max_data_galprop, decimal=0)
+
+
 	# Check no-scatter mock
+	check_range(fake_mock_noscatter, fake_data)
 	sm_low, sm_high = 1.e10, 5.e10
 	check_conditional_one_point(fake_mock_noscatter, fake_data, sm_low, sm_high)
 	check_spearmanr(fake_mock_noscatter, fake_data, sm_low, sm_high, 0.99)
@@ -192,6 +212,7 @@ def test_cam_ssfr():
 	check_spearmanr(fake_mock_noscatter, fake_data, sm_low, sm_high, 0.99)
 
 	# Check mock with 50% correlation strength
+	check_range(fake_mock_scatter_50, fake_data)
 	sm_low, sm_high = 1.e10, 5.e10
 	check_conditional_one_point(fake_mock_scatter_50, fake_data, sm_low, sm_high)
 	check_spearmanr(fake_mock_scatter_50, fake_data, sm_low, sm_high, 0.5)
@@ -200,6 +221,7 @@ def test_cam_ssfr():
 	check_spearmanr(fake_mock_scatter_50, fake_data, sm_low, sm_high, 0.5)
 
 	# Check mock with variable correlation strength
+	check_range(fake_mock_variable_scatter, fake_data)
 	sm_low, sm_high = 1.e10, 5.e10
 	check_conditional_one_point(fake_mock_variable_scatter, fake_data, sm_low, sm_high)
 	check_spearmanr(fake_mock_variable_scatter, fake_data, sm_low, sm_high, 0.34)
