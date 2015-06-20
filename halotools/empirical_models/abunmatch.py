@@ -248,7 +248,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         Here is an example of how to change the correlation strength at the second 
         abciss value (in our case a stellar mass of :math:`10^{11}`):
 
-        >>> cam_variable_scatter.param_dict['correlation_strength_param2']
+        >>> cam_variable_scatter.param_dict['correlation_param2'] = 0.5
         >>> halos['ssfr'] = cam_variable_scatter.mc_ssfr(halos=halos)
 
         .. automethod:: _mc_galprop
