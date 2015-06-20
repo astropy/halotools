@@ -126,10 +126,13 @@ class FakeMock(object):
 	""" Fake galaxy data used in the test suite of `~halotools.empirical_models`. 
 	"""
 
-	def __init__(self, seed=43):
+	def __init__(self, seed=43, approximate_ngals=2e4):
 		""" 
 		Parameters 
 		----------
+		approximate_ngals : int, optional 
+			Approximate number of galaxies in the fake mock. Default is 2e4. 
+		
 		seed : int, optional 
 			Random number seed used to generate the fake halos and particles. 
 			Default is 43.
@@ -164,7 +167,8 @@ class FakeMock(object):
 				>>> cluster_gals = mock.galaxy_table[cluster_mask]
 				>>> cluster_ssfr = cluster_gals['ssfr']
 		"""
-		self.snapshot = FakeSim()
+		nhalos = np.max([100, approximate_ngals/20.]).astype(int)
+		self.snapshot = FakeSim(num_halos_per_massbin=nhalos)
 		self.halos = self.snapshot.halos
 		self.particles = self.snapshot.particles
 		self.create_astropy_table = True
