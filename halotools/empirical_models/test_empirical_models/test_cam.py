@@ -25,7 +25,7 @@ def test_cam_gr_color():
 		input_galaxy_table = fake_data.galaxy_table, 
 		prim_galprop_bins = sm_bins
 		)
-	fake_mock_noscatter = FakeMock(approximate_ngals = 1e5)
+	fake_mock_noscatter = FakeMock(approximate_ngals = 1e4)
 	fake_mock_noscatter.galaxy_table['gr_color'] = (
 		cam_noscatter.mc_gr_color(galaxy_table = fake_mock_noscatter.galaxy_table))
 
@@ -37,7 +37,7 @@ def test_cam_gr_color():
 		prim_galprop_bins = sm_bins, 
 		correlation_strength = 0.5
 		)
-	fake_mock_scatter_50 = FakeMock(approximate_ngals = 1e5)
+	fake_mock_scatter_50 = FakeMock(approximate_ngals = 1e4)
 	fake_mock_scatter_50.galaxy_table['gr_color'] = (
 		cam_scatter_50.mc_gr_color(galaxy_table = fake_mock_scatter_50.galaxy_table))
 
@@ -50,7 +50,7 @@ def test_cam_gr_color():
 		correlation_strength = [0.25, 0.75], 
 		correlation_strength_abcissa = [2.e10, 7.e10]
 		)
-	fake_mock_variable_scatter = FakeMock(approximate_ngals = 1e5)
+	fake_mock_variable_scatter = FakeMock(approximate_ngals = 1e4)
 	fake_mock_variable_scatter.galaxy_table['gr_color'] = (
 		cam_variable_scatter.mc_gr_color(galaxy_table = fake_mock_variable_scatter.galaxy_table))
 
