@@ -210,11 +210,13 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
             if len(idx_bini) > 0:
                 # Fetch the appropriate number of randoms
-                # for the i^th prim_galprop bin, and sort them
+                # for the i^th prim_galprop bin
                 galprop_cumprob_bini = galprop_cumprob[idx_bini]
                 galprop_scatter_bini = galprop_scatter[idx_bini]
-                haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
 
+                # Fetch the halos in the i^th prim_galprop bin, 
+                # and determine how they are sorted
+                haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
                 idx_sorted_haloprop_bini = np.argsort(haloprop_bini)
 
                 galprop_bini = self._condition_matched_galprop(
@@ -232,12 +234,15 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         desired_correlation, randoms, tolerance):
 
         additional_noise = np.random.random(len(galprop_cumprob))
-        new_randoms = galprop_cumprob + 0.5*randoms
-        idx_sorted = np.argsort(new_randoms)
-        galprop_noscatter = (
-            self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
 
-        return galprop_noscatter
+        def get_noisy_galprop(r):
+            new_randoms = galprop_cumprob + r*randoms
+            idx_sorted = np.argsort(new_randoms)
+            galprop_noscatter = (
+                self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
+            return galprop_noscatter
+
+        return get_noisy_galprop(0.5)
 
     def build_one_point_lookup_table(self, **kwargs):
         """
