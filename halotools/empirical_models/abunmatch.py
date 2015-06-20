@@ -7,7 +7,7 @@ and conditional abundance matching (CAM).
 import numpy as np
 
 from scipy.stats import pearsonr
-
+from scipy.optimize import minimize_scalar
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
@@ -222,7 +222,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 galprop_bini = self._condition_matched_galprop(
                     haloprop_bini[idx_sorted_haloprop_bini], 
                     galprop_cumprob_bini, i, 
-                    1, galprop_scatter_bini, 1)
+                    0.75, galprop_scatter_bini, 0.1)
 
                 # Assign the final values to the 
                 # appropriately sorted subarray of output_galprop
@@ -231,18 +231,25 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         return output_galprop
 
     def _condition_matched_galprop(self, sorted_haloprop, galprop_cumprob, ibin, 
-        desired_correlation, randoms, tolerance):
+        desired_correlation, randoms, tol):
 
         additional_noise = np.random.random(len(galprop_cumprob))
 
-        def get_noisy_galprop(r):
+        def compute_pearson_difference(r):
             new_randoms = galprop_cumprob + r*randoms
             idx_sorted = np.argsort(new_randoms)
-            galprop_noscatter = (
+            galprop = (
                 self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
-            return galprop_noscatter
+            return abs(pearsonr(galprop, sorted_haloprop)[0]-desired_correlation)
 
-        return get_noisy_galprop(0.5)
+        result = minimize_scalar(compute_pearson_difference, tol=tol)
+        new_randoms = galprop_cumprob + result.x*randoms
+        idx_sorted = np.argsort(new_randoms)
+        galprop = (
+            self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
+
+        return galprop
+
 
     def build_one_point_lookup_table(self, **kwargs):
         """
