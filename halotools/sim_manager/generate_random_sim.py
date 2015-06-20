@@ -22,7 +22,8 @@ class FakeSim(object):
 	All the same, `FakeSim` is quite useful for testing purposes, 
 	as it permits the testing of `~halotools.sim_manager` and `~halotools.empirical_models` 
 	to be completely decoupled. Default behavior is to use a fixed seed in the random 
-	number generation, so that an identical instance of `FakeSim` is created with each call. 
+	number generation, so that an identical instance of `FakeSim` is created 
+	for calls with the same arguments. 
 	"""
 
 	def __init__(self, num_massbins = 6, num_halos_per_massbin = int(1e3), 
