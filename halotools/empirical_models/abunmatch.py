@@ -194,8 +194,8 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         # All at once, draw all the randoms we will need
         np.random.seed(seed=seed)
         all_randoms = np.random.random(len(galaxy_table)*2)
-        randoms_zero_scatter = all_randoms[0:len(galaxy_table)]
-        randoms_scatter_implementation = all_randoms[len(galaxy_table):]
+        galprop_cumprob = all_randoms[0:len(galaxy_table)]
+        galprop_scatter = all_randoms[len(galaxy_table):]
 
         # Initialize the output array
         output_galprop = np.zeros(len(galaxy_table))
@@ -211,7 +211,8 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             if len(idx_bini) > 0:
                 # Fetch the appropriate number of randoms
                 # for the i^th prim_galprop bin, and sort them
-                galprop_cumprob_bini = randoms_zero_scatter[idx_bini]
+                galprop_cumprob_bini = galprop_cumprob[idx_bini]
+                galprop_scatter_bini = galprop_scatter[idx_bini]
                 haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
 
                 idx_sorted_haloprop_bini = np.argsort(haloprop_bini)
@@ -219,7 +220,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 galprop_bini = self._condition_matched_galprop(
                     haloprop_bini[idx_sorted_haloprop_bini], 
                     galprop_cumprob_bini, i, 
-                    1, randoms_scatter_implementation[idx_bini], 1)
+                    1, galprop_scatter_bini, 1)
 
                 # Assign the final values to the 
                 # appropriately sorted subarray of output_galprop
@@ -231,7 +232,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         desired_correlation, randoms, tolerance):
 
         additional_noise = np.random.random(len(galprop_cumprob))
-        new_randoms = galprop_cumprob + 0.5*additional_noise
+        new_randoms = galprop_cumprob + 0.5*randoms
         idx_sorted = np.argsort(new_randoms)
         galprop_noscatter = (
             self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
