@@ -102,43 +102,46 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         Parameters 
         ----------
         input_galaxy_table : data table, required keyword argument 
-            Astropy Table object storing the input galaxy population.  
-            The conditional one-point functions of this population 
-            will be used as inputs when building the primary behavior 
-            of the `ConditionalAbunMatch` model. 
+            Astropy Table object storing the input galaxy population 
+            upon which the CAM model is based.  
 
         prim_galprop_key : string, required keyword argument 
-            Column name of ``input_galaxy_table`` storing 
-            the galaxy property used to define the 
-            conditional one-point statistics, e.g., ``stellar_mass`` 
-            or ``luminosity``. 
+            Column name such as ``stellar_mass`` or ``luminosity`` 
+            where the primary galaxy property is stored in 
+            ``input_galaxy_table``. 
 
         galprop_key : string, required keyword argument 
-            Column name of ``input_galaxy_table`` storing 
-            the galaxy property being modeled, 
-            e.g., ``gr_color`` or `ssfr``. 
+            Column name such as ``gr_color`` or ``ssfr`` 
+            of the secondary galaxy property being modeled. 
+            Can be any column of ``input_galaxy_table`` other than 
+            ``prim_galprop_key``. 
 
         sec_haloprop_key : string, required keyword argument 
-            Column name of the subhalo property that will be 
-            correlated with ``galprop_key`` at fixed ``prim_galprop_key``. 
+            Column name of the subhalo property that CAM models as 
+            being correlated with ``galprop_key`` at fixed ``prim_galprop_key``. 
 
         prim_galprop_bins : array, required keyword argument 
             Array used to bin ``input_galaxy_table`` by ``prim_galprop_key``. 
 
         correlation_strength : float or array, optional keyword argument 
             Specifies the absolute value of the desired 
-            Spearmann rank-order correlation coefficient 
+            Spearman rank-order correlation coefficient 
             between ``sec_haloprop_key`` and ``galprop_key``. 
             If a float, the correlation strength will be assumed constant 
             for all values of ``prim_galprop_key``. If an array, the i^th entry 
             specifies the correlation strength when ``prim_galprop_key`` equals  
-            ``prim_galprop_bins[i]``. 
-            Default is None, in which case zero scatter is assumed. 
+            ``prim_galprop_bins[i]``. Entries must be in the range [-1, 1], 
+            with negative values corresponding to anti-correlations; 
+            the endpoints signify maximum correlation, zero signifies 
+            that ``sec_haloprop_key`` and ``galprop_key`` are uncorrelated. 
+            Default is maximum (positive) correlation strength of 1. 
 
         correlation_strength_abcissa : float or array, optional keyword argument 
             Specifies the value of ``prim_galprop_key`` at which 
             the input ``correlation_strength`` applies. ``correlation_strength_abcissa`` 
             need only be specified if a ``correlation_strength`` array is passed. 
+            Intermediary values of the correlation strength at values 
+            between the abcissa are solved for by spline interpolation. 
 
         tol : float, optional keyword argument 
             Tolerance for the difference between the actual and desired 
@@ -153,20 +156,22 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             will be used  to determine the conditional PDF. 
 
         new_haloprop_func_dict : function object, optional keyword argument 
-            Dictionary of function objects used by the mock factory 
-            to create additional halo properties during a halo catalog pre-processing 
-            phase. This is useful for cases where the desired ``sec_haloprop_key`` 
+            Can be used to create new halo properties with which to introduce 
+            correlations. This is useful for cases where the desired ``sec_haloprop_key`` 
             does not appear in the input subhalo catalog. 
-            Each dict key of ``new_haloprop_func_dict`` will 
+            ``new_haloprop_func_dict`` is a dictionary of 
+            function objects. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog that will be 
-            created by `~halotools.empirical_models.SubhaloMockFactory` 
-            before calling the  methods of `ConditionalAbunMatch`; 
-            each dict value of ``new_haloprop_func_dict`` is a function object 
+            created. Each dict value of ``new_haloprop_func_dict`` is a function object 
             that returns a length-N numpy array when passed a 
             length-N Astropy table via the ``halos`` keyword argument. 
             By passing the ``new_haloprop_func_dict`` keyword argument, 
             your newly created halo property will be guaranteed to exist, 
-            and can thus be optionally used as ``sec_haloprop_key``. 
+            and can thus be optionally used as the ``sec_haloprop_key``. 
+            This is the device used by 
+            `~halotools.empirical_models.SubhaloMockFactory`  
+            to create new halo properties during 
+            a halo catalog pre-processing phase. 
 
         Examples 
         --------
