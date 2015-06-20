@@ -212,26 +212,14 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 # Fetch the appropriate number of randoms
                 # for the i^th prim_galprop bin, and sort them
                 galprop_cumprob_bini = randoms_zero_scatter[idx_bini]
-
-                #randoms_bini.sort()
-                
-                # Draw monotonically increasing values of galprop
-                #galprop_bini = self.one_point_lookup_table[i](randoms_bini)
-
-                # Determine the indices that would sort the mock galaxies 
-                # that are in the i^th prim_galprop bin
                 haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
 
-#                idx_bini_sorted = self._return_sorting_array(
-#                    haloprop_bini, galprop_cumprob_bini, i, 
-#                    1, randoms_scatter_implementation[idx_bini], 1)
                 galprop_bini, idx_test = self._return_sorting_array(
                     haloprop_bini, galprop_cumprob_bini, i, 
                     1, randoms_scatter_implementation[idx_bini], 1)
 
                 # Assign the final values to the 
                 # appropriately sorted subarray of output_galprop
-#                output_galprop[idx_bini[idx_bini_sorted]] = galprop_bini
                 output_galprop[idx_bini[idx_test]] = galprop_bini
 
         return output_galprop
@@ -240,26 +228,14 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         desired_correlation, randoms, tolerance):
 
         idx_test = np.argsort(haloprop)
-        #haloprop.sort()
 
-        #idx_sorted = np.argsort(galprop_cumprob)
         additional_noise = np.random.random(len(galprop_cumprob))
         new_randoms = galprop_cumprob + 2.*additional_noise
         idx_sorted = np.argsort(new_randoms)
         galprop_noscatter = (
             self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
-#        galprop_noscatter = (
-#            self.one_point_lookup_table[ibin](new_randoms[idx_sorted]))
-
-        corr = pearsonr(haloprop[idx_test], galprop_noscatter)[0]
-        corrdiff = np.abs(corr - desired_correlation)
-
-        #while corrdiff > tolerance:
-            # add scatter
-        #    pass
 
         return galprop_noscatter, idx_test
-        #return idx_sorted
 
     def build_one_point_lookup_table(self, **kwargs):
         """
