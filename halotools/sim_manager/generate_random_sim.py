@@ -243,21 +243,22 @@ class FakeMock(object):
 		def get_colors(num_gals, red_fraction):
 		    num_red = np.round(num_gals*red_fraction).astype(int)
 		    num_blue = num_gals - num_red
-		    red_sequence = np.random.normal(loc=0.75, scale=0.15, size=num_red)
-		    blue_cloud = np.random.normal(loc=0, scale=0.3, size=num_blue)
+		    red_sequence = np.random.normal(loc=0.75, scale=0.1, size=num_red)
+		    blue_cloud = np.random.normal(loc=0, scale=0.2, size=num_blue)
 		    colors = np.append(red_sequence, blue_cloud)
 		    return colors
 
 		def get_ssfr(num_gals, red_fraction):
 		    num_red = np.round(num_gals*red_fraction).astype(int)
 		    num_blue = num_gals - num_red
-		    red_sequence = np.random.normal(loc=-11.5, scale=0.5, size=num_red)
-		    blue_cloud = np.random.normal(loc=-9.5, scale=0.5, size=num_blue)
+		    red_sequence = np.random.normal(loc=-11.5, scale=0.3, size=num_red)
+		    blue_cloud = np.random.normal(loc=-9.5, scale=0.4, size=num_blue)
 		    ssfr = np.append(red_sequence, blue_cloud)
 		    return ssfr
 
-		def get_bulge_to_disk_ratio(num_gals, disk_fraction):
+		def get_bulge_to_disk_ratio(num_gals, bulge_fraction):
 			bulge_mass = np.random.normal(loc=1, scale=0.5, size=num_gals)
+			disk_fraction = 1-bulge_fraction
 			num_disk = np.round(num_gals*disk_fraction).astype(int)
 			num_bulge = num_gals - num_disk
 			bulge = np.random.uniform(0.25, 1.5, num_bulge)
@@ -267,11 +268,38 @@ class FakeMock(object):
 			ratio = np.where(ratio < 0.01, 1, ratio)
 			return ratio
 
+		sm_min = self.galaxy_table['stellar_mass'].min()
+		sm_max = self.galaxy_table['stellar_mass'].max()
+		sm_bins = np.logspace(np.log10(sm_min)-0.01, np.log10(sm_max)+0.01, 50)
+		bimodality = np.linspace(0.1, 0.9, len(sm_bins))
 
-		sm_min = self.galaxy_table['stellar_mass'].min()-0.1
-		sm_max = self.galaxy_table['stellar_mass'].max()+0.1
-		sm_bins = np.logspace(np.log10(sm_min), np.log10(sm_max), 10)
-		self.galaxy_table['ssfr'] = np.random.uniform(-12, -9, num_gals)
+		colors = np.zeros(num_gals)
+		ssfr = np.zeros(num_gals)
+		bulge_ratios = np.zeros(num_gals)
+
+		for ibin in range(len(sm_bins)-1):
+			idx_bini = np.where(
+				(self.galaxy_table['stellar_mass'] > sm_bins[ibin]) & 
+				(self.galaxy_table['stellar_mass'] < sm_bins[ibin+1]))[0]
+			num_gals_ibin = len(self.galaxy_table[idx_bini])
+
+			if num_gals_ibin > 0:
+				colors_bini = get_colors(
+					num_gals_ibin, bimodality[ibin])
+				ssfr_bini = get_ssfr(
+					num_gals_ibin, bimodality[ibin])
+				bulge_ratios_bini = get_bulge_to_disk_ratio(
+					num_gals_ibin, bimodality[ibin])
+
+				colors[idx_bini] = colors_bini
+				ssfr[idx_bini] = ssfr_bini
+				bulge_ratios[idx_bini] = bulge_ratios_bini
+
+
+		self.galaxy_table['bulge_to_disk_ratio'] = bulge_ratios
+		self.galaxy_table['ssfr'] = ssfr
+		self.galaxy_table['gr_color'] = colors
+
 
 
 
