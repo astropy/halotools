@@ -91,7 +91,8 @@ class AbunMatchSmHm(PrimGalpropModel):
 class ConditionalAbunMatch(model_helpers.GalPropModel):
     """ Class to produce any CAM-style model of a galaxy property, such as age matching.  
     """
-    def __init__(self, minimum_sampling_requirement=100, **kwargs):
+    def __init__(self, minimum_sampling_requirement=100, tol=0.01, 
+        **kwargs):
         """ 
         Parameters 
         ----------
@@ -118,7 +119,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             prim_galprop of the model. 
 
         correlation_strength : float or array, optional keyword argument 
-            Specifies the absoluate value of the desired 
+            Specifies the absolute value of the desired 
             Spearmann rank-order correlation coefficient 
             between the secondary halo property and the galprop. 
             If a float, the correlation strength will be assumed constant 
@@ -126,6 +127,15 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             specifies the correlation strength when prim_galprop equals  
             ``prim_galprop_bins[i]``. 
             Default is None, in which case zero scatter is assumed. 
+
+        correlation_strength_abcissa : float or array, optional keyword argument 
+            Specifies the value if the primary galaxy property at which 
+            the input correlation_strength applies. ``correlation_strength_abcissa`` 
+            need only be specified if a ``correlation_strength`` array is passed. 
+
+        tol : float, optional keyword argument 
+            Tolerance for the difference between the actual and desired 
+            correlation strength in each prim_galprop bin. Default is 0.01. 
 
         minimum_sampling_requirement : int, optional
             Minimum number of galaxies in the prim_galprop bin required to 
@@ -143,6 +153,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         """
 
         self.minimum_sampling = minimum_sampling_requirement
+        self.tol = tol
 
         required_kwargs = (
             ['galprop_key', 'prim_galprop_key', 'prim_galprop_bins', 'sec_haloprop_key'])
@@ -150,17 +161,14 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
         super(ConditionalAbunMatch, self).__init__(galprop_key=self.galprop_key)
 
+        self._build_param_dict(**kwargs)
+
         self.build_one_point_lookup_table(**kwargs)
 
         if 'new_haloprop_func_dict' in kwargs.keys():
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
-    def _mc_galprop(self, **kwargs):
-        no_scatter_result = zero_scatter_relation(**kwargs)
-        ### add scatter, if non-zero
-        return None
-
-    def zero_scatter_relation(self, seed=None, **kwargs):
+    def _mc_galprop(self, seed=None, **kwargs):
         """
         Parameters 
         ----------
@@ -222,7 +230,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 galprop_bini = self._condition_matched_galprop(
                     haloprop_bini[idx_sorted_haloprop_bini], 
                     galprop_cumprob_bini, i, 
-                    0.75, galprop_scatter_bini, 0.1)
+                    0.75, galprop_scatter_bini, self.tol)
 
                 # Assign the final values to the 
                 # appropriately sorted subarray of output_galprop
@@ -304,6 +312,27 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             closest_filled_idx = filled_lookup_table_idx[closest_filled_idx_idx]
             self.one_point_lookup_table[idx] = (
                 self.one_point_lookup_table[closest_filled_idx])
+
+    def _build_param_dict(self, **kwargs):
+        
+        if 'correlation_strength' not in kwargs.keys():
+            return 
+        else:
+            correlation_strength = kwargs['correlation_strength']
+            if 'correlation_strength_abcissa' in kwargs.keys():
+                abcissa = kwargs['correlation_strength_abcissa']
+
+            else:
+                abcissa = [0]
+                correlation_strength = [correlation_strength]
+
+            self._param_dict_keys = ['correlation_param' + str(i+1) for i in range(len(abcissa))]
+            self.param_dict = {key:value for key, value in zip(self._param_dict_keys, correlation_strength)}
+
+
+
+
+
 
 
 
