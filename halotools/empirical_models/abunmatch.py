@@ -333,11 +333,14 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             self._param_dict_keys = ['correlation_param' + str(i+1) for i in range(len(correlation_strength))]
             self.param_dict = {key:value for key, value in zip(self._param_dict_keys, correlation_strength)}
 
+            self._set_correlation_strength()
+
     def _set_correlation_strength(self, **kwargs):
 
+        model_helpers.update_param_dict(self, **kwargs)
         abcissa = self.correlation_strength_abcissa
         ordinates = [self.param_dict['correlation_param'+str(i+1)] for i in range(len(abcissa))]
-        correlation_strength_spline = custom_spline(abcissa, ordinates)
+        correlation_strength_spline = model_helpers.custom_spline(abcissa, ordinates)
         self.correlation_strength = correlation_strength_spline(self.prim_galprop_bins)
 
 
