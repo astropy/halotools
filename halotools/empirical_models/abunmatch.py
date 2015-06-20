@@ -220,6 +220,37 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         >>> cam_constant_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = 0.5)
         >>> halos['ssfr'] = cam_constant_scatter.mc_ssfr(halos=halos)
 
+        After building a CAM model, you can vary the strength of the amount of scatter 
+        by the model's parameter dictionary:
+
+        >>> cam_constant_scatter.param_dict['correlation_strength_param1'] = 0.75
+
+        Calling the ``mc_ssfr`` method will now implement a 75% correlation strength:
+
+        >>> halos['ssfr'] = cam_constant_scatter.mc_ssfr(halos=halos)
+
+        The `ConditionalAbunMatch` class also has support for levels of scatter that 
+        vary with the primary galaxy property. To construct such a model, you provide 
+        an array for the ``correlation_strength`` keyword argument, as well as an array 
+        of the same length for the ``correlation_strength_abcissa`` argument. The latter 
+        specifies the values of the primary galaxy property at which the correlation 
+        strength attains the values given by the ``correlation_strength`` array. 
+
+        For example, suppose we wish to have 75% correlation strength at a stellar mass 
+        of :math:`10^{10}`, and a 25% correlation strength at a stellar mass of :math:`10^{11}`:
+
+        >>> cam_variable_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = [0.75, 0.25], correlation_strength_abcissa = [1.e10, 1.e11])
+        >>> halos['ssfr'] = cam_variable_scatter.mc_ssfr(halos=halos)
+
+        Now, there are multiple parameters governing the scatter, one for the strength at 
+        each value of ``correlation_strength_abcissa``. We can modulate the scatter level 
+        independently at each value of the abcissa by changing the values of ``param_dict``. 
+        Here is an example of how to change the correlation strength at the second 
+        abciss value (in our case a stellar mass of :math:`10^{11}`):
+
+        >>> cam_variable_scatter.param_dict['correlation_strength_param2']
+        >>> halos['ssfr'] = cam_variable_scatter.mc_ssfr(halos=halos)
+
         .. automethod:: _mc_galprop
         """
 
