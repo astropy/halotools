@@ -230,8 +230,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
                 galprop_bini = self._condition_matched_galprop(
                     haloprop_bini[idx_sorted_haloprop_bini], 
-                    galprop_cumprob_bini, i, 
-                    0.75, galprop_scatter_bini, self.tol)
+                    galprop_cumprob_bini, i, galprop_scatter_bini, self.tol)
 
                 # Assign the final values to the 
                 # appropriately sorted subarray of output_galprop
@@ -239,23 +238,27 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
         return output_galprop
 
-    def _condition_matched_galprop(self, sorted_haloprop, galprop_cumprob, ibin, 
-        desired_correlation, randoms, tol):
-
-        additional_noise = np.random.random(len(galprop_cumprob))
+    def _condition_matched_galprop(self, sorted_haloprop, galprop_cumprob, 
+        ibin, randoms, tol):
 
         def compute_pearson_difference(r):
             new_randoms = galprop_cumprob + r*randoms
             idx_sorted = np.argsort(new_randoms)
             galprop = (
                 self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
-            return abs(pearsonr(galprop, sorted_haloprop)[0]-desired_correlation)
+            return abs(pearsonr(galprop, sorted_haloprop)[0]-self.correlation_strength[ibin])
 
-        result = minimize_scalar(compute_pearson_difference, tol=tol)
-        new_randoms = galprop_cumprob + result.x*randoms
-        idx_sorted = np.argsort(new_randoms)
-        galprop = (
-            self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
+        if hasattr(self, 'correlation_strength'):
+            result = minimize_scalar(compute_pearson_difference, tol=tol)
+            new_randoms = galprop_cumprob + result.x*randoms
+            idx_sorted = np.argsort(new_randoms)
+            galprop = (
+                self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
+        else:
+            # Zero scatter case
+            idx_sorted = np.argsort(galprop_cumprob)
+            galprop = (
+                self.one_point_lookup_table[ibin](galprop_cumprob[idx_sorted]))
 
         return galprop
 
@@ -344,10 +347,15 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         of the correlation between sec_haloprop and galprop at each value of prim_galprop.  
         """
 
-        abcissa = self.correlation_strength_abcissa
-        ordinates = [self.param_dict['correlation_param'+str(i+1)] for i in range(len(abcissa))]
-        correlation_strength_spline = model_helpers.custom_spline(abcissa, ordinates)
-        self.correlation_strength = correlation_strength_spline(self.prim_galprop_bins)
+        if hasattr(self, 'correlation_strength_abcissa'):
+            abcissa = self.correlation_strength_abcissa
+            ordinates = [self.param_dict['correlation_param'+str(i+1)] for i in range(len(abcissa))]
+            correlation_strength_spline = model_helpers.custom_spline(abcissa, ordinates, k=custom_len(abcissa)-1)
+            self.correlation_strength = correlation_strength_spline(self.prim_galprop_bins)
+            self.correlation_strength[self.correlation_strength>1]=1
+            self.correlation_strength[self.correlation_strength<0]=0
+        else:
+            pass
 
 
 
