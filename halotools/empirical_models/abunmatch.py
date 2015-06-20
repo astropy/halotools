@@ -315,13 +315,17 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
     def _build_param_dict(self, **kwargs):
         
-        if 'correlation_strength' not in kwargs.keys():
-            return 
-        else:
-            correlation_strength = kwargs['correlation_strength']
-            if 'correlation_strength_abcissa' in kwargs.keys():
-                abcissa = kwargs['correlation_strength_abcissa']
+        if 'correlation_strength' in kwargs.keys():
 
+            correlation_strength = kwargs['correlation_strength']
+            if custom_len(correlation_strength) > 1:
+                try:
+                    correlation_strength_abcissa = kwargs['correlation_strength_abcissa']
+                except KeyError:
+                    msg = ("If correlation_strength keyword is passed to the constructor, \n" + 
+                        "you must also pass a correlation_strength_abcissa keyword argument " + 
+                        "storing an array of the same length as correlation_strength.")
+                    raise(msg)
             else:
                 abcissa = [0]
                 correlation_strength = [correlation_strength]
@@ -329,6 +333,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             self._param_dict_keys = ['correlation_param' + str(i+1) for i in range(len(abcissa))]
             self.param_dict = {key:value for key, value in zip(self._param_dict_keys, correlation_strength)}
 
+    def _set_correlation_strength_spline(self, **kwargs):
+
+        spline_abcissa = self.prim_galprop_bins
 
 
 
