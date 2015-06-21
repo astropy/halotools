@@ -137,6 +137,8 @@ class SubhaloModelFactory(ModelFactory):
         
         self._build_composite_lists(**kwargs)
 
+        self._set_init_param_dict()
+
         self._set_primary_behaviors()
 
 
@@ -166,10 +168,19 @@ class SubhaloModelFactory(ModelFactory):
         """
 
         for galprop_key in self.galprop_list:
-            component_model = self.model_blueprint[galprop_key]
+            
             behavior_name = 'mc_'+galprop_key
-            behavior_function = getattr(component_model, behavior_name)
+            behavior_function = partial(self._galprop_func, galprop_key)
             setattr(self, behavior_name, behavior_function)
+
+    def _galprop_func(self, galprop_key, **kwargs):
+        """
+        """
+        component_model = self.model_blueprint[galprop_key]
+        current_galprop_param_dict = self._get_stripped_param_dict(galprop_key)
+        behavior_function = partial(getattr(component_model, 'mc_'+galprop_key), 
+            input_param_dict = current_galprop_param_dict)
+        return behavior_function(**kwargs)
 
     def _build_composite_lists(self, **kwargs):
         """ A composite model has several bookkeeping devices that are built up from 
@@ -222,6 +233,79 @@ class SubhaloModelFactory(ModelFactory):
         self.publications = list(set(pub_list))
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
+    def _set_init_param_dict(self):
+        """ Method used to build a dictionary of parameters for the composite model. 
+
+        Accomplished by retrieving all the parameters of the component models. 
+        Method returns nothing, but binds ``param_dict`` to the class instance. 
+
+        Notes 
+        -----
+        In MCMC applications, the items of ``param_dict`` define the 
+        parameter set explored by the likelihood engine. 
+        Changing the values of the parameters in ``param_dict`` 
+        will propagate to the behavior of the component models. 
+
+        Each component model has its own ``param_dict`` bound to it. 
+        When changing the values of ``param_dict`` bound to `HodModelFactory`, 
+        the corresponding values of the component model ``param_dict`` will *not* change.  
+
+        """
+
+        self.param_dict = {}
+
+        # Loop over all galaxy types in the composite model
+        for galprop in self.galprop_list:
+            galprop_model = self.model_blueprint[galprop]
+
+            if hasattr(galprop_model, 'param_dict'):
+                galprop_model_param_dict = (
+                    {galprop_model.galprop_key+'_'+key:val for key, val in galprop_model.param_dict.items()}
+                    )
+            else:
+                galprop_model_param_dict = {}
+
+            intersection = set(self.param_dict) & set(galprop_model_param_dict)
+            if intersection != set():
+                repeated_key = list(intersection)[0]
+                raise KeyError("The param_dict key %s appears in more "
+                    "than one component model" % repeated_key)
+            else:
+
+                self.param_dict = dict(
+                    galprop_model_param_dict.items() + 
+                    self.param_dict.items()
+                    )
+
+        self._init_param_dict = copy(self.param_dict)
+
+    def _get_stripped_param_dict(self, galprop):
+        """
+        """
+
+        galprop_model = self.model_blueprint[galprop]
+
+        if hasattr(galprop_model, 'param_dict'):
+            galprop_model_param_keys = galprop_model.param_dict.keys()
+        else:
+            galprop_model_param_keys = []
+
+        output_param_dict = {}
+        for key in galprop_model_param_keys:
+            output_param_dict[key] = self.param_dict[galprop+'_'+key]
+
+        return output_param_dict
+
+
+    def restore_init_param_dict(self):
+        """ Reset all values of the current ``param_dict`` to the values 
+        the class was instantiated with. 
+
+        Primary behaviors are reset as well, as this is how the 
+        inherited behaviors get bound to the values in ``param_dict``. 
+        """
+        self.param_dict = self._init_param_dict
+        self._set_primary_behaviors()
 
 
 class HodModelFactory(ModelFactory):
