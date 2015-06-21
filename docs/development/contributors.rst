@@ -20,6 +20,7 @@ Core Package Contributors
 ==========================
 
 * Matt Becker
+* Peter Behroozi
 * Duncan Campbell
 * Shany Danieli
 * Benedikt Diemer
