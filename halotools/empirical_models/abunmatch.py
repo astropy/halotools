@@ -327,8 +327,11 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             raise KeyError(msg)
         elif 'galaxy_table' in kwargs.keys():
             galaxy_table = kwargs['galaxy_table']
+            operative_sec_haloprop_key = (
+                model_defaults.host_haloprop_prefix + self.sec_haloprop_key)
         elif 'halos' in kwargs.keys():
             galaxy_table = kwargs['halos']
+            operative_sec_haloprop_key = self.sec_haloprop_key
         else:
             msg = ("The mc_"+self.galprop_key+" requires either " + 
                 "a halos keyword argument, or a galaxy_table keyword argument")
@@ -368,7 +371,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
                 # Fetch the halos in the i^th prim_galprop bin, 
                 # and determine how they are sorted
-                haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
+                haloprop_bini = galaxy_table[idx_bini][operative_sec_haloprop_key]
                 idx_sorted_haloprop_bini = np.argsort(haloprop_bini)
 
                 galprop_bini = self._condition_matched_galprop(
