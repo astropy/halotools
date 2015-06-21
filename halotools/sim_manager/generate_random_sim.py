@@ -243,7 +243,7 @@ class FakeMock(object):
 		self.galaxy_table['y'] = np.random.uniform(0, self.snapshot.Lbox, num_gals)
 		self.galaxy_table['z'] = np.random.uniform(0, self.snapshot.Lbox, num_gals)
 
-		self.galaxy_table['stellar_mass'] = 10.**(np.random.power(0.5, size=num_gals)*3 + 9)
+		self.galaxy_table['stellar_mass'] = 10.**(np.random.power(0.5, size=num_gals)*4 + 8)
 
 		def get_colors(num_gals, red_fraction):
 		    num_red = np.round(num_gals*red_fraction).astype(int)
