@@ -77,6 +77,7 @@ class FakeSim(object):
 		rvir = np.repeat(10.**logrvirbins, self.num_halos_per_massbin, axis=0)
 		logvmaxbins = -4.25 + 0.5*(np.log10(massbins) - logrvirbins)
 		vmax = np.repeat(10.**logvmaxbins, self.num_halos_per_massbin, axis=0)
+		vpeak = vmax
 
 		conc = np.random.uniform(4, 15, self.num_halos)
 		rs = rvir/conc
@@ -98,6 +99,7 @@ class FakeSim(object):
 			'rs': rs, 
 			'zhalf': zhalf, 
 			'vmax': vmax, 
+			'vpeak': vpeak, 
 			'x': x, 
 			'y': y, 
 			'z': z, 
