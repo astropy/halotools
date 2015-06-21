@@ -11,6 +11,7 @@ from . import smhm_components
 from . import sfr_components
 from . import abunmatch
 from ..sim_manager import sim_defaults
+from ..sim_manager import FakeMock
 
 __all__ = ['SmHmBinarySFR_blueprint', 'Campbell15_blueprint']
 
@@ -79,6 +80,7 @@ def SmHmBinarySFR_blueprint(
 
 def Campbell15_blueprint(
     prim_haloprop_key = model_defaults.default_smhm_haloprop, 
+    sec_galprop_key = 'ssfr', 
     smhm_model=smhm_components.Moster13SmHm, 
     scatter_level = 0.2, 
     redshift = sim_defaults.default_redshift, **kwargs):
@@ -100,11 +102,11 @@ def Campbell15_blueprint(
         where the primary galaxy property is stored in 
         ``input_galaxy_table``. 
 
-    galprop_key : string, required keyword argument 
+    sec_galprop_key : string, optional keyword argument 
         Column name such as ``gr_color`` or ``ssfr`` 
         of the secondary galaxy property being modeled. 
         Can be any column of ``input_galaxy_table`` other than 
-        ``prim_galprop_key``. 
+        ``prim_galprop_key``. Default is ``ssfr``. 
 
     input_galaxy_table : data table, required keyword argument 
         Astropy Table object storing the input galaxy population 
@@ -152,9 +154,17 @@ def Campbell15_blueprint(
 
     ssfr_model = abunmatch.ConditionalAbunMatch(
         galprop_key='ssfr', 
-        prim_galprop_key=sm_model.galprop_key, 
+        prim_galprop_key=stellar_mass_model.galprop_key, 
         **kwargs)
 
+    fake_mock = FakeMock(approximate_ngals = 1e5)
+
+    ssfr_model = ConditionalAbunMatch(input_galaxy_table=input_galaxy_table, 
+                                      sec_haloprop_key=sec_haloprop_key, 
+                                      galprop_key=sec_galprop_key, 
+                                      prim_galprop_key=prim_galprop_key, 
+                                      prim_galprop_bins=prim_galprop_bins, 
+                                      correlation_strength=correlation_strength)
     blueprint = ({
         stellar_mass_model.galprop_key: stellar_mass_model, 
         ssfr_model.galprop_key: ssfr_model, 

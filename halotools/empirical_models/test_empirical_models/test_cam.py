@@ -68,9 +68,10 @@ def test_cam_gr_color():
 			(data.galaxy_table['stellar_mass'] < sm_high))[0]
 		data_sm_range = data.galaxy_table[idx_sm_range_data]
 
-		np.testing.assert_almost_equal(
-			data_sm_range['gr_color'].mean(), 
-			mock_sm_range['gr_color'].mean(), decimal=1)
+		data_mean = data_sm_range['gr_color'].mean()
+		mock_mean= mock_sm_range['gr_color'].mean()
+		mean_fracdiff = (mock_mean-data_mean)/data_mean
+		assert np.allclose(mean_fracdiff, 0, atol=0.3, rtol=0.3)
 
 	def check_spearmanr(mock, data, sm_low, sm_high, desired_correlation):
 		idx_sm_range_mock = np.where(
@@ -84,15 +85,19 @@ def test_cam_gr_color():
 		data_sm_range = data.galaxy_table[idx_sm_range_data]
 
 		corr = spearmanr(mock_sm_range['gr_color'], mock_sm_range['halo_zhalf'])[0]
-		np.testing.assert_almost_equal(corr, desired_correlation, decimal=1)
+		corr_fracdiff = (corr-desired_correlation)/desired_correlation
+		assert np.allclose(corr_fracdiff, 0, atol=0.3, rtol=0.3)
 
 	def check_range(mock, data):
 		min_mock_galprop = mock.galaxy_table['gr_color'].min()
 		max_mock_galprop = mock.galaxy_table['gr_color'].max()
 		min_data_galprop = data.galaxy_table['gr_color'].min()
 		max_data_galprop = data.galaxy_table['gr_color'].max()
-		np.testing.assert_almost_equal(min_mock_galprop, min_data_galprop, decimal=0)
-		np.testing.assert_almost_equal(max_mock_galprop, max_data_galprop, decimal=0)
+
+		min_galprop_fracdiff = (min_mock_galprop-min_data_galprop)/min_data_galprop
+		max_galprop_fracdiff = (max_mock_galprop-max_data_galprop)/max_data_galprop
+		assert np.allclose(min_galprop_fracdiff, 0, atol=0.3, rtol=0.3)
+		assert np.allclose(max_galprop_fracdiff, 0, atol=0.3, rtol=0.3)
 
 	# Check no-scatter mock
 	check_range(fake_mock_noscatter, fake_data)
@@ -138,7 +143,7 @@ def test_cam_ssfr():
 		input_galaxy_table = fake_data.galaxy_table, 
 		prim_galprop_bins = sm_bins
 		)
-	fake_mock_noscatter = FakeMock(approximate_ngals = 1e5)
+	fake_mock_noscatter = FakeMock(approximate_ngals = 1e4)
 	fake_mock_noscatter.galaxy_table['ssfr'] = (
 		cam_noscatter.mc_ssfr(galaxy_table = fake_mock_noscatter.galaxy_table))
 
@@ -150,7 +155,7 @@ def test_cam_ssfr():
 		prim_galprop_bins = sm_bins, 
 		correlation_strength = 0.5
 		)
-	fake_mock_scatter_50 = FakeMock(approximate_ngals = 1e5)
+	fake_mock_scatter_50 = FakeMock(approximate_ngals = 1e4)
 	fake_mock_scatter_50.galaxy_table['ssfr'] = (
 		cam_scatter_50.mc_ssfr(galaxy_table = fake_mock_scatter_50.galaxy_table))
 
@@ -163,7 +168,7 @@ def test_cam_ssfr():
 		correlation_strength = [0.25, 0.75], 
 		correlation_strength_abcissa = [2.e10, 7.e10]
 		)
-	fake_mock_variable_scatter = FakeMock(approximate_ngals = 1e5)
+	fake_mock_variable_scatter = FakeMock(approximate_ngals = 1e4)
 	fake_mock_variable_scatter.galaxy_table['ssfr'] = (
 		cam_variable_scatter.mc_ssfr(galaxy_table = fake_mock_variable_scatter.galaxy_table))
 
@@ -178,9 +183,10 @@ def test_cam_ssfr():
 			(data.galaxy_table['stellar_mass'] < sm_high))[0]
 		data_sm_range = data.galaxy_table[idx_sm_range_data]
 
-		np.testing.assert_almost_equal(
-			data_sm_range['ssfr'].mean(), 
-			mock_sm_range['ssfr'].mean(), decimal=1)
+		data_mean = data_sm_range['ssfr'].mean()
+		mock_mean= mock_sm_range['ssfr'].mean()
+		mean_fracdiff = (mock_mean-data_mean)/data_mean
+		assert np.allclose(mean_fracdiff, 0, atol=0.3, rtol=0.3)
 
 	def check_spearmanr(mock, data, sm_low, sm_high, desired_correlation):
 		idx_sm_range_mock = np.where(
@@ -194,15 +200,19 @@ def test_cam_ssfr():
 		data_sm_range = data.galaxy_table[idx_sm_range_data]
 
 		corr = spearmanr(mock_sm_range['ssfr'], mock_sm_range['halo_zhalf'])[0]
-		np.testing.assert_almost_equal(corr, desired_correlation, decimal=1)
+		corr_fracdiff = (corr-desired_correlation)/desired_correlation
+		assert np.allclose(corr_fracdiff, 0, atol=0.3, rtol=0.3)
 
 	def check_range(mock, data):
 		min_mock_galprop = mock.galaxy_table['ssfr'].min()
 		max_mock_galprop = mock.galaxy_table['ssfr'].max()
 		min_data_galprop = data.galaxy_table['ssfr'].min()
 		max_data_galprop = data.galaxy_table['ssfr'].max()
-		np.testing.assert_almost_equal(min_mock_galprop, min_data_galprop, decimal=0)
-		np.testing.assert_almost_equal(max_mock_galprop, max_data_galprop, decimal=0)
+
+		min_galprop_fracdiff = (min_mock_galprop-min_data_galprop)/min_data_galprop
+		max_galprop_fracdiff = (max_mock_galprop-max_data_galprop)/max_data_galprop
+		assert np.allclose(min_galprop_fracdiff, 0, atol=0.3, rtol=0.3)
+		assert np.allclose(max_galprop_fracdiff, 0, atol=0.3, rtol=0.3)
 
 
 	# Check no-scatter mock
