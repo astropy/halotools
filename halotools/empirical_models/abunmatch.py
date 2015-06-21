@@ -339,11 +339,6 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
         self.add_new_haloprops(galaxy_table)
 
-        if 'galaxy_table_slice_array' not in kwargs.keys():
-            binned_prim_galprop = np.digitize(
-                galaxy_table[self.prim_galprop_key], 
-                self.prim_galprop_bins)
-
         # All at once, draw all the randoms we will need
         np.random.seed(seed=seed)
         all_randoms = np.random.random(len(galaxy_table)*2)
@@ -353,7 +348,16 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         # Initialize the output array
         output_galprop = np.zeros(len(galaxy_table))
 
-        for i in range(len(self.one_point_lookup_table)-1):
+        # Determine binning and loop range
+        if 'galaxy_table_slice_array' not in kwargs.keys():
+            binned_prim_galprop = np.digitize(
+                galaxy_table[self.prim_galprop_key], 
+                self.prim_galprop_bins)
+            prim_galprop_loop_range = set(binned_prim_galprop)
+        else:
+            prim_galprop_loop_range = range(len(self.one_point_lookup_table))
+
+        for i in prim_galprop_loop_range:
 
             # Determine the slice corresponding to the i^th prim_galprop bin
             if 'galaxy_table_slice_array' not in kwargs.keys():
@@ -504,10 +508,14 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             ordinates = [self.param_dict['correlation_param'+str(i+1)] for i in range(len(abcissa))]
             correlation_strength_spline = model_helpers.custom_spline(abcissa, ordinates, k=custom_len(abcissa)-1)
             self.correlation_strength = correlation_strength_spline(self.prim_galprop_bins)
-            self.correlation_strength[self.correlation_strength > 1] = 1
-            self.correlation_strength[self.correlation_strength <- 1] = -1
         else:
             self.correlation_strength = np.repeat(self.param_dict['correlation_param1'], len(self.prim_galprop_bins))
+
+        self.correlation_strength[self.correlation_strength > 1] = 1
+        self.correlation_strength[self.correlation_strength <- 1] = -1
+
+        self.correlation_strength = np.append(
+            self.correlation_strength, self.correlation_strength[-1])
 
     def add_new_haloprops(self, galaxy_table):
         """ Method calls ``new_haloprop_func_dict`` to create new 
