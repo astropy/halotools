@@ -10,7 +10,7 @@ from . import preloaded_hod_blueprints
 
 from .. import sim_manager
 
-__all__ = ['Kravtsov04', 'SmHmBinarySFR']
+__all__ = ['Kravtsov04', 'SmHmBinarySFR', 'Campbell15']
 
 def Kravtsov04(**kwargs):
     """ Simple HOD-style model based on Kravtsov et al. (2004). 
@@ -205,6 +205,29 @@ def Campbell15(**kwargs):
         Stellar mass threshold of mock galaxy catalog. Default is None, 
         in which case the lower bound on stellar mass will be entirely determined 
         by the resolution of the N-body simulation and the model parameters. 
+
+    Examples 
+    --------
+    To load the Campbell et al. (2015) model object with all default settings, simply call 
+    the `Campbell15` function with no arguments:
+
+    >>> model = Campbell15()
+
+    To use our model to populate a simulation with mock galaxies, we only need to 
+    load a snapshot into memory and call the built-in ``populate_mock`` method. 
+    For illustration purposes, we'll use a small, fake simulation, though you 
+    can populate a real simulation by instead calling the 
+    `~halotools.sim_manager.ProcessedSnapshot` class. 
+
+    >>> fake_snapshot = sim_manager.FakeSim()
+    >>> model.populate_mock(snapshot = fake_snapshot)
+
+    We can easily build alternative versions of models and mocks by calling the 
+    `Campbell15` function with different arguments:
+
+    >>> model_with_scatter = Campbell15(correlation_strength = 0.8, sec_haloprop_key = 'zhalf')
+    >>> model_with_scatter.populate_mock(snapshot = fake_snapshot)
+
 
     """
 
