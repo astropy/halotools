@@ -4,9 +4,10 @@
 Module containing some commonly used subhalo-based models.
 
 """
-
+import numpy as np
 from . import model_defaults
 from .mock_factories import SubhaloMockFactory
+from .abunmatch import ConditionalAbunMatch
 from . import smhm_components
 from . import sfr_components
 from . import abunmatch
@@ -80,7 +81,7 @@ def SmHmBinarySFR_blueprint(
 
 def Campbell15_blueprint(
     prim_haloprop_key = model_defaults.default_smhm_haloprop, 
-    sec_galprop_key = 'ssfr', 
+    sec_galprop_key = 'ssfr', sec_haloprop_key = 'vpeak', 
     smhm_model=smhm_components.Moster13SmHm, 
     scatter_level = 0.2, 
     redshift = sim_defaults.default_redshift, **kwargs):
@@ -93,14 +94,10 @@ def Campbell15_blueprint(
         the galaxy propery being modeled.  
         Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-    sec_haloprop_key : string, required keyword argument 
+    sec_haloprop_key : string, optional keyword argument 
         Column name of the subhalo property that CAM models as 
         being correlated with ``galprop_key`` at fixed ``prim_galprop_key``. 
-
-    prim_galprop_key : string, required keyword argument 
-        Column name such as ``stellar_mass`` or ``luminosity`` 
-        where the primary galaxy property is stored in 
-        ``input_galaxy_table``. 
+        Default is ``vpeak``. 
 
     sec_galprop_key : string, optional keyword argument 
         Column name such as ``gr_color`` or ``ssfr`` 
@@ -108,12 +105,15 @@ def Campbell15_blueprint(
         Can be any column of ``input_galaxy_table`` other than 
         ``prim_galprop_key``. Default is ``ssfr``. 
 
-    input_galaxy_table : data table, required keyword argument 
+    input_galaxy_table : data table, optional keyword argument 
         Astropy Table object storing the input galaxy population 
         upon which the CAM model is based.  
+        Default behavior is to use `~halotools.sim_manager.FakeMock`. 
 
-    prim_galprop_bins : array, required keyword argument 
+    prim_galprop_bins : array, optional keyword argument 
         Array used to bin ``input_galaxy_table`` by ``prim_galprop_key``. 
+        Default is 15 bins logarithmically spaced between 
+        :math:`10^{8}M_{\odot}` and :math:`10^{12}M_{\odot}`. 
 
     smhm_model : object, optional keyword argument 
         Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
@@ -138,7 +138,7 @@ def Campbell15_blueprint(
         with negative values corresponding to anti-correlations; 
         the endpoints signify maximum correlation, zero signifies 
         that ``sec_haloprop_key`` and ``galprop_key`` are uncorrelated. 
-        Default is maximum (positive) correlation strength of 1. 
+        Default is constant maximum (positive) correlation strength of 1. 
 
     correlation_strength_abcissa : float or array, optional keyword argument 
         Specifies the value of ``prim_galprop_key`` at which 
@@ -146,25 +146,23 @@ def Campbell15_blueprint(
         need only be specified if a ``correlation_strength`` array is passed. 
         Intermediary values of the correlation strength at values 
         between the abcissa are solved for by spline interpolation. 
+        Default is constant maximum (positive) correlation strength of 1. 
     """
 
     stellar_mass_model = smhm_model(
         prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
         scatter_abcissa = [12], scatter_ordinates = [scatter_level])
 
-    ssfr_model = abunmatch.ConditionalAbunMatch(
-        galprop_key='ssfr', 
-        prim_galprop_key=stellar_mass_model.galprop_key, 
-        **kwargs)
-
     fake_mock = FakeMock(approximate_ngals = 1e5)
+    input_galaxy_table = fake_mock.galaxy_table
+    prim_galprop_bins = np.logspace(8, 12, num=15)    
 
     ssfr_model = ConditionalAbunMatch(input_galaxy_table=input_galaxy_table, 
-                                      sec_haloprop_key=sec_haloprop_key, 
+                                      prim_galprop_key=stellar_mass_model.galprop_key, 
                                       galprop_key=sec_galprop_key, 
-                                      prim_galprop_key=prim_galprop_key, 
+                                      sec_haloprop_key=sec_haloprop_key, 
                                       prim_galprop_bins=prim_galprop_bins, 
-                                      correlation_strength=correlation_strength)
+                                      **kwargs)
     blueprint = ({
         stellar_mass_model.galprop_key: stellar_mass_model, 
         ssfr_model.galprop_key: ssfr_model, 

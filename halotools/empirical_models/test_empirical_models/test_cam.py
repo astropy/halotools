@@ -14,7 +14,7 @@ from ..preloaded_subhalo_model_blueprints import Campbell15_blueprint
 def test_cam_gr_color():
 	galprop_key = 'gr_color'
 	prim_galprop_key = 'stellar_mass'
-	sec_haloprop_key = 'halo_zhalf'
+	sec_haloprop_key = 'zhalf'
 
 	fake_data = FakeMock()
 	sm_min = fake_data.galaxy_table['stellar_mass'].min()
@@ -129,7 +129,7 @@ def test_cam_gr_color():
 def test_cam_ssfr():
 	galprop_key = 'ssfr'
 	prim_galprop_key = 'stellar_mass'
-	sec_haloprop_key = 'halo_zhalf'
+	sec_haloprop_key = 'zhalf'
 
 	fake_data = FakeMock()
 	sm_min = fake_data.galaxy_table['stellar_mass'].min()
