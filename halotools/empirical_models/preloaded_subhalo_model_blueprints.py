@@ -12,7 +12,7 @@ from . import sfr_components
 from . import abunmatch
 from ..sim_manager import sim_defaults
 
-__all__ = ['SmHmBinarySFR_blueprint']
+__all__ = ['SmHmBinarySFR_blueprint', 'Campbell15_blueprint']
 
 
 def SmHmBinarySFR_blueprint(
