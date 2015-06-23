@@ -16,7 +16,7 @@ __all__=['tpcf','tpcf_jackknife','redshift_space_tpcf','wp']
 __author__ = ['Duncan Campbell']
 
 
-def tpcf(sample1, rbins, sample2 = None, randoms=None, period = None,\
+def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
          do_auto=True, do_cross=True, estimator='Natural', N_threads=1,\
          max_sample_size=int(1e6)):
     """ 
@@ -86,10 +86,16 @@ def tpcf(sample1, rbins, sample2 = None, randoms=None, period = None,\
     
     #process input parameters
     sample1 = np.asarray(sample1)
-    if sample2 is not None: sample2 = np.asarray(sample2)
+    if sample2 is not None: 
+        sample2 = np.asarray(sample2)
+        if np.all(sample1==sample2):
+            do_cross==False
+            print("Warning: sample1 and sample2 are exactly the same, only the\
+                   auto-correlation will be returned.")
     else: sample2 = sample1
     if randoms is not None: randoms = np.asarray(randoms)
     rbins = np.asarray(rbins)
+    
     #Process period entry and check for consistency.
     if period is None:
             PBCs = False
@@ -102,6 +108,7 @@ def tpcf(sample1, rbins, sample2 = None, randoms=None, period = None,\
         elif np.shape(period)[0] != np.shape(sample1)[-1]:
             raise ValueError("period should have shape (k,)")
             return None
+    
     #down sample is sample size exceeds max_sample_size.
     if (len(sample2)>max_sample_size) & (not np.all(sample1==sample2)):
         inds = np.arange(0,len(sample2))
@@ -116,16 +123,23 @@ def tpcf(sample1, rbins, sample2 = None, randoms=None, period = None,\
         sample1 = sample1[inds]
         print('down sampling sample1...')
     
+    #check radial bins
     if np.shape(rbins) == ():
         rbins = np.array([rbins])
+    if rbins.ndim != 1:
+        raise ValueError('rbins must be a 1-D array')
+    if len(rbins)<2:
+        raise ValueError('rbins must be of lenght >=2.')
     
     k = np.shape(sample1)[-1] #dimensionality of data
+    if k!=3:
+        raise ValueError('data must be 3-dimensional.')
     
     #check for input parameter consistency
     if (period is not None) & (np.max(rbins)>np.min(period)/2.0):
         raise ValueError('Cannot calculate for seperations larger than Lbox/2.')
     if (sample2 is not None) & (sample1.shape[-1]!=sample2.shape[-1]):
-        raise ValueError('Sample 1 and sample 2 must have same dimension.')
+        raise ValueError('Sample1 and sample2 must have same dimension.')
     if (randoms is None) & (min(period)==np.inf):
         raise ValueError('If no PBCs are specified, randoms must be provided.')
     if estimator not in estimators: 
@@ -133,6 +147,8 @@ def tpcf(sample1, rbins, sample2 = None, randoms=None, period = None,\
         .value(estimators))
     if (PBCs==True) & (max(period)==np.inf):
         raise ValueError('If a non-infinte PBC specified, all PBCs must be non-infinte.')
+    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
+        raise ValueError('do_auto and do_cross keywords must be of type boolean.')
 
     #If PBCs are defined, calculate the randoms analytically. Else, the user must specify 
     #randoms and the pair counts are calculated the old fashion way.
@@ -324,7 +340,7 @@ def tpcf(sample1, rbins, sample2 = None, randoms=None, period = None,\
 
 
 def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.0],\
-                   sample2 = None, period = None, do_auto=True, do_cross=True,\
+                   sample2=None, period=None, do_auto=True, do_cross=True,\
                    estimator='Natural', N_threads=1, max_sample_size=int(1e6)):
     """
     Calculate the two-point correlation function, :math:`\\xi(r)` and the covariance 
@@ -395,7 +411,12 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     
     #process input parameters
     sample1 = np.asarray(sample1)
-    if sample2 != None: sample2 = np.asarray(sample2)
+    if sample2 != None: 
+        sample2 = np.asarray(sample2)
+        if np.all(sample1==sample2):
+            do_cross==False
+            print("Warning: sample1 and sample2 are exactly the same, only the\
+                   auto-correlation will be returned.")
     else: sample2 = sample1
     randoms = np.asarray(randoms)
     rbins = np.asarray(rbins)
@@ -437,10 +458,18 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     if np.shape(Nsub)[0]!=np.shape(sample1)[-1]:
         raise ValueError("Nsub should have shape (k,) or be a single integer")
     
+    #check radial bins
     if np.shape(rbins) == ():
         rbins = np.array([rbins])
+    if rbins.ndim != 1:
+        raise ValueError('rbins must be a 1-D array')
+    if len(rbins)<2:
+        raise ValueError('rbins must be of lenght >=2.')
     
     k = np.shape(sample1)[-1] #dimensionality of data
+    if k!=3:
+        raise ValueError('data must be 3-dimensional.')
+        
     N1 = len(sample1)
     N2 = len(sample2)
     Nran = len(randoms)
@@ -455,6 +484,8 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
         .value(estimators))
     if (PBCs==True) & (max(period)==np.inf):
         raise ValueError('If a non-infinte PBC specified, all PBCs must be non-infinte.')
+    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
+        raise ValueError('do_auto and do_cross keywords must be of type boolean.')
     
     def get_subvolume_labels(sample1, sample2, randoms, Nsub, Lbox):
         """
@@ -714,8 +745,8 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
             return xi_12_full,xi_12_cov
 
 
-def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, randoms=None,\
-                        period = None, do_auto=True, do_cross=True, estimator='Natural',\
+def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
+                        period=None, do_auto=True, do_cross=True, estimator='Natural',\
                         N_threads=1, max_sample_size=int(1e6)):
     """ 
     Calculate the redshift space correlation function, :math:`\\xi(r_p, \\pi)`.
@@ -794,11 +825,17 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, randoms=None,
     
     #process input parameters
     sample1 = np.asarray(sample1)
-    if sample2 is not None: sample2 = np.asarray(sample2)
+    if sample2 is not None: 
+        sample2 = np.asarray(sample2)
+        if np.all(sample1==sample2):
+            do_cross==False
+            print("Warning: sample1 and sample2 are exactly the same, only the\
+                   auto-correlation will be returned.")
     else: sample2 = sample1
     if randoms is not None: randoms = np.asarray(randoms)
     rp_bins = np.asarray(rp_bins)
     pi_bins = np.asarray(pi_bins)
+    
     #Process period entry and check for consistency.
     if period is None:
             PBCs = False
@@ -811,6 +848,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, randoms=None,
         elif np.shape(period)[0] != np.shape(sample1)[-1]:
             raise ValueError("period should have shape (k,)")
             return None
+    
     #down sample is sample size exceeds max_sample_size.
     if (len(sample2)>max_sample_size) & (not np.all(sample1==sample2)):
         inds = np.arange(0,len(sample2))
@@ -825,29 +863,42 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, randoms=None,
         sample1 = sample1[inds]
         print('down sampling sample1...')
     
+    #check radial bins
     if np.shape(rp_bins) == ():
-        rbins = np.array([rp_bins])
+        rp_bins = np.array([rp_bins])
     if np.shape(pi_bins) == ():
-        rbins = np.array([pi_bins])
+        pi_bins = np.array([pi_bins])
+    if rp_bins.ndim != 1:
+        raise ValueError('rp bins must be a 1-D array')
+    if pi_bins.ndim != 1:
+        raise ValueError('pi bins must be a 1-D array')
+    if len(rp_bins)<2:
+        raise ValueError('rp bins must be of lenght >=2.')
+    if len(pi_bins)<2:
+        raise ValueError('pi bins must be of lenght >=2.')
     
     k = np.shape(sample1)[-1] #dimensionality of data
+    if k!=3:
+        raise ValueError('data must be 3-dimensional.')
     
     #check for input parameter consistency
     if (period is not None) & (np.max(rp_bins)>np.min(period[0:2])/2.0):
-        raise ValueError('Cannot calculate for seperations larger than Lbox/2.')
+        raise ValueError('Cannot calculate for rp seperations larger than Lbox[0:2]/2.')
     if (period is not None) & (np.max(pi_bins)>np.min(period[2])/2.0):
-        raise ValueError('Cannot calculate for seperations larger than Lbox/2.')
+        raise ValueError('Cannot calculate for pi seperations larger than Lbox[2]/2.')
     if (sample2 is not None) & (sample1.shape[-1]!=sample2.shape[-1]):
         raise ValueError('Sample 1 and sample 2 must have same dimension.')
     if (randoms is None) & (min(period)==np.inf):
         raise ValueError('If no PBCs are specified, randoms must be provided.')
     if estimator not in estimators: 
-        raise ValueError('Must specify a supported estimator. Supported estimators are:{0}'
-        .value(estimators))
+        raise ValueError('Must specify a supported estimator. Supported estimators \
+        are:{0}'.value(estimators))
     if (PBCs==True) & (max(period)==np.inf):
         raise ValueError('If a non-infinte PBC specified, all PBCs must be non-infinte.')
+    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
+        raise ValueError('do_auto and do_cross keywords must be of type boolean.')
 
-    #If PBCs are defined, calculate the randoms analytically. Else, the user must specify 
+    #If PBCs are defined, calculate the randoms analytically. Else, the user must specify
     #randoms and the pair counts are calculated the old fashion way.
     def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,\
                       PBCs, k, N_threads, do_RR, do_DR):
@@ -1036,7 +1087,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, randoms=None,
             return xi_11
 
 
-def wp(sample1, rp_bins, pi_bins, sample2 = None, randoms=None, period = None,\
+def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
        do_auto=True, do_cross=True, estimator='Natural', N_threads=1,\
        max_sample_size=int(1e6)):
     """ 
@@ -1054,8 +1105,8 @@ def wp(sample1, rp_bins, pi_bins, sample2 = None, randoms=None, period = None,\
     rp_bins : array_like
         numpy array of boundaries defining the bins in which pairs are counted. 
     
-    pi_bins : array_like
-        numpy array of boundaries defining the bins in which pairs are counted. 
+    pi_max : float
+        maximum parallel distance to use when calculating :math:`\\w_p`.
     
     sample2 : array_like, optional
         Npts x 3 numpy array containing 3-d positions of Npts.
@@ -1104,16 +1155,45 @@ def wp(sample1, rp_bins, pi_bins, sample2 = None, randoms=None, period = None,\
         appropriate result is not returned.
 
     """
-
+    
+    #process parameters
+    if type(pi_max) not in [int,float,long]:
+        raise ValueError("pi_max must be a number.")
+    if not pi_max>0.0:
+        raise ValueError("pi_max must be a positive real number.")
+    pi_bins = np.array([0.0,pi_max])
+    
+    #pass the arguments into the redshift space TPCF function
     result = redshift_space_tpcf(sample1, rp_bins, pi_bins,\
                                  sample2 = sample2, randoms=randoms,\
                                  period = period, do_auto=do_auto, do_cross=do_cross,\
                                  estimator=estimator, N_threads=N_threads,\
                                  max_sample_size=max_sample_size)
-
-    if np.all(sample2==sample1): do_cross=False
+    
+    #process the output of the redshift space TPCF function
+    if np.all(sample2==sample1): 
+        do_cross=False
     if sample2 is None: do_cross=False
-
+    
+    #return the results.  Note that the results need to be transposed to get 1-D arrays.
+    if (np.all(sample2==sample1)) | (sample2 is None): #return only sample1 auto
+        wp_D1D1 = result.T[0]
+        return wp_D1D1
+    elif (do_auto==True) & (do_cross==True): #return both auto and cross
+        wp_D1D1 = result[0].T[0]
+        wp_D1D2 = result[1].T[0]
+        wp_D2D2 = result[2].T[0]
+        return wp_D1D1, wp_D1D2, wp_D2D2
+    elif (do_auto==False) & (do_cross==True): #return only cross
+        wp_D1D2 = result.T[0]
+        return wp_D1D2
+    else: #return only autos
+        wp_D1D1 = result[0].T[0]
+        wp_D2D2 = result[1].T[0]
+        return wp_D1D1, wp_D2D2 
+    
+    """
+    #integrate the redshift space TPCF to get w_p
     def integrate_2D_xi(x,pi_bins):
         return np.sum(x*np.diff(pi_bins),axis=1)
 
@@ -1129,5 +1209,6 @@ def wp(sample1, rp_bins, pi_bins, sample2 = None, randoms=None, period = None,\
     else:
         wp_D1D1 = integrate_2D_xi(result,pi_bins)
         return wp_D1D1
+    """
     
     
