@@ -104,7 +104,10 @@ haloprop_list = ['haloid', 'x', 'y', 'z', 'vx', 'vy', 'vz', 'mvir', 'rvir']
 # obsolete now
 #galprop_dict = {'gal_type':4,'pos':[4,4,4]}
 
-haloprop_key_dict = {'prim_haloprop_key':'mvir', 'halo_boundary':'rvir'}
+prim_haloprop_key = 'mvir'
+sec_haloprop_key = 'vmax'
+halo_boundary = 'rvir'
+haloprop_key_dict = {'prim_haloprop_key':prim_haloprop_key, 'halo_boundary':halo_boundary}
 
 assembias_haloprop_key_dict = {
     'prim_haloprop_key':'mvir', 

@@ -55,9 +55,9 @@ def test_unbiased_nfw():
 	mock = HodMockFactory(snapshot, composite_model)
 
 	# Check that mc_radii gives reasonable results for FakeSim
-	satellite_boolean = mock.gal_type == gal_type
+	satellite_boolean = mock.galaxy_table['gal_type'] == gal_type
 	conc_key = mock.model.gal_prof_param_list[0]
-	satellite_conc = getattr(mock, conc_key)[satellite_boolean]
+	satellite_conc = mock.galaxy_table[conc_key][satellite_boolean]
 	satellite_radii = sat_prof.mc_radii(satellite_conc)
 	assert np.all(satellite_radii < 1)
 	assert np.all(satellite_radii > 0)

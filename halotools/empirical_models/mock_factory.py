@@ -32,78 +32,39 @@ class HodMockFactory(object):
 
     """
 
-    def __init__(self, snapshot, composite_model, 
-        create_astropy_table=True, populate=True,
-        additional_haloprops=[], new_haloprop_func_dict={}, **kwargs):
-        """
-        Parameters 
-        ----------
-        snapshot : object 
-            Object containing the halo catalog and its metadata, 
-            produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
-
-        composite_model : object 
-            Any HOD-style model built by `~halotools.empirical_models.HodModelFactory`. 
-            Whatever the features of the model, the ``composite_model`` object 
-            created by the HOD model factory contains all the instructions 
-            needed to produce a Monte Carlo realization of the model with `HodMockFactory`. 
-
-        create_astropy_table : bool, optional keyword argument 
-            If False (the default option), mock galaxy properties must be accessed 
-            as attributes of the class instance, e.g., ``self.halo_mvir``. 
-            If True, the class instance will have a ``galaxy_table`` attribute that is 
-            an Astropy Table object; in this case, 
-            galaxy properties can be accessed as columns of the table, 
-            e.g., ``self.galaxy_table['halo_mvir']``. 
-
-        additional_haloprops : list of strings, optional 
-            Each entry in this list must be a column key of the halo catalog. 
-            For each entry, mock galaxies will have an attribute storing this 
-            property of their host halo. The corresponding mock galaxy attribute name 
-            will be pre-pended by ``halo_``. 
-
-        new_haloprop_func_dict : dictionary of function objects, optional 
-            Dictionary keys will be the names of newly created columns 
-            of the halo catalog; dictionary values are functions that operate on 
-            the halo catalog to produce the new halo property. 
-            For each entry, mock galaxies will have an attribute storing this 
-            property of their host halo. The corresponding mock galaxy attribute name 
-            will be pre-pended by ``halo_``. 
-
-        Notes 
-        -----
-        Docs for the test suite for mocks made from 
-        any pre-loaded HOD-style models can be seen at 
-        `~halotools.empirical_models.test_empirical_models.test_preloaded_hod_mocks`. 
-
-        """
+    def __init__(self, snapshot, composite_model, **kwargs):
 
         # Bind the inputs to the mock object
         self.snapshot = snapshot
         self.halos = snapshot.halos
         self.particles = snapshot.particles
         self.model = composite_model
-        self.create_astropy_table = create_astropy_table
 
-        self.prim_haloprop_key = self.model.prim_haloprop_key
-        if hasattr(self.model,'sec_haloprop_key'): 
-            self.sec_haloprop_key = self.model.sec_haloprop_key
+        self.gal_types = self.model.gal_types
+        occupation_bound = np.array([self.model.occupation_bound[gal_type] 
+            for gal_type in self.model.gal_types])
+        self._occupation_bounds = occupation_bound
 
-        self.additional_haloprops = additional_haloprops
-        # Make sure all the default haloprops are included
-        self.additional_haloprops.extend(model_defaults.haloprop_list) 
-        # Remove any possibly redundant items
+        self.additional_haloprops = model_defaults.haloprop_list
+        self.additional_haloprops.extend(self.model.haloprop_list)
+        if 'additional_haloprops' in kwargs.keys():
+            if kwargs['additional_haloprops'] == 'all':
+                self.additional_haloprops.extend(self.halos.keys())
+            else:
+                self.additional_haloprops.extend(kwargs['additional_haloprops'])
         self.additional_haloprops = list(set(self.additional_haloprops))
 
-        self.new_haloprop_func_dict = new_haloprop_func_dict
-
-        self.gal_types, self._occupation_bounds = self._get_gal_types()
-
-        # Pre-compute any additional halo properties required by the model, 
-        # such as 'NFWmodel_conc'. Also build all necessary lookup tables.
         self.process_halo_catalog()
 
-        if populate==True: self.populate()
+        self.galaxy_table = Table()
+
+        if 'populate' in kwargs.keys():
+            populate = kwargs['populate']
+        else:
+            populate = True
+        if populate is True:
+            self.populate()
+        
 
 
     def process_halo_catalog(self):
@@ -124,8 +85,12 @@ class HodMockFactory(object):
         self.halos = self.halos[mass_cut]
 
         ### Create new columns of the halo catalog, if applicable
-        for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
-            self.halos[new_haloprop_key] = new_haloprop_func(self.halos)
+        for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
+            if new_haloprop_key in self.halos.keys():
+                raise KeyError("There already exists a halo property with the name %s\n" 
+                    "However, the composite model attempted to create a new halo property "
+                    "with that name by using the new_haloprop_func_dict" % new_haloprop_key)
+            self.halos[new_haloprop_key] = new_haloprop_func(halos=self.halos)
             self.additional_haloprops.append(new_haloprop_key)
 
         # Create new columns for the halo catalog associated with each 
@@ -134,13 +99,12 @@ class HodMockFactory(object):
         # new column values are computed by the function objects in halo_prof_func_dict 
         function_dict = self.model.halo_prof_func_dict
         for new_haloprop_key, prof_param_func in function_dict.iteritems():
-            self.halos[new_haloprop_key] = prof_param_func(self.halos[self.prim_haloprop_key])
+            self.halos[new_haloprop_key] = prof_param_func(halos=self.halos)
             self.additional_haloprops.append(new_haloprop_key)
 
         self.build_halo_prof_lookup_tables()
 
-
-    def build_halo_prof_lookup_tables(self, input_prof_param_table_dict={}):
+    def build_halo_prof_lookup_tables(self, **kwargs):
         """ Method calling the `~halotools.empirical_models.HaloProfileModel` 
         component models to build lookup tables of halo profiles. 
 
@@ -167,6 +131,10 @@ class HodMockFactory(object):
             If no ``input_prof_param_table_dict`` is passed, the component 
             models will determine how their parameters are discretized. 
         """
+        if 'input_prof_param_table_dict' in kwargs.keys():
+            input_prof_param_table_dict = kwargs['input_prof_param_table_dict']
+        else:
+            input_prof_param_table_dict = {}
 
         prof_param_table_dict={}
 
@@ -196,57 +164,8 @@ class HodMockFactory(object):
         self.model.build_halo_prof_lookup_tables(
             prof_param_table_dict=prof_param_table_dict)
 
-
-    def _get_gal_types(self):
-        """ Return a list of galaxy types and their per-halo occupation bounds. 
-
-        Returns 
-        -------
-        sorted_gal_type_list : list of strings 
-            Each entry is a string of the nickname of each ``gal_type`` in the model. 
-
-        occupation_bound : array of integers
-            Each entry gives the maximum per-halo occupation of the corresponding 
-            ``gal_type`` galaxy. 
-
-        Notes 
-        -----
-        Assumes the gal_type list bound to the model 
-        has already been sorted according to the occupation bounds, 
-        as is standard practice by the 
-        `~halotools.empirical_models.HodModelFactory`. 
-        """
-
-        sorted_gal_type_list = self.model.gal_types
-
-        occupation_bound = np.array([self.model.occupation_bound[gal_type] 
-            for gal_type in self.model.gal_types])
-
-        return sorted_gal_type_list, occupation_bound
-
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
-
-        Workhorse method of `HodMockFactory`. First, 
-        `allocate_memory` is called to bind empty arrays to ``self``, 
-        into which mock galaxy properties will be stored. 
-        For every ``gal_type``, each of its component models are called 
-        to assign properties to the galaxies; assignment proceeds by 
-        filling the empty arrays created by `allocate_memory`. 
-        Optionally, the resulting collection of arrays 
-        can be bundled into an Astropy Table, for convenience; 
-        for MCMC applications, this bundling may impact performance, 
-        and is not recommended. 
-
-        Parameters 
-        ----------
-        create_astropy_table : boolean, optional 
-            If True, the `bundle_into_table` method will be called 
-            at the end of executing `populate`. If False, 
-            `bundle_into_table` method will not be called. 
-            If ``create_astropy_table`` is not passed at all, 
-            the behavior will be determined by ``self.create_astropy_table``, 
-            set during instantation by the class constructor. 
         """
         self.allocate_memory()
 
@@ -261,42 +180,22 @@ class HodMockFactory(object):
             # For the gal_type_slice indices of 
             # the pre-allocated array self.gal_type, 
             # set each string-type entry equal to the gal_type string
-            getattr(self, 'gal_type')[gal_type_slice] = np.repeat(gal_type, 
-                self._total_abundance[gal_type],axis=0)
-
-            # Store the values of the primary halo property  
-            # into the gal_type_slice indices of  
-            # the array that has been pre-allocated for this purpose
-            getattr(self, self.model.prim_haloprop_key)[gal_type_slice] = np.repeat(
-                self.halos[self.model.prim_haloprop_key], 
-                self._occupation[gal_type],axis=0)
-
-            # If the model uses a secondary halo property, 
-            # store the values of the secondary halo property  
-            # into the gal_type_slice indices of  
-            # the array that has been pre-allocated for this purpose
-            if hasattr(self.model, 'sec_haloprop_key'):
-                getattr(self, self.model.sec_haloprop_key)[gal_type_slice] = np.repeat(
-                    self.halos[self.model.sec_haloprop_key], 
-                    self._occupation[gal_type],axis=0)
+            self.galaxy_table['gal_type'][gal_type_slice] = (
+                np.repeat(gal_type, self._total_abundance[gal_type],axis=0))
 
             # Store all other relevant host halo properties into their 
             # appropriate pre-allocated array 
             for halocatkey in self.additional_haloprops:
-                galcatkey = model_defaults.host_haloprop_prefix+halocatkey
-                getattr(self, galcatkey)[gal_type_slice] = np.repeat(
+                galpropkey = model_defaults.host_haloprop_prefix+halocatkey
+                self.galaxy_table[galpropkey][gal_type_slice] = np.repeat(
                     self.halos[halocatkey], self._occupation[gal_type], axis=0)
-
-            # Call the SFR model, if relevant for this model
-            if hasattr(self.model, 'sfr_model'):
-                # Not implemented yet
-                pass
 
             # Call the galaxy profile components
             for gal_prof_param_key in self.model.gal_prof_param_list:
-
-                getattr(self, gal_prof_param_key)[gal_type_slice] = (
-                    getattr(self.model, gal_prof_param_key)(gal_type, mock_galaxies=self)
+                self.galaxy_table[gal_prof_param_key][gal_type_slice] = (
+                    getattr(self.model, gal_prof_param_key)(
+                        gal_type=gal_type, 
+                        galaxy_table=self.galaxy_table[gal_type_slice])
                     )
 
             # Assign positions 
@@ -305,35 +204,21 @@ class HodMockFactory(object):
             # and any gal_type, without exception
             pos_method_name = 'pos_'+gal_type
 
-            (getattr(self, 'x')[gal_type_slice], 
-                getattr(self, 'y')[gal_type_slice], 
-                getattr(self, 'z')[gal_type_slice]) = getattr(self.model, pos_method_name)(self)
+            self.galaxy_table['x'][gal_type_slice], \
+            self.galaxy_table['y'][gal_type_slice], \
+            self.galaxy_table['z'][gal_type_slice] = (
+                getattr(self.model, pos_method_name)(
+                    self, gal_type = gal_type)
+                )
                 
-            # Assign velocities, if relevant for this model
-            if hasattr(self.model, 'vel'):
-                pass
-
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
-        self.x = occuhelp.enforce_periodicity_of_box(self.x, self.snapshot.Lbox)
-        self.y = occuhelp.enforce_periodicity_of_box(self.y, self.snapshot.Lbox)
-        self.z = occuhelp.enforce_periodicity_of_box(self.z, self.snapshot.Lbox)
-
-        # Bundle the results into an Astropy Table, if requested
-        if 'create_astropy_table' in kwargs.keys():
-            create_astropy_table = kwargs['create_astropy_table']
-        else:
-            create_astropy_table = self.create_astropy_table
-        if create_astropy_table == True:
-            self.bundle_into_table()
-
-
-    def bundle_into_table(self):
-        """ Method to create an Astropy Table containing the mock galaxies. 
-        """
-        galaxy_dict = {name : getattr(self, name) for name in self._mock_galaxy_props}
-        self.galaxy_table = Table(galaxy_dict)
-
+        self.galaxy_table['x'] = occuhelp.enforce_periodicity_of_box(
+            self.galaxy_table['x'], self.snapshot.Lbox)
+        self.galaxy_table['y'] = occuhelp.enforce_periodicity_of_box(
+            self.galaxy_table['y'], self.snapshot.Lbox)
+        self.galaxy_table['z'] = occuhelp.enforce_periodicity_of_box(
+            self.galaxy_table['z'], self.snapshot.Lbox)
 
     def allocate_memory(self):
         """ Method allocates the memory for all the numpy arrays 
@@ -347,6 +232,7 @@ class HodMockFactory(object):
         self._occupation = {}
         self._total_abundance = {}
         self._gal_type_indices = {}
+
         first_galaxy_index = 0
         for gal_type in self.gal_types:
             #print("Working on gal_type %s" % gal_type)
@@ -370,86 +256,23 @@ class HodMockFactory(object):
 
         self.Ngals = np.sum(self._total_abundance.values())
 
-        def _allocate_ndarray_attr(self, propname, example_entry):
-            """ Private method of `allocate_memory` used to create an empty 
-            ndarray of the appropriate shape and dtype, and bind it to the mock instance. 
-
-            Parameters 
-            ----------
-            propname : string 
-                Used to define the name of the attribute being created. 
-
-            example_entry : array_like 
-                Used to define the shape of attribute
-            """
-            if (type(example_entry) != str) & (type(example_entry) != np.string_):
-                example_type = type(np.array(example_entry).flatten()[0])
-            else:
-                example_type = object
-
-            example_shape = list(np.shape(example_entry))
-            example_shape.insert(0, self.Ngals)
-            total_entries = np.product(example_shape)
-            setattr(self, propname, 
-                np.zeros(total_entries,dtype=example_type).reshape(example_shape))
-            self._mock_galaxy_props.append(propname)
-
         # Allocate memory for all additional halo properties, 
         # including profile parameters of the halos such as 'halo_NFWmodel_conc'
-        self._mock_galaxy_props = []
         for halocatkey in self.additional_haloprops:
             galpropkey = model_defaults.host_haloprop_prefix+halocatkey
-            example_entry = self.halos[halocatkey][0]
-            _allocate_ndarray_attr(self, galpropkey, example_entry)
+            self.galaxy_table[galpropkey] = np.zeros(self.Ngals, 
+                dtype = self.halos[halocatkey].dtype)
 
         # Separately allocate memory for the values of the (possibly biased)
         # galaxy profile parameters such as 'gal_NFWmodel_conc'
         for galcatkey in self.model.gal_prof_param_list:
-            example_entry = 0.
-            _allocate_ndarray_attr(self, galcatkey, example_entry)
+            self.galaxy_table[galcatkey] = np.zeros(self.Ngals, dtype = 'f4')
 
-        _allocate_ndarray_attr(self, 'gal_type', self.gal_types[0])
-        _allocate_ndarray_attr(self, self.model.prim_haloprop_key, 0.)
-        if hasattr(self.model,'sec_haloprop_key'):
-            _allocate_ndarray_attr(self, self.model.sec_haloprop_key, 0.)
+        self.galaxy_table['gal_type'] = np.zeros(self.Ngals, dtype=object)
 
-        _allocate_ndarray_attr(self, 'x', 0. )
-        _allocate_ndarray_attr(self, 'y', 0. )
-        _allocate_ndarray_attr(self, 'z', 0. )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        phase_space_keys = ['x', 'y', 'z', 'vx', 'vy', 'vz']
+        for key in phase_space_keys:
+            self.galaxy_table[key] = np.zeros(self.Ngals, dtype = 'f4')
 
 
 
