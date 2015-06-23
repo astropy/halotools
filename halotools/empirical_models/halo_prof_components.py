@@ -705,10 +705,12 @@ class NFWProfile(HaloProfileModel):
             corresponding to the input conc_mass_relation_key. 
         """
 
+        prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
         # Instantiate the container class for concentration-mass relations, 
         # defined in the external module halo_prof_param_components
         conc_mass_model_instance = halo_prof_param_components.ConcMass(
-            cosmology = self.cosmology, redshift = self.redshift)
+            cosmology = self.cosmology, redshift = self.redshift, 
+            prim_haloprop_key = prim_haloprop_key)
 
         # We want to call the specific function where the 'model' keyword argument 
         # is fixed to the conc-mass relation we want. 
