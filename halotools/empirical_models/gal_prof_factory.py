@@ -12,15 +12,15 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
-from ..utils.array_utils import array_like_length as aph_len
-import occupation_helpers as occuhelp 
+from ..utils.array_utils import array_like_length as custom_len
+import model_helpers as model_helpers 
 from functools import partial
 
 import halo_prof_components
 import gal_prof_components as gpc
 
 
-class GalProfFactory(object):
+class GalProfFactory(model_helpers.GalPropModel):
     """ Class modeling the way galaxies are distributed 
     within their halos. 
 
@@ -68,6 +68,7 @@ class GalProfFactory(object):
 
         """
 
+        super(GalProfFactory, self).__init__(galprop_key='pos')
         # Bind the inputs to the instance 
         self.gal_type = gal_type
         self.halo_prof_model = halo_prof_model
@@ -192,13 +193,13 @@ class GalProfFactory(object):
         Implemented as a read-only getter method via the ``@property`` decorator syntax. 
 
         The purpose of `gal_prof_func_dict` is primarily for use by the 
-        `~halotools.empirical_models.mock_factory` module. For example, through the use of 
-        `gal_prof_func_dict`, the `~halotools.empirical_models.mock_factory.HodMockFactory` 
+        `~halotools.empirical_models.mock_factories` module. For example, through the use of 
+        `gal_prof_func_dict`, the `~halotools.empirical_models.mock_factories.HodMockFactory` 
         can create a ``gal_NFWmodel_conc`` attribute for the mock, 
         without knowing the name of the concentration-mass function used in the assignment, 
         nor knowledge of the ``gal_NFWmodel_conc`` keyword. 
         This is one of the tricks that permits   
-        `~halotools.empirical_models.mock_factory.HodMockFactory` to call 
+        `~halotools.empirical_models.mock_factories.HodMockFactory` to call 
         its component models using a uniform syntax, regardless of the complexity 
         of the underlying model. 
         """
@@ -353,8 +354,8 @@ class GalProfFactory(object):
             )
         # Now we have an array of function objects, and we need to evaluate 
         # the i^th funcobj on the i^th element of rho. 
-        # Call the occupation_helpers module to access generic code for doing this 
-        return 10.**occuhelp.call_func_table(
+        # Call the model_helpers module to access generic code for doing this 
+        return 10.**model_helpers.call_func_table(
             self.cumu_inv_func_table, np.log10(rho), func_table_indices)
 
     def mc_angles(self, Npts):

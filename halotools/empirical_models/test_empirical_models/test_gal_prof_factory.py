@@ -4,7 +4,7 @@ import numpy as np
 from .. import halo_prof_components as hpc
 from .. import gal_prof_components as gpc
 from .. import gal_prof_factory as gpf
-from ..mock_factory import HodMockFactory
+from ..mock_factories import HodMockFactory
 
 from ...sim_manager.generate_random_sim import FakeSim
 from ..preloaded_models import Kravtsov04
@@ -37,7 +37,7 @@ def test_unbiased_trivial():
 
 	snapshot = FakeSim()
 	composite_model = Kravtsov04()
-	mock = HodMockFactory(snapshot, composite_model)
+	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
 	x, y, z = cen_prof.mc_pos(mock)
 	assert np.all(x == 0)
@@ -52,7 +52,7 @@ def test_unbiased_nfw():
 
 	snapshot = FakeSim()
 	composite_model = Kravtsov04()
-	mock = HodMockFactory(snapshot, composite_model)
+	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
 	# Check that mc_radii gives reasonable results for FakeSim
 	satellite_boolean = mock.galaxy_table['gal_type'] == gal_type

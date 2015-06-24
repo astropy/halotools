@@ -46,7 +46,7 @@ from astropy.utils.data import _open_shelve as open_shelve
 from . import cache_config, supported_sims, sim_defaults
 
 from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import array_like_length as aph_len
+from ..utils.array_utils import array_like_length as custom_len
 from ..utils.io_utils import download_file_from_url
 
 
@@ -103,7 +103,8 @@ class ProcessedSnapshot(object):
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder,
-        redshift = sim_defaults.default_redshift, **kwargs):
+        redshift = sim_defaults.default_redshift, verbose=False, 
+        **kwargs):
         """
         Parameters 
         ----------
@@ -129,6 +130,10 @@ class ProcessedSnapshot(object):
             For cases where multiple versions of the same halo catalog 
             are stored in the cache, 
             a matching version name must be supplied to disambiguate. 
+
+        verbose : bool, optional 
+            If True, a range of print statements will be issued as sanity checks 
+            on bookkeeping. Default is False. 
 
         """
 
@@ -158,7 +163,9 @@ class ProcessedSnapshot(object):
             fname=self.halocat_fname, 
             simname = self.simname, 
             halo_finder = self.halo_finder, 
-            redshift = self.redshift, **kwargs)
+            redshift = self.redshift, 
+            verbose=verbose, 
+            **kwargs)
 
         self._bind_halocat_metadata()
 
@@ -729,13 +736,13 @@ class CatalogManager(object):
         """
         filename_list = self.available_snapshots(
             location, catalog_type, simname, halo_finder)
-        if aph_len(filename_list) == 0:
+        if custom_len(filename_list) == 0:
             return None
 
         halocat_obj = get_halocat_obj(simname, halo_finder)
         result = halocat_obj.closest_halocat(filename_list, input_redshift, 
             **kwargs)
-        if aph_len(result) == 0:
+        if custom_len(result) == 0:
             print("No halo catalogs found in cache for simname = %s "
                 " and halo-finder = %s" % (simname, halo_finder))
             return None
@@ -1026,7 +1033,7 @@ class CatalogManager(object):
             print("\nTotal runtime to download snapshot = %.1f minutes\n" % runtime)
             return output_fname
 
-    def load_halo_catalog(self, **kwargs):
+    def load_halo_catalog(self, verbose=False, **kwargs):
         """ Method returns an Astropy Table object of halos 
         that have been stored as a processed binary hdf5 file. 
 
@@ -1044,6 +1051,10 @@ class CatalogManager(object):
         redshift : float, optional 
             Redshift of the desired snapshot. 
 
+        verbose : bool, optional 
+            If True, a range of print statements will be issued as sanity checks 
+            on bookkeeping. Default is False. 
+
         Returns 
         -------
         t : table 
@@ -1051,8 +1062,9 @@ class CatalogManager(object):
         """
 
         if 'fname' in kwargs.keys():
-            print("Loading halo catalog "
-                "with the following absolute path: \n%s\n" % kwargs['fname'])
+            if verbose is True:
+                print("Loading halo catalog "
+                    "with the following absolute path: \n%s\n" % kwargs['fname'])
             return Table.read(kwargs['fname'], path='halos')
         else:
             simname = kwargs['simname']
@@ -1061,12 +1073,13 @@ class CatalogManager(object):
 
             result = self.closest_halocat(
                 'cache', 'halos', simname, halo_finder, redshift)
-            if aph_len(result) == 0:
+            if custom_len(result) == 0:
                 return None
             else:
                 fname, z = result[0], result[1]
-                print("Loading z = %.2f halo catalog "
-                    "with the following absolute path: \n%s\n" % (z, fname))
+                if verbose is True:
+                    print("Loading z = %.2f halo catalog "
+                        "with the following absolute path: \n%s\n" % (z, fname))
                 return Table.read(fname, path='halos')
 
     def download_all_default_catalogs(self):
