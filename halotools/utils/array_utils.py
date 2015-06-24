@@ -8,7 +8,7 @@ Modules performing small, commonly used tasks throughout the package.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-__all__ = ['array_like_length', 'find_idx_nearest_val']
+__all__ = ['array_like_length', 'find_idx_nearest_val', 'randomly_downsample_data']
 
 import numpy as np
 
@@ -37,9 +37,18 @@ def array_like_length(x):
     even though such an object formally counts as an Iterable, being an ndarray. 
     This nuisance is so ubiquitous that it's convenient to have a single 
     line of code that replaces the default python len() function with sensible behavior.
+
+    Examples 
+    --------
+    >>> x = np.zeros(5)
+    >>> xlen = array_like_length(x)
+    >>> y = 4
+    >>> ylen = array_like_length(y)
+    >>> z = None 
+    >>> zlen = array_like_length(z)
     """
 
-    if x == None:
+    if x is None:
         return 0
     try:
         array_length = len(x)
@@ -61,6 +70,13 @@ def find_idx_nearest_val(array, value):
     Returns 
     -------
     idx_nearest : int
+
+    Examples 
+    --------
+    >>> x = np.linspace(0, 1000, num=1e5)
+    >>> val = 45.5
+    >>> idx_nearest_val = find_idx_nearest_val(x, val)
+    >>> nearest_val = x[idx_nearest_val]
     """
     if len(array) == 0:
         return None
@@ -81,4 +97,43 @@ def find_idx_nearest_val(array, value):
         else:
             idx_nearest = idx_sorted[idx]
             return idx_nearest
+
+
+def randomly_downsample_data(array, num_downsample):
+    """ Method returns a length-num_downsample random downsampling of the input array.
+
+    Parameters 
+    ----------
+    array : array
+
+    num_downsample : int 
+        Size of the desired downsampled version of the data
+
+    Returns 
+    -------
+    downsampled_array : array or Astropy Table
+        Random downsampling of the input array
+
+    Examples 
+    --------
+    >>> x = np.linspace(0, 1000, num=1e5)
+    >>> desired_sample_size = 1e3
+    >>> downsampled_x = randomly_downsample_data(x, desired_sample_size)
+    """
+
+    input_array_length = array_like_length(array) 
+    if num_downsample > input_array_length:
+        raise SyntaxError("Length of the desired downsampling = %i, "
+            "which exceeds input array length = %i " % (num_downsample, input_array_length))
+    else:
+        randomizer = np.random.random(input_array_length)
+        idx_sorted = np.argsort(randomizer)
+        return array[idx_sorted[0:num_downsample]]
+
+
+
+
+
+
+
 

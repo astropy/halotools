@@ -6,17 +6,37 @@ used by many of the hod model components.
 
 """
 
-__all__=['solve_for_polynomial_coefficients','format_parameter_keys']
+__all__ = (
+    ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
+    'enforce_periodicity_of_box', 'update_param_dict']
+    )
 
 import numpy as np
 from copy import copy
-from ..utils.array_utils import array_like_length as aph_len
 
-from scipy.interpolate import UnivariateSpline as spline
+from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
-import model_defaults
+from . import model_defaults
+from ..utils.array_utils import array_like_length as custom_len
 
-def solve_for_polynomial_coefficients(abcissa,ordinates):
+from astropy.extern import six
+from abc import ABCMeta
+
+@six.add_metaclass(ABCMeta)
+class GalPropModel(object):
+    """ Abstact container class for any model of any galaxy property. 
+    """
+
+    def __init__(self, galprop_key):
+
+        # Enforce the requirement that sub-classes have been configured properly
+        required_method_name = 'mc_'+galprop_key
+        if not hasattr(self, required_method_name):
+            raise SyntaxError("Any sub-class of GalPropModel must "
+                "implement a method named %s " % required_method_name)
+
+
+def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
     minimum-degree polynomial that passes through 
     the input abcissa and attains values equal the input ordinates.  
@@ -34,7 +54,7 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
     -------
     polynomial_coefficients : array 
         Elements are the coefficients determining the polynomial. 
-        Element i of polynomial_coefficients gives the degree i coefficient.
+        Element i of polynomial_coefficients gives the degree i polynomial coefficient.
 
     Notes
     --------
@@ -47,9 +67,8 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
     ordinates when the polynomial is evaluated at the input abcissa.
     The coefficients of that unique polynomial are the output of the function. 
 
-    This function is used by many of the methods in this module. For example, suppose 
-    that a model in which the quenched fraction is 
-    :math:`F_{q}(logM = 12) = 0.25` and :math:`F_{q}(logM = 15) = 0.9`. 
+    As an example, suppose that a model in which the quenched fraction is 
+    :math:`F_{q}(logM_{\\mathrm{halo}} = 12) = 0.25` and :math:`F_{q}(logM_{\\mathrm{halo}} = 15) = 0.9`. 
     Then this function takes [12, 15] as the input abcissa, 
     [0.25, 0.9] as the input ordinates, 
     and returns the array :math:`[c_{0}, c_{1}]`. 
@@ -59,8 +78,7 @@ def solve_for_polynomial_coefficients(abcissa,ordinates):
     
     """
 
-    ones = np.zeros(len(abcissa)) + 1
-    columns = ones
+    columns = np.ones(len(abcissa))
     for i in np.arange(len(abcissa)-1):
         columns = np.append(columns,[abcissa**(i+1)])
     quenching_model_matrix = columns.reshape(
@@ -98,79 +116,12 @@ def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
         input_abcissa = np.array(input_abcissa)
     coefficient_array = solve_for_polynomial_coefficients(
         table_abcissa,table_ordinates)
-    output_ordinates = np.zeros(aph_len(input_abcissa))
+    output_ordinates = np.zeros(custom_len(input_abcissa))
     # Use coefficients to compute values of the inflection function polynomial
     for n,coeff in enumerate(coefficient_array):
         output_ordinates += coeff*input_abcissa**n
 
     return output_ordinates
-
-
-
-def format_parameter_keys(input_param_dict,correct_initial_keys,
-    gal_type, key_prefix=None):
-    """ Simple method that tests whether the input keys are correct, 
-    and if so, appends the key names with the galaxy type that they pertain to.
-
-    Parameters 
-    ----------
-    input_param_dict : dictionary
-        dictionary of parameters being used by the component model.
-
-    correct_initial_keys : list
-        list of strings providing the correct set of keys 
-        that input_param_dict should have. 
-
-    gal_type : string
-        Galaxy type of the population being modeled by the component model. 
-        This string will be appended to each key, with a leading underscore. 
-
-    key_prefix : string, optional
-        If not None, key_prefix will be prepended to 
-        each dictionary key with a trailing underscore.
-
-
-    Returns 
-    -------
-    output_param_dict : dictionary 
-        Provided that the keys of input_param_dict are correct, 
-        the output dictionary will be identical to the input, except 
-        now each key has the gal_type string appended to it. 
-    """
-
-    initial_keys = input_param_dict.keys()
-
-    # Check that the keys are correct
-    # They should only be incorrect in cases where param_dict 
-    # was passed to the initialization constructor
-    test_correct_keys(initial_keys, correct_initial_keys)
-#    if set(initial_keys) != set(correct_initial_keys):
-#        raise KeyError("The param_dict passed to the initialization "
-#            "constructor does not contain the expected keys")
-
-    output_param_dict = copy(input_param_dict)
-
-    key_suffix = '_'+gal_type
-    for old_key in initial_keys:
-        if key_prefix is not None:
-            new_key = key_prefix+'_'+old_key+key_suffix
-        else:
-            new_key = old_key+key_suffix
-        output_param_dict[new_key] = output_param_dict.pop(old_key)
-
-
-    return output_param_dict
-
-def test_correct_keys(input_keys,correct_keys):
-
-    if set(input_keys) != set(correct_keys):
-        raise KeyError("The param_dict passed to the initialization "
-            "constructor does not contain the expected keys")
-
-def test_repeated_keys(dict1, dict2):
-    intersection = set(dict1) & set(dict2)
-    assert intersection == set()
-
 
 def enforce_periodicity_of_box(coords, box_length):
     """ Function used to apply periodic boundary conditions 
@@ -206,9 +157,9 @@ def enforce_periodicity_of_box(coords, box_length):
 def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outside_bins, abcissa):
     """ Piecewise heaviside function. 
 
-    The output function values_inside_bins  
-    when evaluated at points within bin_width/2 of bin_midpoints. Otherwise, 
-    the output function returns value_outside_bins. 
+    The function returns values_inside_bins  
+    when evaluated at points within bin_width/2 of bin_midpoints. 
+    Otherwise, the output function returns value_outside_bins. 
 
     Parameters 
     ----------
@@ -236,28 +187,27 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
 
     """
 
-    if aph_len(abcissa) > 1:
+    if custom_len(abcissa) > 1:
         abcissa = np.array(abcissa)
-    if aph_len(values_inside_bins) > 1:
+    if custom_len(values_inside_bins) > 1:
         values_inside_bins = np.array(values_inside_bins)
         bin_midpoints = np.array(bin_midpoints)
 
     # If there are multiple abcissa bins, make sure they do not overlap
-    if aph_len(bin_midpoints)>1:
+    if custom_len(bin_midpoints)>1:
         midpoint_differences = np.diff(bin_midpoints)
         minimum_separation = midpoint_differences.min()
         if minimum_separation < bin_width:
             raise ValueError("Abcissa bins are not permitted to overlap")
 
-    output = np.zeros(aph_len(abcissa)) + value_outside_bins
+    output = np.zeros(custom_len(abcissa)) + value_outside_bins
 
-    if aph_len(bin_midpoints)==1:
+    if custom_len(bin_midpoints)==1:
         idx_abcissa_in_bin = np.where( 
             (abcissa >= bin_midpoints - bin_width/2.) & (abcissa < bin_midpoints + bin_width/2.) )[0]
         print(idx_abcissa_in_bin)
         output[idx_abcissa_in_bin] = values_inside_bins
     else:
-        print("testing")
         for ii, x in enumerate(bin_midpoints):
             idx_abcissa_in_binii = np.where(
                 (abcissa >= bin_midpoints[ii] - bin_width/2.) & 
@@ -268,7 +218,7 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
     return output
 
 
-def aph_spline(table_abcissa, table_ordinates, k=0):
+def custom_spline(table_abcissa, table_ordinates, k=0):
     """ Simple workaround to replace scipy's silly convention 
     for treating the spline_degree=0 edge case. 
 
@@ -298,16 +248,14 @@ def aph_spline(table_abcissa, table_ordinates, k=0):
     table_ordinates[0] for all values of the input abcissa. 
 
     """
-
-
-    if aph_len(table_abcissa) != aph_len(table_ordinates):
-        len_abcissa = aph_len(table_abcissa)
-        len_ordinates = aph_len(table_ordinates)
+    if custom_len(table_abcissa) != custom_len(table_ordinates):
+        len_abcissa = custom_len(table_abcissa)
+        len_ordinates = custom_len(table_ordinates)
         raise TypeError("table_abcissa and table_ordinates must have the same length \n"
             " len(table_abcissa) = %i and len(table_ordinates) = %i" % (len_abcissa, len_ordinates))
 
-    if k >= aph_len(table_abcissa):
-        len_abcissa = aph_len(table_abcissa)
+    if k >= custom_len(table_abcissa):
+        len_abcissa = custom_len(table_abcissa)
         raise ValueError("Input spline degree k = %i "
             "must be less than len(abcissa) = %i" % (k, len_abcissa))
 
@@ -317,10 +265,10 @@ def aph_spline(table_abcissa, table_ordinates, k=0):
     if k<0:
         raise ValueError("Spline degree must be non-negative")
     elif k==0:
-        if aph_len(table_ordinates) != 1:
+        if custom_len(table_ordinates) != 1:
             raise TypeError("In spline_degree=0 edge case, "
                 "table_abcissa and table_abcissa must be 1-element arrays")
-        return lambda x : table_ordinates[0]
+        return lambda x : np.zeros(custom_len(x)) + table_ordinates[0]
     else:
         spline_function = spline(table_abcissa, table_ordinates, k=k)
         return spline_function
@@ -358,26 +306,70 @@ def call_func_table(func_table, abcissa, func_indices):
         out[ix] = f(abcissa[ix])
     return out
 
-def enforce_required_haloprops(haloprop_dict):
-    required_prop_set = set(model_defaults.haloprop_key_dict)
-    provided_prop_set = set(haloprop_dict)
-    if not required_prop_set.issubset(provided_prop_set):
-        raise KeyError("haloprop_key_dict must, at minimum, contain keys "
-            "'prim_haloprop_key' and 'halo_boundary'")
+def bind_required_kwargs(required_kwargs, obj, **kwargs):
+    """ Method binds each element of ``required_kwargs`` to 
+    the input object ``obj``, or raises and exception for cases 
+    where a mandatory keyword argument was not passed to the 
+    ``obj`` constructor.
 
+    Used throughout the package when a required keyword argument 
+    has no obvious default value. 
 
-def count_haloprops(haloprop_dict):
-    trigger = 'haloprop_key'
-    num_props = 0
-    for key in haloprop_dict.keys():
-        if key[-len(trigger):]==trigger:
-            num_props += 1
-    return num_props
+    Parameters 
+    ----------
+    required_kwargs : list 
+        List of strings of the keyword arguments that are required 
+        when instantiating the input ``obj``. 
 
+    obj : object 
+        The object being instantiated. 
 
+    Notes 
+    -----
+    The `bind_required_kwargs` method assumes that each 
+    required keyword argument should be bound to ``obj`` 
+    as attribute with the same name as the keyword. 
+    """
+    for key in required_kwargs:
+        if key in kwargs.keys():
+            setattr(obj, key, kwargs[key])
+        else:
+            class_name = obj.__class__.__name__
+            msg = (
+                key + ' is a required keyword argument ' + 
+                'to instantiate the '+class_name+' class'
+                )
+            raise KeyError(msg)
 
+def update_param_dict(obj, **kwargs):
+    """ Method used to update the ``param_dict`` attribute of the 
+    input ``obj`` according to ``input_param_dict``. 
 
+    The only items in ``obj.param_dict`` that will be updated 
+    are those with a matching key in ``input_param_dict``; 
+    all other keys in ``input_param_dict`` will be ignored. 
 
+    Parameters 
+    ----------
+    obj : object
+        Class instance whose ``param_dict`` is being updated. 
+
+    input_param_dict : dict, optional keyword argument 
+        Parameter dictionary used to update ``obj.param_dict``.
+        If no ``input_param_dict`` keyword argument is passed, 
+        the `update_param_dict` method does nothing. 
+    """
+    if 'input_param_dict' not in kwargs.keys():
+        return 
+    else:
+        input_param_dict = kwargs['input_param_dict']
+
+    if not hasattr(obj, 'param_dict'):
+        raise AttributeError("Input ``obj`` must have a ``param_dict`` attribute")
+
+    for key in obj.param_dict.keys():
+        if key in input_param_dict.keys():
+            obj.param_dict[key] = input_param_dict[key]
 
 
 
