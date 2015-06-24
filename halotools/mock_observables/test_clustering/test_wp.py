@@ -16,10 +16,10 @@ def test_wp_auto():
     randoms = np.random.random((100,3))
     period = np.array([1,1,1])
     rp_bins = np.linspace(0,0.5,5)
-    pi_max = 0.5
+    pi_bins = np.linspace(0,0.5,5)
     
     #with randoms
-    result = wp(sample1, rp_bins, pi_max, sample2 = None, 
+    result = wp(sample1, rp_bins, pi_bins, sample2 = None, 
                   randoms=randoms, period = None, 
                   max_sample_size=int(1e4), estimator='Natural')
 
@@ -32,10 +32,10 @@ def test_wp_auto_periodic():
     randoms = np.random.random((100,3))
     period = np.array([1,1,1])
     rp_bins = np.linspace(0,0.5,5)
-    pi_max = 0.5
+    pi_bins = np.linspace(0,0.5,5)
     
     #with randoms
-    result = wp(sample1, rp_bins, pi_max, sample2 = None, 
+    result = wp(sample1, rp_bins, pi_bins, sample2 = None, 
                 randoms=randoms, period = period, 
                 max_sample_size=int(1e4), estimator='Natural')
     
@@ -49,10 +49,10 @@ def test_wp_cross_periodic():
     randoms = np.random.random((100,3))
     period = np.array([1,1,1])
     rp_bins = np.linspace(0,0.5,5)
-    pi_max = 0.5
+    pi_bins = np.linspace(0,0.5,5)
     
     #with randoms
-    result = wp(sample1, rp_bins, pi_max, sample2 = sample2, 
+    result = wp(sample1, rp_bins, pi_bins, sample2 = sample2, 
                 randoms=randoms, period = period, 
                 max_sample_size=int(1e4), estimator='Natural')
 
