@@ -1087,7 +1087,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
             return xi_11
 
 
-def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
+def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
        do_auto=True, do_cross=True, estimator='Natural', N_threads=1,\
        max_sample_size=int(1e6)):
     """ 
@@ -1155,13 +1155,14 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
         appropriate result is not returned.
 
     """
-    
+    """
     #process parameters
     if type(pi_max) not in [int,float,long]:
         raise ValueError("pi_max must be a number.")
     if not pi_max>0.0:
         raise ValueError("pi_max must be a positive real number.")
     pi_bins = np.array([0.0,pi_max])
+    """
     
     #pass the arguments into the redshift space TPCF function
     result = redshift_space_tpcf(sample1, rp_bins, pi_bins,\
@@ -1171,10 +1172,12 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
                                  max_sample_size=max_sample_size)
     
     #process the output of the redshift space TPCF function
-    if np.all(sample2==sample1): 
+    if sample2 is None: 
         do_cross=False
-    if sample2 is None: do_cross=False
+    elif np.all(sample2==sample1): 
+        do_cross=False
     
+    """
     #return the results.  Note that the results need to be transposed to get 1-D arrays.
     if (np.all(sample2==sample1)) | (sample2 is None): #return only sample1 auto
         wp_D1D1 = result.T[0]
@@ -1191,13 +1194,16 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
         wp_D1D1 = result[0].T[0]
         wp_D2D2 = result[1].T[0]
         return wp_D1D1, wp_D2D2 
-    
     """
+    
     #integrate the redshift space TPCF to get w_p
     def integrate_2D_xi(x,pi_bins):
         return np.sum(x*np.diff(pi_bins),axis=1)
 
-    #integrate xi to get wp
+    #return the results.  Note that the results need to be transposed to get 1-D arrays.
+    if (np.all(sample2==sample1)) | (sample2 is None): #return only sample1 auto
+        wp_D1D1 = integrate_2D_xi(result,pi_bins)
+        return wp_D1D1
     if (do_auto==True) & (do_cross==True):
         wp_D1D1 = integrate_2D_xi(result[0],pi_bins)
         wp_D1D2 = integrate_2D_xi(result[1],pi_bins)
@@ -1209,6 +1215,6 @@ def wp(sample1, rp_bins, pi_max, sample2=None, randoms=None, period=None,\
     else:
         wp_D1D1 = integrate_2D_xi(result,pi_bins)
         return wp_D1D1
-    """
+    
     
     
