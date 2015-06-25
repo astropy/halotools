@@ -19,7 +19,7 @@ from functools import partial
 from itertools import product
 
 from ..utils.array_utils import array_like_length as custom_len
-import occupation_helpers as occuhelp 
+import model_helpers as model_helpers 
 
 from ..sim_manager import sim_defaults
 
