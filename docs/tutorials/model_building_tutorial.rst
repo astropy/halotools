@@ -44,7 +44,7 @@ Build a central population
 
     cen_nickname = 'cens'
     
-    occupation_model = models.hod_components.Kravtsov04Cens(threshold = -19)
+    occupation_model = models.hod_components.Zheng07Cens(threshold = -19)
     
     halo_prof_model = models.halo_prof_components.TrivialProfile()
     
