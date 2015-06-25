@@ -119,6 +119,7 @@ def randomly_downsample_data(array, num_downsample):
     >>> x = np.linspace(0, 1000, num=1e5)
     >>> desired_sample_size = 1e3
     >>> downsampled_x = randomly_downsample_data(x, desired_sample_size)
+
     """
 
     input_array_length = array_like_length(array) 
