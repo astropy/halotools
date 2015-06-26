@@ -1,17 +1,15 @@
 # cython: profile=False
 
 """
-objective pair counter.
+objective weighting functions.
 """
 
 from __future__ import print_function, division
+import sys
+cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport fabs
-
-__author__=['Duncan Campbell']
-
-#####built in weighting functions####
 
 cdef double mweights(np.float64_t w1, np.float64_t w2, np.float64_t r1, np.float64_t r2):
     """

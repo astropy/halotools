@@ -12,27 +12,28 @@ import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin
 from objective_weights cimport *
-from objective_weights import *
 
-__all__ = ['obj_wnpairs_no_pbc', 'obj_wnpairs_pbc']
+
 __author__ = ['Duncan Campbell']
+__all__ = ['obj_wnpairs_no_pbc', 'obj_wnpairs_pbc']
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
 def obj_wnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
-                      np.ndarray[np.float64_t, ndim=1] y_icell1,
-                      np.ndarray[np.float64_t, ndim=1] z_icell1,
-                      np.ndarray[np.float64_t, ndim=1] x_icell2,
-                      np.ndarray[np.float64_t, ndim=1] y_icell2,
-                      np.ndarray[np.float64_t, ndim=1] z_icell2,
-                      np.ndarray[np.float64_t, ndim=1] w_icell1,
-                      np.ndarray[np.float64_t, ndim=1] w_icell2,
-                      np.ndarray[np.float64_t, ndim=1] r_icell1,
-                      np.ndarray[np.float64_t, ndim=1] r_icell2,
-                      np.ndarray[np.float64_t, ndim=1] rbins,
-                      np.int_t weight_func_id
-                      ):
+                       np.ndarray[np.float64_t, ndim=1] y_icell1,
+                       np.ndarray[np.float64_t, ndim=1] z_icell1,
+                       np.ndarray[np.float64_t, ndim=1] x_icell2,
+                       np.ndarray[np.float64_t, ndim=1] y_icell2,
+                       np.ndarray[np.float64_t, ndim=1] z_icell2,
+                       np.ndarray[np.float64_t, ndim=1] w_icell1,
+                       np.ndarray[np.float64_t, ndim=1] w_icell2,
+                       np.ndarray[np.float64_t, ndim=1] r_icell1,
+                       np.ndarray[np.float64_t, ndim=1] r_icell2,
+                       np.ndarray[np.float64_t, ndim=1] rbins,
+                       np.int_t weight_func_id
+                       ):
     """
     weighted real-space pair counter without periodic boundary conditions (no PBCs).
     Calculate the weighted number of pairs with separations less than or equal to 
@@ -236,7 +237,7 @@ cdef inline radial_wbinning_0(np.float64_t* counts, np.float64_t* bins,\
     """
     
     while d<=bins[k]:
-        counts[k] += mweights(w1,w2,r1,r2)
+        counts[k] += 0
         k=k-1
         if k<0: break
 
