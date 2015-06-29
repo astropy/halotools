@@ -622,9 +622,9 @@ class HodModelFactory(ModelFactory):
                 model_defaults.haloprop_key_dict['halo_boundary']
                 )
 
-        x *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]
-        y *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]
-        z *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]
+        x *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]/1000.
+        y *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]/1000.
+        z *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]/1000.
 
         # Re-center the positions by the host halo location
         halo_xpos_attr_name = model_defaults.host_haloprop_prefix+'x'
