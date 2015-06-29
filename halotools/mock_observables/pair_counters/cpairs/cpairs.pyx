@@ -13,6 +13,7 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin
+from distances cimport *
 
 __all__ = ['npairs_no_pbc', 'npairs_pbc', 'wnpairs_no_pbc', 'wnpairs_pbc',\
            'jnpairs_no_pbc', 'jnpairs_pbc',\
@@ -731,102 +732,6 @@ cdef inline xy_z_jbinning(np.float64_t* counts, np.float64_t* rp_bins,\
                     if g<0: break
                 k=k-1
                 if k<0: break
-
-
-cdef inline double periodic_square_distance(np.float64_t x1,\
-                                            np.float64_t y1,\
-                                            np.float64_t z1,\
-                                            np.float64_t x2,\
-                                            np.float64_t y2,\
-                                            np.float64_t z2,\
-                                            np.float64_t* period):
-    """
-    Calculate the 3D square cartesian distance between two sets of points with periodic
-    boundary conditions.
-    """
-    
-    cdef double dx, dy, dz
-    
-    dx = fabs(x1 - x2)
-    dx = fmin(dx, period[0] - dx)
-    dy = fabs(y1 - y2)
-    dy = fmin(dy, period[1] - dy)
-    dz = fabs(z1 - z2)
-    dz = fmin(dz, period[2] - dz)
-    return dx*dx+dy*dy+dz*dz
-
-
-cdef inline double square_distance(np.float64_t x1, np.float64_t y1, np.float64_t z1,\
-                                   np.float64_t x2, np.float64_t y2, np.float64_t z2):
-    """
-    Calculate the 3D square cartesian distance between two sets of points.
-    """
-    
-    cdef double dx, dy, dz
-    
-    dx = x1 - x2
-    dy = y1 - y2
-    dz = z1 - z2
-    return dx*dx+dy*dy+dz*dz
-
-
-cdef inline double perp_square_distance(np.float64_t x1, np.float64_t y1,\
-                                        np.float64_t x2, np.float64_t y2):
-    """
-    Calculate the projected square cartesian distance between two sets of points.
-    e.g. r_p
-    """
-    
-    cdef double dx, dy
-    
-    dx = x1 - x2
-    dy = y1 - y2
-    return dx*dx+dy*dy
-
-
-cdef inline double para_square_distance(np.float64_t z1, np.float64_t z2):
-    """
-    Calculate the parallel square cartesian distance between two sets of points.
-    e.g. pi
-    """
-    
-    cdef double dz
-    
-    dz = z1 - z2
-    return dz*dz
-
-
-cdef inline double periodic_perp_square_distance(np.float64_t x1, np.float64_t y1,\
-                                                 np.float64_t x2, np.float64_t y2,\
-                                                 np.float64_t* period):
-    """
-    Calculate the projected square cartesian distance between two sets of points with 
-    periodic boundary conditions.
-    e.g. r_p
-    """
-    
-    cdef double dx, dy
-    
-    dx = fabs(x1 - x2)
-    dx = fmin(dx, period[0] - dx)
-    dy = fabs(y1 - y2)
-    dy= fmin(dy, period[1] - dy)
-    return dx*dx+dy*dy
-
-
-cdef inline double periodic_para_square_distance(np.float64_t z1, np.float64_t z2,\
-                                                 np.float64_t* period):
-    """
-    Calculate the parallel square cartesian distance between two sets of points with 
-    periodic boundary conditions.
-    e.g. pi
-    """
-    
-    cdef double dz
-    
-    dz = fabs(z1 - z2)
-    dz = fmin(dz, period[2] - dz)
-    return dz*dz
 
 
 cdef inline double jweight(np.int_t j, np.int_t j1, np.int_t j2,\
