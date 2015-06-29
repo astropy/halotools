@@ -271,8 +271,7 @@ class HodMockFactory(MockFactory):
         # parameter of each halo profile model, e.g., 'NFWmodel_conc'. 
         # New column names are the keys of the halo_prof_func_dict dictionary; 
         # new column values are computed by the function objects in halo_prof_func_dict 
-        function_dict = self.model.halo_prof_func_dict
-        for new_haloprop_key, prof_param_func in function_dict.iteritems():
+        for new_haloprop_key, prof_param_func in self.model.halo_prof_func_dict.iteritems():
             self.halos[new_haloprop_key] = prof_param_func(halos=self.halos)
             self.additional_haloprops.append(new_haloprop_key)
 
@@ -290,25 +289,7 @@ class HodMockFactory(MockFactory):
         that each lookup table spans the necessary range of parameters required 
         by the halo catalog being populated. 
 
-        Parameters 
-        ----------
-        input_prof_param_table_dict : dict, optional 
-            Each dict key of ``input_prof_param_table_dict`` should be 
-            a profile parameter name, e.g., ``NFWmodel_conc``. 
-            Each dict value is a 3-element tuple; 
-            the tuple entries provide, respectively, the min, max, and linear 
-            spacing used to discretize the profile parameter. 
-            This discretization is used by the 
-            `~halotools.empirical_models.HaloProfModel.build_inv_cumu_lookup_table` 
-            method of the  `~halotools.empirical_models.HaloProfModel` class 
-            to create a lookup table associated with the profile parameter.
-            If no ``input_prof_param_table_dict`` is passed, the component 
-            models will determine how their parameters are discretized. 
         """
-        if 'input_prof_param_table_dict' in kwargs.keys():
-            input_prof_param_table_dict = kwargs['input_prof_param_table_dict']
-        else:
-            input_prof_param_table_dict = {}
 
         prof_param_table_dict={}
 
@@ -328,11 +309,6 @@ class HodMockFactory(MockFactory):
                 parmax = np.max([halocat_parmax,model_parmax])
 
                 prof_param_table_dict[key] = (parmin, parmax, dpar)
-
-        # Now over-write prof_param_table_dict with 
-        # input_prof_param_table_dict, if applicable
-        for key, value in input_prof_param_table_dict.iteritems():
-            prof_param_table_dict[key] = value
 
         # Parameter discretization choices have been made. Now build the tables. 
         self.model.build_halo_prof_lookup_tables(
