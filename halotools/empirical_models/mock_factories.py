@@ -355,7 +355,7 @@ class HodMockFactory(MockFactory):
             self.galaxy_table['y'][gal_type_slice], \
             self.galaxy_table['z'][gal_type_slice] = (
                 getattr(self.model, pos_method_name)(
-                    self.galaxy_table[gal_type_slice], gal_type = gal_type)
+                    self.galaxy_table[gal_type_slice])
                 )
                 
         # Positions are now assigned to all populations. 
