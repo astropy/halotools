@@ -576,7 +576,7 @@ class HodModelFactory(ModelFactory):
             setattr(self, gal_prof_param, func)
 
 
-    def mc_pos(self, galaxy_table, **kwargs):
+    def mc_pos(self, **kwargs):
         """ Method used to generate Monte Carlo realizations of galaxy positions. 
 
         Identical to component model version from which the behavior derives, 
@@ -585,7 +585,7 @@ class HodModelFactory(ModelFactory):
 
         Parameters 
         ----------
-        galaxy_table : Astropy Table
+        galaxy_table : Astropy Table, required keyword argument
             Data table storing a length-Ngals galaxy catalog. 
 
         gal_type : string, required keyword argument
@@ -604,9 +604,10 @@ class HodModelFactory(ModelFactory):
         to create a ``mc_pos_gal_type`` method for each ``gal_type`` in the model. 
 
         """
+        galaxy_table = kwargs['galaxy_table']
         gal_type = kwargs['gal_type']
         gal_prof_model = self.model_blueprint[gal_type]['profile']
-        x, y, z = gal_prof_model.mc_pos(galaxy_table)
+        x, y, z = gal_prof_model.mc_pos(galaxy_table=galaxy_table)
 
         # Re-scale the halo-centric distance by the halo boundary
         if 'halo_boundary' in gal_prof_model.haloprop_key_dict.keys():
