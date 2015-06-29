@@ -86,8 +86,10 @@ class HaloProfileModel(object):
         if 'cosmology' in kwargs.keys():
             self.cosmology = kwargs['cosmology']
 
-    def build_inv_cumu_lookup_table(self, prof_param_table_dict={}, 
-        profile_table_radius_array_dict = model_defaults.profile_table_radius_array_dict):
+    def build_inv_cumu_lookup_table(self, 
+        logrmin = model_defaults.default_lograd_min, 
+        logrmax = model_defaults.default_lograd_max, 
+        Npts_radius_table=model_defaults.Npts_radius_table):
         """ Method used to create a lookup table of inverse cumulative mass 
         profile functions. 
 
@@ -125,20 +127,19 @@ class HaloProfileModel(object):
         
         self.set_prof_param_table_dict(prof_param_table_dict)
 
-        npts_radius = profile_table_radius_array_dict['npts']
-        logrmin = profile_table_radius_array_dict['logrmin']
-        logrmax = profile_table_radius_array_dict['logrmax']
-        radius_array = np.logspace(logrmin,logrmax,npts_radius)
+        radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
         logradius_array = np.log10(radius_array)
 
         self.cumu_inv_param_table_dict = {}
         param_array_list = []
         for prof_param_key in self.prof_param_keys:
-            parmin, parmax, dpar = self.prof_param_table_dict[prof_param_key]
+            parmin = getattr(self, prof_param_key + '_lookup_table_min')
+            parmax = getattr(self, prof_param_key + '_lookup_table_max')
+            dpar = getattr(self, prof_param_key + '_lookup_table_spacing')
             npts_par = int(np.round((parmax-parmin)/dpar))
             param_array = np.linspace(parmin,parmax,npts_par)
             param_array_list.append(param_array)
-            self.cumu_inv_param_table_dict[prof_param_key] = param_array
+            setattr(self, prof_param_key + '_cumu_inv_table', param_array)
         
         # Using the itertools product method requires 
         # special handling of the length-zero edge case
