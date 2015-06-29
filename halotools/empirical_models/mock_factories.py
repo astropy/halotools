@@ -349,9 +349,6 @@ class HodMockFactory(MockFactory):
                     )
 
             # Assign positions 
-            # This function is called differently than other galaxy properties, 
-            # since 'x', 'y', and 'z' is an attribute of any galaxy-halo model
-            # and any gal_type, without exception
             pos_method_name = 'pos_'+gal_type
 
             self.galaxy_table['x'][gal_type_slice], \
