@@ -125,12 +125,9 @@ class HaloProfileModel(object):
 
         """
         
-        self.set_prof_param_table_dict(prof_param_table_dict)
-
         radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
         logradius_array = np.log10(radius_array)
 
-        self.cumu_inv_param_table_dict = {}
         param_array_list = []
         for prof_param_key in self.prof_param_keys:
             parmin = getattr(self, prof_param_key + '_lookup_table_min')
@@ -161,26 +158,7 @@ class HaloProfileModel(object):
                 np.arange(np.prod(param_array_dimensions)).reshape(param_array_dimensions)
                 )
             self.func_table_indices = func_table_indices
-
-    def _get_param_key(self, model_nickname, param_nickname):
-        """ Trivial function providing standardized names for halo profile parameters. 
-
-        Parameters 
-        ----------
-        model_nickname : string 
-            Each sub-class of `HaloProfileModel` has a nickname, e.g., ``NFWmodel``. 
-
-        param_nickname : string 
-            Each profile parameter has a nickname, e.g., ``conc``. 
-
-        Returns 
-        -------
-        param_key : string 
-            Underscore-concatenation of the two inputs, e.g., ``NFWmodel_conc``. 
-        """
-        param_key = model_nickname+'_'+param_nickname
-        return param_key
-
+            
 
 class TrivialProfile(HaloProfileModel):
     """ Profile of dark matter halos with all their mass 
@@ -191,10 +169,10 @@ class TrivialProfile(HaloProfileModel):
 
     Parameters 
     ----------
-    cosmology : object 
+    cosmology : object, optional keyword argument
         Astropy cosmology object. Default cosmology is WMAP5. 
 
-    redshift : float 
+    redshift : float, optional keyword argument 
 
     Notes 
     -----
@@ -214,89 +192,26 @@ class TrivialProfile(HaloProfileModel):
     >>> trivial_halo_prof_model = TrivialProfile(cosmology = Planck13, redshift = 0.5)
 
     """
-    def __init__(self, 
-        cosmology=sim_defaults.default_cosmology, 
-        redshift=sim_defaults.default_redshift):
-
-        self.model_nickname = 'TrivialProfile'
-
-        haloprop_key_dict = {}
-        prof_param_keys = []
+    def __init__(self):
 
         # Call the init constructor of the super-class, 
         # whose only purpose is to bind cosmology, redshift, haloprop_key_dict, 
         # and a list of prof_param_keys to the NFWProfile instance. 
-        super(TrivialProfile, self).__init__(
-            cosmology, redshift, prof_param_keys, 
-            haloprop_key_dict=haloprop_key_dict)
+        super(TrivialProfile, self).__init__(prof_param_keys=[], **kwargs)
 
-        empty_dict = {}
-        self.build_inv_cumu_lookup_table(empty_dict)
+        self.build_inv_cumu_lookup_table()
 
-        self.publication = []
-
-    def density_profile(self, x):
-        """ Trivial density profile function. 
-
-        :math:`\\rho(x=0) = 1`
-
-        :math:`\\rho(x>0) = 0`
-
-        Parameters 
-        ----------
-        x : array_like 
-            Value of the radius at which density profile is to be evaluated. 
-            Should be scaled by the halo boundary, 
-            so that :math:`x \equiv r / R_{\\mathrm{halo}}`, and 
-            :math:`0 < x < 1`
-
-        Returns 
-        -------
-        rho : array_like 
-            Dark matter density evaluated at each value of the input array x. 
-
-        """
-        return np.where(r == 0, 1, 0)
-
-    @property
-    def halo_prof_func_dict(self):
-        """ Trivial method binding the empty dictionary ``halo_prof_func_dict`` 
-        to the class instance. 
-
-        Method is required of any `HaloProfileModel` sub-class. 
-        For `TrivialProfile`, the ``halo_prof_func_dict`` is empty because in this case 
-        there are no profile parameters that need to be mapped onto halos. 
-        """
-        return {}
-
-    def set_prof_param_table_dict(self,input_dict):
-        """ Trivial method binding the empty dictionary 
-        ``prof_param_table_dict`` to the class instance. 
-
-        Method is required of any `HaloProfileModel` sub-class. 
-        For `TrivialProfile`, the ``prof_param_table_dict`` is empty 
-        because in this case there are no profile parameters 
-        for which a lookup table needs to be built. 
-        """
-        self.prof_param_table_dict = input_dict
-
-    def cumulative_mass_PDF(self, x):
-        """ Trivial function returning unity for any input. 
-
-        Method is required of any `HaloProfileModel` sub-class.         
-        """
-        return 1
-
+        self.publications = []
 
 class NFWProfile(HaloProfileModel):
     """ NFW halo profile, based on Navarro, Frenk, and White (1999).
 
     Parameters 
     ----------
-    cosmology : object, optional
+    cosmology : object, optional keyword argument 
         Astropy cosmology object. Default cosmology is WMAP5. 
 
-    redshift : float, optional
+    redshift : float, optional keyword argument 
         Default redshift is 0.
 
     prof_param_table_dict : dictionary, optional 
@@ -315,16 +230,10 @@ class NFWProfile(HaloProfileModel):
         the discretization will be determined by the default settings in 
         the `~halotools.empirical_models.model_defaults` module.  
 
-    haloprop_key_dict : dict, optional
-        Dictionary determining the halo properties used by the model. 
-        Dictionary keys must include ``prim_haloprop_key`` 
-        and ``halo_boundary``. 
-        Dictionary values are strings providing the column name 
-        used to extract the relevant data from a halo catalog, 
-        e.g., ``mvir`` and ``rvir``. 
-        ``haloprop_key_dict`` is used by the method 
-        `set_prof_param_table_dict`. 
-        Default values are set in `~halotools.empirical_models.model_defaults`. 
+    halo_boundary : string, optional keyword argument 
+        String giving the column name of the halo catalog that stores the 
+        boundary of the halo. Default is set in 
+        the `~halotools.empirical_models.model_defaults` module. 
 
     conc_mass_relation_key : string, optional 
         String specifying which concentration-mass relation is used to paint model 
@@ -364,28 +273,25 @@ class NFWProfile(HaloProfileModel):
         cosmology=sim_defaults.default_cosmology, 
         redshift=sim_defaults.default_redshift,
         prof_param_table_dict={},
-        haloprop_key_dict=model_defaults.haloprop_key_dict,
+        halo_boundary=model_defaults.halo_boundary,
         conc_mass_relation_key = model_defaults.conc_mass_relation_key):
-
-        self.model_nickname = 'NFWmodel'
-
-        # Call a method inherited from the super-class 
-        # to assign a string that will be used to 
-        # name the concentration parameter assigned to the halo catalog
-        self._conc_parname = self._get_param_key(self.model_nickname, 'conc')
 
         # Call the init constructor of the super-class, 
         # whose only purpose is to bind cosmology, redshift, prim_haloprop_key, 
         # and a list of prof_param_keys to the NFWProfile instance. 
         super(NFWProfile, self).__init__(
-            cosmology, redshift, [self._conc_parname], haloprop_key_dict=haloprop_key_dict)
+            cosmology=cosmology, redshift=redshift, halo_boundary=halo_boundary, 
+            prof_param_keys=['NFWmodel_conc'])
 
-        self._conc_mass_func = self._get_conc_mass_model(conc_mass_relation_key)
+        self.NFWmodel_conc_lookup_table_min = model_defaults.min_permitted_conc
+        self.NFWmodel_conc_lookup_table_max = model_defaults.max_permitted_conc
+        self.NFWmodel_conc_lookup_table_spacing = model_defaults.default_dconc
 
-        self.build_inv_cumu_lookup_table(
-            prof_param_table_dict=prof_param_table_dict)
+        self.NFWmodel_conc = self._get_conc_mass_model(conc_mass_relation_key)
 
-        self.publication = ['arXiv:9611107','arXiv:1402.7073']
+        self.build_inv_cumu_lookup_table()
+
+        self.publications = ['arXiv:9611107','arXiv:1402.7073']
 
     def g(self, x):
         """ Convenience function used to evaluate the profile. 
@@ -493,76 +399,6 @@ class NFWProfile(HaloProfileModel):
             else:
                 c = args[0]
                 return self.g(c) / self.g(r*c)
-
-
-    @property 
-    def halo_prof_func_dict(self):
-        """ Dictionary used as a container for 
-        the functions that map profile parameter values onto dark matter halos. 
-
-        Each dict key of ``halo_prof_func_dict`` corresponds to 
-        the name of a halo profile parameter, e.g., 'NFWmodel_conc'. 
-        The dict value attached to each dict key is a function object
-        providing the mapping between halos and the halo profile parameter, 
-        such as a concentration-mass function. 
-
-        Notes 
-        ----- 
-        Implemented as a read-only getter method via the ``@property`` decorator syntax. 
-        """
-        return {self._conc_parname : self._conc_mass_func}
-
-
-    def set_prof_param_table_dict(self,input_dict={}):
-        """ Method sets the value of the prof_param_table_dict attribute. 
-
-        The prof_param_table_dict attribute is a dictionary 
-        used in the set up of a gridded correspondence between 
-        halo profile properties and inverse cumulative function objects. 
-        This grid is used by mock factories such as `halotools.empirical_models.mock_factories` 
-        to rapidly generate Monte Carlo realizations of satellite profiles. 
-
-        Parameters 
-        ----------
-        input_dict : dict, optional
-            Passed dictionary used to manually determine how to discretize 
-            a halo profile parameter. 
-            All dict keys of ``input_dict`` besides ``NFWmodel_conc`` will be ignored. 
-            The dict value bound to the ``NFWmodel_conc`` key must be a 3-element tuple,
-            which will be used to govern how halo concentration is discretized. 
-            The entries of the tuple give the minimum parameter 
-            value of the table to be built, the 
-            maximum value, and the linear spacing, respectively. 
-            If an empty dict, or if no ``NFWmodel_conc`` key is present, 
-            default behavior is set in the `halotools.empirical_models.model_defaults` module. 
-
-        Notes 
-        ----- 
-        Method does not return anything. Instead, input_dict is bound to 
-        the NFWProfile instance with the attribute name prof_param_table_dict. 
-
-        """
-
-        # First declare the what prof_param_table_dict will be 
-        # in the absence of any input_dict
-        cmin = model_defaults.min_permitted_conc
-        cmax = model_defaults.max_permitted_conc
-        dconc = model_defaults.default_dconc
-        self.prof_param_table_dict = {self._conc_parname:(cmin, cmax, dconc)}
-
-        for key in self.prof_param_table_dict.keys():
-
-            if key in input_dict.keys():
-                if not isinstance(input_dict[key], tuple):
-                    raise TypeError("Values of input_dict passed to "
-                        "set_prof_param_table_dict must be a tuple")
-
-                if len(input_dict[key]) != 3:
-                    raise TypeError("Tuple value of "
-                        "input_dict passed to set_prof_param_table_dict" 
-                        "must have exactly 3 elements")
-
-                self.prof_param_table_dict[key] = input_dict[key]
 
 
     def _get_conc_mass_model(self, conc_mass_relation_key):
