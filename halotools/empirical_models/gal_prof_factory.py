@@ -386,18 +386,19 @@ class GalProfFactory(model_helpers.GalPropModel):
 
         return x, y, z
 
-    def mc_pos(self, galaxy_table):
+    def mc_pos(self, **kwargs):
         """ Method to generate random, three-dimensional, 
         halo-centric positions of galaxies. 
 
         Parameters 
         ----------
-        galaxy_table : Astropy Table
+        galaxy_table : Astropy Table, required keyword argument
             Data table storing galaxy catalog. 
 
         seed : int, optional keyword argument 
             Random number seed used in Monte Carlo realization
         """
+        galaxy_table = kwargs['galaxy_table']
         # get the appropriate slice for the gal_type of this component model
         x = galaxy_table['x']
         y = galaxy_table['y']
