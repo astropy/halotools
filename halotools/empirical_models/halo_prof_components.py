@@ -71,141 +71,20 @@ class HaloProfileModel(object):
 
     """
 
-    def __init__(self, cosmology, redshift, prof_param_keys, 
-        haloprop_key_dict={}):
+    def __init__(self, halo_boundary = model_defaults.halo_boundary, 
+        prim_haloprop_key = model_defaults.prim_haloprop_key, **kwargs):
 
-        self.redshift = redshift
-        self.cosmology = cosmology
-        self.haloprop_key_dict = haloprop_key_dict
+        self.halo_boundary = halo_boundary
+        self.prim_haloprop_key = prim_haloprop_key
 
-        self.prof_param_keys = list(prof_param_keys)
+        required_kwargs = ['prof_param_keys']
+        model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
-    @abstractmethod
-    def density_profile(self, x, *args):
-        """ Required method giving the density profile evaluated at the input radius. 
+        if 'redshift' in kwargs.keys():
+            self.redshift = kwargs['redshift']
 
-        Parameters 
-        ----------
-        x : array_like 
-            Value of the radius at which density profile is to be evaluated. 
-            Should be scaled by the halo boundary, 
-            so that :math:`x \equiv r / R_{\\mathrm{halo}}`, and 
-            :math:`0 < x < 1`
-
-        input_params : array_like 
-            Parameters specifying the halo profile. 
-            Should have the same length as the input x. 
-
-        Returns 
-        -------
-        rho : array_like 
-            Dark matter density evaluated at each value of the input array x. 
-        """
-        raise NotImplementedError("All subclasses of HaloProfileModel"
-        " must include a density_profile method")
-
-    @abstractmethod
-    def cumulative_mass_PDF(self, x, *args):
-        """ Required method specifying the cumulative PDF of the halo mass profile. 
-
-        Parameters 
-        ----------
-        x : array_like 
-            Value of the radius at which density profile is to be evaluated. 
-            Should be scaled by the halo boundary, as in `density_profile`. 
-
-        input_params : array_like 
-            Parameters specifying the halo profile. 
-            Should have the same length as the input x. 
-
-        Returns 
-        -------
-        cumu_mass_PDF : array_like 
-            Cumulative fraction of dark matter mass interior to input x. 
-        """
-        raise NotImplementedError("All sub-classes of HaloProfileModel "
-            "must include a cumulative_mass_PDF method")
-
-    @abstractproperty
-    def halo_prof_func_dict(self):
-        """ Required dictionary attribute containing function objects 
-        that specify the mapping between halos and their profile parameters. 
-
-        `halo_prof_func_dict` is a dictionary. 
-        Each key of this dictionary is a profile parameter name, e.g., ``NFWmodel_conc``. 
-        Each value of this dictionary is a function object; 
-        these function objects take 
-        halos as input, and return the profile parameter value, 
-        e.g., `~halotools.empirical_models.halo_prof_param_components.ConcMass.conc_mass`.  
-        All such mappings are found in the 
-        `~halotools.empirical_models.halo_prof_param_components` module. 
-
-        Notes 
-        -----
-        The ``halo_prof_func_dict`` dictionary can be empty, as is the case for `TrivialProfile`. 
-
-        This dictionary standardizes the way composite models access 
-        the profile parameter mappings. This standardization is necessary 
-        so that composite models can use a uniform syntax to handle cases of 
-        user-defined :math:`c(M)`-type relations whose method names 
-        are not known in advance. 
-
-        When instances of `HaloProfileModel` are called by the mock factories 
-        such as `~halotools.empirical_models.HodMockFactory`, 
-        each dictionary key of `halo_prof_func_dict` will correspond 
-        to the name of a new column for the halo catalog 
-        that will be created by the mock factory 
-        during the pre-processing of the halo catalog.
-
-        """
-        raise NotImplementedError("All subclasses of HaloProfileModel must"
-            " provide a halo_prof_func_dict attribute. \n"
-            "This attribute is a dictionary with dict keys"
-            " giving the names of the halo profile parameters, "
-            " and dict values being the functions used to map "
-            "profile parameter values onto halos")
-
-    @abstractmethod
-    def set_prof_param_table_dict(self,input_dict):
-        """ Required method providing instructions for how to discretize 
-        halo profile parameter values. 
-
-        After calling this method, the class instance has a 
-        ``prof_param_table_dict`` attribute that is a dictionary. 
-        Each dict key is a profile parameter name, e.g., ``NFWmodel_conc``. 
-        Each dict value is a 3-element tuple; 
-        the tuple entries provide, respectively, the min, max, and linear 
-        spacing used to discretize the profile parameter. 
-        This discretization is used by `build_inv_cumu_lookup_table` to 
-        create a lookup table associated with `HaloProfileModel`. 
-
-        Parameters 
-        ----------
-        input_dict : dict, optional
-            Passed dictionary used to manually determine how to discretize 
-            a halo profile parameter. 
-            All keys of ``input_dict`` other than those already in 
-            ``self.prof_param_table_dict`` will be ignored. 
-            The value bound to each key must be a 3-element tuple,
-            which will be used to govern how the halo profile parameter is discretized. 
-            The entries of the tuple give the minimum parameter 
-            value of the table to be built, the 
-            maximum value, and the linear parameter spacing, respectively. 
-            If ``input_dict`` is an empty dict, 
-            the default discretization will be chosen, 
-            which is set in the `halotools.empirical_models.model_defaults` module. 
-            The same applies for the keys of ``self.prof_param_table_dict`` 
-            with no match in ``input_dict``.   
-
-        Notes 
-        -----
-        The ``prof_param_table_dict`` dictionary can be empty, 
-        as is the case for `TrivialProfile`. 
-
-        """ 
-        raise NotImplementedError("All subclasses of HaloProfileModel must"
-            " provide a set_prof_param_table_dict method used to create a "
-            "(possibly trivial) dictionary prof_param_table_dict.")
+        if 'cosmology' in kwargs.keys():
+            self.cosmology = kwargs['cosmology']
 
     def build_inv_cumu_lookup_table(self, prof_param_table_dict={}, 
         profile_table_radius_array_dict = model_defaults.profile_table_radius_array_dict):
@@ -272,7 +151,6 @@ class HaloProfileModel(object):
                 table_ordinates = self.cumulative_mass_PDF(radius_array,*items)
                 log_table_ordinates = np.log10(table_ordinates)
                 funcobj = spline(log_table_ordinates, logradius_array, k=4)
-                #funcobj = spline(self.cumulative_mass_PDF(radius_array,*items),radius_array)
                 func_table.append(funcobj)
 
             param_array_dimensions = [len(param_array) for param_array in param_array_list]
@@ -282,8 +160,6 @@ class HaloProfileModel(object):
                 np.arange(np.prod(param_array_dimensions)).reshape(param_array_dimensions)
                 )
             self.func_table_indices = func_table_indices
-
-
 
     def _get_param_key(self, model_nickname, param_nickname):
         """ Trivial function providing standardized names for halo profile parameters. 
