@@ -39,7 +39,7 @@ def test_unbiased_trivial():
 	composite_model = Kravtsov04()
 	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
-	x, y, z = cen_prof.mc_pos(mock)
+	x, y, z = cen_prof.mc_pos(mock.galaxy_table)
 	assert np.all(x == 0)
 	assert np.all(y == 0)
 	assert np.all(z == 0)
@@ -75,7 +75,7 @@ def test_unbiased_nfw():
 	assert np.allclose(norms, 1)
 
 	# verify that all mc_pos points are inside the unit sphere
-	satellite_xpos, satellite_ypos, satellite_zpos = sat_prof.mc_pos(mock)
+	satellite_xpos, satellite_ypos, satellite_zpos = sat_prof.mc_pos(mock.galaxy_table)
 	satellite_pos = np.array([satellite_xpos, satellite_ypos, satellite_zpos]).T
 	assert np.all(np.linalg.norm(satellite_pos, axis=1) <= 1)
 

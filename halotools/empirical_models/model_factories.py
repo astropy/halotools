@@ -576,7 +576,7 @@ class HodModelFactory(ModelFactory):
             setattr(self, gal_prof_param, func)
 
 
-    def mc_pos(self, mock_obj, **kwargs):
+    def mc_pos(self, galaxy_table, **kwargs):
         """ Method used to generate Monte Carlo realizations of galaxy positions. 
 
         Identical to component model version from which the behavior derives, 
@@ -585,17 +585,16 @@ class HodModelFactory(ModelFactory):
 
         Parameters 
         ----------
-        mock_obj : object 
-            Instance of `~halotools.empirical_models.mock_factories.HodMockFactory`. 
+        galaxy_table : Astropy Table
+            Data table storing a length-Ngals galaxy catalog. 
 
-        gal_type : string 
+        gal_type : string, required keyword argument
             Name of the galaxy population. 
 
         Returns 
         -------
         x, y, z : array_like 
-            Length-Ngals arrays of coordinate positions, 
-            where Ngals is the number of ``gal_type`` gals in the ``mock_obj``. 
+            Length-Ngals arrays of coordinate positions.
 
         Notes 
         -----
@@ -607,9 +606,7 @@ class HodModelFactory(ModelFactory):
         """
         gal_type = kwargs['gal_type']
         gal_prof_model = self.model_blueprint[gal_type]['profile']
-        x, y, z = gal_prof_model.mc_pos(mock_obj)
-
-        gal_type_slice = mock_obj._gal_type_indices[gal_type]
+        x, y, z = gal_prof_model.mc_pos(galaxy_table)
 
         # Re-scale the halo-centric distance by the halo boundary
         if 'halo_boundary' in gal_prof_model.haloprop_key_dict.keys():
@@ -622,18 +619,18 @@ class HodModelFactory(ModelFactory):
                 model_defaults.haloprop_key_dict['halo_boundary']
                 )
 
-        x *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]/1000.
-        y *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]/1000.
-        z *= mock_obj.galaxy_table[halo_boundary_attr_name][gal_type_slice]/1000.
+        x *= galaxy_table[halo_boundary_attr_name]/1000.
+        y *= galaxy_table[halo_boundary_attr_name]/1000.
+        z *= galaxy_table[halo_boundary_attr_name]/1000.
 
         # Re-center the positions by the host halo location
         halo_xpos_attr_name = model_defaults.host_haloprop_prefix+'x'
         halo_ypos_attr_name = model_defaults.host_haloprop_prefix+'y'
         halo_zpos_attr_name = model_defaults.host_haloprop_prefix+'z'
 
-        x += mock_obj.galaxy_table[halo_xpos_attr_name][gal_type_slice]
-        y += mock_obj.galaxy_table[halo_ypos_attr_name][gal_type_slice]
-        z += mock_obj.galaxy_table[halo_zpos_attr_name][gal_type_slice]
+        x += galaxy_table[halo_xpos_attr_name]
+        y += galaxy_table[halo_ypos_attr_name]
+        z += galaxy_table[halo_zpos_attr_name]
 
         return x, y, z
 
