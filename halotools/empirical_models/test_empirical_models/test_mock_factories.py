@@ -36,7 +36,7 @@ def test_preloaded_hod_mocks():
         for key in expected_keys:
             assert key in mock1.galaxy_table.keys()
 
-        mock1.build_halo_prof_lookup_tables()
+        mock1.model.build_halo_prof_lookup_tables()
         assert np.all(mock1.galaxy_table['x'] >= 0)
         assert np.all(mock1.galaxy_table['y'] >= 0)
         assert np.all(mock1.galaxy_table['z'] >= 0)
@@ -50,14 +50,6 @@ def test_preloaded_hod_mocks():
         mock2 = mock_factories.HodMockFactory(snapshot=sim, model=model, 
             additional_haloprops = ['zhalf'])
         assert 'halo_zhalf' in mock2.galaxy_table.keys()
-
-        #func_dict = {'double_mvir' : lambda halos : 2.*halos['mvir']}
-        #mock4 = mock_factories.HodMockFactory(sim, model, 
-        #    new_haloprop_func_dict = func_dict)
-        #assert 'double_mvir' in mock4.halos.keys()
-        #assert hasattr(mock4, 'halo_double_mvir')
-        #assert np.allclose(mock4.halo_mvir/mock4.halo_double_mvir, 0.5)
-
 
     sim = FakeSim()
 
