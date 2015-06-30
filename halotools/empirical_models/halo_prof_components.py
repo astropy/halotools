@@ -33,8 +33,8 @@ class HaloProfileModel(object):
     """ Container class for any halo profile model. 
 
     This is an abstract class, and cannot itself be instantiated. 
-    Rather, `HaloProfileModel` provides a 
-    template for any model for the radial profile of galaxies within their halos. 
+    Rather, `HaloProfileModel` provides a template for any model of 
+    the radial profile of dark matter particles within their halos. 
 
     """
 
