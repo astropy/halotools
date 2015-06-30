@@ -6,7 +6,7 @@ galaxy profiles from a set of components.
 
 """
 
-__all__ = ['GalProfFactory']
+__all__ = ['SphericallySymmetricGalProf']
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
@@ -20,15 +20,15 @@ import halo_prof_components
 import gal_prof_components as gpc
 
 
-class GalProfFactory(model_helpers.GalPropModel):
+class SphericallySymmetricGalProf(halo_prof_components.HaloProfileModel):
     """ Class modeling the way galaxies are distributed 
     within their halos. 
 
-    `GalProfFactory` can be thought of as a factory that produces 
+    `SphericallySymmetricGalProf` can be thought of as a factory that produces 
     model objects for the intra-halo distribution of galaxies.  
-    `GalProfFactory` derives most of its 
+    `SphericallySymmetricGalProf` derives most of its 
     behavior from external functions and classes. 
-    The main purpose of the `GalProfFactory` class is to provide a standardized 
+    The main purpose of the `SphericallySymmetricGalProf` class is to provide a standardized 
     interface for the rest of the package, particularly model factories such as 
     `~halotools.empirical_models.HodModelFactory`, 
     and mock factories such as `~halotools.empirical_models.HodMockFactory`. 
@@ -39,13 +39,28 @@ class GalProfFactory(model_helpers.GalPropModel):
         """
         Parameters 
         ----------
-        gal_type : string 
-            User-supplied name of the galaxy population being modeled, 
-            e.g., ``sats`` or ``orphans``. 
-
-        halo_prof_model : object 
-            Instance of a concrete sub-class of 
+        halo_prof_model : class 
+            Any sub-class of 
             `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
+
+        cosmology : object, optional keyword argument 
+            Astropy cosmology object. Default cosmology is WMAP5. 
+
+        redshift : float, optional keyword argument 
+            Default redshift is 0.
+
+        halo_boundary : string, optional keyword argument 
+            String giving the column name of the halo catalog that stores the 
+            boundary of the halo. Default is set in 
+            the `~halotools.empirical_models.model_defaults` module. 
+
+        conc_mass_model : string, optional keyword argument  
+            String specifying which concentration-mass relation is used to paint model 
+            concentrations onto simulated halos. 
+            Default string/model is set in `~halotools.empirical_models.model_defaults`.
+
+        gal_type : string 
+            Name of the galaxy population being modeled, e.g., ``sats`` or ``orphans``. 
 
         spatial_bias_model : object, optional
             Instance of the class `~halotools.empirical_models.gal_prof_components.SpatialBias`. 
@@ -58,17 +73,20 @@ class GalProfFactory(model_helpers.GalPropModel):
 
         >>> halo_prof_model = halo_prof_components.TrivialProfile()
         >>> gal_type_nickname = 'centrals'
-        >>> gal_prof_model = GalProfFactory(gal_type_nickname, halo_prof_model)
+        >>> gal_prof_model = SphericallySymmetricGalProf(gal_type_nickname, halo_prof_model)
 
         For a satellite-type population distributed according to the NFW profile of the parent halo:
 
         >>> halo_prof_model = halo_prof_components.NFWProfile()
         >>> gal_type_nickname = 'sats'
-        >>> gal_prof_model = GalProfFactory(gal_type_nickname, halo_prof_model)
+        >>> gal_prof_model = SphericallySymmetricGalProf(gal_type_nickname, halo_prof_model)
 
         """
 
-        super(GalProfFactory, self).__init__(galprop_key='pos')
+        self.halo_prof_model = halo_prof_model(**kwargs)
+
+        super(SphericallySymmetricGalProf, self).__init__(
+            prof_param_keys=self.halo_prof_model.prof_param_keys, **kwargs)
 
         required_kwargs = ['gal_type', 'halo_prof_model']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
@@ -105,8 +123,6 @@ class GalProfFactory(model_helpers.GalPropModel):
         """
 
         self.halo_prof_model.build_inv_cumu_lookup_table()
-
-        self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
 
     def mc_radii(self, *args):
         """ Method to generate Monte Carlo realizations of the profile model. 
@@ -171,7 +187,7 @@ class GalProfFactory(model_helpers.GalPropModel):
         # the i^th funcobj on the i^th element of rho. 
         # Call the model_helpers module to access generic code for doing this 
         return 10.**model_helpers.call_func_table(
-            self.cumu_inv_func_table, np.log10(rho), func_table_indices)
+            self.halo_prof_model.cumu_inv_func_table, np.log10(rho), func_table_indices)
 
     def mc_angles(self, Npts):
         """ Returns Npts random points on the unit sphere. 
