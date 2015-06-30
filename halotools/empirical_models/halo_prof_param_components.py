@@ -32,69 +32,60 @@ class ConcMass(object):
 
     def __init__(self, cosmology=sim_defaults.default_cosmology, 
         redshift = sim_defaults.default_redshift, 
-        prim_haloprop_key = model_defaults.prim_haloprop_key):
+        prim_haloprop_key = model_defaults.prim_haloprop_key, 
+        conc_mass_model = model_defaults.conc_mass_model):
 
         self.cosmology = cosmology
         self.redshift = redshift
         self.prim_haloprop_key = prim_haloprop_key
+        self.conc_mass_model = conc_mass_model
 
-#    def conc_mass(self, mass, model=model_defaults.conc_mass_relation_key, **kwargs):
-    def conc_mass(self, **kwargs):
+    def __call__(self, **kwargs):
         """ Method used to evaluate the mean NFW concentration as a function of 
         halo mass. 
 
         This is the primary method seen by the outside world. It has no functionality 
         of its own, it only calls the desired function based on the model keyword. 
 
-        Parameters 
-        ----------
-        mass : array_like 
+        Parameters
+        ----------        
+        prim_haloprop : array, optional keyword argument
+            Array storing a mass-like variable that governs the occupation statistics. 
+            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
-        model : string, optional 
-            Used to specify which model to use for the concentration-mass relation. 
-            Currently supported relations are 'dutton_maccio14'. 
+        halos : object, optional keyword argument 
+            Data table storing halo catalog. 
+            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
+            keyword arguments must be passed. 
 
-        redshift : float or array_like, optional keyword argument
-            If redshift is an array, must be same length as mass. 
-            If no redshift keyword is passed, model_defaults.default_redshift will be chosen. 
+        galaxy_table : object, optional keyword argument 
+            Data table storing mock galaxy catalog. 
+            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            keyword arguments must be passed. 
 
         """
-
-        if 'redshift' in kwargs.keys():
-            z = kwargs['redshift']
-        else:
-            z = self.redshift
-
-        if 'mass' in kwargs.keys():
-            mass = kwargs['mass']
+        # Retrieve the array storing the mass-like variable
+        if 'galaxy_table' in kwargs.keys():
+            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
+            mass = kwargs['galaxy_table'][key]
         elif 'halos' in kwargs.keys():
             mass = kwargs['halos'][self.prim_haloprop_key]
-        elif 'galaxy_table' in kwargs.keys():
-            halo_mass_key = model_defaults.host_haloprop_prefix + self.prim_haloprop_key
-            mass = kwargs['galaxy_table'][halo_mass_key]
-
-        if 'model' not in kwargs.keys():
-            model = model_defaults.conc_mass_relation_key
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
         else:
-            model = kwargs['model']
+            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
+                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
-        if model == 'dutton_maccio14':
-            return self.dutton_maccio14_conc_mass(mass, z)
-        else:
-            raise KeyError("Input conc-mass model is not supported. "
-                "The only currently supported conc-mass model is dutton_maccio14")
+        return getattr(self, self.conc_mass_model)(mass)
 
-
-    def dutton_maccio14_conc_mass(self, mass, z):
+    def dutton_maccio14(self, mass):
         """ Power-law fit to the concentration-mass relation from 
         Equations 12 & 13 of Dutton & Maccio 2014, arXiv:1402.7073.
 
         Parameters 
         ----------
         mass : array_like 
-
-        z : float or array_like 
-            If z is an array, must be same length as mass
 
         Returns 
         -------
@@ -117,8 +108,8 @@ class ConcMass(object):
 
         """
 
-        a = 0.537 + (1.025 - 0.537) * np.exp(-0.718 * z**1.08)
-        b = -0.097 + 0.024 * z
+        a = 0.537 + (1.025 - 0.537) * np.exp(-0.718 * self.redshift**1.08)
+        b = -0.097 + 0.024 * self.redshift
         m0 = 1.e12
 
         logc = a + b * np.log10(mass / m0)

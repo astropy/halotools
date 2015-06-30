@@ -7,27 +7,23 @@ intra-halo position of mock galaxies.
 
 __all__ = ['HaloProfileModel','TrivialProfile','NFWProfile']
 
-from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
-
-import numpy as np
-
-from scipy.interpolate import InterpolatedUnivariateSpline as spline
-#from scipy.interpolate import UnivariateSpline as spline
-
 from functools import partial
 from itertools import product
 
-from ..utils.array_utils import array_like_length as custom_len
-import model_helpers as model_helpers 
+import numpy as np
+from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
-from ..sim_manager import sim_defaults
-
-import astropy.cosmology as cosmology
+from astropy.extern import six
+from astropy import cosmology
 from astropy import units as u
 
-import model_defaults
-import halo_prof_param_components
+from . import model_helpers 
+from . import model_defaults
+from . import halo_prof_param_components
+
+from ..utils.array_utils import array_like_length as custom_len
+from ..sim_manager import sim_defaults
 
 
 ##################################################################################
@@ -158,7 +154,7 @@ class HaloProfileModel(object):
                 np.arange(np.prod(param_array_dimensions)).reshape(param_array_dimensions)
                 )
             self.func_table_indices = func_table_indices
-            
+
 
 class TrivialProfile(HaloProfileModel):
     """ Profile of dark matter halos with all their mass 
@@ -214,22 +210,6 @@ class NFWProfile(HaloProfileModel):
     redshift : float, optional keyword argument 
         Default redshift is 0.
 
-    prof_param_table_dict : dictionary, optional 
-        Dictionary governing how the `build_inv_cumu_lookup_table` method 
-        discretizes the concentration parameter when building the profile lookup table. 
-
-        The ``prof_param_table_dict`` dictionary has a single key giving the 
-        concentration parameter name, ``NFWmodel_conc``. 
-        The value bound to this key is a 3-element tuple; 
-        the tuple entries provide, respectively, the min, max, and linear 
-        spacing used to discretize halo concentration. 
-
-        The `set_prof_param_table_dict` method binds this dictionary to 
-        the class instance; if no ``prof_param_table_dict`` argument 
-        is passed to the constructor, 
-        the discretization will be determined by the default settings in 
-        the `~halotools.empirical_models.model_defaults` module.  
-
     halo_boundary : string, optional keyword argument 
         String giving the column name of the halo catalog that stores the 
         boundary of the halo. Default is set in 
@@ -237,20 +217,14 @@ class NFWProfile(HaloProfileModel):
 
     conc_mass_relation_key : string, optional 
         String specifying which concentration-mass relation is used to paint model 
-        concentrations onto simulated halos. Passed to the 
-        `~halotools.empirical_models.halo_prof_param_components.ConcMass.conc_mass` 
-        method of the `~halotools.empirical_models.halo_prof_param_components.ConcMass` 
-        container class that stores the :math:`c(M)` supported relations. 
+        concentrations onto simulated halos. 
         Default string/model is set in `~halotools.empirical_models.model_defaults`.
 
 
     Notes 
     -----
-    For development purposes, object is temporarily hard-coded to only use  
-    the Dutton & Maccio 2014 concentration-mass relation pertaining to 
-    a virial mass definition of a dark matter halo. This should eventually be 
-    generalized to allow for cosmology-dependent concentration-mass relations, 
-    such as Bhattacharya et al. (2013), and Diemer & Kravtsov (2014). 
+    Currently the only supported c-M relation is the 
+    Dutton & Maccio 2014 concentration-mass relation based on mvir. 
 
     For a review of basic properties of the NFW profile, 
     see for example Lokas & Mamon (2000), arXiv:0002395. 
@@ -272,13 +246,9 @@ class NFWProfile(HaloProfileModel):
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, 
         redshift=sim_defaults.default_redshift,
-        prof_param_table_dict={},
         halo_boundary=model_defaults.halo_boundary,
-        conc_mass_relation_key = model_defaults.conc_mass_relation_key):
+        conc_mass_model = model_defaults.conc_mass_model, **kwargs):
 
-        # Call the init constructor of the super-class, 
-        # whose only purpose is to bind cosmology, redshift, prim_haloprop_key, 
-        # and a list of prof_param_keys to the NFWProfile instance. 
         super(NFWProfile, self).__init__(
             cosmology=cosmology, redshift=redshift, halo_boundary=halo_boundary, 
             prof_param_keys=['NFWmodel_conc'])
@@ -287,7 +257,10 @@ class NFWProfile(HaloProfileModel):
         self.NFWmodel_conc_lookup_table_max = model_defaults.max_permitted_conc
         self.NFWmodel_conc_lookup_table_spacing = model_defaults.default_dconc
 
-        self.NFWmodel_conc = self._get_conc_mass_model(conc_mass_relation_key)
+        conc_mass_model = halo_prof_param_components.ConcMass(
+            cosmology=self.cosmology, redshift = self.redshift, 
+            conc_mass_model=conc_mass_model, **kwargs)
+        self.NFWmodel_conc = conc_mass_model.__call__
 
         self.build_inv_cumu_lookup_table()
 
@@ -392,46 +365,13 @@ class NFWProfile(HaloProfileModel):
             if custom_len(args[0]) == 1:
                 c = np.ones(len(r))*args[0]
                 return self.g(c) / self.g(r*c)
-            elif (custom_len(args[0]) > 1) & (custom_len(args[0]) != custom_len(r)):
+            elif custom_len(args[0]) != custom_len(r):
                 raise ValueError("If passing an array of concentrations to "
                     "cumulative_mass_PDF, the array must have the same length "
                     "as the array of radial positions")
             else:
                 c = args[0]
                 return self.g(c) / self.g(r*c)
-
-
-    def _get_conc_mass_model(self, conc_mass_relation_key):
-        """ Returns function object used compute concentrations. 
-
-        Parameters 
-        ----------
-        conc_mass_relation_key : string
-            Used to select which model to use to paint concentrations 
-            onto dark matter halos. 
-
-        Returns 
-        -------
-        conc_mass_func : function object 
-            When evaluated at a set of input masses, conc_mass_func 
-            returns the mean concentration according to the model 
-            corresponding to the input conc_mass_relation_key. 
-        """
-
-        prim_haloprop_key = self.haloprop_key_dict['prim_haloprop_key']
-        # Instantiate the container class for concentration-mass relations, 
-        # defined in the external module halo_prof_param_components
-        conc_mass_model_instance = halo_prof_param_components.ConcMass(
-            cosmology = self.cosmology, redshift = self.redshift, 
-            prim_haloprop_key = prim_haloprop_key)
-
-        # We want to call the specific function where the 'model' keyword argument 
-        # is fixed to the conc-mass relation we want. 
-        # For this, we use Python's functools
-        conc_mass_func = partial(
-            conc_mass_model_instance.conc_mass, model=conc_mass_relation_key)
-
-        return conc_mass_func
 
 ##################################################################################
 

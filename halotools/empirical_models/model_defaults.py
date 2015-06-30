@@ -37,7 +37,7 @@ default_dconc = 0.025
 Npts_radius_table = 101
 default_lograd_min = -4
 default_lograd_max = 0
-conc_mass_relation_key = 'dutton_maccio14'
+conc_mass_model = 'dutton_maccio14'
 
 ### Default values specifying traditional quenching model
 # Used by models in the halo_occupation module
