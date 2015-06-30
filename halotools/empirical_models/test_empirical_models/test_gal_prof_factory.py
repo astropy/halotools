@@ -16,7 +16,7 @@ __all__ = ['test_unbiased_trivial', 'test_unbiased_nfw']
 
 def test_unbiased_trivial():
 
-	cen_prof = gpf.SphericallySymmetricGalProf(
+	cen_prof = gpf.IsotropicGalProf(
 		gal_type='centrals', halo_prof_model=hpc.TrivialProfile)
 	assert cen_prof.gal_type == 'centrals'
 
@@ -44,7 +44,7 @@ def test_unbiased_trivial():
 
 def test_unbiased_nfw():
 
-	sat_prof = gpf.SphericallySymmetricGalProf(
+	sat_prof = gpf.IsotropicGalProf(
 		halo_prof_model=hpc.NFWProfile, gal_type='satellites')
 
 	snapshot = FakeSim()

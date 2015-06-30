@@ -6,7 +6,7 @@ galaxy profiles from a set of components.
 
 """
 
-__all__ = ['SphericallySymmetricGalProf']
+__all__ = ['IsotropicGalProf']
 
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
@@ -20,15 +20,15 @@ import halo_prof_components
 import gal_prof_components as gpc
 
 
-class SphericallySymmetricGalProf(halo_prof_components.HaloProfileModel):
+class IsotropicGalProf(halo_prof_components.HaloProfileModel):
     """ Class modeling the way galaxies are distributed 
     within their halos. 
 
-    `SphericallySymmetricGalProf` can be thought of as a factory that produces 
+    `IsotropicGalProf` can be thought of as a factory that produces 
     model objects for the intra-halo distribution of galaxies.  
-    `SphericallySymmetricGalProf` derives most of its 
+    `IsotropicGalProf` derives most of its 
     behavior from external functions and classes. 
-    The main purpose of the `SphericallySymmetricGalProf` class is to provide a standardized 
+    The main purpose of the `IsotropicGalProf` class is to provide a standardized 
     interface for the rest of the package, particularly model factories such as 
     `~halotools.empirical_models.HodModelFactory`, 
     and mock factories such as `~halotools.empirical_models.HodMockFactory`. 
@@ -70,17 +70,17 @@ class SphericallySymmetricGalProf(halo_prof_components.HaloProfileModel):
         To build a centrals-like population, with galaxies residing at exactly 
         the halo center:
 
-        >>> gal_prof_model = SphericallySymmetricGalProf(gal_type='centrals', halo_prof_model=halo_prof_components.TrivialProfile)
+        >>> gal_prof_model = IsotropicGalProf(gal_type='centrals', halo_prof_model=halo_prof_components.TrivialProfile)
 
         For a satellite-type population distributed according to the NFW profile of the parent halo:
 
-        >>> gal_prof_model = SphericallySymmetricGalProf(gal_type='sats', halo_prof_model=halo_prof_components.NFWProfile)
+        >>> gal_prof_model = IsotropicGalProf(gal_type='sats', halo_prof_model=halo_prof_components.NFWProfile)
 
         """
 
         self.halo_prof_model = kwargs['halo_prof_model'](**kwargs)
 
-        super(SphericallySymmetricGalProf, self).__init__(
+        super(IsotropicGalProf, self).__init__(
             prof_param_keys=self.halo_prof_model.prof_param_keys, **kwargs)
 
         required_kwargs = ['gal_type']
