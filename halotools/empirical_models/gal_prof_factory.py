@@ -84,7 +84,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         """
         return getattr(self.halo_prof_model, attr)
 
-    def mc_radii(self, *args):
+    def mc_radii(self, *args, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
@@ -108,6 +108,8 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         # Draw random values for the cumulative mass PDF         
         # These will be turned into random radial positions 
         # via the method of transformation of random variables
+        if 'seed' in kwargs.keys():
+            np.random.seed(kwargs['seed'])
         rho = np.random.random(len(args[0]))
 
         # Discretize each profile parameter for every galaxy
@@ -145,7 +147,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         return 10.**model_helpers.call_func_table(
             self.halo_prof_model.cumu_inv_func_table, np.log10(rho), func_table_indices)
 
-    def mc_angles(self, Npts):
+    def mc_angles(self, Npts, **kwargs):
         """ Returns Npts random points on the unit sphere. 
 
         Parameters 
@@ -162,6 +164,9 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
             Length-Npts arrays of the coordinate positions. 
 
         """
+        if 'seed' in kwargs.keys():
+            np.random.seed(kwargs['seed'])
+
         cos_t = np.random.uniform(-1.,1.,Npts)
         phi = np.random.uniform(0,2*np.pi,Npts)
         sin_t = np.sqrt((1.-cos_t*cos_t))
@@ -173,22 +178,23 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         return x, y, z
 
     def mc_pos(self, **kwargs):
-        """ Method to generate random, three-dimensional, 
-        halo-centric positions of galaxies. 
+        """ Method to generate random, three-dimensional, halo-centric positions of galaxies. 
 
         Parameters 
         ----------
         galaxy_table : Astropy Table, required keyword argument
-            Data table storing galaxy catalog. 
+            Data table storing a length-Ngals galaxy catalog. 
 
         seed : int, optional keyword argument 
             Random number seed used in Monte Carlo realization
+
+        Returns 
+        -------
+        x, y, z : arrays 
+            Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
         galaxy_table = kwargs['galaxy_table']
-        # get the appropriate slice for the gal_type of this component model
-        x = galaxy_table['x']
-        y = galaxy_table['y']
-        z = galaxy_table['z']
+        x, y, z = galaxy_table['x'], galaxy_table['y'], galaxy_table['z']
 
         # For the case of a trivial profile model, return the trivial result
         if isinstance(self.halo_prof_model, 
@@ -197,7 +203,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         else:
             # get angles
             Ngals = len(x)
-            x, y, z = self.mc_angles(Ngals)
+            x, y, z = self.mc_angles(Ngals, **kwargs)
 
             # extract all relevant profile parameters from the mock
             profile_params = (
@@ -206,7 +212,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
                 )
 
             # Get the radial positions of the gal_type galaxies
-            scaled_mc_radii = self.mc_radii(*profile_params) 
+            scaled_mc_radii = self.mc_radii(*profile_params, **kwargs) 
 
             # multiply the random radial positions by the random points on the unit sphere 
             # to get random three-dimensional positions
