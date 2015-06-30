@@ -36,7 +36,7 @@ def test_preloaded_hod_mocks():
         for key in expected_keys:
             assert key in mock1.galaxy_table.keys()
 
-        mock1.build_halo_prof_lookup_tables()
+        mock1.model.build_halo_prof_lookup_tables()
         assert np.all(mock1.galaxy_table['x'] >= 0)
         assert np.all(mock1.galaxy_table['y'] >= 0)
         assert np.all(mock1.galaxy_table['z'] >= 0)
