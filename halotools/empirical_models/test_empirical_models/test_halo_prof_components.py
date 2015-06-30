@@ -91,7 +91,7 @@ def test_NFWProfile():
     model_instance = hpc.NFWProfile()
     assert hasattr(model_instance, 'cosmology')
     assert isinstance(model_instance.cosmology, cosmology.FlatLambdaCDM)
-    assert model_instance._conc_parname == 'NFWmodel_conc'
+
 
     # Check that the lookup table attributes are correct
     model_instance.build_inv_cumu_lookup_table()

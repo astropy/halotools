@@ -188,7 +188,7 @@ class TrivialProfile(HaloProfileModel):
     >>> trivial_halo_prof_model = TrivialProfile(cosmology = Planck13, redshift = 0.5)
 
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
 
         # Call the init constructor of the super-class, 
         # whose only purpose is to bind cosmology, redshift, haloprop_key_dict, 

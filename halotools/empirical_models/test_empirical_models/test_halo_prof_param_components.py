@@ -20,10 +20,12 @@ def test_ConcMass():
 	default_model = halo_prof_param_components.ConcMass()
 	assert hasattr(default_model, 'cosmology')
 	assert isinstance(default_model.cosmology, cosmology.FlatLambdaCDM)
+	assert hasattr(default_model, 'redshift')
+	assert hasattr(default_model, 'prim_haloprop_key')
 
 	Npts = 1e3
 	mass = np.logspace(10, 15, Npts)
-	conc = default_model.conc_mass(mass=mass)
+	conc = default_model(prim_haloprop=mass)
 	assert np.all(conc > 1)
 	assert np.all(conc < 100)
 	assert np.all(np.diff(conc) < 0)
