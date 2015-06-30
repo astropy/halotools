@@ -49,11 +49,6 @@ def test_TrivialProfile():
 
         * ``cumu_inv_param_table``
 
-        * ``cumu_inv_param_table_dict``
-
-        * ``halo_prof_func_dict``
-
-        * ``haloprop_key_dict``
     """
 
     # Check that the initialized attributes are correct
@@ -86,7 +81,6 @@ def test_NFWProfile():
 
     # Check that the lookup table attributes are correct
     model_instance.build_inv_cumu_lookup_table()
-
 
     #assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] > 0)
     #assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] < 1000)

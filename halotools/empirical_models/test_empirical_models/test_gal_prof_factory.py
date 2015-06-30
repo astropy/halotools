@@ -15,25 +15,23 @@ from astropy import cosmology
 __all__ = ['test_unbiased_trivial', 'test_unbiased_nfw']
 
 def test_unbiased_trivial():
-	trivial_prof = hpc.TrivialProfile()
-	gal_type = 'centrals'
 
-	cen_prof = gpf.SphericallySymmetricGalProf(gal_type, trivial_prof)
-	assert cen_prof.gal_type == gal_type
+	cen_prof = gpf.SphericallySymmetricGalProf(
+		gal_type='centrals', halo_prof_model=hpc.TrivialProfile)
+	assert cen_prof.gal_type == 'centrals'
 
 	assert isinstance(cen_prof.halo_prof_model, hpc.TrivialProfile)
 
-	assert isinstance(cen_prof.cosmology, cosmology.FlatLambdaCDM)
+	if hasattr(cen_prof, 'cosmology'):
+		assert isinstance(cen_prof.cosmology, cosmology.FlatLambdaCDM)
 
-	assert 0 <= cen_prof.redshift <= 100
+	if hasattr(cen_prof, 'redshift'):
+		assert 0 <= cen_prof.redshift <= 100
 
-	assert cen_prof.haloprop_key_dict == {}
-
-	assert hasattr(cen_prof,'spatial_bias_model')
+	assert hasattr(cen_prof, 'halo_boundary')
+	assert hasattr(cen_prof, 'prim_haloprop_key')
 
 	assert cen_prof.param_dict == {}
-
-	assert cen_prof.gal_prof_func_dict == {}
 
 	snapshot = FakeSim()
 	composite_model = Kravtsov04()
@@ -45,18 +43,17 @@ def test_unbiased_trivial():
 	assert np.all(z == 0)
 
 def test_unbiased_nfw():
-	nfw_prof = hpc.NFWProfile()
-	gal_type = 'satellites'
 
-	sat_prof = gpf.SphericallySymmetricGalProf(gal_type, nfw_prof)
+	sat_prof = gpf.SphericallySymmetricGalProf(
+		halo_prof_model=hpc.NFWProfile, gal_type='satellites')
 
 	snapshot = FakeSim()
 	composite_model = Kravtsov04()
 	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
 	# Check that mc_radii gives reasonable results for FakeSim
-	satellite_boolean = mock.galaxy_table['gal_type'] == gal_type
-	conc_key = mock.model.gal_prof_param_list[0]
+	satellite_boolean = mock.galaxy_table['gal_type'] == sat_prof.gal_type
+	conc_key = 'NFWmodel_conc'
 	satellite_conc = mock.galaxy_table[conc_key][satellite_boolean]
 	satellite_radii = sat_prof.mc_radii(satellite_conc)
 	assert np.all(satellite_radii < 1)

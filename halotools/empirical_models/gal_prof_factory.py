@@ -83,12 +83,12 @@ class SphericallySymmetricGalProf(halo_prof_components.HaloProfileModel):
 
         """
 
-        self.halo_prof_model = halo_prof_model(**kwargs)
+        self.halo_prof_model = kwargs['halo_prof_model'](**kwargs)
 
         super(SphericallySymmetricGalProf, self).__init__(
             prof_param_keys=self.halo_prof_model.prof_param_keys, **kwargs)
 
-        required_kwargs = ['gal_type', 'halo_prof_model']
+        required_kwargs = ['gal_type']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         optional_attrs = ['cosmology', 'redshift']
@@ -98,31 +98,18 @@ class SphericallySymmetricGalProf(halo_prof_components.HaloProfileModel):
 
         self.build_inv_cumu_lookup_table()
 
+        for key in self.prof_param_keys:
+            setattr(self, key, getattr(self.halo_prof_model, key))
+
         self.publications = []
 
-    def build_inv_cumu_lookup_table(self):
-        """ Method building a lookup table used to 
-        rapidly generate Monte Carlo realizations of radial positions 
-        within the halo. 
+        ### NOT CORRECTLY IMPLEMENTED YET ###
+        self.param_dict = {}
 
-        Parameters 
-        ----------
-        prof_param_table_dict : dict, optional
-            Dictionary determining how the profile parameters are discretized 
-            during the building of the lookup table. If no ``prof_param_table_dict`` 
-            is passed, default values for the discretization will be chosen. 
-            See `set_prof_param_table_dict` for details. 
-
-        Notes 
-        -----
-        All of the behavior of this method is derived from 
-        ``self.halo_prof_model``. For further documentation about 
-        how this method works, see the 
-        `~halotools.empirical_models.HaloProfileModel.build_inv_cumu_lookup_table`
-        method of the `~halotools.empirical_models.HaloProfileModel` class. 
+    def __getattr__(self, attr):
         """
-
-        self.halo_prof_model.build_inv_cumu_lookup_table()
+        """
+        return getattr(self.halo_prof_model, attr)
 
     def mc_radii(self, *args):
         """ Method to generate Monte Carlo realizations of the profile model. 
