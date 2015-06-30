@@ -116,31 +116,32 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         digitized_param_list = []
         for param_index, param_key in enumerate(self.halo_prof_model.prof_param_keys):
             input_param_array = args[param_index]
-            param_bins = getattr(self.halo_prof_model, param_key + '_cumu_inv_table')
+            param_bins = getattr(self.halo_prof_model, param_key + '_lookup_table_bins')
             digitized_params = np.digitize(input_param_array, param_bins)
             digitized_param_list.append(digitized_params)
         # Each element of digitized_param_list is a length-Ngals array. 
         # The i^th element of each array contains the bin index of 
         # the discretized profile parameter of the galaxy. 
-        # So if self.NFWmodel_conc_cumu_inv_table = [4, 5, 6, 7,...], 
+        # So if self.NFWmodel_conc_lookup_table_bins = [4, 5, 6, 7,...], 
         # and the i^th entry of the first argument in the input param_array is 6.7, 
         # then the i^th entry of the array stored in the 
         # first element in digitized_param_list will be 3. 
 
         # Now we have a collection of arrays storing indices of individual 
-        # profile parameters, (A_0, A_1, A_2, ...), (B_0, B_1, B_2, ...), etc. 
-        # For the combination of profile parameters (A_0, B_0, ...), we need 
+        # profile parameters, [A_0, A_1, A_2, ...], [B_0, B_1, B_2, ...], etc. 
+        # For the combination of profile parameters [A_0, B_0, ...], we need 
         # the profile function object f_0, which we need to then evaluate 
         # on the randomly generated rho[0], and likewise for 
-        # A_i, B_i, ...), f_i, and rho[i]. 
-        # First determine the index in the profile function table 
+        # [A_i, B_i, ...], f_i, and rho[i], for i = 0, ..., Ngals-1.
+        # To do this, we first determine the index in the profile function table 
         # where the relevant function object is stored:
         func_table_indices = (
             self.halo_prof_model.func_table_indices[digitized_param_list]
             )
-        # Now we have an array of function objects, and we need to evaluate 
-        # the i^th funcobj on the i^th element of rho. 
-        # Call the model_helpers module to access generic code for doing this 
+        # Now we have an array of indices for our functions, and we need to evaluate 
+        # the i^th function on the i^th element of rho. 
+        # Call the model_helpers module to access generic code for doing this.
+        # (Remember that the interpolation is being done in log-space)
         return 10.**model_helpers.call_func_table(
             self.halo_prof_model.cumu_inv_func_table, np.log10(rho), func_table_indices)
 
@@ -161,7 +162,6 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
             Length-Npts arrays of the coordinate positions. 
 
         """
-        
         cos_t = np.random.uniform(-1.,1.,Npts)
         phi = np.random.uniform(0,2*np.pi,Npts)
         sin_t = np.sqrt((1.-cos_t*cos_t))

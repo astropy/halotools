@@ -120,7 +120,7 @@ class HaloProfileModel(object):
             npts_par = int(np.round((parmax-parmin)/dpar))
             param_array = np.linspace(parmin,parmax,npts_par)
             param_array_list.append(param_array)
-            setattr(self, prof_param_key + '_cumu_inv_table', param_array)
+            setattr(self, prof_param_key + '_lookup_table_bins', param_array)
         
         # Using the itertools product method requires 
         # special handling of the length-zero edge case
