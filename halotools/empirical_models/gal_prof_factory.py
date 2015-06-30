@@ -89,12 +89,10 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
 
         Parameters 
         ----------
-        param_array : array_like, optional position argument(s)
-            Array or arrays of length *Ngals* containing the input profile parameters. 
-            In the simplest case, this is a single array of 
-            NFW concentration values. 
-            There should be an input ``param_array`` 
-            for every parameter in the profile model, 
+        param_array : array_like, positional argument(s)
+            Array or arrays of length-Ngals containing the input profile parameters. 
+            In the simplest case, this is a single array of, e.g., NFW concentration values. 
+            There should be an input ``param_array`` for every parameter in the profile model, 
             all of the same length. 
 
         seed : int, optional keyword argument
@@ -104,33 +102,30 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         Returns 
         -------
         r : array 
-            Length-*Ngals* array containing the 
-            radial position of galaxies within their halos, 
-            scaled by the size of the halo's boundary, 
-            so that :math:`0 < r < 1`. 
+            Length-Ngals array containing the radial position of galaxies within their halos, 
+            scaled by the size of the halo's boundary, so that :math:`0 < r < 1`. 
         """
-        # Draw random values for the cumulative mass PDF 
-        # at the position of the satellites
-        
-        rho = np.random.random(len(args[0]))
+        # Draw random values for the cumulative mass PDF         
         # These will be turned into random radial positions 
         # via the method of transformation of random variables
+        rho = np.random.random(len(args[0]))
 
         # Discretize each profile parameter for every galaxy
         # Store the collection of arrays in digitized_param_list 
+        # The number of elements of digitized_param_list is the number of profile parameters in the model
         digitized_param_list = []
         for param_index, param_key in enumerate(self.halo_prof_model.prof_param_keys):
             input_param_array = args[param_index]
             param_bins = getattr(self.halo_prof_model, param_key + '_cumu_inv_table')
             digitized_params = np.digitize(input_param_array, param_bins)
             digitized_param_list.append(digitized_params)
-        # Each element of digitized_param_list is an array. 
+        # Each element of digitized_param_list is a length-Ngals array. 
         # The i^th element of each array contains the bin index of 
-        # the discretized profile parameter array. 
-        # So if self.cumu_inv_param_table_dict[concentration] = [4, 5, 6, 7,...], 
-        # and the i^th entry of the the first array in param_array is 6.7, 
-        # then the i^th entry of the 
-        # first array in digitized_param_list will be 2
+        # the discretized profile parameter of the galaxy. 
+        # So if self.NFWmodel_conc_cumu_inv_table = [4, 5, 6, 7,...], 
+        # and the i^th entry of the first argument in the input param_array is 6.7, 
+        # then the i^th entry of the array stored in the 
+        # first element in digitized_param_list will be 3. 
 
         # Now we have a collection of arrays storing indices of individual 
         # profile parameters, (A_0, A_1, A_2, ...), (B_0, B_1, B_2, ...), etc. 
