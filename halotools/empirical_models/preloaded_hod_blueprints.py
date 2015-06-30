@@ -56,7 +56,7 @@ def Kravtsov04_blueprint(**kwargs):
 		threshold = threshold)
 	cen_model_dict['occupation'] = dark_side_cen_model
 	# Build the profile model
-	cen_profile = gpf.SphericallySymmetricGalProf(
+	cen_profile = gpf.IsotropicGalProf(
 		gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
 	cen_model_dict['profile'] = cen_profile
 
@@ -68,7 +68,7 @@ def Kravtsov04_blueprint(**kwargs):
 		threshold = threshold)
 	sat_model_dict['occupation'] = dark_side_sat_model
 	# Build the profile model
-	sat_profile = gpf.SphericallySymmetricGalProf(
+	sat_profile = gpf.IsotropicGalProf(
 		gal_type=sat_key, halo_prof_model=hpc.NFWProfile)
 	sat_model_dict['profile'] = sat_profile
 

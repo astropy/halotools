@@ -380,13 +380,13 @@ class HodModelFactory(ModelFactory):
         In order for `HodModelFactory` to build a composite model object, 
         each galaxy's ``profile`` key of the ``model_blueprint`` 
         must be an instance of the 
-        `~halotools.empirical_models.SphericallySymmetricGalProf` class. 
+        `~halotools.empirical_models.IsotropicGalProf` class. 
         However, if the user instead passed an instance of 
         `~halotools.empirical_models.HaloProfileModel`, there is no 
         ambiguity in what is desired: a profile model with parameters 
         that are unbiased with respect to the dark matter halo. 
         So the `interpret_input_model_blueprint` method translates 
-        all such instances into `~halotools.empirical_models.SphericallySymmetricGalProf` instances, 
+        all such instances into `~halotools.empirical_models.IsotropicGalProf` instances, 
         and returns the appropriately modified blueprint, saving the user 
         a little rigamarole. 
         """
@@ -395,7 +395,7 @@ class HodModelFactory(ModelFactory):
         for gal_type in self.gal_types:
             input_prof_model = model_blueprint[gal_type]['profile']
 #            if isinstance(input_prof_model, halo_prof_components.HaloProfileModel):
-#                prof_model = gal_prof_factory.SphericallySymmetricGalProf(
+#                prof_model = gal_prof_factory.IsotropicGalProf(
 #                    gal_type, input_prof_model)
 #                model_blueprint[gal_type]['profile'] = prof_model
 
