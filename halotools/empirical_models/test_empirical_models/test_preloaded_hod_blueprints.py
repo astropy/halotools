@@ -76,7 +76,7 @@ def test_Kravtsov04_blueprint():
 		if isinstance(gal_type_blueprint['profile'], gal_prof_factory.SphericallySymmetricGalProf):
 			component_prof = gal_type_blueprint['profile']
 			assert component_prof.gal_type == gal_type
-			assert set(component_prof.gal_prof_func_dict.keys()).issubset(['gal_NFWmodel_conc'])
+			assert set(component_prof.prof_param_keys).issubset(['NFWmodel_conc'])
 
 
 
