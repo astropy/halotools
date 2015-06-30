@@ -51,14 +51,6 @@ def test_preloaded_hod_mocks():
             additional_haloprops = ['zhalf'])
         assert 'halo_zhalf' in mock2.galaxy_table.keys()
 
-        #func_dict = {'double_mvir' : lambda halos : 2.*halos['mvir']}
-        #mock4 = mock_factories.HodMockFactory(sim, model, 
-        #    new_haloprop_func_dict = func_dict)
-        #assert 'double_mvir' in mock4.halos.keys()
-        #assert hasattr(mock4, 'halo_double_mvir')
-        #assert np.allclose(mock4.halo_mvir/mock4.halo_double_mvir, 0.5)
-
-
     sim = FakeSim()
 
     hod_model_list = preloaded_models.__all__
