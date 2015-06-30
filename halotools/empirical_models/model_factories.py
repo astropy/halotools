@@ -380,13 +380,13 @@ class HodModelFactory(ModelFactory):
         In order for `HodModelFactory` to build a composite model object, 
         each galaxy's ``profile`` key of the ``model_blueprint`` 
         must be an instance of the 
-        `~halotools.empirical_models.GalProfFactory` class. 
+        `~halotools.empirical_models.SphericallySymmetricGalProf` class. 
         However, if the user instead passed an instance of 
         `~halotools.empirical_models.HaloProfileModel`, there is no 
         ambiguity in what is desired: a profile model with parameters 
         that are unbiased with respect to the dark matter halo. 
         So the `interpret_input_model_blueprint` method translates 
-        all such instances into `~halotools.empirical_models.GalProfFactory` instances, 
+        all such instances into `~halotools.empirical_models.SphericallySymmetricGalProf` instances, 
         and returns the appropriately modified blueprint, saving the user 
         a little rigamarole. 
         """
@@ -395,7 +395,7 @@ class HodModelFactory(ModelFactory):
         for gal_type in self.gal_types:
             input_prof_model = model_blueprint[gal_type]['profile']
             if isinstance(input_prof_model, halo_prof_components.HaloProfileModel):
-                prof_model = gal_prof_factory.GalProfFactory(
+                prof_model = gal_prof_factory.SphericallySymmetricGalProf(
                     gal_type, input_prof_model)
                 model_blueprint[gal_type]['profile'] = prof_model
 
@@ -549,7 +549,7 @@ class HodModelFactory(ModelFactory):
 
                 * Case 1 - ``gal_type`` galaxies have no associated ``gal_prof_param``: the corresonding property of the halo catalog is returned. 
             
-                * Case 2 - ``gal_type`` *do* have an associated ``gal_prof_param``: the appropriate `GalProfFactory` is called. 
+                * Case 2 - ``gal_type`` *do* have an associated ``gal_prof_param``: the appropriate `SphericallySymmetricGalProf` is called. 
 
             """
 

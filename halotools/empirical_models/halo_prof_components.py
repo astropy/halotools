@@ -213,19 +213,15 @@ class NFWProfile(HaloProfileModel):
         boundary of the halo. Default is set in 
         the `~halotools.empirical_models.model_defaults` module. 
 
-    conc_mass_relation_key : string, optional 
+    conc_mass_model : string, optional keyword argument  
         String specifying which concentration-mass relation is used to paint model 
         concentrations onto simulated halos. 
         Default string/model is set in `~halotools.empirical_models.model_defaults`.
-
 
     Notes 
     -----
     Currently the only supported c-M relation is the 
     Dutton & Maccio 2014 concentration-mass relation based on mvir. 
-
-    For a review of basic properties of the NFW profile, 
-    see for example Lokas & Mamon (2000), arXiv:0002395. 
 
     Examples 
     --------
@@ -262,7 +258,7 @@ class NFWProfile(HaloProfileModel):
 
         self.build_inv_cumu_lookup_table()
 
-        self.publications = ['arXiv:9611107','arXiv:1402.7073']
+        self.publications = ['arXiv:9611107', 'arXiv:0002395', 'arXiv:1402.7073']
 
     def g(self, x):
         """ Convenience function used to evaluate the profile. 

@@ -18,7 +18,7 @@ def test_unbiased_trivial():
 	trivial_prof = hpc.TrivialProfile()
 	gal_type = 'centrals'
 
-	cen_prof = gpf.GalProfFactory(gal_type, trivial_prof)
+	cen_prof = gpf.SphericallySymmetricGalProf(gal_type, trivial_prof)
 	assert cen_prof.gal_type == gal_type
 
 	assert isinstance(cen_prof.halo_prof_model, hpc.TrivialProfile)
@@ -48,7 +48,7 @@ def test_unbiased_nfw():
 	nfw_prof = hpc.NFWProfile()
 	gal_type = 'satellites'
 
-	sat_prof = gpf.GalProfFactory(gal_type, nfw_prof)
+	sat_prof = gpf.SphericallySymmetricGalProf(gal_type, nfw_prof)
 
 	snapshot = FakeSim()
 	composite_model = Kravtsov04()
