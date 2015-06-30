@@ -107,7 +107,6 @@ class GalProfFactory(model_helpers.GalPropModel):
         self.halo_prof_model.build_inv_cumu_lookup_table()
 
         self.cumu_inv_func_table = self.halo_prof_model.cumu_inv_func_table
-        self.cumu_inv_param_table_dict = self.halo_prof_model.cumu_inv_param_table_dict
 
     def mc_radii(self, *args):
         """ Method to generate Monte Carlo realizations of the profile model. 
@@ -145,8 +144,9 @@ class GalProfFactory(model_helpers.GalPropModel):
         # Store the collection of arrays in digitized_param_list 
         digitized_param_list = []
         for param_index, param_key in enumerate(self.halo_prof_model.prof_param_keys):
-            digitized_params = np.digitize(args[param_index], 
-                self.cumu_inv_param_table_dict[param_key])
+            input_param_array = args[param_index]
+            param_bins = getattr(self.halo_prof_model, param_key + '_cumu_inv_table')
+            digitized_params = np.digitize(input_param_array, param_bins)
             digitized_param_list.append(digitized_params)
         # Each element of digitized_param_list is an array. 
         # The i^th element of each array contains the bin index of 
