@@ -21,12 +21,7 @@ class ConcMass(object):
     """ Container class for commonly used concentration-mass 
     relations in the literature. 
 
-    For all models, cosmology-dependent quantities such as peak height 
-    are solved for using the Astropy `~astropy.cosmology` sub-package. 
-
-    Currently supported fitting functions include:
-
-        * `dutton_maccio14_conc_mass`
+    The only currently supported model is `dutton_maccio14`.
 
     """
 
@@ -34,7 +29,29 @@ class ConcMass(object):
         redshift = sim_defaults.default_redshift, 
         prim_haloprop_key = model_defaults.prim_haloprop_key, 
         conc_mass_model = model_defaults.conc_mass_model, **kwargs):
+        """
+        Parameters 
+        ----------
+        cosmology : object, optional keyword argument
+            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
 
+        redshift : float, optional keyword argument 
+            Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        prim_haloprop_key : string, optional keyword argument 
+            Specifies the column name of the mass-like halo property, e.g., 'mvir' or 'm200b'. 
+            Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        conc_mass_model : string, optional keyword argument 
+            Specifies the calibrated fitting function used to model the concentration-mass relation. 
+             Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        Examples 
+        ---------
+        >>> conc_mass_model = ConcMass()
+        >>> conc_mass_model = ConcMass(redshift = 2, prim_haloprop_key = 'm500c')
+
+        """
         self.cosmology = cosmology
         self.redshift = redshift
         self.prim_haloprop_key = prim_haloprop_key
@@ -63,6 +80,11 @@ class ConcMass(object):
             Data table storing mock galaxy catalog. 
             If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
             keyword arguments must be passed. 
+
+        Notes 
+        -----
+        The testing for this model can be found in 
+        `~halotools.empirical_models.test_empirical_models.test_halo_prof_param_components`. 
 
         """
         # Retrieve the array storing the mass-like variable
@@ -93,7 +115,7 @@ class ConcMass(object):
             Concentrations of the input halos. 
 
         Notes 
-        -----
+        -----        
         This model was only calibrated for the Planck 1-year cosmology.
 
         Model assumes that halo mass definition is Mvir.
