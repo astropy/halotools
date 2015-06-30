@@ -33,7 +33,7 @@ class ConcMass(object):
     def __init__(self, cosmology=sim_defaults.default_cosmology, 
         redshift = sim_defaults.default_redshift, 
         prim_haloprop_key = model_defaults.prim_haloprop_key, 
-        conc_mass_model = model_defaults.conc_mass_model):
+        conc_mass_model = model_defaults.conc_mass_model, **kwargs):
 
         self.cosmology = cosmology
         self.redshift = redshift

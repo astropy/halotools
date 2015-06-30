@@ -50,14 +50,6 @@ class HaloProfileModel(object):
         String entries are typically an underscore-concatenation 
         of the model nickname and parameter nickname, e.g., ``NFWmodel_conc``. 
 
-    haloprop_key_dict : dict, optional
-        Dictionary determining the halo properties used by the model. 
-        Dictionary keys are, e.g., ``prim_haloprop_key``; 
-        dictionary values are strings providing the column name 
-        used to extract the relevant data from a halo catalog, e.g., ``mvir``. 
-        Used by the method `set_prof_param_table_dict`. 
-        Default is an empty dict. 
-
     Notes 
     -----
     For development purposes, `HaloProfileModel` is temporarily 
@@ -89,26 +81,19 @@ class HaloProfileModel(object):
         """ Method used to create a lookup table of inverse cumulative mass 
         profile functions. 
 
-        `build_inv_cumu_lookup_table` does not return anything. 
-        Instead, when called, the class instance will have three 
-        (not necessarily newly created) attributes: 
-
-            * ``cumu_inv_param_table_dict``, a dictionary with one key per profile parameter, whose values is an array of discrete values of that parameter. 
-
-            * ``cumu_inv_func_table``, an array of inverse cumulative density profile function objects, :math:`P( <x | p)`, associated with each point in the grid of profile parameters. 
-
-            * ``func_table_indices``, an array used to access the appropriate profile function object based on the discretized profile parameters
-
-        The function objects in the ``cumu_inv_func_table`` lookup table are computed 
-        by `cumulative_mass_PDF`. 
-
         Parameters 
         ----------
-        prof_param_table_dict : dict, optional
-            Dictionary created by `set_prof_param_table_dict` 
-            providing instructions for how to generate a grid of 
-            values for each halo profile parameter. 
-            Default is an empty dict. 
+        logrmin : float, optional 
+            Minimum radius used to build the spline table. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        logrmax : float, optional 
+            Maximum radius used to build the spline table
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        Npts_radius_table : int, optional 
+            Number of control points used in the spline. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
 
         Notes 
         ----- 
@@ -188,9 +173,6 @@ class TrivialProfile(HaloProfileModel):
     """
     def __init__(self, **kwargs):
 
-        # Call the init constructor of the super-class, 
-        # whose only purpose is to bind cosmology, redshift, haloprop_key_dict, 
-        # and a list of prof_param_keys to the NFWProfile instance. 
         super(TrivialProfile, self).__init__(prof_param_keys=[], **kwargs)
 
         self.build_inv_cumu_lookup_table()
@@ -254,6 +236,7 @@ class NFWProfile(HaloProfileModel):
         conc_mass_model = halo_prof_param_components.ConcMass(
             cosmology=self.cosmology, redshift = self.redshift, 
             conc_mass_model=conc_mass_model, **kwargs)
+
         self.NFWmodel_conc = conc_mass_model.__call__
 
         self.build_inv_cumu_lookup_table()
