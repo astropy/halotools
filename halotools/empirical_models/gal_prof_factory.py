@@ -71,15 +71,11 @@ class SphericallySymmetricGalProf(halo_prof_components.HaloProfileModel):
         To build a centrals-like population, with galaxies residing at exactly 
         the halo center:
 
-        >>> halo_prof_model = halo_prof_components.TrivialProfile()
-        >>> gal_type_nickname = 'centrals'
-        >>> gal_prof_model = SphericallySymmetricGalProf(gal_type_nickname, halo_prof_model)
+        >>> gal_prof_model = SphericallySymmetricGalProf(gal_type='centrals', halo_prof_model=halo_prof_components.TrivialProfile)
 
         For a satellite-type population distributed according to the NFW profile of the parent halo:
 
-        >>> halo_prof_model = halo_prof_components.NFWProfile()
-        >>> gal_type_nickname = 'sats'
-        >>> gal_prof_model = SphericallySymmetricGalProf(gal_type_nickname, halo_prof_model)
+        >>> gal_prof_model = SphericallySymmetricGalProf(gal_type='sats', halo_prof_model=halo_prof_components.NFWProfile)
 
         """
 
