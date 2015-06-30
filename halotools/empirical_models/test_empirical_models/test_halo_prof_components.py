@@ -82,13 +82,11 @@ def test_NFWProfile():
     # Check that the lookup table attributes are correct
     model_instance.build_inv_cumu_lookup_table()
 
-    #assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] > 0)
-    #assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] < 1000)
-    assert np.all(model_instance.NFWmodel_conc_cumu_inv_table > 0)
-    assert np.all(model_instance.NFWmodel_conc_cumu_inv_table < 1000)
+    assert np.all(model_instance.NFWmodel_conc_lookup_table_bins > 0)
+    assert np.all(model_instance.NFWmodel_conc_lookup_table_bins < 1000)
 
 
-    assert len(model_instance.NFWmodel_conc_cumu_inv_table) >= 10
+    assert len(model_instance.NFWmodel_conc_lookup_table_bins) >= 10
     assert (len(model_instance.cumu_inv_func_table) == 
         len(model_instance.func_table_indices) )
 
@@ -99,7 +97,7 @@ def test_NFWProfile():
         value inferred from the discretized lookup table. 
         """
         exact_result = model.cumulative_mass_PDF(test_radius, conc)
-        conc_table = model.NFWmodel_conc_cumu_inv_table        
+        conc_table = model.NFWmodel_conc_lookup_table_bins        
         digitized_conc_index = np.digitize(np.array([conc]), conc_table)
         digitized_conc = conc_table[digitized_conc_index]
         func = model.cumu_inv_func_table[digitized_conc_index[0]]
@@ -119,19 +117,19 @@ def test_NFWProfile():
     initial_NFWmodel_conc_lookup_table_min = copy(model_instance.NFWmodel_conc_lookup_table_min)
     initial_NFWmodel_conc_lookup_table_max = copy(model_instance.NFWmodel_conc_lookup_table_max)
     initial_NFWmodel_conc_lookup_table_spacing = copy(model_instance.NFWmodel_conc_lookup_table_spacing)
-    initial_NFWmodel_conc_cumu_inv_table = copy(model_instance.NFWmodel_conc_cumu_inv_table)
+    initial_NFWmodel_conc_lookup_table_bins = copy(model_instance.NFWmodel_conc_lookup_table_bins)
 
     model_instance.NFWmodel_conc_lookup_table_min -= 0.05
     model_instance.NFWmodel_conc_lookup_table_min += 0.05
     model_instance.NFWmodel_conc_lookup_table_spacing *= 0.9
     model_instance.build_inv_cumu_lookup_table()
-    assert model_instance.NFWmodel_conc_cumu_inv_table != initial_NFWmodel_conc_cumu_inv_table
+    assert model_instance.NFWmodel_conc_lookup_table_bins != initial_NFWmodel_conc_lookup_table_bins
 
     model_instance.NFWmodel_conc_lookup_table_min = initial_NFWmodel_conc_lookup_table_min
     model_instance.NFWmodel_conc_lookup_table_max = initial_NFWmodel_conc_lookup_table_max
     model_instance.NFWmodel_conc_lookup_table_spacing = initial_NFWmodel_conc_lookup_table_spacing
     model_instance.build_inv_cumu_lookup_table()
-    assert np.all(model_instance.NFWmodel_conc_cumu_inv_table == initial_NFWmodel_conc_cumu_inv_table)
+    assert np.all(model_instance.NFWmodel_conc_lookup_table_bins == initial_NFWmodel_conc_lookup_table_bins)
 
 
 
