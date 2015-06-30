@@ -148,12 +148,10 @@ class HaloProfileModel(object):
                 func_table.append(funcobj)
 
             param_array_dimensions = [len(param_array) for param_array in param_array_list]
-            func_table = np.array(func_table).reshape(param_array_dimensions)
-            self.cumu_inv_func_table = func_table
-            func_table_indices = (
+            self.cumu_inv_func_table = np.array(func_table).reshape(param_array_dimensions)
+            self.func_table_indices = (
                 np.arange(np.prod(param_array_dimensions)).reshape(param_array_dimensions)
                 )
-            self.func_table_indices = func_table_indices
 
 
 class TrivialProfile(HaloProfileModel):
