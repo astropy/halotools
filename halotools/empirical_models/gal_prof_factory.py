@@ -8,30 +8,19 @@ galaxy profiles from a set of components.
 
 __all__ = ['IsotropicGalProf']
 
+from functools import partial
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
-import model_defaults
+from . import model_defaults, model_helpers, halo_prof_components
+from . import gal_prof_components as gpc
 from ..utils.array_utils import array_like_length as custom_len
-from . import model_helpers 
-from functools import partial
-
-import halo_prof_components
-import gal_prof_components as gpc
+from ..sim_manager import sim_defaults
 
 
 class IsotropicGalProf(halo_prof_components.HaloProfileModel):
-    """ Class modeling the way galaxies are distributed 
-    within their halos. 
-
-    `IsotropicGalProf` can be thought of as a factory that produces 
-    model objects for the intra-halo distribution of galaxies.  
-    `IsotropicGalProf` derives most of its 
-    behavior from external functions and classes. 
-    The main purpose of the `IsotropicGalProf` class is to provide a standardized 
-    interface for the rest of the package, particularly model factories such as 
-    `~halotools.empirical_models.HodModelFactory`, 
-    and mock factories such as `~halotools.empirical_models.HodMockFactory`. 
+    """ Class modeling the intra-halo distribution of galaxies within their halos 
+    under the assumption of spherical symmetry. 
 
     """
 
@@ -40,30 +29,21 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         Parameters 
         ----------
         halo_prof_model : class 
-            Any sub-class of 
-            `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
-
-        cosmology : object, optional keyword argument
-            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
-
-        redshift : float, optional keyword argument 
-            Default is set in `~halotools.empirical_models.sim_defaults`.
-
-        halo_boundary : string, optional keyword argument 
-            String giving the column name of the halo catalog that stores the boundary of the halo. 
-            Default is set in the `~halotools.empirical_models.model_defaults` module. 
-
-        conc_mass_model : string, optional keyword argument  
-            String specifying which concentration-mass relation is used to paint model 
-            concentrations onto simulated halos. 
-            Default string/model is set in `~halotools.empirical_models.model_defaults`.
+            Any sub-class of `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
+            All keyword arguments of `IsotropicGalProf` will be passed to the constructor of ``halo_prof_model``. 
 
         gal_type : string 
             Name of the galaxy population being modeled, e.g., ``sats`` or ``orphans``. 
 
-        spatial_bias_model : object, optional
-            Instance of the class `~halotools.empirical_models.gal_prof_components.SpatialBias`. 
-            Default is None. 
+        cosmology : object, optional keyword argument
+            Astropy cosmology object. Default is None.
+
+        redshift : float, optional keyword argument 
+            Default is None.
+
+        halo_boundary : string, optional keyword argument 
+            String giving the column name of the halo catalog that stores the boundary of the halo. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
         Examples 
         --------
@@ -77,32 +57,30 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         >>> gal_prof_model = IsotropicGalProf(gal_type='sats', halo_prof_model=halo_prof_components.NFWProfile)
 
         """
+        required_kwargs = ['gal_type']
+        model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         self.halo_prof_model = kwargs['halo_prof_model'](**kwargs)
 
         super(IsotropicGalProf, self).__init__(
             prof_param_keys=self.halo_prof_model.prof_param_keys, **kwargs)
 
-        required_kwargs = ['gal_type']
-        model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
-
-        optional_attrs = ['cosmology', 'redshift']
-        for attr in optional_attrs:
-            if hasattr(self.halo_prof_model, attr):
-                setattr(self, attr, getattr(self.halo_prof_model, attr))
-
-        self.build_inv_cumu_lookup_table()
-
         for key in self.prof_param_keys:
             setattr(self, key, getattr(self.halo_prof_model, key))
 
-        self.publications = []
+        self.build_inv_cumu_lookup_table()
+
+        self.publications = self.halo_prof_model.publications
 
         ### NOT CORRECTLY IMPLEMENTED YET ###
         self.param_dict = {}
 
     def __getattr__(self, attr):
-        """
+        """ Over-ride of the python built-in. Necessary because `IsotropicGalProf` is a sub-class 
+        of `halo_prof_components.HaloProfileModel`, which is an abstract container class with 
+        little functionality of its own. This override eliminates the need to explicitly call 
+        ``setattr`` to inherit the needed attributes and methods of the ``halo_prof_model`` 
+        passed to the constructor of `IsotropicGalProf`. 
         """
         return getattr(self.halo_prof_model, attr)
 
