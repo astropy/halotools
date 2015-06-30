@@ -28,39 +28,42 @@ from ..sim_manager import sim_defaults
 
 ##################################################################################
 
-
 @six.add_metaclass(ABCMeta)
 class HaloProfileModel(object):
     """ Container class for any halo profile model. 
 
     This is an abstract class, and cannot itself be instantiated. 
     Rather, `HaloProfileModel` provides a 
-    template for any radial profile component model used by the 
-    empirical model factories such as `~halotools.empirical_models.HodModelFactory`. 
-
-    Parameters 
-    ----------
-    cosmology : object 
-        astropy cosmology object
-
-    redshift : float 
-
-    prof_param_keys : string, or list of strings
-        Provides the names of the halo profile parameters of the model. 
-        String entries are typically an underscore-concatenation 
-        of the model nickname and parameter nickname, e.g., ``NFWmodel_conc``. 
-
-    Notes 
-    -----
-    For development purposes, `HaloProfileModel` is temporarily 
-    hard-coded to only use z=0 Bryan & Norman (1998)
-    virial mass definition fitting function 
-    for standard LCDM cosmological parameter values.
+    template for any model for the radial profile of galaxies within their halos. 
 
     """
 
     def __init__(self, halo_boundary = model_defaults.halo_boundary, 
         prim_haloprop_key = model_defaults.prim_haloprop_key, **kwargs):
+        """
+        Parameters 
+        ----------
+        prof_param_keys : string, or list of strings
+            Provides the names of the halo profile parameters of the model. 
+            String entries are typically an underscore-concatenation 
+            of the model nickname and parameter nickname, e.g., ``NFWmodel_conc``. 
+
+        halo_boundary : string, optional keyword argument 
+            String giving the column name of the halo catalog that stores the boundary of the halo. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        cosmology : object, optional keyword argument
+            Astropy cosmology object. Default is None.
+
+        redshift : float, optional keyword argument 
+            Default is None. 
+
+        """
 
         self.halo_boundary = halo_boundary
         self.prim_haloprop_key = prim_haloprop_key
@@ -140,38 +143,31 @@ class HaloProfileModel(object):
 
 
 class TrivialProfile(HaloProfileModel):
-    """ Profile of dark matter halos with all their mass 
-    concentrated at exactly the halo center. 
+    """ Profile of dark matter halos with all their mass concentrated at exactly the halo center. 
 
-    Primarily used as a dummy class to assign 
-    positions to central-type galaxies. 
-
-    Parameters 
-    ----------
-    cosmology : object, optional keyword argument
-        Astropy cosmology object. Default cosmology is WMAP5. 
-
-    redshift : float, optional keyword argument 
-
-    Notes 
-    -----
-    Testing done by `~halotools.empirical_models.test_empirical_models.test_TrivialProfile`
-
-    Examples 
-    --------
-    You can load a trivial profile model with the default settings simply by calling 
-    the class constructor with no arguments:
-
-    >>> trivial_halo_prof_model = TrivialProfile()
-
-    Use the keyword arguments for ``cosmology`` and ``redshift`` to load profiles 
-    with alternative settings:
-
-    >>> from astropy.cosmology import Planck13
-    >>> trivial_halo_prof_model = TrivialProfile(cosmology = Planck13, redshift = 0.5)
+    This class has virtually no functionality on its own. It is primarily used 
+    as a dummy class to assign positions to central-type galaxies. 
 
     """
     def __init__(self, **kwargs):
+        """
+        Notes 
+        -----
+        Testing done by `~halotools.empirical_models.test_empirical_models.test_TrivialProfile`
+
+        Examples 
+        --------
+        You can load a trivial profile model with the default settings simply by calling 
+        the class constructor with no arguments:
+
+        >>> trivial_halo_prof_model = TrivialProfile()
+
+        Use the keyword arguments for ``cosmology`` and ``redshift`` to load profiles 
+        with alternative settings:
+
+        >>> from astropy.cosmology import Planck13
+        >>> trivial_halo_prof_model = TrivialProfile(cosmology = Planck13, redshift = 0.5)
+        """
 
         super(TrivialProfile, self).__init__(prof_param_keys=[], **kwargs)
 
@@ -182,41 +178,6 @@ class TrivialProfile(HaloProfileModel):
 class NFWProfile(HaloProfileModel):
     """ NFW halo profile, based on Navarro, Frenk, and White (1999).
 
-    Parameters 
-    ----------
-    cosmology : object, optional keyword argument 
-        Astropy cosmology object. Default cosmology is WMAP5. 
-
-    redshift : float, optional keyword argument 
-        Default redshift is 0.
-
-    halo_boundary : string, optional keyword argument 
-        String giving the column name of the halo catalog that stores the 
-        boundary of the halo. Default is set in 
-        the `~halotools.empirical_models.model_defaults` module. 
-
-    conc_mass_model : string, optional keyword argument  
-        String specifying which concentration-mass relation is used to paint model 
-        concentrations onto simulated halos. 
-        Default string/model is set in `~halotools.empirical_models.model_defaults`.
-
-    Notes 
-    -----
-    Currently the only supported c-M relation is the 
-    Dutton & Maccio 2014 concentration-mass relation based on mvir. 
-
-    Examples 
-    --------
-    You can load a NFW profile model with the default settings simply by calling 
-    the class constructor with no arguments:
-
-    >>> nfw_halo_prof_model = NFWProfile()
-
-    For an NFW profile with an alternative cosmology and redshift:
-
-    >>> from astropy.cosmology import WMAP9
-    >>> nfw_halo_prof_model = NFWProfile(cosmology = WMAP9, redshift = 2)
-
     """
 
     def __init__(self, 
@@ -224,10 +185,44 @@ class NFWProfile(HaloProfileModel):
         redshift=sim_defaults.default_redshift,
         halo_boundary=model_defaults.halo_boundary,
         conc_mass_model = model_defaults.conc_mass_model, **kwargs):
+        """
+        Parameters 
+        ----------
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        conc_mass_model : string, optional keyword argument 
+            Specifies the calibrated fitting function used to model the concentration-mass relation. 
+             Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        cosmology : object, optional keyword argument
+            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        redshift : float, optional keyword argument 
+            Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        halo_boundary : string, optional keyword argument 
+            String giving the column name of the halo catalog that stores the boundary of the halo. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+        Examples 
+        --------
+        You can load a NFW profile model with the default settings simply by calling 
+        the class constructor with no arguments:
+
+        >>> nfw_halo_prof_model = NFWProfile()
+
+        For an NFW profile with an alternative cosmology and redshift:
+
+        >>> from astropy.cosmology import WMAP9
+        >>> nfw_halo_prof_model = NFWProfile(cosmology = WMAP9, redshift = 2)
+        """
 
         super(NFWProfile, self).__init__(
             cosmology=cosmology, redshift=redshift, halo_boundary=halo_boundary, 
-            prof_param_keys=['NFWmodel_conc'])
+            prof_param_keys=['NFWmodel_conc'], **kwargs)
 
         self.NFWmodel_conc_lookup_table_min = model_defaults.min_permitted_conc
         self.NFWmodel_conc_lookup_table_max = model_defaults.max_permitted_conc
@@ -254,6 +249,13 @@ class NFWProfile(HaloProfileModel):
         -------
         g : array_like 
             :math:`1 / g(x) = \\log(1+x) - x / (1+x)`
+
+        Examples 
+        --------
+        >>> model = NFWProfile()
+        >>> g = model.g(1)
+        >>> Npts = 25
+        >>> g = model.g(np.logspace(-1, 1, Npts))
         """
         denominator = np.log(1.0+x) - (x/(1.0+x))
         return 1./denominator

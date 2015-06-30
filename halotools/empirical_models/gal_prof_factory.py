@@ -43,16 +43,15 @@ class SphericallySymmetricGalProf(halo_prof_components.HaloProfileModel):
             Any sub-class of 
             `~halotools.empirical_models.halo_prof_components.HaloProfileModel`. 
 
-        cosmology : object, optional keyword argument 
-            Astropy cosmology object. Default cosmology is WMAP5. 
+        cosmology : object, optional keyword argument
+            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
 
         redshift : float, optional keyword argument 
-            Default redshift is 0.
+            Default is set in `~halotools.empirical_models.sim_defaults`.
 
         halo_boundary : string, optional keyword argument 
-            String giving the column name of the halo catalog that stores the 
-            boundary of the halo. Default is set in 
-            the `~halotools.empirical_models.model_defaults` module. 
+            String giving the column name of the halo catalog that stores the boundary of the halo. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
         conc_mass_model : string, optional keyword argument  
             String specifying which concentration-mass relation is used to paint model 
