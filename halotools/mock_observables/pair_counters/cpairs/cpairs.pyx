@@ -12,13 +12,14 @@ import sys
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, fmin
+from libc.math cimport fabs, fmin, sqrt
 from distances cimport *
 
 __all__ = ['npairs_no_pbc', 'npairs_pbc', 'wnpairs_no_pbc', 'wnpairs_pbc',\
            'jnpairs_no_pbc', 'jnpairs_pbc',\
            'xy_z_npairs_no_pbc', 'xy_z_npairs_pbc', 'xy_z_wnpairs_no_pbc', 'xy_z_wnpairs_pbc',\
-           'xy_z_jnpairs_no_pbc', 'xy_z_jnpairs_pbc']
+           'xy_z_jnpairs_no_pbc', 'xy_z_jnpairs_pbc',\
+           's_mu_npairs_no_pbc', 's_mu_npairs_pbc']
 __author__=['Duncan Campbell']
 
 @cython.boundscheck(False)
@@ -614,6 +615,122 @@ def xy_z_jnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                           d_perp, d_para,\
                           nrp_bins_minus_one, npi_bins_minus_one, N_samples,\
                           w_icell1[i], w_icell2[j], j_icell1[i], j_icell2[j])
+        
+    return counts
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
+def s_mu_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
+                       np.ndarray[np.float64_t, ndim=1] y_icell1,
+                       np.ndarray[np.float64_t, ndim=1] z_icell1,
+                       np.ndarray[np.float64_t, ndim=1] x_icell2,
+                       np.ndarray[np.float64_t, ndim=1] y_icell2,
+                       np.ndarray[np.float64_t, ndim=1] z_icell2,
+                       np.ndarray[np.float64_t, ndim=1] s_bins,
+                       np.ndarray[np.float64_t, ndim=1] mu_bins):
+    """
+    2+1D pair counter without periodic boundary conditions (no PBCs).
+    Calculate the number of pairs with separations s, and angle from the line of sight mu.
+    
+    A pre-step for calculating correlation function multipoles, omega etc
+    The s bins can run from 0 <= s < ds*Nsbins
+    The mu bins can run from 0 <= mu <= 1
+    """
+    
+    #c definitions
+    cdef int ns_bins = len(s_bins)
+    cdef int nmu_bins = len(mu_bins)
+    cdef int ns_bins_minus_one = len(s_bins) -1
+    cdef int nmu_bins_minus_one = len(mu_bins) -1
+    cdef np.ndarray[np.int_t, ndim=2] counts =\
+        np.zeros((ns_bins, nmu_bins), dtype=np.int)
+    cdef double d_perp, d_para, s, mu
+    cdef int i, j
+    cdef int Ni = len(x_icell1)
+    cdef int Nj = len(x_icell2)
+    
+    #loop over points in grid1's cell
+    for i in range(0,Ni):
+                
+        #loop over points in grid2's cell
+        for j in range(0,Nj):
+                    
+            #calculate the square distance
+            d_perp = perp_square_distance(x_icell1[i], y_icell1[i],\
+                                          x_icell2[j], y_icell2[j])
+            d_para = para_square_distance(z_icell1[i], z_icell2[j])
+                        
+            #transform to s and mu
+            s = d_perp + d_para
+            mu = sqrt(d_para)/s
+            
+            #calculate counts in bins
+            xy_z_binning(<np.int_t*>counts.data,\
+                         <np.float64_t*>s_bins.data,\
+                         <np.float64_t*>mu_bins.data,\
+                         s, mu, ns_bins_minus_one, nmu_bins_minus_one)
+        
+    return counts
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
+def s_mu_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
+                    np.ndarray[np.float64_t, ndim=1] y_icell1,
+                    np.ndarray[np.float64_t, ndim=1] z_icell1,
+                    np.ndarray[np.float64_t, ndim=1] x_icell2,
+                    np.ndarray[np.float64_t, ndim=1] y_icell2,
+                    np.ndarray[np.float64_t, ndim=1] z_icell2,
+                    np.ndarray[np.float64_t, ndim=1] s_bins,
+                    np.ndarray[np.float64_t, ndim=1] mu_bins,
+                    np.ndarray[np.float64_t, ndim=1] period):
+    """
+    2+1D pair counter with periodic boundary conditions (PBCs).
+    Calculate the number of pairs with separations s, and angle from the line of sight mu.
+    
+    A pre-step for calculating correlation function multipoles, omega etc
+    The s bins can run from 0 <= s < ds*Nsbins
+    The mu bins can run from 0 <= mu <= 1
+    """
+    
+    #c definitions
+    cdef int ns_bins = len(s_bins)
+    cdef int nmu_bins = len(mu_bins)
+    cdef int ns_bins_minus_one = len(s_bins) -1
+    cdef int nmu_bins_minus_one = len(mu_bins) -1
+    cdef np.ndarray[np.int_t, ndim=2] counts =\
+        np.zeros((ns_bins, nmu_bins), dtype=np.int)
+    cdef double d_perp, d_para, s, mu
+    cdef int i, j
+    cdef int Ni = len(x_icell1)
+    cdef int Nj = len(x_icell2)
+    
+    #loop over points in grid1's cell
+    for i in range(0,Ni):
+                
+        #loop over points in grid2's cell
+        for j in range(0,Nj):
+                    
+            #calculate the square distance
+            d_perp = periodic_perp_square_distance(x_icell1[i],y_icell1[i],\
+                                                   x_icell2[j],y_icell2[j],\
+                                                   <np.float64_t*>period.data)
+            d_para = periodic_para_square_distance(z_icell1[i],\
+                                                   z_icell2[j],\
+                                                   <np.float64_t*>period.data)
+            
+            #transform to s and mu
+            s = sqrt(d_perp + d_para)
+            mu = sqrt(d_para)/s
+            
+            #calculate counts in bins
+            xy_z_binning(<np.int_t*>counts.data,\
+                         <np.float64_t*>s_bins.data,\
+                         <np.float64_t*>mu_bins.data,\
+                         s, mu, ns_bins_minus_one, nmu_bins_minus_one)
         
     return counts
 
