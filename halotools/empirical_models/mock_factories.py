@@ -360,6 +360,9 @@ class HodMockFactory(MockFactory):
         ``_occupation`` and ``_gal_type_indices``. 
 
         """
+
+        self.galaxy_table = Table() 
+
         self._occupation = {}
         self._total_abundance = {}
         self._gal_type_indices = {}
