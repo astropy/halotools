@@ -50,10 +50,10 @@ def obj_wnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int Nj = len(x_icell2)
     
     #loop over points in grid1's cell
-    for i in range(0,len(x_icell1)):
+    for i in range(0,Ni):
                 
         #loop over points in grid2's cell
-        for j in range(0,len(x_icell2)):
+        for j in range(0,Nj):
                     
             #calculate the square distance
             d = square_distance(x_icell1[i],y_icell1[i],z_icell1[i],\
@@ -136,10 +136,10 @@ def obj_wnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int Nj = len(x_icell2)
     
     #loop over points in grid1's cell
-    for i in range(0,len(x_icell1)):
+    for i in range(0,Ni):
                 
         #loop over points in grid2's cell
-        for j in range(0,len(x_icell2)):
+        for j in range(0,Nj):
                     
             #calculate the square distance
             d = periodic_square_distance(x_icell1[i],y_icell1[i],z_icell1[i],\

@@ -1,11 +1,11 @@
 from distutils.extension import Extension
 import numpy as np
 import os
+import sys
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ["objective_cpairs.pyx", "objective_weights.pyx"]
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
-
 
 def get_extensions():
 
@@ -14,7 +14,7 @@ def get_extensions():
     include_dirs = [np.get_include()]
     libraries = []
     extra_compile_args = []
-
+    
     extensions = []
     for name, source in zip(names, sources):
         extensions.append(Extension(name=name,
