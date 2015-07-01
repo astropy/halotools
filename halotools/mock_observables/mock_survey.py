@@ -46,22 +46,20 @@ def distant_observer_redshift(x, v, period=None, cosmo=None):
         'observed' redshift.
     """
     
-    c_km_s = c.to('km/s')
+    c_km_s = c.to('km/s').value
     
     #get the peculiar velocity component along the line of sight direction (z direction)
     v_los = v[:,2]
     
     #compute cosmological redshift (h=1, note that positions are in Mpc/h)
-    z_cos = x[:,2]*100.0/c
+    z_cos = x[:,2]*100.0/c_km_s
     
     #redshift is combination of cosmological and peculiar velocities
-    z = z_cos+(v_los/c)*(1.0+z_cos)
-    
-    #maximum cosmological redshift
-    z_cos_max = period[2]*100.00/c
+    z = z_cos+(v_los/c_km_s)*(1.0+z_cos)
     
     #reflect galaxies around PBC
     if period is not None:
+        z_cos_max = period[2]*100.00/c_km_s #maximum cosmological redshift
         flip = (z > z_cos_max)
         z[flip] = z[flip] - z_cos_max
         flip = (z < 0.0)
@@ -98,7 +96,7 @@ def ra_dec_z(x, v, cosmo=None):
     #calculate the observed redshift
     if cosmo==None:
         cosmo = cosmology.FlatLambdaCDM(H0=0.7, Om0=0.3)
-    c_km_s = c.to('km/s')
+    c_km_s = c.to('km/s').value
     
     #remove h scaling from position so we can use the cosmo object
     x = x/cosmo.h
@@ -114,11 +112,11 @@ def ra_dec_z(x, v, cosmo=None):
     vr = v[:,0]*st*cp + v[:,1]*st*sp + v[:,2]*ct
     
     #compute cosmological redshift and add contribution from perculiar velocity
-    y = np.arange(0,1.0,0.001)
-    x = cosmo.comoving_distance(y)
-    f = interp1d(x, y, kind='cubic')
+    yy = np.arange(0,1.0,0.001)
+    xx = cosmo.comoving_distance(yy).value
+    f = interp1d(xx, yy, kind='cubic')
     z_cos = f(r)
-    redshift = z_cos+(vr/c)*(1.0+z_cos)
+    redshift = z_cos+(vr/c_km_s)*(1.0+z_cos)
 
     #calculate spherical coordinates
     theta = np.arccos(x[:,2]/r)
@@ -126,7 +124,7 @@ def ra_dec_z(x, v, cosmo=None):
     
     #convert spherical coordinates into ra,dec
     ra  = phi
-    dec = (math.pi/2.0) - theta
+    dec = (np.pi/2.0) - theta
     
     return ra, dec, redshift
     
