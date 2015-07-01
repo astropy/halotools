@@ -19,7 +19,7 @@ import multiprocessing
 from functools import partial
 
 
-__all__=['npairs', 'wnpairs', 'jnpairs']
+__all__=['npairs', 'wnpairs', 'jnpairs', 'xy_z_npairs', 'xy_z_wnpairs', 'xy_z_jnpairs']
 __author__=['Duncan Campbell']
 
 
@@ -47,8 +47,8 @@ def npairs(data1, data2, rbins, Lbox=None, period=None, verbose=False, N_threads
         length of cube sides which encloses data1 and data2.
     
     period: array_like, optional
-        length k array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        length 3 array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
         If none, PBCs are set to infinity.  If True, period is set to be Lbox
     
     verbose: Boolean, optional

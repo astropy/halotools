@@ -6,18 +6,22 @@ distance calculations
 
 from __future__ import print_function, division
 cimport cython
+import numpy as np
+cimport numpy as np
 from libc.math cimport fabs, fmin
 
 __author__=['Duncan Campbell']
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
 cdef double periodic_square_distance(np.float64_t x1,\
-                                            np.float64_t y1,\
-                                            np.float64_t z1,\
-                                            np.float64_t x2,\
-                                            np.float64_t y2,\
-                                            np.float64_t z2,\
-                                            np.float64_t* period):
+                                     np.float64_t y1,\
+                                     np.float64_t z1,\
+                                     np.float64_t x2,\
+                                     np.float64_t y2,\
+                                     np.float64_t z2,\
+                                     np.float64_t* period):
     """
     Calculate the 3D square cartesian distance between two sets of points with periodic
     boundary conditions.
@@ -33,9 +37,11 @@ cdef double periodic_square_distance(np.float64_t x1,\
     dz = fmin(dz, period[2] - dz)
     return dx*dx+dy*dy+dz*dz
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
 cdef double square_distance(np.float64_t x1, np.float64_t y1, np.float64_t z1,\
-                                   np.float64_t x2, np.float64_t y2, np.float64_t z2):
+                            np.float64_t x2, np.float64_t y2, np.float64_t z2):
     """
     Calculate the 3D square cartesian distance between two sets of points.
     """
@@ -47,9 +53,11 @@ cdef double square_distance(np.float64_t x1, np.float64_t y1, np.float64_t z1,\
     dz = z1 - z2
     return dx*dx+dy*dy+dz*dz
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
 cdef double perp_square_distance(np.float64_t x1, np.float64_t y1,\
-                                        np.float64_t x2, np.float64_t y2):
+                                 np.float64_t x2, np.float64_t y2):
     """
     Calculate the projected square cartesian distance between two sets of points.
     e.g. r_p
@@ -61,7 +69,9 @@ cdef double perp_square_distance(np.float64_t x1, np.float64_t y1,\
     dy = y1 - y2
     return dx*dx+dy*dy
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
 cdef double para_square_distance(np.float64_t z1, np.float64_t z2):
     """
     Calculate the parallel square cartesian distance between two sets of points.
@@ -73,10 +83,12 @@ cdef double para_square_distance(np.float64_t z1, np.float64_t z2):
     dz = z1 - z2
     return dz*dz
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
 cdef double periodic_perp_square_distance(np.float64_t x1, np.float64_t y1,\
-                                                 np.float64_t x2, np.float64_t y2,\
-                                                 np.float64_t* period):
+                                          np.float64_t x2, np.float64_t y2,\
+                                          np.float64_t* period):
     """
     Calculate the projected square cartesian distance between two sets of points with 
     periodic boundary conditions.
@@ -91,9 +103,11 @@ cdef double periodic_perp_square_distance(np.float64_t x1, np.float64_t y1,\
     dy= fmin(dy, period[1] - dy)
     return dx*dx+dy*dy
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
 cdef double periodic_para_square_distance(np.float64_t z1, np.float64_t z2,\
-                                                 np.float64_t* period):
+                                          np.float64_t* period):
     """
     Calculate the parallel square cartesian distance between two sets of points with 
     periodic boundary conditions.
@@ -105,4 +119,5 @@ cdef double periodic_para_square_distance(np.float64_t z1, np.float64_t z2,\
     dz = fabs(z1 - z2)
     dz = fmin(dz, period[2] - dz)
     return dz*dz
+
 
