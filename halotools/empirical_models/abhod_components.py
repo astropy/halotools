@@ -71,7 +71,7 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
             occupation_bound=standard_cen_model.occupation_bound,
             prim_haloprop_key=standard_cen_model.prim_haloprop_key,
             sec_haloprop_key=secondary_haloprop_key,
-            param_dict=standard_cen_model.param_dict)
+            input_param_dict=standard_cen_model.param_dict)
 
         # secondary halo property percentile key
         self.sec_haloprop_percentile_key=self.sec_haloprop_key+'_percentile'
