@@ -9,6 +9,8 @@ __all__ = ['SampleSelector']
 
 import numpy as np
 import collections
+from astropy.table import Table
+
 from ..sim_manager.generate_random_sim import FakeSim
 
 class SampleSelector(object):
@@ -140,20 +142,38 @@ class SampleSelector(object):
 
         """
         table = kwargs['table']
+        if type(table) is not Table:
+            raise TypeError("Input table must be an Astropy Table instance")
+
         key = kwargs['key']
-        percentiles = kwargs['percentiles']
-
+        if key not in table.keys():
+            raise KeyError("Input key must be a column name of the input table")
         table.sort(key)
-        num_total = len(table)
 
+        percentiles = kwargs['percentiles']
         percentiles = np.array(percentiles)
         if np.shape(percentiles) == ():
             percentiles = np.array([percentiles])
+        num_total = len(table)
+        if len(percentiles) >= num_total:
+            raise ValueError("Input length of percentiles must be less than input table length")
 
         indices = percentiles*num_total
         indices = np.insert(indices, 0, 0)
+        percentiles = np.insert(percentiles, 0, 0)
         indices = indices.astype(int)
-        indices = np.append(indices, None)
+        indices = np.append(indices, len(table))
+        percentiles = np.append(percentiles, 1.0)
+
+        d = np.diff(indices)
+        d[-1] -= 1
+        if 0 in d:
+            print "Raise exception: too many percentile bins"
+            idx_too_few = np.nanargmin(d)
+            raise ValueError("The input percentiles spacing is too fine.\n"
+                "For example, there are no table elements in the percentile range (%.2f, %.2f)" % 
+                  (percentiles[idx_too_few], percentiles[idx_too_few+1]))
+
 
         result = np.zeros(len(indices)-1, dtype=object)
         for i, first_idx, last_idx in zip(range(len(result)), indices[:-1], indices[1:]):
