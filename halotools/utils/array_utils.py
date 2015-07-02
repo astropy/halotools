@@ -5,13 +5,9 @@ Modules performing small, commonly used tasks throughout the package.
 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 __all__ = ['array_like_length', 'find_idx_nearest_val', 'randomly_downsample_data']
 
 import numpy as np
-
 import collections
 
 def array_like_length(x):
@@ -129,58 +125,6 @@ def randomly_downsample_data(array, num_downsample):
         randomizer = np.random.random(input_array_length)
         idx_sorted = np.argsort(randomizer)
         return array[idx_sorted[0:num_downsample]]
-
-class SampleSelector(object):
-
-    @staticmethod
-    def property_range(lower_bound = -float("inf"), upper_bound = float("inf"), 
-        return_complement = False, **kwargs):
-        """ Method makes a cut on an input table column based on an input upper and lower bound, and 
-        returns the cut table. 
-
-        Parameters 
-        ----------
-        table : Astropy Table object, keyword argument 
-
-        key : string, keyword argument 
-            Column name that will be used to apply the cut
-
-        lower_bound : float, optional keyword argument 
-            Minimum value for the input column of the returned table. Default is :math:`-\\infty`. 
-
-        upper_bound : float, optional keyword argument 
-            Maximum value for the input column of the returned table. Default is :math:`+\\infty`. 
-
-        return_complement : bool, optional keyword argument 
-            If True, `property_range` gives the table elements that do not pass the cut 
-            as the second return argument. Default is False. 
-
-        Returns 
-        -------
-        cut_table : Astropy Table object
-
-        """
-        table = kwargs['table']
-        key = kwargs['key']
-        mask = (table[key] > lower_bound) & (table[key] < upper_bound)
-
-        if return_complement is True:
-            return table[mask], table[np.invert(mask)]
-        else:
-            return table[mask]
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
