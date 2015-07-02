@@ -135,10 +135,18 @@ class SampleSelector(object):
         >>> snapshot = FakeSim()
         >>> halos = snapshot.halos
 
+        We can easily use `split_sample` to divide the sample into a high-Vmax and low-Vmax subsamples:
+
         >>> sample_below_median, sample_above_median = SampleSelector.split_sample(table = halos, key = 'vmax', percentiles = 0.5)
+
+        Likewise, we can do the same thing to divide the sample into quartiles:
+
         >>> lowest, lower, higher, highest = SampleSelector.split_sample(table = halos, key = 'zhalf', percentiles = [0.25, 0.5, 0.75])
-        >>> sample_collection = SampleSelector.split_sample(table = halos, key = 'zhalf', percentiles = [0.25, 0.5, 0.75])
-        >>> lowest, lower, higher, highest = sample_collection
+
+        The following alternative syntax is also supported:
+
+        >>> subsample_collection = SampleSelector.split_sample(table = halos, key = 'zhalf', percentiles = [0.25, 0.5, 0.75])
+        >>> lowest, lower, higher, highest = subsample_collection
 
         """
         table = kwargs['table']
