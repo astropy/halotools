@@ -105,6 +105,66 @@ class SampleSelector(object):
         else:
             return table[mask]
 
+    @staticmethod
+    def split_sample(**kwargs):
+        """ Method divides a sample into subsamples based on the percentile ranking of a given property. 
+
+        Parameters 
+        ----------
+        table : Astropy Table object, keyword argument 
+
+        key : string, keyword argument 
+            Column name that will be used to define the percentiles
+
+        percentiles : array_like 
+            Sequence of percentiles used to define the returned subsamples. If ``percentiles`` 
+            has more than one element, the elements must be monotonically increasing. 
+            If ``percentiles`` is length-N, there will be N+1 returned subsamples. 
+
+        Returns 
+        -------
+        subsamples : list 
+
+        Examples 
+        --------
+        To demonstrate the `split_sample` method, we will start out by loading 
+        a table of halos into memory using the `FakeSim` class:
+
+        >>> snapshot = FakeSim()
+        >>> halos = snapshot.halos
+
+        >>> sample_below_median, sample_above_median = SampleSelector.split_sample(table = halos, key = 'vmax', percentiles = 0.5)
+        >>> lowest, lower, higher, highest = SampleSelector.split_sample(table = halos, key = 'zhalf', percentiles = [0.25, 0.5, 0.75])
+        >>> sample_collection = SampleSelector.split_sample(table = halos, key = 'zhalf', percentiles = [0.25, 0.5, 0.75])
+        >>> lowest, lower, higher, highest = sample_collection
+
+        """
+        table = kwargs['table']
+        key = kwargs['key']
+        percentiles = kwargs['percentiles']
+
+        table.sort(key)
+        num_total = len(table)
+
+        percentiles = np.array(percentiles)
+        if np.shape(percentiles) == ():
+            percentiles = np.array([percentiles])
+
+        indices = percentiles*num_total
+        indices = np.insert(indices, 0, 0)
+        indices = indices.astype(int)
+        indices = np.append(indices, None)
+
+        result = np.zeros(len(indices)-1, dtype=object)
+        for i, first_idx, last_idx in zip(range(len(result)), indices[:-1], indices[1:]):
+            result[i] = table[first_idx:last_idx]
+
+        return result
+
+            
+
+
+
 
 
 
