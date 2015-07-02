@@ -64,7 +64,7 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # call super-class init routine
         # the instance inherits the basic model of the non-assembly biased model to which it is tied.
 
-        #hod_components.OccupationComponent.__init__(self,
+        #hod_components.OccupationComponent.__init__(self)
         super(HeavisideCenAssemBiasModel,self).__init__(
             gal_type=standard_cen_model.gal_type,
             threshold=standard_cen_model.threshold,
