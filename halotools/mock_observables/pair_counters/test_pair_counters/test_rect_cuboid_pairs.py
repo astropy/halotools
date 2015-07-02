@@ -7,7 +7,9 @@ from ..pairs import wnpairs as simp_wnpairs
 #load rect_cuboid_pairs pair counters
 from ..rect_cuboid_pairs import npairs, wnpairs, jnpairs
 from ..rect_cuboid_pairs import xy_z_npairs, xy_z_wnpairs, xy_z_jnpairs
+from ..rect_cuboid_pairs import s_mu_npairs
 
+np.random.seed(1)
 
 def test_npairs_periodic():
     
@@ -136,6 +138,68 @@ def test_xy_z_npairs_nonperiodic():
     binned_result = np.diff(np.diff(result,axis=1),axis=0)
     
     assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
+
+
+def test_s_mu_npairs_periodic():
+    
+    Lbox = [1.0,1.0,1.0]
+    period = np.array(Lbox)
+    
+    s_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    N_mu_bins=100
+    mu_bins = np.linspace(0,1.0,N_mu_bins)
+    
+    Npts = 1e3
+    
+    x = np.random.uniform(0, Lbox[0], Npts)
+    y = np.random.uniform(0, Lbox[1], Npts)
+    z = np.random.uniform(0, Lbox[2], Npts)
+    data1 = np.vstack((x,y,z)).T
+    
+    result = s_mu_npairs(data1, data1, s_bins, mu_bins, period=period)
+    
+    assert np.shape(result)==(6,N_mu_bins), "result has the wrong shape"
+    
+    result = np.diff(np.diff(result,axis=1),axis=0)
+    
+    xi = np.sum(result,axis=1)
+    
+    comp_result = npairs(data1, data1, s_bins, period=period)
+    comp_result = np.diff(comp_result)
+    
+    assert np.all(xi==comp_result), "pair counts don't match simple pair counts"
+
+
+def test_s_mu_npairs_nonperiodic():
+    
+    Lbox = [1.0,1.0,1.0]
+    period = None
+    
+    s_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    N_mu_bins=100
+    mu_bins = np.linspace(0,1.0,N_mu_bins)
+    
+    Npts = 1e3
+    
+    x = np.random.uniform(0, Lbox[0], Npts)
+    y = np.random.uniform(0, Lbox[1], Npts)
+    z = np.random.uniform(0, Lbox[2], Npts)
+    data1 = np.vstack((x,y,z)).T
+    
+    result = s_mu_npairs(data1, data1, s_bins, mu_bins, period=None, Lbox=Lbox)
+    
+    assert np.shape(result)==(6,N_mu_bins), "result has the wrong shape"
+    
+    result = np.diff(np.diff(result,axis=1),axis=0)
+    
+    xi = np.sum(result,axis=1)
+    
+    comp_result = npairs(data1, data1, s_bins, period=None)
+    comp_result = np.diff(comp_result)
+    
+    print(comp_result, xi)
+    assert np.all(xi==comp_result), "pair counts don't match simple pair counts"
+    
 
 
 def test_wnpairs_periodic():

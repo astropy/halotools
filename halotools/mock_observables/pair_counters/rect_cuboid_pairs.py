@@ -978,7 +978,7 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, Lbox=None, period=None, verbose=F
     Ncell1 = np.prod(grid1.num_divs)
     
     #create a function to call with only one argument
-    engine = partial(_xy_z_npairs_engine, grid1, grid2, s_bins, mu_bins, period, PBCs)
+    engine = partial(_s_mu_npairs_engine, grid1, grid2, s_bins, mu_bins, period, PBCs)
     
     #do the pair counting
     if N_threads>1:
@@ -989,7 +989,7 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, Lbox=None, period=None, verbose=F
     return counts
 
 
-def _s_mu_npairs_engine(grid1, grid2, rp_bins, pi_bins, period, PBCs, icell1):
+def _s_mu_npairs_engine(grid1, grid2, s_bins, mu_bins, period, PBCs, icell1):
     """
     pair counting engine for npairs function.  This code calls a cython function.
     """
