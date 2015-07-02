@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-rectangular Cuboid FoF pair search
+Cuboid FoF pair search
 """
 
 from __future__ import print_function, division
