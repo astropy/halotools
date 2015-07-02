@@ -225,11 +225,12 @@ def _fof_pairs_engine(grid1, grid2, r_max, period, PBCs, icell1):
     return d, i_inds, j_inds
 
 
-def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose=False, N_threads=1):
+def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose=False,\
+                   N_threads=1):
     """
-    real-space FoF pair finder.
+    redshift-space FoF pair finder.
     
-    return the pairs wich have separations <= r_max
+    return the pairs wich have separations <= rp_max and <=pi_max
     
     Parameters
     ----------
