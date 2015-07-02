@@ -663,8 +663,9 @@ def s_mu_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
             d_para = para_square_distance(z_icell1[i], z_icell2[j])
                         
             #transform to s and mu
-            s = d_perp + d_para
-            mu = sqrt(d_para)/s
+            s = sqrt(d_perp + d_para)
+            if s!=0: mu = sqrt(d_para)/s
+            else: mu=0.0
             
             #calculate counts in bins
             xy_z_binning(<np.int_t*>counts.data,\
@@ -703,7 +704,7 @@ def s_mu_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int nmu_bins_minus_one = len(mu_bins) -1
     cdef np.ndarray[np.int_t, ndim=2] counts =\
         np.zeros((ns_bins, nmu_bins), dtype=np.int)
-    cdef double d_perp, d_para, s, mu
+    cdef double d, d_perp, d_para, s, mu
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
@@ -724,7 +725,8 @@ def s_mu_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
             
             #transform to s and mu
             s = sqrt(d_perp + d_para)
-            mu = sqrt(d_para)/s
+            if s!=0: mu = sqrt(d_para)/s
+            else: mu=0.0
             
             #calculate counts in bins
             xy_z_binning(<np.int_t*>counts.data,\
