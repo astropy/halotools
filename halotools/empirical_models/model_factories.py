@@ -404,6 +404,13 @@ class HodModelFactory(ModelFactory):
 
         return model_blueprint 
 
+    def _get_stripped_param_dict(self, gal_type, model_dict):
+        """
+        """
+        pass
+
+
+
     def _set_gal_types(self):
         """ Private method binding the ``gal_types`` list attribute,
         and the ``occupation_bound`` attribute, to the class instance. 
