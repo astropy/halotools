@@ -268,27 +268,9 @@ class Zheng07Cens(OccupationComponent):
             prim_haloprop_key=prim_haloprop_key, 
             **kwargs)
 
-        self._initialize_param_dict(**kwargs)
+        self.param_dict = self.get_published_parameters(self.threshold)
 
         self.publications = ['arXiv:0408564', 'arXiv:0703457']
-
-
-    def _initialize_param_dict(self, input_param_dict={}, **kwargs):
-        """ Private method used to retrieve the 
-        dictionary governing the parameters of the model. 
-        """
-        input_param_dict = input_param_dict
-
-        self.logMmin_key = 'logMmin_'+self.gal_type
-        self.sigma_logM_key = 'sigma_logM_'+self.gal_type
-        published_param_dict = self.get_published_parameters(self.threshold)
-
-        model_keys = [self.logMmin_key, self.sigma_logM_key]
-        for key in model_keys:
-            if key in input_param_dict.keys():
-                self.param_dict[key] = input_param_dict[key]
-            else:
-                self.param_dict[key] = published_param_dict[key]
 
     def mean_occupation(self, **kwargs):
         """ Expected number of central galaxies in a halo of mass halo_mass.
@@ -372,8 +354,8 @@ class Zheng07Cens(OccupationComponent):
 
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
-            (logM - self.param_dict[self.logMmin_key])
-            /self.param_dict[self.sigma_logM_key]))
+            (logM - self.param_dict['logMmin'])
+            /self.param_dict['sigma_logM']))
 
         return mean_ncen
 
@@ -420,8 +402,8 @@ class Zheng07Cens(OccupationComponent):
             threshold_index = np.where(threshold_array==threshold)[0]
             if len(threshold_index)==1:
                 param_dict = {
-                self.logMmin_key : logMmin_array[threshold_index[0]],
-                self.sigma_logM_key : sigma_logM_array[threshold_index[0]]
+                'logMmin': logMmin_array[threshold_index[0]],
+                'sigma_logM' : sigma_logM_array[threshold_index[0]]
                 }
             else:
                 raise ValueError("Input luminosity threshold "
@@ -544,7 +526,7 @@ class Leauthaud11Cens(OccupationComponent):
         mean_ncen = 0.5*(1.0 - 
             erf((self.threshold - logmstar)/logscatter))
 
-        return mean_ncen
+        return mean_ncen        
 
 
 class Kravtsov04Sats(OccupationComponent):
@@ -636,30 +618,13 @@ class Kravtsov04Sats(OccupationComponent):
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
-        self._initialize_param_dict(**kwargs)
+        self.param_dict = self.get_published_parameters(self.threshold)
 
         self._check_consistent_central_behavior(central_occupation_model)
         self.central_occupation_model = central_occupation_model
 
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
 
-    def _initialize_param_dict(self, input_param_dict = {}, **kwargs):
-        """ Method stores default values into ``self.param_dict``. 
-        """
-
-        input_param_dict = input_param_dict
-
-        self.logM0_key = 'logM0_'+self.gal_type
-        self.logM1_key = 'logM1_'+self.gal_type
-        self.alpha_key = 'alpha_'+self.gal_type
-        published_param_dict = self.get_published_parameters(self.threshold)
-
-        model_keys = [self.logM0_key, self.logM1_key, self.alpha_key]
-        for key in model_keys:
-            if key in input_param_dict.keys():
-                self.param_dict[key] = input_param_dict[key]
-            else:
-                self.param_dict[key] = published_param_dict[key]
 
     def _check_consistent_central_behavior(self, central_occupation_model):
         """ Method ensures that the input central_occupation_model is sensible.
@@ -757,21 +722,30 @@ class Kravtsov04Sats(OccupationComponent):
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+        mass = np.array(mass)
+        if np.shape(mass) == ():
+            mass = np.array([mass])
+
 
         model_helpers.update_param_dict(self, **kwargs)
 
-        M0 = 10.**self.param_dict[self.logM0_key]
-        M1 = 10.**self.param_dict[self.logM1_key]
+        M0 = 10.**self.param_dict['logM0']
+        M1 = 10.**self.param_dict['logM1']
 
         # Call to np.where raises a harmless RuntimeWarning exception if 
         # there are entries of input logM for which mean_nsat = 0
         # Evaluating mean_nsat using the catch_warnings context manager 
         # suppresses this warning
+        mean_nsat = np.zeros_like(mass)
+
+        idx_nonzero = np.where(mass - M0 > 0)[0]
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
+
+            mean_nsat[idx_nonzero] = ((mass[idx_nonzero] - M0)/M1)**self.param_dict['alpha']
             # Simultaneously evaluate mean_nsat and impose the usual cutoff
-            mean_nsat = np.where(mass - M0 > 0, 
-                ((mass - M0)/M1)**self.param_dict[self.alpha_key], 0)
+            #mean_nsat = np.where(mass - M0 > 0, 
+            #    ((mass - M0)/M1)**self.param_dict['alpha'], 0)
 
         # If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
@@ -820,9 +794,9 @@ class Kravtsov04Sats(OccupationComponent):
             threshold_index = np.where(threshold_array==threshold)[0]
             if len(threshold_index)==1:
                 param_dict = {
-                self.logM0_key : logM0_array[threshold_index[0]],
-                self.logM1_key : logM1_array[threshold_index[0]],
-                self.alpha_key : alpha_array[threshold_index[0]]
+                'logM0' : logM0_array[threshold_index[0]],
+                'logM1' : logM1_array[threshold_index[0]],
+                'alpha' : alpha_array[threshold_index[0]]
                 }
             else:
                 raise ValueError("Input luminosity threshold "
