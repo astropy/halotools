@@ -9,10 +9,20 @@ def spherical_to_cartesian(ra, dec):
     """
     Calculate cartesian coordinates on a unit sphere given two angular coordinates. 
     parameters
-        ra: np.array of angular coordinate in degrees
-        dec: np.array of angular coordinate in degrees
-    returns
-        x,y,z: np.arrays cartesian coordinates 
+
+    Parameters 
+    -----------
+    ra : array 
+        Angular coordinate in degrees
+
+    dec : array 
+        Angular coordinate in degrees
+
+    Returns 
+    --------
+    x,y,z : sequence of arrays 
+        Cartesian coordinates. 
+
     """
     from numpy import radians, sin, cos
     
@@ -30,11 +40,20 @@ def chord_to_cartesian(theta, radians=True):
     """
     Calculate chord distance on a unit sphere given an angular distance between two 
     points.
-    parameters
-        theta: np.array of angular distance
-        radians: input in radians.  Default is true  If False, input in degrees.
-    returns
-        C: np.array chord distance 
+
+    Parameters
+    -----------
+    theta : array 
+        angular distance
+
+    radians : bool, optional 
+        If True, input is interpreted as radians. 
+        If False, input in degrees. Default is True.   
+    
+    Returns 
+    --------
+    C : array 
+        chord distance 
     """
     import numpy as np
     

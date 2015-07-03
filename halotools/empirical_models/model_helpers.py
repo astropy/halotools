@@ -142,16 +142,8 @@ def enforce_periodicity_of_box(coords, box_length):
         array with values and shape equal to input coords, 
         but with periodic boundary conditions enforced
 
-    """
-    # First correct negative coordinates
-    periodic_coords = np.where(coords > box_length, 
-        coords - box_length, coords)
-
-    # Now correct coordinates that are too large
-    periodic_coords = np.where(periodic_coords < 0, 
-        periodic_coords + box_length, periodic_coords)
-    
-    return periodic_coords
+    """    
+    return coords % box_length
 
 
 def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outside_bins, abcissa):

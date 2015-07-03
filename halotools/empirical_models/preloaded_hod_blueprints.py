@@ -56,9 +56,9 @@ def Kravtsov04_blueprint(**kwargs):
 		threshold = threshold)
 	cen_model_dict['occupation'] = dark_side_cen_model
 	# Build the profile model
-	halo_profile_model_cens = hpc.TrivialProfile()
-	cen_profile = gpf.GalProfFactory(cen_key, halo_profile_model_cens)
-	cen_model_dict['profile'] = halo_profile_model_cens
+	cen_profile = gpf.IsotropicGalProf(
+		gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
+	cen_model_dict['profile'] = cen_profile
 
 	### Build model for satellites
 	sat_key = 'satellites'
@@ -68,8 +68,8 @@ def Kravtsov04_blueprint(**kwargs):
 		threshold = threshold)
 	sat_model_dict['occupation'] = dark_side_sat_model
 	# Build the profile model
-	halo_profile_model_sats = hpc.NFWProfile()
-	sat_profile = gpf.GalProfFactory(sat_key, halo_profile_model_sats)
+	sat_profile = gpf.IsotropicGalProf(
+		gal_type=sat_key, halo_prof_model=hpc.NFWProfile)
 	sat_model_dict['profile'] = sat_profile
 
 	model_blueprint = {
