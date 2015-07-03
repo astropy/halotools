@@ -12,12 +12,14 @@ import sys
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, fmin
+from libc.math cimport fabs, fmin, sqrt
+from distances cimport *
 
 __all__ = ['npairs_no_pbc', 'npairs_pbc', 'wnpairs_no_pbc', 'wnpairs_pbc',\
            'jnpairs_no_pbc', 'jnpairs_pbc',\
            'xy_z_npairs_no_pbc', 'xy_z_npairs_pbc', 'xy_z_wnpairs_no_pbc', 'xy_z_wnpairs_pbc',\
-           'xy_z_jnpairs_no_pbc', 'xy_z_jnpairs_pbc']
+           'xy_z_jnpairs_no_pbc', 'xy_z_jnpairs_pbc',\
+           's_mu_npairs_no_pbc', 's_mu_npairs_pbc']
 __author__=['Duncan Campbell']
 
 @cython.boundscheck(False)
@@ -617,6 +619,124 @@ def xy_z_jnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     return counts
 
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
+def s_mu_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
+                       np.ndarray[np.float64_t, ndim=1] y_icell1,
+                       np.ndarray[np.float64_t, ndim=1] z_icell1,
+                       np.ndarray[np.float64_t, ndim=1] x_icell2,
+                       np.ndarray[np.float64_t, ndim=1] y_icell2,
+                       np.ndarray[np.float64_t, ndim=1] z_icell2,
+                       np.ndarray[np.float64_t, ndim=1] s_bins,
+                       np.ndarray[np.float64_t, ndim=1] mu_bins):
+    """
+    2+1D pair counter without periodic boundary conditions (no PBCs).
+    Calculate the number of pairs with separations s, and angle from the line of sight mu.
+    
+    A pre-step for calculating correlation function multipoles, omega etc
+    The s bins can run from 0 <= s < ds*Nsbins
+    The mu bins can run from 0 <= mu <= 1
+    """
+    
+    #c definitions
+    cdef int ns_bins = len(s_bins)
+    cdef int nmu_bins = len(mu_bins)
+    cdef int ns_bins_minus_one = len(s_bins) -1
+    cdef int nmu_bins_minus_one = len(mu_bins) -1
+    cdef np.ndarray[np.int_t, ndim=2] counts =\
+        np.zeros((ns_bins, nmu_bins), dtype=np.int)
+    cdef double d_perp, d_para, s, mu
+    cdef int i, j
+    cdef int Ni = len(x_icell1)
+    cdef int Nj = len(x_icell2)
+    
+    #loop over points in grid1's cell
+    for i in range(0,Ni):
+                
+        #loop over points in grid2's cell
+        for j in range(0,Nj):
+                    
+            #calculate the square distance
+            d_perp = perp_square_distance(x_icell1[i], y_icell1[i],\
+                                          x_icell2[j], y_icell2[j])
+            d_para = para_square_distance(z_icell1[i], z_icell2[j])
+                        
+            #transform to s and mu
+            s = sqrt(d_perp + d_para)
+            if s!=0: mu = sqrt(d_para)/s
+            else: mu=0.0
+            
+            #calculate counts in bins
+            xy_z_binning(<np.int_t*>counts.data,\
+                         <np.float64_t*>s_bins.data,\
+                         <np.float64_t*>mu_bins.data,\
+                         s, mu, ns_bins_minus_one, nmu_bins_minus_one)
+        
+    return counts
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
+def s_mu_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
+                    np.ndarray[np.float64_t, ndim=1] y_icell1,
+                    np.ndarray[np.float64_t, ndim=1] z_icell1,
+                    np.ndarray[np.float64_t, ndim=1] x_icell2,
+                    np.ndarray[np.float64_t, ndim=1] y_icell2,
+                    np.ndarray[np.float64_t, ndim=1] z_icell2,
+                    np.ndarray[np.float64_t, ndim=1] s_bins,
+                    np.ndarray[np.float64_t, ndim=1] mu_bins,
+                    np.ndarray[np.float64_t, ndim=1] period):
+    """
+    2+1D pair counter with periodic boundary conditions (PBCs).
+    Calculate the number of pairs with separations s, and angle from the line of sight mu.
+    
+    A pre-step for calculating correlation function multipoles, omega etc
+    The s bins can run from 0 <= s < ds*Nsbins
+    The mu bins can run from 0 <= mu <= 1
+    """
+    
+    #c definitions
+    cdef int ns_bins = len(s_bins)
+    cdef int nmu_bins = len(mu_bins)
+    cdef int ns_bins_minus_one = len(s_bins) -1
+    cdef int nmu_bins_minus_one = len(mu_bins) -1
+    cdef np.ndarray[np.int_t, ndim=2] counts =\
+        np.zeros((ns_bins, nmu_bins), dtype=np.int)
+    cdef double d, d_perp, d_para, s, mu
+    cdef int i, j
+    cdef int Ni = len(x_icell1)
+    cdef int Nj = len(x_icell2)
+    
+    #loop over points in grid1's cell
+    for i in range(0,Ni):
+                
+        #loop over points in grid2's cell
+        for j in range(0,Nj):
+                    
+            #calculate the square distance
+            d_perp = periodic_perp_square_distance(x_icell1[i],y_icell1[i],\
+                                                   x_icell2[j],y_icell2[j],\
+                                                   <np.float64_t*>period.data)
+            d_para = periodic_para_square_distance(z_icell1[i],\
+                                                   z_icell2[j],\
+                                                   <np.float64_t*>period.data)
+            
+            #transform to s and mu
+            s = sqrt(d_perp + d_para)
+            if s!=0: mu = sqrt(d_para)/s
+            else: mu=0.0
+            
+            #calculate counts in bins
+            xy_z_binning(<np.int_t*>counts.data,\
+                         <np.float64_t*>s_bins.data,\
+                         <np.float64_t*>mu_bins.data,\
+                         s, mu, ns_bins_minus_one, nmu_bins_minus_one)
+        
+    return counts
+
+
 cdef inline radial_binning(np.int_t* counts, np.float64_t* bins,\
                            np.float64_t d, np.int_t k):
     """
@@ -731,102 +851,6 @@ cdef inline xy_z_jbinning(np.float64_t* counts, np.float64_t* rp_bins,\
                     if g<0: break
                 k=k-1
                 if k<0: break
-
-
-cdef inline double periodic_square_distance(np.float64_t x1,\
-                                            np.float64_t y1,\
-                                            np.float64_t z1,\
-                                            np.float64_t x2,\
-                                            np.float64_t y2,\
-                                            np.float64_t z2,\
-                                            np.float64_t* period):
-    """
-    Calculate the 3D square cartesian distance between two sets of points with periodic
-    boundary conditions.
-    """
-    
-    cdef double dx, dy, dz
-    
-    dx = fabs(x1 - x2)
-    dx = fmin(dx, period[0] - dx)
-    dy = fabs(y1 - y2)
-    dy = fmin(dy, period[1] - dy)
-    dz = fabs(z1 - z2)
-    dz = fmin(dz, period[2] - dz)
-    return dx*dx+dy*dy+dz*dz
-
-
-cdef inline double square_distance(np.float64_t x1, np.float64_t y1, np.float64_t z1,\
-                                   np.float64_t x2, np.float64_t y2, np.float64_t z2):
-    """
-    Calculate the 3D square cartesian distance between two sets of points.
-    """
-    
-    cdef double dx, dy, dz
-    
-    dx = x1 - x2
-    dy = y1 - y2
-    dz = z1 - z2
-    return dx*dx+dy*dy+dz*dz
-
-
-cdef inline double perp_square_distance(np.float64_t x1, np.float64_t y1,\
-                                        np.float64_t x2, np.float64_t y2):
-    """
-    Calculate the projected square cartesian distance between two sets of points.
-    e.g. r_p
-    """
-    
-    cdef double dx, dy
-    
-    dx = x1 - x2
-    dy = y1 - y2
-    return dx*dx+dy*dy
-
-
-cdef inline double para_square_distance(np.float64_t z1, np.float64_t z2):
-    """
-    Calculate the parallel square cartesian distance between two sets of points.
-    e.g. pi
-    """
-    
-    cdef double dz
-    
-    dz = z1 - z2
-    return dz*dz
-
-
-cdef inline double periodic_perp_square_distance(np.float64_t x1, np.float64_t y1,\
-                                                 np.float64_t x2, np.float64_t y2,\
-                                                 np.float64_t* period):
-    """
-    Calculate the projected square cartesian distance between two sets of points with 
-    periodic boundary conditions.
-    e.g. r_p
-    """
-    
-    cdef double dx, dy
-    
-    dx = fabs(x1 - x2)
-    dx = fmin(dx, period[0] - dx)
-    dy = fabs(y1 - y2)
-    dy= fmin(dy, period[1] - dy)
-    return dx*dx+dy*dy
-
-
-cdef inline double periodic_para_square_distance(np.float64_t z1, np.float64_t z2,\
-                                                 np.float64_t* period):
-    """
-    Calculate the parallel square cartesian distance between two sets of points with 
-    periodic boundary conditions.
-    e.g. pi
-    """
-    
-    cdef double dz
-    
-    dz = fabs(z1 - z2)
-    dz = fmin(dz, period[2] - dz)
-    return dz*dz
 
 
 cdef inline double jweight(np.int_t j, np.int_t j1, np.int_t j2,\
