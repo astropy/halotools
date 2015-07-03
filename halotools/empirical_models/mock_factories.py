@@ -237,12 +237,27 @@ class HodMockFactory(MockFactory):
         if populate is True:
             self.populate()
 
-    def preprocess_halo_catalog(self):
+    def preprocess_halo_catalog(self, **kwargs):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. This pre-processing includes identifying the 
         catalog columns that will be used by the model to create the mock, 
         building lookup tables associated with the halo profile, 
         and possibly creating new halo properties. 
+
+        Parameters 
+        ----------
+        logrmin : float, optional 
+            Minimum radius used to build the lookup table for the halo profile. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        logrmax : float, optional 
+            Maximum radius used to build the lookup table for the halo profile. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        Npts_radius_table : int, optional 
+            Number of control points used in the lookup table for the halo profile.
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
         """
 
         ################ Make cuts on halo catalog ################
@@ -271,72 +286,13 @@ class HodMockFactory(MockFactory):
         # parameter of each halo profile model, e.g., 'NFWmodel_conc'. 
         # New column names are the keys of the halo_prof_func_dict dictionary; 
         # new column values are computed by the function objects in halo_prof_func_dict 
-        function_dict = self.model.halo_prof_func_dict
-        for new_haloprop_key, prof_param_func in function_dict.iteritems():
-            self.halos[new_haloprop_key] = prof_param_func(halos=self.halos)
-            self.additional_haloprops.append(new_haloprop_key)
+        for halo_prof_param_key in self.model.prof_param_keys:
+            method_name = halo_prof_param_key + '_halos'
+            method_behavior = getattr(self.model, method_name)
+            self.halos[halo_prof_param_key] = method_behavior(halos=self.halos)
+            self.additional_haloprops.append(halo_prof_param_key)
 
-        self.build_halo_prof_lookup_tables()
-
-    def build_halo_prof_lookup_tables(self, **kwargs):
-        """ Method calling the `~halotools.empirical_models.HaloProfileModel` 
-        component models to build lookup tables of halo profiles. 
-
-        Each ``gal_type`` galaxy has its own associated 
-        `~halotools.empirical_models.HaloProfileModel` governing the profile if 
-        its underlying dark matter halo. The `build_halo_prof_lookup_tables` 
-        method calls each of those component models one by one, requesting 
-        each of them to build their own lookup table. Care is taken to ensure 
-        that each lookup table spans the necessary range of parameters required 
-        by the halo catalog being populated. 
-
-        Parameters 
-        ----------
-        input_prof_param_table_dict : dict, optional 
-            Each dict key of ``input_prof_param_table_dict`` should be 
-            a profile parameter name, e.g., ``NFWmodel_conc``. 
-            Each dict value is a 3-element tuple; 
-            the tuple entries provide, respectively, the min, max, and linear 
-            spacing used to discretize the profile parameter. 
-            This discretization is used by the 
-            `~halotools.empirical_models.HaloProfModel.build_inv_cumu_lookup_table` 
-            method of the  `~halotools.empirical_models.HaloProfModel` class 
-            to create a lookup table associated with the profile parameter.
-            If no ``input_prof_param_table_dict`` is passed, the component 
-            models will determine how their parameters are discretized. 
-        """
-        if 'input_prof_param_table_dict' in kwargs.keys():
-            input_prof_param_table_dict = kwargs['input_prof_param_table_dict']
-        else:
-            input_prof_param_table_dict = {}
-
-        prof_param_table_dict={}
-
-        for gal_type in self.gal_types:
-            gal_prof_model = self.model.model_blueprint[gal_type]['profile']
-
-            for key in gal_prof_model.halo_prof_func_dict.keys():
-
-                model_parmin = gal_prof_model.prof_param_table_dict[key][0]
-                model_parmax = gal_prof_model.prof_param_table_dict[key][1]
-                dpar = gal_prof_model.prof_param_table_dict[key][2]
-
-                halocat_parmin = self.halos[key].min() - dpar
-                halocat_parmax = self.halos[key].max() + dpar
-
-                parmin = np.min([halocat_parmin,model_parmin])
-                parmax = np.max([halocat_parmax,model_parmax])
-
-                prof_param_table_dict[key] = (parmin, parmax, dpar)
-
-        # Now over-write prof_param_table_dict with 
-        # input_prof_param_table_dict, if applicable
-        for key, value in input_prof_param_table_dict.iteritems():
-            prof_param_table_dict[key] = value
-
-        # Parameter discretization choices have been made. Now build the tables. 
-        self.model.build_halo_prof_lookup_tables(
-            prof_param_table_dict=prof_param_table_dict)
+        self.model.build_halo_prof_lookup_tables(**kwargs)
 
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
@@ -365,24 +321,21 @@ class HodMockFactory(MockFactory):
                     self.halos[halocatkey], self._occupation[gal_type], axis=0)
 
             # Call the galaxy profile components
-            for gal_prof_param_key in self.model.gal_prof_param_list:
-                self.galaxy_table[gal_prof_param_key][gal_type_slice] = (
-                    getattr(self.model, gal_prof_param_key)(
-                        gal_type=gal_type, 
-                        galaxy_table=self.galaxy_table[gal_type_slice])
+            for prof_param_key in self.model.prof_param_keys:
+                method_name = prof_param_key + '_' + gal_type
+                method_behavior = getattr(self.model, method_name)
+                self.galaxy_table[prof_param_key][gal_type_slice] = (
+                    method_behavior(galaxy_table = self.galaxy_table[gal_type_slice])
                     )
 
             # Assign positions 
-            # This function is called differently than other galaxy properties, 
-            # since 'x', 'y', and 'z' is an attribute of any galaxy-halo model
-            # and any gal_type, without exception
             pos_method_name = 'pos_'+gal_type
 
             self.galaxy_table['x'][gal_type_slice], \
             self.galaxy_table['y'][gal_type_slice], \
             self.galaxy_table['z'][gal_type_slice] = (
                 getattr(self.model, pos_method_name)(
-                    self, gal_type = gal_type)
+                    galaxy_table=self.galaxy_table[gal_type_slice])
                 )
                 
         # Positions are now assigned to all populations. 
@@ -407,6 +360,9 @@ class HodMockFactory(MockFactory):
         ``_occupation`` and ``_gal_type_indices``. 
 
         """
+
+        self.galaxy_table = Table() 
+
         self._occupation = {}
         self._total_abundance = {}
         self._gal_type_indices = {}
@@ -443,7 +399,7 @@ class HodMockFactory(MockFactory):
 
         # Separately allocate memory for the values of the (possibly biased)
         # galaxy profile parameters such as 'gal_NFWmodel_conc'
-        for galcatkey in self.model.gal_prof_param_list:
+        for galcatkey in self.model.prof_param_keys:
             self.galaxy_table[galcatkey] = np.zeros(self.Ngals, dtype = 'f4')
 
         self.galaxy_table['gal_type'] = np.zeros(self.Ngals, dtype=object)

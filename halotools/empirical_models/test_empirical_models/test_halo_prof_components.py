@@ -23,23 +23,16 @@ def test_HaloProfileModel():
 
     # Now we will test that all sub-classes inherit the correct behavior
     for model_class in component_models_to_test:
-        model_instance = model_class()
+        model_instance = model_class(cosmology=cosmology.WMAP7, redshift=2)
 
         assert hasattr(model_instance, 'cosmology')
         assert isinstance(model_instance.cosmology, cosmology.FlatLambdaCDM)
-
-        assert hasattr(model_instance, 'set_prof_param_table_dict')
-        input_dict = {}
-        model_instance.set_prof_param_table_dict(input_dict)
-        input_dict = model_instance.prof_param_table_dict
-        model_instance.set_prof_param_table_dict(input_dict)
+        assert hasattr(model_instance, 'redshift')
 
         assert hasattr(model_instance, 'build_inv_cumu_lookup_table')
         model_instance.build_inv_cumu_lookup_table()
         assert hasattr(model_instance, 'cumu_inv_func_table')
         assert type(model_instance.cumu_inv_func_table) == np.ndarray
-        assert hasattr(model_instance, 'cumu_inv_param_table_dict')
-        assert type(model_instance.cumu_inv_param_table_dict) == dict
         assert hasattr(model_instance, 'func_table_indices')
         assert type(model_instance.func_table_indices) == np.ndarray
 
@@ -56,22 +49,15 @@ def test_TrivialProfile():
 
         * ``cumu_inv_param_table``
 
-        * ``cumu_inv_param_table_dict``
-
-        * ``halo_prof_func_dict``
-
-        * ``haloprop_key_dict``
     """
 
     # Check that the initialized attributes are correct
     model_instance = hpc.TrivialProfile()
-    assert model_instance.halo_prof_func_dict == {}
-    assert model_instance.haloprop_key_dict == {}
+    assert model_instance.prof_param_keys == []
     
     # Check that the lookup table attributes are correct
     model_instance.build_inv_cumu_lookup_table()
     assert len(model_instance.cumu_inv_func_table) == 0
-    assert model_instance.cumu_inv_param_table_dict == {}
     assert len(model_instance.func_table_indices) == 0
 
 
@@ -91,13 +77,16 @@ def test_NFWProfile():
     model_instance = hpc.NFWProfile()
     assert hasattr(model_instance, 'cosmology')
     assert isinstance(model_instance.cosmology, cosmology.FlatLambdaCDM)
-    assert model_instance._conc_parname == 'NFWmodel_conc'
+
 
     # Check that the lookup table attributes are correct
     model_instance.build_inv_cumu_lookup_table()
-    assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] > 0)
-    assert np.all(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname] < 1000)
-    assert len(model_instance.cumu_inv_param_table_dict[model_instance._conc_parname]) >= 10
+
+    assert np.all(model_instance.NFWmodel_conc_lookup_table_bins > 0)
+    assert np.all(model_instance.NFWmodel_conc_lookup_table_bins < 1000)
+
+
+    assert len(model_instance.NFWmodel_conc_lookup_table_bins) >= 10
     assert (len(model_instance.cumu_inv_func_table) == 
         len(model_instance.func_table_indices) )
 
@@ -108,7 +97,7 @@ def test_NFWProfile():
         value inferred from the discretized lookup table. 
         """
         exact_result = model.cumulative_mass_PDF(test_radius, conc)
-        conc_table = model.cumu_inv_param_table_dict[model._conc_parname]
+        conc_table = model.NFWmodel_conc_lookup_table_bins        
         digitized_conc_index = np.digitize(np.array([conc]), conc_table)
         digitized_conc = conc_table[digitized_conc_index]
         func = model.cumu_inv_func_table[digitized_conc_index[0]]
@@ -125,12 +114,37 @@ def test_NFWProfile():
         assert np.allclose(frac_error, 0, rtol = 1e-3, atol = 1e-3)
 
     # The lookup table should adjust properly when passed an input_dict
+    initial_NFWmodel_conc_lookup_table_min = copy(model_instance.NFWmodel_conc_lookup_table_min)
+    initial_NFWmodel_conc_lookup_table_max = copy(model_instance.NFWmodel_conc_lookup_table_max)
+    initial_NFWmodel_conc_lookup_table_spacing = copy(model_instance.NFWmodel_conc_lookup_table_spacing)
+    initial_NFWmodel_conc_lookup_table_bins = copy(model_instance.NFWmodel_conc_lookup_table_bins)
+
+    model_instance.NFWmodel_conc_lookup_table_min -= 0.05
+    model_instance.NFWmodel_conc_lookup_table_min += 0.05
+    model_instance.NFWmodel_conc_lookup_table_spacing *= 0.9
+    model_instance.build_inv_cumu_lookup_table()
+    assert model_instance.NFWmodel_conc_lookup_table_bins != initial_NFWmodel_conc_lookup_table_bins
+
+    model_instance.NFWmodel_conc_lookup_table_min = initial_NFWmodel_conc_lookup_table_min
+    model_instance.NFWmodel_conc_lookup_table_max = initial_NFWmodel_conc_lookup_table_max
+    model_instance.NFWmodel_conc_lookup_table_spacing = initial_NFWmodel_conc_lookup_table_spacing
+    model_instance.build_inv_cumu_lookup_table()
+    assert np.all(model_instance.NFWmodel_conc_lookup_table_bins == initial_NFWmodel_conc_lookup_table_bins)
+
+
+
+
+
+
+"""
     input_dict = copy(model_instance.prof_param_table_dict)
     input_dict[model_instance._conc_parname] = (1.0, 25.0, 0.04)
     model_instance.set_prof_param_table_dict(input_dict)
     assert model_instance.prof_param_table_dict == input_dict
     input_dict[model_instance._conc_parname] = (2.0, 20.0, 0.03)
     assert model_instance.prof_param_table_dict != input_dict
+
+
     model_instance.build_inv_cumu_lookup_table(
         prof_param_table_dict=input_dict)
     assert model_instance.prof_param_table_dict == input_dict
@@ -139,7 +153,7 @@ def test_NFWProfile():
     model_instance.build_inv_cumu_lookup_table(
         prof_param_table_dict=input_dict)
     assert dict_persistence_check == model_instance.prof_param_table_dict
-
+"""
 
 
 

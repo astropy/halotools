@@ -17,3 +17,4 @@ from .gal_prof_factory import *
 from .smhm_components import *
 from .sfr_components import *
 from .abunmatch import *
+from .model_helpers import *

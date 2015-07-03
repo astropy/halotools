@@ -12,7 +12,7 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from . import model_defaults
-from . import model_helpers as model_helpers
+from . import model_helpers
 from .smhm_components import PrimGalpropModel
 from . import smhm_components
 

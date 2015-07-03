@@ -34,15 +34,10 @@ min_permitted_conc = 0.1
 max_permitted_conc = 30.0
 default_dconc = 0.025
 
-default_Npts_radius_array = 101
+Npts_radius_table = 101
 default_lograd_min = -4
 default_lograd_max = 0
-profile_table_radius_array_dict = {
-    'logrmin' : default_lograd_min, 
-    'logrmax' : default_lograd_max, 
-    'npts' : default_Npts_radius_array
-}
-conc_mass_relation_key = 'dutton_maccio14'
+conc_mass_model = 'dutton_maccio14'
 
 ### Default values specifying traditional quenching model
 # Used by models in the halo_occupation module
@@ -103,19 +98,10 @@ host_haloprop_prefix = 'halo_'
 galprop_prefix = 'gal_'
 haloprop_list = ['haloid', 'x', 'y', 'z', 'vx', 'vy', 'vz', 'mvir', 'rvir']
 
-# obsolete now
-#galprop_dict = {'gal_type':4,'pos':[4,4,4]}
-
 prim_haloprop_key = 'mvir'
 sec_haloprop_key = 'vmax'
 halo_boundary = 'rvir'
-haloprop_key_dict = {'prim_haloprop_key':prim_haloprop_key, 'halo_boundary':halo_boundary}
 
-assembias_haloprop_key_dict = {
-    'prim_haloprop_key':'mvir', 
-    'halo_boundary':'rvir',
-    'sec_haloprop_key':'vmax'
-    }
 
 
 

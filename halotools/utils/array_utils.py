@@ -5,13 +5,9 @@ Modules performing small, commonly used tasks throughout the package.
 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 __all__ = ['array_like_length', 'find_idx_nearest_val', 'randomly_downsample_data']
 
 import numpy as np
-
 import collections
 
 def array_like_length(x):
@@ -129,6 +125,11 @@ def randomly_downsample_data(array, num_downsample):
         randomizer = np.random.random(input_array_length)
         idx_sorted = np.argsort(randomizer)
         return array[idx_sorted[0:num_downsample]]
+
+
+
+
+
 
 
 
