@@ -587,10 +587,9 @@ class HodModelFactory(ModelFactory):
                         "than one component model" % repeated_key)
                 else:
 
-                    self.param_dict = dict(
-                        model_instance.param_dict.items() + 
-                        self.param_dict.items()
-                        )
+                    for key, value in model_instance.param_dict.iteritems():
+                        composite_key = key + '_' + model_instance.gal_type
+                        self.param_dict[composite_key] = value
 
         self._init_param_dict = copy(self.param_dict)
 

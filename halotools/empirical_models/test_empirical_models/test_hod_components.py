@@ -58,7 +58,7 @@ def test_Zheng07Cens():
 		assert hasattr(model, 'mc_occupation')
 
 		# First check that the mean occuation is ~0.5 when model is evaulated at Mmin
-		mvir_midpoint = 10.**model.param_dict[model.logMmin_key]
+		mvir_midpoint = 10.**model.param_dict['logMmin']
 		Npts = 1e3
 		masses = np.ones(Npts)*mvir_midpoint
 		mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
@@ -113,14 +113,16 @@ def test_Zheng07Cens():
 	# Increase Mmin by a factor of 2: 
 	# decreases <Ncen> at fixed mass, and so there should be fewer total centrals in <Ncen> < 1 regime
 	model2_dict = copy(default_dict)
-	model2_dict[default_model.logMmin_key] += np.log10(2.)
-	model2 = hod_components.Zheng07Cens(input_param_dict = model2_dict)
+	model2_dict['logMmin'] += np.log10(2.)
+	model2 = hod_components.Zheng07Cens()
+	model2.param_dict = model2_dict
 	#
 	# Increase sigma_logM by a factor of 2: 
 	# broadens <Ncen> ==> more centrals in halos with Mvir < Mmin, no change whatsoever to mid-mass abundance 
 	model3_dict = copy(default_dict)
-	model3_dict[default_model.sigma_logM_key] *= 2.0
-	model3 = hod_components.Zheng07Cens(input_param_dict = model3_dict)
+	model3_dict['sigma_logM'] *= 2.0
+	model3 = hod_components.Zheng07Cens()
+	model3.param_dict = model3_dict
 	### First test to make sure models run ok
 	test_attributes(model2)
 	test_mean_occupation(model2)
@@ -130,18 +132,18 @@ def test_Zheng07Cens():
 	test_mean_occupation(model3)
 	test_mc_occupation(model3)
 	# Check that the dictionaries were correctly implemented
-	assert model2.param_dict[model2.logMmin_key] > default_model.param_dict[default_model.logMmin_key]
-	assert model3.param_dict[model3.sigma_logM_key] > default_model.param_dict[default_model.sigma_logM_key]
+	assert model2.param_dict['logMmin'] > default_model.param_dict['logMmin']
+	assert model3.param_dict['sigma_logM'] > default_model.param_dict['sigma_logM']
 
 	### Now make sure the value of <Ncen> scales reasonably with the parameters
-	lowmass = (10.**default_model.param_dict[default_model.logMmin_key])/1.1
+	lowmass = (10.**default_model.param_dict['logMmin'])/1.1
 	defocc_lowmass = default_model.mean_occupation(prim_haloprop=lowmass)
 	occ2_lowmass = model2.mean_occupation(prim_haloprop=lowmass)
 	occ3_lowmass = model3.mean_occupation(prim_haloprop=lowmass)
 	assert occ3_lowmass > defocc_lowmass
 	assert defocc_lowmass > occ2_lowmass
 	#
-	highmass = (10.**default_model.param_dict[default_model.logMmin_key])*1.1
+	highmass = (10.**default_model.param_dict['logMmin'])*1.1
 	defocc_highmass = default_model.mean_occupation(prim_haloprop=highmass)
 	occ2_highmass = model2.mean_occupation(prim_haloprop=highmass)
 	occ3_highmass = model3.mean_occupation(prim_haloprop=highmass)
@@ -149,7 +151,7 @@ def test_Zheng07Cens():
 	assert occ3_highmass > occ2_highmass
 	### Verify that directly changing model parameters 
 	# without a new instantiation also behaves properly
-	default_model.param_dict[default_model.sigma_logM_key] *= 2.
+	default_model.param_dict['sigma_logM'] *= 2.
 	updated_defocc_lowmass = default_model.mean_occupation(prim_haloprop=lowmass)
 	updated_defocc_highmass = default_model.mean_occupation(prim_haloprop=highmass)
 	assert updated_defocc_lowmass > defocc_lowmass
@@ -203,12 +205,12 @@ def test_Kravtsov04Sats():
 		### Check the Monte Carlo realization method
 		assert hasattr(model, 'mc_occupation')
 
-		model.param_dict[model.alpha_key] = 1
-		model.param_dict[model.logM0_key] = 11.25
-		model.param_dict[model.logM1_key] = model.param_dict[model.logM0_key] + np.log10(20.)
+		model.param_dict['alpha'] = 1
+		model.param_dict['logM0'] = 11.25
+		model.param_dict['logM1'] = model.param_dict['logM0'] + np.log10(20.)
 
 		Npts = 1e3
-		masses = np.ones(Npts)*10.**model.param_dict[model.logM1_key]
+		masses = np.ones(Npts)*10.**model.param_dict['logM1']
 		mc_occ = model.mc_occupation(prim_haloprop=masses, seed=43)
 		# We chose a specific seed that has been pre-tested, 
 		# so we should always get the same result
@@ -248,10 +250,11 @@ def test_Kravtsov04Sats():
 	###### power law slope ######
 	# Increase steepness of high-mass-end power law
 	model2_dict = copy(default_dict)
-	model2_dict[default_model.alpha_key] *= 1.25
-	model2 = hod_components.Kravtsov04Sats(input_param_dict = model2_dict)
+	model2_dict['alpha'] *= 1.25
+	model2 = hod_components.Kravtsov04Sats()
+	model2.param_dict = model2_dict
 
-	logmass = model2.param_dict[model2.logM1_key] + np.log10(5)
+	logmass = model2.param_dict['logM1'] + np.log10(5)
 	mass = 10.**logmass
 	assert model2.mean_occupation(prim_haloprop=mass) > default_model.mean_occupation(prim_haloprop=mass)
 
@@ -259,13 +262,14 @@ def test_Kravtsov04Sats():
 	masses = np.ones(Npts)*mass
 	assert model2.mc_occupation(prim_haloprop=masses,seed=43).mean() > default_model.mc_occupation(prim_haloprop=masses,seed=43).mean()
 
-	default_model.param_dict[default_model.alpha_key] = model2.param_dict[model2.alpha_key]
+	default_model.param_dict['alpha'] = model2.param_dict['alpha']
 	assert model2.mc_occupation(prim_haloprop=masses,seed=43).mean() == default_model.mc_occupation(prim_haloprop=masses,seed=43).mean()
 
 	###### Increase in M0 ######
 	model2_dict = copy(default_dict)
-	model2_dict[default_model.logM0_key] += np.log10(2)
-	model2 = hod_components.Kravtsov04Sats(input_param_dict = model2_dict)
+	model2_dict['logM0'] += np.log10(2)
+	model2 = hod_components.Kravtsov04Sats()
+	model2.param_dict = model2_dict
 
 	# At very low mass, both models should have zero satellites 
 	lowmass = 1e10
@@ -282,9 +286,9 @@ def test_Kravtsov04Sats():
 
 	###### Increase in M1 ######
 	model2_dict = copy(default_dict)
-	model2_dict[default_model.logM0_key] += np.log10(2)
-	model2 = hod_components.Kravtsov04Sats(input_param_dict = model2_dict)
-
+	model2_dict['logM0'] += np.log10(2)
+	model2 = hod_components.Kravtsov04Sats()
+	model2.param_dict = model2_dict
 	# At very low mass, both models should have zero satellites 
 	lowmass = 1e10
 	assert model2.mean_occupation(prim_haloprop=lowmass) == default_model.mean_occupation(prim_haloprop=lowmass)	
@@ -306,12 +310,13 @@ def test_Kravtsov04Sats():
 
 	### logMmin
 	cen_model2_dict = copy(default_cens.param_dict)
-	cen_model2_dict[default_cens.logMmin_key] += np.log10(2.)
-	cen_model2 = hod_components.Zheng07Cens(input_param_dict = cen_model2_dict)
+	cen_model2_dict['logMmin'] += np.log10(2.)
+	cen_model2 = hod_components.Zheng07Cens()
+	cen_model2.param_dict = cen_model2_dict
 	model2 = hod_components.Kravtsov04Sats(central_occupation_model = cen_model2)
 
 	### Changing the central model should have a large effect at low mass
-	midmass = 10.**default_cens.param_dict[default_cens.logMmin_key]
+	midmass = 10.**default_cens.param_dict['logMmin']
 	assert default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass) > model2.mean_occupation(prim_haloprop=midmass)
 	### And there should be zero effect at high mass
 	highmass = 1e15
@@ -320,7 +325,7 @@ def test_Kravtsov04Sats():
 	# Verify that directly changing the param_dict of the bound central model 
 	# correctly propagates through to the satellite occupation
 	nsat_orig = default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass)
-	default_satmodel_with_cens.central_occupation_model.param_dict[default_satmodel_with_cens.central_occupation_model.logMmin_key] += np.log10(2)
+	default_satmodel_with_cens.central_occupation_model.param_dict['logMmin'] += np.log10(2)
 	nsat_new = default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass)
 	assert nsat_new < nsat_orig
 
