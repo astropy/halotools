@@ -187,7 +187,7 @@ class FoFGroups():
             self.edge_lengths = np.array(lens)
             return self.edge_lengths
         else: print("igraph package not installed.")
-        
+
 
 def _scipy_to_igraph(matrix, coords, directed=False):
     """
