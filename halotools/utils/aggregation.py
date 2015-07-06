@@ -1,25 +1,19 @@
-#Duncan Campbell
-#March 2015
-#Yale University
-
+# -*- coding: utf-8 -*-
 """
-functions to support 'grouped' array calculations; aggregation operations.  There are two 
-general types of calculations supported here:
-    1.) those that return a value for every member,
-    2.) and those that return a value(s) for every group.
+
+Modules to support 'grouped' array calculations; aggregation operations.
+
 """
 
 from __future__ import division, print_function
+import numpy as np
+from halotools.utils.match import match
+from astropy.table import Table, Column
 
 __all__=['add_group_property','add_members_property','group_by',\
          'binned_aggregation_group_property', 'binned_aggregation_members_property',\
          'new_members_property','new_group_property']
-
-
-import numpy as np
-from numpy.lib.recfunctions import append_fields
-from halotools.utils.match import match
-
+__author__=['Andrew Hearin', 'Duncan Campbell']
 
 def add_group_property(members, grouping_key, function, groups, new_field_name):
     """
@@ -27,8 +21,8 @@ def add_group_property(members, grouping_key, function, groups, new_field_name):
     
     Parameters
     ----------
-    members: numpy.recarray
-        record array with one row per object
+    members: astropy.table.Table
+        table with one row per object
     
     grouping_key: string
         key string into members which defines groups, i.e. a group ID.
@@ -38,8 +32,8 @@ def add_group_property(members, grouping_key, function, groups, new_field_name):
         slice of members array corresponding to a group and returns an array of length 1.
         See tutorial for examples of aggregation functions.
     
-    groups: numpy.recarray
-        record array of group properties. Must contain the grouping_key field defining 
+    groups: astropy.table.Table
+        Table of group properties. Must contain the grouping_key field defining 
         groups 
     
     new_field_name: string
@@ -47,24 +41,33 @@ def add_group_property(members, grouping_key, function, groups, new_field_name):
     
     Returns
     -------
-    groups: numpy.recarray
-        record array with new group property appended.
+    groups: astropy.table.Table
+        Table with new group property added.
     
     Notes
     -----
-    if a 'groups' record array does not already exist, use 'create_groups' function.
+    if a 'groups' table does not already exist, use 'create_groups' function.
     """
     
-    members = members.view(np.recarray)
-    groups = groups.view(np.recarray)
+    if not isinstance(members,Table):
+        if isinstance(members,np.ndarray):
+            members = Table(members)
+        else:
+            raise ValueError("members parameter must be a table.")
+    
+    if not isinstance(groups,Table):
+        if isinstance(groups,np.ndarray):
+            members = Table(groups)
+        else:
+            raise ValueError("members parameter must be a table.")
     
     #check to see if grouping key is in groups array
     if not grouping_key in set(groups.dtype.names):
-        raise ValueError("groups array must have a field that matches grouping key.")
+        raise ValueError("groups table must have a field that matches grouping key.")
     
     #check to see if grouping key is in members array
     if not grouping_key in set(members.dtype.names):
-        raise ValueError("groups array must have a field that matches grouping key.")
+        raise ValueError("groups table must have a field that matches grouping key.")
     
     #define group IDs
     GroupIDs = members[grouping_key]
@@ -73,7 +76,9 @@ def add_group_property(members, grouping_key, function, groups, new_field_name):
 
     inds1, inds2 = match(ID,groups[grouping_key])
     new_prop=new_prop[inds1]
-    groups = append_fields(groups,new_field_name,new_prop)
+    
+    new_col = Column(name=new_field_name, data=new_prop)
+    groups.add_column(new_col)
     
     return groups
 
@@ -84,8 +89,8 @@ def create_groups(members, grouping_key, function, new_field_name):
     
     Parameters
     ----------
-    members: numpy.recarray
-        record array with one row per object
+    members: astropy.table.Table
+        table with one row per object
     
     grouping_key: string
         key string into members which defines groups
@@ -100,26 +105,27 @@ def create_groups(members, grouping_key, function, new_field_name):
     
     Returns
     -------
-    groups: numpy.recarray
-        record array with new group property
+    groups: astropy.table.Table
+        table with new group property
     
     """
     
-    members = members.view(np.recarray)
+    if not isinstance(members,Table):
+        if isinstance(members,np.ndarray):
+            members = Table(members)
+        else:
+            raise ValueError("members parameter must be a table.")
     
     #check to see if grouping key is in members array
     if not grouping_key in set(members.dtype.names):
-        raise ValueError("members array must have a field that matches grouping key.")
+        raise ValueError("members table must have a field that matches grouping key.")
     
     #define group IDs
     GroupIDs = members[grouping_key]
     
     new_prop, ID = new_group_property(members, function, None, GroupIDs=GroupdIDs)
     
-    dtype=np.dtype([(grouping_key,np.int),(new_field_name,new_prop.dtype)])
-    groups=np.empty((len(new_prop),),dtype=dtype)
-    groups[grouping_key] = ID
-    groups[new_field_name] = new_prop
+    groups = Table([ID,new_prop], names=[grouping_key,new_field_name], dtype=['<i8', new_prop.dtype.str])
     
     return groups
 
@@ -130,8 +136,8 @@ def add_members_property(members, group_key, new_field_name, function):
     
     Parameters
     ----------
-    members: numpy.recarray
-        record array with one row per object
+    members: astropy.table.Table
+        table with one row per object
     
     group_key: string
         key string into members which defines groups
@@ -147,11 +153,15 @@ def add_members_property(members, group_key, new_field_name, function):
     
     Returns
     -------
-    members: numpy.recarray
-        record array with new group property appended.
+    members: astropy.table.Table
+        table with new group property appended.
     """
     
-    members = members.view(np.recarray)
+    if not isinstance(members,Table):
+        if isinstance(members,np.ndarray):
+            members = Table(members)
+        else:
+            raise ValueError("members parameter must be a table.")
     
     #check to see if keys are fields in members array
     member_keys = set(members.dtype.names)
@@ -164,7 +174,8 @@ def add_members_property(members, group_key, new_field_name, function):
     if new_field_name in members.dtype.names:
         members[new_field_name] = new_prop
     else: # if not, append new field to members array
-        members = append_fields(members,new_field_name,new_prop)
+        new_col = Column(name=new_field_name, data=new_prop)
+        members.add_column(new_col)
     
     return members
 
@@ -175,8 +186,8 @@ def group_by(members, keys=None, function=None, append_id_field=None):
     
     Parameters
     ----------
-    members: numpy.recarray
-        record array with one row per object
+    members: astropy.table.Table
+        table with one row per object
     
     keys: list, optional
         key string(s) into members which defines groups, where a group shares the same 
@@ -210,7 +221,11 @@ def group_by(members, keys=None, function=None, append_id_field=None):
     if (keys!=None) & (function!=None):
         print("using 'function' to group members, ignoring 'keys'.")
     
-    #members = members.view(np.recarray)
+    if not isinstance(members,Table):
+        if isinstance(members,np.ndarray):
+            members = Table(members)
+        else:
+            raise ValueError("members parameter must be a table.")
     
     #check to see if keys are fields in members array
     if keys!=None:
@@ -240,7 +255,8 @@ def group_by(members, keys=None, function=None, append_id_field=None):
     if append_id_field==None: return GroupIDs #return array with group IDs
     else:
         #append new field with group IDs to members and return members
-        members = append_fields(members,append_id_field,GroupIDs)
+        new_col = Column(name=append_id_field, data=GroupIDs)
+        members.add_column(new_col)
         return members
 
 
@@ -250,8 +266,8 @@ def binned_aggregation_group_property(members, binned_prop_key, bins, function):
     
     Parameters
     ----------
-    members: numpy.recarray
-        record array with one row per object
+    members: astropy.table.Table
+        table with one row per object
     
     binned_prop_key: string
         key string into members to bin by
@@ -269,6 +285,12 @@ def binned_aggregation_group_property(members, binned_prop_key, bins, function):
     bins, new_prop: bins, grouped by bin calculation result 
     """
     
+    if not isinstance(members,Table):
+        if isinstance(members,np.ndarray):
+            members = Table(members)
+        else:
+            raise ValueError("members parameter must be a table.")
+    
     GroupIDs = np.digitize(members[binned_prop_key],bins=bins)
     
     new_prop = new_group_property(members, function, None, GroupIDs=GroupIDs)[0]
@@ -283,8 +305,8 @@ def binned_aggregation_members_property(members, binned_prop_key, bins, function
     
     Parameters
     ----------
-    members: numpy.recarray
-        record array with one row per object
+    members: astropy.table.Table
+        Table with one row per object
     
     binned_prop_key: string
         key string into members to bin by
@@ -302,6 +324,12 @@ def binned_aggregation_members_property(members, binned_prop_key, bins, function
     new_prop: array of new grouped by bin properties for each member
     """
     
+    if not isinstance(members,Table):
+        if isinstance(members,np.ndarray):
+            members = Table(members)
+        else:
+            raise ValueError("members parameter must be a table.")
+    
     GroupIDs = np.digitize(members[binned_prop_key],bins=bins)
     
     new_prop = new_members_property(members, function, None, GroupIDs=GroupIDs)
@@ -316,8 +344,9 @@ def new_members_property(x, funcobj, grouping_key, GroupIDs=None):
     
     Parameters
     ----------
-    x: numpy.recarray
-    
+    x: astropy.table.Table
+        table with one row per object
+        
     funcobj: function
         function which operates on a record array and returns member properties
     
@@ -359,8 +388,8 @@ def new_group_property(x, funcobj, grouping_key, GroupIDs=None):
     
     Parameters
     ----------
-    x: numpy.recarray
-        record array with one row per object
+    x: astropy.table.Table
+        table with one row per object
     
     funcobj: function
         function which operates on a record array and returns a group property
