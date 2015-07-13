@@ -215,10 +215,10 @@ def group_by(members, keys=None, function=None, append_id_field=None):
     then the objects are grouped using the function.  Otherwise, 'keys' is used.
     """
     
-    if (keys==None) & (function==None):
+    if (keys is None) & (function is None):
         raise ValueError("one of 'keys' or 'function' must be specified.")
     
-    if (keys!=None) & (function!=None):
+    if (keys is not None) & (function is not None):
         print("using 'function' to group members, ignoring 'keys'.")
     
     if not isinstance(members,Table):
@@ -228,14 +228,14 @@ def group_by(members, keys=None, function=None, append_id_field=None):
             raise ValueError("members parameter must be a table.")
     
     #check to see if keys are fields in members array
-    if keys!=None:
+    if keys is not None:
         member_keys = set(members.dtype.names)
         for key in keys:
             if key not in member_keys:
                 raise ValueError("key '{0}' not in members array".format(key))
     
     #if there is no function, assign groups by unique combination of keys
-    if function==None:
+    if function is None:
         #get an array with each grouping key value per object
         GroupIDs=np.empty((len(members),len(keys)))
         for i,key in enumerate(keys):
@@ -246,13 +246,13 @@ def group_by(members, keys=None, function=None, append_id_field=None):
         GroupIDs = np.arange(0,len(unique_rows))[inverse_inds]
     
     #if a function is supplied, use the function output to assign groups
-    if function!=None:
+    if function is not None:
         vals = function(members)
         unique_vals, inverse_inds = np.unique(vals, return_inverse=True)
         GroupIDs = np.arange(0,len(unique_vals),1).astype(int)
         GroupIDs = GroupIDs[inverse_inds]
     
-    if append_id_field==None: return GroupIDs #return array with group IDs
+    if append_id_field is None: return GroupIDs #return array with group IDs
     else:
         #append new field with group IDs to members and return members
         new_col = Column(name=append_id_field, data=GroupIDs)
@@ -360,7 +360,7 @@ def new_members_property(x, funcobj, grouping_key, GroupIDs=None):
     -------
     result: numpy.array
     """
-    if GroupIDs == None:
+    if GroupIDs is None:
         GroupIDs = x[grouping_key]
     
     # Initialize the output array
@@ -404,7 +404,7 @@ def new_group_property(x, funcobj, grouping_key, GroupIDs=None):
     -------
     result, uniqueIDs
     """
-    if GroupIDs == None:
+    if GroupIDs is None:
         GroupIDs = x[grouping_key]
     
     # Calculate the array of indices that sorts the entire array by the desired key
