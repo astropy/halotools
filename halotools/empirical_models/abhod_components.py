@@ -653,7 +653,7 @@ class HeavisideSatAssemBiasModel(hod_components.OccupationComponent):
 
         if (append_to_catalog):
             # then append the mean occupation number to the halo catalog so that each 
-            # halo knows its mean occupation.
+            # halo knows its mean satellite occupation.
             inp_halo_catalog['nsat_mean']=num_mean_noab
 
         return num_gal
