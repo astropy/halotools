@@ -21,7 +21,6 @@ The other option for installing Halotools is to clone the source code from githu
 
 	git clone https://github.com/astropy/halotools.git
 	cd halotools
-	python setup.py build
 	python setup.py install
 
 Dependencies
