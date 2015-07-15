@@ -514,8 +514,20 @@ class HodModelFactory(ModelFactory):
                 if composite_key in self.param_dict.keys():
                     component_model.param_dict[key] = self.param_dict[composite_key]
 
-            func = getattr(component_model, func_name)
+            # Also update the param dict of ancillary models, if applicable
+            if hasattr(component_model, 'ancillary_model_dependencies'):
+                for model_name in self.ancillary_model_dependencies:
 
+                    dependent_gal_type = getattr(component_model, model_name).gal_type
+                    for key in getattr(component_model, model_name).param_dict.keys():
+                        composite_key = key + '_' + dependent_gal_type
+                        if composite_key in self.param_dict.keys():
+                            getattr(component_model, model_name).param_dict[key] = (
+                                self.param_dict[composite_key]
+                                )
+            # Phew!
+
+            func = getattr(component_model, func_name)
             return func(*args, **kwargs)
 
         return decorated_func

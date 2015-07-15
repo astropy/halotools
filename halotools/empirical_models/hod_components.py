@@ -548,6 +548,8 @@ class Kravtsov04Sats(OccupationComponent):
 
         self._check_consistent_central_behavior(central_occupation_model)
         self.central_occupation_model = central_occupation_model
+        if self.central_occupation_model is not None:
+            self.ancillary_model_dependencies = ['central_occupation_model']
 
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
 
@@ -796,6 +798,8 @@ class Leauthaud11Sats(OccupationComponent):
         self._initialize_param_dict(**kwargs)
 
         self.modulate_with_cenocc = modulate_with_cenocc
+        if self.modulate_with_cenocc is True:
+            self.ancillary_model_dependencies = ['central_occupation_model']
 
         self.publications = self.central_occupation_model.publications
 
