@@ -318,7 +318,6 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             Numpy array storing a Monte Carlo realization of 
             the modeled galaxy property. 
         """
-        model_helpers.update_param_dict(self, **kwargs)
         self._set_correlation_strength()
 
         if ('galaxy_table' in kwargs.keys()) & ('halos' in kwargs.keys()):

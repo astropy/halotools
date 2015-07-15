@@ -290,7 +290,6 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             Values of the galprop fraction evaluated at the input primary halo properties. 
 
         """
-        model_helpers.update_param_dict(self, **kwargs)
 
         # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
