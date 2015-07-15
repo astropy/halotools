@@ -8,7 +8,7 @@ used by many of the hod model components.
 
 __all__ = (
     ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
-    'enforce_periodicity_of_box', 'update_param_dict']
+    'enforce_periodicity_of_box']
     )
 
 import numpy as np
@@ -333,35 +333,6 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
                 )
             raise KeyError(msg)
 
-def update_param_dict(obj, **kwargs):
-    """ Method used to update the ``param_dict`` attribute of the 
-    input ``obj`` according to ``input_param_dict``. 
-
-    The only items in ``obj.param_dict`` that will be updated 
-    are those with a matching key in ``input_param_dict``; 
-    all other keys in ``input_param_dict`` will be ignored. 
-
-    Parameters 
-    ----------
-    obj : object
-        Class instance whose ``param_dict`` is being updated. 
-
-    input_param_dict : dict, optional keyword argument 
-        Parameter dictionary used to update ``obj.param_dict``.
-        If no ``input_param_dict`` keyword argument is passed, 
-        the `update_param_dict` method does nothing. 
-    """
-    if 'input_param_dict' not in kwargs.keys():
-        return 
-    else:
-        input_param_dict = kwargs['input_param_dict']
-
-    if not hasattr(obj, 'param_dict'):
-        raise AttributeError("Input ``obj`` must have a ``param_dict`` attribute")
-
-    for key in obj.param_dict.keys():
-        if key in input_param_dict.keys():
-            obj.param_dict[key] = input_param_dict[key]
 
 
 

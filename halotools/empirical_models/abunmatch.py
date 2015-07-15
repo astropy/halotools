@@ -76,10 +76,6 @@ class AbunMatchSmHm(PrimGalpropModel):
         scatter_level : float, optional keyword argument 
             Level of constant scatter in dex. Default is 0.2. 
 
-        input_param_dict : dict, optional keyword argument
-            Dictionary containing values for the parameters specifying the model.
-            If none is passed, the `Moster13SmHm` instance will be initialized to 
-            the best-fit values taken from Moster et al. (2013). 
         """
 
         kwargs['scatter_model'] = LogNormalScatterModel
@@ -318,7 +314,6 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             Numpy array storing a Monte Carlo realization of 
             the modeled galaxy property. 
         """
-        model_helpers.update_param_dict(self, **kwargs)
         self._set_correlation_strength()
 
         if ('galaxy_table' in kwargs.keys()) & ('halos' in kwargs.keys()):

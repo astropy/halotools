@@ -170,17 +170,48 @@ class SubhaloModelFactory(ModelFactory):
         for galprop_key in self.galprop_list:
             
             behavior_name = 'mc_'+galprop_key
-            behavior_function = partial(self._galprop_func, galprop_key)
+            behavior_function = self._update_param_dict_decorator(galprop_key, behavior_name)
             setattr(self, behavior_name, behavior_function)
 
-    def _galprop_func(self, galprop_key, **kwargs):
+    def _update_param_dict_decorator(self, galprop_key, func_name):
+        """ Decorator used to propagate any possible changes 
+        in the composite model param_dict 
+        down to the appropriate component model param_dict. 
+        """
+
+        component_model = self.model_blueprint[galprop_key]
+
+        def decorated_func(*args, **kwargs):
+
+            # Update the param_dict as necessary
+            for key in component_model.param_dict.keys():
+                composite_key = galprop_key + '_' + key
+                if composite_key in self.param_dict.keys():
+                    component_model.param_dict[key] = self.param_dict[composite_key]
+
+            # Also update the param dict of ancillary models, if applicable
+            if hasattr(component_model, 'ancillary_model_dependencies'):
+                for model_name in self.ancillary_model_dependencies:
+
+                    dependent_galprop_key = getattr(component_model, model_name).galprop_key
+                    for key in getattr(component_model, model_name).param_dict.keys():
+                        composite_key = composite_key = dependent_galprop_key + '_' + key
+                        if composite_key in self.param_dict.keys():
+                            getattr(component_model, model_name).param_dict[key] = (
+                                self.param_dict[composite_key]
+                                )
+
+            func = getattr(component_model, func_name)
+            return func(*args, **kwargs)
+
+        return decorated_func
+
+    def _galprop_func(self, galprop_key):
         """
         """
         component_model = self.model_blueprint[galprop_key]
-        current_galprop_param_dict = self._get_stripped_param_dict(galprop_key)
-        behavior_function = partial(getattr(component_model, 'mc_'+galprop_key), 
-            input_param_dict = current_galprop_param_dict)
-        return behavior_function(**kwargs)
+        behavior_function = getattr(component_model, 'mc_'+galprop_key) 
+        return behavior_function
 
     def _build_composite_lists(self, **kwargs):
         """ A composite model has several bookkeeping devices that are built up from 
@@ -278,24 +309,6 @@ class SubhaloModelFactory(ModelFactory):
                     )
 
         self._init_param_dict = copy(self.param_dict)
-
-    def _get_stripped_param_dict(self, galprop):
-        """
-        """
-
-        galprop_model = self.model_blueprint[galprop]
-
-        if hasattr(galprop_model, 'param_dict'):
-            galprop_model_param_keys = galprop_model.param_dict.keys()
-        else:
-            galprop_model_param_keys = []
-
-        output_param_dict = {}
-        for key in galprop_model_param_keys:
-            output_param_dict[key] = self.param_dict[galprop+'_'+key]
-
-        return output_param_dict
-
 
     def restore_init_param_dict(self):
         """ Reset all values of the current ``param_dict`` to the values 
@@ -404,6 +417,7 @@ class HodModelFactory(ModelFactory):
 
         return model_blueprint 
 
+
     def _set_gal_types(self):
         """ Private method binding the ``gal_types`` list attribute,
         and the ``occupation_bound`` attribute, to the class instance. 
@@ -449,32 +463,35 @@ class HodModelFactory(ModelFactory):
 
             # Set the method used to return Monte Carlo realizations 
             # of per-halo gal_type abundance
-            new_method_name = 'mc_occupation_'+gal_type
             occupation_model = self.model_blueprint[gal_type]['occupation']
-            new_method_behavior = partial(occupation_model.mc_occupation, 
-                input_param_dict = self.param_dict)
+
+            new_method_name = 'mc_occupation_'+gal_type
+            new_method_behavior = self._update_param_dict_decorator(
+                gal_type, 'occupation', 'mc_occupation')
             setattr(self, new_method_name, new_method_behavior)
 
             # For convenience, also inherit  
             # the first moment of the occupation distribution 
             if hasattr(occupation_model, 'mean_occupation'):
                 new_method_name = 'mean_occupation_'+gal_type
-                new_method_behavior = partial(occupation_model.mean_occupation, 
-                    input_param_dict = self.param_dict)
+                new_method_behavior = self._update_param_dict_decorator(
+                    gal_type, 'occupation', 'mean_occupation')
                 setattr(self, new_method_name, new_method_behavior)
 
-            # Create a new method to compute each (unbiased) halo profile parameter
-            # For composite models in which multiple galaxy types have the same 
-            # underlying dark matter profile, use the halo profile model of the 
-            # first gal_type in the self.gal_types list 
             gal_prof_model = self.model_blueprint[gal_type]['profile']
             for prof_param_key in gal_prof_model.prof_param_keys:
 
+            # Create a new method to compute each (unbiased) halo profile parameter
                 new_method_name = prof_param_key + '_halos'
+                # For composite models in which multiple galaxy types have the same 
+                # underlying dark matter profile, use the halo profile model of the 
+                # first gal_type in the self.gal_types list 
                 if not hasattr(self, new_method_name):
                     new_method_behavior = getattr(gal_prof_model.halo_prof_model, prof_param_key)
                     setattr(self, new_method_name, new_method_behavior)
 
+                # Note that biased galaxy profiles are not supported yet
+                # When implementing, will need to call _update_param_dict_decorator here 
                 new_method_name = prof_param_key + '_' + gal_type
                 new_method_behavior = getattr(gal_prof_model, prof_param_key)
                 setattr(self, new_method_name, new_method_behavior)
@@ -492,6 +509,41 @@ class HodModelFactory(ModelFactory):
                     halo_prof_param_method_name = prof_param_key+'_halos'
                     halo_prof_param_method_behavior = getattr(self, halo_prof_param_method_name)
                     setattr(self, gal_prof_param_method_name, halo_prof_param_method_behavior)
+
+
+    def _update_param_dict_decorator(self, gal_type, component_key, func_name):
+        """ Decorator used to propagate any possible changes 
+        in the composite model param_dict 
+        down to the appropriate component model param_dict. 
+        """
+
+        component_model = self.model_blueprint[gal_type][component_key]
+
+        def decorated_func(*args, **kwargs):
+
+            # Update the param_dict as necessary
+            for key in component_model.param_dict.keys():
+                composite_key = key + '_' + component_model.gal_type
+                if composite_key in self.param_dict.keys():
+                    component_model.param_dict[key] = self.param_dict[composite_key]
+
+            # Also update the param dict of ancillary models, if applicable
+            if hasattr(component_model, 'ancillary_model_dependencies'):
+                for model_name in self.ancillary_model_dependencies:
+
+                    dependent_gal_type = getattr(component_model, model_name).gal_type
+                    for key in getattr(component_model, model_name).param_dict.keys():
+                        composite_key = key + '_' + dependent_gal_type
+                        if composite_key in self.param_dict.keys():
+                            getattr(component_model, model_name).param_dict[key] = (
+                                self.param_dict[composite_key]
+                                )
+
+            func = getattr(component_model, func_name)
+            return func(*args, **kwargs)
+
+        return decorated_func
+
 
     def mc_pos(self, **kwargs):
         """ Method used to generate Monte Carlo realizations of galaxy positions. 
@@ -587,10 +639,9 @@ class HodModelFactory(ModelFactory):
                         "than one component model" % repeated_key)
                 else:
 
-                    self.param_dict = dict(
-                        model_instance.param_dict.items() + 
-                        self.param_dict.items()
-                        )
+                    for key, value in model_instance.param_dict.iteritems():
+                        composite_key = key + '_' + model_instance.gal_type
+                        self.param_dict[composite_key] = value
 
         self._init_param_dict = copy(self.param_dict)
 
