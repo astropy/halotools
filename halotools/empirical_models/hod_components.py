@@ -62,15 +62,6 @@ class OccupationComponent(model_helpers.GalPropModel):
             Only pertains to galaxy populations with assembly-biased occupations. 
             Default is None. 
 
-        input_param_dict : dict, optional keyword argument
-            Dictionary containing values for the parameters specifying the model.
-            All dict keys must conclude with the substring 
-            ``_gal_type`` that matches ``self.gal_type``, 
-            e.g., ``logMmin_centrals`` or ``alpha_satellites``.
-            If no ``input_param_dict`` is passed, ``self.param_dict`` will be 
-            initialized with an empty dictionary. 
-            The parameters stored in ``self.param_dict`` are the only ones that 
-            will be varied in MCMC-type likelihood analyses. 
         """
         super(OccupationComponent, self).__init__(galprop_key='occupation')
 
@@ -80,10 +71,7 @@ class OccupationComponent(model_helpers.GalPropModel):
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
-        if 'input_param_dict' in kwargs.keys():
-            self.param_dict = kwargs['input_param_dict']
-        else:
-            self.param_dict = {}
+        self.param_dict = {}
 
         # Enforce the requirement that sub-classes have been configured properly
         required_method_name = 'mean_occupation'
@@ -111,10 +99,6 @@ class OccupationComponent(model_helpers.GalPropModel):
             Data table storing galaxy catalog. 
             If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
             keyword arguments must be passed. 
-
-        input_param_dict : dict, optional keyword argument 
-            Dictionary of parameters governing the model. 
-            If not passed, values bound to ``self`` will be chosen. 
 
         seed : int, optional keyword argument 
             Random number seed used to generate the Monte Carlo realization. 
@@ -420,10 +404,6 @@ class Leauthaud11Cens(OccupationComponent):
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
-
-        input_param_dict : dict, optional keyword argument. 
-            If ``input_param_dict`` is not passed, the best-fit parameter values 
-            will be taken from the input ``smhm_model``. 
         """
         occupation_bound = 1.0
 
@@ -457,10 +437,6 @@ class Leauthaud11Cens(OccupationComponent):
         galaxy_table : object, optional keyword argument 
             Data table storing mock galaxy catalog. 
 
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
-
         Returns
         -------
         mean_ncen : array
@@ -470,14 +446,8 @@ class Leauthaud11Cens(OccupationComponent):
         -----
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
-        model_helpers.update_param_dict(self, **kwargs)
-        if 'input_param_dict' in kwargs.keys():
-            del kwargs['input_param_dict']
-
-        logmstar = np.log10(self.smhm_model.mean_stellar_mass(
-            input_param_dict = self.param_dict, **kwargs))
-        logscatter = math.sqrt(2)*self.smhm_model.mean_scatter(
-            input_param_dict = self.param_dict, **kwargs)
+        logmstar = np.log10(self.smhm_model.mean_stellar_mass(**kwargs))
+        logscatter = math.sqrt(2)*self.smhm_model.mean_scatter(**kwargs)
 
         mean_ncen = 0.5*(1.0 - 
             erf((self.threshold - logmstar)/logscatter))
@@ -516,11 +486,6 @@ class Kravtsov04Sats(OccupationComponent):
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        input_param_dict : dict, optional keyword argument. 
-            If ``input_param_dict`` is not passed, the best-fit parameter values 
-            provided in Table 1 of Zheng et al. (2007) are chosen. 
-            See the `get_published_parameters` method for details. 
-
         central_occupation_model : occupation model instance, optional
             Must be an instance of a sub-class of `~halotools.empirical_models.OccupationComponent`. 
             If a ``central_occupation_model`` is being used, 
@@ -535,22 +500,27 @@ class Kravtsov04Sats(OccupationComponent):
         >>> sat_model = Kravtsov04Sats(gal_type='sats')
         >>> sat_model = Kravtsov04Sats(threshold = -21)
 
-        The ``input_param_dict`` keyword argument can be used to build an alternate 
+        The ``param_dict`` attribute can be used to build an alternate 
         model from an existing instance. This feature has a variety of uses. For example, 
         suppose you wish to study how the choice of halo mass definition impacts HOD predictions:
 
         >>> sat_model1 = Kravtsov04Sats(threshold = -19.5, prim_haloprop_key='m200b')
         >>> sat_model1.param_dict['alpha_satellites'] = 1.05
-        >>> sat_model2 = Kravtsov04Sats(threshold = sat_model1.threshold, input_param_dict = sat_model1.param_dict, prim_haloprop_key='m500c')
+        >>> sat_model2 = Kravtsov04Sats(threshold = -19.5, prim_haloprop_key='m500c')
+        >>> sat_model2.param_dict = sat_model1.param_dict 
+
+        After executing the above four lines of code, ``sat_model1`` and ``sat_model2`` are 
+        identical in every respect, excepting only for the difference in the halo mass definition. 
 
         A common convention in HOD modeling of satellite populations is for the first 
-        occupation moment of the satellites to be multiplied by the first central occupation 
-        moment. Coupling the ``input_param_dict`` and ``central_occupation_model`` 
-        keyword arguments allows you to study the impact of this choice:
+        occupation moment of the satellites to be multiplied by the first occupation 
+        moment of the associated central population. 
+        The ``central_occupation_model`` keyword arguments allows you 
+        to study the impact of this choice:
 
         >>> sat_model1 = Kravtsov04Sats(threshold=-18)
         >>> cen_model_instance = Zheng07Cens(threshold = sat_model1.threshold)
-        >>> sat_model2 = Kravtsov04Sats(threshold = sat_model1.threshold, input_param_dict=sat_model1.param_dict, central_occupation_model=cen_model_instance)
+        >>> sat_model2 = Kravtsov04Sats(threshold = sat_model1.threshold, central_occupation_model=cen_model_instance)
 
         Now ``sat_model1`` and ``sat_model2`` are identical in every respect, 
         excepting only the following difference:
@@ -807,10 +777,6 @@ class Leauthaud11Sats(OccupationComponent):
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        input_param_dict : dict, optional keyword argument. 
-            If ``input_param_dict`` is not passed, the best-fit parameter values 
-            will be taken from the input ``smhm_model``. 
-
         Examples 
         --------
         >>> sat_model = Leauthaud11Sats()
@@ -848,10 +814,6 @@ class Leauthaud11Sats(OccupationComponent):
         galaxy_table : object, optional keyword argument 
             Data table storing mock galaxy catalog. 
 
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
-
         Returns
         -------
         mean_ncen : array
@@ -866,8 +828,6 @@ class Leauthaud11Sats(OccupationComponent):
         -----
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
-        self._update_satellite_params(**kwargs)
-
         # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
             key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
@@ -895,19 +855,12 @@ class Leauthaud11Sats(OccupationComponent):
         the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the 
         lowest redshift bin. 
 
-        Parameters 
-        ----------
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
-
         Notes 
         -----
         These values are only for ballpark purposes, and are 
         not self-consistent with arXiv:1104.0928, 
         because a different stellar-to-halo-mass relation is used here. 
         """
-        model_helpers.update_param_dict(self, **kwargs)
 
         self._msat_mcut_abcissa = np.logspace(9, 15, num=500)
 
@@ -929,23 +882,11 @@ class Leauthaud11Sats(OccupationComponent):
     def _update_satellite_params(self, **kwargs):
         """ Private method to update the model parameters. 
 
-        Parameters 
-        ----------
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
         """
-        model_helpers.update_param_dict(self, **kwargs)
-
-        if 'input_param_dict' in kwargs.keys():
-            input_param_dict = kwargs['input_param_dict']
-        else:
-            input_param_dict = {}
 
         # Tabulate the inverse stellar-to-halo-mass relation
         ordinates = self.central_occupation_model.smhm_model.mean_stellar_mass(
-            prim_haloprop=self._msat_mcut_abcissa, 
-            input_param_dict = input_param_dict)
+            prim_haloprop=self._msat_mcut_abcissa)
         spline_function = spline(ordinates, self._msat_mcut_abcissa)
 
         # Call the interpolater to compute the knee
