@@ -170,17 +170,48 @@ class SubhaloModelFactory(ModelFactory):
         for galprop_key in self.galprop_list:
             
             behavior_name = 'mc_'+galprop_key
-            behavior_function = partial(self._galprop_func, galprop_key)
+            behavior_function = self._update_param_dict_decorator(galprop_key, behavior_name)
             setattr(self, behavior_name, behavior_function)
 
-    def _galprop_func(self, galprop_key, **kwargs):
+    def _update_param_dict_decorator(self, galprop_key, func_name):
+        """ Decorator used to propagate any possible changes 
+        in the composite model param_dict 
+        down to the appropriate component model param_dict. 
+        """
+
+        component_model = self.model_blueprint[galprop_key]
+
+        def decorated_func(*args, **kwargs):
+
+            # Update the param_dict as necessary
+            for key in component_model.param_dict.keys():
+                composite_key = galprop_key + '_' + key
+                if composite_key in self.param_dict.keys():
+                    component_model.param_dict[key] = self.param_dict[composite_key]
+
+            # Also update the param dict of ancillary models, if applicable
+            if hasattr(component_model, 'ancillary_model_dependencies'):
+                for model_name in self.ancillary_model_dependencies:
+
+                    dependent_galprop_key = getattr(component_model, model_name).galprop_key
+                    for key in getattr(component_model, model_name).param_dict.keys():
+                        composite_key = composite_key = dependent_galprop_key + '_' + key
+                        if composite_key in self.param_dict.keys():
+                            getattr(component_model, model_name).param_dict[key] = (
+                                self.param_dict[composite_key]
+                                )
+
+            func = getattr(component_model, func_name)
+            return func(*args, **kwargs)
+
+        return decorated_func
+
+    def _galprop_func(self, galprop_key):
         """
         """
         component_model = self.model_blueprint[galprop_key]
-        current_galprop_param_dict = self._get_stripped_param_dict(galprop_key)
-        behavior_function = partial(getattr(component_model, 'mc_'+galprop_key), 
-            input_param_dict = current_galprop_param_dict)
-        return behavior_function(**kwargs)
+        behavior_function = getattr(component_model, 'mc_'+galprop_key) 
+        return behavior_function
 
     def _build_composite_lists(self, **kwargs):
         """ A composite model has several bookkeeping devices that are built up from 
@@ -278,24 +309,6 @@ class SubhaloModelFactory(ModelFactory):
                     )
 
         self._init_param_dict = copy(self.param_dict)
-
-    def _get_stripped_param_dict(self, galprop):
-        """
-        """
-
-        galprop_model = self.model_blueprint[galprop]
-
-        if hasattr(galprop_model, 'param_dict'):
-            galprop_model_param_keys = galprop_model.param_dict.keys()
-        else:
-            galprop_model_param_keys = []
-
-        output_param_dict = {}
-        for key in galprop_model_param_keys:
-            output_param_dict[key] = self.param_dict[galprop+'_'+key]
-
-        return output_param_dict
-
 
     def restore_init_param_dict(self):
         """ Reset all values of the current ``param_dict`` to the values 
@@ -525,7 +538,7 @@ class HodModelFactory(ModelFactory):
                             getattr(component_model, model_name).param_dict[key] = (
                                 self.param_dict[composite_key]
                                 )
-                            
+
             func = getattr(component_model, func_name)
             return func(*args, **kwargs)
 
