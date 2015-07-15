@@ -525,8 +525,7 @@ class HodModelFactory(ModelFactory):
                             getattr(component_model, model_name).param_dict[key] = (
                                 self.param_dict[composite_key]
                                 )
-            # Phew!
-
+                            
             func = getattr(component_model, func_name)
             return func(*args, **kwargs)
 
