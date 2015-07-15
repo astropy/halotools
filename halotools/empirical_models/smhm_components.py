@@ -88,7 +88,7 @@ class LogNormalScatterModel(object):
             self.gal_type = kwargs['gal_type']
         self._initialize_param_dict()
 
-        self._setup_interpol(**kwargs)
+        self._update_interpol()
 
     def mean_scatter(self, **kwargs):
         """ Return the amount of log-normal scatter that should be added 
@@ -111,10 +111,6 @@ class LogNormalScatterModel(object):
             If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
             keyword arguments must be passed. 
 
-        input_param_dict : dict, optional keyword argument 
-            Dictionary of parameters governing the model. 
-            If not passed, the values already bound to ``self`` will be used. 
-
         Returns 
         -------
         scatter : array_like 
@@ -133,7 +129,6 @@ class LogNormalScatterModel(object):
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
-        model_helpers.update_param_dict(self, **kwargs)
         self._update_interpol()
 
         return self.spline_function(np.log10(mass))
@@ -175,36 +170,21 @@ class LogNormalScatterModel(object):
             
         return np.random.normal(loc=0, scale=scatter_scale)
 
-    def _setup_interpol(self, **kwargs):
-        """ Private method used to initialize the behavior of the interpolating function. 
-
-        Parameters 
-        ----------
-        scatter_spline_degree : int, optional keyword argument
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-        """        
-        scipy_maxdegree = 5
-        degree_list = [scipy_maxdegree, custom_len(self.abcissa)-1]
-        if 'scatter_spline_degree' in kwargs.keys():
-            degree_list.append(kwargs['scatter_spline_degree'])
-        self.spline_degree = np.min(degree_list)
-
-        self.spline_function = model_helpers.custom_spline(
-            self.abcissa, self.ordinates, k=self.spline_degree)
-
     def _update_interpol(self):
         """ Private method that updates the interpolating functon used to 
         define the level of scatter as a function of the input halos. 
         If this method is not called after updating ``self.param_dict``, 
         changes in ``self.param_dict`` will not alter the model behavior. 
         """
-        self.ordinates = (
-            [self.param_dict[self._get_param_key(ipar)] 
-            for ipar in range(len(self.abcissa))]
-            )
-        self._setup_interpol()
+
+        scipy_maxdegree = 5
+        degree_list = [scipy_maxdegree, custom_len(self.abcissa)-1]
+        self.spline_degree = np.min(degree_list)
+
+        self.ordinates = [self.param_dict[self._get_param_key(i)] for i in range(len(self.abcissa))]
+
+        self.spline_function = model_helpers.custom_spline(
+            self.abcissa, self.ordinates, k=self.spline_degree)
 
     def _initialize_param_dict(self):
         """ Private method used to initialize ``self.param_dict``. 
@@ -219,10 +199,7 @@ class LogNormalScatterModel(object):
         that corresponds to the appropriately selected i^th ordinate 
         defining the behavior of the scatter model. 
         """
-        if hasattr(self, 'gal_type'):
-            return 'scatter_model_param'+str(ipar+1)+'_'+self.gal_type
-        else:
-            return 'scatter_model_param'+str(ipar+1)
+        return 'scatter_model_param'+str(ipar+1)
 
 @six.add_metaclass(ABCMeta)
 class PrimGalpropModel(model_helpers.GalPropModel):

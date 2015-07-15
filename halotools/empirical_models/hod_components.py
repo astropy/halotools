@@ -423,7 +423,7 @@ class Leauthaud11Cens(OccupationComponent):
         self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
 
     def mean_occupation(self, **kwargs):
-        """ Expected number of central galaxies in a halo of mass halo_mass.
+        """ Expected number of central galaxies in a halo.
         See Equation 8 of arXiv:1103.2077.
 
         Parameters

@@ -128,6 +128,11 @@ def test_LogNormalScatterModel_behavior():
 	scatter_model2 = smhm_components.LogNormalScatterModel(
 		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
 
+	assert len(scatter_model2.abcissa) == 2
+	assert len(scatter_model2.param_dict) == 2
+	assert set(scatter_model2.param_dict.keys()) == set(['scatter_model_param1', 'scatter_model_param2'])
+	assert set(scatter_model2.param_dict.values()) == set(input_ordinates)
+
 	# Test the mean_scatter method of a non-trivial model at the first abcissa
 	scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass12)
 	assert np.allclose(scatter_array, 0.3)
