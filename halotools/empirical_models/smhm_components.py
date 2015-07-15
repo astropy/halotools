@@ -235,14 +235,6 @@ class PrimGalpropModel(model_helpers.GalPropModel):
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_spline_degree : int, optional keyword argument
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-
-        input_param_dict : dict, optional keyword argument
-            Dictionary containing values for the parameters specifying the model.
-
         new_haloprop_func_dict : function object, optional keyword argument 
             Dictionary of function objects used to create additional halo properties 
             that may be needed by the model component. 
@@ -266,19 +258,11 @@ class PrimGalpropModel(model_helpers.GalPropModel):
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
         self.scatter_model = scatter_model(
-            prim_haloprop_key=self.prim_haloprop_key, 
-            **kwargs)
+            prim_haloprop_key=self.prim_haloprop_key, **kwargs)
         if hasattr(self.scatter_model, 'gal_type'):
             self.gal_type = self.scatter_model.gal_type
 
         self._build_param_dict(**kwargs)
-
-        inherited_mean_scatter_method = partial(
-            self.scatter_model.mean_scatter, input_param_dict = self.param_dict)
-        setattr(self, 'mean_scatter', inherited_mean_scatter_method)
-        inherited_scatter_realization_method = partial(
-            self.scatter_model.scatter_realization, input_param_dict = self.param_dict)
-        setattr(self, 'scatter_realization', inherited_mean_scatter_method)
 
         # Enforce the requirement that sub-classes have been configured properly
         required_method_name = 'mean_'+self.galprop_key
@@ -293,19 +277,35 @@ class PrimGalpropModel(model_helpers.GalPropModel):
 
         super(PrimGalpropModel, self).__init__(galprop_key=self.galprop_key)
 
+    def mean_scatter(self, **kwargs):
+        """ Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict`` 
+        of the scatter model, and then call the `mean_scatter` method of 
+        the scatter model. 
+        """
+        for key in self.scatter_model.param_dict.keys():
+            self.scatter_model.param_dict[key] = self.param_dict[key]
+
+        return self.scatter_model.mean_scatter(**kwargs)
+
+    def scatter_realization(self, **kwargs):
+        """ Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict`` 
+        of the scatter model, and then call the `scatter_realization` method of 
+        the scatter model. 
+        """
+        for key in self.scatter_model.param_dict.keys():
+            self.scatter_model.param_dict[key] = self.param_dict[key]
+
+        return self.scatter_model.scatter_realization(**kwargs)
 
     def _build_param_dict(self, **kwargs):
         """ Method combines the parameter dictionaries of the 
         smhm model and the scatter model. 
         """
 
-        if 'input_param_dict' in kwargs.keys():
-            smhm_param_dict = kwargs['input_param_dict']
+        if hasattr(self, 'retrieve_default_param_dict'):
+            smhm_param_dict = self.retrieve_default_param_dict()
         else:
-            if hasattr(self, 'retrieve_default_param_dict'):
-                smhm_param_dict = self.retrieve_default_param_dict()
-            else:
-                smhm_param_dict = {}
+            smhm_param_dict = {}
 
         scatter_param_dict = self.scatter_model.param_dict
 
@@ -342,10 +342,6 @@ class PrimGalpropModel(model_helpers.GalPropModel):
             to the galaxy property assignment. Default is True. 
             If False, model is purely deterministic, and the behavior is determined 
             by the ``mean_galprop`` method of the sub-class. 
-
-        input_param_dict : dict, optional keyword argument 
-            Dictionary of parameters governing the model. 
-            If not passed, the values already bound to ``self`` will be used. 
 
         Returns 
         -------
