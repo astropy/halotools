@@ -16,6 +16,10 @@ try: import igraph
 except ImportError:
     igraph_available=False
     print("igraph package not installed.  Some functions will not be available.")
+if igraph_available==True: #there is another package called igraph--need to distinguish.
+    if not hasattr(igraph,'Graph'):
+        igraph_available==False
+        print("igraph package is not installed.  Some functions will not be available.")
 ##########################################################################################
 
 __all__=['FoFgroups']
