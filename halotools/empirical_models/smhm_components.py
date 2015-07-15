@@ -401,16 +401,6 @@ class Moster13SmHm(PrimGalpropModel):
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
-
-        scatter_spline_degree : int, optional keyword argument
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-
-        input_param_dict : dict, optional keyword argument
-            Dictionary containing values for the parameters specifying the model.
-            If none is passed, the `Moster13SmHm` instance will be initialized to 
-            the best-fit values taken from Moster et al. (2013). 
         """
 
         super(Moster13SmHm, self).__init__(

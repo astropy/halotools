@@ -842,7 +842,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         mean_nsat = (
             np.exp(-self._mcut/mass)*
-            (mass/self._msat)**self.param_dict[self._alphasat_key]
+            (mass/self._msat)**self.param_dict['alphasat']
             )
 
         if self.modulate_with_cenocc is True:
@@ -864,17 +864,11 @@ class Leauthaud11Sats(OccupationComponent):
 
         self._msat_mcut_abcissa = np.logspace(9, 15, num=500)
 
-        self._bsat_key = 'bsat_'+self.gal_type
-        self._bcut_key = 'bcut_'+self.gal_type
-        self._betasat_key = 'betasat_'+self.gal_type
-        self._betacut_key = 'betacut_'+self.gal_type
-        self._alphasat_key = 'alphasat_'+self.gal_type
-
-        self.param_dict[self._alphasat_key] = 1.0
-        self.param_dict[self._bsat_key] = 10.62
-        self.param_dict[self._bcut_key] = 1.47
-        self.param_dict[self._betacut_key] = -0.13
-        self.param_dict[self._betasat_key] = 0.859
+        self.param_dict['alphasat'] = 1.0
+        self.param_dict['bsat'] = 10.62
+        self.param_dict['bcut'] = 1.47
+        self.param_dict['betacut'] = -0.13
+        self.param_dict['betasat'] = 0.859
 
         self._update_satellite_params(**kwargs)
 
@@ -893,12 +887,12 @@ class Leauthaud11Sats(OccupationComponent):
         knee = spline_function(10.**self.threshold)
 
         self._msat = (
-            1.e12*self.param_dict[self._bsat_key]*
-            (knee / 1.e12)**self.param_dict[self._betasat_key])
+            1.e12*self.param_dict['bsat']*
+            (knee / 1.e12)**self.param_dict['betasat'])
 
         self._mcut = (
-            1.e12*self.param_dict[self._bcut_key]*
-            (knee / 1.e12)**self.param_dict[self._betacut_key])
+            1.e12*self.param_dict['bcut']*
+            (knee / 1.e12)**self.param_dict['betacut'])
 
 
 
