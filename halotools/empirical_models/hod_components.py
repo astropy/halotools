@@ -181,39 +181,6 @@ class OccupationComponent(model_helpers.GalPropModel):
             model_defaults.default_tiny_poisson_fluctuation, first_occupation_moment)
         return poisson.rvs(first_occupation_moment)
 
-    @abstractmethod
-    def mean_occupation(self):
-        """ Method giving the first moment of the occupation distribution. 
-
-        Parameters
-        ----------        
-        prim_haloprop : array, optional keyword argument 
-            Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        halos : object, optional keyword argument 
-            Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
-            keyword arguments must be passed. 
-
-        input_param_dict : dict, optional keyword argument 
-            Dictionary of parameters governing the model. 
-            If not passed, values bound to ``self`` will be chosen. 
-
-        Returns 
-        --------
-        first_occupation_moment : array
-            Array giving the first moment of the occupation distribution function. 
-        """
-        raise NotImplementedError("All subclasses of OccupationComponent " 
-            "must implement a mean_occupation method. ")
-
 class Zheng07Cens(OccupationComponent):
     """ ``Erf`` function model for the occupation statistics of central galaxies, 
     introduced in Zheng et al. 2005, arXiv:0408564. This implementation uses 
@@ -242,11 +209,6 @@ class Zheng07Cens(OccupationComponent):
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
-
-        input_param_dict : dict, optional keyword argument. 
-            If ``input_param_dict`` is not passed, the best-fit parameter values 
-            provided in Table 1 of Zheng et al. (2007) are chosen. 
-            See the `get_published_parameters` method for details. 
 
         Examples 
         --------
@@ -292,10 +254,6 @@ class Zheng07Cens(OccupationComponent):
             Data table storing mock galaxy catalog. 
             If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
             keyword arguments must be passed. 
-
-        input_param_dict : dict, optional keyword argument 
-            Dictionary of parameters governing the model. 
-            If not passed, the values already bound to ``self`` will be used. 
 
         Returns
         -------
@@ -349,8 +307,6 @@ class Zheng07Cens(OccupationComponent):
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halos``, ``prim_haloprop``, or ``galaxy_table``")
-
-        model_helpers.update_param_dict(self, **kwargs)
 
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
@@ -668,10 +624,6 @@ class Kravtsov04Sats(OccupationComponent):
             If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
             keyword arguments must be passed. 
 
-        input_param_dict : dict, optional keyword argument 
-            Dictionary of parameters governing the model. 
-            If not passed, the values already bound to ``self`` will be used. 
-
         Returns
         -------
         mean_nsat : float or array
@@ -726,9 +678,6 @@ class Kravtsov04Sats(OccupationComponent):
         if np.shape(mass) == ():
             mass = np.array([mass])
 
-
-        model_helpers.update_param_dict(self, **kwargs)
-
         M0 = 10.**self.param_dict['logM0']
         M1 = 10.**self.param_dict['logM1']
 
@@ -743,9 +692,6 @@ class Kravtsov04Sats(OccupationComponent):
             warnings.simplefilter("ignore", RuntimeWarning)
 
             mean_nsat[idx_nonzero] = ((mass[idx_nonzero] - M0)/M1)**self.param_dict['alpha']
-            # Simultaneously evaluate mean_nsat and impose the usual cutoff
-            #mean_nsat = np.where(mass - M0 > 0, 
-            #    ((mass - M0)/M1)**self.param_dict['alpha'], 0)
 
         # If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
