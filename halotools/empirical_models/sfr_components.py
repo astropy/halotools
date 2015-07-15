@@ -102,10 +102,6 @@ class BinaryGalpropModel(model_helpers.GalPropModel):
             If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
             keyword arguments must be passed. 
 
-        input_param_dict : dict, optional keyword argument 
-            Dictionary of parameters governing the model. 
-            If not passed, the values already bound to ``self`` will be used. 
-
         seed : int, optional keyword argument 
             Random number seed used to generate the Monte Carlo realization.
             Default is None. 
@@ -279,10 +275,6 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             Astropy Table containing a galaxy catalog. 
             If the ``galaxy_table`` keyword argument is passed, 
             ``self.prim_haloprop_key`` must be a column of the galaxy catalog. 
-
-        input_param_dict : dict, optional keyword argument 
-            If passed, the model will first update 
-            its param_dict with input_param_dict, altering the behavior of the model. 
 
         Returns 
         -------
