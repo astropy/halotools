@@ -50,11 +50,6 @@ class LogNormalScatterModel(object):
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_spline_degree : int, optional keyword argument
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-
         Examples 
         ---------
         >>> scatter_model = LogNormalScatterModel()
@@ -68,10 +63,6 @@ class LogNormalScatterModel(object):
         >>> scatter_abcissa = [12, 15]
         >>> scatter_ordinates = [0.3, 0.1]
         >>> scatter_model = LogNormalScatterModel(scatter_abcissa=scatter_abcissa, scatter_ordinates=scatter_ordinates)
-
-        You can also control the degree of the spline interpolation:
-
-        >>> scatter_model = LogNormalScatterModel(scatter_abcissa=scatter_abcissa, scatter_ordinates=scatter_ordinates, scatter_spline_degree=3)
 
         """
         default_scatter = model_defaults.default_smhm_scatter
