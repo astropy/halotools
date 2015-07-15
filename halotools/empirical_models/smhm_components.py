@@ -50,11 +50,6 @@ class LogNormalScatterModel(object):
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_spline_degree : int, optional keyword argument
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-
         Examples 
         ---------
         >>> scatter_model = LogNormalScatterModel()
@@ -68,10 +63,6 @@ class LogNormalScatterModel(object):
         >>> scatter_abcissa = [12, 15]
         >>> scatter_ordinates = [0.3, 0.1]
         >>> scatter_model = LogNormalScatterModel(scatter_abcissa=scatter_abcissa, scatter_ordinates=scatter_ordinates)
-
-        You can also control the degree of the spline interpolation:
-
-        >>> scatter_model = LogNormalScatterModel(scatter_abcissa=scatter_abcissa, scatter_ordinates=scatter_ordinates, scatter_spline_degree=3)
 
         """
         default_scatter = model_defaults.default_smhm_scatter
@@ -88,7 +79,7 @@ class LogNormalScatterModel(object):
             self.gal_type = kwargs['gal_type']
         self._initialize_param_dict()
 
-        self._setup_interpol(**kwargs)
+        self._update_interpol()
 
     def mean_scatter(self, **kwargs):
         """ Return the amount of log-normal scatter that should be added 
@@ -111,10 +102,6 @@ class LogNormalScatterModel(object):
             If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
             keyword arguments must be passed. 
 
-        input_param_dict : dict, optional keyword argument 
-            Dictionary of parameters governing the model. 
-            If not passed, the values already bound to ``self`` will be used. 
-
         Returns 
         -------
         scatter : array_like 
@@ -133,7 +120,6 @@ class LogNormalScatterModel(object):
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halos``, ``prim_haloprop``, or ``galaxy_table``")
 
-        model_helpers.update_param_dict(self, **kwargs)
         self._update_interpol()
 
         return self.spline_function(np.log10(mass))
@@ -175,36 +161,21 @@ class LogNormalScatterModel(object):
             
         return np.random.normal(loc=0, scale=scatter_scale)
 
-    def _setup_interpol(self, **kwargs):
-        """ Private method used to initialize the behavior of the interpolating function. 
-
-        Parameters 
-        ----------
-        scatter_spline_degree : int, optional keyword argument
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-        """        
-        scipy_maxdegree = 5
-        degree_list = [scipy_maxdegree, custom_len(self.abcissa)-1]
-        if 'scatter_spline_degree' in kwargs.keys():
-            degree_list.append(kwargs['scatter_spline_degree'])
-        self.spline_degree = np.min(degree_list)
-
-        self.spline_function = model_helpers.custom_spline(
-            self.abcissa, self.ordinates, k=self.spline_degree)
-
     def _update_interpol(self):
         """ Private method that updates the interpolating functon used to 
         define the level of scatter as a function of the input halos. 
         If this method is not called after updating ``self.param_dict``, 
         changes in ``self.param_dict`` will not alter the model behavior. 
         """
-        self.ordinates = (
-            [self.param_dict[self._get_param_key(ipar)] 
-            for ipar in range(len(self.abcissa))]
-            )
-        self._setup_interpol()
+
+        scipy_maxdegree = 5
+        degree_list = [scipy_maxdegree, custom_len(self.abcissa)-1]
+        self.spline_degree = np.min(degree_list)
+
+        self.ordinates = [self.param_dict[self._get_param_key(i)] for i in range(len(self.abcissa))]
+
+        self.spline_function = model_helpers.custom_spline(
+            self.abcissa, self.ordinates, k=self.spline_degree)
 
     def _initialize_param_dict(self):
         """ Private method used to initialize ``self.param_dict``. 
@@ -219,10 +190,7 @@ class LogNormalScatterModel(object):
         that corresponds to the appropriately selected i^th ordinate 
         defining the behavior of the scatter model. 
         """
-        if hasattr(self, 'gal_type'):
-            return 'scatter_model_param'+str(ipar+1)+'_'+self.gal_type
-        else:
-            return 'scatter_model_param'+str(ipar+1)
+        return 'scatter_model_param'+str(ipar+1)
 
 @six.add_metaclass(ABCMeta)
 class PrimGalpropModel(model_helpers.GalPropModel):
@@ -267,14 +235,6 @@ class PrimGalpropModel(model_helpers.GalPropModel):
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_spline_degree : int, optional keyword argument
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-
-        input_param_dict : dict, optional keyword argument
-            Dictionary containing values for the parameters specifying the model.
-
         new_haloprop_func_dict : function object, optional keyword argument 
             Dictionary of function objects used to create additional halo properties 
             that may be needed by the model component. 
@@ -298,19 +258,11 @@ class PrimGalpropModel(model_helpers.GalPropModel):
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
         self.scatter_model = scatter_model(
-            prim_haloprop_key=self.prim_haloprop_key, 
-            **kwargs)
+            prim_haloprop_key=self.prim_haloprop_key, **kwargs)
         if hasattr(self.scatter_model, 'gal_type'):
             self.gal_type = self.scatter_model.gal_type
 
         self._build_param_dict(**kwargs)
-
-        inherited_mean_scatter_method = partial(
-            self.scatter_model.mean_scatter, input_param_dict = self.param_dict)
-        setattr(self, 'mean_scatter', inherited_mean_scatter_method)
-        inherited_scatter_realization_method = partial(
-            self.scatter_model.scatter_realization, input_param_dict = self.param_dict)
-        setattr(self, 'scatter_realization', inherited_mean_scatter_method)
 
         # Enforce the requirement that sub-classes have been configured properly
         required_method_name = 'mean_'+self.galprop_key
@@ -325,19 +277,35 @@ class PrimGalpropModel(model_helpers.GalPropModel):
 
         super(PrimGalpropModel, self).__init__(galprop_key=self.galprop_key)
 
+    def mean_scatter(self, **kwargs):
+        """ Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict`` 
+        of the scatter model, and then call the `mean_scatter` method of 
+        the scatter model. 
+        """
+        for key in self.scatter_model.param_dict.keys():
+            self.scatter_model.param_dict[key] = self.param_dict[key]
+
+        return self.scatter_model.mean_scatter(**kwargs)
+
+    def scatter_realization(self, **kwargs):
+        """ Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict`` 
+        of the scatter model, and then call the `scatter_realization` method of 
+        the scatter model. 
+        """
+        for key in self.scatter_model.param_dict.keys():
+            self.scatter_model.param_dict[key] = self.param_dict[key]
+
+        return self.scatter_model.scatter_realization(**kwargs)
 
     def _build_param_dict(self, **kwargs):
         """ Method combines the parameter dictionaries of the 
         smhm model and the scatter model. 
         """
 
-        if 'input_param_dict' in kwargs.keys():
-            smhm_param_dict = kwargs['input_param_dict']
+        if hasattr(self, 'retrieve_default_param_dict'):
+            smhm_param_dict = self.retrieve_default_param_dict()
         else:
-            if hasattr(self, 'retrieve_default_param_dict'):
-                smhm_param_dict = self.retrieve_default_param_dict()
-            else:
-                smhm_param_dict = {}
+            smhm_param_dict = {}
 
         scatter_param_dict = self.scatter_model.param_dict
 
@@ -374,10 +342,6 @@ class PrimGalpropModel(model_helpers.GalPropModel):
             to the galaxy property assignment. Default is True. 
             If False, model is purely deterministic, and the behavior is determined 
             by the ``mean_galprop`` method of the sub-class. 
-
-        input_param_dict : dict, optional keyword argument 
-            Dictionary of parameters governing the model. 
-            If not passed, the values already bound to ``self`` will be used. 
 
         Returns 
         -------
@@ -437,16 +401,6 @@ class Moster13SmHm(PrimGalpropModel):
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
-
-        scatter_spline_degree : int, optional keyword argument
-            Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
-            is ensured to never exceed k-1, nor exceed 5. 
-
-        input_param_dict : dict, optional keyword argument
-            Dictionary containing values for the parameters specifying the model.
-            If none is passed, the `Moster13SmHm` instance will be initialized to 
-            the best-fit values taken from Moster et al. (2013). 
         """
 
         super(Moster13SmHm, self).__init__(
@@ -478,16 +432,11 @@ class Moster13SmHm(PrimGalpropModel):
         redshift : float, keyword argument
             Redshift of the halo hosting the galaxy
 
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
-
         Returns 
         -------
         mstar : array_like 
             Array containing stellar masses living in the input halos. 
         """
-        model_helpers.update_param_dict(self, **kwargs)
 
         # Retrieve the array storing the mass-like variable
         if 'galaxy_table' in kwargs.keys():
@@ -511,10 +460,10 @@ class Moster13SmHm(PrimGalpropModel):
         # compute the parameter values that apply to the input redshift
         a = 1./(1+redshift)
 
-        m1 = self.param_dict[self._m10_key] + self.param_dict[self._m11_key]*(1-a)
-        n = self.param_dict[self._n10_key] + self.param_dict[self._n11_key]*(1-a)
-        beta = self.param_dict[self._beta10_key] + self.param_dict[self._beta11_key]*(1-a)
-        gamma = self.param_dict[self._gamma10_key] + self.param_dict[self._gamma11_key]*(1-a)
+        m1 = self.param_dict['m10'] + self.param_dict['m11']*(1-a)
+        n = self.param_dict['n10'] + self.param_dict['n11']*(1-a)
+        beta = self.param_dict['beta10'] + self.param_dict['beta11']*(1-a)
+        gamma = self.param_dict['gamma10'] + self.param_dict['gamma11']*(1-a)
 
         # Calculate each term contributing to Eqn 2
         norm = 2.*n*mass
@@ -529,11 +478,6 @@ class Moster13SmHm(PrimGalpropModel):
         """ Method returns a dictionary of all model parameters 
         set to the values in Table 1 of Moster et al. (2013). 
 
-        If ``self`` has a ``gal_type``, then each dict key will 
-        be appended with the ``gal_type`` string. This is useful 
-        to protect composite models with multiple ``gal_types`` 
-        from having repeated keys. 
-        
         Returns 
         -------
         d : dict 
@@ -550,43 +494,7 @@ class Moster13SmHm(PrimGalpropModel):
         'gamma10': 0.608, 
         'gamma11': 0.329
         }
-        # If the Moster13SmHm model instance is part of a composite model 
-        # with multiple galaxy types, then the instance has a gal_type 
-        # attribute. Calling the _set_param_dict_key_attrs method 
-        # creates a set of (private) attributes that allow us to 
-        # access our param_dict in the same way regardless of whether the 
-        # composite model discriminates between gal_type.  
-        self._set_param_dict_key_attrs(d)
-
-        # If the Moster13SmHm model instance is part of a composite model 
-        # with multiple galaxy types, then we rename the param_dict keys 
-        # to protect against possibly repeated 
-        # keys in the param_dict of our composite model. 
-        if hasattr(self, 'gal_type'):
-            for oldkey in d.keys():
-                newkey = oldkey + '_'+self.gal_type
-                d[newkey] = d.pop(oldkey)
 
         return d
 
-    def _set_param_dict_key_attrs(self, uncorrected_dict):
-        """ Method binds to ``self`` one new private attribute 
-        for each key of ``param_dict``. 
-        For cases where ``self`` has no ``gal_type``, each private attribute 
-        has the same name as its param_dict key. 
-        For cases where ``self`` does have a ``gal_type``, 
-        each private attribute has the same name as its param_dict key except 
-        for the ``gal_type`` substring has been stripped from param_dict key. 
-        This allows the `mean_stellar_mass` method to access the keys 
-        of ``param_dict`` keys in the same fashion regardless of whether 
-        ``self`` has a ``gal_type`` attribute, even though ``param_dict`` has
-        different key names in these two cases. 
-        """
-        for key in uncorrected_dict.keys():
-            attr_name = '_'+key+'_key'
-            if hasattr(self, 'gal_type'):
-                keyname = key + '_' + self.gal_type
-            else:
-                keyname = key
-            setattr(self, attr_name, keyname)
 
