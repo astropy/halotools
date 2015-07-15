@@ -442,10 +442,6 @@ class Moster13SmHm(PrimGalpropModel):
         redshift : float, keyword argument
             Redshift of the halo hosting the galaxy
 
-        input_param_dict : dict, optional
-            dictionary of parameters governing the model. If not passed, 
-            values bound to ``self`` will be chosen. 
-
         Returns 
         -------
         mstar : array_like 
