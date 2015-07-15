@@ -404,12 +404,6 @@ class HodModelFactory(ModelFactory):
 
         return model_blueprint 
 
-    def _get_stripped_param_dict(self, gal_type, model_dict):
-        """
-        """
-        pass
-
-
 
     def _set_gal_types(self):
         """ Private method binding the ``gal_types`` list attribute,
@@ -456,32 +450,35 @@ class HodModelFactory(ModelFactory):
 
             # Set the method used to return Monte Carlo realizations 
             # of per-halo gal_type abundance
-            new_method_name = 'mc_occupation_'+gal_type
             occupation_model = self.model_blueprint[gal_type]['occupation']
-            new_method_behavior = partial(occupation_model.mc_occupation, 
-                input_param_dict = self.param_dict)
+
+            new_method_name = 'mc_occupation_'+gal_type
+            new_method_behavior = self._update_param_dict_decorator(
+                gal_type, 'occupation', 'mc_occupation')
             setattr(self, new_method_name, new_method_behavior)
 
             # For convenience, also inherit  
             # the first moment of the occupation distribution 
             if hasattr(occupation_model, 'mean_occupation'):
                 new_method_name = 'mean_occupation_'+gal_type
-                new_method_behavior = partial(occupation_model.mean_occupation, 
-                    input_param_dict = self.param_dict)
+                new_method_behavior = self._update_param_dict_decorator(
+                    gal_type, 'occupation', 'mean_occupation')
                 setattr(self, new_method_name, new_method_behavior)
 
-            # Create a new method to compute each (unbiased) halo profile parameter
-            # For composite models in which multiple galaxy types have the same 
-            # underlying dark matter profile, use the halo profile model of the 
-            # first gal_type in the self.gal_types list 
             gal_prof_model = self.model_blueprint[gal_type]['profile']
             for prof_param_key in gal_prof_model.prof_param_keys:
 
+            # Create a new method to compute each (unbiased) halo profile parameter
                 new_method_name = prof_param_key + '_halos'
+                # For composite models in which multiple galaxy types have the same 
+                # underlying dark matter profile, use the halo profile model of the 
+                # first gal_type in the self.gal_types list 
                 if not hasattr(self, new_method_name):
                     new_method_behavior = getattr(gal_prof_model.halo_prof_model, prof_param_key)
                     setattr(self, new_method_name, new_method_behavior)
 
+                # Note that biased galaxy profiles are not supported yet
+                # When implementing, will need to call _update_param_dict_decorator here 
                 new_method_name = prof_param_key + '_' + gal_type
                 new_method_behavior = getattr(gal_prof_model, prof_param_key)
                 setattr(self, new_method_name, new_method_behavior)
@@ -499,6 +496,30 @@ class HodModelFactory(ModelFactory):
                     halo_prof_param_method_name = prof_param_key+'_halos'
                     halo_prof_param_method_behavior = getattr(self, halo_prof_param_method_name)
                     setattr(self, gal_prof_param_method_name, halo_prof_param_method_behavior)
+
+
+    def _update_param_dict_decorator(self, gal_type, component_key, func_name):
+        """ Decorator used to propagate any possible changes 
+        in the composite model param_dict 
+        down to the appropriate component model param_dict. 
+        """
+
+        component_model = self.model_blueprint[gal_type][component_key]
+
+        def decorated_func(*args, **kwargs):
+
+            # Update the param_dict as necessary
+            for key in component_model.param_dict.keys():
+                composite_key = key + '_' + component_model.gal_type
+                if composite_key in self.param_dict.keys():
+                    component_model.param_dict[key] = self.param_dict[composite_key]
+
+            func = getattr(component_model, func_name)
+
+            return func(*args, **kwargs)
+
+        return decorated_func
+
 
     def mc_pos(self, **kwargs):
         """ Method used to generate Monte Carlo realizations of galaxy positions. 
