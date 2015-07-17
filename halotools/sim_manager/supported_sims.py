@@ -3,19 +3,17 @@
 import numpy as np
 import os, sys, warnings, urllib2, fnmatch
 
-HAS_SOUP = False
 try:
     from bs4 import BeautifulSoup
     HAS_SOUP = True
-except:
-    pass
+except ImportError:
+    HAS_SOUP = False
 
-HAS_REQUESTS = False
 try:
     import requests
     HAS_REQUESTS = True
-except:
-    pass
+except ImportError:
+    HAS_REQUESTS = False
 
 import posixpath
 import urlparse
@@ -65,13 +63,6 @@ class SimulationSpecs(object):
     @abstractproperty
     def softening_length(self):
         """ Softening scale of the particle interactions in kpc/h. 
-        """
-        pass
-
-    @abstractproperty
-    def cosmology(self):
-        """ Astropy cosmology instance giving the 
-        cosmological parameters with which the simulation was run. 
         """
         pass
 
@@ -288,9 +279,6 @@ class HaloCat(object):
 
         file_pattern = '*'+self.simname+'/'+self.halo_finder+'*'
         output = fnmatch.filter(all_halocats, file_pattern)
-
-#        file_pattern = '*'+self.halo_finder+'*'
-#        output = fnmatch.filter(simname_halocats, file_pattern)
 
         return output
 

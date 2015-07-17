@@ -29,19 +29,13 @@ try:
 except:
     pass
 
-HAS_H5PY = False
 try:
     import h5py
     HAS_H5PY = True
-except:
-    pass
+except ImportError:
+    HAS_H5PY = False
 
-
-from astropy.io import fits as fits
 from astropy.table import Table
-from astropy.utils.data import get_readable_fileobj
-from astropy.utils.data import _get_download_cache_locs as get_download_cache_locs
-from astropy.utils.data import _open_shelve as open_shelve
 
 from . import cache_config, supported_sims, sim_defaults
 
