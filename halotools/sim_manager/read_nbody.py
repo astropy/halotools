@@ -89,6 +89,8 @@ def get_halocat_obj(simname, halo_finder):
     else:
         return halocat_obj
 
+###################################################################################################
+###################################################################################################
 
 class ProcessedSnapshot(object):
     """ Class containing halo and particle data taken from 
@@ -174,7 +176,7 @@ class ProcessedSnapshot(object):
         f.close()
 
 
-
+###################################################################################################
 ###################################################################################################
 
 class CatalogManager(object):
@@ -183,6 +185,20 @@ class CatalogManager(object):
 
     def __init__(self):
         pass
+
+    def retrieve_simulation(self, simname = sim_defaults.default_simname):
+        """
+        """
+        if simname == 'bolshoi':
+            return supported_sims.Bolshoi()
+        elif simname == 'bolshoipl':
+            return supported_sims.BolshoiPl()
+        elif simname == 'consuelo':
+            return supported_sims.Consuelo()
+        elif simname == 'multidark':
+            return supported_sims.MultiDark()
+        else:
+            raise KeyError("Input simname %s is not supported" % simname)
 
     @property 
     def available_halocats(self):
