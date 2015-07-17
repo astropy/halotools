@@ -226,6 +226,21 @@ def processed_halocats_web_location(**kwargs):
             return os.path.join(os.path.join(webroot, simname), halo_finder)
 
 
+def enable_cache_access_during_pytest(func):
+    """ Decorator used by test suite functions to permit access to the 
+    Halotools cache directory. 
+    """
+    def wrapper(*args, **kwargs):
+
+        xch = os.environ.get('XDG_CACHE_HOME')
+        if xch is not None:
+            del os.environ['XDG_CACHE_HOME']
+
+        os.environ['XDG_CACHE_HOME'] = get_astropy_cache_dir()
+        result = func(*args, **kwargs)
+        os.environ['XDG_CACHE_HOME'] = xch
+
+        return wrapper
 
 
 
