@@ -240,7 +240,9 @@ def enable_cache_access_during_pytest(func):
         result = func(*args, **kwargs)
         os.environ['XDG_CACHE_HOME'] = xch
 
-        return wrapper
+        return result
+
+    return wrapper
 
 
 
