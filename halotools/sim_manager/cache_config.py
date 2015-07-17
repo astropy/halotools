@@ -53,7 +53,7 @@ def defensively_create_subdir(dirname):
 
 def get_supported_simnames():
     class_list = supported_sims.__all__
-    parent_class = supported_sims.SimulationSpecs
+    parent_class = supported_sims.NbodySimulation
 
     supported_simnames = []
     for clname in class_list:

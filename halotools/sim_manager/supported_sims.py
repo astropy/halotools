@@ -29,7 +29,7 @@ from astropy.extern import six
 from astropy import cosmology
 
 __all__ = (
-    ['SimulationSpecs', 'Bolshoi', 'BolshoiPl', 'MultiDark', 'Consuelo', 
+    ['NbodySimulation', 'Bolshoi', 'BolshoiPl', 'MultiDark', 'Consuelo', 
     'HaloCat', 'BolshoiRockstar', 'BolshoiPlRockstar', 
     'BolshoiBdm', 'MultiDarkRockstar', 'ConsuleoRockstar']
     )
@@ -40,7 +40,7 @@ __all__ = (
 ######################################################
 
 @six.add_metaclass(ABCMeta)
-class SimulationSpecs(object):
+class NbodySimulation(object):
     """ Abstract base class for any object used as a container for 
     simulation specs. 
     """
@@ -74,7 +74,7 @@ class SimulationSpecs(object):
         pass
 
 
-class Bolshoi(SimulationSpecs):
+class Bolshoi(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology 
     with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h. 
 
@@ -101,7 +101,7 @@ class Bolshoi(SimulationSpecs):
     def cosmology(self):
         return cosmology.WMAP5
 
-class BolshoiPl(SimulationSpecs):
+class BolshoiPl(NbodySimulation):
     """ Cosmological N-body simulation of Planck 2013 cosmology 
     with Lbox = 250 Mpc/h and 
     particle mass of ~1e8 Msun/h. 
@@ -129,7 +129,7 @@ class BolshoiPl(SimulationSpecs):
     def cosmology(self):
         return cosmology.Planck13
 
-class MultiDark(SimulationSpecs):
+class MultiDark(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology 
     with Lbox = 1Gpc/h and particle mass of ~1e10 Msun/h. 
 
@@ -156,7 +156,7 @@ class MultiDark(SimulationSpecs):
     def cosmology(self):
         return cosmology.WMAP5
 
-class Consuelo(SimulationSpecs):
+class Consuelo(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5-like cosmology 
     with Lbox = 400 Mpc/h and particle mass of ~1e9 Msun/h. 
 
