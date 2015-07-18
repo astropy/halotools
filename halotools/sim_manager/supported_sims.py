@@ -179,8 +179,44 @@ class SimulationSnapshot(object):
 
 
 ######################################################
-########## Halo Catalog classes defined below ########## 
+########## Halo Catalog classes defined below ########
 ######################################################
+
+
+class HaloCatalog(object):
+
+    def __init__(self, snapshot_class, halo_finder):
+        """
+        """
+        snapshotobj = snapshot_class()
+        for attr in snapshotobj._attrlist:
+            setattr(self, attr, getattr(snapshotobj, attr))
+
+        self._attrlist = snapshotobj._attrlist
+
+        self.halo_finder = halo_finder
+        self._attrlist.append('halo_finder')
+
+        ### Attributes that still need to be implemented: 
+        # self.halo_table, self.cuts_description, self.version, 
+        # self.fname, self.orig_data_source, etc. 
+        # Also should implement some slick way to describe all columns in plain English 
+
+class ParticleCatalog(object):
+
+    def __init__(self, snapshot_class):
+        """
+        """
+        snapshotobj = snapshot_class()
+        for attr in snapshotobj._attrlist:
+            setattr(self, attr, getattr(snapshotobj, attr))
+
+        self._attrlist = snapshotobj._attrlist
+
+        ### Attributes that still need to be implemented: 
+        ### self.particle_table, self.fname, self.orig_data_source, etc.
+
+
 
 @six.add_metaclass(ABCMeta)
 class HaloCat(object):
