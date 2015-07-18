@@ -45,7 +45,7 @@ halo catalog so that you can quickly get up and running. You can accomplish
 this by navigating to the root directory of the package and running the initial 
 download script::
 
-	python scripts/download_initial_halocat
+	python scripts/download_initial_halocat.py
 
 Running this script will set up the Halotools cache directory system on your local machine, 
 and then download the default halo catalog to the cache, 
