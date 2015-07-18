@@ -51,7 +51,10 @@ class CatalogManager(object):
 	def retrieve_raw_halocat_from_cache(self, **kwargs):
 		pass
 
-		
+	def store_newly_processed_halocat(self, **kwargs):
+		pass
+
+
 
 class HaloCatalogProcessor(object):
 	""" Class used to read halo catalog ASCII data, 
@@ -60,6 +63,9 @@ class HaloCatalogProcessor(object):
 	"""
 
 	def __init__(self):
+		pass
+
+	def read_raw_halocat_ascii(self, **kwargs):
 		pass
 
 
