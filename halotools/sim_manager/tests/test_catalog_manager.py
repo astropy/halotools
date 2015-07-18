@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import pytest
+slow = pytest.mark.slow
+
 import os, fnmatch
 import numpy as np
 
@@ -36,10 +39,18 @@ class TestCatalogManager(TestCase):
 
         self.dummy_fnames = ['hlist_1.00030', 'hlist_0.547', 'hlist_0.3397']
 
+        assert os.path.isdir(self.dummyloc)
+
+        fname = os.path.join(self.dummyloc, 'marf.txt')
+        os.system('touch ' + fname)
+        assert os.path.isfile(fname)
+
 #        for simname in self.dummy_simnames:
 #            os.mkdir(os.path.join(self.dummyloc, simname))
 
 
+    def teardown_class(self):
+        os.system('rm -rf ' + self.dummyloc)
 
 
 

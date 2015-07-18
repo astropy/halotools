@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import pytest
+slow = pytest.mark.slow
+
 import numpy as np 
 from astropy.table import Table 
 from scipy.stats import spearmanr
@@ -10,7 +13,7 @@ from ...sim_manager import FakeMock
 
 from ..preloaded_subhalo_model_blueprints import Campbell15_blueprint
 
-
+@slow
 def test_cam_gr_color():
 	galprop_key = 'gr_color'
 	prim_galprop_key = 'stellar_mass'
@@ -126,6 +129,7 @@ def test_cam_gr_color():
 	check_conditional_one_point(fake_mock_variable_scatter, fake_data, sm_low, sm_high)
 	check_spearmanr(fake_mock_variable_scatter, fake_data, sm_low, sm_high, 0.835)
 
+@slow
 def test_cam_ssfr():
 	galprop_key = 'ssfr'
 	prim_galprop_key = 'stellar_mass'
@@ -243,9 +247,8 @@ def test_cam_ssfr():
 	check_spearmanr(fake_mock_variable_scatter, fake_data, sm_low, sm_high, 0.835)
 
 
-
+"""
 def test_Campbell15():
-	"""
 	prim_haloprop_key = 'mpeak'
 	prim_galprop_key = 'stellar_mass'
 	sec_haloprop_key = 'halo_zhalf'
@@ -270,8 +273,7 @@ def test_Campbell15():
 		prim_galprop_bins = sm_bins
 		)
 
-
-	"""
+"""
 
 
 

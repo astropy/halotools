@@ -1,3 +1,6 @@
+import pytest
+slow = pytest.mark.slow
+
 import numpy as np
 #load comparison simple pair counters
 from .. fof_pairs import fof_pairs, xy_z_fof_pairs
@@ -6,7 +9,7 @@ from scipy import spatial
 from scipy.sparse import coo_matrix
 import matplotlib.pyplot as plt
 
-
+@slow
 def test_fof_pairs_periodic():
     
     Npts = 1e4
@@ -39,7 +42,7 @@ def test_fof_pairs_periodic():
     # N = (10^3)*7
     assert m.getnnz()==7000
 
-
+@slow
 def test_fof_pairs_non_periodic():
     
     Npts = 1e4
@@ -92,7 +95,7 @@ def test_fof_pairs_non_periodic():
     
     assert np.all(m==mm)
 
-
+@slow
 def test_xy_z_fof_pairs_periodic():
     
     Npts = 1e4
@@ -130,7 +133,7 @@ def test_xy_z_fof_pairs_periodic():
     assert m_para.getnnz()==15000
     assert m_perp.getnnz()==15000
 
-
+@slow
 def test_xy_z_fof_pairs_non_periodic():
     
     Npts = 1e4
