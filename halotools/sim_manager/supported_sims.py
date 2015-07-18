@@ -31,14 +31,14 @@ from astropy import units as u
 
 
 __all__ = (
-    ['NbodySimulation', 'Bolshoi', 'BolshoiPl', 'MultiDark', 'Consuelo', 
-    'HaloCat', 'BolshoiRockstar', 'BolshoiPlRockstar', 
+    ['NbodySimulation', 'Bolshoi', 'BolshoiPlanck', 'MultiDark', 'Consuelo', 
+    'HaloCat', 'BolshoiRockstar', 'BolshoiPlanckRockstar', 
     'BolshoiBdm', 'MultiDarkRockstar', 'ConsuleoRockstar']
     )
 
 
 ######################################################
-########## Simulation classes appear below ########## 
+########## Simulation classes defined below ########## 
 ######################################################
 
 @six.add_metaclass(ABCMeta)
@@ -47,19 +47,26 @@ class NbodySimulation(object):
     simulation specs. 
     """
 
-    def __init__(self, simname, Lbox, particle_mass, softening_length, cosmology):
+    def __init__(self, simname, Lbox, particle_mass, num_ptcl_per_dim, 
+        softening_length, initial_redshift, cosmology):
         """
         simname : string 
             Nickname of the simulation, e.g., 'bolshoi', or 'consuelo'. 
 
         Lbox : float
-            Size of the simulated box in Mpc/h. 
+            Size of the simulated box in Mpc with h=1 units. 
 
         particle_mass : float
             Mass of the dark matter particles in Msun with h=1 units. 
 
+        num_ptcl_per_dim : int 
+            Number of particles per dimension. 
+
         softening_length : float 
-            Softening scale of the particle interactions in kpc/h. 
+            Softening scale of the particle interactions in kpc with h=1 units. 
+
+        initial_redshift : float 
+            Redshift at which the initial conditions were generated. 
 
         cosmology : object 
             `astropy.cosmology` instance giving the cosmological parameters 
@@ -69,8 +76,25 @@ class NbodySimulation(object):
         self.simname = simname
         self.Lbox = Lbox
         self.particle_mass = particle_mass
+        self.num_ptcl_per_dim = num_ptcl_per_dim
         self.softening_length = softening_length
+        self.initial_redshift = initial_redshift
         self.cosmology = cosmology
+
+    def retrieve_snapshot(self, **kwargs):
+        """ Method uses the CatalogManager to return a snapshot object. 
+        """
+        pass
+
+    def retrieve_halocat(self, **kwargs):
+        """ Method uses the CatalogManager to return a halo catalog object. 
+        """
+        pass
+
+    def retrieve_particlecat(self, **kwargs):
+        """ Method uses the CatalogManager to return a particle catalog object. 
+        """
+        pass
 
 
 class Bolshoi(NbodySimulation):
@@ -84,10 +108,11 @@ class Bolshoi(NbodySimulation):
     def __init__(self):
 
         super(Bolshoi, self).__init__(simname = 'bolshoi', Lbox = 250., 
-            particle_mass = 1.35e8, softening_length = 1., cosmology = cosmology.WMAP5)
+            particle_mass = 1.35e8, num_ptcl_per_dim = 2048, 
+            softening_length = 1., initial_redshift = 80., cosmology = cosmology.WMAP5)
 
 
-class BolshoiPl(NbodySimulation):
+class BolshoiPlanck(NbodySimulation):
     """ Cosmological N-body simulation of Planck 2013 cosmology 
     with Lbox = 250 Mpc/h and 
     particle mass of ~1e8 Msun/h. 
@@ -98,8 +123,9 @@ class BolshoiPl(NbodySimulation):
 
     def __init__(self):
 
-        super(BolshoiPl, self).__init__(simname = 'bolshoipl', Lbox = 250., 
-            particle_mass = 1.35e8, softening_length = 1., cosmology = cosmology.Planck13)
+        super(BolshoiPlanck, self).__init__(simname = 'bolshoiplanck', Lbox = 250., 
+            particle_mass = 1.35e8, num_ptcl_per_dim = 2048, 
+            softening_length = 1., initial_redshift = 80., cosmology = cosmology.Planck13)
 
 
 class MultiDark(NbodySimulation):
@@ -111,12 +137,14 @@ class MultiDark(NbodySimulation):
     """
 
     def __init__(self):
+
         super(MultiDark, self).__init__(simname = 'multidark', Lbox = 1000., 
-            particle_mass = 8.7e9, softening_length = 7., cosmology = cosmology.WMAP5)
+            particle_mass = 8.721e9, num_ptcl_per_dim = 2048, 
+            softening_length = 7., initial_redshift = 65., cosmology = cosmology.WMAP5)
 
 class Consuelo(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5-like cosmology 
-    with Lbox = 400 Mpc/h and particle mass of ~1e9 Msun/h. 
+    with Lbox = 420 Mpc/h and particle mass of 4e8 Msun/h. 
 
     For a detailed description of the 
     simulation specs, see http://lss.phy.vanderbilt.edu/lasdamas/simulations.html. 
@@ -124,12 +152,13 @@ class Consuelo(NbodySimulation):
 
     def __init__(self):
 
-        super(Consuelo, self).__init__(simname = 'consuelo', Lbox = 400., 
-            particle_mass = 4.e8, softening_length = 4., cosmology = cosmology.WMAP5)
+        super(Consuelo, self).__init__(simname = 'consuelo', Lbox = 420., 
+            particle_mass = 1.87e9, num_ptcl_per_dim = 1400, 
+            softening_length = 8., initial_redshift = 99., cosmology = cosmology.WMAP5)
 
 
 ######################################################
-########## Halo-finder classes appear below ########## 
+########## Halo Catalog classes defined below ########## 
 ######################################################
 
 @six.add_metaclass(ABCMeta)
@@ -489,14 +518,14 @@ class BolshoiRockstar(HaloCat):
 
         return dt
 
-class BolshoiPlRockstar(HaloCat):
+class BolshoiPlanckRockstar(HaloCat):
     """ Rockstar-based halo catalog for the Bolshoi-Planck simulation. 
     """
 
     def __init__(self):
 
-        bolshoiPl = BolshoiPl()
-        super(BolshoiPlRockstar, self).__init__(bolshoiPl, 'rockstar')
+        bolshoiplanck = BolshoiPlanck()
+        super(BolshoiPlanckRockstar, self).__init__(bolshoiplanck, 'rockstar')
 
     @property 
     def raw_halocat_web_location(self):
