@@ -62,13 +62,14 @@ class CatalogManager(object):
         else:
             cachedir = cache_config.get_catalogs_dir(catalog_type = catalog_type)
 
-        fname_pattern = '*.hdf5'
+        fname_pattern = '.hdf5'
         if 'version_name' in kwargs.keys():
-            fname_pattern = '*' + kwargs['version_name'] + fname_pattern
+            fname_pattern = kwargs['version_name'] + fname_pattern
         if 'halo_finder' in kwargs.keys():
-            fname_pattern = '*' + kwargs['halo_finder'] + fname_pattern
+            fname_pattern = kwargs['halo_finder'] + '*' + fname_pattern
         if 'simname' in kwargs.keys():
-            fname_pattern = '*' + kwargs['simname'] + fname_pattern
+            fname_pattern = kwargs['simname'] + '*' + fname_pattern
+        fname_pattern = '*' + fname_pattern
 
         full_fname_list = []
         for path, dirlist, filelist in os.walk(cachedir):
@@ -173,7 +174,6 @@ class CatalogManager(object):
 
     def raw_halocats_available_for_download(self, **kwargs):
         pass
-
 
     def ptcl_cats_available_for_download(self, **kwargs):
         pass
