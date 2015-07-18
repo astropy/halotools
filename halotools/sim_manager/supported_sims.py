@@ -27,6 +27,8 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
 
 from astropy import cosmology
+from astropy import units as u
+
 
 __all__ = (
     ['NbodySimulation', 'Bolshoi', 'BolshoiPl', 'MultiDark', 'Consuelo', 
@@ -45,33 +47,30 @@ class NbodySimulation(object):
     simulation specs. 
     """
 
-    def __init__(self, simname):
+    def __init__(self, simname, Lbox, particle_mass, softening_length, cosmology):
+        """
+        simname : string 
+            Nickname of the simulation, e.g., 'bolshoi', or 'consuelo'. 
+
+        Lbox : float
+            Size of the simulated box in Mpc/h. 
+
+        particle_mass : float
+            Mass of the dark matter particles in Msun with h=1 units. 
+
+        softening_length : float 
+            Softening scale of the particle interactions in kpc/h. 
+
+        cosmology : object 
+            `astropy.cosmology` instance giving the cosmological parameters 
+            with which the simulation was run. 
+
+        """
         self.simname = simname
-
-    @abstractproperty
-    def Lbox(self):
-        """ Size of the simulated box in Mpc/h. 
-        """
-        pass
-
-    @abstractproperty
-    def particle_mass(self):
-        """ Mass of the dark matter particles in Msun/h. 
-        """
-        pass
-
-    @abstractproperty
-    def softening_length(self):
-        """ Softening scale of the particle interactions in kpc/h. 
-        """
-        pass
-
-    @abstractproperty
-    def cosmology(self):
-        """ Astropy cosmology instance giving the 
-        cosmological parameters with which the simulation was run. 
-        """
-        pass
+        self.Lbox = Lbox
+        self.particle_mass = particle_mass
+        self.softening_length = softening_length
+        self.cosmology = cosmology
 
 
 class Bolshoi(NbodySimulation):
@@ -83,23 +82,10 @@ class Bolshoi(NbodySimulation):
     """
 
     def __init__(self):
-        super(Bolshoi, self).__init__('bolshoi')
 
-    @property
-    def Lbox(self):
-        return 250.0
+        super(Bolshoi, self).__init__(simname = 'bolshoi', Lbox = 250., 
+            particle_mass = 1.35e8, softening_length = 1., cosmology = cosmology.WMAP5)
 
-    @property
-    def particle_mass(self):
-        return 1.35e8
-
-    @property
-    def softening_length(self):
-        return 1.0
-
-    @property
-    def cosmology(self):
-        return cosmology.WMAP5
 
 class BolshoiPl(NbodySimulation):
     """ Cosmological N-body simulation of Planck 2013 cosmology 
@@ -111,23 +97,10 @@ class BolshoiPl(NbodySimulation):
     """
 
     def __init__(self):
-        super(BolshoiPl, self).__init__('bolshoipl')
 
-    @property
-    def Lbox(self):
-        return 250.0
+        super(BolshoiPl, self).__init__(simname = 'bolshoipl', Lbox = 250., 
+            particle_mass = 1.35e8, softening_length = 1., cosmology = cosmology.Planck13)
 
-    @property
-    def particle_mass(self):
-        return 1.35e8
-
-    @property
-    def softening_length(self):
-        return 1.0
-
-    @property
-    def cosmology(self):
-        return cosmology.Planck13
 
 class MultiDark(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology 
@@ -138,23 +111,8 @@ class MultiDark(NbodySimulation):
     """
 
     def __init__(self):
-        super(MultiDark, self).__init__('multidark')
-
-    @property
-    def Lbox(self):
-        return 1000.0
-
-    @property
-    def particle_mass(self):
-        return 8.7e9
-
-    @property
-    def softening_length(self):
-        return 7.0
-
-    @property
-    def cosmology(self):
-        return cosmology.WMAP5
+        super(MultiDark, self).__init__(simname = 'multidark', Lbox = 1000., 
+            particle_mass = 8.7e9, softening_length = 7., cosmology = cosmology.WMAP5)
 
 class Consuelo(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5-like cosmology 
@@ -165,23 +123,10 @@ class Consuelo(NbodySimulation):
     """
 
     def __init__(self):
-        super(Consuelo, self).__init__('consuelo')
 
-    @property
-    def Lbox(self):
-        return 400.0
+        super(Consuelo, self).__init__(simname = 'consuelo', Lbox = 400., 
+            particle_mass = 4.e8, softening_length = 4., cosmology = cosmology.WMAP5)
 
-    @property
-    def particle_mass(self):
-        return 4.e8
-
-    @property
-    def softening_length(self):
-        return 4.0
-
-    @property
-    def cosmology(self):
-        return cosmology.WMAP5
 
 ######################################################
 ########## Halo-finder classes appear below ########## 
