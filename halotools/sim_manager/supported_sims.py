@@ -81,18 +81,13 @@ class NbodySimulation(object):
         self.initial_redshift = initial_redshift
         self.cosmology = cosmology
 
+        self._attrlist = (
+            ['simname', 'Lbox', 'particle_mass', 'num_ptcl_per_dim',
+            'softening_length', 'initial_redshift', 'cosmology']
+            )
+
     def retrieve_snapshot(self, **kwargs):
         """ Method uses the CatalogManager to return a snapshot object. 
-        """
-        pass
-
-    def retrieve_halocat(self, **kwargs):
-        """ Method uses the CatalogManager to return a halo catalog object. 
-        """
-        pass
-
-    def retrieve_particlecat(self, **kwargs):
-        """ Method uses the CatalogManager to return a particle catalog object. 
         """
         pass
 
@@ -155,6 +150,32 @@ class Consuelo(NbodySimulation):
         super(Consuelo, self).__init__(simname = 'consuelo', Lbox = 420., 
             particle_mass = 1.87e9, num_ptcl_per_dim = 1400, 
             softening_length = 8., initial_redshift = 99., cosmology = cosmology.WMAP5)
+
+
+class SimulationSnapshot(object):
+
+    def __init__(self, simulation_class, redshift):
+        """
+        """
+        simobj = simulation_class()
+        for attr in simobj._attrlist:
+            setattr(self, attr, getattr(simobj, attr))
+
+        self._attrlist = simobj._attrlist
+
+        self.redshift = redshift
+        self._attrlist.append('redshift')
+
+
+    def retrieve_halocat(self, **kwargs):
+        """ Method uses the CatalogManager to return a halo catalog object. 
+        """
+        pass
+
+    def retrieve_particlecat(self, **kwargs):
+        """ Method uses the CatalogManager to return a particle catalog object. 
+        """
+        pass
 
 
 ######################################################
