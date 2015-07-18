@@ -51,7 +51,8 @@ class CatalogManager(object):
             cachedir = os.path.abspath(kwargs['external_cache_loc'])
             if os.path.isdir(cachedir) is False:
                 raise KeyError("Input external_cache_loc directory = %s \n Directory does not exist" % cachedir)
-        cachedir = cache_config.get_catalogs_dir(catalog_type = 'halos')
+        else:
+            cachedir = cache_config.get_catalogs_dir(catalog_type = 'halos')
 
         fname_pattern = '*.hdf5'
         if 'version_name' in kwargs.keys():
@@ -61,11 +62,13 @@ class CatalogManager(object):
         if 'simname' in kwargs.keys():
             fname_pattern = '*' + kwargs['simname'] + fname_pattern
 
-        fname_list = []
+        full_fname_list = []
         for path, dirlist, filelist in os.walk(cachedir):
-            for name in fnmatch.filter(filelist,fname_pattern):
-                fname_list.append(os.path.join(path,name))
+            for name in filelist:
+                full_fname_list.append(os.path.join(path,name))
 
+        fname_list = fnmatch.filter(full_fname_list, fname_pattern)
+                
         return fname_list
 
 
