@@ -281,7 +281,7 @@ class CatalogManager(object):
         else:
             if location == 'cache':
                 dirname = cache_config.get_catalogs_dir(
-                    catalog_type, simname=simname, halo_finder=halo_finder)
+                    catalog_type=catalog_type, simname=simname, halo_finder=halo_finder)
             else:
                 dirname = location
                 if not os.path.exists(dirname):
@@ -427,7 +427,7 @@ class CatalogManager(object):
                 output_fname = os.path.join(download_loc, closest_snapshot_fname)
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
-            cache_dirname = cache_config.get_catalogs_dir('raw_halos', 
+            cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', 
                 simname=simname, halo_finder=halo_finder)
             download_loc = cache_dirname
             output_fname = os.path.join(download_loc, closest_snapshot_fname)
@@ -611,7 +611,7 @@ class CatalogManager(object):
             output_loc = 'cache'
 
         if output_loc == 'cache':
-            output_loc = cache_config.get_catalogs_dir('halos', 
+            output_loc = cache_config.get_catalogs_dir(catalog_type='halos', 
                 simname=reader_obj.simname, halo_finder=reader_obj.halo_finder)
         else:
             if not os.path.exists(output_loc):
@@ -768,7 +768,7 @@ class CatalogManager(object):
                     "%s, %s, or %s" % ('raw_halos', 'halos', 'particles'))
         elif location=='cache':
             dirname = cache_config.get_catalogs_dir(
-                catalog_type, simname=simname, halo_finder=halo_finder)
+                catalog_type=catalog_type, simname=simname, halo_finder=halo_finder)
         else:
             dirname = location
             if not os.path.exists(dirname):
@@ -809,7 +809,7 @@ class CatalogManager(object):
 
         """
 
-        rootdir = cache_config.get_catalogs_dir(catalog_type, **kwargs)
+        rootdir = cache_config.get_catalogs_dir(catalog_type=catalog_type, **kwargs)
 
         all_cached_files = []
         for path, dirlist, filelist in os.walk(rootdir):
@@ -865,7 +865,7 @@ class CatalogManager(object):
         """
 
         if location == 'cache':
-            dirname = cache_config.get_catalogs_dir(catalog_type, 
+            dirname = cache_config.get_catalogs_dir(catalog_type=catalog_type, 
                 simname=simname, halo_finder=halo_finder)
         else:
             dirname = os.path.abspath(location)
@@ -1013,7 +1013,7 @@ class CatalogManager(object):
                 output_fname = os.path.join(download_loc, closest_snapshot_fname)
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
-            cache_dirname = cache_config.get_catalogs_dir('halos', 
+            cache_dirname = cache_config.get_catalogs_dir(catalog_type='halos', 
                 simname=simname, halo_finder=halo_finder)
             output_fname = os.path.join(cache_dirname, closest_snapshot_fname)
             download_loc = 'cache'

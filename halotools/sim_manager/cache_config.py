@@ -3,42 +3,16 @@
 various files used throughout the halotools package. 
 """
 
-__all__ = (
-    ['get_halotools_cache_dir','get_catalogs_dir']
-    )
+__all__ = ['get_catalogs_dir']
 
 import os
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
+from astropy.config.paths import _find_home
+
 import warnings
 
 from . import sim_defaults
 from . import supported_sims
-
-def get_halotools_cache_dir():
-    """ Find the path to the root halotools cache directory. 
-
-    If the directory doesn't exist, make it, then return the path. 
-
-    Returns
-    -------
-    dir : str
-        Path to the halotools cache directory.
-
-    """
-
-    halotools_cache_dir = os.path.join(get_astropy_cache_dir(), 'halotools')
-
-    if not os.path.exists(halotools_cache_dir):
-        try:
-            os.mkdir(halotools_cache_dir)
-        except OSError as e:
-            if not os.path.exists(halotools_cache_dir):
-                raise IOError("Unable to create a cache directory for Halotools catalogs")
-    elif not os.path.isdir(halotools_cache_dir):
-        msg = 'Data cache directory {0} is not a directory'
-        raise IOError(msg.format(halotools_cache_dir))
-
-    return halotools_cache_dir
 
 def defensively_create_subdir(dirname):
     if not os.path.exists(dirname):
@@ -106,7 +80,7 @@ def cache_subdir_for_halo_finder(parentdir, simname, halo_finder):
                 "the halotools/sim_manager/supported_sims module. \n")
 
 
-def get_catalogs_dir(catalog_type, **kwargs):
+def get_catalogs_dir(**kwargs):
     """ Find the path to the subdirectory of the halotools cache directory 
     where `catalog_type` are stored. 
     
@@ -114,7 +88,7 @@ def get_catalogs_dir(catalog_type, **kwargs):
 
     Parameters
     ----------
-    catalog_type : string
+    catalog_type : string, optional keyword argument  
         String giving the type of catalog. 
         Should be 'particles', 'subhalos', or 'raw_halos'. 
 
@@ -130,6 +104,18 @@ def get_catalogs_dir(catalog_type, **kwargs):
         Path to the halotools directory storing simulation data.
 
     """
+    homedir = _find_home()
+    astropy_cache_dir = os.path.join(homedir, '.astropy', 'cache')
+    defensively_create_subdir(astropy_cache_dir)
+
+    halotools_cache_dir = os.path.join(astropy_cache_dir, 'halotools')
+    defensively_create_subdir(halotools_cache_dir)
+
+    if 'catalog_type' not in kwargs.keys():
+        return halotools_cache_dir
+    else:
+        catalog_type = kwargs['catalog_type']
+
     acceptable_halos_arguments = (
         ['subhalos', 'subhalo', 'halo', 'halos', 
         'halo_catalogs', 'subhalo_catalogs', 'subhalo_catalog', 'halo_catalog',
@@ -169,7 +155,7 @@ def get_catalogs_dir(catalog_type, **kwargs):
             return default_cache_dir
     else:
         # Create the directory .astropy/cache/halotools/subdir_name
-        catalog_type_dirname = os.path.join(get_halotools_cache_dir(), subdir_name)
+        catalog_type_dirname = os.path.join(halotools_cache_dir, subdir_name)
         defensively_create_subdir(catalog_type_dirname)
 
         # Now check to see if there exists a cache subdirectory for simname
