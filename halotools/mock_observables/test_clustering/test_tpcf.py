@@ -5,6 +5,9 @@ import numpy as np
 import sys
 from ..clustering import tpcf
 
+import pytest
+slow = pytest.mark.slow
+
 __all__=['test_TPCF_auto', 'test_TPCF_estimator', 'test_TPCF_sample_size_limit',\
          'test_TPCF_randoms', 'test_TPCF_period_API']
 
