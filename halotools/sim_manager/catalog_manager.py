@@ -579,8 +579,9 @@ class CatalogManager(object):
                 simname=simname, halo_finder=halo_finder)
             output_fname = os.path.join(cache_dirname, closest_snapshot_fname)
 
-
-
+        # Check whether there are existing catalogs matching the file pattern 
+        # that is about to be downloaded
+        ### LEFT OFF HERE 
 
 
 
