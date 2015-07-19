@@ -324,7 +324,51 @@ class CatalogManager(object):
         return output
 
     def ptcl_cats_available_for_download(self, **kwargs):
-        pass
+        """ Method searches the appropriate web location and 
+        returns a list of the filenames of all reduced  
+        halo catalog binaries processed by Halotools 
+        that are available for download. 
+
+        Parameters 
+        ----------
+        simname : string, optional
+            Nickname of the simulation, e.g. ``bolshoi``. 
+            Argument is used to filter the output list of filenames. 
+            Default is None, in which case `processed_halocats_in_cache` 
+            will not filter the returned list of filenames by ``simname``. 
+
+        Returns 
+        -------
+        output : list 
+            List of web locations of all pre-processed halo catalogs 
+            matching the input arguments. 
+
+        """
+        baseurl = sim_defaults.ptcl_cats_webloc
+        soup = BeautifulSoup(requests.get(baseurl).text)
+        simloclist = []
+        for a in soup.find_all('a', href=True):
+            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+            if dirpath and dirpath[0] != '/':
+                simloclist.append(os.path.join(baseurl, dirpath))
+
+        catlist = []
+        for simloc in simloclist:
+            soup = BeautifulSoup(requests.get(simloc).text)
+            for a in soup.find_all('a'):
+                catlist.append(os.path.join(simloc, a['href']))
+
+        file_pattern = 'particles.hdf5'
+        all_ptcl_cats = fnmatch.filter(catlist, '*'+file_pattern)
+
+        if 'simname' in kwargs.keys():
+            simname = kwargs['simname']
+            file_pattern = '*'+simname+'/*' + file_pattern
+            output = fnmatch.filter(all_ptcl_cats, file_pattern)
+        else:
+            output = all_ptcl_cats
+
+        return output
 
     def closest_matching_catalog_in_cache(self, **kwargs):
         pass
