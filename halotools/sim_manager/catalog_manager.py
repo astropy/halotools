@@ -4,6 +4,9 @@ Methods and classes for halo catalog I/O and organization.
 
 """
 
+import numpy as np
+from warnings import warn
+
 try:
     from bs4 import BeautifulSoup
 except ImportError:
@@ -15,6 +18,10 @@ except ImportError:
     raise("Must have requests package installed to use the catalog_manager module")
 import posixpath
 import urlparse
+
+from ..utils.array_utils import find_idx_nearest_val
+from ..utils.array_utils import array_like_length as custom_len
+from ..utils.io_utils import download_file_from_url
 
 
 from . import supported_sims, cache_config, sim_defaults
@@ -370,8 +377,113 @@ class CatalogManager(object):
 
         return output
 
-    def closest_matching_catalog_in_cache(self, **kwargs):
-        pass
+    def _get_scale_factor_substring(self, fname):
+        """ Method extracts the portion of the Rockstar hlist fname 
+        that contains the scale factor of the snapshot. 
+
+        Parameters 
+        ----------
+        fname : string 
+            Filename of the hlist. 
+
+        Returns 
+        -------
+        scale_factor_substring : string 
+            The substring specifying the scale factor of the snapshot. 
+
+        Notes 
+        -----
+        Assumes that the first character of the relevant substring 
+        is the one immediately following the first incidence of an underscore, 
+        and final character is the one immediately preceding the second decimal. 
+        These assumptions are valid for all catalogs currently on the hipacc website. 
+
+        """
+        first_index = fname.index('_')+1
+        last_index = fname.index('.', fname.index('.')+1)
+        scale_factor_substring = fname[first_index:last_index]
+        return scale_factor_substring
+
+    def closest_catalog_in_cache(self, version_name = sim_defaults.default_version_name, 
+        **kwargs):
+        """
+        Parameters 
+        ----------
+        desired_redshift : float 
+            Redshift of the desired catalog. 
+
+        catalog_type : string 
+            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files. 
+            Must be either ``halos``, ``particles``, or ``raw_halos``
+
+        simname : string
+            Nickname of the simulation, e.g. ``bolshoi``. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar``. 
+            Required when input ``catalog_type`` is ``halos`` or ``raw_halos``. 
+
+        version_name : string, optional 
+            String specifying the version of the processed halo catalog. 
+            Argument is used to filter the output list of filenames. 
+            Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``. 
+
+        external_cache_loc : string, optional 
+            Absolute path to an alternative source of halo catalogs. 
+
+        Returns
+        -------
+        output_fname : list 
+            String of the filename with the closest matching redshift. 
+
+        redshift : float 
+            Value of the redshift of the snapshot
+        """
+
+        simname = kwargs['simname']
+        input_redshift = kwargs['desired_redshift']
+
+        # Verify arguments are as needed
+        catalog_type = kwargs['catalog_type']
+        del kwargs['catalog_type']
+        if catalog_type is not 'particles':
+            try:
+                halo_finder = kwargs['halo_finder']
+            except KeyError:
+                raise("If input catalog_type is not particles, must pass halo_finder argument")
+        else:
+            if 'halo_finder' in kwargs.keys():
+                warn("There is no need to specify a halo-finder when requesting particle data")
+                del kwargs['halo_finder']
+                
+        filename_list = self._scrape_cache(
+            catalog_type = catalog_type, **kwargs)
+
+        if custom_len(filename_list) == 0:
+            print("\nNo matching catalogs found by closest_catalog_in_cache method of CatalogManager\n")
+            return None
+
+        # First create a list of floats storing the scale factors of each hlist file
+        scale_factor_list = []
+        for full_fname in filename_list:
+            fname = os.path.basename(full_fname)
+            scale_factor_substring = self._get_scale_factor_substring(fname)
+            scale_factor = float(scale_factor_substring)
+            scale_factor_list.append(scale_factor)
+        scale_factor_list = np.array(scale_factor_list)
+
+        # Now use the array utils module to determine 
+        # which scale factor is the closest
+        input_scale_factor = 1./(1. + input_redshift)
+        idx_closest_catalog = find_idx_nearest_val(
+            scale_factor_list, input_scale_factor)
+        closest_scale_factor = scale_factor_list[idx_closest_catalog]
+        output_fname = filename_list[idx_closest_catalog]
+
+        redshift = (1./closest_scale_factor) - 1
+
+        return output_fname
+
 
     def download_raw_halocat(self, **kwargs):
         pass
