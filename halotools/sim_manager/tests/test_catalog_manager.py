@@ -55,8 +55,8 @@ class TestCatalogManager(TestCase):
         self.ptclcat_dir = os.path.join(self.dummyloc, 'particle_catalogs')
         defensively_create_empty_dir(self.ptclcat_dir)
 
-        self.raw_halocat_dir = os.path.join(self.dummyloc, 'raw_halo_catalogs')
-        defensively_create_empty_dir(self.raw_halocat_dir)
+        self.raw_halo_table_dir = os.path.join(self.dummyloc, 'raw_halo_catalogs')
+        defensively_create_empty_dir(self.raw_halo_table_dir)
 
         self.simnames = ['bolshoi', 'bolplanck', 'multidark', 'consuelo']
         self.halo_finders = ['rockstar', 'bdm']
@@ -109,7 +109,7 @@ class TestCatalogManager(TestCase):
         assert os.path.isfile(full_fname)
 
     @pytest.mark.skipif('not APH_MACHINE')
-    def test_processed_halocats_in_cache(self):
+    def test_processed_halo_tables_in_cache(self):
 
         for simname in self.simnames:
             attrname = simname + '_fnames'
@@ -118,7 +118,7 @@ class TestCatalogManager(TestCase):
             for version in self.dummy_version_names:
                 basenames_from_setup = [f + '.' + version + self.extension for f in basenames_from_self]
 
-                result = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+                result = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
                     simname = simname, halo_finder = 'rockstar', version_name = version)
                 basenames_from_catman = [os.path.basename(f) for f in result]
 
@@ -126,13 +126,13 @@ class TestCatalogManager(TestCase):
 
         simname = 'bolshoi'
         version = 'halotools.alpha'
-        result_allargs = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+        result_allargs = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
             simname = simname, halo_finder = 'rockstar', version_name = version)
-        result_nosim = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+        result_nosim = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
             halo_finder = 'rockstar', version_name = version)
-        result_noversion = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+        result_noversion = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
             simname = simname, halo_finder = 'rockstar')
-        result_nohf = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+        result_nohf = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
             simname = simname, version_name = version)
 
         assert result_allargs != []
@@ -153,13 +153,13 @@ class TestCatalogManager(TestCase):
         assert set(result_nosim) != (set(result_noversion))
 
     @remote_data
-    def test_ptcl_cats_available_for_download(self):
+    def test_ptcl_tables_available_for_download(self):
 
-        file_list = self.catman.ptcl_cats_available_for_download(simname='bolshoi')
+        file_list = self.catman.ptcl_tables_available_for_download(simname='bolshoi')
         assert len(file_list) == 1
         assert 'hlist_1.00035.particles.hdf5' == os.path.basename(file_list[0])
 
-        file_list = self.catman.ptcl_cats_available_for_download(simname='multidark')
+        file_list = self.catman.ptcl_tables_available_for_download(simname='multidark')
         assert len(file_list) == 1
         assert 'hlist_1.00109.particles.hdf5' == os.path.basename(file_list[0])
 
@@ -169,7 +169,7 @@ class TestCatalogManager(TestCase):
             'hlist_0.67540.particles.hdf5', 
             'hlist_1.00000.particles.hdf5']
             )
-        file_list = self.catman.ptcl_cats_available_for_download(simname='consuelo')
+        file_list = self.catman.ptcl_tables_available_for_download(simname='consuelo')
         assert len(file_list) == 4
         file_set = set([os.path.basename(f) for f in file_list])
         assert file_set == consuelo_set
@@ -180,20 +180,20 @@ class TestCatalogManager(TestCase):
             'hlist_0.66818.particles.hdf5', 
             'hlist_1.00231.particles.hdf5']
             )
-        file_list = self.catman.ptcl_cats_available_for_download(simname='bolplanck')
+        file_list = self.catman.ptcl_tables_available_for_download(simname='bolplanck')
         assert len(file_list) == 4
         file_set = set([os.path.basename(f) for f in file_list])
         assert file_set == bolplanck_set
 
     @remote_data
-    def test_processed_halocats_available_for_download(self):
+    def test_processed_halo_tables_available_for_download(self):
 
-        file_list = self.catman.processed_halocats_available_for_download(
+        file_list = self.catman.processed_halo_tables_available_for_download(
             simname='bolshoi', halo_finder='rockstar')
         assert file_list != []
 
     @pytest.mark.skipif('not APH_MACHINE')
-    def test_closest_processed_halocat_in_cache(self):
+    def test_closest_processed_halo_table_in_cache(self):
 
         catalog_type = 'halos'
         halo_finder = 'rockstar'
@@ -208,7 +208,7 @@ class TestCatalogManager(TestCase):
         assert os.path.basename(closest_fname) == correct_basename
 
     @pytest.mark.skipif('not APH_MACHINE')
-    def test_closest_ptcl_cat_in_cache(self):
+    def test_closest_ptcl_table_in_cache(self):
 
         catalog_type = 'particles'
         simname = 'bolshoi'

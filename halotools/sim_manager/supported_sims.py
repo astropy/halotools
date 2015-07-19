@@ -249,7 +249,7 @@ class HaloCat(object):
         pass
 
     @property 
-    def raw_halocats_available_for_download(self):
+    def raw_halo_tables_available_for_download(self):
         """ Method searches the appropriate web location and 
         returns a list of the filenames of all relevant 
         raw halo catalogs that are available for download. 
@@ -261,7 +261,7 @@ class HaloCat(object):
             for this simulation and halo-finder. 
 
         """
-        url = self.raw_halocat_web_location
+        url = self.raw_halo_table_web_location
 
         soup = BeautifulSoup(requests.get(url).text)
         file_list = []
@@ -274,7 +274,7 @@ class HaloCat(object):
         return output
 
     @property 
-    def preprocessed_halocats_available_for_download(self):
+    def preprocessed_halo_tables_available_for_download(self):
         """ Method searches the appropriate web location and 
         returns a list of the filenames of all reduced  
         halo catalog binaries processed by Halotools 
@@ -287,7 +287,7 @@ class HaloCat(object):
             for this simulation and halo-finder. 
 
         """
-        baseurl = sim_defaults.processed_halocats_webloc
+        baseurl = sim_defaults.processed_halo_tables_webloc
         soup = BeautifulSoup(requests.get(baseurl).text)
         simloclist = []
         for a in soup.find_all('a', href=True):
@@ -488,12 +488,12 @@ class BolshoiRockstar(HaloCat):
         super(BolshoiRockstar, self).__init__(bolshoi, 'rockstar')
 
     @property 
-    def raw_halocat_web_location(self):
+    def raw_halo_table_web_location(self):
         return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
 
     @property
     def original_data_source(self):
-        return self.raw_halocat_web_location
+        return self.raw_halo_table_web_location
 
     @property 
     def halocat_fname_pattern(self):
@@ -589,12 +589,12 @@ class BolPlanckRockstar(HaloCat):
         super(BolPlanckRockstar, self).__init__(bolplanck, 'rockstar')
 
     @property 
-    def raw_halocat_web_location(self):
+    def raw_halo_table_web_location(self):
         return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/'
 
     @property
     def original_data_source(self):
-        return self.raw_halocat_web_location
+        return self.raw_halo_table_web_location
 
     @property 
     def halocat_fname_pattern(self):
@@ -688,12 +688,12 @@ class BolshoiBdm(HaloCat):
         super(BolshoiBdm, self).__init__(bolshoi, 'bdm')
 
     @property 
-    def raw_halocat_web_location(self):
+    def raw_halo_table_web_location(self):
         return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/'
 
     @property
     def original_data_source(self):
-        return self.raw_halocat_web_location
+        return self.raw_halo_table_web_location
 
     @property 
     def halocat_fname_pattern(self):
@@ -761,12 +761,12 @@ class MultiDarkRockstar(HaloCat):
         super(MultiDarkRockstar, self).__init__(multidark, 'rockstar')
 
     @property 
-    def raw_halocat_web_location(self):
+    def raw_halo_table_web_location(self):
         return 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
 
     @property
     def original_data_source(self):
-        return self.raw_halocat_web_location
+        return self.raw_halo_table_web_location
 
     @property 
     def halocat_fname_pattern(self):
@@ -860,12 +860,12 @@ class ConsuleoRockstar(HaloCat):
         super(ConsuleoRockstar, self).__init__(consuelo, 'rockstar')
 
     @property 
-    def raw_halocat_web_location(self):
+    def raw_halo_table_web_location(self):
         return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
 
     @property
     def original_data_source(self):
-        return self.raw_halocat_web_location
+        return self.raw_halo_table_web_location
 
     @property 
     def halocat_fname_pattern(self):
