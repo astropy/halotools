@@ -9,6 +9,8 @@ import numpy as np
 from ..catalog_manager import CatalogManager
 from astropy.config.paths import _find_home 
 
+from astropy.tests.helper import remote_data
+
 from unittest import TestCase
 
 class TestCatalogManager(TestCase):
@@ -135,6 +137,17 @@ class TestCatalogManager(TestCase):
         assert set(result_nohf) != (set(result_nosim))
         assert set(result_nohf) != (set(result_noversion))
         assert set(result_nosim) != (set(result_noversion))
+
+    @remote_data
+    def test_raw_halocats_available_for_download(self):
+        catman = CatalogManager()
+        file_list = catman.ptcl_cats_available_for_download(simname='bolshoi')
+        assert file_list != []
+        assert len(file_list) == 1
+        f = file_list[0]
+        assert 'particles.hdf5' in f
+
+
 
 
     def teardown_class(self):
