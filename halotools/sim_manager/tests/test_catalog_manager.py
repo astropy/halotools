@@ -9,6 +9,18 @@ import numpy as np
 from ..catalog_manager import CatalogManager
 from astropy.config.paths import _find_home 
 
+### Determine whether the machine is mine
+# This will be used to select tests whose 
+# returned values depend on the configuration 
+# of my personal cache directory files
+aph_home = u'/Users/aphearin'
+detected_home = _find_home()
+if aph_home == detected_home:
+    APH_MACHINE = True
+else:
+    APH_MACHINE = False
+
+
 from astropy.tests.helper import remote_data
 
 from unittest import TestCase
@@ -96,6 +108,7 @@ class TestCatalogManager(TestCase):
         full_fname = os.path.join(p, f)
         assert os.path.isfile(full_fname)
 
+    @pytest.mark.skipif('not APH_MACHINE')
     def test_processed_halocats_in_cache(self):
 
         for simname in self.simnames:
@@ -179,7 +192,8 @@ class TestCatalogManager(TestCase):
             simname='bolshoi', halo_finder='rockstar')
         assert file_list != []
 
-    def test_closest_catalog_in_cache(self):
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_closest_processed_halocat_in_cache(self):
 
         catalog_type = 'halos'
         halo_finder = 'rockstar'
@@ -190,9 +204,68 @@ class TestCatalogManager(TestCase):
             desired_redshift = 0.0, halo_finder = halo_finder, 
             simname = simname
             )
-
         correct_basename = 'hlist_1.00030.list.halotools.official.version.hdf5'
         assert os.path.basename(closest_fname) == correct_basename
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_closest_ptcl_cat_in_cache(self):
+
+        catalog_type = 'particles'
+        simname = 'bolshoi'
+
+        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
+            catalog_type=catalog_type, 
+            desired_redshift = 0.0, 
+            simname = simname
+            )
+        correct_basename = 'hlist_1.00035.particles.hdf5'
+        assert os.path.basename(closest_fname) == correct_basename
+       
+        simname = 'consuelo'
+        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
+            catalog_type=catalog_type, 
+            desired_redshift = 0.0, 
+            simname = simname
+            )
+        correct_basename = 'hlist_1.00000.particles.hdf5'
+        assert os.path.basename(closest_fname) == correct_basename
+        
+        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
+            catalog_type=catalog_type, 
+            desired_redshift = 2.0, 
+            simname = simname
+            )
+        correct_basename = 'hlist_0.33324.particles.hdf5'
+        assert os.path.basename(closest_fname) == correct_basename
+
+        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
+            catalog_type=catalog_type, 
+            desired_redshift = 12.0, 
+            simname = simname
+            )
+        correct_basename = 'hlist_0.33324.particles.hdf5'
+        assert os.path.basename(closest_fname) == correct_basename
+
+        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
+            catalog_type=catalog_type, 
+            desired_redshift = 1.2,  
+            simname = simname
+            )
+        correct_basename = 'hlist_0.50648.particles.hdf5'
+        assert os.path.basename(closest_fname) == correct_basename
+
+
+        simname = 'bolplanck'
+        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
+            catalog_type=catalog_type, 
+            desired_redshift = 0.0, 
+            simname = simname
+            )
+        correct_basename = 'hlist_1.00231.particles.hdf5'
+        assert os.path.basename(closest_fname) == correct_basename
+
+
+
 
     def teardown_class(self):
         os.system('rm -rf ' + self.dummyloc)
