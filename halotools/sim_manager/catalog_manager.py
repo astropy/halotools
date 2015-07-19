@@ -6,6 +6,7 @@ Methods and classes for halo catalog I/O and organization.
 
 import numpy as np
 from warnings import warn
+from time import time
 
 try:
     from bs4 import BeautifulSoup
@@ -27,7 +28,7 @@ from astropy.tests.helper import remote_data
 
 
 from . import supported_sims, cache_config, sim_defaults
-import os, fnmatch
+import os, fnmatch, re
 from functools import partial
 
 class CatalogManager(object):
@@ -684,23 +685,35 @@ class CatalogManager(object):
             cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', **kwargs)
             output_fname = os.path.join(cache_dirname, os.path.basename(closest_snapshot_fname))
 
-        return url, output_fname
+        if overwrite == False:
+            file_pattern = os.path.basename(closest_snapshot_fname)
+            # The file may already be decompressed, in which case we don't want to download it again
+            file_pattern = re.sub('.tar.gz', '', file_pattern)
+            file_pattern = re.sub('.gz', '', file_pattern)
+            file_pattern = '*' + file_pattern + '*'
 
-        # Check whether there are existing catalogs matching the file pattern 
-        # that is about to be downloaded
-        ### LEFT OFF HERE 
+            for path, dirlist, filelist in os.walk(cache_dirname):
+                 for fname in filelist:
+                    if fnmatch.filter([fname], file_pattern) != []:
+                        existing_fname = os.path.join(path, fname)
+                        msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
+                            "If you really want to overwrite the file, \n"
+                            "you must call the same function again \n"
+                            "with the keyword argument `overwrite` set to `True`")
+                        print(msg % existing_fname)
+                        return None
 
-        # Check whether there are existing catalogs matching the file pattern 
-        # that is about to be downloaded
-        #is_in_cache = self.check_for_existing_halocat(
-        #    download_loc, 'raw_halos', simname, halo_finder, 
-        #    fname=output_fname)
-
-
+        start = time()
+        download_file_from_url(url, output_fname)
+        end = time()
+        runtime = (end - start)
+        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+        return output_fname
 
 
     def download_processed_halocat(self, **kwargs):
         pass
+
 
     def download_ptcl_cat(self, **kwargs):
         pass
