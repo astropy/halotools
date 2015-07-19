@@ -255,7 +255,7 @@ class CatalogManager(object):
 
         return output
 
-    def orig_halocat_web_location(self, simname, halo_finder):
+    def _orig_halocat_web_location(self, simname, halo_finder):
         """
         Parameters 
         ----------
@@ -311,7 +311,7 @@ class CatalogManager(object):
             matching the input arguments. 
 
         """
-        url = self.orig_halocat_web_location(simname, halo_finder)
+        url = self._orig_halocat_web_location(simname, halo_finder)
 
         soup = BeautifulSoup(requests.get(url).text)
         file_list = []
