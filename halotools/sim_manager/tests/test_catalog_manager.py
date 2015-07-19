@@ -139,13 +139,38 @@ class TestCatalogManager(TestCase):
         assert set(result_nosim) != (set(result_noversion))
 
     @remote_data
-    def test_raw_halocats_available_for_download(self):
+    def test_ptcl_cats_available_for_download(self):
         catman = CatalogManager()
+
         file_list = catman.ptcl_cats_available_for_download(simname='bolshoi')
-        assert file_list != []
         assert len(file_list) == 1
-        f = file_list[0]
-        assert 'particles.hdf5' in f
+        assert 'hlist_1.00035.particles.hdf5' == os.path.basename(file_list[0])
+
+        file_list = catman.ptcl_cats_available_for_download(simname='multidark')
+        assert len(file_list) == 1
+        assert 'hlist_1.00109.particles.hdf5' == os.path.basename(file_list[0])
+
+        consuelo_set = set(
+            ['hlist_0.33324.particles.hdf5', 
+            'hlist_0.50648.particles.hdf5',
+            'hlist_0.67540.particles.hdf5', 
+            'hlist_1.00000.particles.hdf5']
+            )
+        file_list = catman.ptcl_cats_available_for_download(simname='consuelo')
+        assert len(file_list) == 4
+        file_set = set([os.path.basename(f) for f in file_list])
+        assert file_set == consuelo_set
+
+        bolplanck_set = set(
+            ['hlist_0.33406.particles.hdf5', 
+            'hlist_0.50112.particles.hdf5',
+            'hlist_0.66818.particles.hdf5', 
+            'hlist_1.00231.particles.hdf5']
+            )
+        file_list = catman.ptcl_cats_available_for_download(simname='bolplanck')
+        assert len(file_list) == 4
+        file_set = set([os.path.basename(f) for f in file_list])
+        assert file_set == bolplanck_set
 
 
 
