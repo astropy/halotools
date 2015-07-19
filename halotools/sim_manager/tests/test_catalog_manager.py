@@ -44,7 +44,7 @@ class TestCatalogManager(TestCase):
 
         self.simnames = ['bolshoi', 'bolshoiplanck', 'multidark', 'consuelo']
         self.halo_finders = ['rockstar', 'bdm']
-        self.dummy_version_names = ['halotools.alpha', 'some_other_cuts']
+        self.dummy_version_names = ['halotools.alpha']
         self.extension = '.hdf5'
 
         self.bolshoi_fnames = ['hlist_0.33035', 'hlist_0.54435', 'hlist_0.67035', 'hlist_1.00035']
@@ -86,11 +86,11 @@ class TestCatalogManager(TestCase):
                         abs_fname = os.path.join(bdmdir, full_fname)
                         os.system('touch ' + abs_fname)
 
-        #p = os.path.join(self.halocat_dir, 'bolshoi', 'rockstar')
-        #assert os.path.isdir(p)
-        #f = 'hlist_0.33035.halotools.alpha.hdf5'
-        #full_fname = os.path.join(p, f)
-        #assert os.path.isfile(full_fname)
+        p = os.path.join(self.halocat_dir, 'bolshoi', 'bdm')
+        assert os.path.isdir(p)
+        f = 'hlist_0.33030.halotools.alpha.hdf5'
+        full_fname = os.path.join(p, f)
+        assert os.path.isfile(full_fname)
 
     def test_processed_halocats_in_cache(self):
         catman = CatalogManager()
@@ -108,6 +108,8 @@ class TestCatalogManager(TestCase):
 
                 assert set(basenames_from_catman) == set(basenames_from_setup)
 
+        simname = 'bolshoi'
+        version = 'halotools.alpha'
         result_allargs = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
             simname = simname, halo_finder = 'rockstar', version_name = version)
         result_nosim = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
@@ -126,11 +128,13 @@ class TestCatalogManager(TestCase):
         assert set(result_allargs).issubset(set(result_noversion))
         assert set(result_allargs).issubset(set(result_nohf))
 
+        assert set(result_allargs) != set(result_nohf)
+        assert set(result_allargs) != set(result_nosim)
+        assert set(result_allargs) == set(result_noversion)
+
         assert set(result_nohf) != (set(result_nosim))
         assert set(result_nohf) != (set(result_noversion))
         assert set(result_nosim) != (set(result_noversion))
-
-        assert len(result_nohf) < len(result_noversion)
 
 
 
