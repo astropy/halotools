@@ -404,12 +404,12 @@ class CatalogManager(object):
         scale_factor_substring = fname[first_index:last_index]
         return scale_factor_substring
 
-    def _closest_fname(self, filename_list, redshift):
+    def _closest_fname(self, filename_list, desired_redshift):
 
-        if redshift == 0.:
-            input_scale_factor == 1.
+        if desired_redshift == -1:
+            raise ValueError("desired_redshift of -1 is unphysical")
         else:
-            input_scale_factor = (1./redshift) - 1
+            input_scale_factor = 1./(1.+desired_redshift) 
 
         # First create a list of floats storing the scale factors of each hlist file
         scale_factor_list = []
@@ -422,7 +422,7 @@ class CatalogManager(object):
 
         # Now use the array utils module to determine 
         # which scale factor is the closest
-        input_scale_factor = 1./(1. + input_redshift)
+        input_scale_factor = 1./(1. + desired_redshift)
         idx_closest_catalog = find_idx_nearest_val(
             scale_factor_list, input_scale_factor)
         closest_scale_factor = scale_factor_list[idx_closest_catalog]
@@ -432,7 +432,8 @@ class CatalogManager(object):
 
         return output_fname, closest_available_redshift
 
-    def closest_catalog_in_cache(self, version_name = sim_defaults.default_version_name, 
+    def closest_catalog_in_cache(self, desired_redshift, 
+        version_name = sim_defaults.default_version_name, 
         **kwargs):
         """
         Parameters 
@@ -469,7 +470,6 @@ class CatalogManager(object):
         """
 
         simname = kwargs['simname']
-        input_redshift = kwargs['desired_redshift']
 
         # Verify arguments are as needed
         catalog_type = kwargs['catalog_type']
@@ -491,12 +491,72 @@ class CatalogManager(object):
             print("\nNo matching catalogs found by closest_catalog_in_cache method of CatalogManager\n")
             return None
 
-        output_fname, redshift = self._closest_fname(filename_list, input_redshift)
+        output_fname, redshift = self._closest_fname(filename_list, desired_redshift)
 
         return output_fname, redshift
 
+    def closest_catalog_on_web(self, catalog_type, desired_redshift, **kwargs):
+        """
+        Parameters 
+        ----------
+        desired_redshift : float 
+            Redshift of the desired catalog. 
 
-    def download_raw_halocat(self, **kwargs):
+        catalog_type : string 
+            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files. 
+            Must be either ``halos``, ``particles``, or ``raw_halos``
+
+        simname : string
+            Nickname of the simulation, e.g. ``bolshoi``. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar``. 
+            Required when input ``catalog_type`` is ``halos`` or ``raw_halos``. 
+
+        version_name : string, optional 
+            String specifying the version of the processed halo catalog. 
+            Argument is used to filter the output list of filenames. 
+            Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``. 
+
+        external_cache_loc : string, optional 
+            Absolute path to an alternative source of halo catalogs. 
+
+        Returns
+        -------
+        output_fname : list 
+            String of the filename with the closest matching redshift. 
+
+        redshift : float 
+            Value of the redshift of the snapshot
+        """
+
+        simname = kwargs['simname']
+
+        # Verify arguments are as needed
+        catalog_type = kwargs['catalog_type']
+        del kwargs['catalog_type']
+        if catalog_type is not 'particles':
+            try:
+                halo_finder = kwargs['halo_finder']
+            except KeyError:
+                raise("If input catalog_type is not particles, must pass halo_finder argument")
+        else:
+            if 'halo_finder' in kwargs.keys():
+                warn("There is no need to specify a halo-finder when requesting particle data")
+                del kwargs['halo_finder']
+                
+        filename_list = self._scrape_cache(
+            catalog_type = catalog_type, **kwargs)
+
+        if custom_len(filename_list) == 0:
+            print("\nNo matching catalogs found by closest_catalog_in_cache method of CatalogManager\n")
+            return None
+
+        output_fname, redshift = self._closest_fname(filename_list, desired_redshift)
+
+        return output_fname, redshift
+
+    def download_raw_halocat(self, desired_redshift, **kwargs):
         """ Method to download one of the pre-processed binary files 
         storing a reduced halo catalog.  
 
@@ -533,7 +593,6 @@ class CatalogManager(object):
             halo catalog.  
         """
 
-        desired_redshift = kwargs['desired_redshift']
         simname = kwargs['simname']
         halo_finder = kwargs['halo_finder']
 
@@ -582,6 +641,12 @@ class CatalogManager(object):
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
         ### LEFT OFF HERE 
+
+        # Check whether there are existing catalogs matching the file pattern 
+        # that is about to be downloaded
+        is_in_cache = self.check_for_existing_halocat(
+            download_loc, 'raw_halos', simname, halo_finder, 
+            fname=output_fname)
 
 
 
