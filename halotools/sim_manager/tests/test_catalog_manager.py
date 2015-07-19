@@ -102,14 +102,35 @@ class TestCatalogManager(TestCase):
             for version in self.dummy_version_names:
                 basenames_from_setup = [f + '.' + version + self.extension for f in basenames_from_self]
 
-
                 result = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
                     simname = simname, halo_finder = 'rockstar', version_name = version)
-                assert result != []
-
                 basenames_from_catman = [os.path.basename(f) for f in result]
-                
+
                 assert set(basenames_from_catman) == set(basenames_from_setup)
+
+        result_allargs = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+            simname = simname, halo_finder = 'rockstar', version_name = version)
+        result_nosim = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+            halo_finder = 'rockstar', version_name = version)
+        result_noversion = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+            simname = simname, halo_finder = 'rockstar')
+        result_nohf = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+            simname = simname, version_name = version)
+
+        assert result_allargs != []
+        assert result_nosim != []
+        assert result_noversion != []
+        assert result_nohf != []
+
+        assert set(result_allargs).issubset(set(result_nosim))
+        assert set(result_allargs).issubset(set(result_noversion))
+        assert set(result_allargs).issubset(set(result_nohf))
+
+        assert set(result_nohf) != (set(result_nosim))
+        assert set(result_nohf) != (set(result_noversion))
+        assert set(result_nosim) != (set(result_noversion))
+
+        assert len(result_nohf) < len(result_noversion)
 
 
 
