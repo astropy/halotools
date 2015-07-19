@@ -942,9 +942,6 @@ class CatalogManager(object):
     def retrieve_processed_halocat_from_cache(self, **kwargs):
         pass
 
-    def retrieve_raw_halocat_from_cache(self, **kwargs):
-        pass
-
     def store_newly_processed_halocat(self, **kwargs):
         pass
 
