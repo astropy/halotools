@@ -279,16 +279,16 @@ class CatalogManager(object):
 
         return output
 
-    def _orig_halocat_web_location(self, simname, halo_finder):
+    def _orig_halocat_web_location(self, **kwargs):
         """
         Parameters 
         ----------
-        simname : string, optional
+        simname : string
             Nickname of the simulation. Currently supported simulations are 
             Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             
-        halo_finder : string, optional
+        halo_finder : string
             Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``.
 
         Returns 
@@ -296,6 +296,13 @@ class CatalogManager(object):
         webloc : string 
             Web location from which the original halo catalogs were downloaded.  
         """
+        try:
+            simname = kwargs['simname']
+            halo_finder = kwargs['halo_finder']
+        except KeyError:
+            raise("CatalogManager._orig_halocat_web_location method "
+                "must be called with ``simname`` and ``halo_finder`` arguments")
+
         if simname == 'multidark':
             return 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
         elif simname == 'bolshoi':
@@ -343,7 +350,7 @@ class CatalogManager(object):
         simname = kwargs['simname']
         halo_finder = kwargs['halo_finder']
 
-        url = self._orig_halocat_web_location(simname, halo_finder)
+        url = self._orig_halocat_web_location(**kwargs)
 
         soup = BeautifulSoup(requests.get(url).text)
         file_list = []
@@ -527,8 +534,7 @@ class CatalogManager(object):
 
         return output_fname, redshift
 
-    def closest_catalog_on_web(self, catalog_type, desired_redshift, 
-        version_name = sim_defaults.default_version_name, **kwargs):
+    def closest_catalog_on_web(self, **kwargs):
         """
         Parameters 
         ----------
@@ -575,6 +581,8 @@ class CatalogManager(object):
         >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
 
         """
+        if 'version_name' not in kwargs.keys():
+            kwargs['version_name'] = sim_defaults.default_version_name
 
         # Verify arguments are as needed
         try:
@@ -582,6 +590,7 @@ class CatalogManager(object):
         except KeyError:
             raise("Must supply input simname keyword argument")
 
+        catalog_type = kwargs['catalog_type']
         if catalog_type is not 'particles':
             try:
                 halo_finder = kwargs['halo_finder']
@@ -595,17 +604,16 @@ class CatalogManager(object):
         if catalog_type is 'particles':
             filename_list = self.ptcl_cats_available_for_download(**kwargs)
         elif catalog_type is 'raw_halos':
-            filename_list = self.raw_halocats_available_for_download(
-                simname=simname, halo_finder=halo_finder)
+            filename_list = self.raw_halocats_available_for_download(**kwargs)
         elif catalog_type is 'halos':
-            filename_list = self.processed_halocats_available_for_download(
-                simname=simname, halo_finder=halo_finder)
+            filename_list = self.processed_halocats_available_for_download(**kwargs)
 
+        desired_redshift = kwargs['desired_redshift']
         output_fname, redshift = self._closest_fname(filename_list, desired_redshift)
 
         return output_fname, redshift
 
-    def download_raw_halocat(self, desired_redshift, **kwargs):
+    def download_raw_halocat(self, dz_tol = 0.1, overwrite=False, **kwargs):
         """ Method to download one of the pre-processed binary files 
         storing a reduced halo catalog.  
 
@@ -643,24 +651,11 @@ class CatalogManager(object):
             Filename (including absolute path) of the location of the downloaded 
             halo catalog.  
         """
+        desired_redshift = kwargs['desired_redshift']
 
-        simname = kwargs['simname']
-        halo_finder = kwargs['halo_finder']
+        available_fnames_to_download = self.raw_halocats_available_for_download(**kwargs)
 
-        if 'dz_tol' in kwargs.keys():
-            dz_tol = kwargs['dz_tol']
-        else:
-            dz_tol = 0.1
-
-        if 'overwrite' in kwargs.keys():
-            overwrite = kwargs['overwrite']
-        else:
-            overwrite = False
-
-        available_fnames_to_download = self.raw_halocats_available_for_download(
-            simname=simname, halo_finder = halo_finder)
-
-        closest_name, closest_redshift = (
+        closest_snapshot_fname, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
@@ -668,26 +663,28 @@ class CatalogManager(object):
                 "No raw %s halo catalog has \na redshift within %.2f " + 
                 "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
                 )
-            print(msg % (simname, dz_tol, desired_redshift, closest_redshift))
+            print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
 
-        webloc = self._orig_halocat_web_location(simname = simname, halo_finder=halo_finder)
-        url = os.path.join(webloc, closest_name)
+        webloc = self._orig_halocat_web_location(**kwargs)
+        url = os.path.join(webloc, closest_snapshot_fname)
 
         if 'external_cache_loc' in kwargs.keys():
             external_cache_loc = kwargs['external_cache_loc']
             # We were given an explicit path to store the catalog
             # Check that this path actually exists, and if so, use it 
-            if not os.path.exists(external_cache_loc):
+            if os.path.exists(external_cache_loc):
+                output_fname = os.path.join(external_cache_loc, os.path.basename(closest_snapshot_fname))
+            else:
                 raise IOError("Input directory name %s for download location"
                     "of raw halo catalog does not exist" % external_cache_loc)
-            else:
-                output_fname = os.path.join(external_cache_loc, closest_snapshot_fname)
+                
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
-            cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', 
-                simname=simname, halo_finder=halo_finder)
-            output_fname = os.path.join(cache_dirname, closest_snapshot_fname)
+            cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', **kwargs)
+            output_fname = os.path.join(cache_dirname, os.path.basename(closest_snapshot_fname))
+
+        return url, output_fname
 
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
@@ -698,6 +695,7 @@ class CatalogManager(object):
         #is_in_cache = self.check_for_existing_halocat(
         #    download_loc, 'raw_halos', simname, halo_finder, 
         #    fname=output_fname)
+
 
 
 
