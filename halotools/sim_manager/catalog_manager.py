@@ -965,9 +965,13 @@ class CatalogManager(object):
         fname, z = self.closest_catalog_in_cache(simname = simname, 
             catalog_type='particles', desired_redshift=desired_redshift, **kwargs)
 
+        if abs(z-desired_redshift) > 0.01:
+            print("\nClosest matching table of particles in cache is for z = %.3f" % z)
+            print("Loading table with the following filename:\n %s" % fname)
+            print("\nIf your science application requires particles an exact snapshot, "
+                "be sure to double-check that this filename is as expected\n")
+
         return Table.read(fname, path='data')
-
-
 
     def retrieve_processed_halo_table_from_cache(self, **kwargs):
         pass
