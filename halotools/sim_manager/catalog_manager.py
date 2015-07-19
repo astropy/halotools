@@ -486,7 +486,6 @@ class CatalogManager(object):
         return output_fname, closest_available_redshift
 
     def closest_catalog_in_cache(self, catalog_type, desired_redshift, 
-        version_name = sim_defaults.default_version_name, 
         **kwargs):
         """
         Parameters 
@@ -544,6 +543,8 @@ class CatalogManager(object):
                 warn("There is no need to specify a halo-finder when requesting particle data")
                 del kwargs['halo_finder']
                 
+        #if 'version_name' not in kwargs.keys():
+        #    kwargs['version_name'] = sim_defaults.default_version_name
         filename_list = self._scrape_cache(
             catalog_type = catalog_type, **kwargs)
 
