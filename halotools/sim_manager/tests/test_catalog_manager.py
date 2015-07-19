@@ -137,11 +137,6 @@ class TestCatalogManager(TestCase):
         assert set(result_nosim) != (set(result_noversion))
 
 
-
-
-
-
-
     def teardown_class(self):
         os.system('rm -rf ' + self.dummyloc)
 

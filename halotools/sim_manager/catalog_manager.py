@@ -4,7 +4,20 @@ Methods and classes for halo catalog I/O and organization.
 
 """
 
-from . import supported_sims, cache_config
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    raise("Must have bs4 package installed to use the catalog_manager module")
+
+try:
+    import requests
+except ImportError:
+    raise("Must have requests package installed to use the catalog_manager module")
+import posixpath
+import urlparse
+
+
+from . import supported_sims, cache_config, sim_defaults
 import os, fnmatch
 from functools import partial
 
@@ -170,7 +183,78 @@ class CatalogManager(object):
         return f(**kwargs)
 
     def processed_halocats_available_for_download(self, **kwargs):
-        pass
+        """ Method searches the appropriate web location and 
+        returns a list of the filenames of all reduced  
+        halo catalog binaries processed by Halotools 
+        that are available for download. 
+
+        Parameters 
+        ----------
+        simname : string, optional
+            Nickname of the simulation, e.g. `bolshoi`. 
+            Argument is used to filter the output list of filenames. 
+            Default is None, in which case `processed_halocats_in_cache` 
+            will not filter the returned list of filenames by ``simname``. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. `rockstar`. 
+            Argument is used to filter the output list of filenames. 
+            Default is None, in which case `processed_halocats_in_cache` 
+            will not filter the returned list of filenames by ``halo_finder``. 
+
+        Returns 
+        -------
+        output : list 
+            List of web locations of all pre-processed halo catalogs 
+            matching the input arguments. 
+
+        """
+        baseurl = sim_defaults.processed_halocats_webloc
+        soup = BeautifulSoup(requests.get(baseurl).text)
+        simloclist = []
+        for a in soup.find_all('a', href=True):
+            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+            if dirpath and dirpath[0] != '/':
+                simloclist.append(os.path.join(baseurl, dirpath))
+
+        halocatloclist = []
+        for simloc in simloclist:
+            soup = BeautifulSoup(requests.get(simloc).text)
+            for a in soup.find_all('a', href=True):
+                dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+                if dirpath and dirpath[0] != '/':
+                    halocatloclist.append(os.path.join(simloc, dirpath))
+
+        catlist = []
+        for halocatdir in halocatloclist:
+            soup = BeautifulSoup(requests.get(halocatdir).text)
+            for a in soup.find_all('a'):
+                catlist.append(os.path.join(halocatdir, a['href']))
+
+        file_pattern = sim_defaults.default_version_name + '.hdf5'
+        all_halocats = fnmatch.filter(catlist, '*'+file_pattern)
+
+        # all_halocats a list of all pre-processed catalogs on the web
+        # Now we apply our filter, if applicable
+
+        if ('simname' in kwargs.keys()) & ('halo_finder' in kwargs.keys()):
+            simname = kwargs['simname']
+            halo_finder = kwargs['halo_finder']
+            file_pattern = '*'+simname+'/'+halo_finder+'/*' + file_pattern
+            output = fnmatch.filter(all_halocats, file_pattern)
+        elif 'simname' in kwargs.keys():
+            simname = kwargs['simname']
+            file_pattern = '*'+simname+'/*' + file_pattern
+            output = fnmatch.filter(all_halocats, file_pattern)
+        elif 'halo_finder' in kwargs.keys():
+            halo_finder = kwargs['halo_finder']
+            file_pattern = '*/' + halo_finder + '/*' + file_pattern
+            output = fnmatch.filter(all_halocats, file_pattern)
+        else:
+            output = all_halocats
+
+        return output
+
 
     def raw_halocats_available_for_download(self, **kwargs):
         pass
