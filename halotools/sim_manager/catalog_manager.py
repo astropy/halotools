@@ -25,7 +25,7 @@ from ..utils.array_utils import array_like_length as custom_len
 from ..utils.io_utils import download_file_from_url
 
 from astropy.tests.helper import remote_data
-
+from astropy.table import Table
 
 from . import supported_sims, cache_config, sim_defaults
 import os, fnmatch, re
@@ -489,8 +489,7 @@ class CatalogManager(object):
 
         return output_fname, closest_available_redshift
 
-    def closest_catalog_in_cache(self, catalog_type, desired_redshift, 
-        **kwargs):
+    def closest_catalog_in_cache(self, catalog_type, desired_redshift, **kwargs):
         """
         Parameters 
         ----------
@@ -930,21 +929,51 @@ class CatalogManager(object):
                         return None
 
         start = time()
-        #download_file_from_url(url, output_fname)
+        download_file_from_url(url, output_fname)
         end = time()
         runtime = (end - start)
         print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
         return output_fname
 
-    def retrieve_ptcl_cat_from_cache(self, **kwargs):
-        pass
+    def retrieve_ptcl_cat_from_cache(self, simname, desired_redshift, **kwargs):
+        """
+        Parameters 
+        ----------
+        desired_redshift : float 
+            Redshift of the desired catalog. 
+
+        simname : string
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
+        external_cache_loc : string, optional 
+            Absolute path to an alternative source of catalogs. This file searcher assumes 
+            that ``external_cache_loc`` has the same organizational structure as the 
+            default Halotools cache. So if you are searching for particles, 
+            and ``external_cache_loc`` has particle data for some simulation ``simname``, 
+            then there must be a directory ``external_cache_loc/simname`` where the hdf5 files 
+            are stored. If you are searching for halos, there must be a directory 
+            ``external_cache_loc/simname/halo_finder`` where the halo catalogs are stored. 
+
+        Returns
+        -------
+        particles : Astropy Table 
+            `~astropy.table.Table` object storing position and velocity of particles. 
+        """        
+
+        fname, z = self.closest_catalog_in_cache(simname = simname, 
+            catalog_type='particles', desired_redshift=desired_redshift, **kwargs)
+
+        return Table.read(fname, path='data')
+
+
 
     def retrieve_processed_halocat_from_cache(self, **kwargs):
         pass
 
     def store_newly_processed_halocat(self, **kwargs):
         pass
-
 
 
 class HaloCatalogProcessor(object):
