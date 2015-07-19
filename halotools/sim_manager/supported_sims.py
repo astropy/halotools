@@ -50,9 +50,13 @@ class NbodySimulation(object):
     def __init__(self, simname, Lbox, particle_mass, num_ptcl_per_dim, 
         softening_length, initial_redshift, cosmology):
         """
+        Parameters 
+        -----------
         simname : string 
-            Nickname of the simulation, e.g., 'bolshoi', or 'consuelo'. 
-
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
         Lbox : float
             Size of the simulated box in Mpc with h=1 units. 
 

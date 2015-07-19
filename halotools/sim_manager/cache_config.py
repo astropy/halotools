@@ -93,7 +93,9 @@ def get_catalogs_dir(**kwargs):
         Should be 'particles', 'subhalos', or 'raw_halos'. 
 
     simname : string, optional keyword argument 
-        Nickname of the simulation, e.g., `bolshoi`. 
+        Nickname of the simulation. Currently supported simulations are 
+        Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+        MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
 
     halo_finder : string, optional keyword argument 
         Nickname of the halo-finder, e.g., `rockstar` or `bdm`. 
@@ -184,7 +186,9 @@ def processed_halocats_web_location(**kwargs):
     Parameters 
     ----------
     simname : string, optional keyword argument 
-        Nickname of the simulation, e.g., `bolshoi`. 
+        Nickname of the simulation. Currently supported simulations are 
+        Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+        MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
 
     halo_finder : string, optional keyword argument 
         Nickname of the halo-finder, e.g., `rockstar` or `bdm`. 
