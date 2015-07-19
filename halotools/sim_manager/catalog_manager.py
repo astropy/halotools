@@ -40,13 +40,13 @@ class CatalogManager(object):
             Must be either 'halos', 'particles', or 'raw_halos'
 
         simname : string, optional
-            Nickname of the simulation, e.g. `bolshoi`. 
+            Nickname of the simulation, e.g. ``bolshoi``. 
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. `rockstar`. 
+            Nickname of the halo-finder, e.g. ``rockstar``. 
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``halo_finder``. 
@@ -98,13 +98,13 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. `bolshoi`. 
+            Nickname of the simulation, e.g. ``bolshoi``. 
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. `rockstar`. 
+            Nickname of the halo-finder, e.g. ``rockstar``. 
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``halo_finder``. 
@@ -134,13 +134,13 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. `bolshoi`. 
+            Nickname of the simulation, e.g. ``bolshoi``. 
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. `rockstar`. 
+            Nickname of the halo-finder, e.g. ``rockstar``. 
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``halo_finder``. 
@@ -163,7 +163,7 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. `bolshoi`. 
+            Nickname of the simulation, e.g. ``bolshoi``. 
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
@@ -191,13 +191,13 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. `bolshoi`. 
+            Nickname of the simulation, e.g. ``bolshoi``. 
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. `rockstar`. 
+            Nickname of the halo-finder, e.g. ``rockstar``. 
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``halo_finder``. 
@@ -255,9 +255,73 @@ class CatalogManager(object):
 
         return output
 
+    def orig_halocat_web_location(self, simname, halo_finder):
+        """
+        Parameters 
+        ----------
+        simname : string, optional
+            Nickname of the simulation, e.g. ``bolshoi``. 
 
-    def raw_halocats_available_for_download(self, **kwargs):
-        pass
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``.
+
+        Returns 
+        -------
+        webloc : string 
+            Web location from which the original halo catalogs were downloaded.  
+        """
+        if simname == 'multidark':
+            return 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
+        elif simname == 'bolshoi':
+            if halo_finder == 'rockstar':
+                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
+            elif halo_finder == 'bdm':
+                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/' 
+        elif simname == 'bolshoiplanck':
+            return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/' 
+        elif simname == 'consuelo':
+            return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
+        else:
+            raise KeyError("Input simname %s and halo_finder %s do not "
+                "have Halotools-recognized web locations" % (simname, halo_finder))
+
+    def raw_halocats_available_for_download(self, simname, halo_finder):
+        """ Method searches the appropriate web location and 
+        returns a list of the filenames of all relevant 
+        raw halo catalogs that are available for download. 
+
+        Parameters 
+        ----------
+        simname : string
+            Nickname of the simulation, e.g. ``bolshoi``. 
+            Argument is used to filter the output list of filenames. 
+            Default is None, in which case `processed_halocats_in_cache` 
+            will not filter the returned list of filenames by ``simname``. 
+
+        halo_finder : string
+            Nickname of the halo-finder, e.g. ``rockstar``. 
+            Argument is used to filter the output list of filenames. 
+            Default is None, in which case `processed_halocats_in_cache` 
+            will not filter the returned list of filenames by ``halo_finder``. 
+
+        Returns 
+        -------
+        output : list 
+            List of web locations of all pre-processed halo catalogs 
+            matching the input arguments. 
+
+        """
+        url = self.orig_halocat_web_location(simname, halo_finder)
+
+        soup = BeautifulSoup(requests.get(url).text)
+        file_list = []
+        for a in soup.find_all('a'):
+            file_list.append(os.path.join(url, a['href']))
+
+        file_pattern = '*hlist_*'
+        output = fnmatch.filter(file_list, file_pattern)
+
+        return output
 
     def ptcl_cats_available_for_download(self, **kwargs):
         pass
