@@ -292,7 +292,7 @@ class CatalogManager(object):
             raise KeyError("Input simname %s and halo_finder %s do not "
                 "have Halotools-recognized web locations" % (simname, halo_finder))
 
-    def raw_halocats_available_for_download(self, simname, halo_finder):
+    def raw_halocats_available_for_download(self, **kwargs):
         """ Method searches the appropriate web location and 
         returns a list of the filenames of all relevant 
         raw halo catalogs that are available for download. 
@@ -318,6 +318,9 @@ class CatalogManager(object):
             matching the input arguments. 
 
         """
+        simname = kwargs['simname']
+        halo_finder = kwargs['halo_finder']
+
         url = self._orig_halocat_web_location(simname, halo_finder)
 
         soup = BeautifulSoup(requests.get(url).text)
@@ -432,7 +435,7 @@ class CatalogManager(object):
 
         return output_fname, closest_available_redshift
 
-    def closest_catalog_in_cache(self, desired_redshift, 
+    def closest_catalog_in_cache(self, catalog_type, desired_redshift, 
         version_name = sim_defaults.default_version_name, 
         **kwargs):
         """
@@ -458,7 +461,13 @@ class CatalogManager(object):
             Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``. 
 
         external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
+            Absolute path to an alternative source of catalogs. This file searcher assumes 
+            that ``external_cache_loc`` has the same organizational structure as the 
+            default Halotools cache. So if you are searching for particles, 
+            and ``external_cache_loc`` has particle data for some simulation ``simname``, 
+            then there must be a directory ``external_cache_loc/simname`` where the hdf5 files 
+            are stored. If you are searching for halos, there must be a directory 
+            ``external_cache_loc/simname/halo_finder`` where the halo catalogs are stored. 
 
         Returns
         -------
@@ -469,11 +478,7 @@ class CatalogManager(object):
             Value of the redshift of the snapshot
         """
 
-        simname = kwargs['simname']
-
         # Verify arguments are as needed
-        catalog_type = kwargs['catalog_type']
-        del kwargs['catalog_type']
         if catalog_type is not 'particles':
             try:
                 halo_finder = kwargs['halo_finder']
@@ -495,7 +500,8 @@ class CatalogManager(object):
 
         return output_fname, redshift
 
-    def closest_catalog_on_web(self, catalog_type, desired_redshift, **kwargs):
+    def closest_catalog_on_web(self, catalog_type, desired_redshift, 
+        version_name = sim_defaults.default_version_name, **kwargs):
         """
         Parameters 
         ----------
@@ -519,7 +525,13 @@ class CatalogManager(object):
             Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``. 
 
         external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
+            Absolute path to an alternative source of catalogs. This file searcher assumes 
+            that ``external_cache_loc`` has the same organizational structure as the 
+            default Halotools cache. So if you are searching for particles, 
+            and ``external_cache_loc`` has particle data for some simulation ``simname``, 
+            then there must be a directory ``external_cache_loc/simname`` where the hdf5 files 
+            are stored. If you are searching for halos, there must be a directory 
+            ``external_cache_loc/simname/halo_finder`` where the halo catalogs are stored. 
 
         Returns
         -------
@@ -530,11 +542,12 @@ class CatalogManager(object):
             Value of the redshift of the snapshot
         """
 
-        simname = kwargs['simname']
-
         # Verify arguments are as needed
-        catalog_type = kwargs['catalog_type']
-        del kwargs['catalog_type']
+        try:
+            simname = kwargs['simname']
+        except KeyError:
+            raise("Must supply input simname keyword argument")
+
         if catalog_type is not 'particles':
             try:
                 halo_finder = kwargs['halo_finder']
@@ -544,13 +557,15 @@ class CatalogManager(object):
             if 'halo_finder' in kwargs.keys():
                 warn("There is no need to specify a halo-finder when requesting particle data")
                 del kwargs['halo_finder']
-                
-        filename_list = self._scrape_cache(
-            catalog_type = catalog_type, **kwargs)
 
-        if custom_len(filename_list) == 0:
-            print("\nNo matching catalogs found by closest_catalog_in_cache method of CatalogManager\n")
-            return None
+        if catalog_type is 'particles':
+            filename_list = self.ptcl_cats_available_for_download(**kwargs)
+        elif catalog_type is 'raw_halos':
+            filename_list = self.raw_halocats_available_for_download(
+                simname=simname, halo_finder=halo_finder)
+        elif catalog_type is 'halos':
+            filename_list = self.processed_halocats_available_for_download(
+                simname=simname, halo_finder=halo_finder)
 
         output_fname, redshift = self._closest_fname(filename_list, desired_redshift)
 
