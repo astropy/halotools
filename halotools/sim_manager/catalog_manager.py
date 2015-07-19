@@ -23,6 +23,8 @@ from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import array_like_length as custom_len
 from ..utils.io_utils import download_file_from_url
 
+from astropy.tests.helper import remote_data
+
 
 from . import supported_sims, cache_config, sim_defaults
 import os, fnmatch
@@ -47,7 +49,10 @@ class CatalogManager(object):
             Must be either 'halos', 'particles', or 'raw_halos'
 
         simname : string, optional
-            Nickname of the simulation, e.g. ``bolshoi``. 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
@@ -105,7 +110,10 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. ``bolshoi``. 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
@@ -141,7 +149,10 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. ``bolshoi``. 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
@@ -170,7 +181,10 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. ``bolshoi``. 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
@@ -198,7 +212,10 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. ``bolshoi``. 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
@@ -267,8 +284,10 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. ``bolshoi``. 
-
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
         halo_finder : string, optional
             Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``.
 
@@ -300,7 +319,10 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string
-            Nickname of the simulation, e.g. ``bolshoi``. 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
@@ -342,7 +364,10 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string, optional
-            Nickname of the simulation, e.g. ``bolshoi``. 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
             Argument is used to filter the output list of filenames. 
             Default is None, in which case `processed_halocats_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
@@ -449,8 +474,10 @@ class CatalogManager(object):
             Must be either ``halos``, ``particles``, or ``raw_halos``
 
         simname : string
-            Nickname of the simulation, e.g. ``bolshoi``. 
-
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
         halo_finder : string, optional
             Nickname of the halo-finder, e.g. ``rockstar``. 
             Required when input ``catalog_type`` is ``halos`` or ``raw_halos``. 
@@ -513,7 +540,9 @@ class CatalogManager(object):
             Must be either ``halos``, ``particles``, or ``raw_halos``
 
         simname : string
-            Nickname of the simulation, e.g. ``bolshoi``. 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
 
         halo_finder : string, optional
             Nickname of the halo-finder, e.g. ``rockstar``. 
@@ -524,15 +553,6 @@ class CatalogManager(object):
             Argument is used to filter the output list of filenames. 
             Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``. 
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of catalogs. This file searcher assumes 
-            that ``external_cache_loc`` has the same organizational structure as the 
-            default Halotools cache. So if you are searching for particles, 
-            and ``external_cache_loc`` has particle data for some simulation ``simname``, 
-            then there must be a directory ``external_cache_loc/simname`` where the hdf5 files 
-            are stored. If you are searching for halos, there must be a directory 
-            ``external_cache_loc/simname/halo_finder`` where the halo catalogs are stored. 
-
         Returns
         -------
         output_fname : list 
@@ -540,6 +560,20 @@ class CatalogManager(object):
 
         redshift : float 
             Value of the redshift of the snapshot
+
+        Examples 
+        --------
+        >>> catman = CatalogManager()
+
+        Suppose you would like to download a pre-processed halo catalog for the Bolshoi-Planck simulation for z=0.5. 
+        To identify the filename of the available catalog that most closely matches your needs:
+
+        >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='halos', simname='bolplanck', halo_finder='rockstar', desired_redshift=0.5)  # doctest: +REMOTE_DATA
+
+        You may also wish to have a collection of downsampled dark matter particles to accompany this snapshot:
+
+        >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
+
         """
 
         # Verify arguments are as needed
@@ -578,8 +612,10 @@ class CatalogManager(object):
         Parameters 
         ----------
         simname : string 
-            Nickname of the simulation, e.g. `bolshoi`. 
-
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
         halo_finder : string 
             Nickname of the halo-finder, e.g. `rockstar`. 
 
