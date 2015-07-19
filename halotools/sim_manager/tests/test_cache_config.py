@@ -46,7 +46,6 @@ def test_catalogs_config():
 def test_should_not_create_dir():
 	""" Require that attempting to create a cache subdirectory 
 	for an unsupported simulation and/or halo-finder raises an IOError. 
-	"""
 	with pytest.raises(IOError) as exc:
 		parent_dir = cache_config.get_catalogs_dir(catalog_type='raw_halos')
 		nonsense_dirname = 'JoseCanseco'
@@ -68,22 +67,25 @@ def test_should_not_create_dir():
                 "simulation + halo-finder which has no corresponding class defined in "
                 "the halotools/sim_manager/supported_sims module. \n")
 	assert exc.value.args[0] == exception_string
+	"""
+	pass
 
 
 def test_supported_simnames():
 	""" Require `bolshoi`, `bolshoipl`, and `multidark` to 
 	appear in the list of supported simulations. 
 	"""
-	hflist = cache_config.get_supported_simnames()
+	hflist = cache_config.supported_sim_list
 	assert 'bolshoi' in hflist
 	assert 'bolplanck' in hflist
 	assert 'multidark' in hflist
+	assert 'consuelo' in hflist
 
 def test_supported_halo_finders():
 	""" Require `rockstar` to 
 	appear in the list of supported halo-finders for all simulations. 
 	"""
-	simlist = cache_config.get_supported_simnames()
+	simlist = cache_config.supported_sim_list
 	for sim in simlist:
 		hflist = cache_config.get_supported_halo_finders(sim)
 		assert 'rockstar' in hflist
