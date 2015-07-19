@@ -277,7 +277,7 @@ class CatalogManager(object):
                 return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
             elif halo_finder == 'bdm':
                 return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/' 
-        elif simname == 'bolshoiplanck':
+        elif simname == 'bolplanck':
             return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/' 
         elif simname == 'consuelo':
             return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'

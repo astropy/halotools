@@ -31,8 +31,8 @@ from astropy import units as u
 
 
 __all__ = (
-    ['NbodySimulation', 'Bolshoi', 'BolshoiPlanck', 'MultiDark', 'Consuelo', 
-    'HaloCat', 'BolshoiRockstar', 'BolshoiPlanckRockstar', 
+    ['NbodySimulation', 'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo', 
+    'HaloCat', 'BolshoiRockstar', 'BolPlanckRockstar', 
     'BolshoiBdm', 'MultiDarkRockstar', 'ConsuleoRockstar']
     )
 
@@ -107,7 +107,7 @@ class Bolshoi(NbodySimulation):
             softening_length = 1., initial_redshift = 80., cosmology = cosmology.WMAP5)
 
 
-class BolshoiPlanck(NbodySimulation):
+class BolPlanck(NbodySimulation):
     """ Cosmological N-body simulation of Planck 2013 cosmology 
     with Lbox = 250 Mpc/h and 
     particle mass of ~1e8 Msun/h. 
@@ -118,7 +118,7 @@ class BolshoiPlanck(NbodySimulation):
 
     def __init__(self):
 
-        super(BolshoiPlanck, self).__init__(simname = 'bolshoiplanck', Lbox = 250., 
+        super(BolPlanck, self).__init__(simname = 'bolplanck', Lbox = 250., 
             particle_mass = 1.35e8, num_ptcl_per_dim = 2048, 
             softening_length = 1., initial_redshift = 80., cosmology = cosmology.Planck13)
 
@@ -575,14 +575,14 @@ class BolshoiRockstar(HaloCat):
 
         return dt
 
-class BolshoiPlanckRockstar(HaloCat):
+class BolPlanckRockstar(HaloCat):
     """ Rockstar-based halo catalog for the Bolshoi-Planck simulation. 
     """
 
     def __init__(self):
 
-        bolshoiplanck = BolshoiPlanck()
-        super(BolshoiPlanckRockstar, self).__init__(bolshoiplanck, 'rockstar')
+        bolplanck = BolPlanck()
+        super(BolPlanckRockstar, self).__init__(bolplanck, 'rockstar')
 
     @property 
     def raw_halocat_web_location(self):
