@@ -179,19 +179,20 @@ class TestCatalogManager(TestCase):
             simname='bolshoi', halo_finder='rockstar')
         assert file_list != []
 
-    @remote_data
     def test_closest_catalog_in_cache(self):
 
         catalog_type = 'halos'
         halo_finder = 'rockstar'
         simname = 'bolshoi'
 
-        closest_fname = self.catman.closest_catalog_in_cache(
+        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
             catalog_type=catalog_type, 
             desired_redshift = 0.0, halo_finder = halo_finder, 
             simname = simname
             )
 
+        correct_basename = 'hlist_1.00030.list.halotools.official.version.hdf5'
+        assert os.path.basename(closest_fname) == correct_basename
 
     def teardown_class(self):
         os.system('rm -rf ' + self.dummyloc)
