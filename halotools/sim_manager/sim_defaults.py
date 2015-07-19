@@ -27,4 +27,5 @@ default_cosmology = cosmology.WMAP5
 
 # URLs of websites hosting catalogs used by the package
 processed_halocats_webloc = 'http://www.astro.yale.edu/aphearin/Data_files/halo_catalogs'
+ptcl_cats_webloc = 'http://www.astro.yale.edu/aphearin/Data_files/particle_catalogs'
 default_version_name = 'halotools.official.version'
