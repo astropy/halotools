@@ -27,7 +27,7 @@ from ..utils.io_utils import download_file_from_url
 from astropy.tests.helper import remote_data
 from astropy.table import Table
 
-from . import supported_sims, cache_config, sim_defaults
+from . import cache_config, sim_defaults
 import os, fnmatch, re
 from functools import partial
 

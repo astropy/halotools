@@ -5,6 +5,8 @@ various files used throughout the halotools package.
 
 __all__ = ['get_catalogs_dir']
 
+supported_sim_list = ['bolshoi', 'bolplanck', 'consuelo', 'multidark']
+
 import os
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 from astropy.config.paths import _find_home
@@ -12,7 +14,6 @@ from astropy.config.paths import _find_home
 import warnings
 
 from . import sim_defaults
-from . import supported_sims
 
 def simname_is_supported(simname):
     """ Method returns a boolean for whether or not the input 
@@ -28,7 +29,7 @@ def simname_is_supported(simname):
     is_supported : bool 
 
     """
-    return simname in get_supported_simnames()
+    return simname in supported_sim_list
 
 def defensively_create_subdir(dirname):
     if not os.path.exists(dirname):
@@ -41,53 +42,15 @@ def defensively_create_subdir(dirname):
         msg = 'Pathname {0} is not a directory'
         raise IOError(msg.format(dirname))
 
-def get_supported_simnames():
-
-    return [getattr(supported_sims, clname)().simname for clname in supported_sims.__all__ if (
-        (issubclass(getattr(supported_sims, clname), supported_sims.NbodySimulation)) & 
-        (getattr(supported_sims, clname) != supported_sims.NbodySimulation))]
 
 def get_supported_halo_finders(input_simname):
-    class_list = supported_sims.__all__
-    parent_class = supported_sims.HaloCat
 
-    supported_halo_finders = []
-    for clname in class_list:
-        clobj = getattr(supported_sims, clname)
-        if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
-            clinst = clobj()
-            if clinst.simname == input_simname:
-                supported_halo_finders.append(clinst.halo_finder)
-
-    return list(set(supported_halo_finders))
-
-def cache_subdir_for_simulation(parentdir, simname):
-    simulation_cache = os.path.join(parentdir, simname)
-    if os.path.exists(simulation_cache):
-        return simulation_cache
+    if input_simname not in supported_sim_list:
+        raise KeyError("Input simname %s is not recognized by Haltools " % kwargs['simname'])
+    elif input_simname == 'bolshoi':
+        return ['bdm', 'rockstar']
     else:
-        supported_sims = get_supported_simnames()
-        if simname in supported_sims:
-            return simulation_cache
-        else:
-            raise IOError("It is not permissible to create a subdirectory of "
-                "Halotools cache \nfor simulations which have no class defined in "
-                "the halotools/sim_manager/supported_sims module. \n")
-
-def cache_subdir_for_halo_finder(parentdir, simname, halo_finder):
-    halo_finder_cache = os.path.join(parentdir, halo_finder)
-    if os.path.exists(halo_finder_cache):
-        return halo_finder_cache
-    else:
-        supported_halo_finders = get_supported_halo_finders(simname)
-        if halo_finder in supported_halo_finders:
-            return halo_finder_cache
-        else:
-            raise IOError("It is not permissible to create a subdirectory of "
-                "Halotools cache \nfor a combination of "
-                "simulation + halo-finder which has no corresponding class defined in "
-                "the halotools/sim_manager/supported_sims module. \n")
-
+        return ['rockstar']
 
 def get_catalogs_dir(**kwargs):
     """ Find the path to the subdirectory of the halotools cache directory 
@@ -173,16 +136,16 @@ def get_catalogs_dir(**kwargs):
         if 'simname' not in kwargs.keys():
             return catalog_type_dirname
         else:
-            simname_dirname = cache_subdir_for_simulation(catalog_type_dirname, kwargs['simname'])
+            if kwargs['simname'] not in supported_sim_list:
+                raise KeyError("Input simname %s is not recognized by Haltools " % kwargs['simname'])
+
+            simname_dirname = os.path.join(catalog_type_dirname, kwargs['simname'])
             defensively_create_subdir(simname_dirname)
 
             if 'halo_finder' not in kwargs.keys():
                 return simname_dirname
             else:
-                halo_finder_dirname = (
-                    cache_subdir_for_halo_finder(
-                        simname_dirname, kwargs['simname'], kwargs['halo_finder'])
-                    )
+                halo_finder_dirname = os.path.join(simname_dirname, kwargs['halo_finder'])
                 defensively_create_subdir(halo_finder_dirname)
                 return halo_finder_dirname
 
