@@ -28,13 +28,7 @@ def simname_is_supported(simname):
     is_supported : bool 
 
     """
-    return simname in [getattr(supported_sims, clname)().simname for clname in supported_sims.__all__ if (
-        (issubclass(getattr(supported_sims, clname), supported_sims.NbodySimulation)) & 
-            (getattr(supported_sims, clname) != supported_sims.NbodySimulation))]
-
-
-
-
+    return simname in get_supported_simnames()
 
 def defensively_create_subdir(dirname):
     if not os.path.exists(dirname):
@@ -48,17 +42,10 @@ def defensively_create_subdir(dirname):
         raise IOError(msg.format(dirname))
 
 def get_supported_simnames():
-    class_list = supported_sims.__all__
-    parent_class = supported_sims.NbodySimulation
 
-    supported_simnames = []
-    for clname in class_list:
-        clobj = getattr(supported_sims, clname)
-        if (issubclass(clobj, parent_class)) & (clobj.__name__ != parent_class.__name__):
-            clinst = clobj()
-            supported_simnames.append(clinst.simname)
-
-    return list(set(supported_simnames))
+    return [getattr(supported_sims, clname)().simname for clname in supported_sims.__all__ if (
+        (issubclass(getattr(supported_sims, clname), supported_sims.NbodySimulation)) & 
+        (getattr(supported_sims, clname) != supported_sims.NbodySimulation))]
 
 def get_supported_halo_finders(input_simname):
     class_list = supported_sims.__all__
