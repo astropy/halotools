@@ -656,7 +656,7 @@ class CatalogManager(object):
 
         available_fnames_to_download = self.raw_halocats_available_for_download(**kwargs)
 
-        closest_snapshot_fname, closest_redshift = (
+        url, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
@@ -667,15 +667,12 @@ class CatalogManager(object):
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
 
-        webloc = self._orig_halocat_web_location(**kwargs)
-        url = os.path.join(webloc, closest_snapshot_fname)
-
         if 'external_cache_loc' in kwargs.keys():
             external_cache_loc = kwargs['external_cache_loc']
             # We were given an explicit path to store the catalog
             # Check that this path actually exists, and if so, use it 
             if os.path.exists(external_cache_loc):
-                output_fname = os.path.join(external_cache_loc, os.path.basename(closest_snapshot_fname))
+                output_fname = os.path.join(external_cache_loc, os.path.basename(url))
             else:
                 raise IOError("Input directory name %s for download location"
                     "of raw halo catalog does not exist" % external_cache_loc)
@@ -683,10 +680,10 @@ class CatalogManager(object):
         else:
             # We were not given an explicit path, so use the default Halotools cache dir
             cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', **kwargs)
-            output_fname = os.path.join(cache_dirname, os.path.basename(closest_snapshot_fname))
+            output_fname = os.path.join(cache_dirname, os.path.basename(url))
 
         if overwrite == False:
-            file_pattern = os.path.basename(closest_snapshot_fname)
+            file_pattern = os.path.basename(url)
             # The file may already be decompressed, in which case we don't want to download it again
             file_pattern = re.sub('.tar.gz', '', file_pattern)
             file_pattern = re.sub('.gz', '', file_pattern)
@@ -712,7 +709,96 @@ class CatalogManager(object):
 
 
     def download_processed_halocat(self, **kwargs):
-        pass
+        """ Method to download one of the pre-processed binary files 
+        storing a reduced halo catalog.  
+
+        Parameters 
+        ----------
+        simname : string 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
+        halo_finder : string 
+            Nickname of the halo-finder, e.g. `rockstar`. 
+
+        desired_redshift : float 
+            Redshift of the requested snapshot. Must match one of the 
+            available snapshots, or a prompt will be issued providing the nearest 
+            available snapshots to choose from. 
+
+        dz_tol : float, optional
+            Tolerance value determining how close the requested redshift must be to 
+            some available snapshot before issuing a warning. Default value is 0.1. 
+
+        overwrite : boolean, optional
+            If a file with the same filename already exists 
+            in the requested download location, the `overwrite` boolean determines 
+            whether or not to overwrite the file. Default is False, in which case 
+            no download will occur if a pre-existing file is detected. 
+
+        external_cache_loc : string, optional 
+            Absolute path to an alternative source of raw halo catalogs. 
+
+        Returns 
+        -------
+        output_fname : string  
+            Filename (including absolute path) of the location of the downloaded 
+            halo catalog.  
+        """
+        desired_redshift = kwargs['desired_redshift']
+
+        available_fnames_to_download = self.processed_halocats_available_for_download(**kwargs)
+
+        url, closest_redshift = (
+            self._closest_fname(available_fnames_to_download, desired_redshift))
+
+        if abs(closest_redshift - desired_redshift) > dz_tol:
+            msg = (
+                "No raw %s halo catalog has \na redshift within %.2f " + 
+                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                )
+            print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
+            return 
+
+        if 'external_cache_loc' in kwargs.keys():
+            external_cache_loc = kwargs['external_cache_loc']
+            # We were given an explicit path to store the catalog
+            # Check that this path actually exists, and if so, use it 
+            if os.path.exists(external_cache_loc):
+                output_fname = os.path.join(external_cache_loc, os.path.basename(url))
+            else:
+                raise IOError("Input directory name %s for download location"
+                    "of raw halo catalog does not exist" % external_cache_loc)
+        else:
+            # We were not given an explicit path, so use the default Halotools cache dir
+            cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', **kwargs)
+            output_fname = os.path.join(cache_dirname, os.path.basename(url))
+
+        if overwrite == False:
+            file_pattern = os.path.basename(url)
+            # The file may already be decompressed, in which case we don't want to download it again
+            file_pattern = re.sub('.tar.gz', '', file_pattern)
+            file_pattern = re.sub('.gz', '', file_pattern)
+            file_pattern = '*' + file_pattern + '*'
+
+            for path, dirlist, filelist in os.walk(cache_dirname):
+                 for fname in filelist:
+                    if fnmatch.filter([fname], file_pattern) != []:
+                        existing_fname = os.path.join(path, fname)
+                        msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
+                            "If you really want to overwrite the file, \n"
+                            "you must call the same function again \n"
+                            "with the keyword argument `overwrite` set to `True`")
+                        print(msg % existing_fname)
+                        return None
+
+        start = time()
+        download_file_from_url(url, output_fname)
+        end = time()
+        runtime = (end - start)
+        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+        return output_fname
 
 
     def download_ptcl_cat(self, **kwargs):
