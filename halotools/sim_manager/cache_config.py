@@ -14,6 +14,28 @@ import warnings
 from . import sim_defaults
 from . import supported_sims
 
+def simname_is_supported(simname):
+    """ Method returns a boolean for whether or not the input 
+    simname corresponds to a Halotools-supported simulation, as determined by 
+    the sub-classes of `~halotools.sim_manager.NbodySimulation`. 
+
+    Parameters 
+    ----------
+    simname : string 
+
+    Returns 
+    -------
+    is_supported : bool 
+
+    """
+    return simname in [getattr(supported_sims, clname)().simname for clname in supported_sims.__all__ if (
+        (issubclass(getattr(supported_sims, clname), supported_sims.NbodySimulation)) & 
+            (getattr(supported_sims, clname) != supported_sims.NbodySimulation))]
+
+
+
+
+
 def defensively_create_subdir(dirname):
     if not os.path.exists(dirname):
         try:
