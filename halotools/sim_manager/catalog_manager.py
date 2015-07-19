@@ -659,9 +659,9 @@ class CatalogManager(object):
 
         # Check whether there are existing catalogs matching the file pattern 
         # that is about to be downloaded
-        is_in_cache = self.check_for_existing_halocat(
-            download_loc, 'raw_halos', simname, halo_finder, 
-            fname=output_fname)
+        #is_in_cache = self.check_for_existing_halocat(
+        #    download_loc, 'raw_halos', simname, halo_finder, 
+        #    fname=output_fname)
 
 
 
