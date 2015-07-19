@@ -404,6 +404,34 @@ class CatalogManager(object):
         scale_factor_substring = fname[first_index:last_index]
         return scale_factor_substring
 
+    def _closest_fname(self, filename_list, redshift):
+
+        if redshift == 0.:
+            input_scale_factor == 1.
+        else:
+            input_scale_factor = (1./redshift) - 1
+
+        # First create a list of floats storing the scale factors of each hlist file
+        scale_factor_list = []
+        for full_fname in filename_list:
+            fname = os.path.basename(full_fname)
+            scale_factor_substring = self._get_scale_factor_substring(fname)
+            scale_factor = float(scale_factor_substring)
+            scale_factor_list.append(scale_factor)
+        scale_factor_list = np.array(scale_factor_list)
+
+        # Now use the array utils module to determine 
+        # which scale factor is the closest
+        input_scale_factor = 1./(1. + input_redshift)
+        idx_closest_catalog = find_idx_nearest_val(
+            scale_factor_list, input_scale_factor)
+        closest_scale_factor = scale_factor_list[idx_closest_catalog]
+        output_fname = filename_list[idx_closest_catalog]
+
+        closest_available_redshift = (1./closest_scale_factor) - 1
+
+        return output_fname, closest_available_redshift
+
     def closest_catalog_in_cache(self, version_name = sim_defaults.default_version_name, 
         **kwargs):
         """
@@ -463,30 +491,98 @@ class CatalogManager(object):
             print("\nNo matching catalogs found by closest_catalog_in_cache method of CatalogManager\n")
             return None
 
-        # First create a list of floats storing the scale factors of each hlist file
-        scale_factor_list = []
-        for full_fname in filename_list:
-            fname = os.path.basename(full_fname)
-            scale_factor_substring = self._get_scale_factor_substring(fname)
-            scale_factor = float(scale_factor_substring)
-            scale_factor_list.append(scale_factor)
-        scale_factor_list = np.array(scale_factor_list)
+        output_fname, redshift = self._closest_fname(filename_list, input_redshift)
 
-        # Now use the array utils module to determine 
-        # which scale factor is the closest
-        input_scale_factor = 1./(1. + input_redshift)
-        idx_closest_catalog = find_idx_nearest_val(
-            scale_factor_list, input_scale_factor)
-        closest_scale_factor = scale_factor_list[idx_closest_catalog]
-        output_fname = filename_list[idx_closest_catalog]
-
-        redshift = (1./closest_scale_factor) - 1
-
-        return output_fname
+        return output_fname, redshift
 
 
     def download_raw_halocat(self, **kwargs):
-        pass
+        """ Method to download one of the pre-processed binary files 
+        storing a reduced halo catalog.  
+
+        Parameters 
+        ----------
+        simname : string 
+            Nickname of the simulation, e.g. `bolshoi`. 
+
+        halo_finder : string 
+            Nickname of the halo-finder, e.g. `rockstar`. 
+
+        desired_redshift : float 
+            Redshift of the requested snapshot. Must match one of the 
+            available snapshots, or a prompt will be issued providing the nearest 
+            available snapshots to choose from. 
+
+        dz_tol : float, optional
+            Tolerance value determining how close the requested redshift must be to 
+            some available snapshot before issuing a warning. Default value is 0.1. 
+
+        overwrite : boolean, optional
+            If a file with the same filename already exists 
+            in the requested download location, the `overwrite` boolean determines 
+            whether or not to overwrite the file. Default is False, in which case 
+            no download will occur if a pre-existing file is detected. 
+
+        external_cache_loc : string, optional 
+            Absolute path to an alternative source of raw halo catalogs. 
+
+        Returns 
+        -------
+        output_fname : string  
+            Filename (including absolute path) of the location of the downloaded 
+            halo catalog.  
+        """
+
+        desired_redshift = kwargs['desired_redshift']
+        simname = kwargs['simname']
+        halo_finder = kwargs['halo_finder']
+
+        if 'dz_tol' in kwargs.keys():
+            dz_tol = kwargs['dz_tol']
+        else:
+            dz_tol = 0.1
+
+        if 'overwrite' in kwargs.keys():
+            overwrite = kwargs['overwrite']
+        else:
+            overwrite = False
+
+        available_fnames_to_download = self.raw_halocats_available_for_download(
+            simname=simname, halo_finder = halo_finder)
+
+        closest_name, closest_redshift = (
+            self._closest_fname(available_fnames_to_download, desired_redshift))
+
+        if abs(closest_redshift - desired_redshift) > dz_tol:
+            msg = (
+                "No raw %s halo catalog has \na redshift within %.2f " + 
+                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                )
+            print(msg % (simname, dz_tol, desired_redshift, closest_redshift))
+            return 
+
+        webloc = self._orig_halocat_web_location(simname = simname, halo_finder=halo_finder)
+        url = os.path.join(webloc, closest_name)
+
+        if 'external_cache_loc' in kwargs.keys():
+            external_cache_loc = kwargs['external_cache_loc']
+            # We were given an explicit path to store the catalog
+            # Check that this path actually exists, and if so, use it 
+            if not os.path.exists(external_cache_loc):
+                raise IOError("Input directory name %s for download location"
+                    "of raw halo catalog does not exist" % external_cache_loc)
+            else:
+                output_fname = os.path.join(external_cache_loc, closest_snapshot_fname)
+        else:
+            # We were not given an explicit path, so use the default Halotools cache dir
+            cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', 
+                simname=simname, halo_finder=halo_finder)
+            output_fname = os.path.join(cache_dirname, closest_snapshot_fname)
+
+
+
+
+
 
     def download_processed_halocat(self, **kwargs):
         pass
