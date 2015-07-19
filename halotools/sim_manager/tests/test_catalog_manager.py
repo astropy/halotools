@@ -172,6 +172,13 @@ class TestCatalogManager(TestCase):
         file_set = set([os.path.basename(f) for f in file_list])
         assert file_set == bolplanck_set
 
+    @remote_data
+    def test_processed_halocats_available_for_download(self):
+        catman = CatalogManager()
+
+        file_list = catman.processed_halocats_available_for_download(
+            simname='bolshoi', halo_finder='rockstar')
+        assert file_list != []
 
 
 
