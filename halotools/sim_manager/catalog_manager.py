@@ -86,6 +86,10 @@ class CatalogManager(object):
             if cache_config.simname_is_supported(kwargs['simname']) is False:
                 raise KeyError(unsupported_simname_msg % kwargs['simname'])
 
+        if ('version_name' in kwargs.keys()) & (catalog_type is not 'halos'):
+            raise KeyError("The _scrape_cache method received a version_name = %s keyword "
+                "argument, which should not be passed for catalog_type = %s" % (kwargs['version_name'], catalog_type))
+
         if 'external_cache_loc' in kwargs.keys():
             cachedir = os.path.abspath(kwargs['external_cache_loc'])
             if os.path.isdir(cachedir) is False:
@@ -542,9 +546,9 @@ class CatalogManager(object):
             if 'halo_finder' in kwargs.keys():
                 warn("There is no need to specify a halo-finder when requesting particle data")
                 del kwargs['halo_finder']
-                
-        #if 'version_name' not in kwargs.keys():
-        #    kwargs['version_name'] = sim_defaults.default_version_name
+        
+        if (catalog_type == 'halos') & ('version_name' not in kwargs.keys()):
+            kwargs['version_name'] = sim_defaults.default_version_name
         filename_list = self._scrape_cache(
             catalog_type = catalog_type, **kwargs)
 
