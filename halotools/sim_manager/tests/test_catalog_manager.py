@@ -20,6 +20,8 @@ class TestCatalogManager(TestCase):
 
         homedir = _find_home()
 
+        self.catman = CatalogManager()
+
         def defensively_create_empty_dir(dirname):
 
             if os.path.isdir(dirname) is False:
@@ -95,7 +97,6 @@ class TestCatalogManager(TestCase):
         assert os.path.isfile(full_fname)
 
     def test_processed_halocats_in_cache(self):
-        catman = CatalogManager()
 
         for simname in self.simnames:
             attrname = simname + '_fnames'
@@ -104,7 +105,7 @@ class TestCatalogManager(TestCase):
             for version in self.dummy_version_names:
                 basenames_from_setup = [f + '.' + version + self.extension for f in basenames_from_self]
 
-                result = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+                result = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
                     simname = simname, halo_finder = 'rockstar', version_name = version)
                 basenames_from_catman = [os.path.basename(f) for f in result]
 
@@ -112,13 +113,13 @@ class TestCatalogManager(TestCase):
 
         simname = 'bolshoi'
         version = 'halotools.alpha'
-        result_allargs = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+        result_allargs = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
             simname = simname, halo_finder = 'rockstar', version_name = version)
-        result_nosim = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+        result_nosim = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
             halo_finder = 'rockstar', version_name = version)
-        result_noversion = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+        result_noversion = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
             simname = simname, halo_finder = 'rockstar')
-        result_nohf = catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
+        result_nohf = self.catman.processed_halocats_in_cache(external_cache_loc=self.halocat_dir, 
             simname = simname, version_name = version)
 
         assert result_allargs != []
@@ -140,13 +141,12 @@ class TestCatalogManager(TestCase):
 
     @remote_data
     def test_ptcl_cats_available_for_download(self):
-        catman = CatalogManager()
 
-        file_list = catman.ptcl_cats_available_for_download(simname='bolshoi')
+        file_list = self.catman.ptcl_cats_available_for_download(simname='bolshoi')
         assert len(file_list) == 1
         assert 'hlist_1.00035.particles.hdf5' == os.path.basename(file_list[0])
 
-        file_list = catman.ptcl_cats_available_for_download(simname='multidark')
+        file_list = self.catman.ptcl_cats_available_for_download(simname='multidark')
         assert len(file_list) == 1
         assert 'hlist_1.00109.particles.hdf5' == os.path.basename(file_list[0])
 
@@ -156,7 +156,7 @@ class TestCatalogManager(TestCase):
             'hlist_0.67540.particles.hdf5', 
             'hlist_1.00000.particles.hdf5']
             )
-        file_list = catman.ptcl_cats_available_for_download(simname='consuelo')
+        file_list = self.catman.ptcl_cats_available_for_download(simname='consuelo')
         assert len(file_list) == 4
         file_set = set([os.path.basename(f) for f in file_list])
         assert file_set == consuelo_set
@@ -167,19 +167,30 @@ class TestCatalogManager(TestCase):
             'hlist_0.66818.particles.hdf5', 
             'hlist_1.00231.particles.hdf5']
             )
-        file_list = catman.ptcl_cats_available_for_download(simname='bolplanck')
+        file_list = self.catman.ptcl_cats_available_for_download(simname='bolplanck')
         assert len(file_list) == 4
         file_set = set([os.path.basename(f) for f in file_list])
         assert file_set == bolplanck_set
 
     @remote_data
     def test_processed_halocats_available_for_download(self):
-        catman = CatalogManager()
 
-        file_list = catman.processed_halocats_available_for_download(
+        file_list = self.catman.processed_halocats_available_for_download(
             simname='bolshoi', halo_finder='rockstar')
         assert file_list != []
 
+    @remote_data
+    def test_closest_catalog_in_cache(self):
+
+        catalog_type = 'halos'
+        halo_finder = 'rockstar'
+        simname = 'bolshoi'
+
+        closest_fname = self.catman.closest_catalog_in_cache(
+            catalog_type=catalog_type, 
+            desired_redshift = 0.0, halo_finder = halo_finder, 
+            simname = simname
+            )
 
 
     def teardown_class(self):
