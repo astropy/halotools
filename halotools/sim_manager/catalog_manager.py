@@ -340,7 +340,7 @@ class CatalogManager(object):
         Returns 
         -------
         output : list 
-            List of web locations of all pre-processed halo catalogs 
+            List of web locations of all catalogs of downsampled particles
             matching the input arguments. 
 
         """
