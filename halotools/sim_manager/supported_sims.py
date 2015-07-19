@@ -18,7 +18,7 @@ except ImportError:
 import posixpath
 import urlparse
 
-from . import sim_defaults 
+from . import sim_defaults, catalog_manager
 
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import array_like_length as custom_len
