@@ -43,7 +43,7 @@ class CatalogManager(object):
 
     def _scrape_cache(self, catalog_type, **kwargs):
         """ Private method that is the workhorse behind 
-        `processed_halocats_in_cache`, `raw_halocats_in_cache`, and `ptcl_cats_in_cache`. 
+        `processed_halo_tables_in_cache`, `raw_halo_tables_in_cache`, and `ptcl_tables_in_cache`. 
 
         Parameters 
         ----------
@@ -57,19 +57,19 @@ class CatalogManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
 
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         halo_finder : string, optional
             Nickname of the halo-finder, e.g. ``rockstar``. 
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``halo_finder``. 
 
         version_name : string, optional 
             String specifying the version of the processed halo catalog. 
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``version_name``. 
 
         external_cache_loc : string, optional 
@@ -115,7 +115,7 @@ class CatalogManager(object):
                 
         return fname_list
 
-    def processed_halocats_in_cache(self, **kwargs):
+    def processed_halo_tables_in_cache(self, **kwargs):
         """
         Parameters 
         ----------
@@ -125,19 +125,19 @@ class CatalogManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         halo_finder : string, optional
             Nickname of the halo-finder, e.g. ``rockstar``. 
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``halo_finder``. 
 
         version_name : string, optional 
             String specifying the version of the processed halo catalog. 
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``version_name``. 
 
         external_cache_loc : string, optional 
@@ -154,7 +154,7 @@ class CatalogManager(object):
         f = partial(self._scrape_cache, catalog_type='halos')
         return f(**kwargs)
 
-    def raw_halocats_in_cache(self, **kwargs):
+    def raw_halo_tables_in_cache(self, **kwargs):
         """
         Parameters 
         ----------
@@ -164,13 +164,13 @@ class CatalogManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         halo_finder : string, optional
             Nickname of the halo-finder, e.g. ``rockstar``. 
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``halo_finder``. 
 
         external_cache_loc : string, optional 
@@ -186,7 +186,7 @@ class CatalogManager(object):
         f = partial(self._scrape_cache, catalog_type='raw_halos')
         return f(**kwargs)
 
-    def ptcl_cats_in_cache(self, **kwargs):
+    def ptcl_tables_in_cache(self, **kwargs):
         """
         Parameters 
         ----------
@@ -196,7 +196,7 @@ class CatalogManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         external_cache_loc : string, optional 
@@ -213,7 +213,7 @@ class CatalogManager(object):
         f = partial(self._scrape_cache, catalog_type='particles')
         return f(**kwargs)
 
-    def processed_halocats_available_for_download(self, **kwargs):
+    def processed_halo_tables_available_for_download(self, **kwargs):
         """ Method searches the appropriate web location and 
         returns a list of the filenames of all reduced  
         halo catalog binaries processed by Halotools 
@@ -227,13 +227,13 @@ class CatalogManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         halo_finder : string, optional
             Nickname of the halo-finder, e.g. ``rockstar``. 
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``halo_finder``. 
 
         Returns 
@@ -247,7 +247,7 @@ class CatalogManager(object):
             if cache_config.simname_is_supported(kwargs['simname']) is False:
                 raise KeyError(unsupported_simname_msg % kwargs['simname'])
 
-        baseurl = sim_defaults.processed_halocats_webloc
+        baseurl = sim_defaults.processed_halo_tables_webloc
         soup = BeautifulSoup(requests.get(baseurl).text)
         simloclist = []
         for a in soup.find_all('a', href=True):
@@ -293,7 +293,7 @@ class CatalogManager(object):
 
         return output
 
-    def _orig_halocat_web_location(self, **kwargs):
+    def _orig_halo_table_web_location(self, **kwargs):
         """
         Parameters 
         ----------
@@ -314,7 +314,7 @@ class CatalogManager(object):
             simname = kwargs['simname']
             halo_finder = kwargs['halo_finder']
         except KeyError:
-            raise("CatalogManager._orig_halocat_web_location method "
+            raise("CatalogManager._orig_halo_table_web_location method "
                 "must be called with ``simname`` and ``halo_finder`` arguments")
 
         if simname == 'multidark':
@@ -332,7 +332,7 @@ class CatalogManager(object):
             raise KeyError("Input simname %s and halo_finder %s do not "
                 "have Halotools-recognized web locations" % (simname, halo_finder))
 
-    def raw_halocats_available_for_download(self, **kwargs):
+    def raw_halo_tables_available_for_download(self, **kwargs):
         """ Method searches the appropriate web location and 
         returns a list of the filenames of all relevant 
         raw halo catalogs that are available for download. 
@@ -345,13 +345,13 @@ class CatalogManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         halo_finder : string
             Nickname of the halo-finder, e.g. ``rockstar``. 
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``halo_finder``. 
 
         Returns 
@@ -368,7 +368,7 @@ class CatalogManager(object):
         simname = kwargs['simname']
         halo_finder = kwargs['halo_finder']
 
-        url = self._orig_halocat_web_location(**kwargs)
+        url = self._orig_halo_table_web_location(**kwargs)
 
         soup = BeautifulSoup(requests.get(url).text)
         file_list = []
@@ -380,7 +380,7 @@ class CatalogManager(object):
 
         return output
 
-    def ptcl_cats_available_for_download(self, **kwargs):
+    def ptcl_tables_available_for_download(self, **kwargs):
         """ Method searches the appropriate web location and 
         returns a list of the filenames of all reduced  
         halo catalog binaries processed by Halotools 
@@ -394,7 +394,7 @@ class CatalogManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             
             Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halocats_in_cache` 
+            Default is None, in which case `processed_halo_tables_in_cache` 
             will not filter the returned list of filenames by ``simname``. 
 
         Returns 
@@ -408,7 +408,7 @@ class CatalogManager(object):
             if cache_config.simname_is_supported(kwargs['simname']) is False:
                 raise KeyError(unsupported_simname_msg % kwargs['simname'])
 
-        baseurl = sim_defaults.ptcl_cats_webloc
+        baseurl = sim_defaults.ptcl_tables_webloc
         soup = BeautifulSoup(requests.get(baseurl).text)
         simloclist = []
         for a in soup.find_all('a', href=True):
@@ -423,14 +423,14 @@ class CatalogManager(object):
                 catlist.append(os.path.join(simloc, a['href']))
 
         file_pattern = 'particles.hdf5'
-        all_ptcl_cats = fnmatch.filter(catlist, '*'+file_pattern)
+        all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern)
 
         if 'simname' in kwargs.keys():
             simname = kwargs['simname']
             file_pattern = '*'+simname+'/*' + file_pattern
-            output = fnmatch.filter(all_ptcl_cats, file_pattern)
+            output = fnmatch.filter(all_ptcl_tables, file_pattern)
         else:
-            output = all_ptcl_cats
+            output = all_ptcl_tables
 
         return output
 
@@ -631,18 +631,18 @@ class CatalogManager(object):
                 del kwargs['halo_finder']
 
         if catalog_type is 'particles':
-            filename_list = self.ptcl_cats_available_for_download(**kwargs)
+            filename_list = self.ptcl_tables_available_for_download(**kwargs)
         elif catalog_type is 'raw_halos':
-            filename_list = self.raw_halocats_available_for_download(**kwargs)
+            filename_list = self.raw_halo_tables_available_for_download(**kwargs)
         elif catalog_type is 'halos':
-            filename_list = self.processed_halocats_available_for_download(**kwargs)
+            filename_list = self.processed_halo_tables_available_for_download(**kwargs)
 
         desired_redshift = kwargs['desired_redshift']
         output_fname, redshift = self._closest_fname(filename_list, desired_redshift)
 
         return output_fname, redshift
 
-    def download_raw_halocat(self, dz_tol = 0.1, overwrite=False, **kwargs):
+    def download_raw_halo_table(self, dz_tol = 0.1, overwrite=False, **kwargs):
         """ Method to download one of the pre-processed binary files 
         storing a reduced halo catalog.  
 
@@ -686,7 +686,7 @@ class CatalogManager(object):
 
         desired_redshift = kwargs['desired_redshift']
 
-        available_fnames_to_download = self.raw_halocats_available_for_download(**kwargs)
+        available_fnames_to_download = self.raw_halo_tables_available_for_download(**kwargs)
 
         url, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
@@ -740,7 +740,7 @@ class CatalogManager(object):
         return output_fname
 
 
-    def download_processed_halocat(self, dz_tol = 0.1, overwrite=False, **kwargs):
+    def download_processed_halo_table(self, dz_tol = 0.1, overwrite=False, **kwargs):
         """ Method to download one of the pre-processed binary files 
         storing a reduced halo catalog.  
 
@@ -784,7 +784,7 @@ class CatalogManager(object):
 
         desired_redshift = kwargs['desired_redshift']
 
-        available_fnames_to_download = self.processed_halocats_available_for_download(**kwargs)
+        available_fnames_to_download = self.processed_halo_tables_available_for_download(**kwargs)
 
         url, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
@@ -837,7 +837,7 @@ class CatalogManager(object):
         return output_fname
 
 
-    def download_ptcl_cat(self, dz_tol = 0.1, overwrite=False, **kwargs):
+    def download_ptcl_table(self, dz_tol = 0.1, overwrite=False, **kwargs):
         """ Method to download one of the pre-processed binary files 
         storing a reduced halo catalog.  
 
@@ -883,7 +883,7 @@ class CatalogManager(object):
         if 'halo_finder' in kwargs.keys():
             warn("It is not necessary to specify a halo catalog when downloading particles")
 
-        available_fnames_to_download = self.ptcl_cats_available_for_download(**kwargs)
+        available_fnames_to_download = self.ptcl_tables_available_for_download(**kwargs)
 
         url, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
@@ -935,7 +935,7 @@ class CatalogManager(object):
         print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
         return output_fname
 
-    def retrieve_ptcl_cat_from_cache(self, simname, desired_redshift, **kwargs):
+    def retrieve_ptcl_table_from_cache(self, simname, desired_redshift, **kwargs):
         """
         Parameters 
         ----------
@@ -969,10 +969,10 @@ class CatalogManager(object):
 
 
 
-    def retrieve_processed_halocat_from_cache(self, **kwargs):
+    def retrieve_processed_halo_table_from_cache(self, **kwargs):
         pass
 
-    def store_newly_processed_halocat(self, **kwargs):
+    def store_newly_processed_halo_table(self, **kwargs):
         pass
 
 
@@ -985,7 +985,7 @@ class HaloCatalogProcessor(object):
     def __init__(self):
         pass
 
-    def read_raw_halocat_ascii(self, **kwargs):
+    def read_raw_halo_table_ascii(self, **kwargs):
         pass
 
 
