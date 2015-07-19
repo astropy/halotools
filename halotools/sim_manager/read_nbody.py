@@ -191,8 +191,8 @@ class CatalogManager(object):
         """
         if simname == 'bolshoi':
             return supported_sims.Bolshoi()
-        elif simname == 'bolshoiplanck':
-            return supported_sims.BolshoiPlanck()
+        elif simname == 'bolplanck':
+            return supported_sims.bolplanck()
         elif simname == 'consuelo':
             return supported_sims.Consuelo()
         elif simname == 'multidark':

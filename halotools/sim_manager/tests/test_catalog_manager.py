@@ -42,14 +42,14 @@ class TestCatalogManager(TestCase):
         self.raw_halocat_dir = os.path.join(self.dummyloc, 'raw_halo_catalogs')
         defensively_create_empty_dir(self.raw_halocat_dir)
 
-        self.simnames = ['bolshoi', 'bolshoiplanck', 'multidark', 'consuelo']
+        self.simnames = ['bolshoi', 'bolplanck', 'multidark', 'consuelo']
         self.halo_finders = ['rockstar', 'bdm']
         self.dummy_version_names = ['halotools.alpha']
         self.extension = '.hdf5'
 
         self.bolshoi_fnames = ['hlist_0.33035', 'hlist_0.54435', 'hlist_0.67035', 'hlist_1.00035']
         self.bolshoi_bdm_fnames = ['hlist_0.33030', 'hlist_0.49830', 'hlist_0.66430', 'hlist_1.00035']
-        self.bolshoiplanck_fnames = ['hlist_0.33035', 'hlist_0.54435', 'hlist_0.67035', 'hlist_1.00035']
+        self.bolplanck_fnames = ['hlist_0.33035', 'hlist_0.54435', 'hlist_0.67035', 'hlist_1.00035']
         self.consuelo_fnames = ['hlist_0.33324', 'hlist_0.50648', 'hlist_0.67540', 'hlist_1.00000']
         self.multidark_fnames = ['hlist_0.31765', 'hlist_0.49990', 'hlist_0.68215', 'hlist_1.00109']
 
@@ -62,8 +62,8 @@ class TestCatalogManager(TestCase):
 
             if simname == 'bolshoi':
                 fnames = self.bolshoi_fnames
-            elif simname == 'bolshoiplanck':
-                fnames = self.bolshoiplanck_fnames
+            elif simname == 'bolplanck':
+                fnames = self.bolplanck_fnames
             elif simname == 'consuelo':
                 fnames = self.consuelo_fnames
             elif simname == 'multidark':

@@ -76,7 +76,7 @@ def test_supported_simnames():
 	"""
 	hflist = cache_config.get_supported_simnames()
 	assert 'bolshoi' in hflist
-	assert 'bolshoiplanck' in hflist
+	assert 'bolplanck' in hflist
 	assert 'multidark' in hflist
 
 def test_supported_halo_finders():
