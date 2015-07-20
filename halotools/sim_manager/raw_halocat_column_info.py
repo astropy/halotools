@@ -247,13 +247,13 @@ dtype_slac_multidark_rockstar_july19_2015 = dtype_slac_bolshoi_rockstar_july19_2
 
 ################################################################################################
 ################################################################################################
-
+"""
 class BehrooziHeader(object):
     def __init__(self, version, download_date, header_string):
         self.version = version
         self.download_date = download_date
         self.header_string = header_string
-
+"""
 
 
 
