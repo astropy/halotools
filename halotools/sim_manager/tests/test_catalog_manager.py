@@ -118,7 +118,7 @@ class TestCatalogManager(TestCase):
             for version in self.dummy_version_names:
                 basenames_from_setup = [f + '.' + version + self.extension for f in basenames_from_self]
 
-                result = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
+                result = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
                     simname = simname, halo_finder = 'rockstar', version_name = version)
                 basenames_from_catman = [os.path.basename(f) for f in result]
 
@@ -126,13 +126,13 @@ class TestCatalogManager(TestCase):
 
         simname = 'bolshoi'
         version = 'halotools.alpha'
-        result_allargs = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
+        result_allargs = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
             simname = simname, halo_finder = 'rockstar', version_name = version)
-        result_nosim = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
+        result_nosim = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
             halo_finder = 'rockstar', version_name = version)
-        result_noversion = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
+        result_noversion = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
             simname = simname, halo_finder = 'rockstar')
-        result_nohf = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.halocat_dir, 
+        result_nohf = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
             simname = simname, version_name = version)
 
         assert result_allargs != []

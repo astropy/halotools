@@ -31,6 +31,8 @@ from . import cache_config, sim_defaults
 import os, fnmatch, re
 from functools import partial
 
+from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
+
 unsupported_simname_msg = "Input simname ``%s`` is not recognized by Halotools"
 
 class CatalogManager(object):
@@ -74,6 +76,14 @@ class CatalogManager(object):
 
         external_cache_loc : string, optional 
             Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns
         -------
@@ -84,18 +94,13 @@ class CatalogManager(object):
         """
         if 'simname' in kwargs.keys():
             if cache_config.simname_is_supported(kwargs['simname']) is False:
-                raise KeyError(unsupported_simname_msg % kwargs['simname'])
+                raise UnsupportedSimError(kwargs['simname'])
 
         if ('version_name' in kwargs.keys()) & (catalog_type is not 'halos'):
             raise KeyError("The _scrape_cache method received a version_name = %s keyword "
                 "argument, which should not be passed for catalog_type = %s" % (kwargs['version_name'], catalog_type))
 
-        if 'external_cache_loc' in kwargs.keys():
-            cachedir = os.path.abspath(kwargs['external_cache_loc'])
-            if os.path.isdir(cachedir) is False:
-                raise KeyError("Input external_cache_loc directory = %s \n Directory does not exist" % cachedir)
-        else:
-            cachedir = cache_config.get_catalogs_dir(catalog_type = catalog_type)
+        cachedir = cache_config.get_catalogs_dir(catalog_type = catalog_type, **kwargs)
 
         fname_pattern = '.hdf5'
         if 'version_name' in kwargs.keys():
@@ -142,6 +147,14 @@ class CatalogManager(object):
 
         external_cache_loc : string, optional 
             Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns
         -------
@@ -175,6 +188,14 @@ class CatalogManager(object):
 
         external_cache_loc : string, optional 
             Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns
         -------
@@ -201,6 +222,14 @@ class CatalogManager(object):
 
         external_cache_loc : string, optional 
             Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns
         -------
@@ -515,13 +544,15 @@ class CatalogManager(object):
             Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``. 
 
         external_cache_loc : string, optional 
-            Absolute path to an alternative source of catalogs. This file searcher assumes 
-            that ``external_cache_loc`` has the same organizational structure as the 
-            default Halotools cache. So if you are searching for particles, 
-            and ``external_cache_loc`` has particle data for some simulation ``simname``, 
-            then there must be a directory ``external_cache_loc/simname`` where the hdf5 files 
-            are stored. If you are searching for halos, there must be a directory 
-            ``external_cache_loc/simname/halo_finder`` where the halo catalogs are stored. 
+            Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns
         -------
@@ -533,7 +564,7 @@ class CatalogManager(object):
         """
         if 'simname' in kwargs.keys():
             if cache_config.simname_is_supported(kwargs['simname']) is False:
-                raise KeyError(unsupported_simname_msg % kwargs['simname'])
+                raise UnsupportedSimError(kwargs['simname'])
 
         # Verify arguments are as needed
         if catalog_type is not 'particles':
@@ -548,12 +579,11 @@ class CatalogManager(object):
         
         if (catalog_type == 'halos') & ('version_name' not in kwargs.keys()):
             kwargs['version_name'] = sim_defaults.default_version_name
-        filename_list = self._scrape_cache(
-            catalog_type = catalog_type, **kwargs)
+        filename_list = self._scrape_cache(catalog_type = catalog_type, **kwargs)
 
         if custom_len(filename_list) == 0:
-            print("\nNo matching catalogs found by closest_catalog_in_cache method of CatalogManager\n")
-            return None
+            msg = "\nNo matching catalogs found by closest_catalog_in_cache method of CatalogManager\n"
+            raise HalotoolsCacheError(msg)
 
         output_fname, redshift = self._closest_fname(filename_list, desired_redshift)
 
@@ -672,7 +702,15 @@ class CatalogManager(object):
             no download will occur if a pre-existing file is detected. 
 
         external_cache_loc : string, optional 
-            Absolute path to an alternative source of raw halo catalogs. 
+            Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns 
         -------
@@ -682,7 +720,7 @@ class CatalogManager(object):
         """
         if 'simname' in kwargs.keys():
             if cache_config.simname_is_supported(kwargs['simname']) is False:
-                raise KeyError(unsupported_simname_msg % kwargs['simname'])
+                raise UnsupportedSimError(kwargs['simname'])
 
         desired_redshift = kwargs['desired_redshift']
 
@@ -699,20 +737,8 @@ class CatalogManager(object):
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
 
-        if 'external_cache_loc' in kwargs.keys():
-            external_cache_loc = kwargs['external_cache_loc']
-            # We were given an explicit path to store the catalog
-            # Check that this path actually exists, and if so, use it 
-            if os.path.exists(external_cache_loc):
-                output_fname = os.path.join(external_cache_loc, os.path.basename(url))
-            else:
-                raise IOError("Input directory name %s for download location"
-                    "of raw halo catalog does not exist" % external_cache_loc)
-                
-        else:
-            # We were not given an explicit path, so use the default Halotools cache dir
-            cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', **kwargs)
-            output_fname = os.path.join(cache_dirname, os.path.basename(url))
+        cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', **kwargs)
+        output_fname = os.path.join(cache_dirname, os.path.basename(url))
 
         if overwrite == False:
             file_pattern = os.path.basename(url)
@@ -770,7 +796,15 @@ class CatalogManager(object):
             no download will occur if a pre-existing file is detected. 
 
         external_cache_loc : string, optional 
-            Absolute path to an alternative source of raw halo catalogs. 
+            Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns 
         -------
@@ -780,7 +814,7 @@ class CatalogManager(object):
         """
         if 'simname' in kwargs.keys():
             if cache_config.simname_is_supported(kwargs['simname']) is False:
-                raise KeyError(unsupported_simname_msg % kwargs['simname'])
+                raise UnsupportedSimError(kwargs['simname'])
 
         desired_redshift = kwargs['desired_redshift']
 
@@ -797,19 +831,8 @@ class CatalogManager(object):
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
 
-        if 'external_cache_loc' in kwargs.keys():
-            external_cache_loc = kwargs['external_cache_loc']
-            # We were given an explicit path to store the catalog
-            # Check that this path actually exists, and if so, use it 
-            if os.path.exists(external_cache_loc):
-                output_fname = os.path.join(external_cache_loc, os.path.basename(url))
-            else:
-                raise IOError("Input directory name %s for download location"
-                    "of raw halo catalog does not exist" % external_cache_loc)
-        else:
-            # We were not given an explicit path, so use the default Halotools cache dir
-            cache_dirname = cache_config.get_catalogs_dir(catalog_type='halos', **kwargs)
-            output_fname = os.path.join(cache_dirname, os.path.basename(url))
+        cache_dirname = cache_config.get_catalogs_dir(catalog_type='halos', **kwargs)
+        output_fname = os.path.join(cache_dirname, os.path.basename(url))
 
         if overwrite == False:
             file_pattern = os.path.basename(url)
@@ -867,7 +890,15 @@ class CatalogManager(object):
             no download will occur if a pre-existing file is detected. 
 
         external_cache_loc : string, optional 
-            Absolute path to an alternative source of raw halo catalogs. 
+            Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns 
         -------
@@ -877,7 +908,7 @@ class CatalogManager(object):
         """
         if 'simname' in kwargs.keys():
             if cache_config.simname_is_supported(kwargs['simname']) is False:
-                raise KeyError(unsupported_simname_msg % kwargs['simname'])
+                raise UnsupportedSimError(kwargs['simname'])
 
         desired_redshift = kwargs['desired_redshift']
         if 'halo_finder' in kwargs.keys():
@@ -896,19 +927,8 @@ class CatalogManager(object):
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
 
-        if 'external_cache_loc' in kwargs.keys():
-            external_cache_loc = kwargs['external_cache_loc']
-            # We were given an explicit path to store the catalog
-            # Check that this path actually exists, and if so, use it 
-            if os.path.exists(external_cache_loc):
-                output_fname = os.path.join(external_cache_loc, os.path.basename(url))
-            else:
-                raise IOError("Input directory name %s for download location"
-                    "of raw halo catalog does not exist" % external_cache_loc)
-        else:
-            # We were not given an explicit path, so use the default Halotools cache dir
-            cache_dirname = cache_config.get_catalogs_dir(catalog_type='particles', **kwargs)
-            output_fname = os.path.join(cache_dirname, os.path.basename(url))
+        cache_dirname = cache_config.get_catalogs_dir(catalog_type='particles', **kwargs)
+        output_fname = os.path.join(cache_dirname, os.path.basename(url))
 
         if overwrite == False:
             file_pattern = os.path.basename(url)
@@ -925,8 +945,7 @@ class CatalogManager(object):
                             "If you really want to overwrite the file, \n"
                             "you must call the same function again \n"
                             "with the keyword argument `overwrite` set to `True`")
-                        print(msg % existing_fname)
-                        return None
+                        raise HalotoolsCacheError(msg % existing_fname)
 
         start = time()
         download_file_from_url(url, output_fname)
@@ -948,13 +967,15 @@ class CatalogManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             
         external_cache_loc : string, optional 
-            Absolute path to an alternative source of catalogs. This file searcher assumes 
-            that ``external_cache_loc`` has the same organizational structure as the 
-            default Halotools cache. So if you are searching for particles, 
-            and ``external_cache_loc`` has particle data for some simulation ``simname``, 
-            then there must be a directory ``external_cache_loc/simname`` where the hdf5 files 
-            are stored. If you are searching for halos, there must be a directory 
-            ``external_cache_loc/simname/halo_finder`` where the halo catalogs are stored. 
+            Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns
         -------

@@ -10,10 +10,6 @@ import numpy as np
 
 from astropy import cosmology
 
-raw_halo_table_cache_dir = 'pkg_default'
-processed_halo_table_cache_dir = 'pkg_default'
-particles_cache_dir = 'pkg_default'
-
 ### Default halo catalog (used in read_nbody)
 # The following parameters are used by the 
 # simulation object in the read_nbody module

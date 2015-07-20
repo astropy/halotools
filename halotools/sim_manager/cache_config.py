@@ -73,25 +73,45 @@ def get_catalogs_dir(**kwargs):
     halo_finder : string, optional keyword argument 
         Nickname of the halo-finder, e.g., `rockstar` or `bdm`. 
 
+    external_cache_loc : string, optional 
+        Absolute path to an alternative source of halo catalogs. 
+        Method assumes that ``external_cache_loc`` is organized in the 
+        same way that the normal Halotools cache is. Specifically: 
+
+        * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+        * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+        * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
+
     Returns
     -------
     dirname : str
         Path to the halotools directory storing simulation data.
 
     """
-    homedir = _find_home()
-    astropy_cache_dir = os.path.join(homedir, '.astropy', 'cache')
-    defensively_create_subdir(astropy_cache_dir)
 
-    halotools_cache_dir = os.path.join(astropy_cache_dir, 'halotools')
-    defensively_create_subdir(halotools_cache_dir)
+    # Identify the root cache directory
+    if 'external_cache_loc' in kwargs.keys():
+        if os.path.isdir(kwargs['external_cache_loc']) is False:
+            raise KeyError("Input external_cache_loc directory = %s \n Directory does not exist" % kwargs['external_cache_loc'])
+        else:
+            halotools_cache_dir = kwargs['external_cache_loc']
+    else:
+        homedir = _find_home()
+        astropy_cache_dir = os.path.join(homedir, '.astropy', 'cache')
+        defensively_create_subdir(astropy_cache_dir)
+
+        halotools_cache_dir = os.path.join(astropy_cache_dir, 'halotools')
+        defensively_create_subdir(halotools_cache_dir)
+
 
     if 'catalog_type' not in kwargs.keys():
         return halotools_cache_dir
     else:
         catalog_type = kwargs['catalog_type']
 
-    acceptable_halos_arguments = (
+    acceptable_processed_halos_arguments = (
         ['subhalos', 'subhalo', 'halo', 'halos', 
         'halo_catalogs', 'subhalo_catalogs', 'subhalo_catalog', 'halo_catalog',
         'halos_catalogs', 'subhalos_catalogs', 'subhalos_catalog', 'halos_catalog']
@@ -106,49 +126,35 @@ def get_catalogs_dir(**kwargs):
         'raw_halos_catalogs', 'raw_subhalos_catalogs', 'raw_halo_catalogs', 'raw_subhalo_catalogs']
         )
 
-    if catalog_type in acceptable_halos_arguments:
+    if catalog_type in acceptable_processed_halos_arguments:
         subdir_name = 'halo_catalogs'
-        default_cache_dir = sim_defaults.processed_halo_table_cache_dir
     elif catalog_type in acceptable_particles_arguments:
         subdir_name = 'particle_catalogs'
-        default_cache_dir = sim_defaults.particles_cache_dir
     elif catalog_type in acceptable_raw_halos_arguments:
         subdir_name = 'raw_halo_catalogs'
-        default_cache_dir = sim_defaults.raw_halo_table_cache_dir
     else:
         raise CatalogTypeError(catalog_type)
 
-    # Check to see whether we are using the package default or user-provided cache directory
-    if default_cache_dir != 'pkg_default':
-        # Default cache dir has been over-ridden
-        # Check to make sure that the provided dirname is actually a directory
-        if not os.path.isdir(default_cache_dir):
-            errmsg = 'Cache dirname ' + default_cache_dir + 'stored in '
-            'sim_defaults module is not a directory'
-            raise IOError(errmsg)
-        else:
-            return default_cache_dir
+   # Create the directory .astropy/cache/halotools/subdir_name
+    catalog_type_dirname = os.path.join(halotools_cache_dir, subdir_name)
+    defensively_create_subdir(catalog_type_dirname)
+
+    # Now check to see if there exists a cache subdirectory for simname
+    if 'simname' not in kwargs.keys():
+        return catalog_type_dirname
     else:
-        # Create the directory .astropy/cache/halotools/subdir_name
-        catalog_type_dirname = os.path.join(halotools_cache_dir, subdir_name)
-        defensively_create_subdir(catalog_type_dirname)
+        if kwargs['simname'] not in supported_sim_list:
+            raise UnsupportedSimError(kwargs['simname'])
 
-        # Now check to see if there exists a cache subdirectory for simname
-        if 'simname' not in kwargs.keys():
-            return catalog_type_dirname
+        simname_dirname = os.path.join(catalog_type_dirname, kwargs['simname'])
+        defensively_create_subdir(simname_dirname)
+
+        if 'halo_finder' not in kwargs.keys():
+            return simname_dirname
         else:
-            if kwargs['simname'] not in supported_sim_list:
-                raise KeyError("Input simname %s is not recognized by Haltools " % kwargs['simname'])
-
-            simname_dirname = os.path.join(catalog_type_dirname, kwargs['simname'])
-            defensively_create_subdir(simname_dirname)
-
-            if 'halo_finder' not in kwargs.keys():
-                return simname_dirname
-            else:
-                halo_finder_dirname = os.path.join(simname_dirname, kwargs['halo_finder'])
-                defensively_create_subdir(halo_finder_dirname)
-                return halo_finder_dirname
+            halo_finder_dirname = os.path.join(simname_dirname, kwargs['halo_finder'])
+            defensively_create_subdir(halo_finder_dirname)
+            return halo_finder_dirname
 
 
 def processed_halo_tables_web_location(**kwargs):

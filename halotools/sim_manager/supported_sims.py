@@ -105,11 +105,15 @@ class NbodySimulation(object):
             Redshift of the desired catalog. 
             
         external_cache_loc : string, optional 
-            Absolute path to an alternative source of simulation data besides the default cache. 
-            Assumes that ``external_cache_loc`` has the same organizational structure as the 
-            default Halotools cache. So if ``external_cache_loc`` has particle data 
-            for some simulation ``simname``, then there must be a directory 
-            ``external_cache_loc/simname/particle_catalogs`` where the hdf5 files are stored. 
+            Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
         Returns
         -------
