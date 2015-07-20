@@ -104,7 +104,11 @@ class CatalogManager(object):
 
         cachedir = cache_config.get_catalogs_dir(catalog_type = catalog_type, **kwargs)
 
-        fname_pattern = '.hdf5'
+        if catalog_type == 'raw_halos':
+            fname_pattern = '.list'
+        else:
+            fname_pattern = '.hdf5'
+            
         if 'version_name' in kwargs.keys():
             fname_pattern = kwargs['version_name'] + fname_pattern
         if 'halo_finder' in kwargs.keys():
