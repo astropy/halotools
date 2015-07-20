@@ -5,10 +5,12 @@ import unittest
 from astropy.tests.helper import pytest
 
 from .. import cache_config
+from ...halotools_exceptions import UnsupportedSimError
+
 from astropy.config.paths import _find_home
 
 __all__ = (
-	['test_cache_config', 'test_catalogs_config', 'test_should_not_create_dir', 
+	['test_cache_config', 'test_catalogs_config', 
 	'test_supported_simnames', 'test_supported_halo_finders']
 	)
 
@@ -43,34 +45,6 @@ def test_catalogs_config():
 	assert os.path.join(halotools_cache, 'halo_catalogs') == halos_subdir
 
 
-def test_should_not_create_dir():
-	""" Require that attempting to create a cache subdirectory 
-	for an unsupported simulation and/or halo-finder raises an IOError. 
-	with pytest.raises(IOError) as exc:
-		parent_dir = cache_config.get_catalogs_dir(catalog_type='raw_halos')
-		nonsense_dirname = 'JoseCanseco'
-		func = cache_config.cache_subdir_for_simulation
-		s1 = func(parent_dir, nonsense_dirname)
-
-	exception_string = ("It is not permissible to create a subdirectory of " + 
-		"Halotools cache \nfor simulations which have no class defined in " + 
-		"the halotools/sim_manager/supported_sims module. \n")
-	assert exc.value.args[0] == exception_string
-
-	with pytest.raises(IOError) as exc:
-		parent_dir = cache_config.get_catalogs_dir(catalog_type='raw_halos')
-		nonsense_dirname = 'JoseCanseco'
-		func = cache_config.cache_subdir_for_halo_finder
-		s1 = func(parent_dir, 'bolshoi', nonsense_dirname)
-	exception_string = ("It is not permissible to create a subdirectory of "
-                "Halotools cache \nfor a combination of "
-                "simulation + halo-finder which has no corresponding class defined in "
-                "the halotools/sim_manager/supported_sims module. \n")
-	assert exc.value.args[0] == exception_string
-	"""
-	pass
-
-
 def test_supported_simnames():
 	""" Require `bolshoi`, `bolshoipl`, and `multidark` to 
 	appear in the list of supported simulations. 
@@ -91,6 +65,9 @@ def test_supported_halo_finders():
 		assert 'rockstar' in hflist
 		if sim == 'bolshoi':
 			assert 'bdm' in hflist
+
+	with pytest.raises(UnsupportedSimError) as exc:
+		x = cache_config.get_supported_halo_finders('JoseCanseco')
 
 
 
