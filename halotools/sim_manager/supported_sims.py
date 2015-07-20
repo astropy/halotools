@@ -219,7 +219,7 @@ class HaloCatalog(object):
     def __init__(self, simname, halo_finder, redshift):
         """
         """
-        simclass = retrieve_simclass()
+        simclass = retrieve_simclass(simname)
         simobj = simclass()
         for attr in simobj._attrlist:
             setattr(self, attr, getattr(simobj, attr))
