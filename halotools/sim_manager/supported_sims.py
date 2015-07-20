@@ -23,6 +23,8 @@ from . import sim_defaults, catalog_manager
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import array_like_length as custom_len
 
+from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
 
@@ -33,7 +35,7 @@ from astropy import units as u
 __all__ = (
     ['NbodySimulation', 'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo', 
     'HaloCat', 'BolshoiRockstar', 'BolPlanckRockstar', 
-    'BolshoiBdm', 'MultiDarkRockstar', 'ConsuleoRockstar']
+    'BolshoiBdm', 'MultiDarkRockstar', 'ConsuleoRockstar', 'retrieve_simclass']
     )
 
 
@@ -123,9 +125,6 @@ class NbodySimulation(object):
         return self._catman.retrieve_ptcl_table_from_cache(
             simname=self.simname, desired_redshift = desired_redshift, **kwargs)
 
-
-
-
 class Bolshoi(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology 
     with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h. 
@@ -139,7 +138,6 @@ class Bolshoi(NbodySimulation):
         super(Bolshoi, self).__init__(simname = 'bolshoi', Lbox = 250., 
             particle_mass = 1.35e8, num_ptcl_per_dim = 2048, 
             softening_length = 1., initial_redshift = 80., cosmology = cosmology.WMAP5)
-
 
 class BolPlanck(NbodySimulation):
     """ Cosmological N-body simulation of Planck 2013 cosmology 
@@ -186,20 +184,57 @@ class Consuelo(NbodySimulation):
             softening_length = 8., initial_redshift = 99., cosmology = cosmology.WMAP5)
 
 
-class SimulationSnapshot(object):
+def retrieve_simclass(simname):
+    """
+    Parameters 
+    ----------
+    simname : string, optional
+        Nickname of the simulation. Currently supported simulations are 
+        Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+        MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
 
-    def __init__(self, simulation_class, redshift):
+    Returns 
+    -------
+    simclass : object
+        Appropriate sub-class of `~halotools.sim_manager.NbodySimulation`. 
+    """
+    if simname == 'bolshoi':
+        return Bolshoi 
+    elif simname == 'bolplanck':
+        return BolPlanck 
+    elif simname == 'multidark':
+        return MultiDark
+    elif simname == 'consuelo':
+        return Consuelo 
+    else:
+        raise UnsupportedSimError(simname)
+
+
+######################################################
+########## Halo Catalog classes defined below ########
+######################################################
+
+class HaloCatalog(object):
+
+    def __init__(self, simname, halo_finder, redshift):
         """
         """
-        simobj = simulation_class()
+        simclass = retrieve_simclass()
+        simobj = simclass()
         for attr in simobj._attrlist:
             setattr(self, attr, getattr(simobj, attr))
 
         self._attrlist = simobj._attrlist
+        self.halo_finder, self.redshift = halo_finder, redshift 
+        self._attrlist.extend(['halo_finder', 'redshift'])
 
-        self.redshift = redshift
-        self._attrlist.append('redshift')
+        self.dtype_ascii, self.header_ascii = sim_defaults.return_dtype_and_header(simname, halo_finder)
+        self._attrlist.extend(['dtype_ascii', 'header_ascii'])
 
+        ### Attributes that still need to be implemented: 
+        # self.halo_table, self.cuts_description, self.version, 
+        # self.fname, self.orig_data_source, etc. 
+        # Also should implement some slick way to describe all columns in plain English 
 
     def retrieve_halocat(self, **kwargs):
         """ Method uses the CatalogManager to return a halo catalog object. 
@@ -212,29 +247,6 @@ class SimulationSnapshot(object):
         pass
 
 
-######################################################
-########## Halo Catalog classes defined below ########
-######################################################
-
-
-class HaloCatalog(object):
-
-    def __init__(self, snapshot_class, halo_finder):
-        """
-        """
-        snapshotobj = snapshot_class()
-        for attr in snapshotobj._attrlist:
-            setattr(self, attr, getattr(snapshotobj, attr))
-
-        self._attrlist = snapshotobj._attrlist
-
-        self.halo_finder = halo_finder
-        self._attrlist.append('halo_finder')
-
-        ### Attributes that still need to be implemented: 
-        # self.halo_table, self.cuts_description, self.version, 
-        # self.fname, self.orig_data_source, etc. 
-        # Also should implement some slick way to describe all columns in plain English 
 
 
 @six.add_metaclass(ABCMeta)
