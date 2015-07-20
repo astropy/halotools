@@ -7,6 +7,8 @@ Methods and classes to read ASCII files storing simulation data.
 __all__ = ['BehrooziASCIIReader']
 
 import os
+from time import time
+import numpy as np
 
 from . import catalog_manager, supported_sims, sim_defaults
 
