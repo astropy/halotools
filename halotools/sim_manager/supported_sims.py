@@ -236,21 +236,6 @@ class HaloCatalog(object):
         # self.fname, self.orig_data_source, etc. 
         # Also should implement some slick way to describe all columns in plain English 
 
-class ParticleCatalog(object):
-
-    def __init__(self, snapshot_class):
-        """
-        """
-        snapshotobj = snapshot_class()
-        for attr in snapshotobj._attrlist:
-            setattr(self, attr, getattr(snapshotobj, attr))
-
-        self._attrlist = snapshotobj._attrlist
-
-        ### Attributes that still need to be implemented: 
-        ### self.particle_table, self.fname, self.orig_data_source, etc.
-
-
 
 @six.add_metaclass(ABCMeta)
 class HaloCat(object):
