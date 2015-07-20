@@ -90,10 +90,36 @@ class NbodySimulation(object):
             'softening_length', 'initial_redshift', 'cosmology']
             )
 
+        self._catman = catalog_manager.CatalogManager()
+
     def retrieve_snapshot(self, **kwargs):
         """ Method uses the CatalogManager to return a snapshot object. 
         """
         pass
+
+    def retrieve_particles(self, desired_redshift, **kwargs):
+        """
+        Parameters 
+        ----------
+        desired_redshift : float 
+            Redshift of the desired catalog. 
+            
+        external_cache_loc : string, optional 
+            Absolute path to an alternative source of simulation data besides the default cache. 
+            Assumes that ``external_cache_loc`` has the same organizational structure as the 
+            default Halotools cache. So if ``external_cache_loc`` has particle data 
+            for some simulation ``simname``, then there must be a directory 
+            ``external_cache_loc/simname/particle_catalogs`` where the hdf5 files are stored. 
+
+        Returns
+        -------
+        particles : Astropy Table 
+            `~astropy.table.Table` object storing position and velocity of particles. 
+        """
+        return self._catman.retrieve_ptcl_table_from_cache(
+            simname=self.simname, desired_redshift = desired_redshift, **kwargs)
+
+
 
 
 class Bolshoi(NbodySimulation):
