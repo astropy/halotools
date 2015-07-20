@@ -5,25 +5,7 @@ Collection of column info dtypes used to read halo catalog ASCII
 import numpy as np 
 
 ################################################################################################
-### Current versions of dtype and header defined here 
-# Definitions are in terms of historical information defined below 
-dtype_consuelo_rockstar = dtype_slac_consuelo_rockstar_july19_2015
-header_consuelo_rockstar = header_slac_consuelo_rockstar_july19_2015
-#
-dtype_bolshoi_rockstar = dtype_slac_bolshoi_rockstar_july19_2015
-header_bolshoi_rockstar = header_slac_bolshoi_rockstar_july19_2015
-#
-dtype_bolplanck_rockstar = dtype_slac_bolplanck_rockstar_july19_2015
-header_bolplanck_rockstar = header_slac_bolplanck_rockstar_july19_2015
-#
-dtype_multidark_rockstar = dtype_slac_multidark_rockstar_july19_2015
-header_multidark_rockstar = header_slac_multidark_rockstar_july19_2015
-#
-dtype_bolshoi_bdm = dtype_slac_bolshoi_bdm_july19_2015
-header_bolshoi_bdm = header_slac_bolshoi_bdm_july19_2015
 
-################################################################################################
-### Historical information defined here 
 
 ################################################################################################
 ######## Headers copied-and-pasted directly from ASCII downloaded on the indicated date ########
