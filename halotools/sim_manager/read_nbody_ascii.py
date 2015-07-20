@@ -6,6 +6,8 @@ Methods and classes to read ASCII files storing simulation data.
 
 __all__ = ['BehrooziASCIIReader']
 
+import os
+
 from . import catalog_manager, supported_sims, sim_defaults
 
 from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
