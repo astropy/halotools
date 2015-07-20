@@ -295,4 +295,6 @@ class BehrooziASCIIReader(object):
             msg = "Total runtime to read in ASCII = %.1f seconds\n"
         print(msg % runtime)
 
+        #self._compress_ascii()
+
         return output
