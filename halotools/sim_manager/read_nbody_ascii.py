@@ -10,6 +10,8 @@ import os
 from time import time
 import numpy as np
 
+from astropy.table import Table
+
 from . import catalog_manager, supported_sims, sim_defaults
 
 from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
