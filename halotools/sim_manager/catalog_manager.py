@@ -728,8 +728,7 @@ class CatalogManager(object):
 
         available_fnames_to_download = self.raw_halo_tables_available_for_download(**kwargs)
 
-        url, closest_redshift = (
-            self._closest_fname(available_fnames_to_download, desired_redshift))
+        url, closest_redshift = self._closest_fname(available_fnames_to_download, desired_redshift)
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
