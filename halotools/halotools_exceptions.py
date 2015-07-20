@@ -21,6 +21,11 @@ class HalotoolsCacheError(HalotoolsError):
 	def __init__(self, message):
 		super(HalotoolsCacheError, self).__init__(message)
 
+class HalotoolsIOError(HalotoolsError):
+	def __init__(self, message):
+		super(HalotoolsIOError, self).__init__(message)
+
+
 class UnsupportedSimError(HalotoolsCacheError):
 	def __init__(self, simname):
 
