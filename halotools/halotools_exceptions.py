@@ -1,17 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-Classes for all package-specific exceptions. 
+Classes for all Halotools-specific exceptions. 
 """
 __all__ = ['HalotoolsError', 'HalotoolsCacheError', 'UnsupportedSimError', 'CatalogTypeError']
 
-class HalotoolsError(Exception):
-	pass
 
+class HalotoolsError(Exception):
+	""" Base class of all Halotools-specific exceptions. 
+	"""
+	def __init__(self, message):
+		super(HalotoolsError, self).__init__(message)
+
+
+
+#####
 
 
 
 class HalotoolsCacheError(HalotoolsError):
-	pass
+	def __init__(self, message):
+		super(HalotoolsCacheError, self).__init__(message)
 
 class UnsupportedSimError(HalotoolsCacheError):
 	def __init__(self, simname):
