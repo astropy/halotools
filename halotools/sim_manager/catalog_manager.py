@@ -4,6 +4,8 @@ Methods and classes for halo catalog I/O and organization.
 
 """
 
+__all__ = ['CatalogManager']
+
 import numpy as np
 from warnings import warn
 from time import time
@@ -1001,17 +1003,6 @@ class CatalogManager(object):
         pass
 
 
-class HaloCatalogProcessor(object):
-    """ Class used to read halo catalog ASCII data, 
-    produce a value-added halo catalog, and store the catalog  
-    in the cache directory or other desired location. 
-    """
-
-    def __init__(self):
-        pass
-
-    def read_raw_halo_table_ascii(self, **kwargs):
-        pass
 
 
 
