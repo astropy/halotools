@@ -13,15 +13,15 @@ import numpy as np
 ##### Consuelo Rockstar header of file downloaded from 
 ##### http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs on 19 July, 2015
 #
-header_hipacc_consuelo_rockstar_july19_2015='scale(0) id(1) desc_scale(2) desc_id(3) num_prog(4) pid(5) upid(6) desc_pid(7) phantom(8) sam_mvir(9) mvir(10) rvir(11) rs(12) vrms(13) mmp?(14) scale_of_last_MM(15) vmax(16) x(17) y(18) z(19) vx(20) vy(21) vz(22) Jx(23) Jy(24) Jz(25) Spin(26) Breadth_first_ID(27) Depth_first_ID(28) Tree_root_ID(29) Orig_halo_ID(30) Snap_num(31) Next_coprogenitor_depthfirst_ID(32) Last_progenitor_depthfirst_ID(33) Last_mainleaf_depthfirst_ID(34) Rs_Klypin(35) Mvir_all(36) M200b(37) M200c(38) M500c(39) M2500c(40) Xoff(41) Voff(42) Spin_Bullock(43) b_to_a(44) c_to_a(45) A[x](46) A[y](47) A[z](48) b_to_a(500c)(49) c_to_a(500c)(50) A[x](500c)(51) A[y](500c)(52) A[z](500c)(53) T/|U|(54) M_pe_Behroozi(55) M_pe_Diemer(56) Halfmass_Radius(57) Macc(58) Mpeak(59) Vacc(60) Vpeak(61) Halfmass_Scale(62) Acc_Rate_Inst(63) Acc_Rate_100Myr(64) Acc_Rate_1*Tdyn(65) Acc_Rate_2*Tdyn(66) Acc_Rate_Mpeak(67) Mpeak_Scale(68) Acc_Scale(69) First_Acc_Scale(70) First_Acc_Mvir(71) First_Acc_Vmax(72) Vmax@Mpeak(73)'
+header_slac_consuelo_rockstar_july19_2015='scale(0) id(1) desc_scale(2) desc_id(3) num_prog(4) pid(5) upid(6) desc_pid(7) phantom(8) sam_mvir(9) mvir(10) rvir(11) rs(12) vrms(13) mmp?(14) scale_of_last_MM(15) vmax(16) x(17) y(18) z(19) vx(20) vy(21) vz(22) Jx(23) Jy(24) Jz(25) Spin(26) Breadth_first_ID(27) Depth_first_ID(28) Tree_root_ID(29) Orig_halo_ID(30) Snap_num(31) Next_coprogenitor_depthfirst_ID(32) Last_progenitor_depthfirst_ID(33) Last_mainleaf_depthfirst_ID(34) Rs_Klypin(35) Mvir_all(36) M200b(37) M200c(38) M500c(39) M2500c(40) Xoff(41) Voff(42) Spin_Bullock(43) b_to_a(44) c_to_a(45) A[x](46) A[y](47) A[z](48) b_to_a(500c)(49) c_to_a(500c)(50) A[x](500c)(51) A[y](500c)(52) A[z](500c)(53) T/|U|(54) M_pe_Behroozi(55) M_pe_Diemer(56) Halfmass_Radius(57) Macc(58) Mpeak(59) Vacc(60) Vpeak(61) Halfmass_Scale(62) Acc_Rate_Inst(63) Acc_Rate_100Myr(64) Acc_Rate_1*Tdyn(65) Acc_Rate_2*Tdyn(66) Acc_Rate_Mpeak(67) Mpeak_Scale(68) Acc_Scale(69) First_Acc_Scale(70) First_Acc_Mvir(71) First_Acc_Vmax(72) Vmax@Mpeak(73)'
 #
 ################################################################################################
 ##### Bolshoi BDM header of file downloaded from 
 ##### http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM on 19 July, 2015
 #
-header_hipacc_bolshoi_bdm_july19_2015 = 'scale(0) id(1) desc_scale(2) desc_id(3) num_prog(4) pid(5) upid(6) desc_pid(7) phantom(8) sam_mvir(9) mvir(10) rvir(11) rs(12) vrms(13) mmp?(14) scale_of_last_MM(15) vmax(16) x(17) y(18) z(19) vx(20) vy(21) vz(22) Jx(23) Jy(24) Jz(25) Spin(26) Breadth_first_ID(27) Depth_first_ID(28) Tree_root_ID(29) Orig_halo_ID(30) Snap_num(31) Next_coprogenitor_depthfirst_ID(32) Last_progenitor_depthfirst_ID(33) Xoff 2K/Ep-1 Rrms Axba Axca Xax Yax Zax Macc Mpeak Vacc Vpeak'
+header_slac_bolshoi_bdm_july19_2015 = 'scale(0) id(1) desc_scale(2) desc_id(3) num_prog(4) pid(5) upid(6) desc_pid(7) phantom(8) sam_mvir(9) mvir(10) rvir(11) rs(12) vrms(13) mmp?(14) scale_of_last_MM(15) vmax(16) x(17) y(18) z(19) vx(20) vy(21) vz(22) Jx(23) Jy(24) Jz(25) Spin(26) Breadth_first_ID(27) Depth_first_ID(28) Tree_root_ID(29) Orig_halo_ID(30) Snap_num(31) Next_coprogenitor_depthfirst_ID(32) Last_progenitor_depthfirst_ID(33) Xoff 2K/Ep-1 Rrms Axba Axca Xax Yax Zax Macc Mpeak Vacc Vpeak'
 #
-dtype_hipacc_bolshoi_bdm_july19_2015 = np.dtype([
+dtype_slac_bolshoi_bdm_july19_2015 = np.dtype([
     ('scale', 'f4'), 
     ('haloid', 'i8'), 
     ('scale_desc', 'f4'), 
@@ -81,11 +81,11 @@ dtype_hipacc_bolshoi_bdm_july19_2015 = np.dtype([
 #
 ##### All three headers were identical, so only the one appears below
 #
-header_hipacc_bolshoi_rockstar_july19_2015 = 'scale(0) id(1) desc_scale(2) desc_id(3) num_prog(4) pid(5) upid(6) desc_pid(7) phantom(8) sam_mvir(9) mvir(10) rvir(11) rs(12) vrms(13) mmp?(14) scale_of_last_MM(15) vmax(16) x(17) y(18) z(19) vx(20) vy(21) vz(22) Jx(23) Jy(24) Jz(25) Spin(26) Breadth_first_ID(27) Depth_first_ID(28) Tree_root_ID(29) Orig_halo_ID(30) Snap_num(31) Next_coprogenitor_depthfirst_ID(32) Last_progenitor_depthfirst_ID(33) Last_mainleaf_depthfirst_ID(34) Rs_Klypin(35) Mvir_all(36) M200b(37) M200c(38) M500c(39) M2500c(40) Xoff(41) Voff(42) Spin_Bullock(43) b_to_a(44) c_to_a(45) A[x](46) A[y](47) A[z](48) b_to_a(500c)(49) c_to_a(500c)(50) A[x](500c)(51) A[y](500c)(52) A[z](500c)(53) T/|U|(54) M_pe_Behroozi(55) M_pe_Diemer(56) Macc(57) Mpeak(58) Vacc(59) Vpeak(60) Halfmass_Scale(61) Acc_Rate_Inst(62) Acc_Rate_100Myr(63) Acc_Rate_1*Tdyn(64) Acc_Rate_2*Tdyn(65) Acc_Rate_Mpeak(66) Mpeak_Scale(67) Acc_Scale(68) First_Acc_Scale(69) First_Acc_Mvir(70) First_Acc_Vmax(71) Vmax@Mpeak(72)'
-header_hipacc_multidark_rockstar_july19_2015 = header_hipacc_bolshoi_rockstar_july19_2015
-header_hipacc_bolplanck_rockstar_july19_2015 = header_hipacc_bolshoi_rockstar_july19_2015
+header_slac_bolshoi_rockstar_july19_2015 = 'scale(0) id(1) desc_scale(2) desc_id(3) num_prog(4) pid(5) upid(6) desc_pid(7) phantom(8) sam_mvir(9) mvir(10) rvir(11) rs(12) vrms(13) mmp?(14) scale_of_last_MM(15) vmax(16) x(17) y(18) z(19) vx(20) vy(21) vz(22) Jx(23) Jy(24) Jz(25) Spin(26) Breadth_first_ID(27) Depth_first_ID(28) Tree_root_ID(29) Orig_halo_ID(30) Snap_num(31) Next_coprogenitor_depthfirst_ID(32) Last_progenitor_depthfirst_ID(33) Last_mainleaf_depthfirst_ID(34) Rs_Klypin(35) Mvir_all(36) M200b(37) M200c(38) M500c(39) M2500c(40) Xoff(41) Voff(42) Spin_Bullock(43) b_to_a(44) c_to_a(45) A[x](46) A[y](47) A[z](48) b_to_a(500c)(49) c_to_a(500c)(50) A[x](500c)(51) A[y](500c)(52) A[z](500c)(53) T/|U|(54) M_pe_Behroozi(55) M_pe_Diemer(56) Macc(57) Mpeak(58) Vacc(59) Vpeak(60) Halfmass_Scale(61) Acc_Rate_Inst(62) Acc_Rate_100Myr(63) Acc_Rate_1*Tdyn(64) Acc_Rate_2*Tdyn(65) Acc_Rate_Mpeak(66) Mpeak_Scale(67) Acc_Scale(68) First_Acc_Scale(69) First_Acc_Mvir(70) First_Acc_Vmax(71) Vmax@Mpeak(72)'
+header_slac_multidark_rockstar_july19_2015 = header_slac_bolshoi_rockstar_july19_2015
+header_slac_bolplanck_rockstar_july19_2015 = header_slac_bolshoi_rockstar_july19_2015
 #
-dtype_hipacc_bolshoi_rockstar_july19_2015 = np.dtype([
+dtype_slac_bolshoi_rockstar_july19_2015 = np.dtype([
     ('scale', 'f4'), 
     ('haloid', 'i8'), 
     ('scale_desc', 'f4'), 
