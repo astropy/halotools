@@ -6,6 +6,8 @@ Methods and classes to read ASCII files storing simulation data.
 
 __all__ = ['BehrooziASCIIReader']
 
+from . import catalog_manager, supported_sims, sim_defaults
+
 from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
 
 class BehrooziASCIIReader(object):
@@ -15,7 +17,8 @@ class BehrooziASCIIReader(object):
     Each new raw halo catalog must be processed with its own instance of this class. 
     """
 
-    def __init__(self, input_fname, simname, halo_finder, **kwargs):
+    def __init__(self, input_fname, simname, halo_finder, 
+        recompress = True, **kwargs):
         """
         Parameters 
         -----------
@@ -38,19 +41,33 @@ class BehrooziASCIIReader(object):
             within the namespace of the `RockstarReader` instance, and 
             it must be a stand-alone function, not a bound method of 
             some other class.  
+
+        recompress : bool, optional 
+            If ``input_fname`` is a compressed file, `BehrooziASCIIReader` 
+            will automatically uncompress it before reading. If recompress 
+            is True, the file will be recompressed after reading; if False, 
+            it will remain uncompressed. Default is True. 
         """
 
         if not os.path.isfile(input_fname):
             if not os.path.isfile(input_fname[:-3]):
-            	msg = "Input filename %s is not a file" 
-            	raise HalotoolsCacheError(msg % input_fname)
+                msg = "Input filename %s is not a file" 
+                raise HalotoolsCacheError(msg % input_fname)
                 
         self.fname = input_fname
+        self._recompress = recompress
         self._uncompress_ascii()
         self.simname = simname
         self.halo_finder = halo_finder
-        self.halocat_obj = get_halocat_obj(simname, halo_finder)
 
+        self.dtype_ascii, self.header_ascii = sim_defaults.return_dtype_and_header(
+            self.simname, self.halo_finder)
+
+        self._process_cuts_funcobj(**kwargs)
+
+    def _process_cuts_funcobj(self, **kwargs):
+        """
+        """
         if 'cuts_funcobj' in kwargs.keys():
             if kwargs['cuts_funcobj'] == 'nocut':
                 g = lambda x : np.ones(len(x), dtype=bool)
@@ -66,6 +83,7 @@ class BehrooziASCIIReader(object):
         else:
             self.cuts_funcobj = self.default_halocat_cut
             self._cuts_description = 'Default cut set by default_halocat_cut'
+
 
     def default_halocat_cut(self, x):
         """ Function used to provide a simple cut on a raw halo catalog, 
@@ -185,12 +203,12 @@ class BehrooziASCIIReader(object):
         """ Recompresses the halo catalog ascii data, 
         and returns the input filename appended with `.gz`.  
         """
-        if self.fname[-3:]!='.gz':
+
+        recompress = (self._recompress) & (self.fname[-3:]!='.gz')
+        if recompress is True:
             print("...re-compressing ASCII data")
             os.system("gzip "+self.fname)
             self.fname = self.fname + '.gz'
-        else:
-            pass
 
 
     def read_halocat(self, **kwargs):
