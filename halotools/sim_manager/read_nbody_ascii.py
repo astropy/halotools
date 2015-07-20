@@ -23,7 +23,7 @@ class BehrooziASCIIReader(object):
     Each new raw halo catalog must be processed with its own instance of this class. 
     """
 
-    def __init__(self, input_fname, simname, halo_finder, redshift, 
+    def __init__(self, input_fname, simname, halo_finder, 
         recompress = True, **kwargs):
         """
         Parameters 
@@ -36,9 +36,6 @@ class BehrooziASCIIReader(object):
 
         halo_finder : string 
             Nickname of the halo-finder, e.g. `rockstar`. 
-
-        redshift : float 
-            Value of the redshift of the snapshot
 
         cuts_funcobj : function object, optional
             Function used to apply cuts to the rows of the ASCII data. 
@@ -75,6 +72,9 @@ class BehrooziASCIIReader(object):
         self._recompress = recompress
         self._uncompress_ascii()
 
+        self.catman = catalog_manager.CatalogManager()
+        scale_factor = float(self.catman._get_scale_factor_substring(os.path.basename(self.fname)))
+        redshift = (1./scale_factor) - 1
         self.halocat = supported_sims.HaloCatalog(simname, halo_finder, redshift)
 
         self._process_cuts_funcobj(**kwargs)
