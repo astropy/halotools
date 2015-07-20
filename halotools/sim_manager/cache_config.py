@@ -14,6 +14,7 @@ from astropy.config.paths import _find_home
 import warnings
 
 from . import sim_defaults
+from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError
 
 def simname_is_supported(simname):
     """ Method returns a boolean for whether or not the input 
@@ -46,7 +47,7 @@ def defensively_create_subdir(dirname):
 def get_supported_halo_finders(input_simname):
 
     if input_simname not in supported_sim_list:
-        raise KeyError("Input simname %s is not recognized by Haltools " % kwargs['simname'])
+        raise UnsupportedSimError(input_simname)
     elif input_simname == 'bolshoi':
         return ['bdm', 'rockstar']
     else:
@@ -115,7 +116,7 @@ def get_catalogs_dir(**kwargs):
         subdir_name = 'raw_halo_catalogs'
         default_cache_dir = sim_defaults.raw_halo_table_cache_dir
     else:
-        raise TypeError("Input catalog_type must be either 'raw_halos', 'halos', or 'particles'")
+        raise CatalogTypeError(catalog_type)
 
     # Check to see whether we are using the package default or user-provided cache directory
     if default_cache_dir != 'pkg_default':

@@ -14,4 +14,4 @@ if not _ASTROPY_SETUP_:
 	pass
 	# ----------------------------------------------------------------------------
 
-from halotools_exceptions import *
+from . import halotools_exceptions
