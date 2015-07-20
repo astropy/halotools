@@ -8,7 +8,7 @@ __all__ = ['BehrooziASCIIReader']
 
 from . import catalog_manager, supported_sims, sim_defaults
 
-from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
+from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
 
 class BehrooziASCIIReader(object):
     """ Class containing methods used to read raw ASCII data generated with Rockstar
@@ -17,7 +17,7 @@ class BehrooziASCIIReader(object):
     Each new raw halo catalog must be processed with its own instance of this class. 
     """
 
-    def __init__(self, input_fname, simname, halo_finder, 
+    def __init__(self, input_fname, simname, halo_finder, redshift, 
         recompress = True, **kwargs):
         """
         Parameters 
@@ -30,6 +30,9 @@ class BehrooziASCIIReader(object):
 
         halo_finder : string 
             Nickname of the halo-finder, e.g. `rockstar`. 
+
+        redshift : float 
+            Value of the redshift of the snapshot
 
         cuts_funcobj : function object, optional
             Function used to apply cuts to the rows of the ASCII data. 
@@ -49,19 +52,24 @@ class BehrooziASCIIReader(object):
             it will remain uncompressed. Default is True. 
         """
 
+        # Check whether input_fname exists. 
+        # If not, raise an exception. If so, bind to self. 
         if not os.path.isfile(input_fname):
+            # Check to see whether the uncompressed version is in cache
             if not os.path.isfile(input_fname[:-3]):
                 msg = "Input filename %s is not a file" 
                 raise HalotoolsCacheError(msg % input_fname)
+            else:
+                msg = ("Input filename ``%s`` is not a file. \n"
+                    "However, ``%s`` is, so change your input_fname accordingly.")
+                raise HalotoolsCacheError(msg % (input_fname, input_fname[:-3]))
+        else:
+            self.fname = input_fname
                 
-        self.fname = input_fname
         self._recompress = recompress
         self._uncompress_ascii()
-        self.simname = simname
-        self.halo_finder = halo_finder
 
-        self.dtype_ascii, self.header_ascii = sim_defaults.return_dtype_and_header(
-            self.simname, self.halo_finder)
+        self.halocat = supported_sims.HaloCatalog(simname, halo_finder, redshift)
 
         self._process_cuts_funcobj(**kwargs)
 
@@ -101,9 +109,7 @@ class BehrooziASCIIReader(object):
             Length-Nhalos boolean array serving as a mask. 
         """
 
-        return x['mpeak'] > ( 
-            self.halocat_obj.simulation.particle_mass*
-            sim_defaults.Num_ptcl_requirement)
+        return x['mpeak'] > self.halocat.particle_mass*sim_defaults.Num_ptcl_requirement
 
     def file_len(self):
         """ Compute the number of all rows in the raw halo catalog. 
@@ -153,36 +159,6 @@ class BehrooziASCIIReader(object):
 
         return Nheader
 
-    def get_header(self, Nrows_header_total=None):
-        """ Return the header as a list of strings, 
-        one entry per header row. 
-
-        Parameters 
-        ----------
-        fname : string 
-
-        Nrows_header_total :  int, optional
-            If the total number of header rows is not known in advance, 
-            method will call `header_len` to determine Nrows_header_total. 
-
-        Notes 
-        -----
-        Empty lines will be included in the returned header. 
-
-        """
-
-        if Nrows_header_total is None:
-            Nrows_header_total = self.header_len(self.fname)
-
-        print("Reading the first %i lines of the ascii file" % Nrows_header_total)
-
-        output = []
-        with open(self.fname) as f:
-            for i in range(Nrows_header_total):
-                line = f.readline().strip()
-                output.append(line)
-
-        return output
 
     def _uncompress_ascii(self):
         """ If the input fname has file extension `.gz`, 
@@ -237,12 +213,16 @@ class BehrooziASCIIReader(object):
         """
         start = time()
 
+        # First read the first line as a self-consistency check against self.halocat.header_ascii
+        with open(self.fname) as f:
+            self._header_ascii_from_input_fname = f.readline()
+
         if 'nchunks' in kwargs.keys():
             Nchunks = kwargs['nchunks']
         else:
             Nchunks = 1000
 
-        dt = self.halocat_obj.halocat_column_info
+        dt = self.halocat.dtype_ascii
 
         file_length = self.file_len()
         header_length = self.header_len()
@@ -250,7 +230,6 @@ class BehrooziASCIIReader(object):
         if chunksize == 0:
             chunksize = file_length # data will now never be chunked
             Nchunks = 1
-
 
         print("\n...Processing ASCII data of file: \n%s\n " % self.fname)
         print(" Total number of rows in file = %i" % file_length)
@@ -265,6 +244,7 @@ class BehrooziASCIIReader(object):
         container = []
         iout = np.round(Nchunks / 10.).astype(int)
         for linenum, line in enumerate(open(self.fname)):
+
             if line[0] == '#':
                 pass
             else:
@@ -290,7 +270,7 @@ class BehrooziASCIIReader(object):
                     for ncols in Ncolumns:
                         print ncols
                     print chunk[-1]
-                    raise ValueError("Number of columns does not match length of dtype")
+                    raise HalotoolsIOError("Number of columns does not match length of dtype")
 
                 container.append(a[self.cuts_funcobj(a)])
                 chunk = []
