@@ -20,7 +20,7 @@ def host_status(halos):
 
 	* ``subhalo``: a halo whose center is presently found within the halo-finder-determined boundary of a more massive parent halo, and where this more massive parent halo is a host halo (either true or ejected) that appears within the input ``halos`` catalog that was passed to the `host_status` function.
 
-	* ``subhalo_host_not_in_catalog``: a halo whose center is presently found within the halo-finder-determined boundary of a more massive parent halo, and where this more massive parent halo does not appear within the input ``halos`` catalog that was passed to the `host_status` function.
+	* ``subhalo_nohost``: a halo whose center is presently found within the halo-finder-determined boundary of a more massive parent halo, and where this more massive parent halo does not appear within the input ``halos`` catalog that was passed to the `host_status` function.
 
 	* ``merging_subhalo``: a halo whose center is presently found within the halo-finder-determined boundary of a more massive parent halo, and where this more massive parent halo is itself a ``subhalo``. Only happens in rare cases where the more massive parent halo resides inside, but in the outskirts, of another parent. 
 
@@ -55,7 +55,7 @@ def host_status(halos):
 
 	sub_halo_mask = np.invert(host_halo_mask)
 	sub_halos = halos[sub_halo_mask]
-	output[sub_halo_mask] = 'subhalo_host_not_in_catalog'
+	output[sub_halo_mask] = 'subhalo_nohost'
 	output_subhalo_subarray = output[sub_halo_mask]
 
 	a_ind, b_ind = crossmatch(sub_halos['halo_hostid'], host_halos['halo_id'])
