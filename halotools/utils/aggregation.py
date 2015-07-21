@@ -7,7 +7,7 @@ Modules to support 'grouped' array calculations; aggregation operations.
 
 from __future__ import division, print_function
 import numpy as np
-from halotools.utils.match import match
+from halotools.utils.match import crossmatch
 from astropy.table import Table, Column
 
 __all__=['add_group_property','add_members_property','group_by',\
@@ -74,7 +74,7 @@ def add_group_property(members, grouping_key, function, groups, new_field_name):
     
     new_prop, ID = new_group_property(members, function, None, GroupIDs = GroupIDs)
 
-    inds1, inds2 = match(ID,groups[grouping_key])
+    inds1, inds2 = crossmatch(ID,groups[grouping_key])
     new_prop=new_prop[inds1]
     
     new_col = Column(name=new_field_name, data=new_prop)
