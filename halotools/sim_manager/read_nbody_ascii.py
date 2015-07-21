@@ -12,7 +12,7 @@ import numpy as np
 
 from astropy.table import Table
 
-from . import catalog_manager, supported_sims, sim_defaults
+from . import catalog_manager, supported_sims, sim_defaults, cache_config
 
 from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
 
@@ -23,19 +23,20 @@ class BehrooziASCIIReader(object):
     Each new raw halo catalog must be processed with its own instance of this class. 
     """
 
-    def __init__(self, input_fname, simname, halo_finder, 
-        recompress = True, **kwargs):
+    def __init__(self, input_fname, recompress = True, **kwargs):
         """
         Parameters 
         -----------
         input_fname : string 
             Name of the file (including absolute path) to be processed. 
 
-        simname : string 
-            Nickname of the simulation, e.g. `bolshoi`. 
+        simname : string, optional 
+            Nickname of the simulation, e.g. `bolshoi`. If None is passed, 
+            Halotools will attempt to automatically infer this from ``input_fname``. 
 
-        halo_finder : string 
-            Nickname of the halo-finder, e.g. `rockstar`. 
+        halo_finder : string, optional 
+            Nickname of the halo-finder, e.g. `rockstar`. If None is passed, 
+            Halotools will attempt to automatically infer this from ``input_fname``. 
 
         cuts_funcobj : function object, optional
             Function used to apply cuts to the rows of the ASCII data. 
@@ -73,11 +74,49 @@ class BehrooziASCIIReader(object):
         self._uncompress_ascii()
 
         self.catman = catalog_manager.CatalogManager()
-        scale_factor = float(self.catman._get_scale_factor_substring(os.path.basename(self.fname)))
-        redshift = (1./scale_factor) - 1
+
+        simname, halo_finder, redshift = self._infer_snapshot(self.fname, **kwargs)
         self.halocat = supported_sims.HaloCatalog(simname, halo_finder, redshift)
 
         self._process_cuts_funcobj(**kwargs)
+
+    def _infer_snapshot(self, fname, **kwargs):
+        """
+        """
+
+        subdir = os.path.abspath(os.path.join(fname, os.pardir))
+        pardir = os.path.abspath(os.path.join(subdir, os.pardir))
+
+        if 'halo_finder' in kwargs.keys():
+            halo_finder = kwargs['halo_finder']
+        else:
+            halo_finder = os.path.basename(subdir)
+
+        if 'simname' in kwargs.keys():
+            simname = kwargs['simname']
+        else:
+            simname = os.path.basename(pardir)
+
+        if simname not in cache_config.supported_sim_list:
+            msg = "Halotools tried to infer your simname from the input fname = %s \n"
+            "The inferred simname is %s, which is not recognized.\n "
+            "Try calling the function again but using ``simname`` as a keyword argument, \n"
+            "or otherwise add your simname to the list of supported sims. "
+            raise HalotoolsCacheError(msg % (fname, simname))
+
+        supported_halo_finders = cache_config.get_supported_halo_finders(simname)
+        if halo_finder not in supported_halo_finders:
+            msg = "Halotools tried to infer your halo_finder from the input fname = %s \n"
+            "The inferred halo_finder is %s, which is not recognized.\n "
+            "Try calling the function again but using ``halo_finder`` as a keyword argument, \n"
+            "or otherwise add your halo_finder to the list of supported halo_finders. "
+            raise HalotoolsCacheError(msg % (fname, halo_finder))
+
+        scale_factor = float(self.catman._get_scale_factor_substring(os.path.basename(fname)))
+        redshift = (1./scale_factor) - 1
+
+        return simname, halo_finder, redshift
+
 
     def _process_cuts_funcobj(self, **kwargs):
         """
