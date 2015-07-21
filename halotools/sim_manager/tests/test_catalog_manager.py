@@ -204,7 +204,7 @@ class TestCatalogManager(TestCase):
             desired_redshift = 0.0, halo_finder = halo_finder, 
             simname = simname
             )
-        correct_basename = 'hlist_1.00030.list.halotools.official.version.hdf5'
+        correct_basename = 'hlist_1.00035.list.halotools.alpha.version0.hdf5'
         assert os.path.basename(closest_fname) == correct_basename
 
     @pytest.mark.skipif('not APH_MACHINE')
