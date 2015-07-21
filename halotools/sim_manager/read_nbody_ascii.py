@@ -9,6 +9,7 @@ __all__ = ['BehrooziASCIIReader']
 import os
 from time import time
 import numpy as np
+from difflib import get_close_matches
 
 from astropy.table import Table
 
@@ -67,10 +68,6 @@ class BehrooziASCIIReader(object):
             is True, the file will be recompressed after reading; if False, 
             it will remain uncompressed. Default is True. 
         """
-        print("Printing kwargs.keys()")
-        for key in kwargs.keys():
-            print key
-
 
         # Check whether input_fname exists. 
         # If not, raise an exception. If so, bind to self. 
@@ -140,7 +137,6 @@ class BehrooziASCIIReader(object):
         if ('cuts_funcobj' in kwargs.keys()) & ('column_bounds' in kwargs.keys()):
             raise KeyError("You may not pass both a ``cuts_funcobj`` and a ``column_bounds`` argument")
         elif 'cuts_funcobj' in kwargs.keys():
-            print("Keyword cuts_funcobj detected")
             if kwargs['cuts_funcobj'] == 'nocut':
                 g = lambda x : np.ones(len(x), dtype=bool)
                 self.cuts_funcobj = g
@@ -154,6 +150,21 @@ class BehrooziASCIIReader(object):
                     raise TypeError("The input cuts_funcobj must be a callable function")
         elif 'column_bounds' in kwargs.keys():
             column_bounds = kwargs['column_bounds']
+            for cut in column_bounds:
+                if cut[0] not in self.halocat.dtype_ascii.names:
+                    msg = ("columns_bound keyword argument included a cut on ``%s``, "
+                        "which is not a column of this halo catalog\n")
+                    possible_matches = get_close_matches(cut[0], self.halocat.dtype_ascii.names)
+                    if possible_matches != []:
+                        s = ''
+                        for elt in possible_matches: 
+                            s = elt + ', ' + s
+                        s = s[:-2]
+
+                        additional_msg = "Did you mean any of the following keys?\n" + s
+                        msg = msg + additional_msg
+                    raise HalotoolsIOError(msg % cut[0])
+
             def return_cutfunc(column_bounds):
                 cutfuncs = []
                 for cut in column_bounds:
@@ -346,7 +357,7 @@ class BehrooziASCIIReader(object):
                             Ncolumns.append(len(elt))
                     print("Number of columns in chunk = ")
                     for ncols in Ncolumns:
-                        print ncols
+                        print(ncols)
                     print chunk[-1]
                     raise HalotoolsIOError("Number of columns does not match length of dtype")
 
