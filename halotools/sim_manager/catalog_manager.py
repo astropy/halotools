@@ -22,6 +22,9 @@ except ImportError:
 import posixpath
 import urlparse
 
+import h5py
+import datetime 
+
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import array_like_length as custom_len
 from ..utils.io_utils import download_file_from_url
@@ -33,7 +36,7 @@ from . import cache_config, sim_defaults
 import os, fnmatch, re
 from functools import partial
 
-from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
+from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
 
 unsupported_simname_msg = "Input simname ``%s`` is not recognized by Halotools"
 
@@ -1002,8 +1005,107 @@ class CatalogManager(object):
     def retrieve_processed_halo_table_from_cache(self, **kwargs):
         pass
 
-    def store_newly_processed_halo_table(self, **kwargs):
-        pass
+    def store_newly_processed_halo_table(self, halo_table, reader, version_name, **kwargs):
+        """
+        Parameters 
+        -----------
+        halo_table : table 
+            `~astropy.table.Table` object storing the halo catalog 
+
+        reader : object
+            `~halotools.sim_manager.BehrooziASCIIReader` object used to read the ascii data 
+            and produce the input ``halo_table`` 
+
+        version_name : string 
+            String will be appended to the original hlist name when storing the hdf5 file. 
+
+        external_cache_loc : string, optional 
+            Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
+
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
+
+        overwrite : boolean, optional 
+            Determines whether we will overwrite an existing file of the same name, if present
+
+        notes : dict, optional 
+            Additional notes that will be appended to the stored hdf5 file as metadata. 
+            Each dict key of `notes` will be a metadata attribute of the hdf5 file, accessible 
+            via hdf5_fileobj.attrs[key]. The value attached to each key can be any string. 
+
+        Returns 
+        -------
+        output_fname : string 
+            Filename (including absolute path) where the input ``halo_table`` will be stored. 
+        """
+        output_dir = cache_config.get_catalogs_dir(catalog_type = 'halos', 
+            simname = reader.halocat.simname, 
+            halo_finder = reader.halocat.halo_finder, **kwargs)
+
+        basename = os.path.basename(reader.fname) + '.' + version_name + '.hdf5'
+        output_fname = os.path.join(output_dir, basename)
+
+
+        ### notes to attach to output hdf5 as metadata ###
+        if 'notes' in kwargs.keys():
+            notes = kwargs['notes']
+        else:
+            notes = {}
+        for key, value in notes.iteritems():
+            if type(value) != str:
+                raise HalotoolsIOError("Strings are the only permissible data types of values "
+                    "attached to keys in the input notes dictionary")
+
+        if 'overwrite' in kwargs.keys():
+            overwrite = kwargs['overwrite']
+        else:
+            overwrite = False
+        halo_table.write(output_fname, path='data', overwrite = overwrite, append = overwrite)
+
+        ### Add metadata to the hdf5 file
+        f = h5py.File(output_fname)
+
+        time_right_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        f.attrs['time_of_original_reduction'] = time_right_now
+
+        f.attrs['original_data_source'] = self._orig_halo_table_web_location(
+            simname=reader.halocat.simname, 
+            halo_finder=reader.halocat.halo_finder)
+
+        f.attrs['simname'] = reader.halocat.simname
+        f.attrs['halo_finder'] = reader.halocat.halo_finder
+        f.attrs['redshift'] = str(reader.halocat.halo_finder)
+
+        f.attrs['Lbox'] = str(reader.halocat.Lbox) + ' Mpc in h=1 units'
+        f.attrs['particle_mass'] = str(reader.halocat.particle_mass) + ' Msun in h=1 units'
+        f.attrs['softening_length'] = str(reader.halocat.softening_length) + ' kpc in h=1 units'
+
+        for note_key, note in notes.iteritems():
+            f.attrs[note_key] = note
+
+        f.close()
+
+        return output_fname
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
 
 
