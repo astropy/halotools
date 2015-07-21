@@ -20,7 +20,7 @@ from . import preloaded_hod_blueprints
 from . import gal_prof_factory
 from . import halo_prof_components
 
-from ..sim_manager.supported_sims import ProcessedSnapshot
+from ..sim_manager.read_nbody import ProcessedSnapshot
 from ..sim_manager.generate_random_sim import FakeSim
 from ..utils.array_utils import array_like_length as custom_len
 
