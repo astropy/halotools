@@ -18,6 +18,8 @@ except ImportError:
 import posixpath
 import urlparse
 
+import h5py
+
 from . import sim_defaults, catalog_manager
 
 from ..utils.array_utils import find_idx_nearest_val
@@ -30,6 +32,7 @@ from astropy.extern import six
 
 from astropy import cosmology
 from astropy import units as u
+from astropy.table import Table
 
 
 __all__ = (
@@ -216,36 +219,92 @@ def retrieve_simclass(simname):
 
 class HaloCatalog(object):
 
-    def __init__(self, simname, halo_finder, redshift):
+    def __init__(self, simname, halo_finder, redshift, dz_tol = 0.05):
         """
         """
+        self.dz_tol = dz_tol
+
         simclass = retrieve_simclass(simname)
         simobj = simclass()
         for attr in simobj._attrlist:
             setattr(self, attr, getattr(simobj, attr))
 
-        self._attrlist = simobj._attrlist
         self.halo_finder, self.redshift = halo_finder, redshift 
-        self._attrlist.extend(['halo_finder', 'redshift'])
 
-        self.dtype_ascii, self.header_ascii = sim_defaults.return_dtype_and_header(simname, halo_finder)
-        self._attrlist.extend(['dtype_ascii', 'header_ascii'])
+        self.dtype_ascii, self.header_ascii = sim_defaults.return_dtype_and_header(
+            simname, halo_finder)
+
+        self.catman = catalog_manager.CatalogManager()
+
+        self.halo_table = self._retrieve_halo_table(redshift)
+
+        self.ptcl_table = self._retrieve_ptcl_table()
 
         ### Attributes that still need to be implemented: 
-        # self.halo_table, self.cuts_description, self.version, 
-        # self.fname, self.orig_data_source, etc. 
+        # self.version,self.orig_data_source, etc. 
         # Also should implement some slick way to describe all columns in plain English 
 
-    def retrieve_halocat(self, **kwargs):
-        """ Method uses the CatalogManager to return a halo catalog object. 
-        """
-        pass
-
-    def retrieve_particlecat(self, **kwargs):
+    def _retrieve_halo_table(self, redshift):
         """ Method uses the CatalogManager to return a particle catalog object. 
         """
-        pass
+        if sim_defaults.default_cache_location == 'pkg_default':
+            fname, closest_redshift = self.catman.closest_catalog_in_cache(
+                catalog_type = 'halos', 
+                simname = self.simname, 
+                halo_finder = self.halo_finder,
+                desired_redshift = redshift)
+        else:
+            fname, closest_redshift = self.catman.closest_catalog_in_cache(
+                catalog_type = 'halos', 
+                simname = self.simname, 
+                halo_finder = self.halo_finder,
+                desired_redshift = redshift, 
+                external_cache_loc = sim_defaults.default_cache_location)
 
+        self._check_catalog_self_consistency(fname, closest_redshift)
+
+        self.processed_halo_table_fname = fname
+
+        return Table.read(fname, path='data')
+
+    def _retrieve_ptcl_table(self):
+        """ Method uses the CatalogManager to return a particle catalog object. 
+        """
+        if sim_defaults.default_cache_location == 'pkg_default':
+            fname, closest_redshift = self.catman.closest_catalog_in_cache(
+                catalog_type = 'particles', 
+                simname = self.simname, 
+                desired_redshift = self.redshift)
+        else:
+            fname, closest_redshift = self.catman.closest_catalog_in_cache(
+                catalog_type = 'particles', 
+                simname = self.simname, 
+                desired_redshift = self.redshift, 
+                external_cache_loc = sim_defaults.default_cache_location)
+
+        return Table.read(fname, path='data')
+
+    def _check_catalog_self_consistency(self, fname, closest_redshift):
+
+        msg = ("\nInconsistency between the %s in the metadata of the hdf5 file "
+            "and the %s inferred from its filename.\n"
+            "This indicates a bug during the generation of the hdf5 file storing the catalog.")
+
+        f = h5py.File(fname)
+        if abs(float(f.attrs['redshift']) - closest_redshift) > self.dz_tol:
+            raise HalotoolsIOError(msg % ('redshift', 'redshift'))
+        else:
+            self.redshift = float(f.attrs['redshift'])
+
+        if f.attrs['simname'] != self.simname:
+            raise HalotoolsIOError(msg % ('simname', 'simname'))
+
+        if f.attrs['halo_finder'] != self.halo_finder:
+            raise HalotoolsIOError(msg % ('halo_finder', 'halo_finder'))
+
+        self.cuts_description = f.attrs['cuts_description']
+
+        f.close()
 
 
 
