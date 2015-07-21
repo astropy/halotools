@@ -13,9 +13,9 @@ fname = flist[0]
 
 
 
-#reader = BehrooziASCIIReader(input_fname = fname, recompress=False, cuts_funcobj='nocut')
+reader = BehrooziASCIIReader(input_fname = fname, recompress=False, cuts_funcobj='nocut')
 #reader = BehrooziASCIIReader(input_fname = fname, recompress=False)
-reader = BehrooziASCIIReader(input_fname = fname, recompress=False, column_bounds=column_bounds)
+#reader = BehrooziASCIIReader(input_fname = fname, recompress=False)
 
 t = reader.read_halocat()
 

@@ -8,21 +8,7 @@ from __future__ import (absolute_import, division, print_function,
 
 __all__ = ['match']
 
-
 import numpy as np
-
-def main():
-    """
-    example code calling match()
-    """
-    
-    x = np.random.permutation(np.arange(0,1000))
-    x = np.random.permutation(x)
-    y = np.random.permutation(x)
-    match_into_y, matched_y = match(x,y)
-    
-    print(np.all(x[match_into_y]==y[matched_y]))
-
 
 def match(x,y):
     """
@@ -38,12 +24,21 @@ def match(x,y):
     Returns 
     -------
     matches, matched: indices in list x that return matches into list y, indices of list y
+
+    Examples 
+    --------
+    >>> x = np.random.permutation(np.arange(0,1000))
+    >>> x = np.random.permutation(x)
+    >>> y = np.random.permutation(x)
+    >>> match_into_y, matched_y = match(x,y)
+    >>> assert np.all(x[match_into_y] == y[matched_y])
+
     """
     
     #check to make sure the second list is unique
     if len(np.unique(y))!=len(y):
-        "error: second array is not a unique array! returning no matches."
-        return None
+        msg = "error: second array is not a unique array! returning no matches."
+        raise ValueError(msg)
         
     mask = np.where(np.in1d(y,x)==True)
     
@@ -56,6 +51,3 @@ def match(x,y):
     
     return matches, matched
     
-    
-if __name__ == '__main__':
-    main()
