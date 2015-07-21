@@ -30,6 +30,9 @@ processed_halo_tables_webloc = 'http://www.astro.yale.edu/aphearin/Data_files/ha
 ptcl_tables_webloc = 'http://www.astro.yale.edu/aphearin/Data_files/particle_catalogs'
 default_version_name = 'halotools.alpha.version0'
 
+default_cache_location = 'pkg_default'
+
+
 ############################################################
 ### Current versions of dtype and header 
 # for reading ASCII data are defined below 
