@@ -65,7 +65,7 @@ def host_status(halos):
 	output_subhalo_subarray[a_ind] = 'merging_subhalo'
 	output[sub_halo_mask] = output_subhalo_subarray
 
-	return output
+	return output.astype(str)
 
 
 
