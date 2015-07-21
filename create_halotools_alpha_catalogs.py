@@ -12,8 +12,9 @@ flist = catman.raw_halo_tables_in_cache(simname='bolshoi', halo_finder='bdm')
 fname = flist[0]
 
 
-
-reader = BehrooziASCIIReader(input_fname = fname, recompress=False, cuts_funcobj='nocut')
+column_bounds = [('halo_scale_factor_lastm', 100, float("inf"))]
+reader = BehrooziASCIIReader(input_fname = fname, recompress=False, column_bounds=column_bounds)
+#reader = BehrooziASCIIReader(input_fname = fname, recompress=False, cuts_funcobj='nocut')
 #reader = BehrooziASCIIReader(input_fname = fname, recompress=False)
 #reader = BehrooziASCIIReader(input_fname = fname, recompress=False)
 
