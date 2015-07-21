@@ -222,7 +222,9 @@ class BehrooziASCIIReader(object):
             os.system("gunzip "+self.fname)
             self.fname = self.fname[:-3]
         else:
-            pass
+            # input_fname was already decompressed. 
+            # Turn off auto-recompress
+            self._recompress = False
 
     def _compress_ascii(self):
         """ Recompresses the halo catalog ascii data, 
@@ -344,6 +346,6 @@ class BehrooziASCIIReader(object):
             msg = "Total runtime to read in ASCII = %.1f seconds\n"
         print(msg % runtime)
 
-        #self._compress_ascii()
+        self._compress_ascii()
 
         return output

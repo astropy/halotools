@@ -105,7 +105,7 @@ class CatalogManager(object):
         cachedir = cache_config.get_catalogs_dir(catalog_type = catalog_type, **kwargs)
 
         if catalog_type == 'raw_halos':
-            fname_pattern = '.list'
+            fname_pattern = '.list*'
         else:
             fname_pattern = '.hdf5'
             
