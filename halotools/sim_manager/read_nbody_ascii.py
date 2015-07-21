@@ -154,7 +154,11 @@ class BehrooziASCIIReader(object):
             Length-Nhalos boolean array serving as a mask. 
         """
 
-        return x['mpeak'] > self.halocat.particle_mass*sim_defaults.Num_ptcl_requirement
+        key = sim_defaults.mass_like_variable_to_apply_cut
+        mp = self.halocat.particle_mass
+        nptcl = sim_defaults.Num_ptcl_requirement
+        mass_cut = nptcl * mp
+        return x[key] > mass_cut
 
     def file_len(self):
         """ Compute the number of all rows in the raw halo catalog. 
