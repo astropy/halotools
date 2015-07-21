@@ -7,6 +7,7 @@ from halotools.sim_manager.read_nbody_ascii import BehrooziASCIIReader
 from halotools.sim_manager import sim_defaults
 from halotools.utils import halocat_utils
 
+catman = CatalogManager()
 
 input_cache_loc = os.path.abspath('/Volumes/NbodyDisk1/July19_new_catalogs')
 
