@@ -348,4 +348,4 @@ class BehrooziASCIIReader(object):
 
         self._compress_ascii()
 
-        return output
+        return Table(output)
