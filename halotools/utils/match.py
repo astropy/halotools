@@ -6,11 +6,11 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-__all__ = ['match']
+__all__ = ['crossmatch']
 
 import numpy as np
 
-def match(x,y):
+def crossmatch(x,y):
     """
     a function that determines the indices of matches in x into y
     
@@ -34,7 +34,7 @@ def match(x,y):
     >>> x = np.random.permutation(np.arange(0,1000))
     >>> x = np.random.permutation(x)
     >>> y = np.random.permutation(x)
-    >>> match_into_y, matched_y = match(x,y)
+    >>> match_into_y, matched_y = crossmatch(x,y)
     >>> assert np.all(x[match_into_y] == y[matched_y])
 
     """
@@ -44,7 +44,7 @@ def match(x,y):
         msg = "error: second array is not a unique array."
         raise ValueError(msg)
         
-    mask = np.where(np.in1d(y,x)==True)
+    mask = np.where(np.in1d(y,x)==True)[0]
     
     index_x = np.argsort(x)
     sorted_x = x[index_x]
@@ -53,5 +53,5 @@ def match(x,y):
     matches = index_x[ind_x]
     matched = mask
     
-    return matches, matched
+    return np.array(matches), matched
     

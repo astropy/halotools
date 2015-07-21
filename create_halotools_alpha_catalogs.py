@@ -12,7 +12,7 @@ flist = catman.raw_halo_tables_in_cache(simname='bolshoi', halo_finder='bdm')
 fname = flist[0]
 
 
-column_bounds = [('halo_scale_factor_lastm', 100, float("inf"))]
+column_bounds = [('halo_mpeak', 150, float("inf"))]
 reader = BehrooziASCIIReader(input_fname = fname, recompress=False, column_bounds=column_bounds)
 #reader = BehrooziASCIIReader(input_fname = fname, recompress=False, cuts_funcobj='nocut')
 #reader = BehrooziASCIIReader(input_fname = fname, recompress=False)
@@ -60,8 +60,17 @@ for key in t.keys():
 	if key not in bolshoi_bdm_keys_to_keep:
 		del t[key]
 
+print("Number of halos = %i" % len(t))
 
+t['halo_hostid'] = t['halo_upid']
+host_mask = t['halo_upid'] == -1
+sub_mask = np.invert(host_mask)
+hosts = t[host_mask]
+subs = t[sub_mask]
 
+t['halo_hostid'][host_mask] = t['halo_id'][host_mask]
+
+print("Number of subhalos = %i\n" % len(subs))
 
 
 
