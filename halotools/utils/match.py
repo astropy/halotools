@@ -23,7 +23,11 @@ def match(x,y):
 
     Returns 
     -------
-    matches, matched: indices in list x that return matches into list y, indices of list y
+    match_into_y : array 
+        indices in array x that return matches into array y
+
+    matched_y : array 
+        indices of array y
 
     Examples 
     --------
@@ -37,7 +41,7 @@ def match(x,y):
     
     #check to make sure the second list is unique
     if len(np.unique(y))!=len(y):
-        msg = "error: second array is not a unique array! returning no matches."
+        msg = "error: second array is not a unique array."
         raise ValueError(msg)
         
     mask = np.where(np.in1d(y,x)==True)
