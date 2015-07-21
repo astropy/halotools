@@ -28,7 +28,7 @@ default_cosmology = cosmology.WMAP5
 # URLs of websites hosting catalogs used by the package
 processed_halo_tables_webloc = 'http://www.astro.yale.edu/aphearin/Data_files/halo_catalogs'
 ptcl_tables_webloc = 'http://www.astro.yale.edu/aphearin/Data_files/particle_catalogs'
-default_version_name = 'halotools.official.version'
+default_version_name = 'halotools.alpha.version0'
 
 ############################################################
 ### Current versions of dtype and header 
@@ -80,4 +80,58 @@ def return_dtype_and_header(simname, halo_finder):
 
 
 ############################################################
+
+
+
+default_ascii_columns_to_keep = (['halo_scale_factor', 
+	'halo_id',
+	'halo_pid',
+	'halo_upid',
+	'halo_phantom',
+	'halo_mvir',
+	'halo_rvir',
+	'halo_rs',
+	'halo_vrms',
+	'halo_scale_factor_lastmm',
+	'halo_vmax',
+	'halo_x',
+	'halo_y',
+	'halo_z',
+	'halo_vx',
+	'halo_vy',
+	'halo_vz',
+	'halo_jx',
+	'halo_jy',
+	'halo_jz',
+	'halo_spin',
+	'halo_id_tree_root',
+	'halo_rs_klypin',
+	'halo_xoff',
+	'halo_voff',
+	'halo_spin_bullock',
+	'halo_b_to_a',
+	'halo_c_to_a',
+	'halo_axisA_x',
+	'halo_axisA_y',
+	'halo_axisA_z',
+	'halo_t_by_u',
+	'halo_macc',
+	'halo_mpeak',
+	'halo_vacc',
+	'halo_vpeak',
+	'halo_halfmass_scale',
+	'halo_dmvir_dt_inst',
+	'halo_dmvir_dt_100myr',
+	'halo_dmvir_dt_tdyn',
+	'halo_scale_factor_mpeak',
+	'halo_scale_factor_lastacc',
+	'halo_scale_factor_firstacc',
+	'halo_mvir_firstacc',
+	'halo_vmax_firstacc',
+	'halo_vmax_mpeak'
+	])
+
+
+
+
 
