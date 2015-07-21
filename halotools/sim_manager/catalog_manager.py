@@ -1079,11 +1079,13 @@ class CatalogManager(object):
 
         f.attrs['simname'] = reader.halocat.simname
         f.attrs['halo_finder'] = reader.halocat.halo_finder
-        f.attrs['redshift'] = str(reader.halocat.halo_finder)
+        f.attrs['redshift'] = str(reader.halocat.redshift)
 
         f.attrs['Lbox'] = str(reader.halocat.Lbox) + ' Mpc in h=1 units'
         f.attrs['particle_mass'] = str(reader.halocat.particle_mass) + ' Msun in h=1 units'
         f.attrs['softening_length'] = str(reader.halocat.softening_length) + ' kpc in h=1 units'
+
+        f.attrs['cuts_description'] = reader._cuts_description
 
         for note_key, note in notes.iteritems():
             f.attrs[note_key] = note
