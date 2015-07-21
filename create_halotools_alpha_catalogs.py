@@ -1,93 +1,54 @@
 #!/usr/bin/env python
 import numpy as np
+import os, sys
 
 from halotools.sim_manager.catalog_manager import CatalogManager
 from halotools.sim_manager.read_nbody_ascii import BehrooziASCIIReader
+from halotools.simname import sim_defaults
+from halotools.utils import halocat_utils
 
 
-catman = CatalogManager()
+#	external_cache_loc = os.path.abspath('/Volumes/NbodyDisk1/July19_new_catalogs')
+#fname, z= catman.closest_catalog_in_cache(catalog_type='raw_halos', desired_redshift=0, simname='bolshoi', halo_finder='rockstar',external_cache_loc = external_cache_loc) 
 
 
-flist = catman.raw_halo_tables_in_cache(simname='bolshoi', halo_finder='rockstar')
-fname = flist[0]
+def main(fname):
 
 
-column_bounds = [('halo_mpeak', 5e9, float("inf"))]
+	catman = CatalogManager()
 
-#reader = BehrooziASCIIReader(input_fname = fname, recompress=False, column_bounds=column_bounds)
-reader = BehrooziASCIIReader(input_fname = fname, recompress=False, cuts_funcobj='nocut')
-#reader = BehrooziASCIIReader(input_fname = fname, recompress=False)
-#reader = BehrooziASCIIReader(input_fname = fname, recompress=False)
+	reader = BehrooziASCIIReader(input_fname = fname, overwrite=True)
+	halo_table = reader.read_halocat()
 
-t = reader.read_halocat()
+	keys_to_keep = sim_defaults.default_ascii_columns_to_keep
+	for key in halo_table.keys():
+		if key not in keys_to_keep:
+			del halo_table[key]
+	halo_table['halo_nfw_conc'] = halo_table['halo_rvir'] / halo_table['halo_rs']
+	del halo_table['halo_rs']
+	halo_table['halo_rvir'] /= 1000. # convert rvir to Mpc
 
-keys_to_keep = (['halo_scale_factor', 
-	'halo_id',
-	'halo_pid',
-	'halo_upid',
-	'halo_phantom',
-	'halo_mvir',
-	'halo_rvir',
-	'halo_rs',
-	'halo_vrms',
-	'halo_scale_factor_lastmm',
-	'halo_vmax',
-	'halo_x',
-	'halo_y',
-	'halo_z',
-	'halo_vx',
-	'halo_vy',
-	'halo_vz',
-	'halo_jx',
-	'halo_jy',
-	'halo_jz',
-	'halo_spin',
-	'halo_id_tree_root',
-	'halo_rs_klypin',
-	'halo_xoff',
-	'halo_voff',
-	'halo_spin_bullock',
-	'halo_b_to_a',
-	'halo_c_to_a',
-	'halo_axisA_x',
-	'halo_axisA_y',
-	'halo_axisA_z',
-	'halo_t_by_u',
-	'halo_macc',
-	'halo_mpeak',
-	'halo_vacc',
-	'halo_vpeak',
-	'halo_halfmass_scale',
-	'halo_dmvir_dt_inst',
-	'halo_dmvir_dt_100myr',
-	'halo_dmvir_dt_tdyn',
-	'halo_scale_factor_mpeak',
-	'halo_scale_factor_lastacc',
-	'halo_scale_factor_firstacc',
-	'halo_mvir_firstacc',
-	'halo_vmax_firstacc',
-	'halo_vmax_mpeak'
-	])
+	halo_table['halo_hostid'] = halo_table['halo_upid']
+	host_mask = halo_table['halo_upid'] == -1
+	halo_table['halo_hostid'][host_mask] = halo_table['halo_id'][host_mask]
 
-for key in t.keys():
-	if key not in keys_to_keep:
-		del t[key]
-t['halo_nfw_conc'] = t['halo_rvir'] / t['halo_rs']
-del t['halo_rs']
-t['halo_rvir'] /= 1000.
+	halo_table['host_halo_status'] = halocat_utils.host_status(halo_table)
 
-print("Number of halos = %i" % len(t))
-
-t['halo_hostid'] = t['halo_upid']
-host_mask = t['halo_upid'] == -1
-sub_mask = np.invert(host_mask)
-hosts = t[host_mask]
-subs = t[sub_mask]
-
-t['halo_hostid'][host_mask] = t['halo_id'][host_mask]
-
-print("Number of subhalos = %i\n" % len(subs))
+	catman.store_newly_processed_halo_table(
+		halo_table, reader, sim_defaults.default_version_name, overwrite=True)
 
 
 
-#external_cache_loc = os.path.abspath('/Volumes/NbodyDisk1/July19_new_catalogs')
+
+
+
+###################################################################################################
+# Trigger
+###################################################################################################
+
+if __name__ == "__main__":
+        main()
+
+
+
+
