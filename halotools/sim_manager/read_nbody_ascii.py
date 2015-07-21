@@ -39,8 +39,8 @@ class BehrooziASCIIReader(object):
             Halotools will attempt to automatically infer this from ``input_fname``. 
 
         cuts_funcobj : function object, optional
-            Function used to apply cuts to the rows of the ASCII data. 
-            `cuts_funcobj` should accept a structured array as input, 
+            Any function used to apply row-wise cuts when reading ASCII data. 
+            `cuts_funcobj` should accept a structured array or Astropy Table as input, 
             and return a boolean array of the same length. 
             If None, default cut is set by `default_halocat_cut`. 
             If set to the string ``nocut``, all rows will be kept. 
@@ -48,6 +48,18 @@ class BehrooziASCIIReader(object):
             within the namespace of the `RockstarReader` instance, and 
             it must be a stand-alone function, not a bound method of 
             some other class.  
+            If passing ``cuts_funcobj`` keyword argument, 
+            you may not pass a ``column_bounds` keyword argument. 
+
+        column_bounds : list, optional 
+            List of tuples used to apply row-wise cuts when reading ASCII data. 
+            Each list element is a three-element tuple. The first tuple element 
+            must be a column key of the halo catalog. The second and third 
+            tuple elements will be interpreted as lower and upper bounds. 
+            If column_bounds is an N-element list, only ASCII rows passing *all* 
+            cuts will be kept in the resulting catalog. 
+            If passing ``column_bounds`` keyword argument, 
+            you may not pass a ``cuts_funcobj` keyword argument. 
 
         recompress : bool, optional 
             If ``input_fname`` is a compressed file, `BehrooziASCIIReader` 
@@ -55,6 +67,10 @@ class BehrooziASCIIReader(object):
             is True, the file will be recompressed after reading; if False, 
             it will remain uncompressed. Default is True. 
         """
+        print("Printing kwargs.keys()")
+        for key in kwargs.keys():
+            print key
+
 
         # Check whether input_fname exists. 
         # If not, raise an exception. If so, bind to self. 
@@ -121,7 +137,10 @@ class BehrooziASCIIReader(object):
     def _process_cuts_funcobj(self, **kwargs):
         """
         """
-        if 'cuts_funcobj' in kwargs.keys():
+        if ('cuts_funcobj' in kwargs.keys()) & ('column_bounds' in kwargs.keys()):
+            raise KeyError("You may not pass both a ``cuts_funcobj`` and a ``column_bounds`` argument")
+        elif 'cuts_funcobj' in kwargs.keys():
+            print("Keyword cuts_funcobj detected")
             if kwargs['cuts_funcobj'] == 'nocut':
                 g = lambda x : np.ones(len(x), dtype=bool)
                 self.cuts_funcobj = g
@@ -129,13 +148,29 @@ class BehrooziASCIIReader(object):
             else:
                 if callable(kwargs['cuts_funcobj']):
                     self.cuts_funcobj = kwargs['cuts_funcobj']
-                    self._cuts_description = 'User-supplied cuts_funcobj'
+                    self._cuts_description = ('User-supplied cuts_funcobj '
+                        'given as cuts_funcobj keyword argument to BehrooziASCIIReader constructor')
                 else:
                     raise TypeError("The input cuts_funcobj must be a callable function")
-                    
+        elif 'column_bounds' in kwargs.keys():
+            column_bounds = kwargs['column_bounds']
+            def return_cutfunc(column_bounds):
+                cutfuncs = []
+                for cut in column_bounds:
+                    g = lambda x : (x[cut[0]] > cut[1]) & (x[cut[0]] < cut[2])
+                    cutfuncs.append(g)
+                def composite_cut(t):
+                    result = np.ones(len(t), dtype=bool)
+                    for cut in cutfuncs:
+                        result *= cut(t)
+                    return result
+                return composite_cut
+            self.cuts_funcobj = return_cutfunc(column_bounds)
+            self._cuts_description = ('User-supplied cuts_funcobj '
+                'given as cuts_funcobj keyword argument to BehrooziASCIIReader constructor')
         else:
             self.cuts_funcobj = self.default_halocat_cut
-            self._cuts_description = 'Default cut set by default_halocat_cut'
+            self._cuts_description = 'Default cut set by BehrooziASCIIReader.default_halocat_cut method'
 
 
     def default_halocat_cut(self, x):
@@ -244,16 +279,6 @@ class BehrooziASCIIReader(object):
 
         Parameters 
         ----------
-        cuts_funcobj : function object, optional keyword argument
-            Function used to determine whether a row of the raw 
-            halo catalog is included in the reduced binary. 
-            Input of the `cuts_funcobj1 must be a structured array 
-            with some subset of the field names of the 
-            halo catalog. Output of the `cuts_funcobj` must 
-            be a boolean array of length equal to the length of the 
-            input structured array. 
-            Default is set by the `default_halocat_cut` method. 
-
         nchunks : int, optional keyword argument
             `read_halocat` reads and processes ascii 
             in chunks at a time, both to improve performance and 
@@ -289,6 +314,8 @@ class BehrooziASCIIReader(object):
             print("Reading catalog in a single chunk of size %i\n" % chunksize)
         else:
             print("...Reading catalog in %i chunks, each with %i rows\n" % (Nchunks, chunksize))
+
+        print("Applying the following row-wise cuts: \n%s\n" % self._cuts_description)
 
         chunk_counter = 0
         chunk = []
@@ -329,6 +356,7 @@ class BehrooziASCIIReader(object):
         a = np.array(chunk, dtype = dt)
         container.append(a[self.cuts_funcobj(a)])
 
+        print("Done reading ASCII. Now bundling into a single array")
     # Bundle up all array chunks into a single array
         for chunk in container:
             try:
