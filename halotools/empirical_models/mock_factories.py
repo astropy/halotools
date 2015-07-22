@@ -262,13 +262,13 @@ class HodMockFactory(MockFactory):
 
         ################ Make cuts on halo catalog ################
         # Select host halos only, since this is an HOD-style model
-        host_halo_cut = (self.halos['upid']==-1)
+        host_halo_cut = (self.halos['halo_upid']==-1)
         self.halos = self.halos[host_halo_cut]
 
         # make a conservative mvir completeness cut 
         # This can be relaxed by changing sim_defaults.Num_ptcl_requirement
         cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
-        mass_cut = (self.halos['mvir'] > cutoff_mvir)
+        mass_cut = (self.halos['halo_mvir'] > cutoff_mvir)
         self.halos = self.halos[mass_cut]
 
         # Make any additional cuts requested by the composite model

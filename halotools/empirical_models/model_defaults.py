@@ -85,11 +85,11 @@ default_halo_type_split = {
 default_halo_type_calculator_spacing=0.1
 
 # Set the default secondary halo parameter used to generate assembly bias
-default_assembias_key = 'vmax'
+default_assembias_key = 'halo_vmax'
 
 
 default_smhm_scatter = 0.2
-default_smhm_haloprop = 'mpeak'
+default_smhm_haloprop = 'halo_mpeak'
 default_binary_galprop_haloprop = default_smhm_haloprop
 
 # At minimum, the following halo and galaxy properties 
@@ -98,9 +98,9 @@ host_haloprop_prefix = 'halo_'
 galprop_prefix = 'gal_'
 haloprop_list = ['haloid', 'x', 'y', 'z', 'vx', 'vy', 'vz', 'mvir', 'rvir']
 
-prim_haloprop_key = 'mvir'
-sec_haloprop_key = 'vmax'
-halo_boundary = 'rvir'
+prim_haloprop_key = 'halo_mvir'
+sec_haloprop_key = 'halo_vmax'
+halo_boundary = 'halo_rvir'
 
 
 
