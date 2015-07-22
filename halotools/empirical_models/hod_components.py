@@ -239,7 +239,7 @@ class Zheng07Cens(OccupationComponent):
         pass the array of the primary halo property: 
 
         >>> testmass = np.logspace(10, 15, num=50)
-        >>> mean_ncen = cen_model.mean_occupation(prim_haloprop=testmass)
+        >>> mean_ncen = cen_model.mean_occupation(prim_haloprop =testmass)
 
         The second option is to pass `mean_occupation` a full halo catalog. 
         In this case, the array storing the primary halo property will be selected 
@@ -586,7 +586,7 @@ class Kravtsov04Sats(OccupationComponent):
 
         >>> sat_model = Kravtsov04Sats()
         >>> testmass = np.logspace(10, 15, num=50)
-        >>> mean_nsat = sat_model.mean_occupation(prim_haloprop=testmass)
+        >>> mean_nsat = sat_model.mean_occupation(prim_haloprop =testmass)
 
         The second option is to pass `mean_occupation` a full halo catalog. 
         In this case, the array storing the primary halo property will be selected 
@@ -838,7 +838,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         # Tabulate the inverse stellar-to-halo-mass relation
         ordinates = self.central_occupation_model.smhm_model.mean_stellar_mass(
-            prim_haloprop=self._msat_mcut_abcissa)
+            prim_haloprop =self._msat_mcut_abcissa)
         spline_function = spline(ordinates, self._msat_mcut_abcissa)
 
         # Call the interpolater to compute the knee
