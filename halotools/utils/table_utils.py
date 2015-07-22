@@ -24,7 +24,7 @@ class SampleSelector(object):
         on the value of the input ``return_subhalos``. 
         """
         table = kwargs['table']
-        mask = table['upid'] == -1
+        mask = table['halo_upid'] == -1
         if return_subhalos is False:
             return table[mask]
         else:
@@ -78,15 +78,15 @@ class SampleSelector(object):
 
         To make a cut on the halo catalog to select halos in a specific mass range:
 
-        >>> halo_sample = SampleSelector.property_range(table = halos, key = 'mvir', lower_bound = 1e12, upper_bound = 1e13)
+        >>> halo_sample = SampleSelector.property_range(table = halos, key = 'halo_mvir', lower_bound = 1e12, upper_bound = 1e13)
 
         To apply this same cut, and also only select host halos passing the cut, we use the ``host_halos_only`` keyword:
 
-        >>> host_halo_sample = SampleSelector.property_range(table = halos, key = 'mvir', lower_bound = 1e12, upper_bound = 1e13, host_halos_only=True)
+        >>> host_halo_sample = SampleSelector.property_range(table = halos, key = 'halo_mvir', lower_bound = 1e12, upper_bound = 1e13, host_halos_only=True)
 
         The same applies if we only want subhalos returned only now we use the ``subhalos_only`` keyword:
 
-        >>> subhalo_sample = SampleSelector.property_range(table = halos, key = 'mvir', lower_bound = 1e12, upper_bound = 1e13, subhalos_only=True)
+        >>> subhalo_sample = SampleSelector.property_range(table = halos, key = 'halo_mvir', lower_bound = 1e12, upper_bound = 1e13, subhalos_only=True)
 
         """
         table = kwargs['table']
@@ -137,15 +137,15 @@ class SampleSelector(object):
 
         We can easily use `split_sample` to divide the sample into a high-Vmax and low-Vmax subsamples:
 
-        >>> sample_below_median, sample_above_median = SampleSelector.split_sample(table = halos, key = 'vmax', percentiles = 0.5)
+        >>> sample_below_median, sample_above_median = SampleSelector.split_sample(table = halos, key = 'halo_vmax', percentiles = 0.5)
 
         Likewise, we can do the same thing to divide the sample into quartiles:
 
-        >>> lowest, lower, higher, highest = SampleSelector.split_sample(table = halos, key = 'zhalf', percentiles = [0.25, 0.5, 0.75])
+        >>> lowest, lower, higher, highest = SampleSelector.split_sample(table = halos, key = 'halo_zhalf', percentiles = [0.25, 0.5, 0.75])
 
         The following alternative syntax is also supported:
 
-        >>> subsample_collection = SampleSelector.split_sample(table = halos, key = 'zhalf', percentiles = [0.25, 0.5, 0.75])
+        >>> subsample_collection = SampleSelector.split_sample(table = halos, key = 'halo_zhalf', percentiles = [0.25, 0.5, 0.75])
         >>> lowest, lower, higher, highest = subsample_collection
 
         """
