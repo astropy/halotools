@@ -189,7 +189,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         ``gr_color`` and halo formation time ``zhalf`` are 
         in monotonic correspondence at fixed stellar mass:
 
-        >>> cam_noscatter = ConditionalAbunMatch(galprop_key='gr_color', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins)
+        >>> cam_noscatter = ConditionalAbunMatch(galprop_key='gr_color', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'halo_zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins)
 
         ``cam_noscatter`` is our model object that can now be used to generate mock galaxy 
         populations. To do so, we need only pass ``cam_noscatter`` a halo catalog. For 
@@ -220,7 +220,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         implementing a positive correlation of 50% correlation strength 
         between ``zhalf`` and ``ssfr`` at fixed ``stellar_mass``:
 
-        >>> cam_constant_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = 0.5)
+        >>> cam_constant_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'halo_zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = 0.5)
         >>> halos['ssfr'] = cam_constant_scatter.mc_ssfr(halos=halos)
 
         After building a CAM model, you can vary the strength of the amount of scatter 
@@ -242,7 +242,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         For example, suppose we wish to have 75% correlation strength at a stellar mass 
         of :math:`10^{10}M_{\odot}`, and a 25% correlation strength at a stellar mass of :math:`10^{11}M_{\odot}` :
 
-        >>> cam_variable_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = [0.75, 0.25], correlation_strength_abcissa = [1.e10, 1.e11])
+        >>> cam_variable_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'halo_zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = [0.75, 0.25], correlation_strength_abcissa = [1.e10, 1.e11])
         >>> halos['ssfr'] = cam_variable_scatter.mc_ssfr(halos=halos)
 
         Now, there are multiple parameters governing the scatter, one for the strength at 
