@@ -12,9 +12,6 @@ from astropy import cosmology
 from . import raw_halocat_column_info
 from ..halotools_exceptions import UnsupportedSimError, HalotoolsCacheError
 
-### Default halo catalog (used in read_nbody)
-# The following parameters are used by the 
-# simulation object in the read_nbody module
 default_simname = 'bolshoi'
 default_halo_finder = 'rockstar'
 default_numptcl = 2.0e5

@@ -39,7 +39,7 @@ class MockFactory(object):
         ----------
         snapshot : object 
             Object containing the halo catalog and other associated data.  
-            Produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
+            Produced by `~halotools.sim_manager.supported_sims.HaloCatalog`
 
         model : object 
             A model built by a sub-class of `~halotools.empirical_models.ModelFactory`. 
@@ -193,7 +193,7 @@ class HodMockFactory(MockFactory):
         ----------
         snapshot : object, keyword argument
             Object containing the halo catalog and other associated data.  
-            Produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
+            Produced by `~halotools.sim_manager.supported_sims.HaloCatalog`
 
         model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.HodModelFactory`. 
@@ -421,7 +421,7 @@ class SubhaloMockFactory(MockFactory):
         ----------
         snapshot : object, keyword argument 
             Object containing the halo catalog and other associated data.  
-            Produced by `~halotools.sim_manager.read_nbody.ProcessedSnapshot`
+            Produced by `~halotools.sim_manager.supported_sims.HaloCatalog`
 
         model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.SubhaloModelFactory`. 
