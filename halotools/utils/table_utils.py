@@ -74,7 +74,7 @@ class SampleSelector(object):
         a table of halos into memory using the `FakeSim` class:
 
         >>> snapshot = FakeSim()
-        >>> halos = snapshot.halos
+        >>> halos = snapshot.halo_table
 
         To make a cut on the halo catalog to select halos in a specific mass range:
 
@@ -133,7 +133,7 @@ class SampleSelector(object):
         a table of halos into memory using the `FakeSim` class:
 
         >>> snapshot = FakeSim()
-        >>> halos = snapshot.halos
+        >>> halos = snapshot.halo_table
 
         We can easily use `split_sample` to divide the sample into a high-Vmax and low-Vmax subsamples:
 
