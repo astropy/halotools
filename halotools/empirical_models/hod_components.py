@@ -24,6 +24,7 @@ from . import smhm_components
 
 from ..utils.array_utils import array_like_length as custom_len
 from ..  import sim_manager
+from ..halotools_exceptions import ModelInputError
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty

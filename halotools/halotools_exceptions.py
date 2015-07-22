@@ -13,7 +13,7 @@ class HalotoolsError(Exception):
 
 
 
-#####
+########################################
 
 
 
@@ -41,6 +41,17 @@ class CatalogTypeError(HalotoolsCacheError):
 		message = "Input catalog_type = ``"+catalog_type+"``\n Must be either 'raw_halos', 'halos', or 'particles'.\n"
 		
 		super(CatalogTypeError, self).__init__(message)
+
+
+########################################
+
+class ModelInputError(HalotoolsError):
+	def __init__(self, function_name):
+		message = ("Must pass one of the following keyword arguments to %s:\n"
+                "``halo_table`` or  ``prim_haloprop``" % function_name)
+		super(HalotoolsCacheError, self).__init__(message)
+
+
 
 
 
