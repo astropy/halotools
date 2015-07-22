@@ -58,20 +58,20 @@ class AbunMatchSmHm(PrimGalpropModel):
             simply be the stellar mass function or the luminosity function, respectively. 
 
         subhalo_abundance_ordinates : array_like, optional keyword argument 
-            Length-Nh array storing the comoving number density of subhalos.
+            Length-Nh array storing the comoving number density of subhalo_table.
             The value ``subhalo_abundance_ordinates[i]`` gives the comoving number density 
-            of subhalos of property ``subhalo_abundance_abcissa[i]``. 
+            of subhalo_table of property ``subhalo_abundance_abcissa[i]``. 
             If keyword arguments ``subhalo_abundance_ordinates`` 
             and ``subhalo_abundance_abcissa`` are not passed, 
-            then keyword arguments ``prim_haloprop_key`` and ``halos`` must be passed. 
+            then keyword arguments ``prim_haloprop_key`` and ``halo_table`` must be passed. 
 
         subhalo_abundance_abcissa : array_like, optional keyword argument 
-            Length-Nh array storing the stellar mass of subhalos. 
+            Length-Nh array storing the stellar mass of subhalo_table. 
             The value ``subhalo_abundance_ordinates[i]`` gives the comoving number density 
-            of subhalos of property ``subhalo_abundance_abcissa[i]``. 
+            of subhalo_table of property ``subhalo_abundance_abcissa[i]``. 
             If keyword arguments ``subhalo_abundance_ordinates`` 
             and ``subhalo_abundance_abcissa`` are not passed, 
-            then keyword arguments ``prim_haloprop_key`` and ``halos`` must be passed. 
+            then keyword arguments ``prim_haloprop_key`` and ``halo_table`` must be passed. 
 
         scatter_level : float, optional keyword argument 
             Level of constant scatter in dex. Default is 0.2. 
@@ -160,7 +160,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             be the name of a new column of the halo catalog that will be 
             created. Each dict value of ``new_haloprop_func_dict`` is a function object 
             that returns a length-N numpy array when passed a 
-            length-N Astropy table via the ``halos`` keyword argument. 
+            length-N Astropy table via the ``halo_table`` keyword argument. 
             By passing the ``new_haloprop_func_dict`` keyword argument, 
             your newly created halo property will be guaranteed to exist, 
             and can thus be optionally used as the ``sec_haloprop_key``. 
@@ -197,21 +197,21 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         `~halotools.sim_manager.FakeSim`:
 
         >>> fake_sim = sim_manager.FakeSim()
-        >>> halos = fake_sim.halo_table
+        >>> halo_table = fake_sim.halo_table
 
         CAM models do not assign values of ``prim_galprop``, 
-        and so our halos must have stellar masses assigned by 
+        and so our halo_table must have stellar masses assigned by 
         some other means before calling `ConditionalAbunMatch`. Any 
         model for stellar mass can work with CAM, the following example is based on 
         `~halotools.empirical_models.Moster13SmHm`:
 
         >>> moster_model = smhm_components.Moster13SmHm(redshift=0)
-        >>> halos['stellar_mass'] = moster_model.mc_stellar_mass(halos=halos)
+        >>> halo_table['stellar_mass'] = moster_model.mc_stellar_mass(halo_table=halo_table)
 
-        To assign values of ``gr_color`` to our halos, we call the ``mc_gr_color`` method 
+        To assign values of ``gr_color`` to our halo_table, we call the ``mc_gr_color`` method 
         of our model object:
 
-        >>> halos['gr_color'] = cam_noscatter.mc_gr_color(halos=halos)
+        >>> halo_table['gr_color'] = cam_noscatter.mc_gr_color(halo_table=halo_table)
 
         The `ConditionalAbunMatch` class can also produce models in which there is scatter 
         between the galaxy and halo property. The level of scatter is defined by the 
@@ -221,7 +221,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         between ``zhalf`` and ``ssfr`` at fixed ``stellar_mass``:
 
         >>> cam_constant_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'halo_zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = 0.5)
-        >>> halos['ssfr'] = cam_constant_scatter.mc_ssfr(halos=halos)
+        >>> halo_table['ssfr'] = cam_constant_scatter.mc_ssfr(halo_table=halo_table)
 
         After building a CAM model, you can vary the strength of the amount of scatter 
         by the model's parameter dictionary:
@@ -230,7 +230,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
         Calling the ``mc_ssfr`` method will now implement a 75% correlation strength:
 
-        >>> halos['ssfr'] = cam_constant_scatter.mc_ssfr(halos=halos)
+        >>> halo_table['ssfr'] = cam_constant_scatter.mc_ssfr(halo_table=halo_table)
 
         The `ConditionalAbunMatch` class also has support for levels of scatter that 
         vary with the primary galaxy property. To construct such a model, you provide 
@@ -243,7 +243,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         of :math:`10^{10}M_{\odot}`, and a 25% correlation strength at a stellar mass of :math:`10^{11}M_{\odot}` :
 
         >>> cam_variable_scatter = ConditionalAbunMatch(galprop_key='ssfr', prim_galprop_key = 'stellar_mass', sec_haloprop_key = 'halo_zhalf', input_galaxy_table = fake_data.galaxy_table, prim_galprop_bins = sm_bins, correlation_strength = [0.75, 0.25], correlation_strength_abcissa = [1.e10, 1.e11])
-        >>> halos['ssfr'] = cam_variable_scatter.mc_ssfr(halos=halos)
+        >>> halo_table['ssfr'] = cam_variable_scatter.mc_ssfr(halo_table=halo_table)
 
         Now, there are multiple parameters governing the scatter, one for the strength at 
         each value of ``correlation_strength_abcissa``. We can modulate the scatter level 
@@ -252,7 +252,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         abcissa value (in our case a stellar mass of :math:`10^{11}M_{\odot}`):
 
         >>> cam_variable_scatter.param_dict['correlation_param2'] = 0.5
-        >>> halos['ssfr'] = cam_variable_scatter.mc_ssfr(halos=halos)
+        >>> halo_table['ssfr'] = cam_variable_scatter.mc_ssfr(halo_table=halo_table)
 
         .. automethod:: _mc_galprop
         """
@@ -285,19 +285,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
 
         Parameters 
         ----------
-        galaxy_table : data table, optional keyword argument 
-            Astropy Table object storing the mock galaxy population 
-            onto which values of ``self.galprop_key`` will be painted. 
-            If the ``galaxy_table`` keyword argument is not passed, 
-            then the ``halos`` keyword argument must be passed, 
-            but never both. 
-
-        halos : data table, optional keyword argument 
+        halo_table : data table
             Astropy Table object storing the halo population 
             onto which values of ``self.galprop_key`` will be painted. 
-            If the ``halos`` keyword argument is not passed, 
-            then the ``galaxy_table`` keyword argument must be passed, 
-            but never both. 
 
         galaxy_table_slice_array : array, optional keyword argument 
             Array of slice objects. The i^th entry of 
@@ -316,22 +306,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         """
         self._set_correlation_strength()
 
-        if ('galaxy_table' in kwargs.keys()) & ('halos' in kwargs.keys()):
-            msg = ("The mc_"+self.galprop_key+" method accepts either " + 
-                "a halos keyword argument, or a galaxy_table keyword argument" + 
-                " but never both.")
-            raise KeyError(msg)
-        elif 'galaxy_table' in kwargs.keys():
-            galaxy_table = kwargs['galaxy_table']
-            operative_sec_haloprop_key = (
-                model_defaults.host_haloprop_prefix + self.sec_haloprop_key)
-        elif 'halos' in kwargs.keys():
-            galaxy_table = kwargs['halos']
-            operative_sec_haloprop_key = self.sec_haloprop_key
-        else:
-            msg = ("The mc_"+self.galprop_key+" requires either " + 
-                "a halos keyword argument, or a galaxy_table keyword argument")
-            raise KeyError(msg)
+        galaxy_table = kwargs['halo_table']
 
         self.add_new_haloprops(galaxy_table)
 
@@ -369,9 +344,9 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
                 galprop_cumprob_bini = galprop_cumprob[idx_bini]
                 galprop_scatter_bini = galprop_scatter[idx_bini]
 
-                # Fetch the halos in the i^th prim_galprop bin, 
+                # Fetch the halo_table in the i^th prim_galprop bin, 
                 # and determine how they are sorted
-                haloprop_bini = galaxy_table[idx_bini][operative_sec_haloprop_key]
+                haloprop_bini = galaxy_table[idx_bini][self.sec_haloprop_key]
                 idx_sorted_haloprop_bini = np.argsort(haloprop_bini)
 
                 galprop_bini = self._condition_matched_galprop(

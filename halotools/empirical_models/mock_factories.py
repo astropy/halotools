@@ -64,7 +64,7 @@ class MockFactory(object):
             by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
             object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halos`` keyword argument. 
+            via the ``halo_table`` keyword argument. 
             The input ``model`` model object has its own new_haloprop_func_dict; 
             if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
             contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
@@ -223,7 +223,7 @@ class HodMockFactory(MockFactory):
             by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
             object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halos`` keyword argument. 
+            via the ``halo_table`` keyword argument. 
             The input ``model`` model object has its own new_haloprop_func_dict; 
             if the keyword argument ``new_haloprop_func_dict`` passed to `HodMockFactory` 
             contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
@@ -273,13 +273,13 @@ class HodMockFactory(MockFactory):
 
         # Make any additional cuts requested by the composite model
         if hasattr(self.model, 'halocut_funcobj'):
-            self.halo_table = self.model.halocut_funcobj(halos=self.halo_table)
+            self.halo_table = self.model.halocut_funcobj(halo_table=self.halo_table)
         ############################################################
 
         ### Create new columns of the halo catalog, if applicable
         if hasattr(self, 'new_haloprop_func_dict'):
             for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(halos=self.halo_table)
+                self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table=self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
 
         # Create new columns for the halo catalog associated with each 
@@ -289,7 +289,7 @@ class HodMockFactory(MockFactory):
         for halo_prof_param_key in self.model.prof_param_keys:
             method_name = halo_prof_param_key + '_halos'
             method_behavior = getattr(self.model, method_name)
-            self.halo_table[halo_prof_param_key] = method_behavior(halos=self.halo_table)
+            self.halo_table[halo_prof_param_key] = method_behavior(halo_table=self.halo_table)
             self.additional_haloprops.append(halo_prof_param_key)
 
         self.model.build_halo_prof_lookup_tables(**kwargs)
@@ -375,7 +375,7 @@ class HodMockFactory(MockFactory):
             occupation_func = getattr(self.model, occupation_func_name)
             # Call the component model to get a MC 
             # realization of the abundance of gal_type galaxies
-            self._occupation[gal_type] = occupation_func(halos=self.halo_table)
+            self._occupation[gal_type] = occupation_func(halo_table=self.halo_table)
 
             # Now use the above result to set up the indexing scheme
             self._total_abundance[gal_type] = (
@@ -451,7 +451,7 @@ class SubhaloMockFactory(MockFactory):
             by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
             object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halos`` keyword argument. 
+            via the ``halo_table`` keyword argument. 
             The input ``model`` model object has its own new_haloprop_func_dict; 
             if the keyword argument ``new_haloprop_func_dict`` passed to `HodMockFactory` 
             contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
@@ -474,12 +474,12 @@ class SubhaloMockFactory(MockFactory):
 
         # Make any cuts on the halo catalog requested by the composite model
         if hasattr(self.model, 'halocut_funcobj'):
-            self.halo_table = self.model.halocut_funcobj(halos=self.halo_table)
+            self.halo_table = self.model.halocut_funcobj(halo_table=self.halo_table)
 
         ### Create new columns of the halo catalog, if applicable
         if hasattr(self.model, 'new_haloprop_func_dict'):
             for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(halos=self.halo_table)
+                self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table=self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
 
 
