@@ -197,7 +197,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         `~halotools.sim_manager.FakeSim`:
 
         >>> fake_sim = sim_manager.FakeSim()
-        >>> halos = fake_sim.halos
+        >>> halos = fake_sim.halo_table
 
         CAM models do not assign values of ``prim_galprop``, 
         and so our halos must have stellar masses assigned by 
