@@ -18,12 +18,9 @@ from . import catalog_manager, supported_sims, sim_defaults, cache_config
 from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
 
 class BehrooziASCIIReader(object):
-    """ Class containing methods used to read raw ASCII data generated with Rockstar
+    """ Class containing methods used to read raw ASCII data generated with Rockstar 
     and made publicly available by Peter Behroozi. 
-
-    Each new raw halo catalog must be processed with its own instance of this class. 
     """
-
     def __init__(self, input_fname, recompress = True, **kwargs):
         """
         Parameters 
@@ -32,25 +29,25 @@ class BehrooziASCIIReader(object):
             Name of the file (including absolute path) to be processed. 
 
         simname : string, optional 
-            Nickname of the simulation, e.g. `bolshoi`. If None is passed, 
+            Nickname of the simulation, e.g. ``bolshoi``. If None is passed, 
             Halotools will attempt to automatically infer this from ``input_fname``. 
 
         halo_finder : string, optional 
-            Nickname of the halo-finder, e.g. `rockstar`. If None is passed, 
+            Nickname of the halo-finder, e.g. ``rockstar``. If None is passed, 
             Halotools will attempt to automatically infer this from ``input_fname``. 
 
         cuts_funcobj : function object, optional
             Any function used to apply row-wise cuts when reading ASCII data. 
-            `cuts_funcobj` should accept a structured array or Astropy Table as input, 
+            ``cuts_funcobj`` should accept a structured array or Astropy Table as input, 
             and return a boolean array of the same length. 
-            If None, default cut is set by `default_halocat_cut`. 
+            If None, default cut is set by ``default_halocat_cut``. 
             If set to the string ``nocut``, all rows will be kept. 
-            The `cuts_funcobj` must be a callable function defined 
+            The ``cuts_funcobj`` must be a callable function defined 
             within the namespace of the `RockstarReader` instance, and 
             it must be a stand-alone function, not a bound method of 
             some other class.  
             If passing ``cuts_funcobj`` keyword argument, 
-            you may not pass a ``column_bounds` keyword argument. 
+            you may not pass a ``column_bounds`` keyword argument. 
 
         column_bounds : list, optional 
             List of tuples used to apply row-wise cuts when reading ASCII data. 
@@ -60,7 +57,7 @@ class BehrooziASCIIReader(object):
             If column_bounds is an N-element list, only ASCII rows passing *all* 
             cuts will be kept in the resulting catalog. 
             If passing ``column_bounds`` keyword argument, 
-            you may not pass a ``cuts_funcobj` keyword argument. 
+            you may not pass a ``cuts_funcobj`` keyword argument. 
 
         recompress : bool, optional 
             If ``input_fname`` is a compressed file, `BehrooziASCIIReader` 
