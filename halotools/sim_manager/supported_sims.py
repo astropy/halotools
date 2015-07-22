@@ -254,7 +254,7 @@ class HaloCatalog(object):
         if hasattr(self, '_particles'):
             return self._particles
         else:
-            self._particles = self._retrieve_ptcl_table(self.redshift)
+            self._particles = self._retrieve_ptcl_table()
             return self._particles
 
         self.halo_table = self._retrieve_ptcl_table(redshift)
