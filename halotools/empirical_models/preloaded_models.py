@@ -225,7 +225,7 @@ def Campbell15(**kwargs):
     We can easily build alternative versions of models and mocks by calling the 
     `Campbell15` function with different arguments:
 
-    >>> model_with_scatter = Campbell15(correlation_strength = 0.8, sec_haloprop_key = 'zhalf')
+    >>> model_with_scatter = Campbell15(correlation_strength = 0.8, sec_haloprop_key = 'halo_zhalf')
     >>> model_with_scatter.populate_mock(snapshot = fake_snapshot)
 
 
