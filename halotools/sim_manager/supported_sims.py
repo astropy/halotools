@@ -221,7 +221,7 @@ class HaloCatalog(object):
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder, 
-        redshift = sim_defaults.default_redshift, dz_tol = 0.05):
+        redshift = sim_defaults.default_redshift, dz_tol = 0.05, **kwargs):
         """
         """
         self.dz_tol = dz_tol
