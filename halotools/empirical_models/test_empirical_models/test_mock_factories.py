@@ -47,9 +47,9 @@ def test_preloaded_hod_mocks():
         assert np.all(mock1.galaxy_table['halo_NFWmodel_conc'] > 0.5)
         assert np.all(mock1.galaxy_table['halo_NFWmodel_conc'] < 25)
 
-        mock2 = mock_factories.HodMockFactory(snapshot=sim, model=model, 
-            additional_haloprops = ['zhalf'])
-        assert 'halo_zhalf' in mock2.galaxy_table.keys()
+        #mock2 = mock_factories.HodMockFactory(snapshot=sim, model=model, 
+        #    additional_haloprops = ['zhalf'])
+        #assert 'halo_zhalf' in mock2.galaxy_table.keys()
 
     sim = FakeSim()
 
