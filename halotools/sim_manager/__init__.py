@@ -6,3 +6,4 @@ from .read_nbody_ascii import *
 from .generate_random_sim import *
 from .cache_config import *
 from .supported_sims import *
+from .catalog_manager import *
