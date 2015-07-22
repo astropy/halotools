@@ -87,18 +87,11 @@ class OccupationComponent(model_helpers.GalPropModel):
         ----------        
         prim_haloprop : array, optional keyword argument 
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
-            keyword arguments must be passed. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         seed : int, optional keyword argument 
             Random number seed used to generate the Monte Carlo realization. 
@@ -107,7 +100,7 @@ class OccupationComponent(model_helpers.GalPropModel):
         Returns
         -------
         mc_abundance : array
-            Integer array giving the number of galaxies in each of the input halos.     
+            Integer array giving the number of galaxies in each of the input halo_table.     
         """ 
         first_occupation_moment = self.mean_occupation(**kwargs)
         if self.occupation_bound == 1:
@@ -134,7 +127,7 @@ class OccupationComponent(model_helpers.GalPropModel):
         Returns
         -------
         mc_abundance : array
-            Integer array giving the number of galaxies in each of the input halos. 
+            Integer array giving the number of galaxies in each of the input halo_table. 
         """
         np.random.seed(seed=seed)
         mc_generator = np.random.random(custom_len(first_occupation_moment))
@@ -156,7 +149,7 @@ class OccupationComponent(model_helpers.GalPropModel):
         Returns
         -------
         mc_abundance : array
-            Integer array giving the number of galaxies in each of the input halos. 
+            Integer array giving the number of galaxies in each of the input halo_table. 
         """
         np.random.seed(seed=seed)
         # The scipy built-in Poisson number generator raises an exception 
@@ -224,32 +217,25 @@ class Zheng07Cens(OccupationComponent):
 
         Parameters
         ----------        
-        prim_haloprop : array, optional keyword argument
-            Array storing a mass-like variable that governs the occupation statistics. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing mock galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
-            keyword arguments must be passed. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns
         -------
         mean_ncen : array
-            Mean number of central galaxies in the input halos. 
+            Mean number of central galaxies in the input halo_table. 
 
         Examples 
         --------
         >>> cen_model = Zheng07Cens()
 
         The `mean_occupation` method of all OccupationComponent instances supports 
-        three different options for arguments. The first option is to directly 
+        two different options for arguments. The first option is to directly 
         pass the array of the primary halo property: 
 
         >>> testmass = np.logspace(10, 15, num=50)
@@ -262,13 +248,7 @@ class Zheng07Cens(OccupationComponent):
         (much larger) full one:
 
         >>> fake_sim = sim_manager.FakeSim()
-        >>> mean_ncen = cen_model.mean_occupation(halos=fake_sim.halos)
-
-        The third option is to pass a table storing a mock galaxy catalog. In this case, 
-        the syntax is the same as it is when passing a halo catalog:
-
-        >>> fake_mock = sim_manager.FakeMock()
-        >>> mean_ncen = cen_model.mean_occupation(galaxy_table=fake_mock.galaxy_table)
+        >>> mean_ncen = cen_model.mean_occupation(halo_table=fake_sim.halo_table)
 
         Notes 
         -----
@@ -281,16 +261,13 @@ class Zheng07Cens(OccupationComponent):
 
         """
         # Retrieve the array storing the mass-like variable
-        if 'galaxy_table' in kwargs.keys():
-            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
-            mass = kwargs['galaxy_table'][key]
-        elif 'halos' in kwargs.keys():
-            mass = kwargs['halos'][self.prim_haloprop_key]
+        if 'halo_table' in kwargs.keys():
+            mass = kwargs['halo_table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+                "``halo_table`` or  ``prim_haloprop``")
 
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
@@ -429,13 +406,10 @@ class Leauthaud11Cens(OccupationComponent):
         Parameters
         ----------        
         prim_haloprop : array, optional keyword argument
-            array of masses of halos in the catalog
+            array of masses of halo_table in the catalog
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing mock galaxy catalog. 
 
         Returns
         -------
@@ -583,17 +557,12 @@ class Kravtsov04Sats(OccupationComponent):
         ----------        
         prim_haloprop : array, optional keyword argument
             Array storing a mass-like variable that governs the occupation statistics. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` 
             keyword arguments must be passed. 
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing mock galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` 
             keyword arguments must be passed. 
 
         Returns
@@ -612,7 +581,7 @@ class Kravtsov04Sats(OccupationComponent):
         Examples 
         --------
         The `mean_occupation` method of all OccupationComponent instances supports 
-        three different options for arguments. The first option is to directly 
+        two different options for arguments. The first option is to directly 
         pass the array of the primary halo property: 
 
         >>> sat_model = Kravtsov04Sats()
@@ -626,26 +595,17 @@ class Kravtsov04Sats(OccupationComponent):
         (much larger) full one:
 
         >>> fake_sim = sim_manager.FakeSim()
-        >>> mean_nsat = sat_model.mean_occupation(halos=fake_sim.halos)
-
-        The third option is to pass a table storing a mock galaxy catalog. In this case, 
-        the syntax is the same as it is when passing a halo catalog:
-
-        >>> fake_mock = sim_manager.FakeMock()
-        >>> mean_nsat = sat_model.mean_occupation(galaxy_table=fake_mock.galaxy_table)
+        >>> mean_nsat = sat_model.mean_occupation(halo_table=fake_sim.halo_table)
 
         """
         # Retrieve the array storing the mass-like variable
-        if 'galaxy_table' in kwargs.keys():
-            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
-            mass = kwargs['galaxy_table'][key]
-        elif 'halos' in kwargs.keys():
-            mass = kwargs['halos'][self.prim_haloprop_key]
+        if 'halo_table' in kwargs.keys():
+            mass = kwargs['halo_table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+                "``halo_table`` or ``prim_haloprop``")
         mass = np.array(mass)
         if np.shape(mass) == ():
             mass = np.array([mass])
@@ -810,13 +770,10 @@ class Leauthaud11Sats(OccupationComponent):
         Parameters
         ----------        
         prim_haloprop : array, optional keyword argument
-            array of masses of halos in the catalog
+            array of masses of halo_table in the catalog
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing mock galaxy catalog. 
 
         Returns
         -------
@@ -833,16 +790,13 @@ class Leauthaud11Sats(OccupationComponent):
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'galaxy_table' in kwargs.keys():
-            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
-            mass = kwargs['galaxy_table'][key]
-        elif 'halos' in kwargs.keys():
-            mass = kwargs['halos'][self.prim_haloprop_key]
+        if 'halo_table' in kwargs.keys():
+            mass = kwargs['halo_table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+                "``halo_table`` or ``prim_haloprop``")
 
         mean_nsat = (
             np.exp(-self._mcut/mass)*

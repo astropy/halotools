@@ -57,7 +57,7 @@ class FakeSim(object):
 		self.num_ptcl = num_ptcl
 
 	@property 
-	def halos(self):
+	def halo_table(self):
 		""" Astropy Table of randomly generated 
 		dark matter halos. 
 		"""
@@ -176,7 +176,7 @@ class FakeMock(object):
 		"""
 		nhalos = np.max([100, approximate_ngals/20.]).astype(int)
 		self.snapshot = FakeSim(num_halos_per_massbin=nhalos)
-		self.halos = self.snapshot.halos
+		self.halo_table = self.snapshot.halo_table
 		self.particles = self.snapshot.particles
 		self.create_astropy_table = True
 		self.seed = seed
@@ -193,22 +193,22 @@ class FakeMock(object):
 		central_occupations = np.random.random_integers(0,1,self.snapshot.num_halos)
 		self.num_centrals = central_occupations.sum()
 		central_nickname_array = np.repeat('centrals', self.num_centrals)
-		central_halo_mvir = np.repeat(self.halos['halo_mvir'], central_occupations)
-		central_halo_id = np.repeat(self.halos['halo_id'], central_occupations)
-		central_halo_x = np.repeat(self.halos['halo_x'], central_occupations, axis=0)
-		central_halo_y = np.repeat(self.halos['halo_y'], central_occupations, axis=0)
-		central_halo_z = np.repeat(self.halos['halo_z'], central_occupations, axis=0)
-		central_halo_zhalf = np.repeat(self.halos['halo_zhalf'], central_occupations)
+		central_halo_mvir = np.repeat(self.halo_table['halo_mvir'], central_occupations)
+		central_halo_id = np.repeat(self.halo_table['halo_id'], central_occupations)
+		central_halo_x = np.repeat(self.halo_table['halo_x'], central_occupations, axis=0)
+		central_halo_y = np.repeat(self.halo_table['halo_y'], central_occupations, axis=0)
+		central_halo_z = np.repeat(self.halo_table['halo_z'], central_occupations, axis=0)
+		central_halo_zhalf = np.repeat(self.halo_table['halo_zhalf'], central_occupations)
 
 		satellite_occupations = np.random.random_integers(0,3,self.snapshot.num_halos)
 		self.num_satellites = satellite_occupations.sum()
 		satellite_nickname_array = np.repeat('satellites', self.num_satellites)
-		satellite_halo_mvir = np.repeat(self.halos['halo_mvir'], satellite_occupations)
-		satellite_halo_id = np.repeat(self.halos['halo_id'], satellite_occupations)
-		satellite_halo_x = np.repeat(self.halos['halo_x'], satellite_occupations, axis=0)
-		satellite_halo_y = np.repeat(self.halos['halo_y'], satellite_occupations, axis=0)
-		satellite_halo_z = np.repeat(self.halos['halo_z'], satellite_occupations, axis=0)
-		satellite_halo_zhalf = np.repeat(self.halos['halo_zhalf'], satellite_occupations)
+		satellite_halo_mvir = np.repeat(self.halo_table['halo_mvir'], satellite_occupations)
+		satellite_halo_id = np.repeat(self.halo_table['halo_id'], satellite_occupations)
+		satellite_halo_x = np.repeat(self.halo_table['halo_x'], satellite_occupations, axis=0)
+		satellite_halo_y = np.repeat(self.halo_table['halo_y'], satellite_occupations, axis=0)
+		satellite_halo_z = np.repeat(self.halo_table['halo_z'], satellite_occupations, axis=0)
+		satellite_halo_zhalf = np.repeat(self.halo_table['halo_zhalf'], satellite_occupations)
 
 		censat_occ = np.append(central_occupations, satellite_occupations)
 		censat_galtype = np.append(central_nickname_array, satellite_nickname_array)
@@ -222,12 +222,12 @@ class FakeMock(object):
 		orphan_occupations = np.random.random_integers(0,3,self.snapshot.num_halos)
 		self.num_orphans = orphan_occupations.sum()
 		orphan_nickname_array = np.repeat('orphans', self.num_orphans)
-		orphan_halo_mvir = np.repeat(self.halos['halo_mvir'], orphan_occupations)
-		orphan_halo_id = np.repeat(self.halos['halo_id'], orphan_occupations)
-		orphan_halo_x = np.repeat(self.halos['halo_x'], orphan_occupations, axis=0)
-		orphan_halo_y = np.repeat(self.halos['halo_y'], orphan_occupations, axis=0)
-		orphan_halo_z = np.repeat(self.halos['halo_z'], orphan_occupations, axis=0)
-		orphan_halo_zhalf = np.repeat(self.halos['halo_zhalf'], orphan_occupations)
+		orphan_halo_mvir = np.repeat(self.halo_table['halo_mvir'], orphan_occupations)
+		orphan_halo_id = np.repeat(self.halo_table['halo_id'], orphan_occupations)
+		orphan_halo_x = np.repeat(self.halo_table['halo_x'], orphan_occupations, axis=0)
+		orphan_halo_y = np.repeat(self.halo_table['halo_y'], orphan_occupations, axis=0)
+		orphan_halo_z = np.repeat(self.halo_table['halo_z'], orphan_occupations, axis=0)
+		orphan_halo_zhalf = np.repeat(self.halo_table['halo_zhalf'], orphan_occupations)
 
 		self.galaxy_table = Table()
 
