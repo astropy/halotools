@@ -53,7 +53,7 @@ class LogNormalScatterModel(object):
         Examples 
         ---------
         >>> scatter_model = LogNormalScatterModel()
-        >>> scatter_model = LogNormalScatterModel(prim_haloprop_key='mvir')
+        >>> scatter_model = LogNormalScatterModel(prim_haloprop_key='halo_mvir')
 
         To implement variable scatter, we need to define the level 
         of log-normal scatter at a set of control values 
