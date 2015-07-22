@@ -316,8 +316,7 @@ class HodMockFactory(MockFactory):
             # Store all other relevant host halo properties into their 
             # appropriate pre-allocated array 
             for halocatkey in self.additional_haloprops:
-                galpropkey = model_defaults.host_haloprop_prefix+halocatkey
-                self.galaxy_table[galpropkey][gal_type_slice] = np.repeat(
+                self.galaxy_table[halocatkey][gal_type_slice] = np.repeat(
                     self.halo_table[halocatkey], self._occupation[gal_type], axis=0)
 
             # Call the galaxy profile components
@@ -325,7 +324,7 @@ class HodMockFactory(MockFactory):
                 method_name = prof_param_key + '_' + gal_type
                 method_behavior = getattr(self.model, method_name)
                 self.galaxy_table[prof_param_key][gal_type_slice] = (
-                    method_behavior(galaxy_table = self.galaxy_table[gal_type_slice])
+                    method_behavior(halo_table = self.galaxy_table[gal_type_slice])
                     )
 
             # Assign positions 
@@ -335,7 +334,7 @@ class HodMockFactory(MockFactory):
             self.galaxy_table['y'][gal_type_slice], \
             self.galaxy_table['z'][gal_type_slice] = (
                 getattr(self.model, pos_method_name)(
-                    galaxy_table=self.galaxy_table[gal_type_slice])
+                    halo_table=self.galaxy_table[gal_type_slice])
                 )
                 
         # Positions are now assigned to all populations. 
@@ -391,10 +390,9 @@ class HodMockFactory(MockFactory):
         self.Ngals = np.sum(self._total_abundance.values())
 
         # Allocate memory for all additional halo properties, 
-        # including profile parameters of the halos such as 'halo_NFWmodel_conc'
+        # including profile parameters of the halos such as 'NFWmodel_conc'
         for halocatkey in self.additional_haloprops:
-            galpropkey = model_defaults.host_haloprop_prefix+halocatkey
-            self.galaxy_table[galpropkey] = np.zeros(self.Ngals, 
+            self.galaxy_table[halocatkey] = np.zeros(self.Ngals, 
                 dtype = self.halo_table[halocatkey].dtype)
 
         # Separately allocate memory for the values of the (possibly biased)
@@ -489,13 +487,11 @@ class SubhaloMockFactory(MockFactory):
         """
 
         for key in self.additional_haloprops:
-            newkey = model_defaults.host_haloprop_prefix + key
-            self.galaxy_table[newkey] = self.halo_table[key]
+            self.galaxy_table[key] = self.halo_table[key]
 
         phase_space_keys = ['x', 'y', 'z', 'vx', 'vy', 'vz']
         for newkey in phase_space_keys:
-            oldkey = model_defaults.host_haloprop_prefix + newkey
-            self.galaxy_table[newkey] = self.galaxy_table[oldkey]
+            self.galaxy_table[newkey] = self.galaxy_table[model_defaults.host_haloprop_prefix+newkey]
 
         self.galaxy_table['galid'] = np.arange(len(self.galaxy_table))
 
@@ -504,7 +500,7 @@ class SubhaloMockFactory(MockFactory):
             if hasattr(component_model, 'gal_type_func'):
                 newkey = galprop + '_gal_type'
                 self.galaxy_table[newkey] = (
-                    component_model.gal_type_func(galaxy_table=self.galaxy_table)
+                    component_model.gal_type_func(halo_table=self.galaxy_table)
                     )
 
     def populate(self):
@@ -514,7 +510,7 @@ class SubhaloMockFactory(MockFactory):
             
             model_func_name = 'mc_'+galprop_key
             model_func = getattr(self.model, model_func_name)
-            self.galaxy_table[galprop_key] = model_func(galaxy_table=self.galaxy_table)
+            self.galaxy_table[galprop_key] = model_func(halo_table=self.galaxy_table)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)

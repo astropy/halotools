@@ -182,7 +182,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
 
         Parameters 
         ----------
-        galaxy_table : Astropy Table, required keyword argument
+        halo_table : Astropy Table, required keyword argument
             Data table storing a length-Ngals galaxy catalog. 
 
         seed : int, optional keyword argument 
@@ -193,8 +193,8 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
-        galaxy_table = kwargs['galaxy_table']
-        x, y, z = galaxy_table['x'], galaxy_table['y'], galaxy_table['z']
+        halo_table = kwargs['halo_table']
+        x, y, z = halo_table['x'], halo_table['y'], halo_table['z']
 
         # For the case of a trivial profile model, return the trivial result
         if isinstance(self.halo_prof_model, 
@@ -207,7 +207,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
 
             # extract all relevant profile parameters from the mock
             profile_params = (
-                [galaxy_table[model_defaults.host_haloprop_prefix+profile_param_key] 
+                [halo_table[profile_param_key] 
                 for profile_param_key in self.halo_prof_model.prof_param_keys]
                 )
 

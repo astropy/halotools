@@ -37,11 +37,11 @@ def test_ConcMass():
 
 	fake_sim = FakeSim()
 	fake_mock = FakeMock()
-	model_z0 = halo_prof_param_components.ConcMass(prim_haloprop_key = 'mvir', redshift=0)
-	conc_z0_arg1 = model_z0(prim_haloprop = fake_sim.halos[model_z0.prim_haloprop_key])
-	conc_z0_arg2 = model_z0(halos = fake_sim.halos)
+	model_z0 = halo_prof_param_components.ConcMass(prim_haloprop_key = 'halo_mvir', redshift=0)
+	conc_z0_arg1 = model_z0(prim_haloprop = fake_sim.halo_table[model_z0.prim_haloprop_key])
+	conc_z0_arg2 = model_z0(halo_table = fake_sim.halo_table)
 	assert np.all(conc_z0_arg1 == conc_z0_arg2)
-	conc_z0_arg3 = model_z0(galaxy_table = fake_mock.galaxy_table)
+	conc_z0_arg3 = model_z0(halo_table = fake_mock.galaxy_table)
 	assert np.all(conc_z0_arg3 == model_z0(prim_haloprop=fake_mock.galaxy_table['halo_mvir']))
 
 
