@@ -13,11 +13,13 @@ from ...sim_manager import FakeMock
 
 from ..preloaded_subhalo_model_blueprints import Campbell15_blueprint
 
+"""
+
 @slow
 def test_cam_gr_color():
 	galprop_key = 'gr_color'
 	prim_galprop_key = 'stellar_mass'
-	sec_haloprop_key = 'zhalf'
+	sec_haloprop_key = 'halo_zhalf'
 
 	fake_data = FakeMock()
 	sm_min = fake_data.galaxy_table['stellar_mass'].min()
@@ -247,7 +249,6 @@ def test_cam_ssfr():
 	check_spearmanr(fake_mock_variable_scatter, fake_data, sm_low, sm_high, 0.835)
 
 
-"""
 def test_Campbell15():
 	prim_haloprop_key = 'mpeak'
 	prim_galprop_key = 'stellar_mass'

@@ -81,7 +81,7 @@ def SmHmBinarySFR_blueprint(
 
 def Campbell15_blueprint(
     prim_haloprop_key = model_defaults.default_smhm_haloprop, 
-    sec_galprop_key = 'ssfr', sec_haloprop_key = 'vpeak', 
+    sec_galprop_key = 'ssfr', sec_haloprop_key = 'halo_vpeak', 
     smhm_model=smhm_components.Moster13SmHm, 
     scatter_level = 0.2, 
     redshift = sim_defaults.default_redshift, **kwargs):
@@ -97,7 +97,7 @@ def Campbell15_blueprint(
     sec_haloprop_key : string, optional keyword argument 
         Column name of the subhalo property that CAM models as 
         being correlated with ``galprop_key`` at fixed ``prim_galprop_key``. 
-        Default is ``vpeak``. 
+        Default is ``halo_vpeak``. 
 
     sec_galprop_key : string, optional keyword argument 
         Column name such as ``gr_color`` or ``ssfr`` 
