@@ -87,7 +87,7 @@ class BehrooziASCIIReader(object):
 
         simname, halo_finder, redshift = self._infer_snapshot(self.fname, **kwargs)
         self.halocat = supported_sims.HaloCatalog(
-            simname=simname, halo_finder=halo_finder, redshift=redshift)
+            simname=simname, halo_finder=halo_finder, desired_redshift=redshift)
 
         self._process_cuts_funcobj(**kwargs)
 

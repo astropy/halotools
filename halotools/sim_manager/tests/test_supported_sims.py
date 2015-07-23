@@ -27,7 +27,7 @@ def test_load_halo_catalogs():
         alist = adict[simname]
         for a in alist:
             z = 1/a - 1
-            halocat = HaloCatalog(simname = simname, redshift = z)
+            halocat = HaloCatalog(simname = simname, desired_redshift = z)
             #halos = halocat.halo_table
             if simname not in ['bolshoi', 'multidark']:
                 particles = halocat.ptcl_table
