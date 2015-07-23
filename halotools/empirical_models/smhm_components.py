@@ -344,7 +344,7 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         else:
             log10_galprop_with_scatter = (
                 np.log10(galprop_first_moment) + 
-                self.scatter_model.scatter_realization(**kwargs)
+                self.scatter_realization(**kwargs)
                 )
             return 10.**log10_galprop_with_scatter
 
