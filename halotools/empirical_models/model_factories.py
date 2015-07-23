@@ -343,8 +343,6 @@ class HodModelFactory(ModelFactory):
 
         * You can use one of the pre-computed blueprint found in `~halotools.empirical_models.preloaded_hod_blueprints` 
     
-        * The following tutorial, :ref:`custom_hod_model_building_tutorial`, shows how you can build your own, customizing it based on the science you are interested in.  
-
     """
 
     def __init__(self, input_model_blueprint, **kwargs):
@@ -362,7 +360,6 @@ class HodModelFactory(ModelFactory):
             and values are class instances of that type of model. 
             The `interpret_input_model_blueprint` translates 
             ``input_model_blueprint`` into ``self.model_blueprint``.
-            See :ref:`custom_hod_model_building_tutorial` for further details. 
 
         """
 
