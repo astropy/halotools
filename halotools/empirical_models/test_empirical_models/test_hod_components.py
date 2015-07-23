@@ -227,6 +227,10 @@ def test_Zheng07Sats():
 		mean_occ_satmodel_nocens = satmodel_nocens.mean_occupation(prim_haloprop=masses)
 		mean_occ_satmodel_cens = satmodel_cens.mean_occupation(prim_haloprop=masses)
 		assert np.all(mean_occ_satmodel_cens <= mean_occ_satmodel_nocens)
+
+		diff = mean_occ_satmodel_cens - mean_occ_satmodel_nocens
+		assert diff.sum() < 0
+
 		mean_occ_cens = satmodel_cens.central_occupation_model.mean_occupation(prim_haloprop=masses)
 		assert np.all(mean_occ_satmodel_cens == mean_occ_satmodel_nocens*mean_occ_cens)
 
