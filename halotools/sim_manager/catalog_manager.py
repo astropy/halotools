@@ -853,12 +853,14 @@ class CatalogManager(object):
                  for fname in filelist:
                     if fnmatch.filter([fname], file_pattern) != []:
                         existing_fname = os.path.join(path, fname)
-                        msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
-                            "If you really want to overwrite the file, \n"
-                            "you must call the same function again \n"
-                            "with the keyword argument `overwrite` set to `True`")
-                        print(msg % existing_fname)
-                        return None
+                        if 'initial_download_script_msg' in kwargs.keys():
+                            msg = kwargs['initial_download_script_msg']
+                        else:
+                            msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
+                                "If you really want to overwrite the file, \n"
+                                "you must call the same function again \n"
+                                "with the keyword argument `overwrite` set to `True`")
+                        raise HalotoolsCacheError(msg % existing_fname)
 
         start = time()
         download_file_from_url(url, output_fname)
