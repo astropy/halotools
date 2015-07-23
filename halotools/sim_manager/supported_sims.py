@@ -238,24 +238,24 @@ class HaloCatalog(object):
         self.catman = catalog_manager.CatalogManager()
 
     @property 
-    def halos(self):
+    def halo_table(self):
         """
         """
-        if hasattr(self, '_halos'):
-            return self._halos
+        if hasattr(self, '_halo_table'):
+            return self._halo_table
         else:
-            self._halos = self._retrieve_halo_table(self.redshift)
-            return self._halos
+            self._halo_table = self._retrieve_halo_table(self.redshift)
+            return self._halo_table
 
     @property 
-    def particles(self):
+    def ptcl_table(self):
         """
         """
-        if hasattr(self, '_particles'):
-            return self._particles
+        if hasattr(self, '_ptcl_table'):
+            return self._ptcl_table
         else:
-            self._particles = self._retrieve_ptcl_table()
-            return self._particles
+            self._ptcl_table = self._retrieve_ptcl_table()
+            return self._ptcl_table
 
         self.halo_table = self._retrieve_ptcl_table(redshift)
 
