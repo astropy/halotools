@@ -223,19 +223,31 @@ class HaloCatalog(object):
         redshift = sim_defaults.default_redshift, dz_tol = 0.05, **kwargs):
         """
         """
-        self.dz_tol = dz_tol
-
-        simclass = retrieve_simclass(simname)
-        simobj = simclass()
-        for attr in simobj._attrlist:
-            setattr(self, attr, getattr(simobj, attr))
-
-        self.halo_finder, self.redshift = halo_finder, redshift 
-
-        self.dtype_ascii, self.header_ascii = sim_defaults.return_dtype_and_header(
-            simname, halo_finder)
-
         self.catman = catalog_manager.CatalogManager()
+
+        fname, closest_redshift = self._retrieve_closest_halo_table_fname(
+            simname, halo_finder, redshift)
+        if abs(closest_redshift - redshift) > dz_tol:
+            msg = ("Your input cache directory does not contain a halo catalog \n" 
+                "within %.3f of your input redshift = %.3f.\n"
+                "For the ``%s`` simulation and ``%s`` halo-finder, \n" 
+                "the catalog with the closest redshift in your cache has redshift = %.3f.\n"
+                "If that is the catalog you want, simply call the HaloCatalog class constructor \n"
+                "using the ``redshift`` keyword argument set to %.3f. \nOtherwise, choose a different "
+                "halo catalog from your cache,\nor use the CatalogManager to download the catalog you need.\n")
+            raise HalotoolsCacheError(msg % (dz_tol, redshift, 
+                simname, halo_finder, closest_redshift, closest_redshift))
+        else:
+            self.processed_halo_table_fname = fname
+            simclass = retrieve_simclass(simname)
+            simobj = simclass()
+            for attr in simobj._attrlist:
+                setattr(self, attr, getattr(simobj, attr))
+            self.redshift = closest_redshift
+            self.halo_finder = halo_finder 
+            self.dtype_ascii, self.header_ascii = sim_defaults.return_dtype_and_header(
+                self.simname, self.halo_finder)
+            self._check_catalog_self_consistency(fname, closest_redshift)
 
     @property 
     def halo_table(self):
@@ -244,7 +256,7 @@ class HaloCatalog(object):
         if hasattr(self, '_halo_table'):
             return self._halo_table
         else:
-            self._halo_table = self._retrieve_halo_table(self.redshift)
+            self._halo_table = Table.read(self.processed_halo_table_fname, path='data')
             return self._halo_table
 
     @property 
@@ -254,42 +266,48 @@ class HaloCatalog(object):
         if hasattr(self, '_ptcl_table'):
             return self._ptcl_table
         else:
-            self._ptcl_table = self._retrieve_ptcl_table()
+            fname, closest_redshift = self._retrieve_closest_ptcl_table_fname()
+            if abs(closest_redshift - self.redshift) > 0.01:
+                msg = ("Your input cache directory does not contain a particle catalog \n" 
+                    "that matches the redshift = %.3f of your halo catalog.\n"
+                    "For the ``%s`` simulation, the particle catalog with "
+                    "the closest redshift in your cache has z = %.3f.\n"
+                    "\nTo see whether a matching ptcl_table is available for download, \n"
+                    "use the ``closest_catalog_on_web`` method of the CatalogManager. \n"
+                    "If there exists a matching catalog, you can download it with the "
+                    "download_ptcl_table method of the CatalogManager.\n")
+                raise HalotoolsCacheError(msg % (self.redshift, self.simname, closest_redshift))
+            else:
+                self.ptcl_table_fname = fname
+                self._ptcl_table = Table.read(self.ptcl_table_fname, path='data')
             return self._ptcl_table
-
-        self.halo_table = self._retrieve_ptcl_table(redshift)
-
-        self.ptcl_table = self._retrieve_ptcl_table()
 
         ### Attributes that still need to be implemented: 
         # self.version,self.orig_data_source, etc. 
         # Also should implement some slick way to describe all columns in plain English 
 
-    def _retrieve_halo_table(self, redshift):
-        """ Method uses the CatalogManager to return a particle catalog object. 
+    def _retrieve_closest_halo_table_fname(self, simname, halo_finder, redshift):
+        """ Method uses the CatalogManager to return a halo catalog filename. 
         """
         if sim_defaults.default_cache_location == 'pkg_default':
             fname, closest_redshift = self.catman.closest_catalog_in_cache(
                 catalog_type = 'halos', 
-                simname = self.simname, 
-                halo_finder = self.halo_finder,
+                simname = simname, 
+                halo_finder = halo_finder,
                 desired_redshift = redshift)
         else:
             fname, closest_redshift = self.catman.closest_catalog_in_cache(
                 catalog_type = 'halos', 
-                simname = self.simname, 
-                halo_finder = self.halo_finder,
+                simname = simname, 
+                halo_finder = halo_finder,
                 desired_redshift = redshift, 
                 external_cache_loc = sim_defaults.default_cache_location)
 
-        self._check_catalog_self_consistency(fname, closest_redshift)
+        
+        return fname, closest_redshift
 
-        self.processed_halo_table_fname = fname
-
-        return Table.read(fname, path='data')
-
-    def _retrieve_ptcl_table(self):
-        """ Method uses the CatalogManager to return a particle catalog object. 
+    def _retrieve_closest_ptcl_table_fname(self):
+        """ Method uses the CatalogManager to return a particle catalog filename. 
         """
         if sim_defaults.default_cache_location == 'pkg_default':
             fname, closest_redshift = self.catman.closest_catalog_in_cache(
@@ -303,7 +321,7 @@ class HaloCatalog(object):
                 desired_redshift = self.redshift, 
                 external_cache_loc = sim_defaults.default_cache_location)
 
-        return Table.read(fname, path='data')
+        return fname, closest_redshift
 
     def _check_catalog_self_consistency(self, fname, closest_redshift):
 
@@ -312,10 +330,8 @@ class HaloCatalog(object):
             "This indicates a bug during the generation of the hdf5 file storing the catalog.")
 
         f = h5py.File(fname)
-        if abs(float(f.attrs['redshift']) - closest_redshift) > self.dz_tol:
+        if abs(float(f.attrs['redshift']) - closest_redshift) > 0.01:
             raise HalotoolsIOError(msg % ('redshift', 'redshift'))
-        else:
-            self.redshift = float(f.attrs['redshift'])
 
         if f.attrs['simname'] != self.simname:
             raise HalotoolsIOError(msg % ('simname', 'simname'))
