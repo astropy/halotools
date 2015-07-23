@@ -11,6 +11,19 @@ from astropy.tests.helper import remote_data
 
 from unittest import TestCase
 
+import pytest
+### Determine whether the machine is mine
+# This will be used to select tests whose 
+# returned values depend on the configuration 
+# of my personal cache directory files
+aph_home = u'/Users/aphearin'
+detected_home = _find_home()
+if aph_home == detected_home:
+    APH_MACHINE = True
+else:
+    APH_MACHINE = False
+
+
 class TestCatalogManager(TestCase):
 
 
@@ -94,6 +107,7 @@ class TestCatalogManager(TestCase):
         full_fname = os.path.join(p, f)
         assert os.path.isfile(full_fname)
 
+    @pytest.mark.skipif('not APH_MACHINE')
     def test_processed_halo_tables_in_cache(self):
 
         for simname in self.simnames:
@@ -177,6 +191,7 @@ class TestCatalogManager(TestCase):
             simname='bolshoi', halo_finder='rockstar')
         assert file_list != []
 
+    @pytest.mark.skipif('not APH_MACHINE')
     def test_closest_processed_halo_table_in_cache(self):
 
         catalog_type = 'halos'
@@ -191,6 +206,7 @@ class TestCatalogManager(TestCase):
         correct_basename = 'hlist_1.00035.list.halotools.alpha.version0.hdf5'
         assert os.path.basename(closest_fname) == correct_basename
 
+    @pytest.mark.skipif('not APH_MACHINE')
     def test_closest_ptcl_table_in_cache(self):
 
         catalog_type = 'particles'
