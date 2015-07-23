@@ -75,7 +75,7 @@ class MockFactory(object):
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         self.halo_table = self.snapshot.halo_table
-        self.particles = self.snapshot.particles
+        self.ptcl_table = self.snapshot.ptcl_table
         if hasattr(self.model, 'gal_types'):
             self.gal_types = self.model.gal_types
 
