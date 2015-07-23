@@ -42,6 +42,20 @@ def test_Zheng07_composite():
 	satocc_restored = model.mean_occupation_satellites(prim_haloprop=testmass2)
 	assert satocc_restored == satocc_orig
 
+	#######################################################
+	########  Verify that changes to the central occupations 
+	######## propagate to the satellites, when applicable
+	#######################################################
+
+
+
+
+
+
+
+
+
+
 
 
 
