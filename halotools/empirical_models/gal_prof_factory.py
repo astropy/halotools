@@ -11,6 +11,7 @@ __all__ = ['IsotropicGalProf']
 from functools import partial
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
+from copy import copy
 
 from . import model_defaults, model_helpers, halo_prof_components
 from . import gal_prof_components as gpc
@@ -57,13 +58,21 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         >>> gal_prof_model = IsotropicGalProf(gal_type='sats', halo_prof_model=halo_prof_components.NFWProfile)
 
         """
-        required_kwargs = ['gal_type']
-        model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
+        self.gal_type = kwargs['gal_type']
 
-        self.halo_prof_model = kwargs['halo_prof_model'](**kwargs)
+        kwargs_without_halo_prof_model = copy(kwargs)
+        #print("printing kwargs keys & values during instantiation of IsotropicGalProf for gal_type %s" % self.gal_type)
+        #for key, value in kwargs_without_halo_prof_model.iteritems():
+        #    print key, value
+        #print("\nDone printing arguments\n")
+        del kwargs_without_halo_prof_model['halo_prof_model']
+        #print "check 1"
+        self.halo_prof_model = kwargs['halo_prof_model'](**kwargs_without_halo_prof_model)
+        #print "check 2"
 
         super(IsotropicGalProf, self).__init__(
-            prof_param_keys=self.halo_prof_model.prof_param_keys, **kwargs)
+            prof_param_keys=self.halo_prof_model.prof_param_keys, **kwargs_without_halo_prof_model)
+        #print "check 3"
 
         for key in self.prof_param_keys:
             setattr(self, key, getattr(self.halo_prof_model, key))
