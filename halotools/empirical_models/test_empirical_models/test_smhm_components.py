@@ -6,6 +6,7 @@ from astropy.table import Table
 from .. import smhm_components
 from .. import model_defaults
 
+from copy import copy
 
 __all__ = ['test_Moster13SmHm_initialization', 'test_LogNormalScatterModel_initialization']
 
@@ -46,6 +47,28 @@ def test_Moster13SmHm_initialization():
 	macc_model = smhm_components.Moster13SmHm(prim_haloprop_key='macc')
 	assert macc_model.prim_haloprop_key == 'macc'
 	assert macc_model.scatter_model.prim_haloprop_key == 'macc'
+
+def test_Moster13SmHm_behavior():
+	"""
+	"""
+	default_model = smhm_components.Moster13SmHm()
+	mstar1 = default_model.mean_stellar_mass(prim_haloprop = 1.e12)
+	ratio1 = mstar1/3.4275e10
+	np.testing.assert_array_almost_equal(ratio1, 1.0, decimal=3)
+
+	default_model.param_dict['n10'] *= 1.1
+	mstar2 = default_model.mean_stellar_mass(prim_haloprop = 1.e12)
+	assert mstar2 > mstar1
+
+	default_model.param_dict['n11'] *= 1.1
+	mstar3 = default_model.mean_stellar_mass(prim_haloprop = 1.e12)
+	assert mstar3 == mstar2
+
+	mstar4_z1 = default_model.mean_stellar_mass(prim_haloprop = 1.e12, redshift=1)
+	default_model.param_dict['n11'] *= 1.1
+	mstar5_z1 = default_model.mean_stellar_mass(prim_haloprop = 1.e12, redshift=1)
+	assert mstar5_z1 != mstar4_z1
+
 
 
 def test_LogNormalScatterModel_initialization():
