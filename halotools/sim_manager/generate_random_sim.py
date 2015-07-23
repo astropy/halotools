@@ -16,7 +16,7 @@ class FakeSim(object):
 	The `FakeSim` object has all the attributes required by 
 	Mock Factories such as `~halotools.empirical_models.HodMockFactory` to 
 	create a mock galaxy population. 
-	The columns of the `halos` and `particles` attributes of `FakeSim` 
+	The columns of the `halo_table` and `ptcl_table` attributes of `FakeSim` 
 	are generated with ``np.random``. Thus mock catalogs built into `FakeSim` 
 	will not have physically realistic spatial distributions, mass functions, etc.
 	All the same, `FakeSim` is quite useful for testing purposes, 
@@ -111,7 +111,7 @@ class FakeSim(object):
 		return Table(d)
 
 	@property 
-	def particles(self):
+	def ptcl_table(self):
 		""" Astropy Table of randomly generated 
 		dark matter particles. 
 		"""
@@ -177,7 +177,7 @@ class FakeMock(object):
 		nhalos = np.max([100, approximate_ngals/20.]).astype(int)
 		self.snapshot = FakeSim(num_halos_per_massbin=nhalos)
 		self.halo_table = self.snapshot.halo_table
-		self.particles = self.snapshot.particles
+		self.ptcl_table = self.snapshot.ptcl_table
 		self.create_astropy_table = True
 		self.seed = seed
 
