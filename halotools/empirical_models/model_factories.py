@@ -408,10 +408,11 @@ class HodModelFactory(ModelFactory):
         model_blueprint = copy(self._input_model_blueprint)
         for gal_type in self.gal_types:
             input_prof_model = model_blueprint[gal_type]['profile']
-#            if isinstance(input_prof_model, halo_prof_components.HaloProfileModel):
-#                prof_model = gal_prof_factory.IsotropicGalProf(
-#                    gal_type, input_prof_model)
-#                model_blueprint[gal_type]['profile'] = prof_model
+            if input_prof_model.__class__ != gal_prof_factory.IsotropicGalProf:
+                #print("%s gal_type is an instance of a HaloProfileModel" % gal_type)
+                prof_model = gal_prof_factory.IsotropicGalProf(
+                    gal_type=gal_type, halo_prof_model=input_prof_model.__class__)
+                model_blueprint[gal_type]['profile'] = prof_model
 
         if 'mock_factory' not in model_blueprint.keys():
             model_blueprint['mock_factory'] = mock_factories.HodMockFactory
