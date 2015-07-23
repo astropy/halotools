@@ -4,11 +4,11 @@ import numpy as np
 from .. import preloaded_models
 from .. import model_factories
 
-__all__ = ['test_Kravtsov04_composite']
+__all__ = ['test_Zheng07_composite']
 
-def test_Kravtsov04_composite():
+def test_Zheng07_composite():
 	""" Method to test the basic behavior of 
-	`~halotools.empirical_models.preloaded_models.Kravtsov04`, 
+	`~halotools.empirical_models.preloaded_models.Zheng07`, 
 	a specific pre-loaded model of 
 	`~halotools.empirical_models.model_factories.HodModelFactory`. 
 
@@ -18,7 +18,7 @@ def test_Kravtsov04_composite():
 
 		* Default behavior is recovered after calling the `~halotools.empirical_models.model_factories.HodModelFactory.restore_init_param_dict` method. 
 	"""
-	model = preloaded_models.Kravtsov04(threshold = -18)
+	model = preloaded_models.Zheng07(threshold = -18)
 
 	# Verify that changes param_dict properly propagate
 	testmass1 = 5.e11

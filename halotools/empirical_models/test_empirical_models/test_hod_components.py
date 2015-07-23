@@ -9,7 +9,7 @@ from .. import gal_prof_factory
 from astropy.table import Table
 from copy import copy
 
-__all__ = ['test_Zheng07Cens','test_Kravtsov04Sats']
+__all__ = ['test_Zheng07Cens','test_Zheng07Sats']
 
 
 def test_Zheng07Cens():
@@ -162,9 +162,9 @@ def test_Zheng07Cens():
 	assert updated_defocc_highmass == occ3_highmass
 	
 
-def test_Kravtsov04Sats():
+def test_Zheng07Sats():
 	""" Function to test 
-	`~halotools.empirical_models.Kravtsov04Sats`. 
+	`~halotools.empirical_models.Zheng07Sats`. 
 	Here's a brief summary of the tests performed: 
 
 		* The basic metadata of the model is correct, e.g., ``self.occupation_bound = 1`` 
@@ -218,9 +218,9 @@ def test_Kravtsov04Sats():
 		np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
 
 	def test_ncen_inheritance():
-		satmodel_nocens = hod_components.Kravtsov04Sats()
+		satmodel_nocens = hod_components.Zheng07Sats()
 		cenmodel = hod_components.Zheng07Cens()
-		satmodel_cens = hod_components.Kravtsov04Sats(central_occupation_model=cenmodel)
+		satmodel_cens = hod_components.Zheng07Sats(central_occupation_model=cenmodel)
 
 		Npts = 1e2 
 		masses = np.logspace(10, 15, Npts)
@@ -231,14 +231,14 @@ def test_Kravtsov04Sats():
 		assert np.all(mean_occ_satmodel_cens == mean_occ_satmodel_nocens*mean_occ_cens)
 
 	### First test the model with all default settings
-	default_model = hod_components.Kravtsov04Sats()
+	default_model = hod_components.Zheng07Sats()
 	test_attributes(default_model)
 	test_mean_occupation(default_model)
 	test_mc_occupation(default_model)
 
 	### Now test the various threshold settings
 	for threshold in np.arange(-22, -17.5, 0.5):
-		thresh_model = hod_components.Kravtsov04Sats(threshold = threshold,gal_type='sats')
+		thresh_model = hod_components.Zheng07Sats(threshold = threshold,gal_type='sats')
 		test_attributes(thresh_model,gal_type='sats')
 		test_mean_occupation(thresh_model)
 
@@ -251,7 +251,7 @@ def test_Kravtsov04Sats():
 	# Increase steepness of high-mass-end power law
 	model2_dict = copy(default_dict)
 	model2_dict['alpha'] *= 1.25
-	model2 = hod_components.Kravtsov04Sats()
+	model2 = hod_components.Zheng07Sats()
 	model2.param_dict = model2_dict
 
 	logmass = model2.param_dict['logM1'] + np.log10(5)
@@ -268,7 +268,7 @@ def test_Kravtsov04Sats():
 	###### Increase in M0 ######
 	model2_dict = copy(default_dict)
 	model2_dict['logM0'] += np.log10(2)
-	model2 = hod_components.Kravtsov04Sats()
+	model2 = hod_components.Zheng07Sats()
 	model2.param_dict = model2_dict
 
 	# At very low mass, both models should have zero satellites 
@@ -287,7 +287,7 @@ def test_Kravtsov04Sats():
 	###### Increase in M1 ######
 	model2_dict = copy(default_dict)
 	model2_dict['logM0'] += np.log10(2)
-	model2 = hod_components.Kravtsov04Sats()
+	model2 = hod_components.Zheng07Sats()
 	model2.param_dict = model2_dict
 	# At very low mass, both models should have zero satellites 
 	lowmass = 1e10
@@ -306,14 +306,14 @@ def test_Kravtsov04Sats():
 
 	######## Check scaling with central parameters
 	default_cens = hod_components.Zheng07Cens()
-	default_satmodel_with_cens = hod_components.Kravtsov04Sats(central_occupation_model = default_cens)
+	default_satmodel_with_cens = hod_components.Zheng07Sats(central_occupation_model = default_cens)
 
 	### logMmin
 	cen_model2_dict = copy(default_cens.param_dict)
 	cen_model2_dict['logMmin'] += np.log10(2.)
 	cen_model2 = hod_components.Zheng07Cens()
 	cen_model2.param_dict = cen_model2_dict
-	model2 = hod_components.Kravtsov04Sats(central_occupation_model = cen_model2)
+	model2 = hod_components.Zheng07Sats(central_occupation_model = cen_model2)
 
 	### Changing the central model should have a large effect at low mass
 	midmass = 10.**default_cens.param_dict['logMmin']

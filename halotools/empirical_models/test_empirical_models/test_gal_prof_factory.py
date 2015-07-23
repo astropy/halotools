@@ -7,7 +7,7 @@ from .. import gal_prof_factory as gpf
 from ..mock_factories import HodMockFactory
 
 from ...sim_manager.generate_random_sim import FakeSim
-from ..preloaded_models import Kravtsov04
+from ..preloaded_models import Zheng07
 
 from astropy import cosmology
 
@@ -34,7 +34,7 @@ def test_unbiased_trivial():
 	assert cen_prof.param_dict == {}
 
 	snapshot = FakeSim()
-	composite_model = Kravtsov04()
+	composite_model = Zheng07()
 	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
 	x, y, z = cen_prof.mc_pos(halo_table=mock.galaxy_table)
@@ -48,7 +48,7 @@ def test_unbiased_nfw():
 		halo_prof_model=hpc.NFWProfile, gal_type='satellites')
 
 	snapshot = FakeSim()
-	composite_model = Kravtsov04()
+	composite_model = Zheng07()
 	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
 	# Check that mc_radii gives reasonable results for FakeSim

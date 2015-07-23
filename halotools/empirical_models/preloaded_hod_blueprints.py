@@ -12,17 +12,17 @@ from . import halo_prof_components as hpc
 from . import gal_prof_components as gpc
 from . import mock_factories
 
-__all__ = ['Kravtsov04_blueprint']
+__all__ = ['Zheng07_blueprint']
 
 
-def Kravtsov04_blueprint(**kwargs):
+def Zheng07_blueprint(**kwargs):
 	""" Blueprint for the simplest pre-loaded HOD model. 
 	There are two populations, 
 	centrals and satellites, with occupation statistics, 
 	positions and velocities based on Kravtsov et al. (2004). 
 
 	Documentation of the test suite of this blueprint can be found at 
-	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04_blueprint`
+	`~halotools.empirical_models.test_empirical_models.test_Zheng07_blueprint`
 
 	Parameters 
 	----------
@@ -34,13 +34,13 @@ def Kravtsov04_blueprint(**kwargs):
 	model_blueprint : dict 
 		Dictionary containing instructions for how to build the model. 
 		When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
-		the factory returns the Kravtsov04 model object. 
+		the factory returns the Zheng07 model object. 
 
 	Examples 
 	--------
 	>>> from halotools.empirical_models import preloaded_hod_blueprints
-	>>> blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint()
-	>>> blueprint  = preloaded_hod_blueprints.Kravtsov04_blueprint(threshold = -19)
+	>>> blueprint = preloaded_hod_blueprints.Zheng07_blueprint()
+	>>> blueprint  = preloaded_hod_blueprints.Zheng07_blueprint(threshold = -19)
 	"""
 
 	if 'threshold' in kwargs.keys():
@@ -64,7 +64,7 @@ def Kravtsov04_blueprint(**kwargs):
 	sat_key = 'satellites'
 	sat_model_dict = {}
 	# Build the occupation model
-	dark_side_sat_model = hoc.Kravtsov04Sats(gal_type=sat_key, 
+	dark_side_sat_model = hoc.Zheng07Sats(gal_type=sat_key, 
 		threshold = threshold)
 	sat_model_dict['occupation'] = dark_side_sat_model
 	# Build the profile model
