@@ -57,11 +57,8 @@ def Zheng07_blueprint(**kwargs):
 	cen_model_dict['occupation'] = dark_side_cen_model
 	# Build the profile model
 	
-	#cen_profile = gpf.IsotropicGalProf(
-		#gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
-
-	cen_profile = hpc.TrivialProfile()
-
+	cen_profile = gpf.IsotropicGalProf(
+		gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
 
 	cen_model_dict['profile'] = cen_profile
 
