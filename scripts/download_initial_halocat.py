@@ -30,14 +30,29 @@ def main(flags):
         catman.download_processed_halo_table(simname = simname, 
             halo_finder = halo_finder, desired_redshift = redshift, 
             initial_download_script_msg = existing_fname_error_msg)
+        catman.download_ptcl_table(simname = simname, 
+            desired_redshift = redshift, dz_tol = 0.05)
+
     elif (len(flags) == 2) & (flags[1] == '-overwrite'):
         catman.download_processed_halo_table(simname = simname, 
             halo_finder = halo_finder, desired_redshift = redshift, 
             initial_download_script_msg = existing_fname_error_msg, 
             overwrite = True)
+        catman.download_ptcl_table(simname = simname, 
+            desired_redshift = redshift, dz_tol = 0.05, overwrite=True)
     else:
         raise HalotoolsError(command_line_arg_error_msg)
 
+    msg = ("\n\nYour Halotools cache directory now has two hdf5 files, \n"
+        "one storing a z = %.2f %s halo catalog for the %s simulation, \n"
+        "another storing a random downsampling of ~1e6 dark matter particles from the same snapshot.\n"
+        "\nHalotools can load these catalogs into memory with the following syntax:\n\n"
+        ">>> from halotools.sim_manager import HaloCatalog\n"
+        ">>> bolshoi_z0 = HaloCatalog()\n"
+        ">>> halos = bolshoi_z0.halo_table\n"
+        ">>> particles = bolshoi_z0.ptcl_table\n\n")
+
+    print(msg % (abs(redshift), halo_finder, simname))
 
 
 ###################################################################################################
