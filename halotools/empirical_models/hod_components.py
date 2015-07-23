@@ -718,21 +718,6 @@ class Leauthaud11Sats(OccupationComponent):
             If True, the first satellite moment will be multiplied by the 
             the first central moment. Default is True. 
 
-        scatter_model : object, optional keyword argument 
-            Class governing stochasticity of stellar mass. Default scatter is log-normal, 
-            implemented by the `~halotools.empirical_models.LogNormalScatterModel` class. 
-
-        scatter_abcissa : array_like, optional keyword argument 
-            Array of values giving the abcissa at which
-            the level of scatter will be specified by the input ordinates.
-            Default behavior will result in constant scatter at a level set in the 
-            `~halotools.empirical_models.model_defaults` module. 
-
-        scatter_ordinates : array_like, optional keyword argument 
-            Array of values defining the level of scatter at the input abcissa.
-            Default behavior will result in constant scatter at a level set in the 
-            `~halotools.empirical_models.model_defaults` module. 
-
         Examples 
         --------
         >>> sat_model = Leauthaud11Sats()
@@ -771,7 +756,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         Returns
         -------
-        mean_ncen : array
+        mean_nsat : array
             Mean number of central galaxies in the halo of the input mass. 
 
         Examples 
@@ -791,6 +776,8 @@ class Leauthaud11Sats(OccupationComponent):
         else:
             function_name = "Leauthaud11Sats.mean_occupation"
             raise HalotoolsModelInputError(function_name)
+
+        self._update_satellite_params()
 
         mean_nsat = (
             np.exp(-self._mcut/mass)*
@@ -825,7 +812,7 @@ class Leauthaud11Sats(OccupationComponent):
         self._update_satellite_params(**kwargs)
 
 
-    def _update_satellite_params(self, **kwargs):
+    def _update_satellite_params(self):
         """ Private method to update the model parameters. 
 
         """
