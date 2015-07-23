@@ -46,7 +46,7 @@ def test_Leauthaud11Sats():
 	model = Leauthaud11Sats()
 	nsat1 = model.mean_occupation(prim_haloprop = 5.e12)
 	mcocc = model.mc_occupation(prim_haloprop = np.ones(1e4)*5e12, seed=43)
-	assert 0.3790 < np.mean(mcocc) < 0.3792
+	assert 0.391 < np.mean(mcocc) < 0.392
 
 	model.param_dict['alphasat'] *= 1.1
 	nsat2 = model.mean_occupation(prim_haloprop = 5.e12)
@@ -69,7 +69,7 @@ def test_Leauthaud11Sats():
 	assert nsat6 < nsat5
 
 	model2a = Leauthaud11Sats(modulate_with_cenocc = False)
-	model2b = Leauthaud11Sats(modulate_with_cenocc = True)
+	model2b = Leauthaud11Sats(modulate_with_cenocc = True, gal_type_centrals='centrals')
 	nsat2a = model2a.mean_occupation(prim_haloprop = 5.e12)
 	nsat2b = model2b.mean_occupation(prim_haloprop = 5.e12)
 	assert model2b.central_occupation_model.mean_occupation(prim_haloprop = 5.e12) < 1
