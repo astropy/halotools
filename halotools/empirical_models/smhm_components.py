@@ -359,8 +359,7 @@ class Moster13SmHm(PrimGalpropModel):
         Parameters 
         ----------
         prim_haloprop_key : string, optional keyword argument 
-            String giving the column name of the primary halo property governing 
-            stellar mass. 
+            String giving the column name of the primary halo property governing stellar mass. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
         scatter_model : object, optional keyword argument 
