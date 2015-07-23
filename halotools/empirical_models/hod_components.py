@@ -435,7 +435,7 @@ class Zheng07Sats(OccupationComponent):
         gal_type='satellites', 
         threshold=model_defaults.default_luminosity_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        central_occupation_model = None, 
+        modulate_with_cenocc = False, 
         **kwargs):
         """
         Parameters 
@@ -454,13 +454,20 @@ class Zheng07Sats(OccupationComponent):
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        central_occupation_model : occupation model instance, optional
-            Must be an instance of a sub-class of `~halotools.empirical_models.OccupationComponent`. 
-            If a ``central_occupation_model`` is being used, 
+        modulate_with_cenocc : bool, optional keyword argument 
+            If True, the first satellite moment will be multiplied by the 
+            the first central moment. Default is False. 
+            If ``modulate_with_cenocc`` is True, 
             the mean occupation method of `Zheng07Sats` will 
-            be multiplied by the value of central_occupation_model at each mass, 
-            as in Zheng et al. 2007, so that 
+            be multiplied by the the first moment of `Zheng07Cens`, 
+            as in Zheng et al. 2007, so that:
+
             :math:`\\langle N_{\mathrm{sat}}\\rangle_{M}\\Rightarrow\\langle N_{\mathrm{sat}}\\rangle_{M}\\times\\langle N_{\mathrm{cen}}\\rangle_{M}`
+
+        gal_type_centrals : string, optional keyword argument
+            Name of the central galaxy population whose first moment 
+            modulates the `mean_occupation` method of `Zheng07Sats`. 
+            Only required if ``modulate_with_cenocc`` is True. 
 
         Examples 
         --------
@@ -483,12 +490,12 @@ class Zheng07Sats(OccupationComponent):
         A common convention in HOD modeling of satellite populations is for the first 
         occupation moment of the satellites to be multiplied by the first occupation 
         moment of the associated central population. 
-        The ``central_occupation_model`` keyword arguments allows you 
+        The ``modulate_with_cenocc`` keyword arguments allows you 
         to study the impact of this choice:
 
         >>> sat_model1 = Zheng07Sats(threshold=-18)
         >>> cen_model_instance = Zheng07Cens(threshold = sat_model1.threshold)
-        >>> sat_model2 = Zheng07Sats(threshold = sat_model1.threshold, central_occupation_model=cen_model_instance)
+        >>> sat_model2 = Zheng07Sats(threshold = sat_model1.threshold, modulate_with_cenocc=True, gal_type_centrals = 'cens')
 
         Now ``sat_model1`` and ``sat_model2`` are identical in every respect, 
         excepting only the following difference:
@@ -514,39 +521,19 @@ class Zheng07Sats(OccupationComponent):
 
         self.param_dict = self.get_published_parameters(self.threshold)
 
-
-        #gal_type='centrals', 
-        #threshold=model_defaults.default_luminosity_threshold,
-        #prim_haloprop_key=model_defaults.prim_haloprop_key,
-
-        self._check_consistent_central_behavior(central_occupation_model)
-        self.central_occupation_model = central_occupation_model
-        if self.central_occupation_model is not None:
+        self.modulate_with_cenocc = modulate_with_cenocc
+        if self.modulate_with_cenocc is True:
+            if 'gal_type_centrals' not in kwargs.keys():
+                raise KeyError("If ``modulate_with_cenocc`` is True, must also pass "
+                    "the gal_type_centrals keyword.")
+            gal_type_centrals = kwargs['gal_type_centrals']
+            self.central_occupation_model = Zheng07Cens(
+                prim_haloprop_key = prim_haloprop_key, 
+                threshold = threshold, gal_type = gal_type_centrals)
             self.ancillary_model_dependencies = ['central_occupation_model']
+            
 
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
-
-
-    def _check_consistent_central_behavior(self, central_occupation_model):
-        """ Method ensures that the input central_occupation_model is sensible.
-        """        
-        if central_occupation_model is not None:
-            # Test that we were given a sensible input central_occupation_model 
-            if not isinstance(central_occupation_model, OccupationComponent):
-                msg = ("When passing a central_occupation_model to " + 
-                    "the Zheng07Sats constructor, \n you must pass an instance of " + 
-                    "an OccupationComponent.")
-                if issubclass(central_occupation_model, OccupationComponent):
-                    msg = (msg + 
-                        "\n Instead, the Zheng07Sats received the actual class " + 
-                        central_occupation_model.__name__+", " + 
-                    "rather than an instance of that class. ")
-                raise SyntaxError(msg)
-
-            # Test if centrals and satellites thresholds are equal
-            if self.threshold != central_occupation_model.threshold:
-                warnings.warn("Satellite and Central luminosity tresholds do not match")
-            #
 
     def mean_occupation(self, **kwargs):
         """Expected number of satellite galaxies in a halo of mass logM.
@@ -626,7 +613,7 @@ class Zheng07Sats(OccupationComponent):
 
         # If a central occupation model was passed to the constructor, 
         # multiply mean_nsat by an overall factor of mean_ncen
-        if self.central_occupation_model is not None:
+        if self.modulate_with_cenocc is True:
             mean_ncen = self.central_occupation_model.mean_occupation(**kwargs)
             mean_nsat *= mean_ncen
 
@@ -695,7 +682,7 @@ class Leauthaud11Sats(OccupationComponent):
         gal_type = 'satellites', 
         threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        modulate_with_cenocc = True, 
+        modulate_with_cenocc = False, 
         **kwargs):
         """
         Parameters 
@@ -721,17 +708,33 @@ class Leauthaud11Sats(OccupationComponent):
 
         modulate_with_cenocc : bool, optional keyword argument 
             If True, the first satellite moment will be multiplied by the 
-            the first central moment. Default is True. 
+            the first central moment. Default is False. 
+
+        gal_type_centrals : string, keyword argument
+            Name of the central galaxy population whose first moment 
+            modulates the `mean_occupation` method of `Zheng07Sats`. 
+            Only required if ``modulate_with_cenocc`` is True. 
 
         Examples 
         --------
         >>> sat_model = Leauthaud11Sats()
         """
 
-        self.central_occupation_model = Leauthaud11Cens(
-            gal_type='centrals', threshold=threshold,
-            prim_haloprop_key = prim_haloprop_key, smhm_model = smhm_model, 
-            **kwargs)
+        if modulate_with_cenocc is True:
+            if 'gal_type_centrals' not in kwargs.keys():
+                raise KeyError("If ``modulate_with_cenocc`` is True, must also pass "
+                    "the gal_type_centrals keyword.")
+            gal_type_centrals = kwargs['gal_type_centrals']
+            self.central_occupation_model = Leauthaud11Cens(
+                gal_type=gal_type_centrals, threshold=threshold,
+                prim_haloprop_key = prim_haloprop_key, smhm_model = smhm_model, 
+                **kwargs)
+        else:
+            self.central_occupation_model = Leauthaud11Cens(
+                threshold=threshold, prim_haloprop_key = prim_haloprop_key, 
+                smhm_model = smhm_model, **kwargs)
+
+        self.ancillary_model_dependencies = ['central_occupation_model']
 
         super(Leauthaud11Sats, self).__init__(
             gal_type=gal_type, threshold=threshold, 
@@ -739,11 +742,10 @@ class Leauthaud11Sats(OccupationComponent):
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
-        self._initialize_param_dict(**kwargs)
+        self._initialize_param_dict()
 
         self.modulate_with_cenocc = modulate_with_cenocc
-        if self.modulate_with_cenocc is True:
-            self.ancillary_model_dependencies = ['central_occupation_model']
+
 
         self.publications = self.central_occupation_model.publications
 
@@ -794,7 +796,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         return mean_nsat
 
-    def _initialize_param_dict(self, **kwargs):
+    def _initialize_param_dict(self):
         """ Set the initial values of ``self.param_dict`` according to 
         the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the 
         lowest redshift bin. 
@@ -814,7 +816,7 @@ class Leauthaud11Sats(OccupationComponent):
         self.param_dict['betacut'] = -0.13
         self.param_dict['betasat'] = 0.859
 
-        self._update_satellite_params(**kwargs)
+        self._update_satellite_params()
 
 
     def _update_satellite_params(self):
