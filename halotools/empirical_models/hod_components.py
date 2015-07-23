@@ -514,6 +514,11 @@ class Zheng07Sats(OccupationComponent):
 
         self.param_dict = self.get_published_parameters(self.threshold)
 
+
+        #gal_type='centrals', 
+        #threshold=model_defaults.default_luminosity_threshold,
+        #prim_haloprop_key=model_defaults.prim_haloprop_key,
+
         self._check_consistent_central_behavior(central_occupation_model)
         self.central_occupation_model = central_occupation_model
         if self.central_occupation_model is not None:
