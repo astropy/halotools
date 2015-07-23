@@ -6,14 +6,14 @@ import sys
 from halotools.sim_manager import CatalogManager, sim_defaults
 from halotools.halotools_exceptions import HalotoolsError
 
-existing_fname_error_msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
+existing_fname_error_msg = ("\n\nThe following filename already exists in your cache directory: \n\n%s\n\n"
     "If you really want to overwrite the file, \n"
-    "simply execute this script again but using ``-overwrite`` as a command-line argument")
+    "simply execute this script again but using ``-overwrite`` as a command-line argument.\n\n")
 
-command_line_arg_error_msg = ("The only command-line argument recognized by the "
-    "download_initial_halocat script is ``-overwrite``.\n "
-    "This flag should be thrown in case your cache directory already contains the "
-    "default processed halo catalog, and you want to overwrite it with a new download.")
+command_line_arg_error_msg = ("\n\nThe only command-line argument recognized by the "
+    "download_initial_halocat script is ``-overwrite``.\n"
+    "The -overwrite flag should be thrown in case your cache directory already contains the "
+    "default processed halo catalog, and you want to overwrite it with a new download.\n\n")
 
 def main(flags):
     """ args is a python list. Element 0 is the name of the module. 
