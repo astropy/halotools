@@ -17,8 +17,6 @@ else:
 from .. import cache_config
 from ..supported_sims import HaloCatalog 
 
-APH_MACHINE = False
-
 @pytest.mark.skipif('not APH_MACHINE')
 def test_load_halo_catalogs():
 
@@ -30,7 +28,7 @@ def test_load_halo_catalogs():
         for a in alist:
             z = 1/a - 1
             halocat = HaloCatalog(simname = simname, redshift = z)
-            halos = halocat.halo_table
+            #halos = halocat.halo_table
             if simname not in ['bolshoi', 'multidark']:
                 particles = halocat.ptcl_table
             else:
