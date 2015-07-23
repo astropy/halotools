@@ -38,19 +38,34 @@ class UnsupportedSimError(HalotoolsCacheError):
 class CatalogTypeError(HalotoolsCacheError):
 	def __init__(self, catalog_type):
 
-		message = "Input catalog_type = ``"+catalog_type+"``\n Must be either 'raw_halos', 'halos', or 'particles'.\n"
+		message = "\nInput catalog_type = ``"+catalog_type+"``\n Must be either 'raw_halos', 'halos', or 'particles'.\n"
 		
 		super(CatalogTypeError, self).__init__(message)
 
 
 ########################################
 
-class ModelInputError(HalotoolsError):
+class HalotoolsModelInputError(HalotoolsError):
 	def __init__(self, function_name):
-		message = ("Must pass one of the following keyword arguments to %s:\n"
+		message = ("\nMust pass one of the following keyword arguments to %s:\n"
                 "``halo_table`` or  ``prim_haloprop``" % function_name)
-		super(HalotoolsCacheError, self).__init__(message)
+		super(HalotoolsModelInputError, self).__init__(message)
 
+class HalotoolsArgumentError(HalotoolsError):
+	def __init__(self, function_name, required_input_list):
+		"""
+		Parameters 
+		-----------
+		function_name : string 
+
+		required_input_list : list 
+			List of strings 
+		"""
+		message = "\nMust pass each of the following keyword arguments to " + function_name + ":\n"
+		for required_input in required_input_list:
+			message = message + required_input + ', '
+		message = message[:-2]
+		super(HalotoolsArgumentError, self).__init__(message)
 
 
 
