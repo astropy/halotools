@@ -8,7 +8,7 @@ from .. import hod_components
 from .. import gal_prof_factory
 from .. import halo_prof_components
 
-__all__ = ['test_Kravtsov04_blueprint']
+__all__ = ['test_Zheng07_blueprint']
 
 
 def get_gal_type_model(blueprint, gal_type):
@@ -18,9 +18,9 @@ def get_component_models(gal_type_blueprint,feature_key):
 	return gal_type_blueprint[feature_key]
 
 
-def test_Kravtsov04_blueprint():
+def test_Zheng07_blueprint():
 	""" Suite of tests to check the self-consistency of 
-	`~halotools.empirical_models.Kravtsov04_blueprint`
+	`~halotools.empirical_models.Zheng07_blueprint`
 	and its component models. 
 
 	Bullet-point overview of the tests peformed is as follows:
@@ -33,25 +33,25 @@ def test_Kravtsov04_blueprint():
 	
 	* Satellite profiles are NFW, central profiles are trival
 
-	Since the Kravtsov04 composite model derives all its behavior from 
+	Since the Zheng07 composite model derives all its behavior from 
 	`~halotools.empirical_models.hod_components.Zheng07Cens` and 
-	`~halotools.empirical_models.hod_components.Kravtsov04Sats`, 
+	`~halotools.empirical_models.hod_components.Zheng07Sats`, 
 	all further testing is relegated to 
 	`~halotools.empirical_models.test_empirical_models.test_Zheng07Cens` and 
-	`~halotools.empirical_models.test_empirical_models.test_Kravtsov04Sats`. 
+	`~halotools.empirical_models.test_empirical_models.test_Zheng07Sats`. 
 
 	Examples 
 	--------
 	>>> from halotools.empirical_models import preloaded_hod_blueprints
-	>>> blueprint  = preloaded_hod_blueprints.Kravtsov04_blueprint(threshold = -21)
+	>>> blueprint  = preloaded_hod_blueprints.Zheng07_blueprint(threshold = -21)
 
 	"""
-	default_blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint()
+	default_blueprint = preloaded_hod_blueprints.Zheng07_blueprint()
 	assert {'satellites','centrals'}.issubset(set(default_blueprint.keys()))
 
 	# Check thresholds are being self-consistently set
 	for threshold in np.arange(-22, -17.5, 0.5):
-		temp_blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint(threshold=threshold)
+		temp_blueprint = preloaded_hod_blueprints.Zheng07_blueprint(threshold=threshold)
 		assert (
 			temp_blueprint['satellites']['occupation'].threshold ==
 			temp_blueprint['centrals']['occupation'].threshold 

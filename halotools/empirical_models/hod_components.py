@@ -5,7 +5,7 @@ HOD-style models of the galaxy-halo connection.
 
 """
 
-__all__ = (['OccupationComponent','Zheng07Cens','Kravtsov04Sats', 
+__all__ = (['OccupationComponent','Zheng07Cens','Zheng07Sats', 
     'Leauthaud11Cens', 'Leauthaud11Sats']
     )
 
@@ -430,7 +430,7 @@ class Leauthaud11Cens(OccupationComponent):
         return mean_ncen        
 
 
-class Kravtsov04Sats(OccupationComponent):
+class Zheng07Sats(OccupationComponent):
     """ Power law model for the occupation statistics of satellite galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519.
 
@@ -464,24 +464,24 @@ class Kravtsov04Sats(OccupationComponent):
         central_occupation_model : occupation model instance, optional
             Must be an instance of a sub-class of `~halotools.empirical_models.OccupationComponent`. 
             If a ``central_occupation_model`` is being used, 
-            the mean occupation method of `Kravtsov04Sats` will 
+            the mean occupation method of `Zheng07Sats` will 
             be multiplied by the value of central_occupation_model at each mass, 
             as in Zheng et al. 2007, so that 
             :math:`\\langle N_{\mathrm{sat}}\\rangle_{M}\\Rightarrow\\langle N_{\mathrm{sat}}\\rangle_{M}\\times\\langle N_{\mathrm{cen}}\\rangle_{M}`
 
         Examples 
         --------
-        >>> sat_model = Kravtsov04Sats()
-        >>> sat_model = Kravtsov04Sats(gal_type='sats')
-        >>> sat_model = Kravtsov04Sats(threshold = -21)
+        >>> sat_model = Zheng07Sats()
+        >>> sat_model = Zheng07Sats(gal_type='sats')
+        >>> sat_model = Zheng07Sats(threshold = -21)
 
         The ``param_dict`` attribute can be used to build an alternate 
         model from an existing instance. This feature has a variety of uses. For example, 
         suppose you wish to study how the choice of halo mass definition impacts HOD predictions:
 
-        >>> sat_model1 = Kravtsov04Sats(threshold = -19.5, prim_haloprop_key='m200b')
+        >>> sat_model1 = Zheng07Sats(threshold = -19.5, prim_haloprop_key='m200b')
         >>> sat_model1.param_dict['alpha_satellites'] = 1.05
-        >>> sat_model2 = Kravtsov04Sats(threshold = -19.5, prim_haloprop_key='m500c')
+        >>> sat_model2 = Zheng07Sats(threshold = -19.5, prim_haloprop_key='m500c')
         >>> sat_model2.param_dict = sat_model1.param_dict 
 
         After executing the above four lines of code, ``sat_model1`` and ``sat_model2`` are 
@@ -493,9 +493,9 @@ class Kravtsov04Sats(OccupationComponent):
         The ``central_occupation_model`` keyword arguments allows you 
         to study the impact of this choice:
 
-        >>> sat_model1 = Kravtsov04Sats(threshold=-18)
+        >>> sat_model1 = Zheng07Sats(threshold=-18)
         >>> cen_model_instance = Zheng07Cens(threshold = sat_model1.threshold)
-        >>> sat_model2 = Kravtsov04Sats(threshold = sat_model1.threshold, central_occupation_model=cen_model_instance)
+        >>> sat_model2 = Zheng07Sats(threshold = sat_model1.threshold, central_occupation_model=cen_model_instance)
 
         Now ``sat_model1`` and ``sat_model2`` are identical in every respect, 
         excepting only the following difference:
@@ -506,14 +506,14 @@ class Kravtsov04Sats(OccupationComponent):
         Notes 
         -----
         The test suite for this model is documented at 
-        `~halotools.empirical_models.test_empirical_models.test_Kravtsov04Sats`
+        `~halotools.empirical_models.test_empirical_models.test_Zheng07Sats`
 
         """
         occupation_bound = float("inf")
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
-        super(Kravtsov04Sats, self).__init__(
+        super(Zheng07Sats, self).__init__(
             gal_type=gal_type, threshold=threshold, 
             occupation_bound=occupation_bound, 
             prim_haloprop_key = prim_haloprop_key, 
@@ -536,11 +536,11 @@ class Kravtsov04Sats(OccupationComponent):
             # Test that we were given a sensible input central_occupation_model 
             if not isinstance(central_occupation_model, OccupationComponent):
                 msg = ("When passing a central_occupation_model to " + 
-                    "the Kravtsov04Sats constructor, \n you must pass an instance of " + 
+                    "the Zheng07Sats constructor, \n you must pass an instance of " + 
                     "an OccupationComponent.")
                 if issubclass(central_occupation_model, OccupationComponent):
                     msg = (msg + 
-                        "\n Instead, the Kravtsov04Sats received the actual class " + 
+                        "\n Instead, the Zheng07Sats received the actual class " + 
                         central_occupation_model.__name__+", " + 
                     "rather than an instance of that class. ")
                 raise SyntaxError(msg)
@@ -585,7 +585,7 @@ class Kravtsov04Sats(OccupationComponent):
         two different options for arguments. The first option is to directly 
         pass the array of the primary halo property: 
 
-        >>> sat_model = Kravtsov04Sats()
+        >>> sat_model = Zheng07Sats()
         >>> testmass = np.logspace(10, 15, num=50)
         >>> mean_nsat = sat_model.mean_occupation(prim_haloprop =testmass)
 
@@ -605,7 +605,7 @@ class Kravtsov04Sats(OccupationComponent):
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
-            function_name = "Kravtsov04Sats.mean_occupation"
+            function_name = "Zheng07Sats.mean_occupation"
             raise HalotoolsModelInputError(function_name)
         mass = np.array(mass)
         if np.shape(mass) == ():
@@ -657,7 +657,7 @@ class Kravtsov04Sats(OccupationComponent):
 
         Examples 
         --------
-        >>> sat_model = Kravtsov04Sats()
+        >>> sat_model = Zheng07Sats()
         >>> sat_model.param_dict = sat_model.get_published_parameters(sat_model.threshold)
         """
 
@@ -686,7 +686,7 @@ class Kravtsov04Sats(OccupationComponent):
             param_dict = get_zheng07_params(threshold)
             return param_dict
         else:
-            raise KeyError("For Kravtsov04Sats, only supported best-fit models are currently Zheng et al. 2007")
+            raise KeyError("For Zheng07Sats, only supported best-fit models are currently Zheng et al. 2007")
 
 
 class Leauthaud11Sats(OccupationComponent):
