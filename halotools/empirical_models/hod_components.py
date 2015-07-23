@@ -24,7 +24,7 @@ from . import smhm_components
 
 from ..utils.array_utils import array_like_length as custom_len
 from ..  import sim_manager
-from ..halotools_exceptions import ModelInputError
+from ..halotools_exceptions import HalotoolsModelInputError
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -267,8 +267,8 @@ class Zheng07Cens(OccupationComponent):
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
-            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halo_table`` or  ``prim_haloprop``")
+            function_name = "Zheng07Cens.mean_occupation"
+            raise HalotoolsModelInputError(function_name)
 
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
@@ -605,8 +605,8 @@ class Kravtsov04Sats(OccupationComponent):
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
-            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halo_table`` or ``prim_haloprop``")
+            function_name = "Kravtsov04Sats.mean_occupation"
+            raise HalotoolsModelInputError(function_name)
         mass = np.array(mass)
         if np.shape(mass) == ():
             mass = np.array([mass])
@@ -796,8 +796,8 @@ class Leauthaud11Sats(OccupationComponent):
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
-            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halo_table`` or ``prim_haloprop``")
+            function_name = "Leauthaud11Sats.mean_occupation"
+            raise HalotoolsModelInputError(function_name)
 
         mean_nsat = (
             np.exp(-self._mcut/mass)*
