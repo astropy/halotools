@@ -55,11 +55,11 @@ class OccupationComponent(model_helpers.GalPropModel):
 
         prim_haloprop_key : string, keyword argument 
             String giving the column name of the primary halo property governing 
-            the occupation statistics of gal_type galaxies. 
+            the occupation statistics of gal_type galaxies, e.g., ``halo_mvir``. 
 
         sec_haloprop_key : string, optional keyword argument
             String giving the column name of the secondary halo property governing 
-            the occupation statistics of gal_type galaxies. 
+            the occupation statistics of gal_type galaxies, e.g., ``halo_nfw_conc``.
             Only pertains to galaxy populations with assembly-biased occupations. 
             Default is None. 
 
@@ -192,7 +192,7 @@ class Zheng07Cens(OccupationComponent):
         --------
         >>> cen_model = Zheng07Cens()
         >>> cen_model = Zheng07Cens(gal_type='cens', threshold=-19.5)
-        >>> cen_model = Zheng07Cens(prim_haloprop_key='m200b')
+        >>> cen_model = Zheng07Cens(prim_haloprop_key='halo_m200b')
 
         Notes 
         -----
@@ -240,7 +240,7 @@ class Zheng07Cens(OccupationComponent):
         pass the array of the primary halo property: 
 
         >>> testmass = np.logspace(10, 15, num=50)
-        >>> mean_ncen = cen_model.mean_occupation(prim_haloprop =testmass)
+        >>> mean_ncen = cen_model.mean_occupation(prim_haloprop = testmass)
 
         The second option is to pass `mean_occupation` a full halo catalog. 
         In this case, the array storing the primary halo property will be selected 
@@ -368,20 +368,12 @@ class Leauthaud11Cens(OccupationComponent):
         redshift : float, optional keyword argument 
             Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
-        scatter_model : object, optional keyword argument 
-            Class governing stochasticity of stellar mass. Default scatter is log-normal, 
-            implemented by the `~halotools.empirical_models.LogNormalScatterModel` class. 
+        Examples 
+        --------
+        >>> cen_model = Leauthaud11Cens()
+        >>> cen_model = Leauthaud11Cens(threshold = 11.25)
+        >>> cen_model = Leauthaud11Cens(prim_haloprop_key = 'halo_m200b')
 
-        scatter_abcissa : array_like, optional keyword argument 
-            Array of values giving the abcissa at which
-            the level of scatter will be specified by the input ordinates.
-            Default behavior will result in constant scatter at a level set in the 
-            `~halotools.empirical_models.model_defaults` module. 
-
-        scatter_ordinates : array_like, optional keyword argument 
-            Array of values defining the level of scatter at the input abcissa.
-            Default behavior will result in constant scatter at a level set in the 
-            `~halotools.empirical_models.model_defaults` module. 
         """
         occupation_bound = 1.0
 
@@ -394,8 +386,7 @@ class Leauthaud11Cens(OccupationComponent):
             **kwargs)
 
         self.smhm_model = smhm_model(
-            gal_type=gal_type, prim_haloprop_key = prim_haloprop_key, 
-            **kwargs)
+            gal_type=gal_type, prim_haloprop_key = prim_haloprop_key, **kwargs)
         self.param_dict = self.smhm_model.param_dict
 
         self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
@@ -406,11 +397,13 @@ class Leauthaud11Cens(OccupationComponent):
 
         Parameters
         ----------        
-        prim_haloprop : array, optional keyword argument
-            array of masses of halo_table in the catalog
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
         halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns
         -------
