@@ -56,6 +56,12 @@ def Zheng07(**kwargs):
     blueprint = preloaded_hod_blueprints.Zheng07_blueprint(**kwargs)
     return model_factories.HodModelFactory(blueprint, **kwargs)
 
+def Leauthaud11(**kwargs):
+    """ 
+    """
+    blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
+    return model_factories.HodModelFactory(blueprint, **kwargs)
+
 def SmHmBinarySFR(**kwargs):
     """ Blueprint for a very simple model assigning stellar mass and 
     quiescent/active designation to a subhalo catalog. 
