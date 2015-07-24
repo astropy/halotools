@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
 import numpy as np 
+from copy import copy 
+
 from .. import preloaded_models
 from .. import model_factories
 from .. import hod_components
-from copy import copy 
+
+from ...sim_manager import FakeSim
 
 __all__ = ['test_Zheng07_composite']
 
@@ -45,9 +48,8 @@ def test_Zheng07_composite():
 	assert satocc_restored == satocc_orig
 
 	#######################################################
-	########  Verify that changes to the central occupations 
-	######## propagate to the satellites, when applicable
-	#######################################################
+	fakesim = FakeSim()
+	model.populate_mock(snapshot = fakesim)
 
 
 def test_alt_Zheng07_composites():
