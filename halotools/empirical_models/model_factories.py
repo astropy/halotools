@@ -192,7 +192,7 @@ class SubhaloModelFactory(ModelFactory):
 
             # Also update the param dict of ancillary models, if applicable
             if hasattr(component_model, 'ancillary_model_dependencies'):
-                for model_name in self.ancillary_model_dependencies:
+                for model_name in component_model.ancillary_model_dependencies:
 
                     dependent_galprop_key = getattr(component_model, model_name).galprop_key
                     for key in getattr(component_model, model_name).param_dict.keys():
@@ -528,7 +528,7 @@ class HodModelFactory(ModelFactory):
 
             # Also update the param dict of ancillary models, if applicable
             if hasattr(component_model, 'ancillary_model_dependencies'):
-                for model_name in self.ancillary_model_dependencies:
+                for model_name in component_model.ancillary_model_dependencies:
 
                     dependent_gal_type = getattr(component_model, model_name).gal_type
                     for key in getattr(component_model, model_name).param_dict.keys():

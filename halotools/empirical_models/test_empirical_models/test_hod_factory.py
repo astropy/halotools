@@ -3,6 +3,8 @@
 import numpy as np 
 from .. import preloaded_models
 from .. import model_factories
+from .. import hod_components
+from copy import copy 
 
 __all__ = ['test_Zheng07_composite']
 
@@ -46,6 +48,42 @@ def test_Zheng07_composite():
 	########  Verify that changes to the central occupations 
 	######## propagate to the satellites, when applicable
 	#######################################################
+
+
+def test_alt_Zheng07_composites():
+
+	# First build two models that are identical except for the satellite occupations
+	default_model = preloaded_models.Zheng07()
+	default_model_blueprint = default_model._input_model_blueprint
+	default_satocc_component = default_model_blueprint['satellites']['occupation']
+	assert not hasattr(default_satocc_component, 'ancillary_model_dependencies')
+	cenmod_satocc_compoent = hod_components.Zheng07Sats(
+		threshold = default_satocc_component.threshold, modulate_with_cenocc = True, 
+		gal_type_centrals = 'centrals')
+	assert hasattr(cenmod_satocc_compoent, 'ancillary_model_dependencies')
+	cenmod_model_blueprint = copy(default_model_blueprint)
+	cenmod_model_blueprint['satellites']['occupation'] = cenmod_satocc_compoent
+	cenmod_model = model_factories.HodModelFactory(cenmod_model_blueprint)
+
+	# Now we test whether changes to the param_dict keys of the composite model 
+	# that pertain to the centrals properly propagate through to the behavior 
+	# of the satellites, only for cases where satellite occupations are modulated 
+	# by central occupations 
+	assert set(cenmod_model.param_dict) == set(default_model.param_dict)
+
+	nsat1 = default_model.mean_occupation_satellites(prim_haloprop = 2.e12)
+	nsat2 = cenmod_model.mean_occupation_satellites(prim_haloprop = 2.e12)
+	assert nsat2 < nsat1
+
+	cenmod_model.param_dict['logMmin_centrals'] *= 1.1
+	nsat3 = cenmod_model.mean_occupation_satellites(prim_haloprop = 2.e12)
+	assert nsat3 < nsat2
+
+	nsat3 = default_model.mean_occupation_satellites(prim_haloprop = 2.e12)
+	default_model.param_dict['logMmin_centrals'] *= 1.1
+	nsat4 = default_model.mean_occupation_satellites(prim_haloprop = 2.e12)
+	assert nsat3 == nsat4
+
 
 
 
