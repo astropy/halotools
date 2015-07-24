@@ -79,25 +79,20 @@ def Zheng07_blueprint(threshold = model_defaults.default_luminosity_threshold, *
 
 
 def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_threshold, **kwargs):
-	""" Blueprint for the simplest pre-loaded HOD model. 
-	There are two populations, 
-	centrals and satellites, with occupation statistics, 
-	positions and velocities based on Kravtsov et al. (2004). 
-
-	Documentation of the test suite of this blueprint can be found at 
-	`~halotools.empirical_models.test_empirical_models.test_Zheng07_blueprint`
+	""" Blueprint for a Leauthaud11-style HOD model. 
 
 	Parameters 
 	----------
 	threshold : float, optional 
-		Luminosity threshold of the galaxy sample being modeled. 
+		Stellar mass threshold of the galaxy sample being modeled, 
+		in ``logarithmic units``. 
 
 	Returns 
 	-------
 	model_blueprint : dict 
 		Dictionary containing instructions for how to build the model. 
 		When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
-		the factory returns the Zheng07 model object. 
+		the factory returns the Leauthaud11 model object. 
 
 	Examples 
 	--------
