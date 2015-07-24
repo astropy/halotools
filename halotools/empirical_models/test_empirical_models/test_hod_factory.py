@@ -92,16 +92,7 @@ def test_alt_Zheng07_composites():
 
 
 def test_Leauthaud11_composite():
-	""" Method to test the basic behavior of 
-	`~halotools.empirical_models.preloaded_models.Zheng07`, 
-	a specific pre-loaded model of 
-	`~halotools.empirical_models.model_factories.HodModelFactory`. 
-
-	The suite includes the following tests:
-
-		* Changes to ``self.param_dict`` properly propagate through to occupation component models. 
-
-		* Default behavior is recovered after calling the `~halotools.empirical_models.model_factories.HodModelFactory.restore_init_param_dict` method. 
+	"""
 	"""
 	model = preloaded_models.Leauthaud11(threshold = 10.5)
 
