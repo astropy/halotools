@@ -223,7 +223,7 @@ def Campbell15(**kwargs):
     load a snapshot into memory and call the built-in ``populate_mock`` method. 
     For illustration purposes, we'll use a small, fake simulation, though you 
     can populate a real simulation by instead calling the 
-    `~halotools.sim_manager.ProcessedSnapshot` class. 
+    `~halotools.sim_manager.HaloCatalog` class. 
 
     >>> fake_snapshot = sim_manager.FakeSim()
     >>> model.populate_mock(snapshot = fake_snapshot)
