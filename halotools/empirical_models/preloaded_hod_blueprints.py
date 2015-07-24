@@ -15,7 +15,7 @@ from . import mock_factories
 __all__ = ['Zheng07_blueprint']
 
 
-def Zheng07_blueprint(**kwargs):
+def Zheng07_blueprint(threshold = model_defaults.default_luminosity_threshold, **kwargs):
 	""" Blueprint for the simplest pre-loaded HOD model. 
 	There are two populations, 
 	centrals and satellites, with occupation statistics, 
@@ -41,12 +41,7 @@ def Zheng07_blueprint(**kwargs):
 	>>> from halotools.empirical_models import preloaded_hod_blueprints
 	>>> blueprint = preloaded_hod_blueprints.Zheng07_blueprint()
 	>>> blueprint  = preloaded_hod_blueprints.Zheng07_blueprint(threshold = -19)
-	"""
-
-	if 'threshold' in kwargs.keys():
-		threshold = kwargs['threshold']
-	else:
-		threshold = model_defaults.default_luminosity_threshold
+	"""		
 
 	### Build model for centrals
 	cen_key = 'centrals'
