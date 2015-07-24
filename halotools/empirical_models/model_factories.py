@@ -20,7 +20,7 @@ from . import preloaded_hod_blueprints
 from . import gal_prof_factory
 from . import halo_prof_components
 
-from ..sim_manager.supported_sims import HaloCatalog as ProcessedSnapshot
+from ..sim_manager.supported_sims import HaloCatalog
 
 from ..sim_manager.generate_random_sim import FakeSim
 from ..utils.array_utils import array_like_length as custom_len
@@ -66,7 +66,7 @@ class ModelFactory(object):
         Parameters 
         ----------
         snapshot : object, optional keyword argument
-            Class instance of `~halotools.sim_manager.ProcessedSnapshot`. 
+            Class instance of `~halotools.sim_manager.HaloCatalog`. 
             This object contains the halo catalog and its metadata.  
 
         """
@@ -81,7 +81,7 @@ class ModelFactory(object):
                 # will pass multiple snapshot arguments
                 del kwargs['snapshot']
             else:
-                snapshot = ProcessedSnapshot(**kwargs)
+                snapshot = HaloCatalog(**kwargs)
 
             mock_factory = self.model_blueprint['mock_factory']
             mock = mock_factory(snapshot=snapshot, model=self, **kwargs)
