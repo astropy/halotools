@@ -86,6 +86,10 @@ def test_alt_Zheng07_composites():
 	nsat4 = default_model.mean_occupation_satellites(prim_haloprop = 2.e12)
 	assert nsat3 == nsat4
 
+	fakesim = FakeSim()
+	cenmod_model.populate_mock(snapshot = fakesim)
+	default_model.populate_mock(snapshot = fakesim)
+
 
 def test_Leauthaud11_composite():
 	""" Method to test the basic behavior of 
@@ -116,6 +120,10 @@ def test_Leauthaud11_composite():
 	nsat3 = model.mean_occupation_satellites(prim_haloprop=testmass1)
 	assert ncen3 == ncen2
 	assert nsat3 == nsat2
+
+	fakesim = FakeSim()
+	model.populate_mock(snapshot = fakesim)
+
 
 	"""
 	orig_logMmin_centrals = model.param_dict['logMmin_centrals']
