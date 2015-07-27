@@ -10,9 +10,9 @@ from . import preloaded_hod_blueprints
 
 from .. import sim_manager
 
-__all__ = ['Kravtsov04', 'SmHmBinarySFR', 'Campbell15']
+__all__ = ['Zheng07', 'SmHmBinarySFR', 'Campbell15']
 
-def Kravtsov04(**kwargs):
+def Zheng07(**kwargs):
     """ Simple HOD-style model based on Kravtsov et al. (2004). 
 
     There are two populations, centrals and satellites. 
@@ -24,11 +24,11 @@ def Kravtsov04(**kwargs):
     Under the hood, this model is built from a set of component models whose 
     behavior is coded up elsewhere. The behavior of the central occupations 
     derives from the `~halotools.empirical_models.hod_components.Zheng07Cens` class, while for 
-    satellites the relevant class is `~halotools.empirical_models.hod_components.Kravtsov04Sats`. 
+    satellites the relevant class is `~halotools.empirical_models.hod_components.Zheng07Sats`. 
 
     This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
     which followed the instructions contained in 
-    `~halotools.empirical_models.Kravtsov04_blueprint`. 
+    `~halotools.empirical_models.Zheng07_blueprint`. 
 
     Parameters 
     ----------
@@ -42,8 +42,8 @@ def Kravtsov04(**kwargs):
 
     Examples 
     --------
-    >>> model = Kravtsov04()
-    >>> model = Kravtsov04(threshold = -20.5)
+    >>> model = Zheng07()
+    >>> model = Zheng07(threshold = -20.5)
 
     To use our model to populate a simulation with mock galaxies, we only need to 
     load a snapshot into memory and call the built-in ``populate_mock`` method. 
@@ -53,7 +53,13 @@ def Kravtsov04(**kwargs):
     >>> model.populate_mock(snapshot = fake_snapshot)
 
     """
-    blueprint = preloaded_hod_blueprints.Kravtsov04_blueprint(**kwargs)
+    blueprint = preloaded_hod_blueprints.Zheng07_blueprint(**kwargs)
+    return model_factories.HodModelFactory(blueprint, **kwargs)
+
+def Leauthaud11(**kwargs):
+    """ 
+    """
+    blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
     return model_factories.HodModelFactory(blueprint, **kwargs)
 
 def SmHmBinarySFR(**kwargs):
@@ -217,7 +223,7 @@ def Campbell15(**kwargs):
     load a snapshot into memory and call the built-in ``populate_mock`` method. 
     For illustration purposes, we'll use a small, fake simulation, though you 
     can populate a real simulation by instead calling the 
-    `~halotools.sim_manager.ProcessedSnapshot` class. 
+    `~halotools.sim_manager.HaloCatalog` class. 
 
     >>> fake_snapshot = sim_manager.FakeSim()
     >>> model.populate_mock(snapshot = fake_snapshot)
@@ -225,7 +231,7 @@ def Campbell15(**kwargs):
     We can easily build alternative versions of models and mocks by calling the 
     `Campbell15` function with different arguments:
 
-    >>> model_with_scatter = Campbell15(correlation_strength = 0.8, sec_haloprop_key = 'zhalf')
+    >>> model_with_scatter = Campbell15(correlation_strength = 0.8, sec_haloprop_key = 'halo_zhalf')
     >>> model_with_scatter.populate_mock(snapshot = fake_snapshot)
 
 

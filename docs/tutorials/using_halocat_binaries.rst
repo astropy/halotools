@@ -21,7 +21,7 @@ snapshot into memory with a single line of code:
 .. code:: python
 
     from halotools import sim_manager
-    default_snapshot = sim_manager.ProcessedSnapshot()
+    default_snapshot = sim_manager.HaloCatalog()
 
 
 .. parsed-literal::
@@ -31,19 +31,19 @@ snapshot into memory with a single line of code:
     
 
 
-The `~halotools.sim_manager.ProcessedSnapshot` is the primary
-class you will use when working with halo catalogs. When you instantiate
-this class, as in the second line of code above, Halotools first
-searches for the relevant halo catalog in your cache directory. Since
-you called `~halotools.sim_manager.ProcessedSnapshot` with no
-arguments, the default snapshot is chosen.
+The `~halotools.sim_manager.HaloCatalog` is the primary class you
+will use when working with halo catalogs. When you instantiate this
+class, as in the second line of code above, Halotools first searches for
+the relevant halo catalog in your cache directory. Since you called
+`~halotools.sim_manager.HaloCatalog` with no arguments, the
+default snapshot is chosen.
 
 The halo catalog is attached to the snapshot object in the form of the
-``halos`` attribute:
+``halo_table`` attribute:
 
 .. code:: python
 
-    print(default_snapshot.halos[0:4])
+    print(default_snapshot.halo_table[0:4])
 
 
 .. parsed-literal::
@@ -56,7 +56,7 @@ The halo catalog is attached to the snapshot object in the form of the
     1.0003 3058441456        0.0 ...     9.709e+13        679.37     679.37
 
 
-The data structure behind the scenes of the ``halos`` attribute of
+The data structure behind the scenes of the ``halo_table`` attribute of
 ``default_snapshot`` is an Astropy Table. We'll give a few simple
 examples illustrating how to manipulate Astropy Tables below, but for
 more detailed information about this data structure, see
@@ -70,6 +70,7 @@ metadata bound to it. Here are a few examples:
     print("Simulation name = %s " % default_snapshot.simname)
     print("Halo-finder = %s " % default_snapshot.halo_finder)
     print("Snapshot redshift = %.1f " % default_snapshot.redshift)
+    print("Description of applied cuts = \n%s " % default_snapshot.cuts_description)
 
 
 .. parsed-literal::
@@ -79,33 +80,23 @@ metadata bound to it. Here are a few examples:
     Snapshot redshift = -0.0 
 
 
-There is also metadata describing details of how the catalog was
-produced:
+This metadata is also bound to the hdf5 files themselves, so that both
+the `~halotools.sim_manager.HaloCatalog` and the binary file
+itself are self-expressive regarding exactly how they were generated.
+
+The default snapshot also comes with a randomly selected downsampling of
+~1e6 dark matter particles, which you can access via the ``ptcl_table``
+attribute:
 
 .. code:: python
 
-    print("Source of original data = %s " % default_snapshot.original_data_source)
-    print("Time of original reduction = %s " % default_snapshot.time_of_original_reduction)
-    print("Description of applied cuts = \n%s " % default_snapshot.cuts_description)
+    print(default_snapshot.ptcl_table[0:4])
 
-
-.. parsed-literal::
-
-    Source of original data = http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/ 
-    Time of original reduction = 2015-05-08 17:49:14 
-    Description of applied cuts = 
-    The only cut on the original catalog made by  the default_halocat_cut method of RockstarReader is to throw out all (sub)halos with Mpeak < 300 particles 
-
-
-This metadata is also bound to the hdf5 files themselves, so that both
-the `~halotools.sim_manager.ProcessedSnapshot` and the binary file
-itself are self-expressive regarding exactly how they were generated.
-
-Downloading other pre-processed snapshots
-=========================================
+Downloading other halo catalogs
+===============================
 
 Up until now, you have been working with the default snapshot downloaded
-by the startup script ``download_initial_halocat``. However, the
+by the startup script ``download_initial_halocat.py``. However, the
 Halotools team also provides other pre-processed snapshots to choose
 from. To see which ones, you need to use the Catalog Manager:
 
@@ -113,40 +104,13 @@ from. To see which ones, you need to use the Catalog Manager:
 
     catman = sim_manager.CatalogManager()
 
-First, let's take a look at which combinations and halo-finders are
-supported by the package:
+To see which snapshots have been pre-processed for a given simulation:
 
 .. code:: python
 
-    halocat_list = catman.available_halocats
-    for simname, halo_finder in halocat_list:
-        print(simname, halo_finder)
-        
-
-.. parsed-literal::
-
-    ('bolshoi', 'rockstar')
-    ('bolshoipl', 'rockstar')
-    ('bolshoi', 'bdm')
-    ('multidark', 'rockstar')
-    ('consuelo', 'rockstar')
-
-
-Each simulation/halo-finder combination is actually composed of a
-collection of many, many publicly available snapshots. To see which
-snapshots have been pre-processed, we'll use the
-`~halotools.sim_manager.CatalogManager.available_redshifts` method
-of the `~halotools.sim_manager.CatalogManager`:
-
-.. code:: python
-
-    location = 'web'
-    catalog_type = 'halos'
-    simname = 'bolshoi'
-    halo_finder = 'rockstar'
-    redshift_list = catman.available_redshifts(location, catalog_type, simname, halo_finder)
-    for z in redshift_list:
-        print("z = %.2f " % z)
+    catlist = catman.processed_halo_tables_available_for_download(simname='bolshoi', halo_finder='rockstar')    
+    for fname in catlist:
+        print fname
         
 
 .. parsed-literal::
@@ -157,28 +121,18 @@ of the `~halotools.sim_manager.CatalogManager`:
     z = -0.00 
 
 
+Halotools keeps the same filenames for each processed catalog to
+maintain consistency with the original data sources; the convention is
+that the scale factor of the snapshot is part of the ``hlist_``
+filename.
+
 So for this combination of simulation/halo-finder, we have four options
 to choose from for our pre-processed snapshot. To download the z=2
 snapshot:
 
 .. code:: python
 
-    desired_redshift = 2.03
-    catman.check_for_existing_halocat('cache', 'halos', simname, halo_finder, 
-                                      redshift=desired_redshift)
-
-
-
-
-.. parsed-literal::
-
-    u'/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5'
-
-
-
-.. code:: python
-
-    catman.download_preprocessed_halo_catalog(simname, halo_finder, desired_redshift)
+    catman.download_processed_halo_table(simname='bolshoi', halo_finder='rockstar', desired_redshift=2)
 
 
 .. parsed-literal::
@@ -203,7 +157,7 @@ method:
 
 .. code:: python
 
-    z2_snapshot = sim_manager.ProcessedSnapshot(simname, halo_finder, desired_redshift)
+    z2_snapshot = sim_manager.HaloCatalog(simname='bolshoi', halo_finder='rockstar', desired_redshift=2)
 
 
 .. parsed-literal::
@@ -216,28 +170,7 @@ method:
 Concluding notes
 ================
 
-If you anticipate studying how your science targets depend on redshift,
-cosmology, or halo-finding, you may find it useful to use the
-`~halotools.sim_manager.CatalogManager.download_all_default_catalogs`
-method. This will download the following pre-processed snapshots to your
-cache directory:
-
-::
-
-    * Rockstar-based Bolshoi halos at z = 0, 0.5, 1, and 2
-    * BDM-based Bolshoi halos at z=0
-    * Rockstar-based Bolshoi-Planck halos at z=0
-
-These catalogs will occupy a total of ~3Gb of disk space on your
-machine.
-
-There are two other convenience methods that are worthy of special
-mention here. The first is
-`~halotools.sim_manager.CatalogManager.check_for_existing_halocat`,
-which checks your cache for an existing catalog. And the second is
-`~halotools.sim_manager.CatalogManager.all_halocats_in_cache`,
-which lists all cached catalogs of a given type. Refer to the
-:ref:`sim_manager_api` section of the documentation to see how to call
-these and other methods of the
+Refer to the :ref:`sim_manager_api` section of the documentation to
+see how to call these and other methods of the
 `~halotools.sim_manager.CatalogManager`.
 

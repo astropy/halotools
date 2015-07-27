@@ -13,3 +13,5 @@ from ._astropy_init import *
 if not _ASTROPY_SETUP_:
 	pass
 	# ----------------------------------------------------------------------------
+
+from . import halotools_exceptions

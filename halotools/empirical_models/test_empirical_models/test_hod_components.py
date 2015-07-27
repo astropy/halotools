@@ -9,7 +9,7 @@ from .. import gal_prof_factory
 from astropy.table import Table
 from copy import copy
 
-__all__ = ['test_Zheng07Cens','test_Kravtsov04Sats']
+__all__ = ['test_Zheng07Cens','test_Zheng07Sats']
 
 
 def test_Zheng07Cens():
@@ -87,11 +87,11 @@ def test_Zheng07Cens():
 		halo_catalog = Table(mvir_dict)
 		# First test mean occupations
 		meanocc_from_array = model.mean_occupation(prim_haloprop=mvir_array)
-		meanocc_from_halos = model.mean_occupation(halos=halo_catalog)
+		meanocc_from_halos = model.mean_occupation(halo_table=halo_catalog)
 		assert np.all(meanocc_from_array == meanocc_from_halos)
 		# Now test Monte Carlo occupations
 		mcocc_from_array = model.mc_occupation(prim_haloprop=mvir_array,seed=43)
-		mcocc_from_halos = model.mc_occupation(halos=halo_catalog,seed=43)
+		mcocc_from_halos = model.mc_occupation(halo_table=halo_catalog,seed=43)
 		assert np.all(mcocc_from_array == mcocc_from_halos)
 
 	### First test the model with all default settings
@@ -162,9 +162,9 @@ def test_Zheng07Cens():
 	assert updated_defocc_highmass == occ3_highmass
 	
 
-def test_Kravtsov04Sats():
+def test_Zheng07Sats():
 	""" Function to test 
-	`~halotools.empirical_models.Kravtsov04Sats`. 
+	`~halotools.empirical_models.Zheng07Sats`. 
 	Here's a brief summary of the tests performed: 
 
 		* The basic metadata of the model is correct, e.g., ``self.occupation_bound = 1`` 
@@ -218,27 +218,31 @@ def test_Kravtsov04Sats():
 		np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
 
 	def test_ncen_inheritance():
-		satmodel_nocens = hod_components.Kravtsov04Sats()
+		satmodel_nocens = hod_components.Zheng07Sats()
 		cenmodel = hod_components.Zheng07Cens()
-		satmodel_cens = hod_components.Kravtsov04Sats(central_occupation_model=cenmodel)
+		satmodel_cens = hod_components.Zheng07Sats(modulate_with_cenocc=True, gal_type_centrals='centrals')
 
 		Npts = 1e2 
 		masses = np.logspace(10, 15, Npts)
 		mean_occ_satmodel_nocens = satmodel_nocens.mean_occupation(prim_haloprop=masses)
 		mean_occ_satmodel_cens = satmodel_cens.mean_occupation(prim_haloprop=masses)
 		assert np.all(mean_occ_satmodel_cens <= mean_occ_satmodel_nocens)
-		mean_occ_cens = cenmodel.mean_occupation(prim_haloprop=masses)
+
+		diff = mean_occ_satmodel_cens - mean_occ_satmodel_nocens
+		assert diff.sum() < 0
+
+		mean_occ_cens = satmodel_cens.central_occupation_model.mean_occupation(prim_haloprop=masses)
 		assert np.all(mean_occ_satmodel_cens == mean_occ_satmodel_nocens*mean_occ_cens)
 
 	### First test the model with all default settings
-	default_model = hod_components.Kravtsov04Sats()
+	default_model = hod_components.Zheng07Sats()
 	test_attributes(default_model)
 	test_mean_occupation(default_model)
 	test_mc_occupation(default_model)
 
 	### Now test the various threshold settings
 	for threshold in np.arange(-22, -17.5, 0.5):
-		thresh_model = hod_components.Kravtsov04Sats(threshold = threshold,gal_type='sats')
+		thresh_model = hod_components.Zheng07Sats(threshold = threshold,gal_type='sats')
 		test_attributes(thresh_model,gal_type='sats')
 		test_mean_occupation(thresh_model)
 
@@ -251,7 +255,7 @@ def test_Kravtsov04Sats():
 	# Increase steepness of high-mass-end power law
 	model2_dict = copy(default_dict)
 	model2_dict['alpha'] *= 1.25
-	model2 = hod_components.Kravtsov04Sats()
+	model2 = hod_components.Zheng07Sats()
 	model2.param_dict = model2_dict
 
 	logmass = model2.param_dict['logM1'] + np.log10(5)
@@ -268,7 +272,7 @@ def test_Kravtsov04Sats():
 	###### Increase in M0 ######
 	model2_dict = copy(default_dict)
 	model2_dict['logM0'] += np.log10(2)
-	model2 = hod_components.Kravtsov04Sats()
+	model2 = hod_components.Zheng07Sats()
 	model2.param_dict = model2_dict
 
 	# At very low mass, both models should have zero satellites 
@@ -287,7 +291,7 @@ def test_Kravtsov04Sats():
 	###### Increase in M1 ######
 	model2_dict = copy(default_dict)
 	model2_dict['logM0'] += np.log10(2)
-	model2 = hod_components.Kravtsov04Sats()
+	model2 = hod_components.Zheng07Sats()
 	model2.param_dict = model2_dict
 	# At very low mass, both models should have zero satellites 
 	lowmass = 1e10
@@ -303,32 +307,6 @@ def test_Kravtsov04Sats():
 		default_model.mean_occupation(prim_haloprop=highmass))
 	assert fracdiff_highmass < 0
 	assert fracdiff_highmass > fracdiff_midmass
-
-	######## Check scaling with central parameters
-	default_cens = hod_components.Zheng07Cens()
-	default_satmodel_with_cens = hod_components.Kravtsov04Sats(central_occupation_model = default_cens)
-
-	### logMmin
-	cen_model2_dict = copy(default_cens.param_dict)
-	cen_model2_dict['logMmin'] += np.log10(2.)
-	cen_model2 = hod_components.Zheng07Cens()
-	cen_model2.param_dict = cen_model2_dict
-	model2 = hod_components.Kravtsov04Sats(central_occupation_model = cen_model2)
-
-	### Changing the central model should have a large effect at low mass
-	midmass = 10.**default_cens.param_dict['logMmin']
-	assert default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass) > model2.mean_occupation(prim_haloprop=midmass)
-	### And there should be zero effect at high mass
-	highmass = 1e15
-	assert default_satmodel_with_cens.mean_occupation(prim_haloprop=highmass) == model2.mean_occupation(prim_haloprop=highmass)
-
-	# Verify that directly changing the param_dict of the bound central model 
-	# correctly propagates through to the satellite occupation
-	nsat_orig = default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass)
-	default_satmodel_with_cens.central_occupation_model.param_dict['logMmin'] += np.log10(2)
-	nsat_new = default_satmodel_with_cens.mean_occupation(prim_haloprop=midmass)
-	assert nsat_new < nsat_orig
-
 
 
 

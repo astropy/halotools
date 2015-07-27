@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Module containing classes used to model the mapping between 
-stellar mass and subhalos. 
+stellar mass and subhalo_table. 
 """
 import numpy as np
 
@@ -53,12 +53,12 @@ class LogNormalScatterModel(object):
         Examples 
         ---------
         >>> scatter_model = LogNormalScatterModel()
-        >>> scatter_model = LogNormalScatterModel(prim_haloprop_key='mvir')
+        >>> scatter_model = LogNormalScatterModel(prim_haloprop_key='halo_mvir')
 
         To implement variable scatter, we need to define the level 
         of log-normal scatter at a set of control values 
         of the primary halo property. Here we give an example of a model 
-        in which the scatter is 0.3 dex for Milky Way halos and 0.1 dex in cluster halos:
+        in which the scatter is 0.3 dex for Milky Way halo_table and 0.1 dex in cluster halo_table:
 
         >>> scatter_abcissa = [12, 15]
         >>> scatter_ordinates = [0.3, 0.1]
@@ -83,42 +83,32 @@ class LogNormalScatterModel(object):
 
     def mean_scatter(self, **kwargs):
         """ Return the amount of log-normal scatter that should be added 
-        to the galaxy property as a function of the input halos. 
+        to the galaxy property as a function of the input halo_table. 
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument
-            Array storing a mass-like variable that governs the occupation statistics. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing mock galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
-            keyword arguments must be passed. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
         -------
         scatter : array_like 
             Array containing the amount of log-normal scatter evaluated 
-            at the input halos. 
+            at the input halo_table. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'galaxy_table' in kwargs.keys():
-            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
-            mass = kwargs['galaxy_table'][key]
-        elif 'halos' in kwargs.keys():
-            mass = kwargs['halos'][self.prim_haloprop_key]
+        if 'halo_table' in kwargs.keys():
+            mass = kwargs['halo_table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+                "``halo_table`` or ``prim_haloprop``")
 
         self._update_interpol()
 
@@ -126,24 +116,17 @@ class LogNormalScatterModel(object):
 
     def scatter_realization(self, seed=None, **kwargs):
         """ Return the amount of log-normal scatter that should be added 
-        to the galaxy property as a function of the input halos. 
+        to the galaxy property as a function of the input halo_table. 
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument
-            Array storing a mass-like variable that governs the occupation statistics. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing mock galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
-            keyword arguments must be passed. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         seed : int, optional keyword argument 
             Random number seed. Default is None. 
@@ -163,7 +146,7 @@ class LogNormalScatterModel(object):
 
     def _update_interpol(self):
         """ Private method that updates the interpolating functon used to 
-        define the level of scatter as a function of the input halos. 
+        define the level of scatter as a function of the input halo_table. 
         If this method is not called after updating ``self.param_dict``, 
         changes in ``self.param_dict`` will not alter the model behavior. 
         """
@@ -194,7 +177,7 @@ class LogNormalScatterModel(object):
 
 @six.add_metaclass(ABCMeta)
 class PrimGalpropModel(model_helpers.GalPropModel):
-    """ Abstract container class for models connecting halos to their primary
+    """ Abstract container class for models connecting halo_table to their primary
     galaxy property, e.g., stellar mass or luminosity. 
     """
 
@@ -242,7 +225,7 @@ class PrimGalpropModel(model_helpers.GalPropModel):
             Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
             object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halos`` keyword argument. 
+            via the ``halo_table`` keyword argument. 
             The input ``model`` model object has its own new_haloprop_func_dict; 
             if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
             contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
@@ -315,24 +298,17 @@ class PrimGalpropModel(model_helpers.GalPropModel):
             )
 
     def _mc_galprop(self, include_scatter = True, **kwargs):
-        """ Return the prim_galprop of the galaxies living in the input halos. 
+        """ Return the prim_galprop of the galaxies living in the input halo_table. 
 
         Parameters 
         ----------
         prim_haloprop : array, optional keyword argument 
-            Array of mass-like variable governing the primary galaxy property. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
-            keyword arguments must be passed. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         redshift : float, optional keyword argument
             Redshift of the halo hosting the galaxy. 
@@ -347,7 +323,7 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         -------
         prim_galprop : array_like 
             Array storing the values of the primary galaxy property 
-            of the galaxies living in the input halos. 
+            of the galaxies living in the input halo_table. 
         """
 
         # Interpret the inputs to determine the appropriate redshift
@@ -368,7 +344,7 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         else:
             log10_galprop_with_scatter = (
                 np.log10(galprop_first_moment) + 
-                self.scatter_model.scatter_realization(**kwargs)
+                self.scatter_realization(**kwargs)
                 )
             return 10.**log10_galprop_with_scatter
 
@@ -383,8 +359,7 @@ class Moster13SmHm(PrimGalpropModel):
         Parameters 
         ----------
         prim_haloprop_key : string, optional keyword argument 
-            String giving the column name of the primary halo property governing 
-            stellar mass. 
+            String giving the column name of the primary halo property governing stellar mass. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
         scatter_model : object, optional keyword argument 
@@ -410,24 +385,17 @@ class Moster13SmHm(PrimGalpropModel):
 
     def mean_stellar_mass(self, **kwargs):
         """ Return the stellar mass of a central galaxy as a function 
-        of the input halos.  
+        of the input halo_table.  
 
         Parameters 
         ----------
         prim_haloprop : array, optional keyword argument 
-            Array of mass-like variable governing stellar mass. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
-            keyword arguments must be passed. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         redshift : float, keyword argument
             Redshift of the halo hosting the galaxy
@@ -435,20 +403,17 @@ class Moster13SmHm(PrimGalpropModel):
         Returns 
         -------
         mstar : array_like 
-            Array containing stellar masses living in the input halos. 
+            Array containing stellar masses living in the input halo_table. 
         """
 
         # Retrieve the array storing the mass-like variable
-        if 'galaxy_table' in kwargs.keys():
-            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
-            mass = kwargs['galaxy_table'][key]
-        elif 'halos' in kwargs.keys():
-            mass = kwargs['halos'][self.prim_haloprop_key]
+        if 'halo_table' in kwargs.keys():
+            mass = kwargs['halo_table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+                "``halo_table`` or ``prim_haloprop``")
 
         if 'redshift' in kwargs.keys():
             redshift = kwargs['redshift']

@@ -11,6 +11,7 @@ __all__ = ['IsotropicGalProf']
 from functools import partial
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
+from copy import copy
 
 from . import model_defaults, model_helpers, halo_prof_components
 from . import gal_prof_components as gpc
@@ -57,13 +58,21 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         >>> gal_prof_model = IsotropicGalProf(gal_type='sats', halo_prof_model=halo_prof_components.NFWProfile)
 
         """
-        required_kwargs = ['gal_type']
-        model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
+        self.gal_type = kwargs['gal_type']
 
-        self.halo_prof_model = kwargs['halo_prof_model'](**kwargs)
+        kwargs_without_halo_prof_model = copy(kwargs)
+        #print("printing kwargs keys & values during instantiation of IsotropicGalProf for gal_type %s" % self.gal_type)
+        #for key, value in kwargs_without_halo_prof_model.iteritems():
+        #    print key, value
+        #print("\nDone printing arguments\n")
+        del kwargs_without_halo_prof_model['halo_prof_model']
+        #print "check 1"
+        self.halo_prof_model = kwargs['halo_prof_model'](**kwargs_without_halo_prof_model)
+        #print "check 2"
 
         super(IsotropicGalProf, self).__init__(
-            prof_param_keys=self.halo_prof_model.prof_param_keys, **kwargs)
+            prof_param_keys=self.halo_prof_model.prof_param_keys, **kwargs_without_halo_prof_model)
+        #print "check 3"
 
         for key in self.prof_param_keys:
             setattr(self, key, getattr(self.halo_prof_model, key))
@@ -182,7 +191,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
 
         Parameters 
         ----------
-        galaxy_table : Astropy Table, required keyword argument
+        halo_table : Astropy Table, required keyword argument
             Data table storing a length-Ngals galaxy catalog. 
 
         seed : int, optional keyword argument 
@@ -193,8 +202,8 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
-        galaxy_table = kwargs['galaxy_table']
-        x, y, z = galaxy_table['x'], galaxy_table['y'], galaxy_table['z']
+        halo_table = kwargs['halo_table']
+        x, y, z = halo_table['x'], halo_table['y'], halo_table['z']
 
         # For the case of a trivial profile model, return the trivial result
         if isinstance(self.halo_prof_model, 
@@ -207,7 +216,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
 
             # extract all relevant profile parameters from the mock
             profile_params = (
-                [galaxy_table[model_defaults.host_haloprop_prefix+profile_param_key] 
+                [halo_table[profile_param_key] 
                 for profile_param_key in self.halo_prof_model.prof_param_keys]
                 )
 
