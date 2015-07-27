@@ -5,7 +5,7 @@ Module containing some commonly used composite HOD model blueprints.
 
 """
 
-from . import model_defaults, mock_factories, smhm_components
+from . import model_defaults, mock_factories, smhm_components, abhod_components
 from . import hod_components as hoc
 from . import gal_prof_factory as gpf
 from . import halo_prof_components as hpc
@@ -140,7 +140,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
 def Zentner15_blueprint(threshold = model_defaults.default_stellar_mass_threshold, 
     smhm_model=smhm_components.Moster13SmHm, 
     prim_haloprop_key=model_defaults.prim_haloprop_key, 
-    sec_haloprop_key=model_defaults.sec_haloprop_key,
+    sec_haloprop_key=model_defaults.sec_haloprop_key,    
     redshift = sim_defaults.default_redshift, 
     **kwargs):
     """ 
@@ -165,6 +165,12 @@ def Zentner15_blueprint(threshold = model_defaults.default_stellar_mass_threshol
         the occupation statistics of the galaxies. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
+    ab_percentile : float
+        percentile at which to implement heavside 2-population assembly bias
+
+    frac_dNmax : float
+        fraction of maximal assembly bias effect
+
     redshift : float, optional keyword argument 
         Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
@@ -180,21 +186,22 @@ def Zentner15_blueprint(threshold = model_defaults.default_stellar_mass_threshol
     ### Build model for centrals
     cen_key = 'centrals'
     cen_model_dict = {}
+
     # Build the occupation model
-    occu_cen_model = hoc.Leauthaud11Cens(
-        gal_type=cen_key, 
-        threshold = threshold, 
-        smhm_model = smhm_model, 
-        prim_haloprop_key = prim_haloprop_key, 
-        redshift = redshift
-        )
-    cen_model_dict['occupation'] = occu_cen_model
+    standard_cen_model = hoc.Leauthaud11Cens(**kwargs)
+
+    z = abhod_components.HeavisideCenAssemBiasModel(
+        standard_cen_model = standard_cen_model, **kwargs)
+    cen_model_dict['occupation'] = standard_cen_model
     # Build the profile model
     
     cen_profile = gpf.IsotropicGalProf(
         gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
-
     cen_model_dict['profile'] = cen_profile
+
+    model_blueprint = {standard_cen_model.gal_type : cen_model_dict}
+    return model_blueprint
+
 
 """
     ### Build model for satellites
@@ -216,7 +223,6 @@ def Zentner15_blueprint(threshold = model_defaults.default_stellar_mass_threshol
         }
 """
 
-    return model_blueprint
 
 
 

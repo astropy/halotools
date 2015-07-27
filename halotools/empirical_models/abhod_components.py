@@ -16,13 +16,14 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         an instance of a standard central galaxy occupation component that implements an HOD with no assembly bias
 
     ab_percentile : float
-        percentile at which to implement heavside 2-population assembly bias
+        percentile at which to implement heavside 2-population assembly bias. Default is 0.5. 
 
     frac_dNmax : float
-        fraction of maximal assembly bias effect
+        fraction of maximal assembly bias effect. Default is 0.
 
     secondary_haloprop_key : string
         the secondary halo property upon which assembly bias is based
+        Default is set in `~halotools.empirical_models.model_defaults` module. 
 
     Notes
     -----
@@ -34,7 +35,7 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         standard_cen_model,
         ab_percentile=0.50,
         frac_dNmax=0.0,
-        secondary_haloprop_key='vmax'):
+        secondary_haloprop_key = model_defaults.sec_haloprop_key):
         
         """
         Parameters

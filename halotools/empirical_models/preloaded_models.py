@@ -4,11 +4,11 @@
 Module containing some commonly used composite HOD models.
 
 """
-from . import model_factories
+from . import model_factories, model_defaults, smhm_components
 from . import preloaded_subhalo_model_blueprints
 from . import preloaded_hod_blueprints
 
-from .. import sim_manager
+from ..sim_manager import FakeMock, FakeSim, sim_defaults
 
 __all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15']
 
@@ -49,7 +49,7 @@ def Zheng07(**kwargs):
     load a snapshot into memory and call the built-in ``populate_mock`` method. 
     For illustration purposes, we'll use a small, fake simulation:
 
-    >>> fake_snapshot = sim_manager.FakeSim()
+    >>> fake_snapshot = FakeSim()
     >>> model.populate_mock(snapshot = fake_snapshot)
 
     """
@@ -60,6 +60,51 @@ def Leauthaud11(**kwargs):
     """ 
     """
     blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
+    return model_factories.HodModelFactory(blueprint, **kwargs)
+
+def Zentner15(threshold = model_defaults.default_stellar_mass_threshold, 
+    smhm_model=smhm_components.Moster13SmHm, 
+    prim_haloprop_key=model_defaults.prim_haloprop_key, 
+    sec_haloprop_key=model_defaults.sec_haloprop_key,
+    redshift = sim_defaults.default_redshift, 
+    **kwargs):
+    """ 
+
+    Parameters 
+    ----------
+    threshold : float, optional keyword argument
+        Stellar mass threshold of the mock galaxy sample. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    smhm_model : object, optional keyword argument 
+        Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
+        the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
+
+    prim_haloprop_key : string, optional keyword argument 
+        String giving the column name of the primary halo property governing 
+        the occupation statistics of gal_type galaxies. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    sec_haloprop_key : string, optional keyword argument 
+        String giving the column name of the secondary halo property modulating 
+        the occupation statistics of the galaxies. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    redshift : float, optional keyword argument 
+        Redshift of the stellar-to-halo-mass relation. Default is 0. 
+
+    Returns 
+    -------
+    model_blueprint : dict 
+        Dictionary containing instructions for how to build the model. 
+        When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
+        the factory returns the Zentner15 model object. 
+
+    """     
+    blueprint = preloaded_hod_blueprints.Zentner15_blueprint(
+        threshold = threshold, smhm_model = smhm_model, 
+        prim_haloprop_key = prim_haloprop_key, sec_haloprop_key = sec_haloprop_key,
+        redshift = redshift, **kwargs)
     return model_factories.HodModelFactory(blueprint, **kwargs)
 
 def SmHmBinarySFR(**kwargs):
@@ -126,7 +171,7 @@ def SmHmBinarySFR(**kwargs):
     load a snapshot into memory and call the built-in ``populate_mock`` method. 
     For illustration purposes, we'll use a small, fake simulation:
 
-    >>> fake_snapshot = sim_manager.FakeSim()
+    >>> fake_snapshot = FakeSim()
     >>> model.populate_mock(snapshot = fake_snapshot)
 
     """
@@ -225,7 +270,7 @@ def Campbell15(**kwargs):
     can populate a real simulation by instead calling the 
     `~halotools.sim_manager.HaloCatalog` class. 
 
-    >>> fake_snapshot = sim_manager.FakeSim()
+    >>> fake_snapshot = FakeSim()
     >>> model.populate_mock(snapshot = fake_snapshot)
 
     We can easily build alternative versions of models and mocks by calling the 
