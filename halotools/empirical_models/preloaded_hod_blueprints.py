@@ -185,9 +185,9 @@ def Zentner15_blueprint(**kwargs):
 
     # Build the occupation model
     standard_cen_model = hoc.Leauthaud11Cens(**kwargs)
-    z = abhod_components.HeavisideCenAssemBiasModel(
+    arz = abhod_components.HeavisideCenAssemBiasModel(
         standard_cen_model = standard_cen_model, **kwargs)
-    cen_model_dict['occupation'] = standard_cen_model
+    cen_model_dict['occupation'] = arz
 
     # Build the profile model
     cen_profile = gpf.IsotropicGalProf(
