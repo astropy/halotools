@@ -10,7 +10,7 @@ from . import preloaded_hod_blueprints
 
 from .. import sim_manager
 
-__all__ = ['Zheng07', 'SmHmBinarySFR', 'Campbell15']
+__all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15']
 
 def Zheng07(**kwargs):
     """ Simple HOD-style model based on Kravtsov et al. (2004). 
