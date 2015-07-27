@@ -3,87 +3,131 @@
 import numpy as np
 import os, sys, warnings, urllib2, fnmatch
 
-HAS_SOUP = False
 try:
     from bs4 import BeautifulSoup
     HAS_SOUP = True
-except:
-    pass
+except ImportError:
+    HAS_SOUP = False
 
-HAS_REQUESTS = False
 try:
     import requests
     HAS_REQUESTS = True
-except:
-    pass
+except ImportError:
+    HAS_REQUESTS = False
 
 import posixpath
 import urlparse
 
-from . import sim_defaults 
+import h5py
+
+from . import sim_defaults, catalog_manager
 
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import array_like_length as custom_len
+
+from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
 
 from astropy import cosmology
+from astropy import units as u
+from astropy.table import Table
+
 
 __all__ = (
-    ['SimulationSpecs', 'Bolshoi', 'BolshoiPl', 'MultiDark', 'Consuelo', 
-    'HaloCat', 'BolshoiRockstar', 'BolshoiPlRockstar', 
-    'BolshoiBdm', 'MultiDarkRockstar', 'ConsuleoRockstar']
+    ['NbodySimulation', 'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo', 
+    'HaloCatalog', 'retrieve_simclass']
     )
 
 
 ######################################################
-########## Simulation classes appear below ########## 
+########## Simulation classes defined below ########## 
 ######################################################
 
 @six.add_metaclass(ABCMeta)
-class SimulationSpecs(object):
+class NbodySimulation(object):
     """ Abstract base class for any object used as a container for 
     simulation specs. 
     """
 
-    def __init__(self, simname):
+    def __init__(self, simname, Lbox, particle_mass, num_ptcl_per_dim, 
+        softening_length, initial_redshift, cosmology):
+        """
+        Parameters 
+        -----------
+        simname : string 
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            
+        Lbox : float
+            Size of the simulated box in Mpc with h=1 units. 
+
+        particle_mass : float
+            Mass of the dark matter particles in Msun with h=1 units. 
+
+        num_ptcl_per_dim : int 
+            Number of particles per dimension. 
+
+        softening_length : float 
+            Softening scale of the particle interactions in kpc with h=1 units. 
+
+        initial_redshift : float 
+            Redshift at which the initial conditions were generated. 
+
+        cosmology : object 
+            `astropy.cosmology` instance giving the cosmological parameters 
+            with which the simulation was run. 
+
+        """
         self.simname = simname
+        self.Lbox = Lbox
+        self.particle_mass = particle_mass
+        self.num_ptcl_per_dim = num_ptcl_per_dim
+        self.softening_length = softening_length
+        self.initial_redshift = initial_redshift
+        self.cosmology = cosmology
 
-    @abstractproperty
-    def Lbox(self):
-        """ Size of the simulated box in Mpc/h. 
+        self._attrlist = (
+            ['simname', 'Lbox', 'particle_mass', 'num_ptcl_per_dim',
+            'softening_length', 'initial_redshift', 'cosmology']
+            )
+
+        self._catman = catalog_manager.CatalogManager()
+
+    def retrieve_snapshot(self, **kwargs):
+        """ Method uses the CatalogManager to return a snapshot object. 
         """
         pass
 
-    @abstractproperty
-    def particle_mass(self):
-        """ Mass of the dark matter particles in Msun/h. 
+    def retrieve_particles(self, desired_redshift, **kwargs):
         """
-        pass
+        Parameters 
+        ----------
+        desired_redshift : float 
+            Redshift of the desired catalog. 
+            
+        external_cache_loc : string, optional 
+            Absolute path to an alternative source of halo catalogs. 
+            Method assumes that ``external_cache_loc`` is organized in the 
+            same way that the normal Halotools cache is. Specifically: 
 
-    @abstractproperty
-    def softening_length(self):
-        """ Softening scale of the particle interactions in kpc/h. 
+            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
+
+            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
+
+            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
+
+        Returns
+        -------
+        particles : Astropy Table 
+            `~astropy.table.Table` object storing position and velocity of particles. 
         """
-        pass
+        return self._catman.retrieve_ptcl_table_from_cache(
+            simname=self.simname, desired_redshift = desired_redshift, **kwargs)
 
-    @abstractproperty
-    def cosmology(self):
-        """ Astropy cosmology instance giving the 
-        cosmological parameters with which the simulation was run. 
-        """
-        pass
-
-    @abstractproperty
-    def cosmology(self):
-        """ Astropy cosmology instance giving the 
-        cosmological parameters with which the simulation was run. 
-        """
-        pass
-
-
-class Bolshoi(SimulationSpecs):
+class Bolshoi(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology 
     with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h. 
 
@@ -92,25 +136,12 @@ class Bolshoi(SimulationSpecs):
     """
 
     def __init__(self):
-        super(Bolshoi, self).__init__('bolshoi')
 
-    @property
-    def Lbox(self):
-        return 250.0
+        super(Bolshoi, self).__init__(simname = 'bolshoi', Lbox = 250., 
+            particle_mass = 1.35e8, num_ptcl_per_dim = 2048, 
+            softening_length = 1., initial_redshift = 80., cosmology = cosmology.WMAP5)
 
-    @property
-    def particle_mass(self):
-        return 1.35e8
-
-    @property
-    def softening_length(self):
-        return 1.0
-
-    @property
-    def cosmology(self):
-        return cosmology.WMAP5
-
-class BolshoiPl(SimulationSpecs):
+class BolPlanck(NbodySimulation):
     """ Cosmological N-body simulation of Planck 2013 cosmology 
     with Lbox = 250 Mpc/h and 
     particle mass of ~1e8 Msun/h. 
@@ -120,25 +151,13 @@ class BolshoiPl(SimulationSpecs):
     """
 
     def __init__(self):
-        super(BolshoiPl, self).__init__('bolshoipl')
 
-    @property
-    def Lbox(self):
-        return 250.0
+        super(BolPlanck, self).__init__(simname = 'bolplanck', Lbox = 250., 
+            particle_mass = 1.35e8, num_ptcl_per_dim = 2048, 
+            softening_length = 1., initial_redshift = 80., cosmology = cosmology.Planck13)
 
-    @property
-    def particle_mass(self):
-        return 1.35e8
 
-    @property
-    def softening_length(self):
-        return 1.0
-
-    @property
-    def cosmology(self):
-        return cosmology.Planck13
-
-class MultiDark(SimulationSpecs):
+class MultiDark(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology 
     with Lbox = 1Gpc/h and particle mass of ~1e10 Msun/h. 
 
@@ -147,793 +166,181 @@ class MultiDark(SimulationSpecs):
     """
 
     def __init__(self):
-        super(MultiDark, self).__init__('multidark')
 
-    @property
-    def Lbox(self):
-        return 1000.0
+        super(MultiDark, self).__init__(simname = 'multidark', Lbox = 1000., 
+            particle_mass = 8.721e9, num_ptcl_per_dim = 2048, 
+            softening_length = 7., initial_redshift = 65., cosmology = cosmology.WMAP5)
 
-    @property
-    def particle_mass(self):
-        return 8.7e9
-
-    @property
-    def softening_length(self):
-        return 7.0
-
-    @property
-    def cosmology(self):
-        return cosmology.WMAP5
-
-class Consuelo(SimulationSpecs):
+class Consuelo(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5-like cosmology 
-    with Lbox = 400 Mpc/h and particle mass of ~1e9 Msun/h. 
+    with Lbox = 420 Mpc/h and particle mass of 4e8 Msun/h. 
 
     For a detailed description of the 
     simulation specs, see http://lss.phy.vanderbilt.edu/lasdamas/simulations.html. 
     """
 
     def __init__(self):
-        super(Consuelo, self).__init__('consuelo')
 
-    @property
-    def Lbox(self):
-        return 400.0
+        super(Consuelo, self).__init__(simname = 'consuelo', Lbox = 420., 
+            particle_mass = 1.87e9, num_ptcl_per_dim = 1400, 
+            softening_length = 8., initial_redshift = 99., cosmology = cosmology.WMAP5)
 
-    @property
-    def particle_mass(self):
-        return 4.e8
 
-    @property
-    def softening_length(self):
-        return 4.0
-
-    @property
-    def cosmology(self):
-        return cosmology.WMAP5
-
-######################################################
-########## Halo-finder classes appear below ########## 
-######################################################
-
-@six.add_metaclass(ABCMeta)
-class HaloCat(object):
-    """ Abstract container class for any halo catalog object. 
-
-    Concrete instances of this class are used to standardize the 
-    specs of a simulation, how its associated 
-    raw ASCII data is read, etc. 
+def retrieve_simclass(simname):
     """
+    Parameters 
+    ----------
+    simname : string, optional
+        Nickname of the simulation. Currently supported simulations are 
+        Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+        MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
 
-    def __init__(self, simobj, halo_finder):
-        self.simulation = simobj
-        self.simname = self.simulation.simname
+    Returns 
+    -------
+    simclass : object
+        Appropriate sub-class of `~halotools.sim_manager.NbodySimulation`. 
+    """
+    if simname == 'bolshoi':
+        return Bolshoi 
+    elif simname == 'bolplanck':
+        return BolPlanck 
+    elif simname == 'multidark':
+        return MultiDark
+    elif simname == 'consuelo':
+        return Consuelo 
+    else:
+        raise UnsupportedSimError(simname)
 
-        self.halo_finder = halo_finder
 
-    @abstractproperty
-    def original_data_source(self):
-        """ String specifying the source of the original, 
-        unprocessed halo catalog. For all halo catalogs 
-        officially supported by Halotools, this will be a 
-        publicly available web location. However, the 
-        `~halotools.sim_manager` sub-package provides user-support 
-        for proprietary simulations and catalogs. 
+######################################################
+########## Halo Catalog classes defined below ########
+######################################################
+
+class HaloCatalog(object):
+
+    def __init__(self, simname=sim_defaults.default_simname, 
+        halo_finder=sim_defaults.default_halo_finder, 
+        desired_redshift = sim_defaults.default_redshift, dz_tol = 0.05, **kwargs):
         """
-        pass
+        """
+        self.catman = catalog_manager.CatalogManager()
+
+        fname, closest_redshift = self._retrieve_closest_halo_table_fname(
+            simname, halo_finder, desired_redshift)
+        if abs(closest_redshift - desired_redshift) > dz_tol:
+            msg = ("Your input cache directory does not contain a halo catalog \n" 
+                "within %.3f of your input redshift = %.3f.\n"
+                "For the ``%s`` simulation and ``%s`` halo-finder, \n" 
+                "the catalog with the closest redshift in your cache has redshift = %.3f.\n"
+                "If that is the catalog you want, simply call the HaloCatalog class constructor \n"
+                "using the ``redshift`` keyword argument set to %.3f. \nOtherwise, choose a different "
+                "halo catalog from your cache,\nor use the CatalogManager to download the catalog you need.\n")
+            raise HalotoolsCacheError(msg % (dz_tol, desired_redshift, 
+                simname, halo_finder, closest_redshift, closest_redshift))
+        else:
+            self.processed_halo_table_fname = fname
+            simclass = retrieve_simclass(simname)
+            simobj = simclass()
+            for attr in simobj._attrlist:
+                setattr(self, attr, getattr(simobj, attr))
+            self.redshift = closest_redshift
+            self.halo_finder = halo_finder 
+            self.dtype_ascii, self.header_ascii = sim_defaults.return_dtype_and_header(
+                self.simname, self.halo_finder)
+            self._check_catalog_self_consistency(fname, closest_redshift)
 
     @property 
-    def raw_halocats_available_for_download(self):
-        """ Method searches the appropriate web location and 
-        returns a list of the filenames of all relevant 
-        raw halo catalogs that are available for download. 
-
-        Returns 
-        -------
-        output : list 
-            List of strings of all raw halo catalogs available for download 
-            for this simulation and halo-finder. 
-
+    def halo_table(self):
         """
-        url = self.raw_halocat_web_location
-
-        soup = BeautifulSoup(requests.get(url).text)
-        file_list = []
-        for a in soup.find_all('a'):
-            file_list.append(os.path.join(url, a['href']))
-
-        file_pattern = self.halocat_fname_pattern
-        output = fnmatch.filter(file_list, file_pattern)
-
-        return output
+        """
+        if hasattr(self, '_halo_table'):
+            return self._halo_table
+        else:
+            self._halo_table = Table.read(self.processed_halo_table_fname, path='data')
+            return self._halo_table
 
     @property 
-    def preprocessed_halocats_available_for_download(self):
-        """ Method searches the appropriate web location and 
-        returns a list of the filenames of all reduced  
-        halo catalog binaries processed by Halotools 
-        that are available for download. 
-
-        Returns 
-        -------
-        output : list 
-            List of strings of all halo catalogs available for download 
-            for this simulation and halo-finder. 
-
+    def ptcl_table(self):
         """
-        baseurl = sim_defaults.processed_halocats_webloc
-        soup = BeautifulSoup(requests.get(baseurl).text)
-        simloclist = []
-        for a in soup.find_all('a', href=True):
-            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
-            if dirpath and dirpath[0] != '/':
-                simloclist.append(os.path.join(baseurl, dirpath))
-
-        halocatloclist = []
-        for simloc in simloclist:
-            soup = BeautifulSoup(requests.get(simloc).text)
-            for a in soup.find_all('a', href=True):
-                dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
-                if dirpath and dirpath[0] != '/':
-                    halocatloclist.append(os.path.join(simloc, dirpath))
-
-        catlist = []
-        for halocatdir in halocatloclist:
-            soup = BeautifulSoup(requests.get(halocatdir).text)
-            for a in soup.find_all('a'):
-                catlist.append(os.path.join(halocatdir, a['href']))
-
-        file_pattern = '*halotools.official.version*'
-        all_halocats = fnmatch.filter(catlist, file_pattern)
-
-        file_pattern = '*'+self.simname+'/'+self.halo_finder+'*'
-        output = fnmatch.filter(all_halocats, file_pattern)
-
-#        file_pattern = '*'+self.halo_finder+'*'
-#        output = fnmatch.filter(simname_halocats, file_pattern)
-
-        return output
-
-
-    def closest_halocat(self, filename_list, input_redshift, **kwargs):
-        """ Method searches `filename_list` and returns the filename 
-        of the closest matching snapshot to ``input_redshift``. 
-
-        Parameters 
-        ----------
-        filename_list : list of strings
-            Each entry of the list must be a filenames of 
-            the format generated by Rockstar, 
-            e.g., `hlist_0.09630.list.gz`. 
-
-        input_redshift : float
-            Redshift of the requested snapshot.
-
-        version_name : string, optional
-            For cases where multiple versions of the same halo catalog 
-            are stored in the input `filename_list`, a matching 
-            version name must be supplied to disambiguate. 
-
-        Returns
-        -------
-        output_fname : list 
-            String of the filenames with the closest matching redshift. 
-
-        redshift : float 
-            Value of the redshift of the snapshot
         """
-
-        if custom_len(filename_list)==0:
-            return None
-
-        # First create a list of floats storing the scale factors of each hlist file
-        scale_factor_list = []
-        for full_fname in filename_list:
-            fname = os.path.basename(full_fname)
-            scale_factor_substring = self.get_scale_factor_substring(fname)
-            scale_factor = float(scale_factor_substring)
-            scale_factor_list.append(scale_factor)
-        scale_factor_list = np.array(scale_factor_list)
-
-        # Now use the array utils module to determine 
-        # which scale factor is the closest
-        input_scale_factor = 1./(1. + input_redshift)
-        idx_closest_catalog = find_idx_nearest_val(
-            scale_factor_list, input_scale_factor)
-        closest_scale_factor = scale_factor_list[idx_closest_catalog]
-        output_fname = filename_list[idx_closest_catalog]
-
-        # At this point, we have found a single filename 
-        # storing a halo catalog with the most closely matching redshift
-        # However, there may be cases where there are multiple versions of a 
-        # snapshot in a given location (e.g., the same halo catalog 
-        # with different cuts applied). 
-        # To robustly handle such cases, 
-        # the following behavior will return *all* 
-        # filenames in the list which store snapshots 
-        # at the most closely matching redshift
-        scale_factor_substring = self.get_scale_factor_substring(os.path.basename(output_fname))
-        file_pattern = '*'+scale_factor_substring+'*'
-        all_matching_fnames = fnmatch.filter(filename_list, file_pattern)
-        fnames_with_matching_scale_factor = [os.path.basename(fname) for fname in all_matching_fnames]
-
-        # If necessary, disambiguate by using the input version_name
-        if len(fnames_with_matching_scale_factor) == 0:
-            raise SyntaxError("No matching filenames found. "
-                "This indicates a bug in Halotools, not your usage of the package. "
-                "Please raise an Issue on Github, or email a member of the Halotools team.")
-        elif len(fnames_with_matching_scale_factor) == 1:
-            output_fname = fnames_with_matching_scale_factor[0]
-        elif len(fnames_with_matching_scale_factor) > 1:
-            if 'version_name' not in kwargs.keys():
-                print("\nPrinting all filenames with scale factor = %s:\n" % scale_factor_substring)
-                for f in fnames_with_matching_scale_factor:
-                    print(f)
-                print ("\n")
-                raise KeyError("Multiple versions the halo catalog "
-                    " were found for scale factor = %s.\n"
-                    "In such a case, you must disambiguate by providing"
-                    " a string value for keyword argument version_name" 
-                    % scale_factor_substring)
+        if hasattr(self, '_ptcl_table'):
+            return self._ptcl_table
+        else:
+            fname, closest_redshift = self._retrieve_closest_ptcl_table_fname()
+            if abs(closest_redshift - self.redshift) > 0.01:
+                msg = ("Your input cache directory does not contain a particle catalog \n" 
+                    "that matches the redshift = %.3f of your halo catalog.\n"
+                    "For the ``%s`` simulation, the particle catalog with "
+                    "the closest redshift in your cache has z = %.3f.\n"
+                    "\nTo see whether a matching ptcl_table is available for download, \n"
+                    "use the ``closest_catalog_on_web`` method of the CatalogManager. \n"
+                    "If there exists a matching catalog, you can download it with the "
+                    "download_ptcl_table method of the CatalogManager.\n")
+                raise HalotoolsCacheError(msg % (self.redshift, self.simname, closest_redshift))
             else:
-                version_name = kwargs['version_name']
-                version_name_file_pattern = '*.list.'+version_name+'.hdf5'
-                should_be_unique_fname = fnmatch.filter(
-                    fnames_with_matching_scale_factor, version_name_file_pattern)
-                if len(should_be_unique_fname) == 0:
-                    print("\nPrinting all filenames with scale factor = %s:\n" % scale_factor_substring)
-                    for f in fnames_with_matching_scale_factor:
-                        print(f)
-                    raise KeyError("\nInput version_name = %s.\n"
-                        "This does not correspond to any of the version names "
-                        "of halo catalogs with scale factor = %s:\n" 
-                        % (version_name, scale_factor_substring))
-                elif len(should_be_unique_fname)==1:
-                    output_fname = should_be_unique_fname[0]
-                else:
-                    print("\nPrinting all filenames with scale factor = %s:\n" % scale_factor_substring)
-                    for f in fnames_with_matching_scale_factor:
-                        print(f)
-                    raise KeyError("\nInput version_name = %s.\n"
-                        "This substring appears in more than one of the "
-                        "input fnames" % version_name)
+                self.ptcl_table_fname = fname
+                self._ptcl_table = Table.read(self.ptcl_table_fname, path='data')
+            return self._ptcl_table
 
-        redshift = (1./closest_scale_factor) - 1
-        return os.path.basename(output_fname), redshift
+        ### Attributes that still need to be implemented: 
+        # self.version,self.orig_data_source, etc. 
+        # Also should implement some slick way to describe all columns in plain English 
 
-    @abstractproperty
-    def halocat_column_info(self):
-        """ Method used to define how to interpret the columns of 
-        raw ASCII halo catalog data. 
-
-        Returns 
-        -------
-        dt : numpy dtype
-            Numpy dtype object. Each entry is a tuple 
-            corresponding to a single column of the ASCII 
-            halo catalog. Like all dtype objects, the tuples have 
-            just two elements: a field and a data type. 
-            The field is a string defining the name of the property 
-            stored in the colunmn. The data type can be any type 
-            supported by Numpy, e.g., `f4`, `i8`, etc. 
-
+    def _retrieve_closest_halo_table_fname(self, simname, halo_finder, redshift):
+        """ Method uses the CatalogManager to return a halo catalog filename. 
         """
-        pass
+        if sim_defaults.default_cache_location == 'pkg_default':
+            fname, closest_redshift = self.catman.closest_catalog_in_cache(
+                catalog_type = 'halos', 
+                simname = simname, 
+                halo_finder = halo_finder,
+                desired_redshift = redshift)
+        else:
+            fname, closest_redshift = self.catman.closest_catalog_in_cache(
+                catalog_type = 'halos', 
+                simname = simname, 
+                halo_finder = halo_finder,
+                desired_redshift = redshift, 
+                external_cache_loc = sim_defaults.default_cache_location)
 
-    @abstractproperty
-    def halocat_fname_pattern(self):
-        """ String pattern that will be used to identify halo catalog filenames 
-        associated with this simulation and halo-finder. 
+        
+        return fname, closest_redshift
+
+    def _retrieve_closest_ptcl_table_fname(self):
+        """ Method uses the CatalogManager to return a particle catalog filename. 
         """
-        pass
-
-    def get_scale_factor_substring(self, fname):
-        """ Method extracts the portion of the Rockstar hlist fname 
-        that contains the scale factor of the snapshot. 
-
-        Parameters 
-        ----------
-        fname : string 
-            Filename of the hlist. 
-
-        Returns 
-        -------
-        scale_factor_substring : string 
-            The substring specifying the scale factor of the snapshot. 
-
-        Notes 
-        -----
-        Assumes that the first character of the relevant substring 
-        is the one immediately following the first incidence of an underscore, 
-        and final character is the one immediately preceding the second decimal. 
-        These assumptions are valid for all catalogs currently on the hipacc website, 
-        including `bolshoi`, `bolshoi_bdm`, `consuelo`, and `multidark`. 
-
-        """
-        first_index = fname.index('_')+1
-        last_index = fname.index('.', fname.index('.')+1)
-        scale_factor_substring = fname[first_index:last_index]
-        return scale_factor_substring
-
-class BolshoiRockstar(HaloCat):
-    """ Rockstar-based halo catalog for the Bolshoi simulation. 
-    """
-
-    def __init__(self):
-
-        bolshoi = Bolshoi()
-        super(BolshoiRockstar, self).__init__(bolshoi, 'rockstar')
-
-    @property 
-    def raw_halocat_web_location(self):
-        return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
-
-    @property
-    def original_data_source(self):
-        return self.raw_halocat_web_location
-
-    @property 
-    def halocat_fname_pattern(self):
-        return '*hlist_*'
-
-    @property 
-    def halocat_column_info(self):
-
-        dt = np.dtype([
-            ('scale', 'f4'), 
-            ('haloid', 'i8'), 
-            ('scale_desc', 'f4'), 
-            ('haloid_desc', 'i8'), 
-            ('num_prog', 'i4'), 
-            ('pid', 'i8'), 
-            ('upid', 'i8'), 
-            ('pid_desc', 'i8'), 
-            ('phantom', 'i4'), 
-            ('mvir_sam', 'f4'), 
-            ('mvir', 'f4'), 
-            ('rvir', 'f4'), 
-            ('rs', 'f4'), 
-            ('vrms', 'f4'), 
-            ('mmp', 'i4'), 
-            ('scale_lastmm', 'f4'), 
-            ('vmax', 'f4'), 
-            ('x', 'f4'), 
-            ('y', 'f4'), 
-            ('z', 'f4'), 
-            ('vx', 'f4'), 
-            ('vy', 'f4'), 
-            ('vz', 'f4'), 
-            ('jx', 'f4'), 
-            ('jy', 'f4'), 
-            ('jz', 'f4'), 
-            ('spin', 'f4'), 
-            ('haloid_breadth_first', 'i8'), 
-            ('haloid_depth_first', 'i8'), 
-            ('haloid_tree_root', 'i8'), 
-            ('haloid_orig', 'i8'), 
-            ('snap_num', 'i4'), 
-            ('haloid_next_coprog_depthfirst', 'i8'), 
-            ('haloid_last_prog_depthfirst', 'i8'), 
-            ('rs_klypin', 'f4'), 
-            ('mvir_all', 'f4'), 
-            ('m200b', 'f4'), 
-            ('m200c', 'f4'), 
-            ('m500c', 'f4'), 
-            ('m2500c', 'f4'), 
-            ('xoff', 'f4'), 
-            ('voff', 'f4'), 
-            ('spin_bullock', 'f4'), 
-            ('b_to_a', 'f4'), 
-            ('c_to_a', 'f4'), 
-            ('axisA_x', 'f4'), 
-            ('axisA_y', 'f4'), 
-            ('axisA_z', 'f4'), 
-            ('b_to_a_500c', 'f4'), 
-            ('c_to_a_500c', 'f4'), 
-            ('axisA_x_500c', 'f4'), 
-            ('axisA_y_500c', 'f4'), 
-            ('axisA_z_500c', 'f4'), 
-            ('t_by_u', 'f4'), 
-            ('mass_pe_behroozi', 'f4'), 
-            ('mass_pe_diemer', 'f4'), 
-            ('macc', 'f4'), 
-            ('mpeak', 'f4'), 
-            ('vacc', 'f4'), 
-            ('vpeak', 'f4'), 
-            ('halfmass_scale', 'f4'), 
-            ('dmvir_dt_inst', 'f4'), 
-            ('dmvir_dt_100myr', 'f4'), 
-            ('dmvir_dt_tdyn', 'f4'), 
-            ('dmvir_dt_2dtyn', 'f4'), 
-            ('dmvir_dt_mpeak', 'f4'), 
-            ('scale_mpeak', 'f4'), 
-            ('scale_lastacc', 'f4'), 
-            ('scale_firstacc', 'f4'), 
-            ('mvir_firstacc', 'f4'), 
-            ('vmax_firstacc', 'f4'), 
-            ('vmax_mpeak', 'f4')
-            ])
-
-        return dt
-
-class BolshoiPlRockstar(HaloCat):
-    """ Rockstar-based halo catalog for the Bolshoi-Planck simulation. 
-    """
-
-    def __init__(self):
-
-        bolshoiPl = BolshoiPl()
-        super(BolshoiPlRockstar, self).__init__(bolshoiPl, 'rockstar')
-
-    @property 
-    def raw_halocat_web_location(self):
-        return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/'
-
-    @property
-    def original_data_source(self):
-        return self.raw_halocat_web_location
-
-    @property 
-    def halocat_fname_pattern(self):
-        return '*hlist_*'
-
-    @property 
-    def halocat_column_info(self):
-        dt = np.dtype([
-            ('scale', 'f4'), 
-            ('haloid', 'i8'), 
-            ('scale_desc', 'f4'), 
-            ('haloid_desc', 'i8'), 
-            ('num_prog', 'i4'), 
-            ('pid', 'i8'), 
-            ('upid', 'i8'), 
-            ('pid_desc', 'i8'), 
-            ('phantom', 'i4'), 
-            ('mvir_sam', 'f4'), 
-            ('mvir', 'f4'), 
-            ('rvir', 'f4'), 
-            ('rs', 'f4'), 
-            ('vrms', 'f4'), 
-            ('mmp', 'i4'), 
-            ('scale_lastmm', 'f4'), 
-            ('vmax', 'f4'), 
-            ('x', 'f4'), 
-            ('y', 'f4'), 
-            ('z', 'f4'), 
-            ('vx', 'f4'), 
-            ('vy', 'f4'), 
-            ('vz', 'f4'), 
-            ('jx', 'f4'), 
-            ('jy', 'f4'), 
-            ('jz', 'f4'), 
-            ('spin', 'f4'), 
-            ('haloid_breadth_first', 'i8'), 
-            ('haloid_depth_first', 'i8'), 
-            ('haloid_tree_root', 'i8'), 
-            ('haloid_orig', 'i8'), 
-            ('snap_num', 'i4'), 
-            ('haloid_next_coprog_depthfirst', 'i8'), 
-            ('haloid_last_prog_depthfirst', 'i8'), 
-            ('rs_klypin', 'f4'), 
-            ('mvir_all', 'f4'), 
-            ('m200b', 'f4'), 
-            ('m200c', 'f4'), 
-            ('m500c', 'f4'), 
-            ('m2500c', 'f4'), 
-            ('xoff', 'f4'), 
-            ('voff', 'f4'), 
-            ('spin_bullock', 'f4'), 
-            ('b_to_a', 'f4'), 
-            ('c_to_a', 'f4'), 
-            ('axisA_x', 'f4'), 
-            ('axisA_y', 'f4'), 
-            ('axisA_z', 'f4'), 
-            ('b_to_a_500c', 'f4'), 
-            ('c_to_a_500c', 'f4'), 
-            ('axisA_x_500c', 'f4'), 
-            ('axisA_y_500c', 'f4'), 
-            ('axisA_z_500c', 'f4'), 
-            ('t_by_u', 'f4'), 
-            ('mass_pe_behroozi', 'f4'), 
-            ('mass_pe_diemer', 'f4'), 
-            ('macc', 'f4'), 
-            ('mpeak', 'f4'), 
-            ('vacc', 'f4'), 
-            ('vpeak', 'f4'), 
-            ('halfmass_scale', 'f4'), 
-            ('dmvir_dt_inst', 'f4'), 
-            ('dmvir_dt_100myr', 'f4'), 
-            ('dmvir_dt_tdyn', 'f4'), 
-            ('dmvir_dt_2dtyn', 'f4'), 
-            ('dmvir_dt_mpeak', 'f4'), 
-            ('scale_mpeak', 'f4'), 
-            ('scale_lastacc', 'f4'), 
-            ('scale_firstacc', 'f4'), 
-            ('mvir_firstacc', 'f4'), 
-            ('vmax_firstacc', 'f4'), 
-            ('vmax_mpeak', 'f4')
-            ])
-        return dt
-
-class BolshoiBdm(HaloCat):
-    """ BDM-based halo catalog for the Bolshoi simulation. 
-    """
-
-    def __init__(self):
-
-        bolshoi = Bolshoi()
-        super(BolshoiBdm, self).__init__(bolshoi, 'bdm')
-
-    @property 
-    def raw_halocat_web_location(self):
-        return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/'
-
-    @property
-    def original_data_source(self):
-        return self.raw_halocat_web_location
-
-    @property 
-    def halocat_fname_pattern(self):
-        return '*hlist_*'
-
-    @property 
-    def halocat_column_info(self):
-        dt = np.dtype([
-            ('scale', 'f4'), 
-            ('haloid', 'i8'), 
-            ('scale_desc', 'f4'), 
-            ('haloid_desc', 'i8'), 
-            ('num_prog', 'i4'), 
-            ('pid', 'i8'), 
-            ('upid', 'i8'), 
-            ('pid_desc', 'i8'), 
-            ('phantom', 'i4'),  
-            ('mvir_sam', 'f4'), 
-            ('mvir', 'f4'), 
-            ('rvir', 'f4'),  
-            ('rs', 'f4'), 
-            ('vrms', 'f4'), 
-            ('mmp', 'i4'), 
-            ('scale_lastmm', 'f4'), 
-            ('vmax', 'f4'), 
-            ('x', 'f4'), 
-            ('y', 'f4'), 
-            ('z', 'f4'), 
-            ('vx', 'f4'), 
-            ('vy', 'f4'), 
-            ('vz', 'f4'), 
-            ('jx', 'f4'), 
-            ('jy', 'f4'), 
-            ('jz', 'f4'), 
-            ('spin', 'f4'), 
-            ('haloid_breadth_first', 'i8'), 
-            ('haloid_depth_first', 'i8'), 
-            ('haloid_tree_root', 'i8'), 
-            ('haloid_orig', 'i8'), 
-            ('snap_num', 'i4'), 
-            ('haloid_next_coprog_depthfirst', 'i8'), 
-            ('haloid_last_prog_depthfirst', 'i8'), 
-            ('xoff', 'f4'), 
-            ('2K/Ep-1', 'f4'), 
-            ('Rrms', 'f4'), 
-            ('b_to_a', 'f4'), 
-            ('c_to_a', 'f4'), 
-            ('axisA_x', 'f4'), 
-            ('axisA_y', 'f4'), 
-            ('axisA_z', 'f4'), 
-            ('macc', 'f4'), 
-            ('mpeak', 'f4'), 
-            ('vacc', 'f4'), 
-            ('vpeak', 'f4')
-            ]) 
-        return dt
-
-class MultiDarkRockstar(HaloCat):
-    """ Rockstar-based halo catalog for the Multidark simulation. 
-    """
-
-    def __init__(self):
-
-        multidark = MultiDark()
-        super(MultiDarkRockstar, self).__init__(multidark, 'rockstar')
-
-    @property 
-    def raw_halocat_web_location(self):
-        return 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
-
-    @property
-    def original_data_source(self):
-        return self.raw_halocat_web_location
-
-    @property 
-    def halocat_fname_pattern(self):
-        return '*hlist_*'
-
-    @property 
-    def halocat_column_info(self):
-        dt = np.dtype([
-            ('scale', 'f4'), 
-            ('haloid', 'i8'), 
-            ('scale_desc', 'f4'), 
-            ('haloid_desc', 'i8'), 
-            ('num_prog', 'i4'), 
-            ('pid', 'i8'), 
-            ('upid', 'i8'), 
-            ('pid_desc', 'i8'), 
-            ('phantom', 'i4'), 
-            ('mvir_sam', 'f4'), 
-            ('mvir', 'f4'), 
-            ('rvir', 'f4'), 
-            ('rs', 'f4'), 
-            ('vrms', 'f4'), 
-            ('mmp', 'i4'), 
-            ('scale_lastmm', 'f4'), 
-            ('vmax', 'f4'), 
-            ('x', 'f4'), 
-            ('y', 'f4'), 
-            ('z', 'f4'), 
-            ('vx', 'f4'), 
-            ('vy', 'f4'), 
-            ('vz', 'f4'), 
-            ('jx', 'f4'), 
-            ('jy', 'f4'), 
-            ('jz', 'f4'), 
-            ('spin', 'f4'), 
-            ('haloid_breadth_first', 'i8'), 
-            ('haloid_depth_first', 'i8'), 
-            ('haloid_tree_root', 'i8'), 
-            ('haloid_orig', 'i8'), 
-            ('snap_num', 'i4'), 
-            ('haloid_next_coprog_depthfirst', 'i8'), 
-            ('haloid_last_prog_depthfirst', 'i8'), 
-            ('rs_klypin', 'f4'), 
-            ('mvir_all', 'f4'), 
-            ('m200b', 'f4'), 
-            ('m200c', 'f4'), 
-            ('m500c', 'f4'), 
-            ('m2500c', 'f4'), 
-            ('xoff', 'f4'), 
-            ('voff', 'f4'), 
-            ('spin_bullock', 'f4'), 
-            ('b_to_a', 'f4'), 
-            ('c_to_a', 'f4'), 
-            ('axisA_x', 'f4'), 
-            ('axisA_y', 'f4'), 
-            ('axisA_z', 'f4'), 
-            ('b_to_a_500c', 'f4'), 
-            ('c_to_a_500c', 'f4'), 
-            ('axisA_x_500c', 'f4'), 
-            ('axisA_y_500c', 'f4'), 
-            ('axisA_z_500c', 'f4'), 
-            ('t_by_u', 'f4'), 
-            ('mass_pe_behroozi', 'f4'), 
-            ('mass_pe_diemer', 'f4'), 
-            ('macc', 'f4'), 
-            ('mpeak', 'f4'), 
-            ('vacc', 'f4'), 
-            ('vpeak', 'f4'), 
-            ('halfmass_scale', 'f4'), 
-            ('dmvir_dt_inst', 'f4'), 
-            ('dmvir_dt_100myr', 'f4'), 
-            ('dmvir_dt_tdyn', 'f4'), 
-            ('dmvir_dt_2dtyn', 'f4'), 
-            ('dmvir_dt_mpeak', 'f4'), 
-            ('scale_mpeak', 'f4'), 
-            ('scale_lastacc', 'f4'), 
-            ('scale_firstacc', 'f4'), 
-            ('mvir_firstacc', 'f4'), 
-            ('vmax_firstacc', 'f4'), 
-            ('vmax_mpeak', 'f4')
-            ])
-        return dt
-
-class ConsuleoRockstar(HaloCat):
-    """ Rockstar-based halo catalog for the Consuelo simulation. 
-    """
-
-    def __init__(self):
-
-        consuelo = Consuelo()
-        super(ConsuleoRockstar, self).__init__(consuelo, 'rockstar')
-
-    @property 
-    def raw_halocat_web_location(self):
-        return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
-
-    @property
-    def original_data_source(self):
-        return self.raw_halocat_web_location
-
-    @property 
-    def halocat_fname_pattern(self):
-        return '*hlist_*'
-
-    @property 
-    def halocat_column_info(self):
-        dt = np.dtype([
-            ('scale', 'f4'), 
-            ('haloid', 'i8'), 
-            ('scale_desc', 'f4'), 
-            ('haloid_desc', 'i8'), 
-            ('num_prog', 'i4'), 
-            ('pid', 'i8'), 
-            ('upid', 'i8'), 
-            ('pid_desc', 'i8'), 
-            ('phantom', 'i4'),  
-            ('mvir_sam', 'f4'), 
-            ('mvir', 'f4'), 
-            ('rvir', 'f4'),  
-            ('rs', 'f4'), 
-            ('vrms', 'f4'), 
-            ('mmp', 'i4'), 
-            ('scale_lastmm', 'f4'), 
-            ('vmax', 'f4'), 
-            ('x', 'f4'), 
-            ('y', 'f4'), 
-            ('z', 'f4'), 
-            ('vx', 'f4'), 
-            ('vy', 'f4'), 
-            ('vz', 'f4'), 
-            ('jx', 'f4'), 
-            ('jy', 'f4'), 
-            ('jz', 'f4'), 
-            ('spin', 'f4'), 
-            ('haloid_breadth_first', 'i8'), 
-            ('haloid_depth_first', 'i8'), 
-            ('haloid_tree_root', 'i8'), 
-            ('haloid_orig', 'i8'), 
-            ('snap_num', 'i4'), 
-            ('haloid_next_coprog_depthfirst', 'i8'), 
-            ('haloid_last_prog_depthfirst', 'i8'), 
-            ('rs_klypin', 'f4'), 
-            ('mvir_all', 'f4'), 
-            ('m200b', 'f4'), 
-            ('m200c', 'f4'), 
-            ('m500c', 'f4'), 
-            ('m2500c', 'f4'), 
-            ('xoff', 'f4'), 
-            ('voff', 'f4'), 
-            ('spin_bullock', 'f4'), 
-            ('b_to_a', 'f4'), 
-            ('c_to_a', 'f4'), 
-            ('axisA_x', 'f4'), 
-            ('axisA_y', 'f4'), 
-            ('axisA_z', 'f4'), 
-            ('t_by_u', 'f4'), 
-            ('macc', 'f4'), 
-            ('mpeak', 'f4'), 
-            ('vacc', 'f4'), 
-            ('vpeak', 'f4'), 
-            ('scale_halfmass', 'f4')
-            ])
-        return dt
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        if sim_defaults.default_cache_location == 'pkg_default':
+            fname, closest_redshift = self.catman.closest_catalog_in_cache(
+                catalog_type = 'particles', 
+                simname = self.simname, 
+                desired_redshift = self.redshift)
+        else:
+            fname, closest_redshift = self.catman.closest_catalog_in_cache(
+                catalog_type = 'particles', 
+                simname = self.simname, 
+                desired_redshift = self.redshift, 
+                external_cache_loc = sim_defaults.default_cache_location)
+
+        return fname, closest_redshift
+
+    def _check_catalog_self_consistency(self, fname, closest_redshift):
+
+        msg = ("\nInconsistency between the %s in the metadata of the hdf5 file "
+            "and the %s inferred from its filename.\n"
+            "This indicates a bug during the generation of the hdf5 file storing the catalog.")
+
+        f = h5py.File(fname)
+        if abs(float(f.attrs['redshift']) - closest_redshift) > 0.01:
+            raise HalotoolsIOError(msg % ('redshift', 'redshift'))
+
+        if f.attrs['simname'] != self.simname:
+            raise HalotoolsIOError(msg % ('simname', 'simname'))
+
+        if f.attrs['halo_finder'] != self.halo_finder:
+            raise HalotoolsIOError(msg % ('halo_finder', 'halo_finder'))
+
+        self.cuts_description = f.attrs['cuts_description']
+
+        f.close()
 
 
