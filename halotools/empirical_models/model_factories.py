@@ -469,13 +469,13 @@ class HodModelFactory(ModelFactory):
                 gal_type, 'occupation', 'mc_occupation')
             setattr(self, new_method_name, new_method_behavior)
 
-            # For convenience, also inherit  
-            # the first moment of the occupation distribution 
-            if hasattr(occupation_model, 'mean_occupation'):
-                new_method_name = 'mean_occupation_'+gal_type
-                new_method_behavior = self._update_param_dict_decorator(
-                    gal_type, 'occupation', 'mean_occupation')
-                setattr(self, new_method_name, new_method_behavior)
+            if hasattr(occupation_model, '_additional_methods_to_inherit'):
+                additional_methods_to_inherit = occupation_model._additional_methods_to_inherit
+                for methodname in additional_methods_to_inherit:
+                    new_method_name = methodname + '_' + gal_type
+                    new_method_behavior = self._update_param_dict_decorator(
+                        gal_type, 'occupation', methodname)
+                    setattr(self, new_method_name, new_method_behavior)
 
             gal_prof_model = self.model_blueprint[gal_type]['profile']
             for prof_param_key in gal_prof_model.prof_param_keys:
