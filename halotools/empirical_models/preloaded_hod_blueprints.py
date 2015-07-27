@@ -196,6 +196,7 @@ def Zentner15_blueprint(threshold = model_defaults.default_stellar_mass_threshol
 
     cen_model_dict['profile'] = cen_profile
 
+"""
     ### Build model for satellites
     sat_key = 'satellites'
     sat_model_dict = {}
@@ -213,6 +214,7 @@ def Zentner15_blueprint(threshold = model_defaults.default_stellar_mass_threshol
         occu_sat_model.gal_type : sat_model_dict, 
         'mock_factory' : mock_factories.HodMockFactory
         }
+"""
 
     return model_blueprint
 
