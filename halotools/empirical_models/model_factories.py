@@ -251,7 +251,7 @@ class SubhaloModelFactory(ModelFactory):
                 dict_intersection = set(new_haloprop_func_dict).intersection(
                     set(component_model.new_haloprop_func_dict))
                 if dict_intersection == set():
-                    new_haloprop_func_dict = (
+                    new_haloprop_func_dict = dict(
                         new_haloprop_func_dict.items() + 
                         component_model.new_haloprop_func_dict.items()
                         )
@@ -476,7 +476,6 @@ class HodModelFactory(ModelFactory):
                     new_method_behavior = self._update_param_dict_decorator(
                         gal_type, 'occupation', methodname)
                     setattr(self, new_method_name, new_method_behavior)
-
 
             gal_prof_model = self.model_blueprint[gal_type]['profile']
             for prof_param_key in gal_prof_model.prof_param_keys:

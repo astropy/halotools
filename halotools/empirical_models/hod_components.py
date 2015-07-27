@@ -82,7 +82,6 @@ class OccupationComponent(model_helpers.GalPropModel):
 
         self._additional_methods_to_inherit = ['mean_occupation']
 
-
     def mc_occupation(self, seed=None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 
