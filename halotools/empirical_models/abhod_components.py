@@ -62,6 +62,7 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # establish the non-assembly biased model that these routines will
         # be working with.
         self.standard_cen_model = standard_cen_model
+        self.ancillary_model_dependencies = ['standard_cen_model']
 
         # call super-class init routine
         # the instance inherits the basic model of the non-assembly biased model to which it is tied.
@@ -79,10 +80,13 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # key for haloprop bins
         self.prim_haloprop_bin_key = self.prim_haloprop_key + '_bin_index'
 
+        self.new_haloprop_func_dict = {self.prim_haloprop_bin_key: self.compute_massbins, self.sec_haloprop_percentile_key: self.compute_sec_haloprop_percentiles}
+
         # add the assembly bias parameters to the param_dict so that they may 
         # be varied in an MCMC if needed.
         self.param_dict['ab_percentile'] = ab_percentile
         self.param_dict['frac_dNmax'] = frac_dNmax
+
 
         # check that these parameter values do not violate number conservation
         self.check_valid_ab_parameters()
