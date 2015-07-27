@@ -84,6 +84,7 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
 
         # add the assembly bias parameters to the param_dict so that they may 
         # be varied in an MCMC if needed.
+        self.param_dict = self.standard_cen_model.param_dict
         self.param_dict['ab_percentile'] = ab_percentile
         self.param_dict['frac_dNmax'] = frac_dNmax
 
