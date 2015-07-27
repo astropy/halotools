@@ -137,7 +137,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     return model_blueprint
 
 
-def Zentner15_blueprint(**kwargs):
+def Zentner15_blueprint(baseline_central_hod_model=hoc.Leauthaud11Cens, **kwargs):
     """ 
 
     Parameters 
@@ -146,9 +146,9 @@ def Zentner15_blueprint(**kwargs):
         Stellar mass threshold of the mock galaxy sample. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    smhm_model : object, optional keyword argument 
-        Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
-        the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
+    baseline_central_hod_model : object, optional keyword argument 
+        Sub-class of `~halotools.empirical_models.OccupationComponent` governing 
+        the underlying standard HOD of centrals. Default is `Leauthaud11Cens`. 
 
     prim_haloprop_key : string, optional keyword argument 
         String giving the column name of the primary halo property governing 
@@ -184,7 +184,7 @@ def Zentner15_blueprint(**kwargs):
     cen_model_dict = {}
 
     # Build the occupation model
-    standard_cen_model = hoc.Leauthaud11Cens(**kwargs)
+    standard_cen_model = baseline_central_hod_model(**kwargs)
     arz = abhod_components.HeavisideCenAssemBiasModel(
         standard_cen_model = standard_cen_model, **kwargs)
     cen_model_dict['occupation'] = arz
