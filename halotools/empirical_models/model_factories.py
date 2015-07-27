@@ -689,7 +689,7 @@ class HodModelFactory(ModelFactory):
                     dict_intersection = set(new_haloprop_func_dict).intersection(
                         set(component_model.new_haloprop_func_dict))
                     if dict_intersection == set():
-                        new_haloprop_func_dict = (
+                        new_haloprop_func_dict = dict(
                             new_haloprop_func_dict.items() + 
                             component_model.new_haloprop_func_dict.items()
                             )
