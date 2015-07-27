@@ -64,14 +64,12 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # call super-class init routine
         # the instance inherits the basic model of the non-assembly biased model to which it is tied.
 
-        #hod_components.OccupationComponent.__init__(self)
         super(HeavisideCenAssemBiasModel,self).__init__(
             gal_type=standard_cen_model.gal_type,
             threshold=standard_cen_model.threshold,
             occupation_bound=standard_cen_model.occupation_bound,
             prim_haloprop_key=standard_cen_model.prim_haloprop_key,
-            sec_haloprop_key=secondary_haloprop_key,
-            input_param_dict=standard_cen_model.param_dict)
+            sec_haloprop_key=secondary_haloprop_key)
 
         # secondary halo property percentile key
         self.sec_haloprop_percentile_key=self.sec_haloprop_key+'_percentile'
@@ -87,15 +85,9 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # check that these parameter values do not violate number conservation
         self.check_valid_ab_parameters()
 
-
     # checks validity of the input parameters
     def check_valid_ab_parameters(self):
         """
-        Parameters
-        ----------
-
-        Notes
-        -----
         Checks if the assembly bias parameters are valid. 
         In particular, this checks that the assembly bias percentile lies 
         between 0 and 1 and that the fraction of the maximum effect lies 
@@ -113,11 +105,6 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         elif (self.param_dict['frac_dNmax']>1.0):
             self.param_dict['frac_dNmax']=1.0
 
-        return None
-
-
-
-
 
     # assign halos percentile values of the secondary halo property
     def assign_sec_haloprop_percentiles(self,
@@ -133,7 +120,8 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         num_mass_bins : integer
             number of bins of mass within which to assign secondary property percentiles
 
-        append_mass_bins : if true, this will append the indices of the mass bins that are 
+        append_mass_bins : boolean 
+            if true, this will append the indices of the mass bins that are 
             used to construct the percentiles. this makes reconstruction of the mass bins 
             quick and easy if needed.
 
@@ -158,7 +146,9 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
                 "method can only accept the 'halos' keyword and this must be specified.")
 
         # new halo property field
-        inp_halo_catalog[self.sec_haloprop_percentile_key]=np.zeros_like(inp_halo_catalog[self.prim_haloprop_key])
+        inp_halo_catalog[self.sec_haloprop_percentile_key] = (
+            np.zeros_like(inp_halo_catalog[self.prim_haloprop_key])
+            )
 
         # check that we have access to the desired property
         if (self.sec_haloprop_key not in inp_halo_catalog.keys()):
@@ -185,7 +175,7 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # iterating to num_mass_bins+1 ensures that any halos that exceed the 
         # maximum mass in the bins is accounted for.
         for idummy in range(num_mass_bins):
-            indices_of_mass_bin=np.where(in_mass_bin==idummy)
+            indices_of_mass_bin=np.where(in_mass_bin==idummy)[0]
 
             # Find the indices that sort by the secondary property
             ind_sorted=np.argsort(inp_halo_catalog[self.sec_haloprop_key][indices_of_mass_bin])
@@ -199,12 +189,7 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
             
         print 'Percentiles are assigned \n ***** \n ----- \n'
 
-        return None
-
-
-
-
-
+        
     # compute mean halo occupation
     def mean_occupation(self,
         append_to_catalog=False,
