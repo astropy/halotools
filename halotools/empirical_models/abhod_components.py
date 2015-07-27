@@ -91,6 +91,10 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         # check that these parameter values do not violate number conservation
         self.check_valid_ab_parameters()
 
+        self._additional_methods_to_inherit.extend(
+            ['compute_sec_haloprop_percentiles', 'standard_mean_occupation', 'compute_massbins']
+            )
+
     # checks validity of the input parameters
     def check_valid_ab_parameters(self):
         """
