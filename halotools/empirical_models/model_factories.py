@@ -470,7 +470,7 @@ class HodModelFactory(ModelFactory):
             setattr(self, new_method_name, new_method_behavior)
 
             if hasattr(occupation_model, '_additional_methods_to_inherit'):
-                additional_methods_to_inherit = occupation_model._additional_methods_to_inherit
+                additional_methods_to_inherit = list(set(occupation_model._additional_methods_to_inherit))
                 for methodname in additional_methods_to_inherit:
                     new_method_name = methodname + '_' + gal_type
                     new_method_behavior = self._update_param_dict_decorator(
