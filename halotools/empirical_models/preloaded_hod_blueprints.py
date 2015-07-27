@@ -137,12 +137,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     return model_blueprint
 
 
-def Zentner15_blueprint(threshold = model_defaults.default_stellar_mass_threshold, 
-    smhm_model=smhm_components.Moster13SmHm, 
-    prim_haloprop_key=model_defaults.prim_haloprop_key, 
-    sec_haloprop_key=model_defaults.sec_haloprop_key,    
-    redshift = sim_defaults.default_redshift, 
-    **kwargs):
+def Zentner15_blueprint(**kwargs):
     """ 
 
     Parameters 
@@ -183,21 +178,26 @@ def Zentner15_blueprint(threshold = model_defaults.default_stellar_mass_threshol
 
     """     
 
+    ##############################
     ### Build model for centrals
     cen_key = 'centrals'
     cen_model_dict = {}
 
     # Build the occupation model
     standard_cen_model = hoc.Leauthaud11Cens(**kwargs)
-
     z = abhod_components.HeavisideCenAssemBiasModel(
         standard_cen_model = standard_cen_model, **kwargs)
     cen_model_dict['occupation'] = standard_cen_model
+
     # Build the profile model
-    
     cen_profile = gpf.IsotropicGalProf(
         gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
     cen_model_dict['profile'] = cen_profile
+
+    ##############################
+    ### Build model for satellites
+    cen_key = 'satellites'
+    sat_model_dict = {}
 
     model_blueprint = {standard_cen_model.gal_type : cen_model_dict}
     return model_blueprint

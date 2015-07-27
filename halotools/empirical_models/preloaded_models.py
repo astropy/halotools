@@ -62,12 +62,7 @@ def Leauthaud11(**kwargs):
     blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
     return model_factories.HodModelFactory(blueprint, **kwargs)
 
-def Zentner15(threshold = model_defaults.default_stellar_mass_threshold, 
-    smhm_model=smhm_components.Moster13SmHm, 
-    prim_haloprop_key=model_defaults.prim_haloprop_key, 
-    sec_haloprop_key=model_defaults.sec_haloprop_key,
-    redshift = sim_defaults.default_redshift, 
-    **kwargs):
+def Zentner15(**kwargs):
     """ 
 
     Parameters 
@@ -101,10 +96,7 @@ def Zentner15(threshold = model_defaults.default_stellar_mass_threshold,
         the factory returns the Zentner15 model object. 
 
     """     
-    blueprint = preloaded_hod_blueprints.Zentner15_blueprint(
-        threshold = threshold, smhm_model = smhm_model, 
-        prim_haloprop_key = prim_haloprop_key, sec_haloprop_key = sec_haloprop_key,
-        redshift = redshift, **kwargs)
+    blueprint = preloaded_hod_blueprints.Zentner15_blueprint(**kwargs)
     return model_factories.HodModelFactory(blueprint, **kwargs)
 
 def SmHmBinarySFR(**kwargs):
