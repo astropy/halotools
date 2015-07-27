@@ -8,7 +8,7 @@ import fnmatch
 from subprocess import PIPE,Popen
 import fileinput
 
-tutorials_root = './docs/tutorials'
+tutorials_root = os.path.abspath('./docs/tutorials')
 
 def get_tutlist(tut):
 
@@ -68,6 +68,9 @@ def add_asterisk_header(fname):
     f = open(fname, 'r')
     lines = f.readlines()
     f.close()
+    print("Printing lines in first cell:")
+    for line in lines:
+        print line
     title = lines[3]
     asterisks = get_asterisks_line(title)
     lines.insert(4, asterisks)
@@ -177,13 +180,13 @@ def test_ipynb(fname):
 
 def prepare_system_for_tutorial(fname):
 
-    if 'raw_halocats.' in os.path.basename(fname):
+    if 'using_halocat_binaries.' in os.path.basename(fname):
         print("\n ...Preparing system for %s" % fname)
         cachedir = '/Users/aphearin/.astropy/cache/halotools'
-        dirname = os.path.join(cachedir, 'raw_halo_catalogs/multidark/rockstar')
-        full_fname = os.path.join(dirname, 'hlist_0.08820.list.gz')
+        dirname = os.path.join(cachedir, 'halo_catalogs/bolshoi/rockstar')
+        full_fname = os.path.join(dirname, 'hlist_0.33035.list.halotools.alpha.version0.hdf5')
         if os.path.isfile(full_fname):
-            print("Deleting high-z multidark catalog %s\n" % full_fname)
+            print("Deleting z=2 bolshoi catalog %s\n" % full_fname)
             command = "rm " + full_fname
             os.system(command)
     else:

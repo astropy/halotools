@@ -194,12 +194,12 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         The ``cen_quiescent_model`` has a built-in method that computes the quiescent fraction 
         as a function of mass:
 
-        >>> quiescent_frac = cen_quiescent_model.mean_quiescent_fraction(prim_haloprop=1e12)
+        >>> quiescent_frac = cen_quiescent_model.mean_quiescent_fraction(prim_haloprop =1e12)
 
         There is also a built-in method to return a Monte Carlo realization of quiescent/star-forming galaxies:
 
         >>> masses = np.logspace(10, 15, num=100)
-        >>> quiescent_realization = cen_quiescent_model.mc_quiescent(prim_haloprop=masses)
+        >>> quiescent_realization = cen_quiescent_model.mc_quiescent(prim_haloprop =masses)
 
         Now ``quiescent_realization`` is a boolean-valued array of the same length as ``masses``. 
         Entries of ``quiescent_realization`` that are ``True`` correspond to central galaxies that are quiescent. 
@@ -210,7 +210,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_key='late_type', abcissa=abcissa, ordinates=ordinates, prim_haloprop_key='vpeak_host', gal_type='sats')
         >>> vmax_array = np.logspace(2, 3, num=100)
-        >>> morphology_realization = sat_morphology_model.mc_late_type(prim_haloprop=vmax_array)
+        >>> morphology_realization = sat_morphology_model.mc_late_type(prim_haloprop =vmax_array)
 
         .. automethod:: _mean_galprop_fraction
         """
@@ -261,20 +261,13 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         Parameters 
         ----------
-        prim_haloprop : array_like, optional keyword argument
-            Array of primary halo property, e.g., `mvir`, 
-            at which the galprop fraction is being computed. 
-            Functionality is equivalent to using the prim_haloprop keyword argument. 
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halos : table, optional keyword argument
-            Astropy Table containing a halo catalog. 
-            If the ``halos`` keyword argument is passed, 
-            ``self.prim_haloprop_key`` must be a column of the halo catalog. 
-
-        galaxy_table : table, optional keyword argument
-            Astropy Table containing a galaxy catalog. 
-            If the ``galaxy_table`` keyword argument is passed, 
-            ``self.prim_haloprop_key`` must be a column of the galaxy catalog. 
+        halo_table : object, optional keyword argument 
+            Data table storing halo catalog. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
         -------
@@ -282,18 +275,14 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             Values of the galprop fraction evaluated at the input primary halo properties. 
 
         """
-
         # Retrieve the array storing the mass-like variable
-        if 'galaxy_table' in kwargs.keys():
-            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
-            prim_haloprop = kwargs['galaxy_table'][key]
-        elif 'halos' in kwargs.keys():
-            prim_haloprop = kwargs['halos'][self.prim_haloprop_key]
+        if 'halo_table' in kwargs.keys():
+            prim_haloprop = kwargs['halo_table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             prim_haloprop = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+                "``halo_table`` or  ``prim_haloprop``")
 
         if self._logparam is True:
             prim_haloprop = np.log10(prim_haloprop)

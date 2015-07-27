@@ -7,7 +7,7 @@ from .. import gal_prof_factory as gpf
 from ..mock_factories import HodMockFactory
 
 from ...sim_manager.generate_random_sim import FakeSim
-from ..preloaded_models import Kravtsov04
+from ..preloaded_models import Zheng07
 
 from astropy import cosmology
 
@@ -34,10 +34,10 @@ def test_unbiased_trivial():
 	assert cen_prof.param_dict == {}
 
 	snapshot = FakeSim()
-	composite_model = Kravtsov04()
+	composite_model = Zheng07()
 	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
-	x, y, z = cen_prof.mc_pos(galaxy_table=mock.galaxy_table)
+	x, y, z = cen_prof.mc_pos(halo_table=mock.galaxy_table)
 	assert np.all(x == 0)
 	assert np.all(y == 0)
 	assert np.all(z == 0)
@@ -48,7 +48,7 @@ def test_unbiased_nfw():
 		halo_prof_model=hpc.NFWProfile, gal_type='satellites')
 
 	snapshot = FakeSim()
-	composite_model = Kravtsov04()
+	composite_model = Zheng07()
 	mock = HodMockFactory(snapshot=snapshot, model=composite_model)
 
 	# Check that mc_radii gives reasonable results for FakeSim
@@ -72,7 +72,7 @@ def test_unbiased_nfw():
 	assert np.allclose(norms, 1)
 
 	# verify that all mc_pos points are inside the unit sphere
-	satellite_xpos, satellite_ypos, satellite_zpos = sat_prof.mc_pos(galaxy_table=mock.galaxy_table)
+	satellite_xpos, satellite_ypos, satellite_zpos = sat_prof.mc_pos(halo_table=mock.galaxy_table)
 	satellite_pos = np.array([satellite_xpos, satellite_ypos, satellite_zpos]).T
 	assert np.all(np.linalg.norm(satellite_pos, axis=1) <= 1)
 

@@ -29,5 +29,4 @@ go ahead and do that before navigating to :ref:`using_halocat_binaries`.
 Starting from scratch with raw ASCII
 =======================================
 
-If you would like to learn how to start from scratch with raw ASCII data from one of the halo catalogs supported by Halotools, then navigate to :ref:`raw_halocats_tutorial`. 
-
+Coming soon!
