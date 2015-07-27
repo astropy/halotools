@@ -66,20 +66,13 @@ class ConcMass(object):
 
         Parameters
         ----------        
-        prim_haloprop : array, optional keyword argument
-            Array storing a mass-like variable that governs the occupation statistics. 
-            If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halos : object, optional keyword argument 
+        halo_table : object, optional keyword argument 
             Data table storing halo catalog. 
-            If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
-            keyword arguments must be passed. 
-
-        galaxy_table : object, optional keyword argument 
-            Data table storing mock galaxy catalog. 
-            If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
-            keyword arguments must be passed. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Notes 
         -----
@@ -88,16 +81,13 @@ class ConcMass(object):
 
         """
         # Retrieve the array storing the mass-like variable
-        if 'galaxy_table' in kwargs.keys():
-            key = model_defaults.host_haloprop_prefix+self.prim_haloprop_key
-            mass = kwargs['galaxy_table'][key]
-        elif 'halos' in kwargs.keys():
-            mass = kwargs['halos'][self.prim_haloprop_key]
+        if 'halo_table' in kwargs.keys():
+            mass = kwargs['halo_table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halos``, ``prim_haloprop``, or ``galaxy_table``")
+                "``halo_table`` or ``prim_haloprop``")
 
         return getattr(self, self.conc_mass_model)(mass)
 
