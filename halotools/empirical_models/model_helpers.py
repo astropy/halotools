@@ -210,7 +210,7 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
     return output
 
 
-def custom_spline(table_abcissa, table_ordinates, k=0):
+def custom_spline(table_abcissa, table_ordinates, k=3):
     """ Simple workaround to replace scipy's silly convention 
     for treating the spline_degree=0 edge case. 
 
