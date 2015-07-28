@@ -208,7 +208,6 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
             # place the percentiles into the catalog
             output[indices_of_mass_bin] = 1.00 - percentiles[ind_sorted]
 
-        print 'Percentiles are assigned \n ***** \n ----- \n'
         return output
         
     # compute mean halo occupation
@@ -246,7 +245,6 @@ class HeavisideCenAssemBiasModel(hod_components.OccupationComponent):
         try:
             sec_haloprop_percentile = inp_halo_catalog[self.sec_haloprop_percentile_key]
         except KeyError:
-            print(' Secondary halo property percentiles not pre-computed, computing now.')
             sec_haloprop_percentile = self.compute_sec_haloprop_percentiles(**kwargs)
 
 
