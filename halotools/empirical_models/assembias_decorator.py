@@ -12,6 +12,7 @@ class HeavisideAssembiasComponent(object):
     """
     """
     def __init__(self, sec_haloprop_key = model_defaults.sec_haloprop_key, 
+        loginterp = True, 
         **kwargs):
         """
         """
@@ -27,6 +28,7 @@ class HeavisideAssembiasComponent(object):
             raise HalotoolsError(msg % ('lower_bound', 'upper_bound', 
                 'method_name_to_decorate', 'baseline_model'))
 
+        self._loginterp = loginterp
         self.sec_haloprop_key = sec_haloprop_key
         self.prim_haloprop_key = self.baseline_model.prim_haloprop_key
 
@@ -48,8 +50,28 @@ class HeavisideAssembiasComponent(object):
         else:
             msg = ("The constructor to the HeavisideAssembiasComponent class "
                 "must be called with either the ``split`` keyword argument,\n"
-                " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" 
+                " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" )
             raise HalotoolsError(msg)
+
+    def percentile_splitting_function(self, halo_table):
+        """
+        """
+        try:
+            prim_haloprop = halo_table[self.prim_haloprop_key]
+        except KeyError:
+            raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
+
+        model_ordinates = [self.param_dict[self._get_param_dict_key(ipar)] for ipar in range(len(model_abcissa))]
+
+        if self._loginterp is True:
+            spline_function = model_helpers.custom_spline(
+                np.log10(self._abcissa), model_ordinates)
+            return spline_function(np.log10(prim_haloprop))
+        else:
+            model_abcissa = self._abcissa
+            spline_function = model_helpers.custom_spline(
+                self._abcissa, model_ordinates)
+            return spline_function(prim_haloprop)
 
     def _initialize_param_dict(self, **kwargs):
         """
@@ -69,7 +91,7 @@ class HeavisideAssembiasComponent(object):
         else:
             msg = ("The constructor to the HeavisideAssembiasComponent class "
                 "must be called with either the ``split`` keyword argument,\n"
-                " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" 
+                " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" )
             raise HalotoolsError(msg)
 
 
