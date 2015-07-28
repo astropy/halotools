@@ -15,9 +15,32 @@ class HeavisideAssembiasComponent(object):
         loginterp = True, 
         **kwargs):
         """
+        Parameters 
+        ----------
+        baseline_model : Class object 
+            Class governing the underlying behavior which is being 
+            decorated with assembly bias. An instance of this class will 
+            be built by passing on the full set of keyword arguments that 
+            were passed to `HeavisideAssembiasComponent`. 
+
+        method_name_to_decorate : string 
+            Name of the method bound instances of ``baseline_model`` that 
+            we are decorating with assembly bias. 
+
+        sec_haloprop_key : string, optional 
+            String giving the column name of the secondary halo property 
+            governing the assembly bias. Must be a key in the halo_table 
+            passed to the methods of `HeavisideAssembiasComponent`. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        loginterp : bool, optional
+            If set to True, the interpolation will be done 
+            in the logarithm of the primary halo property, 
+            rather than linearly. Default is True. 
+
         """
         try:
-            self.baseline_model = kwargs['baseline_model']
+            self.baseline_model_instance_instance = kwargs['baseline_model'](**kwargs)
             self._method_name_to_decorate = kwargs['method_name_to_decorate']
             self._lower_bound = kwargs['lower_bound']
             self._upper_bound = kwargs['upper_bound']
@@ -26,17 +49,17 @@ class HeavisideAssembiasComponent(object):
                 "must be called with the following keyword arguments:\n" 
                 "``%s``, ``%s``, ``%s``, ``%s``")
             raise HalotoolsError(msg % ('lower_bound', 'upper_bound', 
-                'method_name_to_decorate', 'baseline_model'))
+                'method_name_to_decorate', 'baseline_model_instance'))
 
         self._loginterp = loginterp
         self.sec_haloprop_key = sec_haloprop_key
-        self.prim_haloprop_key = self.baseline_model.prim_haloprop_key
+        self.prim_haloprop_key = self.baseline_model_instance.prim_haloprop_key
 
         self._initialize_param_dict(**kwargs)
         self._setup_percentile_splitting(**kwargs)
 
     def __getattr__(self, attr):
-        return getattr(self.baseline_model, attr)
+        return getattr(self.baseline_model_instance, attr)
 
     def _setup_percentile_splitting(self, **kwargs):
         """
@@ -76,8 +99,8 @@ class HeavisideAssembiasComponent(object):
     def _initialize_param_dict(self, **kwargs):
         """
         """
-        if hasattr(self.baseline_model, 'param_dict'):
-            self.param_dict = self.baseline_model.param_dict
+        if hasattr(self.baseline_model_instance, 'param_dict'):
+            self.param_dict = self.baseline_model_instance.param_dict
         else:
             self.param_dict = {}
 
