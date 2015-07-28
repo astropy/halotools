@@ -4,19 +4,79 @@ Decorator class for implementing generalized assembly bias
 """
 
 import numpy as np 
-from . import hod_components 
 from . import model_defaults 
 
 from ..halotools_exceptions import HalotoolsError
 
-class HeavisideAssembiasDecorator(object):
+class HeavisideAssembiasComponent(object):
     """
     """
-    def __init__(self, lower_bound, upper_bound, split_func, main_func):
-        self.lower_bound = lower_bound
-        self.upper_bound = upper_bound
-        self.split_func = split_func
-        self.main_func = main_func
+    def __init__(self, sec_haloprop_key = model_defaults.sec_haloprop_key, 
+        **kwargs):
+        """
+        """
+        try:
+            self.baseline_model = kwargs['baseline_model']
+            self._method_name_to_decorate = kwargs['method_name_to_decorate']
+            self._lower_bound = kwargs['lower_bound']
+            self._upper_bound = kwargs['upper_bound']
+        except KeyError:
+            msg = ("The constructor to the HeavisideAssembiasComponent class "
+                "must be called with the following keyword arguments:\n" 
+                "``%s``, ``%s``, ``%s``, ``%s``")
+            raise HalotoolsError(msg % ('lower_bound', 'upper_bound', 
+                'method_name_to_decorate', 'baseline_model'))
+
+        self.sec_haloprop_key = sec_haloprop_key
+        self.prim_haloprop_key = self.baseline_model.prim_haloprop_key
+
+        self._initialize_param_dict(**kwargs)
+        self._setup_percentile_splitting(**kwargs)
+
+    def __getattr__(self, attr):
+        return getattr(self.baseline_model, attr)
+
+    def _setup_percentile_splitting(self, **kwargs):
+        """
+        """
+        if 'split' in kwargs.keys():
+            self._split_abcissa = [0]
+            self._split_ordinates = [kwargs['split']]
+        elif ('split_ordinates' in kwargs.keys()) & ('split_abcissa' in kwargs.keys()):
+            self._split_abcissa = kwargs['split_abcissa']
+            self._split_ordinates = kwargs['split_ordinates']
+        else:
+            msg = ("The constructor to the HeavisideAssembiasComponent class "
+                "must be called with either the ``split`` keyword argument,\n"
+                " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" 
+            raise HalotoolsError(msg)
+
+    def _initialize_param_dict(self, **kwargs):
+        """
+        """
+        if hasattr(self.baseline_model, 'param_dict'):
+            self.param_dict = self.baseline_model.param_dict
+        else:
+            self.param_dict = {}
+
+        if 'assembias_strength' in kwargs.keys():
+            self._assembias_strength_abcissa = [0]
+            self.param_dict[self._get_param_dict_key(0)] = kwargs['assembias_strength']
+        elif ('assembias_strength_ordinates' in kwargs.keys()) & ('assembias_strength_abcissa' in kwargs.keys()):
+            self._assembias_strength_abcissa = kwargs['assembias_strength_abcissa']
+            for ipar, val in enumerate(kwargs['assembias_strength_ordinates']):
+                self.param_dict[self._get_param_dict_key(ipar)] = val
+        else:
+            msg = ("The constructor to the HeavisideAssembiasComponent class "
+                "must be called with either the ``split`` keyword argument,\n"
+                " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" 
+            raise HalotoolsError(msg)
+
+
+    def _get_param_dict_key(self, ipar):
+        """
+        """
+        return self._method_name_to_decorate + '_assembias_param' + str(ipar+1)
 
     def bound_decfunc(self, bound):
 
