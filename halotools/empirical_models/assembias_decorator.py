@@ -12,8 +12,7 @@ class HeavisideAssembiasComponent(object):
     """
     """
     def __init__(self, sec_haloprop_key = model_defaults.sec_haloprop_key, 
-        loginterp = True, 
-        **kwargs):
+        loginterp = True, split = 0.5, assembias_strength = 0.5, **kwargs):
         """
         Parameters 
         ----------
@@ -25,7 +24,34 @@ class HeavisideAssembiasComponent(object):
 
         method_name_to_decorate : string 
             Name of the method bound instances of ``baseline_model`` that 
-            we are decorating with assembly bias. 
+            we are decorating with assembly bias.
+
+        lower_bound : float 
+            Smallest physically meaningful value for the property being modeled. 
+
+            For example, if modeling the first occupation moment of any galaxy type, 
+            ``lower_bound`` = 0; the same value would be used if modeling 
+            the quenched fraction. 
+
+            Can be set to -float("inf") provided that 
+            the ``upper_bound`` keyword argument is set to a bounded value. 
+
+        upper_bound : float 
+            Largest physically meaningful value for the property being modeled. 
+
+            For example, if modeling the first occupation moment of any central galaxies, 
+            ``upper_bound`` = 1, whereas for satellites we would set ``upper_bound`` = float("inf"). 
+
+            Can be set to float("inf") provided that 
+            the ``lower_bound`` keyword argument is set to a bounded value. 
+
+        split : float, optional 
+            Fraction between 0 and 1 defining how we split halos into two groupings based on 
+            their conditional secondary percentiles. Default is 0.5
+
+        assembias_strength : float, optional 
+            Fraction between -1 and 1 defining the assembly bias correlation strength. 
+            Default is 0.5. 
 
         sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property 
@@ -40,7 +66,8 @@ class HeavisideAssembiasComponent(object):
 
         """
         try:
-            self.baseline_model_instance_instance = kwargs['baseline_model'](**kwargs)
+            baseline_model_instance = kwargs['baseline_model'](**kwargs)
+            self.baseline_model_instance = baseline_model_instance
             self._method_name_to_decorate = kwargs['method_name_to_decorate']
             self._lower_bound = kwargs['lower_bound']
             self._upper_bound = kwargs['upper_bound']
@@ -55,9 +82,20 @@ class HeavisideAssembiasComponent(object):
         self.sec_haloprop_key = sec_haloprop_key
         self.prim_haloprop_key = self.baseline_model_instance.prim_haloprop_key
 
-        self._initialize_param_dict(**kwargs)
-        self._setup_percentile_splitting(**kwargs)
+        if 'split_abcissa' and 'split_ordinates' in kwargs:
+            self._setup_percentile_splitting(split_abcissa=kwargs['split_abcissa'], 
+                split_ordinates=kwargs['split_ordinates'])
+        else:
+            self._setup_percentile_splitting(split = split)
 
+
+        if 'assembias_strength_abcissa' and 'assembias_strength_ordinates' in kwargs:
+            self._initialize_param_dict(split_abcissa=kwargs['assembias_strength_abcissa'], 
+                split_ordinates=kwargs['assembias_strength_abcissa'])
+        else:
+            self._initialize_param_dict(assembias_strength=assembias_strength)
+
+        
     def __getattr__(self, attr):
         return getattr(self.baseline_model_instance, attr)
 
@@ -105,16 +143,16 @@ class HeavisideAssembiasComponent(object):
             self.param_dict = {}
 
         if 'assembias_strength' in kwargs.keys():
-            self._assembias_strength_abcissa = [0]
+            self._assembias_strength_abcissa = [1]
             self.param_dict[self._get_param_dict_key(0)] = kwargs['assembias_strength']
-        elif ('assembias_strength_ordinates' in kwargs.keys()) & ('assembias_strength_abcissa' in kwargs.keys()):
+        elif 'assembias_strength_ordinates' and 'assembias_strength_abcissa' in kwargs:
             self._assembias_strength_abcissa = kwargs['assembias_strength_abcissa']
             for ipar, val in enumerate(kwargs['assembias_strength_ordinates']):
                 self.param_dict[self._get_param_dict_key(ipar)] = val
         else:
             msg = ("The constructor to the HeavisideAssembiasComponent class "
-                "must be called with either the ``split`` keyword argument,\n"
-                " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" )
+                "must be called with either the ``assembias_strength`` keyword argument,\n"
+                " or both the ``assembias_strength_abcissa`` and ``assembias_strength_ordinates`` keyword arguments" )
             raise HalotoolsError(msg)
 
 
