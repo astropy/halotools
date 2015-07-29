@@ -6,6 +6,8 @@ Decorator class for implementing generalized assembly bias
 __all__ = ['HeavisideAssembiasComponent']
 
 import numpy as np 
+from warnings import warn 
+
 from . import model_defaults, model_helpers
 
 from ..halotools_exceptions import HalotoolsError
@@ -65,6 +67,20 @@ class HeavisideAssembiasComponent(object):
             This fraction will equal the input ``split_ordinates`` for halos whose ``prim_haloprop`` 
             equals the input ``split_abcissa``. Default is to assume a constant 50/50 split. 
 
+        split_func : function, optional 
+            Function object used to split the input halos into two types.
+
+        halo_type_tuple : tuple, optional 
+            Tuple providing the information about how elements of the input ``halo_table`` 
+            have been pre-divided into types. The first tuple entry must be a 
+            string giving the column name of the input ``halo_table`` that provides the halo-typing. 
+            Second and third entries gives the value of this column for type-1 and type-2 halos, respectively. 
+
+            If provided, you must ensure that the splitting of the ``halo_table`` 
+            was self-consistently performed with the 
+            input ``split``, or ``split_abcissa`` and ``split_ordinates``, or 
+            ``split_func`` keyword arguments. 
+
         assembias_strength : float, optional 
             Fraction between -1 and 1 defining the assembly bias correlation strength. 
             Default is 0.5. 
@@ -106,18 +122,22 @@ class HeavisideAssembiasComponent(object):
         self.sec_haloprop_key = sec_haloprop_key
         self.prim_haloprop_key = self.baseline_model_instance.prim_haloprop_key
 
-        if 'split_abcissa' and 'split_ordinates' in kwargs:
+        if 'split_func' in kwargs:
+            self.set_percentile_splitting(split_func = kwargs['split_func'])
+        elif 'split_abcissa' and 'split_ordinates' in kwargs:
             self.set_percentile_splitting(split_abcissa=kwargs['split_abcissa'], 
                 split_ordinates=kwargs['split_ordinates'])
         else:
             self.set_percentile_splitting(split = split)
-
 
         if 'assembias_strength_abcissa' and 'assembias_strength_ordinates' in kwargs:
             self._initialize_param_dict(split_abcissa=kwargs['assembias_strength_abcissa'], 
                 split_ordinates=kwargs['assembias_strength_abcissa'])
         else:
             self._initialize_param_dict(assembias_strength=assembias_strength)
+
+        if 'halo_type_tuple' in kwargs:
+            self.halo_type_tuple = kwargs['halo_type_tuple']
 
         
     def __getattr__(self, attr):
@@ -126,7 +146,13 @@ class HeavisideAssembiasComponent(object):
     def set_percentile_splitting(self, **kwargs):
         """
         """
-        if 'split' in kwargs.keys():
+        if 'split_func' in kwargs.keys():
+            func = kwargs['split_func']
+            if callable(func):
+                self._input_split_func = func
+            else:
+                raise HalotoolsError("Input ``split_func`` must be a callable function")
+        elif 'split' in kwargs.keys():
             self._split_abcissa = [0]
             self._split_ordinates = [kwargs['split']]
         elif ('split_ordinates' in kwargs.keys()) & ('split_abcissa' in kwargs.keys()):
@@ -138,15 +164,22 @@ class HeavisideAssembiasComponent(object):
                 " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" )
             raise HalotoolsError(msg)
 
-    def percentile_splitting_function(self, halo_table):
+    def percentile_splitting_function(self, **kwargs):
         """
         """
+        try:
+            halo_table = kwargs['halo_table']
+        except KeyError:
+            raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
+                "``halo_table`` input keyword argument")
         try:
             prim_haloprop = halo_table[self.prim_haloprop_key]
         except KeyError:
             raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
 
-        if self._loginterp is True:
+        if hasattr(self, '_input_split_func'):
+            return self._input_split_func(halo_table = halo_table)
+        elif self._loginterp is True:
             spline_function = model_helpers.custom_spline(
                 np.log10(self._split_abcissa), self._split_ordinates)
             return spline_function(np.log10(prim_haloprop))
@@ -177,9 +210,16 @@ class HeavisideAssembiasComponent(object):
                 " or both the ``assembias_strength_abcissa`` and ``assembias_strength_ordinates`` keyword arguments" )
             raise HalotoolsError(msg)
 
-    def assembias_strength(self, halo_table):
+    def assembias_strength(self, **kwargs):
         """
         """
+
+        try:
+            halo_table = kwargs['halo_table']
+        except KeyError:
+            raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
+                "``halo_table`` input keyword argument")
+
         try:
             prim_haloprop = halo_table[self.prim_haloprop_key]
         except KeyError:
@@ -251,14 +291,15 @@ class HeavisideAssembiasComponent(object):
         dx1 = self.dx1(*args, **kwargs)
         return -split*dx1/(1-split)
 
-    def new_main(self, *args, **kwargs):
+    def new_main(self, halo_table):
 
-        split = self.split_func(*args, **kwargs)
-        result = self.main_func(*args, **kwargs)
+        split = self.split_func(halo_table)
+        result = self.main_func(halo_table)
 
         no_edge_mask = (split > 0) & (split < 1) & (result > lower_bound) & (result < upper_bound)
         no_edge_result = result[no_edge_mask]
-        no_edge_halos = halos[no_edge_mask]
+        no_edge_halos = halo_table[no_edge_mask]
+
 
         case1_mask = no_edge_halos['case'] == 1
         dx1 = self.dx1(no_edge_halos[case1_mask])
@@ -272,22 +313,43 @@ class HeavisideAssembiasComponent(object):
 
     def assembias_decorator(self, func):
 
-        def wrapper(**kwargs):
-            result = func(**kwargs)
-            split = self.percentile_splitting_function(**kwargs)
+        def wrapper(*args, **kwargs):
 
+            try:
+                halo_table = kwargs['halo_table']
+            except KeyError:
+                raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
+                    "``halo_table`` input keyword argument")
+
+            split = self.percentile_splitting_function(halo_table = halo_table)
+            result = func(*args, **kwargs)
+
+            # We will only apply decorate values that are not edge cases
             no_edge_mask = (
                 (split > 0) & (split < 1) & 
                 (result > self._lower_bound) & (result < self._upper_bound)
                 )
-
             no_edge_result = result[no_edge_mask]
-            no_edge_halos = kwargs['halo_table'][no_edge_mask]
+            no_edge_halos = halo_table[no_edge_mask]
 
-            if hasattr(self, halo_type_key):
-                pass
+            # Determine the type1_mask that divides the halo sample into two subsamples
+            if hasattr(self, halo_type_tuple):
+                halo_type_key = self.halo_type_tuple[0]
+                halo_type1_val = self.halo_type_tuple[1]
+                type1_mask = no_edge_halos[halo_type_key] == halo_type1_val
+            elif self.sec_haloprop_key + '_percentile' in no_edge_halos.keys():
+                no_edge_percentiles = no_edge_halos[self.sec_haloprop_key + '_percentile']
+                no_edge_split = split[no_edge_mask]
+                type1_mask = no_edge_percentiles < no_edge_split
+            else:
+                no_edge_percentiles = compute_conditional_percentiles(
+                    halo_table = no_edge_halos, 
+                    prim_haloprop_key = self.prim_haloprop_key, 
+                    sec_haloprop_key = self.sec_haloprop_key
+                    )
+                no_edge_split = split[no_edge_mask]
+                type1_mask = no_edge_percentiles < no_edge_split
 
-            case1_mask = no_edge_halos['case'] == 1
             dx1 = self.dx1(no_edge_halos[case1_mask])
             no_edge_result[case1_mask] += dx1
             dx2 = self.dx1(no_edge_halos[np.invert(case1_mask)])
