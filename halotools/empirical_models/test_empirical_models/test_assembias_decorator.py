@@ -14,6 +14,11 @@ from .. import model_defaults
 from ...utils.table_utils import SampleSelector
 
 
+@pytest.mark.slow
+def test_silly():
+    assert 4 < 5
+
+
 class TestAssembiasDecorator(TestCase):
 
     def setup_class(self):
