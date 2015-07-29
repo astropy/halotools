@@ -136,7 +136,7 @@ def compute_conditional_percentiles(**kwargs):
             float(len(sec_haloprop[indices_of_prim_haloprop_bin]))
         
         # place the percentiles into the catalog
-        output[indices_of_prim_haloprop_bin] = 1.00 - percentiles[ind_sorted]
+        output[indices_of_prim_haloprop_bin] = 1.0 - percentiles[ind_sorted][::-1]
 
     return output
 
