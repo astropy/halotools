@@ -22,7 +22,6 @@ except ImportError:
 import posixpath
 import urlparse
 
-import h5py
 import datetime 
 
 from ..utils.array_utils import find_idx_nearest_val
@@ -1070,6 +1069,7 @@ class CatalogManager(object):
         halo_table.write(output_fname, path='data', overwrite = overwrite, append = overwrite)
 
         ### Add metadata to the hdf5 file
+        import h5py
         f = h5py.File(output_fname)
 
         time_right_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
