@@ -9,16 +9,16 @@ from astropy.tests.pytest_plugins import *
 # enable_deprecations_as_exceptions()
 
 
-def pytest_addoption_decorator(func):
+# def pytest_addoption_decorator(func):
 
-    def wrapper(parser):
-        baseline_behavior = func(parser)
+#     def wrapper(parser):
+#         baseline_behavior = func(parser)
 
-        parser.addoption('--slow', action='store_true', default=False,
-            help='Also run slow tests')
+#         parser.addoption('--slow', action='store_true', default=False,
+#             help='Also run slow tests')
 
-    return wrapper
-pytest_addoption = pytest_addoption_decorator(pytest_addoption)
+#     return wrapper
+# pytest_addoption = pytest_addoption_decorator(pytest_addoption)
 
 # import pytest
 
