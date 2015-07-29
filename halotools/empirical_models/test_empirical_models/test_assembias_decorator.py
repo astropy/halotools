@@ -51,6 +51,10 @@ class TestAssembiasDecorator(TestCase):
     	output_split = model.percentile_splitting_function(halo_table=self.halo_table)
     	assert np.all(output_split == 0.75)
 
+    	output_strength = model.assembias_strength(halo_table=self.halo_table)
+    	assert np.all(output_strength == 0.5)
+
+
 
 
 

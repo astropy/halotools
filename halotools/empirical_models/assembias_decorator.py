@@ -161,8 +161,14 @@ class HeavisideAssembiasComponent(object):
         except KeyError:
             raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
 
-        model_ordinates = [self.param_dict[self._get_param_dict_key(ipar)] for ipar in range(len(model_abcissa))]
+        model_ordinates = [self.param_dict[self._get_param_dict_key(ipar)] for ipar in range(len(self._assembias_strength_abcissa))]
 
+        spline_function = model_helpers.custom_spline(self._assembias_strength_abcissa, model_ordinates)
+
+        if self._loginterp is True:
+            return spline_function(np.log10(prim_haloprop))
+        else:
+            spline_function(prim_haloprop)
 
 
     def _get_param_dict_key(self, ipar):
