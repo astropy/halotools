@@ -3,6 +3,8 @@
 Decorator class for implementing generalized assembly bias
 """
 
+__all__ = ['HeavisideAssembiasComponent']
+
 import numpy as np 
 from . import model_defaults, model_helpers
 
@@ -48,10 +50,31 @@ class HeavisideAssembiasComponent(object):
         split : float, optional 
             Fraction between 0 and 1 defining how we split halos into two groupings based on 
             their conditional secondary percentiles. Default is 0.5
+            their conditional secondary percentiles. Default is 0.5 for a constant 50/50 split. 
+
+        split_abcissa : list, optional 
+            Values of the primary halo property at which the halos are split as described above in 
+            the ``split`` argument. 
+            If ``loginterp`` is set to True (the default behavior), the interpolation will be done 
+            in the logarithm of the primary halo property. Default is to assume a constant 50/50 split. 
+
+        split_ordinates : list, optional 
+            Values of the fraction between 0 and 1 defining how we split halos into two groupings in a 
+            fashion that varies with the value of ``prim_haloprop``. 
+            This fraction will equal the input ``split_ordinates`` for halos whose ``prim_haloprop`` 
+            equals the input ``split_abcissa``. Default is to assume a constant 50/50 split. 
 
         assembias_strength : float, optional 
             Fraction between -1 and 1 defining the assembly bias correlation strength. 
             Default is 0.5. 
+
+        assembias_strength_abcissa : list, optional 
+            Values of the primary halo property at which the assembly bias strength is specified. 
+            Default is to assume a constant strength given by ``assembias_strength`` keyword argument. 
+
+        assembias_strength_ordinates : list, optional 
+            Values of the assembly bias strength when evaluated at the input ``assembias_strength_abcissa``. 
+            Default is to assume a constant strength given by ``assembias_strength`` keyword argument. 
 
         sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property 
