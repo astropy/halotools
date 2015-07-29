@@ -13,7 +13,7 @@ from ..hod_components import Zheng07Cens, Leauthaud11Cens
 from ..sfr_components import BinaryGalpropInterpolModel
 from ...sim_manager import FakeSim
 from ...utils.table_utils import SampleSelector
-
+from ...utils.array_utils import array_like_length as custom_len
 
 @pytest.mark.slow
 def test_silly():
@@ -26,7 +26,9 @@ class TestAssembiasDecorator(TestCase):
     	Npts = 1e4
     	mass = np.zeros(Npts) + 1e12
     	zform = np.linspace(0, 10, Npts)
-    	d = {'halo_mvir': mass, 'halo_zform': zform}
+        halo_designation = np.zeros(Npts, dtype=bool)
+        halo_designation[Npts/2:] = True
+    	d = {'halo_mvir': mass, 'halo_zform': zform, 'halo_is_old': halo_designation}
     	self.toy_halo_table = Table(d)
 
         fakesim = FakeSim()
@@ -74,16 +76,22 @@ class TestAssembiasDecorator(TestCase):
         galprop_ordinates = [0.5]
         method_name_to_decorate='mean_'+galprop_key+'_fraction'
 
-        # baseline_model_instance = BinaryGalpropInterpolModel(galprop_key = galprop_key, 
-        #     abcissa = abcissa, ordinates = ordinates)
-        # x = np.logspace(1, 25, 1e4)
-        # assert np.all(baseline_model_instance.mean_quiescent_fraction(prim_haloprop=x) == 0.5)
+        def split_func(**kwargs):
+            return np.zeros(custom_len(kwargs['halo_table'])) + 0.5
+
+        halo_type_tuple = ('halo_is_old', False, True)
 
         model = HeavisideAssembiasComponent(baseline_model=baseline_model, 
             galprop_abcissa = galprop_abcissa, galprop_ordinates = galprop_ordinates, galprop_key = galprop_key,
             method_name_to_decorate=method_name_to_decorate, 
             lower_bound = 0, upper_bound = 1, 
+            split_func = split_func, halo_type_tuple = halo_type_tuple, 
+            prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_zform'
             )
+
+        result = model.mean_quiescent_fraction(halo_table = self.toy_halo_table)
+
+
 
 
 
