@@ -299,15 +299,15 @@ class HeavisideAssembiasComponent(object):
 
         strength = self.assembias_strength(halo_table=halo_table)
         positive_strength_idx = strength > 0
-        negative_strength_idx = np.invert(positive_strength)
+        negative_strength_idx = np.invert(positive_strength_idx)
 
-        if len(halo_table[positive_strength_idx] > 0):
+        if len(halo_table[positive_strength_idx]) > 0:
             result[positive_strength_idx] = (
                 strength[positive_strength_idx]*
                 self.upper_bound_galprop_perturbation(halo_table = halo_table[positive_strength_idx])
                 )
 
-        if len(halo_table[negative_strength_idx] > 0):
+        if len(halo_table[negative_strength_idx]) > 0:
             result[negative_strength_idx] = (
                 strength[negative_strength_idx]*
                 self.lower_bound_galprop_perturbation(halo_table = halo_table[negative_strength_idx])
@@ -315,10 +315,10 @@ class HeavisideAssembiasComponent(object):
 
         return result
 
-    def dx2(self, *args, **kwargs):
-        split = self.split_func(*args, **kwargs)
-        dx1 = self.dx1(*args, **kwargs)
-        return -split*dx1/(1-split)
+    def complementary_galprop_perturbation(self, **kwargs):
+        split = self.percentile_splitting_function(**kwargs)
+        galprop_perturbation = self.galprop_perturbation(**kwargs)
+        return -split*galprop_perturbation/(1-split)
 
     def assembias_decorator(self, func):
         """
@@ -344,7 +344,7 @@ class HeavisideAssembiasComponent(object):
             no_edge_halos = halo_table[no_edge_mask]
 
             # Determine the type1_mask that divides the halo sample into two subsamples
-            if hasattr(self, halo_type_tuple):
+            if hasattr(self, 'halo_type_tuple'):
                 halo_type_key = self.halo_type_tuple[0]
                 halo_type1_val = self.halo_type_tuple[1]
                 type1_mask = no_edge_halos[halo_type_key] == halo_type1_val
@@ -361,10 +361,13 @@ class HeavisideAssembiasComponent(object):
                 no_edge_split = split[no_edge_mask]
                 type1_mask = no_edge_percentiles < no_edge_split
 
-            dx1 = self.dx1(no_edge_halos[case1_mask])
-            no_edge_result[case1_mask] += dx1
-            dx2 = self.dx1(no_edge_halos[np.invert(case1_mask)])
-            no_edge_result[np.invert(case1_mask)] += dx2
+            no_edge_halos_type1 = no_edge_halos[type1_mask]
+            no_edge_result[type1_mask] += self.galprop_perturbation(halo_table = no_edge_halos_type1)
+
+            no_edge_halos_type2 = no_edge_halos[np.invert(type1_mask)]
+            no_edge_result[np.invert(type1_mask)] += (
+                self.complementary_galprop_perturbation(halo_table = no_edge_halos_type2)
+                )
 
             result[no_edge_mask] = no_edge_result
             return result
