@@ -62,8 +62,8 @@ class TestComputeConditionalPercentiles(TestCase):
     	mass[Npts/2:] = 1e14
 
     	zform = np.zeros(Npts)
-    	zform[0:Npts/2] = np.linspace(0, 5, Npts/2)
-    	zform[Npts/2:] = np.linspace(10, 15, Npts/2)
+    	zform[0:Npts/2] = np.linspace(0, 10, Npts/2)
+    	zform[Npts/2:] = np.linspace(20, 30, Npts/2)
 
     	d = {'halo_mvir': mass, 'halo_zform': zform}
     	self.custom_halo_table = Table(d)
@@ -83,11 +83,10 @@ class TestComputeConditionalPercentiles(TestCase):
     def test_custom_halo_table(self):
     	prim_haloprop_bin_boundaries = [1e10, 1e13, 1e15]
 
-    	manual_split = self.custom_halo_table['halo_mvir'] < 1e13
-    	manual_low_zform = self.custom_halo_table[manual_split]
-    	manual_high_zform = self.custom_halo_table[np.invert(manual_split)]
-    	assert manual_low_zform['halo_zform'].max() < manual_high_zform['halo_zform'].min()
-
+    	manual_mass_split = self.custom_halo_table['halo_mvir'] < 1e13
+    	manual_low_mass = self.custom_halo_table[manual_mass_split]
+    	manual_high_mass = self.custom_halo_table[np.invert(manual_mass_split)]
+    	assert manual_low_mass['halo_zform'].max() < manual_high_mass['halo_zform'].min()
 
     	percentiles = compute_conditional_percentiles(
     		halo_table = self.custom_halo_table, 
@@ -95,9 +94,22 @@ class TestComputeConditionalPercentiles(TestCase):
     		sec_haloprop_key = 'halo_zform', 
     		prim_haloprop_bin_boundaries = prim_haloprop_bin_boundaries)
 
+    	low_mass_percentiles = percentiles[manual_mass_split]
+    	high_mass_percentiles = percentiles[np.invert(manual_mass_split)]
+
+    	assert set(low_mass_percentiles) == set(high_mass_percentiles)
+
+    	low_mass_split = low_mass_percentiles < 0.5
+    	low_mass_low_zform = manual_low_mass[low_mass_split]
+    	low_mass_high_zform = manual_low_mass[np.invert(low_mass_split)]
+    	assert 0 <= low_mass_low_zform['halo_zform'].max() <= 5
+    	#assert 5 <= low_mass_high_zform['halo_zform'].max() <= 10
+
     	split = percentiles < 0.5
     	low_zform, high_zform = self.custom_halo_table[split], self.custom_halo_table[np.invert(split)]
     	assert len(low_zform) == len(high_zform)
+
+
 
 
 
