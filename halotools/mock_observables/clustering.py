@@ -951,7 +951,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
         #PBCs and no randoms--calculate randoms analytically.
         elif randoms is None:
             #do volume calculations
-            dv = cylinder_volume(rp_bins,pi_bins) #volume of spheres
+            dv = cylinder_volume(rp_bins,2.0*pi_bins) #volume of spheres
             dv = np.diff(np.diff(dv, axis=0),axis=1) #volume of annuli
             global_volume = period.prod() #sexy
             
@@ -1103,10 +1103,10 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         Npts x 3 numpy array containing 3-d positions of Npts. 
     
     rp_bins : array_like
-        numpy array of boundaries defining the bins in which pairs are counted. 
+        array of boundaries defining the perpendicular bins in which pairs are counted.
     
-    pi_max : float
-        maximum parallel distance to use when calculating :math:`\\w_p`.
+    pi_bins : array_like
+        array of boundaries defining the parallel bins in which pairs are counted. 
     
     sample2 : array_like, optional
         Npts x 3 numpy array containing 3-d positions of Npts.
@@ -1155,14 +1155,6 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         appropriate result is not returned.
 
     """
-    """
-    #process parameters
-    if type(pi_max) not in [int,float,long]:
-        raise ValueError("pi_max must be a number.")
-    if not pi_max>0.0:
-        raise ValueError("pi_max must be a positive real number.")
-    pi_bins = np.array([0.0,pi_max])
-    """
     
     #pass the arguments into the redshift space TPCF function
     result = redshift_space_tpcf(sample1, rp_bins, pi_bins,\
@@ -1177,33 +1169,11 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     elif np.all(sample2==sample1): 
         do_cross=False
     
-    """
-    #return the results.  Note that the results need to be transposed to get 1-D arrays.
-    if (np.all(sample2==sample1)) | (sample2 is None): #return only sample1 auto
-        wp_D1D1 = result.T[0]
-        return wp_D1D1
-    elif (do_auto==True) & (do_cross==True): #return both auto and cross
-        wp_D1D1 = result[0].T[0]
-        wp_D1D2 = result[1].T[0]
-        wp_D2D2 = result[2].T[0]
-        return wp_D1D1, wp_D1D2, wp_D2D2
-    elif (do_auto==False) & (do_cross==True): #return only cross
-        wp_D1D2 = result.T[0]
-        return wp_D1D2
-    else: #return only autos
-        wp_D1D1 = result[0].T[0]
-        wp_D2D2 = result[1].T[0]
-        return wp_D1D1, wp_D2D2 
-    """
-    
     #integrate the redshift space TPCF to get w_p
     def integrate_2D_xi(x,pi_bins):
         return np.sum(x*np.diff(pi_bins),axis=1)
 
-    #return the results.  Note that the results need to be transposed to get 1-D arrays.
-    if (np.all(sample2==sample1)) | (sample2 is None): #return only sample1 auto
-        wp_D1D1 = integrate_2D_xi(result,pi_bins)
-        return wp_D1D1
+    #return the results.
     if (do_auto==True) & (do_cross==True):
         wp_D1D1 = integrate_2D_xi(result[0],pi_bins)
         wp_D1D2 = integrate_2D_xi(result[1],pi_bins)
@@ -1212,9 +1182,14 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     elif (do_auto==False) & (do_cross==True):
         wp_D1D2 = integrate_2D_xi(result,pi_bins)
         return wp_D1D2
-    else:
-        wp_D1D1 = integrate_2D_xi(result,pi_bins)
-        return wp_D1D1
+    elif (do_auto==True) & (do_cross==False):
+        if (np.all(sample2==sample1)) | (sample2 is None): # do only sample 1 auto
+            wp_D1D1 = integrate_2D_xi(result,pi_bins)
+            return wp_D1D1
+        else: # do both auto for sample1 and sample2
+            wp_D1D1 = integrate_2D_xi(result[0],pi_bins)  
+            wp_D2D2 = integrate_2D_xi(result[1],pi_bins)
+            return wp_D1D1, wp_D2D2
 
 
 def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
