@@ -74,7 +74,9 @@ class HeavisideAssembiasComponent(object):
             Tuple providing the information about how elements of the input ``halo_table`` 
             have been pre-divided into types. The first tuple entry must be a 
             string giving the column name of the input ``halo_table`` that provides the halo-typing. 
-            Second and third entries gives the value of this column for type-1 and type-2 halos, respectively. 
+            The second entry gives the value that will be stored in this column for halos 
+            that are above the percentile split, the third entry gives the value for halos 
+            below the split. 
 
             If provided, you must ensure that the splitting of the ``halo_table`` 
             was self-consistently performed with the 

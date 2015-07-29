@@ -217,6 +217,8 @@ def retrieve_simclass(simname):
 ######################################################
 
 class HaloCatalog(object):
+    """
+    """
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder, 
