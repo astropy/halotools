@@ -7,6 +7,8 @@ from functools import partial
 from ..table_utils import SampleSelector
 from astropy.table import Table
 
+from ...sim_manager.generate_random_sim import FakeSim
+
 class TestSampleSelector(TestCase):
 	"""
 	"""
@@ -49,6 +51,23 @@ class TestSampleSelector(TestCase):
 		f = partial(SampleSelector.split_sample, table=ax, key='x', 
 			percentiles= 0.5)
 		self.assertRaises(TypeError, f)
+
+
+class TestComputeConditionalPercentiles(TestCase):
+
+    def setup_class(self):
+    	Npts = 1e4
+    	mass = np.zeros(Npts) + 1e12
+    	zform = np.linspace(0, 10, Npts)
+    	d = {'halo_mvir': mass, 'halo_zform': zform}
+    	self.trivial_halo_table = Table(d)
+
+    	fakesim = FakeSim()
+    	self.fake_halo_table = fakesim.halo_table
+
+    def test_fake_halo_table(self):
+    	pass
+
 
 
 

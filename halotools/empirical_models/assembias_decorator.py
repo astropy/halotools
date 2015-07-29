@@ -9,6 +9,7 @@ import numpy as np
 from . import model_defaults, model_helpers
 
 from ..halotools_exceptions import HalotoolsError
+from ..utils.table_utils import compute_conditional_percentiles
 
 class HeavisideAssembiasComponent(object):
     """
