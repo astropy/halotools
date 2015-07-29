@@ -18,8 +18,6 @@ except ImportError:
 import posixpath
 import urlparse
 
-import h5py
-
 from . import sim_defaults, catalog_manager
 
 from ..utils.array_utils import find_idx_nearest_val
@@ -329,6 +327,7 @@ class HaloCatalog(object):
             "and the %s inferred from its filename.\n"
             "This indicates a bug during the generation of the hdf5 file storing the catalog.")
 
+        import h5py
         f = h5py.File(fname)
         if abs(float(f.attrs['redshift']) - closest_redshift) > 0.01:
             raise HalotoolsIOError(msg % ('redshift', 'redshift'))
