@@ -8,9 +8,10 @@ import numpy as np
 from astropy.table import Table
 
 from ..assembias_decorator import HeavisideAssembiasComponent
-from ...sim_manager import FakeSim
-from ..hod_components import Zheng07Cens, Leauthaud11Cens
 from .. import model_defaults
+from ..hod_components import Zheng07Cens, Leauthaud11Cens
+from ..sfr_components import BinaryGalpropInterpolModel
+from ...sim_manager import FakeSim
 from ...utils.table_utils import SampleSelector
 
 
@@ -26,7 +27,10 @@ class TestAssembiasDecorator(TestCase):
     	mass = np.zeros(Npts) + 1e12
     	zform = np.linspace(0, 10, Npts)
     	d = {'halo_mvir': mass, 'halo_zform': zform}
-    	self.halo_table = Table(d)
+    	self.toy_halo_table = Table(d)
+
+        fakesim = FakeSim()
+        self.fake_halo_table = fakesim.halo_table
 
     def test_initialization(self):
     	"""
@@ -49,17 +53,40 @@ class TestAssembiasDecorator(TestCase):
     	keys = [key for key in model.param_dict.keys() if method_name_to_decorate + '_assembias_param' in key]
     	assert len(keys) == len(model._assembias_strength_abcissa)
 
-    	output_split = model.percentile_splitting_function(halo_table=self.halo_table)
+    	output_split = model.percentile_splitting_function(halo_table=self.toy_halo_table)
     	assert np.all(output_split == 0.5)
 
     	model._split_ordinates = [0.75]
-    	output_split = model.percentile_splitting_function(halo_table=self.halo_table)
+    	output_split = model.percentile_splitting_function(halo_table=self.toy_halo_table)
     	assert np.all(output_split == 0.75)
 
-    	output_strength = model.assembias_strength(halo_table=self.halo_table)
+    	output_strength = model.assembias_strength(halo_table=self.toy_halo_table)
     	assert np.all(output_strength == 0.5)
 
         assert hasattr(model, 'mean_occupation')
+
+    def test_behavior_default_model(self):
+        """
+        """
+        baseline_model = BinaryGalpropInterpolModel
+        galprop_key='quiescent'
+        galprop_abcissa = [12]
+        galprop_ordinates = [0.5]
+        method_name_to_decorate='mean_'+galprop_key+'_fraction'
+
+        # baseline_model_instance = BinaryGalpropInterpolModel(galprop_key = galprop_key, 
+        #     abcissa = abcissa, ordinates = ordinates)
+        # x = np.logspace(1, 25, 1e4)
+        # assert np.all(baseline_model_instance.mean_quiescent_fraction(prim_haloprop=x) == 0.5)
+
+        model = HeavisideAssembiasComponent(baseline_model=baseline_model, 
+            galprop_abcissa = galprop_abcissa, galprop_ordinates = galprop_ordinates, galprop_key = galprop_key,
+            method_name_to_decorate=method_name_to_decorate, 
+            lower_bound = 0, upper_bound = 1, 
+            )
+
+
+
 
 
 
