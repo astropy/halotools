@@ -182,12 +182,17 @@ class HeavisideAssembiasComponent(object):
         elif self._loginterp is True:
             spline_function = model_helpers.custom_spline(
                 np.log10(self._split_abcissa), self._split_ordinates)
-            return spline_function(np.log10(prim_haloprop))
+            result = spline_function(np.log10(prim_haloprop))
         else:
             model_abcissa = self._split_abcissa
             spline_function = model_helpers.custom_spline(
                 self._split_abcissa, self._split_ordinates)
-            return spline_function(prim_haloprop)
+            result = spline_function(prim_haloprop)
+
+        result = np.where(result < 0, 0, result)
+        result = np.where(result > 1, 1, result)
+        return result
+
 
     def _initialize_param_dict(self, **kwargs):
         """
@@ -229,10 +234,16 @@ class HeavisideAssembiasComponent(object):
 
         spline_function = model_helpers.custom_spline(self._assembias_strength_abcissa, model_ordinates)
 
+
         if self._loginterp is True:
-            return spline_function(np.log10(prim_haloprop))
+            result = spline_function(np.log10(prim_haloprop))
         else:
-            spline_function(prim_haloprop)
+            result = spline_function(prim_haloprop)
+
+        result = np.where(result > 1, 1, result)
+        result = np.where(result < -1, -1, result)
+
+        return result
 
 
     def _get_param_dict_key(self, ipar):
@@ -259,30 +270,62 @@ class HeavisideAssembiasComponent(object):
 
         return decorator
 
-    def lower_bound(self, *args, **kwargs):
+    def lower_bound_galprop_perturbation(self, **kwargs):
+        """
+        """
 
-        lower_bound1_func = self.bound_decfunc(self.lower_bound)(self.main_func)
-        lower_bound2_func = self.complementary_bound_decfunc(self.split_func)(upper_bound1_func)
+        baseline_func = getattr(self.baseline_model_instance, self._method_name_to_decorate)
 
-        return np.max(lower_bound1_func(*args, **kwargs), lower_bound2_func(*args, **kwargs))
+        lower_bound1 = self._lower_bound - baseline_func(**kwargs)
+        lower_bound2_prefactor = (
+            (1 - self.percentile_splitting_function(**kwargs))/
+            self.percentile_splitting_function(**kwargs))
+        lower_bound2 = lower_bound2_prefactor*(baseline_func(**kwargs) - self._upper_bound)
 
-    def upper_bound(self, *args, **kwargs):
+        return np.maximum(lower_bound1, lower_bound2)
 
-        upper_bound1_func = self.bound_decfunc(self.upper)(self.main_func)
-        upper_bound2_func = self.complementary_bound_decfunc(self.split_func)(lower_bound1_func)
+    def upper_bound_galprop_perturbation(self, **kwargs):
+        """
+        """
 
-        return np.min(upper_bound1_func(*args, **kwargs), upper_bound2_func(*args, **kwargs))
+        baseline_func = getattr(self.baseline_model_instance, self._method_name_to_decorate)
 
-    def dx1(self, *args, **kwargs):
+        upper_bound1 = self._upper_bound - baseline_func(**kwargs)
+        upper_bound2_prefactor = (
+            (1 - self.percentile_splitting_function(**kwargs))/
+            self.percentile_splitting_function(**kwargs))
+        upper_bound2 = upper_bound2_prefactor*(baseline_func(**kwargs) - self._lower_bound)
 
-        result = np.zeros(len(args(0)))
+        return np.minimum(upper_bound1, upper_bound2)
 
-        strength = self.strength(*args, **kwargs)
+
+    def galprop_perturbation(self, **kwargs):
+        """
+        """
+
+        try:
+            halo_table = kwargs['halo_table']
+        except KeyError:
+            raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
+                "``halo_table`` input keyword argument")
+
+        result = np.zeros(len(halo_table))
+
+        strength = self.assembias_strength(halo_table=halo_table)
         positive_strength_idx = strength > 0
         negative_strength_idx = np.invert(positive_strength)
 
-        result[positive_strength_idx] = strength[positive_strength_idx]*upper_bound(*args, **kwargs)
-        result[negative_strength_idx] = strength[negative_strength_idx]*lower_bound(*args, **kwargs)
+        if len(halo_table[positive_strength_idx] > 0):
+            result[positive_strength_idx] = (
+                strength[positive_strength_idx]*
+                self.upper_bound_galprop_perturbation(halo_table = halo_table[positive_strength_idx])
+                )
+
+        if len(halo_table[negative_strength_idx] > 0):
+            result[negative_strength_idx] = (
+                strength[negative_strength_idx]*
+                self.lower_bound_galprop_perturbation(halo_table = halo_table[negative_strength_idx])
+                )
 
         return result
 
@@ -290,26 +333,6 @@ class HeavisideAssembiasComponent(object):
         split = self.split_func(*args, **kwargs)
         dx1 = self.dx1(*args, **kwargs)
         return -split*dx1/(1-split)
-
-    def new_main(self, halo_table):
-
-        split = self.split_func(halo_table)
-        result = self.main_func(halo_table)
-
-        no_edge_mask = (split > 0) & (split < 1) & (result > lower_bound) & (result < upper_bound)
-        no_edge_result = result[no_edge_mask]
-        no_edge_halos = halo_table[no_edge_mask]
-
-
-        case1_mask = no_edge_halos['case'] == 1
-        dx1 = self.dx1(no_edge_halos[case1_mask])
-        no_edge_result[case1_mask] += dx1
-        dx2 = self.dx1(no_edge_halos[np.invert(case1_mask)])
-        no_edge_result[np.invert(case1_mask)] += dx2
-
-        result[no_edge_mask] = no_edge_result
-
-        return result
 
     def assembias_decorator(self, func):
 
