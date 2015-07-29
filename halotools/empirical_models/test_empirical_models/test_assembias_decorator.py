@@ -79,17 +79,42 @@ class TestAssembiasDecorator(TestCase):
         def split_func(**kwargs):
             return np.zeros(custom_len(kwargs['halo_table'])) + 0.5
 
-        halo_type_tuple = ('halo_is_old', False, True)
+        halo_type_tuple = ('halo_is_old', True, False)
 
         model = HeavisideAssembiasComponent(baseline_model=baseline_model, 
             galprop_abcissa = galprop_abcissa, galprop_ordinates = galprop_ordinates, galprop_key = galprop_key,
             method_name_to_decorate=method_name_to_decorate, 
             lower_bound = 0, upper_bound = 1, 
             split_func = split_func, halo_type_tuple = halo_type_tuple, 
-            prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_zform'
+            prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_zform', 
+            assembias_strength = 1
             )
 
+
+        upper_bound = model.upper_bound_galprop_perturbation(halo_table = self.toy_halo_table)
+        assert np.all(upper_bound == 0.5)
+
+        lower_bound = model.lower_bound_galprop_perturbation(halo_table = self.toy_halo_table)
+        assert np.all(lower_bound == -0.5)
+
+        strength = model.assembias_strength(halo_table = self.toy_halo_table)
+        assert np.all(strength == 1)
+
         result = model.mean_quiescent_fraction(halo_table = self.toy_halo_table)
+        assert np.all(result >= 0)
+        assert np.all(result <= 1)
+
+        young_mask = self.toy_halo_table['halo_is_old'] == False
+        young_halos = self.toy_halo_table[young_mask]
+        old_halos = self.toy_halo_table[np.invert(young_mask)]
+        assert len(young_halos) == len(old_halos) == len(self.toy_halo_table)/2
+        assert np.all(young_halos['halo_zform'] <= 5)
+        assert np.all(old_halos['halo_zform'] >= 5)
+
+        young_result = result[young_mask]
+        assert np.all(young_result == 0)
+        old_result = result[np.invert(young_mask)]
+        assert np.all(old_result == 1)
 
 
 
