@@ -139,6 +139,10 @@ class HeavisideAssembiasComponent(object):
         if 'halo_type_tuple' in kwargs:
             self.halo_type_tuple = kwargs['halo_type_tuple']
 
+        setattr(self, self._method_name_to_decorate, 
+            self.assembias_decorator(getattr(self.baseline_model_instance, 
+                self._method_name_to_decorate)))
+
         
     def __getattr__(self, attr):
         return getattr(self.baseline_model_instance, attr)
@@ -317,6 +321,8 @@ class HeavisideAssembiasComponent(object):
         return -split*dx1/(1-split)
 
     def assembias_decorator(self, func):
+        """
+        """
 
         def wrapper(*args, **kwargs):
 
