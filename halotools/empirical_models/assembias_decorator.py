@@ -269,8 +269,33 @@ class HeavisideAssembiasComponent(object):
 
         return result
 
+    def assembias_decorator(self, func):
 
+        def wrapper(**kwargs):
+            result = func(**kwargs)
+            split = self.percentile_splitting_function(**kwargs)
 
+            no_edge_mask = (
+                (split > 0) & (split < 1) & 
+                (result > self._lower_bound) & (result < self._upper_bound)
+                )
+
+            no_edge_result = result[no_edge_mask]
+            no_edge_halos = kwargs['halo_table'][no_edge_mask]
+
+            if hasattr(self, halo_type_key):
+                pass
+
+            case1_mask = no_edge_halos['case'] == 1
+            dx1 = self.dx1(no_edge_halos[case1_mask])
+            no_edge_result[case1_mask] += dx1
+            dx2 = self.dx1(no_edge_halos[np.invert(case1_mask)])
+            no_edge_result[np.invert(case1_mask)] += dx2
+
+            result[no_edge_mask] = no_edge_result
+            return result
+
+        return wrapper
 
 
 
