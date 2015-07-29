@@ -4,7 +4,7 @@ Decorator class for implementing generalized assembly bias
 """
 
 import numpy as np 
-from . import model_defaults 
+from . import model_defaults, model_helpers
 
 from ..halotools_exceptions import HalotoolsError
 
@@ -83,10 +83,10 @@ class HeavisideAssembiasComponent(object):
         self.prim_haloprop_key = self.baseline_model_instance.prim_haloprop_key
 
         if 'split_abcissa' and 'split_ordinates' in kwargs:
-            self._setup_percentile_splitting(split_abcissa=kwargs['split_abcissa'], 
+            self.set_percentile_splitting(split_abcissa=kwargs['split_abcissa'], 
                 split_ordinates=kwargs['split_ordinates'])
         else:
-            self._setup_percentile_splitting(split = split)
+            self.set_percentile_splitting(split = split)
 
 
         if 'assembias_strength_abcissa' and 'assembias_strength_ordinates' in kwargs:
@@ -99,7 +99,7 @@ class HeavisideAssembiasComponent(object):
     def __getattr__(self, attr):
         return getattr(self.baseline_model_instance, attr)
 
-    def _setup_percentile_splitting(self, **kwargs):
+    def set_percentile_splitting(self, **kwargs):
         """
         """
         if 'split' in kwargs.keys():
@@ -122,16 +122,14 @@ class HeavisideAssembiasComponent(object):
         except KeyError:
             raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
 
-        model_ordinates = [self.param_dict[self._get_param_dict_key(ipar)] for ipar in range(len(model_abcissa))]
-
         if self._loginterp is True:
             spline_function = model_helpers.custom_spline(
-                np.log10(self._abcissa), model_ordinates)
+                np.log10(self._split_abcissa), self._split_ordinates)
             return spline_function(np.log10(prim_haloprop))
         else:
-            model_abcissa = self._abcissa
+            model_abcissa = self._split_abcissa
             spline_function = model_helpers.custom_spline(
-                self._abcissa, model_ordinates)
+                self._split_abcissa, self._split_ordinates)
             return spline_function(prim_haloprop)
 
     def _initialize_param_dict(self, **kwargs):
@@ -154,6 +152,17 @@ class HeavisideAssembiasComponent(object):
                 "must be called with either the ``assembias_strength`` keyword argument,\n"
                 " or both the ``assembias_strength_abcissa`` and ``assembias_strength_ordinates`` keyword arguments" )
             raise HalotoolsError(msg)
+
+    def assembias_strength(self, halo_table):
+        """
+        """
+        try:
+            prim_haloprop = halo_table[self.prim_haloprop_key]
+        except KeyError:
+            raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
+
+        model_ordinates = [self.param_dict[self._get_param_dict_key(ipar)] for ipar in range(len(model_abcissa))]
+
 
 
     def _get_param_dict_key(self, ipar):
