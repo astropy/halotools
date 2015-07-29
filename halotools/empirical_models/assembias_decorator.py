@@ -251,24 +251,6 @@ class HeavisideAssembiasComponent(object):
         """
         return self._method_name_to_decorate + '_assembias_param' + str(ipar+1)
 
-    def bound_decfunc(self, bound):
-
-        def decorator(func):
-            def wrapper(*args, **kwargs):
-                return bound - func(*args, **kwargs)
-            return wrapper
-
-        return decorator
-
-    def complementary_bound_decfunc(self, split_func):
-
-        def decorator(func):
-            def wrapper(*args, **kwargs):
-                prefactor = (1 - split_func(*args, **kwargs))/split_func(*args, **kwargs)
-                return prefactor*func(*args, **kwargs)
-            return wrapper
-
-        return decorator
 
     def lower_bound_galprop_perturbation(self, **kwargs):
         """
