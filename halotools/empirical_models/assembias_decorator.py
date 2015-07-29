@@ -353,7 +353,7 @@ class HeavisideAssembiasComponent(object):
             elif self.sec_haloprop_key + '_percentile' in no_edge_halos.keys():
                 no_edge_percentiles = no_edge_halos[self.sec_haloprop_key + '_percentile']
                 no_edge_split = split[no_edge_mask]
-                type1_mask = no_edge_percentiles < no_edge_split
+                type1_mask = no_edge_percentiles >= no_edge_split
             else:
                 no_edge_percentiles = compute_conditional_percentiles(
                     halo_table = no_edge_halos, 
@@ -361,7 +361,7 @@ class HeavisideAssembiasComponent(object):
                     sec_haloprop_key = self.sec_haloprop_key
                     )
                 no_edge_split = split[no_edge_mask]
-                type1_mask = no_edge_percentiles < no_edge_split
+                type1_mask = no_edge_percentiles >= no_edge_split
 
             no_edge_halos_type1 = no_edge_halos[type1_mask]
             no_edge_result[type1_mask] += self.galprop_perturbation(halo_table = no_edge_halos_type1)

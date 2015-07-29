@@ -90,7 +90,6 @@ class TestAssembiasDecorator(TestCase):
             assembias_strength = 1
             )
 
-
         upper_bound = model.upper_bound_galprop_perturbation(halo_table = self.toy_halo_table)
         assert np.all(upper_bound == 0.5)
 
@@ -116,7 +115,19 @@ class TestAssembiasDecorator(TestCase):
         old_result = result[np.invert(young_mask)]
         assert np.all(old_result == 1)
 
+        model2 = HeavisideAssembiasComponent(baseline_model=baseline_model, 
+            galprop_abcissa = galprop_abcissa, galprop_ordinates = galprop_ordinates, galprop_key = galprop_key,
+            method_name_to_decorate=method_name_to_decorate, 
+            lower_bound = 0, upper_bound = 1, 
+            split = 0.5, prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_zform', 
+            assembias_strength = 1
+            )
 
+        result2 = model2.mean_quiescent_fraction(halo_table = self.toy_halo_table)
+        young_result2 = result2[young_mask]
+        assert np.all(young_result2 == 0)
+        old_result2 = result2[np.invert(young_mask)]
+        assert np.all(old_result2 == 1)
 
 
 
