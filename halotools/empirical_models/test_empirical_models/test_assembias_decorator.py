@@ -107,18 +107,33 @@ class TestAssembiasDecorator(TestCase):
         """
         """
 
-        def execute_all_behavior_tests(model, halo_table, 
-            correct_upper_pert_bound, correct_lower_pert_bound, 
+        def execute_all_behavior_tests(correct_upper_pert_bound, 
+            correct_lower_pert_bound, 
             correct_split, **kwargs):
 
-            self.constructor_tests(model)
-            self.perturbation_bound_tests(model, halo_table = halo_table, 
-                correct_upper_pert_bound = correct_upper_pert_bound, 
-                correct_lower_pert_bound = correct_lower_pert_bound, **kwargs)
-            self.assembias_strength_tests(model, halo_table = halo_table, **kwargs)
-            self.splitting_func_tests(model, halo_table = halo_table, 
-                correct_split=correct_split, **kwargs)
-            self.decorated_method_tests(model, halo_table = halo_table, **kwargs)
+            model = HeavisideAssembiasComponent(**kwargs)
+
+            is_old = self.toy_halo_table2['halo_zform_percentile'] > correct_split
+            table3 = self.toy_halo_table1
+            table3['halo_is_old'] = is_old
+
+            halo_table_gen = (self.toy_halo_table1, self.toy_halo_table2, table3)
+            for ii, halo_table in enumerate(halo_table_gen):
+                if ii == 2:
+                    kwargs['halo_type_tuple'] = ('halo_is_old', True, False)
+
+                model = HeavisideAssembiasComponent(**kwargs)
+                self.constructor_tests(model)
+                self.perturbation_bound_tests(model, halo_table = halo_table, 
+                    correct_upper_pert_bound = correct_upper_pert_bound, 
+                    correct_lower_pert_bound = correct_lower_pert_bound, **kwargs)
+                self.assembias_strength_tests(model, halo_table = halo_table, **kwargs)
+                self.splitting_func_tests(model, halo_table = halo_table, 
+                    correct_split=correct_split, **kwargs)
+                self.decorated_method_tests(model, halo_table = halo_table, **kwargs)
+
+
+
 
 
         baseline_model = BinaryGalpropInterpolModel
@@ -150,25 +165,12 @@ class TestAssembiasDecorator(TestCase):
             }
             )
 
-        model = HeavisideAssembiasComponent(**kwargs)
         correct_upper_pert_bound = 0.5
         correct_lower_pert_bound = -0.5
         correct_split = 0.5
+        execute_all_behavior_tests(correct_upper_pert_bound, 
+            correct_lower_pert_bound, correct_split, **kwargs)
 
-        execute_all_behavior_tests(model, self.toy_halo_table1, 
-            correct_upper_pert_bound, correct_lower_pert_bound, 
-            correct_split, **kwargs)
-        execute_all_behavior_tests(model, self.toy_halo_table2, 
-            correct_upper_pert_bound, correct_lower_pert_bound, 
-            correct_split, **kwargs)
-        is_old = self.toy_halo_table2['halo_zform_percentile'] > correct_split
-        table3 = self.toy_halo_table1
-        table3['halo_is_old'] = is_old
-        kwargs['halo_type_tuple'] = ('halo_is_old', True, False)
-        model = HeavisideAssembiasComponent(**kwargs)
-        execute_all_behavior_tests(model, table3, 
-            correct_upper_pert_bound, correct_lower_pert_bound, 
-            correct_split, **kwargs)
 
         
         
