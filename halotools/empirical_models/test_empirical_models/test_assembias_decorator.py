@@ -144,7 +144,6 @@ class TestAssembiasDecorator(TestCase):
             'lower_bound': lower_bound, 
             'upper_bound': upper_bound, 
             'split_func': split_func, 
-            # 'halo_type_tuple': halo_type_tuple, 
             'prim_haloprop_key': prim_haloprop_key, 
             'sec_haloprop_key': sec_haloprop_key, 
             'assembias_strength': assembias_strength
@@ -162,6 +161,15 @@ class TestAssembiasDecorator(TestCase):
         execute_all_behavior_tests(model, self.toy_halo_table2, 
             correct_upper_pert_bound, correct_lower_pert_bound, 
             correct_split, **kwargs)
+        is_old = self.toy_halo_table2['halo_zform_percentile'] > correct_split
+        table3 = self.toy_halo_table1
+        table3['halo_is_old'] = is_old
+        kwargs['halo_type_tuple'] = ('halo_is_old', True, False)
+        model = HeavisideAssembiasComponent(**kwargs)
+        execute_all_behavior_tests(model, table3, 
+            correct_upper_pert_bound, correct_lower_pert_bound, 
+            correct_split, **kwargs)
+
         
         
         
