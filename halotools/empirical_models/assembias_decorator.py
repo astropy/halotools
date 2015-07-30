@@ -159,7 +159,7 @@ class HeavisideAssembiasComponent(object):
             else:
                 raise HalotoolsError("Input ``split_func`` must be a callable function")
         elif 'split' in kwargs.keys():
-            self._split_abcissa = [0]
+            self._split_abcissa = [2]
             self._split_ordinates = [kwargs['split']]
         elif ('split_ordinates' in kwargs.keys()) & ('split_abcissa' in kwargs.keys()):
             self._split_abcissa = kwargs['split_abcissa']

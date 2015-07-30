@@ -12,7 +12,7 @@ from .. import model_defaults
 from ..hod_components import Zheng07Cens, Leauthaud11Cens
 from ..sfr_components import BinaryGalpropInterpolModel
 from ...sim_manager import FakeSim
-from ...utils.table_utils import SampleSelector
+from ...utils.table_utils import SampleSelector, compute_conditional_percentiles
 from ...utils.array_utils import array_like_length as custom_len
 
 
@@ -31,27 +31,13 @@ class TestAssembiasDecorator(TestCase):
         self.toy_halo_table1 = Table(d1)
 
         halo_zform_percentile = (np.arange(Npts)+1) / float(Npts)
+        halo_zform_percentile = 1. - halo_zform_percentile[::-1]
         d2 = {'halo_mvir': mass, 'halo_zform': zform, 'halo_zform_percentile': halo_zform_percentile}
         self.toy_halo_table2 = Table(d2)
-
-
-     #    halo_designation = np.zeros(Npts, dtype=bool)
-     #    halo_designation[Npts/2:] = True
-    	# d = {'halo_mvir': mass, 'halo_zform': zform, 'halo_is_old': halo_designation}
-    	# self.toy_halo_table = Table(d)
-     #    is_old = self.toy_halo_table['halo_is_old'] == True
-     #    self.young_toy_halos = self.toy_halo_table[np.invert(is_old)]
-     #    self.old_toy_halos = self.toy_halo_table[is_old]
 
         fakesim = FakeSim()
         self.fake_halo_table = fakesim.halo_table
 
-    # def test_setup(self):
-    #     """
-    #     """
-    #     assert len(self.young_toy_halos) == len(self.old_toy_halos) == len(self.toy_halo_table)/2
-    #     assert np.all(self.young_toy_halos['halo_zform'] <= 5)
-    #     assert np.all(self.old_toy_halos['halo_zform'] >= 5)
 
     def constructor_tests(self, model):
     	"""
@@ -92,15 +78,42 @@ class TestAssembiasDecorator(TestCase):
         """
         """
         method = getattr(model, model._method_name_to_decorate)
+        baseline_method = getattr(model.baseline_model_instance, model._method_name_to_decorate)
         result = method(halo_table = halo_table)
+        baseline_result = baseline_method(halo_table = halo_table)
 
         assert np.all(result >= model._lower_bound)
         assert np.all(result <= model._upper_bound)
+        assert np.all(baseline_result == 0.5)
 
-        # young_result = result[young_mask]
-        # assert np.all(young_result == 0)
-        # old_result = result[np.invert(young_mask)]
-        # assert np.all(old_result == 1)
+        halo_zform_percentile = (np.arange(len(halo_table))+1) / float(len(halo_table)) 
+        halo_zform_percentile = 1. - halo_zform_percentile[::-1]
+
+        old_mask = halo_zform_percentile >= kwargs['correct_split']
+        old_halos = halo_table[old_mask]
+        assert len(old_halos) == kwargs['correct_split']*len(halo_table)
+
+        young_halos = halo_table[np.invert(old_mask)]
+        assert len(young_halos) == (1-kwargs['correct_split'])*len(halo_table)
+
+        if 'assembias_strength' and 'split' in kwargs:
+            strength = kwargs['assembias_strength']
+            split = kwargs['split']
+            if strength > 0:
+                dx1 = strength*model.upper_bound_galprop_perturbation(
+                    halo_table = halo_table)
+            else:
+                dx1 = strength*model.lower_bound_galprop_perturbation(
+                    halo_table = halo_table)
+            dx2 = -split*dx1/(1-split)
+
+            assert np.all(result[old_mask] == baseline_result[old_mask] + dx1[old_mask])
+
+            assert np.all(result[np.invert(old_mask)] == 
+                baseline_result[np.invert(old_mask)] + dx2[np.invert(old_mask)])
+
+
+
 
 
     def test_binary_galprop_models(self):
@@ -113,7 +126,7 @@ class TestAssembiasDecorator(TestCase):
 
             model = HeavisideAssembiasComponent(**kwargs)
 
-            is_old = self.toy_halo_table2['halo_zform_percentile'] > correct_split
+            is_old = self.toy_halo_table2['halo_zform_percentile'] >= correct_split
             table3 = self.toy_halo_table1
             table3['halo_is_old'] = is_old
 
@@ -124,13 +137,14 @@ class TestAssembiasDecorator(TestCase):
 
                 model = HeavisideAssembiasComponent(**kwargs)
                 self.constructor_tests(model)
+                self.splitting_func_tests(model, halo_table = halo_table, 
+                    correct_split=correct_split, **kwargs)
+                self.assembias_strength_tests(model, halo_table = halo_table, **kwargs)
                 self.perturbation_bound_tests(model, halo_table = halo_table, 
                     correct_upper_pert_bound = correct_upper_pert_bound, 
                     correct_lower_pert_bound = correct_lower_pert_bound, **kwargs)
-                self.assembias_strength_tests(model, halo_table = halo_table, **kwargs)
-                self.splitting_func_tests(model, halo_table = halo_table, 
-                    correct_split=correct_split, **kwargs)
-                self.decorated_method_tests(model, halo_table = halo_table, **kwargs)
+                self.decorated_method_tests(model, halo_table = halo_table, 
+                    correct_split = correct_split, **kwargs)
 
 
 
@@ -143,8 +157,9 @@ class TestAssembiasDecorator(TestCase):
         method_name_to_decorate='mean_'+galprop_key+'_fraction'
         lower_bound = 0
         upper_bound = 1
+        split = 0.5
         def split_func(**kwargs):
-            return np.zeros(custom_len(kwargs['halo_table'])) + 0.5
+            return np.zeros(len(kwargs['halo_table'])) + split
         halo_type_tuple = ('halo_is_old', True, False)
         prim_haloprop_key = 'halo_mvir'
         sec_haloprop_key = 'halo_zform'
@@ -168,44 +183,50 @@ class TestAssembiasDecorator(TestCase):
         correct_upper_pert_bound = 0.5
         correct_lower_pert_bound = -0.5
         correct_split = 0.5
+        # print("...Working on input split_func case")
+        execute_all_behavior_tests(correct_upper_pert_bound, 
+            correct_lower_pert_bound, correct_split, **kwargs)
+        del kwargs['split_func']
+        kwargs['split'] = split
+        # print("...working on input scalar split case")
         execute_all_behavior_tests(correct_upper_pert_bound, 
             correct_lower_pert_bound, correct_split, **kwargs)
 
 
-        
-        
-        
+
+
+        # assembias_strength = 0.5
+        # kwargs = (
+        #     {'baseline_model': baseline_model, 
+        #     'galprop_abcissa': galprop_abcissa, 
+        #     'galprop_ordinates': galprop_ordinates, 
+        #     'galprop_key': galprop_key, 
+        #     'method_name_to_decorate': method_name_to_decorate, 
+        #     'lower_bound': lower_bound, 
+        #     'upper_bound': upper_bound, 
+        #     'split': split, 
+        #     'prim_haloprop_key': prim_haloprop_key, 
+        #     'sec_haloprop_key': sec_haloprop_key, 
+        #     'assembias_strength': assembias_strength
+        #     }
+        #     )
+        # execute_all_behavior_tests(correct_upper_pert_bound, 
+        #     correct_lower_pert_bound, correct_split, **kwargs)
+
+
+
+
+
+        # split = 0.25
+        # correct_upper_pert_bound = 0.25
+        # correct_lower_pert_bound = -0.25
+        # correct_split = 0.25
+        # kwargs['split'] = split
+        # execute_all_behavior_tests(correct_upper_pert_bound, 
+        #     correct_lower_pert_bound, correct_split, **kwargs)
 
         
-
-
-        # kwargs['assembias_strength'] = 0.5
-        # model = HeavisideAssembiasComponent(**kwargs)
-        # self.constructor_tests(model)
-        # self.perturbation_bound_tests(model, 
-        #     correct_upper_pert_bound = 0.5, correct_lower_pert_bound = -0.5, **kwargs)
-        # self.assembias_strength_tests(model, **kwargs)
-        # self.splitting_func_tests(model, correct_split=0.5, **kwargs)
-
-
-
-
-
-
-        # baseline_model = Zheng07Cens
-        # method_name_to_decorate='mean_occupation'
-
-        # model = HeavisideAssembiasComponent(baseline_model=baseline_model, 
-        #   method_name_to_decorate=method_name_to_decorate, 
-        #   lower_bound = 0, upper_bound = 1, 
-        #   )
-
-
-
-
-
-
-
+        
 
 
 
