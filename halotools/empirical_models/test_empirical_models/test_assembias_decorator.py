@@ -15,14 +15,14 @@ from ...sim_manager import FakeSim
 from ...utils.table_utils import SampleSelector
 from ...utils.array_utils import array_like_length as custom_len
 
-@pytest.mark.slow
-def test_silly():
-    assert 4 < 5
-
 
 class TestAssembiasDecorator(TestCase):
+    """
+    """
 
     def setup_class(self):
+        """
+        """
     	Npts = 1e4
     	mass = np.zeros(Npts) + 1e12
     	zform = np.linspace(0, 10, Npts)
@@ -35,7 +35,8 @@ class TestAssembiasDecorator(TestCase):
         self.fake_halo_table = fakesim.halo_table
 
     def test_setup(self):
-
+        """
+        """
         is_old_mask = self.toy_halo_table['halo_is_old'] == True
         young_halos = self.toy_halo_table[np.invert(is_old_mask)]
         old_halos = self.toy_halo_table[is_old_mask]
@@ -46,17 +47,6 @@ class TestAssembiasDecorator(TestCase):
     def constructor_tests(self, model):
     	"""
     	"""
-    	# baseline_model = Zheng07Cens
-    	# method_name_to_decorate='mean_occupation'
-
-    	# model = HeavisideAssembiasComponent(baseline_model=baseline_model, 
-    	# 	method_name_to_decorate=method_name_to_decorate, 
-    	# 	lower_bound = 0, upper_bound = 1, 
-    	# 	)
-
-    	# assert isinstance(model.baseline_model_instance, baseline_model)
-    	# assert hasattr(model, '_split_abcissa')
-    	# assert hasattr(model, '_split_ordinates')
     	assert hasattr(model, '_assembias_strength_abcissa')
     	assert hasattr(model, 'param_dict')
         assert hasattr(model, '_method_name_to_decorate')
@@ -65,35 +55,34 @@ class TestAssembiasDecorator(TestCase):
     	keys = [key for key in model.param_dict.keys() if model._method_name_to_decorate + '_assembias_param' in key]
     	assert len(keys) == len(model._assembias_strength_abcissa) 
 
-    	# output_split = model.percentile_splitting_function(halo_table=self.toy_halo_table)
-    	# assert np.all(output_split == 0.5)
 
-    	# model._split_ordinates = [0.75]
-    	# output_split = model.percentile_splitting_function(halo_table=self.toy_halo_table)
-    	# assert np.all(output_split == 0.75)
+    def splitting_func_tests(self, model, **kwargs):
+        """
+        """
+        output_split = model.percentile_splitting_function(halo_table=self.toy_halo_table)
+        if 'split' in kwargs:
+            assert np.all(output_split == kwargs['split'])
 
-    	# output_strength = model.assembias_strength(halo_table=self.toy_halo_table)
-    	# assert np.all(output_strength == 0.5)
-
-        # assert hasattr(model, 'mean_occupation')
 
     def perturbation_bound_tests(self, model, **kwargs):
         """
         """
-
         upper_bound = model.upper_bound_galprop_perturbation(halo_table = self.toy_halo_table)
         assert np.all(upper_bound == kwargs['upper_bound'])
-
         lower_bound = model.lower_bound_galprop_perturbation(halo_table = self.toy_halo_table)
         assert np.all(lower_bound == kwargs['lower_bound'])
 
-    def assembias_strength_tests(self, model, **kwargs):
 
+    def assembias_strength_tests(self, model, **kwargs):
+        """
+        """
         strength = model.assembias_strength(halo_table = self.toy_halo_table)
         assert np.all(strength == kwargs['strength'])
 
-    def decorated_method_tests(self, model, **kwargs):
 
+    def decorated_method_tests(self, model, **kwargs):
+        """
+        """
         result = model.mean_quiescent_fraction(halo_table = self.toy_halo_table)
         assert np.all(result >= model._lower_bound)
         assert np.all(result <= model._upper_bound)
@@ -119,7 +108,8 @@ class TestAssembiasDecorator(TestCase):
 
 
     def test_binary_galprop_models(self):
-
+        """
+        """
         baseline_model = BinaryGalpropInterpolModel
         galprop_key='quiescent'
         galprop_abcissa = [12]
@@ -145,8 +135,16 @@ class TestAssembiasDecorator(TestCase):
         self.perturbation_bound_tests(model, 
             upper_bound = 0.5, lower_bound = -0.5)
         self.assembias_strength_tests(model, strength = 1)
+        self.splitting_func_tests(model, split=0.5)
 
 
+        # baseline_model = Zheng07Cens
+        # method_name_to_decorate='mean_occupation'
+
+        # model = HeavisideAssembiasComponent(baseline_model=baseline_model, 
+        #   method_name_to_decorate=method_name_to_decorate, 
+        #   lower_bound = 0, upper_bound = 1, 
+        #   )
 
 
 
