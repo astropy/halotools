@@ -147,9 +147,6 @@ class TestAssembiasDecorator(TestCase):
                     correct_split = correct_split, **kwargs)
 
 
-
-
-
         baseline_model = BinaryGalpropInterpolModel
         galprop_abcissa = [12]
         galprop_ordinates = [0.5]
@@ -183,37 +180,32 @@ class TestAssembiasDecorator(TestCase):
         correct_upper_pert_bound = 0.5
         correct_lower_pert_bound = -0.5
         correct_split = 0.5
-        # print("...Working on input split_func case")
         execute_all_behavior_tests(correct_upper_pert_bound, 
             correct_lower_pert_bound, correct_split, **kwargs)
         del kwargs['split_func']
         kwargs['split'] = split
-        # print("...working on input scalar split case")
         execute_all_behavior_tests(correct_upper_pert_bound, 
             correct_lower_pert_bound, correct_split, **kwargs)
 
-
-
-
-        # assembias_strength = 0.5
-        # kwargs = (
-        #     {'baseline_model': baseline_model, 
-        #     'galprop_abcissa': galprop_abcissa, 
-        #     'galprop_ordinates': galprop_ordinates, 
-        #     'galprop_key': galprop_key, 
-        #     'method_name_to_decorate': method_name_to_decorate, 
-        #     'lower_bound': lower_bound, 
-        #     'upper_bound': upper_bound, 
-        #     'split': split, 
-        #     'prim_haloprop_key': prim_haloprop_key, 
-        #     'sec_haloprop_key': sec_haloprop_key, 
-        #     'assembias_strength': assembias_strength
-        #     }
-        #     )
-        # execute_all_behavior_tests(correct_upper_pert_bound, 
-        #     correct_lower_pert_bound, correct_split, **kwargs)
-
-
+        # Loop over a range of assembly bias strengths and conduct all tests
+        strength_gen = [0.5, 0., -0.5, -1]
+        for assembias_strength in strength_gen:
+            kwargs = (
+                {'baseline_model': baseline_model, 
+                'galprop_abcissa': galprop_abcissa, 
+                'galprop_ordinates': galprop_ordinates, 
+                'galprop_key': galprop_key, 
+                'method_name_to_decorate': method_name_to_decorate, 
+                'lower_bound': lower_bound, 
+                'upper_bound': upper_bound, 
+                'split': split, 
+                'prim_haloprop_key': prim_haloprop_key, 
+                'sec_haloprop_key': sec_haloprop_key, 
+                'assembias_strength': assembias_strength
+                }
+                )
+            execute_all_behavior_tests(correct_upper_pert_bound, 
+                correct_lower_pert_bound, correct_split, **kwargs)
 
 
 
