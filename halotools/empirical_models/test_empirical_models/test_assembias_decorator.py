@@ -111,26 +111,36 @@ class TestAssembiasDecorator(TestCase):
         """
         """
         baseline_model = BinaryGalpropInterpolModel
-        galprop_key='quiescent'
         galprop_abcissa = [12]
         galprop_ordinates = [0.5]
+        galprop_key='quiescent'
         method_name_to_decorate='mean_'+galprop_key+'_fraction'
-
+        lower_bound = 0
+        upper_bound = 1
         def split_func(**kwargs):
             return np.zeros(custom_len(kwargs['halo_table'])) + 0.5
-
         halo_type_tuple = ('halo_is_old', True, False)
+        prim_haloprop_key = 'halo_mvir'
+        sec_haloprop_key = 'halo_zform'
+        assembias_strength = 1
 
-        model = HeavisideAssembiasComponent(baseline_model=baseline_model, 
-            galprop_abcissa = galprop_abcissa, galprop_ordinates = galprop_ordinates, 
-            galprop_key = galprop_key,
-            method_name_to_decorate=method_name_to_decorate, 
-            lower_bound = 0, upper_bound = 1, 
-            split_func = split_func, halo_type_tuple = halo_type_tuple, 
-            prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_zform', 
-            assembias_strength = 1
+        kwargs = (
+            {'baseline_model': baseline_model, 
+            'galprop_abcissa': galprop_abcissa, 
+            'galprop_ordinates': galprop_ordinates, 
+            'galprop_key': galprop_key, 
+            'method_name_to_decorate': method_name_to_decorate, 
+            'lower_bound': lower_bound, 
+            'upper_bound': upper_bound, 
+            'split_func': split_func, 
+            'halo_type_tuple': halo_type_tuple, 
+            'prim_haloprop_key': prim_haloprop_key, 
+            'sec_haloprop_key': sec_haloprop_key, 
+            'assembias_strength': assembias_strength
+            }
             )
 
+        model = HeavisideAssembiasComponent(**kwargs)
         self.constructor_tests(model)
         self.perturbation_bound_tests(model, 
             upper_bound = 0.5, lower_bound = -0.5)
