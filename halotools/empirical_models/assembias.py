@@ -280,17 +280,17 @@ class HeavisideAssembias(object):
         """
         """
         try:
-            baseline_func = kwargs['baseline_func']
+            baseline_result = kwargs['baseline_result']
         except KeyError:
             msg = ("Must call lower_bound_galprop_perturbation method of the" 
-                "HeavisideAssembias class with the baseline_func keyword argument")
+                "HeavisideAssembias class with the baseline_result keyword argument")
             raise HalotoolsError(msg)
 
-        lower_bound1 = self._lower_bound - baseline_func(**kwargs)
+        lower_bound1 = self._lower_bound - baseline_result
         lower_bound2_prefactor = (
             (1 - self.percentile_splitting_function(**kwargs))/
             self.percentile_splitting_function(**kwargs))
-        lower_bound2 = lower_bound2_prefactor*(baseline_func(**kwargs) - self._upper_bound)
+        lower_bound2 = lower_bound2_prefactor*(baseline_result - self._upper_bound)
 
         return np.maximum(lower_bound1, lower_bound2)
 
@@ -298,17 +298,17 @@ class HeavisideAssembias(object):
         """
         """
         try:
-            baseline_func = kwargs['baseline_func']
+            baseline_result = kwargs['baseline_result']
         except KeyError:
             msg = ("Must call upper_bound_galprop_perturbation method of the" 
-                "HeavisideAssembias class with the baseline_func keyword argument")
+                "HeavisideAssembias class with the baseline_result keyword argument")
             raise HalotoolsError(msg)
 
-        upper_bound1 = self._upper_bound - baseline_func(**kwargs)
+        upper_bound1 = self._upper_bound - baseline_result
         upper_bound2_prefactor = (
             (1 - self.percentile_splitting_function(**kwargs))/
             self.percentile_splitting_function(**kwargs))
-        upper_bound2 = upper_bound2_prefactor*(baseline_func(**kwargs) - self._lower_bound)
+        upper_bound2 = upper_bound2_prefactor*(baseline_result - self._lower_bound)
 
         return np.minimum(upper_bound1, upper_bound2)
 
@@ -317,10 +317,10 @@ class HeavisideAssembias(object):
         """
         """
         try:
-            baseline_func = kwargs['baseline_func']
+            baseline_result = kwargs['baseline_result']
         except KeyError:
             msg = ("Must call galprop_perturbation method of the" 
-                "HeavisideAssembias class with the baseline_func keyword argument")
+                "HeavisideAssembias class with the baseline_result keyword argument")
             raise HalotoolsError(msg)
 
         try:
@@ -340,7 +340,7 @@ class HeavisideAssembias(object):
                 strength[positive_strength_idx]*
                 self.upper_bound_galprop_perturbation(
                     halo_table = halo_table[positive_strength_idx], 
-                    baseline_func = baseline_func)
+                    baseline_result = baseline_result[positive_strength_idx])
                 )
 
         if len(halo_table[negative_strength_idx]) > 0:
@@ -348,7 +348,7 @@ class HeavisideAssembias(object):
                 strength[negative_strength_idx]*
                 self.lower_bound_galprop_perturbation(
                     halo_table = halo_table[negative_strength_idx], 
-                    baseline_func = baseline_func)
+                    baseline_result = baseline_result[negative_strength_idx])
                 )
 
         return result
@@ -406,15 +406,17 @@ class HeavisideAssembias(object):
                 type1_mask = no_edge_percentiles >= no_edge_split
 
             no_edge_halos_type1 = no_edge_halos[type1_mask]
-            no_edge_result[type1_mask] += self.galprop_perturbation(
-                halo_table = no_edge_halos_type1, 
-                baseline_func = func)
+            no_edge_result[type1_mask] += (
+                self.galprop_perturbation(
+                    halo_table = no_edge_halos_type1, 
+                    baseline_result = no_edge_result[type1_mask])
+                )
 
             no_edge_halos_type2 = no_edge_halos[np.invert(type1_mask)]
             no_edge_result[np.invert(type1_mask)] += (
                 self.complementary_galprop_perturbation(
                     halo_table = no_edge_halos_type2, 
-                    baseline_func = func)
+                    baseline_result = no_edge_result[np.invert(type1_mask)])
                 )
 
             result[no_edge_mask] = no_edge_result
