@@ -413,11 +413,12 @@ class HeavisideAssembias(object):
                     "Method is much faster if this quantity is pre-computed")
                 key = self.sec_haloprop_key + '_percentile'
                 warn(msg % key)
-                no_edge_percentiles = compute_conditional_percentiles(
-                    halo_table = no_edge_halos, 
+                percentiles = compute_conditional_percentiles(
+                    halo_table = halo_table, 
                     prim_haloprop_key = self.prim_haloprop_key, 
                     sec_haloprop_key = self.sec_haloprop_key
                     )
+                no_edge_percentiles = percentiles[no_edge_mask]
                 no_edge_split = split[no_edge_mask]
                 type1_mask = no_edge_percentiles >= no_edge_split
 
