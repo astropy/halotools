@@ -287,9 +287,8 @@ class HeavisideAssembias(object):
             raise HalotoolsError(msg)
 
         lower_bound1 = self._lower_bound - baseline_result
-        lower_bound2_prefactor = (
-            (1 - self.percentile_splitting_function(**kwargs))/
-            self.percentile_splitting_function(**kwargs))
+        split = self.percentile_splitting_function(**kwargs)
+        lower_bound2_prefactor = (1 - split)/split
         lower_bound2 = lower_bound2_prefactor*(baseline_result - self._upper_bound)
 
         return np.maximum(lower_bound1, lower_bound2)
@@ -305,9 +304,8 @@ class HeavisideAssembias(object):
             raise HalotoolsError(msg)
 
         upper_bound1 = self._upper_bound - baseline_result
-        upper_bound2_prefactor = (
-            (1 - self.percentile_splitting_function(**kwargs))/
-            self.percentile_splitting_function(**kwargs))
+        split = self.percentile_splitting_function(**kwargs)
+        upper_bound2_prefactor = (1 - split)/split
         upper_bound2 = upper_bound2_prefactor*(baseline_result - self._lower_bound)
 
         return np.minimum(upper_bound1, upper_bound2)
