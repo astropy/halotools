@@ -64,8 +64,13 @@ class HeavisideAssembias(object):
             the input ``split_ordinates`` for halos whose ``prim_haloprop`` 
             equals the input ``split_abcissa``. Default is to assume a constant 50/50 split. 
 
-        split_func : function, optional 
-            Function object used to split the input halos into two types.
+        splitting_model : object, optional 
+            Model instance with a method called ``splitting_method_name``  
+            used to split the input halos into two types.
+
+        splitting_method_name : string, optional 
+            Name of method bound to ``splitting_model`` used to split the input halos into 
+            two types. 
 
         halo_type_tuple : tuple, optional 
             Tuple providing the information about how elements of the input ``halo_table`` 
@@ -119,8 +124,11 @@ class HeavisideAssembias(object):
         self._loginterp = loginterp
         self.sec_haloprop_key = sec_haloprop_key
 
-        if 'split_func' in kwargs:
-            self.set_percentile_splitting(split_func = kwargs['split_func'])
+        if 'splitting_model' in kwargs:
+            self.splitting_model = kwargs['splitting_model']
+            self.ancillary_model_dependencies = ['splitting_model']
+            self.set_percentile_splitting(
+                splitting_method_name = kwargs['splitting_method_name'])
         elif 'split_abcissa' and 'split_ordinates' in kwargs:
             self.set_percentile_splitting(split_abcissa=kwargs['split_abcissa'], 
                 split_ordinates=kwargs['split_ordinates'])
@@ -150,12 +158,13 @@ class HeavisideAssembias(object):
     def set_percentile_splitting(self, **kwargs):
         """
         """
-        if 'split_func' in kwargs.keys():
-            func = kwargs['split_func']
+        if 'splitting_method_name' in kwargs.keys():
+            func = getattr(self.splitting_model, kwargs['splitting_method_name'])
             if callable(func):
                 self._input_split_func = func
             else:
-                raise HalotoolsError("Input ``split_func`` must be a callable function")
+                raise HalotoolsError("Input ``splitting_model`` must have a callable function "
+                    "named ``%s``" % kwargs['splitting_method_name'])
         elif 'split' in kwargs.keys():
             self._split_abcissa = [2]
             self._split_ordinates = [kwargs['split']]
