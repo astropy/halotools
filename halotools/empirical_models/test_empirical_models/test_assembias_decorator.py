@@ -206,8 +206,6 @@ class TestAssembiasDecorator(TestCase):
             execute_all_behavior_tests(correct_upper_pert_bound, 
                 correct_lower_pert_bound, correct_split, **kwargs)
 
-
-
         split = 0.25
         correct_upper_pert_bound = 0.5
         correct_lower_pert_bound = -0.5
@@ -217,34 +215,4 @@ class TestAssembiasDecorator(TestCase):
             correct_lower_pert_bound, correct_split, **kwargs)
 
         
-        # model = HeavisideAssembiasComponent(**kwargs)
-        # halo_table = self.toy_halo_table1
-        # s = model.percentile_splitting_function(halo_table = halo_table)
-        # assert np.all(s == 0.25)
-
-
-        # baseline_func = getattr(model.baseline_model_instance, model._method_name_to_decorate)
-        # baseline_result = baseline_func(halo_table = halo_table)
-        # assert np.all(baseline_result == 0.5)
-
-        # ### LOWER BOUND WITH 0.25 SPLIT
-        # lower_bound1 = model._lower_bound - baseline_func(halo_table = halo_table)
-        # assert np.all(lower_bound1 == -0.5)
-
-        # lower_bound2_prefactor = (
-        #     (1 - model.percentile_splitting_function(halo_table = halo_table))/
-        #     model.percentile_splitting_function(halo_table = halo_table))
-        # assert np.all(lower_bound2_prefactor == 3)
-
-        # assert np.all(model.lower_bound_galprop_perturbation(halo_table=halo_table) == -0.5)
-
-        # ### UPPER BOUND WITH 0.25 SPLIT
-        # upper_bound1 = model._upper_bound - baseline_func(halo_table = halo_table)
-        # assert np.all(upper_bound1 == 0.5)
-
-
-
-
-
-
 
