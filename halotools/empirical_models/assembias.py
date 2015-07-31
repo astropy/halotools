@@ -25,6 +25,10 @@ class HeavisideAssembias(object):
             String giving the column name of the primary halo property governing 
             the galaxy property function that `HeavisideAssembias` decorates with assembly bias. 
 
+        method_name_to_decorate : string 
+            Name of the method bound to instances of the baseline_model that 
+            we are decorating with assembly bias.
+
         lower_bound : float 
             Smallest physically meaningful value for the property being modeled. 
 
@@ -102,13 +106,15 @@ class HeavisideAssembias(object):
         """
         try:
             self.prim_haloprop_key = kwargs['prim_haloprop_key']
+            self._method_name_to_decorate = kwargs['method_name_to_decorate']
             self._lower_bound = kwargs['lower_bound']
             self._upper_bound = kwargs['upper_bound']
         except KeyError:
             msg = ("The constructor to the HeavisideAssembiasComponent class "
                 "must be called with the following keyword arguments:\n" 
-                "``%s``, ``%s``, ``%s``")
-            raise HalotoolsError(msg % ('prim_haloprop_key', 'lower_bound', 'upper_bound'))
+                "``%s``, ``%s``, ``%s``, ``%s``")
+            raise HalotoolsError(msg % ('prim_haloprop_key', '_method_name_to_decorate', 
+                'lower_bound', 'upper_bound'))
 
         self._loginterp = loginterp
         self.sec_haloprop_key = sec_haloprop_key
@@ -129,6 +135,16 @@ class HeavisideAssembias(object):
 
         if 'halo_type_tuple' in kwargs:
             self.halo_type_tuple = kwargs['halo_type_tuple']
+
+        try:
+            baseline_method = getattr(self, self._method_name_to_decorate)
+            decorated_method = self.assembias_decorator(baseline_method)
+            setattr(self, decorated_method, self._method_name_to_decorate)
+        except AttributeError:
+            msg = ("The baseline model constructor must be called before "
+                "calling the HeavisideAssembias constructor, \n"
+                "and the baseline model must have a method named ``%s``")
+            raise HalotoolsError(msg % self._method_name_to_decorate)
 
 
     def set_percentile_splitting(self, **kwargs):
@@ -253,8 +269,12 @@ class HeavisideAssembias(object):
     def lower_bound_galprop_perturbation(self, **kwargs):
         """
         """
-
-        baseline_func = getattr(self.baseline_model_instance, self._method_name_to_decorate)
+        try:
+            baseline_func = kwargs['baseline_func']
+        except KeyError:
+            msg = ("Must call lower_bound_galprop_perturbation method of the" 
+                "HeavisideAssembias class with the baseline_func keyword argument")
+            raise HalotoolsError(msg)
 
         lower_bound1 = self._lower_bound - baseline_func(**kwargs)
         lower_bound2_prefactor = (
@@ -267,8 +287,12 @@ class HeavisideAssembias(object):
     def upper_bound_galprop_perturbation(self, **kwargs):
         """
         """
-
-        baseline_func = getattr(self.baseline_model_instance, self._method_name_to_decorate)
+        try:
+            baseline_func = kwargs['baseline_func']
+        except KeyError:
+            msg = ("Must call upper_bound_galprop_perturbation method of the" 
+                "HeavisideAssembias class with the baseline_func keyword argument")
+            raise HalotoolsError(msg)
 
         upper_bound1 = self._upper_bound - baseline_func(**kwargs)
         upper_bound2_prefactor = (
@@ -282,6 +306,12 @@ class HeavisideAssembias(object):
     def galprop_perturbation(self, **kwargs):
         """
         """
+        try:
+            baseline_func = kwargs['baseline_func']
+        except KeyError:
+            msg = ("Must call galprop_perturbation method of the" 
+                "HeavisideAssembias class with the baseline_func keyword argument")
+            raise HalotoolsError(msg)
 
         try:
             halo_table = kwargs['halo_table']
@@ -298,18 +328,24 @@ class HeavisideAssembias(object):
         if len(halo_table[positive_strength_idx]) > 0:
             result[positive_strength_idx] = (
                 strength[positive_strength_idx]*
-                self.upper_bound_galprop_perturbation(halo_table = halo_table[positive_strength_idx])
+                self.upper_bound_galprop_perturbation(
+                    halo_table = halo_table[positive_strength_idx], 
+                    baseline_func = baseline_func)
                 )
 
         if len(halo_table[negative_strength_idx]) > 0:
             result[negative_strength_idx] = (
                 strength[negative_strength_idx]*
-                self.lower_bound_galprop_perturbation(halo_table = halo_table[negative_strength_idx])
+                self.lower_bound_galprop_perturbation(
+                    halo_table = halo_table[negative_strength_idx], 
+                    baseline_func = baseline_func)
                 )
 
         return result
 
     def complementary_galprop_perturbation(self, **kwargs):
+        """
+        """
         split = self.percentile_splitting_function(**kwargs)
         galprop_perturbation = self.galprop_perturbation(**kwargs)
         return -split*galprop_perturbation/(1-split)
@@ -356,11 +392,15 @@ class HeavisideAssembias(object):
                 type1_mask = no_edge_percentiles >= no_edge_split
 
             no_edge_halos_type1 = no_edge_halos[type1_mask]
-            no_edge_result[type1_mask] += self.galprop_perturbation(halo_table = no_edge_halos_type1)
+            no_edge_result[type1_mask] += self.galprop_perturbation(
+                halo_table = no_edge_halos_type1, 
+                baseline_func = func)
 
             no_edge_halos_type2 = no_edge_halos[np.invert(type1_mask)]
             no_edge_result[np.invert(type1_mask)] += (
-                self.complementary_galprop_perturbation(halo_table = no_edge_halos_type2)
+                self.complementary_galprop_perturbation(
+                    halo_table = no_edge_halos_type2, 
+                    baseline_func = func)
                 )
 
             result[no_edge_mask] = no_edge_result
