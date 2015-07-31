@@ -21,6 +21,10 @@ class HeavisideAssembias(object):
         """
         Parameters 
         ----------
+        prim_haloprop_key : string 
+            String giving the column name of the primary halo property governing 
+            the galaxy property function that `HeavisideAssembias` decorates with assembly bias. 
+
         lower_bound : float 
             Smallest physically meaningful value for the property being modeled. 
 
@@ -97,21 +101,17 @@ class HeavisideAssembias(object):
 
         """
         try:
-            baseline_model_instance = kwargs['baseline_model'](**kwargs)
-            self.baseline_model_instance = baseline_model_instance
-            self._method_name_to_decorate = kwargs['method_name_to_decorate']
+            self.prim_haloprop_key = kwargs['prim_haloprop_key']
             self._lower_bound = kwargs['lower_bound']
             self._upper_bound = kwargs['upper_bound']
         except KeyError:
             msg = ("The constructor to the HeavisideAssembiasComponent class "
                 "must be called with the following keyword arguments:\n" 
-                "``%s``, ``%s``, ``%s``, ``%s``")
-            raise HalotoolsError(msg % ('lower_bound', 'upper_bound', 
-                'method_name_to_decorate', 'baseline_model_instance'))
+                "``%s``, ``%s``, ``%s``")
+            raise HalotoolsError(msg % ('prim_haloprop_key', 'lower_bound', 'upper_bound'))
 
         self._loginterp = loginterp
         self.sec_haloprop_key = sec_haloprop_key
-        self.prim_haloprop_key = self.baseline_model_instance.prim_haloprop_key
 
         if 'split_func' in kwargs:
             self.set_percentile_splitting(split_func = kwargs['split_func'])
@@ -130,13 +130,6 @@ class HeavisideAssembias(object):
         if 'halo_type_tuple' in kwargs:
             self.halo_type_tuple = kwargs['halo_type_tuple']
 
-        setattr(self, self._method_name_to_decorate, 
-            self.assembias_decorator(getattr(self.baseline_model_instance, 
-                self._method_name_to_decorate)))
-
-        
-    def __getattr__(self, attr):
-        return getattr(self.baseline_model_instance, attr)
 
     def set_percentile_splitting(self, **kwargs):
         """
@@ -154,7 +147,7 @@ class HeavisideAssembias(object):
             self._split_abcissa = kwargs['split_abcissa']
             self._split_ordinates = kwargs['split_ordinates']
         else:
-            msg = ("The constructor to the HeavisideAssembiasComponent class "
+            msg = ("The constructor to the HeavisideAssembias class "
                 "must be called with either the ``split`` keyword argument,\n"
                 " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" )
             raise HalotoolsError(msg)
@@ -173,7 +166,19 @@ class HeavisideAssembias(object):
             raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
 
         if hasattr(self, '_input_split_func'):
-            return self._input_split_func(halo_table = halo_table)
+            result = self._input_split_func(halo_table = halo_table)
+
+            if np.any(result < 0):
+                msg = ("The input split_func passed to the HeavisideAssembias class"
+                    "must not return negative values")
+                raise HalotoolsError(msg)
+            if np.any(result > 1):
+                msg = ("The input split_func passed to the HeavisideAssembias class"
+                    "must not return values exceeding unity")
+                raise HalotoolsError(msg)
+
+            return result
+
         elif self._loginterp is True:
             spline_function = model_helpers.custom_spline(
                 np.log10(self._split_abcissa), self._split_ordinates)
@@ -192,20 +197,18 @@ class HeavisideAssembias(object):
     def _initialize_param_dict(self, **kwargs):
         """
         """
-        if hasattr(self.baseline_model_instance, 'param_dict'):
-            self.param_dict = self.baseline_model_instance.param_dict
-        else:
+        if not hasattr(self, 'param_dict'):
             self.param_dict = {}
 
         if 'assembias_strength' in kwargs.keys():
-            self._assembias_strength_abcissa = [1]
+            self._assembias_strength_abcissa = [2]
             self.param_dict[self._get_param_dict_key(0)] = kwargs['assembias_strength']
         elif 'assembias_strength_ordinates' and 'assembias_strength_abcissa' in kwargs:
             self._assembias_strength_abcissa = kwargs['assembias_strength_abcissa']
             for ipar, val in enumerate(kwargs['assembias_strength_ordinates']):
                 self.param_dict[self._get_param_dict_key(ipar)] = val
         else:
-            msg = ("The constructor to the HeavisideAssembiasComponent class "
+            msg = ("The constructor to the HeavisideAssembias class "
                 "must be called with either the ``assembias_strength`` keyword argument,\n"
                 " or both the ``assembias_strength_abcissa`` and ``assembias_strength_ordinates`` keyword arguments" )
             raise HalotoolsError(msg)
