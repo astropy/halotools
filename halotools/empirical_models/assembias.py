@@ -286,8 +286,13 @@ class HeavisideAssembias(object):
                 "HeavisideAssembias class with the baseline_result keyword argument")
             raise HalotoolsError(msg)
 
+        try:
+            split = kwargs['splitting_result']
+        except KeyError:
+            raise HalotoolsError("The ``lower_bound_galprop_perturbation`` method requires a "
+                "``splitting_result`` input keyword argument")
+
         lower_bound1 = self._lower_bound - baseline_result
-        split = self.percentile_splitting_function(**kwargs)
         lower_bound2_prefactor = (1 - split)/split
         lower_bound2 = lower_bound2_prefactor*(baseline_result - self._upper_bound)
 
@@ -303,8 +308,13 @@ class HeavisideAssembias(object):
                 "HeavisideAssembias class with the baseline_result keyword argument")
             raise HalotoolsError(msg)
 
+        try:
+            split = kwargs['splitting_result']
+        except KeyError:
+            raise HalotoolsError("The ``upper_bound_galprop_perturbation`` method requires a "
+                "``splitting_result`` input keyword argument")
+
         upper_bound1 = self._upper_bound - baseline_result
-        split = self.percentile_splitting_function(**kwargs)
         upper_bound2_prefactor = (1 - split)/split
         upper_bound2 = upper_bound2_prefactor*(baseline_result - self._lower_bound)
 
@@ -327,6 +337,12 @@ class HeavisideAssembias(object):
             raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
                 "``halo_table`` input keyword argument")
 
+        try:
+            splitting_result = kwargs['splitting_result']
+        except KeyError:
+            raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
+                "``splitting_result`` input keyword argument")
+
         result = np.zeros(len(halo_table))
 
         strength = self.assembias_strength(halo_table=halo_table)
@@ -338,7 +354,8 @@ class HeavisideAssembias(object):
                 strength[positive_strength_idx]*
                 self.upper_bound_galprop_perturbation(
                     halo_table = halo_table[positive_strength_idx], 
-                    baseline_result = baseline_result[positive_strength_idx])
+                    baseline_result = baseline_result[positive_strength_idx], 
+                    splitting_result = splitting_result[positive_strength_idx])
                 )
 
         if len(halo_table[negative_strength_idx]) > 0:
@@ -346,7 +363,8 @@ class HeavisideAssembias(object):
                 strength[negative_strength_idx]*
                 self.lower_bound_galprop_perturbation(
                     halo_table = halo_table[negative_strength_idx], 
-                    baseline_result = baseline_result[negative_strength_idx])
+                    baseline_result = baseline_result[negative_strength_idx], 
+                    splitting_result = splitting_result[negative_strength_idx])
                 )
 
         return result
@@ -407,14 +425,16 @@ class HeavisideAssembias(object):
             no_edge_result[type1_mask] += (
                 self.galprop_perturbation(
                     halo_table = no_edge_halos_type1, 
-                    baseline_result = no_edge_result[type1_mask])
+                    baseline_result = no_edge_result[type1_mask], 
+                    splitting_result = no_edge_split[type1_mask])
                 )
 
             no_edge_halos_type2 = no_edge_halos[np.invert(type1_mask)]
             no_edge_result[np.invert(type1_mask)] += (
                 self.complementary_galprop_perturbation(
                     halo_table = no_edge_halos_type2, 
-                    baseline_result = no_edge_result[np.invert(type1_mask)])
+                    baseline_result = no_edge_result[np.invert(type1_mask)], 
+                    splitting_result = no_edge_split[np.invert(type1_mask)])
                 )
 
             result[no_edge_mask] = no_edge_result
