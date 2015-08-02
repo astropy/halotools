@@ -382,22 +382,47 @@ class HeavisideAssembias(object):
 
         def wrapper(*args, **kwargs):
 
+            t0 = time()
             try:
                 halo_table = kwargs['halo_table']
             except KeyError:
                 raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
                     "``halo_table`` input keyword argument")
 
+            t1 = time()
+            t = (t1 - t0)*1000.
+            print("t1 = %.2f ms" % t)
+
             split = self.percentile_splitting_function(halo_table = halo_table)
+            t2 = time()
+            t = (t2 - t1)*1000.
+            print("t2 = %.2f ms" % t)
+
             result = func(*args, **kwargs)
+            print(type(result))
+            t3 = time()
+            t = (t3 - t2)*1000.
+            print("t3 = %.2f ms" % t)
+
 
             # We will only apply decorate values that are not edge cases
             no_edge_mask = (
                 (split > 0) & (split < 1) & 
                 (result > self._lower_bound) & (result < self._upper_bound)
                 )
+            t4 = time()
+            t = (t4 - t3)*1000.
+            print("t4 = %.2f ms" % t)
             no_edge_result = result[no_edge_mask]
+            t5 = time()
+            t = (t5 - t4)*1000.
+            print("t5 = %.2f ms" % t)
+
             no_edge_halos = halo_table[no_edge_mask]
+            t6 = time()
+            t = (t6 - t5)*1000.
+            print("t6 = %.2f ms" % t)
+
 
             # Determine the type1_mask that divides the halo sample into two subsamples
             if hasattr(self, 'halo_type_tuple'):
@@ -409,10 +434,10 @@ class HeavisideAssembias(object):
                 no_edge_split = split[no_edge_mask]
                 type1_mask = no_edge_percentiles >= no_edge_split
             else:
-                msg = ("Computing ``%s`` quantity from scratch - \n"
-                    "Method is much faster if this quantity is pre-computed")
-                key = self.sec_haloprop_key + '_percentile'
-                warn(msg % key)
+                # msg = ("Computing ``%s`` quantity from scratch - \n"
+                #     "Method is much faster if this quantity is pre-computed")
+                # key = self.sec_haloprop_key + '_percentile'
+                # warn(msg % key)
                 percentiles = compute_conditional_percentiles(
                     halo_table = halo_table, 
                     prim_haloprop_key = self.prim_haloprop_key, 
@@ -422,23 +447,48 @@ class HeavisideAssembias(object):
                 no_edge_split = split[no_edge_mask]
                 type1_mask = no_edge_percentiles >= no_edge_split
 
+            t7 = time()
+            t = (t7 - t6)*1000.
+            print("t7 = %.2f ms" % t)
+
+
             no_edge_halos_type1 = no_edge_halos[type1_mask]
+            t8 = time()
+            t = (t8 - t7)*1000.
+            print("t8 = %.2f ms" % t)
+
             no_edge_result[type1_mask] += (
                 self.galprop_perturbation(
                     halo_table = no_edge_halos_type1, 
                     baseline_result = no_edge_result[type1_mask], 
                     splitting_result = no_edge_split[type1_mask])
                 )
+            t9 = time()
+            t = (t9 - t8)*1000.
+            print("t9 = %.2f ms" % t)
+
 
             no_edge_halos_type2 = no_edge_halos[np.invert(type1_mask)]
+            t10 = time()
+            t = (t10 - t9)*1000.
+            print("t10 = %.2f ms" % t)
+
             no_edge_result[np.invert(type1_mask)] += (
                 self.complementary_galprop_perturbation(
                     halo_table = no_edge_halos_type2, 
                     baseline_result = no_edge_result[np.invert(type1_mask)], 
                     splitting_result = no_edge_split[np.invert(type1_mask)])
                 )
+            t11 = time()
+            t = (t11 - t10)*1000.
+            print("t11 = %.2f ms" % t)
+
 
             result[no_edge_mask] = no_edge_result
+            t12 = time()
+            t = (t12 - t11)*1000.
+            print("t12 = %.2f ms" % t)
+
             return result
 
         return wrapper
