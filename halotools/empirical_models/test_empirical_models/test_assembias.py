@@ -53,7 +53,7 @@ class TestAssembias(TestCase):
         method = getattr(model, model._method_name_to_decorate)
         result = method(halo_table = self.toy_halo_table2)
 
-        mask = self.toy_halo_table2['halo_zform_percentile'] >= 0.5
+        mask = self.toy_halo_table2['halo_zform_percentile'] >= model._split_ordinates[0]
         oldmean = result[mask].mean()
         youngmean = result[np.invert(mask)].mean()
         baseline_mean = baseline_result.mean()
@@ -75,11 +75,21 @@ class TestAssembias(TestCase):
         self.init_test(abz)
         self.baseline_recovery_test(abz)
 
+        abz2 = AssembiasZheng07Cens(sec_haloprop_key = 'halo_zform', 
+            split=0.75, assembias_strength = -0.25)
+        self.init_test(abz2)
+        self.baseline_recovery_test(abz2)
+
     def test_assembias_zheng07_sats(self):
         abz = AssembiasZheng07Sats(sec_haloprop_key = 'halo_zform')
+
         self.init_test(abz)
         self.baseline_recovery_test(abz)
 
+        abz2 = AssembiasZheng07Sats(sec_haloprop_key = 'halo_zform', 
+            split=0.25, assembias_strength = -0.25)
+        self.init_test(abz2)
+        self.baseline_recovery_test(abz2)
 
 
 
