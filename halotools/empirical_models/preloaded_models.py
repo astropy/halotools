@@ -62,42 +62,42 @@ def Leauthaud11(**kwargs):
     blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
     return model_factories.HodModelFactory(blueprint, **kwargs)
 
-def Zentner15(**kwargs):
-    """ 
+# def Zentner15(**kwargs):
+#     """ 
 
-    Parameters 
-    ----------
-    threshold : float, optional keyword argument
-        Stellar mass threshold of the mock galaxy sample. 
-        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+#     Parameters 
+#     ----------
+#     threshold : float, optional keyword argument
+#         Stellar mass threshold of the mock galaxy sample. 
+#         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    baseline_central_hod_model : object, optional keyword argument 
-        Sub-class of `~halotools.empirical_models.OccupationComponent` governing 
-        the underlying standard HOD of centrals. Default is `Leauthaud11Cens`. 
+#     baseline_central_hod_model : object, optional keyword argument 
+#         Sub-class of `~halotools.empirical_models.OccupationComponent` governing 
+#         the underlying standard HOD of centrals. Default is `Leauthaud11Cens`. 
 
-    prim_haloprop_key : string, optional keyword argument 
-        String giving the column name of the primary halo property governing 
-        the occupation statistics of gal_type galaxies. 
-        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+#     prim_haloprop_key : string, optional keyword argument 
+#         String giving the column name of the primary halo property governing 
+#         the occupation statistics of gal_type galaxies. 
+#         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    sec_haloprop_key : string, optional keyword argument 
-        String giving the column name of the secondary halo property modulating 
-        the occupation statistics of the galaxies. 
-        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+#     sec_haloprop_key : string, optional keyword argument 
+#         String giving the column name of the secondary halo property modulating 
+#         the occupation statistics of the galaxies. 
+#         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    redshift : float, optional keyword argument 
-        Redshift of the stellar-to-halo-mass relation. Default is 0. 
+#     redshift : float, optional keyword argument 
+#         Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
-    Returns 
-    -------
-    model_blueprint : dict 
-        Dictionary containing instructions for how to build the model. 
-        When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
-        the factory returns the Zentner15 model object. 
+#     Returns 
+#     -------
+#     model_blueprint : dict 
+#         Dictionary containing instructions for how to build the model. 
+#         When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
+#         the factory returns the Zentner15 model object. 
 
-    """     
-    blueprint = preloaded_hod_blueprints.Zentner15_blueprint(**kwargs)
-    return model_factories.HodModelFactory(blueprint, **kwargs)
+#     """     
+#     blueprint = preloaded_hod_blueprints.Zentner15_blueprint(**kwargs)
+#     return model_factories.HodModelFactory(blueprint, **kwargs)
 
 def SmHmBinarySFR(**kwargs):
     """ Blueprint for a very simple model assigning stellar mass and 
