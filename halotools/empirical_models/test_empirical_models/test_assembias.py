@@ -87,7 +87,7 @@ class TestAssembias(TestCase):
         self.baseline_recovery_test(abz)
 
         abz2 = AssembiasZheng07Sats(sec_haloprop_key = 'halo_zform', 
-            split=0.25, assembias_strength = -0.25)
+            split=0.25, assembias_strength = -0.7)
         self.init_test(abz2)
         self.baseline_recovery_test(abz2)
 
