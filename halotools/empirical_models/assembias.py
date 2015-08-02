@@ -160,16 +160,14 @@ class HeavisideAssembias(object):
     def percentile_splitting_function(self, **kwargs):
         """
         """
-        ta = time()
         try:
             halo_table = kwargs['halo_table']
-        except KeyError:
-            raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
-                "``halo_table`` input keyword argument")
-        try:
             prim_haloprop = halo_table[self.prim_haloprop_key]
         except KeyError:
-            raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
+            msg = ("The ``percentile_splitting_function`` method requires a "
+                "``halo_table`` input keyword argument.\n"
+                "The input halo_table must have a column with name %s")
+            raise HalotoolsError(msg % self.prim_haloprop_key)
 
         if hasattr(self, '_input_split_func'):
             result = self._input_split_func(halo_table = halo_table)
@@ -198,8 +196,6 @@ class HeavisideAssembias(object):
         result = np.where(result < 0, 0, result)
         result = np.where(result > 1, 1, result)
 
-        tb = (time() - ta)*1000.
-        print("percentile_splitting_function calculation runtime = %.2f ms" % tb)
         return result
 
 
@@ -225,8 +221,6 @@ class HeavisideAssembias(object):
     def assembias_strength(self, **kwargs):
         """
         """
-        ta = time()
-
         try:
             prim_haloprop = kwargs['prim_haloprop']
         except KeyError:
@@ -295,76 +289,38 @@ class HeavisideAssembias(object):
 
         return result
 
-    def complementary_galprop_perturbation(self, **kwargs):
-        """
-        """
-        galprop_perturbation = self.galprop_perturbation(**kwargs)
-
-        split = kwargs['splitting_result']
-        result = -split*galprop_perturbation/(1-split)
-
-        return result
-
     def assembias_decorator(self, func):
         """
         """
 
         def wrapper(*args, **kwargs):
-
-            t0 = time()
             try:
                 halo_table = kwargs['halo_table']
-            except KeyError:
-                raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
-                    "``halo_table`` input keyword argument")
-
-            try:
                 prim_haloprop = halo_table[self.prim_haloprop_key]
             except KeyError:
-                raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
-
-            t1 = time()
-            t = (t1 - t0)*1000.
-            print("t1 = %.2f ms" % t)
+                msg = ("The ``assembias_decorator`` method requires a "
+                    "``halo_table`` input keyword argument.\n"
+                    "The input halo_table must have a column with name %s")
+                raise HalotoolsError(msg % self.prim_haloprop_key)
 
             split = self.percentile_splitting_function(halo_table = halo_table)
-            t2 = time()
-            t = (t2 - t1)*1000.
-            print("t2 = %.2f ms" % t)
-
             result = func(*args, **kwargs)
-            t3 = time()
-            t = (t3 - t2)*1000.
-            print("t3 = %.2f ms" % t)
-
 
             # We will only apply decorate values that are not edge cases
             no_edge_mask = (
                 (split > 0) & (split < 1) & 
                 (result > self._lower_bound) & (result < self._upper_bound)
                 )
-            t4 = time()
-            t = (t4 - t3)*1000.
-            print("t4 = %.2f ms" % t)
             no_edge_result = result[no_edge_mask]
-            t5 = time()
-            t = (t5 - t4)*1000.
-            print("t5 = %.2f ms" % t)
-
-            # no_edge_halos = halo_table[no_edge_mask]
-            t6 = time()
-            t = (t6 - t5)*1000.
-            print("t6 = %.2f ms" % t)
+            no_edge_split = split[no_edge_mask]
 
             # Determine the type1_mask that divides the halo sample into two subsamples
             if hasattr(self, 'halo_type_tuple'):
                 halo_type_key = self.halo_type_tuple[0]
                 halo_type1_val = self.halo_type_tuple[1]
                 type1_mask = halo_table[halo_type_key][no_edge_mask] == halo_type1_val
-                # type1_mask = no_edge_halos[halo_type_key] == halo_type1_val
             elif self.sec_haloprop_key + '_percentile' in halo_table.keys():
                 no_edge_percentiles = halo_table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
-                no_edge_split = split[no_edge_mask]
                 type1_mask = no_edge_percentiles >= no_edge_split
             else:
                 msg = ("Computing ``%s`` quantity from scratch - \n"
@@ -377,54 +333,19 @@ class HeavisideAssembias(object):
                     prim_haloprop_key = self.prim_haloprop_key, 
                     sec_haloprop_key = self.sec_haloprop_key
                     )
-                t7a = time()
-                t = (t7a - t6)*1000.
-                print("t7a = %.2f ms" % t)
                 no_edge_percentiles = percentiles[no_edge_mask]
-                no_edge_split = split[no_edge_mask]
                 type1_mask = no_edge_percentiles >= no_edge_split
 
-            t7 = time()
-            t = (t7 - t6)*1000.
-            print("t7 = %.2f ms" % t)
+            perturbation = self.galprop_perturbation(
+                    prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask], 
+                    baseline_result = no_edge_result, 
+                    splitting_result = no_edge_split)
+            perturbation[np.invert(type1_mask)] *= (-no_edge_split[np.invert(type1_mask)]/
+                (1 - no_edge_split[np.invert(type1_mask)]))
 
-
-            t8 = time()
-            t = (t8 - t7)*1000.
-            print("t8 = %.2f ms" % t)
-
-            no_edge_result[type1_mask] += (
-                self.galprop_perturbation(
-                    prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask][type1_mask], 
-                    baseline_result = no_edge_result[type1_mask], 
-                    splitting_result = no_edge_split[type1_mask])
-                )
-            t9 = time()
-            t = (t9 - t8)*1000.
-            print("t9 = %.2f ms" % t)
-
-
-            # no_edge_halos_type2 = no_edge_halos[np.invert(type1_mask)]
-            t10 = time()
-            t = (t10 - t9)*1000.
-            print("t10 = %.2f ms" % t)
-
-            no_edge_result[np.invert(type1_mask)] += (
-                self.complementary_galprop_perturbation(
-                    prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask][np.invert(type1_mask)], 
-                    baseline_result = no_edge_result[np.invert(type1_mask)], 
-                    splitting_result = no_edge_split[np.invert(type1_mask)])
-                )
-            t11 = time()
-            t = (t11 - t10)*1000.
-            print("t11 = %.2f ms" % t)
-
+            no_edge_result += perturbation
 
             result[no_edge_mask] = no_edge_result
-            t12 = time()
-            t = (t12 - t11)*1000.
-            print("t12 = %.2f ms" % t)
-
             return result
 
         return wrapper
