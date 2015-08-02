@@ -45,40 +45,40 @@ class TestAssembias(TestCase):
         assert hasattr(model, '_lower_bound')
         assert hasattr(model, '_upper_bound')
 
-    def test_assembias_zheng07_cens(self):
-        abz = AssembiasZheng07Cens(sec_haloprop_key = 'halo_zform')
-        self.init_test(abz)
+    def baseline_recovery_test(self, model):
 
-        baseline_result = abz.baseline_mean_occupation(halo_table = self.toy_halo_table2)
-        np.testing.assert_allclose(baseline_result, 0.456686, rtol=1e-3)
-        result = abz.mean_occupation(halo_table = self.toy_halo_table2)
-        assert result.mean() == baseline_result.mean()
+        baseline_method = getattr(model, 'baseline_'+model._method_name_to_decorate)
+        baseline_result = baseline_method(halo_table = self.toy_halo_table2)
+
+        method = getattr(model, model._method_name_to_decorate)
+        result = method(halo_table = self.toy_halo_table2)
 
         mask = self.toy_halo_table2['halo_zform_percentile'] >= 0.5
-        assert result[mask].mean() != result[np.invert(mask)].mean()
-
         oldmean = result[mask].mean()
         youngmean = result[np.invert(mask)].mean()
-        derived_mean = 0.5*oldmean + 0.5*youngmean
+        baseline_mean = baseline_result.mean()
+        assert oldmean != youngmean
+        assert oldmean != baseline_mean
+        assert youngmean != baseline_mean 
+
+        split = model.percentile_splitting_function(halo_table = self.toy_halo_table2)
+        split = np.where(mask, split, 1-split)
+        derived_result = split*oldmean
+        derived_result[np.invert(mask)] = split[np.invert(mask)]*youngmean
+        derived_mean = derived_result[mask].mean() + derived_result[np.invert(mask)].mean()
         baseline_mean = baseline_result.mean()
         np.testing.assert_allclose(baseline_mean, derived_mean, rtol=1e-3)
+
+    def test_assembias_zheng07_cens(self):
+        abz = AssembiasZheng07Cens(sec_haloprop_key = 'halo_zform')
+
+        self.init_test(abz)
+        self.baseline_recovery_test(abz)
 
     def test_assembias_zheng07_sats(self):
         abz = AssembiasZheng07Sats(sec_haloprop_key = 'halo_zform')
-
-        self.toy_halo_table2['halo_mvir'] = 1e14
-        baseline_result = abz.baseline_mean_occupation(halo_table = self.toy_halo_table2)
-        np.testing.assert_allclose(baseline_result, 5.373959, rtol=1e-3)
-        result = abz.mean_occupation(halo_table = self.toy_halo_table2)
-        np.testing.assert_allclose(result.mean(), baseline_result.mean(), rtol=1e-3)
-
-        mask = self.toy_halo_table2['halo_zform_percentile'] >= 0.5
-        oldmean = result[mask].mean()
-        youngmean = result[np.invert(mask)].mean()
-        baseline_mean = baseline_result.mean()
-        assert oldmean > baseline_mean > youngmean
-        derived_mean = 0.5*oldmean + 0.5*youngmean        
-        np.testing.assert_allclose(baseline_mean, derived_mean, rtol=1e-3)
+        self.init_test(abz)
+        self.baseline_recovery_test(abz)
 
 
 
