@@ -257,33 +257,15 @@ class HeavisideAssembias(object):
     def galprop_perturbation(self, **kwargs):
         """
         """
-        ta = time()
         try:
             baseline_result = kwargs['baseline_result']
-        except KeyError:
-            msg = ("Must call galprop_perturbation method of the" 
-                "HeavisideAssembias class with the baseline_result keyword argument")
-            raise HalotoolsError(msg)
-
-        if 'prim_haloprop' in kwargs.keys():
             prim_haloprop = kwargs['prim_haloprop']
-        else:
-            try:
-                halo_table = kwargs['halo_table']
-            except KeyError:
-                raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
-                    "``halo_table`` input keyword argument")
-
-            try:
-                prim_haloprop = halo_table[self.prim_haloprop_key]
-            except KeyError:
-                raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
-
-        try:
             splitting_result = kwargs['splitting_result']
         except KeyError:
-            raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
-                "``splitting_result`` input keyword argument")
+            msg = ("Must call galprop_perturbation method of the" 
+                "HeavisideAssembias class with the following keyword arguments:\n"
+                "``baseline_result``, ``splitting_result`` and ``prim_haloprop``")
+            raise HalotoolsError(msg)
 
         result = np.zeros(len(prim_haloprop))
 
@@ -297,8 +279,7 @@ class HeavisideAssembias(object):
             strength_pos = strength[positive_strength_idx]
 
             upper_bound1 = self._upper_bound - base_pos
-            upper_bound2_prefactor = (1 - split_pos)/split_pos
-            upper_bound2 = upper_bound2_prefactor*(base_pos - self._lower_bound)
+            upper_bound2 = ((1 - split_pos)/split_pos)*(base_pos - self._lower_bound)
             upper_bound = np.minimum(upper_bound1, upper_bound2)
             result[positive_strength_idx] = strength_pos*upper_bound
 
@@ -308,31 +289,20 @@ class HeavisideAssembias(object):
             strength_neg = strength[negative_strength_idx]
 
             lower_bound1 = self._lower_bound - base_neg
-            lower_bound2_prefactor = (1 - split_neg)/split_neg
-            lower_bound2 = lower_bound2_prefactor*(base_neg - self._upper_bound)
+            lower_bound2 = (1 - split_neg)/split_neg*(base_neg - self._upper_bound)
             lower_bound = np.minimum(lower_bound1, lower_bound2)
             result[negative_strength_idx] = strength_neg*lower_bound
 
-        tb = time() - ta
-        print("galprop_perturbation runtime = %.2f ms" % (tb*1000.))
         return result
 
     def complementary_galprop_perturbation(self, **kwargs):
         """
         """
-        ta = time()
-
-        try:
-            split = kwargs['splitting_result']
-        except KeyError:
-            raise HalotoolsError("The ``upper_bound_galprop_perturbation`` method requires a "
-                "``splitting_result`` input keyword argument")
-
         galprop_perturbation = self.galprop_perturbation(**kwargs)
 
+        split = kwargs['splitting_result']
         result = -split*galprop_perturbation/(1-split)
-        tb = time() - ta
-        print("complementary_galprop_perturbation runtime = %.2f ms" % (tb*1000.))
+
         return result
 
     def assembias_decorator(self, func):
@@ -419,7 +389,6 @@ class HeavisideAssembias(object):
             print("t7 = %.2f ms" % t)
 
 
-            # no_edge_halos_type1 = no_edge_halos[type1_mask]
             t8 = time()
             t = (t8 - t7)*1000.
             print("t8 = %.2f ms" % t)
