@@ -147,6 +147,8 @@ class HeavisideAssembias(object):
 
         try:
             baseline_method = getattr(self, self._method_name_to_decorate)
+            setattr(self, 'baseline_'+self._method_name_to_decorate, 
+                baseline_method)
             decorated_method = self.assembias_decorator(baseline_method)
             setattr(self, self._method_name_to_decorate, decorated_method)
         except AttributeError:
