@@ -6,7 +6,7 @@ HOD-style models of the galaxy-halo connection.
 """
 
 __all__ = (['OccupationComponent','Zheng07Cens','Zheng07Sats', 
-    'Leauthaud11Cens', 'Leauthaud11Sats']
+    'Leauthaud11Cens', 'Leauthaud11Sats', 'AssembiasZheng07Cens', 'AssembiasZheng07Sats']
     )
 
 from functools import partial
