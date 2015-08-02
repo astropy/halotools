@@ -279,6 +279,7 @@ class HeavisideAssembias(object):
     def lower_bound_galprop_perturbation(self, **kwargs):
         """
         """
+        ta = time()
         try:
             baseline_result = kwargs['baseline_result']
         except KeyError:
@@ -296,11 +297,15 @@ class HeavisideAssembias(object):
         lower_bound2_prefactor = (1 - split)/split
         lower_bound2 = lower_bound2_prefactor*(baseline_result - self._upper_bound)
 
+        tb = time() - ta
+        print("lower_bound_galprop_perturbation runtime = %.2f ms" % (tb*1000.))
+
         return np.maximum(lower_bound1, lower_bound2)
 
     def upper_bound_galprop_perturbation(self, **kwargs):
         """
         """
+        ta = time()
         try:
             baseline_result = kwargs['baseline_result']
         except KeyError:
@@ -317,6 +322,8 @@ class HeavisideAssembias(object):
         upper_bound1 = self._upper_bound - baseline_result
         upper_bound2_prefactor = (1 - split)/split
         upper_bound2 = upper_bound2_prefactor*(baseline_result - self._lower_bound)
+        tb = time() - ta
+        print("upper_bound_galprop_perturbation runtime = %.2f ms" % (tb*1000.))
 
         return np.minimum(upper_bound1, upper_bound2)
 
@@ -324,6 +331,7 @@ class HeavisideAssembias(object):
     def galprop_perturbation(self, **kwargs):
         """
         """
+        ta = time()
         try:
             baseline_result = kwargs['baseline_result']
         except KeyError:
@@ -349,7 +357,7 @@ class HeavisideAssembias(object):
         positive_strength_idx = strength > 0
         negative_strength_idx = np.invert(positive_strength_idx)
 
-        if len(halo_table[positive_strength_idx]) > 0:
+        if len(baseline_result[positive_strength_idx]) > 0:
             result[positive_strength_idx] = (
                 strength[positive_strength_idx]*
                 self.upper_bound_galprop_perturbation(
@@ -358,7 +366,7 @@ class HeavisideAssembias(object):
                     splitting_result = splitting_result[positive_strength_idx])
                 )
 
-        if len(halo_table[negative_strength_idx]) > 0:
+        if len(baseline_result[negative_strength_idx]) > 0:
             result[negative_strength_idx] = (
                 strength[negative_strength_idx]*
                 self.lower_bound_galprop_perturbation(
@@ -367,14 +375,28 @@ class HeavisideAssembias(object):
                     splitting_result = splitting_result[negative_strength_idx])
                 )
 
+        tb = time() - ta
+        print("galprop_perturbation runtime = %.2f ms" % (tb*1000.))
         return result
 
     def complementary_galprop_perturbation(self, **kwargs):
         """
         """
-        split = self.percentile_splitting_function(**kwargs)
+        ta = time()
+
+        try:
+            split = kwargs['splitting_result']
+        except KeyError:
+            raise HalotoolsError("The ``upper_bound_galprop_perturbation`` method requires a "
+                "``splitting_result`` input keyword argument")
+
+        #split = self.percentile_splitting_function(**kwargs)
         galprop_perturbation = self.galprop_perturbation(**kwargs)
-        return -split*galprop_perturbation/(1-split)
+
+        result = -split*galprop_perturbation/(1-split)
+        tb = time() - ta
+        print("complementary_galprop_perturbation runtime = %.2f ms" % (tb*1000.))
+        return result
 
     def assembias_decorator(self, func):
         """
@@ -399,7 +421,6 @@ class HeavisideAssembias(object):
             print("t2 = %.2f ms" % t)
 
             result = func(*args, **kwargs)
-            print(type(result))
             t3 = time()
             t = (t3 - t2)*1000.
             print("t3 = %.2f ms" % t)
@@ -434,15 +455,19 @@ class HeavisideAssembias(object):
                 no_edge_split = split[no_edge_mask]
                 type1_mask = no_edge_percentiles >= no_edge_split
             else:
-                # msg = ("Computing ``%s`` quantity from scratch - \n"
-                #     "Method is much faster if this quantity is pre-computed")
-                # key = self.sec_haloprop_key + '_percentile'
-                # warn(msg % key)
+                msg = ("Computing ``%s`` quantity from scratch - \n"
+                    "Method is much faster if this quantity is pre-computed")
+                key = self.sec_haloprop_key + '_percentile'
+                warn(msg % key)
+
                 percentiles = compute_conditional_percentiles(
                     halo_table = halo_table, 
                     prim_haloprop_key = self.prim_haloprop_key, 
                     sec_haloprop_key = self.sec_haloprop_key
                     )
+                t7a = time()
+                t = (t7a - t6)*1000.
+                print("t7a = %.2f ms" % t)
                 no_edge_percentiles = percentiles[no_edge_mask]
                 no_edge_split = split[no_edge_mask]
                 type1_mask = no_edge_percentiles >= no_edge_split
