@@ -58,6 +58,9 @@ If you want to start playing with this catalog right away:
 >>> default_snapshot = sim_manager.HaloCatalog() # doctest: +SKIP
 >>> print(default_snapshot.halo_table[0:9]) # doctest: +SKIP
 
+To see simple examples of how to manipulate the data stored in halo catalogs, 
+see the Examples section of the `~halotools.sim_manager.HaloCatalog` API documentation. 
+
 Getting started with subpackages
 ================================
 
