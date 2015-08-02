@@ -49,7 +49,7 @@ class OccupationComponent(model_helpers.GalPropModel):
             Threshold value defining the selection function of the galaxy population 
             being modeled. Typically refers to absolute magnitude or stellar mass. 
 
-        occupation_bound : float, keyword argument
+        upper_bound : float, keyword argument
             Upper bound on the number of gal_type galaxies per halo. 
             The only currently supported values are unity or infinity. 
 
@@ -66,8 +66,9 @@ class OccupationComponent(model_helpers.GalPropModel):
         """
         super(OccupationComponent, self).__init__(galprop_key='occupation')
 
-        required_kwargs = ['gal_type',  'threshold', 'occupation_bound', 'prim_haloprop_key']
+        required_kwargs = ['gal_type',  'threshold', 'upper_bound', 'prim_haloprop_key']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
+        self.lower_bound = 0
 
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
@@ -105,12 +106,12 @@ class OccupationComponent(model_helpers.GalPropModel):
             Integer array giving the number of galaxies in each of the input halo_table.     
         """ 
         first_occupation_moment = self.mean_occupation(**kwargs)
-        if self.occupation_bound == 1:
+        if self.upper_bound == 1:
             return self._nearest_integer_distribution(first_occupation_moment, seed=seed, **kwargs)
-        elif self.occupation_bound == float("inf"):
+        elif self.upper_bound == float("inf"):
             return self._poisson_distribution(first_occupation_moment, seed=seed, **kwargs)
         else:
-            raise KeyError("The only permissible values of occupation_bound for instances "
+            raise KeyError("The only permissible values of upper_bound for instances "
                 "of OccupationComponent are unity and infinity.")
 
     def _nearest_integer_distribution(self, first_occupation_moment, seed=None, **kwargs):
@@ -200,12 +201,12 @@ class Zheng07Cens(OccupationComponent):
         The test suite for this model is documented at 
         `~halotools.empirical_models.test_empirical_models.test_Zheng07Cens`
         """
-        occupation_bound = 1.0
+        upper_bound = 1.0
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Zheng07Cens, self).__init__(gal_type=gal_type, 
-            threshold=threshold, occupation_bound=occupation_bound, 
+            threshold=threshold, upper_bound=upper_bound, 
             prim_haloprop_key=prim_haloprop_key, 
             **kwargs)
 
@@ -376,13 +377,13 @@ class Leauthaud11Cens(OccupationComponent):
         >>> cen_model = Leauthaud11Cens(prim_haloprop_key = 'halo_m200b')
 
         """
-        occupation_bound = 1.0
+        upper_bound = 1.0
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Leauthaud11Cens, self).__init__(
             gal_type=gal_type, threshold=threshold, 
-            occupation_bound=occupation_bound, 
+            upper_bound=upper_bound, 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
@@ -510,13 +511,13 @@ class Zheng07Sats(OccupationComponent):
         `~halotools.empirical_models.test_empirical_models.test_Zheng07Sats`
 
         """
-        occupation_bound = float("inf")
+        upper_bound = float("inf")
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Zheng07Sats, self).__init__(
             gal_type=gal_type, threshold=threshold, 
-            occupation_bound=occupation_bound, 
+            upper_bound=upper_bound, 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
@@ -739,7 +740,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         super(Leauthaud11Sats, self).__init__(
             gal_type=gal_type, threshold=threshold, 
-            occupation_bound=float("inf"), 
+            upper_bound=float("inf"), 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 

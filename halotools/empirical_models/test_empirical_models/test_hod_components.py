@@ -17,7 +17,7 @@ def test_Zheng07Cens():
 	`~halotools.empirical_models.Zheng07Cens`. 
 	Here's a brief summary of the tests performed: 
 
-		* The basic metadata of the model is correct, e.g., ``self.occupation_bound = 1`` 
+		* The basic metadata of the model is correct, e.g., ``self.upper_bound = 1`` 
 
 		* The `mean_occupation` function is bounded by zero and unity for the full range of reasonable input masses, :math:`0 <= \\langle N_{\mathrm{cen}}(M) \\rangle <=1` for :math:`\\log_{10}M/M_{\odot} \\in [10, 16]`
 
@@ -36,7 +36,7 @@ def test_Zheng07Cens():
 
 		assert hasattr(model, 'prim_haloprop_key')
 
-		assert model.occupation_bound == 1
+		assert model.upper_bound == 1
 
 	def test_mean_occupation(model):
 
@@ -167,7 +167,7 @@ def test_Zheng07Sats():
 	`~halotools.empirical_models.Zheng07Sats`. 
 	Here's a brief summary of the tests performed: 
 
-		* The basic metadata of the model is correct, e.g., ``self.occupation_bound = 1`` 
+		* The basic metadata of the model is correct, e.g., ``self.upper_bound = 1`` 
 
 		* The `mean_occupation` function is bounded by zero and unity for the full range of reasonable input masses, :math:`0 <= \\langle N_{\mathrm{cen}}(M) \\rangle <=1` for :math:`\\log_{10}M/M_{\odot} \\in [10, 16]`
 
@@ -186,7 +186,7 @@ def test_Zheng07Sats():
 
 		assert hasattr(model, 'prim_haloprop_key')
 
-		assert model.occupation_bound == float("inf")
+		assert model.upper_bound == float("inf")
 
 	def test_mean_occupation(model):
 
