@@ -7,7 +7,7 @@ from copy import copy
 import numpy as np 
 from astropy.table import Table
 
-from ..assembias import HeavisideAssembias, AssembiasZheng07Cens
+from ..assembias import HeavisideAssembias, AssembiasZheng07Cens, AssembiasZheng07Sats
 
 from .. import model_defaults
 from ..hod_components import Zheng07Cens, Leauthaud11Cens
@@ -55,8 +55,22 @@ class TestAssembias(TestCase):
         baseline_mean = baseline_result.mean()
         np.testing.assert_allclose(baseline_mean, derived_mean, rtol=1e-3)
 
+    def test_assembias_zheng07_sats(self):
+        abz = AssembiasZheng07Sats(sec_haloprop_key = 'halo_zform')
 
+        self.toy_halo_table2['halo_mvir'] = 1e14
+        baseline_result = abz.baseline_mean_occupation(halo_table = self.toy_halo_table2)
+        np.testing.assert_allclose(baseline_result, 5.373959, rtol=1e-3)
+        result = abz.mean_occupation(halo_table = self.toy_halo_table2)
+        np.testing.assert_allclose(result.mean(), baseline_result.mean(), rtol=1e-3)
 
+        mask = self.toy_halo_table2['halo_zform_percentile'] >= 0.5
+        oldmean = result[mask].mean()
+        youngmean = result[np.invert(mask)].mean()
+        baseline_mean = baseline_result.mean()
+        assert oldmean > baseline_mean > youngmean
+        derived_mean = 0.5*oldmean + 0.5*youngmean        
+        np.testing.assert_allclose(baseline_mean, derived_mean, rtol=1e-3)
 
 
 
