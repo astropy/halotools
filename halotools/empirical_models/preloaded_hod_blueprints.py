@@ -5,7 +5,7 @@ Module containing some commonly used composite HOD model blueprints.
 
 """
 
-from . import model_defaults, mock_factories, smhm_components, abhod_components
+from . import model_defaults, mock_factories, smhm_components
 from . import hod_components as hoc
 from . import gal_prof_factory as gpf
 from . import halo_prof_components as hpc
@@ -137,70 +137,70 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     return model_blueprint
 
 
-def Zentner15_blueprint(baseline_central_hod_model=hoc.Leauthaud11Cens, **kwargs):
-    """ 
+# def Zentner15_blueprint(baseline_central_hod_model=hoc.Leauthaud11Cens, **kwargs):
+#     """ 
 
-    Parameters 
-    ----------
-    threshold : float, optional keyword argument
-        Stellar mass threshold of the mock galaxy sample. 
-        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+#     Parameters 
+#     ----------
+#     threshold : float, optional keyword argument
+#         Stellar mass threshold of the mock galaxy sample. 
+#         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    baseline_central_hod_model : object, optional keyword argument 
-        Sub-class of `~halotools.empirical_models.OccupationComponent` governing 
-        the underlying standard HOD of centrals. Default is `Leauthaud11Cens`. 
+#     baseline_central_hod_model : object, optional keyword argument 
+#         Sub-class of `~halotools.empirical_models.OccupationComponent` governing 
+#         the underlying standard HOD of centrals. Default is `Leauthaud11Cens`. 
 
-    prim_haloprop_key : string, optional keyword argument 
-        String giving the column name of the primary halo property governing 
-        the occupation statistics of gal_type galaxies. 
-        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+#     prim_haloprop_key : string, optional keyword argument 
+#         String giving the column name of the primary halo property governing 
+#         the occupation statistics of gal_type galaxies. 
+#         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    sec_haloprop_key : string, optional keyword argument 
-        String giving the column name of the secondary halo property modulating 
-        the occupation statistics of the galaxies. 
-        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+#     sec_haloprop_key : string, optional keyword argument 
+#         String giving the column name of the secondary halo property modulating 
+#         the occupation statistics of the galaxies. 
+#         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    ab_percentile : float
-        percentile at which to implement heavside 2-population assembly bias
+#     ab_percentile : float
+#         percentile at which to implement heavside 2-population assembly bias
 
-    frac_dNmax : float
-        fraction of maximal assembly bias effect
+#     frac_dNmax : float
+#         fraction of maximal assembly bias effect
 
-    redshift : float, optional keyword argument 
-        Redshift of the stellar-to-halo-mass relation. Default is 0. 
+#     redshift : float, optional keyword argument 
+#         Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
-    Returns 
-    -------
-    model_blueprint : dict 
-        Dictionary containing instructions for how to build the model. 
-        When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
-        the factory returns the Zentner15 model object. 
+#     Returns 
+#     -------
+#     model_blueprint : dict 
+#         Dictionary containing instructions for how to build the model. 
+#         When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
+#         the factory returns the Zentner15 model object. 
 
-    """     
+#     """     
 
-    ##############################
-    ### Build model for centrals
-    cen_key = 'centrals'
-    cen_model_dict = {}
+#     ##############################
+#     ### Build model for centrals
+#     cen_key = 'centrals'
+#     cen_model_dict = {}
 
-    # Build the occupation model
-    standard_cen_model = baseline_central_hod_model(**kwargs)
-    arz = abhod_components.HeavisideCenAssemBiasModel(
-        standard_cen_model = standard_cen_model, **kwargs)
-    cen_model_dict['occupation'] = arz
+#     # Build the occupation model
+#     standard_cen_model = baseline_central_hod_model(**kwargs)
+#     arz = abhod_components.HeavisideCenAssemBiasModel(
+#         standard_cen_model = standard_cen_model, **kwargs)
+#     cen_model_dict['occupation'] = arz
 
-    # Build the profile model
-    cen_profile = gpf.IsotropicGalProf(
-        gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
-    cen_model_dict['profile'] = cen_profile
+#     # Build the profile model
+#     cen_profile = gpf.IsotropicGalProf(
+#         gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
+#     cen_model_dict['profile'] = cen_profile
 
-    ##############################
-    ### Build model for satellites
-    cen_key = 'satellites'
-    sat_model_dict = {}
+#     ##############################
+#     ### Build model for satellites
+#     cen_key = 'satellites'
+#     sat_model_dict = {}
 
-    model_blueprint = {standard_cen_model.gal_type : cen_model_dict}
-    return model_blueprint
+#     model_blueprint = {standard_cen_model.gal_type : cen_model_dict}
+#     return model_blueprint
 
 
 """

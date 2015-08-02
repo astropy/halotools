@@ -18,4 +18,4 @@ from .smhm_components import *
 from .sfr_components import *
 from .abunmatch import *
 from .model_helpers import *
-from .assembias_decorator import *
+from .assembias import *
