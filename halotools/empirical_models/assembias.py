@@ -254,59 +254,6 @@ class HeavisideAssembias(object):
         """
         return self._method_name_to_decorate + '_assembias_param' + str(ipar+1)
 
-
-    def lower_bound_galprop_perturbation(self, **kwargs):
-        """
-        """
-        ta = time()
-        try:
-            baseline_result = kwargs['baseline_result']
-        except KeyError:
-            msg = ("Must call lower_bound_galprop_perturbation method of the" 
-                "HeavisideAssembias class with the baseline_result keyword argument")
-            raise HalotoolsError(msg)
-
-        try:
-            split = kwargs['splitting_result']
-        except KeyError:
-            raise HalotoolsError("The ``lower_bound_galprop_perturbation`` method requires a "
-                "``splitting_result`` input keyword argument")
-
-        lower_bound1 = self._lower_bound - baseline_result
-        lower_bound2_prefactor = (1 - split)/split
-        lower_bound2 = lower_bound2_prefactor*(baseline_result - self._upper_bound)
-
-        tb = time() - ta
-        print("lower_bound_galprop_perturbation runtime = %.2f ms" % (tb*1000.))
-
-        return np.maximum(lower_bound1, lower_bound2)
-
-    def upper_bound_galprop_perturbation(self, **kwargs):
-        """
-        """
-        ta = time()
-        try:
-            baseline_result = kwargs['baseline_result']
-        except KeyError:
-            msg = ("Must call upper_bound_galprop_perturbation method of the" 
-                "HeavisideAssembias class with the baseline_result keyword argument")
-            raise HalotoolsError(msg)
-
-        try:
-            split = kwargs['splitting_result']
-        except KeyError:
-            raise HalotoolsError("The ``upper_bound_galprop_perturbation`` method requires a "
-                "``splitting_result`` input keyword argument")
-
-        upper_bound1 = self._upper_bound - baseline_result
-        upper_bound2_prefactor = (1 - split)/split
-        upper_bound2 = upper_bound2_prefactor*(baseline_result - self._lower_bound)
-        tb = time() - ta
-        print("upper_bound_galprop_perturbation runtime = %.2f ms" % (tb*1000.))
-
-        return np.minimum(upper_bound1, upper_bound2)
-
-
     def galprop_perturbation(self, **kwargs):
         """
         """
@@ -345,20 +292,26 @@ class HeavisideAssembias(object):
         negative_strength_idx = np.invert(positive_strength_idx)
 
         if len(baseline_result[positive_strength_idx]) > 0:
-            result[positive_strength_idx] = (
-                strength[positive_strength_idx]*
-                self.upper_bound_galprop_perturbation(
-                    baseline_result = baseline_result[positive_strength_idx], 
-                    splitting_result = splitting_result[positive_strength_idx])
-                )
+            base_pos = baseline_result[positive_strength_idx]
+            split_pos = splitting_result[positive_strength_idx]
+            strength_pos = strength[positive_strength_idx]
+
+            upper_bound1 = self._upper_bound - base_pos
+            upper_bound2_prefactor = (1 - split_pos)/split_pos
+            upper_bound2 = upper_bound2_prefactor*(base_pos - self._lower_bound)
+            upper_bound = np.minimum(upper_bound1, upper_bound2)
+            result[positive_strength_idx] = strength_pos*upper_bound
 
         if len(baseline_result[negative_strength_idx]) > 0:
-            result[negative_strength_idx] = (
-                strength[negative_strength_idx]*
-                self.lower_bound_galprop_perturbation(
-                    baseline_result = baseline_result[negative_strength_idx], 
-                    splitting_result = splitting_result[negative_strength_idx])
-                )
+            base_neg = baseline_result[negative_strength_idx]
+            split_neg = splitting_result[negative_strength_idx]
+            strength_neg = strength[negative_strength_idx]
+
+            lower_bound1 = self._lower_bound - base_neg
+            lower_bound2_prefactor = (1 - split_neg)/split_neg
+            lower_bound2 = lower_bound2_prefactor*(base_neg - self._upper_bound)
+            lower_bound = np.minimum(lower_bound1, lower_bound2)
+            result[negative_strength_idx] = strength_neg*lower_bound
 
         tb = time() - ta
         print("galprop_perturbation runtime = %.2f ms" % (tb*1000.))
