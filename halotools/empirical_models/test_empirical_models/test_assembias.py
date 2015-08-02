@@ -8,7 +8,7 @@ import numpy as np
 from astropy.table import Table
 
 from ..assembias import HeavisideAssembias
-from ..hod_components import AssembiasZheng07Cens, AssembiasZheng07Sats
+from ..hod_components import AssembiasZheng07Cens, AssembiasZheng07Sats, AssembiasLeauthaud11Cens
 
 from .. import model_defaults
 from ..hod_components import Zheng07Cens, Leauthaud11Cens
@@ -92,6 +92,16 @@ class TestAssembias(TestCase):
         self.init_test(abz2)
         self.baseline_recovery_test(abz2)
 
+    def test_assembias_leauthaud11_cens(self):
+        abl = AssembiasLeauthaud11Cens(sec_haloprop_key = 'halo_zform')
+
+        self.init_test(abl)
+        self.baseline_recovery_test(abl)
+
+        abl2 = AssembiasLeauthaud11Cens(sec_haloprop_key = 'halo_zform', 
+            split=0.25, assembias_strength = -0.7)
+        self.init_test(abl2)
+        self.baseline_recovery_test(abl2)
 
 
 
