@@ -218,12 +218,33 @@ def retrieve_simclass(simname):
 
 class HaloCatalog(object):
     """
+    Container class for halo catalogs and particle data.  
     """
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder, 
         desired_redshift = sim_defaults.default_redshift, dz_tol = 0.05, **kwargs):
         """
+        Parameters 
+        ----------
+        simname : string, optional
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        desired_redshift : float, optional
+            Redshift of the desired catalog. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        dz_tol : float, optional
+            Tolerance value determining how close the requested redshift must be to 
+            some available snapshot before issuing a warning. Default value is 0.05. 
+
         """
         self.catman = catalog_manager.CatalogManager()
 
@@ -254,6 +275,7 @@ class HaloCatalog(object):
     @property 
     def halo_table(self):
         """
+        `~astropy.table.Table` object storing a catalog of dark matter halos. 
         """
         if hasattr(self, '_halo_table'):
             return self._halo_table
@@ -264,6 +286,7 @@ class HaloCatalog(object):
     @property 
     def ptcl_table(self):
         """
+        `~astropy.table.Table` object storing a catalog of dark matter particles. 
         """
         if hasattr(self, '_ptcl_table'):
             return self._ptcl_table
