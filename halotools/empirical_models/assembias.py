@@ -114,10 +114,10 @@ class HeavisideAssembias(object):
             self.set_percentile_splitting(split = split)
 
         if 'assembias_strength_abcissa' and 'assembias_strength_ordinates' in kwargs:
-            self._initialize_param_dict(split_abcissa=kwargs['assembias_strength_abcissa'], 
+            self._initialize_assembias_param_dict(split_abcissa=kwargs['assembias_strength_abcissa'], 
                 split_ordinates=kwargs['assembias_strength_abcissa'])
         else:
-            self._initialize_param_dict(assembias_strength=assembias_strength)
+            self._initialize_assembias_param_dict(assembias_strength=assembias_strength)
 
         if 'halo_type_tuple' in kwargs:
             self.halo_type_tuple = kwargs['halo_type_tuple']
@@ -199,7 +199,7 @@ class HeavisideAssembias(object):
         return result
 
 
-    def _initialize_param_dict(self, **kwargs):
+    def _initialize_assembias_param_dict(self, **kwargs):
         """
         """
         if not hasattr(self, 'param_dict'):
@@ -207,11 +207,11 @@ class HeavisideAssembias(object):
 
         if 'assembias_strength' in kwargs.keys():
             self._assembias_strength_abcissa = [2]
-            self.param_dict[self._get_param_dict_key(0)] = kwargs['assembias_strength']
+            self.param_dict[self._get_assembias_param_dict_key(0)] = kwargs['assembias_strength']
         elif 'assembias_strength_ordinates' and 'assembias_strength_abcissa' in kwargs:
             self._assembias_strength_abcissa = kwargs['assembias_strength_abcissa']
             for ipar, val in enumerate(kwargs['assembias_strength_ordinates']):
-                self.param_dict[self._get_param_dict_key(ipar)] = val
+                self.param_dict[self._get_assembias_param_dict_key(ipar)] = val
         else:
             msg = ("The constructor to the HeavisideAssembias class "
                 "must be called with either the ``assembias_strength`` keyword argument,\n"
@@ -227,7 +227,7 @@ class HeavisideAssembias(object):
             raise HalotoolsError("The ``assembias_strength`` method requires a "
                 "``prim_haloprop`` input keyword argument")
 
-        model_ordinates = (self.param_dict[self._get_param_dict_key(ipar)] 
+        model_ordinates = (self.param_dict[self._get_assembias_param_dict_key(ipar)] 
             for ipar in range(len(self._assembias_strength_abcissa)))
         spline_function = model_helpers.custom_spline(
             self._assembias_strength_abcissa, list(model_ordinates))
@@ -243,7 +243,7 @@ class HeavisideAssembias(object):
         return result
 
 
-    def _get_param_dict_key(self, ipar):
+    def _get_assembias_param_dict_key(self, ipar):
         """
         """
         return self._method_name_to_decorate + '_assembias_param' + str(ipar+1)
