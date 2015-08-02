@@ -7,7 +7,8 @@ from copy import copy
 import numpy as np 
 from astropy.table import Table
 
-from ..assembias import HeavisideAssembias, AssembiasZheng07Cens, AssembiasZheng07Sats
+from ..assembias import HeavisideAssembias
+from ..hod_components import AssembiasZheng07Cens, AssembiasZheng07Sats
 
 from .. import model_defaults
 from ..hod_components import Zheng07Cens, Leauthaud11Cens
