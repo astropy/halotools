@@ -248,16 +248,19 @@ class HeavisideAssembias(object):
         """
         ta = time()
 
-        try:
-            halo_table = kwargs['halo_table']
-        except KeyError:
-            raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
-                "``halo_table`` input keyword argument")
+        if 'prim_haloprop' in kwargs.keys():
+            prim_haloprop = kwargs['prim_haloprop']
+        else:
+            try:
+                halo_table = kwargs['halo_table']
+            except KeyError:
+                raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
+                    "``halo_table`` input keyword argument")
 
-        try:
-            prim_haloprop = halo_table[self.prim_haloprop_key]
-        except KeyError:
-            raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
+            try:
+                prim_haloprop = halo_table[self.prim_haloprop_key]
+            except KeyError:
+                raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
 
         model_ordinates = [self.param_dict[self._get_param_dict_key(ipar)] for ipar in range(len(self._assembias_strength_abcissa))]
 
@@ -346,11 +349,19 @@ class HeavisideAssembias(object):
                 "HeavisideAssembias class with the baseline_result keyword argument")
             raise HalotoolsError(msg)
 
-        try:
-            halo_table = kwargs['halo_table']
-        except KeyError:
-            raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
-                "``halo_table`` input keyword argument")
+        if 'prim_haloprop' in kwargs.keys():
+            prim_haloprop = kwargs['prim_haloprop']
+        else:
+            try:
+                halo_table = kwargs['halo_table']
+            except KeyError:
+                raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
+                    "``halo_table`` input keyword argument")
+
+            try:
+                prim_haloprop = halo_table[self.prim_haloprop_key]
+            except KeyError:
+                raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
 
         try:
             splitting_result = kwargs['splitting_result']
@@ -358,9 +369,9 @@ class HeavisideAssembias(object):
             raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
                 "``splitting_result`` input keyword argument")
 
-        result = np.zeros(len(halo_table))
+        result = np.zeros(len(prim_haloprop))
 
-        strength = self.assembias_strength(halo_table=halo_table)
+        strength = self.assembias_strength(prim_haloprop=prim_haloprop)
         positive_strength_idx = strength > 0
         negative_strength_idx = np.invert(positive_strength_idx)
 
@@ -368,7 +379,6 @@ class HeavisideAssembias(object):
             result[positive_strength_idx] = (
                 strength[positive_strength_idx]*
                 self.upper_bound_galprop_perturbation(
-                    # halo_table = halo_table[positive_strength_idx], 
                     baseline_result = baseline_result[positive_strength_idx], 
                     splitting_result = splitting_result[positive_strength_idx])
                 )
@@ -377,7 +387,6 @@ class HeavisideAssembias(object):
             result[negative_strength_idx] = (
                 strength[negative_strength_idx]*
                 self.lower_bound_galprop_perturbation(
-                    # halo_table = halo_table[negative_strength_idx], 
                     baseline_result = baseline_result[negative_strength_idx], 
                     splitting_result = splitting_result[negative_strength_idx])
                 )
@@ -397,7 +406,6 @@ class HeavisideAssembias(object):
             raise HalotoolsError("The ``upper_bound_galprop_perturbation`` method requires a "
                 "``splitting_result`` input keyword argument")
 
-        #split = self.percentile_splitting_function(**kwargs)
         galprop_perturbation = self.galprop_perturbation(**kwargs)
 
         result = -split*galprop_perturbation/(1-split)
@@ -417,6 +425,11 @@ class HeavisideAssembias(object):
             except KeyError:
                 raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
                     "``halo_table`` input keyword argument")
+
+            try:
+                prim_haloprop = halo_table[self.prim_haloprop_key]
+            except KeyError:
+                raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
 
             t1 = time()
             t = (t1 - t0)*1000.
@@ -446,19 +459,19 @@ class HeavisideAssembias(object):
             t = (t5 - t4)*1000.
             print("t5 = %.2f ms" % t)
 
-            no_edge_halos = halo_table[no_edge_mask]
+            # no_edge_halos = halo_table[no_edge_mask]
             t6 = time()
             t = (t6 - t5)*1000.
             print("t6 = %.2f ms" % t)
-
 
             # Determine the type1_mask that divides the halo sample into two subsamples
             if hasattr(self, 'halo_type_tuple'):
                 halo_type_key = self.halo_type_tuple[0]
                 halo_type1_val = self.halo_type_tuple[1]
-                type1_mask = no_edge_halos[halo_type_key] == halo_type1_val
-            elif self.sec_haloprop_key + '_percentile' in no_edge_halos.keys():
-                no_edge_percentiles = no_edge_halos[self.sec_haloprop_key + '_percentile']
+                type1_mask = halo_table[halo_type_key][no_edge_mask] == halo_type1_val
+                # type1_mask = no_edge_halos[halo_type_key] == halo_type1_val
+            elif self.sec_haloprop_key + '_percentile' in halo_table.keys():
+                no_edge_percentiles = halo_table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
                 no_edge_split = split[no_edge_mask]
                 type1_mask = no_edge_percentiles >= no_edge_split
             else:
@@ -484,14 +497,14 @@ class HeavisideAssembias(object):
             print("t7 = %.2f ms" % t)
 
 
-            no_edge_halos_type1 = no_edge_halos[type1_mask]
+            # no_edge_halos_type1 = no_edge_halos[type1_mask]
             t8 = time()
             t = (t8 - t7)*1000.
             print("t8 = %.2f ms" % t)
 
             no_edge_result[type1_mask] += (
                 self.galprop_perturbation(
-                    halo_table = no_edge_halos_type1, 
+                    prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask][type1_mask], 
                     baseline_result = no_edge_result[type1_mask], 
                     splitting_result = no_edge_split[type1_mask])
                 )
@@ -500,14 +513,14 @@ class HeavisideAssembias(object):
             print("t9 = %.2f ms" % t)
 
 
-            no_edge_halos_type2 = no_edge_halos[np.invert(type1_mask)]
+            # no_edge_halos_type2 = no_edge_halos[np.invert(type1_mask)]
             t10 = time()
             t = (t10 - t9)*1000.
             print("t10 = %.2f ms" % t)
 
             no_edge_result[np.invert(type1_mask)] += (
                 self.complementary_galprop_perturbation(
-                    halo_table = no_edge_halos_type2, 
+                    prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask][np.invert(type1_mask)], 
                     baseline_result = no_edge_result[np.invert(type1_mask)], 
                     splitting_result = no_edge_split[np.invert(type1_mask)])
                 )
