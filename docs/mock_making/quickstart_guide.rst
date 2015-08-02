@@ -12,12 +12,11 @@ so to make any mock, you will be using the `~halotools.empirical_models` sub-pac
 
 The simplest way to get up and running with a mock galaxy catalog  
 is to just use one of the default models that come pre-loaded with Halotools. 
-In this quickstart guide, we'll use a simple HOD-style model: 
+In this quickstart guide, we'll use a simple HOD-style model based on 
+`~halotools.empirical_models.Zheng07`. 
 
 >>> hod_model = empirical_models.preloaded_models.Zheng07()
 
-The above line of code calls the `~halotools.empirical_models.HodModelFactory` 
-and returns a model object based on Kravtsov et al. (2004), arXiv:0308519. 
 For a list of other out-of-the-box model options you can choose from, see 
 :ref:`list_of_default_models`. 
 
@@ -27,7 +26,7 @@ allows you to create a synthetic galaxy catalog with one line of code:
 >>> hod_model.populate_mock() # doctest: +SKIP
 
 Calling the `~halotools.empirical_models.HodModelFactory.populate_mock` method 
-with no arguments, as above, automatically retrieves the default simulation snapshot
+with no arguments, as above, automatically retrieves the default halo catalog 
 and generates a Monte Carlo realization of your model into those simulated halos. 
 The resulting mock catalog can then be accessed via:
 
