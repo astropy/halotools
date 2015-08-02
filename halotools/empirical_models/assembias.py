@@ -181,6 +181,7 @@ class HeavisideAssembias(object):
     def percentile_splitting_function(self, **kwargs):
         """
         """
+        ta = time()
         try:
             halo_table = kwargs['halo_table']
         except KeyError:
@@ -217,6 +218,9 @@ class HeavisideAssembias(object):
 
         result = np.where(result < 0, 0, result)
         result = np.where(result > 1, 1, result)
+
+        tb = (time() - ta)*1000.
+        print("percentile_splitting_function calculation runtime = %.2f ms" % tb)
         return result
 
 
@@ -242,6 +246,7 @@ class HeavisideAssembias(object):
     def assembias_strength(self, **kwargs):
         """
         """
+        ta = time()
 
         try:
             halo_table = kwargs['halo_table']
@@ -267,6 +272,8 @@ class HeavisideAssembias(object):
         result = np.where(result > 1, 1, result)
         result = np.where(result < -1, -1, result)
 
+        tb = (time() - ta)*1000.
+        print("Assembias_strength calculation runtime = %.2f ms" % tb)
         return result
 
 
@@ -361,7 +368,7 @@ class HeavisideAssembias(object):
             result[positive_strength_idx] = (
                 strength[positive_strength_idx]*
                 self.upper_bound_galprop_perturbation(
-                    halo_table = halo_table[positive_strength_idx], 
+                    # halo_table = halo_table[positive_strength_idx], 
                     baseline_result = baseline_result[positive_strength_idx], 
                     splitting_result = splitting_result[positive_strength_idx])
                 )
@@ -370,7 +377,7 @@ class HeavisideAssembias(object):
             result[negative_strength_idx] = (
                 strength[negative_strength_idx]*
                 self.lower_bound_galprop_perturbation(
-                    halo_table = halo_table[negative_strength_idx], 
+                    # halo_table = halo_table[negative_strength_idx], 
                     baseline_result = baseline_result[negative_strength_idx], 
                     splitting_result = splitting_result[negative_strength_idx])
                 )
