@@ -22,33 +22,6 @@ class HeavisideAssembias(object):
         """
         Parameters 
         ----------
-        prim_haloprop_key : string 
-            String giving the column name of the primary halo property governing 
-            the galaxy property function that `HeavisideAssembias` decorates with assembly bias. 
-
-        method_name_to_decorate : string 
-            Name of the method bound to instances of the baseline_model that 
-            we are decorating with assembly bias.
-
-        lower_bound : float 
-            Smallest physically meaningful value for the property being modeled. 
-
-            For example, if modeling the first occupation moment of any galaxy type, 
-            ``lower_bound`` = 0; the same value would be used if modeling 
-            the quenched fraction. 
-
-            Can be set to -float("inf") provided that 
-            the ``upper_bound`` keyword argument is set to a bounded value. 
-
-        upper_bound : float 
-            Largest physically meaningful value for the property being modeled. 
-
-            For example, if modeling the first occupation moment of any central galaxies, 
-            ``upper_bound`` = 1, whereas for satellites we would set ``upper_bound`` = float("inf"). 
-
-            Can be set to float("inf") provided that 
-            the ``lower_bound`` keyword argument is set to a bounded value. 
-
         split : float, optional 
             Fraction between 0 and 1 defining how we split halos into two groupings based on 
             their conditional secondary percentiles. Default is 0.5 for a constant 50/50 split. 
@@ -111,16 +84,20 @@ class HeavisideAssembias(object):
 
         """
         try:
-            self.prim_haloprop_key = kwargs['prim_haloprop_key']
             self._method_name_to_decorate = kwargs['method_name_to_decorate']
-            self._lower_bound = kwargs['lower_bound']
-            self._upper_bound = kwargs['upper_bound']
         except KeyError:
             msg = ("The constructor to the HeavisideAssembiasComponent class "
                 "must be called with the following keyword arguments:\n" 
-                "``%s``, ``%s``, ``%s``, ``%s``")
-            raise HalotoolsError(msg % ('prim_haloprop_key', '_method_name_to_decorate', 
-                'lower_bound', 'upper_bound'))
+                "``%s``")
+            raise HalotoolsError(msg % ('_method_name_to_decorate'))
+
+        required_attr_list = ['prim_haloprop_key', '_lower_bound', '_upper_bound']
+        for attr in required_attr_list:
+            if not hasattr(self, attr):
+                msg = ("In order to use the HeavisideAssembias class " 
+                    "to decorate your model component with assembly bias, \n"
+                    "the component instance must have a %s attribute")
+                raise HalotoolsError(msg % attr)
 
         self._loginterp = loginterp
         self.sec_haloprop_key = sec_haloprop_key

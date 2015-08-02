@@ -38,8 +38,16 @@ class TestAssembias(TestCase):
         fakesim = FakeSim()
         self.fake_halo_table = fakesim.halo_table
 
+    def init_test(self, model):
+
+        assert hasattr(model, 'prim_haloprop_key')
+        assert hasattr(model, 'sec_haloprop_key')
+        assert hasattr(model, '_lower_bound')
+        assert hasattr(model, '_upper_bound')
+
     def test_assembias_zheng07_cens(self):
         abz = AssembiasZheng07Cens(sec_haloprop_key = 'halo_zform')
+        self.init_test(abz)
 
         baseline_result = abz.baseline_mean_occupation(halo_table = self.toy_halo_table2)
         np.testing.assert_allclose(baseline_result, 0.456686, rtol=1e-3)

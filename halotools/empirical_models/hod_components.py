@@ -66,9 +66,11 @@ class OccupationComponent(model_helpers.GalPropModel):
         """
         super(OccupationComponent, self).__init__(galprop_key='occupation')
 
-        required_kwargs = ['gal_type',  'threshold', 'upper_bound', 'prim_haloprop_key']
+        required_kwargs = ['gal_type', 'threshold', 'prim_haloprop_key']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
-        self.lower_bound = 0
+
+        self._upper_bound = kwargs['upper_bound']
+        self._lower_bound = 0
 
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
@@ -106,9 +108,9 @@ class OccupationComponent(model_helpers.GalPropModel):
             Integer array giving the number of galaxies in each of the input halo_table.     
         """ 
         first_occupation_moment = self.mean_occupation(**kwargs)
-        if self.upper_bound == 1:
+        if self._upper_bound == 1:
             return self._nearest_integer_distribution(first_occupation_moment, seed=seed, **kwargs)
-        elif self.upper_bound == float("inf"):
+        elif self._upper_bound == float("inf"):
             return self._poisson_distribution(first_occupation_moment, seed=seed, **kwargs)
         else:
             raise KeyError("The only permissible values of upper_bound for instances "
