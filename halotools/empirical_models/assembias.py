@@ -227,24 +227,16 @@ class HeavisideAssembias(object):
         """
         ta = time()
 
-        if 'prim_haloprop' in kwargs.keys():
+        try:
             prim_haloprop = kwargs['prim_haloprop']
-        else:
-            try:
-                halo_table = kwargs['halo_table']
-            except KeyError:
-                raise HalotoolsError("The ``percentile_splitting_function`` method requires a "
-                    "``halo_table`` input keyword argument")
+        except KeyError:
+            raise HalotoolsError("The ``assembias_strength`` method requires a "
+                "``prim_haloprop`` input keyword argument")
 
-            try:
-                prim_haloprop = halo_table[self.prim_haloprop_key]
-            except KeyError:
-                raise HalotoolsError("prim_haloprop_key = %s is not a column of the input halo_table" % self.prim_haloprop_key)
-
-        model_ordinates = [self.param_dict[self._get_param_dict_key(ipar)] for ipar in range(len(self._assembias_strength_abcissa))]
-
-        spline_function = model_helpers.custom_spline(self._assembias_strength_abcissa, model_ordinates)
-
+        model_ordinates = (self.param_dict[self._get_param_dict_key(ipar)] 
+            for ipar in range(len(self._assembias_strength_abcissa)))
+        spline_function = model_helpers.custom_spline(
+            self._assembias_strength_abcissa, list(model_ordinates))
 
         if self._loginterp is True:
             result = spline_function(np.log10(prim_haloprop))
@@ -254,8 +246,6 @@ class HeavisideAssembias(object):
         result = np.where(result > 1, 1, result)
         result = np.where(result < -1, -1, result)
 
-        tb = (time() - ta)*1000.
-        print("Assembias_strength calculation runtime = %.2f ms" % tb)
         return result
 
 
