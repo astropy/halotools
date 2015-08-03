@@ -13,9 +13,9 @@ so to make any mock, you will be using the `~halotools.empirical_models` sub-pac
 The simplest way to get up and running with a mock galaxy catalog  
 is to just use one of the default models that come pre-loaded with Halotools. 
 In this quickstart guide, we'll use a simple HOD-style model based on 
-`~halotools.empirical_models.Zheng07`. 
+`~halotools.empirical_models.Leauthaud11`. 
 
->>> hod_model = empirical_models.preloaded_models.Zheng07()
+>>> hod_model = empirical_models.preloaded_models.Leauthaud11()
 
 For a list of other out-of-the-box model options you can choose from, see 
 :ref:`list_of_default_models`. 
