@@ -69,7 +69,55 @@ def Zheng07(**kwargs):
     return model_factories.HodModelFactory(blueprint, **kwargs)
 
 def Leauthaud11(**kwargs):
-    """ 
+    """ HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
+    The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
+
+    There are two populations, centrals and satellites. 
+    Central occupation statistics are given by a nearest integer distribution 
+    with first moment given by an ``erf`` function; the class governing this 
+    behavior is `~halotools.empirical_models.hod_components.Leauthaud11Cens`. 
+    Central galaxies are assumed to reside at the exact center of the host halo; 
+    the class governing this behavior is `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
+
+    Satellite occupation statistics are given by a Poisson distribution 
+    with first moment given by a power law that has been truncated at the low-mass end; 
+    the class governing this behavior is `~halotools.empirical_models.hod_components.Leauthaud11Sats`; 
+    satellites in this model follow an (unbiased) NFW profile, as governed by the 
+    `~halotools.empirical_models.halo_prof_components.NFWProfile` class. 
+
+    This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
+    which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_blueprint`. 
+
+    Parameters 
+    ----------
+    threshold : float, optional keyword argument
+        Stellar mass threshold of the mock galaxy sample. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    Returns 
+    -------
+    model : object 
+        Instance of `~halotools.empirical_models.model_factories.HodModelFactory`
+
+    Examples 
+    --------
+    Calling the `Leauthaud11` class with no arguments instantiates a model based on the 
+    default stellar mass threshold: 
+
+    >>> model = Leauthaud11()
+
+    The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
+    To load a model based on a different threshold, use the ``threshold`` keyword argument:
+
+    >>> model = Leauthaud11(threshold = 11.25)
+
+    To use our model to populate a simulation with mock galaxies, we only need to 
+    load a snapshot into memory and call the built-in ``populate_mock`` method. 
+    For illustration purposes, we'll use a small, fake simulation:
+
+    >>> fake_snapshot = FakeSim()
+    >>> model.populate_mock(snapshot = fake_snapshot)
+
     """
     blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
     return model_factories.HodModelFactory(blueprint, **kwargs)

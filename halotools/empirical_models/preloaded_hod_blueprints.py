@@ -84,9 +84,9 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
 
     Parameters 
     ----------
-    threshold : float, optional 
-        Stellar mass threshold of the galaxy sample being modeled, 
-        in ``logarithmic units``. 
+    threshold : float, optional keyword argument
+        Stellar mass threshold of the mock galaxy sample. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
     Returns 
     -------
