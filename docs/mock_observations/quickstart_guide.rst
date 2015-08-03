@@ -2,7 +2,7 @@
 .. _mock_observation_quickstart:
 
 ******************************************************************
-Quickstart Guide to Making Observations of a Mock Galaxy Catalog
+Quickstart Guide to Mock Observations 
 ******************************************************************
 
 
