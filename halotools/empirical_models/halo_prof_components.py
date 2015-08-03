@@ -162,11 +162,6 @@ class TrivialProfile(HaloProfileModel):
 
         >>> trivial_halo_prof_model = TrivialProfile()
 
-        Use the keyword arguments for ``cosmology`` and ``redshift`` to load profiles 
-        with alternative settings:
-
-        >>> from astropy.cosmology import Planck13
-        >>> trivial_halo_prof_model = TrivialProfile(cosmology = Planck13, redshift = 0.5)
         """
 
         super(TrivialProfile, self).__init__(prof_param_keys=[], **kwargs)

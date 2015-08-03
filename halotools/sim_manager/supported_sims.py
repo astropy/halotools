@@ -215,11 +215,65 @@ def retrieve_simclass(simname):
 ######################################################
 
 class HaloCatalog(object):
+    """
+    Container class for halo catalogs and particle data.  
+    """
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder, 
         desired_redshift = sim_defaults.default_redshift, dz_tol = 0.05, **kwargs):
         """
+        Parameters 
+        ----------
+        simname : string, optional
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        desired_redshift : float, optional
+            Redshift of the desired catalog. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        dz_tol : float, optional
+            Tolerance value determining how close the requested redshift must be to 
+            some available snapshot before issuing a warning. Default value is 0.05. 
+
+        Examples 
+        ---------
+        The default halo catalog can be loaded into memory by calling `HaloCatalog` with no arguments: 
+
+        >>> default_halocat = HaloCatalog() # doctest: +SKIP
+
+        By modifying the `~halotools.sim_manager.sim_defaults` module, 
+        you can set your default catalog to whatever simulation, 
+        halo-finder and redshift you wish; simply change 
+        ``default_simname``, ``default_halo_finder`` and ``default_redshift``, respectively. 
+
+        To access the table of halos bound to your halo catalog:
+
+        >>> halo_table = default_halocat.halo_table # doctest: +SKIP
+
+        As with any `~astropy.table.Table` object, you can access the column data you want 
+        via the corresponding field name: 
+
+        >>> mass = halo_table['halo_mvir'] # doctest: +SKIP
+
+        To see what columns are available for a given halo catalog:
+
+        >>> print(halo_table.keys()) # doctest: +SKIP
+
+        Most of the pre-processed `HaloCatalog` objects provided by Halotools 
+        also come bundled with a random downsampling of 
+        roughly a million dark matter particles. To access the 
+        `~astropy.table.Table` storing this data:
+
+        >>> particles = default_halocat.ptcl_table # doctest: +SKIP
+
         """
         self.catman = catalog_manager.CatalogManager()
 
@@ -250,6 +304,7 @@ class HaloCatalog(object):
     @property 
     def halo_table(self):
         """
+        `~astropy.table.Table` object storing a catalog of dark matter halos. 
         """
         if hasattr(self, '_halo_table'):
             return self._halo_table
@@ -260,6 +315,7 @@ class HaloCatalog(object):
     @property 
     def ptcl_table(self):
         """
+        `~astropy.table.Table` object storing a catalog of dark matter particles. 
         """
         if hasattr(self, '_ptcl_table'):
             return self._ptcl_table
