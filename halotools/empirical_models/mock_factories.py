@@ -187,6 +187,8 @@ class MockFactory(object):
 
     def compute_galaxy_clustering(self, include_crosscorr = False, **kwargs):
         """
+        Built-in method for all mock catalogs to compute the galaxy clustering signal. 
+
         Parameters 
         ----------
         variable_galaxy_mask : scalar, optional 
@@ -317,6 +319,8 @@ class MockFactory(object):
 
     def compute_galaxy_matter_cross_clustering(self, include_complement = False, **kwargs):
         """
+        Built-in method for all mock catalogs to compute the galaxy-matter cross-correlation function. 
+
         Parameters 
         ----------
         variable_galaxy_mask : scalar, optional 

@@ -16,6 +16,9 @@ built-in method to calculate galaxy clustering:
 
 >>> radial_bins, clustering = hod_model.mock.compute_galaxy_clustering() # doctest: +SKIP
 
+See `~halotools.empirical_models.MockFactory.compute_galaxy_clustering` for further documentation 
+and more example usages. 
+
 Galaxy-Galaxy Lensing 
 ------------------------------------
 
@@ -25,6 +28,9 @@ between the population of galaxies (lenses) and the cosmic distribution of dark 
 For any model, all mock populations come with a built-in method to calculate this cross-correlation: 
 
 >>> radial_bins, clustering = hod_model.mock.compute_galaxy_matter_cross_clustering() # doctest: +SKIP
+
+See `~halotools.empirical_models.MockFactory.compute_galaxy_matter_cross_clustering` for further documentation 
+and more example usages. 
 
 Group Identification 
 ------------------------------------
