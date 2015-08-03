@@ -12,6 +12,136 @@ import collections
 from astropy.table import Table
 
 from ..sim_manager.generate_random_sim import FakeSim
+from ..halotools_exceptions import HalotoolsError
+
+def compute_conditional_percentiles(**kwargs):
+    """
+    In bins of the ``prim_haloprop``, compute the rank-order percentile 
+    of the input ``halo_table`` based on the value of ``sec_haloprop``. 
+
+    Parameters
+    ----------
+    halo_table : astropy table 
+        a keyword argument that stores halo catalog being used to make mock galaxy population
+
+    prim_haloprop_key : string 
+        Name of the column of the input ``halo_table`` that will be used to access the 
+        primary halo property. `compute_conditional_percentiles` bins the ``halo_table`` by 
+        ``prim_haloprop_key`` when computing the result. 
+
+    sec_haloprop_key : string 
+        Name of the column of the input ``halo_table`` that will be used to access the 
+        secondary halo property. `compute_conditional_percentiles` bins the ``halo_table`` by 
+        ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key`` 
+        to compute the ``prim_haloprop``-conditioned rank-order percentile. 
+
+    prim_haloprop_bin_boundaries : array, optional 
+        Array defining the boundaries by which we will bin the input ``halo_table``. 
+        Default is None, in which case the binning will be automatically determined using 
+        the ``dlog10_prim_haloprop`` keyword. 
+
+    dlog10_prim_haloprop : float, optional 
+        Logarithmic spacing of bins of the mass-like variable within which 
+        we will assign secondary property percentiles. Default is 0.2. 
+
+    Examples 
+    --------
+    >>> fakesim = FakeSim()
+    >>> result = compute_conditional_percentiles(halo_table = fakesim.halo_table, prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_vmax')
+
+
+    Notes
+    -----
+    Takes the input halo catalog and uses the assembly bias model to assign percentiles 
+    of the property in sec_haloprop_key to each halo.
+
+    """
+
+    try:
+        halo_table = kwargs['halo_table']
+        prim_haloprop_key = kwargs['prim_haloprop_key']
+        sec_haloprop_key = kwargs['sec_haloprop_key']
+    except KeyError:
+        msg = ("The ``compute_conditional_percentiles`` method requires the following arguments:\n"
+            "``halo_table``, ``prim_haloprop_key`` and ``sec_haloprop_key``.")
+        raise HalotoolsError(msg)
+
+    try:
+        prim_haloprop = halo_table[prim_haloprop_key]
+        sec_haloprop = halo_table[sec_haloprop_key]
+    except KeyError:
+        msg = ("Input halo catalog to ``compute_conditional_percentiles`` method " 
+            "must contain prim_haloprop_key = %s and sec_haloprop_key = %s")
+        raise HalotoolsError(msg % (prim_haloprop_key, sec_haloprop_key))
+
+    def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.2, **kwargs):
+        """
+        Parameters
+        ----------
+        prim_haloprop : array 
+            Array storing the value of the primary halo property column of the ``halo_table`` 
+            passed to ``compute_conditional_percentiles``. 
+
+        prim_haloprop_bin_boundaries : array, optional 
+            Array defining the boundaries by which we will bin the input ``halo_table``. 
+            Default is None, in which case the binning will be automatically determined using 
+            the ``dlog10_prim_haloprop`` keyword. 
+
+        dlog10_prim_haloprop : float, optional 
+            Logarithmic spacing of bins of the mass-like variable within which 
+            we will assign secondary property percentiles. Default is 0.2. 
+
+        Returns 
+        --------
+        output : array 
+            Numpy array of integers storing the bin index of the prim_haloprop bin 
+            to which each halo in the input halo_table was assigned. 
+
+        """
+        try:
+            prim_haloprop = kwargs['prim_haloprop']
+        except KeyError:
+            msg = ("The ``compute_prim_haloprop_bins`` method "
+                "requires the ``prim_haloprop`` keyword argument")
+            raise HalotoolsError(msg)
+
+        try:
+            prim_haloprop_bin_boundaries = kwargs['prim_haloprop_bin_boundaries']
+        except KeyError:
+            lg10_min_prim_haloprop = np.log10(np.min(prim_haloprop))-0.001
+            lg10_max_prim_haloprop = np.log10(np.max(prim_haloprop))+0.001
+            num_prim_haloprop_bins = (lg10_max_prim_haloprop-lg10_min_prim_haloprop)/dlog10_prim_haloprop
+            prim_haloprop_bin_boundaries = np.logspace(
+                lg10_min_prim_haloprop, lg10_max_prim_haloprop, 
+                num=num_prim_haloprop_bins)
+
+        # digitize the masses so that we can access them bin-wise
+        output = np.digitize(prim_haloprop, prim_haloprop_bin_boundaries)
+
+        return output
+
+    prim_haloprop_bins = compute_prim_haloprop_bins(prim_haloprop = prim_haloprop, **kwargs)
+
+    output = np.zeros_like(prim_haloprop)
+
+    # sort on secondary property only with each mass bin
+    bins_in_halocat = set(prim_haloprop_bins)
+    for ibin in bins_in_halocat:
+        indices_of_prim_haloprop_bin = np.where(prim_haloprop_bins == ibin)[0]
+
+        # Find the indices that sort by the secondary property
+        ind_sorted = np.argsort(sec_haloprop[indices_of_prim_haloprop_bin])
+
+        percentiles = (np.arange(len(sec_haloprop[indices_of_prim_haloprop_bin])) + 1.0) / \
+            float(len(sec_haloprop[indices_of_prim_haloprop_bin]))
+        
+        # place the percentiles into the catalog
+        output[indices_of_prim_haloprop_bin] = 1.0 - percentiles[ind_sorted][::-1]
+
+    return output
+
+
+
 
 class SampleSelector(object):
     """ Container class for commonly used sample selections. 
