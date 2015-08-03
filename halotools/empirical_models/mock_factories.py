@@ -29,6 +29,7 @@ except ImportError:
     HAS_MOCKOBS = False
 
 from ..sim_manager import sim_defaults
+from ..utils.array_utils import randomly_downsample_data
 
 __all__ = ['MockFactory', 'HodMockFactory', 'SubhaloMockFactory']
 __author__ = ['Andrew Hearin']
@@ -183,7 +184,7 @@ class MockFactory(object):
         if composite_haloprop_func_dict != {}:
             self.new_haloprop_func_dict = composite_haloprop_func_dict
 
-    def two_point_clustering(self, include_crosscorr = False, **kwargs):
+    def galaxy_clustering(self, include_crosscorr = False, **kwargs):
         """
         Parameters 
         ----------
@@ -225,24 +226,24 @@ class MockFactory(object):
         --------
         Compute two-point clustering of all galaxies in the mock: 
 
-        >>> r, clustering = mock.two_point_clustering() # doctest: +SKIP
+        >>> r, clustering = mock.galaxy_clustering() # doctest: +SKIP
 
         Compute two-point clustering of central galaxies only: 
 
-        >>> r, clustering = mock.two_point_clustering(gal_type = 'centrals') # doctest: +SKIP
+        >>> r, clustering = mock.galaxy_clustering(gal_type = 'centrals') # doctest: +SKIP
 
         Compute two-point clustering of quiescent galaxies, star-forming galaxies, 
         as well as the cross-correlation: 
 
-        >>> r, quiescent_clustering, q_sf_cross_clustering, star_forming_clustering = mock.two_point_clustering(quiescent = True, include_crosscorr = True) # doctest: +SKIP
+        >>> r, quiescent_clustering, q_sf_cross_clustering, star_forming_clustering = mock.galaxy_clustering(quiescent = True, include_crosscorr = True) # doctest: +SKIP
         """
         if HAS_MOCKOBS is False:
-            msg = ("\nThe two_point_clustering method is only available "
+            msg = ("\nThe galaxy_clustering method is only available "
                 " if the mock_observables sub-package has been compiled\n")
             raise HalotoolsError(msg)
 
         Nthreads = cpu_count()
-        rbins = np.logspace(-1, 1.35, 10)
+        rbins = model_defaults.default_rbins
         rbin_centers = (rbins[1:]+rbins[:1])/2.0
 
         if kwargs == {}:
@@ -260,7 +261,7 @@ class MockFactory(object):
                 try:
                     mask = self.galaxy_table[key] == kwargs[key]
                 except KeyError:
-                    msg = ("The two_point_clustering method was passed ``%s`` as a keyword argument\n."
+                    msg = ("The galaxy_clustering method was passed ``%s`` as a keyword argument\n."
                         "Only keys of the galaxy_table are permitted inputs")
                     raise HalotoolsError(msg % key)
 
@@ -270,13 +271,13 @@ class MockFactory(object):
                     raise HalotoolsError(msg % (key, kwargs[key]))
                 elif len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
                     msg = ("All mock galaxies have ``%s`` = ``%s``, \n"
-                        "If this result is expected, you should not call the two_point_clustering" 
+                        "If this result is expected, you should not call the galaxy_clustering" 
                         "method with the %s keyword")
                     raise HalotoolsError(msg % (key, kwargs[key], key))
             else:
                 # We were passed too many keywords - raise an exception
                 msg = ("Only a single mask at a time is permitted by calls to "
-                    "two_point_clustering. \nChoose only one of the following keyword arguments:\n")
+                    "galaxy_clustering. \nChoose only one of the following keyword arguments:\n")
                 arglist = ''
                 for arg in keylist:
                     arglist = arglist + arg + ', '
@@ -297,6 +298,128 @@ class MockFactory(object):
                     sample1=pos, rbins=rbins, sample2=pos2, 
                     period=self.snapshot.Lbox, N_threads=Nthreads)
                 return rbin_centers, xi11, xi12, xi22 
+
+    def galaxy_matter_cross_clustering(self, include_complement = False, **kwargs):
+        """
+        Parameters 
+        ----------
+        variable_galaxy_mask : scalar, optional 
+            Any value used to construct a mask to select a sub-population 
+            of mock galaxies. See examples below. 
+
+        include_complement : bool, optional 
+            Only for simultaneous use with a ``variable_galaxy_mask``-determined mask. 
+            If ``include_complement`` is set to False (the default option), method will return 
+            the cross-correlation function between a random downsampling of dark matter particles 
+            and the subsample of galaxies determined by 
+            the input ``variable_galaxy_mask``. If ``include_complement`` is True, 
+            method will also return the cross-correlation between the dark matter particles 
+            and the complementary subsample. See the example below. 
+
+        Returns 
+        --------
+        rbin_centers : array 
+            Midpoint of the bins used in the correlation function calculation 
+
+        correlation_func : array 
+            If not using a ``variable_galaxy_mask`` (the default option), method returns the 
+            correlation function of the full mock galaxy catalog. 
+
+            If using a ``variable_galaxy_mask``, 
+            and if ``include_complement`` is False (the default option), 
+            method returns the cross-correlation function between a random downsampling 
+            of dark matter particles and the subsample of galaxies determined by 
+            the input ``variable_galaxy_mask``.
+
+            If using a ``variable_galaxy_mask``, and if ``include_complement`` is True, 
+            method will also return the cross-correlation between the dark matter particles 
+            and the complementary subsample. See the example below. 
+
+        Examples 
+        --------
+        Compute two-point clustering between all mock galaxies and dark matter particles: 
+
+        >>> r, galaxy_matter_clustering = mock.galaxy_matter_cross_clustering() # doctest: +SKIP
+
+        Compute the same quantity but for central galaxies only: 
+
+        >>> r, central_galaxy_matter_clusteringclustering = mock.galaxy_clustering(gal_type = 'centrals') # doctest: +SKIP
+
+        Compute the galaxy-matter cross-clustering for quiescent galaxies and for star-forming galaxies:
+
+        >>> r, quiescent_matter_clustering, star_forming_matter_clustering = mock.galaxy_clustering(quiescent = True, include_complement = True) # doctest: +SKIP
+        """
+        if HAS_MOCKOBS is False:
+            msg = ("\nThe galaxy_clustering method is only available "
+                " if the mock_observables sub-package has been compiled\n")
+            raise HalotoolsError(msg)
+
+        nptcl = np.max([1e5, len(self.galaxy_table)])
+        ptcl_table = randomly_downsample_data(self.snapshot.ptcl_table, nptcl)
+        ptcl_pos = three_dim_pos_bundle(table = ptcl_table, 
+            key1='x', key2='y', key3='z')
+
+        Nthreads = cpu_count()
+        rbins = model_defaults.default_rbins
+        rbin_centers = (rbins[1:]+rbins[:1])/2.0
+
+        if kwargs == {}:
+            # Compute the clustering of the full mock
+            pos = three_dim_pos_bundle(table = self.galaxy_table, 
+                key1='x', key2='y', key3='z')
+            clustering = mock_observables.clustering.tpcf(
+                sample1=pos, rbins=rbins, sample2=ptcl_pos, 
+                period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
+            return rbin_centers, clustering
+        else:
+            # Use the input keyword arguments to determine the mock galaxy mask
+            keylist = [key for key in kwargs.keys() if key is not 'include_complement']
+            if len(keylist) == 1:
+                key = keylist[0]
+                try:
+                    mask = self.galaxy_table[key] == kwargs[key]
+                except KeyError:
+                    msg = ("The galaxy_clustering method was passed ``%s`` as a keyword argument\n."
+                        "Only keys of the galaxy_table are permitted inputs")
+                    raise HalotoolsError(msg % key)
+
+                # Verify that the mask is non-trivial
+                if len(self.galaxy_table['x'][mask]) == 0:
+                    msg = ("Zero mock galaxies have ``%s`` = ``%s``")
+                    raise HalotoolsError(msg % (key, kwargs[key]))
+                elif len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
+                    msg = ("All mock galaxies have ``%s`` = ``%s``, \n"
+                        "If this result is expected, you should not call the galaxy_clustering" 
+                        "method with the %s keyword")
+                    raise HalotoolsError(msg % (key, kwargs[key], key))
+            else:
+                # We were passed too many keywords - raise an exception
+                msg = ("Only a single mask at a time is permitted by calls to "
+                    "galaxy_clustering. \nChoose only one of the following keyword arguments:\n")
+                arglist = ''
+                for arg in keylist:
+                    arglist = arglist + arg + ', '
+                arglist = arglist[:-2]
+                msg = msg + arglist
+                raise HalotoolsError(msg)
+
+            if include_complement is False:
+                pos = three_dim_pos_bundle(table = self.galaxy_table, 
+                key1='x', key2='y', key3='z', mask=mask, return_complement=False)
+                clustering = mock_observables.clustering.tpcf(
+                    sample1=pos, rbins=rbins, sample2=ptcl_pos, 
+                    period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
+                return rbin_centers, clustering
+            else:
+                pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table, 
+                key1='x', key2='y', key3='z', mask=mask, return_complement=True)
+                clustering = mock_observables.clustering.tpcf(
+                    sample1=pos, rbins=rbins, sample2=ptcl_pos, 
+                    period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
+                clustering2 = mock_observables.clustering.tpcf(
+                    sample1=pos2, rbins=rbins, sample2=ptcl_pos, 
+                    period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
+                return rbin_centers, clustering, clustering2 
 
 
 
