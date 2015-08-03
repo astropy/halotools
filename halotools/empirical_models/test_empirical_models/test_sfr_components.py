@@ -12,8 +12,8 @@ def test_BinaryGalpropInterpolModel():
     """
     abcissa, ordinates = [12, 15], [1/3., 0.9]
     m = BinaryModel(galprop_key='late_type', 
-        abcissa=abcissa, ordinates=ordinates, 
-        prim_haloprop_key='vpeak_host', gal_type='sats')
+        galprop_abcissa = abcissa, galprop_ordinates = ordinates, 
+        prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
 
     Npts = 5e3
     testmass12 = np.ones(Npts)*1e12

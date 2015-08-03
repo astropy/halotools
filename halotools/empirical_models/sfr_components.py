@@ -18,6 +18,7 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
+from ..halotools_exceptions import HalotoolsError
 
 @six.add_metaclass(ABCMeta)
 class BinaryGalpropModel(model_helpers.GalPropModel):
@@ -74,7 +75,7 @@ class BinaryGalpropModel(model_helpers.GalPropModel):
         # Enforce the requirement that sub-classes have been configured properly
         required_method_name = 'mean_'+self.galprop_key+'_fraction'
         if not hasattr(self, required_method_name):
-            raise SyntaxError("Any sub-class of BinaryGalpropModel must "
+            raise HalotoolsError("Any sub-class of BinaryGalpropModel must "
                 "implement a method named %s " % required_method_name)
 
         setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
@@ -135,7 +136,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
     """
 
-    def __init__(self, abcissa = [12, 15], ordinates = [0.25, 0.75], 
+    def __init__(self, galprop_abcissa = [12, 15], galprop_ordinates = [0.25, 0.75], 
         logparam=True, interpol_method='spline', **kwargs):
         """ 
         Parameters 
@@ -154,11 +155,11 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             the `BinaryGalpropInterpolModel` instance is part of a composite model, 
             with multiple population types. Default is None. 
 
-        abcissa : array, optional keyword argument 
+        galprop_abcissa : array, optional keyword argument 
             Values of the primary halo property at which the galprop fraction is specified. 
             Default is [12, 15], in accord with the default True value for ``logparam``. 
 
-        ordinates : array, optional keyword argument 
+        galprop_ordinates : array, optional keyword argument 
             Values of the galprop fraction when evaluated at the input abcissa. 
             Default is [0.25, 0.75]
 
@@ -189,7 +190,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         We can use the `BinaryGalpropInterpolModel` to implement this as follows:
 
         >>> abcissa, ordinates = [12, 15], [1/3., 0.9]
-        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_key='quiescent', abcissa=abcissa, ordinates=ordinates, prim_haloprop_key='mvir', gal_type='cens')
+        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_key='quiescent', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='mvir', gal_type='cens')
 
         The ``cen_quiescent_model`` has a built-in method that computes the quiescent fraction 
         as a function of mass:
@@ -208,7 +209,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         to construct a simple model for satellite morphology, where the early- vs. late-type 
         of the satellite depends on :math:`V_{\\mathrm{peak}}` value of the host halo
 
-        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_key='late_type', abcissa=abcissa, ordinates=ordinates, prim_haloprop_key='vpeak_host', gal_type='sats')
+        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_key='late_type', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host', gal_type='sats')
         >>> vmax_array = np.logspace(2, 3, num=100)
         >>> morphology_realization = sat_morphology_model.mc_late_type(prim_haloprop =vmax_array)
 
@@ -217,7 +218,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         try:
             galprop_key = kwargs['galprop_key']
         except KeyError:
-            raise("\nAll sub-classes of BinaryGalpropInterpolModel must pass "
+            raise HalotoolsError("\nAll sub-classes of BinaryGalpropInterpolModel must pass "
                 "a ``galprop_key`` keyword argument to the constructor\n")
 
         setattr(self, 'mean_'+galprop_key+'_fraction', self._mean_galprop_fraction)
@@ -225,8 +226,8 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         self._interpol_method = interpol_method
         self._logparam = logparam
-        self._abcissa = abcissa
-        self._ordinates = ordinates
+        self._abcissa = galprop_abcissa
+        self._ordinates = galprop_ordinates
 
         if self._interpol_method=='spline':
             if 'input_spline_degree' in kwargs.keys():
@@ -300,7 +301,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
                     k=self._spline_degree)
             mean_galprop_fraction = spline_function(prim_haloprop)
         else:
-            raise IOError("Input interpol_method must be 'polynomial' or 'spline'.")
+            raise HalotoolsError("Input interpol_method must be 'polynomial' or 'spline'.")
 
         # Enforce boundary conditions 
         mean_galprop_fraction[mean_galprop_fraction<0]=0

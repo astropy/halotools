@@ -99,11 +99,11 @@ galprop_prefix = 'gal_'
 haloprop_list = ['halo_id', 'halo_x', 'halo_y', 'halo_z', 'halo_vx', 'halo_vy', 'halo_vz', 'halo_mvir', 'halo_rvir']
 
 prim_haloprop_key = 'halo_mvir'
-sec_haloprop_key = 'halo_vmax'
+sec_haloprop_key = 'halo_nfw_conc'
 halo_boundary = 'halo_rvir'
 
-
-
+default_rbins = np.logspace(-1, 1.35, 10)
+default_nptcls = 1e5
 
 
 

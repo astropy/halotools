@@ -55,8 +55,11 @@ you are on a fast university connection the download time should be less than a 
 If you want to start playing with this catalog right away:
 
 >>> from halotools import sim_manager
->>> default_snapshot = sim_manager.ProcessedSnapshot() # doctest: +SKIP
->>> print(default_snapshot.halos[0:9]) # doctest: +SKIP
+>>> default_snapshot = sim_manager.HaloCatalog() # doctest: +SKIP
+>>> print(default_snapshot.halo_table[0:9]) # doctest: +SKIP
+
+To see simple examples of how to manipulate the data stored in halo catalogs, 
+see the Examples section of the `~halotools.sim_manager.HaloCatalog` API documentation. 
 
 Getting started with subpackages
 ================================

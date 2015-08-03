@@ -55,6 +55,15 @@ User Documentation
    managing_catalogs/index
    managing_catalogs/supported_sim_list
 
+**Making Mock Observations**
+--------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   mock_observations/overview
+   mock_observations/quickstart_guide
+
 **Tutorials**
 --------------------------------------------
 
