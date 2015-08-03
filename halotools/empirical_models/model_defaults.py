@@ -103,7 +103,7 @@ sec_haloprop_key = 'halo_nfw_conc'
 halo_boundary = 'halo_rvir'
 
 default_rbins = np.logspace(-1, 1.35, 10)
-
+default_nptcls = 1e5
 
 
 

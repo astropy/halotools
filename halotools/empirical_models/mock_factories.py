@@ -343,18 +343,18 @@ class MockFactory(object):
 
         Compute the same quantity but for central galaxies only: 
 
-        >>> r, central_galaxy_matter_clusteringclustering = mock.galaxy_clustering(gal_type = 'centrals') # doctest: +SKIP
+        >>> r, central_galaxy_matter_clusteringclustering = mock.galaxy_matter_cross_clustering(gal_type = 'centrals') # doctest: +SKIP
 
         Compute the galaxy-matter cross-clustering for quiescent galaxies and for star-forming galaxies:
 
-        >>> r, quiescent_matter_clustering, star_forming_matter_clustering = mock.galaxy_clustering(quiescent = True, include_complement = True) # doctest: +SKIP
+        >>> r, quiescent_matter_clustering, star_forming_matter_clustering = mock.galaxy_matter_cross_clustering(quiescent = True, include_complement = True) # doctest: +SKIP
         """
         if HAS_MOCKOBS is False:
-            msg = ("\nThe galaxy_clustering method is only available "
+            msg = ("\nThe galaxy_matter_cross_clustering method is only available "
                 " if the mock_observables sub-package has been compiled\n")
             raise HalotoolsError(msg)
 
-        nptcl = np.max([1e5, len(self.galaxy_table)])
+        nptcl = np.max([model_defaults.default_nptcls, len(self.galaxy_table)])
         ptcl_table = randomly_downsample_data(self.snapshot.ptcl_table, nptcl)
         ptcl_pos = three_dim_pos_bundle(table = ptcl_table, 
             key1='x', key2='y', key3='z')
@@ -379,7 +379,7 @@ class MockFactory(object):
                 try:
                     mask = self.galaxy_table[key] == kwargs[key]
                 except KeyError:
-                    msg = ("The galaxy_clustering method was passed ``%s`` as a keyword argument\n."
+                    msg = ("The galaxy_matter_cross_clustering method was passed ``%s`` as a keyword argument\n."
                         "Only keys of the galaxy_table are permitted inputs")
                     raise HalotoolsError(msg % key)
 
@@ -389,13 +389,13 @@ class MockFactory(object):
                     raise HalotoolsError(msg % (key, kwargs[key]))
                 elif len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
                     msg = ("All mock galaxies have ``%s`` = ``%s``, \n"
-                        "If this result is expected, you should not call the galaxy_clustering" 
+                        "If this result is expected, you should not call the galaxy_matter_cross_clustering" 
                         "method with the %s keyword")
                     raise HalotoolsError(msg % (key, kwargs[key], key))
             else:
                 # We were passed too many keywords - raise an exception
                 msg = ("Only a single mask at a time is permitted by calls to "
-                    "galaxy_clustering. \nChoose only one of the following keyword arguments:\n")
+                    "galaxy_matter_cross_clustering. \nChoose only one of the following keyword arguments:\n")
                 arglist = ''
                 for arg in keylist:
                     arglist = arglist + arg + ', '
