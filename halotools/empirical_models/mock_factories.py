@@ -245,7 +245,7 @@ class MockFactory(object):
         rbins = np.logspace(-1, 1.35, 10)
         rbin_centers = (rbins[1:]+rbins[:1])/2.0
 
-        if kwargs is {}:
+        if kwargs == {}:
             # Compute the clustering of the full mock
             pos = three_dim_pos_bundle(table = self.galaxy_table, 
                 key1='x', key2='y', key3='z')
