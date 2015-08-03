@@ -39,20 +39,9 @@ Making Mock Observations
 ==========================
 
 Once you have a synthetic galaxy population in hand, you can use the 
-`~halotools.mock_observables` sub-package to mock observations of it. We'll give a few examples 
-of simple observations you can make below. For a full discussion of the wide variety 
-of options you have to make mock observations of your galaxies, see :ref:`mock_observation_overview`. 
-
-One of the simplest and most powerful observational statistics that can be used to 
-constrain the galaxy-halo connection is the two-point correlation function of galaxies. 
-For any model, all mock populations come with a built-in method to calculate this observable: 
-
->>> radial_bins, clustering = hod_model.mock.compute_galaxy_clustering() # doctest: +SKIP
-
-
-
-
-
+`~halotools.mock_observables` sub-package to mock observations of it. 
+For a brief overview giving a few examples of simple observations you can make, see the :ref:`mock_observation_quickstart`. 
+For a full discussion of the wide variety of options you have, see the :ref:`mock_observation_overview`. 
 
 
 

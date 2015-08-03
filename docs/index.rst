@@ -60,8 +60,9 @@ User Documentation
 
 .. toctree::
    :maxdepth: 1
-   
+
    mock_observations/overview
+   mock_observations/quickstart_guide
 
 **Tutorials**
 --------------------------------------------
