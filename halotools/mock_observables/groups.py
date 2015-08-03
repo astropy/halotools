@@ -22,7 +22,7 @@ if igraph_available==True: #there is another package called igraph--need to dist
         print("igraph package is not installed.  Some functions will not be available.")
 ##########################################################################################
 
-__all__=['FoFgroups']
+__all__=['FoFGroups']
 __author__ = ['Duncan Campbell']
 
 class FoFGroups(object):
