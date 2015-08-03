@@ -25,7 +25,7 @@ if igraph_available==True: #there is another package called igraph--need to dist
 __all__=['FoFgroups']
 __author__ = ['Duncan Campbell']
 
-class FoFGroups():
+class FoFGroups(object):
     """
     friends-of-friends groups object.
     
