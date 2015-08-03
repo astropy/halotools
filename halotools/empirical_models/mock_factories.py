@@ -9,6 +9,7 @@ Currently only composite HOD models are supported.
 """
 
 import numpy as np
+from multiprocessing import cpu_count
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -17,6 +18,9 @@ from astropy.table import Table
 
 from . import model_helpers as model_helpers
 from . import model_defaults
+from .mock_helpers import three_dim_pos_bundle
+
+from .. import mock_observables
 
 from ..sim_manager import sim_defaults
 
@@ -172,6 +176,20 @@ class MockFactory(object):
 
         if composite_haloprop_func_dict != {}:
             self.new_haloprop_func_dict = composite_haloprop_func_dict
+
+    def two_point_clustering(self, **kwargs):
+        """
+        """
+        pos = three_dim_pos_bundle(table = self.galaxy_table, 
+            key1='x', key2='y', key3='z')
+
+        Nthreads = cpu_count()
+        rbins = np.logspace(-1, 1.35, 10)
+        rbin_centers = (rbins[1:]+rbins[:1])/2.0
+
+        clustering = mock_observables.clustering.tpcf(
+            pos, rbins, period=self.snapshot.Lbox, N_threads=Nthreads)
+
 
 
 class HodMockFactory(MockFactory):
