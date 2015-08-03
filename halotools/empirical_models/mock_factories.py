@@ -20,7 +20,13 @@ from . import model_helpers as model_helpers
 from . import model_defaults
 from .mock_helpers import three_dim_pos_bundle
 
-from .. import mock_observables
+from ..halotools_exceptions import HalotoolsError
+
+try:
+    from .. import mock_observables
+    HAS_MOCKOBS = True
+except ImportError:
+    HAS_MOCKOBS = False
 
 from ..sim_manager import sim_defaults
 
@@ -180,6 +186,11 @@ class MockFactory(object):
     def two_point_clustering(self, **kwargs):
         """
         """
+        if HAS_MOCKOBS is False:
+            msg = ("\nThe two_point_clustering method is only available "
+                " if the mock_observables sub-package has been compiled\n")
+            raise HalotoolsError(msg)
+
         pos = three_dim_pos_bundle(table = self.galaxy_table, 
             key1='x', key2='y', key3='z')
 
@@ -189,6 +200,8 @@ class MockFactory(object):
 
         clustering = mock_observables.clustering.tpcf(
             pos, rbins, period=self.snapshot.Lbox, N_threads=Nthreads)
+
+        return rbin_centers, clustering
 
 
 
