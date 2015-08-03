@@ -1,7 +1,9 @@
+
+.. _mock_observation_overview:
+
 ****************************************
 Overview of Mock Observations
 ****************************************
 
-.. _mock_observation_overview:
 
 Coming soon!
