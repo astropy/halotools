@@ -152,7 +152,7 @@ download the catalog. If you are following this tutorial for the first
 time, the download would proceed.
 
 Now that your z=2 catalog is in cache, you can load it into memory just
-as before by using the `~halotools.sim_manager.ProcessedSnapshot`
+as before by using the `~halotools.sim_manager.HaloCatalog`
 method:
 
 .. code:: python
