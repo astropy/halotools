@@ -6,7 +6,8 @@ HOD-style models of the galaxy-halo connection.
 """
 
 __all__ = (['OccupationComponent','Zheng07Cens','Zheng07Sats', 
-    'Leauthaud11Cens', 'Leauthaud11Sats']
+    'Leauthaud11Cens', 'Leauthaud11Sats', 'AssembiasZheng07Cens', 'AssembiasZheng07Sats', 
+    'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats']
     )
 
 from functools import partial
@@ -18,9 +19,8 @@ from scipy.stats import poisson
 from scipy.optimize import brentq
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
-from . import model_defaults
-from . import model_helpers as model_helpers
-from . import smhm_components
+from . import model_defaults, model_helpers, smhm_components
+from .assembias import HeavisideAssembias
 
 from ..utils.array_utils import array_like_length as custom_len
 from ..  import sim_manager
@@ -49,7 +49,7 @@ class OccupationComponent(model_helpers.GalPropModel):
             Threshold value defining the selection function of the galaxy population 
             being modeled. Typically refers to absolute magnitude or stellar mass. 
 
-        occupation_bound : float, keyword argument
+        upper_bound : float, keyword argument
             Upper bound on the number of gal_type galaxies per halo. 
             The only currently supported values are unity or infinity. 
 
@@ -66,8 +66,11 @@ class OccupationComponent(model_helpers.GalPropModel):
         """
         super(OccupationComponent, self).__init__(galprop_key='occupation')
 
-        required_kwargs = ['gal_type',  'threshold', 'occupation_bound', 'prim_haloprop_key']
+        required_kwargs = ['gal_type', 'threshold', 'prim_haloprop_key']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
+
+        self._upper_bound = kwargs['upper_bound']
+        self._lower_bound = 0
 
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
@@ -105,12 +108,12 @@ class OccupationComponent(model_helpers.GalPropModel):
             Integer array giving the number of galaxies in each of the input halo_table.     
         """ 
         first_occupation_moment = self.mean_occupation(**kwargs)
-        if self.occupation_bound == 1:
+        if self._upper_bound == 1:
             return self._nearest_integer_distribution(first_occupation_moment, seed=seed, **kwargs)
-        elif self.occupation_bound == float("inf"):
+        elif self._upper_bound == float("inf"):
             return self._poisson_distribution(first_occupation_moment, seed=seed, **kwargs)
         else:
-            raise KeyError("The only permissible values of occupation_bound for instances "
+            raise KeyError("The only permissible values of upper_bound for instances "
                 "of OccupationComponent are unity and infinity.")
 
     def _nearest_integer_distribution(self, first_occupation_moment, seed=None, **kwargs):
@@ -200,12 +203,12 @@ class Zheng07Cens(OccupationComponent):
         The test suite for this model is documented at 
         `~halotools.empirical_models.test_empirical_models.test_Zheng07Cens`
         """
-        occupation_bound = 1.0
+        upper_bound = 1.0
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Zheng07Cens, self).__init__(gal_type=gal_type, 
-            threshold=threshold, occupation_bound=occupation_bound, 
+            threshold=threshold, upper_bound=upper_bound, 
             prim_haloprop_key=prim_haloprop_key, 
             **kwargs)
 
@@ -376,13 +379,13 @@ class Leauthaud11Cens(OccupationComponent):
         >>> cen_model = Leauthaud11Cens(prim_haloprop_key = 'halo_m200b')
 
         """
-        occupation_bound = 1.0
+        upper_bound = 1.0
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Leauthaud11Cens, self).__init__(
             gal_type=gal_type, threshold=threshold, 
-            occupation_bound=occupation_bound, 
+            upper_bound=upper_bound, 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
@@ -426,7 +429,8 @@ class Leauthaud11Cens(OccupationComponent):
 
 class Zheng07Sats(OccupationComponent):
     """ Power law model for the occupation statistics of satellite galaxies, 
-    introduced in Kravtsov et al. 2004, arXiv:0308519.
+    introduced in Kravtsov et al. 2004, arXiv:0308519. This implementation uses 
+    Zheng et al. 2007, arXiv:0703457, to assign fiducial parameter values.
 
     :math:`\\langle N_{sat} \\rangle_{M} = \left( \\frac{M - M_{0}}{M_{1}} \\right)^{\\alpha}`
 
@@ -510,13 +514,13 @@ class Zheng07Sats(OccupationComponent):
         `~halotools.empirical_models.test_empirical_models.test_Zheng07Sats`
 
         """
-        occupation_bound = float("inf")
+        upper_bound = float("inf")
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Zheng07Sats, self).__init__(
             gal_type=gal_type, threshold=threshold, 
-            occupation_bound=occupation_bound, 
+            upper_bound=upper_bound, 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
@@ -739,7 +743,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         super(Leauthaud11Sats, self).__init__(
             gal_type=gal_type, threshold=threshold, 
-            occupation_bound=float("inf"), 
+            upper_bound=float("inf"), 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
@@ -840,6 +844,236 @@ class Leauthaud11Sats(OccupationComponent):
         self._mcut = (
             1.e12*self.param_dict['bcut']*
             (knee / 1.e12)**self.param_dict['betacut'])
+
+
+
+class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
+    """
+    """
+    def __init__(self, **kwargs):
+        """
+        Parameters 
+        ----------
+        gal_type : string, optional keyword argument
+            Name of the galaxy population being modeled. Default is ``satellites``.  
+
+        threshold : float, optional keyword argument
+            Luminosity threshold of the mock galaxy sample. If specified, 
+            input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
+            [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        split : float, optional 
+            Fraction between 0 and 1 defining how we split halos into two groupings based on 
+            their conditional secondary percentiles. Default is 0.5 for a constant 50/50 split. 
+
+        assembias_strength : float, optional 
+            Fraction between -1 and 1 defining the assembly bias correlation strength. 
+            Default is 0.5. 
+
+        assembias_strength_abcissa : list, optional 
+            Values of the primary halo property at which the assembly bias strength is specified. 
+            Default is to assume a constant strength of 0.5. 
+
+        assembias_strength_ordinates : list, optional 
+            Values of the assembly bias strength when evaluated at the input ``assembias_strength_abcissa``. 
+            Default is to assume a constant strength of 0.5. 
+
+        sec_haloprop_key : string, optional 
+            String giving the column name of the secondary halo property 
+            governing the assembly bias. Must be a key in the halo_table 
+            passed to the methods of `HeavisideAssembiasComponent`. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        """
+        Zheng07Sats.__init__(self, **kwargs)
+        HeavisideAssembias.__init__(self, 
+            method_name_to_decorate = 'mean_occupation', **kwargs)
+
+
+class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
+    """
+    """
+    def __init__(self, **kwargs):
+        """
+        Parameters 
+        ----------
+        gal_type : string, optional keyword argument
+            Name of the galaxy population being modeled. Default is ``centrals``.  
+
+        threshold : float, optional keyword argument
+            Luminosity threshold of the mock galaxy sample. If specified, 
+            input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
+            [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        split : float, optional 
+            Fraction between 0 and 1 defining how we split halos into two groupings based on 
+            their conditional secondary percentiles. Default is 0.5 for a constant 50/50 split. 
+
+        assembias_strength : float, optional 
+            Fraction between -1 and 1 defining the assembly bias correlation strength. 
+            Default is 0.5. 
+
+        assembias_strength_abcissa : list, optional 
+            Values of the primary halo property at which the assembly bias strength is specified. 
+            Default is to assume a constant strength of 0.5. 
+
+        assembias_strength_ordinates : list, optional 
+            Values of the assembly bias strength when evaluated at the input ``assembias_strength_abcissa``. 
+            Default is to assume a constant strength of 0.5. 
+
+        sec_haloprop_key : string, optional 
+            String giving the column name of the secondary halo property 
+            governing the assembly bias. Must be a key in the halo_table 
+            passed to the methods of `HeavisideAssembiasComponent`. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        """
+        Zheng07Cens.__init__(self, **kwargs)
+        HeavisideAssembias.__init__(self, 
+            method_name_to_decorate = 'mean_occupation', **kwargs)
+
+
+class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
+    """ HOD-style model for any central galaxy occupation that derives from 
+    a stellar-to-halo-mass relation. 
+    """
+    def __init__(self, **kwargs):
+        """
+        Parameters 
+        ----------
+        gal_type : string, optional keyword argument
+            Name of the galaxy population being modeled. Default is ``centrals``.  
+
+        threshold : float, optional keyword argument
+            Stellar mass threshold of the mock galaxy sample. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        smhm_model : object, optional keyword argument 
+            Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
+            the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
+
+        redshift : float, optional keyword argument 
+            Redshift of the stellar-to-halo-mass relation. Default is 0. 
+
+        split : float, optional 
+            Fraction between 0 and 1 defining how we split halos into two groupings based on 
+            their conditional secondary percentiles. Default is 0.5 for a constant 50/50 split. 
+
+        assembias_strength : float, optional 
+            Fraction between -1 and 1 defining the assembly bias correlation strength. 
+            Default is 0.5. 
+
+        assembias_strength_abcissa : list, optional 
+            Values of the primary halo property at which the assembly bias strength is specified. 
+            Default is to assume a constant strength of 0.5. 
+
+        assembias_strength_ordinates : list, optional 
+            Values of the assembly bias strength when evaluated at the input ``assembias_strength_abcissa``. 
+            Default is to assume a constant strength of 0.5. 
+
+        sec_haloprop_key : string, optional 
+            String giving the column name of the secondary halo property 
+            governing the assembly bias. Must be a key in the halo_table 
+            passed to the methods of `HeavisideAssembiasComponent`. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        """
+        Leauthaud11Cens.__init__(self, **kwargs)
+        HeavisideAssembias.__init__(self, 
+            method_name_to_decorate = 'mean_occupation', **kwargs)
+
+
+class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
+    """ HOD-style model for any central galaxy occupation that derives from 
+    a stellar-to-halo-mass relation. 
+    """
+    def __init__(self, **kwargs):
+        """
+        Parameters 
+        ----------
+        gal_type : string, optional keyword argument
+            Name of the galaxy population being modeled. Default is ``satellites``.  
+
+        threshold : float, optional keyword argument
+            Stellar mass threshold of the mock galaxy sample. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        prim_haloprop_key : string, optional keyword argument 
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        smhm_model : object, optional keyword argument 
+            Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
+            the stellar-to-halo-mass relation 
+
+        redshift : float, optional keyword argument 
+            Redshift of the stellar-to-halo-mass relation. Default is 0. 
+
+        split : float, optional 
+            Fraction between 0 and 1 defining how we split halos into two groupings based on 
+            their conditional secondary percentiles. Default is 0.5 for a constant 50/50 split. 
+
+        assembias_strength : float, optional 
+            Fraction between -1 and 1 defining the assembly bias correlation strength. 
+            Default is 0.5. 
+
+        assembias_strength_abcissa : list, optional 
+            Values of the primary halo property at which the assembly bias strength is specified. 
+            Default is to assume a constant strength of 0.5. 
+
+        assembias_strength_ordinates : list, optional 
+            Values of the assembly bias strength when evaluated at the input ``assembias_strength_abcissa``. 
+            Default is to assume a constant strength of 0.5. 
+
+        sec_haloprop_key : string, optional 
+            String giving the column name of the secondary halo property 
+            governing the assembly bias. Must be a key in the halo_table 
+            passed to the methods of `HeavisideAssembiasComponent`. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        """
+        Leauthaud11Sats.__init__(self, **kwargs)
+        HeavisideAssembias.__init__(self, 
+            method_name_to_decorate = 'mean_occupation', **kwargs)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

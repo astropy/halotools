@@ -4,36 +4,38 @@
 Module containing some commonly used composite HOD models.
 
 """
-from . import model_factories
+from . import model_factories, model_defaults, smhm_components
 from . import preloaded_subhalo_model_blueprints
 from . import preloaded_hod_blueprints
 
-from .. import sim_manager
+from ..sim_manager import FakeMock, FakeSim, sim_defaults
 
-__all__ = ['Zheng07', 'SmHmBinarySFR', 'Campbell15']
+__all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15']
 
 def Zheng07(**kwargs):
-    """ Simple HOD-style model based on Kravtsov et al. (2004). 
+    """ Simple HOD-style based on Zheng et al. (2007), arXiv:0703457. 
 
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
-    with first moment given by an ``erf`` function. 
-    Satellite occupation statistics are given by a Poisson distribution 
-    with first moment given by a power law that has been truncated at the low-mass end. 
+    with first moment given by an ``erf`` function; the class governing this 
+    behavior is `~halotools.empirical_models.hod_components.Zheng07Cens`. 
+    Central galaxies are assumed to reside at the exact center of the host halo; 
+    the class governing this behavior is `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
 
-    Under the hood, this model is built from a set of component models whose 
-    behavior is coded up elsewhere. The behavior of the central occupations 
-    derives from the `~halotools.empirical_models.hod_components.Zheng07Cens` class, while for 
-    satellites the relevant class is `~halotools.empirical_models.hod_components.Zheng07Sats`. 
+    Satellite occupation statistics are given by a Poisson distribution 
+    with first moment given by a power law that has been truncated at the low-mass end; 
+    the class governing this behavior is `~halotools.empirical_models.hod_components.Zheng07Sats`; 
+    satellites in this model follow an (unbiased) NFW profile, as governed by the 
+    `~halotools.empirical_models.halo_prof_components.NFWProfile` class. 
 
     This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
-    which followed the instructions contained in 
-    `~halotools.empirical_models.Zheng07_blueprint`. 
+    which followed the instructions contained in `~halotools.empirical_models.Zheng07_blueprint`. 
 
     Parameters 
     ----------
     threshold : float, optional keyword argument
         Luminosity threshold of the galaxy sample being modeled. 
+        Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
     Returns 
     -------
@@ -42,14 +44,24 @@ def Zheng07(**kwargs):
 
     Examples 
     --------
+    Calling the `Zheng07` class with no arguments instantiates a model based on the 
+    default luminosity threshold: 
+
     >>> model = Zheng07()
+
+    The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
+    To load a model based on a different threshold, use the ``threshold`` keyword argument:
+
     >>> model = Zheng07(threshold = -20.5)
+
+    This call will create a model whose parameter values are set according to the best-fit 
+    values given in Table 1 of arXiv:0703457. 
 
     To use our model to populate a simulation with mock galaxies, we only need to 
     load a snapshot into memory and call the built-in ``populate_mock`` method. 
     For illustration purposes, we'll use a small, fake simulation:
 
-    >>> fake_snapshot = sim_manager.FakeSim()
+    >>> fake_snapshot = FakeSim()
     >>> model.populate_mock(snapshot = fake_snapshot)
 
     """
@@ -57,10 +69,59 @@ def Zheng07(**kwargs):
     return model_factories.HodModelFactory(blueprint, **kwargs)
 
 def Leauthaud11(**kwargs):
-    """ 
+    """ HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
+    The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
+
+    There are two populations, centrals and satellites. 
+    Central occupation statistics are given by a nearest integer distribution 
+    with first moment given by an ``erf`` function; the class governing this 
+    behavior is `~halotools.empirical_models.hod_components.Leauthaud11Cens`. 
+    Central galaxies are assumed to reside at the exact center of the host halo; 
+    the class governing this behavior is `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
+
+    Satellite occupation statistics are given by a Poisson distribution 
+    with first moment given by a power law that has been truncated at the low-mass end; 
+    the class governing this behavior is `~halotools.empirical_models.hod_components.Leauthaud11Sats`; 
+    satellites in this model follow an (unbiased) NFW profile, as governed by the 
+    `~halotools.empirical_models.halo_prof_components.NFWProfile` class. 
+
+    This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
+    which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_blueprint`. 
+
+    Parameters 
+    ----------
+    threshold : float, optional keyword argument
+        Stellar mass threshold of the mock galaxy sample. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    Returns 
+    -------
+    model : object 
+        Instance of `~halotools.empirical_models.model_factories.HodModelFactory`
+
+    Examples 
+    --------
+    Calling the `Leauthaud11` class with no arguments instantiates a model based on the 
+    default stellar mass threshold: 
+
+    >>> model = Leauthaud11()
+
+    The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
+    To load a model based on a different threshold, use the ``threshold`` keyword argument:
+
+    >>> model = Leauthaud11(threshold = 11.25)
+
+    To use our model to populate a simulation with mock galaxies, we only need to 
+    load a snapshot into memory and call the built-in ``populate_mock`` method. 
+    For illustration purposes, we'll use a small, fake simulation:
+
+    >>> fake_snapshot = FakeSim()
+    >>> model.populate_mock(snapshot = fake_snapshot)
+
     """
     blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
     return model_factories.HodModelFactory(blueprint, **kwargs)
+
 
 def SmHmBinarySFR(**kwargs):
     """ Blueprint for a very simple model assigning stellar mass and 
@@ -126,7 +187,7 @@ def SmHmBinarySFR(**kwargs):
     load a snapshot into memory and call the built-in ``populate_mock`` method. 
     For illustration purposes, we'll use a small, fake simulation:
 
-    >>> fake_snapshot = sim_manager.FakeSim()
+    >>> fake_snapshot = FakeSim()
     >>> model.populate_mock(snapshot = fake_snapshot)
 
     """
@@ -225,7 +286,7 @@ def Campbell15(**kwargs):
     can populate a real simulation by instead calling the 
     `~halotools.sim_manager.HaloCatalog` class. 
 
-    >>> fake_snapshot = sim_manager.FakeSim()
+    >>> fake_snapshot = FakeSim()
     >>> model.populate_mock(snapshot = fake_snapshot)
 
     We can easily build alternative versions of models and mocks by calling the 
