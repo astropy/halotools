@@ -9,6 +9,8 @@ from copy import copy
 from ..halotools_exceptions import HalotoolsError
 from .model_factories import HodModelFactory 
 
+__all__ = ['HodModelArchitect']
+
 
 class HodModelArchitect(object):
     """ Class used to create customized HOD-style models.  
