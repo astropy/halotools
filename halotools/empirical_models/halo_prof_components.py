@@ -29,7 +29,7 @@ from ..sim_manager import sim_defaults
 ##################################################################################
 
 @six.add_metaclass(ABCMeta)
-class HaloProfileModel(object):
+class HaloProfileModel(model_helpers.GalPropModel):
     """ Container class for any halo profile model. 
 
     This is an abstract class, and cannot itself be instantiated. 
@@ -64,6 +64,7 @@ class HaloProfileModel(object):
             Default is None. 
 
         """
+        super(HaloProfileModel, self).__init__(galprop_key='occupation')
 
         self.halo_boundary = halo_boundary
         self.prim_haloprop_key = prim_haloprop_key
@@ -162,11 +163,6 @@ class TrivialProfile(HaloProfileModel):
 
         >>> trivial_halo_prof_model = TrivialProfile()
 
-        Use the keyword arguments for ``cosmology`` and ``redshift`` to load profiles 
-        with alternative settings:
-
-        >>> from astropy.cosmology import Planck13
-        >>> trivial_halo_prof_model = TrivialProfile(cosmology = Planck13, redshift = 0.5)
         """
 
         super(TrivialProfile, self).__init__(prof_param_keys=[], **kwargs)

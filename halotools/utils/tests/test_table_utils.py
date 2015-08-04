@@ -4,8 +4,10 @@ import numpy as np
 from unittest import TestCase
 from functools import partial
 
-from ..table_utils import SampleSelector
+from ..table_utils import SampleSelector, compute_conditional_percentiles
 from astropy.table import Table
+
+from ...sim_manager.generate_random_sim import FakeSim
 
 class TestSampleSelector(TestCase):
 	"""
@@ -49,6 +51,91 @@ class TestSampleSelector(TestCase):
 		f = partial(SampleSelector.split_sample, table=ax, key='x', 
 			percentiles= 0.5)
 		self.assertRaises(TypeError, f)
+
+
+class TestComputeConditionalPercentiles(TestCase):
+
+    def setup_class(self):
+    	Npts = 1e4
+    	mass = np.zeros(Npts)
+    	mass[0:Npts/2] = 1e12
+    	mass[Npts/2:] = 1e14
+
+    	zform = np.zeros(Npts)
+    	zform[0:Npts/2] = np.linspace(0, 10, Npts/2)
+    	zform[Npts/2:] = np.linspace(20, 30, Npts/2)
+
+    	d = {'halo_mvir': mass, 'halo_zform': zform}
+    	self.custom_halo_table = Table(d)
+
+    	fakesim = FakeSim()
+    	self.fake_halo_table = fakesim.halo_table
+
+    def test_fake_halo_table(self):
+    	percentiles = compute_conditional_percentiles(
+    		halo_table = self.fake_halo_table, 
+    		prim_haloprop_key = 'halo_mvir', 
+    		sec_haloprop_key = 'halo_vmax')
+    	split = percentiles < 0.5
+    	low_vmax, high_vmax = self.fake_halo_table[split], self.fake_halo_table[np.invert(split)]
+    	assert len(low_vmax) == len(high_vmax)
+
+    def test_custom_halo_table(self):
+    	prim_haloprop_bin_boundaries = [1e10, 1e13, 1e15]
+
+    	manual_mass_split = self.custom_halo_table['halo_mvir'] < 1e13
+    	manual_low_mass = self.custom_halo_table[manual_mass_split]
+    	manual_high_mass = self.custom_halo_table[np.invert(manual_mass_split)]
+        assert np.all(manual_low_mass['halo_mvir'] == 1e12)
+        assert np.all(manual_high_mass['halo_mvir'] == 1e14)
+        assert manual_low_mass['halo_zform'].max() == 10 
+        assert manual_low_mass['halo_zform'].min() == 0 
+        assert manual_high_mass['halo_zform'].max() == 30 
+        assert manual_high_mass['halo_zform'].min() == 20 
+
+    	percentiles = compute_conditional_percentiles(
+    		halo_table = self.custom_halo_table, 
+    		prim_haloprop_key = 'halo_mvir', 
+    		sec_haloprop_key = 'halo_zform', 
+    		prim_haloprop_bin_boundaries = prim_haloprop_bin_boundaries)
+
+        assert np.all(percentiles <= 1)
+        assert np.all(percentiles >= 0)
+        assert np.any(percentiles > 0.9)
+        assert np.any(percentiles < 0.1)
+
+    	low_mass_percentiles = percentiles[manual_mass_split]
+        assert np.all(low_mass_percentiles <= 1)
+        assert np.all(low_mass_percentiles >= 0)
+        assert np.any(low_mass_percentiles > 0.9)
+        assert np.any(low_mass_percentiles < 0.1)
+    	high_mass_percentiles = percentiles[np.invert(manual_mass_split)]
+        assert np.all(high_mass_percentiles <= 1)
+        assert np.all(high_mass_percentiles >= 0)
+        assert np.any(high_mass_percentiles > 0.9)
+        assert np.any(high_mass_percentiles < 0.1)
+    	assert set(low_mass_percentiles) == set(high_mass_percentiles)
+
+    	low_mass_split = low_mass_percentiles < 0.5
+    	low_mass_low_zform = manual_low_mass[low_mass_split]
+    	low_mass_high_zform = manual_low_mass[np.invert(low_mass_split)]
+        assert 0 <= low_mass_low_zform['halo_zform'].max() <= 5
+    	assert 5 <= low_mass_high_zform['halo_zform'].max() <= 10
+
+        high_mass_split = high_mass_percentiles < 0.5
+        high_mass_low_zform = manual_high_mass[high_mass_split]
+        high_mass_high_zform = manual_high_mass[np.invert(high_mass_split)]
+        assert 20 <= high_mass_low_zform['halo_zform'].max() <= 25
+        assert 25 <= high_mass_high_zform['halo_zform'].max() <= 30
+
+    	split = percentiles < 0.5
+    	low_zform, high_zform = self.custom_halo_table[split], self.custom_halo_table[np.invert(split)]
+    	assert len(low_zform) == len(high_zform)
+
+
+
+
+
 
 
 

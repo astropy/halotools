@@ -18,6 +18,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults
 from ..utils.array_utils import array_like_length as custom_len
+from ..halotools_exceptions import HalotoolsError
 
 from astropy.extern import six
 from abc import ABCMeta
@@ -26,14 +27,14 @@ from abc import ABCMeta
 class GalPropModel(object):
     """ Abstact container class for any model of any galaxy property. 
     """
-
     def __init__(self, galprop_key):
+        self.galprop_key = galprop_key
 
-        # Enforce the requirement that sub-classes have been configured properly
-        required_method_name = 'mc_'+galprop_key
-        if not hasattr(self, required_method_name):
-            raise SyntaxError("Any sub-class of GalPropModel must "
-                "implement a method named %s " % required_method_name)
+        # # Enforce the requirement that sub-classes have been configured properly
+        # required_method_name = 'mc_'+galprop_key
+        # if not hasattr(self, required_method_name):
+        #     raise SyntaxError("Any sub-class of GalPropModel must "
+        #         "implement a method named %s " % required_method_name)
 
 
 def solve_for_polynomial_coefficients(abcissa, ordinates):
@@ -210,7 +211,7 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
     return output
 
 
-def custom_spline(table_abcissa, table_ordinates, k=0):
+def custom_spline(table_abcissa, table_ordinates, **kwargs):
     """ Simple workaround to replace scipy's silly convention 
     for treating the spline_degree=0 edge case. 
 
@@ -222,7 +223,7 @@ def custom_spline(table_abcissa, table_ordinates, k=0):
     table_ordinates : array_like
         ordinate values defining the interpolation 
 
-    k : int 
+    k : int, optional
         Degree of the desired spline interpolation
 
     Returns 
@@ -243,22 +244,20 @@ def custom_spline(table_abcissa, table_ordinates, k=0):
     if custom_len(table_abcissa) != custom_len(table_ordinates):
         len_abcissa = custom_len(table_abcissa)
         len_ordinates = custom_len(table_ordinates)
-        raise TypeError("table_abcissa and table_ordinates must have the same length \n"
+        raise HalotoolsError("table_abcissa and table_ordinates must have the same length \n"
             " len(table_abcissa) = %i and len(table_ordinates) = %i" % (len_abcissa, len_ordinates))
 
-    if k >= custom_len(table_abcissa):
-        len_abcissa = custom_len(table_abcissa)
-        raise ValueError("Input spline degree k = %i "
-            "must be less than len(abcissa) = %i" % (k, len_abcissa))
-
     max_scipy_spline_degree = 5
-    k = np.min([k, max_scipy_spline_degree])
+    if 'k' in kwargs:
+        k = np.min([custom_len(table_abcissa)-1, kwargs['k'], max_scipy_spline_degree])
+    else:
+        k = np.min([custom_len(table_abcissa)-1, max_scipy_spline_degree])
 
     if k<0:
-        raise ValueError("Spline degree must be non-negative")
+        raise HalotoolsError("Spline degree must be non-negative")
     elif k==0:
         if custom_len(table_ordinates) != 1:
-            raise TypeError("In spline_degree=0 edge case, "
+            raise HalotoolsError("In spline_degree=0 edge case, "
                 "table_abcissa and table_abcissa must be 1-element arrays")
         return lambda x : np.zeros(custom_len(x)) + table_ordinates[0]
     else:
