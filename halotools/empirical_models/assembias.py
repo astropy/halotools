@@ -323,10 +323,14 @@ class HeavisideAssembias(object):
                 no_edge_percentiles = halo_table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
                 type1_mask = no_edge_percentiles >= no_edge_split
             else:
-                msg = ("Computing ``%s`` quantity from scratch - \n"
-                    "Method is much faster if this quantity is pre-computed")
+                msg = ("\nThe HeavisideAssembias class implements assembly bias \n" 
+                    "by altering the behavior of the model according to the value of " 
+                    "``%s``.\n This quantity can be pre-computed using the "
+                    "new_haloprop_func_dict mechanism, making your mock population run faster.\n"
+                    "See the MockFactory documentation for detailed instructions.\n "
+                    "Now computing %s from scratch.\n")
                 key = self.sec_haloprop_key + '_percentile'
-                warn(msg % key)
+                warn(msg % (key, key))
 
                 percentiles = compute_conditional_percentiles(
                     halo_table = halo_table, 
