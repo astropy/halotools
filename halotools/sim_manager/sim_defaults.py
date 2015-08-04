@@ -14,8 +14,9 @@ from ..halotools_exceptions import UnsupportedSimError, HalotoolsCacheError
 
 default_simname = 'bolshoi'
 default_halo_finder = 'rockstar'
-default_numptcl = 2.0e5
 default_redshift = 0.0
+
+default_numptcl = 2.0e5
 
 Num_ptcl_requirement = 300
 mass_like_variable_to_apply_cut = 'halo_mpeak'

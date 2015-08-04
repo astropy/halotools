@@ -406,7 +406,6 @@ class HodModelFactory(ModelFactory):
         for gal_type in self.gal_types:
             input_prof_model = model_blueprint[gal_type]['profile']
             if input_prof_model.__class__ != gal_prof_factory.IsotropicGalProf:
-                #print("%s gal_type is an instance of a HaloProfileModel" % gal_type)
                 prof_model = gal_prof_factory.IsotropicGalProf(
                     gal_type=gal_type, halo_prof_model=input_prof_model.__class__)
                 model_blueprint[gal_type]['profile'] = prof_model
@@ -418,29 +417,10 @@ class HodModelFactory(ModelFactory):
 
 
     def _set_gal_types(self):
-        """ Private method binding the ``gal_types`` list attribute,
-        and the ``occupation_bound`` attribute, to the class instance. 
-
-        The ``self.gal_types`` list is sequenced 
-        in ascending order of the occupation bound. 
+        """ Private method binding the ``gal_types`` list attribute.
         """
-
         gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factory']
-
-        occupation_bounds = []
-        for gal_type in gal_types:
-            model = self._input_model_blueprint[gal_type]['occupation']
-            occupation_bounds.append(model.occupation_bound)
-
-        # Lists have been created. Now sort them and then bind the sorted lists to the instance. 
-        sorted_idx = np.argsort(occupation_bounds)
-        gal_types = list(np.array(gal_types)[sorted_idx])
         self.gal_types = gal_types
-
-        self.occupation_bound = {}
-        for gal_type in self.gal_types:
-            self.occupation_bound[gal_type] = (
-                self._input_model_blueprint[gal_type]['occupation'].occupation_bound)
 
     def _set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `HodModelFactory` 
