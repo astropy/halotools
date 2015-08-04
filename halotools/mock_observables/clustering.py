@@ -1171,7 +1171,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     
     #integrate the redshift space TPCF to get w_p
     def integrate_2D_xi(x,pi_bins):
-        return np.sum(x*np.diff(pi_bins),axis=1)
+        return 2.0*np.sum(x*np.diff(pi_bins),axis=1)
 
     #return the results.
     if (do_auto==True) & (do_cross==True):
