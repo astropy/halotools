@@ -19,3 +19,4 @@ from .sfr_components import *
 from .abunmatch import *
 from .model_helpers import *
 from .assembias import *
+from .hod_designer import *

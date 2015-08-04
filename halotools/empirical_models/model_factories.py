@@ -406,7 +406,6 @@ class HodModelFactory(ModelFactory):
         for gal_type in self.gal_types:
             input_prof_model = model_blueprint[gal_type]['profile']
             if input_prof_model.__class__ != gal_prof_factory.IsotropicGalProf:
-                #print("%s gal_type is an instance of a HaloProfileModel" % gal_type)
                 prof_model = gal_prof_factory.IsotropicGalProf(
                     gal_type=gal_type, halo_prof_model=input_prof_model.__class__)
                 model_blueprint[gal_type]['profile'] = prof_model
