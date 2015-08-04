@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-
 This module provides a convenient interface 
 for building a new galaxy-halo model by swapping out features 
 from an existing model. 
@@ -12,6 +11,8 @@ from .model_factories import HodModelFactory
 
 
 class HodModelArchitect(object):
+    """ Class used to create customized HOD-style models.  
+    """
 
     def __init__(self):
         pass
