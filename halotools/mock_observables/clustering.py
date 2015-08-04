@@ -15,6 +15,7 @@ from .pair_counters.rect_cuboid_pairs import npairs, xy_z_npairs, jnpairs, s_mu_
 __all__=['tpcf','tpcf_jackknife','redshift_space_tpcf','wp','s_mu_tpcf']
 __author__ = ['Duncan Campbell']
 
+np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
          do_auto=True, do_cross=True, estimator='Natural', N_threads=1,\
@@ -64,10 +65,10 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     Returns 
     -------
     correlation_function : array_like
-        array containing correlation function :math:`\\xi` computed in each of the bins
-        defined by input `rbins`.
+        len(rbins)-1 length array containing correlation function :math:`\\xi` computed 
+        in each of the bins defined by input `rbins`.
 
-        :math:`1 + \\xi(r) \equiv DD / RR`, if 'Natural' estimator is used,
+        :math:`1 + \\xi(r) \\equiv DD / RR`, if 'Natural' estimator is used,
         where `DD` is calculated by the pair counter, and `RR` is counted internally
         using analytic `randoms` if no randoms are passed as an argument.
 
@@ -75,7 +76,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         :math:`\\xi_{11}(r)`, `\\xi_{12}(r)`, `\\xi_{22}(r)`
         The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
         and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
-        appropriate result is not returned.
+        appropriate result(s) is not returned.
 
     """
     
@@ -346,8 +347,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     Calculate the two-point correlation function, :math:`\\xi(r)` and the covariance 
     matrix.
     
-    Calculate the covariance matrix using spatial jackknife sampling of the simulation 
-    box.
+    The covariance matrix is calculated using spatial jackknife sampling of the simulation 
+    box.  The spatial samples are defined by splitting the box along each dimension set by
+    the `Nsub` argument.
     
     Parameters
     ----------
@@ -397,10 +399,20 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
 
     Returns 
     -------
-    correlation_function(s), cov_matrix : array_like
-        array containing correlation function :math:`\\xi(r)` computed in each of the Nrbins 
-        defined by input `rbins`.
-        Nrbins x Nrbins array containing the covariance matrix of `\\xi(r)`
+    correlation_function(s), cov_matrix(ices) : np.array, np.ndarray
+        len(rbins)-1 length array containing correlation function :math:`\\xi(r)` computed
+        in each of the radial bins defined by input `rbins`.
+        
+        len(rbins)-1 x len(rbins)-1 ndarray containing the covariance matrix of `\\xi(r)`
+        
+        If sample2 is passed as input, three arrays of length len(rbins)-1 are returned: 
+        :math:`\\xi_{11}(r)`, `\\xi_{12}(r)`, `\\xi_{22}(r)`
+        and three ndarrays of shape len(rbins)-1 x len(rbins)-1
+        :math: `cov_{11}`, `cov_{12}`, `cov_{22}`
+        
+        The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
+        and the autocorrelation of sample2, and the associated covariance matrices.  If 
+        do_auto or do_cross is set to False, the appropriate result(s) is not returned.
 
     """
     
@@ -804,14 +816,13 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
         of the len(rp_bins)-1 X len(pi_bins)-1 bins defined by input `rp_bins` and 
         `pi_bins`.
 
-        :math:`1 + \\xi(r_p,\\pi) \equiv DD / RR`, is the 'Natural' estimator is used, 
+        :math:`1 + \\xi(r_p,\\pi) \\equiv DD / RR`, is the 'Natural' estimator is used, 
         where `DD` is calculated by the pair counter, and `RR` is counted internally 
         analytic `randoms` if no randoms are passed as an argument.
 
         If sample2 is passed as input, three ndarrays of shape 
-        (len(rp_bins)-1,len(pi_bins)-1) are returned: 
+        len(rp_bins)-1 x en(pi_bins)-1 are returned: 
         :math:`\\xi_{11}(rp, \\pi)`, `\\xi_{12}(r_p,\\pi)`, `\\xi_{22}(r_p,\\pi)`
-        and the associated covariance matrices.
         The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
         and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
         appropriate result is not returned.
@@ -1091,7 +1102,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
        do_auto=True, do_cross=True, estimator='Natural', N_threads=1,\
        max_sample_size=int(1e6)):
     """ 
-    Calculate the projected correlation function, :math:`\\w_p`.
+    Calculate the projected correlation function, :math:`\\w_p(r_p)`.
     
     The first two dimensions define the plane for perpendicular distances.  The third 
     dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
@@ -1140,11 +1151,11 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
 
     Returns 
     -------
-    correlation_function : array_like
-        array containing correlation function :math:`\\w_p` computed in each of the Nrbins 
-        defined by input `rp_bins`.
+    correlation_function : np.array
+        len(rp_bins)-1 length array containing correlation function :math:`\\w_p(r_p)` 
+        computed in each of the bins defined by input `rp_bins`.
 
-        :math:`1 + \\w_p(r) \equiv DD / RR`, 
+        :math:`1 + \\w_p(r) \\equiv DD / RR`, 
         where `DD` is calculated by the pair counter, and `RR` is counted internally 
         using analytic `randoms` if no randoms are passed as an argument.
 
@@ -1183,7 +1194,10 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         wp_D1D2 = integrate_2D_xi(result,pi_bins)
         return wp_D1D2
     elif (do_auto==True) & (do_cross==False):
-        if (np.all(sample2==sample1)) | (sample2 is None): # do only sample 1 auto
+        if sample2 is None: # do only sample 1 auto
+            wp_D1D1 = integrate_2D_xi(result,pi_bins)
+            return wp_D1D1
+        elif np.all(sample2==sample1): # do only sample 1 auto
             wp_D1D1 = integrate_2D_xi(result,pi_bins)
             return wp_D1D1
         else: # do both auto for sample1 and sample2
@@ -1196,7 +1210,12 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
               period=None, do_auto=True, do_cross=True, estimator='Natural',\
               N_threads=1, max_sample_size=int(1e6)):
     """ 
-    Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)`.
+    Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)`, where
+    .. math::
+    s^2 = r_{\\parallel}^2+r_{\\perp}^2
+    and, 
+    .. math::
+    `\\mu = r_{\\perp}/s`
     
     The first two dimensions define the plane for perpendicular distances.  The third 
     dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
@@ -1250,17 +1269,16 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
     -------
     correlation_function : array_like
         ndarray containing correlation function :math:`\\xi(s, \\mu)` computed in each 
-        of the len(rp_bins)-1 X len(pi_bins)-1 bins defined by input `rp_bins` and 
-        `pi_bins`.
+        of the len(rp_bins)-1 X len(pi_bins)-1 bins defined by input `s_bins` and 
+        `mu_bins`.
 
-        :math:`1 + \\xi(s,\\mu) \equiv DD / RR`, is the 'Natural' estimator is used, 
+        :math:`1 + \\xi(s,\\mu) \\equiv DD / RR`, is the 'Natural' estimator is used, 
         where `DD` is calculated by the pair counter, and `RR` is counted internally 
         analytic `randoms` if no randoms are passed as an argument.
 
         If sample2 is passed as input, three ndarrays of shape 
-        (len(rp_bins)-1,len(pi_bins)-1) are returned: 
+        len(rp_bins)-1 x len(pi_bins)-1 are returned: 
         :math:`\\xi_{11}(s, \\mu)`, `\\xi_{12}(s,\\mu)`, `\\xi_{22}(s,\\mu)`
-        and the associated covariance matrices.
         The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
         and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
         appropriate result is not returned.
@@ -1404,8 +1422,9 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         #PBCs and no randoms--calculate randoms analytically.
         elif randoms is None:
             #do volume calculations
-            dv = spherical_sector_volume(s_bins,mu_bins) #volume of spheres
-            dv = np.diff(np.diff(dv, axis=0),axis=1) #volume of annuli
+            dv = spherical_sector_volume(s_bins,mu_bins) #2 times the volume of spherical cones
+            dv = np.diff(dv, axis=1) #volume of annuli
+            dv = np.diff(dv, axis=0) #volume of wedge pieces
             global_volume = period.prod() #sexy
             
             #calculate randoms for sample1
