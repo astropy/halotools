@@ -27,14 +27,14 @@ from abc import ABCMeta
 class GalPropModel(object):
     """ Abstact container class for any model of any galaxy property. 
     """
-
     def __init__(self, galprop_key):
+        self.galprop_key = galprop_key
 
-        # Enforce the requirement that sub-classes have been configured properly
-        required_method_name = 'mc_'+galprop_key
-        if not hasattr(self, required_method_name):
-            raise SyntaxError("Any sub-class of GalPropModel must "
-                "implement a method named %s " % required_method_name)
+        # # Enforce the requirement that sub-classes have been configured properly
+        # required_method_name = 'mc_'+galprop_key
+        # if not hasattr(self, required_method_name):
+        #     raise SyntaxError("Any sub-class of GalPropModel must "
+        #         "implement a method named %s " % required_method_name)
 
 
 def solve_for_polynomial_coefficients(abcissa, ordinates):

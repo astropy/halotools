@@ -29,7 +29,7 @@ from ..sim_manager import sim_defaults
 ##################################################################################
 
 @six.add_metaclass(ABCMeta)
-class HaloProfileModel(object):
+class HaloProfileModel(model_helpers.GalPropModel):
     """ Container class for any halo profile model. 
 
     This is an abstract class, and cannot itself be instantiated. 
@@ -64,6 +64,7 @@ class HaloProfileModel(object):
             Default is None. 
 
         """
+        super(HaloProfileModel, self).__init__(galprop_key='occupation')
 
         self.halo_boundary = halo_boundary
         self.prim_haloprop_key = prim_haloprop_key
