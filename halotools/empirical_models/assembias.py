@@ -134,6 +134,16 @@ class HeavisideAssembias(object):
                 "and the baseline model must have a method named ``%s``")
             raise HalotoolsError(msg % self._method_name_to_decorate)
 
+        def assembias_percentile_calculator(halo_table):
+            return compute_conditional_percentiles(
+                halo_table = halo_table, 
+                prim_haloprop_key = self.prim_haloprop_key, 
+                sec_haloprop_key = self.sec_haloprop_key
+                )
+
+        key = self.sec_haloprop_key + '_percentile'
+        self.new_haloprop_func_dict = {}
+        self.new_haloprop_func_dict[key] = assembias_percentile_calculator
 
     def set_percentile_splitting(self, **kwargs):
         """
