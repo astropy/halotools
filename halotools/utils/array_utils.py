@@ -5,10 +5,12 @@ Modules performing small, commonly used tasks throughout the package.
 
 """
 
-__all__ = ['array_like_length', 'find_idx_nearest_val', 'randomly_downsample_data']
+__all__ = (['array_like_length', 'find_idx_nearest_val', 
+    'randomly_downsample_data', 'array_is_monotonic'])
 
 import numpy as np
 import collections
+from ..halotools_exceptions import HalotoolsError
 
 def array_like_length(x):
     """ Simple method to return a zero-valued 1-D numpy array 
@@ -126,6 +128,59 @@ def randomly_downsample_data(array, num_downsample):
         randomizer = np.random.random(input_array_length)
         idx_sorted = np.argsort(randomizer)
         return array[idx_sorted[0:num_downsample]]
+
+def array_is_monotonic(array, strict = False):
+    """
+    Method determines whether an input array is monotonic.
+
+    Parameters 
+    -----------
+    array : array_like 
+
+    strict : bool, optional 
+        If set to True, an array must be strictly monotonic to pass the criteria. 
+        Default is False. 
+
+    Returns 
+    -------
+    flag : int 
+        If input ``array`` is monotonically increasing, the returned flag = 1; 
+        if ``array`` is monotonically decreasing, flag = -1. Otherwise, flag = 0. 
+
+    Examples 
+    --------
+    >>> x = np.linspace(0, 10, 100)
+    >>> assert array_is_monotonic(x) == 1
+    >>> assert array_is_monotonic(x[::-1]) == -1
+
+    >>> y = np.ones(100)
+    >>> assert array_is_monotonic(y) == 1
+    >>> assert array_is_monotonic(y, strict=True) == 0
+
+    Notes 
+    -----
+    If the input ``array`` is constant-valued, method returns flag = 1. 
+
+    """
+    if array_like_length(array) < 3:
+        msg = ("Input array to the array_is_monotonic method has less then 3 elements")
+        raise HalotoolsError(msg)
+    d = np.diff(array)
+
+    if strict is True:
+        if np.all(d > 0):
+            return 1
+        elif np.all(d < 0):
+            return -1
+        else:
+            return 0
+    else:
+        if np.all(d >= 0):
+            return 1
+        elif np.all(d <= 0):
+            return -1
+        else:
+            return 0
 
 
 
