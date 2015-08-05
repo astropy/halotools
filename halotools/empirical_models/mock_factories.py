@@ -31,6 +31,8 @@ except ImportError:
 from ..sim_manager import sim_defaults
 from ..utils.array_utils import randomly_downsample_data
 
+from ..sim_manager import FakeSim, FakeMock
+
 
 __all__ = ['MockFactory', 'HodMockFactory', 'SubhaloMockFactory']
 __author__ = ['Andrew Hearin']
@@ -210,6 +212,10 @@ class MockFactory(object):
             the ``variable_galaxy_mask`` option, but more flexible since an input ``mask`` 
             allows for the possibility of multiple simultaneous cuts. See examples below. 
 
+        rbins : array, optional 
+            Bins in which the correlation function will be calculated. 
+            Default is set in `~halotools.empirical_models.model_defaults` module. 
+
         Returns 
         --------
         rbin_centers : array 
@@ -251,6 +257,12 @@ class MockFactory(object):
         >>> cluster_satellite_mask = (mock.galaxy_table['halo_mvir'] > 1e14) & (mock.galaxy_table['galaxy_type'] == 'satellite') # doctest: +SKIP
         >>> r, cluster_sat_clustering = mock.compute_galaxy_clustering(mask = cluster_satellite_mask) # doctest: +SKIP
 
+        Notes 
+        -----
+        The `compute_galaxy_clustering` method bound to mock instances is just a convenience wrapper 
+        around the `~halotools.mock_observables.clustering.tpcf` function. If you wish for greater 
+        control over how your galaxy clustering signal is estimated, 
+        see the `~halotools.mock_observables.clustering.tpcf` documentation. 
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_clustering method is only available "
@@ -258,7 +270,10 @@ class MockFactory(object):
             raise HalotoolsError(msg)
 
         Nthreads = cpu_count()
-        rbins = model_defaults.default_rbins
+        if 'rbins' in kwargs:
+            rbins = kwargs['rbins']
+        else:
+            rbins = model_defaults.default_rbins
         rbin_centers = (rbins[1:]+rbins[:1])/2.0
 
         if kwargs == {}:
@@ -341,6 +356,10 @@ class MockFactory(object):
             the ``variable_galaxy_mask`` option, but more flexible since an input ``mask`` 
             allows for the possibility of multiple simultaneous cuts. See examples below. 
 
+        rbins : array, optional 
+            Bins in which the correlation function will be calculated. 
+            Default is set in `~halotools.empirical_models.model_defaults` module. 
+
         Returns 
         --------
         rbin_centers : array 
@@ -379,6 +398,13 @@ class MockFactory(object):
 
         >>> cluster_satellite_mask = (mock.galaxy_table['halo_mvir'] > 1e14) & (mock.galaxy_table['galaxy_type'] == 'satellite') # doctest: +SKIP
         >>> r, cluster_sat_clustering = mock.compute_galaxy_matter_cross_clustering(mask = cluster_satellite_mask) # doctest: +SKIP
+
+        Notes 
+        -----
+        The `compute_galaxy_matter_cross_clustering` method bound to mock instances is just a convenience wrapper 
+        around the `~halotools.mock_observables.clustering.tpcf` function. If you wish for greater 
+        control over how your galaxy clustering signal is estimated, 
+        see the `~halotools.mock_observables.clustering.tpcf` documentation. 
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_matter_cross_clustering method is only available "
@@ -391,7 +417,10 @@ class MockFactory(object):
             key1='x', key2='y', key3='z')
 
         Nthreads = cpu_count()
-        rbins = model_defaults.default_rbins
+        if 'rbins' in kwargs:
+            rbins = kwargs['rbins']
+        else:
+            rbins = model_defaults.default_rbins
         rbin_centers = (rbins[1:]+rbins[:1])/2.0
 
         if kwargs == {}:
@@ -455,7 +484,9 @@ class MockFactory(object):
                     period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
                 return rbin_centers, clustering, clustering2 
 
-    def compute_fof_group_ids(self, zspace = True):
+    def compute_fof_group_ids(self, zspace = True, 
+        b_perp = model_defaults.default_b_perp, 
+        b_para = model_defaults.default_b_para, **kwargs):
         """
         Method computes the friends-of-friends group IDs of the 
         mock galaxy catalog after (optionally) placing the mock into redshift space. 
@@ -467,10 +498,28 @@ class MockFactory(object):
             positions of galaxies using the distant-observer approximation. 
             Default is True. 
 
+        b_perp : float, optional 
+            Maximum linking length in the perpendicular direction, 
+            normalized by the mean separation between galaxies. 
+            Default is set in `~halotools.empirical_models.model_defaults` module. 
+
+        b_para : float, optional 
+            Maximum linking length in the line-of-sight direction, 
+            normalized by the mean separation between galaxies. 
+            Default is set in `~halotools.empirical_models.model_defaults` module. 
+
         Returns 
         --------
         ids : array 
             Integer array containing the group ID of each mock galaxy. 
+
+        Notes 
+        -----
+        The `compute_fof_group_ids` method bound to mock instances is just a convenience wrapper 
+        around the `~halotools.mock_observables.groups.FoFGroups` class. 
+        If you wish for greater control over how your galaxy clustering signal is estimated, 
+        see the `~halotools.mock_observables.groups.FoFGroups.group_ids` documentation. 
+
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_fof_group_ids method is only available "
@@ -488,7 +537,7 @@ class MockFactory(object):
         pos = np.vstack((x, y, z)).T
 
         group_finder = mock_observables.FoFGroups(positions=pos, 
-            b_perp = 0.2, b_para = 0.75, 
+            b_perp = b_perp, b_para = b_para, 
             Lbox = self.snapshot.Lbox, N_threads = Nthreads)
 
         return group_finder.group_ids
