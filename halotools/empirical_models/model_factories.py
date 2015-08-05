@@ -89,6 +89,104 @@ class ModelFactory(object):
             mock = mock_factory(snapshot=snapshot, model=self, **kwargs)
             self.mock = mock
 
+    def compute_galaxy_clustering(self, include_crosscorr = False, num_iterations=5, 
+        summary_statistic = 'median', **kwargs):
+        """
+        Method repeatedly populates a simulation with a mock galaxy catalog, computes the clustering 
+        signal of each Monte Carlo realization, and returns a summary statistic of the clustering 
+        such as the median computed from the collection of clustering measurements. 
+
+        Parameters 
+        ----------
+        num_iterations : int, optional 
+            Number of Monte Carlo realizations to use to estimate the clustering signal. 
+            Default is 5.
+
+        summary_statistic : string, optional 
+            String specifying the method used to estimate the clustering signal from the 
+            collection of Monte Carlo realizations. Options are ``median``, ``mean``, 
+            and ``trimmed_mean``. Default is ``median``. 
+
+        simname : string, optional 
+            Nickname of the simulation into which mock galaxies will be populated. 
+            Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        halo_finder : string, optional keyword argument 
+            Nickname of the halo-finder of the snapshot into which mock galaxies 
+            will be populated, e.g., `rockstar` or `bdm`. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        desired_redshift : float, optional
+            Redshift of the desired snapshot into which mock galaxies will be populated. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        variable_galaxy_mask : scalar, optional 
+            Any value used to construct a mask to select a sub-population 
+            of mock galaxies. See examples below. 
+
+        include_crosscorr : bool, optional 
+            Only for simultaneous use with a ``variable_galaxy_mask``-determined mask. 
+            If ``include_crosscorr`` is set to False (the default option), method will return 
+            the auto-correlation function of the subsample of galaxies determined by 
+            the input ``variable_galaxy_mask``. If ``include_crosscorr`` is True, 
+            method will return the auto-correlation of the subsample, 
+            the cross-correlation of the subsample and the complementary subsample, 
+            and the the auto-correlation of the complementary subsample, in that order. 
+            See examples below. 
+
+        mask : array, optional 
+            Numpy array serving as a mask to select a specific sub-population. Equivalent to 
+            the ``variable_galaxy_mask`` option, but more flexible since an input ``mask`` 
+            allows for the possibility of multiple simultaneous cuts. See examples below. 
+
+        rbins : array, optional 
+            Bins in which the correlation function will be calculated. 
+            Default is set in `~halotools.empirical_models.model_defaults` module. 
+
+        Returns 
+        --------
+        rbin_centers : array 
+            Midpoint of the bins used in the correlation function calculation 
+
+        correlation_func : array 
+            If not using any mask (the default option), method returns the 
+            correlation function of the full mock galaxy catalog. 
+
+            If using a mask, and if ``include_crosscorr`` is False (the default option), 
+            method returns the correlation function of the subsample of galaxies determined by 
+            the input mask. 
+
+            If using a mask, and if ``include_crosscorr`` is True, 
+            method will return the auto-correlation of the subsample, 
+            the cross-correlation of the subsample and the complementary subsample, 
+            and the the auto-correlation of the complementary subsample, in that order. 
+            See the example below. 
+
+        Notes 
+        -----
+        The `compute_galaxy_clustering` method bound to mock instances is just a convenience wrapper 
+        around the `~halotools.mock_observables.clustering.tpcf` function. If you wish for greater 
+        control over how your galaxy clustering signal is estimated, 
+        see the `~halotools.mock_observables.clustering.tpcf` documentation. 
+        """
+        snapshot = HaloCatalog(preload_halo_table = True, **kwargs)
+
+        if 'rbins' in kwargs:
+            rbins = kwargs['rbins']
+        else:
+            rbins = model_defaults.default_rbins
+
+        clustering_collection = np.zeros(
+            len(rbins)*num_iterations).reshape(num_iterations, len(rbins))
+
+        for i in range(num_iterations):
+            print("Populating mock for iteration %i" % i)
+            self.populate_mock(snapshot = snapshot)
+            #clustering_collection[i, :] = self.mock.compute_galaxy_clustering(**kwargs)
+
 
 class SubhaloModelFactory(ModelFactory):
     """ Class used to build any model of the galaxy-halo connection 
