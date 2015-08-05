@@ -370,6 +370,7 @@ class HodModelFactory(ModelFactory):
         # Create attributes for galaxy types and their occupation bounds
         self._set_gal_types()
         self.model_blueprint = self.interpret_input_model_blueprint()
+        self._test_blueprint_consistency()
 
         # Build the composite model dictionary, 
         # whose keys are parameters of our model
@@ -687,6 +688,26 @@ class HodModelFactory(ModelFactory):
         self.prof_param_keys = list(set(prof_param_keys))
         self.publications = list(set(pub_list))
         self.new_haloprop_func_dict = new_haloprop_func_dict
+
+    def _test_blueprint_consistency(self):
+        """
+        Method tests to make sure that all HOD occupation components have the same 
+        threshold, and raises an exception if not. 
+        """
+        threshold_list = []
+        threshold_msg = ''
+        for gal_type in self.gal_types:
+            component_dict = self.model_blueprint[gal_type]
+            for component_key in component_dict.keys():
+                component_model = component_dict[component_key]
+                if component_key == 'occupation':
+                    threshold_list.append(component_model.threshold)
+                    threshold_msg = threshold_msg + '\n' + gal_type + ' threshold = ' + str(component_model.threshold)
+        if len(threshold_list) > 1:
+            d = np.diff(threshold_list)
+            if np.any(d != 0):
+                msg = ("Inconsistency in the threshold of the component occupation models:\n" + threshold_msg + "\n")
+                raise HalotoolsError(msg)
 
 
 
