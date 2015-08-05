@@ -8,6 +8,7 @@ from an existing model.
 from copy import copy 
 from ..halotools_exceptions import HalotoolsError
 from .model_factories import HodModelFactory 
+from warnings import warn 
 
 __all__ = ['HodModelArchitect']
 
@@ -51,17 +52,30 @@ class HodModelArchitect(object):
         baseline_blueprint = baseline_model.model_blueprint
         new_blueprint = copy(baseline_blueprint)
 
-        for component in args:
+        for new_component in args:
             try:
-                gal_type = component.gal_type
-                galprop_key = component.galprop_key
+                gal_type = new_component.gal_type
+                galprop_key = new_component.galprop_key
             except AttributeError:
                 msg = ("\nEvery argument of the customize_model method of HodModelArchitect "
                     "must be a model instance that has a ``gal_type`` and a ``galprop_key`` attribute.\n")
                 raise HalotoolsError(msg)
-            new_blueprint[gal_type][galprop_key] = component
-        new_model = HodModelFactory(new_blueprint)
 
+            # Enforce self-consistency in the thresholds of new and old components
+            if galprop_key == 'occupation':
+                old_component = baseline_blueprint[gal_type][galprop_key]
+                if new_component.threshold != old_component.threshold:
+                    msg = ("\n\nYou tried to swap in a %s occupation component \nthat has a different " 
+                        "threshold than the original %s occupation component.\n"
+                        "This is technically permissible, but in general, composite HOD-style models \n"
+                        "must have the same threshold for all occupation components.\n"
+                        "Thus if you do not request the HodModelArchitect to make the corresponding threshold change \n"
+                        "for all gal_types, the resulting composite model will raise an exception and not build.\n")
+                    warn(msg % (gal_type, gal_type)) 
+
+            new_blueprint[gal_type][galprop_key] = new_component
+
+        new_model = HodModelFactory(new_blueprint)
         return new_model
 
 
