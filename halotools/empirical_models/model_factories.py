@@ -89,8 +89,7 @@ class ModelFactory(object):
             mock = mock_factory(snapshot=snapshot, model=self, **kwargs)
             self.mock = mock
 
-    def compute_galaxy_clustering(self, include_crosscorr = False, num_iterations=5, 
-        summary_statistic = 'median', **kwargs):
+    def compute_galaxy_clustering(self, num_iterations=5, summary_statistic = 'median', **kwargs):
         """
         Method repeatedly populates a simulation with a mock galaxy catalog, computes the clustering 
         signal of each Monte Carlo realization, and returns a summary statistic of the clustering 
@@ -104,8 +103,8 @@ class ModelFactory(object):
 
         summary_statistic : string, optional 
             String specifying the method used to estimate the clustering signal from the 
-            collection of Monte Carlo realizations. Options are ``median``, ``mean``, 
-            and ``trimmed_mean``. Default is ``median``. 
+            collection of Monte Carlo realizations. Options are ``median`` and ``mean``. 
+            Default is ``median``. 
 
         simname : string, optional 
             Nickname of the simulation into which mock galaxies will be populated. 
@@ -172,6 +171,11 @@ class ModelFactory(object):
         control over how your galaxy clustering signal is estimated, 
         see the `~halotools.mock_observables.clustering.tpcf` documentation. 
         """
+        if summary_statistic == 'mean':
+            summary_func = np.mean 
+        else:
+            summary_func = np.median
+
         snapshot = HaloCatalog(preload_halo_table = True, **kwargs)
 
         if 'rbins' in kwargs:
@@ -179,13 +183,32 @@ class ModelFactory(object):
         else:
             rbins = model_defaults.default_rbins
 
-        clustering_collection = np.zeros(
-            len(rbins)*num_iterations).reshape(num_iterations, len(rbins))
+        if ('include_crosscorr' in kwargs) & (kwargs['include_crosscorr'] == True):
 
-        for i in range(num_iterations):
-            print("Populating mock for iteration %i" % i)
-            self.populate_mock(snapshot = snapshot)
-            #clustering_collection[i, :] = self.mock.compute_galaxy_clustering(**kwargs)
+            xi_coll = np.zeros(
+                len(rbins)*num_iterations*3).reshape(3, num_iterations, len(rbins))
+
+            for i in range(num_iterations):
+                self.populate_mock(snapshot = snapshot)
+                rbin_centers, xi_coll[0, i, :], xi_coll[1, i, :], xi_coll[2, i, :] = (
+                    self.mock.compute_galaxy_clustering(**kwargs)
+                    )
+            xi_11 = summary_func(xi_coll[0, :], axis=0)
+            xi_12 = summary_func(xi_coll[1, :], axis=0)
+            xi_22 = summary_func(xi_coll[2, :], axis=0)
+            return rbin_centers, xi_11, xi_12, xi_22
+        else:
+
+            xi_coll = np.zeros(
+                len(rbins)*num_iterations).reshape(num_iterations, len(rbins))
+
+            for i in range(num_iterations):
+                self.populate_mock(snapshot = snapshot)
+                rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_clustering(**kwargs)
+            xi = summary_func(xi_coll, axis=0)
+            return rbin_centers, xi
+
+
 
 
 class SubhaloModelFactory(ModelFactory):
