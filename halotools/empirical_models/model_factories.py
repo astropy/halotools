@@ -183,7 +183,12 @@ class ModelFactory(object):
         else:
             rbins = model_defaults.default_rbins
 
-        if ('include_crosscorr' in kwargs) & (kwargs['include_crosscorr'] == True):
+        if 'include_crosscorr' in kwargs:
+            include_crosscorr = kwargs['include_crosscorr']
+        else:
+            include_crosscorr = False
+
+        if include_crosscorr is True:
 
             xi_coll = np.zeros(
                 len(rbins)*num_iterations*3).reshape(3, num_iterations, len(rbins))
