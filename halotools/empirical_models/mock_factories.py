@@ -18,7 +18,7 @@ from astropy.table import Table
 
 from . import model_helpers as model_helpers
 from . import model_defaults
-from .mock_helpers import three_dim_pos_bundle
+from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
 
 from ..halotools_exceptions import HalotoolsError
 
@@ -276,61 +276,32 @@ class MockFactory(object):
             rbins = model_defaults.default_rbins
         rbin_centers = (rbins[1:]+rbins[:1])/2.0
 
-        if kwargs == {}:
-            # Compute the clustering of the full mock
+        mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
+        # Verify that the mask is non-trivial
+        if len(self.galaxy_table['x'][mask]) == 0:
+            msg = ("Zero mock galaxies have ``%s`` = ``%s``")
+            raise HalotoolsError(msg % (key, kwargs[key]))
+
+        if include_crosscorr is False:
             pos = three_dim_pos_bundle(table = self.galaxy_table, 
-                key1='x', key2='y', key3='z')
+                key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.clustering.tpcf(
                 pos, rbins, period=self.snapshot.Lbox, N_threads=Nthreads)
             return rbin_centers, clustering
         else:
-            if 'mask' in kwargs:
-                mask = kwargs['mask']
-            else:
-                # Use the input keyword arguments to determine the mock galaxy mask
-                keylist = [key for key in kwargs.keys() if key is not 'include_crosscorr']
-                if len(keylist) == 1:
-                    key = keylist[0]
-                    try:
-                        mask = self.galaxy_table[key] == kwargs[key]
-                    except KeyError:
-                        msg = ("The compute_galaxy_clustering method was passed ``%s`` as a keyword argument\n."
-                            "Only keys of the galaxy_table are permitted inputs")
-                        raise HalotoolsError(msg % key)
-                else:
-                    # We were passed too many keywords - raise an exception
-                    msg = ("Only a single mask at a time is permitted by calls to "
-                        "compute_galaxy_clustering. \nChoose only one of the following keyword arguments:\n")
-                    arglist = ''
-                    for arg in keylist:
-                        arglist = arglist + arg + ', '
-                    arglist = arglist[:-2]
-                    msg = msg + arglist
-                    raise HalotoolsError(msg)
-
-            # Verify that the mask is non-trivial
-            if len(self.galaxy_table['x'][mask]) == 0:
-                msg = ("Zero mock galaxies have ``%s`` = ``%s``")
-                raise HalotoolsError(msg % (key, kwargs[key]))
-            elif len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
+            # Verify that the complementary mask is non-trivial
+            if len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
                 msg = ("All mock galaxies have ``%s`` = ``%s``, \n"
                     "If this result is expected, you should not call the compute_galaxy_clustering" 
                     "method with the %s keyword")
                 raise HalotoolsError(msg % (key, kwargs[key], key))
+            pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table, 
+                key1='x', key2='y', key3='z', mask=mask, return_complement=True)
+            xi11, xi12, xi22 = mock_observables.clustering.tpcf(
+                sample1=pos, rbins=rbins, sample2=pos2, 
+                period=self.snapshot.Lbox, N_threads=Nthreads)
+            return rbin_centers, xi11, xi12, xi22 
 
-            if include_crosscorr is False:
-                pos = three_dim_pos_bundle(table = self.galaxy_table, 
-                    key1='x', key2='y', key3='z', mask=mask, return_complement=False)
-                clustering = mock_observables.clustering.tpcf(
-                    pos, rbins, period=self.snapshot.Lbox, N_threads=Nthreads)
-                return rbin_centers, clustering
-            else:
-                pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table, 
-                    key1='x', key2='y', key3='z', mask=mask, return_complement=True)
-                xi11, xi12, xi22 = mock_observables.clustering.tpcf(
-                    sample1=pos, rbins=rbins, sample2=pos2, 
-                    period=self.snapshot.Lbox, N_threads=Nthreads)
-                return rbin_centers, xi11, xi12, xi22 
 
     def compute_galaxy_matter_cross_clustering(self, include_complement = False, **kwargs):
         """
@@ -423,66 +394,36 @@ class MockFactory(object):
             rbins = model_defaults.default_rbins
         rbin_centers = (rbins[1:]+rbins[:1])/2.0
 
-        if kwargs == {}:
-            # Compute the clustering of the full mock
+        mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
+        # Verify that the mask is non-trivial
+        if len(self.galaxy_table['x'][mask]) == 0:
+            msg = ("Zero mock galaxies have ``%s`` = ``%s``")
+            raise HalotoolsError(msg % (key, kwargs[key]))
+
+        if include_complement is False:
             pos = three_dim_pos_bundle(table = self.galaxy_table, 
-                key1='x', key2='y', key3='z')
+                key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.clustering.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos, 
                 period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
             return rbin_centers, clustering
         else:
-            if 'mask' in kwargs:
-                mask = kwargs['mask']
-            else:
-                # Use the input keyword arguments to determine the mock galaxy mask
-                keylist = [key for key in kwargs.keys() if key is not 'include_crosscorr']
-                if len(keylist) == 1:
-                    key = keylist[0]
-                    try:
-                        mask = self.galaxy_table[key] == kwargs[key]
-                    except KeyError:
-                        msg = ("The compute_galaxy_clustering method was passed ``%s`` as a keyword argument\n."
-                            "Only keys of the galaxy_table are permitted inputs")
-                        raise HalotoolsError(msg % key)
-                else:
-                    # We were passed too many keywords - raise an exception
-                    msg = ("Only a single mask at a time is permitted by calls to "
-                        "compute_galaxy_clustering. \nChoose only one of the following keyword arguments:\n")
-                    arglist = ''
-                    for arg in keylist:
-                        arglist = arglist + arg + ', '
-                    arglist = arglist[:-2]
-                    msg = msg + arglist
-                    raise HalotoolsError(msg)
-
-            # Verify that the mask is non-trivial
-            if len(self.galaxy_table['x'][mask]) == 0:
-                msg = ("Zero mock galaxies have ``%s`` = ``%s``")
-                raise HalotoolsError(msg % (key, kwargs[key]))
-            elif len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
+            # Verify that the complementary mask is non-trivial
+            if len(self.galaxy_table['x'][mask]) == len(self.galaxy_table['x']):
                 msg = ("All mock galaxies have ``%s`` = ``%s``, \n"
                     "If this result is expected, you should not call the compute_galaxy_clustering" 
                     "method with the %s keyword")
                 raise HalotoolsError(msg % (key, kwargs[key], key))
+            pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table, 
+                key1='x', key2='y', key3='z', mask=mask, return_complement=True)
+            clustering = mock_observables.clustering.tpcf(
+                sample1=pos, rbins=rbins, sample2=ptcl_pos, 
+                period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
+            clustering2 = mock_observables.clustering.tpcf(
+                sample1=pos2, rbins=rbins, sample2=ptcl_pos, 
+                period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
+            return rbin_centers, clustering, clustering2 
 
-            if include_complement is False:
-                pos = three_dim_pos_bundle(table = self.galaxy_table, 
-                    key1='x', key2='y', key3='z', mask=mask, return_complement=False)
-                clustering = mock_observables.clustering.tpcf(
-                    sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                    period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
-                return rbin_centers, clustering
-            else:
-                pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table, 
-                    key1='x', key2='y', key3='z', mask=mask, return_complement=True)
-                clustering = mock_observables.clustering.tpcf(
-                    sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                    period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
-                clustering2 = mock_observables.clustering.tpcf(
-                    sample1=pos2, rbins=rbins, sample2=ptcl_pos, 
-                    period=self.snapshot.Lbox, N_threads=Nthreads, do_auto=False)
-                return rbin_centers, clustering, clustering2 
 
     def compute_fof_group_ids(self, zspace = True, 
         b_perp = model_defaults.default_b_perp, 
