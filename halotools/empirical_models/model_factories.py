@@ -183,7 +183,7 @@ class ModelFactory(object):
         else:
             rbins = model_defaults.default_rbins
 
-        if 'include_crosscorr' in kwargs:
+        if 'include_crosscorr' in kwargs.keys():
             include_crosscorr = kwargs['include_crosscorr']
         else:
             include_crosscorr = False
@@ -191,7 +191,7 @@ class ModelFactory(object):
         if include_crosscorr is True:
 
             xi_coll = np.zeros(
-                len(rbins)*num_iterations*3).reshape(3, num_iterations, len(rbins))
+                (len(rbins)-1)*num_iterations*3).reshape(3, num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
                 self.populate_mock(snapshot = snapshot)
@@ -205,7 +205,7 @@ class ModelFactory(object):
         else:
 
             xi_coll = np.zeros(
-                len(rbins)*num_iterations).reshape(num_iterations, len(rbins))
+                (len(rbins)-1)*num_iterations).reshape(num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
                 self.populate_mock(snapshot = snapshot)
