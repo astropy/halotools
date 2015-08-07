@@ -23,7 +23,10 @@ def simname_is_supported(simname):
 
     Parameters 
     ----------
-    simname : string 
+    simname : string, optional keyword argument 
+        Nickname of the simulation. Currently supported simulations are 
+        Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+        MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
 
     Returns 
     -------

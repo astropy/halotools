@@ -5,5 +5,10 @@
 Overview of Mock Observations
 ****************************************
 
+Using ``mock_observables``
+============================================
 
-Coming soon!
+.. toctree::
+   :maxdepth: 1
+
+   mock_observables_api.rst
