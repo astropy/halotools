@@ -207,9 +207,9 @@ class MockFactory(object):
             and the the auto-correlation of the complementary subsample, in that order. 
             See examples below. 
 
-        mask : array, optional 
-            Numpy array serving as a mask to select a specific sub-population. Equivalent to 
-            the ``variable_galaxy_mask`` option, but more flexible since an input ``mask`` 
+        mask_function : array, optional 
+            Function object returning a masking array when operating on the galaxy_table. 
+            More flexible than the simpler ``variable_galaxy_mask`` option because ``mask_function``
             allows for the possibility of multiple simultaneous cuts. See examples below. 
 
         rbins : array, optional 
@@ -253,9 +253,6 @@ class MockFactory(object):
         Finally, suppose we wish to ask a very targeted question about how some physical effect 
         impacts the clustering of galaxies in a specific halo mass range. For this we can use the 
         more flexible mask option to select our population:
-
-        >>> cluster_satellite_mask = (mock.galaxy_table['halo_mvir'] > 1e14) & (mock.galaxy_table['galaxy_type'] == 'satellite') # doctest: +SKIP
-        >>> r, cluster_sat_clustering = mock.compute_galaxy_clustering(mask = cluster_satellite_mask) # doctest: +SKIP
 
         Notes 
         -----
@@ -322,9 +319,9 @@ class MockFactory(object):
             method will also return the cross-correlation between the dark matter particles 
             and the complementary subsample. See examples below. 
 
-        mask : array, optional 
-            Numpy array serving as a mask to select a specific sub-population. Equivalent to 
-            the ``variable_galaxy_mask`` option, but more flexible since an input ``mask`` 
+        mask_function : array, optional 
+            Function object returning a masking array when operating on the galaxy_table. 
+            More flexible than the simpler ``variable_galaxy_mask`` option because ``mask_function``
             allows for the possibility of multiple simultaneous cuts. See examples below. 
 
         rbins : array, optional 
@@ -365,10 +362,7 @@ class MockFactory(object):
 
         Finally, suppose we wish to ask a very targeted question about how some physical effect 
         impacts the clustering of galaxies in a specific halo mass range. For this we can use the 
-        more flexible mask option to select our population:
-
-        >>> cluster_satellite_mask = (mock.galaxy_table['halo_mvir'] > 1e14) & (mock.galaxy_table['galaxy_type'] == 'satellite') # doctest: +SKIP
-        >>> r, cluster_sat_clustering = mock.compute_galaxy_matter_cross_clustering(mask = cluster_satellite_mask) # doctest: +SKIP
+        more flexible mask_function option to select our population:
 
         Notes 
         -----
