@@ -109,7 +109,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
             raise ValueError("period should have shape (k,)")
             return None
     
-    #down sample is sample size exceeds max_sample_size.
+    #down sample if sample size exceeds max_sample_size.
     if (len(sample1)>max_sample_size) & (np.all(sample1==sample2)):
         inds = np.arange(0,len(sample1))
         np.random.shuffle(inds)
@@ -503,24 +503,30 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
         """
         Count jackknife data pairs: DD
         """
-        D1D1 = jnpairs(sample1, sample1, rbins, period=period,\
-                       jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,\
-                       N_threads=N_threads)
-        D1D1 = np.diff(D1D1,axis=1)
+        if do_auto==True:
+            D1D1 = jnpairs(sample1, sample1, rbins, period=period,\
+                           jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,\
+                           N_threads=N_threads)
+            D1D1 = np.diff(D1D1,axis=1)
+        else:
+            D1D1=None
+            D2D2=None
+        
         if np.all(sample1 == sample2):
             D1D2 = D1D1
             D2D2 = D1D1
         else:
-            D1D2 = D1D1
-            D2D2 = D1D1
-            D1D2 = jnpairs(sample1, sample2, rbins, period=period,\
-                           jtags1=j_index_1, jtags2=j_index_2,\
-                            N_samples=N_sub_vol, N_threads=N_threads)
-            D1D2 = np.diff(D1D2,axis=1)
-            D2D2 = jnpairs(sample2, sample2, rbins, period=period,\
-                           jtags1=j_index_2, jtags2=j_index_2,\
-                            N_samples=N_sub_vol, N_threads=N_threads)
-            D2D2 = np.diff(D2D2,axis=1)
+            if do_cross==True:
+                D1D2 = jnpairs(sample1, sample2, rbins, period=period,\
+                               jtags1=j_index_1, jtags2=j_index_2,\
+                               N_samples=N_sub_vol, N_threads=N_threads)
+                D1D2 = np.diff(D1D2,axis=1)
+            else: D1D2=None
+            if do_auto==True:
+                D2D2 = jnpairs(sample2, sample2, rbins, period=period,\
+                               jtags1=j_index_2, jtags2=j_index_2,\
+                               N_samples=N_sub_vol, N_threads=N_threads)
+                D2D2 = np.diff(D2D2,axis=1)
 
         return D1D1, D1D2, D2D2
     
@@ -1435,6 +1441,8 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
     """
     private internal function.
     two point correlation function estimator
+    
+    note: jackknife_tpcf uses its own intenral version, this is not totally ideal.
     """
     if estimator == 'Natural':
         factor = ND1*ND2/(NR1*NR2)
