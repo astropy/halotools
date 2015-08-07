@@ -221,7 +221,8 @@ class HaloCatalog(object):
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder, 
-        desired_redshift = sim_defaults.default_redshift, dz_tol = 0.05, **kwargs):
+        desired_redshift = sim_defaults.default_redshift, dz_tol = 0.05, 
+        preload_halo_table = False, **kwargs):
         """
         Parameters 
         ----------
@@ -242,6 +243,10 @@ class HaloCatalog(object):
         dz_tol : float, optional
             Tolerance value determining how close the requested redshift must be to 
             some available snapshot before issuing a warning. Default value is 0.05. 
+
+        preload_halo_table : bool, optional 
+            If True, the `HaloCatalog` class will automatically retrieve the halo 
+            table from disk upon instantiation. Default is False. 
 
         Examples 
         ---------
@@ -300,6 +305,10 @@ class HaloCatalog(object):
             self.dtype_ascii, self.header_ascii = sim_defaults.return_dtype_and_header(
                 self.simname, self.halo_finder)
             self._check_catalog_self_consistency(fname, closest_redshift)
+
+        if preload_halo_table is True:
+            self._halo_table = Table.read(self.processed_halo_table_fname, path='data')
+
 
     @property 
     def halo_table(self):
