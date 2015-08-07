@@ -164,6 +164,47 @@ class ModelFactory(object):
             and the the auto-correlation of the complementary subsample, in that order. 
             See the example below. 
 
+        Examples 
+        ---------
+        The simplest use-case of the `compute_galaxy_clustering` function 
+        is just to call the function with no arguments. This will generate a sequence 
+        of Monte Carlo realizations of your model into the default snapshot, 
+        calculate the two-point correlation function of all galaxies in your mock, 
+        and return the median clustering strength in each radial bin: 
+
+        >>> model = Leauthaud11() # doctest: +SKIP 
+        >>> r, clustering = model.compute_galaxy_clustering() # doctest: +SKIP 
+
+        To control how which simulation is used, you use the same syntax you use to load 
+        a `~halotools.sim_manager.HaloCatalog` into memory from your cache directory: 
+
+        >>> r, clustering = model.compute_galaxy_clustering(simname = 'multidark', desired_redshift=1) # doctest: +SKIP 
+
+        You can control the number of mock catalogs that are generated via: 
+
+        >>> r, clustering = model.compute_galaxy_clustering(num_iterations = 10) # doctest: +SKIP 
+
+        You may wish to focus on the clustering signal for a specific subpopulation. To do this, 
+        you have two options. First, you can use the ``variable_galaxy_mask`` mechanism: 
+
+        >>> r, clustering = model.compute_galaxy_clustering(gal_type = 'centrals') # doctest: +SKIP 
+
+        With the ``variable_galaxy_mask`` mechanism, you are free to use any column of your galaxy_table 
+        as a keyword argument. If you couple this function call with the ``include_crosscorr`` 
+        keyword argument, the function will also return all auto- and cross-correlations of the subset 
+        and its complement:
+
+        >>> r, cen_cen, cen_sat, sat_sat = model.compute_galaxy_clustering(gal_type = 'centrals', include_crosscorr = True) # doctest: +SKIP 
+
+        Your second option is to use the ``mask_function`` option. 
+        For example, suppose we wish to study the clustering of satellite galaxies 
+        residing in cluster-mass halos:
+
+        >>> def my_masking_function(table): # doctest: +SKIP
+        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
+        >>>     return result # doctest: +SKIP
+        >>> r, cluster_sat_clustering = model.compute_galaxy_clustering(mask_function = my_masking_function) # doctest: +SKIP 
+
         Notes 
         -----
         The `compute_galaxy_clustering` method bound to mock instances is just a convenience wrapper 
@@ -270,6 +311,47 @@ class ModelFactory(object):
             Bins in which the correlation function will be calculated. 
             Default is set in `~halotools.empirical_models.model_defaults` module. 
 
+        Examples 
+        ---------
+        The simplest use-case of the `compute_galaxy_matter_cross_clustering` function 
+        is just to call the function with no arguments. This will generate a sequence 
+        of Monte Carlo realizations of your model into the default snapshot, 
+        calculate the cross-correlation function between dark matter 
+        and all galaxies in your mock, and return the median 
+        clustering strength in each radial bin: 
+
+        >>> model = Leauthaud11() # doctest: +SKIP 
+        >>> r, clustering = model.compute_galaxy_matter_cross_clustering() # doctest: +SKIP 
+
+        To control how which simulation is used, you use the same syntax you use to load 
+        a `~halotools.sim_manager.HaloCatalog` into memory from your cache directory: 
+
+        >>> r, clustering = model.compute_galaxy_matter_cross_clustering(simname = 'multidark', desired_redshift=1) # doctest: +SKIP 
+
+        You can control the number of mock catalogs that are generated via: 
+
+        >>> r, clustering = model.compute_galaxy_matter_cross_clustering(num_iterations = 10) # doctest: +SKIP 
+
+        You may wish to focus on the clustering signal for a specific subpopulation. To do this, 
+        you have two options. First, you can use the ``variable_galaxy_mask`` mechanism: 
+
+        >>> r, clustering = model.compute_galaxy_matter_cross_clustering(gal_type = 'centrals') # doctest: +SKIP 
+
+        With the ``variable_galaxy_mask`` mechanism, you are free to use any column of your galaxy_table 
+        as a keyword argument. If you couple this function call with the ``include_complement`` 
+        keyword argument, the function will also return the correlation function of the complementary subset. 
+
+        >>> r, cen_clustering, sat_clustering = model.compute_galaxy_matter_cross_clustering(gal_type = 'centrals', include_complement = True) # doctest: +SKIP 
+
+        Your second option is to use the ``mask_function`` option. 
+        For example, suppose we wish to study the galaxy-matter cross-correlation function of satellite galaxies 
+        residing in cluster-mass halos:
+
+        >>> def my_masking_function(table): # doctest: +SKIP
+        >>>     result = (table['halo_mvir'] > 1e14) & (table['gal_type'] == 'satellites') # doctest: +SKIP
+        >>>     return result # doctest: +SKIP
+        >>> r, cluster_sat_clustering = model.compute_galaxy_matter_cross_clustering(mask_function = my_masking_function) # doctest: +SKIP 
+
         Returns 
         --------
         rbin_centers : array 
@@ -322,7 +404,7 @@ class ModelFactory(object):
             for i in range(num_iterations):
                 self.populate_mock(snapshot = snapshot)
                 rbin_centers, xi_coll[0, i, :], xi_coll[1, i, :] = (
-                    self.mock.compute_galaxy_clustering(**kwargs)
+                    self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
                     )
             xi_11 = summary_func(xi_coll[0, :], axis=0)
             xi_22 = summary_func(xi_coll[1, :], axis=0)
@@ -334,7 +416,7 @@ class ModelFactory(object):
 
             for i in range(num_iterations):
                 self.populate_mock(snapshot = snapshot)
-                rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_clustering(**kwargs)
+                rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
             xi = summary_func(xi_coll, axis=0)
             return rbin_centers, xi
 
