@@ -136,11 +136,6 @@ class ModelFactory(object):
             and the the auto-correlation of the complementary subsample, in that order. 
             See examples below. 
 
-        mask : array, optional 
-            Numpy array serving as a mask to select a specific sub-population. Equivalent to 
-            the ``variable_galaxy_mask`` option, but more flexible since an input ``mask`` 
-            allows for the possibility of multiple simultaneous cuts. See examples below. 
-
         rbins : array, optional 
             Bins in which the correlation function will be calculated. 
             Default is set in `~halotools.empirical_models.model_defaults` module. 

@@ -7,6 +7,7 @@ used to provide convenience wrappers for mock objects
 
 import numpy as np 
 from ..halotools_exceptions import HalotoolsError
+from warnings import warn
 
 def three_dim_pos_bundle(table, key1, key2, key3, 
     return_complement=False, **kwargs):
@@ -44,15 +45,16 @@ def three_dim_pos_bundle(table, key1, key2, key3,
         return np.vstack((x, y, z)).T
 
 
-def infer_mask_from_kwargs(table, **kwargs):
+def infer_mask_from_kwargs(galaxy_table, **kwargs):
     """
     """
-    if 'mask' in kwargs:
-        mask = kwargs['mask']
+    if 'mask_function' in kwargs:
+        func = kwargs['mask_function']
+        mask = func(galaxy_table)
     else:
         galaxy_table_keyset = set(galaxy_table.keys())
         kwargs_set = set(kwargs.keys())
-        masking_keys = list(galaxy_table.intersection(kwargs_set))
+        masking_keys = list(galaxy_table_keyset.intersection(kwargs_set))
         if len(masking_keys) == 0:
             mask = np.ones(len(galaxy_table), dtype=bool)
         elif len(masking_keys) == 1:
