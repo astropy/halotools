@@ -126,6 +126,11 @@ class ModelFactory(object):
             Any value used to construct a mask to select a sub-population 
             of mock galaxies. See examples below. 
 
+        mask_function : array, optional 
+            Function object returning a masking array when operating on the galaxy_table. 
+            More flexible than the simpler ``variable_galaxy_mask`` option because ``mask_function``
+            allows for the possibility of multiple simultaneous cuts. See examples below. 
+
         include_crosscorr : bool, optional 
             Only for simultaneous use with a ``variable_galaxy_mask``-determined mask. 
             If ``include_crosscorr`` is set to False (the default option), method will return 
@@ -197,6 +202,131 @@ class ModelFactory(object):
             xi_12 = summary_func(xi_coll[1, :], axis=0)
             xi_22 = summary_func(xi_coll[2, :], axis=0)
             return rbin_centers, xi_11, xi_12, xi_22
+        else:
+
+            xi_coll = np.zeros(
+                (len(rbins)-1)*num_iterations).reshape(num_iterations, len(rbins)-1)
+
+            for i in range(num_iterations):
+                self.populate_mock(snapshot = snapshot)
+                rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_clustering(**kwargs)
+            xi = summary_func(xi_coll, axis=0)
+            return rbin_centers, xi
+
+    def compute_galaxy_matter_cross_clustering(self, num_iterations=5, 
+        summary_statistic = 'median', **kwargs):
+        """
+        Method repeatedly populates a simulation with a mock galaxy catalog, 
+        computes the galaxy-matter cross-correlation  
+        signal of each Monte Carlo realization, and returns a summary statistic of the clustering 
+        such as the median computed from the collection of repeated measurements. 
+
+        Parameters 
+        ----------
+        num_iterations : int, optional 
+            Number of Monte Carlo realizations to use to estimate the clustering signal. 
+            Default is 5.
+
+        summary_statistic : string, optional 
+            String specifying the method used to estimate the clustering signal from the 
+            collection of Monte Carlo realizations. Options are ``median`` and ``mean``. 
+            Default is ``median``. 
+
+        simname : string, optional 
+            Nickname of the simulation into which mock galaxies will be populated. 
+            Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        halo_finder : string, optional keyword argument 
+            Nickname of the halo-finder of the snapshot into which mock galaxies 
+            will be populated, e.g., `rockstar` or `bdm`. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        desired_redshift : float, optional
+            Redshift of the desired snapshot into which mock galaxies will be populated. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        variable_galaxy_mask : scalar, optional 
+            Any value used to construct a mask to select a sub-population 
+            of mock galaxies. See examples below. 
+
+        mask_function : array, optional 
+            Function object returning a masking array when operating on the galaxy_table. 
+            More flexible than the simpler ``variable_galaxy_mask`` option because ``mask_function``
+            allows for the possibility of multiple simultaneous cuts. See examples below. 
+
+        include_complement : bool, optional 
+            Only for simultaneous use with a ``variable_galaxy_mask``-determined mask. 
+            If ``include_complement`` is set to False (the default option), method will return 
+            the cross-correlation function between a random downsampling of dark matter particles 
+            and the subsample of galaxies determined by 
+            the input ``variable_galaxy_mask``. If ``include_complement`` is True, 
+            method will also return the cross-correlation between the dark matter particles 
+            and the complementary subsample. See examples below. 
+
+        rbins : array, optional 
+            Bins in which the correlation function will be calculated. 
+            Default is set in `~halotools.empirical_models.model_defaults` module. 
+
+        Returns 
+        --------
+        rbin_centers : array 
+            Midpoint of the bins used in the correlation function calculation 
+
+        correlation_func : array 
+            If not using any mask (the default option), method returns the 
+            correlation function of the full mock galaxy catalog. 
+
+            If using a mask, and if ``include_crosscorr`` is False (the default option), 
+            method returns the correlation function of the subsample of galaxies determined by 
+            the input mask. 
+
+            If using a mask, and if ``include_crosscorr`` is True, 
+            method will return the auto-correlation of the subsample, 
+            the cross-correlation of the subsample and the complementary subsample, 
+            and the the auto-correlation of the complementary subsample, in that order. 
+            See the example below. 
+
+        Notes 
+        -----
+        The `compute_galaxy_matter_cross_clustering` method bound to 
+        mock instances is just a convenience wrapper 
+        around the `~halotools.mock_observables.clustering.tpcf` function. If you wish for greater 
+        control over how your galaxy clustering signal is estimated, 
+        see the `~halotools.mock_observables.clustering.tpcf` documentation. 
+        """
+        if summary_statistic == 'mean':
+            summary_func = np.mean 
+        else:
+            summary_func = np.median
+
+        snapshot = HaloCatalog(preload_halo_table = True, **kwargs)
+
+        if 'rbins' in kwargs:
+            rbins = kwargs['rbins']
+        else:
+            rbins = model_defaults.default_rbins
+
+        if 'include_complement' in kwargs.keys():
+            include_complement = kwargs['include_complement']
+        else:
+            include_complement = False
+
+        if include_complement is True:
+
+            xi_coll = np.zeros(
+                (len(rbins)-1)*num_iterations*2).reshape(2, num_iterations, len(rbins)-1)
+
+            for i in range(num_iterations):
+                self.populate_mock(snapshot = snapshot)
+                rbin_centers, xi_coll[0, i, :], xi_coll[1, i, :] = (
+                    self.mock.compute_galaxy_clustering(**kwargs)
+                    )
+            xi_11 = summary_func(xi_coll[0, :], axis=0)
+            xi_22 = summary_func(xi_coll[1, :], axis=0)
+            return rbin_centers, xi_11, xi_22
         else:
 
             xi_coll = np.zeros(
