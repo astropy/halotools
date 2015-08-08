@@ -1013,7 +1013,7 @@ class HodModelFactory(ModelFactory):
                         example_repeated_element = list(dict_intersection)[0]
                         msg = ("The composite model received multiple "
                             "component models \nwith a new_haloprop_func_dict that use "
-                            "the %s key. \Ignoring the one that appears in the %s " 
+                            "the %s key. \nIgnoring the one that appears in the %s " 
                             "component for %s galaxies")
                         warn(msg % (example_repeated_element, component_key, gal_type))
 
