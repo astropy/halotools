@@ -322,6 +322,16 @@ class HaloCatalog(object):
             return self._halo_table
 
     @property 
+    def host_halos(self):
+        if hasattr(self, '_halo_table'):
+            mask = self._halo_table['halo_hostid'] == self._halo_table['halo_id']
+            return self._halo_table[mask]
+        else:
+            self._halo_table = Table.read(self.processed_halo_table_fname, path='data')
+            mask = self._halo_table['halo_hostid'] == self._halo_table['halo_id']
+            return self._halo_table[mask]        
+
+    @property 
     def ptcl_table(self):
         """
         `~astropy.table.Table` object storing a catalog of dark matter particles. 
