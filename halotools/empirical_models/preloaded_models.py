@@ -10,7 +10,7 @@ from . import preloaded_hod_blueprints
 
 from ..sim_manager import FakeMock, FakeSim, sim_defaults
 
-__all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15']
+__all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15', 'Hearin15']
 
 def Zheng07(**kwargs):
     """ Simple HOD-style based on Zheng et al. (2007), arXiv:0703457. 
