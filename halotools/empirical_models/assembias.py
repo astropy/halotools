@@ -297,7 +297,7 @@ class HeavisideAssembias(object):
             lower_bound1 = self._lower_bound - base_neg
             lower_bound2 = (1 - split_neg)/split_neg*(base_neg - self._upper_bound)
             lower_bound = np.maximum(lower_bound1, lower_bound2)
-            result[negative_strength_idx] = strength_neg*lower_bound
+            result[negative_strength_idx] = np.abs(strength_neg)*lower_bound
 
         return result
 
