@@ -62,6 +62,15 @@ class TestAssembias(TestCase):
         assert oldmean != baseline_mean
         assert youngmean != baseline_mean 
 
+        param_key = model._method_name_to_decorate + '_assembias_param1'
+        param = model.param_dict[param_key]
+        if param > 0:
+            assert oldmean > youngmean 
+        elif param < 0: 
+            assert oldmean < youngmean
+        else:
+            assert oldmean == youngmean 
+
         split = model.percentile_splitting_function(halo_table = self.toy_halo_table2)
         split = np.where(mask, split, 1-split)
         derived_result = split*oldmean
