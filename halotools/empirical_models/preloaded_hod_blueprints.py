@@ -193,7 +193,7 @@ def Hearin15_blueprint(central_assembias = True, satellite_assembias = True,
     if central_assembias is True:
         cen_ab_component = hoc.AssembiasLeauthaud11Cens(**kwargs)
     else:
-        cen_ab_component = Lhoc.eauthaud11Cens(**kwargs)
+        cen_ab_component = hoc.Leauthaud11Cens(**kwargs)
 
     cen_model_dict = {}
     cen_model_dict['occupation'] = cen_ab_component
