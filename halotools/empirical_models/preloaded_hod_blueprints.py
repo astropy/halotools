@@ -48,8 +48,7 @@ def Zheng07_blueprint(threshold = model_defaults.default_luminosity_threshold, *
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Zheng07Cens(gal_type=cen_key, 
-        threshold = threshold)
+    occu_cen_model = hoc.Zheng07Cens(threshold = threshold)
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
@@ -62,8 +61,7 @@ def Zheng07_blueprint(threshold = model_defaults.default_luminosity_threshold, *
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Zheng07Sats(gal_type=sat_key, 
-        threshold = threshold)
+    occu_sat_model = hoc.Zheng07Sats(threshold = threshold)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
     sat_profile = gpf.IsotropicGalProf(
@@ -106,8 +104,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Leauthaud11Cens(gal_type=cen_key, 
-        threshold = threshold)
+    occu_cen_model = hoc.Leauthaud11Cens(threshold = threshold)
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
@@ -120,8 +117,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Leauthaud11Sats(gal_type=sat_key, 
-        threshold = threshold)
+    occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
     sat_profile = gpf.IsotropicGalProf(
