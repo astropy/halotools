@@ -286,16 +286,14 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         """
 
         if hasattr(self, 'retrieve_default_param_dict'):
-            smhm_param_dict = self.retrieve_default_param_dict()
+            self.param_dict = self.retrieve_default_param_dict()
         else:
-            smhm_param_dict = {}
+            self.param_dict = {}
 
         scatter_param_dict = self.scatter_model.param_dict
 
-        self.param_dict = dict(
-            smhm_param_dict.items() + 
-            scatter_param_dict.items()
-            )
+        for key, value in scatter_param_dict.iteritems():
+            self.param_dict[key] = value
 
     def _mc_galprop(self, include_scatter = True, **kwargs):
         """ Return the prim_galprop of the galaxies living in the input halo_table. 
