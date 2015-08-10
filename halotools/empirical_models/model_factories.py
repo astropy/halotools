@@ -753,10 +753,26 @@ class HodModelFactory(ModelFactory):
 
 
     def _set_gal_types(self):
-        """ Private method binding the ``gal_types`` list attribute.
+        """ Private method binding the ``gal_types`` list attribute. 
+        If there are both centrals and satellites, method ensures that centrals 
+        will always be built first, out of consideration for satellite 
+        model components with explicit dependence on the central population. 
         """
         gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factory']
-        self.gal_types = gal_types
+        if len(gal_types) == 1:
+            self.gal_types = gal_types
+        elif len(gal_types) == 2:
+            self.gal_types = ['centrals', 'satellites']
+        else:
+            raise HalotoolsError("The HOD _input_model_blueprint currently only permits "
+                "gal_types = 'centrals' and 'sateliltes'")
+
+        for gal_type in self.gal_types:
+            if gal_type not in self._input_model_blueprint.keys():
+                raise HalotoolsError("The HOD _input_model_blueprint currently only permits "
+                    "gal_types = 'centrals' and 'sateliltes'")
+
+
 
     def _set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `HodModelFactory` 
@@ -837,10 +853,9 @@ class HodModelFactory(ModelFactory):
         def decorated_func(*args, **kwargs):
 
             # Update the param_dict as necessary
-            for key in component_model.param_dict.keys():
-                composite_key = key + '_' + component_model.gal_type
-                if composite_key in self.param_dict.keys():
-                    component_model.param_dict[key] = self.param_dict[composite_key]
+            for key in self.param_dict.keys():
+                if key in component_model.param_dict:
+                    component_model.param_dict[key] = self.param_dict[key]
 
             func = getattr(component_model, func_name)
             return func(*args, **kwargs)
@@ -929,6 +944,14 @@ class HodModelFactory(ModelFactory):
 
         self.param_dict = {}
 
+        def test_expected_key_repetition(model, key):
+            if hasattr(model, 'ancillary_model_param_keys'):
+                if key in model.ancillary_model_param_keys:
+                    return 
+                    
+            raise HalotoolsError("The param_dict key %s appears in more "
+                "than one component model" % key)
+
         # Loop over all galaxy types in the composite model
         for gal_type in self.gal_types:
             gal_type_dict = self.model_blueprint[gal_type]
@@ -937,14 +960,11 @@ class HodModelFactory(ModelFactory):
 
                 intersection = set(self.param_dict) & set(model_instance.param_dict)
                 if intersection != set():
-                    repeated_key = list(intersection)[0]
-                    raise KeyError("The param_dict key %s appears in more "
-                        "than one component model" % repeated_key)
-                else:
+                    for key in intersection:
+                        test_expected_key_repetition(model_instance, key)
 
-                    for key, value in model_instance.param_dict.iteritems():
-                        composite_key = key + '_' + model_instance.gal_type
-                        self.param_dict[composite_key] = value
+                for key, value in model_instance.param_dict.iteritems():
+                    self.param_dict[key] = value
 
         self._init_param_dict = copy(self.param_dict)
 

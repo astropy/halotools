@@ -62,7 +62,7 @@ class TestAssembias(TestCase):
         assert oldmean != baseline_mean
         assert youngmean != baseline_mean 
 
-        param_key = model._method_name_to_decorate + '_assembias_param1'
+        param_key = model._get_assembias_param_dict_key(0)
         param = model.param_dict[param_key]
         if param > 0:
             assert oldmean > youngmean 
