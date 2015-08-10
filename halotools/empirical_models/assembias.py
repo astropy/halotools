@@ -258,7 +258,7 @@ class HeavisideAssembias(object):
     def _get_assembias_param_dict_key(self, ipar):
         """
         """
-        return self._method_name_to_decorate + '_assembias_param' + str(ipar+1)
+        return self._method_name_to_decorate + '_' + self.gal_type + '_assembias_param' + str(ipar+1)
 
     def galprop_perturbation(self, **kwargs):
         """
