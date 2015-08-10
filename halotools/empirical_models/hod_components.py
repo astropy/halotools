@@ -195,7 +195,7 @@ class Zheng07Cens(OccupationComponent):
         Examples 
         --------
         >>> cen_model = Zheng07Cens()
-        >>> cen_model = Zheng07Cens(gal_type='cens', threshold=-19.5)
+        >>> cen_model = Zheng07Cens(threshold=-19.5)
         >>> cen_model = Zheng07Cens(prim_haloprop_key='halo_m200b')
 
         Notes 
