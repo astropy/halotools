@@ -74,7 +74,7 @@ def compute_conditional_percentiles(**kwargs):
             "must contain prim_haloprop_key = %s and sec_haloprop_key = %s")
         raise HalotoolsError(msg % (prim_haloprop_key, sec_haloprop_key))
 
-    def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.2, **kwargs):
+    def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
         """
         Parameters
         ----------
