@@ -23,6 +23,7 @@ from . import model_defaults, model_helpers, smhm_components
 from .assembias import HeavisideAssembias
 
 from ..utils.array_utils import array_like_length as custom_len
+from ..utils.table_utils import compute_conditional_percentiles
 from ..  import sim_manager
 from ..halotools_exceptions import HalotoolsModelInputError
 
@@ -1053,6 +1054,9 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
         Leauthaud11Sats.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self, 
             method_name_to_decorate = 'mean_occupation', **kwargs)
+
+
+
 
 
 
