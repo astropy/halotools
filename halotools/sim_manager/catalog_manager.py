@@ -500,8 +500,8 @@ class CatalogManager(object):
 
     def _closest_fname(self, filename_list, desired_redshift):
 
-        if desired_redshift == -1:
-            raise ValueError("desired_redshift of -1 is unphysical")
+        if desired_redshift <= -1:
+            raise ValueError("desired_redshift of <= -1 is unphysical")
         else:
             input_scale_factor = 1./(1.+desired_redshift) 
 
