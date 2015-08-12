@@ -38,10 +38,6 @@ def main(command_line_args):
         print(command_line_arg_error_msg)
         return 
 
-    # print("length of args = %i" % len(args))
-    # print("Argument 1 = %s" % args[0])
-    # print("length of opts = %i" % len(opts))
-
     if '-ptclsonly' in opts:
         # for a in args:
         #     print a
@@ -69,7 +65,8 @@ def main(command_line_args):
             redshift = float(args[1])
     else:
         msg = ("\n\nHalotoolsError: \nWhen running the "
-        "download_alternate_halocat.py script, you must specify a simname, redshift, and halo-finder.\n"
+        "download_alternate_halocat.py script, \n"
+        "you must specify a simname, redshift, and halo-finder, and only those three quantities.\n"
         "Now printing the -help message for further details.\n")
         if len(args) != 3:
             print(msg)   
@@ -115,7 +112,8 @@ def main(command_line_args):
             ">>> halocat = HaloCatalog(simname = your_chosen_simname, redshift = your_chosen_redshift)\n"
             ">>> particles = halocat.ptcl_table\n" % (abs(redshift), simname))
         catman.download_ptcl_table(simname = simname, 
-            desired_redshift = redshift, dz_tol = 0.05, success_msg = msg)
+            desired_redshift = redshift, dz_tol = 0.05, success_msg = msg, 
+            initial_download_script_msg = existing_fname_error_msg)
     else:
         msg = ("\n\nYour Halotools cache directory now has two hdf5 files, \n"
             "one storing a z = %.2f %s halo catalog for the %s simulation, \n"
@@ -131,7 +129,7 @@ def main(command_line_args):
             overwrite = overwrite)
         catman.download_ptcl_table(simname = simname, 
             desired_redshift = redshift, dz_tol = 0.05, 
-            success_msg = msg)
+            success_msg = msg, initial_download_script_msg = existing_fname_error_msg)
 
 
 
