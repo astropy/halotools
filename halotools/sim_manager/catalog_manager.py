@@ -739,7 +739,7 @@ class CatalogManager(object):
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
                 "No raw %s halo catalog has \na redshift within %.2f " + 
-                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
@@ -769,7 +769,9 @@ class CatalogManager(object):
         download_file_from_url(url, output_fname)
         end = time()
         runtime = (end - start)
-        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+        print("\nTotal runtime to download raw halo catalog = %.1f seconds\n" % runtime)
+        if 'success_msg' in kwargs.keys():
+            print(kwargs['success_msg'])
         return output_fname
 
 
@@ -833,7 +835,7 @@ class CatalogManager(object):
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
                 "No pre-processed %s halo catalog has \na redshift within %.2f " + 
-                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
@@ -865,7 +867,9 @@ class CatalogManager(object):
         download_file_from_url(url, output_fname)
         end = time()
         runtime = (end - start)
-        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+        print("\nTotal runtime to download pre-processed halo catalog = %.1f seconds\n" % runtime)
+        if 'success_msg' in kwargs.keys():
+            print(kwargs['success_msg'])
         return output_fname
 
 
@@ -931,7 +935,7 @@ class CatalogManager(object):
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
                 "No %s particle catalog has \na redshift within %.2f " + 
-                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
@@ -960,7 +964,9 @@ class CatalogManager(object):
         download_file_from_url(url, output_fname)
         end = time()
         runtime = (end - start)
-        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+        print("\nTotal runtime to download particle data = %.1f seconds\n" % runtime)
+        if 'success_msg' in kwargs.keys():
+            print(kwargs['success_msg'])
         return output_fname
 
     def retrieve_ptcl_table_from_cache(self, simname, desired_redshift, **kwargs):
