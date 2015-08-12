@@ -162,9 +162,13 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
                       do_RR, do_DR):
         """
         Count random pairs.  There are three high level branches: 
+
             1. no PBCs w/ randoms.
+
             2. PBCs w/ randoms
+
             3. PBCs and analytical randoms
+
         There are also logical bits to do RR and DR pair counts, as not all estimators 
         need one or the other, and not doing these can save a lot of calculation.
         
@@ -701,7 +705,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
                         period=None, do_auto=True, do_cross=True, estimator='Natural',\
                         N_threads=1, max_sample_size=int(1e6)):
     """ 
-    Calculate the redshift space correlation function, :math:`\\xi(r_p, \\pi)`.
+    Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`.
     
     The first two dimensions define the plane for perpendicular distances.  The third 
     dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
@@ -752,17 +756,20 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
     Returns 
     -------
     correlation_function : array_like
-        ndarray containing correlation function :math:`\\xi(r_p, \\pi)` computed in each 
+        ndarray containing correlation function :math:`\\xi(r_{p}, \\pi)` computed in each 
         of the len(rp_bins)-1 X len(pi_bins)-1 bins defined by input `rp_bins` and 
         `pi_bins`.
 
-        :math:`1 + \\xi(r_p,\\pi) \\equiv DD / RR`, is the 'Natural' estimator is used, 
+        :math:`1 + \\xi(r_{p},\\pi) = DD / RR`, is the 'Natural' estimator is used, 
+
         where `DD` is calculated by the pair counter, and `RR` is counted internally 
         analytic `randoms` if no randoms are passed as an argument.
 
         If sample2 is passed as input, three ndarrays of shape 
-        len(rp_bins)-1 x en(pi_bins)-1 are returned: 
-        :math:`\\xi_{11}(rp, \\pi)`, `\\xi_{12}(r_p,\\pi)`, `\\xi_{22}(r_p,\\pi)`
+        (len(rp_bins)-1,len(pi_bins)-1) are returned: 
+        :math:`\\xi_{11}(rp, \\pi)`, `\\xi_{12}(r_{p},\\pi)`, `\\xi_{22}(r_{p},\\pi)`
+        and the associated covariance matrices.
+        
         The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
         and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
         appropriate result is not returned.
@@ -852,9 +859,13 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
                       PBCs, k, N_threads, do_RR, do_DR):
         """
         Count random pairs.  There are three high level branches: 
+
             1. no PBCs w/ randoms.
+
             2. PBCs w/ randoms
+            
             3. PBCs and analytical randoms
+
         There are also logical bits to do RR and DR pair counts, as not all estimators 
         need one or the other, and not doing these can save a lot of calculation.
         """
@@ -991,7 +1002,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
        do_auto=True, do_cross=True, estimator='Natural', N_threads=1,\
        max_sample_size=int(1e6)):
     """ 
-    Calculate the projected correlation function, :math:`\\w_p(r_p)`.
+    Calculate the projected correlation function, :math:`w_{p}`.
     
     The first two dimensions define the plane for perpendicular distances.  The third 
     dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
@@ -1041,15 +1052,18 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     Returns 
     -------
     correlation_function : np.array
-        len(rp_bins)-1 length array containing correlation function :math:`\\w_p(r_p)` 
+        len(rp_bins)-1 length array containing correlation function :math:`w_p(r_p)` 
         computed in each of the bins defined by input `rp_bins`.
 
-        :math:`1 + \\w_p(r) \\equiv DD / RR`, 
+        :math:`1 + w_p(r) \\equiv DD / RR`, 
+
         where `DD` is calculated by the pair counter, and `RR` is counted internally 
         using analytic `randoms` if no randoms are passed as an argument.
 
         If sample2 is passed as input, three arrays of length len(rbins)-1 are returned: 
-        :math:`\\w_{p11}(r_p)`, `\\w_{p12}(r_p)`, `\\w_{p22}(r_p)`
+        
+        :math:`w_{p11}(r_p)`, `w_{p12}(r_p)`, `w_{p22}(r_p)`
+
         The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
         and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
         appropriate result(s) is not returned.
@@ -1269,9 +1283,13 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
                       PBCs, k, N_threads, do_RR, do_DR):
         """
         Count random pairs.  There are three high level branches: 
+
             1. no PBCs w/ randoms.
+
             2. PBCs w/ randoms
+
             3. PBCs and analytical randoms
+
         There are also logical bits to do RR and DR pair counts, as not all estimators 
         need one or the other, and not doing these can save a lot of calculation.
         
