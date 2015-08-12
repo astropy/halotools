@@ -96,6 +96,7 @@ def main(command_line_args):
     if '-halosonly' in opts:
         msg = ("\n\nYour Halotools cache directory a new hdf5 file \n"
             "storing a z = %.2f %s halo catalog for the %s simulation. \n"
+            "The data structure stored by this hdf5 file is an Astropy Table.\n"
             "\nHalotools can load this catalog into memory with the following syntax:\n\n"
             ">>> from halotools.sim_manager import HaloCatalog\n"
             ">>> halocat = HaloCatalog(simname = your_chosen_simname, redshift = your_chosen_redshift, halo_finder = your_chosen_halo_finder)\n"
@@ -107,17 +108,19 @@ def main(command_line_args):
     elif '-ptclsonly' in opts:
         msg = ("\n\nYour Halotools cache directory a new hdf5 file \n"
             "storing a z = %.2f particle catalog for the %s simulation. \n"
+            "The data structure stored by this hdf5 file is an Astropy Table.\n"
             "\nHalotools can load this catalog into memory with the following syntax:\n\n"
             ">>> from halotools.sim_manager import HaloCatalog\n"
             ">>> halocat = HaloCatalog(simname = your_chosen_simname, redshift = your_chosen_redshift)\n"
             ">>> particles = halocat.ptcl_table\n" % (abs(redshift), simname))
         catman.download_ptcl_table(simname = simname, 
             desired_redshift = redshift, dz_tol = 0.05, success_msg = msg, 
-            initial_download_script_msg = existing_fname_error_msg)
+            initial_download_script_msg = existing_fname_error_msg, overwrite=overwrite)
     else:
         msg = ("\n\nYour Halotools cache directory now has two hdf5 files, \n"
             "one storing a z = %.2f %s halo catalog for the %s simulation, \n"
             "another storing a random downsampling of ~1e6 dark matter particles from the same snapshot.\n"
+            "The data structure stored by these hdf5 files is an Astropy Table.\n"
             "\nHalotools can load these catalogs into memory with the following syntax:\n\n"
             ">>> from halotools.sim_manager import HaloCatalog\n"
             ">>> halocat = HaloCatalog(simname = your_chosen_simname, redshift = your_chosen_redshift, halo_finder = your_chosen_halo_finder)\n"
@@ -129,7 +132,8 @@ def main(command_line_args):
             overwrite = overwrite)
         catman.download_ptcl_table(simname = simname, 
             desired_redshift = redshift, dz_tol = 0.05, 
-            success_msg = msg, initial_download_script_msg = existing_fname_error_msg)
+            success_msg = msg, initial_download_script_msg = existing_fname_error_msg, 
+            overwrite=overwrite)
 
 
 
