@@ -832,7 +832,7 @@ class CatalogManager(object):
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
-                "No raw %s halo catalog has \na redshift within %.2f " + 
+                "No pre-processed %s halo catalog has \na redshift within %.2f " + 
                 "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
@@ -930,7 +930,7 @@ class CatalogManager(object):
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
-                "No raw %s halo catalog has \na redshift within %.2f " + 
+                "No %s particle catalog has \na redshift within %.2f " + 
                 "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
