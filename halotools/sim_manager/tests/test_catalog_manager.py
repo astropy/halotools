@@ -264,6 +264,16 @@ class TestCatalogManager(TestCase):
         assert os.path.basename(closest_fname) == correct_basename
 
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_illustrate_get_scale_factor_substring_bug(self): 
+        simname = 'consuelo'
+        redshift = 2
+        halo_finder = 'bdm'
+        self.catman.download_processed_halo_table(simname = simname, 
+            halo_finder = halo_finder, desired_redshift = redshift, 
+            overwrite = False)
+
 
 
     def teardown_class(self):
