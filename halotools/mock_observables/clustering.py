@@ -15,6 +15,8 @@ from .pair_counters.rect_cuboid_pairs import npairs, xy_z_npairs, jnpairs, s_mu_
 __all__=['tpcf','tpcf_jackknife','redshift_space_tpcf','wp','s_mu_tpcf']
 __author__ = ['Duncan Campbell']
 
+np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+
 
 def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
          do_auto=True, do_cross=True, estimator='Natural', N_threads=1,\
@@ -25,33 +27,34 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-d positions of Npts.
+        Npts x 3 numpy array containing 3-D positions of points.
     
     rbins : array_like
-        numpy array of boundaries defining the bins in which pairs are counted.
+        array of boundaries defining the real space radial bins in which pairs are 
+        counted.
     
     sample2 : array_like, optional
-        Npts x 3 numpy array containing 3-d positions of Npts.
+        Npts x 3 array containing 3-D positions of points.
     
     randoms : array_like, optional
-        Nran x 3 numpy array containing 3-d positions of Npts.  If no randoms are provided
+        Npts x 3 array containing 3-D positions of points.  If no randoms are provided
         analytic randoms are used (only valid for periodic boundary conditions).
     
-    period: array_like, optional
+    period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
         If none, PBCs are set to infinity.
     
-    do_auto: boolean, optional
-        do auto-correlation?  Default is True.
+    do_auto : boolean, optional
+        do auto-correlation?
     
-    do_cross: boolean, optional
-        do cross-correlation?  Default is True.
+    do_cross : boolean, optional
+        do cross-correlation?
     
-    estimator: string, optional
+    estimator : string, optional
         options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
     
-    N_threads: int, optional
+    N_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
 
@@ -64,10 +67,10 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     Returns 
     -------
     correlation_function : array_like
-        array containing correlation function :math:`\\xi` computed in each of the bins
-        defined by input `rbins`.
+        len(rbins)-1 length array containing correlation function :math:`\\xi(r)` computed 
+        in each of the bins defined by input `rbins`.
 
-        :math:`1 + \\xi(r) \equiv DD / RR`, if 'Natural' estimator is used,
+        :math:`1 + \\xi(r) \\equiv DD / RR`, if 'Natural' estimator is used,
         where `DD` is calculated by the pair counter, and `RR` is counted internally
         using analytic `randoms` if no randoms are passed as an argument.
 
@@ -75,14 +78,11 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         :math:`\\xi_{11}(r)`, `\\xi_{12}(r)`, `\\xi_{22}(r)`
         The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
         and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
-        appropriate result is not returned.
+        appropriate result(s) is not returned.
 
     """
     
-    def list_estimators():
-        estimators = ['Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay']
-        return estimators
-    estimators = list_estimators()
+    estimators = _list_estimators()
     
     #process input parameters
     sample1 = np.asarray(sample1)
@@ -109,8 +109,15 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
             raise ValueError("period should have shape (k,)")
             return None
     
-    #down sample is sample size exceeds max_sample_size.
-    if (len(sample2)>max_sample_size) & (not np.all(sample1==sample2)):
+    #down sample if sample size exceeds max_sample_size.
+    if (len(sample1)>max_sample_size) & (np.all(sample1==sample2)):
+        inds = np.arange(0,len(sample1))
+        np.random.shuffle(inds)
+        inds = inds[0:max_sample_size]
+        sample1 = sample1[inds]
+        sample2 = sample1[inds]
+        print('downsampling sample1...')
+    if len(sample2)>max_sample_size:
         inds = np.arange(0,len(sample2))
         np.random.shuffle(inds)
         inds = inds[0:max_sample_size]
@@ -131,27 +138,26 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     if len(rbins)<2:
         raise ValueError('rbins must be of lenght >=2.')
     
-    k = np.shape(sample1)[-1] #dimensionality of data
+    #check dimensionality of data. currently, points must be 3D.
+    k = np.shape(sample1)[-1]
     if k!=3:
         raise ValueError('data must be 3-dimensional.')
     
     #check for input parameter consistency
     if (period is not None) & (np.max(rbins)>np.min(period)/2.0):
-        raise ValueError('Cannot calculate for seperations larger than Lbox/2.')
+        raise ValueError('cannot calculate for seperations larger than Lbox/2.')
     if (sample2 is not None) & (sample1.shape[-1]!=sample2.shape[-1]):
-        raise ValueError('Sample1 and sample2 must have same dimension.')
+        raise ValueError('sample1 and sample2 must have same dimension.')
     if (randoms is None) & (min(period)==np.inf):
-        raise ValueError('If no PBCs are specified, randoms must be provided.')
+        raise ValueError('if no PBCs are specified, randoms must be provided.')
     if estimator not in estimators: 
-        raise ValueError('Must specify a supported estimator. Supported estimators are:{0}'
-        .value(estimators))
+        raise ValueError('user must specify a supported estimator. Supported estimators \
+        are:{0}'.value(estimators))
     if (PBCs==True) & (max(period)==np.inf):
-        raise ValueError('If a non-infinte PBC specified, all PBCs must be non-infinte.')
+        raise ValueError('if a non-infinte PBC specified, all PBCs must be non-infinte.')
     if (type(do_auto) is not bool) | (type(do_cross) is not bool):
         raise ValueError('do_auto and do_cross keywords must be of type boolean.')
 
-    #If PBCs are defined, calculate the randoms analytically. Else, the user must specify 
-    #randoms and the pair counts are calculated the old fashion way.
     def random_counts(sample1, sample2, randoms, rbins, period, PBCs, k, N_threads,\
                       do_RR, do_DR):
         """
@@ -165,6 +171,9 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
 
         There are also logical bits to do RR and DR pair counts, as not all estimators 
         need one or the other, and not doing these can save a lot of calculation.
+        
+        If no randoms are passes, calculate analytical randoms; otherwise, do it the old 
+        fashioned way.
         """
         def nball_volume(R,k):
             """
@@ -226,9 +235,11 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
                 rho2 = N2/global_volume
                 D2R = N2*(dv*rho2) #read note about pair counter
                 #calculate the random-random pairs.
+                #RR is only the RR for the cross-correlation when using analytical randoms
+                #for the non-cross case, DR==RR (in analytical world).
                 NR = N1*N2
                 rhor = NR/global_volume
-                RR = (dv*rhor) #RR is only the RR for the cross-correlation.
+                RR = (dv*rhor)
 
             return D1R, D2R, RR
         else:
@@ -238,83 +249,37 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         """
         Count data pairs.
         """
-        D1D1 = npairs(sample1, sample1, rbins, period=period, N_threads=N_threads)
-        D1D1 = np.diff(D1D1)
+        if do_auto==True:
+            D1D1 = npairs(sample1, sample1, rbins, period=period, N_threads=N_threads)
+            D1D1 = np.diff(D1D1)
+        else:
+            D1D1=None
+            D2D2=None
+        
         if np.all(sample1 == sample2):
             D1D2 = D1D1
             D2D2 = D1D1
         else:
-            D1D2 = npairs(sample1, sample2, rbins, period=period, N_threads=N_threads)
-            D1D2 = np.diff(D1D2)
-            D2D2 = npairs(sample2, sample2, rbins, period=period, N_threads=N_threads)
-            D2D2 = np.diff(D2D2)
+            if do_cross==True:
+                D1D2 = npairs(sample1, sample2, rbins, period=period, N_threads=N_threads)
+                D1D2 = np.diff(D1D2)
+            else: D1D2=None
+            if do_auto==True:
+                D2D2 = npairs(sample2, sample2, rbins, period=period, N_threads=N_threads)
+                D2D2 = np.diff(D2D2)
+            else: D2D2=None
 
         return D1D1, D1D2, D2D2
-        
-    def TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
-        """
-        two point correlation function estimator
-        """
-        if estimator == 'Natural':
-            factor = ND1*ND2/(NR1*NR2)
-            #DD/RR-1
-            xi = (1.0/factor)*DD/RR - 1.0
-        elif estimator == 'Davis-Peebles':
-            factor = ND1*ND2/(ND1*NR2)
-            #DD/DR-1
-            xi = (1.0/factor)*DD/DR - 1.0
-        elif estimator == 'Hewett':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD-DR)/RR
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*DR/RR
-        elif estimator == 'Hamilton':
-            #DDRR/DRDR-1
-            xi = (DD*RR)/(DR*DR) - 1.0
-        elif estimator == 'Landy-Szalay':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD - 2.0*DR + RR)/RR
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*2.0*DR/RR + 1.0
-        else: 
-            raise ValueError("unsupported estimator!")
-        return xi
     
-    def TP_estimator_requirements(estimator):
-        """
-        return booleans indicating which pairs need to be counted for the chosen estimator
-        """
-        if estimator == 'Natural':
-            do_DD = True
-            do_DR = False
-            do_RR = True
-        elif estimator == 'Davis-Peebles':
-            do_DD = True
-            do_DR = True
-            do_RR = False
-        elif estimator == 'Hewett':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        elif estimator == 'Hamilton':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        elif estimator == 'Landy-Szalay':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        else: 
-            raise ValueError("unsupported estimator!")
-        return do_DD, do_DR, do_RR
+    #what needs to be done?
+    do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
-    do_DD, do_DR, do_RR = TP_estimator_requirements(estimator)
-              
+    #how many points are there? (for normalization purposes)
     if randoms is not None:
         N1 = len(sample1)
         N2 = len(sample2)
         NR = len(randoms)
-    else: 
+    else: #this is taken care of in the analytical randoms case.
         N1 = 1.0
         N2 = 1.0
         NR = 1.0
@@ -325,21 +290,22 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,\
                                  PBCs, k, N_threads, do_RR, do_DR)
     
+    #return results
     if np.all(sample2==sample1):
-        xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+        xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
     else:
         if (do_auto==True) & (do_cross==True): 
-            xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-            xi_12 = TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
-            xi_22 = TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
             return xi_11, xi_12, xi_22
         elif (do_cross==True):
-            xi_12 = TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             return xi_12
         elif (do_auto==True):
-            xi_11 = TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
-            xi_22 = TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
+            xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11
 
 
@@ -350,8 +316,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     Calculate the two-point correlation function, :math:`\\xi(r)` and the covariance 
     matrix.
     
-    Calculate the covariance matrix using spatial jackknife sampling of the simulation 
-    box.
+    The covariance matrix is calculated using spatial jackknife sampling of the simulation 
+    box.  The spatial samples are defined by splitting the box along each dimension set by
+    the `Nsub` argument.
     
     Parameters
     ----------
@@ -401,17 +368,24 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
 
     Returns 
     -------
-    correlation_function(s), cov_matrix : array_like
-        array containing correlation function :math:`\\xi(r)` computed in each of the Nrbins 
-        defined by input `rbins`.
-        Nrbins x Nrbins array containing the covariance matrix of `\\xi(r)`
+    correlation_function(s), cov_matrix(ices) : np.array, np.ndarray
+        len(rbins)-1 length array containing correlation function :math:`\\xi(r)` computed
+        in each of the radial bins defined by input `rbins`.
+        
+        len(rbins)-1 x len(rbins)-1 ndarray containing the covariance matrix of `\\xi(r)`
+        
+        If sample2 is passed as input, three arrays of length len(rbins)-1 are returned: 
+        :math:`\\xi_{11}(r)`, `\\xi_{12}(r)`, `\\xi_{22}(r)`
+        and three ndarrays of shape len(rbins)-1 x len(rbins)-1
+        :math: `cov_{11}`, `cov_{12}`, `cov_{22}`
+        
+        The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
+        and the autocorrelation of sample2, and the associated covariance matrices.  If 
+        do_auto or do_cross is set to False, the appropriate result(s) is not returned.
 
     """
     
-    def list_estimators():
-        estimators = ['Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay']
-        return estimators
-    estimators = list_estimators()
+    estimators = _list_estimators()
     
     #process input parameters
     sample1 = np.asarray(sample1)
@@ -533,24 +507,30 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
         """
         Count jackknife data pairs: DD
         """
-        D1D1 = jnpairs(sample1, sample1, rbins, period=period,\
-                       jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,\
-                       N_threads=N_threads)
-        D1D1 = np.diff(D1D1,axis=1)
+        if do_auto==True:
+            D1D1 = jnpairs(sample1, sample1, rbins, period=period,\
+                           jtags1=j_index_1, jtags2=j_index_1,  N_samples=N_sub_vol,\
+                           N_threads=N_threads)
+            D1D1 = np.diff(D1D1,axis=1)
+        else:
+            D1D1=None
+            D2D2=None
+        
         if np.all(sample1 == sample2):
             D1D2 = D1D1
             D2D2 = D1D1
         else:
-            D1D2 = D1D1
-            D2D2 = D1D1
-            D1D2 = jnpairs(sample1, sample2, rbins, period=period,\
-                           jtags1=j_index_1, jtags2=j_index_2,\
-                            N_samples=N_sub_vol, N_threads=N_threads)
-            D1D2 = np.diff(D1D2,axis=1)
-            D2D2 = jnpairs(sample2, sample2, rbins, period=period,\
-                           jtags1=j_index_2, jtags2=j_index_2,\
-                            N_samples=N_sub_vol, N_threads=N_threads)
-            D2D2 = np.diff(D2D2,axis=1)
+            if do_cross==True:
+                D1D2 = jnpairs(sample1, sample2, rbins, period=period,\
+                               jtags1=j_index_1, jtags2=j_index_2,\
+                               N_samples=N_sub_vol, N_threads=N_threads)
+                D1D2 = np.diff(D1D2,axis=1)
+            else: D1D2=None
+            if do_auto==True:
+                D2D2 = jnpairs(sample2, sample2, rbins, period=period,\
+                               jtags1=j_index_2, jtags2=j_index_2,\
+                               N_samples=N_sub_vol, N_threads=N_threads)
+                D2D2 = np.diff(D2D2,axis=1)
 
         return D1D1, D1D2, D2D2
     
@@ -574,63 +554,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
         else: RR=None
 
         return DR, RR
-        
-    def TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
-        """
-        two point correlation function estimator
-        """
-        if estimator == 'Natural':
-            factor = ND1*ND2/(NR1*NR2)
-            #DD/RR-1
-            xi = (1.0/factor)*(DD/RR).T - 1.0
-        elif estimator == 'Davis-Peebles':
-            factor = ND1*ND2/(ND1*NR2)
-            #DD/DR-1
-            xi = (1.0/factor)*(DD/DR).T - 1.0
-        elif estimator == 'Hewett':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD-DR)/RR
-            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*(DR/RR).T
-        elif estimator == 'Hamilton':
-            #DDRR/DRDR-1
-            xi = (DD*RR)/(DR*DR) - 1.0
-        elif estimator == 'Landy-Szalay':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD - 2.0*DR + RR)/RR
-            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*2.0*(DR/RR).T + 1.0
-        else: 
-            raise ValueError("unsupported estimator!")
-        return xi.T #transpose 2 times to get the multiplication to work
-    
-    def TP_estimator_requirements(estimator):
-        """
-        return booleans indicating which pairs need to be counted for the chosen estimator
-        """
-        if estimator == 'Natural':
-            do_DD = True
-            do_DR = False
-            do_RR = True
-        elif estimator == 'Davis-Peebles':
-            do_DD = True
-            do_DR = True
-            do_RR = False
-        elif estimator == 'Hewett':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        elif estimator == 'Hamilton':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        elif estimator == 'Landy-Szalay':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        else: 
-            raise ValueError("unsupported estimator!")
-        return do_DD, do_DR, do_RR
     
     def jackknife_errors(sub,full,N_sub_vol):
         """
@@ -660,7 +583,36 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     
         return cov
     
-    do_DD, do_DR, do_RR = TP_estimator_requirements(estimator)
+    def TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
+        """
+        two point correlation function estimator
+        """
+        if estimator == 'Natural':
+            factor = ND1*ND2/(NR1*NR2)
+            #DD/RR-1
+            xi = (1.0/factor)*(DD/RR).T - 1.0
+        elif estimator == 'Davis-Peebles':
+            factor = ND1*ND2/(ND1*NR2)
+            #DD/DR-1
+            xi = (1.0/factor)*(DD/DR).T - 1.0
+        elif estimator == 'Hewett':
+            factor1 = ND1*ND2/(NR1*NR2)
+            factor2 = ND1*NR2/(NR1*NR2)
+            #(DD-DR)/RR
+            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*(DR/RR).T
+        elif estimator == 'Hamilton':
+            #DDRR/DRDR-1
+            xi = (DD*RR)/(DR*DR) - 1.0
+        elif estimator == 'Landy-Szalay':
+            factor1 = ND1*ND2/(NR1*NR2)
+            factor2 = ND1*NR2/(NR1*NR2)
+            #(DD - 2.0*DR + RR)/RR
+            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*2.0*(DR/RR).T + 1.0
+        else: 
+            raise ValueError("unsupported estimator!")
+        return xi.T #transpose 2 times to get the multiplication to work
+    
+    do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
     N1 = len(sample1)
     N2 = len(sample2)
@@ -809,6 +761,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
         `pi_bins`.
 
         :math:`1 + \\xi(r_{p},\\pi) = DD / RR`, is the 'Natural' estimator is used, 
+
         where `DD` is calculated by the pair counter, and `RR` is counted internally 
         analytic `randoms` if no randoms are passed as an argument.
 
@@ -816,16 +769,14 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
         (len(rp_bins)-1,len(pi_bins)-1) are returned: 
         :math:`\\xi_{11}(rp, \\pi)`, `\\xi_{12}(r_{p},\\pi)`, `\\xi_{22}(r_{p},\\pi)`
         and the associated covariance matrices.
+        
         The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
         and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
         appropriate result is not returned.
 
     """
     
-    def list_estimators():
-        estimators = ['Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay']
-        return estimators
-    estimators = list_estimators()
+    estimators = _list_estimators()
     
     #process input parameters
     sample1 = np.asarray(sample1)
@@ -926,32 +877,38 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
         
         #No PBCs, randoms must have been provided.
         if PBCs==False:
-            RR = xy_z_npairs(randoms, randoms, rp_bins, pi_bins, period=period, N_threads=N_threads)
+            RR = xy_z_npairs(randoms, randoms, rp_bins, pi_bins, period=period,\
+                             N_threads=N_threads)
             RR = np.diff(np.diff(RR,axis=0),axis=1)
-            D1R = xy_z_npairs(sample1, randoms, rp_bins, pi_bins, period=period, N_threads=N_threads)
+            D1R = xy_z_npairs(sample1, randoms, rp_bins, pi_bins, period=period,\
+                              N_threads=N_threads)
             D1R = np.diff(np.diff(D1R,axis=0),axis=1)
             if np.all(sample1 == sample2): #calculating the cross-correlation
                 D2R = None
             else:
-                D2R = xy_z_npairs(sample2, randoms, rp_bins, pi_bins, period=period, N_threads=N_threads)
+                D2R = xy_z_npairs(sample2, randoms, rp_bins, pi_bins, period=period,\
+                                  N_threads=N_threads)
                 D2R = np.diff(np.diff(D2R,axis=0),axis=1)
             
             return D1R, D2R, RR
         #PBCs and randoms.
         elif randoms is not None:
             if do_RR==True:
-                RR = xy_z_npairs(randoms, randoms, rp_bins, pi_bins, period=period, N_threads=N_threads)
+                RR = xy_z_npairs(randoms, randoms, rp_bins, pi_bins, period=period,\
+                                 N_threads=N_threads)
                 RR = np.diff(np.diff(RR,axis=0),axis=1)
             else: RR=None
             if do_DR==True:
-                D1R = xy_z_npairs(sample1, randoms, rp_bins, pi_bins, period=period, N_threads=N_threads)
+                D1R = xy_z_npairs(sample1, randoms, rp_bins, pi_bins, period=period,\
+                                  N_threads=N_threads)
                 D1R = np.diff(np.diff(D1R,axis=0),axis=1)
             else: D1R=None
             if np.all(sample1 == sample2): #calculating the cross-correlation
                 D2R = None
             else:
                 if do_DR==True:
-                    D2R = xy_z_npairs(sample2, randoms, rp_bins, pi_bins, period=period, N_threads=N_threads)
+                    D2R = xy_z_npairs(sample2, randoms, rp_bins, pi_bins, period=period,\
+                                      N_threads=N_threads)
                     D2R = np.diff(np.diff(D2R,axis=0),axis=1)
                 else: D2R=None
             
@@ -990,77 +947,23 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
         """
         Count data pairs.
         """
-        D1D1 = xy_z_npairs(sample1, sample1, rp_bins, pi_bins, period=period, N_threads=N_threads)
+        D1D1 = xy_z_npairs(sample1, sample1, rp_bins, pi_bins, period=period,\
+                           N_threads=N_threads)
         D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
         if np.all(sample1 == sample2):
             D1D2 = D1D1
             D2D2 = D1D1
         else:
-            D1D2 = xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=period, N_threads=N_threads)
+            D1D2 = xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=period,\
+                               N_threads=N_threads)
             D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
-            D2D2 = xy_z_npairs(sample2, sample2, rp_bins, pi_bins, period=period, N_threads=N_threads)
+            D2D2 = xy_z_npairs(sample2, sample2, rp_bins, pi_bins, period=period,\
+                               N_threads=N_threads)
             D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
 
         return D1D1, D1D2, D2D2
-        
-    def TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
-        """
-        two point correlation function estimator
-        """
-        if estimator == 'Natural':
-            factor = ND1*ND2/(NR1*NR2)
-            #DD/RR-1
-            xi = (1.0/factor)*DD/RR - 1.0
-        elif estimator == 'Davis-Peebles':
-            factor = ND1*ND2/(ND1*NR2)
-            #DD/DR-1
-            xi = (1.0/factor)*DD/DR - 1.0
-        elif estimator == 'Hewett':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD-DR)/RR
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*DR/RR
-        elif estimator == 'Hamilton':
-            #DDRR/DRDR-1
-            xi = (DD*RR)/(DR*DR) - 1.0
-        elif estimator == 'Landy-Szalay':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD - 2.0*DR + RR)/RR
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*2.0*DR/RR + 1.0
-        else: 
-            raise ValueError("unsupported estimator!")
-        return xi
     
-    def TP_estimator_requirements(estimator):
-        """
-        return booleans indicating which pairs need to be counted for the chosen estimator
-        """
-        if estimator == 'Natural':
-            do_DD = True
-            do_DR = False
-            do_RR = True
-        elif estimator == 'Davis-Peebles':
-            do_DD = True
-            do_DR = True
-            do_RR = False
-        elif estimator == 'Hewett':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        elif estimator == 'Hamilton':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        elif estimator == 'Landy-Szalay':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        else: 
-            raise ValueError("unsupported estimator!")
-        return do_DD, do_DR, do_RR
-    
-    do_DD, do_DR, do_RR = TP_estimator_requirements(estimator)
+    do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
               
     if randoms is not None:
         N1 = len(sample1)
@@ -1078,20 +981,20 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
                                  PBCs, k, N_threads, do_RR, do_DR)
     
     if np.all(sample2==sample1):
-        xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+        xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
     else:
         if (do_auto==True) & (do_cross==True): 
-            xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-            xi_12 = TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
-            xi_22 = TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
             return xi_11, xi_12, xi_22
         elif (do_cross==True):
-            xi_12 = TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
             return xi_12
         elif (do_auto==True):
-            xi_11 = TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
-            xi_22 = TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
+            xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11
 
 
@@ -1108,7 +1011,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-d positions of Npts. 
+        Npts x 3 numpy array containing 3-D positions of points. 
     
     rp_bins : array_like
         array of boundaries defining the perpendicular bins in which pairs are counted.
@@ -1117,26 +1020,26 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         array of boundaries defining the parallel bins in which pairs are counted. 
     
     sample2 : array_like, optional
-        Npts x 3 numpy array containing 3-d positions of Npts.
+        Npts x 3 numpy array containing 3-D positions of points.
     
     randoms : array_like, optional
-        Nran x 3 numpy array containing 3-d positions of Npts.
+        Nran x 3 numpy array containing 3-D positions of points.
     
-    period: array_like, optional
+    period : array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
     
-    do_auto: boolean, optional
+    do_auto : boolean, optional
         do auto-correlation?  Default is True.
     
-    do_cross: boolean, optional
+    do_cross : boolean, optional
         do cross-correlation?  Default is True.
     
-    estimator: string, optional
+    estimator : string, optional
         options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
     
-    N_threads: int, optional
+    N_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
     
@@ -1144,23 +1047,26 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         Defines maximum size of the sample that will be passed to the pair counter. 
         
         If sample size exceeds max_sample_size, the sample will be randomly down-sampled 
-        such that the subsample is (roughly) equal to max_sample_size.
+        such that the subsample is equal to max_sample_size.
 
     Returns 
     -------
-    correlation_function : array_like
-        array containing correlation function :math:`w_{p}` computed in each of the Nrbins 
-        defined by input `rp_bins`.
+    correlation_function : np.array
+        len(rp_bins)-1 length array containing correlation function :math:`w_p(r_p)` 
+        computed in each of the bins defined by input `rp_bins`.
 
-        :math:`1 + w_p(r) \equiv DD / RR`, 
+        :math:`1 + w_p(r) \\equiv DD / RR`, 
+
         where `DD` is calculated by the pair counter, and `RR` is counted internally 
         using analytic `randoms` if no randoms are passed as an argument.
 
         If sample2 is passed as input, three arrays of length len(rbins)-1 are returned: 
-        :math:`w_{p11}(r)`, `w_{p12}(r)`, `w_{p22}(r)`
+        
+        :math:`w_{p11}(r_p)`, `w_{p12}(r_p)`, `w_{p22}(r_p)`
+
         The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
         and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
-        appropriate result is not returned.
+        appropriate result(s) is not returned.
 
     """
     
@@ -1171,7 +1077,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
                                  estimator=estimator, N_threads=N_threads,\
                                  max_sample_size=max_sample_size)
     
-    #process the output of the redshift space TPCF function
+    #take care of some API issues
     if sample2 is None: 
         do_cross=False
     elif np.all(sample2==sample1): 
@@ -1179,7 +1085,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     
     #integrate the redshift space TPCF to get w_p
     def integrate_2D_xi(x,pi_bins):
-        return np.sum(x*np.diff(pi_bins),axis=1)
+        return 2.0*np.sum(x*np.diff(pi_bins),axis=1)
 
     #return the results.
     if (do_auto==True) & (do_cross==True):
@@ -1191,7 +1097,10 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         wp_D1D2 = integrate_2D_xi(result,pi_bins)
         return wp_D1D2
     elif (do_auto==True) & (do_cross==False):
-        if (np.all(sample2==sample1)) | (sample2 is None): # do only sample 1 auto
+        if sample2 is None: # do only sample 1 auto
+            wp_D1D1 = integrate_2D_xi(result,pi_bins)
+            return wp_D1D1
+        elif np.all(sample2==sample1): # do only sample 1 auto
             wp_D1D1 = integrate_2D_xi(result,pi_bins)
             return wp_D1D1
         else: # do both auto for sample1 and sample2
@@ -1204,11 +1113,17 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
               period=None, do_auto=True, do_cross=True, estimator='Natural',\
               N_threads=1, max_sample_size=int(1e6)):
     """ 
-    Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)`.
+    Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)`, where
+    .. math::
+    s^2 = r_{\\parallel}^2+r_{\\perp}^2
+    and, 
+    .. math::
+    `\\mu = r_{\\parallel}/s`
     
-    The first two dimensions define the plane for perpendicular distances.  The third 
-    dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
-    sky, and z is the redshift coordinate.  This is the distant observer approximation.
+    Data must be 3D.  The first two dimensions define the plane for perpendicular 
+    distances.  The third dimension is used for parallel distances.  i.e. x,y positions 
+    are on the plane of the sky, and z is the redshift coordinate.  This is the distant 
+    observer approximation.
     
     This is a pre-step for calculating correlation function multipoles.
     
@@ -1230,21 +1145,21 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         Nran x 3 numpy array containing 3-d positions of Npts.  If no randoms are provided
         analytic randoms are used (only valid for periodic boundary conditions).
     
-    period: array_like, optional
+    period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
         If none, PBCs are set to infinity.
     
-    estimator: string, optional
+    estimator : string, optional
         options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
     
-    do_auto: boolean, optional
+    do_auto : boolean, optional
         do auto-correlation?  Default is True.
     
-    do_cross: boolean, optional
+    do_cross : boolean, optional
         do cross-correlation?  Default is True.
     
-    N_thread: int, optional
+    N_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
     
@@ -1252,33 +1167,28 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         Defines maximum size of the sample that will be passed to the pair counter. 
         
         If sample size exeeds max_sample_size, the sample will be randomly down-sampled 
-        such that the subsample is (roughly) equal to max_sample_size. 
+        such that the subsample length is equal to max_sample_size. 
 
     Returns 
     -------
-    correlation_function : array_like
+    correlation_function : np.array
         ndarray containing correlation function :math:`\\xi(s, \\mu)` computed in each 
-        of the len(rp_bins)-1 X len(pi_bins)-1 bins defined by input `rp_bins` and 
-        `pi_bins`.
+        of the len(s_bins)-1 X len(mu_bins)-1 bins defined by input `s_bins` and 
+        `mu_bins`.
 
-        :math:`1 + \\xi(s,\\mu) \equiv DD / RR`, is the 'Natural' estimator is used, 
+        :math:`1 + \\xi(s,\\mu) \\equiv DD / RR`, if the 'Natural' estimator is used, 
         where `DD` is calculated by the pair counter, and `RR` is counted internally 
-        analytic `randoms` if no randoms are passed as an argument.
+        using analytic `randoms` if no randoms are passed as an argument.
 
         If sample2 is passed as input, three ndarrays of shape 
-        (len(rp_bins)-1,len(pi_bins)-1) are returned: 
+        len(rp_bins)-1 x len(pi_bins)-1 are returned: 
         :math:`\\xi_{11}(s, \\mu)`, `\\xi_{12}(s,\\mu)`, `\\xi_{22}(s,\\mu)`
-        and the associated covariance matrices.
         The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
         and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
         appropriate result is not returned.
-
     """
     
-    def list_estimators():
-        estimators = ['Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay']
-        return estimators
-    estimators = list_estimators()
+    estimators = _list_estimators()
     
     #process input parameters
     sample1 = np.asarray(sample1)
@@ -1293,7 +1203,13 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
     s_bins = np.asarray(s_bins)
     mu_bins = np.asarray(mu_bins)
     
-    #Process period entry and check for consistency.
+    #work with the sine of the angle between s and the LOS.  Only using cosine as the 
+    #input because of convention.  sin(theta_los) increases as theta_los increases, which
+    #is required in order to get the pair counter to work.  see note in cpairs s_mu_pairs.
+    theta = np.arccos(mu_bins)
+    mu_bins = np.sin(theta)[::-1] #must be increasing, remember to reverse result.
+    
+    #process the period parameter and check for consistency.
     if period is None:
             PBCs = False
             period = np.array([np.inf]*np.shape(sample1)[-1])
@@ -1304,23 +1220,29 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
             period = np.array([period]*np.shape(sample1)[-1])
         elif np.shape(period)[0] != np.shape(sample1)[-1]:
             raise ValueError("period should have shape (k,)")
-            return None
     
-    #down sample is sample size exceeds max_sample_size.
-    if (len(sample2)>max_sample_size) & (not np.all(sample1==sample2)):
+    #downsample if sample size exceeds max_sample_size.
+    if (len(sample1)>max_sample_size) & (np.all(sample1==sample2)):
+        inds = np.arange(0,len(sample1))
+        np.random.shuffle(inds)
+        inds = inds[0:max_sample_size]
+        sample1 = sample1[inds]
+        sample2 = sample1[inds]
+        print('downsampling sample1...')
+    if len(sample2)>max_sample_size:
         inds = np.arange(0,len(sample2))
         np.random.shuffle(inds)
         inds = inds[0:max_sample_size]
         sample2 = sample2[inds]
-        print('down sampling sample2...')
+        print('downsampling sample2...')
     if len(sample1)>max_sample_size:
         inds = np.arange(0,len(sample1))
         np.random.shuffle(inds)
         inds = inds[0:max_sample_size]
         sample1 = sample1[inds]
-        print('down sampling sample1...')
+        print('downsampling sample1...')
     
-    #check radial bins
+    #check the bins parameters
     if np.shape(s_bins) == ():
         s_bins = np.array([s_bins])
     if np.shape(mu_bins) == ():
@@ -1336,27 +1258,27 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
     if (np.min(mu_bins)<0.0) | (np.max(mu_bins)>1.0):
         raise ValueError('mu bins must be in the range [0,1]')
     
-    k = np.shape(sample1)[-1] #dimensionality of data
+    #check dimensionality of data. currently, points must be 3D.
+    k = np.shape(sample1)[-1]
     if k!=3:
         raise ValueError('data must be 3-dimensional.')
     
     #check for input parameter consistency
     if (period is not None) & (np.max(s_bins)>np.min(period)/2.0):
-        raise ValueError('Cannot calculate for s seperations larger than Lbox/2.')
+        raise ValueError('cannot calculate for s seperations larger than Lbox/2.')
     if (sample2 is not None) & (sample1.shape[-1]!=sample2.shape[-1]):
-        raise ValueError('Sample 1 and sample 2 must have same dimension.')
+        raise ValueError('sample1 and sample2 must have same dimension.')
     if (randoms is None) & (min(period)==np.inf):
-        raise ValueError('If no PBCs are specified, randoms must be provided.')
+        raise ValueError('if no PBCs are specified, randoms must be provided!')
     if estimator not in estimators: 
-        raise ValueError('Must specify a supported estimator. Supported estimators \
+        raise ValueError('user must specify a supported estimator. supported estimators \
         are:{0}'.value(estimators))
     if (PBCs==True) & (max(period)==np.inf):
-        raise ValueError('If a non-infinte PBC specified, all PBCs must be non-infinte.')
+        raise ValueError('If a non-infinte PBC is specified, all PBCs must be \
+        non-infinte.')
     if (type(do_auto) is not bool) | (type(do_cross) is not bool):
         raise ValueError('do_auto and do_cross keywords must be of type boolean.')
 
-    #If PBCs are defined, calculate the randoms analytically. Else, the user must specify
-    #randoms and the pair counts are calculated the old fashion way.
     def random_counts(sample1, sample2, randoms, s_bins, mu_bins, period,\
                       PBCs, k, N_threads, do_RR, do_DR):
         """
@@ -1370,45 +1292,57 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
 
         There are also logical bits to do RR and DR pair counts, as not all estimators 
         need one or the other, and not doing these can save a lot of calculation.
+        
+        If no randoms are passes, calculate analytical randoms; otherwise, do it the old 
+        fashioned way.
         """
         def spherical_sector_volume(s,mu):
             """
+            This function is used to calculate analytical randoms.
+            
             Calculate the volume of a spherical sector, used for the analytical randoms.
             https://en.wikipedia.org/wiki/Spherical_sector
             
-            note that the extra *2 is to get the reflection.
+            Note that the extra *2 is to get the reflection.
             """
             theta = np.arcsin(mu)
-            return (2.0*np.pi/3.0) * np.outer((s**3.0),(1.0-np.cos(theta)))*2
+            vol = (2.0*np.pi/3.0) * np.outer((s**3.0),(1.0-np.cos(theta)))*2.0
+            return vol
         
         #No PBCs, randoms must have been provided.
         if PBCs==False:
-            RR = s_mu_npairs(randoms, randoms, s_bins, mu_bins, period=period, N_threads=N_threads)
+            RR = s_mu_npairs(randoms, randoms, s_bins, mu_bins, period=period,\
+                             N_threads=N_threads)
             RR = np.diff(np.diff(RR,axis=0),axis=1)
-            D1R = s_mu_npairs(sample1, randoms, s_bins, mu_bins, period=period, N_threads=N_threads)
+            D1R = s_mu_npairs(sample1, randoms, s_bins, mu_bins, period=period,\
+                              N_threads=N_threads)
             D1R = np.diff(np.diff(D1R,axis=0),axis=1)
             if np.all(sample1 == sample2): #calculating the cross-correlation
                 D2R = None
             else:
-                D2R = s_mu_npairs(sample2, randoms, s_bins, mu_bins, period=period, N_threads=N_threads)
+                D2R = s_mu_npairs(sample2, randoms, s_bins, mu_bins, period=period,\
+                                  N_threads=N_threads)
                 D2R = np.diff(np.diff(D2R,axis=0),axis=1)
             
             return D1R, D2R, RR
         #PBCs and randoms.
         elif randoms is not None:
             if do_RR==True:
-                RR = s_mu_npairs(randoms, randoms, s_bins, mu_bins, period=period, N_threads=N_threads)
+                RR = s_mu_npairs(randoms, randoms, s_bins, mu_bins, period=period,\
+                                 N_threads=N_threads)
                 RR = np.diff(np.diff(RR,axis=0),axis=1)
             else: RR=None
             if do_DR==True:
-                D1R = s_mu_npairs(sample1, randoms, s_bins, mu_bins, period=period, N_threads=N_threads)
+                D1R = s_mu_npairs(sample1, randoms, s_bins, mu_bins, period=period,\
+                                  N_threads=N_threads)
                 D1R = np.diff(np.diff(D1R,axis=0),axis=1)
             else: D1R=None
             if np.all(sample1 == sample2): #calculating the cross-correlation
                 D2R = None
             else:
                 if do_DR==True:
-                    D2R = s_mu_npairs(sample2, randoms, s_bins, mu_bins, period=period, N_threads=N_threads)
+                    D2R = s_mu_npairs(sample2, randoms, s_bins, mu_bins, period=period,\
+                                      N_threads=N_threads)
                     D2R = np.diff(np.diff(D2R,axis=0),axis=1)
                 else: D2R=None
             
@@ -1416,14 +1350,15 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         #PBCs and no randoms--calculate randoms analytically.
         elif randoms is None:
             #do volume calculations
-            dv = spherical_sector_volume(s_bins,mu_bins) #volume of spheres
-            dv = np.diff(np.diff(dv, axis=0),axis=1) #volume of annuli
+            dv = spherical_sector_volume(s_bins,mu_bins)
+            dv = np.diff(dv, axis=1) #volume of wedges
+            dv = np.diff(dv, axis=0) #volume of wedge 'pieces'
             global_volume = period.prod() #sexy
             
             #calculate randoms for sample1
             N1 = np.shape(sample1)[0]
             rho1 = N1/global_volume
-            D1R = (N1)*(dv*rho1) #read note about pair counter
+            D1R = (N1-1.0)*(dv*rho1) #read note about pair counter
             
             #if not calculating cross-correlation, set RR exactly equal to D1R.
             if np.all(sample1 == sample2):
@@ -1432,11 +1367,13 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
             else: #if there is a sample2, calculate randoms for it.
                 N2 = np.shape(sample2)[0]
                 rho2 = N2/global_volume
-                D2R = N2*(dv*rho2) #read note about pair counter
+                D2R = (N2-1.0)*(dv*rho2) #read note about pair counter
                 #calculate the random-random pairs.
+                #RR is only the RR for the cross-correlation when using analytical randoms
+                #for the non-cross case, DR==RR (in analytical world).
                 NR = N1*N2
                 rhor = NR/global_volume
-                RR = (dv*rhor) #RR is only the RR for the cross-correlation.
+                RR = (dv*rhor)
 
             return D1R, D2R, RR
         else:
@@ -1447,106 +1384,135 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         """
         Count data pairs.
         """
-        D1D1 = s_mu_npairs(sample1, sample1, s_bins, mu_bins, period=period, N_threads=N_threads)
-        D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
+        if do_auto==True:
+            D1D1 = s_mu_npairs(sample1, sample1, s_bins, mu_bins, period=period,\
+                               N_threads=N_threads)
+            D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
+        else: 
+            D1D1=None
+            D2D2=None
+            
         if np.all(sample1 == sample2):
             D1D2 = D1D1
             D2D2 = D1D1
         else:
-            D1D2 = s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=period, N_threads=N_threads)
-            D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
-            D2D2 = s_mu_npairs(sample2, sample2, s_bins, mu_bins, period=period, N_threads=N_threads)
-            D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
+            if do_cross==True:
+                D1D2 = s_mu_npairs(sample1, sample2, s_bins, mu_bins, period=period,\
+                                   N_threads=N_threads)
+                D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
+            else: D1D2=None
+            if do_auto==True:
+                D2D2 = s_mu_npairs(sample2, sample2, s_bins, mu_bins, period=period,\
+                                   N_threads=N_threads)
+                D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
+            else: D2D2=None
 
         return D1D1, D1D2, D2D2
-        
-    def TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
-        """
-        two point correlation function estimator
-        """
-        if estimator == 'Natural':
-            factor = ND1*ND2/(NR1*NR2)
-            #DD/RR-1
-            xi = (1.0/factor)*DD/RR - 1.0
-        elif estimator == 'Davis-Peebles':
-            factor = ND1*ND2/(ND1*NR2)
-            #DD/DR-1
-            xi = (1.0/factor)*DD/DR - 1.0
-        elif estimator == 'Hewett':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD-DR)/RR
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*DR/RR
-        elif estimator == 'Hamilton':
-            #DDRR/DRDR-1
-            xi = (DD*RR)/(DR*DR) - 1.0
-        elif estimator == 'Landy-Szalay':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD - 2.0*DR + RR)/RR
-            xi = (1.0/factor1)*DD/RR - (1.0/factor2)*2.0*DR/RR + 1.0
-        else: 
-            raise ValueError("unsupported estimator!")
-        return xi
     
-    def TP_estimator_requirements(estimator):
-        """
-        return booleans indicating which pairs need to be counted for the chosen estimator
-        """
-        if estimator == 'Natural':
-            do_DD = True
-            do_DR = False
-            do_RR = True
-        elif estimator == 'Davis-Peebles':
-            do_DD = True
-            do_DR = True
-            do_RR = False
-        elif estimator == 'Hewett':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        elif estimator == 'Hamilton':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        elif estimator == 'Landy-Szalay':
-            do_DD = True
-            do_DR = True
-            do_RR = True
-        else: 
-            raise ValueError("unsupported estimator!")
-        return do_DD, do_DR, do_RR
+    #what needs to be done?
+    do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
-    do_DD, do_DR, do_RR = TP_estimator_requirements(estimator)
-              
+    #how many points (for normalization purposes)
     if randoms is not None:
         N1 = len(sample1)
         N2 = len(sample2)
         NR = len(randoms)
-    else: 
+    else: #this is taken care of in the random_pairs analytical randoms section.
         N1 = 1.0
         N2 = 1.0
         NR = 1.0
     
-    #count pairs
+    #count pairs!
     D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, s_bins, mu_bins, period,\
                                  N_threads, do_auto, do_cross, do_DD)
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, s_bins, mu_bins, period,\
                                  PBCs, k, N_threads, do_RR, do_DR)
     
+    #return results.  remember to reverse the final result because we used sin(theta_los)
+    #bins instead of the user passed in mu = cos(theta_los). 
     if np.all(sample2==sample1):
-        xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
+        xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)[:,::-1]
         return xi_11
     else:
         if (do_auto==True) & (do_cross==True): 
-            xi_11 = TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-            xi_12 = TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
-            xi_22 = TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)[:,::-1]
+            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)[:,::-1]
+            xi_22 = _TP_estimator(D2D2,D2R,RR,N2,N2,NR,NR,estimator)[:,::-1]
             return xi_11, xi_12, xi_22
         elif (do_cross==True):
-            xi_12 = TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
+            xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)[:,::-1]
             return xi_12
         elif (do_auto==True):
-            xi_11 = TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
-            xi_22 = TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
+            xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)[:,::-1]
+            xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)[:,::-1]
             return xi_11
+
+def _list_estimators():
+    """
+    private internal function.
+    list available tpcf estimators
+    """
+    estimators = ['Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay']
+    return estimators
+
+def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
+    """
+    private internal function.
+    two point correlation function estimator
+    
+    note: jackknife_tpcf uses its own intenral version, this is not totally ideal.
+    """
+    if estimator == 'Natural':
+        factor = ND1*ND2/(NR1*NR2)
+        #DD/RR-1
+        xi = (1.0/factor)*DD/RR - 1.0
+    elif estimator == 'Davis-Peebles':
+        factor = ND1*ND2/(ND1*NR2)
+        #DD/DR-1
+        xi = (1.0/factor)*DD/DR - 1.0
+    elif estimator == 'Hewett':
+        factor1 = ND1*ND2/(NR1*NR2)
+        factor2 = ND1*NR2/(NR1*NR2)
+        #(DD-DR)/RR
+        xi = (1.0/factor1)*DD/RR - (1.0/factor2)*DR/RR
+    elif estimator == 'Hamilton':
+        #DDRR/DRDR-1
+        xi = (DD*RR)/(DR*DR) - 1.0
+    elif estimator == 'Landy-Szalay':
+        factor1 = ND1*ND2/(NR1*NR2)
+        factor2 = ND1*NR2/(NR1*NR2)
+        #(DD - 2.0*DR + RR)/RR
+        xi = (1.0/factor1)*DD/RR - (1.0/factor2)*2.0*DR/RR + 1.0
+    else: 
+        raise ValueError("unsupported estimator!")
+    return xi
+    
+def _TP_estimator_requirements(estimator):
+    """
+    private internal function.
+    return booleans indicating which pairs need to be counted for the chosen estimator
+    """
+    if estimator == 'Natural':
+        do_DD = True
+        do_DR = False
+        do_RR = True
+    elif estimator == 'Davis-Peebles':
+        do_DD = True
+        do_DR = True
+        do_RR = False
+    elif estimator == 'Hewett':
+        do_DD = True
+        do_DR = True
+        do_RR = True
+    elif estimator == 'Hamilton':
+        do_DD = True
+        do_DR = True
+        do_RR = True
+    elif estimator == 'Landy-Szalay':
+        do_DD = True
+        do_DR = True
+        do_RR = True
+    else: 
+        raise ValueError("unsupported estimator!")
+    return do_DD, do_DR, do_RR
+
