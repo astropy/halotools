@@ -98,6 +98,7 @@ class FakeSim(object):
 			'halo_rvir': rvir, 
 			'halo_rs': rs, 
 			'halo_zhalf': zhalf, 
+			'halo_nfw_conc': conc, 
 			'halo_vmax': vmax, 
 			'halo_vpeak': vpeak, 
 			'halo_x': x, 

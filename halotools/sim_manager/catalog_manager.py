@@ -25,7 +25,7 @@ import urlparse
 import datetime 
 
 from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..utils.io_utils import download_file_from_url
 
 from astropy.tests.helper import remote_data
@@ -35,7 +35,7 @@ from . import cache_config, sim_defaults
 import os, fnmatch, re
 from functools import partial
 
-from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
+from ..custom_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError, HalotoolsError
 
 unsupported_simname_msg = "Input simname ``%s`` is not recognized by Halotools"
 
@@ -499,9 +499,15 @@ class CatalogManager(object):
         return scale_factor_substring
 
     def _closest_fname(self, filename_list, desired_redshift):
+        """
+        """
 
-        if desired_redshift == -1:
-            raise ValueError("desired_redshift of -1 is unphysical")
+        if custom_len(filename_list) == 0:
+            msg = "The _closest_fname method was passed an empty filename_list"
+            raise HalotoolsError(msg)
+
+        if desired_redshift <= -1:
+            raise ValueError("desired_redshift of <= -1 is unphysical")
         else:
             input_scale_factor = 1./(1.+desired_redshift) 
 
@@ -739,7 +745,7 @@ class CatalogManager(object):
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
                 "No raw %s halo catalog has \na redshift within %.2f " + 
-                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
@@ -769,7 +775,9 @@ class CatalogManager(object):
         download_file_from_url(url, output_fname)
         end = time()
         runtime = (end - start)
-        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+        print("\nTotal runtime to download raw halo catalog = %.1f seconds\n" % runtime)
+        if 'success_msg' in kwargs.keys():
+            print(kwargs['success_msg'])
         return output_fname
 
 
@@ -826,14 +834,26 @@ class CatalogManager(object):
         desired_redshift = kwargs['desired_redshift']
 
         available_fnames_to_download = self.processed_halo_tables_available_for_download(**kwargs)
+        if available_fnames_to_download == []:
+            msg = "You made the following request for a pre-processed halo catalog:\n"
+            if 'simname' in kwargs:
+                msg = msg + "simname = " + kwargs['simname'] + "\n"
+            else:
+                msg = msg + "simname = any simulation\n"
+            if 'halo_finder' in kwargs:
+                msg = msg + "halo-finder = " + kwargs['halo_finder'] + "\n"
+            else:
+                msg = msg + "halo-finder = any halo-finder\n" 
+            msg = msg + "There are no halo catalogs meeting your specifications"
+            raise UnsupportedSimError(msg)
 
         url, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
-                "No raw %s halo catalog has \na redshift within %.2f " + 
-                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                "No pre-processed %s halo catalog has \na redshift within %.2f " + 
+                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
@@ -865,7 +885,9 @@ class CatalogManager(object):
         download_file_from_url(url, output_fname)
         end = time()
         runtime = (end - start)
-        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+        print("\nTotal runtime to download pre-processed halo catalog = %.1f seconds\n" % runtime)
+        if 'success_msg' in kwargs.keys():
+            print(kwargs['success_msg'])
         return output_fname
 
 
@@ -927,11 +949,19 @@ class CatalogManager(object):
 
         url, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
+        if available_fnames_to_download == []:
+            msg = "You made the following request for a pre-processed halo catalog:\n"
+            if 'simname' in kwargs:
+                msg = msg + "simname = " + kwargs['simname'] + "\n"
+            else:
+                msg = msg + "simname = any simulation\n"
+            msg = msg + "There are no simulations with this name with particles available for download"
+            raise UnsupportedSimError(msg)
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
-                "No raw %s halo catalog has \na redshift within %.2f " + 
-                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f"
+                "No %s particle catalog has \na redshift within %.2f " + 
+                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return 
@@ -950,17 +980,22 @@ class CatalogManager(object):
                  for fname in filelist:
                     if fnmatch.filter([fname], file_pattern) != []:
                         existing_fname = os.path.join(path, fname)
-                        msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
-                            "If you really want to overwrite the file, \n"
-                            "you must call the same function again \n"
-                            "with the keyword argument `overwrite` set to `True`")
+                        if 'initial_download_script_msg' in kwargs.keys():
+                            msg = kwargs['initial_download_script_msg']
+                        else:
+                            msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
+                                "If you really want to overwrite the file, \n"
+                                "you must call the same function again \n"
+                                "with the keyword argument `overwrite` set to `True`")
                         raise HalotoolsCacheError(msg % existing_fname)
 
         start = time()
         download_file_from_url(url, output_fname)
         end = time()
         runtime = (end - start)
-        print("\nTotal runtime to download snapshot = %.1f seconds\n" % runtime)
+        print("\nTotal runtime to download particle data = %.1f seconds\n" % runtime)
+        if 'success_msg' in kwargs.keys():
+            print(kwargs['success_msg'])
         return output_fname
 
     def retrieve_ptcl_table_from_cache(self, simname, desired_redshift, **kwargs):

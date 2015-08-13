@@ -22,10 +22,10 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from . import model_defaults, model_helpers, smhm_components
 from .assembias import HeavisideAssembias
 
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 from ..utils.table_utils import compute_conditional_percentiles
 from ..  import sim_manager
-from ..halotools_exceptions import HalotoolsModelInputError
+from ..custom_exceptions import HalotoolsModelInputError
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -85,6 +85,9 @@ class OccupationComponent(model_helpers.GalPropModel):
                 "implement a method named %s " % required_method_name)
 
         self._additional_methods_to_inherit = ['mean_occupation']
+
+        if not hasattr(self, 'publications'):
+            self.publications = []
 
     def mc_occupation(self, seed=None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 

@@ -23,9 +23,9 @@ from . import halo_prof_components
 from ..sim_manager.supported_sims import HaloCatalog
 
 from ..sim_manager.generate_random_sim import FakeSim
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 
-from ..halotools_exceptions import HalotoolsError
+from ..custom_exceptions import HalotoolsError
 from warnings import warn 
 
 @six.add_metaclass(ABCMeta)
@@ -1013,7 +1013,7 @@ class HodModelFactory(ModelFactory):
                         example_repeated_element = list(dict_intersection)[0]
                         msg = ("The composite model received multiple "
                             "component models \nwith a new_haloprop_func_dict that use "
-                            "the %s key. \Ignoring the one that appears in the %s " 
+                            "the %s key. \nIgnoring the one that appears in the %s " 
                             "component for %s galaxies")
                         warn(msg % (example_repeated_element, component_key, gal_type))
 

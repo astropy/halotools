@@ -14,7 +14,7 @@ from astropy.config.paths import _find_home
 import warnings
 
 from . import sim_defaults
-from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError
+from ..custom_exceptions import UnsupportedSimError, CatalogTypeError
 
 def simname_is_supported(simname):
     """ Method returns a boolean for whether or not the input 

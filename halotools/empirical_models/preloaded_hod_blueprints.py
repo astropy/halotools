@@ -13,7 +13,7 @@ from . import gal_prof_components as gpc
 
 from ..sim_manager import sim_defaults
 
-__all__ = ['Zheng07_blueprint', 'Leauthaud11_blueprint']
+__all__ = ['Zheng07_blueprint', 'Leauthaud11_blueprint', 'Hearin15_blueprint']
 
 
 def Zheng07_blueprint(threshold = model_defaults.default_luminosity_threshold, **kwargs):
@@ -137,91 +137,89 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     return model_blueprint
 
 
-# def Zentner15_blueprint(baseline_central_hod_model=hoc.Leauthaud11Cens, **kwargs):
-#     """ 
+def Hearin15_blueprint(central_assembias = True, satellite_assembias = True, 
+    **kwargs):
+    """ 
+    HOD-style model in which central and satellite occupations statistics are assembly-biased. 
 
-#     Parameters 
-#     ----------
-#     threshold : float, optional keyword argument
-#         Stellar mass threshold of the mock galaxy sample. 
-#         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+    Parameters 
+    ----------
+    threshold : float, optional
+        Stellar mass threshold of the mock galaxy sample. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-#     baseline_central_hod_model : object, optional keyword argument 
-#         Sub-class of `~halotools.empirical_models.OccupationComponent` governing 
-#         the underlying standard HOD of centrals. Default is `Leauthaud11Cens`. 
+    central_assembias : bool, optional 
+        Boolean determining whether the model implements assembly biased occupations for centrals. 
+        Default is True. 
 
-#     prim_haloprop_key : string, optional keyword argument 
-#         String giving the column name of the primary halo property governing 
-#         the occupation statistics of gal_type galaxies. 
-#         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+    satellite_assembias : bool, optional 
+        Boolean determining whether the model implements assembly biased occupations for satellites. 
+        Default is True. 
 
-#     sec_haloprop_key : string, optional keyword argument 
-#         String giving the column name of the secondary halo property modulating 
-#         the occupation statistics of the galaxies. 
-#         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+    sec_haloprop_key : string, optional keyword argument 
+        String giving the column name of the secondary halo property modulating 
+        the occupation statistics of the galaxies. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-#     ab_percentile : float
-#         percentile at which to implement heavside 2-population assembly bias
+    split : float
+        percentile at which to implement heavside 2-population assembly bias
 
-#     frac_dNmax : float
-#         fraction of maximal assembly bias effect
+    assembias_strength : float, optional 
+        Fraction between -1 and 1 defining the assembly bias correlation strength. 
+        Default is 0.5. 
 
-#     redshift : float, optional keyword argument 
-#         Redshift of the stellar-to-halo-mass relation. Default is 0. 
+    assembias_strength_abcissa : list, optional 
+        Values of the primary halo property at which the assembly bias strength is specified. 
+        Default is to assume a constant strength of 0.5. 
 
-#     Returns 
-#     -------
-#     model_blueprint : dict 
-#         Dictionary containing instructions for how to build the model. 
-#         When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
-#         the factory returns the Zentner15 model object. 
+    assembias_strength_ordinates : list, optional 
+        Values of the assembly bias strength when evaluated at the input ``assembias_strength_abcissa``. 
+        Default is to assume a constant strength of 0.5. 
 
-#     """     
+    redshift : float, optional keyword argument 
+        Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
-#     ##############################
-#     ### Build model for centrals
-#     cen_key = 'centrals'
-#     cen_model_dict = {}
+    Returns 
+    -------
+    model_blueprint : dict 
+        Dictionary containing instructions for how to build the model. 
+        When model_blueprint is passed to `~halotools.empirical_models.HodModelFactory`, 
+        the factory returns the Hearin15 model object. 
 
-#     # Build the occupation model
-#     standard_cen_model = baseline_central_hod_model(**kwargs)
-#     arz = abhod_components.HeavisideCenAssemBiasModel(
-#         standard_cen_model = standard_cen_model, **kwargs)
-#     cen_model_dict['occupation'] = arz
+    """     
 
-#     # Build the profile model
-#     cen_profile = gpf.IsotropicGalProf(
-#         gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
-#     cen_model_dict['profile'] = cen_profile
+    ##############################
+    ### Build the occupation model
+    if central_assembias is True:
+        cen_ab_component = hoc.AssembiasLeauthaud11Cens(**kwargs)
+    else:
+        cen_ab_component = hoc.Leauthaud11Cens(**kwargs)
 
-#     ##############################
-#     ### Build model for satellites
-#     cen_key = 'satellites'
-#     sat_model_dict = {}
+    cen_model_dict = {}
+    cen_model_dict['occupation'] = cen_ab_component
 
-#     model_blueprint = {standard_cen_model.gal_type : cen_model_dict}
-#     return model_blueprint
+    # Build the profile model
+    cen_profile = gpf.IsotropicGalProf(
+        gal_type='centrals', halo_prof_model=hpc.TrivialProfile)
+    cen_model_dict['profile'] = cen_profile
 
+    ##############################
+    ### Build the occupation model
+    if satellite_assembias is True:
+        sat_ab_component = hoc.AssembiasLeauthaud11Sats(**kwargs)
+    else:
+        sat_ab_component = hoc.Leauthaud11Sats(**kwargs)
 
-"""
-    ### Build model for satellites
-    sat_key = 'satellites'
     sat_model_dict = {}
-    # Build the occupation model
-    occu_sat_model = hoc.Zheng07Sats(gal_type=sat_key, 
-        threshold = threshold)
-    sat_model_dict['occupation'] = occu_sat_model
+    sat_model_dict['occupation'] = sat_ab_component
+
     # Build the profile model
     sat_profile = gpf.IsotropicGalProf(
-        gal_type=sat_key, halo_prof_model=hpc.NFWProfile)
+        gal_type='satellites', halo_prof_model=hpc.NFWProfile)
     sat_model_dict['profile'] = sat_profile
 
-    model_blueprint = {
-        occu_cen_model.gal_type : cen_model_dict,
-        occu_sat_model.gal_type : sat_model_dict, 
-        'mock_factory' : mock_factories.HodMockFactory
-        }
-"""
+    model_blueprint = {'centrals': cen_model_dict, 'satellites': sat_model_dict}
+    return model_blueprint
 
 
 
