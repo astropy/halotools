@@ -10,7 +10,7 @@ from warnings import warn
 from time import time
 
 from . import model_defaults, model_helpers
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 
 from ..custom_exceptions import HalotoolsError
 from ..utils.table_utils import compute_conditional_percentiles
