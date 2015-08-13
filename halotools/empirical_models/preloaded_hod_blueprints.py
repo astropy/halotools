@@ -48,8 +48,7 @@ def Zheng07_blueprint(threshold = model_defaults.default_luminosity_threshold, *
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Zheng07Cens(gal_type=cen_key, 
-        threshold = threshold)
+    occu_cen_model = hoc.Zheng07Cens(threshold = threshold)
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
@@ -62,8 +61,7 @@ def Zheng07_blueprint(threshold = model_defaults.default_luminosity_threshold, *
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Zheng07Sats(gal_type=sat_key, 
-        threshold = threshold)
+    occu_sat_model = hoc.Zheng07Sats(threshold = threshold)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
     sat_profile = gpf.IsotropicGalProf(
@@ -106,8 +104,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Leauthaud11Cens(gal_type=cen_key, 
-        threshold = threshold)
+    occu_cen_model = hoc.Leauthaud11Cens(threshold = threshold)
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
@@ -120,8 +117,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Leauthaud11Sats(gal_type=sat_key, 
-        threshold = threshold)
+    occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
     sat_profile = gpf.IsotropicGalProf(
@@ -164,16 +160,20 @@ def Hearin15_blueprint(central_assembias = True, satellite_assembias = True,
     split : float
         percentile at which to implement heavside 2-population assembly bias
 
-    assembias_strength : float, optional 
-        Fraction between -1 and 1 defining the assembly bias correlation strength. 
-        Default is 0.5. 
+    central_assembias_strength : float or list, optional 
+        Fraction or list of fractions between -1 and 1 defining 
+        the assembly bias correlation strength. Default is 0.5. 
 
-    assembias_strength_abcissa : list, optional 
+    central_assembias_strength_abcissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
         Default is to assume a constant strength of 0.5. 
 
-    assembias_strength_ordinates : list, optional 
-        Values of the assembly bias strength when evaluated at the input ``assembias_strength_abcissa``. 
+    satellite_assembias_strength : float or list, optional 
+        Fraction or list of fractions between -1 and 1 defining 
+        the assembly bias correlation strength. Default is 0.5. 
+
+    satellite_assembias_strength_abcissa : list, optional 
+        Values of the primary halo property at which the assembly bias strength is specified. 
         Default is to assume a constant strength of 0.5. 
 
     redshift : float, optional keyword argument 

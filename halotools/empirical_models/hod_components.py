@@ -175,16 +175,12 @@ class Zheng07Cens(OccupationComponent):
     """
 
     def __init__(self, 
-        gal_type='centrals', 
         threshold=model_defaults.default_luminosity_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         **kwargs):
         """
         Parameters 
         ----------
-        gal_type : string, optional keyword argument
-            Name of the galaxy population being modeled. Default is ``centrals``.  
-
         threshold : float, optional keyword argument
             Luminosity threshold of the mock galaxy sample. If specified, 
             input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
@@ -199,7 +195,7 @@ class Zheng07Cens(OccupationComponent):
         Examples 
         --------
         >>> cen_model = Zheng07Cens()
-        >>> cen_model = Zheng07Cens(gal_type='cens', threshold=-19.5)
+        >>> cen_model = Zheng07Cens(threshold=-19.5)
         >>> cen_model = Zheng07Cens(prim_haloprop_key='halo_m200b')
 
         Notes 
@@ -211,7 +207,7 @@ class Zheng07Cens(OccupationComponent):
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
-        super(Zheng07Cens, self).__init__(gal_type=gal_type, 
+        super(Zheng07Cens, self).__init__(gal_type='centrals', 
             threshold=threshold, upper_bound=upper_bound, 
             prim_haloprop_key=prim_haloprop_key, 
             **kwargs)
@@ -350,16 +346,12 @@ class Leauthaud11Cens(OccupationComponent):
     a stellar-to-halo-mass relation. 
     """
     def __init__(self, smhm_model=smhm_components.Moster13SmHm, 
-        gal_type = 'centrals', 
         threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         **kwargs):
         """
         Parameters 
         ----------
-        gal_type : string, optional keyword argument
-            Name of the galaxy population being modeled. Default is ``centrals``.  
-
         threshold : float, optional keyword argument
             Stellar mass threshold of the mock galaxy sample. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
@@ -388,14 +380,16 @@ class Leauthaud11Cens(OccupationComponent):
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Leauthaud11Cens, self).__init__(
-            gal_type=gal_type, threshold=threshold, 
+            gal_type='centrals', threshold=threshold, 
             upper_bound=upper_bound, 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
         self.smhm_model = smhm_model(
-            gal_type=gal_type, prim_haloprop_key = prim_haloprop_key, **kwargs)
-        self.param_dict = self.smhm_model.param_dict
+            gal_type='centrals', prim_haloprop_key = prim_haloprop_key, **kwargs)
+
+        for key, value in self.smhm_model.param_dict.iteritems():
+            self.param_dict[key] = value
 
         self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
 
@@ -422,14 +416,45 @@ class Leauthaud11Cens(OccupationComponent):
         -----
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
+        for key, value in self.param_dict.iteritems():
+            if key in self.smhm_model.param_dict.keys():
+                self.smhm_model.param_dict[key] = value 
+
         logmstar = np.log10(self.smhm_model.mean_stellar_mass(**kwargs))
         logscatter = math.sqrt(2)*self.smhm_model.mean_scatter(**kwargs)
 
         mean_ncen = 0.5*(1.0 - 
             erf((self.threshold - logmstar)/logscatter))
 
-        return mean_ncen        
+        return mean_ncen
 
+    def mean_stellar_mass(self, **kwargs):
+        """ Return the stellar mass of a central galaxy as a function 
+        of the input halo_table.  
+
+        Parameters 
+        ----------
+        prim_haloprop : array, optional keyword argument 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+
+        halo_table : object, optional keyword argument 
+            Data table storing halo catalog. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+
+        redshift : float, keyword argument
+            Redshift of the halo hosting the galaxy
+
+        Returns 
+        -------
+        mstar : array_like 
+            Array containing stellar masses living in the input halo_table. 
+        """
+
+        for key, value in self.param_dict.iteritems():
+            if key in self.smhm_model.param_dict:
+                self.smhm_model.param_dict[key] = value 
+        return self.smhm_model.mean_stellar_mass(**kwargs)
 
 class Zheng07Sats(OccupationComponent):
     """ Power law model for the occupation statistics of satellite galaxies, 
@@ -441,7 +466,6 @@ class Zheng07Sats(OccupationComponent):
     """
 
     def __init__(self,
-        gal_type='satellites', 
         threshold=model_defaults.default_luminosity_threshold,
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         modulate_with_cenocc = False, 
@@ -449,9 +473,6 @@ class Zheng07Sats(OccupationComponent):
         """
         Parameters 
         ----------
-        gal_type : string, optional keyword argument
-            Name of the galaxy population being modeled. Default is ``satellites``.  
-
         threshold : float, optional keyword argument
             Luminosity threshold of the mock galaxy sample. If specified, 
             input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
@@ -473,15 +494,9 @@ class Zheng07Sats(OccupationComponent):
 
             :math:`\\langle N_{\mathrm{sat}}\\rangle_{M}\\Rightarrow\\langle N_{\mathrm{sat}}\\rangle_{M}\\times\\langle N_{\mathrm{cen}}\\rangle_{M}`
 
-        gal_type_centrals : string, optional keyword argument
-            Name of the central galaxy population whose first moment 
-            modulates the `mean_occupation` method of `Zheng07Sats`. 
-            Only required if ``modulate_with_cenocc`` is True. 
-
         Examples 
         --------
         >>> sat_model = Zheng07Sats()
-        >>> sat_model = Zheng07Sats(gal_type='sats')
         >>> sat_model = Zheng07Sats(threshold = -21)
 
         The ``param_dict`` attribute can be used to build an alternate 
@@ -504,7 +519,7 @@ class Zheng07Sats(OccupationComponent):
 
         >>> sat_model1 = Zheng07Sats(threshold=-18)
         >>> cen_model_instance = Zheng07Cens(threshold = sat_model1.threshold)
-        >>> sat_model2 = Zheng07Sats(threshold = sat_model1.threshold, modulate_with_cenocc=True, gal_type_centrals = 'cens')
+        >>> sat_model2 = Zheng07Sats(threshold = sat_model1.threshold, modulate_with_cenocc=True)
 
         Now ``sat_model1`` and ``sat_model2`` are identical in every respect, 
         excepting only the following difference:
@@ -523,7 +538,7 @@ class Zheng07Sats(OccupationComponent):
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Zheng07Sats, self).__init__(
-            gal_type=gal_type, threshold=threshold, 
+            gal_type='satellites', threshold=threshold, 
             upper_bound=upper_bound, 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
@@ -532,15 +547,13 @@ class Zheng07Sats(OccupationComponent):
 
         self.modulate_with_cenocc = modulate_with_cenocc
         if self.modulate_with_cenocc is True:
-            if 'gal_type_centrals' not in kwargs.keys():
-                raise KeyError("If ``modulate_with_cenocc`` is True, must also pass "
-                    "the gal_type_centrals keyword.")
-            gal_type_centrals = kwargs['gal_type_centrals']
             self.central_occupation_model = Zheng07Cens(
                 prim_haloprop_key = prim_haloprop_key, 
-                threshold = threshold, gal_type = gal_type_centrals)
+                threshold = threshold)
+            for key, value in self.central_occupation_model.param_dict.iteritems():
+                self.param_dict[key] = value
             self.ancillary_model_dependencies = ['central_occupation_model']
-            
+            self.ancillary_model_param_keys = self.central_occupation_model.param_dict.keys()
 
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
 
@@ -581,7 +594,7 @@ class Zheng07Sats(OccupationComponent):
 
         >>> sat_model = Zheng07Sats()
         >>> testmass = np.logspace(10, 15, num=50)
-        >>> mean_nsat = sat_model.mean_occupation(prim_haloprop =testmass)
+        >>> mean_nsat = sat_model.mean_occupation(prim_haloprop = testmass)
 
         The second option is to pass `mean_occupation` a full halo catalog. 
         In this case, the array storing the primary halo property will be selected 
@@ -593,6 +606,11 @@ class Zheng07Sats(OccupationComponent):
         >>> mean_nsat = sat_model.mean_occupation(halo_table=fake_sim.halo_table)
 
         """
+        if self.modulate_with_cenocc is True:
+            for key, value in self.param_dict.iteritems():
+                if key in self.central_occupation_model.param_dict:
+                    self.central_occupation_model.param_dict[key] = value 
+
         # Retrieve the array storing the mass-like variable
         if 'halo_table' in kwargs.keys():
             mass = kwargs['halo_table'][self.prim_haloprop_key]
@@ -688,7 +706,6 @@ class Leauthaud11Sats(OccupationComponent):
     a stellar-to-halo-mass relation. 
     """
     def __init__(self, smhm_model=smhm_components.Moster13SmHm, 
-        gal_type = 'satellites', 
         threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         modulate_with_cenocc = False, 
@@ -696,9 +713,6 @@ class Leauthaud11Sats(OccupationComponent):
         """
         Parameters 
         ----------
-        gal_type : string, optional keyword argument
-            Name of the galaxy population being modeled. Default is ``satellites``.  
-
         threshold : float, optional keyword argument
             Stellar mass threshold of the mock galaxy sample. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
@@ -719,34 +733,19 @@ class Leauthaud11Sats(OccupationComponent):
             If True, the first satellite moment will be multiplied by the 
             the first central moment. Default is False. 
 
-        gal_type_centrals : string, keyword argument
-            Name of the central galaxy population whose first moment 
-            modulates the `mean_occupation` method of `Zheng07Sats`. 
-            Only required if ``modulate_with_cenocc`` is True. 
-
         Examples 
         --------
         >>> sat_model = Leauthaud11Sats()
         """
 
-        if modulate_with_cenocc is True:
-            if 'gal_type_centrals' not in kwargs.keys():
-                raise KeyError("If ``modulate_with_cenocc`` is True, must also pass "
-                    "the gal_type_centrals keyword.")
-            gal_type_centrals = kwargs['gal_type_centrals']
-            self.central_occupation_model = Leauthaud11Cens(
-                gal_type=gal_type_centrals, threshold=threshold,
-                prim_haloprop_key = prim_haloprop_key, smhm_model = smhm_model, 
-                **kwargs)
-        else:
-            self.central_occupation_model = Leauthaud11Cens(
-                threshold=threshold, prim_haloprop_key = prim_haloprop_key, 
-                smhm_model = smhm_model, **kwargs)
-
+        self.central_occupation_model = Leauthaud11Cens(
+            threshold=threshold, prim_haloprop_key = prim_haloprop_key, 
+            smhm_model = smhm_model, **kwargs)
         self.ancillary_model_dependencies = ['central_occupation_model']
+        self.ancillary_model_param_keys = self.central_occupation_model.param_dict.keys()
 
         super(Leauthaud11Sats, self).__init__(
-            gal_type=gal_type, threshold=threshold, 
+            gal_type='satellites', threshold=threshold, 
             upper_bound=float("inf"), 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
@@ -754,7 +753,6 @@ class Leauthaud11Sats(OccupationComponent):
         self._initialize_param_dict()
 
         self.modulate_with_cenocc = modulate_with_cenocc
-
 
         self.publications = self.central_occupation_model.publications
 
@@ -825,6 +823,9 @@ class Leauthaud11Sats(OccupationComponent):
         self.param_dict['betacut'] = -0.13
         self.param_dict['betasat'] = 0.859
 
+        for key, value in self.central_occupation_model.param_dict.iteritems():
+            self.param_dict[key] = value
+
         self._update_satellite_params()
 
 
@@ -832,9 +833,12 @@ class Leauthaud11Sats(OccupationComponent):
         """ Private method to update the model parameters. 
 
         """
+        for key, value in self.param_dict.iteritems():
+            if key in self.central_occupation_model.param_dict:
+                self.central_occupation_model.param_dict[key] = value
 
         # Tabulate the inverse stellar-to-halo-mass relation
-        ordinates = self.central_occupation_model.smhm_model.mean_stellar_mass(
+        ordinates = self.central_occupation_model.mean_stellar_mass(
             prim_haloprop =self._msat_mcut_abcissa)
         spline_function = spline(ordinates, self._msat_mcut_abcissa)
 

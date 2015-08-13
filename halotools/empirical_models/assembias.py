@@ -10,6 +10,7 @@ from warnings import warn
 from time import time
 
 from . import model_defaults, model_helpers
+from ..utils.array_utils import array_like_length as custom_len
 
 from ..custom_exceptions import HalotoolsError
 from ..utils.table_utils import compute_conditional_percentiles
@@ -22,21 +23,17 @@ class HeavisideAssembias(object):
         """
         Parameters 
         ----------
-        split : float, optional 
-            Fraction between 0 and 1 defining how we split halos into two groupings based on 
-            their conditional secondary percentiles. Default is 0.5 for a constant 50/50 split. 
+        split : float or list, optional 
+            Fraction or list of fractions between 0 and 1 defining how 
+            we split halos into two groupings based on 
+            their conditional secondary percentiles. 
+            Default is 0.5 for a constant 50/50 split. 
 
         split_abcissa : list, optional 
             Values of the primary halo property at which the halos are split as described above in 
             the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
             the interpolation will be done in the logarithm of the primary halo property. 
             Default is to assume a constant 50/50 split. 
-
-        split_ordinates : list, optional 
-            Values of the fraction between 0 and 1 defining how we split halos into two groupings in a 
-            fashion that varies with the value of ``prim_haloprop``. This fraction will equal 
-            the input ``split_ordinates`` for halos whose ``prim_haloprop`` 
-            equals the input ``split_abcissa``. Default is to assume a constant 50/50 split. 
 
         splitting_model : object, optional 
             Model instance with a method called ``splitting_method_name``  
@@ -65,10 +62,8 @@ class HeavisideAssembias(object):
 
         assembias_strength_abcissa : list, optional 
             Values of the primary halo property at which the assembly bias strength is specified. 
-            Default is to assume a constant strength of 0.5. 
-
-        assembias_strength_ordinates : list, optional 
-            Values of the assembly bias strength when evaluated at the input ``assembias_strength_abcissa``. 
+            Default is to assume a constant strength of 0.5. If passing a list, the strength 
+            will interpreted at the input ``assembias_strength_abcissa``.
             Default is to assume a constant strength of 0.5. 
 
         sec_haloprop_key : string, optional 
@@ -107,14 +102,15 @@ class HeavisideAssembias(object):
             self.ancillary_model_dependencies = ['splitting_model']
             self.set_percentile_splitting(
                 splitting_method_name = kwargs['splitting_method_name'])
-        elif 'split_abcissa' and 'split_ordinates' in kwargs:
+        elif 'split_abcissa' in kwargs:
             self.set_percentile_splitting(split_abcissa=kwargs['split_abcissa'], 
-                split_ordinates=kwargs['split_ordinates'])
+                split=kwargs['split'])
         else:
             self.set_percentile_splitting(split = split)
 
-        if 'assembias_strength_abcissa' and 'assembias_strength_ordinates' in kwargs:
-            self._initialize_assembias_param_dict(split_abcissa=kwargs['assembias_strength_abcissa'], 
+        if 'assembias_strength_abcissa' in kwargs:
+            self._initialize_assembias_param_dict(
+                split_abcissa=kwargs['assembias_strength_abcissa'], 
                 split_ordinates=kwargs['assembias_strength_abcissa'])
         else:
             self._initialize_assembias_param_dict(assembias_strength=assembias_strength)
@@ -157,17 +153,20 @@ class HeavisideAssembias(object):
             else:
                 raise HalotoolsError("Input ``splitting_model`` must have a callable function "
                     "named ``%s``" % kwargs['splitting_method_name'])
-        elif 'split' in kwargs.keys():
-            self._split_abcissa = [2]
-            self._split_ordinates = [kwargs['split']]
-        elif ('split_ordinates' in kwargs.keys()) & ('split_abcissa' in kwargs.keys()):
+        elif 'split_abcissa' in kwargs.keys():
+            if custom_len(kwargs['split_abcissa']) != custom_len(kwargs['split']):
+                raise HalotoolsError("``split`` and ``split_abcissa`` must have the same length")
             self._split_abcissa = kwargs['split_abcissa']
-            self._split_ordinates = kwargs['split_ordinates']
+            self._split_ordinates = kwargs['split']
         else:
-            msg = ("The constructor to the HeavisideAssembias class "
-                "must be called with either the ``split`` keyword argument,\n"
-                " or both the ``split_abcissa`` and ``split_ordinates`` keyword arguments" )
-            raise HalotoolsError(msg)
+            try:
+                self._split_abcissa = [2]
+                self._split_ordinates = [kwargs['split']]
+            except KeyError:
+                msg = ("The set_percentile_splitting method must at least be called with a ``split``" 
+                    "keyword argument, or alternatively ``split`` and ``split_abcissa`` arguments.")
+                raise HalotoolsError(msg)
+
 
     def percentile_splitting_function(self, **kwargs):
         """
@@ -217,18 +216,20 @@ class HeavisideAssembias(object):
         if not hasattr(self, 'param_dict'):
             self.param_dict = {}
 
-        if 'assembias_strength' in kwargs.keys():
-            self._assembias_strength_abcissa = [2]
-            self.param_dict[self._get_assembias_param_dict_key(0)] = kwargs['assembias_strength']
-        elif 'assembias_strength_ordinates' and 'assembias_strength_abcissa' in kwargs:
-            self._assembias_strength_abcissa = kwargs['assembias_strength_abcissa']
-            for ipar, val in enumerate(kwargs['assembias_strength_ordinates']):
+        if 'assembias_strength_abcissa' in kwargs:
+            if custom_len(kwargs['assembias_strength_abcissa']) != custom_len(kwargs['assembias_strength']):
+                raise HalotoolsError("``assembias_strength`` and ``assembias_strength_abcissa`` must have the same length")
+            self._assembias_strength_abcissa = list(kwargs['assembias_strength_abcissa'])
+            for ipar, val in enumerate(list(kwargs['assembias_strength'])):
                 self.param_dict[self._get_assembias_param_dict_key(ipar)] = val
         else:
-            msg = ("The constructor to the HeavisideAssembias class "
-                "must be called with either the ``assembias_strength`` keyword argument,\n"
-                " or both the ``assembias_strength_abcissa`` and ``assembias_strength_ordinates`` keyword arguments" )
-            raise HalotoolsError(msg)
+            try:
+                self._assembias_strength_abcissa = [2]
+                self.param_dict[self._get_assembias_param_dict_key(0)] = kwargs['assembias_strength']
+            except KeyError:
+                msg = ("The _initialize_assembias_param_dict method must at least be called with a ``assembias_strength``" 
+                    "keyword argument, or alternatively ``assembias_strength`` and ``assembias_strength_abcissa`` arguments.")
+                raise HalotoolsError(msg)
 
     def assembias_strength(self, **kwargs):
         """
@@ -258,7 +259,7 @@ class HeavisideAssembias(object):
     def _get_assembias_param_dict_key(self, ipar):
         """
         """
-        return self._method_name_to_decorate + '_assembias_param' + str(ipar+1)
+        return self._method_name_to_decorate + '_' + self.gal_type + '_assembias_param' + str(ipar+1)
 
     def galprop_perturbation(self, **kwargs):
         """
@@ -333,7 +334,7 @@ class HeavisideAssembias(object):
                 type1_mask = halo_table[halo_type_key][no_edge_mask] == halo_type1_val
             elif self.sec_haloprop_key + '_percentile' in halo_table.keys():
                 no_edge_percentiles = halo_table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
-                type1_mask = no_edge_percentiles >= no_edge_split
+                type1_mask = no_edge_percentiles > no_edge_split
             else:
                 msg = ("\nThe HeavisideAssembias class implements assembly bias \n" 
                     "by altering the behavior of the model according to the value of " 
@@ -350,7 +351,7 @@ class HeavisideAssembias(object):
                     sec_haloprop_key = self.sec_haloprop_key
                     )
                 no_edge_percentiles = percentiles[no_edge_mask]
-                type1_mask = no_edge_percentiles >= no_edge_split
+                type1_mask = no_edge_percentiles > no_edge_split
 
             perturbation = self.galprop_perturbation(
                     prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask], 
