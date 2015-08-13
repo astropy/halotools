@@ -15,7 +15,7 @@ from ..hod_components import Zheng07Cens, Leauthaud11Cens
 from ..sfr_components import BinaryGalpropInterpolModel
 from ...sim_manager import FakeSim
 from ...utils.table_utils import SampleSelector, compute_conditional_percentiles
-from ...utils.array_utils import array_like_length as custom_len
+from ...utils.array_utils import custom_len
 
 class TestAssembias(TestCase):
     """

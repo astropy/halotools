@@ -20,7 +20,7 @@ from . import model_helpers as model_helpers
 from . import model_defaults
 from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
 
-from ..halotools_exceptions import HalotoolsError
+from ..custom_exceptions import HalotoolsError
 
 try:
     from .. import mock_observables
