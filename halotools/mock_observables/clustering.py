@@ -12,8 +12,10 @@ from math import pi, gamma
 from .pair_counters.rect_cuboid_pairs import npairs, xy_z_npairs, jnpairs, s_mu_npairs
 ##########################################################################################
 
+
 __all__=['tpcf','tpcf_jackknife','redshift_space_tpcf','wp','s_mu_tpcf']
 __author__ = ['Duncan Campbell']
+
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
@@ -57,29 +59,43 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     N_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
-
+    
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
         
         If sample size exeeds max_sample_size, the sample will be randomly down-sampled
-        such that the subsample is (roughly) equal to max_sample_size. 
-        
+        such that the subsample is equal to max_sample_size. 
+    
     Returns 
     -------
-    correlation_function : array_like
-        len(rbins)-1 length array containing correlation function :math:`\\xi(r)` computed 
-        in each of the bins defined by input `rbins`.
+    correlation_function : numpy.array
+        len(`rbins`)-1 length array containing the correlation function :math:`\\xi(r)` 
+        computed in each of the bins defined by input `rbins`.
+        
+        :math:`1 + \\xi(r) \\equiv \\mathrm{DD} / \\mathrm{RR}`, if the 'Natural' 
+        `estimator` is used, where  :math:`\\mathrm{DD}` is calculated by the pair 
+        counter, and :math:`\\mathrm{RR}` is counted internally using 'analytic randoms' 
+        if no `randoms` are passed as an argument (see notes for an explanation).
+        
+        If `sample2` is passed as input, three arrays of length len(`rbins`)-1 are 
+        returned: :math:`\\xi_{11}(r)`, :math:`\\xi_{12}(r)`, :math:`\\xi_{22}(r)`,
+        the autocorrelation of sample1, the cross-correlation between `sample1` and 
+        `sample2`, and the autocorrelation of `sample2`.  If `do_auto` or `do_cross` is 
+        set to False, the appropriate result(s) is not returned.
 
-        :math:`1 + \\xi(r) \\equiv DD / RR`, if 'Natural' estimator is used,
-        where `DD` is calculated by the pair counter, and `RR` is counted internally
-        using analytic `randoms` if no randoms are passed as an argument.
-
-        If sample2 is passed as input, three arrays of length len(rbins)-1 are returned: 
-        :math:`\\xi_{11}(r)`, `\\xi_{12}(r)`, `\\xi_{22}(r)`
-        The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
-        and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
-        appropriate result(s) is not returned.
-
+    Notes
+    -----
+    Pairs are counted using the pair_counters.rect_cuboid_pairs module.  This pair 
+    counter is optimized to work on points distributed in a rectangular cuboid volume, 
+    e.g. a simulation box.  This optimization restricts this function to work on 3-D 
+    point distributions.
+    
+    If the points are distributed in a 'periodic box', then `randoms` are not necessary, 
+    as the geometry is very simple, and the monte carlo integration that randoms are used 
+    for in complex geometries can be done analytically.
+    
+    If the `period` argument is passed, points may not have any component of their 
+    coordinates be negative.
     """
     
     estimators = _list_estimators()
@@ -323,10 +339,10 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     Parameters
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-d positions of Npts.
+        Npts x 3 numpy array containing 3-D positions of points.
     
     randoms : array_like
-        Nran x 3 numpy array containing 3-d positions of Npts.
+        Nran x 3 numpy array containing 3-D positions of points.
     
     rbins : array_like
         numpy array of boundaries defining the bins in which pairs are counted. 
@@ -334,29 +350,29 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     Nsub : array_like, optional
         numpy array of number of divisions along each dimension defining jackknife 
         subvolumes.  If single integer is given, assumed to be equivalent for each 
-        dimension.  Total number of jackknife samples is np.prod(Nsub).
+        dimension.  Total number of jackknife samples is numpy.prod(`Nsub`).
     
     Lbox : array_like, optional
-        length of data volume along each dimension
+        length of data volume along each dimension.
     
     sample2 : array_like, optional
-        Npts x 3 numpy array containing 3-d positions of Npts.
+        Npts x 3 numpy array containing 3-D positions of points.
     
-    period: array_like, optional
+    period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
+        one number, Lbox, is specified, period is assumed to be numpy.array([Lbox]*3).
         If none, PBCs are set to infinity.
     
-    do_auto: boolean, optional
+    do_auto : boolean, optional
         do auto-correlation?  Default is True.
     
-    do_cross: boolean, optional
+    do_cross : boolean, optional
         do cross-correlation?  Default is True.
     
-    estimator: string, optional
+    estimator : string, optional
         options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
     
-    N_threads: int, optional
+    N_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
     
@@ -364,25 +380,33 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
         Defines maximum size of the sample that will be passed to the pair counter. 
         
         If sample size exeeds max_sample_size, the sample will be randomly down-sampled 
-        such that the subsample is (roughly) equal to max_sample_size. 
+        such that the subsample is equal to max_sample_size. 
 
     Returns 
     -------
-    correlation_function(s), cov_matrix(ices) : np.array, np.ndarray
-        len(rbins)-1 length array containing correlation function :math:`\\xi(r)` computed
-        in each of the radial bins defined by input `rbins`.
+    correlation_function(s), cov_matrix(ices) : numpy.array, numpy.ndarray
+        len(`rbins`)-1 length array containing correlation function :math:`\\xi(r)` 
+        computed in each of the radial bins defined by input `rbins`.
         
         len(rbins)-1 x len(rbins)-1 ndarray containing the covariance matrix of `\\xi(r)`
         
-        If sample2 is passed as input, three arrays of length len(rbins)-1 are returned: 
-        :math:`\\xi_{11}(r)`, `\\xi_{12}(r)`, `\\xi_{22}(r)`
-        and three ndarrays of shape len(rbins)-1 x len(rbins)-1
-        :math: `cov_{11}`, `cov_{12}`, `cov_{22}`
+        If `sample2` is passed as input, three arrays of length len(`rbins`)-1 are 
+        returned: :math:`\\xi_{11}(r)`, :math:`\\xi_{12}(r)`, :math:`\\xi_{22}(r)`,
+        and three arrays of shape len(`rbins`)-1 by len(`rbins`)-1
+        :math: `\\mathrm{cov}_{11}`, :math:`\\mathrm{cov}_{12}`, 
+        :math:`\\mathrm{cov}_{22}`, are returned.
         
-        The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
-        and the autocorrelation of sample2, and the associated covariance matrices.  If 
-        do_auto or do_cross is set to False, the appropriate result(s) is not returned.
-
+        The autocorrelation of `sample1`, the cross-correlation between `sample1` and 
+        `sample2`, and the autocorrelation of `sample2`, and the associated covariance 
+        matrices.  If `do_auto` or `do_cross` is set to False, the appropriate result(s) 
+        is not returned.
+    
+    Notes
+    -----
+    The jackknife sampling of pair counts is done internally to the pair counter.  Pairs 
+    are counted for each jackknife sample such that if both pairs are in the current 
+    sample, they contribute +1 count, if one pair is inside, and one outside, +0.5 
+    counts, and if both are outside, +0 counts.
     """
     
     estimators = _list_estimators()
@@ -714,7 +738,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-d positions of Npts. 
+        Npts x 3 numpy array containing 3-D positions of points. 
     
     rp_bins : array_like
         numpy array of boundaries defining the bins in which pairs are counted. 
@@ -723,56 +747,56 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
         numpy array of boundaries defining the bins in which pairs are counted. 
     
     sample2 : array_like, optional
-        Npts x 3 numpy array containing 3-d positions of Npts.
+        Npts x 3 numpy array containing 3-D positions of points.
     
     randoms : array_like, optional
-        Nran x 3 numpy array containing 3-d positions of Npts.  If no randoms are provided
-        analytic randoms are used (only valid for periodic boundary conditions).
+        Nran x 3 numpy array containing 3-D positions of points.  If no randoms are 
+        provided analytic randoms are used (only valid for periodic boundary conditions).
     
-    period: array_like, optional
+    period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
         If none, PBCs are set to infinity.
     
-    estimator: string, optional
+    estimator : string, optional
         options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
     
-    do_auto: boolean, optional
+    do_auto : boolean, optional
         do auto-correlation?  Default is True.
     
-    do_cross: boolean, optional
+    do_cross : boolean, optional
         do cross-correlation?  Default is True.
     
-    N_thread: int, optional
+    N_thread : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
         
-        If sample size exeeds max_sample_size, the sample will be randomly down-sampled 
-        such that the subsample is (roughly) equal to max_sample_size. 
+        If sample size exceeds `max_sample_size`, the sample will be randomly down-sampled 
+        such that the subsample is equal to `max_sample_size`. 
 
     Returns 
     -------
     correlation_function : array_like
         ndarray containing correlation function :math:`\\xi(r_{p}, \\pi)` computed in each 
-        of the len(rp_bins)-1 X len(pi_bins)-1 bins defined by input `rp_bins` and 
+        of the len(`rp_bins`)-1 by len(`pi_bins`)-1 bins defined by input `rp_bins` and 
         `pi_bins`.
 
-        :math:`1 + \\xi(r_{p},\\pi) = DD / RR`, is the 'Natural' estimator is used, 
-
-        where `DD` is calculated by the pair counter, and `RR` is counted internally 
-        analytic `randoms` if no randoms are passed as an argument.
+        :math:`1 + \\xi(r_{p},\\pi) = \\mathrm{DD} / \\mathrm{RR}`, is the 'Natural' 
+        `estimator` is used, where :math:`\\mathrm{DD}` is calculated by the pair 
+        counter, and :math:`\\mathrm{RR}` is counted internally analytic randoms if no 
+        `randoms` are passed as an argument.
 
         If sample2 is passed as input, three ndarrays of shape 
-        (len(rp_bins)-1,len(pi_bins)-1) are returned: 
-        :math:`\\xi_{11}(rp, \\pi)`, `\\xi_{12}(r_{p},\\pi)`, `\\xi_{22}(r_{p},\\pi)`
-        and the associated covariance matrices.
+        (len(`rp_bins`)-1,len(`pi_bins`)-1) are returned: 
+        :math:`\\xi_{11}(rp, \\pi)`, :math:`\\xi_{12}(r_{p},\\pi)`, 
+        :math:`\\xi_{22}(r_{p},\\pi)`,
         
-        The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
-        and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
-        appropriate result is not returned.
+        The autocorrelation of` sample1`, the cross-correlation between `sample1` 
+        and `sample2`, and the autocorrelation of `sample2`.  If `do_auto` or `do_cross` 
+        is set to False, the appropriate result(s) is not returned.
 
     """
     
@@ -1002,7 +1026,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
        do_auto=True, do_cross=True, estimator='Natural', N_threads=1,\
        max_sample_size=int(1e6)):
     """ 
-    Calculate the projected correlation function, :math:`w_{p}`.
+    Calculate the projected correlation function, :math:`w_{p}(r_p)`.
     
     The first two dimensions define the plane for perpendicular distances.  The third 
     dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
@@ -1051,23 +1075,29 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
 
     Returns 
     -------
-    correlation_function : np.array
-        len(rp_bins)-1 length array containing correlation function :math:`w_p(r_p)` 
+    correlation_function : numpy.array
+        len(`rp_bins`)-1 length array containing the correlation function :math:`w_p(r_p)` 
         computed in each of the bins defined by input `rp_bins`.
 
-        :math:`1 + w_p(r) \\equiv DD / RR`, 
+        If `sample2` is passed as input, three arrays of length len(`rbins`)-1 are 
+        returned: :math:`w_{p11}(r_p)`, :math:`w_{p12}(r_p)`, :math:`w_{p22}(r_p)`.
 
-        where `DD` is calculated by the pair counter, and `RR` is counted internally 
-        using analytic `randoms` if no randoms are passed as an argument.
-
-        If sample2 is passed as input, three arrays of length len(rbins)-1 are returned: 
-        
-        :math:`w_{p11}(r_p)`, `w_{p12}(r_p)`, `w_{p22}(r_p)`
-
-        The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
-        and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
-        appropriate result(s) is not returned.
-
+        The autocorrelation of `sample1`, the cross-correlation between `sample1` 
+        and `sample2`, and the autocorrelation of `sample2`.  If `do_auto` or `do_cross` 
+        is set to False, the appropriate result(s) is not returned.
+    
+    Notes
+    -----
+    The projected correlation function is calculated by:
+    
+    .. math:: `w_p{r_p} = \\int_0^{\\pi_{\\rm max}}\\xi(r_p,\\pi)\\mathrm{d}\\pi`
+    
+    where :math:`\\pi_{\\rm max} = \\mathrm{maximum(pi_bins)}` and :math:`\\xi(r_p,\\pi)` 
+    is the redshift space correlation function.  See the documentation on 
+    redshift_space_tpcf() for further details.
+    
+    Notice that the results will generally be sensitive to the choice of `pi_bins`.
+    
     """
     
     #pass the arguments into the redshift space TPCF function
@@ -1114,13 +1144,11 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
               N_threads=1, max_sample_size=int(1e6)):
     """ 
     Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)`, where
-    .. math::
-    s^2 = r_{\\parallel}^2+r_{\\perp}^2
+    .. math:: s^2 = r_{\\parallel}^2+r_{\\perp}^2
     and, 
-    .. math::
-    `\\mu = r_{\\parallel}/s`
+    .. math:: `\\mu = r_{\\parallel}/s`
     
-    Data must be 3D.  The first two dimensions define the plane for perpendicular 
+    Data must be 3-D.  The first two dimensions define the plane for perpendicular 
     distances.  The third dimension is used for parallel distances.  i.e. x,y positions 
     are on the plane of the sky, and z is the redshift coordinate.  This is the distant 
     observer approximation.
@@ -1130,7 +1158,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-d positions of Npts. 
+        Npts x 3 numpy array containing 3-D positions of points. 
     
     s_bins : array_like
         numpy array of boundaries defining the bins in which pairs are counted. 
@@ -1139,11 +1167,11 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         numpy array of boundaries defining the bins in which pairs are counted. 
     
     sample2 : array_like, optional
-        Npts x 3 numpy array containing 3-d positions of Npts.
+        Npts x 3 numpy array containing 3-D positions of points.
     
     randoms : array_like, optional
-        Nran x 3 numpy array containing 3-d positions of Npts.  If no randoms are provided
-        analytic randoms are used (only valid for periodic boundary conditions).
+        Nran x 3 numpy array containing 3-D positions of points.  If no randoms are 
+        provided 'analytic randoms' are used (only valid for periodic boundary conditions).
     
     period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only 
@@ -1173,19 +1201,20 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
     -------
     correlation_function : np.array
         ndarray containing correlation function :math:`\\xi(s, \\mu)` computed in each 
-        of the len(s_bins)-1 X len(mu_bins)-1 bins defined by input `s_bins` and 
+        of the len(`s_bins`)-1 by len(`mu_bins`)-1 bins defined by input `s_bins` and 
         `mu_bins`.
 
-        :math:`1 + \\xi(s,\\mu) \\equiv DD / RR`, if the 'Natural' estimator is used, 
-        where `DD` is calculated by the pair counter, and `RR` is counted internally 
-        using analytic `randoms` if no randoms are passed as an argument.
+        :math:`1 + \\xi(s,\\mu) \\equiv \\mathrm{DD} / \\mathrm{RR}`, if the 'Natural' 
+        `estimator` is used, where :math:`\\mathrm{DD}` is calculated by the pair counter, 
+        and :math:`\\mathrm{RR}` is counted internally using analytic randoms if no 
+        `randoms` are passed as an argument.
 
-        If sample2 is passed as input, three ndarrays of shape 
-        len(rp_bins)-1 x len(pi_bins)-1 are returned: 
-        :math:`\\xi_{11}(s, \\mu)`, `\\xi_{12}(s,\\mu)`, `\\xi_{22}(s,\\mu)`
-        The autocorrelation of sample1, the cross-correlation between sample1 and sample2,
-        and the autocorrelation of sample2.  If do_auto or do_cross is set to False, the 
-        appropriate result is not returned.
+        If `sample2` is passed as input, three arrays of shape 
+        len(`rp_bins`)-1 by len(`pi_bins`)-1 are returned: 
+        :math:`\\xi_{11}(s, \\mu)`, :math:`\\xi_{12}(s,\\mu)`, :math:`\\xi_{22}(s,\\mu)`,
+        the autocorrelation of `sample1`, the cross-correlation between `sample1` 
+        and `sample2`, and the autocorrelation of sample2.  If `do_auto` or `do_cross` 
+        is set to False, the appropriate result(s) is not returned.
     """
     
     estimators = _list_estimators()
@@ -1447,17 +1476,21 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)[:,::-1]
             return xi_11
 
+
 def _list_estimators():
     """
     private internal function.
+    
     list available tpcf estimators
     """
     estimators = ['Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay']
     return estimators
 
+
 def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
     """
     private internal function.
+    
     two point correlation function estimator
     
     note: jackknife_tpcf uses its own intenral version, this is not totally ideal.
@@ -1486,10 +1519,12 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
     else: 
         raise ValueError("unsupported estimator!")
     return xi
-    
+
+
 def _TP_estimator_requirements(estimator):
     """
     private internal function.
+    
     return booleans indicating which pairs need to be counted for the chosen estimator
     """
     if estimator == 'Natural':
@@ -1515,4 +1550,5 @@ def _TP_estimator_requirements(estimator):
     else: 
         raise ValueError("unsupported estimator!")
     return do_DD, do_DR, do_RR
+
 
