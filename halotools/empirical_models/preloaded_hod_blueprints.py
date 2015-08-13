@@ -211,7 +211,7 @@ def Hearin15_blueprint(central_assembias_strength = 1,
 
     ##############################
     ### Build the occupation model
-    if central_assembias_strength == 0:
+    if satellite_assembias_strength == 0:
         sat_ab_component = hoc.Leauthaud11Sats(**kwargs)
     else:
         sat_ab_component = hoc.AssembiasLeauthaud11Sats(
