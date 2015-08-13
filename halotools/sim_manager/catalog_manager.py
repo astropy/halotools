@@ -949,6 +949,14 @@ class CatalogManager(object):
 
         url, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
+        if available_fnames_to_download == []:
+            msg = "You made the following request for a pre-processed halo catalog:\n"
+            if 'simname' in kwargs:
+                msg = msg + "simname = " + kwargs['simname'] + "\n"
+            else:
+                msg = msg + "simname = any simulation\n"
+            msg = msg + "There are no simulations with this name with particles available for download"
+            raise UnsupportedSimError(msg)
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
