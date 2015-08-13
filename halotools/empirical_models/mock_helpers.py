@@ -6,7 +6,7 @@ used to provide convenience wrappers for mock objects
 """
 
 import numpy as np 
-from ..halotools_exceptions import HalotoolsError
+from ..custom_exceptions import HalotoolsError
 from warnings import warn
 
 def three_dim_pos_bundle(table, key1, key2, key3, 

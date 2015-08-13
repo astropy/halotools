@@ -22,7 +22,7 @@ from . import model_helpers
 from . import model_defaults
 from . import halo_prof_param_components
 
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 from ..sim_manager import sim_defaults
 
 

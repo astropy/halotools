@@ -4,7 +4,7 @@
 
 import sys
 from halotools.sim_manager import CatalogManager, sim_defaults
-from halotools.halotools_exceptions import HalotoolsError
+from halotools.custom_exceptions import HalotoolsError, UnsupportedSimError
 
 existing_fname_error_msg = ("\n\nThe following filename already exists in your cache directory: \n\n%s\n\n"
     "If you really want to overwrite the file, \n"

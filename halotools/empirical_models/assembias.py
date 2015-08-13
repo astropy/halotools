@@ -11,7 +11,7 @@ from time import time
 
 from . import model_defaults, model_helpers
 
-from ..halotools_exceptions import HalotoolsError
+from ..custom_exceptions import HalotoolsError
 from ..utils.table_utils import compute_conditional_percentiles
 
 class HeavisideAssembias(object):
@@ -144,6 +144,8 @@ class HeavisideAssembias(object):
         key = self.sec_haloprop_key + '_percentile'
         self.new_haloprop_func_dict = {}
         self.new_haloprop_func_dict[key] = assembias_percentile_calculator
+
+        self._additional_methods_to_inherit.extend(['assembias_strength'])
 
     def set_percentile_splitting(self, **kwargs):
         """
@@ -295,7 +297,7 @@ class HeavisideAssembias(object):
             lower_bound1 = self._lower_bound - base_neg
             lower_bound2 = (1 - split_neg)/split_neg*(base_neg - self._upper_bound)
             lower_bound = np.maximum(lower_bound1, lower_bound2)
-            result[negative_strength_idx] = strength_neg*lower_bound
+            result[negative_strength_idx] = np.abs(strength_neg)*lower_bound
 
         return result
 

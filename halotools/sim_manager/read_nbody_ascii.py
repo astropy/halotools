@@ -15,7 +15,7 @@ from astropy.table import Table
 
 from . import catalog_manager, supported_sims, sim_defaults, cache_config
 
-from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
+from ..custom_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
 
 class BehrooziASCIIReader(object):
     """ Class containing methods used to read raw ASCII data generated with Rockstar 

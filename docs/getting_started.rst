@@ -48,7 +48,7 @@ download script::
 	python scripts/download_initial_halocat.py
 
 Running this script will set up the Halotools cache directory system on your local machine, 
-and then download the default halo catalog to the cache, 
+and then download the default halo catalog to the cache (Bolshoi z=0 rockstar halos), 
 storing the catalog as a pre-processed binary file. The default catalog is ~400Mb, and if 
 you are on a fast university connection the download time should be less than a minute. 
 
@@ -60,6 +60,17 @@ If you want to start playing with this catalog right away:
 
 To see simple examples of how to manipulate the data stored in halo catalogs, 
 see the Examples section of the `~halotools.sim_manager.HaloCatalog` API documentation. 
+
+If you wish to download alternate snapshots, you should can either use the 
+`~halotools.sim_manager.CatalogManager`, or use the download_alternate_halocats.py convenience script, 
+which should be called with three arguments: simname, redshift, and halo-finder. For example: 
+
+	python scripts/download_alternate_halocats.py multidark 0.5 rockstar
+
+You can read about your download options by running:
+
+	python scripts/download_alternate_halocats.py -help
+
 
 Getting started with subpackages
 ================================

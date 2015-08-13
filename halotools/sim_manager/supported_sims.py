@@ -21,9 +21,9 @@ import urlparse
 from . import sim_defaults, catalog_manager
 
 from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 
-from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
+from ..custom_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
@@ -320,6 +320,16 @@ class HaloCatalog(object):
         else:
             self._halo_table = Table.read(self.processed_halo_table_fname, path='data')
             return self._halo_table
+
+    @property 
+    def host_halos(self):
+        if hasattr(self, '_halo_table'):
+            mask = self._halo_table['halo_hostid'] == self._halo_table['halo_id']
+            return self._halo_table[mask]
+        else:
+            self._halo_table = Table.read(self.processed_halo_table_fname, path='data')
+            mask = self._halo_table['halo_hostid'] == self._halo_table['halo_id']
+            return self._halo_table[mask]        
 
     @property 
     def ptcl_table(self):
