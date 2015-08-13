@@ -133,7 +133,10 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     return model_blueprint
 
 
-def Hearin15_blueprint(central_assembias = True, satellite_assembias = True, 
+def Hearin15_blueprint(central_assembias_strength = 1, 
+    central_assembias_strength_abcissa = [1e12], 
+    satellite_assembias_strength = 0.2, 
+    satellite_assembias_strength_abcissa = [1e12], 
     **kwargs):
     """ 
     HOD-style model in which central and satellite occupations statistics are assembly-biased. 
@@ -144,37 +147,38 @@ def Hearin15_blueprint(central_assembias = True, satellite_assembias = True,
         Stellar mass threshold of the mock galaxy sample. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    central_assembias : bool, optional 
-        Boolean determining whether the model implements assembly biased occupations for centrals. 
-        Default is True. 
-
-    satellite_assembias : bool, optional 
-        Boolean determining whether the model implements assembly biased occupations for satellites. 
-        Default is True. 
-
     sec_haloprop_key : string, optional keyword argument 
         String giving the column name of the secondary halo property modulating 
         the occupation statistics of the galaxies. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    split : float
-        percentile at which to implement heavside 2-population assembly bias
+    split : float or list, optional 
+        Fraction or list of fractions between 0 and 1 defining how 
+        we split halos into two groupings based on 
+        their conditional secondary percentiles. 
+        Default is 0.5 for a constant 50/50 split. 
+
+    split_abcissa : list, optional 
+        Values of the primary halo property at which the halos are split as described above in 
+        the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
+        the interpolation will be done in the logarithm of the primary halo property. 
+        Default is to assume a constant 50/50 split. 
 
     central_assembias_strength : float or list, optional 
         Fraction or list of fractions between -1 and 1 defining 
-        the assembly bias correlation strength. Default is 0.5. 
+        the assembly bias correlation strength. Default is 1. 
 
     central_assembias_strength_abcissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
-        Default is to assume a constant strength of 0.5. 
+        Default is to assume a constant strength of 1. 
 
     satellite_assembias_strength : float or list, optional 
         Fraction or list of fractions between -1 and 1 defining 
-        the assembly bias correlation strength. Default is 0.5. 
+        the assembly bias correlation strength. Default is 0.2. 
 
     satellite_assembias_strength_abcissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
-        Default is to assume a constant strength of 0.5. 
+        Default is to assume a constant strength of 0.2. 
 
     redshift : float, optional keyword argument 
         Redshift of the stellar-to-halo-mass relation. Default is 0. 
@@ -190,11 +194,13 @@ def Hearin15_blueprint(central_assembias = True, satellite_assembias = True,
 
     ##############################
     ### Build the occupation model
-    if central_assembias is True:
-        cen_ab_component = hoc.AssembiasLeauthaud11Cens(**kwargs)
-    else:
+    if central_assembias_strength == 0:
         cen_ab_component = hoc.Leauthaud11Cens(**kwargs)
-
+    else:
+        cen_ab_component = hoc.AssembiasLeauthaud11Cens(
+            assembias_strength = central_assembias_strength, 
+            assembias_abcissa = central_assembias_strength_abcissa, 
+            **kwargs)
     cen_model_dict = {}
     cen_model_dict['occupation'] = cen_ab_component
 
@@ -205,10 +211,13 @@ def Hearin15_blueprint(central_assembias = True, satellite_assembias = True,
 
     ##############################
     ### Build the occupation model
-    if satellite_assembias is True:
-        sat_ab_component = hoc.AssembiasLeauthaud11Sats(**kwargs)
-    else:
+    if central_assembias_strength == 0:
         sat_ab_component = hoc.Leauthaud11Sats(**kwargs)
+    else:
+        sat_ab_component = hoc.AssembiasLeauthaud11Sats(
+            assembias_strength = satellite_assembias_strength, 
+            assembias_abcissa = satellite_assembias_strength_abcissa, 
+            **kwargs)
 
     sat_model_dict = {}
     sat_model_dict['occupation'] = sat_ab_component
