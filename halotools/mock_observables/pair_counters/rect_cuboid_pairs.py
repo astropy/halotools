@@ -151,6 +151,7 @@ def npairs(data1, data2, rbins, Lbox=None, period=None, verbose=False, N_threads
     #do the pair counting
     if N_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        pool.close()
     if N_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
@@ -345,6 +346,7 @@ def wnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2
     #do the pair counting
     if N_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        pool.close()
     if N_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
@@ -602,6 +604,7 @@ def jnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2
     #do the pair counting
     if N_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        pool.close()
     if N_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
@@ -804,6 +807,7 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, verbose=
     #do the pair counting
     if N_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        pool.close()
     if N_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
@@ -983,6 +987,7 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, Lbox=None, period=None, verbose=F
     #do the pair counting
     if N_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        pool.close()
     if N_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
@@ -1188,6 +1193,7 @@ def xy_z_wnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights
     #do the pair counting
     if N_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        pool.close()
     if N_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
@@ -1461,6 +1467,7 @@ def xy_z_jnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights
     #do the pair counting
     if N_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        pool.close()
     if N_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     

@@ -151,6 +151,7 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
     #do the pair counting
     if N_threads>1:
         result = pool.map(engine,range(Ncell1))
+        pool.close()
     if N_threads==1:
         result = map(engine,range(Ncell1))
     
@@ -168,7 +169,7 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
     #resort the result (it was sorted to make in continuous over the cell structure)
     i_inds = grid1.idx_sorted[i_inds]
     j_inds = grid2.idx_sorted[j_inds]
-    
+
     return coo_matrix((d, (i_inds, j_inds)))
 
 
@@ -364,6 +365,7 @@ def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose
     #do the pair counting
     if N_threads>1:
         result = pool.map(engine,range(Ncell1))
+        pool.close()
     if N_threads==1:
         result = map(engine,range(Ncell1))
     
