@@ -25,7 +25,7 @@ from .assembias import HeavisideAssembias
 from ..utils.array_utils import array_like_length as custom_len
 from ..utils.table_utils import compute_conditional_percentiles
 from ..  import sim_manager
-from ..halotools_exceptions import HalotoolsModelInputError
+from ..custom_exceptions import HalotoolsModelInputError
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty

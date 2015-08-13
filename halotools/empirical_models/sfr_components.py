@@ -18,7 +18,7 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
-from ..halotools_exceptions import HalotoolsError
+from ..custom_exceptions import HalotoolsError
 
 @six.add_metaclass(ABCMeta)
 class BinaryGalpropModel(model_helpers.GalPropModel):

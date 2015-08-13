@@ -10,7 +10,7 @@ __all__ = (['array_like_length', 'find_idx_nearest_val',
 
 import numpy as np
 import collections
-from ..halotools_exceptions import HalotoolsError
+from ..custom_exceptions import HalotoolsError
 
 def array_like_length(x):
     """ Simple method to return a zero-valued 1-D numpy array 
@@ -76,7 +76,7 @@ def find_idx_nearest_val(array, value):
     >>> idx_nearest_val = find_idx_nearest_val(x, val)
     >>> nearest_val = x[idx_nearest_val]
     """
-    if len(array) == 0:
+    if array_like_length(array) == 0:
         return None
 
     idx_sorted = np.argsort(array)

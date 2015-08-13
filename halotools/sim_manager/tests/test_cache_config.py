@@ -5,7 +5,7 @@ import unittest
 from astropy.tests.helper import pytest
 
 from .. import cache_config
-from ...halotools_exceptions import UnsupportedSimError
+from ...custom_exceptions import UnsupportedSimError
 
 from astropy.config.paths import _find_home
 

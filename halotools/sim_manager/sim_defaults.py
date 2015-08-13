@@ -10,7 +10,7 @@ import numpy as np
 
 from astropy import cosmology
 from . import raw_halocat_column_info
-from ..halotools_exceptions import UnsupportedSimError, HalotoolsCacheError
+from ..custom_exceptions import UnsupportedSimError, HalotoolsCacheError
 
 default_simname = 'bolshoi'
 default_halo_finder = 'rockstar'

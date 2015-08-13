@@ -11,7 +11,7 @@ from time import time
 
 from . import model_defaults, model_helpers
 
-from ..halotools_exceptions import HalotoolsError
+from ..custom_exceptions import HalotoolsError
 from ..utils.table_utils import compute_conditional_percentiles
 
 class HeavisideAssembias(object):
