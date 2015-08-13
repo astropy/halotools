@@ -102,44 +102,45 @@ class TestComputeConditionalPercentiles(TestCase):
         assert manual_high_mass['halo_zform'].max() == 30 
         assert manual_high_mass['halo_zform'].min() == 20 
 
-    	# percentiles = compute_conditional_percentiles(
-    	# 	halo_table = self.custom_halo_table, 
-    	# 	prim_haloprop_key = 'halo_mvir', 
-    	# 	sec_haloprop_key = 'halo_zform', 
-    	# 	prim_haloprop_bin_boundaries = prim_haloprop_bin_boundaries)
+    	percentiles = compute_conditional_percentiles(
+    		halo_table = self.custom_halo_table, 
+    		prim_haloprop_key = 'halo_mvir', 
+    		sec_haloprop_key = 'halo_zform', 
+    		prim_haloprop_bin_boundaries = prim_haloprop_bin_boundaries)
 
-     #    assert np.all(percentiles <= 1)
-     #    assert np.all(percentiles >= 0)
-     #    assert np.any(percentiles > 0.9)
-     #    assert np.any(percentiles < 0.1)
+        assert np.all(percentiles <= 1)
+        assert np.all(percentiles >= 0)
+        assert np.any(percentiles > 0.9)
+        assert np.any(percentiles < 0.1)
 
-    	# low_mass_percentiles = percentiles[manual_mass_split]
-     #    assert np.all(low_mass_percentiles <= 1)
-     #    assert np.all(low_mass_percentiles >= 0)
-     #    assert np.any(low_mass_percentiles > 0.9)
-     #    assert np.any(low_mass_percentiles < 0.1)
-    	# high_mass_percentiles = percentiles[np.invert(manual_mass_split)]
-     #    assert np.all(high_mass_percentiles <= 1)
-     #    assert np.all(high_mass_percentiles >= 0)
-     #    assert np.any(high_mass_percentiles > 0.9)
-     #    assert np.any(high_mass_percentiles < 0.1)
-    	# assert set(low_mass_percentiles) == set(high_mass_percentiles)
+    	low_mass_percentiles = percentiles[manual_mass_split]
+        assert np.all(low_mass_percentiles <= 1)
+        assert np.all(low_mass_percentiles >= 0)
+        assert np.any(low_mass_percentiles > 0.9)
+        assert np.any(low_mass_percentiles < 0.1)
 
-    	# low_mass_split = low_mass_percentiles < 0.5
-    	# low_mass_low_zform = manual_low_mass[low_mass_split]
-    	# low_mass_high_zform = manual_low_mass[np.invert(low_mass_split)]
-     #    assert 0 <= low_mass_low_zform['halo_zform'].max() <= 5
-    	# assert 5 <= low_mass_high_zform['halo_zform'].max() <= 10
+    	high_mass_percentiles = percentiles[np.invert(manual_mass_split)]
+        assert np.all(high_mass_percentiles <= 1)
+        assert np.all(high_mass_percentiles >= 0)
+        assert np.any(high_mass_percentiles > 0.9)
+        assert np.any(high_mass_percentiles < 0.1)
+    	assert set(low_mass_percentiles) == set(high_mass_percentiles)
 
-     #    high_mass_split = high_mass_percentiles < 0.5
-     #    high_mass_low_zform = manual_high_mass[high_mass_split]
-     #    high_mass_high_zform = manual_high_mass[np.invert(high_mass_split)]
-     #    assert 20 <= high_mass_low_zform['halo_zform'].max() <= 25
-     #    assert 25 <= high_mass_high_zform['halo_zform'].max() <= 30
+    	low_mass_split = low_mass_percentiles < 0.5
+    	low_mass_low_zform = manual_low_mass[low_mass_split]
+    	low_mass_high_zform = manual_low_mass[np.invert(low_mass_split)]
+        assert 0 <= low_mass_low_zform['halo_zform'].max() <= 5
+    	assert 5 <= low_mass_high_zform['halo_zform'].max() <= 10
 
-    	# split = percentiles < 0.5
-    	# low_zform, high_zform = self.custom_halo_table[split], self.custom_halo_table[np.invert(split)]
-    	# assert len(low_zform) == len(high_zform)
+        high_mass_split = high_mass_percentiles < 0.5
+        high_mass_low_zform = manual_high_mass[high_mass_split]
+        high_mass_high_zform = manual_high_mass[np.invert(high_mass_split)]
+        assert 20 <= high_mass_low_zform['halo_zform'].max() <= 25
+        assert 25 <= high_mass_high_zform['halo_zform'].max() <= 30
+
+    	split = percentiles <= 0.5
+    	low_zform, high_zform = self.custom_halo_table[split], self.custom_halo_table[np.invert(split)]
+    	assert len(low_zform) == len(high_zform)
 
 
 
