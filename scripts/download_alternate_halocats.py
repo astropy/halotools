@@ -4,7 +4,7 @@
 
 import sys
 from halotools.sim_manager import CatalogManager, sim_defaults
-from halotools.halotools_exceptions import HalotoolsError
+from halotools.custom_exceptions import HalotoolsError, UnsupportedSimError
 
 existing_fname_error_msg = ("\n\nThe following filename already exists in your cache directory: \n\n%s\n\n"
     "If you really want to overwrite the file, \n"
@@ -45,6 +45,8 @@ def main(command_line_args):
             msg = ("\n\nHalotoolsError: \nWhen throwing the -ptclsonly flag during a call to the "
             "download_alternate_halocat.py script, \nyou must specify a simname and redshift, "
             "and only those two quantities.\n"
+            "In particular, be sure you did not also specify a halo-finder, which is unnecessary" 
+            "if you only want particle data.\n"
             "Now printing the -help message for further details.\n")
             print(msg)
             print(command_line_arg_error_msg)
@@ -57,6 +59,8 @@ def main(command_line_args):
                 msg = ("\n\nHalotoolsError: \nWhen throwing the -ptclsonly flag during a call to the "
                 "download_alternate_halocat.py script, \nyou must specify a simname and redshift, "
                 "and only those two quantities.\n"
+                "In particular, the redshift you supplied via your second command-line argument " 
+                "does not appear to be convertible to a float.\n"
                 "Now printing the -help message for further details.\n")
                 print(msg)
                 print(command_line_arg_error_msg)
