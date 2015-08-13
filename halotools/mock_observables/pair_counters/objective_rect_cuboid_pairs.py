@@ -205,6 +205,7 @@ def obj_wnpairs(data1, data2, rbins, Lbox=None, period=None,\
     #do the pair counting
     if N_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        pool.close()
     if N_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
