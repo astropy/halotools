@@ -795,6 +795,7 @@ class HodModelFactory(ModelFactory):
             # Set the method used to return Monte Carlo realizations 
             # of per-halo gal_type abundance
             occupation_model = self.model_blueprint[gal_type]['occupation']
+            self.threshold = occupation_model.threshold
 
             new_method_name = 'mc_occupation_'+gal_type
             new_method_behavior = self._update_param_dict_decorator(
