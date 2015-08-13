@@ -102,7 +102,7 @@ prim_haloprop_key = 'halo_mvir'
 sec_haloprop_key = 'halo_nfw_conc'
 halo_boundary = 'halo_rvir'
 
-default_rbins = np.logspace(-0.75, 1.25, 15)
+default_rbins = np.logspace(-1, 1.25, 15)
 default_nptcls = 1e5
 
 default_b_perp = 0.2
