@@ -35,7 +35,7 @@ from . import cache_config, sim_defaults
 import os, fnmatch, re
 from functools import partial
 
-from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
+from ..custom_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
 
 unsupported_simname_msg = "Input simname ``%s`` is not recognized by Halotools"
 

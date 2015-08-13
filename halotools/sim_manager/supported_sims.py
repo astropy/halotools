@@ -23,7 +23,7 @@ from . import sim_defaults, catalog_manager
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import array_like_length as custom_len
 
-from ..halotools_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
+from ..custom_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
