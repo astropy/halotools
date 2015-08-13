@@ -213,33 +213,29 @@ def Hearin15(**kwargs):
         Stellar mass threshold of the mock galaxy sample. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    central_assembias : bool, optional 
-        Boolean determining whether the model implements assembly biased occupations for centrals. 
-        Default is True. 
-
-    satellite_assembias : bool, optional 
-        Boolean determining whether the model implements assembly biased occupations for satellites. 
-        Default is True. 
-
     sec_haloprop_key : string, optional keyword argument 
         String giving the column name of the secondary halo property modulating 
         the occupation statistics of the galaxies. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    split : float
-        percentile at which to implement heavside 2-population assembly bias
+    central_assembias_strength : float or list, optional 
+        Fraction or list of fractions between -1 and 1 defining 
+        the assembly bias correlation strength. Default is 0.5. 
 
-    assembias_strength : float, optional 
-        Fraction between -1 and 1 defining the assembly bias correlation strength. 
-        Default is 0.5. 
-
-    assembias_strength_abcissa : list, optional 
+    central_assembias_strength_abcissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
         Default is to assume a constant strength of 0.5. 
 
-    assembias_strength_ordinates : list, optional 
-        Values of the assembly bias strength when evaluated at the input ``assembias_strength_abcissa``. 
+    satellite_assembias_strength : float or list, optional 
+        Fraction or list of fractions between -1 and 1 defining 
+        the assembly bias correlation strength. Default is 0.5. 
+
+    satellite_assembias_strength_abcissa : list, optional 
+        Values of the primary halo property at which the assembly bias strength is specified. 
         Default is to assume a constant strength of 0.5. 
+
+    split : float
+        percentile at which to implement heavside 2-population assembly bias
 
     redshift : float, optional keyword argument 
         Redshift of the stellar-to-halo-mass relation. Default is 0. 

@@ -74,7 +74,7 @@ def compute_conditional_percentiles(**kwargs):
             "must contain prim_haloprop_key = %s and sec_haloprop_key = %s")
         raise HalotoolsError(msg % (prim_haloprop_key, sec_haloprop_key))
 
-    def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.2, **kwargs):
+    def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
         """
         Parameters
         ----------
@@ -129,14 +129,16 @@ def compute_conditional_percentiles(**kwargs):
     for ibin in bins_in_halocat:
         indices_of_prim_haloprop_bin = np.where(prim_haloprop_bins == ibin)[0]
 
+        num_in_bin = len(sec_haloprop[indices_of_prim_haloprop_bin])
+
         # Find the indices that sort by the secondary property
         ind_sorted = np.argsort(sec_haloprop[indices_of_prim_haloprop_bin])
 
-        percentiles = (np.arange(len(sec_haloprop[indices_of_prim_haloprop_bin])) + 1.0) / \
-            float(len(sec_haloprop[indices_of_prim_haloprop_bin]))
+        percentiles = np.zeros(num_in_bin)
+        percentiles[ind_sorted] = (np.arange(num_in_bin) + 1.0) / float(num_in_bin)
         
         # place the percentiles into the catalog
-        output[indices_of_prim_haloprop_bin] = 1.0 - percentiles[ind_sorted][::-1]
+        output[indices_of_prim_haloprop_bin] = percentiles
 
     return output
 
