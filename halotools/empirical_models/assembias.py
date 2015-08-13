@@ -217,20 +217,29 @@ class HeavisideAssembias(object):
         if not hasattr(self, 'param_dict'):
             self.param_dict = {}
 
+        # Make sure the code behaves properly whether or not we were passed an iterable
+        strength = kwargs['assembias_strength']
         if 'assembias_strength_abcissa' in kwargs:
-            if custom_len(kwargs['assembias_strength_abcissa']) != custom_len(kwargs['assembias_strength']):
-                raise HalotoolsError("``assembias_strength`` and ``assembias_strength_abcissa`` must have the same length")
-            self._assembias_strength_abcissa = list(kwargs['assembias_strength_abcissa'])
-            for ipar, val in enumerate(list(kwargs['assembias_strength'])):
-                self.param_dict[self._get_assembias_param_dict_key(ipar)] = val
-        else:
+            abcissa = kwargs['assembias_strength_abcissa']
             try:
-                self._assembias_strength_abcissa = [2]
-                self.param_dict[self._get_assembias_param_dict_key(0)] = kwargs['assembias_strength']
-            except KeyError:
-                msg = ("The _initialize_assembias_param_dict method must at least be called with a ``assembias_strength``" 
-                    "keyword argument, or alternatively ``assembias_strength`` and ``assembias_strength_abcissa`` arguments.")
-                raise HalotoolsError(msg)
+                iterator = iter(abcissa)
+                abcissa = list(abcissa)
+            except TypeError:
+                abcissa = [abcissa]
+        else:
+            abcissa = [2]
+
+        if custom_len(abcissa) != custom_len(strength):
+            raise HalotoolsError("``assembias_strength`` and ``assembias_strength_abcissa`` must have the same length")
+        try:
+            iterator = iter(strength)
+            strength = list(strength)
+        except TypeError:
+            strength = [strength]
+
+        self._assembias_strength_abcissa = abcissa
+        for ipar, val in enumerate(strength):
+            self.param_dict[self._get_assembias_param_dict_key(ipar)] = val
 
     def assembias_strength(self, **kwargs):
         """
