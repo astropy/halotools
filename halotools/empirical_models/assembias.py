@@ -334,7 +334,7 @@ class HeavisideAssembias(object):
                 type1_mask = halo_table[halo_type_key][no_edge_mask] == halo_type1_val
             elif self.sec_haloprop_key + '_percentile' in halo_table.keys():
                 no_edge_percentiles = halo_table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
-                type1_mask = no_edge_percentiles >= no_edge_split
+                type1_mask = no_edge_percentiles > no_edge_split
             else:
                 msg = ("\nThe HeavisideAssembias class implements assembly bias \n" 
                     "by altering the behavior of the model according to the value of " 
@@ -351,7 +351,7 @@ class HeavisideAssembias(object):
                     sec_haloprop_key = self.sec_haloprop_key
                     )
                 no_edge_percentiles = percentiles[no_edge_mask]
-                type1_mask = no_edge_percentiles >= no_edge_split
+                type1_mask = no_edge_percentiles > no_edge_split
 
             perturbation = self.galprop_perturbation(
                     prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask], 
