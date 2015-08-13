@@ -7,11 +7,12 @@ import numpy as np
 from ..catalog_manager import CatalogManager
 from astropy.config.paths import _find_home 
 
-from astropy.tests.helper import remote_data
+from astropy.tests.helper import remote_data, pytest
 
 from unittest import TestCase
 
-import pytest
+from halotools.custom_exceptions import UnsupportedSimError
+
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
 # returned values depend on the configuration 
@@ -266,13 +267,14 @@ class TestCatalogManager(TestCase):
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
-    def test_illustrate_get_scale_factor_substring_bug(self): 
+    def test_unsupported_sim_download_attempt(self): 
         simname = 'consuelo'
         redshift = 2
         halo_finder = 'bdm'
-        self.catman.download_processed_halo_table(simname = simname, 
-            halo_finder = halo_finder, desired_redshift = redshift, 
-            overwrite = False)
+        with pytest.raises(UnsupportedSimError) as exc:
+            self.catman.download_processed_halo_table(simname = simname, 
+                halo_finder = halo_finder, desired_redshift = redshift, 
+                overwrite = False)
 
 
 

@@ -25,7 +25,7 @@ import urlparse
 import datetime 
 
 from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import custom_len
+from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..utils.io_utils import download_file_from_url
 
 from astropy.tests.helper import remote_data
@@ -35,7 +35,7 @@ from . import cache_config, sim_defaults
 import os, fnmatch, re
 from functools import partial
 
-from ..custom_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
+from ..custom_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError, HalotoolsError
 
 unsupported_simname_msg = "Input simname ``%s`` is not recognized by Halotools"
 
@@ -499,6 +499,12 @@ class CatalogManager(object):
         return scale_factor_substring
 
     def _closest_fname(self, filename_list, desired_redshift):
+        """
+        """
+
+        if custom_len(filename_list) == 0:
+            msg = "The _closest_fname method was passed an empty filename_list"
+            raise HalotoolsError(msg)
 
         if desired_redshift <= -1:
             raise ValueError("desired_redshift of <= -1 is unphysical")
@@ -828,6 +834,18 @@ class CatalogManager(object):
         desired_redshift = kwargs['desired_redshift']
 
         available_fnames_to_download = self.processed_halo_tables_available_for_download(**kwargs)
+        if available_fnames_to_download == []:
+            msg = "You made the following request for a pre-processed halo catalog:\n"
+            if 'simname' in kwargs:
+                msg = msg + "simname = " + kwargs['simname'] + "\n"
+            else:
+                msg = msg + "simname = any simulation\n"
+            if 'halo_finder' in kwargs:
+                msg = msg + "halo-finder = " + kwargs['halo_finder'] + "\n"
+            else:
+                msg = msg + "halo-finder = any halo-finder\n" 
+            msg = msg + "There are no halo catalogs meeting your specifications"
+            raise UnsupportedSimError(msg)
 
         url, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
