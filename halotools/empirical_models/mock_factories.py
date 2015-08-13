@@ -278,7 +278,7 @@ class MockFactory(object):
             rbins = kwargs['rbins']
         else:
             rbins = model_defaults.default_rbins
-        rbin_centers = (rbins[1:]+rbins[:1])/2.0
+        rbin_centers = (rbins[1:] + rbins[0:-1])/2.
 
         mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
@@ -401,7 +401,7 @@ class MockFactory(object):
             rbins = kwargs['rbins']
         else:
             rbins = model_defaults.default_rbins
-        rbin_centers = (rbins[1:]+rbins[:1])/2.0
+        rbin_centers = (rbins[1:] + rbins[0:-1])/2.
 
         mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
