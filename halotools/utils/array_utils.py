@@ -6,11 +6,60 @@ Modules performing small, commonly used tasks throughout the package.
 """
 
 __all__ = (['array_like_length', 'find_idx_nearest_val', 
-    'randomly_downsample_data', 'array_is_monotonic'])
+    'randomly_downsample_data', 'array_is_monotonic', 'convert_to_ndarray'])
 
 import numpy as np
 import collections
 from ..custom_exceptions import HalotoolsError
+from astropy.table import Table
+
+def convert_to_ndarray(x):
+    """ Method checks to see in the input array x is an ndarray 
+    or an Astropy Table. If not, returns an array version of x. 
+
+    Parameters 
+    -----------
+    x : array_like 
+        Any sequence or scalar. 
+
+    Returns 
+    -------
+    y : array 
+        Numpy ndarray
+
+    Examples 
+    --------
+    >>> x, y, z  = 0, [0], None 
+    >>> xarr, yarr, zarr = convert_to_ndarray(x), convert_to_ndarray(y), convert_to_ndarray(z)
+    >>> assert len(xarr) == len(yarr) == len(zarr) == 1
+
+    >>> t, u, v = np.array(1), np.array([1]), np.array('abc')
+    >>> tarr, uarr, varr = convert_to_ndarray(t), convert_to_ndarray(u), convert_to_ndarray(v) 
+    >>> assert len(tarr) == len(uarr) == len(varr) == 1 
+
+    >>> s = 'abc'
+    >>> sarr = convert_to_ndarray(s)
+    >>> assert len(sarr) == 1
+
+    """
+    if type(x) is np.ndarray:
+        try:
+            iterator = iter(x)
+            return x
+        except TypeError:
+            x = x.reshape(1)
+            return x
+    elif type(x) is Table:
+        return x
+    elif type(x) is str:
+        return np.array([x])
+    else:
+        try:
+            l = len(x)
+            return np.array(x)
+        except TypeError:
+            return np.array([x])
+
 
 def array_like_length(x):
     """ Simple method to return a zero-valued 1-D numpy array 
@@ -38,16 +87,10 @@ def array_like_length(x):
 
     Examples 
     --------
-    >>> x = np.zeros(5)
-    >>> xlen = array_like_length(x)
-    >>> y = 4
-    >>> ylen = array_like_length(y)
-    >>> z = None 
-    >>> zlen = array_like_length(z)
+    >>> x, y, z  = 0, [0], None 
+    >>> xlen, ylen, zlen = array_like_length(x), array_like_length(y), array_like_length(z)
     """
 
-    if x is None:
-        return 0
     try:
         array_length = len(x)
     except TypeError:
@@ -77,7 +120,8 @@ def find_idx_nearest_val(array, value):
     >>> nearest_val = x[idx_nearest_val]
     """
     if array_like_length(array) == 0:
-        return None
+        msg = "find_idx_nearest_val method was passed an empty array"
+        raise HalotoolsError(msg)
 
     idx_sorted = np.argsort(array)
     sorted_array = np.array(array[idx_sorted])
