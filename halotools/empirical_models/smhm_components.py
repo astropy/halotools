@@ -11,7 +11,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from . import model_defaults
 from . import model_helpers as model_helpers
 
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 from ..sim_manager import sim_defaults 
 
 from warnings import warn

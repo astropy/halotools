@@ -12,7 +12,7 @@ import collections
 from astropy.table import Table
 
 from ..sim_manager.generate_random_sim import FakeSim
-from ..halotools_exceptions import HalotoolsError
+from ..custom_exceptions import HalotoolsError
 
 def compute_conditional_percentiles(**kwargs):
     """
