@@ -56,8 +56,9 @@ class HeavisideAssembias(object):
             input ``split``, or ``split_abcissa`` and ``split_ordinates``, or 
             ``split_func`` keyword arguments. 
 
-        assembias_strength : float, optional 
-            Fraction between -1 and 1 defining the assembly bias correlation strength. 
+        assembias_strength : float or list, optional 
+            Fraction or sequence of fractions between -1 and 1 
+            defining the assembly bias correlation strength. 
             Default is 0.5. 
 
         assembias_strength_abcissa : list, optional 
