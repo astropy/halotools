@@ -25,7 +25,7 @@ import urlparse
 import datetime 
 
 from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 from ..utils.io_utils import download_file_from_url
 
 from astropy.tests.helper import remote_data

@@ -5,7 +5,7 @@ Modules performing small, commonly used tasks throughout the package.
 
 """
 
-__all__ = (['array_like_length', 'find_idx_nearest_val', 
+__all__ = (['custom_len', 'find_idx_nearest_val', 
     'randomly_downsample_data', 'array_is_monotonic', 'convert_to_ndarray'])
 
 import numpy as np
@@ -61,7 +61,7 @@ def convert_to_ndarray(x):
             return np.array([x])
 
 
-def array_like_length(x):
+def custom_len(x):
     """ Simple method to return a zero-valued 1-D numpy array 
     with the length of the input x. 
 
@@ -88,7 +88,7 @@ def array_like_length(x):
     Examples 
     --------
     >>> x, y, z  = 0, [0], None 
-    >>> xlen, ylen, zlen = array_like_length(x), array_like_length(y), array_like_length(z)
+    >>> xlen, ylen, zlen = custom_len(x), custom_len(y), custom_len(z)
     """
 
     try:
@@ -119,7 +119,7 @@ def find_idx_nearest_val(array, value):
     >>> idx_nearest_val = find_idx_nearest_val(x, val)
     >>> nearest_val = x[idx_nearest_val]
     """
-    if array_like_length(array) == 0:
+    if custom_len(array) == 0:
         msg = "find_idx_nearest_val method was passed an empty array"
         raise HalotoolsError(msg)
 
@@ -164,7 +164,7 @@ def randomly_downsample_data(array, num_downsample):
 
     """
 
-    input_array_length = array_like_length(array) 
+    input_array_length = custom_len(array) 
     if num_downsample > input_array_length:
         raise SyntaxError("Length of the desired downsampling = %i, "
             "which exceeds input array length = %i " % (num_downsample, input_array_length))
@@ -206,7 +206,7 @@ def array_is_monotonic(array, strict = False):
     If the input ``array`` is constant-valued, method returns flag = 1. 
 
     """
-    if array_like_length(array) < 3:
+    if custom_len(array) < 3:
         msg = ("Input array to the array_is_monotonic method has less then 3 elements")
         raise HalotoolsError(msg)
     d = np.diff(array)

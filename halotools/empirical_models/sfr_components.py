@@ -11,7 +11,7 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
 import model_defaults
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 import model_helpers as model_helpers
 
 from astropy.extern import six

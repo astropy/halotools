@@ -17,7 +17,7 @@ from copy import copy
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 from ..custom_exceptions import HalotoolsError
 
 from astropy.extern import six

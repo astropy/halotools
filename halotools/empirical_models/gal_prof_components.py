@@ -16,7 +16,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
-from ..utils.array_utils import array_like_length as custom_len
+from ..utils.array_utils import custom_len
 import model_helpers as model_helpers 
 import model_defaults
 
