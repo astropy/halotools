@@ -492,6 +492,13 @@ class MockFactory(object):
 
         return group_finder.group_ids
 
+    @property 
+    def satellite_fraction(self):
+        """ Fraction of mock galaxies that are satellites. 
+        """
+        satmask = self.galaxy_table['gal_type'] == 'satellites'
+        return len(self.galaxy_table[satmask]) / float(len(self.galaxy_table))
+
 class HodMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a 
     population of mock galaxies based on an HOD-style model. 
