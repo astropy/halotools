@@ -345,8 +345,7 @@ class Leauthaud11Cens(OccupationComponent):
     """ HOD-style model for any central galaxy occupation that derives from 
     a stellar-to-halo-mass relation. 
     """
-    def __init__(self, smhm_model=smhm_components.Moster13SmHm, 
-        threshold = model_defaults.default_stellar_mass_threshold, 
+    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         **kwargs):
         """
@@ -360,10 +359,6 @@ class Leauthaud11Cens(OccupationComponent):
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
-
-        smhm_model : object, optional keyword argument 
-            Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
-            the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
 
         redshift : float, optional keyword argument 
             Redshift of the stellar-to-halo-mass relation. Default is 0. 
@@ -385,8 +380,8 @@ class Leauthaud11Cens(OccupationComponent):
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
-        self.smhm_model = smhm_model(
-            gal_type='centrals', prim_haloprop_key = prim_haloprop_key, **kwargs)
+        self.smhm_model = smhm_components.Moster13SmHm(
+            prim_haloprop_key = prim_haloprop_key, **kwargs)
 
         for key, value in self.smhm_model.param_dict.iteritems():
             self.param_dict[key] = value
