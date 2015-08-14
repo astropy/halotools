@@ -2,6 +2,7 @@
 import numpy as np
 
 from ..hod_components import Leauthaud11Cens, Leauthaud11Sats
+from ..preloaded_models import Leauthaud11
 
 from .. import model_defaults
 
@@ -100,7 +101,17 @@ def test_Leauthaud11Sats():
 	ncen11 = model11.central_occupation_model.mean_occupation(prim_haloprop = 5e12)
 	assert ncen10 > ncen105 > ncen11 
 
+def test_fsat_mock():
+	model10 = Leauthaud11(threshold = 10)
+	model10.populate_mock()
+	model11 = Leauthaud11(threshold = 11.25)
+	model11.populate_mock()
 
+	mask10 = model10.mock.galaxy_table['gal_type'] == 'satellites'
+	fsat10 = len(model10.mock.galaxy_table[mask10]) / float(len(model10.mock.galaxy_table))
+	mask11 = model11.mock.galaxy_table['gal_type'] == 'satellites'
+	fsat11 = len(model11.mock.galaxy_table[mask11]) / float(len(model11.mock.galaxy_table))
+	assert fsat10 > fsat11
 
 
 
