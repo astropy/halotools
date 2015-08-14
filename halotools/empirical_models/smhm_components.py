@@ -496,11 +496,26 @@ class Behroozi10SmHm(PrimGalpropModel):
             Dictionary containing parameter values. 
         """
 
+        littleh = 0.7
+        littlehsq = littleh**2
+
+        table_2_m0_0 = 10.**10.72
+        rescaled_m0_0 = np.log10(table_2_m0_0/littlehsq)
+
+        table_2_m0_a = 10.**0.59
+        rescaled_m0_a = np.log10(table_2_m0_a/littlehsq)
+
+        table_2_m1_0 = 10.**12.35
+        rescaled_m1_0 = np.log10(table_2_m1_0/littlehsq)
+        
+        table_2_m1_a = 10.**0.3
+        rescaled_m1_a = np.log10(table_2_m1_a/littlehsq)
+
         d = {
-        'm0_0': 10.72, 
-        'm0_a': 0.59, 
-        'm1_0': 12.35, 
-        'm1_a': 0.3,
+        'm0_0': rescaled_m0_0, 
+        'm0_a': rescaled_m0_a, 
+        'm1_0': rescaled_m1_0, 
+        'm1_a': rescaled_m1_a,
         'beta_0': 0.43,
         'beta_a': 0.18, 
         'delta_0': 0.56, 
