@@ -834,13 +834,16 @@ class Leauthaud11Sats(OccupationComponent):
         # Call the interpolater to compute the knee
         knee = spline_function(10.**self.threshold)
 
+        littleh = 0.72
+        knee_mass = 1.e12/littleh
+
         self._msat = (
-            1.e12*self.param_dict['bsat']*
-            (knee / 1.e12)**self.param_dict['betasat'])
+            knee_mass*self.param_dict['bsat']*
+            (knee / knee_mass)**self.param_dict['betasat'])
 
         self._mcut = (
-            1.e12*self.param_dict['bcut']*
-            (knee / 1.e12)**self.param_dict['betacut'])
+            knee_mass*self.param_dict['bcut']*
+            (knee / knee_mass)**self.param_dict['betacut'])
 
 
 
