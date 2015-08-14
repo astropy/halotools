@@ -20,10 +20,3 @@ Halotools is a fully open-source package with contributing scientists spread acr
 
 Halotools is licensed under a 3-clause BSD style license - see the licenses/LICENSE.rst file.
 
-
-
-
-
-
-
-
