@@ -36,9 +36,6 @@ class LogNormalScatterModel(object):
             the level of scatter. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        gal_type : string, optional keyword argument 
-            Name of the galaxy population being modeled. Default is None. 
-
         scatter_abcissa : array_like, optional keyword argument 
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
@@ -75,8 +72,6 @@ class LogNormalScatterModel(object):
             self.abcissa = [12]
             self.ordinates = [default_scatter]
 
-        if 'gal_type' in kwargs.keys():
-            self.gal_type = kwargs['gal_type']
         self._initialize_param_dict()
 
         self._update_interpol()
@@ -197,9 +192,6 @@ class PrimGalpropModel(model_helpers.GalPropModel):
             stellar mass.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        gal_type : string, optional keyword argument 
-            Name of the galaxy population being modeled. Default is None. 
-
         scatter_model : object, optional keyword argument 
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
             implemented by the `LogNormalScatterModel` class. 
@@ -242,8 +234,6 @@ class PrimGalpropModel(model_helpers.GalPropModel):
 
         self.scatter_model = scatter_model(
             prim_haloprop_key=self.prim_haloprop_key, **kwargs)
-        if hasattr(self.scatter_model, 'gal_type'):
-            self.gal_type = self.scatter_model.gal_type
 
         self._build_param_dict(**kwargs)
 
