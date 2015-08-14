@@ -100,13 +100,13 @@ def test_Leauthaud11_composite():
 	testmass1 = 5.e11
 	ncen1 = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	nsat1 = model.mean_occupation_satellites(prim_haloprop=testmass1)
-	model.param_dict['n10'] *= 1.1
+	model.param_dict['m1_0'] /= 1.02
 	ncen2 = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	nsat2 = model.mean_occupation_satellites(prim_haloprop=testmass1)
 	assert ncen2 > ncen1
 	assert nsat2 > nsat1
 
-	model.param_dict['n11'] *= 1.1
+	model.param_dict['m1_a'] *= 1.1
 	ncen3 = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	nsat3 = model.mean_occupation_satellites(prim_haloprop=testmass1)
 	assert ncen3 == ncen2
