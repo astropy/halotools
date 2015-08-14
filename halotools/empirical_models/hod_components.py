@@ -380,7 +380,7 @@ class Leauthaud11Cens(OccupationComponent):
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
-        self.smhm_model = smhm_components.Moster13SmHm(
+        self.smhm_model = smhm_components.Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
         for key, value in self.smhm_model.param_dict.iteritems():
@@ -700,8 +700,7 @@ class Leauthaud11Sats(OccupationComponent):
     """ HOD-style model for any satellite galaxy occupation that derives from 
     a stellar-to-halo-mass relation. 
     """
-    def __init__(self, smhm_model=smhm_components.Moster13SmHm, 
-        threshold = model_defaults.default_stellar_mass_threshold, 
+    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         modulate_with_cenocc = False, 
         **kwargs):
@@ -717,10 +716,6 @@ class Leauthaud11Sats(OccupationComponent):
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        smhm_model : object, optional keyword argument 
-            Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
-            the stellar-to-halo-mass relation 
-
         redshift : float, optional keyword argument 
             Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
@@ -734,8 +729,7 @@ class Leauthaud11Sats(OccupationComponent):
         """
 
         self.central_occupation_model = Leauthaud11Cens(
-            threshold=threshold, prim_haloprop_key = prim_haloprop_key, 
-            smhm_model = smhm_model, **kwargs)
+            threshold=threshold, prim_haloprop_key = prim_haloprop_key, **kwargs)
         self.ancillary_model_dependencies = ['central_occupation_model']
         self.ancillary_model_param_keys = self.central_occupation_model.param_dict.keys()
 
