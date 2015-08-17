@@ -14,6 +14,8 @@ from . import model_helpers as model_helpers
 from ..utils.array_utils import custom_len
 from ..sim_manager import sim_defaults 
 
+from astropy import cosmology
+
 from warnings import warn
 from functools import partial
 
@@ -496,7 +498,8 @@ class Behroozi10SmHm(PrimGalpropModel):
             Dictionary containing parameter values. 
         """
 
-        littleh = 0.7
+        # littleh = 0.7
+        littleh = 1.0
         littlehsq = littleh**2
 
         table_2_m0_0 = 10.**10.72
@@ -603,7 +606,7 @@ class Behroozi10SmHm(PrimGalpropModel):
         else:
             redshift = sim_defaults.default_redshift
 
-        log_stellar_mass_table = np.linspace(8.5, 13, 500)
+        log_stellar_mass_table = np.linspace(8.5, 12.5, 100)
         log_halo_mass_table = self.mean_log_halo_mass(log_stellar_mass_table, redshift=redshift)
         interpol_func = model_helpers.custom_spline(log_halo_mass_table, log_stellar_mass_table)
         log_stellar_mass = interpol_func(np.log10(halo_mass))
@@ -612,7 +615,8 @@ class Behroozi10SmHm(PrimGalpropModel):
 
         # The numerical values of the behroozi best-fit parameters are quoted assuming h=0.7, 
         # so we divide by h**2 to return results in h=1 units. 
-        littlehsq = 0.7**2
+        # littlehsq = 0.7**2
+        littlehsq = 1.0
         return stellar_mass/littlehsq
 
 

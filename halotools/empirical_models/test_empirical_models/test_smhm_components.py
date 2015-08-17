@@ -306,7 +306,13 @@ class TestBehroozi10SmHm(TestCase):
 		z01_sm = self.model.mean_stellar_mass(prim_haloprop = halo_mass_z01, redshift = 0.1)
 		z01_ratio = z01_sm / halo_mass_z01
 		z01_result = np.log10(z01_ratio)
-		assert z01_result[-1] == self.logmratio_z01[-1]
+		assert np.allclose(z01_result, self.logmratio_z01, rtol=0.02)
+
+		halo_mass_z1 = 10.**self.logmh_z1
+		z1_sm = self.model.mean_stellar_mass(prim_haloprop = halo_mass_z1, redshift = 1)
+		z1_ratio = z1_sm / halo_mass_z1
+		z1_result = np.log10(z1_ratio)
+		assert np.allclose(z1_result, self.logmratio_z1, rtol=0.02)
 
 
 
