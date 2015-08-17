@@ -257,7 +257,6 @@ class TestBehroozi10SmHm(TestCase):
 	def setup_class(self):
 
 		self.model = smhm_components.Behroozi10SmHm()
-		self.behroozi10_littleh = 0.7
 
 		self.logmratio_z1 = np.array(
 			[-2.145909, -2.020974, -1.924020, -1.852937, 
@@ -321,12 +320,12 @@ class TestBehroozi10SmHm(TestCase):
 			14.566248, 14.691248]
 			)
 
-		# self.logmh_z01 = np.log10((10.**self.logmh_z01)/self.behroozi10_littleh)
-		# self.logmratio_z05 = np.log10((10.**self.logmratio_z05)/self.behroozi10_littleh)
-		# self.logmh_z1 = np.log10((10.**self.logmh_z1)/self.behroozi10_littleh)
-		# self.logmratio_z01 = np.log10((10.**self.logmratio_z01)/self.behroozi10_littleh)
-		# self.logmh_z05 = np.log10((10.**self.logmh_z05)/self.behroozi10_littleh)
-		# self.logmratio_z1 = np.log10((10.**self.logmratio_z1)/self.behroozi10_littleh)
+		self.logmh_z01 = np.log10((10.**self.logmh_z01)/self.model.littleh)
+		self.logmratio_z05 = np.log10((10.**self.logmratio_z05)/self.model.littleh)
+		self.logmh_z1 = np.log10((10.**self.logmh_z1)/self.model.littleh)
+		self.logmratio_z01 = np.log10((10.**self.logmratio_z01)/self.model.littleh)
+		self.logmh_z05 = np.log10((10.**self.logmh_z05)/self.model.littleh)
+		self.logmratio_z1 = np.log10((10.**self.logmratio_z1)/self.model.littleh)
 
 
 	def test_smhm_blackbox(self):
