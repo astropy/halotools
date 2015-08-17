@@ -299,11 +299,35 @@ class TestBehroozi10SmHm(TestCase):
 			-2.94024, -3.033235, -3.127133, -3.221902, 
 			-3.317498, -3.413892, -3.511041, -3.608918])
 
-		
-		self.logmh_z01 = np.log10((10.**self.logmh_z01)/self.behroozi10_littleh)
-		self.logmh_z1 = np.log10((10.**self.logmh_z1)/self.behroozi10_littleh)
-		self.logmratio_z01 = np.log10((10.**self.logmratio_z01)/self.behroozi10_littleh)
-		self.logmratio_z1 = np.log10((10.**self.logmratio_z1)/self.behroozi10_littleh)
+		self.logmratio_z05 = np.array([
+			-2.375180, -2.183537, -2.015065, -1.879960, 
+			-1.782708, -1.720799, -1.688169, -1.678521, 
+			-1.686669, -1.708703, -1.741731, -1.783616, 
+			-1.832761, -1.887952, -1.948255, -2.012940, 
+			-2.081414, -2.153203, -2.227921, -2.305249, 
+			-2.384912, -2.466680, -2.550359, -2.635785, 
+			-2.722806, -2.811296, -2.901139, -2.992246, 
+			-3.084516, -3.177873]
+			)
+
+		self.logmh_z05 = np.array([
+			11.066248, 11.191248, 11.316248, 11.441248, 
+			11.566248, 11.691248, 11.816248, 11.941248, 
+			12.066248, 12.191248, 12.316248, 12.441248, 
+			12.566248, 12.691248, 12.816248, 12.941248, 
+			13.066248, 13.191248, 13.316248, 13.441248, 
+			13.566248, 13.691248, 13.816248, 13.941248, 
+			14.066248, 14.191248, 14.316248, 14.441248, 
+			14.566248, 14.691248]
+			)
+
+		# self.logmh_z01 = np.log10((10.**self.logmh_z01)/self.behroozi10_littleh)
+		# self.logmratio_z05 = np.log10((10.**self.logmratio_z05)/self.behroozi10_littleh)
+		# self.logmh_z1 = np.log10((10.**self.logmh_z1)/self.behroozi10_littleh)
+		# self.logmratio_z01 = np.log10((10.**self.logmratio_z01)/self.behroozi10_littleh)
+		# self.logmh_z05 = np.log10((10.**self.logmh_z05)/self.behroozi10_littleh)
+		# self.logmratio_z1 = np.log10((10.**self.logmratio_z1)/self.behroozi10_littleh)
+
 
 	def test_smhm_blackbox(self):
 		"""
@@ -315,11 +339,18 @@ class TestBehroozi10SmHm(TestCase):
 		z01_result = np.log10(z01_ratio)
 		assert np.allclose(z01_result, self.logmratio_z01, rtol=0.02)
 
+		halo_mass_z05 = 10.**self.logmh_z05
+		z05_sm = self.model.mean_stellar_mass(prim_haloprop = halo_mass_z05, redshift = 0.5)
+		z05_ratio = z05_sm / halo_mass_z05
+		z05_result = np.log10(z05_ratio)
+		assert np.allclose(z05_result, self.logmratio_z05, rtol=0.02)
+
 		halo_mass_z1 = 10.**self.logmh_z1
 		z1_sm = self.model.mean_stellar_mass(prim_haloprop = halo_mass_z1, redshift = 1)
 		z1_ratio = z1_sm / halo_mass_z1
 		z1_result = np.log10(z1_ratio)
-		assert np.allclose(z1_result[-1], self.logmratio_z1[-1], rtol=0.02)
+		assert np.allclose(z1_result, self.logmratio_z1, rtol=0.02)
+
 
 
 
