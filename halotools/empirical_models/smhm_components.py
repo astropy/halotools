@@ -5,6 +5,8 @@ stellar mass and subhalo_table.
 """
 import numpy as np
 
+from scipy.interpolate import UnivariateSpline
+
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
@@ -498,8 +500,9 @@ class Behroozi10SmHm(PrimGalpropModel):
             Dictionary containing parameter values. 
         """
 
-        # littleh = 0.7
-        littleh = 1.0
+        # The numerical values of the behroozi best-fit parameters are quoted assuming h=0.7, 
+        # so we divide by h**2 to return results in h=1 units. 
+        littleh = 0.7
         littlehsq = littleh**2
 
         table_2_m0_0 = 10.**10.72
@@ -509,10 +512,10 @@ class Behroozi10SmHm(PrimGalpropModel):
         rescaled_m0_a = np.log10(table_2_m0_a/littlehsq)
 
         table_2_m1_0 = 10.**12.35
-        rescaled_m1_0 = np.log10(table_2_m1_0/littlehsq)
+        rescaled_m1_0 = np.log10(table_2_m1_0/littleh)
         
         table_2_m1_a = 10.**0.3
-        rescaled_m1_a = np.log10(table_2_m1_a/littlehsq)
+        rescaled_m1_a = np.log10(table_2_m1_a/littleh)
 
         d = {
         'm0_0': rescaled_m0_0, 
@@ -608,17 +611,14 @@ class Behroozi10SmHm(PrimGalpropModel):
 
         log_stellar_mass_table = np.linspace(8.5, 12.5, 100)
         log_halo_mass_table = self.mean_log_halo_mass(log_stellar_mass_table, redshift=redshift)
+
         interpol_func = model_helpers.custom_spline(log_halo_mass_table, log_stellar_mass_table)
+
         log_stellar_mass = interpol_func(np.log10(halo_mass))
 
         stellar_mass = 10.**log_stellar_mass
 
-        # The numerical values of the behroozi best-fit parameters are quoted assuming h=0.7, 
-        # so we divide by h**2 to return results in h=1 units. 
-        # littlehsq = 0.7**2
-        littlehsq = 1.0
-        return stellar_mass/littlehsq
-
+        return stellar_mass
 
 
 

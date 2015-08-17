@@ -257,6 +257,7 @@ class TestBehroozi10SmHm(TestCase):
 	def setup_class(self):
 
 		self.model = smhm_components.Behroozi10SmHm()
+		self.behroozi10_littleh = 0.7
 
 		self.logmratio_z1 = np.array(
 			[-2.145909, -2.020974, -1.924020, -1.852937, 
@@ -298,6 +299,12 @@ class TestBehroozi10SmHm(TestCase):
 			-2.94024, -3.033235, -3.127133, -3.221902, 
 			-3.317498, -3.413892, -3.511041, -3.608918])
 
+		
+		self.logmh_z01 = np.log10((10.**self.logmh_z01)/self.behroozi10_littleh)
+		self.logmh_z1 = np.log10((10.**self.logmh_z1)/self.behroozi10_littleh)
+		self.logmratio_z01 = np.log10((10.**self.logmratio_z01)/self.behroozi10_littleh)
+		self.logmratio_z1 = np.log10((10.**self.logmratio_z1)/self.behroozi10_littleh)
+
 	def test_smhm_blackbox(self):
 		"""
 		"""
@@ -312,7 +319,7 @@ class TestBehroozi10SmHm(TestCase):
 		z1_sm = self.model.mean_stellar_mass(prim_haloprop = halo_mass_z1, redshift = 1)
 		z1_ratio = z1_sm / halo_mass_z1
 		z1_result = np.log10(z1_ratio)
-		assert np.allclose(z1_result, self.logmratio_z1, rtol=0.02)
+		assert np.allclose(z1_result[-1], self.logmratio_z1[-1], rtol=0.02)
 
 
 
