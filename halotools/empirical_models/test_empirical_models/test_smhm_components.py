@@ -2,7 +2,9 @@
 
 import numpy as np 
 from astropy.table import Table 
-
+from astropy.io.ascii import read as astropy_ascii_read
+from astropy.utils.data import get_pkg_data_filename, get_pkg_data_fileobj
+from astropy.tests.helper import remote_data, pytest
 from .. import smhm_components
 from .. import model_defaults
 
@@ -246,6 +248,27 @@ def test_LogNormalScatterModel_behavior():
 	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop =mass12)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, 0.3, decimal=2)
+
+def test_behroozi10_smhm():
+	"""
+	"""
+	logmass_ratio_z1 = np.array(
+		[-2.145909, -2.020974, -1.924020, -1.852937, 
+		-1.804730, -1.776231, -1.764455, -1.766820, 
+		-1.781140, -1.805604, -1.838727, -1.879292, 
+		-1.926290, -1.978890, -2.036405, -2.098245, 
+		-2.163930, -2.233045, -2.305230, -2.380185, 
+		-2.457643, -2.537377, -2.619191, -2.702901]
+		)
+
+	logmhalo_z1 = np.array(
+		[11.368958, 11.493958, 11.618958, 11.743958, 
+		11.868958, 11.993958, 12.118958, 12.243958, 
+		12.368958, 12.493958, 12.618958, 12.743958, 
+		12.868958, 12.993958, 13.118958, 13.243958, 
+		13.368958, 13.493958, 13.618958, 13.743958, 
+		13.868958, 13.993958, 14.118958, 14.243958]
+		)
 
 
 
