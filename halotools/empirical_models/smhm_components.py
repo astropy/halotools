@@ -502,7 +502,7 @@ class Behroozi10SmHm(PrimGalpropModel):
 
         # The numerical values of the behroozi best-fit parameters are quoted assuming h=0.7, 
         # so we divide by h**2 to return results in h=1 units. 
-        littleh = 0.7
+        littleh = 1.0
         littlehsq = littleh**2
 
         table_2_m0_0 = 10.**10.72
