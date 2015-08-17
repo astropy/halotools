@@ -483,12 +483,12 @@ class Behroozi10SmHm(PrimGalpropModel):
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
         """
+        self.littleh = 0.7
 
         super(Behroozi10SmHm, self).__init__(
             galprop_key='stellar_mass', **kwargs)
 
         self.publications = ['arXiv:1001.0015']
-
 
     def retrieve_default_param_dict(self):
         """ Method returns a dictionary of all model parameters 
@@ -502,20 +502,18 @@ class Behroozi10SmHm(PrimGalpropModel):
 
         # The numerical values of the behroozi best-fit parameters are quoted assuming h=0.7, 
         # so we divide by h**2 to return results in h=1 units. 
-        littleh = 1.0
-        littlehsq = littleh**2
 
         table_2_m0_0 = 10.**10.72
-        rescaled_m0_0 = np.log10(table_2_m0_0/littlehsq)
+        rescaled_m0_0 = np.log10(table_2_m0_0/self.littleh**2)
 
         table_2_m0_a = 10.**0.59
-        rescaled_m0_a = np.log10(table_2_m0_a/littlehsq)
+        rescaled_m0_a = np.log10(table_2_m0_a/self.littleh**2)
 
         table_2_m1_0 = 10.**12.35
-        rescaled_m1_0 = np.log10(table_2_m1_0/littleh)
+        rescaled_m1_0 = np.log10(table_2_m1_0/self.littleh)
         
         table_2_m1_a = 10.**0.3
-        rescaled_m1_a = np.log10(table_2_m1_a/littleh)
+        rescaled_m1_a = np.log10(table_2_m1_a/self.littleh)
 
         d = {
         'm0_0': rescaled_m0_0, 
