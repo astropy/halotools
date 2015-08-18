@@ -389,8 +389,11 @@ class Moster13SmHm(PrimGalpropModel):
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
-        redshift : float, keyword argument
-            Redshift of the halo hosting the galaxy
+        redshift : float or array, optional 
+            Redshift of the halo hosting the galaxy. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+            If passing an array, must be of the same length as 
+            the ``prim_haloprop`` or ``halo_table`` argument. 
 
         Returns 
         -------
