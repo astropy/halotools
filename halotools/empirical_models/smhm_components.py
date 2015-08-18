@@ -499,27 +499,16 @@ class Behroozi10SmHm(PrimGalpropModel):
         d : dict 
             Dictionary containing parameter values. 
         """
-
-        # The numerical values of the behroozi best-fit parameters are quoted assuming h=0.7, 
-        # so we divide by h**2 to return results in h=1 units. 
-
-        table_2_m0_0 = 10.**10.72
-        rescaled_m0_0 = np.log10(table_2_m0_0/self.littleh**2)
-
-        table_2_m0_a = 10.**0.59
-        rescaled_m0_a = np.log10(table_2_m0_a/self.littleh**2)
-
-        table_2_m1_0 = 10.**12.35
-        rescaled_m1_0 = np.log10(table_2_m1_0/self.littleh)
-        
-        table_2_m1_a = 10.**0.3
-        rescaled_m1_a = np.log10(table_2_m1_a/self.littleh)
+        # All calculations are done internally using the same h=0.7 units 
+        # as in Behroozi et al. (2010), so the parameter values here are 
+        # the same as in Table 2, even though the mean_log_halo_mass and 
+        # mean_stellar_mass methods use accept and return arguments in h=1 units. 
 
         d = {
-        'm0_0': rescaled_m0_0, 
-        'm0_a': rescaled_m0_a, 
-        'm1_0': rescaled_m1_0, 
-        'm1_a': rescaled_m1_a,
+        'm0_0': 10.72, 
+        'm0_a': 0.59, 
+        'm1_0': 12.35, 
+        'm1_a': 0.3,
         'beta_0': 0.43,
         'beta_a': 0.18, 
         'delta_0': 0.56, 
@@ -536,21 +525,19 @@ class Behroozi10SmHm(PrimGalpropModel):
         Parameters 
         ----------
         log_stellar_mass : array
-            Array of base-10 logarithm of stellar masses at which to evaluate the halo mass. 
+            Array of base-10 logarithm of stellar masses in h=1 solar mass units. 
 
         redshift : float or array, optional 
             Redshift of the halo hosting the galaxy. If passing an array, 
             must be of the same length as the input ``log_stellar_mass``. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-
         Returns 
         -------
         log_halo_mass : array_like 
-            Array containing 10-base logarithm of halo mass 
-            in which galaxies of the the input ``log_stellar_mass`` reside. 
+            Array containing 10-base logarithm of halo mass in h=1 solar mass units. 
         """
-        stellar_mass = 10.**log_stellar_mass
+        stellar_mass = (10.**log_stellar_mass)*(self.littleh**2)
         a = 1./(1. + redshift)
 
         logm0 = self.param_dict['m0_0'] + self.param_dict['m0_a']*(a - 1)
@@ -566,7 +553,7 @@ class Behroozi10SmHm(PrimGalpropModel):
 
         log_halo_mass = logm1 + beta*np.log10(stellar_mass_by_m0) + (term3_numerator/term3_denominator) - 0.5
 
-        return log_halo_mass
+        return np.log10((10.**log_halo_mass)/self.littleh)
 
     def mean_stellar_mass(self, **kwargs):
         """ Return the stellar mass of a central galaxy as a function 
