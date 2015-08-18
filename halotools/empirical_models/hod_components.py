@@ -352,7 +352,7 @@ class Leauthaud11Cens(OccupationComponent):
         Parameters 
         ----------
         threshold : float, optional keyword argument
-            Stellar mass threshold of the mock galaxy sample. 
+            Stellar mass threshold of the mock galaxy sample in h=1 solar mass units. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         prim_haloprop_key : string, optional keyword argument 
@@ -708,7 +708,7 @@ class Leauthaud11Sats(OccupationComponent):
         Parameters 
         ----------
         threshold : float, optional keyword argument
-            Stellar mass threshold of the mock galaxy sample. 
+            Stellar mass threshold of the mock galaxy sample in h=1 solar mass units. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         prim_haloprop_key : string, optional keyword argument 
@@ -727,6 +727,8 @@ class Leauthaud11Sats(OccupationComponent):
         --------
         >>> sat_model = Leauthaud11Sats()
         """
+
+        self.littleh = 0.72
 
         self.central_occupation_model = Leauthaud11Cens(
             threshold=threshold, prim_haloprop_key = prim_haloprop_key, **kwargs)
@@ -782,6 +784,8 @@ class Leauthaud11Sats(OccupationComponent):
 
         self._update_satellite_params()
 
+        mass *= self.littleh
+
         mean_nsat = (
             np.exp(-self._mcut/mass)*
             (mass/self._msat)**self.param_dict['alphasat']
@@ -829,13 +833,16 @@ class Leauthaud11Sats(OccupationComponent):
         # Tabulate the inverse stellar-to-halo-mass relation
         ordinates = self.central_occupation_model.mean_stellar_mass(
             prim_haloprop =self._msat_mcut_abcissa)
+
+        ordinates *= self.littleh**2
+
         spline_function = spline(ordinates, self._msat_mcut_abcissa)
 
         # Call the interpolater to compute the knee
-        knee = spline_function(10.**self.threshold)
+        scaled_threshold = (10.**self.threshold)*self.littleh**2
+        knee = spline_function(scaled_threshold)
 
-        littleh = 0.72
-        knee_mass = 1.e12/littleh
+        knee_mass = 1.e12
 
         self._msat = (
             knee_mass*self.param_dict['bsat']*
@@ -844,7 +851,6 @@ class Leauthaud11Sats(OccupationComponent):
         self._mcut = (
             knee_mass*self.param_dict['bcut']*
             (knee / knee_mass)**self.param_dict['betacut'])
-
 
 
 class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
