@@ -811,7 +811,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         self._update_satellite_params()
 
-        mass *= self.littleh
+        # mass *= self.littleh
 
         mean_nsat = (
             np.exp(-self._mcut/mass)*
