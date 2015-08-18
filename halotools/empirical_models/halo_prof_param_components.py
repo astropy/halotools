@@ -32,17 +32,17 @@ class ConcMass(object):
         """
         Parameters 
         ----------
-        cosmology : object, optional keyword argument
+        cosmology : object, optional 
             Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        redshift : float, optional keyword argument 
+        redshift : float, optional  
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             Specifies the column name of the mass-like halo property, e.g., 'mvir' or 'm200b'. 
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        conc_mass_model : string, optional keyword argument 
+        conc_mass_model : string, optional  
             Specifies the calibrated fitting function used to model the concentration-mass relation. 
              Default is set in `~halotools.empirical_models.sim_defaults`.
 
@@ -66,11 +66,11 @@ class ConcMass(object):
 
         Parameters
         ----------        
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 

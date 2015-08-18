@@ -30,9 +30,9 @@ def test_Zheng07Cens():
 
 	"""
 
-	def test_attributes(model, gal_type='centrals'):
+	def test_attributes(model):
 		assert isinstance(model, hod_components.OccupationComponent)
-		assert model.gal_type == gal_type
+		assert model.gal_type == 'centrals'
 
 		assert hasattr(model, 'prim_haloprop_key')
 
@@ -103,8 +103,8 @@ def test_Zheng07Cens():
 
 	### Now test the various threshold settings
 	for threshold in np.arange(-22, -17.5, 0.5):
-		thresh_model = hod_components.Zheng07Cens(threshold = threshold,gal_type='cens')
-		test_attributes(thresh_model,gal_type='cens')
+		thresh_model = hod_components.Zheng07Cens(threshold = threshold)
+		test_attributes(thresh_model)
 		test_mean_occupation(thresh_model)
 		test_mc_occupation(thresh_model)
 
@@ -180,9 +180,9 @@ def test_Zheng07Sats():
 
 	"""
 
-	def test_attributes(model, gal_type='satellites'):
+	def test_attributes(model):
 		assert isinstance(model, hod_components.OccupationComponent)
-		assert model.gal_type == gal_type
+		assert model.gal_type == 'satellites'
 
 		assert hasattr(model, 'prim_haloprop_key')
 
@@ -220,7 +220,7 @@ def test_Zheng07Sats():
 	def test_ncen_inheritance():
 		satmodel_nocens = hod_components.Zheng07Sats()
 		cenmodel = hod_components.Zheng07Cens()
-		satmodel_cens = hod_components.Zheng07Sats(modulate_with_cenocc=True, gal_type_centrals='centrals')
+		satmodel_cens = hod_components.Zheng07Sats(modulate_with_cenocc=True)
 
 		Npts = 1e2 
 		masses = np.logspace(10, 15, Npts)
@@ -242,8 +242,8 @@ def test_Zheng07Sats():
 
 	### Now test the various threshold settings
 	for threshold in np.arange(-22, -17.5, 0.5):
-		thresh_model = hod_components.Zheng07Sats(threshold = threshold,gal_type='sats')
-		test_attributes(thresh_model,gal_type='sats')
+		thresh_model = hod_components.Zheng07Sats(threshold = threshold)
+		test_attributes(thresh_model)
 		test_mean_occupation(thresh_model)
 
 	test_ncen_inheritance()

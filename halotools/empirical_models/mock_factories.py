@@ -58,7 +58,7 @@ class MockFactory(object):
         model : object 
             A model built by a sub-class of `~halotools.empirical_models.ModelFactory`. 
 
-        additional_haloprops : list of strings, optional keyword argument  
+        additional_haloprops : list of strings, optional   
             Each entry in this list must be a column key of ``snapshot.halo_table``. 
             For each entry of ``additional_haloprops``, each member of the mock galaxy population 
             will have an attribute storing this property of its host halo. 
@@ -66,14 +66,14 @@ class MockFactory(object):
             If ``additional_haloprops`` is set to the string value ``all``, 
             the galaxy table will inherit every halo property in the catalog. Default is None. 
 
-        halocut_funcobj : function object, optional keyword argument  
+        halocut_funcobj : function object, optional   
             Function object used to place a cut on the input ``snapshot.halo_table`` table. 
             Default behavior depends on the sub-class of `MockFactory`. 
             If the ``halocut_funcobj`` keyword argument is passed, 
             the input to the function must be a length-Nsubhalos structured numpy array or Astropy table; 
             the function output must be a length-Nsubhalos boolean array that will be used as a mask. 
 
-        new_haloprop_func_dict : function object, optional keyword argument 
+        new_haloprop_func_dict : function object, optional  
             Dictionary of function objects used to create additional halo properties 
             by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
@@ -278,7 +278,7 @@ class MockFactory(object):
             rbins = kwargs['rbins']
         else:
             rbins = model_defaults.default_rbins
-        rbin_centers = (rbins[1:]+rbins[:1])/2.0
+        rbin_centers = (rbins[1:] + rbins[0:-1])/2.
 
         mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
@@ -401,7 +401,7 @@ class MockFactory(object):
             rbins = kwargs['rbins']
         else:
             rbins = model_defaults.default_rbins
-        rbin_centers = (rbins[1:]+rbins[:1])/2.0
+        rbin_centers = (rbins[1:] + rbins[0:-1])/2.
 
         mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
@@ -492,6 +492,13 @@ class MockFactory(object):
 
         return group_finder.group_ids
 
+    @property 
+    def satellite_fraction(self):
+        """ Fraction of mock galaxies that are satellites. 
+        """
+        satmask = self.galaxy_table['gal_type'] == 'satellites'
+        return len(self.galaxy_table[satmask]) / float(len(self.galaxy_table))
+
 class HodMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a 
     population of mock galaxies based on an HOD-style model. 
@@ -516,7 +523,7 @@ class HodMockFactory(MockFactory):
         model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.HodModelFactory`. 
 
-        additional_haloprops : list of strings, optional keyword argument  
+        additional_haloprops : list of strings, optional   
             Each entry in this list must be a column key of ``snapshot.halo_table``. 
             For each entry of ``additional_haloprops``, each member of the mock galaxy population 
             will have an attribute storing this property of its host halo. 
@@ -524,19 +531,19 @@ class HodMockFactory(MockFactory):
             If ``additional_haloprops`` is set to the string value ``all``, 
             the galaxy table will inherit every halo property in the catalog. Default is None. 
 
-        halocut_funcobj : function object, optional keyword argument  
+        halocut_funcobj : function object, optional   
             Function object used to place a cut on the input ``snapshot.halo_table`` table. 
             Default behavior depends on the sub-class of `MockFactory`. 
             If the ``halocut_funcobj`` keyword argument is passed, 
             the input to the function must be a length-Nsubhalos structured numpy array or Astropy table; 
             the function output must be a length-Nsubhalos boolean array that will be used as a mask. 
 
-        populate : boolean, optional keyword argument  
+        populate : boolean, optional   
             If set to ``False``, the class will perform all pre-processing tasks 
             but will not call the ``model`` to populate the ``galaxy_table`` 
             with mock galaxies and their observable properties. Default is ``True``. 
 
-        new_haloprop_func_dict : function object, optional keyword argument 
+        new_haloprop_func_dict : function object, optional  
             Dictionary of function objects used to create additional halo properties 
             by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
@@ -742,7 +749,7 @@ class SubhaloMockFactory(MockFactory):
         model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.SubhaloModelFactory`. 
 
-        additional_haloprops : list of strings, optional keyword argument  
+        additional_haloprops : list of strings, optional   
             Each entry in this list must be a column key of ``snapshot.halo_table``. 
             For each entry of ``additional_haloprops``, each member of the mock galaxy population 
             will have an attribute storing this property of its host halo. 
@@ -750,19 +757,19 @@ class SubhaloMockFactory(MockFactory):
             If ``additional_haloprops`` is set to the string value ``all``, 
             the galaxy table will inherit every halo property in the catalog. Default is None. 
 
-        halocut_funcobj : function object, optional keyword argument  
+        halocut_funcobj : function object, optional   
             Function object used to place a cut on the input ``snapshot.halo_table`` table. 
             Default behavior depends on the sub-class of `MockFactory`. 
             If the ``halocut_funcobj`` keyword argument is passed, 
             the input to the function must be a length-Nsubhalos structured numpy array or Astropy table; 
             the function output must be a length-Nsubhalos boolean array that will be used as a mask. 
 
-        populate : boolean, optional keyword argument  
+        populate : boolean, optional   
             If set to ``False``, the class will perform all pre-processing tasks 
             but will not call the ``model`` to populate the ``galaxy_table`` 
             with mock galaxies and their observable properties. Default is ``True``. 
 
-        new_haloprop_func_dict : function object, optional keyword argument 
+        new_haloprop_func_dict : function object, optional  
             Dictionary of function objects used to create additional halo properties 
             by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 

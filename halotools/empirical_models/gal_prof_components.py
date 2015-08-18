@@ -184,7 +184,7 @@ class SpatialBias(object):
             Array of the underlying dark matter halo profile 
             parameters of the mock galaxies.
 
-        mock_galaxies : object, optional keyword argument 
+        mock_galaxies : object, optional  
 
         Returns 
         ------- 
@@ -270,9 +270,9 @@ class SpatialBias(object):
             Array of the underlying dark matter halo profile 
             parameters of the mock galaxies.
 
-        mock_galaxies : object, optional keyword argument 
+        mock_galaxies : object, optional  
 
-        prof_param_key : string, optional keyword argument
+        prof_param_key : string, optional 
             Used to access the correct halo profile parameter. 
 
         Returns 

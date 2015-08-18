@@ -5,6 +5,8 @@ stellar mass and subhalo_table.
 """
 import numpy as np
 
+from scipy.interpolate import UnivariateSpline
+
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 
@@ -14,10 +16,12 @@ from . import model_helpers as model_helpers
 from ..utils.array_utils import custom_len
 from ..sim_manager import sim_defaults 
 
+from astropy import cosmology
+
 from warnings import warn
 from functools import partial
 
-__all__ = ['PrimGalpropModel', 'Moster13SmHm', 'LogNormalScatterModel']
+__all__ = ['PrimGalpropModel', 'Moster13SmHm', 'Behroozi10SmHm', 'LogNormalScatterModel']
 
 class LogNormalScatterModel(object):
     """ Simple model used to generate log-normal scatter 
@@ -31,21 +35,18 @@ class LogNormalScatterModel(object):
         """
         Parameters 
         ----------
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the level of scatter. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        gal_type : string, optional keyword argument 
-            Name of the galaxy population being modeled. Default is None. 
-
-        scatter_abcissa : array_like, optional keyword argument 
+        scatter_abcissa : array_like, optional  
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_ordinates : array_like, optional keyword argument 
+        scatter_ordinates : array_like, optional  
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
@@ -75,8 +76,6 @@ class LogNormalScatterModel(object):
             self.abcissa = [12]
             self.ordinates = [default_scatter]
 
-        if 'gal_type' in kwargs.keys():
-            self.gal_type = kwargs['gal_type']
         self._initialize_param_dict()
 
         self._update_interpol()
@@ -87,11 +86,11 @@ class LogNormalScatterModel(object):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
@@ -120,15 +119,15 @@ class LogNormalScatterModel(object):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
-        seed : int, optional keyword argument 
+        seed : int, optional  
             Random number seed. Default is None. 
 
         Returns 
@@ -188,37 +187,34 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         """
         Parameters 
         ----------
-        galprop_key : string, optional keyword argument 
+        galprop_key : string, optional  
             Name of the galaxy property being assigned. Default is ``stellar mass``, 
             though another common case may be ``luminosity``. 
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             stellar mass.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        gal_type : string, optional keyword argument 
-            Name of the galaxy population being modeled. Default is None. 
-
-        scatter_model : object, optional keyword argument 
+        scatter_model : object, optional  
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
             implemented by the `LogNormalScatterModel` class. 
 
-        redshift : float, optional keyword argument 
+        redshift : float, optional  
             Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
-        scatter_abcissa : array_like, optional keyword argument 
+        scatter_abcissa : array_like, optional  
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_ordinates : array_like, optional keyword argument 
+        scatter_ordinates : array_like, optional  
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        new_haloprop_func_dict : function object, optional keyword argument 
+        new_haloprop_func_dict : function object, optional  
             Dictionary of function objects used to create additional halo properties 
             that may be needed by the model component. 
             Used strictly by the `MockFactory` during call to the `process_halo_catalog` method. 
@@ -242,8 +238,6 @@ class PrimGalpropModel(model_helpers.GalPropModel):
 
         self.scatter_model = scatter_model(
             prim_haloprop_key=self.prim_haloprop_key, **kwargs)
-        if hasattr(self.scatter_model, 'gal_type'):
-            self.gal_type = self.scatter_model.gal_type
 
         self._build_param_dict(**kwargs)
 
@@ -286,34 +280,32 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         """
 
         if hasattr(self, 'retrieve_default_param_dict'):
-            smhm_param_dict = self.retrieve_default_param_dict()
+            self.param_dict = self.retrieve_default_param_dict()
         else:
-            smhm_param_dict = {}
+            self.param_dict = {}
 
         scatter_param_dict = self.scatter_model.param_dict
 
-        self.param_dict = dict(
-            smhm_param_dict.items() + 
-            scatter_param_dict.items()
-            )
+        for key, value in scatter_param_dict.iteritems():
+            self.param_dict[key] = value
 
     def _mc_galprop(self, include_scatter = True, **kwargs):
         """ Return the prim_galprop of the galaxies living in the input halo_table. 
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
-        redshift : float, optional keyword argument
+        redshift : float, optional 
             Redshift of the halo hosting the galaxy. 
 
-        include_scatter : boolean, optional keyword argument 
+        include_scatter : boolean, optional  
             Determines whether or not the scatter model is applied to add stochasticity 
             to the galaxy property assignment. Default is True. 
             If False, model is purely deterministic, and the behavior is determined 
@@ -358,21 +350,21 @@ class Moster13SmHm(PrimGalpropModel):
         """
         Parameters 
         ----------
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing stellar mass. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_model : object, optional keyword argument 
+        scatter_model : object, optional  
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
             implemented by the `LogNormalScatterModel` class. 
 
-        scatter_abcissa : array_like, optional keyword argument 
+        scatter_abcissa : array_like, optional  
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_ordinates : array_like, optional keyword argument 
+        scatter_ordinates : array_like, optional  
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
@@ -389,16 +381,19 @@ class Moster13SmHm(PrimGalpropModel):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
-        redshift : float, keyword argument
-            Redshift of the halo hosting the galaxy
+        redshift : float or array, optional 
+            Redshift of the halo hosting the galaxy. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+            If passing an array, must be of the same length as 
+            the ``prim_haloprop`` or ``halo_table`` argument. 
 
         Returns 
         -------
@@ -461,5 +456,163 @@ class Moster13SmHm(PrimGalpropModel):
         }
 
         return d
+
+
+class Behroozi10SmHm(PrimGalpropModel):
+    """ Stellar-to-halo-mass relation based on 
+    Behroozi et al. (2010), arXiv:1205.5807. 
+    """
+
+    def __init__(self, **kwargs):
+        """
+        Parameters 
+        ----------
+        prim_haloprop_key : string, optional  
+            String giving the column name of the primary halo property governing stellar mass. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_model : object, optional  
+            Class governing stochasticity of stellar mass. Default scatter is log-normal, 
+            implemented by the `LogNormalScatterModel` class. 
+
+        scatter_abcissa : array_like, optional  
+            Array of values giving the abcissa at which
+            the level of scatter will be specified by the input ordinates.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+
+        scatter_ordinates : array_like, optional  
+            Array of values defining the level of scatter at the input abcissa.
+            Default behavior will result in constant scatter at a level set in the 
+            `~halotools.empirical_models.model_defaults` module. 
+        """
+        self.littleh = 0.7
+
+        super(Behroozi10SmHm, self).__init__(
+            galprop_key='stellar_mass', **kwargs)
+
+        self.publications = ['arXiv:1001.0015']
+
+    def retrieve_default_param_dict(self):
+        """ Method returns a dictionary of all model parameters 
+        set to the column 2 values in Table 2 of Behroozi et al. (2010). 
+
+        Returns 
+        -------
+        d : dict 
+            Dictionary containing parameter values. 
+        """
+        # All calculations are done internally using the same h=0.7 units 
+        # as in Behroozi et al. (2010), so the parameter values here are 
+        # the same as in Table 2, even though the mean_log_halo_mass and 
+        # mean_stellar_mass methods use accept and return arguments in h=1 units. 
+
+        d = {
+        'm0_0': 10.72, 
+        'm0_a': 0.59, 
+        'm1_0': 12.35, 
+        'm1_a': 0.3,
+        'beta_0': 0.43,
+        'beta_a': 0.18, 
+        'delta_0': 0.56, 
+        'delta_a': 0.18, 
+        'gamma_0': 1.54,  
+        'gamma_a': 2.52}
+
+        return d
+
+    def mean_log_halo_mass(self, log_stellar_mass, redshift=sim_defaults.default_redshift):
+        """ Return the halo mass of a central galaxy as a function 
+        of the stellar mass.  
+
+        Parameters 
+        ----------
+        log_stellar_mass : array
+            Array of base-10 logarithm of stellar masses in h=1 solar mass units. 
+
+        redshift : float or array, optional 
+            Redshift of the halo hosting the galaxy. If passing an array, 
+            must be of the same length as the input ``log_stellar_mass``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        Returns 
+        -------
+        log_halo_mass : array_like 
+            Array containing 10-base logarithm of halo mass in h=1 solar mass units. 
+        """
+        stellar_mass = (10.**log_stellar_mass)*(self.littleh**2)
+        a = 1./(1. + redshift)
+
+        logm0 = self.param_dict['m0_0'] + self.param_dict['m0_a']*(a - 1)
+        m0 = 10.**logm0
+        logm1 = self.param_dict['m1_0'] + self.param_dict['m1_a']*(a - 1)
+        beta = self.param_dict['beta_0'] + self.param_dict['beta_a']*(a - 1)
+        delta = self.param_dict['delta_0'] + self.param_dict['delta_a']*(a - 1)
+        gamma = self.param_dict['gamma_0'] + self.param_dict['gamma_a']*(a - 1)
+
+        stellar_mass_by_m0 = stellar_mass/m0
+        term3_numerator = (stellar_mass_by_m0)**delta
+        term3_denominator = 1 + (stellar_mass_by_m0)**(-gamma)
+
+        log_halo_mass = logm1 + beta*np.log10(stellar_mass_by_m0) + (term3_numerator/term3_denominator) - 0.5
+
+        return np.log10((10.**log_halo_mass)/self.littleh)
+
+    def mean_stellar_mass(self, **kwargs):
+        """ Return the stellar mass of a central galaxy as a function 
+        of the input halo_table.  
+
+        Parameters 
+        ----------
+        prim_haloprop : array, optional 
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+
+        halo_table : object, optional 
+            Data table storing halo catalog. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+
+        redshift : float or array
+            Redshift of the halo hosting the galaxy. If passing an array, 
+            must be of the same length as the input ``stellar_mass``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        Returns 
+        -------
+        mstar : array_like 
+            Array containing stellar masses living in the input halo_table, 
+            in solar mass units assuming h = 1.
+        """
+        # Retrieve the array storing the mass-like variable
+        if 'halo_table' in kwargs.keys():
+            halo_mass = kwargs['halo_table'][self.prim_haloprop_key]
+        elif 'prim_haloprop' in kwargs.keys():
+            halo_mass = kwargs['prim_haloprop']
+        else:
+            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
+                "``halo_table`` or ``prim_haloprop``")
+
+        if 'redshift' in kwargs:
+            redshift = kwargs['redshift']
+        else:
+            redshift = sim_defaults.default_redshift
+
+        log_stellar_mass_table = np.linspace(8.5, 12.5, 100)
+        log_halo_mass_table = self.mean_log_halo_mass(log_stellar_mass_table, redshift=redshift)
+
+        interpol_func = model_helpers.custom_spline(log_halo_mass_table, log_stellar_mass_table)
+
+        log_stellar_mass = interpol_func(np.log10(halo_mass))
+
+        stellar_mass = 10.**log_stellar_mass
+
+        return stellar_mass
+
+
+
+
+
+
+
 
 
