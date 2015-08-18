@@ -522,8 +522,8 @@ class Behroozi10SmHm(PrimGalpropModel):
         return d
 
     def mean_log_halo_mass(self, log_stellar_mass, redshift=sim_defaults.default_redshift):
-        """ Return the stellar mass of a central galaxy as a function 
-        of the input halo_table.  
+        """ Return the halo mass of a central galaxy as a function 
+        of the stellar mass.  
 
         Parameters 
         ----------

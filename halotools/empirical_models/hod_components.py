@@ -453,6 +453,27 @@ class Leauthaud11Cens(OccupationComponent):
                 self.smhm_model.param_dict[key] = value 
         return self.smhm_model.mean_stellar_mass(redshift = self.redshift, **kwargs)
 
+    def mean_log_halo_mass(self, log_stellar_mass):
+        """ Return the base-10 logarithm of the halo mass of a central galaxy as a function 
+        of the input stellar mass.  
+
+        Parameters 
+        ----------
+        log_stellar_mass : array
+            Array of base-10 logarithm of stellar masses in h=1 solar mass units. 
+
+        Returns 
+        -------
+        log_halo_mass : array_like 
+            Array containing 10-base logarithm of halo mass in h=1 solar mass units. 
+        """
+        for key, value in self.param_dict.iteritems():
+            if key in self.smhm_model.param_dict:
+                self.smhm_model.param_dict[key] = value 
+        return self.smhm_model.mean_log_halo_mass(log_stellar_mass, 
+            redshift = self.redshift)
+
+
 class Zheng07Sats(OccupationComponent):
     """ Power law model for the occupation statistics of satellite galaxies, 
     introduced in Kravtsov et al. 2004, arXiv:0308519. This implementation uses 
@@ -836,27 +857,19 @@ class Leauthaud11Sats(OccupationComponent):
             if key in self.central_occupation_model.param_dict:
                 self.central_occupation_model.param_dict[key] = value
 
-        # Tabulate the inverse stellar-to-halo-mass relation
-        ordinates = self.central_occupation_model.mean_stellar_mass(
-            prim_haloprop =self._msat_mcut_abcissa)
-
-        ordinates *= self.littleh**2
-
-        spline_function = spline(ordinates, self._msat_mcut_abcissa)
-
-        # Call the interpolater to compute the knee
-        scaled_threshold = (10.**self.threshold)*self.littleh**2
-        knee = spline_function(scaled_threshold)
+        log_halo_mass_threshold = self.central_occupation_model.mean_log_halo_mass(
+            log_stellar_mass = self.threshold)
+        knee_threshold = (10.**log_halo_mass_threshold)*self.littleh
 
         knee_mass = 1.e12
 
         self._msat = (
             knee_mass*self.param_dict['bsat']*
-            (knee / knee_mass)**self.param_dict['betasat'])
+            (knee_threshold / knee_mass)**self.param_dict['betasat'])
 
         self._mcut = (
             knee_mass*self.param_dict['bcut']*
-            (knee / knee_mass)**self.param_dict['betacut'])
+            (knee_threshold / knee_mass)**self.param_dict['betacut'])
 
 
 class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
