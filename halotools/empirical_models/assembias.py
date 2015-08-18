@@ -101,13 +101,13 @@ class HeavisideAssembias(object):
         if 'splitting_model' in kwargs:
             self.splitting_model = kwargs['splitting_model']
             self.ancillary_model_dependencies = ['splitting_model']
-            self.set_percentile_splitting(
+            self._set_percentile_splitting(
                 splitting_method_name = kwargs['splitting_method_name'])
         elif 'split_abcissa' in kwargs:
-            self.set_percentile_splitting(split_abcissa=kwargs['split_abcissa'], 
+            self._set_percentile_splitting(split_abcissa=kwargs['split_abcissa'], 
                 split=kwargs['split'])
         else:
-            self.set_percentile_splitting(split = split)
+            self._set_percentile_splitting(split = split)
 
         if 'assembias_strength_abcissa' in kwargs:
             self._initialize_assembias_param_dict(
@@ -144,7 +144,7 @@ class HeavisideAssembias(object):
 
         self._additional_methods_to_inherit.extend(['assembias_strength'])
 
-    def set_percentile_splitting(self, **kwargs):
+    def _set_percentile_splitting(self, **kwargs):
         """
         Method interprets the arguments passed to the constructor 
         and sets up the interpolation scheme for how halos will be 
@@ -167,13 +167,25 @@ class HeavisideAssembias(object):
                 self._split_abcissa = [2]
                 self._split_ordinates = [kwargs['split']]
             except KeyError:
-                msg = ("The set_percentile_splitting method must at least be called with a ``split``" 
+                msg = ("The _set_percentile_splitting method must at least be called with a ``split``" 
                     "keyword argument, or alternatively ``split`` and ``split_abcissa`` arguments.")
                 raise HalotoolsError(msg)
 
 
     def percentile_splitting_function(self, **kwargs):
         """
+        Method returns the fraction of halos that are ``type1`` 
+        as a function of the input primary halo property. 
+
+        Parameters 
+        -----------
+        halo_table : object, optional  
+            Data table storing halo catalog. 
+
+        Returns 
+        -------
+        split : float
+            Fraction of ``type1`` halos at the input primary halo property. 
         """
         try:
             halo_table = kwargs['halo_table']
@@ -246,6 +258,18 @@ class HeavisideAssembias(object):
 
     def assembias_strength(self, **kwargs):
         """
+        Method returns the strength of assembly bias as a function of the input halos, 
+        where the strength varies between -1 and 1. 
+
+        Parameters 
+        ----------
+        prim_haloprop : array_like 
+            Array storing the primary halo property. 
+
+        Returns 
+        -------
+        strength : array_like 
+            Strength of assembly bias as a function of the input halo property. 
         """
         try:
             prim_haloprop = kwargs['prim_haloprop']
@@ -274,15 +298,19 @@ class HeavisideAssembias(object):
         """
         return self._method_name_to_decorate + '_' + self.gal_type + '_assembias_param' + str(ipar+1)
 
-    def galprop_perturbation(self, **kwargs):
+    def _galprop_perturbation(self, **kwargs):
         """
+        Method determines how much to boost the baseline function 
+        according to the strength of assembly bias and the min/max 
+        boost allowable by the requirement that the all-halo baseline 
+        function be preserved. 
         """
         try:
             baseline_result = kwargs['baseline_result']
             prim_haloprop = kwargs['prim_haloprop']
             splitting_result = kwargs['splitting_result']
         except KeyError:
-            msg = ("Must call galprop_perturbation method of the" 
+            msg = ("Must call _galprop_perturbation method of the" 
                 "HeavisideAssembias class with the following keyword arguments:\n"
                 "``baseline_result``, ``splitting_result`` and ``prim_haloprop``")
             raise HalotoolsError(msg)
@@ -316,7 +344,20 @@ class HeavisideAssembias(object):
         return result
 
     def assembias_decorator(self, func):
-        """
+        """ Primary behavior of the `HeavisideAssembias` class. 
+
+        This method is used to introduce a boost/decrement of the baseline 
+        function in a manner that preserves the all-halo result. 
+
+        Parameters 
+        -----------
+        func : function object 
+            Baseline function whose behavior is being decorated with assembly bias. 
+
+        Returns 
+        -------
+        wrapper : function object 
+            Decorated function that includes assembly bias effects. 
         """
 
         def wrapper(*args, **kwargs):
@@ -366,7 +407,7 @@ class HeavisideAssembias(object):
                 no_edge_percentiles = percentiles[no_edge_mask]
                 type1_mask = no_edge_percentiles > no_edge_split
 
-            perturbation = self.galprop_perturbation(
+            perturbation = self._galprop_perturbation(
                     prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask], 
                     baseline_result = no_edge_result, 
                     splitting_result = no_edge_split)

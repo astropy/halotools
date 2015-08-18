@@ -234,11 +234,14 @@ def Hearin15(**kwargs):
         Values of the primary halo property at which the assembly bias strength is specified. 
         Default is to assume a constant strength of 0.5. 
 
-    split : float
-        percentile at which to implement heavside 2-population assembly bias
+    split : float, optional 
+        Fraction between 0 and 1 defining how 
+        we split halos into two groupings based on 
+        their conditional secondary percentiles. 
+        Default is 0.5 for a constant 50/50 split. 
 
     redshift : float, optional  
-        Redshift of the stellar-to-halo-mass relation. Default is 0. 
+        Default is set in the `~halotools.sim_manager.sim_defaults` module. 
 
     """     
     blueprint = preloaded_hod_blueprints.Hearin15_blueprint(**kwargs)
