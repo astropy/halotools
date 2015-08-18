@@ -28,20 +28,20 @@ def test_Zheng07_composite():
 	# Verify that changes param_dict properly propagate
 	testmass1 = 5.e11
 	cenocc_orig = model.mean_occupation_centrals(prim_haloprop=testmass1)
-	orig_logMmin_centrals = model.param_dict['logMmin_centrals']
-	model.param_dict['logMmin_centrals'] = 11.5
+	orig_logMmin_centrals = model.param_dict['logMmin']
+	model.param_dict['logMmin'] = 11.5
 	cenocc_new = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	assert cenocc_new < cenocc_orig
 
 	testmass2 = 5.e12
 	satocc_orig = model.mean_occupation_satellites(prim_haloprop=testmass2)
-	model.param_dict['logM0_satellites'] = 11.4
+	model.param_dict['logM0'] = 11.4
 	satocc_new = model.mean_occupation_satellites(prim_haloprop=testmass2)
 	assert satocc_new < satocc_orig
 
 	# Test that we can recover our initial behavior
 	model.restore_init_param_dict()
-	assert model.param_dict['logMmin_centrals'] == orig_logMmin_centrals
+	assert model.param_dict['logMmin'] == orig_logMmin_centrals
 	cenocc_restored = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	assert cenocc_restored == cenocc_orig
 	satocc_restored = model.mean_occupation_satellites(prim_haloprop=testmass2)
@@ -77,12 +77,12 @@ def test_alt_Zheng07_composites():
 	nsat2 = cenmod_model.mean_occupation_satellites(prim_haloprop = 2.e12)
 	assert nsat2 < nsat1
 
-	cenmod_model.param_dict['logMmin_centrals'] *= 1.1
+	cenmod_model.param_dict['logMmin'] *= 1.1
 	nsat3 = cenmod_model.mean_occupation_satellites(prim_haloprop = 2.e12)
 	assert nsat3 < nsat2
 
 	nsat3 = default_model.mean_occupation_satellites(prim_haloprop = 2.e12)
-	default_model.param_dict['logMmin_centrals'] *= 1.1
+	default_model.param_dict['logMmin'] *= 1.1
 	nsat4 = default_model.mean_occupation_satellites(prim_haloprop = 2.e12)
 	assert nsat3 == nsat4
 
@@ -100,13 +100,13 @@ def test_Leauthaud11_composite():
 	testmass1 = 5.e11
 	ncen1 = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	nsat1 = model.mean_occupation_satellites(prim_haloprop=testmass1)
-	model.param_dict['n10_centrals'] *= 1.1
+	model.param_dict['m1_0'] /= 1.02
 	ncen2 = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	nsat2 = model.mean_occupation_satellites(prim_haloprop=testmass1)
 	assert ncen2 > ncen1
 	assert nsat2 > nsat1
 
-	model.param_dict['n11_centrals'] *= 1.1
+	model.param_dict['m1_a'] *= 1.1
 	ncen3 = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	nsat3 = model.mean_occupation_satellites(prim_haloprop=testmass1)
 	assert ncen3 == ncen2
@@ -117,20 +117,20 @@ def test_Leauthaud11_composite():
 
 
 	"""
-	orig_logMmin_centrals = model.param_dict['logMmin_centrals']
-	model.param_dict['logMmin_centrals'] = 11.5
+	orig_logMmin_centrals = model.param_dict['logMmin']
+	model.param_dict['logMmin'] = 11.5
 	cenocc_new = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	assert cenocc_new < cenocc_orig
 
 	testmass2 = 5.e12
 	satocc_orig = model.mean_occupation_satellites(prim_haloprop=testmass2)
-	model.param_dict['logM0_satellites'] = 11.4
+	model.param_dict['logM0'] = 11.4
 	satocc_new = model.mean_occupation_satellites(prim_haloprop=testmass2)
 	assert satocc_new < satocc_orig
 
 	# Test that we can recover our initial behavior
 	model.restore_init_param_dict()
-	assert model.param_dict['logMmin_centrals'] == orig_logMmin_centrals
+	assert model.param_dict['logMmin'] == orig_logMmin_centrals
 	cenocc_restored = model.mean_occupation_centrals(prim_haloprop=testmass1)
 	assert cenocc_restored == cenocc_orig
 	satocc_restored = model.mean_occupation_satellites(prim_haloprop=testmass2)

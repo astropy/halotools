@@ -154,6 +154,8 @@ def npairs(data1, data2, rbins, Lbox=None, period=None, verbose=False, N_threads
         pool.close()
     if N_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
+
+
     
     return counts
 
