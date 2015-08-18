@@ -48,19 +48,19 @@ class HaloProfileModel(model_helpers.GalPropModel):
             String entries are typically an underscore-concatenation 
             of the model nickname and parameter nickname, e.g., ``NFWmodel_conc``. 
 
-        halo_boundary : string, optional keyword argument 
+        halo_boundary : string, optional  
             String giving the column name of the halo catalog that stores the boundary of the halo. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        cosmology : object, optional keyword argument
+        cosmology : object, optional 
             Astropy cosmology object. Default is None.
 
-        redshift : float, optional keyword argument 
+        redshift : float, optional  
             Default is None. 
 
         """
@@ -184,22 +184,22 @@ class NFWProfile(HaloProfileModel):
         """
         Parameters 
         ----------
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        conc_mass_model : string, optional keyword argument 
+        conc_mass_model : string, optional  
             Specifies the calibrated fitting function used to model the concentration-mass relation. 
              Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        cosmology : object, optional keyword argument
+        cosmology : object, optional 
             Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        redshift : float, optional keyword argument 
+        redshift : float, optional  
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        halo_boundary : string, optional keyword argument 
+        halo_boundary : string, optional  
             String giving the column name of the halo catalog that stores the boundary of the halo. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 

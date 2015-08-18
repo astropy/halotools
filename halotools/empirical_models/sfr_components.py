@@ -36,15 +36,15 @@ class BinaryGalpropModel(model_helpers.GalPropModel):
         galprop_key : string, keyword argument 
             Name of the galaxy property being assigned. 
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the galaxy propery being modeled.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        gal_type : string, optional keyword argument 
+        gal_type : string, optional  
             Name of the galaxy population being modeled. Default is None. 
 
-        new_haloprop_func_dict : function object, optional keyword argument 
+        new_haloprop_func_dict : function object, optional  
             Dictionary of function objects used to create additional halo properties 
             that may be needed by the model component. 
             Used strictly by the `MockFactory` during call to the `process_halo_catalog` method. 
@@ -88,22 +88,22 @@ class BinaryGalpropModel(model_helpers.GalPropModel):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable governing the galaxy property. 
             If ``prim_haloprop`` is not passed, then either ``halos`` or ``galaxy_table`` 
             keyword arguments must be passed. 
 
-        halos : object, optional keyword argument 
+        halos : object, optional  
             Data table storing halo catalog. 
             If ``halos`` is not passed, then either ``prim_haloprop`` or ``galaxy_table`` 
             keyword arguments must be passed. 
 
-        galaxy_table : object, optional keyword argument 
+        galaxy_table : object, optional  
             Data table storing galaxy catalog. 
             If ``galaxy_table`` is not passed, then either ``prim_haloprop`` or ``halos`` 
             keyword arguments must be passed. 
 
-        seed : int, optional keyword argument 
+        seed : int, optional  
             Random number seed used to generate the Monte Carlo realization.
             Default is None. 
 
@@ -144,31 +144,31 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         galprop_key : array, keyword argument
             String giving the name of galaxy property being assigned a binary value. 
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             stellar mass.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        gal_type : string, optional keyword argument
+        gal_type : string, optional 
             Name of the galaxy population being modeled, e.g., 'centrals'. 
             This is only necessary to specify in cases where 
             the `BinaryGalpropInterpolModel` instance is part of a composite model, 
             with multiple population types. Default is None. 
 
-        galprop_abcissa : array, optional keyword argument 
+        galprop_abcissa : array, optional  
             Values of the primary halo property at which the galprop fraction is specified. 
             Default is [12, 15], in accord with the default True value for ``logparam``. 
 
-        galprop_ordinates : array, optional keyword argument 
+        galprop_ordinates : array, optional  
             Values of the galprop fraction when evaluated at the input abcissa. 
             Default is [0.25, 0.75]
 
-        logparam : bool, optional keyword argument
+        logparam : bool, optional 
             If set to True, the interpolation will be done 
             in the base-10 logarithm of the primary halo property, 
             rather than linearly. Default is True. 
 
-        interpol_method : string, optional keyword argument 
+        interpol_method : string, optional  
             Keyword specifying how `mean_galprop_fraction` 
             evaluates input values of the primary halo property. 
             The default spline option interpolates the 
@@ -176,7 +176,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             The polynomial option uses the unique, degree N polynomial 
             passing through the ordinates, where N is the number of supplied ordinates. 
 
-        input_spline_degree : int, optional keyword argument
+        input_spline_degree : int, optional 
             Degree of the spline interpolation for the case of interpol_method='spline'. 
             If there are k abcissa values specifying the model, input_spline_degree 
             is ensured to never exceed k-1, nor exceed 5. Default is 3. 
@@ -262,11 +262,11 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 

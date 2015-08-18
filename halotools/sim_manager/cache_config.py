@@ -23,7 +23,7 @@ def simname_is_supported(simname):
 
     Parameters 
     ----------
-    simname : string, optional keyword argument 
+    simname : string, optional  
         Nickname of the simulation. Currently supported simulations are 
         Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
         MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
@@ -64,16 +64,16 @@ def get_catalogs_dir(**kwargs):
 
     Parameters
     ----------
-    catalog_type : string, optional keyword argument  
+    catalog_type : string, optional   
         String giving the type of catalog. 
         Should be 'particles', 'subhalos', or 'raw_halos'. 
 
-    simname : string, optional keyword argument 
+    simname : string, optional  
         Nickname of the simulation. Currently supported simulations are 
         Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
         MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
 
-    halo_finder : string, optional keyword argument 
+    halo_finder : string, optional  
         Nickname of the halo-finder, e.g., `rockstar` or `bdm`. 
 
     external_cache_loc : string, optional 
@@ -167,12 +167,12 @@ def processed_halo_tables_web_location(**kwargs):
 
     Parameters 
     ----------
-    simname : string, optional keyword argument 
+    simname : string, optional  
         Nickname of the simulation. Currently supported simulations are 
         Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
         MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
 
-    halo_finder : string, optional keyword argument 
+    halo_finder : string, optional  
         Nickname of the halo-finder, e.g., `rockstar` or `bdm`. 
 
     Returns 

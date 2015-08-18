@@ -42,7 +42,7 @@ class ModelFactory(object):
             Blueprint providing instructions for how to build the composite 
             model from a set of components. 
 
-        galaxy_selection_func : function object, optional keyword argument 
+        galaxy_selection_func : function object, optional  
             Function object that imposes a cut on the mock galaxies. 
             Function should take an Astropy table as a positional argument, 
             and return a boolean numpy array that will be 
@@ -67,7 +67,7 @@ class ModelFactory(object):
 
         Parameters 
         ----------
-        snapshot : object, optional keyword argument
+        snapshot : object, optional 
             Class instance of `~halotools.sim_manager.HaloCatalog`. 
             This object contains the halo catalog and its metadata.  
 
@@ -113,7 +113,7 @@ class ModelFactory(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-        halo_finder : string, optional keyword argument 
+        halo_finder : string, optional  
             Nickname of the halo-finder of the snapshot into which mock galaxies 
             will be populated, e.g., `rockstar` or `bdm`. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
@@ -280,7 +280,7 @@ class ModelFactory(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-        halo_finder : string, optional keyword argument 
+        halo_finder : string, optional  
             Nickname of the halo-finder of the snapshot into which mock galaxies 
             will be populated, e.g., `rockstar` or `bdm`. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
@@ -457,7 +457,7 @@ class SubhaloModelFactory(ModelFactory):
             may depend on the first galprop, and so forth. Default behavior is 
             to assume that no galprop has explicit dependence upon any other. 
 
-        galaxy_selection_func : function object, optional keyword argument 
+        galaxy_selection_func : function object, optional  
             Function object that imposes a cut on the mock galaxies. 
             Function should take an Astropy table as a positional argument, 
             and return a boolean numpy array that will be 

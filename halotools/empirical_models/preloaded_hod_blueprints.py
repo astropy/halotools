@@ -82,7 +82,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
 
     Parameters 
     ----------
-    threshold : float, optional keyword argument
+    threshold : float, optional 
         Stellar mass threshold of the mock galaxy sample. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
@@ -147,7 +147,7 @@ def Hearin15_blueprint(central_assembias_strength = 1,
         Stellar mass threshold of the mock galaxy sample. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-    sec_haloprop_key : string, optional keyword argument 
+    sec_haloprop_key : string, optional  
         String giving the column name of the secondary halo property modulating 
         the occupation statistics of the galaxies. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
@@ -180,7 +180,7 @@ def Hearin15_blueprint(central_assembias_strength = 1,
         Values of the primary halo property at which the assembly bias strength is specified. 
         Default is to assume a constant strength of 0.2. 
 
-    redshift : float, optional keyword argument 
+    redshift : float, optional  
         Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
     Returns 

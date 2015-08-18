@@ -36,7 +36,7 @@ class AbunMatchSmHm(PrimGalpropModel):
         """
         Parameters 
         ----------
-        galprop_key : string, optional keyword argument 
+        galprop_key : string, optional  
             Name of the galaxy property being assigned. Default is ``stellar mass``, 
             though another common case may be ``luminosity``. 
 
@@ -57,7 +57,7 @@ class AbunMatchSmHm(PrimGalpropModel):
             stellar mass or luminosity, in which case ``galaxy_abundance_ordinates`` would 
             simply be the stellar mass function or the luminosity function, respectively. 
 
-        subhalo_abundance_ordinates : array_like, optional keyword argument 
+        subhalo_abundance_ordinates : array_like, optional  
             Length-Nh array storing the comoving number density of subhalo_table.
             The value ``subhalo_abundance_ordinates[i]`` gives the comoving number density 
             of subhalo_table of property ``subhalo_abundance_abcissa[i]``. 
@@ -65,7 +65,7 @@ class AbunMatchSmHm(PrimGalpropModel):
             and ``subhalo_abundance_abcissa`` are not passed, 
             then keyword arguments ``prim_haloprop_key`` and ``halo_table`` must be passed. 
 
-        subhalo_abundance_abcissa : array_like, optional keyword argument 
+        subhalo_abundance_abcissa : array_like, optional  
             Length-Nh array storing the stellar mass of subhalo_table. 
             The value ``subhalo_abundance_ordinates[i]`` gives the comoving number density 
             of subhalo_table of property ``subhalo_abundance_abcissa[i]``. 
@@ -73,7 +73,7 @@ class AbunMatchSmHm(PrimGalpropModel):
             and ``subhalo_abundance_abcissa`` are not passed, 
             then keyword arguments ``prim_haloprop_key`` and ``halo_table`` must be passed. 
 
-        scatter_level : float, optional keyword argument 
+        scatter_level : float, optional  
             Level of constant scatter in dex. Default is 0.2. 
 
         """
@@ -119,7 +119,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         prim_galprop_bins : array, required keyword argument 
             Array used to bin ``input_galaxy_table`` by ``prim_galprop_key``. 
 
-        correlation_strength : float or array, optional keyword argument 
+        correlation_strength : float or array, optional  
             Specifies the absolute value of the desired 
             Spearman rank-order correlation coefficient 
             between ``sec_haloprop_key`` and ``galprop_key``. 
@@ -132,18 +132,18 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             that ``sec_haloprop_key`` and ``galprop_key`` are uncorrelated. 
             Default is maximum (positive) correlation strength of 1. 
 
-        correlation_strength_abcissa : float or array, optional keyword argument 
+        correlation_strength_abcissa : float or array, optional  
             Specifies the value of ``prim_galprop_key`` at which 
             the input ``correlation_strength`` applies. ``correlation_strength_abcissa`` 
             need only be specified if a ``correlation_strength`` array is passed. 
             Intermediary values of the correlation strength at values 
             between the abcissa are solved for by spline interpolation. 
 
-        tol : float, optional keyword argument 
+        tol : float, optional  
             Tolerance for the difference between the actual and desired 
             correlation strength. Default is 0.01. 
 
-        minimum_sampling_requirement : int, optional keyword argument 
+        minimum_sampling_requirement : int, optional  
             Minimum number of galaxies in the ``prim_galprop_key`` bin required to 
             adequately sample the probability distribution of ``galprop_key`` at 
             fixed ``prim_galprop_key``. Default is 100. 
@@ -151,7 +151,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             the nearest ``prim_galprop_key`` bin of sufficient size 
             will be used  to determine the conditional PDF. 
 
-        new_haloprop_func_dict : function object, optional keyword argument 
+        new_haloprop_func_dict : function object, optional  
             Can be used to create new halo properties with which to introduce 
             correlations. This is useful for cases where the desired ``sec_haloprop_key`` 
             does not appear in the input subhalo catalog. 
@@ -289,7 +289,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
             Astropy Table object storing the halo population 
             onto which values of ``self.galprop_key`` will be painted. 
 
-        galaxy_table_slice_array : array, optional keyword argument 
+        galaxy_table_slice_array : array, optional  
             Array of slice objects. The i^th entry of 
             ``galaxy_table_slice_array`` stores the slice of 
             the halo catalog which falls into the i^th 
