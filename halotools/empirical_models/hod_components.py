@@ -347,6 +347,7 @@ class Leauthaud11Cens(OccupationComponent):
     """
     def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
+        redshift = sim_manager.sim_defaults.default_redshift, 
         **kwargs):
         """
         Parameters 
@@ -361,7 +362,8 @@ class Leauthaud11Cens(OccupationComponent):
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         redshift : float, optional keyword argument 
-            Redshift of the stellar-to-halo-mass relation. Default is 0. 
+            Redshift of the stellar-to-halo-mass relation. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         Examples 
         --------
@@ -372,6 +374,7 @@ class Leauthaud11Cens(OccupationComponent):
         """
         upper_bound = 1.0
 
+
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Leauthaud11Cens, self).__init__(
@@ -379,6 +382,7 @@ class Leauthaud11Cens(OccupationComponent):
             upper_bound=upper_bound, 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
+        self.redshift = redshift
 
         self.smhm_model = smhm_components.Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
@@ -415,7 +419,8 @@ class Leauthaud11Cens(OccupationComponent):
             if key in self.smhm_model.param_dict.keys():
                 self.smhm_model.param_dict[key] = value 
 
-        logmstar = np.log10(self.smhm_model.mean_stellar_mass(**kwargs))
+        logmstar = np.log10(self.smhm_model.mean_stellar_mass(
+            redshift = self.redshift, **kwargs))
         logscatter = math.sqrt(2)*self.smhm_model.mean_scatter(**kwargs)
 
         mean_ncen = 0.5*(1.0 - 
@@ -437,9 +442,6 @@ class Leauthaud11Cens(OccupationComponent):
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
-        redshift : float, keyword argument
-            Redshift of the halo hosting the galaxy
-
         Returns 
         -------
         mstar : array_like 
@@ -449,7 +451,7 @@ class Leauthaud11Cens(OccupationComponent):
         for key, value in self.param_dict.iteritems():
             if key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[key] = value 
-        return self.smhm_model.mean_stellar_mass(**kwargs)
+        return self.smhm_model.mean_stellar_mass(redshift = self.redshift, **kwargs)
 
 class Zheng07Sats(OccupationComponent):
     """ Power law model for the occupation statistics of satellite galaxies, 
@@ -702,6 +704,7 @@ class Leauthaud11Sats(OccupationComponent):
     """
     def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
+        redshift = sim_manager.sim_defaults.default_redshift, 
         modulate_with_cenocc = False, 
         **kwargs):
         """
@@ -716,8 +719,9 @@ class Leauthaud11Sats(OccupationComponent):
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        redshift : float, optional keyword argument 
-            Redshift of the stellar-to-halo-mass relation. Default is 0. 
+        redshift : float, optional 
+            Redshift of the stellar-to-halo-mass relation. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         modulate_with_cenocc : bool, optional keyword argument 
             If True, the first satellite moment will be multiplied by the 
@@ -731,7 +735,8 @@ class Leauthaud11Sats(OccupationComponent):
         self.littleh = 0.72
 
         self.central_occupation_model = Leauthaud11Cens(
-            threshold=threshold, prim_haloprop_key = prim_haloprop_key, **kwargs)
+            threshold=threshold, prim_haloprop_key = prim_haloprop_key, 
+            redshift = redshift, **kwargs)
         self.ancillary_model_dependencies = ['central_occupation_model']
         self.ancillary_model_param_keys = self.central_occupation_model.param_dict.keys()
 
@@ -740,6 +745,7 @@ class Leauthaud11Sats(OccupationComponent):
             upper_bound=float("inf"), 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
+        self.redshift = redshift
 
         self._initialize_param_dict()
 
