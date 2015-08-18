@@ -255,6 +255,9 @@ def test_LogNormalScatterModel_behavior():
 class TestBehroozi10SmHm(TestCase):
 
 	def setup_class(self):
+		""" Use tabular data provided by Peter Behroozi 
+		as a blackbox test of the implementation. 
+		"""
 
 		self.model = smhm_components.Behroozi10SmHm()
 
@@ -328,7 +331,7 @@ class TestBehroozi10SmHm(TestCase):
 		self.logmratio_z1 = np.log10((10.**self.logmratio_z1)/self.model.littleh)
 
 
-	def test_smhm_blackbox(self):
+	def test_behroozi10_smhm_blackbox(self):
 		"""
 		"""
 
