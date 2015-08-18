@@ -746,7 +746,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         modulate_with_cenocc : bool, optional keyword argument 
             If True, the first satellite moment will be multiplied by the 
-            the first central moment. Default is False. 
+            the first central moment. Default is True. 
 
         Examples 
         --------
@@ -811,11 +811,9 @@ class Leauthaud11Sats(OccupationComponent):
 
         self._update_satellite_params()
 
-        # mass *= self.littleh
-
         mean_nsat = (
-            np.exp(-self._mcut/mass)*
-            (mass/self._msat)**self.param_dict['alphasat']
+            np.exp(-self._mcut/(mass*self.littleh))*
+            (mass*self.littleh/self._msat)**self.param_dict['alphasat']
             )
 
         if self.modulate_with_cenocc is True:
