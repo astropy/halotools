@@ -29,31 +29,31 @@ def SmHmBinarySFR_blueprint(
 
     Parameters 
     ----------
-    prim_haloprop_key : string, optional keyword argument 
+    prim_haloprop_key : string, optional  
         String giving the column name of the primary halo property governing 
         the galaxy propery being modeled.  
         Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-    smhm_model : object, optional keyword argument 
+    smhm_model : object, optional  
         Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
         the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
 
-    scatter_level : float, optional keyword argument 
+    scatter_level : float, optional  
         Constant amount of scatter in stellar mass, in dex. Default is 0.2. 
 
-    redshift : float, optional keyword argument
+    redshift : float, optional 
         Redshift of the halo hosting the galaxy. Used to evaluate the 
         stellar-to-halo-mass relation. Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-    sfr_abcissa : array, optional keyword argument 
+    sfr_abcissa : array, optional  
         Values of the primary halo property at which the quiescent fraction is specified. 
         Default is [12, 15], in accord with the default True value for ``logparam``. 
 
-    sfr_ordinates : array, optional keyword argument 
+    sfr_ordinates : array, optional  
         Values of the quiescent fraction when evaluated at the input abcissa. 
         Default is [0.25, 0.75]
 
-    logparam : bool, optional keyword argument
+    logparam : bool, optional 
         If set to True, the interpolation will be done 
         in the base-10 logarithm of the primary halo property, 
         rather than linearly. Default is True. 
@@ -89,45 +89,45 @@ def Campbell15_blueprint(
 
     Parameters
     -----------
-    prim_haloprop_key : string, optional keyword argument 
+    prim_haloprop_key : string, optional  
         String giving the column name of the primary halo property governing 
         the galaxy propery being modeled.  
         Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-    sec_haloprop_key : string, optional keyword argument 
+    sec_haloprop_key : string, optional  
         Column name of the subhalo property that CAM models as 
         being correlated with ``galprop_key`` at fixed ``prim_galprop_key``. 
         Default is ``halo_vpeak``. 
 
-    sec_galprop_key : string, optional keyword argument 
+    sec_galprop_key : string, optional  
         Column name such as ``gr_color`` or ``ssfr`` 
         of the secondary galaxy property being modeled. 
         Can be any column of ``input_galaxy_table`` other than 
         ``prim_galprop_key``. Default is ``ssfr``. 
 
-    input_galaxy_table : data table, optional keyword argument 
+    input_galaxy_table : data table, optional  
         Astropy Table object storing the input galaxy population 
         upon which the CAM model is based.  
         Default behavior is to use `~halotools.sim_manager.FakeMock`. 
 
-    prim_galprop_bins : array, optional keyword argument 
+    prim_galprop_bins : array, optional  
         Array used to bin ``input_galaxy_table`` by ``prim_galprop_key``. 
         Default is 15 bins logarithmically spaced between 
         :math:`10^{8}M_{\odot}` and :math:`10^{12}M_{\odot}`. 
 
-    smhm_model : object, optional keyword argument 
+    smhm_model : object, optional  
         Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
         the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
 
-    scatter_level : float, optional keyword argument 
+    scatter_level : float, optional  
         Constant amount of scatter in dex in ``prim_galprop_key`` 
         at fixed ``prim_haloprop_key``. Default is 0.2. 
 
-    redshift : float, optional keyword argument
+    redshift : float, optional 
         Redshift of the halo hosting the galaxy. Used to evaluate the 
         stellar-to-halo-mass relation. Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-    correlation_strength : float or array, optional keyword argument 
+    correlation_strength : float or array, optional  
         Specifies the absolute value of the desired 
         Spearman rank-order correlation coefficient 
         between ``sec_haloprop_key`` and ``galprop_key``. 
@@ -140,7 +140,7 @@ def Campbell15_blueprint(
         that ``sec_haloprop_key`` and ``galprop_key`` are uncorrelated. 
         Default is constant maximum (positive) correlation strength of 1. 
 
-    correlation_strength_abcissa : float or array, optional keyword argument 
+    correlation_strength_abcissa : float or array, optional  
         Specifies the value of ``prim_galprop_key`` at which 
         the input ``correlation_strength`` applies. ``correlation_strength_abcissa`` 
         need only be specified if a ``correlation_strength`` array is passed. 

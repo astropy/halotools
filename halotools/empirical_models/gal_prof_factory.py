@@ -36,13 +36,13 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         gal_type : string 
             Name of the galaxy population being modeled, e.g., ``sats`` or ``orphans``. 
 
-        cosmology : object, optional keyword argument
+        cosmology : object, optional 
             Astropy cosmology object. Default is None.
 
-        redshift : float, optional keyword argument 
+        redshift : float, optional  
             Default is None.
 
-        halo_boundary : string, optional keyword argument 
+        halo_boundary : string, optional  
             String giving the column name of the halo catalog that stores the boundary of the halo. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
@@ -104,7 +104,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
             There should be an input ``param_array`` for every parameter in the profile model, 
             all of the same length. 
 
-        seed : int, optional keyword argument
+        seed : int, optional 
             Random number seed used to generate Monte Carlo realization. 
             Default is None. 
 
@@ -164,7 +164,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         Npts : int 
             Number of 3d points to generate
 
-        seed : int, optional keyword argument
+        seed : int, optional 
             Random number seed. Default is None. 
 
         Returns 
@@ -194,7 +194,7 @@ class IsotropicGalProf(halo_prof_components.HaloProfileModel):
         halo_table : Astropy Table, required keyword argument
             Data table storing a length-Ngals galaxy catalog. 
 
-        seed : int, optional keyword argument 
+        seed : int, optional  
             Random number seed used in Monte Carlo realization
 
         Returns 

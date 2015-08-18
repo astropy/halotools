@@ -23,6 +23,12 @@ class HeavisideAssembias(object):
         """
         Parameters 
         ----------
+        sec_haloprop_key : string, optional 
+            String giving the column name of the secondary halo property 
+            governing the assembly bias. Must be a key in the halo_table 
+            passed to the methods of `HeavisideAssembiasComponent`. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
         split : float or list, optional 
             Fraction or list of fractions between 0 and 1 defining how 
             we split halos into two groupings based on 
@@ -66,12 +72,6 @@ class HeavisideAssembias(object):
             Default is to assume a constant strength of 0.5. If passing a list, the strength 
             will interpreted at the input ``assembias_strength_abcissa``.
             Default is to assume a constant strength of 0.5. 
-
-        sec_haloprop_key : string, optional 
-            String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the halo_table 
-            passed to the methods of `HeavisideAssembiasComponent`. 
-            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         loginterp : bool, optional
             If set to True, the interpolation will be done 
@@ -146,6 +146,9 @@ class HeavisideAssembias(object):
 
     def set_percentile_splitting(self, **kwargs):
         """
+        Method interprets the arguments passed to the constructor 
+        and sets up the interpolation scheme for how halos will be 
+        divided into two types as a function of the primary halo property. 
         """
         if 'splitting_method_name' in kwargs.keys():
             func = getattr(self.splitting_model, kwargs['splitting_method_name'])

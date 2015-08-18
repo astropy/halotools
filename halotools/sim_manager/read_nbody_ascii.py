@@ -288,7 +288,7 @@ class BehrooziASCIIReader(object):
 
         Parameters 
         ----------
-        nchunks : int, optional keyword argument
+        nchunks : int, optional 
             `read_halocat` reads and processes ascii 
             in chunks at a time, both to improve performance and 
             so that the entire raw halo catalog need not fit in memory 

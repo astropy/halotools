@@ -35,18 +35,18 @@ class LogNormalScatterModel(object):
         """
         Parameters 
         ----------
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the level of scatter. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_abcissa : array_like, optional keyword argument 
+        scatter_abcissa : array_like, optional  
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_ordinates : array_like, optional keyword argument 
+        scatter_ordinates : array_like, optional  
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
@@ -86,11 +86,11 @@ class LogNormalScatterModel(object):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
@@ -119,15 +119,15 @@ class LogNormalScatterModel(object):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
-        seed : int, optional keyword argument 
+        seed : int, optional  
             Random number seed. Default is None. 
 
         Returns 
@@ -187,34 +187,34 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         """
         Parameters 
         ----------
-        galprop_key : string, optional keyword argument 
+        galprop_key : string, optional  
             Name of the galaxy property being assigned. Default is ``stellar mass``, 
             though another common case may be ``luminosity``. 
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             stellar mass.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_model : object, optional keyword argument 
+        scatter_model : object, optional  
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
             implemented by the `LogNormalScatterModel` class. 
 
-        redshift : float, optional keyword argument 
+        redshift : float, optional  
             Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
-        scatter_abcissa : array_like, optional keyword argument 
+        scatter_abcissa : array_like, optional  
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_ordinates : array_like, optional keyword argument 
+        scatter_ordinates : array_like, optional  
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        new_haloprop_func_dict : function object, optional keyword argument 
+        new_haloprop_func_dict : function object, optional  
             Dictionary of function objects used to create additional halo properties 
             that may be needed by the model component. 
             Used strictly by the `MockFactory` during call to the `process_halo_catalog` method. 
@@ -294,18 +294,18 @@ class PrimGalpropModel(model_helpers.GalPropModel):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
-        redshift : float, optional keyword argument
+        redshift : float, optional 
             Redshift of the halo hosting the galaxy. 
 
-        include_scatter : boolean, optional keyword argument 
+        include_scatter : boolean, optional  
             Determines whether or not the scatter model is applied to add stochasticity 
             to the galaxy property assignment. Default is True. 
             If False, model is purely deterministic, and the behavior is determined 
@@ -350,21 +350,21 @@ class Moster13SmHm(PrimGalpropModel):
         """
         Parameters 
         ----------
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing stellar mass. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_model : object, optional keyword argument 
+        scatter_model : object, optional  
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
             implemented by the `LogNormalScatterModel` class. 
 
-        scatter_abcissa : array_like, optional keyword argument 
+        scatter_abcissa : array_like, optional  
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_ordinates : array_like, optional keyword argument 
+        scatter_ordinates : array_like, optional  
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
@@ -381,11 +381,11 @@ class Moster13SmHm(PrimGalpropModel):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
@@ -467,21 +467,21 @@ class Behroozi10SmHm(PrimGalpropModel):
         """
         Parameters 
         ----------
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing stellar mass. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_model : object, optional keyword argument 
+        scatter_model : object, optional  
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
             implemented by the `LogNormalScatterModel` class. 
 
-        scatter_abcissa : array_like, optional keyword argument 
+        scatter_abcissa : array_like, optional  
             Array of values giving the abcissa at which
             the level of scatter will be specified by the input ordinates.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_ordinates : array_like, optional keyword argument 
+        scatter_ordinates : array_like, optional  
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 

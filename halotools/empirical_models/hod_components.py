@@ -58,7 +58,7 @@ class OccupationComponent(model_helpers.GalPropModel):
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies, e.g., ``halo_mvir``. 
 
-        sec_haloprop_key : string, optional keyword argument
+        sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property governing 
             the occupation statistics of gal_type galaxies, e.g., ``halo_nfw_conc``.
             Only pertains to galaxy populations with assembly-biased occupations. 
@@ -94,15 +94,15 @@ class OccupationComponent(model_helpers.GalPropModel):
 
         Parameters
         ----------        
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
-        seed : int, optional keyword argument 
+        seed : int, optional  
             Random number seed used to generate the Monte Carlo realization. 
             Default is None. 
 
@@ -129,7 +129,7 @@ class OccupationComponent(model_helpers.GalPropModel):
         first_occupation_moment : array
             Array giving the first moment of the occupation distribution function. 
 
-        seed : int, optional keyword argument 
+        seed : int, optional  
             Random number seed used to generate the Monte Carlo realization. 
             Default is None. 
 
@@ -151,7 +151,7 @@ class OccupationComponent(model_helpers.GalPropModel):
         first_occupation_moment : array
             Array giving the first moment of the occupation distribution function. 
 
-        seed : int, optional keyword argument 
+        seed : int, optional  
             Random number seed used to generate the Monte Carlo realization. 
             Default is None. 
 
@@ -181,13 +181,13 @@ class Zheng07Cens(OccupationComponent):
         """
         Parameters 
         ----------
-        threshold : float, optional keyword argument
+        threshold : float, optional 
             Luminosity threshold of the mock galaxy sample. If specified, 
             input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
@@ -222,11 +222,11 @@ class Zheng07Cens(OccupationComponent):
 
         Parameters
         ----------        
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
@@ -296,7 +296,7 @@ class Zheng07Cens(OccupationComponent):
             then ``threshold`` must be agree with one of the published values: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
 
-        publication : string, optional keyword argument 
+        publication : string, optional  
             String specifying the publication that will be used to set  
             the values of ``param_dict``. Default is Zheng et al. (2007). 
 
@@ -352,16 +352,16 @@ class Leauthaud11Cens(OccupationComponent):
         """
         Parameters 
         ----------
-        threshold : float, optional keyword argument
+        threshold : float, optional 
             Stellar mass threshold of the mock galaxy sample in h=1 solar mass units. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        redshift : float, optional keyword argument 
+        redshift : float, optional  
             Redshift of the stellar-to-halo-mass relation. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
@@ -398,11 +398,11 @@ class Leauthaud11Cens(OccupationComponent):
 
         Parameters
         ----------        
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
@@ -434,11 +434,11 @@ class Leauthaud11Cens(OccupationComponent):
 
         Parameters 
         ----------
-        prim_haloprop : array, optional keyword argument 
+        prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
@@ -491,18 +491,18 @@ class Zheng07Sats(OccupationComponent):
         """
         Parameters 
         ----------
-        threshold : float, optional keyword argument
+        threshold : float, optional 
             Luminosity threshold of the mock galaxy sample. If specified, 
             input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        modulate_with_cenocc : bool, optional keyword argument 
+        modulate_with_cenocc : bool, optional  
             If True, the first satellite moment will be multiplied by the 
             the first central moment. Default is False. 
             If ``modulate_with_cenocc`` is True, 
@@ -581,12 +581,12 @@ class Zheng07Sats(OccupationComponent):
 
         Parameters
         ----------        
-        prim_haloprop : array, optional keyword argument
+        prim_haloprop : array, optional 
             Array storing a mass-like variable that governs the occupation statistics. 
             If ``prim_haloprop`` is not passed, then ``halo_table`` 
             keyword arguments must be passed. 
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` 
             keyword arguments must be passed. 
@@ -675,7 +675,7 @@ class Zheng07Sats(OccupationComponent):
             Input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
 
-        publication : string, optional keyword argument 
+        publication : string, optional  
             String specifying the publication that will be used to set  
             the values of ``param_dict``. Default is Zheng et al. (2007). 
 
@@ -731,11 +731,11 @@ class Leauthaud11Sats(OccupationComponent):
         """
         Parameters 
         ----------
-        threshold : float, optional keyword argument
+        threshold : float, optional 
             Stellar mass threshold of the mock galaxy sample in h=1 solar mass units. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
@@ -744,7 +744,7 @@ class Leauthaud11Sats(OccupationComponent):
             Redshift of the stellar-to-halo-mass relation. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-        modulate_with_cenocc : bool, optional keyword argument 
+        modulate_with_cenocc : bool, optional  
             If True, the first satellite moment will be multiplied by the 
             the first central moment. Default is True. 
 
@@ -780,10 +780,10 @@ class Leauthaud11Sats(OccupationComponent):
 
         Parameters
         ----------        
-        prim_haloprop : array, optional keyword argument
+        prim_haloprop : array, optional 
             array of masses of halo_table in the catalog
 
-        halo_table : object, optional keyword argument 
+        halo_table : object, optional  
             Data table storing halo catalog. 
 
         Returns
@@ -875,16 +875,16 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
         """
         Parameters 
         ----------
-        gal_type : string, optional keyword argument
+        gal_type : string, optional 
             Name of the galaxy population being modeled. Default is ``satellites``.  
 
-        threshold : float, optional keyword argument
+        threshold : float, optional 
             Luminosity threshold of the mock galaxy sample. If specified, 
             input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
@@ -924,16 +924,16 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
         """
         Parameters 
         ----------
-        gal_type : string, optional keyword argument
+        gal_type : string, optional 
             Name of the galaxy population being modeled. Default is ``centrals``.  
 
-        threshold : float, optional keyword argument
+        threshold : float, optional 
             Luminosity threshold of the mock galaxy sample. If specified, 
             input value must agree with one of the thresholds used in Zheng07 to fit HODs: 
             [-18, -18.5, -19, -19.5, -20, -20.5, -21, -21.5, -22].
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
@@ -974,23 +974,23 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
         """
         Parameters 
         ----------
-        gal_type : string, optional keyword argument
+        gal_type : string, optional 
             Name of the galaxy population being modeled. Default is ``centrals``.  
 
-        threshold : float, optional keyword argument
+        threshold : float, optional 
             Stellar mass threshold of the mock galaxy sample. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        smhm_model : object, optional keyword argument 
+        smhm_model : object, optional  
             Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
             the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
 
-        redshift : float, optional keyword argument 
+        redshift : float, optional  
             Redshift of the stellar-to-halo-mass relation. Default is 0. 
 
         split : float or list, optional 
@@ -1036,24 +1036,24 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
         """
         Parameters 
         ----------
-        gal_type : string, optional keyword argument
-            Name of the galaxy population being modeled. Default is ``satellites``.  
-
-        threshold : float, optional keyword argument
+        threshold : float, optional
             Stellar mass threshold of the mock galaxy sample. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        prim_haloprop_key : string, optional keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        smhm_model : object, optional keyword argument 
-            Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
-            the stellar-to-halo-mass relation 
+        sec_haloprop_key : string, optional 
+            String giving the column name of the secondary halo property 
+            governing the assembly bias. Must be a key in the halo_table 
+            passed to the methods of `HeavisideAssembiasComponent`. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
-        redshift : float, optional keyword argument 
-            Redshift of the stellar-to-halo-mass relation. Default is 0. 
+        redshift : float, optional  
+            Redshift of the stellar-to-halo-mass relation. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         split : float or list, optional 
             Fraction or list of fractions between 0 and 1 defining how 
@@ -1078,62 +1078,9 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
             will interpreted at the input ``assembias_strength_abcissa``.
             Default is to assume a constant strength of 0.5. 
 
-        sec_haloprop_key : string, optional 
-            String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the halo_table 
-            passed to the methods of `HeavisideAssembiasComponent`. 
-            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
         """
         Leauthaud11Sats.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self, 
             method_name_to_decorate = 'mean_occupation', **kwargs)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
