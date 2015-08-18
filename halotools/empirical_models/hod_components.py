@@ -726,7 +726,7 @@ class Leauthaud11Sats(OccupationComponent):
     def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
         redshift = sim_manager.sim_defaults.default_redshift, 
-        modulate_with_cenocc = False, 
+        modulate_with_cenocc = True, 
         **kwargs):
         """
         Parameters 
@@ -834,8 +834,6 @@ class Leauthaud11Sats(OccupationComponent):
         not self-consistent with arXiv:1104.0928, 
         because a different stellar-to-halo-mass relation is used here. 
         """
-
-        self._msat_mcut_abcissa = np.logspace(9, 15, num=500)
 
         self.param_dict['alphasat'] = 1.0
         self.param_dict['bsat'] = 10.62
