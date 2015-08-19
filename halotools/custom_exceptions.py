@@ -2,7 +2,10 @@
 """
 Classes for all Halotools-specific exceptions. 
 """
-__all__ = ['HalotoolsError', 'HalotoolsCacheError', 'UnsupportedSimError', 'CatalogTypeError']
+__all__ = (['HalotoolsError', 'HalotoolsCacheError', 
+	'HalotoolsIOError', 'UnsupportedSimError', 'CatalogTypeError', 
+	'HalotoolsModelInputError', 'HalotoolsArgumentError']
+	)
 
 
 class HalotoolsError(Exception):

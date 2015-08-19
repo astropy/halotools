@@ -29,7 +29,8 @@ def test_load_halo_catalogs():
         alist = adict[simname]
         for a in alist:
             z = 1/a - 1
-            halocat = HaloCatalog(simname = simname, desired_redshift = z)
+            halocat = HaloCatalog(simname = simname, redshift = z)
+            assert np.allclose(halocat.redshift, z, atol = 0.01)
 
             if simname not in ['bolshoi', 'multidark']:
                 particles = halocat.ptcl_table
@@ -42,7 +43,7 @@ def test_correct_redshift():
     """
     """
     simname = 'bolshoi'
-    
+
 
 
 
