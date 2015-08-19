@@ -213,6 +213,10 @@ def Hearin15_blueprint(central_assembias_strength = 1,
             assembias_strength = satellite_assembias_strength, 
             assembias_abcissa = satellite_assembias_strength_abcissa, 
             **kwargs)
+        # There is no need for a redundant new_haloprop_func_dict 
+        # if this is already possessed by the central model
+        if hasattr(cen_ab_component, 'new_haloprop_func_dict'):
+            del sat_ab_component.new_haloprop_func_dict
 
     sat_model_dict = {}
     sat_model_dict['occupation'] = sat_ab_component
