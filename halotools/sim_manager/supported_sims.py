@@ -345,7 +345,6 @@ class HaloCatalog(object):
                 halo_finder = halo_finder,
                 desired_redshift = redshift, 
                 external_cache_loc = sim_defaults.default_cache_location)
-
         
         return fname, closest_redshift
 
