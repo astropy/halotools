@@ -94,37 +94,6 @@ class NbodySimulation(object):
 
         self._catman = catalog_manager.CatalogManager()
 
-    def retrieve_snapshot(self, **kwargs):
-        """ Method uses the CatalogManager to return a snapshot object. 
-        """
-        pass
-
-    def retrieve_particles(self, desired_redshift, **kwargs):
-        """
-        Parameters 
-        ----------
-        desired_redshift : float 
-            Redshift of the desired catalog. 
-            
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
-
-            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
-
-            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
-
-            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
-
-        Returns
-        -------
-        particles : Astropy Table 
-            `~astropy.table.Table` object storing position and velocity of particles. 
-        """
-        return self._catman.retrieve_ptcl_table_from_cache(
-            simname=self.simname, desired_redshift = desired_redshift, **kwargs)
-
 class Bolshoi(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology 
     with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h. 
