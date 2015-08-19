@@ -38,12 +38,6 @@ def test_load_halo_catalogs():
                 if a == 1:
                     particles = halocat.ptcl_table
 
-@pytest.mark.skipif('not APH_MACHINE')
-def test_correct_redshift():
-    """
-    """
-    simname = 'bolshoi'
-
 
 
 
