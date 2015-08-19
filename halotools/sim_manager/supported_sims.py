@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import os, sys, warnings, urllib2, fnmatch
+import os, sys, urllib2, fnmatch
+from warnings import warn 
 
 try:
     from bs4 import BeautifulSoup
@@ -93,37 +94,6 @@ class NbodySimulation(object):
             )
 
         self._catman = catalog_manager.CatalogManager()
-
-    def retrieve_snapshot(self, **kwargs):
-        """ Method uses the CatalogManager to return a snapshot object. 
-        """
-        pass
-
-    def retrieve_particles(self, desired_redshift, **kwargs):
-        """
-        Parameters 
-        ----------
-        desired_redshift : float 
-            Redshift of the desired catalog. 
-            
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
-
-            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
-
-            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
-
-            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
-
-        Returns
-        -------
-        particles : Astropy Table 
-            `~astropy.table.Table` object storing position and velocity of particles. 
-        """
-        return self._catman.retrieve_ptcl_table_from_cache(
-            simname=self.simname, desired_redshift = desired_redshift, **kwargs)
 
 class Bolshoi(NbodySimulation):
     """ Cosmological N-body simulation of WMAP5 cosmology 
@@ -221,8 +191,8 @@ class HaloCatalog(object):
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder, 
-        desired_redshift = sim_defaults.default_redshift, dz_tol = 0.05, 
-        preload_halo_table = False, **kwargs):
+        redshift = sim_defaults.default_redshift, dz_tol = 0.05, 
+        preload_halo_table = False):
         """
         Parameters 
         ----------
@@ -236,7 +206,7 @@ class HaloCatalog(object):
             Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-        desired_redshift : float, optional
+        redshift : float, optional
             Redshift of the desired catalog. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
@@ -283,8 +253,8 @@ class HaloCatalog(object):
         self.catman = catalog_manager.CatalogManager()
 
         fname, closest_redshift = self._retrieve_closest_halo_table_fname(
-            simname, halo_finder, desired_redshift)
-        if abs(closest_redshift - desired_redshift) > dz_tol:
+            simname, halo_finder, redshift)
+        if abs(closest_redshift - redshift) > dz_tol:
             msg = ("Your input cache directory does not contain a halo catalog \n" 
                 "within %.3f of your input redshift = %.3f.\n"
                 "For the ``%s`` simulation and ``%s`` halo-finder, \n" 
@@ -292,7 +262,7 @@ class HaloCatalog(object):
                 "If that is the catalog you want, simply call the HaloCatalog class constructor \n"
                 "using the ``redshift`` keyword argument set to %.3f. \nOtherwise, choose a different "
                 "halo catalog from your cache,\nor use the CatalogManager to download the catalog you need.\n")
-            raise HalotoolsCacheError(msg % (dz_tol, desired_redshift, 
+            raise HalotoolsCacheError(msg % (dz_tol, redshift, 
                 simname, halo_finder, closest_redshift, closest_redshift))
         else:
             self.processed_halo_table_fname = fname
@@ -375,7 +345,6 @@ class HaloCatalog(object):
                 halo_finder = halo_finder,
                 desired_redshift = redshift, 
                 external_cache_loc = sim_defaults.default_cache_location)
-
         
         return fname, closest_redshift
 
