@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import os, sys, warnings, urllib2, fnmatch
+import os, sys, urllib2, fnmatch
+from warnings import warn 
 
 try:
     from bs4 import BeautifulSoup
@@ -190,7 +191,7 @@ class HaloCatalog(object):
 
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder, 
-        desired_redshift = sim_defaults.default_redshift, dz_tol = 0.05, 
+        redshift = sim_defaults.default_redshift, dz_tol = 0.05, 
         preload_halo_table = False, **kwargs):
         """
         Parameters 
