@@ -71,6 +71,20 @@ class ModelFactory(object):
             Class instance of `~halotools.sim_manager.HaloCatalog`. 
             This object contains the halo catalog and its metadata.  
 
+        simname : string, optional
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        redshift : float, optional
+            Redshift of the desired catalog. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
         """
 
         if hasattr(self, 'mock'):
@@ -86,7 +100,7 @@ class ModelFactory(object):
                 snapshot = HaloCatalog(**kwargs)
 
             mock_factory = self.model_blueprint['mock_factory']
-            mock = mock_factory(snapshot=snapshot, model=self, **kwargs)
+            mock = mock_factory(snapshot=snapshot, model=self, populate=True)
             self.mock = mock
 
     def compute_galaxy_clustering(self, num_iterations=5, summary_statistic = 'median', **kwargs):
