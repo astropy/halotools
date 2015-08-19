@@ -91,9 +91,14 @@ class MockFactory(object):
         self.halo_table = self.snapshot.halo_table
         try:
             self.ptcl_table = self.snapshot.ptcl_table
+        except:
+            pass   
+            
+        try:
             self.gal_types = self.model.gal_types
         except:
-            pass            
+            pass   
+
 
         self._build_additional_haloprops_list(**kwargs)
         self._build_new_haloprop_func_dict(**kwargs)
