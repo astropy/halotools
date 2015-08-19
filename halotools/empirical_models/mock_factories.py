@@ -194,6 +194,20 @@ class MockFactory(object):
         if composite_haloprop_func_dict != {}:
             self.new_haloprop_func_dict = composite_haloprop_func_dict
 
+    @property 
+    def number_density(self):
+        """ Comoving number density of the mock galaxy catalog.
+
+        Returns
+        --------
+        number density : float 
+            Comoving number density in units of :math:`(h/Mpc)^{3}`. 
+
+        """
+        ngals = len(self.galaxy_table)
+        comoving_volume = self.snapshot.Lbox**3
+        return ngals/float(comoving_volume)
+
     def compute_galaxy_clustering(self, include_crosscorr = False, **kwargs):
         """
         Built-in method for all mock catalogs to compute the galaxy clustering signal. 
