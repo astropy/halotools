@@ -89,9 +89,11 @@ class MockFactory(object):
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         self.halo_table = self.snapshot.halo_table
-        self.ptcl_table = self.snapshot.ptcl_table
-        if hasattr(self.model, 'gal_types'):
+        try:
+            self.ptcl_table = self.snapshot.ptcl_table
             self.gal_types = self.model.gal_types
+        except:
+            pass            
 
         self._build_additional_haloprops_list(**kwargs)
         self._build_new_haloprop_func_dict(**kwargs)
