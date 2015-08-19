@@ -192,7 +192,7 @@ class HaloCatalog(object):
     def __init__(self, simname=sim_defaults.default_simname, 
         halo_finder=sim_defaults.default_halo_finder, 
         redshift = sim_defaults.default_redshift, dz_tol = 0.05, 
-        preload_halo_table = False, **kwargs):
+        preload_halo_table = False):
         """
         Parameters 
         ----------
@@ -206,7 +206,7 @@ class HaloCatalog(object):
             Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-        desired_redshift : float, optional
+        redshift : float, optional
             Redshift of the desired catalog. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
@@ -253,8 +253,8 @@ class HaloCatalog(object):
         self.catman = catalog_manager.CatalogManager()
 
         fname, closest_redshift = self._retrieve_closest_halo_table_fname(
-            simname, halo_finder, desired_redshift)
-        if abs(closest_redshift - desired_redshift) > dz_tol:
+            simname, halo_finder, redshift)
+        if abs(closest_redshift - redshift) > dz_tol:
             msg = ("Your input cache directory does not contain a halo catalog \n" 
                 "within %.3f of your input redshift = %.3f.\n"
                 "For the ``%s`` simulation and ``%s`` halo-finder, \n" 
@@ -262,7 +262,7 @@ class HaloCatalog(object):
                 "If that is the catalog you want, simply call the HaloCatalog class constructor \n"
                 "using the ``redshift`` keyword argument set to %.3f. \nOtherwise, choose a different "
                 "halo catalog from your cache,\nor use the CatalogManager to download the catalog you need.\n")
-            raise HalotoolsCacheError(msg % (dz_tol, desired_redshift, 
+            raise HalotoolsCacheError(msg % (dz_tol, redshift, 
                 simname, halo_finder, closest_redshift, closest_redshift))
         else:
             self.processed_halo_table_fname = fname
