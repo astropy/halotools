@@ -6,7 +6,7 @@ within their halos.
 """
 __author__ = ['Andrew Hearin']
 
-__all__ = ['AnalyticDensityProf']
+__all__ = ['AnalyticDensityProf', 'IsotropicJeansVelocity']
 
 import numpy as np
 from abc import ABCMeta
