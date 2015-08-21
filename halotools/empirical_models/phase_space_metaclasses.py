@@ -18,12 +18,7 @@ from . import model_defaults
 
 @six.add_metaclass(ABCMeta)
 class AnalyticDensityProf(object):
-    """ Container class for any halo profile model. 
-
-    This is an abstract class, and cannot itself be instantiated. 
-    Rather, `HaloProfileModel` provides a template for any model of 
-    the radial profile of dark matter particles within their halos. 
-
+    """ Container class for any radial profile model. 
     """
 
     def __init__(self, halo_boundary = model_defaults.halo_boundary, 
@@ -316,5 +311,68 @@ class AnalyticDensityProf(object):
         z += halo_table[halo_zpos_key]
 
         return x, y, z
+
+
+@six.add_metaclass(ABCMeta)
+class IsotropicJeansVelocity(object):
+    """ Orthogonal mixin class used to transform a configuration 
+    space model for the 1-halo term into a phase space model in which 
+    velocities solve the Jeans equation of the underlying potential. 
+    """
+    def __init__(self):
+        pass
+
+    def build_velocity_dispersion_lookup_table(self, 
+        logrmin = model_defaults.default_lograd_min, 
+        logrmax = model_defaults.default_lograd_max, 
+        Npts_radius_table=model_defaults.Npts_radius_table):
+        """ Method used to create a lookup table of solutions 
+        to the Jeans equation.  
+
+        Parameters 
+        ----------
+        logrmin : float, optional 
+            Minimum radius used to build the spline table. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        logrmax : float, optional 
+            Maximum radius used to build the spline table
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        Npts_radius_table : int, optional 
+            Number of control points used in the spline. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+        """
+        pass
+
+    def _unscaled_radial_velocity_dispersion(self, x):
+        """
+        Method returns the radial velocity dispersion as a function of the 
+        halo-centric distance. 
+        """
+        pass
+
+    def mc_vel(self, **kwargs):
+        """ Method returns the velocity of galaxies living in their halos. 
+        """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
