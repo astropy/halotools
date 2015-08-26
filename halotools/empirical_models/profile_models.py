@@ -8,7 +8,12 @@ inside their halos.
 import numpy as np 
 from phase_space_metaclasses import AnalyticDensityProf
 from ..sim_manager import sim_defaults 
-from . import model_defaults 
+from . import model_defaults
+from .conc_mass_models import ConcMass
+from profile_helpers import *
+from ..utils.array_utils import convert_to_ndarray
+from ..custom_exceptions import *
+
 
 __author__ = ['Andrew Hearin']
 
@@ -19,7 +24,12 @@ class TrivialProfile(AnalyticDensityProf):
     as a dummy class to assign positions to central-type galaxies. 
 
     """
-    def __init__(self, **kwargs):
+    def __init__(self, 
+        cosmology=sim_defaults.default_cosmology, 
+        redshift=sim_defaults.default_redshift,
+        mdef = model_defaults.halo_mass_definition,
+        halo_boundary=model_defaults.halo_boundary, 
+        **kwargs):
         """
         Notes 
         -----
@@ -30,18 +40,30 @@ class TrivialProfile(AnalyticDensityProf):
         You can load a trivial profile model with the default settings simply by calling 
         the class constructor with no arguments:
 
-        >>> trivial_halo_prof_model = TrivialProfile() # doctest: +SKIP 
+        >>> trivial_halo_prof_model = TrivialProfile() 
 
         """
 
-        super(TrivialProfile, self).__init__(prof_param_keys=[], **kwargs)
+        super(TrivialProfile, self).__init__(cosmology, redshift, mdef, **kwargs)
 
-        self.build_inv_cumu_lookup_table()
+    def mass_density(self, radius, mass):
+        """
+        Parameters 
+        -----------
+        radius: array_like
+            Halo radius in physical Mpc/h; can be a scalar or a numpy array.
 
-        self.publications = []
+        mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
 
+        """
+        volume = (4*np.pi/3)*radius**3
+        return mass/volume
 
-class NFWProfile(AnalyticDensityProf):
+    def enclosed_mass(self, radius, mass):
+        return mass
+
+class NFWProfile(AnalyticDensityProf, ConcMass):
     """ NFW halo profile, based on Navarro, Frenk and White (1999).
 
     """
@@ -49,16 +71,12 @@ class NFWProfile(AnalyticDensityProf):
     def __init__(self, 
         cosmology=sim_defaults.default_cosmology, 
         redshift=sim_defaults.default_redshift,
-        halo_boundary=model_defaults.halo_boundary,
-        conc_mass_model = model_defaults.conc_mass_model, **kwargs):
+        mdef = model_defaults.halo_mass_definition,
+        halo_boundary=model_defaults.halo_boundary, 
+        **kwargs):
         """
         Parameters 
         ----------
-        prim_haloprop_key : string, optional  
-            String giving the column name of the primary halo property governing 
-            the occupation statistics of gal_type galaxies. 
-            Default is set in `~halotools.empirical_models.sim_defaults`.
-
         conc_mass_model : string, optional  
             Specifies the calibrated fitting function used to model the concentration-mass relation. 
              Default is set in `~halotools.empirical_models.sim_defaults`.
@@ -86,23 +104,31 @@ class NFWProfile(AnalyticDensityProf):
         >>> nfw_halo_prof_model = NFWProfile(cosmology = WMAP9, redshift = 2) # doctest: +SKIP 
         """
 
-        super(NFWProfile, self).__init__(
-            cosmology=cosmology, redshift=redshift, halo_boundary=halo_boundary, 
-            prof_param_keys=['NFWmodel_conc'], **kwargs)
+        super(NFWProfile, self).__init__(cosmology, redshift, mdef)
+        ConcMass.__init__(self, **kwargs)
 
-        self.NFWmodel_conc_lookup_table_min = model_defaults.min_permitted_conc
-        self.NFWmodel_conc_lookup_table_max = model_defaults.max_permitted_conc
-        self.NFWmodel_conc_lookup_table_spacing = model_defaults.default_dconc
-
-        conc_mass_model = halo_prof_param_components.ConcMass(
-            cosmology=self.cosmology, redshift = self.redshift, 
-            conc_mass_model=conc_mass_model, **kwargs)
-
-        self.NFWmodel_conc = conc_mass_model.__call__
-
-        self.build_inv_cumu_lookup_table()
+        self.prof_param_keys = ['NFWmodel_conc']
+        self.NFWmodel_conc = self.__call__
 
         self.publications = ['arXiv:9611107', 'arXiv:0002395', 'arXiv:1402.7073']
+
+    def dimensionless_mass_density(self, x, conc):
+        """
+        """
+        numerator = conc**3/(3.*self.g(conc))
+        denominator = conc*x*(1 + conc*x)**2
+        return numerator/denominator
+
+    def mass_density(self, r, mass, conc):
+        """
+        """
+        halo_radius = halo_mass_to_halo_radius(mass=mass, 
+            cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef)
+        x = r/halo_radius
+        physical_density = (self.density_threshold*
+            self.dimensionless_mass_density(x, conc)
+            )
+        return physical_density
 
     def g(self, x):
         """ Convenience function used to evaluate the profile. 
@@ -114,7 +140,7 @@ class NFWProfile(AnalyticDensityProf):
         Returns 
         -------
         g : array_like 
-            :math:`1 / g(x) = \\log(1+x) - x / (1+x)`
+            :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)`
 
         Examples 
         --------
@@ -126,97 +152,70 @@ class NFWProfile(AnalyticDensityProf):
         denominator = np.log(1.0+x) - (x/(1.0+x))
         return 1./denominator
 
-    def rho_s(self, c):
-        """ Normalization of the NFW profile. 
-
-        Parameters 
-        ----------
-        c : array_like
-            concentration of the profile
-
-        Returns 
-        -------
-        rho_s : array_like 
-            Profile normalization 
-            :math:`\\rho_{\\mathrm{s}} = \\frac{1}{3}\\Delta_{\\mathrm{vir}}c^{3}g(c)\\bar{\\rho}_{\\mathrm{m}}`
-
+    def cumulative_mass_PDF(self, x, conc):
         """
-        return (self.delta_vir/3.)*c*c*c*self.g(c)*self.cosmic_matter_density
+        The fraction of the total mass enclosed within 
+        dimensionless radius :math:`x = r / R_{\\rm halo}`.
 
-    def density_profile(self, r, c):
-        """ NFW profile density. 
+        Parameters
+        -------------
+        x: array_like
+            Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
+            Can be a scalar or a numpy array.
 
-        :math:`\\rho_{\\mathrm{NFW}}(r | c) = \\rho_{\\mathrm{s}} / cr(1+cr)^{2}`
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``x``. 
+            
+        Returns
+        -------------
+        p: array_like
+            The fraction of the total mass enclosed 
+            within radius x, in :math:`M_{\odot}/h`; 
+            has the same dimensions as the input ``x``.
+        """     
+        x = convert_to_ndarray(x)
+        x = np.where(x > 1, 1, x)
 
-        Parameters 
-        ----------
-        r : array_like 
-            Value of the radius at which density profile is to be evaluated. 
-            Should be scaled by the halo boundary, so that :math: `0 < r < 1`
+        conc = convert_to_ndarray(conc)
 
-        c : array_like 
-            Concentration specifying the halo profile. 
-            If an array, should be of the same length 
-            as the input r. 
-
-        Returns 
-        -------
-        result : array_like 
-            NFW density profile :math:`\\rho_{\\mathrm{NFW}}(r | c)`.
-        """
-        numerator = self.rho_s(c)
-        denominator = (c*r)*(1.0 + c*r)*(1.0 + c*r)
-        return numerator / denominator
-
-    def cumulative_mass_PDF(self, r, *args):
-        """ Cumulative probability distribution of the NFW profile. 
-
-        Parameters 
-        ----------
-        r : array_like 
-            Value of the radius at which density profile is to be evaluated. 
-            Should be scaled by the halo boundary, so that :math:`0 < r < 1`
-
-        c : array_like 
-            Concentration specifying the halo profile. 
-            If an array, should be of the same length 
-            as the input r. 
-
-        Returns 
-        -------
-        cumulative_PDF : array_like
-            :math:`P_{\\mathrm{NFW}}(<r | c) = g(c) / g(c*r)`. 
-
-        Examples 
-        --------
-        To evaluate the cumulative PDF for a single profile: 
-
-        >>> nfw_halo_prof_model = NFWProfile() # doctest: +SKIP 
-        >>> Npts = 100 # doctest: +SKIP 
-        >>> radius = np.logspace(-2, 0, Npts) # doctest: +SKIP 
-        >>> conc = 8 # doctest: +SKIP 
-        >>> cumulative_prob = nfw_halo_prof_model.cumulative_mass_PDF(radius, conc) # doctest: +SKIP 
-
-        Or, to evaluate the cumulative PDF for profiles with a range of concentrations:
-
-        >>> conc_array = np.linspace(1, 25, Npts) # doctest: +SKIP 
-        >>> cumulative_prob = nfw_halo_prof_model.cumulative_mass_PDF(radius, conc_array) # doctest: +SKIP 
-        """
-
-        if len(args)==0:
-            raise SyntaxError("Must pass array of concentrations to cumulative_mass_PDF. \n"
-                "Only received array of radii.")
+        if len(x) != len(conc):
+            raise HalotoolsError("If passing an array of concentrations to "
+                "cumulative_mass_PDF, the array must have the same length "
+                "as the input array of radial positions")
         else:
-            if custom_len(args[0]) == 1:
-                c = np.ones(len(r))*args[0]
-                return self.g(c) / self.g(r*c)
-            elif custom_len(args[0]) != custom_len(r):
-                raise ValueError("If passing an array of concentrations to "
-                    "cumulative_mass_PDF, the array must have the same length "
-                    "as the array of radial positions")
-            else:
-                c = args[0]
-                return self.g(c) / self.g(r*c)
+            return self.g(conc) / self.g(x*conc)
+
+    def enclosed_mass(self, radius, mass, conc):
+        """
+        The mass enclosed within dimensionless radius :math:`x = r / R_{\\rm halo}`.
+
+        Parameters
+        -----------------
+        radius: array_like
+            Halo radius in physical Mpc/h; can be a scalar or a numpy array.
+
+        mass: array_like
+            Total halo mass. Can either be a scalar, or a numpy array with
+            the same dimensions as the input ``radius``.
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``radius``. 
+            
+        Returns
+        ----------
+        mass_encl: array_like
+            The mass enclosed within the input ``radius``, in :math:`M_{\odot}/h`; 
+            has the same dimensions as the input ``radius``.
+        """   
+        radius = convert_to_ndarray(radius)  
+        mass = convert_to_ndarray(mass)  
+        halo_boundary = halo_mass_to_halo_radius(mass, 
+            self.cosmology, self.redshift, self.mdef)
+        x = radius/halo_boundary
+        conc = convert_to_ndarray(conc)  
+        return mass*self.cumulative_mass_PDF(x, conc)
 
 ##################################################################################
 
