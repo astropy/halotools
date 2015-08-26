@@ -14,6 +14,7 @@ import numpy as np
 import model_defaults
 from ..sim_manager import sim_defaults
 import model_defaults
+from ..custom_exceptions import *
 
 __all__ = ['ConcMass']
 
@@ -25,10 +26,7 @@ class ConcMass(object):
 
     """
 
-    def __init__(self, cosmology=sim_defaults.default_cosmology, 
-        redshift = sim_defaults.default_redshift, 
-        prim_haloprop_key = model_defaults.prim_haloprop_key, 
-        conc_mass_model = model_defaults.conc_mass_model, **kwargs):
+    def __init__(self, conc_mass_model = model_defaults.conc_mass_model, **kwargs):
         """
         Parameters 
         ----------
@@ -49,13 +47,25 @@ class ConcMass(object):
         Examples 
         ---------
         >>> conc_mass_model = ConcMass()
-        >>> conc_mass_model = ConcMass(redshift = 2, prim_haloprop_key = 'm500c')
+        >>> conc_mass_model = ConcMass(redshift = 2, prim_haloprop_key = 'halo_m500c')
 
         """
-        self.cosmology = cosmology
-        self.redshift = redshift
-        self.prim_haloprop_key = prim_haloprop_key
         self.conc_mass_model = conc_mass_model
+
+        def bind_kwarg_mixin_safe(kwlist):
+            for kw in kwlist:
+                if kw in kwargs:
+                    if hasattr(self, kw):
+                        msg = ("When using ConcMass as a mix-in class, do not pass "
+                            "%s to the constructor as this should already be bound to "
+                            "the dominant orthogonal class")
+                        raise HalotoolsError(msg % kw)
+                    else:
+                        setattr(self, kw, kwargs[kw])
+                else:
+                    pass
+
+        bind_kwarg_mixin_safe(['cosmology', 'redshift', 'prim_haloprop_key'])
 
     def __call__(self, **kwargs):
         """ Method used to evaluate the mean NFW concentration as a function of 
@@ -89,7 +99,8 @@ class ConcMass(object):
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halo_table`` or ``prim_haloprop``")
 
-        return getattr(self, self.conc_mass_model)(mass)
+        conc_mass_func = getattr(self, self.conc_mass_model)
+        return conc_mass_func(mass)
 
     def dutton_maccio14(self, mass):
         """ Power-law fit to the concentration-mass relation from 

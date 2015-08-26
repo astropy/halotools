@@ -16,6 +16,7 @@ from itertools import product
 from ..utils import convert_to_ndarray
 
 from . import model_defaults
+from profile_helpers import *
 
 from scipy.integrate import quad as quad_integration
 from scipy.optimize import minimize as scipy_minimize
@@ -30,24 +31,40 @@ class AnalyticDensityProf(object):
     """ Container class for any radial profile model. 
     """
 
-    def __init__(self):
+    def __init__(self, cosmology, redshift, mdef, **kwargs):
         """
         """
-        pass
+        self.cosmology = cosmology
+        self.redshift = redshift
+        self.mdef = mdef
+
+        self.halo_boundary = model_defaults.halo_boundary_key(self.mdef)
+
+        self.density_threshold = density_threshold(
+            cosmology = self.cosmology, 
+            redshift = self.redshift, mdef = self.mdef)
+
+        self.prof_param_keys = []
+        self.publications = []
 
 
     @abstractmethod
-    def density(self, x):
+    def mass_density(self, r, *args, **kwargs):
         """
         """
         pass
+
+    def _enclosed_mass_integrand(self, y):
+        """
+        """
+        return self.mass_density(z) * 4.0 * np.pi * z**2
 
     def enclosed_mass(self, x, rtol = 1E-5):
         """
         The mass enclosed within dimensionless radius :math:`x = r / R_{\\rm halo}`.
 
         Parameters
-        -------------------------------------------------------------------------------------------
+        -----------------
         x: array_like
             Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
             Can be a scalar or a numpy array.
@@ -56,29 +73,25 @@ class AnalyticDensityProf(object):
             Relative tolerance of the integration accuracy. Default is 1e-5. 
             
         Returns
-        -------------------------------------------------------------------------------------------
-        M: array_like
+        ----------
+        mass: array_like
             The mass enclosed within radius r, in :math:`M_{\odot}/h`; 
             has the same dimensions as the input ``x``.
-        """     
-
-        def integrand(z):
-            return self.density(z) * 4.0 * np.pi * z**2
-
+        """                
         x = convert_to_ndarray(x)
-        M = np.zeros_like(x)
+        mass = np.zeros_like(x)
         for i in range(len(x)):
-            M[i], _ = quad_integration(integrand, 0., x[i], epsrel = rtol)
+            mass[i], _ = quad_integration(self._enclosed_mass_integrand, 0., x[i], epsrel = rtol)
     
-        return M
+        return mass
 
-    def enclosed_mass_cumulative_pdf(self, x, rtol = 1E-5):
+    def cumulative_mass_PDF(self, x, rtol = 1E-5):
         """
         The fraction of the total mass enclosed within 
         dimensionless radius :math:`x = r / R_{\\rm halo}`.
 
         Parameters
-        -------------------------------------------------------------------------------------------
+        -------------
         x: array_like
             Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
             Can be a scalar or a numpy array.
@@ -87,7 +100,7 @@ class AnalyticDensityProf(object):
             Relative tolerance of the integration accuracy. Default is 1e-5. 
             
         Returns
-        -------------------------------------------------------------------------------------------
+        -------------
         p: array_like
             The fraction of the total mass enclosed 
             within radius x, in :math:`M_{\odot}/h`; 
@@ -101,18 +114,18 @@ class AnalyticDensityProf(object):
         The circular velocity, :math:`v_c \\equiv \\sqrt{GM(<r)/r}`.
 
         Parameters
-        -------------------------------------------------------------------------------------------
+        --------------
         x: array_like
             Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
             Can be a scalar or a numpy array.
             
         Returns
-        -------------------------------------------------------------------------------------------
+        ----------
         vc: float
             The circular velocity in km / s; has the same dimensions as r.
 
         See also
-        -------------------------------------------------------------------------------------------
+        ------------
         Vmax: The maximum circular velocity, and the radius where it occurs.
         """     
     
@@ -134,7 +147,7 @@ class AnalyticDensityProf(object):
         The maximum circular velocity, and the radius where it occurs.
             
         Returns
-        -------------------------------------------------------------------------------------------
+        -----------------
         vmax: float
             The maximum circular velocity in km / s.
         rmax: float
@@ -158,7 +171,7 @@ class IsotropicJeansVelocity(object):
     space model for the 1-halo term into a phase space model in which 
     velocities solve the Jeans equation of the underlying potential. 
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
         pass
 
     def _unscaled_radial_velocity_dispersion(self, x):
