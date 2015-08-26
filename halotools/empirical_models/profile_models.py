@@ -7,6 +7,8 @@ inside their halos.
 
 import numpy as np 
 from phase_space_metaclasses import AnalyticDensityProf
+from ..sim_manager import sim_defaults 
+from . import model_defaults 
 
 __author__ = ['Andrew Hearin']
 
@@ -28,7 +30,7 @@ class TrivialProfile(AnalyticDensityProf):
         You can load a trivial profile model with the default settings simply by calling 
         the class constructor with no arguments:
 
-        >>> trivial_halo_prof_model = TrivialProfile()
+        >>> trivial_halo_prof_model = TrivialProfile() # doctest: +SKIP 
 
         """
 
@@ -76,12 +78,12 @@ class NFWProfile(AnalyticDensityProf):
         You can load a NFW profile model with the default settings simply by calling 
         the class constructor with no arguments:
 
-        >>> nfw_halo_prof_model = NFWProfile()
+        >>> nfw_halo_prof_model = NFWProfile() # doctest: +SKIP 
 
         For an NFW profile with an alternative cosmology and redshift:
 
         >>> from astropy.cosmology import WMAP9
-        >>> nfw_halo_prof_model = NFWProfile(cosmology = WMAP9, redshift = 2)
+        >>> nfw_halo_prof_model = NFWProfile(cosmology = WMAP9, redshift = 2) # doctest: +SKIP 
         """
 
         super(NFWProfile, self).__init__(
@@ -116,10 +118,10 @@ class NFWProfile(AnalyticDensityProf):
 
         Examples 
         --------
-        >>> model = NFWProfile()
-        >>> g = model.g(1)
-        >>> Npts = 25
-        >>> g = model.g(np.logspace(-1, 1, Npts))
+        >>> model = NFWProfile() # doctest: +SKIP 
+        >>> g = model.g(1) # doctest: +SKIP 
+        >>> Npts = 25 # doctest: +SKIP 
+        >>> g = model.g(np.logspace(-1, 1, Npts)) # doctest: +SKIP 
         """
         denominator = np.log(1.0+x) - (x/(1.0+x))
         return 1./denominator
@@ -189,16 +191,16 @@ class NFWProfile(AnalyticDensityProf):
         --------
         To evaluate the cumulative PDF for a single profile: 
 
-        >>> nfw_halo_prof_model = NFWProfile()
-        >>> Npts = 100
-        >>> radius = np.logspace(-2, 0, Npts)
-        >>> conc = 8
-        >>> cumulative_prob = nfw_halo_prof_model.cumulative_mass_PDF(radius, conc)
+        >>> nfw_halo_prof_model = NFWProfile() # doctest: +SKIP 
+        >>> Npts = 100 # doctest: +SKIP 
+        >>> radius = np.logspace(-2, 0, Npts) # doctest: +SKIP 
+        >>> conc = 8 # doctest: +SKIP 
+        >>> cumulative_prob = nfw_halo_prof_model.cumulative_mass_PDF(radius, conc) # doctest: +SKIP 
 
         Or, to evaluate the cumulative PDF for profiles with a range of concentrations:
 
-        >>> conc_array = np.linspace(1, 25, Npts)
-        >>> cumulative_prob = nfw_halo_prof_model.cumulative_mass_PDF(radius, conc_array)
+        >>> conc_array = np.linspace(1, 25, Npts) # doctest: +SKIP 
+        >>> cumulative_prob = nfw_halo_prof_model.cumulative_mass_PDF(radius, conc_array) # doctest: +SKIP 
         """
 
         if len(args)==0:
