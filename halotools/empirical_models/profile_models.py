@@ -6,7 +6,7 @@ inside their halos.
 """
 
 import numpy as np 
-from phase_space_metaclasses import AnalyticDensityProf
+from phase_space_metaclasses import *
 from ..sim_manager import sim_defaults 
 from . import model_defaults
 from .conc_mass_models import ConcMass
@@ -17,11 +17,10 @@ from ..custom_exceptions import *
 
 __author__ = ['Andrew Hearin']
 
+__all__ = ['TrivialProfile', 'NFWProfile', 'BiasedNFWProfile']
+
 class TrivialProfile(AnalyticDensityProf):
     """ Profile of dark matter halos with all their mass concentrated at exactly the halo center. 
-
-    This class has virtually no functionality on its own. It is primarily used 
-    as a dummy class to assign positions to central-type galaxies. 
 
     """
     def __init__(self, 
@@ -107,10 +106,14 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         super(NFWProfile, self).__init__(cosmology, redshift, mdef)
         ConcMass.__init__(self, **kwargs)
 
-        self.prof_param_keys = ['NFWmodel_conc']
-        self.NFWmodel_conc = self.__call__
+        self.prof_param_keys = ['conc_NFWmodel']
 
         self.publications = ['arXiv:9611107', 'arXiv:0002395', 'arXiv:1402.7073']
+
+    def conc_NFWmodel(self, **kwargs):
+        """
+        """
+        return self.compute_concentration(**kwargs)
 
     def dimensionless_mass_density(self, x, conc):
         """
@@ -217,11 +220,77 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         conc = convert_to_ndarray(conc)  
         return mass*self.cumulative_mass_PDF(x, conc)
 
+
+
+class BiasedNFWProfile(NFWProfile):
+    """ NFW halo profile, based on Navarro, Frenk and White (1999), 
+    allowing galaxies to have distinct concentrations from their underlying 
+    dark matter halos.
+
+    """
+
+    def __init__(self, **kwargs):
+        """
+        Parameters 
+        ----------
+        conc_mass_model : string, optional  
+            Specifies the calibrated fitting function used to model the concentration-mass relation. 
+             Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        cosmology : object, optional 
+            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        redshift : float, optional  
+            Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        halo_boundary : string, optional  
+            String giving the column name of the halo catalog that stores the boundary of the halo. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+        """
+
+        super(BiasedNFWProfile, self).__init__(**kwargs)
+
+        self.param_dict['conc_NFWmodel_bias'] = 1.
+
+    def conc_NFWmodel(self, **kwargs):
+        """
+        """
+        result = (self.param_dict['conc_NFWmodel_bias']*
+            super(BiasedNFWProfile, self).conc_NFWmodel(**kwargs)
+            )
+        return result
+
+
+
 ##################################################################################
 
+class NFWPhaseSpace(NFWProfile, IsotropicJeansVelocity):
+    """ NFW halo profile, based on Navarro, Frenk and White (1999).
 
+    """
 
+    def __init__(self, **kwargs):
+        """
+        Parameters 
+        ----------
+        conc_mass_model : string, optional  
+            Specifies the calibrated fitting function used to model the concentration-mass relation. 
+             Default is set in `~halotools.empirical_models.sim_defaults`.
 
+        cosmology : object, optional 
+            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        redshift : float, optional  
+            Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        halo_boundary : string, optional  
+            String giving the column name of the halo catalog that stores the boundary of the halo. 
+            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+        """
+
+        super(NFWPhaseSpace, self).__init__(**kwargs)
 
 
 
