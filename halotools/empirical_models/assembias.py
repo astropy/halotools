@@ -18,8 +18,7 @@ from ..utils.table_utils import compute_conditional_percentiles
 class HeavisideAssembias(object):
     """
     """
-    def __init__(self, sec_haloprop_key = model_defaults.sec_haloprop_key, 
-        loginterp = True, split = 0.5, assembias_strength = 0.5, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters 
         ----------
@@ -79,6 +78,20 @@ class HeavisideAssembias(object):
             rather than linearly. Default is True. 
 
         """
+        self._interpret_constructor_inputs(**kwargs)
+
+        self._decorate_baseline_method()
+
+        self._bind_new_haloprop_func_dict()
+
+
+    def _interpret_constructor_inputs(self, loginterp = True, 
+        sec_haloprop_key = model_defaults.sec_haloprop_key, **kwargs):
+        """
+        """
+        self._loginterp = loginterp
+        self.sec_haloprop_key = sec_haloprop_key
+
         try:
             self._method_name_to_decorate = kwargs['method_name_to_decorate']
         except KeyError:
@@ -95,29 +108,76 @@ class HeavisideAssembias(object):
                     "the component instance must have a %s attribute")
                 raise HalotoolsError(msg % attr)
 
-        self._loginterp = loginterp
-        self.sec_haloprop_key = sec_haloprop_key
+        self._set_percentile_splitting(**kwargs)
+        self._initialize_assembias_param_dict(**kwargs)
+
+        if 'halo_type_tuple' in kwargs:
+            self.halo_type_tuple = kwargs['halo_type_tuple']
+
+    def _set_percentile_splitting(self, split = 0.5, **kwargs):
+        """
+        Method interprets the arguments passed to the constructor 
+        and sets up the interpolation scheme for how halos will be 
+        divided into two types as a function of the primary halo property. 
+        """
 
         if 'splitting_model' in kwargs:
             self.splitting_model = kwargs['splitting_model']
             self.ancillary_model_dependencies = ['splitting_model']
-            self._set_percentile_splitting(
-                splitting_method_name = kwargs['splitting_method_name'])
-        elif 'split_abcissa' in kwargs:
-            self._set_percentile_splitting(split_abcissa=kwargs['split_abcissa'], 
-                split=kwargs['split'])
+            func = getattr(self.splitting_model, kwargs['splitting_method_name'])
+            if callable(func):
+                self._input_split_func = func
+            else:
+                raise HalotoolsError("Input ``splitting_model`` must have a callable function "
+                    "named ``%s``" % kwargs['splitting_method_name'])
+        elif 'split_abcissa' in kwargs.keys():
+            if custom_len(kwargs['split_abcissa']) != custom_len(split):
+                raise HalotoolsError("``split`` and ``split_abcissa`` must have the same length")
+            self._split_abcissa = kwargs['split_abcissa']
+            self._split_ordinates = split
         else:
-            self._set_percentile_splitting(split = split)
+            try:
+                self._split_abcissa = [2]
+                self._split_ordinates = [split]
+            except KeyError:
+                msg = ("The _set_percentile_splitting method must at least be called with a ``split``" 
+                    "keyword argument, or alternatively ``split`` and ``split_abcissa`` arguments.")
+                raise HalotoolsError(msg)
+
+    def _initialize_assembias_param_dict(self, assembias_strength = 0.5, **kwargs):
+        """
+        """
+        if not hasattr(self, 'param_dict'):
+            self.param_dict = {}
+
+        # Make sure the code behaves properly whether or not we were passed an iterable
+        strength = assembias_strength
+        try:
+            iterator = iter(strength)
+            strength = list(strength)
+        except TypeError:
+            strength = [strength]
 
         if 'assembias_strength_abcissa' in kwargs:
-            self._initialize_assembias_param_dict(
-                split_abcissa=kwargs['assembias_strength_abcissa'], 
-                split_ordinates=kwargs['assembias_strength_abcissa'])
+            abcissa = kwargs['assembias_strength_abcissa']
+            try:
+                iterator = iter(abcissa)
+                abcissa = list(abcissa)
+            except TypeError:
+                abcissa = [abcissa]
         else:
-            self._initialize_assembias_param_dict(assembias_strength=assembias_strength)
+            abcissa = [2]
 
-        if 'halo_type_tuple' in kwargs:
-            self.halo_type_tuple = kwargs['halo_type_tuple']
+        if custom_len(abcissa) != custom_len(strength):
+            raise HalotoolsError("``assembias_strength`` and ``assembias_strength_abcissa`` must have the same length")
+
+        self._assembias_strength_abcissa = abcissa
+        for ipar, val in enumerate(strength):
+            self.param_dict[self._get_assembias_param_dict_key(ipar)] = val
+
+    def _decorate_baseline_method(self):
+        """
+        """
 
         try:
             baseline_method = getattr(self, self._method_name_to_decorate)
@@ -131,6 +191,10 @@ class HeavisideAssembias(object):
                 "and the baseline model must have a method named ``%s``")
             raise HalotoolsError(msg % self._method_name_to_decorate)
 
+    def _bind_new_haloprop_func_dict(self):
+        """
+        """
+
         def assembias_percentile_calculator(halo_table):
             return compute_conditional_percentiles(
                 halo_table = halo_table, 
@@ -143,33 +207,6 @@ class HeavisideAssembias(object):
         self.new_haloprop_func_dict[key] = assembias_percentile_calculator
 
         self._additional_methods_to_inherit.extend(['assembias_strength'])
-
-    def _set_percentile_splitting(self, **kwargs):
-        """
-        Method interprets the arguments passed to the constructor 
-        and sets up the interpolation scheme for how halos will be 
-        divided into two types as a function of the primary halo property. 
-        """
-        if 'splitting_method_name' in kwargs.keys():
-            func = getattr(self.splitting_model, kwargs['splitting_method_name'])
-            if callable(func):
-                self._input_split_func = func
-            else:
-                raise HalotoolsError("Input ``splitting_model`` must have a callable function "
-                    "named ``%s``" % kwargs['splitting_method_name'])
-        elif 'split_abcissa' in kwargs.keys():
-            if custom_len(kwargs['split_abcissa']) != custom_len(kwargs['split']):
-                raise HalotoolsError("``split`` and ``split_abcissa`` must have the same length")
-            self._split_abcissa = kwargs['split_abcissa']
-            self._split_ordinates = kwargs['split']
-        else:
-            try:
-                self._split_abcissa = [2]
-                self._split_ordinates = [kwargs['split']]
-            except KeyError:
-                msg = ("The _set_percentile_splitting method must at least be called with a ``split``" 
-                    "keyword argument, or alternatively ``split`` and ``split_abcissa`` arguments.")
-                raise HalotoolsError(msg)
 
 
     def percentile_splitting_function(self, **kwargs):
@@ -226,35 +263,6 @@ class HeavisideAssembias(object):
         return result
 
 
-    def _initialize_assembias_param_dict(self, **kwargs):
-        """
-        """
-        if not hasattr(self, 'param_dict'):
-            self.param_dict = {}
-
-        # Make sure the code behaves properly whether or not we were passed an iterable
-        strength = kwargs['assembias_strength']
-        if 'assembias_strength_abcissa' in kwargs:
-            abcissa = kwargs['assembias_strength_abcissa']
-            try:
-                iterator = iter(abcissa)
-                abcissa = list(abcissa)
-            except TypeError:
-                abcissa = [abcissa]
-        else:
-            abcissa = [2]
-
-        if custom_len(abcissa) != custom_len(strength):
-            raise HalotoolsError("``assembias_strength`` and ``assembias_strength_abcissa`` must have the same length")
-        try:
-            iterator = iter(strength)
-            strength = list(strength)
-        except TypeError:
-            strength = [strength]
-
-        self._assembias_strength_abcissa = abcissa
-        for ipar, val in enumerate(strength):
-            self.param_dict[self._get_assembias_param_dict_key(ipar)] = val
 
     def assembias_strength(self, **kwargs):
         """
