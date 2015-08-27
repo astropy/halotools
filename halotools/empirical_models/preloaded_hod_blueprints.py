@@ -194,7 +194,7 @@ def Hearin15_blueprint(central_assembias_strength = 1,
     else:
         cen_ab_component = hoc.AssembiasLeauthaud11Cens(
             assembias_strength = central_assembias_strength, 
-            assembias_abcissa = central_assembias_strength_abcissa, 
+            assembias_strength_abcissa = central_assembias_strength_abcissa, 
             **kwargs)
     cen_model_dict = {}
     cen_model_dict['occupation'] = cen_ab_component
@@ -211,7 +211,7 @@ def Hearin15_blueprint(central_assembias_strength = 1,
     else:
         sat_ab_component = hoc.AssembiasLeauthaud11Sats(
             assembias_strength = satellite_assembias_strength, 
-            assembias_abcissa = satellite_assembias_strength_abcissa, 
+            assembias_strength_abcissa = satellite_assembias_strength_abcissa, 
             **kwargs)
         # There is no need for a redundant new_haloprop_func_dict 
         # if this is already possessed by the central model
