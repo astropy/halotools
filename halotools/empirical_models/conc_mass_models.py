@@ -67,7 +67,7 @@ class ConcMass(object):
 
         bind_kwarg_mixin_safe(['cosmology', 'redshift', 'prim_haloprop_key'])
 
-    def __call__(self, **kwargs):
+    def compute_concentration(self, **kwargs):
         """ Method used to evaluate the mean NFW concentration as a function of 
         halo mass. 
 

@@ -46,6 +46,7 @@ class AnalyticDensityProf(object):
 
         self.prof_param_keys = []
         self.publications = []
+        self.param_dict = {}
 
 
     @abstractmethod
