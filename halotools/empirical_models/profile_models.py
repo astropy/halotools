@@ -14,6 +14,7 @@ from .conc_mass_models import ConcMass
 from profile_helpers import *
 from ..utils.array_utils import convert_to_ndarray
 from ..custom_exceptions import *
+from scipy.integrate import quad as quad_integration
 
 
 __author__ = ['Andrew Hearin']
@@ -42,57 +43,139 @@ class AnalyticDensityProf(object):
         self.publications = []
         self.param_dict = {}
 
-
-    @abstractmethod
-    def mass_density(self, r, *args, **kwargs):
+    def dimensionless_mass_density(self, x, *args):
         """
+        Parameters 
+        -----------
+        x : array_like 
+            Halo-centric distance scaled by the halo boundary, so that 
+            :math:`0 <= x <= 1`. Can be a scalar or numpy array
+
+        args : array_like, optional 
+            Any additional array(s) necessary to specify the shape of the radial profile, 
+            e.g., halo concentration. 
+
+        Returns 
+        -------
+        dimensionless_density: array_like 
+            Density of a dark matter halo of the input ``mass`` 
+            at the input ``radius``, scaled by the density threshold for this 
+            halo mass definition, cosmology, and redshift. 
+            Result is an array of the dimension as the input ``x``, which equals the 
+            physical `mass_density` when multiplied by the appropriate `density_threshold`. 
+
         """
         pass
 
-    def _enclosed_mass_integrand(self, y):
+    def mass_density(self, r, mass, *args):
         """
+        Parameters 
+        -----------
+        r : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
+
+        mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``r``. 
+
+        args : array_like, optional 
+            Any additional array(s) necessary to specify the shape of the radial profile, 
+            e.g., halo concentration. 
+
+        Returns 
+        -------
+        density: array_like 
+            Physical density of a dark matter halo of the input ``mass`` 
+            at the input ``radius``. Result is an array of the 
+            dimension as the input ``r``, reported in units of :math:`h^{3}/Mpc^{3}`. 
+
         """
-        return self.mass_density(z) * 4.0 * np.pi * z**2
+        halo_radius = self.halo_mass_to_halo_radius(mass)
+        x = r/halo_radius
 
-    def enclosed_mass(self, x, rtol = 1E-5):
+        dimensionless_mass = self.dimensionless_mass_density(x, *args)
+
+        density = self.density_threshold*dimensionless_mass
+        return density
+
+    def _enclosed_mass_integrand(self, radius, *args):
         """
-        The mass enclosed within dimensionless radius :math:`x = r / R_{\\rm halo}`.
+        Parameters 
+        -----------
+        radius : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
 
-        Parameters
-        -----------------
-        x: array_like
-            Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
-            Can be a scalar or a numpy array.
+        mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
 
-        rtol: float, optional
-            Relative tolerance of the integration accuracy. Default is 1e-5. 
+        args : array_like, optional 
+            Any additional array(s) necessary to specify the shape of the radial profile, 
+            e.g., halo concentration. 
+
+        Returns 
+        -------
+        integrand: array_like 
+            function to be integrated to yield the amount of enclosed mass.
+        """
+        density = self.mass_density(radius, *args)
+        return density*4*np.pi*radius**2
+
+    # The enclosed_mass routine below is incorrect in some way TBD. 
+    # When evaulating the enclosed_mass at the virial radius, the 
+    # method returns a result that is less than the total mass, 
+    # at least for a 1e12 NFW halo with concentration = 5
+    def enclosed_mass(self, radius, *args):
+        """
+        The mass enclosed within the input radius.
+
+        Parameters 
+        -----------
+        radius : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
+
+        mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        args : array_like, optional 
+            Any additional array(s) necessary to specify the shape of the radial profile, 
+            e.g., halo concentration.         
             
         Returns
         ----------
-        mass: array_like
+        enclosed_mass: array_like
             The mass enclosed within radius r, in :math:`M_{\odot}/h`; 
-            has the same dimensions as the input ``x``.
+            has the same dimensions as the input ``radius``.
         """                
-        x = convert_to_ndarray(x)
-        mass = np.zeros_like(x)
-        for i in range(len(x)):
-            mass[i], _ = quad_integration(self._enclosed_mass_integrand, 0., x[i], epsrel = rtol)
-    
-        return mass
+        radius = convert_to_ndarray(radius)
+        enclosed_mass = np.zeros_like(radius)
 
-    def cumulative_mass_PDF(self, x, rtol = 1E-5):
+        for i in range(len(radius)):
+            enclosed_mass[i], _ = quad_integration(
+                self._enclosed_mass_integrand, 0., radius[i], epsrel = 1e-5, 
+                args = args)
+    
+        return enclosed_mass
+
+    def cumulative_mass_PDF(self, x, *args):
         """
         The fraction of the total mass enclosed within 
         dimensionless radius :math:`x = r / R_{\\rm halo}`.
 
-        Parameters
-        -------------
-        x: array_like
-            Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
-            Can be a scalar or a numpy array.
+        Parameters 
+        -----------
+        x : array_like 
+            Halo-centric distance scaled by the halo boundary, so that 
+            :math:`0 <= x <= 1`. Can be a scalar or numpy array
 
-        rtol: float, optional
-            Relative tolerance of the integration accuracy. Default is 1e-5. 
+        mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        args : array_like, optional 
+            Any additional array(s) necessary to specify the shape of the radial profile, 
+            e.g., halo concentration.         
             
         Returns
         -------------
@@ -100,64 +183,58 @@ class AnalyticDensityProf(object):
             The fraction of the total mass enclosed 
             within radius x, in :math:`M_{\odot}/h`; 
             has the same dimensions as the input ``x``.
-        """     
-        p = self.enclosed_mass(x)/self.enclosed_mass(1.0)
+        """
+        mass = args[0]
+        halo_radius = halo_mass_to_halo_radius(mass, 
+            self.cosmology, self.redshift, self.mdef)
+        radius = x*halo_radius
+        p = self.enclosed_mass(radius, *args)/self.enclosed_mass(halo_radius, *args)
         return p
 
-    def circular_velocity(self, x):
+    def circular_velocity(self, radius, mass, *args):
         """
         The circular velocity, :math:`v_c \\equiv \\sqrt{GM(<r)/r}`.
 
         Parameters
         --------------
-        x: array_like
-            Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
-            Can be a scalar or a numpy array.
-            
+        radius : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
+
+        mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        args : array_like, optional 
+            Any additional array(s) necessary to specify the shape of the radial profile, 
+            e.g., halo concentration.         
+
         Returns
         ----------
-        vc: float
+        vc: array_like
             The circular velocity in km / s; has the same dimensions as r.
 
         See also
         ------------
         Vmax: The maximum circular velocity, and the radius where it occurs.
         """     
-    
-        M = self.enclosed_mass(x)
-        v = numpy.sqrt(newtonG.value * M / x)
+        mass_enclosed = self.enclosed_mass(radius, mass, *args)
+        v = numpy.sqrt(newtonG.value * mass_enclosed / radius)
         
         return v
 
-    def gravitational_potential_radial_gradient(self, x):
+    def gravitational_potential_radial_gradient(self, radius, mass, *args):
         """
         """
-        return newtonG.value * self.enclosed_mass(x) / x**2
+        return newtonG.value * self.enclosed_mass(radius, mass, *args) / radius**2
 
+    def halo_mass_to_halo_radius(self, mass):
+        return halo_mass_to_halo_radius(mass, cosmology = self.cosmology, 
+            redshift = self.redshift, mdef = self.mdef)
 
-    ###############################################################################################
+    def halo_radius_to_halo_mass(self, radius):
+        return halo_radius_to_halo_mass(radius, cosmology = self.cosmology, 
+            redshift = self.redshift, mdef = self.mdef)
 
-    def vmax(self):
-        """
-        The maximum circular velocity, and the radius where it occurs.
-            
-        Returns
-        -----------------
-        vmax: float
-            The maximum circular velocity in km / s.
-        rmax: float
-            The radius where fmax occurs, in physical kpc/h.
-
-        """     
-        def _circular_velocity_negative(x):
-            return -self.circular_velocity(x)
-
-        x_guess = 0.1
-        res = scipy_minimize(_circular_velocity_negative, x_guess)
-        rmax = res.x[0]
-        vmax = self.circular_velocity(rmax)
-        
-        return vmax, rmax
 
 class TrivialProfile(AnalyticDensityProf):
     """ Profile of dark matter halos with all their mass concentrated at exactly the halo center. 
@@ -262,17 +339,6 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         denominator = conc*x*(1 + conc*x)**2
         return numerator/denominator
 
-    def mass_density(self, r, mass, conc):
-        """
-        """
-        halo_radius = halo_mass_to_halo_radius(mass=mass, 
-            cosmology=self.cosmology, redshift=self.redshift, mdef=self.mdef)
-        x = r/halo_radius
-        physical_density = (self.density_threshold*
-            self.dimensionless_mass_density(x, conc)
-            )
-        return physical_density
-
     def g(self, x):
         """ Convenience function used to evaluate the profile. 
 
@@ -329,36 +395,40 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         else:
             return self.g(conc) / self.g(x*conc)
 
-    def enclosed_mass(self, radius, mass, conc):
-        """
-        The mass enclosed within dimensionless radius :math:`x = r / R_{\\rm halo}`.
+    ##### The following override gives the correct behavior for a NFW profile
+    ### Currently it is commented out so that a bug in the superclass is revealed
+    # The enclosed_mass routine in the does not produce the total halo mass 
+    # when given the virial radius as input, a bug. 
+    # The override below does not have this bug. 
+    # def enclosed_mass(self, radius, mass, conc):
+    #     """
+    #     The mass enclosed within dimensionless radius :math:`x = r / R_{\\rm halo}`.
 
-        Parameters
-        -----------------
-        radius: array_like
-            Halo radius in physical Mpc/h; can be a scalar or a numpy array.
+    #     Parameters
+    #     -----------------
+    #     radius: array_like
+    #         Halo radius in physical Mpc/h; can be a scalar or a numpy array.
 
-        mass: array_like
-            Total halo mass. Can either be a scalar, or a numpy array with
-            the same dimensions as the input ``radius``.
+    #     mass: array_like
+    #         Total halo mass. Can either be a scalar, or a numpy array with
+    #         the same dimensions as the input ``radius``.
 
-        conc : array_like 
-            Value of the halo concentration. Can either be a scalar, or a numpy array 
-            of the same dimension as the input ``radius``. 
+    #     conc : array_like 
+    #         Value of the halo concentration. Can either be a scalar, or a numpy array 
+    #         of the same dimension as the input ``radius``. 
             
-        Returns
-        ----------
-        mass_encl: array_like
-            The mass enclosed within the input ``radius``, in :math:`M_{\odot}/h`; 
-            has the same dimensions as the input ``radius``.
-        """   
-        radius = convert_to_ndarray(radius)  
-        mass = convert_to_ndarray(mass)  
-        halo_boundary = halo_mass_to_halo_radius(mass, 
-            self.cosmology, self.redshift, self.mdef)
-        x = radius/halo_boundary
-        conc = convert_to_ndarray(conc)  
-        return mass*self.cumulative_mass_PDF(x, conc)
+    #     Returns
+    #     ----------
+    #     mass_encl: array_like
+    #         The mass enclosed within the input ``radius``, in :math:`M_{\odot}/h`; 
+    #         has the same dimensions as the input ``radius``.
+    #     """   
+    #     radius = convert_to_ndarray(radius)  
+    #     mass = convert_to_ndarray(mass)  
+    #     halo_boundary = self.halo_mass_to_halo_radius(mass)
+    #     x = radius/halo_boundary
+    #     conc = convert_to_ndarray(conc)  
+    #     return mass*self.cumulative_mass_PDF(x, conc)
 
 
 
