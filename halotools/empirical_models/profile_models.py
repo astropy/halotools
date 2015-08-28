@@ -47,6 +47,7 @@ class AnalyticDensityProf(object):
         self.publications = []
         self.param_dict = {}
 
+    @abstractmethod
     def dimensionless_mass_density(self, x, *args):
         """
         Parameters 
@@ -297,22 +298,24 @@ class TrivialProfile(AnalyticDensityProf):
 
         super(TrivialProfile, self).__init__(cosmology, redshift, mdef, **kwargs)
 
-    def mass_density(self, radius, mass):
+
+    def dimensionless_mass_density(self, x, total_mass):
         """
         Parameters 
         -----------
-        radius: array_like
-            Halo radius in physical Mpc/h; can be a scalar or a numpy array.
+        x: array_like
+            Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
+            Can be a scalar or a numpy array.
 
-        mass: array_like
+        total_mass: array_like
             Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
 
         """
-        volume = (4*np.pi/3)*radius**3
-        return mass/volume
+        volume = (4*np.pi/3)*x**3
+        return total_mass/volume
 
-    def enclosed_mass(self, radius, mass):
-        return mass
+    def enclosed_mass(self, radius, total_mass):
+        return total_mass
 
 class NFWProfile(AnalyticDensityProf, ConcMass):
     """ NFW halo profile, based on Navarro, Frenk and White (1999).
@@ -369,6 +372,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
     def dimensionless_mass_density(self, x, conc):
         """
+        x: array_like
+            Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
+            Can be a scalar or a numpy array.
         """
         numerator = conc**3/(3.*self.g(conc))
         denominator = conc*x*(1 + conc*x)**2
