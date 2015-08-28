@@ -152,6 +152,6 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
 	"""
 	
 	rho = density_threshold(cosmology, redshift, mdef)
-	mass = 4.0 / 3.0 * np.pi * rho * R**3
+	mass = 4.0 / 3.0 * np.pi * rho * radius**3
 	return mass
 
