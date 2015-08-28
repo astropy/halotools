@@ -213,10 +213,20 @@ class AnalyticDensityProf(object):
         ------------
         Vmax: The maximum circular velocity, and the radius where it occurs.
         """     
-        mass_enclosed = self.enclosed_mass(radius, total_mass, *args)
-        v = np.sqrt(newtonG.value * mass_enclosed / radius)
+        halo_radius = self.halo_mass_to_halo_radius(total_mass)
+        x = convert_to_ndarray(radius) / halo_radius
+        return self.dimensionless_circular_velocity(x, *args)*self.virial_velocity(total_mass)
         
-        return v
+    def dimensionless_circular_velocity(self, x, *args):
+        """
+        """
+        return np.sqrt(self.cumulative_mass_PDF(x, *args)/x)
+
+    def virial_velocity(self, total_mass):
+        """
+        """
+        halo_radius = self.halo_mass_to_halo_radius(total_mass)
+        return np.sqrt(newtonG.value*total_mass/halo_radius)
 
     def _vmax_helper(self, x, *args):
         """ Helper function used to calculate `vmax` and `rmax`. 
@@ -250,7 +260,7 @@ class AnalyticDensityProf(object):
     def gravitational_potential_radial_gradient(self, radius, total_mass, *args):
         """
         """
-        return self.circular_velocity(radius, total_mass, *args)**2/radius
+        pass
 
     def halo_mass_to_halo_radius(self, mass):
         return halo_mass_to_halo_radius(mass, cosmology = self.cosmology, 
