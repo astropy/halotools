@@ -188,6 +188,18 @@ class AnalyticDensityProf(object):
 
         return mass
 
+    def dimensionless_circular_velocity(self, x, *args):
+        """
+        """
+        return np.sqrt(self.cumulative_mass_PDF(x, *args)/x)
+
+
+    def virial_velocity(self, total_mass):
+        """
+        """
+        halo_radius = self.halo_mass_to_halo_radius(total_mass)
+        return np.sqrt(newtonG.value*total_mass/halo_radius)
+
     def circular_velocity(self, radius, total_mass, *args):
         """
         The circular velocity, :math:`v_c \\equiv \\sqrt{GM(<r)/r}`.
@@ -217,17 +229,6 @@ class AnalyticDensityProf(object):
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
         x = convert_to_ndarray(radius) / halo_radius
         return self.dimensionless_circular_velocity(x, *args)*self.virial_velocity(total_mass)
-        
-    def dimensionless_circular_velocity(self, x, *args):
-        """
-        """
-        return np.sqrt(self.cumulative_mass_PDF(x, *args)/x)
-
-    def virial_velocity(self, total_mass):
-        """
-        """
-        halo_radius = self.halo_mass_to_halo_radius(total_mass)
-        return np.sqrt(newtonG.value*total_mass/halo_radius)
 
     def _vmax_helper(self, x, *args):
         """ Helper function used to calculate `vmax` and `rmax`. 
