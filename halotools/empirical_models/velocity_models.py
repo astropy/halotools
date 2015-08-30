@@ -15,7 +15,7 @@ from ..utils.array_utils import convert_to_ndarray
 
 __author__ = ['Andrew Hearin']
 
-__all__ = ['IsotropicJeansVelocity']
+__all__ = ['IsotropicJeansVelocity', 'NFWJeansVelocity']
 
 
 
@@ -71,8 +71,8 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
 
         lower_limit = conc*x
         upper_limit = float("inf")
-        for i in xrange(len(x)):
-            result[i] = quad_integration(self._jeans_integrand, 
+        for i in range(len(x)):
+            result[i], _ = quad_integration(self._jeans_integrand, 
                 lower_limit[i], upper_limit, epsrel=1e-5)
 
         return result*prefactor
