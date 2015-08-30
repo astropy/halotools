@@ -91,9 +91,9 @@ haloprop_list = ['halo_id', 'halo_x', 'halo_y', 'halo_z', 'halo_vx', 'halo_vy', 
 prim_haloprop_key = 'halo_mvir'
 sec_haloprop_key = 'halo_nfw_conc'
 
-halo_mass_definition = 'rvir'
+halo_mass_definition = 'vir'
 def halo_boundary_key(mdef):
-    return 'halo_'+mdef
+    return 'halo_r'+mdef
 halo_boundary = halo_boundary_key(halo_mass_definition)
 
 # Number of bins to use in the lookup table attached to the NFWProfile. 

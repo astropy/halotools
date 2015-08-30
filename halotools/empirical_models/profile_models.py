@@ -21,17 +21,37 @@ from astropy import units as u
 from astropy.constants import G
 newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
-__author__ = ['Andrew Hearin']
+__author__ = ['Andrew Hearin', 'Benedikt Diemer']
 
-__all__ = ['TrivialProfile', 'NFWProfile', 'BiasedNFWProfile']
+__all__ = ['AnalyticDensityProf', 'TrivialProfile', 'NFWProfile', 'BiasedNFWProfile']
 
 @six.add_metaclass(ABCMeta)
 class AnalyticDensityProf(object):
-    """ Container class for any radial profile model. 
+    """ Container class for any analytical radial profile model. 
+
+    Notes 
+    -----
+    The primary behavior of the `AnalyticDensityProf` class is governed by the 
+    `dimensionless_mass_density`  method. The `AnalyticDensityProf` class has no 
+    implementation of its own of `dimensionless_mass_density`, but does implement 
+    all other behaviors that derive from `dimensionless_mass_density`. Thus for users 
+    who wish to define their own profile class, defining the `dimensionless_mass_density` of 
+    the profile is the necessary and sufficient ingredient. 
     """
 
     def __init__(self, cosmology, redshift, mdef, **kwargs):
         """
+        Parameters 
+        -----------
+        cosmology : object 
+            Instance of an `~astropy.cosmology` object. 
+
+        redshift: array_like
+            Can be a scalar or a numpy array.
+
+        mdef: str
+            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+
         """
         self.cosmology = cosmology
         self.redshift = redshift
@@ -50,6 +70,14 @@ class AnalyticDensityProf(object):
     @abstractmethod
     def dimensionless_mass_density(self, x, *args):
         """
+        Physical density of the halo scaled by the density threshold of the 
+        mass definition:
+
+        `dimensionless_mass_density` :math:`\\equiv \\rho(x) / \\rho_{\\rm thresh}`, 
+        where :math:`x\\equiv r/R_{\\rm vir}`, and :math:`\\rho_{\\rm thresh}` is 
+        a function of the halo mass definition, cosmology and redshift, 
+        and is computed via the `~halotools.empirical_models.profile_helpers.density_threshold` function. 
+
         Parameters 
         -----------
         x : array_like 
@@ -69,11 +97,21 @@ class AnalyticDensityProf(object):
             Result is an array of the dimension as the input ``x``, which equals the 
             physical `mass_density` when multiplied by the appropriate `density_threshold`. 
 
+        Notes 
+        -----
+        All of the behavior of a subclass of `AnalyticDensityProf` is determined by 
+        `dimensionless_mass_density`. This is numerically convenient, because mass densities 
+        in physical units are astronomically large numbers, whereas `dimensionless_mass_density` 
+        is of order :math:`\\mathcal{O}(1-100)`. This also saves users writing their own subclass 
+        from having to worry over factors of little h, how profile normalization scales 
+        with the mass definition, etc. 
+
         """
         pass
 
     def mass_density(self, radius, mass, *args):
         """
+        Physical density of the halo at the input radius, given in units of :math:`h^{3}/{\\rm Mpc}^{3}`. 
         Parameters 
         -----------
         radius : array_like 
@@ -105,6 +143,7 @@ class AnalyticDensityProf(object):
 
     def _enclosed_dimensionless_mass_integrand(self, x, *args):
         """
+        Integrand used when computing `cumulative_mass_PDF`. 
         Parameters 
         -----------
         x : array_like 
@@ -163,6 +202,8 @@ class AnalyticDensityProf(object):
         """
         The mass enclosed within the input radius. 
 
+        :math:`M(<r) = 4\\pi\\int_{0}^{r}dr'r'^{2}\\rho(r)`. 
+
         Parameters 
         -----------
         radius : array_like 
@@ -189,20 +230,51 @@ class AnalyticDensityProf(object):
         return mass
 
     def dimensionless_circular_velocity(self, x, *args):
-        """
+        """ Circular velocity scaled by the virial velocity, 
+        :math:`V_{\\rm cir}(x) / V_{\\rm vir}`, as a function of 
+        dimensionless position :math:`x = r / R_{\\rm vir}`.
+
+        Parameters 
+        -----------
+        x : array_like 
+            Halo-centric distance scaled by the halo boundary, so that 
+            :math:`0 <= x <= 1`. Can be a scalar or numpy array
+
+        args : array_like, optional 
+            Any additional array(s) necessary to specify the shape of the radial profile, 
+            e.g., halo concentration. 
+
+        Returns 
+        -------
+        vcir : array_like 
+            Circular velocity scaled by the virial velocity, :math:`V_{\\rm cir}(x) / V_{\\rm vir}`.         
+
         """
         return np.sqrt(self.cumulative_mass_PDF(x, *args)/x)
 
 
     def virial_velocity(self, total_mass):
-        """
+        """ The circular velocity evaluated at the halo boundary, 
+        :math:`V_{\\rm vir} \\equiv \\sqrt{GM_{\\rm halo}/R_{\\rm halo}}`.
+
+        Parameters
+        --------------
+        total_mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        Returns 
+        --------
+        vvir : array_like 
+            Virial velocity in km/s.
         """
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
         return np.sqrt(newtonG.value*total_mass/halo_radius)
 
     def circular_velocity(self, radius, total_mass, *args):
         """
-        The circular velocity, :math:`v_c \\equiv \\sqrt{GM(<r)/r}`.
+        The circular velocity, :math:`V_{\\rm cir} \\equiv \\sqrt{GM(<r)/r}`, 
+        as a function of halo-centric distance r. 
 
         Parameters
         --------------
@@ -222,9 +294,6 @@ class AnalyticDensityProf(object):
         vc: array_like
             The circular velocity in km / s; has the same dimensions as r.
 
-        See also
-        ------------
-        Vmax: The maximum circular velocity, and the radius where it occurs.
         """     
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
         x = convert_to_ndarray(radius) / halo_radius
@@ -238,6 +307,16 @@ class AnalyticDensityProf(object):
 
     def rmax(self, total_mass, *args):
         """ Radius at which the halo attains its maximum circular velocity.
+
+        Parameters 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+
+        Returns 
+        --------
+        rmax : array_like 
+            :math:`R_{\\rm max}` in Mpc/h.
         """
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
 
@@ -249,26 +328,62 @@ class AnalyticDensityProf(object):
 
     def vmax(self, total_mass, *args):
         """ Maximum circular velocity of the halo profile. 
+
+        Parameters 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+
+        Returns 
+        --------
+        vmax : array_like 
+            :math:`V_{\\rm max}` in km/s.
         """
-        halo_radius = self.halo_mass_to_halo_radius(total_mass)
 
         guess = 0.25
-
         result = scipy_minimize(self._vmax_helper, guess, args=args)
+        halo_radius = self.halo_mass_to_halo_radius(total_mass)
 
         return self.circular_velocity(result.x[0]*halo_radius, total_mass, *args)
 
-
-    def gravitational_potential_radial_gradient(self, radius, total_mass, *args):
+    def halo_mass_to_halo_radius(self, total_mass):
         """
-        """
-        pass
+        Spherical overdensity radius as a function of the input mass. 
 
-    def halo_mass_to_halo_radius(self, mass):
-        return halo_mass_to_halo_radius(mass, cosmology = self.cosmology, 
+        Note that this function is independent of the form of the density profile.
+
+        Parameters 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+
+        Returns 
+        -------
+        radius : array_like 
+            Radius of the halo in Mpc/h units. 
+            Will have the same dimension as the input ``total_mass``.
+        """
+        return halo_mass_to_halo_radius(total_mass, cosmology = self.cosmology, 
             redshift = self.redshift, mdef = self.mdef)
 
     def halo_radius_to_halo_mass(self, radius):
+        """
+        Spherical overdensity mass as a function of the input radius. 
+
+        Note that this function is independent of the form of the density profile.
+
+        Parameters 
+        ------------
+        radius : array_like 
+            Radius of the halo in Mpc/h units; can be a number or a numpy array.
+
+        Returns 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`. 
+            Will have the same dimension as the input ``radius``.
+
+        """
         return halo_radius_to_halo_mass(radius, cosmology = self.cosmology, 
             redshift = self.redshift, mdef = self.mdef)
 
