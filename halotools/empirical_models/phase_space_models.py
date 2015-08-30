@@ -7,9 +7,10 @@ full phase space distribution of galaxies within their halos.
 
 __author__ = ['Andrew Hearin']
 
+from profile_models import *
 from velocity_models import *
 
-class NFWPhaseSpace(NFWProfile, IsotropicJeansVelocity):
+class NFWPhaseSpace(NFWProfile, NFWJeansVelocity):
     """ NFW halo profile, based on Navarro, Frenk and White (1999).
 
     """
@@ -35,3 +36,13 @@ class NFWPhaseSpace(NFWProfile, IsotropicJeansVelocity):
         """
 
         super(NFWPhaseSpace, self).__init__(**kwargs)
+
+
+
+
+
+
+
+
+
+        
