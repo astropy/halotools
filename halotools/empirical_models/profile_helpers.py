@@ -14,20 +14,20 @@ def density_threshold(cosmology, redshift, mdef):
 	
 	Parameters
 	--------------
-	redshift: array_like
-		Can be a scalar or a numpy array.
-
 	cosmology : object 
 		Instance of an `~astropy.cosmology` object. 
 
+	redshift: array_like
+		Can be a scalar or a numpy array.
+
 	mdef: str
-		String specifying the halo mass definition, e.g., 'rvir' or '200m'. 
+		String specifying the halo mass definition, e.g., 'vir' or '200m'. 
 		
 	Returns
 	---------
 	rho: array_like
 		The threshold density in physical :math:`M_{\odot}h^2/Mpc^3`. 
-		Has the same dimensions as the input ``z``. 
+		Has the same dimensions as the input ``redshift``. 
 
 	See also
 	----------
@@ -36,18 +36,18 @@ def density_threshold(cosmology, redshift, mdef):
 	rho_crit = cosmology.critical_density(redshift)
 	rho_crit = rho_crit.to(u.Msun/u.Mpc**3).value/cosmology.h**2
 
-	if mdef[len(mdef) - 1] == 'c':
+	if mdef[-1] == 'c':
 		delta = int(mdef[:-1])
 		rho_treshold = rho_crit * delta
 
-	elif mdef[len(mdef) - 1] == 'm':
+	elif mdef[-1] == 'm':
 		rho_crit0 = cosmology.critical_density0
 		rho_crit0 = rho_crit0.to(u.Msun/u.Mpc**3).value/cosmology.h**2
 		delta = int(mdef[:-1])
 		rho_m = cosmology.Om(redshift)*rho_crit0
 		rho_treshold = delta * rho_m
 
-	elif mdef == 'rvir':
+	elif mdef == 'vir':
 		delta = delta_vir(cosmology, redshift)
 		rho_treshold = rho_crit * delta
 
@@ -59,10 +59,8 @@ def density_threshold(cosmology, redshift, mdef):
 
 def delta_vir(cosmology, redshift):
 	"""
-	The virial overdensity in units of the critical density.
-	
-	This function uses the fitting formula of Bryan & Norman 1998 to determine the virial 
-	overdensity. 
+	The virial overdensity in units of the critical density, 
+	using the fitting formula of Bryan & Norman 1998.
 	
 	Parameters
 	--------------
@@ -89,10 +87,9 @@ def delta_vir(cosmology, redshift):
 
 def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 	"""
-	Spherical overdensity mass from radius.
-	
-	This function returns a spherical overdensity halo radius for a halo mass M. Note that this 
-	function is independent of the form of the density profile.
+	Spherical overdensity radius as a function of the input mass. 
+
+	Note that this function is independent of the form of the density profile.
 
 	Parameters
 	------------
@@ -106,7 +103,7 @@ def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 		Can either be a scalar, or a numpy array of the same dimension as the input ``mass``. 
 
 	mdef: str
-		String specifying the halo mass definition, e.g., 'rvir' or '200m'. 
+		String specifying the halo mass definition, e.g., 'vir' or '200m'. 
 		
 	Returns
 	--------
@@ -125,10 +122,9 @@ def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 
 def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
 	"""
-	Spherical overdensity radius from mass.
-	
-	This function returns a spherical overdensity halo mass for a halo radius R. Note that this 
-	function is independent of the form of the density profile.
+	Spherical overdensity mass as a function of the input radius. 
+
+	Note that this function is independent of the form of the density profile.
 
 	Parameters
 	------------
@@ -142,7 +138,7 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
 		Can either be a scalar, or a numpy array of the same dimension as the input ``radius``. 
 
 	mdef: str
-		String specifying the halo mass definition, e.g., 'rvir' or '200m'. 
+		String specifying the halo mass definition, e.g., 'vir' or '200m'. 
 		
 	Returns
 	---------
