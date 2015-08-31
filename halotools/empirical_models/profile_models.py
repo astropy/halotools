@@ -314,6 +314,10 @@ class AnalyticDensityProf(object):
         total_mass: array_like
             Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
 
+        args : array_like 
+            Any additional array(s) necessary to specify the shape of the radial profile, 
+            e.g., halo concentration.         
+
         Returns 
         --------
         rmax : array_like 
@@ -334,6 +338,10 @@ class AnalyticDensityProf(object):
         ----------
         total_mass: array_like
             Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+
+        args : array_like 
+            Any additional array(s) necessary to specify the shape of the radial profile, 
+            e.g., halo concentration.         
 
         Returns 
         --------
