@@ -7,6 +7,7 @@ relative to their halos.
 
 import numpy as np 
 from scipy.integrate import quad as quad_integration
+from scipy.special import spence 
 
 from astropy.extern import six 
 from abc import ABCMeta, abstractmethod
@@ -42,10 +43,34 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
     for galaxies orbiting in an isotropic NFW profile with no spatial bias. 
     """
 
-    def _jeans_integrand(self, y):
+    def _jeans_integrand_term1(self, y):
         """
         """
-        return self.g(y)/(y**3*(1+y)**2)
+        return np.log(1+y)/(y**3*(1+y)**2)
+
+    def _jeans_integrand_term2(self, y):
+        """
+        """
+        return 1/(y**2*(1+y)**3)
+
+    def _jeans_integral(self, x):
+        """
+        """
+        term1 = 6.*spence(1. + x)
+        term2 = -np.log(1. + x)/x**2
+        term3 = 1./x
+        term4 = 6./(1. + x)
+        term5 = 1./(1. + x)**2
+        term6 = -3.*(np.log(1. + x))**2
+        term7 = 4.*np.log(1. + x)/x
+        term8 = 2.*np.log(1. + x)/(1. + x)
+        term9 = -1*np.log(1. + x)
+        term10 = np.log(x)
+
+        sum_of_terms = (term1 + term2 + term3 + term4 + term5 + 
+            term6 + term7 + term8 + term9 + term10)
+
+        return 0.5*sum_of_terms
 
     def dimensionless_velocity_dispersion(self, x, conc):
         """
@@ -72,10 +97,13 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
         lower_limit = conc*x
         upper_limit = float("inf")
         for i in range(len(x)):
-            result[i], _ = quad_integration(self._jeans_integrand, 
+            term1, _ = quad_integration(self._jeans_integrand_term1, 
                 lower_limit[i], upper_limit, epsrel=1e-5)
+            term2, _ = quad_integration(self._jeans_integrand_term2, 
+                lower_limit[i], upper_limit, epsrel=1e-5)
+            result[i] = term1 - term2 
 
-        return result*prefactor
+        return result, prefactor, result*prefactor
 
 
 
