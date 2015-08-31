@@ -185,6 +185,7 @@ class AnalyticDensityProf(object):
             has the same dimensions as the input ``x``.
         """
         x = convert_to_ndarray(x)
+        x = x.astype(np.float64)
         enclosed_mass = np.zeros_like(x)
 
         for i in range(len(x)):
@@ -515,8 +516,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         >>> Npts = 25 # doctest: +SKIP 
         >>> g = model.g(np.logspace(-1, 1, Npts)) # doctest: +SKIP 
         """
-        denominator = np.log(1.0+x) - (x/(1.0+x))
-        return 1./denominator
+        return np.log(1.0+x) - (x/(1.0+x))
 
     def cumulative_mass_PDF_override(self, x, conc):
         """
@@ -550,7 +550,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
                 "cumulative_mass_PDF, the array must have the same length "
                 "as the input array of radial positions")
         else:
-            return self.g(conc) / self.g(x*conc)
+            return self.g(conc*x) / self.g(conc)
 
     def enclosed_mass_override(self, radius, mass, conc):
         """
