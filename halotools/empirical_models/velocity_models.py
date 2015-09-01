@@ -53,25 +53,6 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
         """
         return 1/(y**2*(1+y)**3)
 
-    def _jeans_integral(self, x):
-        """
-        """
-        term1 = 6.*spence(1. + x)
-        term2 = -np.log(1. + x)/x**2
-        term3 = 1./x
-        term4 = 6./(1. + x)
-        term5 = 1./(1. + x)**2
-        term6 = -3.*(np.log(1. + x))**2
-        term7 = 4.*np.log(1. + x)/x
-        term8 = 2.*np.log(1. + x)/(1. + x)
-        term9 = -1*np.log(1. + x)
-        term10 = np.log(x)
-
-        sum_of_terms = (term1 + term2 + term3 + term4 + term5 + 
-            term6 + term7 + term8 + term9 + term10)
-
-        return 0.5*sum_of_terms
-
     def dimensionless_velocity_dispersion(self, x, conc):
         """
         Parameters 
@@ -103,7 +84,7 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
                 lower_limit[i], upper_limit, epsrel=1e-5)
             result[i] = term1 - term2 
 
-        return result, prefactor, result*prefactor
+        return result*prefactor
 
 
 
