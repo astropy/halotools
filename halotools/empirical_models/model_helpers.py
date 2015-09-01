@@ -8,7 +8,7 @@ used by many of the hod model components.
 
 __all__ = (
     ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
-    'enforce_periodicity_of_box']
+    'enforce_periodicity_of_box', 'custom_spline']
     )
 
 import numpy as np
@@ -212,8 +212,9 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
 
 
 def custom_spline(table_abcissa, table_ordinates, **kwargs):
-    """ Simple workaround to replace scipy's silly convention 
-    for treating the spline_degree=0 edge case. 
+    """ Convenience wrapper around scipy.InterpolatedUnivariateSpline, 
+    written specifically to handle the edge case of a spline table being 
+    built from a single point.  
 
     Parameters 
     ----------
