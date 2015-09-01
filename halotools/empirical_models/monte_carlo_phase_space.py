@@ -44,7 +44,9 @@ class MonteCarloGalProf(object):
             setattr(self, '_' + prof_param_key + '_lookup_table_max', args[ipar][1])
             setattr(self, '_' + prof_param_key + '_lookup_table_spacing', args[ipar][2])
 
-    def build_profile_lookup_tables(self, 
+        self.build_lookup_tables()
+
+    def build_lookup_tables(self, 
         logrmin = model_defaults.default_lograd_min, 
         logrmax = model_defaults.default_lograd_max, 
         Npts_radius_table=model_defaults.Npts_radius_table):
@@ -94,8 +96,9 @@ class MonteCarloGalProf(object):
                 funcobj = custom_spline(log_table_ordinates, self.logradius_array, k=4)
                 func_table.append(funcobj)
 
-                velocity_table_ordinates = self.dimensionless_velocity_dispersion(radius_array,*items)
-                velocity_funcobj = custom_spline(velocity_table_ordinates, self.logradius_array, k=4)
+                velocity_table_ordinates = self.dimensionless_velocity_dispersion(
+                    radius_array, *items)
+                velocity_funcobj = custom_spline(self.logradius_array, velocity_table_ordinates)
                 velocity_func_table.append(velocity_funcobj)
 
             param_array_dimensions = [len(param_array) for param_array in param_array_list]
@@ -412,7 +415,9 @@ class MonteCarloGalProf(object):
             solution to the Jeans equation. 
         """
 
-        dimensionless_radial_dispersions = None 
+        dimensionless_radial_dispersions = (
+            self.dimensionless_radial_velocity_dispersion(x, *args))
+
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
 
         if 'seed' in kwargs.keys():
