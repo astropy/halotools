@@ -10,6 +10,7 @@ __author__ = ['Andrew Hearin']
 from .profile_models import *
 from .velocity_models import *
 from .monte_carlo_phase_space import *
+from . import model_defaults
 
 class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
     """ NFW halo profile, based on Navarro, Frenk and White (1999).
