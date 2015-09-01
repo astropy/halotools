@@ -94,6 +94,8 @@ sec_haloprop_key = 'halo_nfw_conc'
 halo_mass_definition = 'vir'
 def get_halo_boundary_key(mdef):
     return 'halo_r'+mdef
+def get_halo_mass_key(mdef):
+    return 'halo_m'+mdef
 halo_boundary = get_halo_boundary_key(halo_mass_definition)
 
 # Number of bins to use in the lookup table attached to the NFWProfile. 

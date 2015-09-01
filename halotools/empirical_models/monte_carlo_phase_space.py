@@ -15,6 +15,8 @@ from functools import partial
 from itertools import product
 
 from .model_helpers import custom_spline 
+from ..utils.array_utils import custom_len 
+
 from . import model_defaults
 
 class MonteCarloGalProf(object):
@@ -290,7 +292,7 @@ class MonteCarloGalProf(object):
             then both ``profile_params`` and ``halo_radius`` must be provided. 
 
         seed : int, optional  
-            Random number seed used in Monte Carlo realization
+            Random number seed used in Monte Carlo realization. Default is None. 
 
         Returns 
         -------
@@ -325,7 +327,7 @@ class MonteCarloGalProf(object):
             return x, y, z
 
 
-    def mc_dimensionless_radial_velocity_dispersion(self, x, *args, **kwargs):
+    def dimensionless_radial_velocity_dispersion(self, x, *args):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
@@ -334,15 +336,11 @@ class MonteCarloGalProf(object):
             Halo-centric distance scaled by the halo boundary, so that 
             :math:`0 <= x <= 1`. Can be a scalar or length-Ngals numpy array
 
-        param_array : array_like, positional argument(s)
+        param_array : array_like
             Array or arrays of length-Ngals containing the input profile parameters. 
             In the simplest case, this is a single array of, e.g., NFW concentration values. 
             There should be an input ``param_array`` for every parameter in the profile model, 
             all of the same length. 
-
-        seed : int, optional 
-            Random number seed used to generate Monte Carlo realization. 
-            Default is None. 
 
         Returns 
         -------
@@ -382,8 +380,77 @@ class MonteCarloGalProf(object):
         # Now we have an array of indices for our functions, and we need to evaluate 
         # the i^th function on the i^th element of rho. 
         # Call the model_helpers module to access generic code for doing this.
-        return model_helpers.call_func_table(
+        dimensionless_radial_dispersions = model_helpers.call_func_table(
             self.vel_prof_func_table, np.log10(x), vel_prof_func_table_indices)
+
+        return dimensionless_radial_dispersions
+
+    def mc_radial_velocity(self, x, virial_velocities, *args, **kwargs):
+        """
+        Parameters 
+        ----------
+        x : array_like 
+            Halo-centric distance scaled by the halo boundary, so that 
+            :math:`0 <= x <= 1`. Can be a scalar or length-Ngals numpy array
+
+        virial_velocities : array_like 
+            Array storing the virial velocity of the halos hosting the galaxies. 
+
+        param_array : array_like
+            Array or arrays of length-Ngals containing the input profile parameters. 
+            In the simplest case, this is a single array of, e.g., NFW concentration values. 
+            There should be an input ``param_array`` for every parameter in the profile model, 
+            all of the same length. 
+
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization. Default is None. 
+
+        Returns 
+        -------
+        radial_velocities : array_like 
+            Array of radial velocities drawn from Gaussians with a width determined by the 
+            solution to the Jeans equation. 
+        """
+
+        dimensionless_radial_dispersions = None 
+        radial_dispersions = virial_velocities*dimensionless_radial_dispersions
+
+        if 'seed' in kwargs.keys():
+            np.random.seed(kwargs['seed'])
+
+        ngals = custom_len(x)
+        radial_velocities = np.random.normal(scale = radial_dispersions)
+
+        return radial_velocities
+
+    def mc_vel(self, halo_table):
+        """
+        """
+
+        x = halo_table['host_centric_distance'] / halo_table[self.halo_boundary_key]
+        profile_params = [halo_table[key] for key in self.prof_param_keys]
+        try:
+            virial_velocities = halo_table['halo_vvir']
+        except KeyError:
+            virial_velocities = self.virial_velocity(
+                total_mass = halo_table[self.halo_mass_key])
+        vx = self.mc_radial_velocity(
+            x, virial_velocities, *profile_params, **kwargs)
+        vy = self.mc_radial_velocity(
+            x, virial_velocities, *profile_params, **kwargs)
+        vz = self.mc_radial_velocity(
+            x, virial_velocities, *profile_params, **kwargs)
+        halo_table['vx'] = halo_table['halo_vx'] + vx
+        halo_table['vy'] = halo_table['halo_vy'] + vy
+        halo_table['vz'] = halo_table['halo_vz'] + vz
+
+
+
+
+
+
+
+
 
 
 
