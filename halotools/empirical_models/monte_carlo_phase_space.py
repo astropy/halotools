@@ -93,8 +93,7 @@ class MonteCarloGalProf(object):
                 func_table.append(funcobj)
 
                 velocity_table_ordinates = self.dimensionless_velocity_dispersion(radius_array,*items)
-                log_velocity_table_ordinates = np.log10(velocity_table_ordinates)
-                velocity_funcobj = custom_spline(log_velocity_table_ordinates, self.logradius_array, k=4)
+                velocity_funcobj = custom_spline(velocity_table_ordinates, self.logradius_array, k=4)
                 velocity_func_table.append(velocity_funcobj)
 
             param_array_dimensions = [len(param_array) for param_array in param_array_list]
@@ -326,21 +325,65 @@ class MonteCarloGalProf(object):
             return x, y, z
 
 
-    def mc_vel(self, **kwargs):
-        """ Method to generate random, three-dimensional positions of galaxies. 
+    def mc_dimensionless_radial_velocity_dispersion(self, x, *args, **kwargs):
+        """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
         ----------
-        halo_table : data table, optional 
-            Astropy Table storing a length-Ngals galaxy catalog. 
-            If ``halo_table`` is not provided, 
-            then both ``profile_params`` and ``halo_radius`` must be provided. 
+        x : array_like 
+            Halo-centric distance scaled by the halo boundary, so that 
+            :math:`0 <= x <= 1`. Can be a scalar or length-Ngals numpy array
 
-        seed : int, optional  
-            Random number seed used in Monte Carlo realization
+        param_array : array_like, positional argument(s)
+            Array or arrays of length-Ngals containing the input profile parameters. 
+            In the simplest case, this is a single array of, e.g., NFW concentration values. 
+            There should be an input ``param_array`` for every parameter in the profile model, 
+            all of the same length. 
 
+        seed : int, optional 
+            Random number seed used to generate Monte Carlo realization. 
+            Default is None. 
+
+        Returns 
+        -------
+        sigma_vr : array 
+            Length-Ngals array containing the radial velocity dispersion 
+            of galaxies within their halos, 
+            scaled by the size of the halo's virial velocity. 
         """
-        pass
+        # Discretize each profile parameter for every galaxy
+        # Store the collection of arrays in digitized_param_list 
+        # The number of elements of digitized_param_list is the number of profile parameters in the model
+        digitized_param_list = []
+        for param_index, param_key in enumerate(self.prof_param_keys):
+            input_param_array = args[param_index]
+            param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
+            digitized_params = np.digitize(input_param_array, param_bins)
+            digitized_param_list.append(digitized_params)
+        # Each element of digitized_param_list is a length-Ngals array. 
+        # The i^th element of each array contains the bin index of 
+        # the discretized profile parameter of the galaxy. 
+        # So if self.NFWmodel_conc_lookup_table_bins = [4, 5, 6, 7,...], 
+        # and the i^th entry of the first argument in the input param_array is 6.7, 
+        # then the i^th entry of the array stored in the 
+        # first element in digitized_param_list will be 3. 
+
+        # Now we have a collection of arrays storing indices of individual 
+        # profile parameters, [A_0, A_1, A_2, ...], [B_0, B_1, B_2, ...], etc. 
+        # For the combination of profile parameters [A_0, B_0, ...], we need 
+        # the profile function object f_0, which we need to then evaluate 
+        # on the randomly generated rho[0], and likewise for 
+        # [A_i, B_i, ...], f_i, and rho[i], for i = 0, ..., Ngals-1.
+        # To do this, we first determine the index in the profile function table 
+        # where the relevant function object is stored:
+        vel_prof_func_table_indices = (
+            self.vel_prof_func_table_indices[digitized_param_list]
+            )
+        # Now we have an array of indices for our functions, and we need to evaluate 
+        # the i^th function on the i^th element of rho. 
+        # Call the model_helpers module to access generic code for doing this.
+        return model_helpers.call_func_table(
+            self.vel_prof_func_table, np.log10(x), vel_prof_func_table_indices)
 
 
 
