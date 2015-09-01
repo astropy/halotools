@@ -57,7 +57,7 @@ class AnalyticDensityProf(object):
         self.redshift = redshift
         self.mdef = mdef
 
-        self.halo_boundary = model_defaults.halo_boundary_key(self.mdef)
+        self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
 
         self.density_threshold = density_threshold(
             cosmology = self.cosmology, 

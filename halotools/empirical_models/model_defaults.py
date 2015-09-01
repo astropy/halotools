@@ -92,9 +92,9 @@ prim_haloprop_key = 'halo_mvir'
 sec_haloprop_key = 'halo_nfw_conc'
 
 halo_mass_definition = 'vir'
-def halo_boundary_key(mdef):
+def get_halo_boundary_key(mdef):
     return 'halo_r'+mdef
-halo_boundary = halo_boundary_key(halo_mass_definition)
+halo_boundary = get_halo_boundary_key(halo_mass_definition)
 
 # Number of bins to use in the lookup table attached to the NFWProfile. 
 # Used primarily by HODMockFactory.
