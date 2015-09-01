@@ -24,7 +24,7 @@ class MonteCarloGalProf(object):
     of a mock galaxy population. 
     """
 
-    def _setup_radial_profile_lookup_tables(self, *args):
+    def _setup_lookup_tables(self, *args):
         """
         Private method used to set up the lookup table grid 
 
@@ -42,13 +42,12 @@ class MonteCarloGalProf(object):
             setattr(self, '_' + prof_param_key + '_lookup_table_max', args[ipar][1])
             setattr(self, '_' + prof_param_key + '_lookup_table_spacing', args[ipar][2])
 
-
-    def build_radial_profile_lookup_table(self, 
+    def build_profile_lookup_tables(self, 
         logrmin = model_defaults.default_lograd_min, 
         logrmax = model_defaults.default_lograd_max, 
         Npts_radius_table=model_defaults.Npts_radius_table):
-        """ Method used to create a lookup table of inverse cumulative mass 
-        profile functions. 
+        """ Method used to create a lookup table of the radial profile 
+        and velocity profile.  
 
         Parameters 
         ----------
@@ -64,19 +63,10 @@ class MonteCarloGalProf(object):
             Number of control points used in the spline. 
             Default is set in `~halotools.empirical_models.model_defaults`. 
 
-        Notes 
-        ----- 
-
-            * Used by mock factories such as `~halotools.empirical_models.HodMockFactory` to rapidly generate Monte Carlo realizations of intra-halo positions. 
-
-            * As tested in `~halotools.empirical_models.test_empirical_models.test_halo_prof_components`, for the case of a `~halotools.empirical_models.NFWProfile`, errors due to interpolation from the lookup table are below 0.1 percent at all relevant radii and concentration. 
-
-            * The interpolation is done in log-space. Thus each function object stored in ``rad_prof_func_table`` operates on :math:`\\log_{10}\\mathrm{P}`, and returns :math:`\\log_{10}r`, where :math:`\\mathrm{P} = \\mathrm{P}_{\\mathrm{NFW}}( < r | c )`, computed by the `cumulative_mass_PDF` method. 
-
         """
         
         radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
-        logradius_array = np.log10(radius_array)
+        self.logradius_array = np.log10(radius_array)
 
         param_array_list = []
         for prof_param_key in self.prof_param_keys:
@@ -86,7 +76,7 @@ class MonteCarloGalProf(object):
             npts_par = int(np.round((parmax-parmin)/dpar))
             param_array = np.linspace(parmin,parmax,npts_par)
             param_array_list.append(param_array)
-            setattr(self, prof_param_key + '_lookup_table_bins', param_array)
+            setattr(self, '_' + prof_param_key + '_lookup_table_bins', param_array)
         
         # Using the itertools product method requires 
         # special handling of the length-zero edge case
@@ -95,18 +85,25 @@ class MonteCarloGalProf(object):
             self.rad_prof_func_table_indices = np.array([])
         else:
             func_table = []
+            velocity_func_table = []
             for items in product(*param_array_list):
                 table_ordinates = self.cumulative_mass_PDF(radius_array,*items)
                 log_table_ordinates = np.log10(table_ordinates)
-                funcobj = custom_spline(log_table_ordinates, logradius_array, k=4)
+                funcobj = custom_spline(log_table_ordinates, self.logradius_array, k=4)
                 func_table.append(funcobj)
+
+                velocity_table_ordinates = self.dimensionless_velocity_dispersion(radius_array,*items)
+                log_velocity_table_ordinates = np.log10(velocity_table_ordinates)
+                velocity_funcobj = custom_spline(log_velocity_table_ordinates, self.logradius_array, k=4)
+                velocity_func_table.append(velocity_funcobj)
 
             param_array_dimensions = [len(param_array) for param_array in param_array_list]
             self.rad_prof_func_table = np.array(func_table).reshape(param_array_dimensions)
+            self.vel_prof_func_table = np.array(velocity_func_table).reshape(param_array_dimensions)
+
             self.rad_prof_func_table_indices = (
                 np.arange(np.prod(param_array_dimensions)).reshape(param_array_dimensions)
                 )
-
 
     def mc_dimensionless_radial_distance(self, *args, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
@@ -142,7 +139,7 @@ class MonteCarloGalProf(object):
         digitized_param_list = []
         for param_index, param_key in enumerate(self.prof_param_keys):
             input_param_array = args[param_index]
-            param_bins = getattr(self, param_key + '_lookup_table_bins')
+            param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
             digitized_params = np.digitize(input_param_array, param_bins)
             digitized_param_list.append(digitized_params)
         # Each element of digitized_param_list is a length-Ngals array. 
@@ -327,6 +324,24 @@ class MonteCarloGalProf(object):
             x, y, z = self.mc_halo_centric_pos(
                 profile_params, halo_radius, **kwargs)
             return x, y, z
+
+
+    def mc_vel(self, **kwargs):
+        """ Method to generate random, three-dimensional positions of galaxies. 
+
+        Parameters 
+        ----------
+        halo_table : data table, optional 
+            Astropy Table storing a length-Ngals galaxy catalog. 
+            If ``halo_table`` is not provided, 
+            then both ``profile_params`` and ``halo_radius`` must be provided. 
+
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization
+
+        """
+        pass
+
 
 
 

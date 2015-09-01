@@ -103,7 +103,7 @@ max_permitted_conc = 30.0
 default_dconc = 0.025
 
 Npts_radius_table = 101
-default_lograd_min = -4
+default_lograd_min = -3
 default_lograd_max = 0
 conc_mass_model = 'dutton_maccio14'
 

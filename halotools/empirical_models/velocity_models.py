@@ -28,11 +28,28 @@ class IsotropicJeansVelocity(object):
     """
 
     @abstractmethod
-    def dimensionless_velocity_dispersion(self, x):
+    def dimensionless_velocity_dispersion(self, x, *args):
         """
         Method returns the radial velocity dispersion scaled by 
         the virial velocity, as a function of the 
         halo-centric distance scaled by the halo radius.
+
+        Parameters 
+        ----------
+        x : array_like 
+            Halo-centric distance scaled by the halo boundary, so that 
+            :math:`0 <= x <= 1`. Can be a scalar or numpy array
+
+        args : sequence, optional 
+            Any additional parameters necessary to specify the shape of the radial profile, 
+            e.g., halo concentration.         
+
+        Returns 
+        -------
+        result : array_like 
+            Radial velocity dispersion profile scaled by the virial velocity. 
+            The returned result has the same dimension as the input ``x``. 
+
         """
         pass
 
@@ -84,7 +101,7 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
                 lower_limit[i], upper_limit, epsrel=1e-5)
             result[i] = term1 - term2 
 
-        return result*prefactor
+        return np.sqrt(result*prefactor)
 
 
 
