@@ -7,16 +7,106 @@ full phase space distribution of galaxies within their halos.
 
 __author__ = ['Andrew Hearin']
 
+__all__ = ['MonteCarloGalProf']
+
+import numpy as np 
+
+from functools import partial
+from itertools import product
+
+from .model_helpers import custom_spline 
+from . import model_defaults
+
 class MonteCarloGalProf(object):
     """ Orthogonal mix-in class used to turn an analytical 
     phase space model into a class that can be used 
     to generate the phase space distribution 
     of a mock galaxy population. 
     """
-    def __init__(self, **kwargs):
+
+    def _setup_radial_profile_lookup_tables(self, *args):
         """
+        Private method used to set up the lookup table grid 
+
+        Parameters 
+        ----------
+        args : sequence 
+            Length-Nparams list, with one entry per radial profile parameter. 
+            Each entry must be a 3-element tuple. The first entry will be the minimum 
+            value of the profile parameter, the second entry the maxium, the third entry 
+            the linear spacing of the grid. The i^th element of the input ``args`` 
+            is assumed to correspond to the i^th element of ``self.prom_param_keys``. 
         """
-        pass
+        for ipar, prof_param_key in enumerate(self.prof_param_keys):
+            setattr(self, '_' + prof_param_key + '_lookup_table_min', args[ipar][0])
+            setattr(self, '_' + prof_param_key + '_lookup_table_max', args[ipar][1])
+            setattr(self, '_' + prof_param_key + '_lookup_table_spacing', args[ipar][2])
+
+
+    def build_radial_profile_lookup_table(self, 
+        logrmin = model_defaults.default_lograd_min, 
+        logrmax = model_defaults.default_lograd_max, 
+        Npts_radius_table=model_defaults.Npts_radius_table):
+        """ Method used to create a lookup table of inverse cumulative mass 
+        profile functions. 
+
+        Parameters 
+        ----------
+        logrmin : float, optional 
+            Minimum radius used to build the spline table. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        logrmax : float, optional 
+            Maximum radius used to build the spline table
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        Npts_radius_table : int, optional 
+            Number of control points used in the spline. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        Notes 
+        ----- 
+
+            * Used by mock factories such as `~halotools.empirical_models.HodMockFactory` to rapidly generate Monte Carlo realizations of intra-halo positions. 
+
+            * As tested in `~halotools.empirical_models.test_empirical_models.test_halo_prof_components`, for the case of a `~halotools.empirical_models.NFWProfile`, errors due to interpolation from the lookup table are below 0.1 percent at all relevant radii and concentration. 
+
+            * The interpolation is done in log-space. Thus each function object stored in ``rad_prof_func_table`` operates on :math:`\\log_{10}\\mathrm{P}`, and returns :math:`\\log_{10}r`, where :math:`\\mathrm{P} = \\mathrm{P}_{\\mathrm{NFW}}( < r | c )`, computed by the `cumulative_mass_PDF` method. 
+
+        """
+        
+        radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
+        logradius_array = np.log10(radius_array)
+
+        param_array_list = []
+        for prof_param_key in self.prof_param_keys:
+            parmin = getattr(self, '_' + prof_param_key + '_lookup_table_min')
+            parmax = getattr(self, '_' + prof_param_key + '_lookup_table_max')
+            dpar = getattr(self, '_' + prof_param_key + '_lookup_table_spacing')
+            npts_par = int(np.round((parmax-parmin)/dpar))
+            param_array = np.linspace(parmin,parmax,npts_par)
+            param_array_list.append(param_array)
+            setattr(self, prof_param_key + '_lookup_table_bins', param_array)
+        
+        # Using the itertools product method requires 
+        # special handling of the length-zero edge case
+        if len(param_array_list) == 0:
+            self.rad_prof_func_table = np.array([])
+            self.rad_prof_func_table_indices = np.array([])
+        else:
+            func_table = []
+            for items in product(*param_array_list):
+                table_ordinates = self.cumulative_mass_PDF(radius_array,*items)
+                log_table_ordinates = np.log10(table_ordinates)
+                funcobj = custom_spline(log_table_ordinates, logradius_array, k=4)
+                func_table.append(funcobj)
+
+            param_array_dimensions = [len(param_array) for param_array in param_array_list]
+            self.rad_prof_func_table = np.array(func_table).reshape(param_array_dimensions)
+            self.rad_prof_func_table_indices = (
+                np.arange(np.prod(param_array_dimensions)).reshape(param_array_dimensions)
+                )
+
 
     def mc_dimensionless_radial_distance(self, *args, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
@@ -71,15 +161,15 @@ class MonteCarloGalProf(object):
         # [A_i, B_i, ...], f_i, and rho[i], for i = 0, ..., Ngals-1.
         # To do this, we first determine the index in the profile function table 
         # where the relevant function object is stored:
-        func_table_indices = (
-            self.func_table_indices[digitized_param_list]
+        rad_prof_func_table_indices = (
+            self.rad_prof_func_table_indices[digitized_param_list]
             )
         # Now we have an array of indices for our functions, and we need to evaluate 
         # the i^th function on the i^th element of rho. 
         # Call the model_helpers module to access generic code for doing this.
         # (Remember that the interpolation is being done in log-space)
         return 10.**model_helpers.call_func_table(
-            self.cumu_inv_func_table, np.log10(rho), func_table_indices)
+            self.rad_prof_func_table, np.log10(rho), rad_prof_func_table_indices)
 
     def mc_unit_sphere(self, Npts, seed = None):
         """ Returns Npts random points on the unit sphere. 
