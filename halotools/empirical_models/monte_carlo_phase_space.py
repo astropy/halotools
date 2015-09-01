@@ -14,8 +14,8 @@ import numpy as np
 from functools import partial
 from itertools import product
 
-from .model_helpers import custom_spline 
-from ..utils.array_utils import custom_len 
+from .model_helpers import custom_spline, call_func_table
+from ..utils.array_utils import custom_len, convert_to_ndarray
 
 from . import model_defaults
 
@@ -109,7 +109,7 @@ class MonteCarloGalProf(object):
                 np.arange(np.prod(param_array_dimensions)).reshape(param_array_dimensions)
                 )
 
-    def mc_dimensionless_radial_distance(self, *args, **kwargs):
+    def _mc_dimensionless_radial_distance(self, *args, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
@@ -142,7 +142,7 @@ class MonteCarloGalProf(object):
         # The number of elements of digitized_param_list is the number of profile parameters in the model
         digitized_param_list = []
         for param_index, param_key in enumerate(self.prof_param_keys):
-            input_param_array = args[param_index]
+            input_param_array = convert_to_ndarray(args[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
             digitized_params = np.digitize(input_param_array, param_bins)
             digitized_param_list.append(digitized_params)
@@ -169,7 +169,7 @@ class MonteCarloGalProf(object):
         # the i^th function on the i^th element of rho. 
         # Call the model_helpers module to access generic code for doing this.
         # (Remember that the interpolation is being done in log-space)
-        return 10.**model_helpers.call_func_table(
+        return 10.**call_func_table(
             self.rad_prof_func_table, np.log10(rho), rad_prof_func_table_indices)
 
     def mc_unit_sphere(self, Npts, seed = None):
@@ -226,7 +226,7 @@ class MonteCarloGalProf(object):
         x, y, z = self.mc_unit_sphere(Ngals, **kwargs)
 
         # Get the radial positions of the galaxies scaled by the halo radius
-        dimensionless_radial_distance = self.mc_dimensionless_radial_distance(
+        dimensionless_radial_distance = self._mc_dimensionless_radial_distance(
             *profile_params, **kwargs) 
 
         # get random positions within the solid sphere
@@ -330,7 +330,7 @@ class MonteCarloGalProf(object):
             return x, y, z
 
 
-    def dimensionless_radial_velocity_dispersion(self, x, *args):
+    def _vrad_disp_from_lookup(self, x, *args):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
@@ -357,7 +357,7 @@ class MonteCarloGalProf(object):
         # The number of elements of digitized_param_list is the number of profile parameters in the model
         digitized_param_list = []
         for param_index, param_key in enumerate(self.prof_param_keys):
-            input_param_array = args[param_index]
+            input_param_array = convert_to_ndarray(args[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
             digitized_params = np.digitize(input_param_array, param_bins)
             digitized_param_list.append(digitized_params)
@@ -378,12 +378,12 @@ class MonteCarloGalProf(object):
         # To do this, we first determine the index in the profile function table 
         # where the relevant function object is stored:
         vel_prof_func_table_indices = (
-            self.vel_prof_func_table_indices[digitized_param_list]
+            self.rad_prof_func_table_indices[digitized_param_list]
             )
         # Now we have an array of indices for our functions, and we need to evaluate 
         # the i^th function on the i^th element of rho. 
         # Call the model_helpers module to access generic code for doing this.
-        dimensionless_radial_dispersions = model_helpers.call_func_table(
+        dimensionless_radial_dispersions = call_func_table(
             self.vel_prof_func_table, np.log10(x), vel_prof_func_table_indices)
 
         return dimensionless_radial_dispersions
@@ -416,7 +416,7 @@ class MonteCarloGalProf(object):
         """
 
         dimensionless_radial_dispersions = (
-            self.dimensionless_radial_velocity_dispersion(x, *args))
+            self._vrad_disp_from_lookup(x, *args))
 
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
 
