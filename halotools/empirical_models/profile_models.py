@@ -76,7 +76,8 @@ class AnalyticDensityProf(object):
         `dimensionless_mass_density` :math:`\\equiv \\rho(x) / \\rho_{\\rm thresh}`, 
         where :math:`x\\equiv r/R_{\\rm vir}`, and :math:`\\rho_{\\rm thresh}` is 
         a function of the halo mass definition, cosmology and redshift, 
-        and is computed via the `~halotools.empirical_models.profile_helpers.density_threshold` function. 
+        and is computed via the 
+        `~halotools.empirical_models.profile_helpers.density_threshold` function. 
 
         Parameters 
         -----------
@@ -111,7 +112,8 @@ class AnalyticDensityProf(object):
 
     def mass_density(self, radius, mass, *args):
         """
-        Physical density of the halo at the input radius, given in units of :math:`h^{3}/{\\rm Mpc}^{3}`. 
+        Physical density of the halo at the input radius, 
+        given in units of :math:`h^{3}/{\\rm Mpc}^{3}`. 
         Parameters 
         -----------
         radius : array_like 
@@ -248,7 +250,8 @@ class AnalyticDensityProf(object):
         Returns 
         -------
         vcir : array_like 
-            Circular velocity scaled by the virial velocity, :math:`V_{\\rm cir}(x) / V_{\\rm vir}`.         
+            Circular velocity scaled by the virial velocity, 
+            :math:`V_{\\rm cir}(x) / V_{\\rm vir}`.         
 
         """
         return np.sqrt(self.cumulative_mass_PDF(x, *args)/x)
@@ -498,8 +501,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
     def dimensionless_mass_density(self, x, conc):
         """
         x: array_like
-            Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
-            Can be a scalar or a numpy array.
+            Halo-centric distance scaled by the halo boundary, 
+            such that :math:`0 < x < 1`. Can be a scalar or a numpy array.
         """
         numerator = conc**3/(3.*self.g(conc))
         denominator = conc*x*(1 + conc*x)**2
@@ -526,7 +529,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """
         return np.log(1.0+x) - (x/(1.0+x))
 
-    def cumulative_mass_PDF_override(self, x, conc):
+    def cumulative_mass_PDF(self, x, conc):
         """
         The fraction of the total mass enclosed within 
         dimensionless radius :math:`x = r / R_{\\rm halo}`.
@@ -548,48 +551,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             within radius x, in :math:`M_{\odot}/h`; 
             has the same dimensions as the input ``x``.
         """     
-        x = convert_to_ndarray(x)
         x = np.where(x > 1, 1, x)
-
-        conc = convert_to_ndarray(conc)
-
-        if len(x) != len(conc):
-            raise HalotoolsError("If passing an array of concentrations to "
-                "cumulative_mass_PDF, the array must have the same length "
-                "as the input array of radial positions")
-        else:
-            return self.g(conc*x) / self.g(conc)
-
-    def enclosed_mass_override(self, radius, mass, conc):
-        """
-        The mass enclosed within dimensionless radius :math:`x = r / R_{\\rm halo}`.
-
-        Parameters
-        -----------------
-        radius: array_like
-            Halo radius in physical Mpc/h; can be a scalar or a numpy array.
-
-        mass: array_like
-            Total halo mass. Can either be a scalar, or a numpy array with
-            the same dimensions as the input ``radius``.
-
-        conc : array_like 
-            Value of the halo concentration. Can either be a scalar, or a numpy array 
-            of the same dimension as the input ``radius``. 
-            
-        Returns
-        ----------
-        mass_encl: array_like
-            The mass enclosed within the input ``radius``, in :math:`M_{\odot}/h`; 
-            has the same dimensions as the input ``radius``.
-        """   
-        radius = convert_to_ndarray(radius)  
-        mass = convert_to_ndarray(mass)  
-        halo_boundary = self.halo_mass_to_halo_radius(mass)
-        x = radius/halo_boundary
-        conc = convert_to_ndarray(conc)  
-        return mass*self.cumulative_mass_PDF(x, conc)
-
+        return self.g(conc*x) / self.g(conc)
 
 
 class BiasedNFWProfile(NFWProfile):
