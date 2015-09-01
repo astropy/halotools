@@ -39,9 +39,13 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         super(NFWPhaseSpace, self).__init__(**kwargs)
 
-        self._NFWmodel_conc_lookup_table_min = model_defaults.min_permitted_conc
-        self._NFWmodel_conc_lookup_table_max = model_defaults.max_permitted_conc
-        self._NFWmodel_conc_lookup_table_spacing = model_defaults.default_dconc
+        cmin, cmax, dc = (
+            model_defaults.min_permitted_conc, 
+            model_defaults.max_permitted_conc,
+            model_defaults.default_dconc
+            )
+        self._setup_lookup_tables((cmin, cmax, dc))
+
 
 
 
