@@ -585,13 +585,13 @@ class BiasedNFWProfile(NFWProfile):
 
         self.param_dict['conc_NFWmodel_bias'] = 1.
 
-    def conc_NFWmodel(self, **kwargs):
-        """
-        """
-        result = (self.param_dict['conc_NFWmodel_bias']*
-            super(BiasedNFWProfile, self).conc_NFWmodel(**kwargs)
-            )
-        return result
+    # def conc_NFWmodel(self, **kwargs):
+    #     """
+    #     """
+    #     result = (self.param_dict['conc_NFWmodel_bias']*
+    #         super(BiasedNFWProfile, self).conc_NFWmodel(**kwargs)
+    #         )
+    #     return result
 
 
 

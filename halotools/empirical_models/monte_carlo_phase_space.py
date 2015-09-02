@@ -16,6 +16,7 @@ from itertools import product
 
 from .model_helpers import custom_spline, call_func_table
 from ..utils.array_utils import custom_len, convert_to_ndarray
+from ..custom_exceptions import HalotoolsError 
 
 from . import model_defaults
 
@@ -130,6 +131,9 @@ class MonteCarloGalProf(object):
             Length-Ngals array containing the radial position of galaxies within their halos, 
             scaled by the size of the halo's boundary, so that :math:`0 < r < 1`. 
         """
+        if not hasattr(self, 'rad_prof_func_table'):
+            self.build_lookup_tables()
+
         # Draw random values for the cumulative mass PDF         
         # These will be turned into random radial positions 
         # via the method of transformation of random variables
@@ -220,6 +224,7 @@ class MonteCarloGalProf(object):
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
+
         Ngals = len(profile_params[0])
 
         # get angles
@@ -233,6 +238,16 @@ class MonteCarloGalProf(object):
         x *= dimensionless_radial_distance
         y *= dimensionless_radial_distance
         z *= dimensionless_radial_distance
+
+            
+        if 'halo_table' in kwargs:    
+            halo_table = kwargs['halo_table']
+            try:
+                halo_table['host_centric_distance'] = dimensionless_radial_distance
+            except KeyError:
+                msg = ("The mc_solid_sphere method of the MonteCarloGalProf class "
+                    "requires a halo_table key ``host_centric_distance`` to be pre-allocated ")
+                raise HalotoolsError(msg)
            
         return x, y, z
 
@@ -261,10 +276,20 @@ class MonteCarloGalProf(object):
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
+
         x, y, z = self.mc_solid_sphere(profile_params, **kwargs)
         x *= halo_radius 
         y *= halo_radius 
         z *= halo_radius 
+
+        if 'halo_table' in kwargs:    
+            halo_table = kwargs['halo_table']
+            try:
+                halo_table['host_centric_distance'] *= float(halo_radius)
+            except KeyError:
+                msg = ("The mc_solid_sphere method of the MonteCarloGalProf class "
+                    "requires a halo_table key ``host_centric_distance`` to be pre-allocated ")
+                raise HalotoolsError(msg)
 
         return x, y, z
 
@@ -352,6 +377,8 @@ class MonteCarloGalProf(object):
             of galaxies within their halos, 
             scaled by the size of the halo's virial velocity. 
         """
+        if not hasattr(self, 'vel_prof_func_table'):
+            self.build_lookup_tables()
         # Discretize each profile parameter for every galaxy
         # Store the collection of arrays in digitized_param_list 
         # The number of elements of digitized_param_list is the number of profile parameters in the model

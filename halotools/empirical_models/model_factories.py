@@ -806,6 +806,7 @@ class HodModelFactory(ModelFactory):
 
         for gal_type in self.gal_types:
 
+            ###########################
             # Set the method used to return Monte Carlo realizations 
             # of per-halo gal_type abundance
             occupation_model = self.model_blueprint[gal_type]['occupation']
@@ -815,15 +816,20 @@ class HodModelFactory(ModelFactory):
             new_method_behavior = self._update_param_dict_decorator(
                 gal_type, 'occupation', 'mc_occupation')
             setattr(self, new_method_name, new_method_behavior)
-
+            
+            ###########################
+            # Set any additional methods requested by the component models
             if hasattr(occupation_model, '_additional_methods_to_inherit'):
-                additional_methods_to_inherit = list(set(occupation_model._additional_methods_to_inherit))
+                additional_methods_to_inherit = list(
+                    set(occupation_model._additional_methods_to_inherit))
                 for methodname in additional_methods_to_inherit:
                     new_method_name = methodname + '_' + gal_type
                     new_method_behavior = self._update_param_dict_decorator(
                         gal_type, 'occupation', methodname)
                     setattr(self, new_method_name, new_method_behavior)
 
+            ###########################
+            # Set the method used to assign positions and velocities
             gal_prof_model = self.model_blueprint[gal_type]['profile']
             for prof_param_key in gal_prof_model.prof_param_keys:
 
