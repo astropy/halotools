@@ -7,6 +7,7 @@ full phase space distribution of galaxies within their halos.
 
 __author__ = ['Andrew Hearin']
 
+import numpy as np
 from .profile_models import *
 from .velocity_models import *
 from .monte_carlo_phase_space import *
