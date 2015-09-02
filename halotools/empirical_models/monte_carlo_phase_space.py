@@ -13,6 +13,7 @@ import numpy as np
 
 from functools import partial
 from itertools import product
+from time import time
 
 from .model_helpers import custom_spline, call_func_table
 from ..utils.array_utils import custom_len, convert_to_ndarray
@@ -45,8 +46,6 @@ class MonteCarloGalProf(object):
             setattr(self, '_' + prof_param_key + '_lookup_table_max', args[ipar][1])
             setattr(self, '_' + prof_param_key + '_lookup_table_spacing', args[ipar][2])
 
-        self.build_lookup_tables()
-
     def build_lookup_tables(self, 
         logrmin = model_defaults.default_lograd_min, 
         logrmax = model_defaults.default_lograd_max, 
@@ -69,6 +68,9 @@ class MonteCarloGalProf(object):
             Default is set in `~halotools.empirical_models.model_defaults`. 
 
         """
+        print("\n...Building lookup tables for the radial profile.\n"
+            "This can take a minute or two "
+            "depending on how finely you have chosen your grid spacing to be.\n")
         
         radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
         self.logradius_array = np.log10(radius_array)
@@ -377,6 +379,8 @@ class MonteCarloGalProf(object):
             of galaxies within their halos, 
             scaled by the size of the halo's virial velocity. 
         """
+        x = convert_to_ndarray(x)
+
         if not hasattr(self, 'vel_prof_func_table'):
             self.build_lookup_tables()
         # Discretize each profile parameter for every galaxy
