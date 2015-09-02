@@ -8,7 +8,7 @@ used by many of the hod model components.
 
 __all__ = (
     ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
-    'enforce_periodicity_of_box', 'custom_spline']
+    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype']
     )
 
 import numpy as np
@@ -332,6 +332,46 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
                 'to instantiate the '+class_name+' class'
                 )
             raise KeyError(msg)
+
+def create_composite_dtype(dtype_list):
+    """ Find the union of the dtypes in the input list, and return a composite 
+    dtype after verifying consistency of typing of possibly repeated fields. 
+
+    Parameters 
+    ----------
+    dtype_list : list 
+        List of dtypes with possibly repeated field names. 
+
+    Returns 
+    --------
+    composite_dtype : dtype 
+        Numpy dtype object composed of the union of the input dtypes. 
+
+    Notes 
+    -----
+    Basically an awkward workaround to the fact 
+    that numpy dtype objects are not iterable.
+    """
+    name_list = list(set([name for d in dtype_list for name in d.names]))
+
+    composite_list = []
+    for name in name_list:
+        for dt in dtype_list:
+            if name in dt.names:
+                tmp = np.dtype(composite_list)
+                if name in tmp.names:
+                    if tmp[name].type == dt[name].type:
+                        pass
+                    else:
+                        msg = ("Inconsistent dtypes for name = ``%s``.\n" 
+                            "    dtype1 = %s\n    dtype2 = %s\n" % 
+                            (name, tmp[name].type, dt[name].type))
+                        raise HalotoolsError(msg)
+                else:
+                    composite_list.append((name, dt[name].type))
+    composite_dtype = np.dtype(composite_list)
+    return composite_dtype
+
 
 
 
