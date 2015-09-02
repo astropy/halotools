@@ -14,7 +14,6 @@ from scipy.interpolate import UnivariateSpline as spline
 from copy import copy
 
 from . import model_defaults, model_helpers, halo_prof_components
-from . import gal_prof_components as gpc
 from ..utils.array_utils import custom_len
 from ..sim_manager import sim_defaults
 
