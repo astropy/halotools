@@ -17,7 +17,7 @@ from copy import copy
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults
-from ..utils.array_utils import custom_len
+from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
 from astropy.extern import six
@@ -29,13 +29,6 @@ class GalPropModel(object):
     """
     def __init__(self, galprop_key):
         self.galprop_key = galprop_key
-
-        # # Enforce the requirement that sub-classes have been configured properly
-        # required_method_name = 'mc_'+galprop_key
-        # if not hasattr(self, required_method_name):
-        #     raise SyntaxError("Any sub-class of GalPropModel must "
-        #         "implement a method named %s " % required_method_name)
-
 
 def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
@@ -289,6 +282,10 @@ def call_func_table(func_table, abcissa, func_indices):
         abcissa element. 
 
     """
+    func_table = convert_to_ndarray(func_table)
+    abcissa = convert_to_ndarray(abcissa)
+    func_indices = convert_to_ndarray(func_indices)
+    
     func_argsort = func_indices.argsort()
     func_ranges = list(np.searchsorted(func_indices[func_argsort], range(len(func_table))))
     func_ranges.append(None)
