@@ -68,9 +68,7 @@ class MonteCarloGalProf(object):
             Default is set in `~halotools.empirical_models.model_defaults`. 
 
         """
-        print("\n...Building lookup tables for the radial profile.\n"
-            "This can take a minute or two "
-            "depending on how finely you have chosen your grid spacing to be.\n")
+        print("\n...Building lookup tables for the radial profile.")
         
         radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
         self.logradius_array = np.log10(radius_array)
@@ -93,7 +91,8 @@ class MonteCarloGalProf(object):
         else:
             func_table = []
             velocity_func_table = []
-            for items in product(*param_array_list):
+            start = time()
+            for ii, items in enumerate(product(*param_array_list)):
                 table_ordinates = self.cumulative_mass_PDF(radius_array,*items)
                 log_table_ordinates = np.log10(table_ordinates)
                 funcobj = custom_spline(log_table_ordinates, self.logradius_array, k=4)
@@ -103,6 +102,13 @@ class MonteCarloGalProf(object):
                     radius_array, *items)
                 velocity_funcobj = custom_spline(self.logradius_array, velocity_table_ordinates)
                 velocity_func_table.append(velocity_funcobj)
+                if ii == 9:
+                    current_lookup_time = time() - start
+                    runtime = (
+                        current_lookup_time*
+                        len(list(product(*param_array_list)))/(2.*float(ii)+1.)
+                        )
+                    print("    (This will take about %.0f seconds)" % runtime)
 
             param_array_dimensions = [len(param_array) for param_array in param_array_list]
             self.rad_prof_func_table = np.array(func_table).reshape(param_array_dimensions)
