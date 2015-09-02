@@ -2,7 +2,6 @@
 import numpy as np 
 
 from .. import halo_prof_components as hpc
-from .. import gal_prof_components as gpc
 from .. import gal_prof_factory as gpf
 from ..mock_factories import HodMockFactory
 
