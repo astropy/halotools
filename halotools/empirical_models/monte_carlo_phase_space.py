@@ -189,7 +189,7 @@ class MonteCarloGalProf(object):
         return 10.**call_func_table(
             self.rad_prof_func_table, np.log10(rho), rad_prof_func_table_indices)
 
-    def mc_unit_sphere(self, Npts, seed = None):
+    def mc_unit_sphere(self, Npts, **kwargs):
         """ Returns Npts random points on the unit sphere. 
 
         Parameters 
@@ -206,7 +206,8 @@ class MonteCarloGalProf(object):
             Length-Npts arrays of the coordinate positions. 
 
         """
-        np.random.seed(seed)
+        if 'seed' in kwargs:
+            np.random.seed(kwargs['seed'])
 
         cos_t = np.random.uniform(-1.,1.,Npts)
         phi = np.random.uniform(0,2*np.pi,Npts)
@@ -256,7 +257,7 @@ class MonteCarloGalProf(object):
         if 'halo_table' in kwargs:    
             halo_table = kwargs['halo_table']
             try:
-                halo_table['host_centric_distance'] = dimensionless_radial_distance
+                halo_table['host_centric_distance'][:] = dimensionless_radial_distance
             except KeyError:
                 msg = ("The mc_solid_sphere method of the MonteCarloGalProf class "
                     "requires a halo_table key ``host_centric_distance`` to be pre-allocated ")

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
+import pytest
 from unittest import TestCase
 
 import numpy as np 
 from astropy.table import Table 
 from ...sim_manager import HaloCatalog
 from ..phase_space_models import NFWPhaseSpace
+from ...custom_exceptions import HalotoolsError
 
 __all__ = ['TestNFWPhaseSpace']
 
@@ -81,7 +83,7 @@ class TestNFWPhaseSpace(TestCase):
 
     def test_mc_solid_sphere(self):
         """ Method used to test 
-        `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
+        `~halotools.empirical_models.NFWPhaseSpace.mc_solid_sphere`. 
         """
         x, y, z = self.nfw.mc_solid_sphere(self.c15, seed=43)
         pos = np.vstack([x, y, z]).T
@@ -94,6 +96,12 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(y < 1)
         assert np.all(z > -1)
         assert np.all(z < 1)
+
+        t = Table({'c': self.c15})
+        with pytest.raises(HalotoolsError) as exc:
+            x, y, z = self.nfw.mc_solid_sphere(self.c15, seed=43, 
+                halo_table = t)
+
 
 
 
