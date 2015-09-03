@@ -298,7 +298,7 @@ class MonteCarloGalProf(object):
 
         x, y, z = self.mc_solid_sphere(**kwargs)
 
-        halo_radius = kwargs['halo_radius']
+        halo_radius = convert_to_ndarray(kwargs['halo_radius'])
         x *= halo_radius 
         y *= halo_radius 
         z *= halo_radius 
@@ -377,7 +377,7 @@ class MonteCarloGalProf(object):
         else:
             try:
                 profile_params = kwargs['profile_params']
-                halo_radius = kwargs['halo_radius']
+                halo_radius = convert_to_ndarray(kwargs['halo_radius'])
             except KeyError:
                 raise HalotoolsError("\nIf not passing a ``halo_table`` keyword argument "
                     "to mc_pos, must pass the following keyword arguments:\n"
@@ -410,6 +410,7 @@ class MonteCarloGalProf(object):
             scaled by the size of the halo's virial velocity. 
         """
         x = convert_to_ndarray(kwargs['x'])
+        x = x.astype(float)
         profile_params = kwargs['profile_params']
 
         if not hasattr(self, 'vel_prof_func_table'):
@@ -450,7 +451,7 @@ class MonteCarloGalProf(object):
 
         return dimensionless_radial_dispersions
 
-    def mc_radial_velocity(self, x, virial_velocities, *args, **kwargs):
+    def mc_radial_velocity(self, **kwargs):
         """
         Parameters 
         ----------
@@ -479,14 +480,14 @@ class MonteCarloGalProf(object):
         """
 
         dimensionless_radial_dispersions = (
-            self._vrad_disp_from_lookup(x, *args))
+            self._vrad_disp_from_lookup(**kwargs))
 
+        virial_velocities = convert_to_ndarray(kwargs['virial_velocities'])
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
 
         if 'seed' in kwargs.keys():
             np.random.seed(kwargs['seed'])
 
-        ngals = custom_len(x)
         radial_velocities = np.random.normal(scale = radial_dispersions)
 
         return radial_velocities
