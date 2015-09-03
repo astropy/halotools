@@ -67,9 +67,9 @@ class TestNFWPhaseSpace(TestCase):
         """ Method used to test 
         `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
         """
-        r15 = self.nfw._mc_dimensionless_radial_distance(self.c15, seed=43)
-        r10 = self.nfw._mc_dimensionless_radial_distance(self.c10, seed=43)
-        r5 = self.nfw._mc_dimensionless_radial_distance(self.c5, seed=43)
+        r15 = self.nfw._mc_dimensionless_radial_distance(profile_params=[self.c15], seed=43)
+        r10 = self.nfw._mc_dimensionless_radial_distance(profile_params=[self.c10], seed=43)
+        r5 = self.nfw._mc_dimensionless_radial_distance(profile_params=[self.c5], seed=43)
 
         assert np.all(r15 <= 1)
         assert np.all(r15 >= 0)
@@ -85,7 +85,7 @@ class TestNFWPhaseSpace(TestCase):
         """ Method used to test 
         `~halotools.empirical_models.NFWPhaseSpace.mc_solid_sphere`. 
         """
-        x, y, z = self.nfw.mc_solid_sphere(self.c15, seed=43)
+        x, y, z = self.nfw.mc_solid_sphere(profile_params=[self.c15], seed=43)
         pos = np.vstack([x, y, z]).T
         norm = np.linalg.norm(pos, axis=1)
         assert np.all(norm < 1)
@@ -99,7 +99,7 @@ class TestNFWPhaseSpace(TestCase):
 
         t = Table({'c': self.c15})
         with pytest.raises(HalotoolsError) as exc:
-            x, y, z = self.nfw.mc_solid_sphere(self.c15, seed=43, 
+            x, y, z = self.nfw.mc_solid_sphere(profile_params=[self.c15], seed=43, 
                 halo_table = t)
 
     def test_mc_halo_centric_pos(self):
@@ -109,7 +109,7 @@ class TestNFWPhaseSpace(TestCase):
         r = 0.25
         halo_radius = np.zeros(len(self.c15)) + r
         x15, y15, z15 = self.nfw.mc_halo_centric_pos(
-            halo_radius, self.c15, seed=43)
+            halo_radius=halo_radius, profile_params=[self.c15], seed=43)
         assert np.all(x15 > -r)
         assert np.all(x15 < r)
         assert np.all(y15 > -r)
@@ -123,12 +123,12 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(norm15 > 0)
 
         x5, y5, z5 = self.nfw.mc_halo_centric_pos(
-            halo_radius, self.c5, seed=43)
+            halo_radius=halo_radius, profile_params=[self.c5], seed=43)
         pos5 = np.vstack([x5, y5, z5]).T
         norm5 = np.linalg.norm(pos5, axis=1)
 
         x10, y10, z10 = self.nfw.mc_halo_centric_pos(
-            halo_radius, self.c10, seed=43)
+            halo_radius=halo_radius, profile_params=[self.c10], seed=43)
         pos10 = np.vstack([x10, y10, z10]).T
         norm10 = np.linalg.norm(pos10, axis=1)
 
@@ -136,7 +136,7 @@ class TestNFWPhaseSpace(TestCase):
         assert np.median(norm5) > np.median(norm10) > np.median(norm15)
 
         x10a, y10a, z10a = self.nfw.mc_halo_centric_pos(
-            halo_radius*2, self.c10, seed=43)
+            halo_radius=halo_radius*2, profile_params=[self.c10], seed=43)
         pos10a = np.vstack([x10a, y10a, z10a]).T
         norm10a = np.linalg.norm(pos10a, axis=1)
 
@@ -146,13 +146,25 @@ class TestNFWPhaseSpace(TestCase):
         t = Table({'c': self.c15})
         with pytest.raises(HalotoolsError) as exc:
             x, y, z = self.nfw.mc_halo_centric_pos(
-            halo_radius, self.c10, seed=43, halo_table = t)
+            halo_radius=halo_radius, profile_params=[self.c10], seed=43, halo_table = t)
         t['host_centric_distance'] = 0.
         x, y, z = self.nfw.mc_halo_centric_pos(
-            halo_radius, self.c10, seed=43, halo_table = t)
+            halo_radius=halo_radius, profile_params=[self.c10], seed=43, halo_table = t)
         norm = t['host_centric_distance']
         assert np.all(norm > 0)
         assert np.all(norm < halo_radius)
+
+    def test_mc_pos(self):
+        """ Method used to test 
+        `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`. 
+        """
+        pass
+        # r = 0.25
+        # halo_radius = np.zeros(len(self.c15)) + r
+        # x15, y15, z15 = self.nfw.mc_pos(
+        #     halo_radius=halo_radius, profile_params=[self.c15], seed=43)
+    
+
 
 
 

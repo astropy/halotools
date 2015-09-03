@@ -78,26 +78,26 @@ class MonteCarloGalProf(object):
         radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
         self.logradius_array = np.log10(radius_array)
 
-        param_array_list = []
+        profile_params_list = []
         for prof_param_key in self.prof_param_keys:
             parmin = getattr(self, '_' + prof_param_key + '_lookup_table_min')
             parmax = getattr(self, '_' + prof_param_key + '_lookup_table_max')
             dpar = getattr(self, '_' + prof_param_key + '_lookup_table_spacing')
             npts_par = int(np.round((parmax-parmin)/dpar))
-            param_array = np.linspace(parmin,parmax,npts_par)
-            param_array_list.append(param_array)
-            setattr(self, '_' + prof_param_key + '_lookup_table_bins', param_array)
+            profile_params = np.linspace(parmin,parmax,npts_par)
+            profile_params_list.append(profile_params)
+            setattr(self, '_' + prof_param_key + '_lookup_table_bins', profile_params)
         
         # Using the itertools product method requires 
         # special handling of the length-zero edge case
-        if len(param_array_list) == 0:
+        if len(profile_params_list) == 0:
             self.rad_prof_func_table = np.array([])
             self.rad_prof_func_table_indices = np.array([])
         else:
             func_table = []
             velocity_func_table = []
             start = time()
-            for ii, items in enumerate(product(*param_array_list)):
+            for ii, items in enumerate(product(*profile_params_list)):
                 table_ordinates = self.cumulative_mass_PDF(radius_array,*items)
                 log_table_ordinates = np.log10(table_ordinates)
                 funcobj = custom_spline(log_table_ordinates, self.logradius_array, k=4)
@@ -111,28 +111,29 @@ class MonteCarloGalProf(object):
                     current_lookup_time = time() - start
                     runtime = (
                         current_lookup_time*
-                        len(list(product(*param_array_list)))/(2.*float(ii)+1.)
+                        len(list(product(*profile_params_list)))/(2.*float(ii)+1.)
                         )
                     print("    (This will take about %.0f seconds)" % runtime)
 
-            param_array_dimensions = [len(param_array) for param_array in param_array_list]
-            self.rad_prof_func_table = np.array(func_table).reshape(param_array_dimensions)
-            self.vel_prof_func_table = np.array(velocity_func_table).reshape(param_array_dimensions)
+            profile_params_dimensions = [len(profile_params) for profile_params in profile_params_list]
+            self.rad_prof_func_table = np.array(func_table).reshape(profile_params_dimensions)
+            self.vel_prof_func_table = np.array(velocity_func_table).reshape(profile_params_dimensions)
 
             self.rad_prof_func_table_indices = (
-                np.arange(np.prod(param_array_dimensions)).reshape(param_array_dimensions)
+                np.arange(np.prod(profile_params_dimensions)).reshape(profile_params_dimensions)
                 )
 
-    def _mc_dimensionless_radial_distance(self, *args, **kwargs):
+    def _mc_dimensionless_radial_distance(self, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
         ----------
-        param_array : array_like, positional argument(s)
-            Array or arrays of length-Ngals containing the input profile parameters. 
-            In the simplest case, this is a single array of, e.g., NFW concentration values. 
-            There should be an input ``param_array`` for every parameter in the profile model, 
-            all of the same length. 
+        profile_params : list
+            List of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this list has a single element, 
+            e.g. a single array of the NFW concentration values. 
+            There should be a ``profile_params`` list item for 
+            every parameter in the profile model, each item a length-Ngals array.
 
         seed : int, optional 
             Random number seed used to generate Monte Carlo realization. 
@@ -144,6 +145,8 @@ class MonteCarloGalProf(object):
             Length-Ngals array containing the radial position of galaxies within their halos, 
             scaled by the size of the halo's boundary, so that :math:`0 < r < 1`. 
         """
+        profile_params = kwargs['profile_params']
+
         if not hasattr(self, 'rad_prof_func_table'):
             self.build_lookup_tables()
 
@@ -152,22 +155,22 @@ class MonteCarloGalProf(object):
         # via the method of transformation of random variables
         if 'seed' in kwargs.keys():
             np.random.seed(kwargs['seed'])
-        rho = np.random.random(len(args[0]))
+        rho = np.random.random(len(profile_params[0]))
 
         # Discretize each profile parameter for every galaxy
         # Store the collection of arrays in digitized_param_list 
         # The number of elements of digitized_param_list is the number of profile parameters in the model
         digitized_param_list = []
         for param_index, param_key in enumerate(self.prof_param_keys):
-            input_param_array = convert_to_ndarray(args[param_index])
+            input_profile_params = convert_to_ndarray(profile_params[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
-            digitized_params = np.digitize(input_param_array, param_bins)
+            digitized_params = np.digitize(input_profile_params, param_bins)
             digitized_param_list.append(digitized_params)
         # Each element of digitized_param_list is a length-Ngals array. 
         # The i^th element of each array contains the bin index of 
         # the discretized profile parameter of the galaxy. 
         # So if self.NFWmodel_conc_lookup_table_bins = [4, 5, 6, 7,...], 
-        # and the i^th entry of the first argument in the input param_array is 6.7, 
+        # and the i^th entry of the first argument in the input profile_params is 6.7, 
         # then the i^th entry of the array stored in the 
         # first element in digitized_param_list will be 3. 
 
@@ -219,16 +222,20 @@ class MonteCarloGalProf(object):
 
         return x, y, z
 
-    def mc_solid_sphere(self, *profile_params, **kwargs):
+    def mc_solid_sphere(self, **kwargs):
         """ Method to generate random, three-dimensional, halo-centric positions of galaxies. 
 
         Parameters 
         ----------
-        profile_params : list 
-            Length-Nparams list, where Nparams is the number of 
-            parameters specifying the profile model. Each list 
-            entry must be a length-Ngals array storing the values of 
-            the profile parameter for each galaxy. 
+        profile_params : list
+            List of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this list has a single element, 
+            e.g. a single array of the NFW concentration values. 
+            There should be a ``profile_params`` list item for 
+            every parameter in the profile model, each item a length-Ngals array.
+
+        halo_table : data table, optional 
+            Astropy Table storing a length-Ngals galaxy catalog. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization
@@ -238,21 +245,19 @@ class MonteCarloGalProf(object):
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
-
+        profile_params = kwargs['profile_params']
+        # get random angles
         Ngals = len(profile_params[0])
-
-        # get angles
         x, y, z = self.mc_unit_sphere(Ngals, **kwargs)
 
         # Get the radial positions of the galaxies scaled by the halo radius
         dimensionless_radial_distance = self._mc_dimensionless_radial_distance(
-            *profile_params, **kwargs) 
+            **kwargs) 
 
         # get random positions within the solid sphere
         x *= dimensionless_radial_distance
         y *= dimensionless_radial_distance
         z *= dimensionless_radial_distance
-
             
         if 'halo_table' in kwargs:    
             halo_table = kwargs['halo_table']
@@ -265,7 +270,7 @@ class MonteCarloGalProf(object):
            
         return x, y, z
 
-    def mc_halo_centric_pos(self, halo_radius, *profile_params, **kwargs):
+    def mc_halo_centric_pos(self, **kwargs):
         """ Method to generate random, three-dimensional 
         halo-centric positions of galaxies. 
 
@@ -275,9 +280,12 @@ class MonteCarloGalProf(object):
             Length-Ngals array storing the radial boundary of the halo 
             hosting each galaxy. Units assumed to be in Mpc/h. 
 
-        profile_params : array or sequence of arrays 
-            Array(s) storing the values of 
-            the profile parameter for each galaxy. 
+        profile_params : list 
+            List of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this list has a single element, 
+            e.g. a single array of the NFW concentration values. 
+            There should be a ``profile_params`` list item for 
+            every parameter in the profile model, each item a length-Ngals array.
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization
@@ -288,7 +296,9 @@ class MonteCarloGalProf(object):
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
 
-        x, y, z = self.mc_solid_sphere(*profile_params, **kwargs)
+        x, y, z = self.mc_solid_sphere(**kwargs)
+
+        halo_radius = kwargs['halo_radius']
         x *= halo_radius 
         y *= halo_radius 
         z *= halo_radius 
@@ -318,13 +328,12 @@ class MonteCarloGalProf(object):
             If ``halo_table`` is not provided, 
             then both ``profile_params`` and ``halo_radius`` must be provided. 
 
-        profile_params : list, optional 
-            Length-Nparams list, where Nparams is the number of 
-            parameters specifying the profile model. Each list 
-            entry must be a length-Ngals array storing the values of 
-            the profile parameter for each galaxy. 
-            If ``halo_table`` is not provided, 
-            then both ``profile_params`` and ``halo_radius`` must be provided. 
+        profile_params : list
+            List of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this list has a single element, 
+            e.g. a single array of the NFW concentration values. 
+            There should be a ``profile_params`` list item for 
+            every parameter in the profile model, each item a length-Ngals array.
 
         halo_radius : array_like, optional 
             Length-Ngals array storing the radial boundary of the halo 
@@ -356,16 +365,20 @@ class MonteCarloGalProf(object):
             profile_params = ([halo_table[profile_param_key] 
                 for profile_param_key in self.prof_param_keys])
             halo_radius = halo_table[self.halo_boundary_key]
-            x, y, z = self.mc_halo_centric_pos(
-                profile_params, halo_radius, **kwargs)
+            x, y, z = self.mc_halo_centric_pos(halo_radius, 
+                *profile_params, **kwargs)
             halo_table['x'][:] += x
             halo_table['y'][:] += y
             halo_table['z'][:] += z
         else:
-            profile_params = kwargs['profile_params']
-            halo_radius = kwargs['halo_radius']
-            x, y, z = self.mc_halo_centric_pos(
-                profile_params, halo_radius, **kwargs)
+            try:
+                profile_params = kwargs['profile_params']
+                halo_radius = kwargs['halo_radius']
+            except KeyError:
+                raise HalotoolsError("\nIf not passing a ``halo_table`` keyword argument "
+                    "to mc_pos, must pass the following keyword arguments:\n"
+                    "``profile_params``, ``halo_radius``.")
+            x, y, z = self.mc_halo_centric_pos(**kwargs)
             return x, y, z
 
 
@@ -378,11 +391,12 @@ class MonteCarloGalProf(object):
             Halo-centric distance scaled by the halo boundary, so that 
             :math:`0 <= x <= 1`. Can be a scalar or length-Ngals numpy array
 
-        param_array : array_like
-            Array or arrays of length-Ngals containing the input profile parameters. 
-            In the simplest case, this is a single array of, e.g., NFW concentration values. 
-            There should be an input ``param_array`` for every parameter in the profile model, 
-            all of the same length. 
+        profile_params : list
+            List of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this list has a single element, 
+            e.g. a single array of the NFW concentration values. 
+            There should be a ``profile_params`` list item for 
+            every parameter in the profile model, each item a length-Ngals array.
 
         Returns 
         -------
@@ -400,15 +414,15 @@ class MonteCarloGalProf(object):
         # The number of elements of digitized_param_list is the number of profile parameters in the model
         digitized_param_list = []
         for param_index, param_key in enumerate(self.prof_param_keys):
-            input_param_array = convert_to_ndarray(args[param_index])
+            input_profile_params = convert_to_ndarray(profile_params[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
-            digitized_params = np.digitize(input_param_array, param_bins)
+            digitized_params = np.digitize(input_profile_params, param_bins)
             digitized_param_list.append(digitized_params)
         # Each element of digitized_param_list is a length-Ngals array. 
         # The i^th element of each array contains the bin index of 
         # the discretized profile parameter of the galaxy. 
         # So if self.NFWmodel_conc_lookup_table_bins = [4, 5, 6, 7,...], 
-        # and the i^th entry of the first argument in the input param_array is 6.7, 
+        # and the i^th entry of the first argument in the input profile_params is 6.7, 
         # then the i^th entry of the array stored in the 
         # first element in digitized_param_list will be 3. 
 
@@ -442,11 +456,12 @@ class MonteCarloGalProf(object):
         virial_velocities : array_like 
             Array storing the virial velocity of the halos hosting the galaxies. 
 
-        param_array : array_like
-            Array or arrays of length-Ngals containing the input profile parameters. 
-            In the simplest case, this is a single array of, e.g., NFW concentration values. 
-            There should be an input ``param_array`` for every parameter in the profile model, 
-            all of the same length. 
+        profile_params : list
+            List of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this list has a single element, 
+            e.g. a single array of the NFW concentration values. 
+            There should be a ``profile_params`` list item for 
+            every parameter in the profile model, each item a length-Ngals array.
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
