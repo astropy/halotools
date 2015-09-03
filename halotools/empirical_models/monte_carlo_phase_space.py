@@ -299,7 +299,7 @@ class MonteCarloGalProf(object):
                 # halo_table['host_centric_distance'] has already been assigned 
                 # a dimensionless_radial_distance by mc_solid_sphere
                 # Here we just scale this by the halo boundary
-                halo_table['host_centric_distance'][:] *= float(halo_radius)
+                halo_table['host_centric_distance'][:] *= halo_radius
             except KeyError:
                 msg = ("The mc_solid_sphere method of the MonteCarloGalProf class "
                     "requires a halo_table key ``host_centric_distance`` to be pre-allocated ")
