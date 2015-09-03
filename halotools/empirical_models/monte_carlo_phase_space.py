@@ -68,6 +68,11 @@ class MonteCarloGalProf(object):
             Default is set in `~halotools.empirical_models.model_defaults`. 
 
         """
+        key = self.prof_param_keys[0]
+        if not hasattr(self, '_' + key + '_lookup_table_min'):
+            raise HalotoolsError("You must first call _setup_lookup_tables"
+                "to determine the grids before building the lookup tables")
+        
         print("\n...Building lookup tables for the radial profile.")
         
         radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)

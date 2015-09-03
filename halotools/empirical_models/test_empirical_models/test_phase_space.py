@@ -19,7 +19,7 @@ class TestNFWPhaseSpace(TestCase):
         # self.halocat = HaloCatalog()
 
         self.nfw = NFWPhaseSpace()
-        cmin, cmax, dc = 1, 15, 25
+        cmin, cmax, dc = 1, 25, 0.5
         self.nfw._setup_lookup_tables((cmin, cmax, dc))
         self.nfw.build_lookup_tables()
 
@@ -47,16 +47,37 @@ class TestNFWPhaseSpace(TestCase):
         assert hasattr(self.nfw, 'conc_NFWmodel')
         assert hasattr(self.nfw, 'conc_mass_model')
 
-
-
-
     def test_mc_unit_sphere(self):
-        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_unit_sphere`. 
+        """ Method used to test 
+        `~halotools.empirical_models.NFWPhaseSpace.mc_unit_sphere`. 
         """
-        x, y, z = self.nfw.mc_unit_sphere(100)
+        x, y, z = self.nfw.mc_unit_sphere(100, seed=43)
         pos = np.vstack([x, y, z]).T 
         norm = np.linalg.norm(pos, axis=1)
         assert np.allclose(norm, 1, rtol=1e-4)
+
+    def test_mc_dimensionless_radial_distance(self):
+        """ Method used to test 
+        `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
+        """
+        Npts = 1e3
+        c15 = np.ones(Npts) + 15
+        r15 = self.nfw._mc_dimensionless_radial_distance(c15, seed=43)
+        assert np.all(r15 <= 1)
+        assert np.all(r15 >= 0)
+
+        c10 = np.ones(Npts) + 10
+        r10 = self.nfw._mc_dimensionless_radial_distance(c10, seed=43)
+        assert np.all(r10 <= 1)
+        assert np.all(r10 >= 0)
+
+        c5 = np.ones(Npts) + 5
+        r5 = self.nfw._mc_dimensionless_radial_distance(c5, seed=43)
+        assert np.all(r5 <= 1)
+        assert np.all(r5 >= 0)
+
+        assert np.mean(r15) < np.mean(r10) < np.mean(r5)
+        assert np.median(r15) < np.median(r10) < np.median(r5)
 
 
 
