@@ -169,7 +169,8 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(z1 == z2)
 
     def test_vrad_disp_from_lookup(self):
-        """
+        """ Method used to test 
+        `~halotools.empirical_models.NFWPhaseSpace._vrad_disp_from_lookup`. 
         """
         x = np.random.uniform(0, 1, len(self.c15))
         vr_disp = self.nfw._vrad_disp_from_lookup(
@@ -178,8 +179,28 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(vr_disp < 1)
         assert np.all(vr_disp > 0)
 
+    def test_mc_radial_velocity(self):
+        """
+        """
+        npts = 1e2
+        conc = 10
+        carr = np.ones(npts) + conc
 
+        mass = 1e12
+        v = self.nfw.virial_velocity(mass)
+        rmax = self.nfw.rmax(mass, conc)
+        vmax = self.nfw.vmax(mass, conc)
+        r = np.zeros(npts) + rmax
+        rvir = self.nfw.halo_mass_to_halo_radius(mass)
+        x = r/rvir
 
+        v = 250.
+        vvir = np.zeros_like(x) + v
+        mc_vr = self.nfw.mc_radial_velocity(
+            x = x, virial_velocities = vvir, profile_params = [carr])
+
+        vr_dispersion_from_monte_carlo = np.std(mc_vr)
+        assert np.allclose(vr_dispersion_from_monte_carlo, vmax, rtol=0.05)
 
 
 

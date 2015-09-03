@@ -88,9 +88,10 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
             The returned result has the same dimension as the input ``x``. 
         """
         x = convert_to_ndarray(x)
+        x = x.astype(float)
         result = np.zeros_like(x)
 
-        prefactor = conc*(conc*x)*(1 + conc*x)**2/self.g(conc)
+        prefactor = conc*(conc*x)*(1. + conc*x)**2/self.g(conc)
 
         lower_limit = conc*x
         upper_limit = float("inf")
