@@ -158,13 +158,25 @@ class TestNFWPhaseSpace(TestCase):
         """ Method used to test 
         `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`. 
         """
-        pass
-        # r = 0.25
-        # halo_radius = np.zeros(len(self.c15)) + r
-        # x15, y15, z15 = self.nfw.mc_pos(
-        #     halo_radius=halo_radius, profile_params=[self.c15], seed=43)
-    
+        r = 0.25
+        halo_radius = np.zeros(len(self.c15)) + r
+        x1, y1, z1 = self.nfw.mc_pos(
+            halo_radius=halo_radius, profile_params=[self.c15], seed=43)
+        x2, y2, z2 = self.nfw.mc_halo_centric_pos(
+            halo_radius=halo_radius, profile_params=[self.c15], seed=43)
+        assert np.all(x1 == x2)
+        assert np.all(y1 == y2)
+        assert np.all(z1 == z2)
 
+    def test_vrad_disp_from_lookup(self):
+        """
+        """
+        x = np.random.uniform(0, 1, len(self.c15))
+        vr_disp = self.nfw._vrad_disp_from_lookup(
+            x = x, profile_params=[self.c15], seed=43)
+    
+        assert np.all(vr_disp < 1)
+        assert np.all(vr_disp > 0)
 
 
 

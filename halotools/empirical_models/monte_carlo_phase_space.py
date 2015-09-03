@@ -328,17 +328,21 @@ class MonteCarloGalProf(object):
             If ``halo_table`` is not provided, 
             then both ``profile_params`` and ``halo_radius`` must be provided. 
 
-        profile_params : list
+        profile_params : list, optional 
             List of length-Ngals array(s) containing the input profile parameter(s). 
             In the simplest case, this list has a single element, 
             e.g. a single array of the NFW concentration values. 
             There should be a ``profile_params`` list item for 
             every parameter in the profile model, each item a length-Ngals array.
+            If ``halo_table`` is not provided, 
+            then both ``profile_params`` and ``halo_radius`` must be provided. 
 
         halo_radius : array_like, optional 
             Length-Ngals array storing the radial boundary of the halo 
             hosting each galaxy. 
             Units assumed to be in Mpc/h. 
+            If ``halo_table`` is not provided, 
+            then both ``profile_params`` and ``halo_radius`` must be provided. 
             If ``halo_table`` is not provided, 
             then both ``profile_params`` and ``halo_radius`` must be provided. 
 
@@ -382,7 +386,7 @@ class MonteCarloGalProf(object):
             return x, y, z
 
 
-    def _vrad_disp_from_lookup(self, x, *args):
+    def _vrad_disp_from_lookup(self, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
@@ -405,7 +409,8 @@ class MonteCarloGalProf(object):
             of galaxies within their halos, 
             scaled by the size of the halo's virial velocity. 
         """
-        x = convert_to_ndarray(x)
+        x = convert_to_ndarray(kwargs['x'])
+        profile_params = kwargs['profile_params']
 
         if not hasattr(self, 'vel_prof_func_table'):
             self.build_lookup_tables()
