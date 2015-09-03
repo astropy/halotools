@@ -495,8 +495,11 @@ class MonteCarloGalProf(object):
     def mc_vel(self, halo_table):
         """
         """
-
-        x = halo_table['host_centric_distance'] / halo_table[self.halo_boundary_key]
+        try:
+            x = halo_table['host_centric_distance'] / halo_table[self.halo_boundary_key]
+        except KeyError:
+            raise HalotoolsError("The mc_vel method requires ``host_centric_distance`` "
+                "to be an existing column of the input halo_table")
         profile_params = [halo_table[key] for key in self.prof_param_keys]
         try:
             virial_velocities = halo_table['halo_vvir']
