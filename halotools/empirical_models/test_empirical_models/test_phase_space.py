@@ -23,6 +23,11 @@ class TestNFWPhaseSpace(TestCase):
         self.nfw._setup_lookup_tables((cmin, cmax, dc))
         self.nfw.build_lookup_tables()
 
+        Npts = 1e3
+        self.c15 = np.ones(Npts) + 15
+        self.c10 = np.ones(Npts) + 10
+        self.c5 = np.ones(Npts) + 5
+
     def test_constructor(self):
         """
         """
@@ -60,25 +65,35 @@ class TestNFWPhaseSpace(TestCase):
         """ Method used to test 
         `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
         """
-        Npts = 1e3
-        c15 = np.ones(Npts) + 15
-        r15 = self.nfw._mc_dimensionless_radial_distance(c15, seed=43)
+        r15 = self.nfw._mc_dimensionless_radial_distance(self.c15, seed=43)
+        r10 = self.nfw._mc_dimensionless_radial_distance(self.c10, seed=43)
+        r5 = self.nfw._mc_dimensionless_radial_distance(self.c5, seed=43)
+
         assert np.all(r15 <= 1)
         assert np.all(r15 >= 0)
-
-        c10 = np.ones(Npts) + 10
-        r10 = self.nfw._mc_dimensionless_radial_distance(c10, seed=43)
         assert np.all(r10 <= 1)
         assert np.all(r10 >= 0)
-
-        c5 = np.ones(Npts) + 5
-        r5 = self.nfw._mc_dimensionless_radial_distance(c5, seed=43)
         assert np.all(r5 <= 1)
         assert np.all(r5 >= 0)
 
         assert np.mean(r15) < np.mean(r10) < np.mean(r5)
         assert np.median(r15) < np.median(r10) < np.median(r5)
 
+    def test_mc_solid_sphere(self):
+        """ Method used to test 
+        `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
+        """
+        x, y, z = self.nfw.mc_solid_sphere(self.c15, seed=43)
+        pos = np.vstack([x, y, z]).T
+        norm = np.linalg.norm(pos, axis=1)
+        assert np.all(norm < 1)
+        assert np.all(norm > 0)
+        assert np.all(x > -1)
+        assert np.all(x < 1)
+        assert np.all(y > -1)
+        assert np.all(y < 1)
+        assert np.all(z > -1)
+        assert np.all(z < 1)
 
 
 
