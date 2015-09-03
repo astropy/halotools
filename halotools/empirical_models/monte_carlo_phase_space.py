@@ -265,22 +265,19 @@ class MonteCarloGalProf(object):
            
         return x, y, z
 
-    def mc_halo_centric_pos(self, profile_params, halo_radius, **kwargs):
+    def mc_halo_centric_pos(self, halo_radius, *profile_params, **kwargs):
         """ Method to generate random, three-dimensional 
         halo-centric positions of galaxies. 
 
         Parameters 
         ----------
-        profile_params : list 
-            Length-Nparams list, where Nparams is the number of 
-            parameters specifying the profile model. Each list 
-            entry must be a length-Ngals array storing the values of 
-            the profile parameter for each galaxy. 
-
         halo_radius : array_like 
             Length-Ngals array storing the radial boundary of the halo 
-            hosting each galaxy. 
-            Units assumed to be in Mpc/h. 
+            hosting each galaxy. Units assumed to be in Mpc/h. 
+
+        profile_params : array or sequence of arrays 
+            Array(s) storing the values of 
+            the profile parameter for each galaxy. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization
@@ -291,7 +288,7 @@ class MonteCarloGalProf(object):
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
 
-        x, y, z = self.mc_solid_sphere(profile_params, **kwargs)
+        x, y, z = self.mc_solid_sphere(*profile_params, **kwargs)
         x *= halo_radius 
         y *= halo_radius 
         z *= halo_radius 
@@ -299,7 +296,10 @@ class MonteCarloGalProf(object):
         if 'halo_table' in kwargs:    
             halo_table = kwargs['halo_table']
             try:
-                halo_table['host_centric_distance'] *= float(halo_radius)
+                # halo_table['host_centric_distance'] has already been assigned 
+                # a dimensionless_radial_distance by mc_solid_sphere
+                # Here we just scale this by the halo boundary
+                halo_table['host_centric_distance'][:] *= float(halo_radius)
             except KeyError:
                 msg = ("The mc_solid_sphere method of the MonteCarloGalProf class "
                     "requires a halo_table key ``host_centric_distance`` to be pre-allocated ")
@@ -358,9 +358,9 @@ class MonteCarloGalProf(object):
             halo_radius = halo_table[self.halo_boundary_key]
             x, y, z = self.mc_halo_centric_pos(
                 profile_params, halo_radius, **kwargs)
-            halo_table['x'] += x
-            halo_table['y'] += y
-            halo_table['z'] += z
+            halo_table['x'][:] += x
+            halo_table['y'][:] += y
+            halo_table['z'][:] += z
         else:
             profile_params = kwargs['profile_params']
             halo_radius = kwargs['halo_radius']
@@ -488,9 +488,9 @@ class MonteCarloGalProf(object):
             x, virial_velocities, *profile_params, **kwargs)
         vz = self.mc_radial_velocity(
             x, virial_velocities, *profile_params, **kwargs)
-        halo_table['vx'] = halo_table['halo_vx'] + vx
-        halo_table['vy'] = halo_table['halo_vy'] + vy
-        halo_table['vz'] = halo_table['halo_vz'] + vz
+        halo_table['vx'][:] = halo_table['halo_vx'] + vx
+        halo_table['vy'][:] = halo_table['halo_vy'] + vy
+        halo_table['vz'][:] = halo_table['halo_vz'] + vz
 
 
 

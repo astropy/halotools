@@ -102,6 +102,51 @@ class TestNFWPhaseSpace(TestCase):
             x, y, z = self.nfw.mc_solid_sphere(self.c15, seed=43, 
                 halo_table = t)
 
+    def test_mc_halo_centric_pos(self):
+        """ Method used to test 
+        `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`. 
+        """
+        r = 0.25
+        halo_radius = np.zeros(len(self.c15)) + r
+        x15, y15, z15 = self.nfw.mc_halo_centric_pos(
+            halo_radius, self.c15, seed=43)
+        assert np.all(x15 > -r)
+        assert np.all(x15 < r)
+        assert np.all(y15 > -r)
+        assert np.all(y15 < r)
+        assert np.all(z15 > -r)
+        assert np.all(z15 < r)
+
+        pos15 = np.vstack([x15, y15, z15]).T
+        norm15 = np.linalg.norm(pos15, axis=1)
+        assert np.all(norm15 < r)
+        assert np.all(norm15 > 0)
+
+        x5, y5, z5 = self.nfw.mc_halo_centric_pos(
+            halo_radius, self.c5, seed=43)
+        pos5 = np.vstack([x5, y5, z5]).T
+        norm5 = np.linalg.norm(pos5, axis=1)
+
+        x10, y10, z10 = self.nfw.mc_halo_centric_pos(
+            halo_radius, self.c10, seed=43)
+        pos10 = np.vstack([x10, y10, z10]).T
+        norm10 = np.linalg.norm(pos10, axis=1)
+
+        assert np.mean(norm5) > np.mean(norm10) > np.mean(norm15)
+        assert np.median(norm5) > np.median(norm10) > np.median(norm15)
+
+        x10a, y10a, z10a = self.nfw.mc_halo_centric_pos(
+            halo_radius*2, self.c10, seed=43)
+        pos10a = np.vstack([x10a, y10a, z10a]).T
+        norm10a = np.linalg.norm(pos10a, axis=1)
+
+        assert np.any(norm10a > r)
+        assert np.all(norm10a < 2*r)
+     
+
+
+
+
 
 
 
