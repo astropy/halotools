@@ -72,7 +72,7 @@ class MonteCarloGalProf(object):
         if not hasattr(self, '_' + key + '_lookup_table_min'):
             raise HalotoolsError("You must first call _setup_lookup_tables"
                 "to determine the grids before building the lookup tables")
-        
+
         print("\n...Building lookup tables for the radial profile.")
         
         radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
@@ -218,7 +218,7 @@ class MonteCarloGalProf(object):
 
         return x, y, z
 
-    def mc_solid_sphere(self, profile_params, **kwargs):
+    def mc_solid_sphere(self, *profile_params, **kwargs):
         """ Method to generate random, three-dimensional, halo-centric positions of galaxies. 
 
         Parameters 
