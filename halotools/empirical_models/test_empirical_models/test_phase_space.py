@@ -203,6 +203,26 @@ class TestNFWPhaseSpace(TestCase):
         assert np.allclose(vr_dispersion_from_monte_carlo, vmax, rtol=0.05)
 
 
+    def test_mc_vel(self):
+
+        npts = 1e3
+        Lbox = 250
+        zeros = np.zeros(npts)
+        x = np.random.uniform(0, Lbox, npts)
+        y = np.random.uniform(0, Lbox, npts)
+        z = np.random.uniform(0, Lbox, npts)
+        halo_vx = np.random.uniform(-250, 250, npts)
+        halo_vy = np.random.uniform(-250, 250, npts)
+        halo_vz = np.random.uniform(-250, 250, npts)
+        d = np.random.uniform(0, 0.25, npts)
+        mass = 1e12
+        vvir = self.nfw.virial_velocity(mass)
+
+        t = Table({'halo_x': x, 'halo_y': y, 'halo_z': z, 'host_centric_distance': d,
+            'halo_vx': halo_vx, 'halo_vy': halo_vy, 'halo_vz': halo_vz, 
+            'x': zeros, 'y': zeros, 'z': zeros, 'vx': zeros, 'vy': zeros, 'vz': zeros})
+
+        self.nfw.mc_vel(t)
 
 
 
