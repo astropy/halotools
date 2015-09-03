@@ -297,7 +297,7 @@ class AnalyticDensityProf(object):
         Returns
         ----------
         vc: array_like
-            The circular velocity in km / s; has the same dimensions as r.
+            The circular velocity in km/s; has the same dimensions as the input ``radius``.
 
         """     
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
