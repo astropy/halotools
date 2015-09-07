@@ -146,16 +146,6 @@ class AltHodMockFactory(MockFactory):
                 self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table=self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
 
-        # Create new columns for the halo catalog associated with each 
-        # parameter of each halo profile model, e.g., 'conc_NFWmodel'. 
-        # New column names are the keys of the halo_prof_func_dict dictionary; 
-        # new column values are computed by the function objects in halo_prof_func_dict 
-        for halo_prof_param_key in self.model.prof_param_keys:
-            method_name = halo_prof_param_key + '_halos'
-            method_behavior = getattr(self.model, method_name)
-            self.halo_table[halo_prof_param_key] = method_behavior(halo_table=self.halo_table)
-            self.additional_haloprops.append(halo_prof_param_key)
-
         self.model.build_halo_prof_lookup_tables(**kwargs)
 
     def populate(self, **kwargs):
