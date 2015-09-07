@@ -47,12 +47,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             )
         self._setup_lookup_tables((cmin, cmax, dc))
 
-        self.column_keys_to_allocate = np.dtype([
+        self._galprop_dtypes_to_allocate = np.dtype([
             ('host_centric_distance', 'f8'), 
             ('x', 'f8'), ('y', 'f8'), ('z', 'f8'), 
-            ('halo_x', 'f8'), ('halo_y', 'f8'), ('halo_z', 'f8'), 
             ('vx', 'f8'), ('vy', 'f8'), ('vz', 'f8'), 
-            ('halo_vx', 'f8'), ('halo_vy', 'f8'), ('halo_vz', 'f8'), 
             ])
 
     def assign_phase_space(self, halo_table):

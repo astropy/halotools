@@ -7,20 +7,10 @@ __author__ = ['Andrew Hearin']
 
 import numpy as np
 from copy import copy
-from functools import partial
 
-from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
-
-from . import model_helpers as model_helpers
-from . import model_defaults
-from . import mock_factories
-from . import preloaded_hod_blueprints
-from . import gal_prof_factory
-from . import halo_prof_components
+from . import model_helpers, mock_factories
 
 from ..sim_manager.supported_sims import HaloCatalog
-
 from ..sim_manager.generate_random_sim import FakeSim
 from ..utils.array_utils import custom_len
 
@@ -87,6 +77,8 @@ class AltHodModelFactory(ModelFactory):
         # that will be called by the mock factory 
         self._set_primary_behaviors()
         self._test_blueprint_consistency()
+
+        self.mock_factory = mock_factories.HodMockFactory
 
 
     def _set_gal_types(self):
@@ -242,6 +234,7 @@ class AltHodModelFactory(ModelFactory):
         haloprop_list = []
         prof_param_keys = []
         pub_list = []
+        dtype_list = []
         new_haloprop_func_dict = {}
 
         for gal_type in self.gal_types:
@@ -258,6 +251,10 @@ class AltHodModelFactory(ModelFactory):
                 # halo profile parameter keys
                 if hasattr(component_model, 'prof_param_keys'):
                     prof_param_keys.extend(component_model.prof_param_keys)
+
+                # Column dtypes to add to mock galaxy_table
+                if hasattr(component_model, '_galprop_dtypes_to_allocate'):
+                    dtype_list.append(component_model._galprop_dtypes_to_allocate)
 
                 # Reference list
                 if hasattr(component_model, 'publications'):
@@ -284,13 +281,14 @@ class AltHodModelFactory(ModelFactory):
         self.prof_param_keys = list(set(prof_param_keys))
         self.publications = list(set(pub_list))
         self.new_haloprop_func_dict = new_haloprop_func_dict
+        self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
 
     def _test_blueprint_consistency(self):
         """
         Method tests to make sure that all HOD occupation components have the same 
         threshold, and raises an exception if not. 
         """
-        threshold_list = [getattr(self, 'threshold_' + gal_type) for gal_type in self.gal_types)]
+        threshold_list = [getattr(self, 'threshold_' + gal_type) for gal_type in self.gal_types]
 
         if len(threshold_list) > 1:
             d = np.diff(threshold_list)

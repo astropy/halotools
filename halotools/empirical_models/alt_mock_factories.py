@@ -16,8 +16,8 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from astropy.table import Table 
 
-from . import model_helpers as model_helpers
-from . import model_defaults
+from . import model_helpers, model_defaults
+
 from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
 
 from ..custom_exceptions import HalotoolsError
@@ -82,17 +82,6 @@ class AltHodMockFactory(MockFactory):
             If set to ``False``, the class will perform all pre-processing tasks 
             but will not call the ``model`` to populate the ``galaxy_table`` 
             with mock galaxies and their observable properties. Default is ``True``. 
-
-        new_haloprop_func_dict : function object, optional  
-            Dictionary of function objects used to create additional halo properties 
-            by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
-            be the name of a new column of the halo catalog; each dict value is a function 
-            object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halo_table`` keyword argument. 
-            The input ``model`` model object has its own new_haloprop_func_dict; 
-            if the keyword argument ``new_haloprop_func_dict`` passed to `HodMockFactory` 
-            contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
-            ``model``, and exception will be raised. 
         """
 
         super(HodMockFactory, self).__init__(populate=populate, **kwargs)
@@ -141,8 +130,8 @@ class AltHodMockFactory(MockFactory):
         ############################################################
 
         ### Create new columns of the halo catalog, if applicable
-        if hasattr(self, 'new_haloprop_func_dict'):
-            for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
+        if hasattr(self.model, 'new_haloprop_func_dict'):
+            for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
                 self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table=self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
 
@@ -222,11 +211,9 @@ class AltHodMockFactory(MockFactory):
 
         first_galaxy_index = 0
         for gal_type in self.gal_types:
-            #print("Working on gal_type %s" % gal_type)
-            #
             occupation_func_name = 'mc_occupation_'+gal_type
             occupation_func = getattr(self.model, occupation_func_name)
-            # Call the component model to get a MC 
+            # Call the component model to get a Monte Carlo
             # realization of the abundance of gal_type galaxies
             self._occupation[gal_type] = occupation_func(halo_table=self.halo_table)
 
@@ -249,15 +236,14 @@ class AltHodMockFactory(MockFactory):
             self.galaxy_table[halocatkey] = np.zeros(self.Ngals, 
                 dtype = self.halo_table[halocatkey].dtype)
 
-        # Separately allocate memory for the values of the (possibly biased)
-        # galaxy profile parameters such as 'gal_NFWmodel_conc'
+        # Separately allocate memory for the galaxy profile parameters
         for galcatkey in self.model.prof_param_keys:
-            self.galaxy_table[galcatkey] = np.zeros(self.Ngals, dtype = 'f4')
+            self.galaxy_table[galcatkey] = 0.
 
         self.galaxy_table['gal_type'] = np.zeros(self.Ngals, dtype=object)
 
-        phase_space_keys = ['x', 'y', 'z', 'vx', 'vy', 'vz']
-        for key in phase_space_keys:
-            self.galaxy_table[key] = np.zeros(self.Ngals, dtype = 'f4')
+        dt = self._galprop_dtypes_to_allocate
+        for key in dt.names:
+            self.galaxy_table[key] = np.zeros(self.Ngals, dtype = dt[key].type)
 
 
