@@ -24,7 +24,7 @@ from . import sim_defaults, catalog_manager
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import custom_len
 
-from ..custom_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError
+from ..custom_exceptions import *
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
@@ -371,7 +371,11 @@ class HaloCatalog(object):
             "and the %s inferred from its filename.\n"
             "This indicates a bug during the generation of the hdf5 file storing the catalog.")
 
-        import h5py
+        try:
+            import h5py
+        except ImportError:
+            raise HalotoolsError("Must have h5py installed to use the "
+                "store_newly_processed_halo_table method")
         f = h5py.File(fname)
         if abs(float(f.attrs['redshift']) - closest_redshift) > 0.01:
             raise HalotoolsIOError(msg % ('redshift', 'redshift'))
