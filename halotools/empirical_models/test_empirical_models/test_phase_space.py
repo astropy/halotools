@@ -215,11 +215,14 @@ class TestNFWPhaseSpace(TestCase):
         halo_vy = np.random.uniform(-250, 250, npts)
         halo_vz = np.random.uniform(-250, 250, npts)
         d = np.random.uniform(0, 0.25, npts)
-        mass = 1e12
-        vvir = self.nfw.virial_velocity(mass)
+        rvir = np.zeros(npts) + 0.2
+        conc_nfw = np.random.uniform(1.5, 15, npts)
+        mass = np.zeros(npts) + 1e12
+        vvir = self.nfw.virial_velocity(total_mass=mass)
 
-        t = Table({'halo_x': x, 'halo_y': y, 'halo_z': z, 'host_centric_distance': d,
-            'halo_vx': halo_vx, 'halo_vy': halo_vy, 'halo_vz': halo_vz, 
+        t = Table({'halo_x': x, 'halo_y': y, 'halo_z': z, 
+            'host_centric_distance': d, 'halo_rvir': rvir, 'conc_NFWmodel': conc_nfw, 
+            'halo_vx': halo_vx, 'halo_vy': halo_vy, 'halo_vz': halo_vz, 'halo_vvir': vvir, 
             'x': zeros, 'y': zeros, 'z': zeros, 'vx': zeros, 'vy': zeros, 'vz': zeros})
 
         self.nfw.mc_vel(t)
