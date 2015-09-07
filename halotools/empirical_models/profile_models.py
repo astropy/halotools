@@ -492,8 +492,10 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         self.publications = ['arXiv:9611107', 'arXiv:0002395', 'arXiv:1402.7073']
 
+        self.conc_NFWmodel.__func__.__doc__ = getattr(self, self.conc_mass_model).__doc__
+
     def conc_NFWmodel(self, **kwargs):
-        """
+        """ marf
         """
         return self.compute_concentration(**kwargs)
 
