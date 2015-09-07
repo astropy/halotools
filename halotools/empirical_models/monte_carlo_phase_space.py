@@ -28,6 +28,17 @@ class MonteCarloGalProf(object):
     of a mock galaxy population. 
     """
 
+    def __init__(self):
+        """
+        """
+        # For each function computing a profile parameter, 
+        # add it to new_haloprop_func_dict so that the profile parameter 
+        # will be pre-computed for each halo prior to mock population
+        self.new_haloprop_func_dict = {}
+        for key in self.prof_param_keys:
+            self.new_haloprop_func_dict[key] = getattr(self, key)
+
+
     def _setup_lookup_tables(self, *args):
         """
         Private method used to set up the lookup table grid 
