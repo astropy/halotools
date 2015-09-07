@@ -38,6 +38,11 @@ class MonteCarloGalProf(object):
         for key in self.prof_param_keys:
             self.new_haloprop_func_dict[key] = getattr(self, key)
 
+        try:
+            self._methods_to_inherit.append('assign_phase_space')
+        except AttributeError:
+            self._methods_to_inherit = ['assign_phase_space']
+
 
     def _setup_lookup_tables(self, *args):
         """
