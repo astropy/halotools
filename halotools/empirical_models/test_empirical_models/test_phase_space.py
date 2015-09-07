@@ -41,7 +41,7 @@ class TestNFWPhaseSpace(TestCase):
 
         ### NFWPhaseSpace attributes
         assert hasattr(self.nfw, 'assign_phase_space')
-        assert hasattr(self.nfw, 'column_keys_to_allocate')
+        assert hasattr(self.nfw, '_galprop_dtypes_to_allocate')
 
         ### AnalyticDensityProf attributes 
         assert hasattr(self.nfw, 'circular_velocity')
