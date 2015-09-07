@@ -24,7 +24,7 @@ from ..sim_manager.supported_sims import HaloCatalog
 from ..sim_manager.generate_random_sim import FakeSim
 from ..utils.array_utils import custom_len
 
-from ..custom_exceptions import HalotoolsError
+from ..custom_exceptions import *
 from warnings import warn 
 
 from .model_factories import ModelFactory
@@ -75,7 +75,6 @@ class AltHodModelFactory(ModelFactory):
         # Create attributes for galaxy types and their occupation bounds
         self._set_gal_types()
         self.model_blueprint = self._input_model_blueprint
-        self._test_blueprint_consistency()
 
         # Build the composite model dictionary, 
         # whose keys are parameters of our model
@@ -87,6 +86,7 @@ class AltHodModelFactory(ModelFactory):
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
         self._set_primary_behaviors()
+        self._test_blueprint_consistency()
 
 
     def _set_gal_types(self):
@@ -150,7 +150,10 @@ class AltHodModelFactory(ModelFactory):
                     attr = getattr(component_model_instance, attrname)
                     setattr(self, new_attr_name, attr)
 
-            self.threshold = getattr(self, 'threshold' + '_' + gal_type)
+            # Repeatedly overwrite self.threshold 
+            # This is harmless provided that all gal_types are ensured to have the same threshold, 
+            # which is guaranteed by the _test_blueprint_consistency method
+            self.threshold = getattr(self, 'threshold_' + gal_type)
 
 
     def _update_param_dict_decorator(self, component_model, func_name):
@@ -187,15 +190,11 @@ class AltHodModelFactory(ModelFactory):
 
         Notes 
         -----
-        In MCMC applications, the items of ``param_dict`` define the 
+        In MCMC applications, the items of ``param_dict`` define the possible 
         parameter set explored by the likelihood engine. 
         Changing the values of the parameters in ``param_dict`` 
-        will propagate to the behavior of the component models. 
-
-        Each component model has its own ``param_dict`` bound to it. 
-        When changing the values of ``param_dict`` bound to `HodModelFactory`, 
-        the corresponding values of the component model ``param_dict`` will *not* change.  
-
+        will propagate to the behavior of the component models 
+        when the relevant methods are called. 
         """
 
         self.param_dict = {}
@@ -291,15 +290,8 @@ class AltHodModelFactory(ModelFactory):
         Method tests to make sure that all HOD occupation components have the same 
         threshold, and raises an exception if not. 
         """
-        threshold_list = []
-        threshold_msg = ''
-        for gal_type in self.gal_types:
-            component_dict = self.model_blueprint[gal_type]
-            for component_key in component_dict.keys():
-                component_model = component_dict[component_key]
-                if component_key == 'occupation':
-                    threshold_list.append(component_model.threshold)
-                    threshold_msg = threshold_msg + '\n' + gal_type + ' threshold = ' + str(component_model.threshold)
+        threshold_list = [getattr(self, 'threshold_' + gal_type) for gal_type in self.gal_types)]
+
         if len(threshold_list) > 1:
             d = np.diff(threshold_list)
             if np.any(d != 0):
