@@ -84,7 +84,15 @@ class OccupationComponent(model_helpers.GalPropModel):
             raise SyntaxError("Any sub-class of OccupationComponent must "
                 "implement a method named %s " % required_method_name)
 
-        self._additional_methods_to_inherit = ['mean_occupation']
+        try:
+            self._methods_to_inherit.extend(['mc_occupation', 'mean_occupation'])
+        except AttributeError:
+            self._methods_to_inherit = ['mc_occupation', 'mean_occupation']
+
+        try:
+            self._attrs_to_inherit.append('threshold')
+        except AttributeError:
+            self._attrs_to_inherit = ['threshold']
 
         if not hasattr(self, 'publications'):
             self.publications = []
