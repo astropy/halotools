@@ -496,22 +496,35 @@ class MonteCarloGalProf(object):
         """
         """
         try:
-            x = halo_table['host_centric_distance'] / halo_table[self.halo_boundary_key]
+            d = halo_table['host_centric_distance']
         except KeyError:
             raise HalotoolsError("The mc_vel method requires ``host_centric_distance`` "
                 "to be an existing column of the input halo_table")
+        try:
+            rhalo = halo_table[self.halo_boundary_key]
+        except KeyError:
+            msg = ("halo_boundary_key = %s must be a key of the input halo catalog")
+            raise HalotoolsError(msg % self.halo_boundary_key)
+        x = d/rhalo
+
         profile_params = [halo_table[key] for key in self.prof_param_keys]
         try:
             virial_velocities = halo_table['halo_vvir']
         except KeyError:
             virial_velocities = self.virial_velocity(
                 total_mass = halo_table[self.halo_mass_key])
+
         vx = self.mc_radial_velocity(
-            x, virial_velocities, *profile_params, **kwargs)
+            virial_velocities = virial_velocities, 
+            x = x, profile_params = profile_params)
         vy = self.mc_radial_velocity(
-            x, virial_velocities, *profile_params, **kwargs)
+            virial_velocities = virial_velocities, 
+            x = x, profile_params = profile_params)
         vz = self.mc_radial_velocity(
-            x, virial_velocities, *profile_params, **kwargs)
+            virial_velocities = virial_velocities, 
+            x = x, profile_params = profile_params)
+
+
         halo_table['vx'][:] = halo_table['halo_vx'] + vx
         halo_table['vy'][:] = halo_table['halo_vy'] + vy
         halo_table['vz'][:] = halo_table['halo_vz'] + vz
