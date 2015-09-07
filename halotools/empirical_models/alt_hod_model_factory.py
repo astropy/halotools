@@ -109,8 +109,6 @@ class AltHodModelFactory(ModelFactory):
                 raise HalotoolsError("The HOD _input_model_blueprint currently only permits "
                     "gal_types = 'centrals' and 'sateliltes'")
 
-
-
     def _set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `HodModelFactory` 
         that will be used by the outside world.  
@@ -129,54 +127,37 @@ class AltHodModelFactory(ModelFactory):
 
         for gal_type in self.gal_types:
 
-            ###########################
-            # Set the method used to return Monte Carlo realizations 
-            # of per-halo gal_type abundance
-            occupation_model = self.model_blueprint[gal_type]['occupation']
-            self.threshold = occupation_model.threshold
+            gal_type_blueprint = self.model_blueprint[gal_type]
 
-            new_method_name = 'mc_occupation_'+gal_type
-            new_method_behavior = self._update_param_dict_decorator(
-                gal_type, 'occupation', 'mc_occupation')
-            setattr(self, new_method_name, new_method_behavior)
-            
-            ###########################
-            # Set any additional methods requested by the component models
-            if hasattr(occupation_model, '_additional_methods_to_inherit'):
-                additional_methods_to_inherit = list(
-                    set(occupation_model._additional_methods_to_inherit))
-                for methodname in additional_methods_to_inherit:
+            feature_generator = (feature_name for feature_name in gal_type_blueprint
+                if feature_name is not 'mock_factory')
+
+            for feature_name in feature_generator:
+                component_model_instance = gal_type_blueprint[feature_name]
+
+                methods_to_inherit = list(set(
+                    component_model_instance._methods_to_inherit))
+                for methodname in methods_to_inherit:
                     new_method_name = methodname + '_' + gal_type
                     new_method_behavior = self._update_param_dict_decorator(
-                        gal_type, 'occupation', methodname)
+                        component_model_instance, methodname)
                     setattr(self, new_method_name, new_method_behavior)
 
-            ###########################
-            # Set the method used to assign positions and velocities
-            gal_prof_model = self.model_blueprint[gal_type]['profile']
-            for prof_param_key in gal_prof_model.prof_param_keys:
+                attrs_to_inherit = list(set(
+                    component_model_instance._attrs_to_inherit))
+                for attrname in attrs_to_inherit:
+                    new_attr_name = attrname + '_' + gal_type
+                    attr = getattr(component_model_instance, attrname)
+                    setattr(self, new_attr_name, attr)
 
-            # Create a new method to compute each (unbiased) halo profile parameter
-                new_method_name = prof_param_key + '_halos'
-                # For composite models in which multiple galaxy types have the same 
-                # underlying dark matter profile, use the halo profile model of the 
-                # first gal_type in the self.gal_types list 
-                if not hasattr(self, new_method_name):
-                    new_method_behavior = getattr(gal_prof_model, prof_param_key)
-                    setattr(self, new_method_name, new_method_behavior)
-
-            setattr(self, 'assign_phase_space_' + gal_type, 
-                gal_prof_model.assign_phase_space)
+            self.threshold = getattr(self, 'threshold' + '_' + gal_type)
 
 
-
-    def _update_param_dict_decorator(self, gal_type, component_key, func_name):
+    def _update_param_dict_decorator(self, component_model, func_name):
         """ Decorator used to propagate any possible changes 
         in the composite model param_dict 
         down to the appropriate component model param_dict. 
         """
-
-        component_model = self.model_blueprint[gal_type][component_key]
 
         def decorated_func(*args, **kwargs):
 

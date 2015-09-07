@@ -142,7 +142,7 @@ class HeavisideAssembias(object):
         self.new_haloprop_func_dict = {}
         self.new_haloprop_func_dict[key] = assembias_percentile_calculator
 
-        self._additional_methods_to_inherit.extend(['assembias_strength'])
+        self._methods_to_inherit.extend(['assembias_strength'])
 
     def _set_percentile_splitting(self, **kwargs):
         """
