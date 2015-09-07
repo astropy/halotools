@@ -1104,7 +1104,11 @@ class CatalogManager(object):
         halo_table.write(output_fname, path='data', overwrite = overwrite, append = overwrite)
 
         ### Add metadata to the hdf5 file
-        import h5py
+        try:
+            import h5py
+        except ImportError:
+            raise HalotoolsError("Must have h5py installed to use the "
+                "store_newly_processed_halo_table method")
         f = h5py.File(output_fname)
 
         time_right_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')

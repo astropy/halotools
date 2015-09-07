@@ -12,7 +12,7 @@ The latest build of the documentation can be found at http://halotools.readthedo
 
 ## Project Status
 
-Halotools is a fully open-source package with contributing scientists spread across many universities. The package is still in alpha, with several core features still under active development. 
+Halotools is a fully open-source package with contributing scientists spread across many universities. The package is still in alpha, with several core features still under active development. If you wish to use Halotools before the first official release, please contact andrew.hearin@yale.edu.
 
 ---
 
