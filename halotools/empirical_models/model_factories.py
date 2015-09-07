@@ -819,9 +819,9 @@ class HodModelFactory(ModelFactory):
             
             ###########################
             # Set any additional methods requested by the component models
-            if hasattr(occupation_model, '_additional_methods_to_inherit'):
+            if hasattr(occupation_model, '_methods_to_inherit'):
                 additional_methods_to_inherit = list(
-                    set(occupation_model._additional_methods_to_inherit))
+                    set(occupation_model._methods_to_inherit))
                 for methodname in additional_methods_to_inherit:
                     new_method_name = methodname + '_' + gal_type
                     new_method_behavior = self._update_param_dict_decorator(
