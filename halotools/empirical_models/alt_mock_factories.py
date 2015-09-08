@@ -162,6 +162,8 @@ class AltHodMockFactory(MockFactory):
                 self.galaxy_table[halocatkey][gal_type_slice] = np.repeat(
                     self.halo_table[halocatkey], self._occupation[gal_type], axis=0)
 
+            ### LEFT OFF HERE.
+            # NEED TO IMPLEMENT COMPOSITE CALLING SEQUENCE
 
             # Assign phase space distribution 
             pos_method_name = 'pos_'+gal_type
