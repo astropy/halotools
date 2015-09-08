@@ -216,7 +216,10 @@ class MockFactory(object):
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_clustering method is only available "
-                " if the mock_observables sub-package has been compiled\n")
+                " if the mock_observables sub-package has been compiled.\n"
+                "You are likely encountering this error because you are using \nyour Halotools repository "
+                "as your working directory."
+                )
             raise HalotoolsError(msg)
 
         Nthreads = cpu_count()
@@ -334,7 +337,10 @@ class MockFactory(object):
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_matter_cross_clustering method is only available "
-                " if the mock_observables sub-package has been compiled\n")
+                " if the mock_observables sub-package has been compiled\n"
+                "You are likely encountering this error because you are using \nyour Halotools repository "
+                "as your working directory."
+                )
             raise HalotoolsError(msg)
 
         nptcl = np.max([model_defaults.default_nptcls, len(self.galaxy_table)])
@@ -419,7 +425,10 @@ class MockFactory(object):
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_fof_group_ids method is only available "
-                " if the mock_observables sub-package has been compiled\n")
+                " if the mock_observables sub-package has been compiled\n"
+                "You are likely encountering this error because you are using \nyour Halotools repository "
+                "as your working directory."
+                )
             raise HalotoolsError(msg)
 
         Nthreads = cpu_count()

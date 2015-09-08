@@ -103,7 +103,6 @@ halo_boundary = get_halo_boundary_key(halo_mass_definition)
 min_permitted_conc = 0.1
 max_permitted_conc = 30.0
 default_dconc = 0.025
-# default_dconc = 0.5
 
 Npts_radius_table = 101
 default_lograd_min = -3
