@@ -283,6 +283,36 @@ class AltHodModelFactory(ModelFactory):
         self.new_haloprop_func_dict = new_haloprop_func_dict
         self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
 
+    def _set_calling_sequence(self, **kwargs):
+        """
+        """
+        if 'mock_generation_calling_sequence' in kwargs:
+            self._mock_generation_calling_sequence = kwargs['mock_generation_calling_sequence']
+            return 
+
+        feature_keys = self.model_blueprint[self.model_blueprint.keys()[0]].keys()
+        feature_keys.remove('occupation')
+        feature_keys.remove('profile')
+        feature_keys.insert(0, 'occupation')
+        feature_keys.append('occupation')
+
+        missing_calling_sequence_msg = ("\nComponent models typically have a list attribute called "
+            "_mock_generation_calling_sequence.\nThis list determines the methods that are called "
+            "by the mock factory, and the order in which they are called.\n"
+            "The ``%s`` component of the gal_type = ``%s`` population has no such method.\n"
+            "Only ignore this warning if you are sure this is not an error.\n")
+
+        self._mock_generation_calling_sequence = []
+        for gal_type in self.gal_types:
+            for feature_key in feature_keys:
+                component_model = self.model_blueprint[gal_type][feature_key]
+                if hasattr(component_model, '_mock_generation_calling_sequence'):
+                    component_methods = [name + '_' + gal_type for name in component_model._mock_generation_calling_sequence]
+                    self._mock_generation_calling_sequence.extend(component_methods)
+                else:
+                    warn(missing_calling_sequence_msg % (feature_key, gal_type))
+
+
     def _test_blueprint_consistency(self):
         """
         Impose the following requirements on the blueprint: 
@@ -301,7 +331,7 @@ class AltHodModelFactory(ModelFactory):
                 msg = ("Inconsistency in the threshold of the component occupation models:\n" + threshold_msg + "\n")
                 raise HalotoolsError(msg)
 
-        missing_method_msg = ("\nAll component models have a ``_mock_generation_calling_sequence`` attribute,\n"
+        missing_method_msg1 = ("\nAll component models have a ``_mock_generation_calling_sequence`` attribute,\n"
             "which is a list of method names that are called by the ``populate_mock`` method of the mock factory.\n"
             "All component models also have a ``_methods_to_inherit`` attribute, \n"
             "which determines which methods of the component model are inherited by the composite model.\n"
@@ -315,7 +345,18 @@ class AltHodModelFactory(ModelFactory):
                 missing_methods = mock_generation_methods - overlap
                 if missing_methods != set():
                     some_missing_method = list(missing_methods)[0]
-                    raise HalotoolsError(missing_method_msg % (gal_type, some_missing_method))
+                    raise HalotoolsError(missing_method_msg1 % (gal_type, some_missing_method))
+
+        missing_method_msg2 = ("\nAll component models have a ``_mock_generation_calling_sequence`` attribute,\n"
+            "which is a list of method names that are called by the ``populate_mock`` method of the mock factory.\n"
+            "The AltHodModelFactory builds a composite ``_mock_generation_calling_sequence`` from each of these lists.\n"
+            "However, the following method does not appear to have been created during this process:\n%s\n"
+            "This is likely a bug in Halotools - please raise an Issue on https://github.com/astropy/halotools\n")
+        for method in self._mock_generation_calling_sequence:
+            if not hasattr(self, method):
+                raise HalotoolsError(missing_method_msg2)
+
+
 
 
 
