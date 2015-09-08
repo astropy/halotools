@@ -97,6 +97,8 @@ class OccupationComponent(model_helpers.GalPropModel):
         if not hasattr(self, 'publications'):
             self.publications = []
 
+        self._mock_generation_calling_sequence = ['mc_occupation']
+
     def mc_occupation(self, seed=None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 

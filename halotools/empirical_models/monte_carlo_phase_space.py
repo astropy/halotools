@@ -43,6 +43,12 @@ class MonteCarloGalProf(object):
         except AttributeError:
             self._methods_to_inherit = ['assign_phase_space']
 
+        self._galprop_dtypes_to_allocate = np.dtype([
+            ('host_centric_distance', 'f8'), 
+            ('x', 'f8'), ('y', 'f8'), ('z', 'f8'), 
+            ('vx', 'f8'), ('vy', 'f8'), ('vz', 'f8'), 
+            ])
+
 
     def _setup_lookup_tables(self, *args):
         """
