@@ -57,6 +57,27 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         self.mc_vel(halo_table = halo_table)
 
 
+class TrivialPhaseSpace(object):
+    """
+    """
+    def __init__(self):
+        """
+        """
+        self._mock_generation_calling_sequence = ['assign_phase_space']
+        self._galprop_dtypes_to_allocate = np.dtype([
+            ('x', 'f8'), ('y', 'f8'), ('z', 'f8'), 
+            ('vx', 'f8'), ('vy', 'f8'), ('vz', 'f8'), 
+            ])
+
+    def assign_phase_space(self, halo_table):
+        """
+        """
+        halo_table['x'] = halo_table['halo_x']
+        halo_table['y'] = halo_table['halo_y']
+        halo_table['z'] = halo_table['halo_z']
+        halo_table['vx'] = halo_table['halo_vx']
+        halo_table['vy'] = halo_table['halo_vy']
+        halo_table['vz'] = halo_table['halo_vz']
 
 
 
