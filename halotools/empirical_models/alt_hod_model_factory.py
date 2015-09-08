@@ -285,16 +285,41 @@ class AltHodModelFactory(ModelFactory):
 
     def _test_blueprint_consistency(self):
         """
-        Method tests to make sure that all HOD occupation components have the same 
-        threshold, and raises an exception if not. 
+        Impose the following requirements on the blueprint: 
+
+            * All occupation components have the same threshold. 
+
+            * Each element in _mock_generation_calling_sequence is included in _methods_to_inherit
         """
         threshold_list = [getattr(self, 'threshold_' + gal_type) for gal_type in self.gal_types]
-
         if len(threshold_list) > 1:
             d = np.diff(threshold_list)
             if np.any(d != 0):
+                threshold_msg = ''
+                for gal_type in self.gal_types:
+                    threshold_msg += '\n' + gal_type + ' threshold = ' + str(getattr(self, 'threshold_' + gal_type))
                 msg = ("Inconsistency in the threshold of the component occupation models:\n" + threshold_msg + "\n")
                 raise HalotoolsError(msg)
+
+        missing_method_msg = ("\nAll component models have a ``_mock_generation_calling_sequence`` attribute,\n"
+            "which is a list of method names that are called by the ``populate_mock`` method of the mock factory.\n"
+            "All component models also have a ``_methods_to_inherit`` attribute, \n"
+            "which determines which methods of the component model are inherited by the composite model.\n"
+            "The former must be a subset of the latter. However, for ``gal_type`` = %s,\n"
+            "the following method was not inherited:\n%s")
+        for gal_type in self.gal_types:
+            for component_model in self.model_blueprint.values():
+                mock_generation_methods = set(component_model._mock_generation_calling_sequence)
+                inherited_methods = set(component_model._methods_to_inherit)
+                overlap = mock_generation_methods.intersection(inherited_methods)
+                missing_methods = mock_generation_methods - overlap
+                if missing_methods != set():
+                    some_missing_method = list(missing_methods)[0]
+                    raise HalotoolsError(missing_method_msg % (gal_type, some_missing_method))
+
+
+
+
 
 
 

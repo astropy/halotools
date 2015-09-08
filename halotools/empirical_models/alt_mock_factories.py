@@ -162,15 +162,8 @@ class AltHodMockFactory(MockFactory):
                 self.galaxy_table[halocatkey][gal_type_slice] = np.repeat(
                     self.halo_table[halocatkey], self._occupation[gal_type], axis=0)
 
-            # Call the galaxy profile components
-            for prof_param_key in self.model.prof_param_keys:
-                method_name = prof_param_key + '_' + gal_type
-                method_behavior = getattr(self.model, method_name)
-                self.galaxy_table[prof_param_key][gal_type_slice] = (
-                    method_behavior(halo_table = self.galaxy_table[gal_type_slice])
-                    )
 
-            # Assign positions 
+            # Assign phase space distribution 
             pos_method_name = 'pos_'+gal_type
 
             self.galaxy_table['x'][gal_type_slice], \

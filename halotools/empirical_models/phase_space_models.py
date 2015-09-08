@@ -36,9 +36,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             String giving the column name of the halo catalog that stores the boundary of the halo. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        """
-
-        super(NFWPhaseSpace, self).__init__(**kwargs)
+        """        
+        NFWProfile.__init__(self, **kwargs)
+        NFWJeansVelocity.__init__(self, **kwargs)
+        MonteCarloGalProf.__init__(self, **kwargs)
 
         cmin, cmax, dc = (
             model_defaults.min_permitted_conc, 
@@ -47,11 +48,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             )
         self._setup_lookup_tables((cmin, cmax, dc))
 
-        self._galprop_dtypes_to_allocate = np.dtype([
-            ('host_centric_distance', 'f8'), 
-            ('x', 'f8'), ('y', 'f8'), ('z', 'f8'), 
-            ('vx', 'f8'), ('vy', 'f8'), ('vz', 'f8'), 
-            ])
+        self._mock_generation_calling_sequence = ['assign_phase_space']
 
     def assign_phase_space(self, halo_table):
         """
