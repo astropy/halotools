@@ -163,7 +163,7 @@ class AltHodMockFactory(MockFactory):
                     self.halo_table[halocatkey], self._occupation[gal_type], axis=0)
 
         for method in self.model._mock_generation_calling_sequence:
-            func = getattr(self, method)
+            func = getattr(self.model, method)
             if 'centrals' in method:
                 gal_type_slice = self._gal_type_indices['centrals']
             elif 'satellites' in method:
@@ -234,7 +234,7 @@ class AltHodMockFactory(MockFactory):
 
         self.galaxy_table['gal_type'] = np.zeros(self.Ngals, dtype=object)
 
-        dt = self._galprop_dtypes_to_allocate
+        dt = self.model._galprop_dtypes_to_allocate
         for key in dt.names:
             self.galaxy_table[key] = np.zeros(self.Ngals, dtype = dt[key].type)
 
