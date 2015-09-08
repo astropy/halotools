@@ -21,7 +21,7 @@ from . import model_helpers, model_defaults
 from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
 
 from ..custom_exceptions import HalotoolsError
-from ..mock_factories import MockFactory
+from .mock_factories import MockFactory
 
 try:
     from .. import mock_observables
@@ -84,7 +84,7 @@ class AltHodMockFactory(MockFactory):
             with mock galaxies and their observable properties. Default is ``True``. 
         """
 
-        super(HodMockFactory, self).__init__(populate=populate, **kwargs)
+        super(AltHodMockFactory, self).__init__(populate=populate, **kwargs)
 
         self.preprocess_halo_catalog()
 
@@ -135,7 +135,7 @@ class AltHodMockFactory(MockFactory):
                 self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table=self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
 
-        self.model.build_halo_prof_lookup_tables(**kwargs)
+        self.model.build_lookup_tables(**kwargs)
 
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
