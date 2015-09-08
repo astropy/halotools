@@ -60,7 +60,7 @@ class AltHodModelFactory(ModelFactory):
 
         """
 
-        super(HodModelFactory, self).__init__(input_model_blueprint, **kwargs)
+        super(AltHodModelFactory, self).__init__(input_model_blueprint, **kwargs)
 
         # Create attributes for galaxy types and their occupation bounds
         self._set_gal_types()
@@ -76,6 +76,7 @@ class AltHodModelFactory(ModelFactory):
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
         self._set_primary_behaviors()
+        self._set_calling_sequence(**kwargs)
         self._test_blueprint_consistency()
 
         self.mock_factory = mock_factories.HodMockFactory
@@ -205,6 +206,8 @@ class AltHodModelFactory(ModelFactory):
             # For each galaxy type, loop over its features
             for model_instance in gal_type_dict.values():
 
+                if not hasattr(model_instance, 'param_dict'):
+                    model_instance.param_dict = {}
                 intersection = set(self.param_dict) & set(model_instance.param_dict)
                 if intersection != set():
                     for key in intersection:
@@ -286,9 +289,14 @@ class AltHodModelFactory(ModelFactory):
                     inherited_methods = component_model._methods_to_inherit
                 except AttributeError:
                     inherited_methods = []
+                    component_model._methods_to_inherit = []
+
                 missing_methods = set(mock_making_methods) - set(inherited_methods).intersection(set(mock_making_methods))
                 for methodname in missing_methods:
                     component_model._methods_to_inherit.append(methodname)
+
+                if not hasattr(component_model, '_attrs_to_inherit'):
+                    component_model._attrs_to_inherit = []
 
 
         self._haloprop_list = list(set(haloprop_list))
@@ -352,7 +360,7 @@ class AltHodModelFactory(ModelFactory):
             "The former must be a subset of the latter. However, for ``gal_type`` = %s,\n"
             "the following method was not inherited:\n%s")
         for gal_type in self.gal_types:
-            for component_model in self.model_blueprint.values():
+            for component_model in self.model_blueprint[gal_type].values():
                 mock_generation_methods = set(component_model._mock_generation_calling_sequence)
                 inherited_methods = set(component_model._methods_to_inherit)
                 overlap = mock_generation_methods.intersection(inherited_methods)
