@@ -277,6 +277,20 @@ class AltHodModelFactory(ModelFactory):
                             "component for %s galaxies")
                         warn(msg % (example_repeated_element, component_key, gal_type))
 
+                # Ensure that all methods in the calling sequence are inherited
+                try:
+                    mock_making_methods = component_model._mock_generation_calling_sequence
+                except AttributeError:
+                    mock_making_methods = []
+                try:
+                    inherited_methods = component_model._methods_to_inherit
+                except AttributeError:
+                    inherited_methods = []
+                missing_methods = set(mock_making_methods) - set(inherited_methods).intersection(set(mock_making_methods))
+                for methodname in missing_methods:
+                    component_model._methods_to_inherit.append(methodname)
+
+
         self._haloprop_list = list(set(haloprop_list))
         self.prof_param_keys = list(set(prof_param_keys))
         self.publications = list(set(pub_list))
