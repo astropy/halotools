@@ -162,18 +162,15 @@ class AltHodMockFactory(MockFactory):
                 self.galaxy_table[halocatkey][gal_type_slice] = np.repeat(
                     self.halo_table[halocatkey], self._occupation[gal_type], axis=0)
 
-            ### LEFT OFF HERE.
-            # NEED TO IMPLEMENT COMPOSITE CALLING SEQUENCE
-
-            # Assign phase space distribution 
-            pos_method_name = 'pos_'+gal_type
-
-            self.galaxy_table['x'][gal_type_slice], \
-            self.galaxy_table['y'][gal_type_slice], \
-            self.galaxy_table['z'][gal_type_slice] = (
-                getattr(self.model, pos_method_name)(
-                    halo_table=self.galaxy_table[gal_type_slice])
-                )
+        for method in self.model._mock_generation_calling_sequence:
+            func = getattr(self, method)
+            if 'centrals' in method:
+                gal_type_slice = self._gal_type_indices['centrals']
+            elif 'satellites' in method:
+                gal_type_slice = self._gal_type_indices['satellites']
+            else:
+                raise HalotoolsError("Unable to determine gal_type from methodname = %s" % method)
+            func(halo_table = self.galaxy_table[gal_type_slice])
                 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
