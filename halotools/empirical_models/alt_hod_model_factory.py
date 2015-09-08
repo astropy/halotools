@@ -57,7 +57,6 @@ class AltHodModelFactory(ModelFactory):
             and values are class instances of that type of model. 
             The `interpret_input_model_blueprint` translates 
             ``input_model_blueprint`` into ``self.model_blueprint``.
-
         """
 
         super(AltHodModelFactory, self).__init__(input_model_blueprint, **kwargs)
@@ -173,7 +172,9 @@ class AltHodModelFactory(ModelFactory):
         """
 
         for gal_type in self.gal_types:
-            self.model_blueprint[gal_type]['profile'].build_lookup_tables()
+            profile_model = self.model_blueprint[gal_type]['profile']
+            if hasattr(profile_model, 'build_lookup_tables'):
+                profile_model.build_lookup_tables()
 
     def _set_init_param_dict(self):
         """ Method used to build a dictionary of parameters for the composite model. 
@@ -377,14 +378,6 @@ class AltHodModelFactory(ModelFactory):
         for method in self._mock_generation_calling_sequence:
             if not hasattr(self, method):
                 raise HalotoolsError(missing_method_msg2)
-
-
-
-
-
-
-
-
 
 ##########################################
 

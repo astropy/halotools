@@ -90,7 +90,8 @@ class MonteCarloGalProf(object):
             raise HalotoolsError("You must first call _setup_lookup_tables"
                 "to determine the grids before building the lookup tables")
 
-        print("\n...Building lookup tables for the radial profile.")
+        modelname = self.__class__.__name__
+        print("\n...Building lookup tables for the %s radial profile." % modelname)
         
         radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
         self.logradius_array = np.log10(radius_array)

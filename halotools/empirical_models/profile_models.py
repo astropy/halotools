@@ -59,6 +59,7 @@ class AnalyticDensityProf(object):
 
         self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
         self.halo_mass_key = model_defaults.get_halo_mass_key(self.mdef)
+        self.prim_haloprop_key = self.halo_mass_key 
 
         self.density_threshold = density_threshold(
             cosmology = self.cosmology, 
