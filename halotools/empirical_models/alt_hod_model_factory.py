@@ -126,14 +126,22 @@ class AltHodModelFactory(ModelFactory):
 
             for feature_name in feature_generator:
                 component_model_instance = gal_type_blueprint[feature_name]
+                try:
+                    component_model_galprop_dtype = component_model_instance._galprop_dtypes_to_allocate
+                except AttributeError:
+                    component_model_galprop_dtype = np.dtype([])
 
                 methods_to_inherit = list(set(
                     component_model_instance._methods_to_inherit))
+
                 for methodname in methods_to_inherit:
                     new_method_name = methodname + '_' + gal_type
                     new_method_behavior = self._update_param_dict_decorator(
                         component_model_instance, methodname)
                     setattr(self, new_method_name, new_method_behavior)
+                    setattr(getattr(self, new_method_name), 
+                        '_galprop_dtypes_to_allocate', component_model_galprop_dtype)
+                    setattr(getattr(self, new_method_name), 'gal_type', gal_type)
 
                 attrs_to_inherit = list(set(
                     component_model_instance._attrs_to_inherit))
