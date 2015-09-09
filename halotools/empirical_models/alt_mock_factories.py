@@ -165,12 +165,7 @@ class AltHodMockFactory(MockFactory):
 
         for method in self._remaining_methods_to_call:
             func = getattr(self.model, method)
-            if 'centrals' in method:
-                gal_type_slice = self._gal_type_indices['centrals']
-            elif 'satellites' in method:
-                gal_type_slice = self._gal_type_indices['satellites']
-            else:
-                raise HalotoolsError("Unable to determine gal_type from methodname = %s" % method)
+            gal_type_slice = self._gal_type_indices[func.gal_type]
             func(halo_table = self.galaxy_table[gal_type_slice])
                 
         # Positions are now assigned to all populations. 
@@ -197,15 +192,35 @@ class AltHodMockFactory(MockFactory):
         """
 
         self.galaxy_table = Table() 
+
+        # We will keep track of the calling sequence with a list called _remaining_methods_to_call
+        # Each time a function in this list is called, we will remove that function from the list
+        # Mock generation will be complete when _remaining_methods_to_call is exhausted
         self._remaining_methods_to_call = copy(self.model._mock_generation_calling_sequence)
 
+        # Call all composite model methods that should be called prior to mc_occupation 
+        # All such function calls must be applied to the halo_table, since we do not yet know 
+        # how much memory we need for the mock galaxy_table
+        galprops_assigned_to_halo_table = []
         for func_name in self.model._mock_generation_calling_sequence:
             if 'mc_occupation' in func_name:
                 break
             else:
                 func = getattr(self.model, func_name)
                 func(halo_table = self.halo_table)
+                galprops_assigned_to_halo_table_by_func = func._galprop_dtypes_to_allocate.names
+                galprops_assigned_to_halo_table.extend(galprops_assigned_to_halo_table_by_func)
                 self._remaining_methods_to_call.remove(func_name)
+        # Now update the list of additional_haloprops, if applicable
+        # This is necessary because each of the above function calls created new 
+        # columns for the *halo_table*, not the *galaxy_table*. So we will need to use 
+        # np.repeat inside mock.populate() so that mock galaxies inherit these newly-created columns
+        # Since there is already a loop over additional_haloprops inside mock.populate() that does this, 
+        # then all we need to do is append to this list
+        galprops_assigned_to_halo_table = list(set(
+            galprops_assigned_to_halo_table))
+        self.additional_haloprops.extend(galprops_assigned_to_halo_table)
+        self.additional_haloprops = list(set(self.additional_haloprops))
 
         self._occupation = {}
         self._total_abundance = {}
@@ -229,6 +244,7 @@ class AltHodMockFactory(MockFactory):
             self._gal_type_indices[gal_type] = slice(
                 first_galaxy_index, last_galaxy_index)
             first_galaxy_index = last_galaxy_index
+            # Remove the mc_occupation function from the list of methods to call
             self._remaining_methods_to_call.remove(occupation_func_name)
             
         self.Ngals = np.sum(self._total_abundance.values())
