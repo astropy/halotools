@@ -10,6 +10,7 @@ Currently only composite HOD models are supported.
 
 import numpy as np
 from multiprocessing import cpu_count
+from copy import copy 
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -162,7 +163,7 @@ class AltHodMockFactory(MockFactory):
                 self.galaxy_table[halocatkey][gal_type_slice] = np.repeat(
                     self.halo_table[halocatkey], self._occupation[gal_type], axis=0)
 
-        for method in self.model._mock_generation_calling_sequence:
+        for method in self._remaining_methods_to_call:
             func = getattr(self.model, method)
             if 'centrals' in method:
                 gal_type_slice = self._gal_type_indices['centrals']
@@ -196,6 +197,15 @@ class AltHodMockFactory(MockFactory):
         """
 
         self.galaxy_table = Table() 
+        self._remaining_methods_to_call = copy(self.model._mock_generation_calling_sequence)
+
+        for func_name in self.model._mock_generation_calling_sequence:
+            if 'mc_occupation' in func_name:
+                break
+            else:
+                func = getattr(self.model, func_name)
+                func(halo_table = self.halo_table)
+                self._remaining_methods_to_call.remove(func_name)
 
         self._occupation = {}
         self._total_abundance = {}
@@ -219,7 +229,8 @@ class AltHodMockFactory(MockFactory):
             self._gal_type_indices[gal_type] = slice(
                 first_galaxy_index, last_galaxy_index)
             first_galaxy_index = last_galaxy_index
-
+            self._remaining_methods_to_call.remove(occupation_func_name)
+            
         self.Ngals = np.sum(self._total_abundance.values())
 
         # Allocate memory for all additional halo properties, 
@@ -237,5 +248,6 @@ class AltHodMockFactory(MockFactory):
         dt = self.model._galprop_dtypes_to_allocate
         for key in dt.names:
             self.galaxy_table[key] = np.zeros(self.Ngals, dtype = dt[key].type)
+
 
 
