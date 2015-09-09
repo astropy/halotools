@@ -265,15 +265,18 @@ class MonteCarloGalProf(object):
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
+        # Retrieve the list of profile_params
         if 'halo_table' in kwargs:
             halo_table = kwargs['halo_table']
             profile_params = ([halo_table[profile_param_key] 
                 for profile_param_key in self.prof_param_keys])
+            halo_radius = halo_table[self.halo_boundary_key]
         else:
             try:
                 profile_params = kwargs['profile_params']
             except KeyError:
-                raise HalotoolsError("If not passing an input ``halo_table`` keyword argument to mc_solid_sphere,\n"
+                raise HalotoolsError("If not passing an input ``halo_table`` "
+                    "keyword argument to mc_solid_sphere,\n"
                     "must pass a ``profile_params`` keyword argument")
 
         # get random angles
@@ -293,10 +296,11 @@ class MonteCarloGalProf(object):
         y *= dimensionless_radial_distance
         z *= dimensionless_radial_distance
             
+        # Assign the value of the host_centric_distance halo_table column
         if 'halo_table' in kwargs:    
-            halo_table = kwargs['halo_table']
             try:
                 halo_table['host_centric_distance'][:] = dimensionless_radial_distance
+                halo_table['host_centric_distance'][:] *= halo_radius
             except KeyError:
                 msg = ("The mc_solid_sphere method of the MonteCarloGalProf class "
                     "requires a halo_table key ``host_centric_distance`` to be pre-allocated ")
@@ -332,30 +336,22 @@ class MonteCarloGalProf(object):
 
         x, y, z = self.mc_solid_sphere(**kwargs)
 
+        ### Retrieve the halo_radius
         if 'halo_table' in kwargs:    
             halo_table = kwargs['halo_table']
             halo_radius = halo_table[self.halo_boundary_key]
-            try:
-                # halo_table['host_centric_distance'] has already been assigned 
-                # a dimensionless_radial_distance by mc_solid_sphere
-                # Here we just scale this by the halo boundary
-                halo_table['host_centric_distance'][:] *= halo_radius
-            except KeyError:
-                msg = ("The mc_solid_sphere method of the MonteCarloGalProf class "
-                    "requires a halo_table key ``host_centric_distance`` to be pre-allocated ")
-                raise HalotoolsError(msg)
         else:
             try:
                 halo_radius = convert_to_ndarray(kwargs['halo_radius'])
             except KeyError:
-                raise HalotoolsError("If not passing an input ``halo_table`` keyword argument to mc_halo_centric_pos,\n"
+                raise HalotoolsError("If not passing an input ``halo_table`` "
+                    "keyword argument to mc_halo_centric_pos,\n"
                     "must pass the following keyword arguments:\n"
                     "``halo_radius``, ``profile_params``.")
 
         x *= halo_radius 
         y *= halo_radius 
         z *= halo_radius 
-
         return x, y, z
 
 
