@@ -30,6 +30,27 @@ class TestNFWPhaseSpace(TestCase):
         self.c10 = np.ones(Npts) + 10
         self.c5 = np.ones(Npts) + 5
 
+        npts = 1e3
+        Lbox = 250
+        zeros = np.zeros(npts)
+        x = np.random.uniform(0, Lbox, npts)
+        y = np.random.uniform(0, Lbox, npts)
+        z = np.random.uniform(0, Lbox, npts)
+        halo_vx = np.random.uniform(-250, 250, npts)
+        halo_vy = np.random.uniform(-250, 250, npts)
+        halo_vz = np.random.uniform(-250, 250, npts)
+        d = np.random.uniform(0, 0.25, npts)
+        rvir = np.zeros(npts) + 0.2
+        conc_nfw = np.random.uniform(1.5, 15, npts)
+        mass = np.zeros(npts) + 1e12
+        vvir = self.nfw.virial_velocity(total_mass=mass)
+
+        self._dummy_halo_table = Table({'halo_x': x, 'halo_y': y, 'halo_z': z, 
+            'host_centric_distance': d, 'halo_rvir': rvir, 'conc_NFWmodel': conc_nfw, 
+            'halo_vx': halo_vx, 'halo_vy': halo_vy, 'halo_vz': halo_vz, 'halo_vvir': vvir, 
+            'x': zeros, 'y': zeros, 'z': zeros, 'vx': zeros, 'vy': zeros, 'vz': zeros})
+
+
     def test_constructor(self):
         """
         """
@@ -97,11 +118,6 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(z > -1)
         assert np.all(z < 1)
 
-        t = Table({'c': self.c15})
-        with pytest.raises(HalotoolsError) as exc:
-            x, y, z = self.nfw.mc_solid_sphere(profile_params=[self.c15], seed=43, 
-                halo_table = t)
-
     def test_mc_halo_centric_pos(self):
         """ Method used to test 
         `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`. 
@@ -144,15 +160,15 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(norm10a < 2*r)
      
         t = Table({'c': self.c15})
-        with pytest.raises(HalotoolsError) as exc:
-            x, y, z = self.nfw.mc_halo_centric_pos(
-            halo_radius=halo_radius, profile_params=[self.c10], seed=43, halo_table = t)
-        t['host_centric_distance'] = 0.
-        x, y, z = self.nfw.mc_halo_centric_pos(
-            halo_radius=halo_radius, profile_params=[self.c10], seed=43, halo_table = t)
-        norm = t['host_centric_distance']
-        assert np.all(norm > 0)
-        assert np.all(norm < halo_radius)
+        # with pytest.raises(HalotoolsError) as exc:
+        #     x, y, z = self.nfw.mc_halo_centric_pos(
+        #     halo_radius=halo_radius, profile_params=[self.c10], seed=43, halo_table = t)
+        # t['host_centric_distance'] = 0.
+        # x, y, z = self.nfw.mc_halo_centric_pos(
+        #     halo_radius=halo_radius, profile_params=[self.c10], seed=43, halo_table = t)
+        # norm = t['host_centric_distance']
+        # assert np.all(norm > 0)
+        # assert np.all(norm < halo_radius)
 
     def test_mc_pos(self):
         """ Method used to test 
@@ -167,6 +183,8 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(x1 == x2)
         assert np.all(y1 == y2)
         assert np.all(z1 == z2)
+
+        self.nfw.mc_pos(halo_table = self._dummy_halo_table)
 
     def test_vrad_disp_from_lookup(self):
         """ Method used to test 
@@ -197,7 +215,7 @@ class TestNFWPhaseSpace(TestCase):
         v = 250.
         vvir = np.zeros_like(x) + v
         mc_vr = self.nfw.mc_radial_velocity(
-            x = x, virial_velocities = vvir, profile_params = [carr])
+            x = x, virial_velocities = vvir, profile_params = [carr], seed=43)
 
         vr_dispersion_from_monte_carlo = np.std(mc_vr)
         assert np.allclose(vr_dispersion_from_monte_carlo, vmax, rtol=0.05)
@@ -205,27 +223,8 @@ class TestNFWPhaseSpace(TestCase):
 
     def test_mc_vel(self):
 
-        npts = 1e3
-        Lbox = 250
-        zeros = np.zeros(npts)
-        x = np.random.uniform(0, Lbox, npts)
-        y = np.random.uniform(0, Lbox, npts)
-        z = np.random.uniform(0, Lbox, npts)
-        halo_vx = np.random.uniform(-250, 250, npts)
-        halo_vy = np.random.uniform(-250, 250, npts)
-        halo_vz = np.random.uniform(-250, 250, npts)
-        d = np.random.uniform(0, 0.25, npts)
-        rvir = np.zeros(npts) + 0.2
-        conc_nfw = np.random.uniform(1.5, 15, npts)
-        mass = np.zeros(npts) + 1e12
-        vvir = self.nfw.virial_velocity(total_mass=mass)
 
-        t = Table({'halo_x': x, 'halo_y': y, 'halo_z': z, 
-            'host_centric_distance': d, 'halo_rvir': rvir, 'conc_NFWmodel': conc_nfw, 
-            'halo_vx': halo_vx, 'halo_vy': halo_vy, 'halo_vz': halo_vz, 'halo_vvir': vvir, 
-            'x': zeros, 'y': zeros, 'z': zeros, 'vx': zeros, 'vy': zeros, 'vz': zeros})
-
-        self.nfw.mc_vel(t)
+        self.nfw.mc_vel(self._dummy_halo_table)
 
 
 
