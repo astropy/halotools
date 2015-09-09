@@ -317,7 +317,7 @@ class AltHodModelFactory(ModelFactory):
         feature_keys.remove('occupation')
         feature_keys.remove('profile')
         feature_keys.insert(0, 'occupation')
-        feature_keys.append('occupation')
+        feature_keys.append('profile')
 
         missing_calling_sequence_msg = ("\nComponent models typically have a list attribute called "
             "_mock_generation_calling_sequence.\nThis list determines the methods that are called "
@@ -326,8 +326,9 @@ class AltHodModelFactory(ModelFactory):
             "Only ignore this warning if you are sure this is not an error.\n")
 
         self._mock_generation_calling_sequence = []
-        for gal_type in self.gal_types:
-            for feature_key in feature_keys:
+
+        for feature_key in feature_keys:
+            for gal_type in self.gal_types:
                 component_model = self.model_blueprint[gal_type][feature_key]
                 if hasattr(component_model, '_mock_generation_calling_sequence'):
                     component_methods = [name + '_' + gal_type for name in component_model._mock_generation_calling_sequence]
