@@ -245,15 +245,17 @@ class MonteCarloGalProf(object):
 
         Parameters 
         ----------
-        profile_params : list
+        profile_params : list, optional 
             List of length-Ngals array(s) containing the input profile parameter(s). 
             In the simplest case, this list has a single element, 
             e.g. a single array of the NFW concentration values. 
             There should be a ``profile_params`` list item for 
             every parameter in the profile model, each item a length-Ngals array.
+            If ``profile_params`` is not passed, ``halo_table`` must be passed. 
 
         halo_table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
+            If ``halo_table`` is not passed, ``profile_params`` must be passed. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization
@@ -263,14 +265,28 @@ class MonteCarloGalProf(object):
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
         """
-        profile_params = kwargs['profile_params']
+        if 'halo_table' in kwargs:
+            halo_table = kwargs['halo_table']
+            profile_params = ([halo_table[profile_param_key] 
+                for profile_param_key in self.prof_param_keys])
+        else:
+            try:
+                profile_params = kwargs['profile_params']
+            except KeyError:
+                raise HalotoolsError("If not passing an input ``halo_table`` keyword argument to mc_solid_sphere,\n"
+                    "must pass a ``profile_params`` keyword argument")
+
         # get random angles
         Ngals = len(profile_params[0])
         x, y, z = self.mc_unit_sphere(Ngals, **kwargs)
 
         # Get the radial positions of the galaxies scaled by the halo radius
+        if 'seed' in kwargs:
+            seed = kwargs['seed']
+        else:
+            seed = None
         dimensionless_radial_distance = self._mc_dimensionless_radial_distance(
-            **kwargs) 
+            profile_params = profile_params, seed = seed) 
 
         # get random positions within the solid sphere
         x *= dimensionless_radial_distance
@@ -316,13 +332,9 @@ class MonteCarloGalProf(object):
 
         x, y, z = self.mc_solid_sphere(**kwargs)
 
-        halo_radius = convert_to_ndarray(kwargs['halo_radius'])
-        x *= halo_radius 
-        y *= halo_radius 
-        z *= halo_radius 
-
         if 'halo_table' in kwargs:    
             halo_table = kwargs['halo_table']
+            halo_radius = halo_table[self.halo_boundary_key]
             try:
                 # halo_table['host_centric_distance'] has already been assigned 
                 # a dimensionless_radial_distance by mc_solid_sphere
@@ -332,6 +344,17 @@ class MonteCarloGalProf(object):
                 msg = ("The mc_solid_sphere method of the MonteCarloGalProf class "
                     "requires a halo_table key ``host_centric_distance`` to be pre-allocated ")
                 raise HalotoolsError(msg)
+        else:
+            try:
+                halo_radius = convert_to_ndarray(kwargs['halo_radius'])
+            except KeyError:
+                raise HalotoolsError("If not passing an input ``halo_table`` keyword argument to mc_halo_centric_pos,\n"
+                    "must pass the following keyword arguments:\n"
+                    "``halo_radius``, ``profile_params``.")
+
+        x *= halo_radius 
+        y *= halo_radius 
+        z *= halo_radius 
 
         return x, y, z
 
@@ -384,11 +407,7 @@ class MonteCarloGalProf(object):
 
         if 'halo_table' in kwargs:
             halo_table = kwargs['halo_table']
-            profile_params = ([halo_table[profile_param_key] 
-                for profile_param_key in self.prof_param_keys])
-            halo_radius = halo_table[self.halo_boundary_key]
-            x, y, z = self.mc_halo_centric_pos(halo_radius, 
-                *profile_params, **kwargs)
+            x, y, z = self.mc_halo_centric_pos(**kwargs)
             halo_table['x'][:] += x
             halo_table['y'][:] += y
             halo_table['z'][:] += z
