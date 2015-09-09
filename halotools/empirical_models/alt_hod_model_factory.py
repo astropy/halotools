@@ -309,15 +309,7 @@ class AltHodModelFactory(ModelFactory):
     def _set_calling_sequence(self, **kwargs):
         """
         """
-        if 'mock_generation_calling_sequence' in kwargs:
-            self._mock_generation_calling_sequence = kwargs['mock_generation_calling_sequence']
-            return 
-
-        feature_keys = self.model_blueprint[self.model_blueprint.keys()[0]].keys()
-        feature_keys.remove('occupation')
-        feature_keys.remove('profile')
-        feature_keys.insert(0, 'occupation')
-        feature_keys.append('profile')
+        self._mock_generation_calling_sequence = []
 
         missing_calling_sequence_msg = ("\nComponent models typically have a list attribute called "
             "_mock_generation_calling_sequence.\nThis list determines the methods that are called "
@@ -325,16 +317,37 @@ class AltHodModelFactory(ModelFactory):
             "The ``%s`` component of the gal_type = ``%s`` population has no such method.\n"
             "Only ignore this warning if you are sure this is not an error.\n")
 
-        self._mock_generation_calling_sequence = []
+        ###############
+        # If provided, retrieve the input list of tuples defining the calling sequence.
+        # Otherwise, build the tuple list according to the default calling sequence
+        if 'mock_generation_calling_sequence' in kwargs:
+            sequence_tuples = kwargs['mock_generation_calling_sequence']
+        else:
+            sequence_tuples = []
+            feature_keys = self.model_blueprint[self.model_blueprint.keys()[0]].keys()
+            feature_keys.remove('occupation')
+            feature_keys.remove('profile')
+            feature_keys.insert(0, 'occupation')
+            feature_keys.append('profile')
+            for feature_key in feature_keys:
+                for gal_type in self.gal_types:
+                    sequence_tuples.append((gal_type, feature_key))
 
-        for feature_key in feature_keys:
-            for gal_type in self.gal_types:
-                component_model = self.model_blueprint[gal_type][feature_key]
-                if hasattr(component_model, '_mock_generation_calling_sequence'):
-                    component_methods = [name + '_' + gal_type for name in component_model._mock_generation_calling_sequence]
-                    self._mock_generation_calling_sequence.extend(component_methods)
-                else:
-                    warn(missing_calling_sequence_msg % (feature_key, gal_type))
+        ###############
+        # Loop over the list of tuples and successively append 
+        # each component model's calling sequence to the composite model calling sequence
+        for component_model_tuple in sequence_tuples:
+            gal_type = component_model_tuple[0]
+            feature_key = component_model_tuple[1]
+            component_model = self.model_blueprint[gal_type][feature_key]
+            if hasattr(component_model, '_mock_generation_calling_sequence'):
+                component_method_list = (
+                    [name + '_' + gal_type 
+                    for name in component_model._mock_generation_calling_sequence]
+                    )
+                self._mock_generation_calling_sequence.extend(component_method_list)
+            else:
+                warn(missing_calling_sequence_msg % (feature_key, gal_type))
 
 
     def _test_blueprint_consistency(self):
