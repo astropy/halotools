@@ -16,9 +16,13 @@ from .model_helpers import bind_default_kwarg_mixin_safe
 __all__ = ['ConcMass']
 
 class ConcMass(object):
-    """ Container class for commonly used concentration-mass 
-    relations in the literature. 
+    """ Container class for commonly used concentration-mass relations in the literature. 
 
+    `ConcMass` can be instantiated as a stand-alone class, or used as an orthogonal mix-in 
+    with the `~halotools.empirical_models.NFWProfile` or any of its sub-classes. 
+
+    Notes 
+    ------
     The only currently supported model is `dutton_maccio14`.
 
     """
@@ -86,7 +90,8 @@ class ConcMass(object):
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
-            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
+            raise KeyError("Must pass one of the following keyword arguments "
+                "to the compute_concentration method:\n"
                 "``halo_table`` or ``prim_haloprop``")
 
         conc_mass_func = getattr(self, self.conc_mass_model)
