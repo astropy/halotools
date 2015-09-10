@@ -73,16 +73,6 @@ class MockFactory(object):
             the input to the function must be a length-Nsubhalos structured numpy array or Astropy table; 
             the function output must be a length-Nsubhalos boolean array that will be used as a mask. 
 
-        new_haloprop_func_dict : function object, optional  
-            Dictionary of function objects used to create additional halo properties 
-            by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
-            be the name of a new column of the halo catalog; each dict value is a function 
-            object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halo_table`` keyword argument. 
-            The input ``model`` model object has its own new_haloprop_func_dict; 
-            if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
-            contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
-            ``model``, and exception will be raised. 
         """
 
         required_kwargs = ['snapshot', 'model']
@@ -99,9 +89,7 @@ class MockFactory(object):
         except:
             pass   
 
-
         self._build_additional_haloprops_list(**kwargs)
-        self._build_new_haloprop_func_dict(**kwargs)
 
         if 'halocut_funcobj' in kwargs.keys():
             self.halocut_funcobj = kwargs['halocut_funcobj']
@@ -130,69 +118,6 @@ class MockFactory(object):
             else:
                 self.additional_haloprops.extend(kwargs['additional_haloprops'])
         self.additional_haloprops = list(set(self.additional_haloprops))
-
-
-    def _build_new_haloprop_func_dict(self, **kwargs):
-        """ Private method tests self-consistency of the new_haloprop_func_dict 
-        dictionaries with the halo catalog. 
-
-        """
-        # Test consistency of the keyword argument new_haloprop_func_dict
-        if 'new_haloprop_func_dict' in kwargs.keys():
-            kwargs_input_haloprop_func_dict = kwargs['new_haloprop_func_dict']
-
-            # Test that kwargs_input_haloprop_func_dict does not have keys that 
-            # overlap with the halo catalog.  
-            for key in kwargs_input_haloprop_func_dict.keys():
-                if key in self.halo_table.keys():
-                    raise KeyError("There already exists a halo property "
-                        "with the name %s.\n However, the keyword argument  "
-                        "new_haloprop_func_dict contains this key.\n"
-                        "If the %s column is already the column you need, "
-                        "then you should delete the corresponding entry of new_haloprop_func_dict.\n"
-                        "Otherwise, you should rename the key "
-                        "that you are using new_haloprop_func_dict to create." % (key, key))
-        else:
-            kwargs_input_haloprop_func_dict = {}
-
-        # Test consistency of the new_haloprop_func_dict bound to the composite model
-        if hasattr(self.model, 'new_haloprop_func_dict'):
-            model_haloprop_func_dict = self.model.new_haloprop_func_dict
-
-            # Test that model_haloprop_func_dict does not have keys that 
-            # overlap with the halo catalog.  
-            for key in model_haloprop_func_dict.keys():
-                if key in self.halo_table.keys():
-                    raise KeyError("There already exists a halo property "
-                        "with the name %s.\n However, the composite model's "
-                        "new_haloprop_func_dict contains this key.\n"
-                        "If the %s column is already the column you need, "
-                        "then you should delete the corresponding entry of new_haloprop_func_dict.\n"
-                        "Otherwise, you should rename the key "
-                        "that you are using new_haloprop_func_dict to create." % (key, key))
-        else:
-            model_haloprop_func_dict = {}
-
-        kwargs_input_haloprop_func_set = set(kwargs_input_haloprop_func_dict)
-        model_haloprop_func_set = set(model_haloprop_func_dict)
-        intersection = kwargs_input_haloprop_func_set.intersection(model_haloprop_func_set)
-        if intersection == set():
-            composite_haloprop_func_dict = dict(
-                kwargs_input_haloprop_func_dict.items() + 
-                model_haloprop_func_dict.items()
-                )
-        else:
-            repeated_key = list(intersection)[0]
-            raise KeyError("The dict key %s appears both in "
-                " the new_haloprop_func_dict passed to "
-                "the mock factory as a keyword argument, "
-                "and also appears in the new_haloprop_func_dict"
-                "bound to the model. "
-                "You must disambiguate either by providing a new key name, "
-                "or by deleting this entry from one of the dictionaries. " % repeated_key)
-
-        if composite_haloprop_func_dict != {}:
-            self.new_haloprop_func_dict = composite_haloprop_func_dict
 
     @property 
     def number_density(self):
@@ -291,7 +216,10 @@ class MockFactory(object):
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_clustering method is only available "
-                " if the mock_observables sub-package has been compiled\n")
+                " if the mock_observables sub-package has been compiled.\n"
+                "You are likely encountering this error because you are using \nyour Halotools repository "
+                "as your working directory."
+                )
             raise HalotoolsError(msg)
 
         Nthreads = cpu_count()
@@ -409,7 +337,10 @@ class MockFactory(object):
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_matter_cross_clustering method is only available "
-                " if the mock_observables sub-package has been compiled\n")
+                " if the mock_observables sub-package has been compiled\n"
+                "You are likely encountering this error because you are using \nyour Halotools repository "
+                "as your working directory."
+                )
             raise HalotoolsError(msg)
 
         nptcl = np.max([model_defaults.default_nptcls, len(self.galaxy_table)])
@@ -494,7 +425,10 @@ class MockFactory(object):
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_fof_group_ids method is only available "
-                " if the mock_observables sub-package has been compiled\n")
+                " if the mock_observables sub-package has been compiled\n"
+                "You are likely encountering this error because you are using \nyour Halotools repository "
+                "as your working directory."
+                )
             raise HalotoolsError(msg)
 
         Nthreads = cpu_count()
@@ -564,16 +498,6 @@ class HodMockFactory(MockFactory):
             but will not call the ``model`` to populate the ``galaxy_table`` 
             with mock galaxies and their observable properties. Default is ``True``. 
 
-        new_haloprop_func_dict : function object, optional  
-            Dictionary of function objects used to create additional halo properties 
-            by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
-            be the name of a new column of the halo catalog; each dict value is a function 
-            object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halo_table`` keyword argument. 
-            The input ``model`` model object has its own new_haloprop_func_dict; 
-            if the keyword argument ``new_haloprop_func_dict`` passed to `HodMockFactory` 
-            contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
-            ``model``, and exception will be raised. 
         """
 
         super(HodMockFactory, self).__init__(populate=populate, **kwargs)
@@ -623,8 +547,8 @@ class HodMockFactory(MockFactory):
         ############################################################
 
         ### Create new columns of the halo catalog, if applicable
-        if hasattr(self, 'new_haloprop_func_dict'):
-            for new_haloprop_key, new_haloprop_func in self.new_haloprop_func_dict.iteritems():
+        if hasattr(self.model, 'new_haloprop_func_dict'):
+            for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
                 self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table=self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
 
@@ -789,17 +713,6 @@ class SubhaloMockFactory(MockFactory):
             If set to ``False``, the class will perform all pre-processing tasks 
             but will not call the ``model`` to populate the ``galaxy_table`` 
             with mock galaxies and their observable properties. Default is ``True``. 
-
-        new_haloprop_func_dict : function object, optional  
-            Dictionary of function objects used to create additional halo properties 
-            by `preprocess_halo_catalog`. Each dict key of ``new_haloprop_func_dict`` will 
-            be the name of a new column of the halo catalog; each dict value is a function 
-            object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halo_table`` keyword argument. 
-            The input ``model`` model object has its own new_haloprop_func_dict; 
-            if the keyword argument ``new_haloprop_func_dict`` passed to `HodMockFactory` 
-            contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
-            ``model``, and exception will be raised. 
         """
 
         super(SubhaloMockFactory, self).__init__(populate=populate, **kwargs)
