@@ -9,7 +9,6 @@ from . import model_defaults, mock_factories, smhm_components
 from . import hod_components as hoc
 from . import gal_prof_factory as gpf
 from . import halo_prof_components as hpc
-from . import gal_prof_components as gpc
 
 from ..sim_manager import sim_defaults
 
