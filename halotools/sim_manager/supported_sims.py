@@ -33,6 +33,11 @@ from astropy import cosmology
 from astropy import units as u
 from astropy.table import Table
 
+try:
+    import h5py
+except ImportError:
+    warn("Most of the functionality of the catalog_manager module requires h5py to be installed,\n"
+        "which can be accomplished either with pip or conda")
 
 __all__ = (
     ['NbodySimulation', 'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo', 
@@ -250,6 +255,10 @@ class HaloCatalog(object):
         >>> particles = default_halocat.ptcl_table # doctest: +SKIP
 
         """
+        try:
+            import h5py
+        except ImportError:
+            raise HalotoolsError("Must have h5py package installed to use this feature")
         self.catman = catalog_manager.CatalogManager()
 
         fname, closest_redshift = self._retrieve_closest_halo_table_fname(
