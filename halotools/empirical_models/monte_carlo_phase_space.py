@@ -526,7 +526,15 @@ class MonteCarloGalProf(object):
         return radial_velocities
 
     def mc_vel(self, halo_table):
-        """
+        """ Method assigns a Monte Carlo realization of the Jeans velocity 
+        solution to the halos in the input ``halo_table``. 
+
+        Parameters 
+        -----------
+        halo_table : Astropy Table 
+            `astropy.table.Table` object storing the halo catalog. 
+            Calling the `mc_vel` method will over-write the existing values of 
+            the ``vx``, ``vy`` and ``vz`` columns. 
         """
         try:
             d = halo_table['host_centric_distance']
