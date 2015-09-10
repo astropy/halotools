@@ -8,7 +8,7 @@ used by many of the hod model components.
 
 __all__ = (
     ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
-    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype']
+    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 'orthogonal_mixin_kwargs_check']
     )
 
 import numpy as np
@@ -368,6 +368,18 @@ def create_composite_dtype(dtype_list):
                     composite_list.append((name, dt[name].type))
     composite_dtype = np.dtype(composite_list)
     return composite_dtype
+
+def orthogonal_mixin_kwargs_check(obj, keyword_argument):
+    """ Function used to ensure that a keyword argument passed to the constructor 
+    of an orthogonal mix-in class is not already an attribute bound to self.
+    """
+    if hasattr(obj, keyword_argument):
+        clname = obj.__class__.__name__
+        raise HalotoolsError("Do not pass the  ``%s`` keyword argument " 
+        "to the constructor of the %s class"
+            "when using the %s class as an orthogonal mix-in" % (keyword_argument, clname, clname))
+    else:
+        pass
 
 
 
