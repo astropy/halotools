@@ -78,6 +78,11 @@ class ConcMass(object):
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
+        Returns 
+        -------
+        c : array_like
+            Concentrations of the input halos. 
+
         Notes 
         -----
         The testing for this model can be found in 
