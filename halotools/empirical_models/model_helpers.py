@@ -8,7 +8,7 @@ used by many of the hod model components.
 
 __all__ = (
     ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
-    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 'orthogonal_mixin_kwargs_check']
+    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 'bind_default_kwarg_mixin_safe']
     )
 
 import numpy as np
@@ -369,17 +369,46 @@ def create_composite_dtype(dtype_list):
     composite_dtype = np.dtype(composite_list)
     return composite_dtype
 
-def orthogonal_mixin_kwargs_check(obj, keyword_argument):
+def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, default_value):
     """ Function used to ensure that a keyword argument passed to the constructor 
     of an orthogonal mix-in class is not already an attribute bound to self.
+    If it is safe to bind the keyword_argument to the object, 
+    `bind_default_kwarg_mixin_safe` will do so.
+
+    Parameters 
+    ----------
+    obj : class instance 
+        Instance of the class to which we want to bind the input ``keyword_argument``.
+
+    keyword_argument : string 
+        name of the attribute that will be bound to the object if the action is deemed mix-in safe.
+
+    constructor_kwargs : dict 
+        keyword argument dictionary passed to the constructor of the input ``obj``.
+
+    default_value : object 
+        Whatever the default value for the attribute should be if ``keyword_argument`` does not 
+        appear in kwargs nor is it already bound to the ``obj``.
+
+    Notes 
+    ------
+    See the constructor of `~halotools.empirical_models.conc_mass_models.ConcMass` for a usage example.    
     """
     if hasattr(obj, keyword_argument):
-        clname = obj.__class__.__name__
-        raise HalotoolsError("Do not pass the  ``%s`` keyword argument " 
-        "to the constructor of the %s class"
-            "when using the %s class as an orthogonal mix-in" % (keyword_argument, clname, clname))
+        if keyword_argument in constructor_kwargs:
+            clname = obj.__class__.__name__
+            msg = ("Do not pass the  ``%s`` keyword argument "
+                "to the constructor of the %s class when using the %s class "
+                "as an orthogonal mix-in" % (keyword_argument, clname, clname))
+            raise HalotoolsError(msg)
+        else:
+            pass
     else:
-        pass
+        if keyword_argument in constructor_kwargs:
+            setattr(obj, keyword_argument, constructor_kwargs[keyword_argument])
+        else:
+            setattr(obj, keyword_argument, default_value)
+
 
 
 

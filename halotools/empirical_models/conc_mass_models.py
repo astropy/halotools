@@ -11,6 +11,7 @@ import model_defaults
 from ..sim_manager import sim_defaults
 import model_defaults
 from ..custom_exceptions import *
+from .model_helpers import bind_default_kwarg_mixin_safe
 
 __all__ = ['ConcMass']
 
@@ -32,36 +33,29 @@ class ConcMass(object):
         redshift : float, optional  
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        prim_haloprop_key : string, optional  
-            Specifies the column name of the mass-like halo property, e.g., 'mvir' or 'm200b'. 
-            Default is set in `~halotools.empirical_models.sim_defaults`.
+        mdef: str, optional 
+            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+             Default is set in `~halotools.empirical_models.model_defaults`.
 
         conc_mass_model : string, optional  
             Specifies the calibrated fitting function used to model the concentration-mass relation. 
-             Default is set in `~halotools.empirical_models.sim_defaults`.
+             Default is set in `~halotools.empirical_models.model_defaults`.
 
         Examples 
         ---------
         >>> conc_mass_model = ConcMass()
-        >>> conc_mass_model = ConcMass(redshift = 2, prim_haloprop_key = 'halo_m500c')
+        >>> conc_mass_model = ConcMass(redshift = 2, mdef = '500c')
 
         """
         self.conc_mass_model = conc_mass_model
 
-        def bind_kwarg_mixin_safe(kwlist):
-            for kw in kwlist:
-                if kw in kwargs:
-                    if hasattr(self, kw):
-                        msg = ("When using ConcMass as a mix-in class, do not pass "
-                            "%s to the constructor as this should already be bound to "
-                            "the dominant orthogonal class")
-                        raise HalotoolsError(msg % kw)
-                    else:
-                        setattr(self, kw, kwargs[kw])
-                else:
-                    pass
+        bind_default_kwarg_mixin_safe(self, 'cosmology', kwargs, sim_defaults.default_cosmology)
+        bind_default_kwarg_mixin_safe(self, 'redshift', kwargs, sim_defaults.default_redshift)
+        bind_default_kwarg_mixin_safe(self, 'mdef', kwargs, model_defaults.halo_mass_definition)
 
-        bind_kwarg_mixin_safe(['cosmology', 'redshift', 'prim_haloprop_key'])
+        if not hasattr(self, 'halo_mass_key'):
+            self.halo_mass_key = model_defaults.get_halo_mass_key(self.mdef)
+
 
     def compute_concentration(self, **kwargs):
         """ Method used to evaluate the mean NFW concentration as a function of 
@@ -88,7 +82,7 @@ class ConcMass(object):
         """
         # Retrieve the array storing the mass-like variable
         if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+            mass = kwargs['halo_table'][self.halo_mass_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
