@@ -836,11 +836,6 @@ class Leauthaud11Sats(OccupationComponent):
         the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the 
         lowest redshift bin. 
 
-        Notes 
-        -----
-        These values are only for ballpark purposes, and are 
-        not self-consistent with arXiv:1104.0928, 
-        because a different stellar-to-halo-mass relation is used here. 
         """
 
         self.param_dict['alphasat'] = 1.0
