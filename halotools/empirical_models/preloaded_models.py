@@ -20,13 +20,13 @@ def Zheng07(**kwargs):
     with first moment given by an ``erf`` function; the class governing this 
     behavior is `~halotools.empirical_models.hod_components.Zheng07Cens`. 
     Central galaxies are assumed to reside at the exact center of the host halo; 
-    the class governing this behavior is `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
+    the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`. 
 
     Satellite occupation statistics are given by a Poisson distribution 
     with first moment given by a power law that has been truncated at the low-mass end; 
     the class governing this behavior is `~halotools.empirical_models.hod_components.Zheng07Sats`; 
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
-    `~halotools.empirical_models.halo_prof_components.NFWProfile` class. 
+    `~halotools.empirical_models.NFWPhaseSpace` class. 
 
     This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
     which followed the instructions contained in `~halotools.empirical_models.Zheng07_blueprint`. 
@@ -61,8 +61,8 @@ def Zheng07(**kwargs):
     load a snapshot into memory and call the built-in ``populate_mock`` method. 
     For illustration purposes, we'll use a small, fake simulation:
 
-    >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot)
+    >>> fake_snapshot = FakeSim() # doctest: +SKIP
+    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     """
     blueprint = preloaded_hod_blueprints.Zheng07_blueprint(**kwargs)
@@ -77,13 +77,13 @@ def Leauthaud11(**kwargs):
     with first moment given by an ``erf`` function; the class governing this 
     behavior is `~halotools.empirical_models.hod_components.Leauthaud11Cens`. 
     Central galaxies are assumed to reside at the exact center of the host halo; 
-    the class governing this behavior is `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
+    the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`. 
 
     Satellite occupation statistics are given by a Poisson distribution 
     with first moment given by a power law that has been truncated at the low-mass end; 
     the class governing this behavior is `~halotools.empirical_models.hod_components.Leauthaud11Sats`; 
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
-    `~halotools.empirical_models.halo_prof_components.NFWProfile` class. 
+    `~halotools.empirical_models.NFWPhaseSpace` class. 
 
     This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
     which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_blueprint`. 
@@ -116,7 +116,7 @@ def Leauthaud11(**kwargs):
     For illustration purposes, we'll use a small, fake simulation:
 
     >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot)
+    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     """
     blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
@@ -188,7 +188,7 @@ def SmHmBinarySFR(**kwargs):
     For illustration purposes, we'll use a small, fake simulation:
 
     >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot)
+    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     """
 
@@ -331,13 +331,13 @@ def Campbell15(**kwargs):
     `~halotools.sim_manager.HaloCatalog` class. 
 
     >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot)
+    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     We can easily build alternative versions of models and mocks by calling the 
     `Campbell15` function with different arguments:
 
     >>> model_with_scatter = Campbell15(correlation_strength = 0.8, sec_haloprop_key = 'halo_zhalf')
-    >>> model_with_scatter.populate_mock(snapshot = fake_snapshot)
+    >>> model_with_scatter.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
 
     """
