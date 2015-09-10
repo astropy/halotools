@@ -116,6 +116,7 @@ class AnalyticDensityProf(object):
         """
         Physical density of the halo at the input radius, 
         given in units of :math:`h^{3}/{\\rm Mpc}^{3}`. 
+        
         Parameters 
         -----------
         radius : array_like 
@@ -135,7 +136,6 @@ class AnalyticDensityProf(object):
             Physical density of a dark matter halo of the input ``mass`` 
             at the input ``radius``. Result is an array of the 
             dimension as the input ``radius``, reported in units of :math:`h^{3}/Mpc^{3}`. 
-
         """
         halo_radius = self.halo_mass_to_halo_radius(mass)
         x = radius/halo_radius

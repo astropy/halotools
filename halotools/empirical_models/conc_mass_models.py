@@ -83,7 +83,7 @@ class ConcMass(object):
         Notes 
         -----
         The testing for this model can be found in 
-        `~halotools.empirical_models.test_empirical_models.test_halo_prof_param_components`. 
+        `~halotools.empirical_models.test_empirical_models.test_conc_mass`. 
 
         """
         # Retrieve the array storing the mass-like variable
