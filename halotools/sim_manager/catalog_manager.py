@@ -37,6 +37,12 @@ from functools import partial
 
 from ..custom_exceptions import *
 
+try:
+    import h5py
+except ImportError:
+    warn("Most of the functionality of the catalog_manager module requires h5py to be installed,\n"
+        "which can be accomplished either with pip or conda")
+
 unsupported_simname_msg = "Input simname ``%s`` is not recognized by Halotools"
 
 class CatalogManager(object):
@@ -1026,6 +1032,10 @@ class CatalogManager(object):
         particles : Astropy Table 
             `~astropy.table.Table` object storing position and velocity of particles. 
         """        
+        try:
+            import h5py
+        except ImportError:
+            raise HalotoolsError("Must have h5py package installed to use this feature")
 
         fname, z = self.closest_catalog_in_cache(simname = simname, 
             catalog_type='particles', desired_redshift=desired_redshift, **kwargs)
