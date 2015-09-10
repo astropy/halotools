@@ -7,8 +7,7 @@ Module containing some commonly used composite HOD model blueprints.
 
 from . import model_defaults, mock_factories, smhm_components
 from . import hod_components as hoc
-from . import gal_prof_factory as gpf
-from . import halo_prof_components as hpc
+from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
 from ..sim_manager import sim_defaults
 
@@ -51,9 +50,7 @@ def Zheng07_blueprint(threshold = model_defaults.default_luminosity_threshold, *
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
-    cen_profile = gpf.IsotropicGalProf(
-        gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
-
+    cen_profile = TrivialPhaseSpace()
     cen_model_dict['profile'] = cen_profile
 
     ### Build model for satellites
@@ -63,8 +60,7 @@ def Zheng07_blueprint(threshold = model_defaults.default_luminosity_threshold, *
     occu_sat_model = hoc.Zheng07Sats(threshold = threshold)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
-    sat_profile = gpf.IsotropicGalProf(
-        gal_type=sat_key, halo_prof_model=hpc.NFWProfile)
+    sat_profile = NFWPhaseSpace()    
     sat_model_dict['profile'] = sat_profile
 
     model_blueprint = {
@@ -107,8 +103,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
-    cen_profile = gpf.IsotropicGalProf(
-        gal_type=cen_key, halo_prof_model=hpc.TrivialProfile)
+    cen_profile = TrivialPhaseSpace()
 
     cen_model_dict['profile'] = cen_profile
 
@@ -119,8 +114,7 @@ def Leauthaud11_blueprint(threshold = model_defaults.default_stellar_mass_thresh
     occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
-    sat_profile = gpf.IsotropicGalProf(
-        gal_type=sat_key, halo_prof_model=hpc.NFWProfile)
+    sat_profile = NFWPhaseSpace()    
     sat_model_dict['profile'] = sat_profile
 
     model_blueprint = {
@@ -199,8 +193,7 @@ def Hearin15_blueprint(central_assembias_strength = 1,
     cen_model_dict['occupation'] = cen_ab_component
 
     # Build the profile model
-    cen_profile = gpf.IsotropicGalProf(
-        gal_type='centrals', halo_prof_model=hpc.TrivialProfile)
+    cen_profile = TrivialPhaseSpace()
     cen_model_dict['profile'] = cen_profile
 
     ##############################
@@ -221,8 +214,7 @@ def Hearin15_blueprint(central_assembias_strength = 1,
     sat_model_dict['occupation'] = sat_ab_component
 
     # Build the profile model
-    sat_profile = gpf.IsotropicGalProf(
-        gal_type='satellites', halo_prof_model=hpc.NFWProfile)
+    sat_profile = NFWPhaseSpace()    
     sat_model_dict['profile'] = sat_profile
 
     model_blueprint = {'centrals': cen_model_dict, 'satellites': sat_model_dict}

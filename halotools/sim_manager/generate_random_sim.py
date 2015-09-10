@@ -92,6 +92,7 @@ class FakeSim(object):
 
 		d = {
 			'halo_id': halo_id, 
+			'halo_hostid': halo_id, 
 			'halo_upid': upid, 
 			'halo_mvir': mvir, 
 			'halo_mpeak': mpeak, 
@@ -110,6 +111,11 @@ class FakeSim(object):
 			}
 
 		return Table(d)
+
+	@property 
+	def host_halos(self):
+		mask = self.halo_table['halo_hostid'] == self.halo_table['halo_id']
+		return self.halo_table[mask]
 
 	@property 
 	def ptcl_table(self):

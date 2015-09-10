@@ -5,8 +5,6 @@ import numpy as np
 from .. import preloaded_hod_blueprints
 from .. import model_defaults
 from .. import hod_components
-from .. import gal_prof_factory
-from .. import halo_prof_components
 
 __all__ = ['test_Zheng07_blueprint']
 
@@ -66,17 +64,6 @@ def test_Zheng07_blueprint():
 		assert isinstance(gal_type_blueprint['occupation'], 
 			hod_components.OccupationComponent)
 
-		assert (
-			isinstance(gal_type_blueprint['profile'], gal_prof_factory.IsotropicGalProf) or 
-			isinstance(gal_type_blueprint['profile'], halo_prof_components.HaloProfileModel)
-			)
-
-
-		# Test the profile model component
-		if isinstance(gal_type_blueprint['profile'], gal_prof_factory.IsotropicGalProf):
-			component_prof = gal_type_blueprint['profile']
-			assert component_prof.gal_type == gal_type
-			assert set(component_prof.prof_param_keys).issubset(['NFWmodel_conc'])
 
 
 
