@@ -94,11 +94,12 @@ class AnalyticDensityProf(object):
         Returns 
         -------
         dimensionless_density: array_like 
-            Density of a dark matter halo of the input ``mass`` 
-            at the input ``radius``, scaled by the density threshold for this 
+            Dimensionless density of a dark matter halo 
+            at the input ``x``, scaled by the density threshold for this 
             halo mass definition, cosmology, and redshift. 
-            Result is an array of the dimension as the input ``x``, which equals the 
-            physical `mass_density` when multiplied by the appropriate `density_threshold`. 
+            Result is an array of the dimension as the input ``x``. 
+            The physical `mass_density` is simply the `dimensionless_mass_density` 
+            multiplied by the appropriate physical density threshold. 
 
         Notes 
         -----
@@ -459,19 +460,19 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """
         Parameters 
         ----------
-        conc_mass_model : string, optional  
-            Specifies the calibrated fitting function used to model the concentration-mass relation. 
-             Default is set in `~halotools.empirical_models.sim_defaults`.
-
         cosmology : object, optional 
             Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
 
         redshift : float, optional  
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        halo_boundary : string, optional  
-            String giving the column name of the halo catalog that stores the boundary of the halo. 
-            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+        mdef: str, optional 
+            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+             Default is set in `~halotools.empirical_models.model_defaults`.
+
+        conc_mass_model : string, optional  
+            Specifies the calibrated fitting function used to model the concentration-mass relation. 
+             Default is set in `~halotools.empirical_models.model_defaults`.
 
         Examples 
         --------
@@ -493,18 +494,65 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         self.publications = ['arXiv:9611107', 'arXiv:0002395', 'arXiv:1402.7073']
 
+        # Grab the docstring of the ConcMass function and bind it to the conc_NFWmodel function
         self.conc_NFWmodel.__func__.__doc__ = getattr(self, self.conc_mass_model).__doc__
 
     def conc_NFWmodel(self, **kwargs):
-        """ marf
+        """ Method computes the NFW concentration as a function of the input halos according to the 
+        ``conc_mass_model`` bound to the `NFWProfile` instance. 
+
+        Parameters
+        ----------        
+        prim_haloprop : array, optional  
+            Array of mass-like variable upon which occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+
+        halo_table : object, optional  
+            Data table storing halo catalog. 
+            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+
+        Returns 
+        -------
+        c : array_like
+            Concentrations of the input halos. 
+
+        Notes 
+        ------
+        The behavior of this function is not defined here, but in the 
+        `~halotools.empirical_models.ConcMass` class.
         """
         return self.compute_concentration(**kwargs)
 
     def dimensionless_mass_density(self, x, conc):
         """
-        x: array_like
-            Halo-centric distance scaled by the halo boundary, 
-            such that :math:`0 < x < 1`. Can be a scalar or a numpy array.
+        Physical density of the halo scaled by the density threshold of the 
+        mass definition:
+
+        `dimensionless_mass_density` :math:`\\equiv \\rho(x) / \\rho_{\\rm thresh}`, 
+        where :math:`x\\equiv r/R_{\\rm vir}`, and :math:`\\rho_{\\rm thresh}` is 
+        a function of the halo mass definition, cosmology and redshift, 
+        and is computed via the 
+        `~halotools.empirical_models.profile_helpers.density_threshold` function. 
+
+        Parameters 
+        -----------
+        x : array_like 
+            Halo-centric distance scaled by the halo boundary, so that 
+            :math:`0 <= x <= 1`. Can be a scalar or numpy array
+
+        conc : array_like
+            Concentrations of the input halos. 
+
+        Returns 
+        -------
+        dimensionless_density: array_like 
+            Dimensionless density of a dark matter halo 
+            at the input ``x``, scaled by the density threshold for this 
+            halo mass definition, cosmology, and redshift. 
+            Result is an array of the dimension as the input ``x``. 
+            The physical `mass_density` is simply the `dimensionless_mass_density` 
+            multiplied by the appropriate physical density threshold. 
+
         """
         numerator = conc**3/(3.*self.g(conc))
         denominator = conc*x*(1 + conc*x)**2
@@ -568,19 +616,19 @@ class BiasedNFWProfile(NFWProfile):
         """
         Parameters 
         ----------
-        conc_mass_model : string, optional  
-            Specifies the calibrated fitting function used to model the concentration-mass relation. 
-             Default is set in `~halotools.empirical_models.sim_defaults`.
-
         cosmology : object, optional 
             Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
 
         redshift : float, optional  
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        halo_boundary : string, optional  
-            String giving the column name of the halo catalog that stores the boundary of the halo. 
-            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+        mdef: str, optional 
+            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+             Default is set in `~halotools.empirical_models.model_defaults`.
+
+        conc_mass_model : string, optional  
+            Specifies the calibrated fitting function used to model the concentration-mass relation. 
+             Default is set in `~halotools.empirical_models.model_defaults`.
 
         """
 
