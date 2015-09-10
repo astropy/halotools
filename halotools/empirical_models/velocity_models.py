@@ -27,6 +27,20 @@ class IsotropicJeansVelocity(object):
     by solving the Jeans equation of the underlying potential. 
     """
 
+    def __init__(self, velocity_bias = False):
+        """
+        Parameters 
+        -----------
+        velocity_bias : bool, optional 
+            Boolean specifying whether the galaxy velocities are biased 
+            with respect to the halo velocities. If True, ``param_dict`` will have a 
+            parameter called ``velbias_satellites`` that multiplies the underlying 
+            Jeans solution for the halo radial velocity dispersion by an overall factor. 
+            Default is False. 
+        """
+        if velocity_bias is True:
+            self.param_dict['velbias_satellites'] = 1.
+
     @abstractmethod
     def dimensionless_velocity_dispersion(self, x, *args):
         """
@@ -54,11 +68,23 @@ class IsotropicJeansVelocity(object):
         pass
 
 
-
 class NFWJeansVelocity(IsotropicJeansVelocity):
     """ Orthogonal mix-in class providing the solution to the Jeans equation 
     for galaxies orbiting in an isotropic NFW profile with no spatial bias. 
     """
+
+    def __init__(self, **kwargs):
+        """
+        Parameters 
+        -----------
+        velocity_bias : bool, optional 
+            Boolean specifying whether the galaxy velocities are biased 
+            with respect to the halo velocities. If True, ``param_dict`` will have a 
+            parameter called ``velbias_satellites`` that multiplies the underlying 
+            Jeans solution for the halo radial velocity dispersion by an overall factor. 
+            Default is False. 
+        """
+        IsotropicJeansVelocity.__init__(self, **kwargs)
 
     def _jeans_integrand_term1(self, y):
         """

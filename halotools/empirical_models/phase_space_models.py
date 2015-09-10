@@ -36,6 +36,13 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             String giving the column name of the halo catalog that stores the boundary of the halo. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
+        velocity_bias : bool, optional 
+            Boolean specifying whether the galaxy velocities are biased 
+            with respect to the halo velocities. If True, ``param_dict`` will have a 
+            parameter called ``velbias_satellites`` that multiplies the underlying 
+            Jeans solution for the halo radial velocity dispersion by an overall factor. 
+            Default is False. 
+
         """        
         NFWProfile.__init__(self, **kwargs)
         NFWJeansVelocity.__init__(self, **kwargs)
@@ -60,8 +67,15 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 class TrivialPhaseSpace(object):
     """
     """
-    def __init__(self):
+    def __init__(self, velocity_bias = False):
         """
+        Parameters 
+        ----------
+        velocity_bias : bool, optional 
+            Boolean specifying whether the galaxy velocities are biased 
+            with respect to the halo velocities. If True, ``param_dict`` will have a 
+            parameter called ``velbias_centrals`` that multiplies the underlying 
+            halo velocity by an overall factor. Default is False. 
         """
         self._mock_generation_calling_sequence = ['assign_phase_space']
         self._galprop_dtypes_to_allocate = np.dtype([
@@ -69,15 +83,17 @@ class TrivialPhaseSpace(object):
             ('vx', 'f8'), ('vy', 'f8'), ('vz', 'f8'), 
             ])
 
+        if velocity_bias is True:
+            self.param_dict['velbias_centrals'] = 1.
+
     def assign_phase_space(self, halo_table):
         """
         """
-        halo_table['x'] = halo_table['halo_x']
-        halo_table['y'] = halo_table['halo_y']
-        halo_table['z'] = halo_table['halo_z']
-        halo_table['vx'] = halo_table['halo_vx']
-        halo_table['vy'] = halo_table['halo_vy']
-        halo_table['vz'] = halo_table['halo_vz']
+        phase_space_keys = ['x', 'y', 'z', 'vx', 'vy', 'vz']
+        for key in phase_space_keys:
+            halo_table[key] = halo_table['halo_'+key]
+            if 'velbias_centrals' in self.param_dict:
+                halo_table[key] *= self.param_dict['velbias_centrals']
 
 
 

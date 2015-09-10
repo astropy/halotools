@@ -547,6 +547,9 @@ class MonteCarloGalProf(object):
             virial_velocities = self.virial_velocity(
                 total_mass = halo_table[self.halo_mass_key])
 
+        if 'velbias_satellites' in self.param_dict:
+            virial_velocities *= self.param_dict['velbias_satellites']
+    
         vx = self.mc_radial_velocity(
             virial_velocities = virial_velocities, 
             x = x, profile_params = profile_params)
