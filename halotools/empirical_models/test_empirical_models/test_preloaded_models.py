@@ -1,10 +1,24 @@
 #!/usr/bin/env python
 
 from unittest import TestCase
+import pytest
 import numpy as np
 from astropy.table import Table
 from .. import preloaded_models
 from ...utils.table_utils import compute_conditional_percentiles
+from ...sim_manager import HaloCatalog
+
+### Determine whether the machine is mine
+# This will be used to select tests whose 
+# returned values depend on the configuration 
+# of my personal cache directory files
+from astropy.config.paths import _find_home 
+aph_home = u'/Users/aphearin'
+detected_home = _find_home()
+if aph_home == detected_home:
+    APH_MACHINE = True
+else:
+    APH_MACHINE = False
 
 class TestHearin15(TestCase):
 
@@ -25,6 +39,45 @@ class TestHearin15(TestCase):
 		self.highz_toy_halos = self.toy_halo_table[highz_mask]
 		self.lowz_toy_halos = self.toy_halo_table[np.invert(highz_mask)]
 
-	def test_default_model(self):
+		self.snapshot = HaloCatalog(preload_halo_table = True)
 
-		model = preloaded_models.Hearin15()
+	@pytest.mark.skipif('not APH_MACHINE')
+	def test_Hearin15(self):
+
+		model = preloaded_models.Hearin15(concentration_binning = (1, 35, 5))
+		model.populate_mock(snapshot = self.snapshot)
+
+	def test_Leauthaud11(self):
+
+		model = preloaded_models.Leauthaud11(concentration_binning = (1, 35, 5))
+		model.populate_mock(snapshot = self.snapshot)
+
+		model2 = preloaded_models.Leauthaud11(concentration_binning = (1, 35, 5), 
+			central_velocity_bias = True, satellite_velocity_bias = True)
+		model2.param_dict['velbias_centrals'] = 10
+		model2.populate_mock(snapshot = self.snapshot)
+
+		# Test that the velocity bias is actually operative
+		central_mask = ( 
+			(model.mock.galaxy_table['gal_type'] == 'centrals') & 
+			(model.mock.galaxy_table['halo_mvir'] > 5e12) & 
+			(model.mock.galaxy_table['halo_mvir'] > 1e13)
+			)
+		cens1 = model.mock.galaxy_table[central_mask]
+
+		central_mask = ( 
+			(model2.mock.galaxy_table['gal_type'] == 'centrals') & 
+			(model2.mock.galaxy_table['halo_mvir'] > 5e12) & 
+			(model2.mock.galaxy_table['halo_mvir'] > 1e13)
+			)
+		cens2 = model2.mock.galaxy_table[central_mask]
+
+		assert np.std(cens1['vx']) < np.std(cens2['vx'])
+		assert np.std(cens1['vy']) < np.std(cens2['vy'])
+		assert np.std(cens1['vz']) < np.std(cens2['vz'])
+
+
+
+
+
+
