@@ -18,6 +18,7 @@ from . import model_defaults
 from . import mock_factories
 
 from ..sim_manager.supported_sims import HaloCatalog
+from ..sim_manager import sim_defaults
 
 from ..sim_manager.generate_random_sim import FakeSim
 from ..utils.array_utils import custom_len
@@ -83,22 +84,60 @@ class ModelFactory(object):
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         """
+        inconsistent_redshift_error_msg = ("Inconsistency between the model redshift = %.2f "
+            "and the snapshot redshift = %.2f.\n"
+            "You should instantiate a new model object if you wish to switch halo catalogs.")
+        inconsistent_simname_error_msg = ("Inconsistency between the simname "
+            "already bound to the existing mock = ``%s`` "
+            "and the simname passed as a keyword argument = ``%s``.\n"
+            "You should instantiate a new model object if you wish to switch halo catalogs.")
+        inconsistent_halo_finder_error_msg = ("Inconsistency between the halo-finder "
+            "already bound to the existing mock = ``%s`` "
+            "and the halo-finder passed as a keyword argument = ``%s``.\n"
+            "You should instantiate a new model object if you wish to switch halo catalogs.")
+
+
+        def test_consistency_with_existing_mock(**kwargs):
+            if 'redshift' in kwargs:
+                redshift = kwargs['redshift']
+            else:
+                redshift = sim_defaults.default_redshift
+            if abs(redshift - self.mock.snapshot.redshift) > 0.02:
+                raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, self.mock.snapshot.redshift))
+
+            if 'simname' in kwargs:
+                simname = kwargs['simname']
+            else:
+                simname = sim_defaults.default_simname
+            if simname != self.mock.snapshot.simname:
+                raise HalotoolsError(inconsistent_simname_error_msg)
+
+            if 'halo_finder' in kwargs:
+                halo_finder = kwargs['halo_finder']
+            else:
+                halo_finder = sim_defaults.default_halo_finder
+            if halo_finder != self.mock.snapshot.halo_finder:
+                raise HalotoolsError(inconsistent_halo_finder_error_msg)
 
         if hasattr(self, 'mock'):
-            self.mock.populate()
+            test_consistency_with_existing_mock(**kwargs)
         else:
             if 'snapshot' in kwargs.keys():
                 snapshot = kwargs['snapshot']
-                # we need to delete the 'snapshot' keyword 
-                # or else the call to mock_factories below 
-                # will pass multiple snapshot arguments
-                del kwargs['snapshot']
+                del kwargs['snapshot'] # otherwise the call to mock_factories below has multiple snapshot arguments
             else:
                 snapshot = HaloCatalog(**kwargs)
 
+            if hasattr(self, 'redshift'):
+                if abs(self.redshift - snapshot.redshift) > 0.05:
+                    raise HalotoolsError("Inconsistency between the model redshift = %.2f" 
+                        " and the snapshot redshift = %.2f" % (self.redshift, snapshot.redshift))
+
             mock_factory = self.mock_factory 
-            mock = mock_factory(snapshot=snapshot, model=self, populate=True)
-            self.mock = mock
+            self.mock = mock_factory(snapshot=snapshot, model=self, populate=False)
+
+
+        self.mock.populate()
 
     def compute_galaxy_clustering(self, num_iterations=5, summary_statistic = 'median', **kwargs):
         """
