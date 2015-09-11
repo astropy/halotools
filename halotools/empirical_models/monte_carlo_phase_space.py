@@ -46,24 +46,24 @@ class MonteCarloGalProf(object):
             ])
 
 
-    def _setup_lookup_tables(self, *args):
+    def _setup_lookup_tables(self, *lookup_table_binning):
         """
         Private method used to set up the lookup table grid. 
 
         Parameters 
         ----------
-        args : sequence 
+        lookup_table_binning : sequence 
             Length-Nparams list, with one entry per radial profile parameter. 
             Each entry must be a 3-element tuple. The first entry will be the minimum 
             value of the profile parameter in the lookup table, 
             the second entry the maximum, the third entry 
-            the linear spacing of the grid. The i^th element of the input ``args`` 
+            the linear spacing of the grid. The i^th element of the input ``lookup_table_binning`` 
             is assumed to correspond to the i^th element of ``self.prof_param_keys``. 
         """
         for ipar, prof_param_key in enumerate(self.prof_param_keys):
-            setattr(self, '_' + prof_param_key + '_lookup_table_min', args[ipar][0])
-            setattr(self, '_' + prof_param_key + '_lookup_table_max', args[ipar][1])
-            setattr(self, '_' + prof_param_key + '_lookup_table_spacing', args[ipar][2])
+            setattr(self, '_' + prof_param_key + '_lookup_table_min', lookup_table_binning[ipar][0])
+            setattr(self, '_' + prof_param_key + '_lookup_table_max', lookup_table_binning[ipar][1])
+            setattr(self, '_' + prof_param_key + '_lookup_table_spacing', lookup_table_binning[ipar][2])
 
     def build_lookup_tables(self, 
         logrmin = model_defaults.default_lograd_min, 
