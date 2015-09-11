@@ -96,7 +96,7 @@ class ModelFactory(object):
             else:
                 snapshot = HaloCatalog(**kwargs)
 
-            mock_factory = self.model.mock_factory 
+            mock_factory = self.mock_factory 
             mock = mock_factory(snapshot=snapshot, model=self, populate=True)
             self.mock = mock
 
