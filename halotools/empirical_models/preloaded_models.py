@@ -4,11 +4,14 @@
 Module containing some commonly used composite HOD models.
 
 """
+import numpy as np
 from . import model_factories, model_defaults, smhm_components
-from . import preloaded_subhalo_model_blueprints
-from . import preloaded_hod_blueprints
 from . import hod_components as hoc
+from . import smhm_components
+from . import sfr_components
 from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
+from .abunmatch import ConditionalAbunMatch
+
 from ..sim_manager import FakeMock, FakeSim, sim_defaults
 
 
@@ -176,12 +179,18 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, **kwa
     return model_factories.HodModelFactory(model_blueprint)
 
 
-def SmHmBinarySFR(**kwargs):
-    """ Blueprint for a very simple model assigning stellar mass and 
+def SmHmBinarySFR(
+    prim_haloprop_key = model_defaults.default_smhm_haloprop, 
+    smhm_model=smhm_components.Moster13SmHm, 
+    scatter_level = 0.2, 
+    redshift = sim_defaults.default_redshift, 
+    sfr_abcissa = [12, 15], sfr_ordinates = [0.25, 0.75], logparam=True, 
+    **kwargs):
+    """ Very simple model assigning stellar mass and 
     quiescent/active designation to a subhalo catalog. 
 
     Stellar masses are assigned according to a parameterized relation, 
-    Moster et al. (2013) by default. SFR designation is determined by 
+    Behroozi et al. (2010) by default. SFR designation is determined by 
     interpolating between a set of input control points, with default 
     behavior being a 25% quiescent fraction for galaxies 
     residing in Milky Way halos, and 75% for cluster galaxies. 
@@ -245,7 +254,15 @@ def SmHmBinarySFR(**kwargs):
 
     """
 
-    blueprint = preloaded_subhalo_model_blueprints.SmHmBinarySFR_blueprint(**kwargs)
+    sfr_model = sfr_components.BinaryGalpropInterpolModel(
+        galprop_key='quiescent', prim_haloprop_key=prim_haloprop_key, 
+        abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam)
+
+    sm_model = smhm_components.Behroozi10SmHm(
+        prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
+        scatter_abcissa = [12], scatter_ordinates = [scatter_level])
+
+    blueprint = {sm_model.galprop_key: sm_model, sfr_model.galprop_key: sfr_model}
 
     if 'threshold' in kwargs.keys():
         galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
@@ -342,7 +359,12 @@ def Hearin15(central_assembias_strength = 1,
     return model_factories.HodModelFactory(model_blueprint)
 
 
-def Campbell15(**kwargs):
+def Campbell15(
+    prim_haloprop_key = model_defaults.default_smhm_haloprop, 
+    sec_galprop_key = 'ssfr', sec_haloprop_key = 'halo_vpeak', 
+    smhm_model=smhm_components.Moster13SmHm, 
+    scatter_level = 0.2, 
+    redshift = sim_defaults.default_redshift, **kwargs):
     """ Conditional abundance matching model based on Campbell et al. (2015). 
 
     Parameters
@@ -436,7 +458,24 @@ def Campbell15(**kwargs):
 
     """
 
-    blueprint = preloaded_subhalo_model_blueprints.Campbell15_blueprint(**kwargs)
+    stellar_mass_model = smhm_model(
+        prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
+        scatter_abcissa = [12], scatter_ordinates = [scatter_level])
+
+    fake_mock = FakeMock(approximate_ngals = 1e5)
+    input_galaxy_table = fake_mock.galaxy_table
+    prim_galprop_bins = np.logspace(8, 12, num=15)    
+
+    ssfr_model = ConditionalAbunMatch(input_galaxy_table=input_galaxy_table, 
+                                      prim_galprop_key=stellar_mass_model.galprop_key, 
+                                      galprop_key=sec_galprop_key, 
+                                      sec_haloprop_key=sec_haloprop_key, 
+                                      prim_galprop_bins=prim_galprop_bins, 
+                                      **kwargs)
+    blueprint = (
+        {stellar_mass_model.galprop_key: stellar_mass_model, 
+        ssfr_model.galprop_key: ssfr_model}
+        )
 
     if 'threshold' in kwargs.keys():
         galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']

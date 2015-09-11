@@ -16,7 +16,6 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from . import model_helpers
 from . import model_defaults 
 from . import mock_factories
-from . import preloaded_hod_blueprints
 
 from ..sim_manager.supported_sims import HaloCatalog
 
@@ -673,13 +672,6 @@ class HodModelFactory(ModelFactory):
     The aim is to provide a standardized model object 
     that interfaces consistently with the rest of the package, 
     regardless of the features of the model. 
-
-    Notes 
-    -----
-    There are two main options for creating HOD-style blueprints 
-    that can be passed to this class:
-
-        * You can use one of the pre-computed blueprint found in `~halotools.empirical_models.preloaded_hod_blueprints` 
     
     """
 
