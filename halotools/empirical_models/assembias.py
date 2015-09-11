@@ -16,7 +16,9 @@ from ..custom_exceptions import HalotoolsError
 from ..utils.table_utils import compute_conditional_percentiles
 
 class HeavisideAssembias(object):
-    """
+    """ Class used as an orthogonal mix-in to introduce 
+    assembly-biased behavior into the class whose behavior is being supplemented class.  
+
     """
     def __init__(self, **kwargs):
         """

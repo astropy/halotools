@@ -181,7 +181,6 @@ class Zheng07Cens(OccupationComponent):
     """ ``Erf`` function model for the occupation statistics of central galaxies, 
     introduced in Zheng et al. 2005, arXiv:0408564. This implementation uses 
     Zheng et al. 2007, arXiv:0703457, to assign fiducial parameter values. 
-
     """
 
     def __init__(self, 
@@ -874,7 +873,7 @@ class Leauthaud11Sats(OccupationComponent):
 
 
 class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
-    """
+    """ Assembly-biased modulation of `Zheng07Sats`. 
     """
     def __init__(self, **kwargs):
         """
@@ -927,7 +926,7 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
 
 
 class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
-    """
+    """ Assembly-biased modulation of `Zheng07Cens`. 
     """
     def __init__(self, **kwargs):
         """
@@ -980,8 +979,7 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
 
 
 class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
-    """ HOD-style model for any central galaxy occupation that derives from 
-    a stellar-to-halo-mass relation. 
+    """ Assembly-biased modulation of `Leauthaud11Cens`. 
     """
     def __init__(self, **kwargs):
         """
@@ -1036,8 +1034,7 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
 
 
 class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
-    """ HOD-style model for any central galaxy occupation that derives from 
-    a stellar-to-halo-mass relation. 
+    """ Assembly-biased modulation of `Leauthaud11Sats`. 
     """
     def __init__(self, **kwargs):
         """
