@@ -58,8 +58,34 @@ sec_haloprop_key = 'halo_nfw_conc'
 
 halo_mass_definition = 'vir'
 def get_halo_boundary_key(mdef):
+    """ For the input mass definition, 
+    return the string used to access halo table column 
+    storing the halo radius. 
+
+    Parameters 
+    -----------
+    mdef: str
+        String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+
+    Returns 
+    --------
+    radius_key : str
+    """
     return 'halo_r'+mdef
 def get_halo_mass_key(mdef):
+    """ For the input mass definition, 
+    return the string used to access halo table column 
+    storing the halo mass. 
+
+    Parameters 
+    -----------
+    mdef: str
+        String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+
+    Returns 
+    --------
+    mass_key : str
+    """
     return 'halo_m'+mdef
 halo_boundary = get_halo_boundary_key(halo_mass_definition)
 
