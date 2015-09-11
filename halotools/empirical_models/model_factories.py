@@ -481,23 +481,15 @@ class SubhaloModelFactory(ModelFactory):
 
         super(SubhaloModelFactory, self).__init__(input_model_blueprint, **kwargs)
 
-        self.model_blueprint = self._interpret_input_model_blueprint()
+        self.mock_factory = mock_factories.SubhaloMockFactory
+
+        self.model_blueprint = copy(self._input_model_blueprint)
         
         self._build_composite_lists(**kwargs)
 
         self._set_init_param_dict()
 
         self._set_primary_behaviors()
-
-
-    def _interpret_input_model_blueprint(self):
-
-        model_blueprint = copy(self._input_model_blueprint)
-
-        if 'mock_factory' not in model_blueprint.keys():
-            model_blueprint['mock_factory'] = mock_factories.SubhaloMockFactory
-
-        return model_blueprint
 
     def _set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
@@ -566,7 +558,7 @@ class SubhaloModelFactory(ModelFactory):
         the components: ``_haloprop_list``, ``publications``, and ``new_haloprop_func_dict``. 
         """
 
-        unordered_galprop_list = [key for key in self.model_blueprint.keys() if key is not 'mock_factory']
+        unordered_galprop_list = [key for key in self.model_blueprint.keys()]
         if 'galprop_sequence' in kwargs.keys():
             if set(kwargs['galprop_sequence']) != set(unordered_galprop_list):
                 raise KeyError("The input galprop_sequence keyword argument must "
