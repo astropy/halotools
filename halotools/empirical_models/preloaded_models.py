@@ -7,12 +7,14 @@ Module containing some commonly used composite HOD models.
 from . import model_factories, model_defaults, smhm_components
 from . import preloaded_subhalo_model_blueprints
 from . import preloaded_hod_blueprints
-
+from . import hod_components as hoc
+from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from ..sim_manager import FakeMock, FakeSim, sim_defaults
+
 
 __all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15', 'Hearin15']
 
-def Zheng07(**kwargs):
+def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     """ Simple HOD-style based on Zheng et al. (2007), arXiv:0703457. 
 
     There are two populations, centrals and satellites. 
@@ -28,8 +30,7 @@ def Zheng07(**kwargs):
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
-    which followed the instructions contained in `~halotools.empirical_models.Zheng07_blueprint`. 
+    This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`.
 
     Parameters 
     ----------
@@ -65,10 +66,36 @@ def Zheng07(**kwargs):
     >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     """
-    blueprint = preloaded_hod_blueprints.Zheng07_blueprint(**kwargs)
-    return model_factories.HodModelFactory(blueprint, **kwargs)
 
-def Leauthaud11(**kwargs):
+    ### Build model for centrals
+    cen_key = 'centrals'
+    cen_model_dict = {}
+    # Build the occupation model
+    occu_cen_model = hoc.Zheng07Cens(threshold = threshold)
+    cen_model_dict['occupation'] = occu_cen_model
+    # Build the profile model
+    
+    cen_profile = TrivialPhaseSpace()
+    cen_model_dict['profile'] = cen_profile
+
+    ### Build model for satellites
+    sat_key = 'satellites'
+    sat_model_dict = {}
+    # Build the occupation model
+    occu_sat_model = hoc.Zheng07Sats(threshold = threshold)
+    sat_model_dict['occupation'] = occu_sat_model
+    # Build the profile model
+    sat_profile = NFWPhaseSpace()    
+    sat_model_dict['profile'] = sat_profile
+
+    model_blueprint = {
+        occu_cen_model.gal_type : cen_model_dict,
+        occu_sat_model.gal_type : sat_model_dict 
+        }
+
+    return model_factories.HodModelFactory(model_blueprint)
+
+def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, **kwargs):
     """ HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
 
@@ -119,8 +146,34 @@ def Leauthaud11(**kwargs):
     >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     """
-    blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
-    return model_factories.HodModelFactory(blueprint, **kwargs)
+    ### Build model for centrals
+    cen_key = 'centrals'
+    cen_model_dict = {}
+    # Build the occupation model
+    occu_cen_model = hoc.Leauthaud11Cens(threshold = threshold)
+    cen_model_dict['occupation'] = occu_cen_model
+    # Build the profile model
+    
+    cen_profile = TrivialPhaseSpace()
+
+    cen_model_dict['profile'] = cen_profile
+
+    ### Build model for satellites
+    sat_key = 'satellites'
+    sat_model_dict = {}
+    # Build the occupation model
+    occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold)
+    sat_model_dict['occupation'] = occu_sat_model
+    # Build the profile model
+    sat_profile = NFWPhaseSpace()    
+    sat_model_dict['profile'] = sat_profile
+
+    model_blueprint = {
+        occu_cen_model.gal_type : cen_model_dict,
+        occu_sat_model.gal_type : sat_model_dict
+        }
+
+    return model_factories.HodModelFactory(model_blueprint)
 
 
 def SmHmBinarySFR(**kwargs):
@@ -203,7 +256,11 @@ def SmHmBinarySFR(**kwargs):
 
     return model
 
-def Hearin15(**kwargs):
+def Hearin15(central_assembias_strength = 1, 
+    central_assembias_strength_abcissa = [1e12], 
+    satellite_assembias_strength = 0.2, 
+    satellite_assembias_strength_abcissa = [1e12], 
+    **kwargs):
     """ 
     HOD-style model in which central and satellite occupations statistics are assembly-biased. 
 
@@ -244,8 +301,45 @@ def Hearin15(**kwargs):
         Default is set in the `~halotools.sim_manager.sim_defaults` module. 
 
     """     
-    blueprint = preloaded_hod_blueprints.Hearin15_blueprint(**kwargs)
-    return model_factories.HodModelFactory(blueprint, **kwargs)
+    ##############################
+    ### Build the occupation model
+    if central_assembias_strength == 0:
+        cen_ab_component = hoc.Leauthaud11Cens(**kwargs)
+    else:
+        cen_ab_component = hoc.AssembiasLeauthaud11Cens(
+            assembias_strength = central_assembias_strength, 
+            assembias_strength_abcissa = central_assembias_strength_abcissa, 
+            **kwargs)
+    cen_model_dict = {}
+    cen_model_dict['occupation'] = cen_ab_component
+
+    # Build the profile model
+    cen_profile = TrivialPhaseSpace()
+    cen_model_dict['profile'] = cen_profile
+
+    ##############################
+    ### Build the occupation model
+    if satellite_assembias_strength == 0:
+        sat_ab_component = hoc.Leauthaud11Sats(**kwargs)
+    else:
+        sat_ab_component = hoc.AssembiasLeauthaud11Sats(
+            assembias_strength = satellite_assembias_strength, 
+            assembias_strength_abcissa = satellite_assembias_strength_abcissa, 
+            **kwargs)
+        # There is no need for a redundant new_haloprop_func_dict 
+        # if this is already possessed by the central model
+        if hasattr(cen_ab_component, 'new_haloprop_func_dict'):
+            del sat_ab_component.new_haloprop_func_dict
+
+    sat_model_dict = {}
+    sat_model_dict['occupation'] = sat_ab_component
+
+    # Build the profile model
+    sat_profile = NFWPhaseSpace()    
+    sat_model_dict['profile'] = sat_profile
+
+    model_blueprint = {'centrals': cen_model_dict, 'satellites': sat_model_dict}
+    return model_factories.HodModelFactory(model_blueprint)
 
 
 def Campbell15(**kwargs):
