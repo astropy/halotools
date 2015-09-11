@@ -7,6 +7,7 @@ from astropy.table import Table
 from .. import preloaded_models
 from ...utils.table_utils import compute_conditional_percentiles
 from ...sim_manager import HaloCatalog
+from ...custom_exceptions import *
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
@@ -75,6 +76,14 @@ class TestHearin15(TestCase):
 		assert np.std(cens1['vx']) < np.std(cens2['vx'])
 		assert np.std(cens1['vy']) < np.std(cens2['vy'])
 		assert np.std(cens1['vz']) < np.std(cens2['vz'])
+
+		# Test that an attempt to repopulate with a different snapshot raises an exception
+		with pytest.raises(HalotoolsError) as exc:
+			model2.populate_mock(redshift=2)
+		with pytest.raises(HalotoolsError) as exc:
+			model2.populate_mock(simname='consuelo')
+		with pytest.raises(HalotoolsError) as exc:
+			model2.populate_mock(halo_finder='bdm')
 
 
 
