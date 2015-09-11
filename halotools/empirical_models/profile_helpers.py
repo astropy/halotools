@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
+""" Module containing functions related to halo mass definitions, 
+the relations between halo mass and radius, and the variation of these 
+relations with cosmology and redshift. 
+
+The functions contained in this module borrow heavily from the Colossus 
+package developed by Benedikt Diemer, http://bdiemer.bitbucket.org. 
 """
 import numpy as np 
 from astropy import cosmology
@@ -7,6 +12,8 @@ from astropy import units as u
 
 __all__ = (['density_threshold', 'delta_vir', 
 	'halo_mass_to_halo_radius', 'halo_radius_to_halo_mass'])
+
+__author__ = ['Benedikt Diemer', 'Andrew Hearin']
 
 def density_threshold(cosmology, redshift, mdef):
 	"""

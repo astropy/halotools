@@ -6,6 +6,7 @@ full phase space distribution of galaxies within their halos.
 """
 
 __author__ = ['Andrew Hearin']
+__all__ = ['NFWPhaseSpace']
 
 import numpy as np
 from .profile_models import *

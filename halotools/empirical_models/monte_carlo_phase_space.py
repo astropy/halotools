@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Module composes the behavior of the profile models 
-and the velocity models to produce models for the 
-full phase space distribution of galaxies within their halos. 
+The `MonteCarloGalProf` class defined in this module is 
+used to augment the analytic profile and velocity models. 
+The result of using `MonteCarloGalProf` as an orthogonal mix-in class 
+is a composite class that can be used to generate Monte Carlo realizations 
+of the full phase space distribution of galaxies within their halos. 
 """
 
 __author__ = ['Andrew Hearin']
-
 __all__ = ['MonteCarloGalProf']
 
 import numpy as np 
@@ -23,8 +24,8 @@ from . import model_defaults
 
 class MonteCarloGalProf(object):
     """ Orthogonal mix-in class used to turn an analytical 
-    phase space model into a class that can be used 
-    to generate the phase space distribution 
+    phase space model (e.g., `~halotools.empirical_models.NFWPhaseSpace`)
+    into a class that can generate the phase space distribution 
     of a mock galaxy population. 
     """
 
@@ -47,16 +48,17 @@ class MonteCarloGalProf(object):
 
     def _setup_lookup_tables(self, *args):
         """
-        Private method used to set up the lookup table grid 
+        Private method used to set up the lookup table grid. 
 
         Parameters 
         ----------
         args : sequence 
             Length-Nparams list, with one entry per radial profile parameter. 
             Each entry must be a 3-element tuple. The first entry will be the minimum 
-            value of the profile parameter, the second entry the maxium, the third entry 
+            value of the profile parameter in the lookup table, 
+            the second entry the maximum, the third entry 
             the linear spacing of the grid. The i^th element of the input ``args`` 
-            is assumed to correspond to the i^th element of ``self.prom_param_keys``. 
+            is assumed to correspond to the i^th element of ``self.prof_param_keys``. 
         """
         for ipar, prof_param_key in enumerate(self.prof_param_keys):
             setattr(self, '_' + prof_param_key + '_lookup_table_min', args[ipar][0])
@@ -66,7 +68,7 @@ class MonteCarloGalProf(object):
     def build_lookup_tables(self, 
         logrmin = model_defaults.default_lograd_min, 
         logrmax = model_defaults.default_lograd_max, 
-        Npts_radius_table=model_defaults.Npts_radius_table):
+        Npts_radius_table = model_defaults.Npts_radius_table):
         """ Method used to create a lookup table of the radial profile 
         and velocity profile.  
 
@@ -93,7 +95,7 @@ class MonteCarloGalProf(object):
         modelname = self.__class__.__name__
         print("\n...Building lookup tables for the %s radial profile." % modelname)
         
-        radius_array = np.logspace(logrmin,logrmax,Npts_radius_table)
+        radius_array = np.logspace(logrmin, logrmax, Npts_radius_table)
         self.logradius_array = np.log10(radius_array)
 
         profile_params_list = []
@@ -125,6 +127,7 @@ class MonteCarloGalProf(object):
                     radius_array, *items)
                 velocity_funcobj = custom_spline(self.logradius_array, velocity_table_ordinates)
                 velocity_func_table.append(velocity_funcobj)
+                # Print a message for the expected runtime of the table build
                 if ii == 9:
                     current_lookup_time = time() - start
                     runtime = (
@@ -153,9 +156,8 @@ class MonteCarloGalProf(object):
             There should be a ``profile_params`` list item for 
             every parameter in the profile model, each item a length-Ngals array.
 
-        seed : int, optional 
-            Random number seed used to generate Monte Carlo realization. 
-            Default is None. 
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization. Default is None. 
 
         Returns 
         -------
@@ -170,7 +172,7 @@ class MonteCarloGalProf(object):
 
         # Draw random values for the cumulative mass PDF         
         # These will be turned into random radial positions 
-        # via the method of transformation of random variables
+        # by inverting the tabulated cumulative_mass_PDF
         if 'seed' in kwargs.keys():
             np.random.seed(kwargs['seed'])
         rho = np.random.random(len(profile_params[0]))
@@ -218,8 +220,8 @@ class MonteCarloGalProf(object):
         Npts : int 
             Number of 3d points to generate
 
-        seed : int, optional 
-            Random number seed. Default is None. 
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization. Default is None. 
 
         Returns 
         -------
@@ -258,7 +260,7 @@ class MonteCarloGalProf(object):
             If ``halo_table`` is not passed, ``profile_params`` must be passed. 
 
         seed : int, optional  
-            Random number seed used in Monte Carlo realization
+            Random number seed used in Monte Carlo realization. Default is None. 
 
         Returns 
         -------
@@ -314,19 +316,25 @@ class MonteCarloGalProf(object):
 
         Parameters 
         ----------
-        halo_radius : array_like 
-            Length-Ngals array storing the radial boundary of the halo 
-            hosting each galaxy. Units assumed to be in Mpc/h. 
+        halo_table : data table, optional 
+            Astropy Table storing a length-Ngals galaxy catalog. 
+            If ``halo_table`` is not passed, ``profile_params`` and ``halo_radius`` must be passed. 
 
-        profile_params : list 
+        profile_params : list, optional 
             List of length-Ngals array(s) containing the input profile parameter(s). 
             In the simplest case, this list has a single element, 
             e.g. a single array of the NFW concentration values. 
             There should be a ``profile_params`` list item for 
             every parameter in the profile model, each item a length-Ngals array.
+            If ``profile_params`` and ``halo_radius`` are not passed, ``halo_table`` must be passed. 
+
+        halo_radius : array_like, optional 
+            Length-Ngals array storing the radial boundary of the halo 
+            hosting each galaxy. Units assumed to be in Mpc/h. 
+            If ``profile_params`` and ``halo_radius`` are not passed, ``halo_table`` must be passed. 
 
         seed : int, optional  
-            Random number seed used in Monte Carlo realization
+            Random number seed used in Monte Carlo realization. Default is None. 
 
         Returns 
         -------
@@ -362,8 +370,7 @@ class MonteCarloGalProf(object):
         ----------
         halo_table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
-            If ``halo_table`` is not provided, 
-            then both ``profile_params`` and ``halo_radius`` must be provided. 
+            If ``halo_table`` is not passed, ``profile_params`` and ``halo_radius`` must be passed. 
 
         profile_params : list, optional 
             List of length-Ngals array(s) containing the input profile parameter(s). 
@@ -371,17 +378,12 @@ class MonteCarloGalProf(object):
             e.g. a single array of the NFW concentration values. 
             There should be a ``profile_params`` list item for 
             every parameter in the profile model, each item a length-Ngals array.
-            If ``halo_table`` is not provided, 
-            then both ``profile_params`` and ``halo_radius`` must be provided. 
+            If ``profile_params`` and ``halo_radius`` are not passed, ``halo_table`` must be passed. 
 
         halo_radius : array_like, optional 
             Length-Ngals array storing the radial boundary of the halo 
-            hosting each galaxy. 
-            Units assumed to be in Mpc/h. 
-            If ``halo_table`` is not provided, 
-            then both ``profile_params`` and ``halo_radius`` must be provided. 
-            If ``halo_table`` is not provided, 
-            then both ``profile_params`` and ``halo_radius`` must be provided. 
+            hosting each galaxy. Units assumed to be in Mpc/h. 
+            If ``profile_params`` and ``halo_radius`` are not passed, ``halo_table`` must be passed. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -389,14 +391,14 @@ class MonteCarloGalProf(object):
         Returns 
         -------
         x, y, z : arrays, optional 
-            If no ``halo_table`` is passed as an argument, 
+            For the case where no ``halo_table`` is passed as an argument, 
             method will return x, y and z points distributed about the 
             origin according to the profile model. 
 
-            If ``halo_table`` is passed as an argument, 
-            the ``x``, ``y``, and ``z`` columns will be over-written with the 
-            existing values plus the values that would otherwise be 
-            returned by the method. Thus the ``halo_table`` mode of operation 
+            For the case where ``halo_table`` is passed as an argument 
+            (this is the use case of populating halos with mock galaxies), 
+            the ``x``, ``y``, and ``z`` columns of the table will be over-written.
+            When ``halo_table`` is passed as an argument, the method 
             assumes that the ``x``, ``y``, and ``z`` columns already store 
             the position of the host halo center. 
         """

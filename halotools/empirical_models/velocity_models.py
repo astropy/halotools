@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the components for 
-the velocities of galaxies 
-relative to their halos. 
+Module contains the classes used to model the velocities 
+of galaxies within their halos. 
 """
 
 import numpy as np 
