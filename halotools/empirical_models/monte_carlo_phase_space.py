@@ -53,11 +53,12 @@ class MonteCarloGalProf(object):
         Parameters 
         ----------
         lookup_table_binning : sequence 
-            Length-Nparams list, with one entry per radial profile parameter. 
-            Each entry must be a 3-element tuple. The first entry will be the minimum 
+            Sequence of tuples, with one tuple per radial profile parameter. 
+            The first entry of each tuple will be the minimum 
             value of the profile parameter in the lookup table, 
             the second entry the maximum, the third entry 
-            the linear spacing of the grid. The i^th element of the input ``lookup_table_binning`` 
+            the linear spacing of the grid. The i^th element of 
+            the input ``lookup_table_binning`` sequence 
             is assumed to correspond to the i^th element of ``self.prof_param_keys``. 
         """
         for ipar, prof_param_key in enumerate(self.prof_param_keys):

@@ -44,16 +44,26 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Jeans solution for the halo radial velocity dispersion by an overall factor. 
             Default is False. 
 
+        concentration_binning : tuple, optional 
+            Three-element tuple. The first entry will be the minimum 
+            value of the concentration in the lookup table, 
+            the second entry the maximum, the third entry 
+            the linear spacing of the grid. 
+            Default is set in `~halotools.empirical_models.model_defaults`.  
+
         """        
         NFWProfile.__init__(self, **kwargs)
         NFWJeansVelocity.__init__(self, **kwargs)
-        MonteCarloGalProf.__init__(self, **kwargs)
+        MonteCarloGalProf.__init__(self)
 
-        cmin, cmax, dc = (
-            model_defaults.min_permitted_conc, 
-            model_defaults.max_permitted_conc,
-            model_defaults.default_dconc
-            )
+        if 'concentration_binning' in kwargs:
+            cmin, cmax, dc = kwargs['concentration']
+        else:
+            cmin, cmax, dc = (
+                model_defaults.min_permitted_conc, 
+                model_defaults.max_permitted_conc,
+                model_defaults.default_dconc
+                )
         self._setup_lookup_tables((cmin, cmax, dc))
 
         self._mock_generation_calling_sequence = ['assign_phase_space']
