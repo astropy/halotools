@@ -102,7 +102,7 @@ class ModelFactory(object):
                 redshift = kwargs['redshift']
             else:
                 redshift = sim_defaults.default_redshift
-            if abs(redshift - self.mock.snapshot.redshift) > 0.02:
+            if abs(redshift - self.mock.snapshot.redshift) > 0.05:
                 raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, self.mock.snapshot.redshift))
 
             if 'simname' in kwargs:
@@ -737,6 +737,8 @@ class HodModelFactory(ModelFactory):
         self._set_gal_types()
         self.model_blueprint = self._input_model_blueprint
 
+        self._set_model_redshift()
+
         # Build the composite model dictionary, 
         # whose keys are parameters of our model
         self._set_init_param_dict()
@@ -907,6 +909,33 @@ class HodModelFactory(ModelFactory):
         """
         self.param_dict = self._init_param_dict
         self._set_primary_behaviors()
+
+    def _set_model_redshift(self):
+        """ 
+        """
+        msg = ("Inconsistency between the redshifts of the component models:\n"
+            "    For gal_type = ``%s``, the %s model has redshift = %.2f.\n"
+            "    For gal_type = ``%s``, the %s model has redshift = %.2f.\n")
+
+        for gal_type in self.gal_types:
+            component_dict = self.model_blueprint[gal_type]
+            for component_key in component_dict.keys():
+                component_model = component_dict[component_key]
+
+                if hasattr(component_model, 'redshift'):
+                    redshift = component_model.redshift 
+                    try:
+                        if redshift != existing_redshift:
+                            t = (gal_type, component_model.__class__.__name__, redshift, 
+                                last_gal_type, last_component.__class__.__name__, existing_redshift)
+                            raise HalotoolsError(msg % t)
+                    except NameError:
+                        existing_redshift = redshift 
+
+                last_component = component_model
+                last_gal_type = gal_type
+
+        self.redshift = redshift
 
     def _build_composite_lists(self):
         """ A composite model has several lists that are built up from 

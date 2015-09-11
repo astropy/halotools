@@ -6,13 +6,14 @@ full phase space distribution of galaxies within their halos.
 """
 
 __author__ = ['Andrew Hearin']
-__all__ = ['NFWPhaseSpace']
+__all__ = ['NFWPhaseSpace', 'TrivialPhaseSpace']
 
 import numpy as np
 from .profile_models import *
 from .velocity_models import *
 from .monte_carlo_phase_space import *
 from . import model_defaults
+from ..sim_manager import sim_defaults
 
 class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
     """ NFW halo profile, based on Navarro, Frenk and White (1999).
@@ -33,9 +34,9 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         redshift : float, optional  
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        halo_boundary : string, optional  
-            String giving the column name of the halo catalog that stores the boundary of the halo. 
-            Default is set in the `~halotools.empirical_models.model_defaults` module. 
+        mdef: str
+            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+            Default is set in `~halotools.empirical_models.model_defaults`.  
 
         velocity_bias : bool, optional 
             Boolean specifying whether the galaxy velocities are biased 
@@ -78,7 +79,11 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 class TrivialPhaseSpace(object):
     """
     """
-    def __init__(self, velocity_bias = False, **kwargs):
+    def __init__(self, velocity_bias = False, 
+        cosmology = sim_defaults.default_cosmology, 
+        redshift = sim_defaults.default_redshift, 
+        mdef = model_defaults.halo_mass_definition, 
+        **kwargs):
         """
         Parameters 
         ----------
@@ -87,6 +92,16 @@ class TrivialPhaseSpace(object):
             with respect to the halo velocities. If True, ``param_dict`` will have a 
             parameter called ``velbias_centrals`` that multiplies the underlying 
             halo velocity by an overall factor. Default is False. 
+
+        cosmology : object, optional 
+            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        redshift : float, optional  
+            Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        mdef: str
+            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+            Default is set in `~halotools.empirical_models.model_defaults`.  
         """
         self._mock_generation_calling_sequence = ['assign_phase_space']
         self._galprop_dtypes_to_allocate = np.dtype([
@@ -97,6 +112,11 @@ class TrivialPhaseSpace(object):
         self.param_dict = {}
         if velocity_bias is True:
             self.param_dict['velbias_centrals'] = 1.
+
+        self.cosmology = cosmology
+        self.redshift = redshift 
+        self.mdef = mdef 
+        self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
 
     def assign_phase_space(self, halo_table):
         """
