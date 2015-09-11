@@ -57,7 +57,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         MonteCarloGalProf.__init__(self)
 
         if 'concentration_binning' in kwargs:
-            cmin, cmax, dc = kwargs['concentration']
+            cmin, cmax, dc = kwargs['concentration_binning']
         else:
             cmin, cmax, dc = (
                 model_defaults.min_permitted_conc, 
@@ -78,7 +78,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 class TrivialPhaseSpace(object):
     """
     """
-    def __init__(self, velocity_bias = False):
+    def __init__(self, velocity_bias = False, **kwargs):
         """
         Parameters 
         ----------
@@ -94,6 +94,7 @@ class TrivialPhaseSpace(object):
             ('vx', 'f8'), ('vy', 'f8'), ('vz', 'f8'), 
             ])
 
+        self.param_dict = {}
         if velocity_bias is True:
             self.param_dict['velbias_centrals'] = 1.
 

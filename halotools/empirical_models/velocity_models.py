@@ -26,7 +26,7 @@ class IsotropicJeansVelocity(object):
     by solving the Jeans equation of the underlying potential. 
     """
 
-    def __init__(self, velocity_bias = False):
+    def __init__(self, velocity_bias = False, **kwargs):
         """
         Parameters 
         -----------
