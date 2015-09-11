@@ -135,7 +135,7 @@ class MonteCarloGalProf(object):
                         current_lookup_time*
                         len(list(product(*profile_params_list)))/(2.*float(ii)+1.)
                         )
-                    print("    (This will take about %.0f seconds)" % runtime)
+                    print("    (This will take about %.0f seconds, and only needs to be done once)" % runtime)
 
             profile_params_dimensions = [len(profile_params) for profile_params in profile_params_list]
             self.rad_prof_func_table = np.array(func_table).reshape(profile_params_dimensions)
