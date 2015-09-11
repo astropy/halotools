@@ -294,19 +294,19 @@ def Hearin15(central_assembias_strength = 1,
 
     central_assembias_strength : float or list, optional 
         Fraction or list of fractions between -1 and 1 defining 
-        the assembly bias correlation strength. Default is 0.5. 
+        the assembly bias correlation strength. Default is a constant strength of 0.5. 
 
     central_assembias_strength_abcissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
-        Default is to assume a constant strength of 0.5. 
+        Default is a constant strength of 0.5. 
 
     satellite_assembias_strength : float or list, optional 
         Fraction or list of fractions between -1 and 1 defining 
-        the assembly bias correlation strength. Default is 0.5. 
+        the assembly bias correlation strength. Default is a constant strength of 0.5. 
 
     satellite_assembias_strength_abcissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
-        Default is to assume a constant strength of 0.5. 
+        Default is a constant strength of 0.5. 
 
     split : float, optional 
         Fraction between 0 and 1 defining how 
@@ -316,6 +316,15 @@ def Hearin15(central_assembias_strength = 1,
 
     redshift : float, optional  
         Default is set in the `~halotools.sim_manager.sim_defaults` module. 
+
+    Examples 
+    --------
+    >>> model = Hearin15()
+
+    To use our model to populate a simulation with mock galaxies, we only need to 
+    load a snapshot into memory and call the built-in ``populate_mock`` method:
+
+    >>> model.populate_mock() # doctest: +SKIP
 
     """     
     ##############################
