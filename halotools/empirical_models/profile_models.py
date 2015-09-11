@@ -23,7 +23,7 @@ newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 __author__ = ['Andrew Hearin', 'Benedikt Diemer']
 
-__all__ = ['AnalyticDensityProf', 'TrivialProfile', 'NFWProfile', 'BiasedNFWProfile']
+__all__ = ['AnalyticDensityProf', 'TrivialProfile', 'NFWProfile']
 
 @six.add_metaclass(ABCMeta)
 class AnalyticDensityProf(object):
@@ -108,7 +108,8 @@ class AnalyticDensityProf(object):
         in physical units are astronomically large numbers, whereas `dimensionless_mass_density` 
         is of order :math:`\\mathcal{O}(1-100)`. This also saves users writing their own subclass 
         from having to worry over factors of little h, how profile normalization scales 
-        with the mass definition, etc. 
+        with the mass definition, etc. Once a model's `dimensionless_mass_density` is specified, 
+        all the other functionality is derived from this definition. 
 
         """
         pass
@@ -426,7 +427,7 @@ class TrivialProfile(AnalyticDensityProf):
 
         """
 
-        super(TrivialProfile, self).__init__(cosmology, redshift, mdef, **kwargs)
+        super(TrivialProfile, self).__init__(cosmology, redshift, mdef)
 
 
     def dimensionless_mass_density(self, x, total_mass):
@@ -468,11 +469,11 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         mdef: str, optional 
             String specifying the halo mass definition, e.g., 'vir' or '200m'. 
-             Default is set in `~halotools.empirical_models.model_defaults`.
+            Default is set in `~halotools.empirical_models.model_defaults`.
 
         conc_mass_model : string, optional  
             Specifies the calibrated fitting function used to model the concentration-mass relation. 
-             Default is set in `~halotools.empirical_models.model_defaults`.
+            Default is set in `~halotools.empirical_models.model_defaults`.
 
         Examples 
         --------
@@ -604,37 +605,37 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         x = np.where(x > 1, 1, x)
         return self.g(conc*x) / self.g(conc)
 
+### The current implementation of the Jeans solutions will not be correct for the BiasedNFWProfile class
+# class BiasedNFWProfile(NFWProfile):
+#     """ NFW halo profile, based on Navarro, Frenk and White (1999), 
+#     allowing galaxies to have distinct concentrations from their underlying 
+#     dark matter halos.
 
-class BiasedNFWProfile(NFWProfile):
-    """ NFW halo profile, based on Navarro, Frenk and White (1999), 
-    allowing galaxies to have distinct concentrations from their underlying 
-    dark matter halos.
+#     """
 
-    """
+#     def __init__(self, **kwargs):
+#         """
+#         Parameters 
+#         ----------
+#         cosmology : object, optional 
+#             Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
 
-    def __init__(self, **kwargs):
-        """
-        Parameters 
-        ----------
-        cosmology : object, optional 
-            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
+#         redshift : float, optional  
+#             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        redshift : float, optional  
-            Default is set in `~halotools.empirical_models.sim_defaults`.
+#         mdef: str, optional 
+#             String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+#              Default is set in `~halotools.empirical_models.model_defaults`.
 
-        mdef: str, optional 
-            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
-             Default is set in `~halotools.empirical_models.model_defaults`.
+#         conc_mass_model : string, optional  
+#             Specifies the calibrated fitting function used to model the concentration-mass relation. 
+#              Default is set in `~halotools.empirical_models.model_defaults`.
 
-        conc_mass_model : string, optional  
-            Specifies the calibrated fitting function used to model the concentration-mass relation. 
-             Default is set in `~halotools.empirical_models.model_defaults`.
+#         """
 
-        """
+#         super(BiasedNFWProfile, self).__init__(**kwargs)
 
-        super(BiasedNFWProfile, self).__init__(**kwargs)
-
-        self.param_dict['conc_NFWmodel_bias'] = 1.
+#         self.param_dict['conc_NFWmodel_bias'] = 1.
 
     # def conc_NFWmodel(self, **kwargs):
     #     """
