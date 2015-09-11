@@ -98,7 +98,8 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
 
     return model_factories.HodModelFactory(model_blueprint)
 
-def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, **kwargs):
+def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, 
+    central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
     """ HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
 
@@ -123,6 +124,28 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, **kwa
     threshold : float, optional 
         Stellar mass threshold of the mock galaxy sample. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    concentration_binning : tuple, optional 
+        Three-element tuple. The first entry will be the minimum 
+        value of the concentration in the lookup table for the satellite NFW profile, 
+        the second entry the maximum, the third entry 
+        the linear spacing of the grid. 
+        Default is set in `~halotools.empirical_models.model_defaults`.  
+        If high-precision is not required, the lookup tables will build much faster if 
+        ``concentration_binning`` is set to (1, 25, 0.5).
+
+    central_velocity_bias : bool, optional 
+        Boolean specifying whether the central galaxy velocities are biased 
+        with respect to the halo velocities. If True, ``param_dict`` will have a 
+        parameter called ``velbias_centrals`` that multiplies the underlying 
+        halo velocities. Default is False. 
+
+    satellite_velocity_bias : bool, optional 
+        Boolean specifying whether the satellite galaxy velocities are biased 
+        with respect to the halo velocities. If True, ``param_dict`` will have a 
+        parameter called ``velbias_satellites`` that multiplies the underlying 
+        Jeans solution for the halo radial velocity dispersion by an overall factor. 
+        Default is False. 
 
     Returns 
     -------
@@ -157,7 +180,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, **kwa
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
-    cen_profile = TrivialPhaseSpace()
+    cen_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
 
     cen_model_dict['profile'] = cen_profile
 
@@ -168,7 +191,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, **kwa
     occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
-    sat_profile = NFWPhaseSpace()    
+    sat_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
     sat_model_dict['profile'] = sat_profile
 
     model_blueprint = {
@@ -317,6 +340,15 @@ def Hearin15(central_assembias_strength = 1,
     redshift : float, optional  
         Default is set in the `~halotools.sim_manager.sim_defaults` module. 
 
+    concentration_binning : tuple, optional 
+        Three-element tuple. The first entry will be the minimum 
+        value of the concentration in the lookup table for the satellite NFW profile, 
+        the second entry the maximum, the third entry 
+        the linear spacing of the grid. 
+        Default is set in `~halotools.empirical_models.model_defaults`.  
+        If high-precision is not required, the lookup tables will build much faster if 
+        ``concentration_binning`` is set to (1, 25, 0.5).
+
     Examples 
     --------
     >>> model = Hearin15()
@@ -340,7 +372,7 @@ def Hearin15(central_assembias_strength = 1,
     cen_model_dict['occupation'] = cen_ab_component
 
     # Build the profile model
-    cen_profile = TrivialPhaseSpace()
+    cen_profile = TrivialPhaseSpace(**kwargs)
     cen_model_dict['profile'] = cen_profile
 
     ##############################
@@ -361,7 +393,7 @@ def Hearin15(central_assembias_strength = 1,
     sat_model_dict['occupation'] = sat_ab_component
 
     # Build the profile model
-    sat_profile = NFWPhaseSpace()    
+    sat_profile = NFWPhaseSpace(**kwargs)    
     sat_model_dict['profile'] = sat_profile
 
     model_blueprint = {'centrals': cen_model_dict, 'satellites': sat_model_dict}
