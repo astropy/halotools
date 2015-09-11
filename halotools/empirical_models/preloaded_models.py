@@ -74,21 +74,21 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Zheng07Cens(threshold = threshold)
+    occu_cen_model = hoc.Zheng07Cens(threshold = threshold, **kwargs)
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
-    cen_profile = TrivialPhaseSpace()
+    cen_profile = TrivialPhaseSpace(**kwargs)
     cen_model_dict['profile'] = cen_profile
 
     ### Build model for satellites
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Zheng07Sats(threshold = threshold)
+    occu_sat_model = hoc.Zheng07Sats(threshold = threshold, **kwargs)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
-    sat_profile = NFWPhaseSpace()    
+    sat_profile = NFWPhaseSpace(**kwargs)    
     sat_model_dict['profile'] = sat_profile
 
     model_blueprint = {
@@ -176,7 +176,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Leauthaud11Cens(threshold = threshold)
+    occu_cen_model = hoc.Leauthaud11Cens(threshold = threshold, **kwargs)
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
@@ -188,7 +188,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold)
+    occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold, **kwargs)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
     sat_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
@@ -279,11 +279,11 @@ def SmHmBinarySFR(
 
     sfr_model = sfr_components.BinaryGalpropInterpolModel(
         galprop_key='quiescent', prim_haloprop_key=prim_haloprop_key, 
-        abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam)
+        abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam, **kwargs)
 
     sm_model = smhm_components.Behroozi10SmHm(
         prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
-        scatter_abcissa = [12], scatter_ordinates = [scatter_level])
+        scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
 
     blueprint = {sm_model.galprop_key: sm_model, sfr_model.galprop_key: sfr_model}
 

@@ -23,6 +23,7 @@ else:
 
 class TestHearin15(TestCase):
 
+	@pytest.mark.skipif('not APH_MACHINE')
 	def setup_class(self):
 
 		Npts = 1e4
@@ -42,12 +43,15 @@ class TestHearin15(TestCase):
 
 		self.snapshot = HaloCatalog(preload_halo_table = True)
 
+		self.snapshot2 = HaloCatalog(preload_halo_table = True, redshift = 2.)
+
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Hearin15(self):
 
 		model = preloaded_models.Hearin15(concentration_binning = (1, 35, 5))
 		model.populate_mock(snapshot = self.snapshot)
 
+	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11(self):
 
 		model = preloaded_models.Leauthaud11(concentration_binning = (1, 35, 5))
@@ -84,6 +88,18 @@ class TestHearin15(TestCase):
 			model2.populate_mock(simname='consuelo')
 		with pytest.raises(HalotoolsError) as exc:
 			model2.populate_mock(halo_finder='bdm')
+
+		model_highz = preloaded_models.Leauthaud11(redshift = 2., 
+			concentration_binning = (1, 35, 5))
+		model_highz.populate_mock(snapshot = self.snapshot2)
+		with pytest.raises(HalotoolsError) as exc:
+			model_highz.populate_mock()
+		with pytest.raises(HalotoolsError) as exc:
+			model_highz.populate_mock(snapshot = self.snapshot)
+		model_highz.populate_mock(redshift = 2.)
+
+
+
 
 
 
