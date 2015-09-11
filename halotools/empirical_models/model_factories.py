@@ -97,7 +97,7 @@ class ModelFactory(object):
             else:
                 snapshot = HaloCatalog(**kwargs)
 
-            mock_factory = self.model_blueprint['mock_factory']
+            mock_factory = self.model.mock_factory 
             mock = mock_factory(snapshot=snapshot, model=self, populate=True)
             self.mock = mock
 
@@ -736,7 +736,7 @@ class HodModelFactory(ModelFactory):
         will always be built first, out of consideration for satellite 
         model components with explicit dependence on the central population. 
         """
-        gal_types = [key for key in self._input_model_blueprint.keys() if key is not 'mock_factory']
+        gal_types = [key for key in self._input_model_blueprint.keys()]
         if len(gal_types) == 1:
             self.gal_types = gal_types
         elif len(gal_types) == 2:
@@ -770,8 +770,7 @@ class HodModelFactory(ModelFactory):
 
             gal_type_blueprint = self.model_blueprint[gal_type]
 
-            feature_generator = (feature_name for feature_name in gal_type_blueprint
-                if feature_name is not 'mock_factory')
+            feature_generator = (feature_name for feature_name in gal_type_blueprint)
 
             for feature_name in feature_generator:
                 component_model_instance = gal_type_blueprint[feature_name]
