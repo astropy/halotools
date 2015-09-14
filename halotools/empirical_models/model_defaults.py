@@ -28,16 +28,6 @@ default_tiny_poisson_fluctuation = 1.e-20
 # slightly larger than the largest value of x, this never happens.
 default_bin_max_epsilon = 1.e-5
 
-# Number of bins to use in the lookup table attached to the NFWProfile. 
-# Used primarily by HODMockFactory.
-min_permitted_conc = 0.1
-max_permitted_conc = 30.0
-default_dconc = 0.025
-
-Npts_radius_table = 101
-default_lograd_min = -4
-default_lograd_max = 0
-conc_mass_model = 'dutton_maccio14'
 
 ### Default values specifying traditional quenching model
 # Used by models in the halo_occupation module
@@ -65,7 +55,50 @@ haloprop_list = ['halo_id', 'halo_x', 'halo_y', 'halo_z', 'halo_vx', 'halo_vy', 
 
 prim_haloprop_key = 'halo_mvir'
 sec_haloprop_key = 'halo_nfw_conc'
-halo_boundary = 'halo_rvir'
+
+halo_mass_definition = 'vir'
+def get_halo_boundary_key(mdef):
+    """ For the input mass definition, 
+    return the string used to access halo table column 
+    storing the halo radius. 
+
+    Parameters 
+    -----------
+    mdef: str
+        String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+
+    Returns 
+    --------
+    radius_key : str
+    """
+    return 'halo_r'+mdef
+def get_halo_mass_key(mdef):
+    """ For the input mass definition, 
+    return the string used to access halo table column 
+    storing the halo mass. 
+
+    Parameters 
+    -----------
+    mdef: str
+        String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+
+    Returns 
+    --------
+    mass_key : str
+    """
+    return 'halo_m'+mdef
+
+# Number of bins to use in the lookup table attached to the NFWProfile. 
+# Used primarily by HODMockFactory.
+min_permitted_conc = 0.1
+max_permitted_conc = 30.0
+default_dconc = 0.025
+
+Npts_radius_table = 101
+default_lograd_min = -3
+default_lograd_max = 0
+conc_mass_model = 'dutton_maccio14'
+
 
 default_rbins = np.logspace(-1, 1.25, 15)
 default_nptcls = 1e5

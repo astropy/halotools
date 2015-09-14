@@ -48,8 +48,8 @@ def test_Zheng07_composite():
 	assert satocc_restored == satocc_orig
 
 	#######################################################
-	fakesim = FakeSim()
-	model.populate_mock(snapshot = fakesim)
+	# fakesim = FakeSim()
+	# model.populate_mock(snapshot = fakesim)
 
 
 def test_alt_Zheng07_composites():
@@ -87,8 +87,8 @@ def test_alt_Zheng07_composites():
 	assert nsat3 == nsat4
 
 	fakesim = FakeSim()
-	cenmod_model.populate_mock(snapshot = fakesim)
-	default_model.populate_mock(snapshot = fakesim)
+	# cenmod_model.populate_mock(snapshot = fakesim)
+	# default_model.populate_mock(snapshot = fakesim)
 
 
 def test_Leauthaud11_composite():
@@ -112,8 +112,8 @@ def test_Leauthaud11_composite():
 	assert ncen3 == ncen2
 	assert nsat3 == nsat2
 
-	fakesim = FakeSim()
-	model.populate_mock(snapshot = fakesim)
+	# fakesim = FakeSim()
+	# model.populate_mock(snapshot = fakesim)
 
 
 	"""

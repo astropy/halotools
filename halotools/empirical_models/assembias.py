@@ -16,7 +16,9 @@ from ..custom_exceptions import HalotoolsError
 from ..utils.table_utils import compute_conditional_percentiles
 
 class HeavisideAssembias(object):
-    """
+    """ Class used as an orthogonal mix-in to introduce 
+    assembly-biased behavior into the class whose behavior is being supplemented class.  
+
     """
     def __init__(self, **kwargs):
         """
@@ -206,7 +208,7 @@ class HeavisideAssembias(object):
         self.new_haloprop_func_dict = {}
         self.new_haloprop_func_dict[key] = assembias_percentile_calculator
 
-        self._additional_methods_to_inherit.extend(['assembias_strength'])
+        self._methods_to_inherit.extend(['assembias_strength'])
 
 
     def percentile_splitting_function(self, **kwargs):
