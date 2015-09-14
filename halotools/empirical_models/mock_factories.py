@@ -660,6 +660,8 @@ class HodMockFactory(MockFactory):
             first_galaxy_index = last_galaxy_index
             # Remove the mc_occupation function from the list of methods to call
             self._remaining_methods_to_call.remove(occupation_func_name)
+            galprops_assigned_to_halo_table_by_func = occupation_func._galprop_dtypes_to_allocate.names
+            self.additional_haloprops.extend(galprops_assigned_to_halo_table_by_func)
             
         self.Ngals = np.sum(self._total_abundance.values())
 
