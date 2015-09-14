@@ -32,7 +32,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
 @six.add_metaclass(ABCMeta)
-class OccupationComponent(model_helpers.GalPropModel):
+class OccupationComponent(object):
     """ Abstract base class of any occupation model. 
     Functionality is mostly trivial. 
     The sole purpose of the base class is to 
@@ -58,8 +58,6 @@ class OccupationComponent(model_helpers.GalPropModel):
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies, e.g., ``halo_mvir``. 
         """
-        super(OccupationComponent, self).__init__(galprop_key='occupation')
-
         required_kwargs = ['gal_type', 'threshold', 'prim_haloprop_key']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
@@ -74,11 +72,15 @@ class OccupationComponent(model_helpers.GalPropModel):
             raise SyntaxError("Any sub-class of OccupationComponent must "
                 "implement a method named %s " % required_method_name)
 
+        # The _methods_to_inherit determines which methods will be directly callable 
+        # by the composite model built by the HodModelFactory
         try:
             self._methods_to_inherit.extend(['mc_occupation', 'mean_occupation'])
         except AttributeError:
             self._methods_to_inherit = ['mc_occupation', 'mean_occupation']
 
+        # The _attrs_to_inherit determines which methods will be directly bound  
+        # to the composite model built by the HodModelFactory
         try:
             self._attrs_to_inherit.append('threshold')
         except AttributeError:
@@ -87,6 +89,8 @@ class OccupationComponent(model_helpers.GalPropModel):
         if not hasattr(self, 'publications'):
             self.publications = []
 
+        # The _mock_generation_calling_sequence determines which methods 
+        # will be called during mock population, as well as in what order they will be called
         self._mock_generation_calling_sequence = ['mc_occupation']
 
     def mc_occupation(self, seed=None, **kwargs):
