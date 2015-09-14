@@ -8,7 +8,7 @@ used by many of the hod model components.
 
 __all__ = (
     ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
-    'enforce_periodicity_of_box']
+    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 'bind_default_kwarg_mixin_safe']
     )
 
 import numpy as np
@@ -17,7 +17,7 @@ from copy import copy
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults
-from ..utils.array_utils import custom_len
+from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
 from astropy.extern import six
@@ -29,13 +29,6 @@ class GalPropModel(object):
     """
     def __init__(self, galprop_key):
         self.galprop_key = galprop_key
-
-        # # Enforce the requirement that sub-classes have been configured properly
-        # required_method_name = 'mc_'+galprop_key
-        # if not hasattr(self, required_method_name):
-        #     raise SyntaxError("Any sub-class of GalPropModel must "
-        #         "implement a method named %s " % required_method_name)
-
 
 def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
@@ -212,8 +205,9 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
 
 
 def custom_spline(table_abcissa, table_ordinates, **kwargs):
-    """ Simple workaround to replace scipy's silly convention 
-    for treating the spline_degree=0 edge case. 
+    """ Convenience wrapper around scipy.InterpolatedUnivariateSpline, 
+    written specifically to handle the edge case of a spline table being 
+    built from a single point.  
 
     Parameters 
     ----------
@@ -288,6 +282,10 @@ def call_func_table(func_table, abcissa, func_indices):
         abcissa element. 
 
     """
+    func_table = convert_to_ndarray(func_table)
+    abcissa = convert_to_ndarray(abcissa)
+    func_indices = convert_to_ndarray(func_indices)
+    
     func_argsort = func_indices.argsort()
     func_ranges = list(np.searchsorted(func_indices[func_argsort], range(len(func_table))))
     func_ranges.append(None)
@@ -331,6 +329,87 @@ def bind_required_kwargs(required_kwargs, obj, **kwargs):
                 'to instantiate the '+class_name+' class'
                 )
             raise KeyError(msg)
+
+def create_composite_dtype(dtype_list):
+    """ Find the union of the dtypes in the input list, and return a composite 
+    dtype after verifying consistency of typing of possibly repeated fields. 
+
+    Parameters 
+    ----------
+    dtype_list : list 
+        List of dtypes with possibly repeated field names. 
+
+    Returns 
+    --------
+    composite_dtype : dtype 
+        Numpy dtype object composed of the union of the input dtypes. 
+
+    Notes 
+    -----
+    Basically an awkward workaround to the fact 
+    that numpy dtype objects are not iterable.
+    """
+    name_list = list(set([name for d in dtype_list for name in d.names]))
+
+    composite_list = []
+    for name in name_list:
+        for dt in dtype_list:
+            if name in dt.names:
+                tmp = np.dtype(composite_list)
+                if name in tmp.names:
+                    if tmp[name].type == dt[name].type:
+                        pass
+                    else:
+                        msg = ("Inconsistent dtypes for name = ``%s``.\n" 
+                            "    dtype1 = %s\n    dtype2 = %s\n" % 
+                            (name, tmp[name].type, dt[name].type))
+                        raise HalotoolsError(msg)
+                else:
+                    composite_list.append((name, dt[name].type))
+    composite_dtype = np.dtype(composite_list)
+    return composite_dtype
+
+def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, default_value):
+    """ Function used to ensure that a keyword argument passed to the constructor 
+    of an orthogonal mix-in class is not already an attribute bound to self.
+    If it is safe to bind the keyword_argument to the object, 
+    `bind_default_kwarg_mixin_safe` will do so.
+
+    Parameters 
+    ----------
+    obj : class instance 
+        Instance of the class to which we want to bind the input ``keyword_argument``.
+
+    keyword_argument : string 
+        name of the attribute that will be bound to the object if the action is deemed mix-in safe.
+
+    constructor_kwargs : dict 
+        keyword argument dictionary passed to the constructor of the input ``obj``.
+
+    default_value : object 
+        Whatever the default value for the attribute should be if ``keyword_argument`` does not 
+        appear in kwargs nor is it already bound to the ``obj``.
+
+    Notes 
+    ------
+    See the constructor of `~halotools.empirical_models.conc_mass_models.ConcMass` for a usage example.    
+    """
+    if hasattr(obj, keyword_argument):
+        if keyword_argument in constructor_kwargs:
+            clname = obj.__class__.__name__
+            msg = ("Do not pass the  ``%s`` keyword argument "
+                "to the constructor of the %s class when using the %s class "
+                "as an orthogonal mix-in" % (keyword_argument, clname, clname))
+            raise HalotoolsError(msg)
+        else:
+            pass
+    else:
+        if keyword_argument in constructor_kwargs:
+            setattr(obj, keyword_argument, constructor_kwargs[keyword_argument])
+        else:
+            setattr(obj, keyword_argument, default_value)
+
+
 
 
 

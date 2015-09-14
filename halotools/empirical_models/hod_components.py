@@ -32,7 +32,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
 @six.add_metaclass(ABCMeta)
-class OccupationComponent(model_helpers.GalPropModel):
+class OccupationComponent(object):
     """ Abstract base class of any occupation model. 
     Functionality is mostly trivial. 
     The sole purpose of the base class is to 
@@ -57,24 +57,12 @@ class OccupationComponent(model_helpers.GalPropModel):
         prim_haloprop_key : string, keyword argument 
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies, e.g., ``halo_mvir``. 
-
-        sec_haloprop_key : string, optional 
-            String giving the column name of the secondary halo property governing 
-            the occupation statistics of gal_type galaxies, e.g., ``halo_nfw_conc``.
-            Only pertains to galaxy populations with assembly-biased occupations. 
-            Default is None. 
-
         """
-        super(OccupationComponent, self).__init__(galprop_key='occupation')
-
         required_kwargs = ['gal_type', 'threshold', 'prim_haloprop_key']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         self._upper_bound = kwargs['upper_bound']
         self._lower_bound = 0
-
-        if 'sec_haloprop_key' in kwargs.keys():
-            self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
         self.param_dict = {}
 
@@ -84,10 +72,27 @@ class OccupationComponent(model_helpers.GalPropModel):
             raise SyntaxError("Any sub-class of OccupationComponent must "
                 "implement a method named %s " % required_method_name)
 
-        self._additional_methods_to_inherit = ['mean_occupation']
+        # The _methods_to_inherit determines which methods will be directly callable 
+        # by the composite model built by the HodModelFactory
+        try:
+            self._methods_to_inherit.extend(['mc_occupation', 'mean_occupation'])
+        except AttributeError:
+            self._methods_to_inherit = ['mc_occupation', 'mean_occupation']
+
+        # The _attrs_to_inherit determines which methods will be directly bound  
+        # to the composite model built by the HodModelFactory
+        try:
+            self._attrs_to_inherit.append('threshold')
+        except AttributeError:
+            self._attrs_to_inherit = ['threshold']
 
         if not hasattr(self, 'publications'):
             self.publications = []
+
+        # The _mock_generation_calling_sequence determines which methods 
+        # will be called during mock population, as well as in what order they will be called
+        self._mock_generation_calling_sequence = ['mc_occupation']
+        self._galprop_dtypes_to_allocate = np.dtype([('halo_num_'+ self.gal_type, 'i4')])
 
     def mc_occupation(self, seed=None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
@@ -140,7 +145,11 @@ class OccupationComponent(model_helpers.GalPropModel):
         """
         np.random.seed(seed=seed)
         mc_generator = np.random.random(custom_len(first_occupation_moment))
-        return np.where(mc_generator < first_occupation_moment, 1, 0)
+
+        result = np.where(mc_generator < first_occupation_moment, 1, 0)
+        if 'halo_table' in kwargs:
+            kwargs['halo_table']['halo_num_'+self.gal_type] = result
+        return result
 
     def _poisson_distribution(self, first_occupation_moment, seed=None, **kwargs):
         """ Poisson distribution used to draw Monte Carlo occupation statistics 
@@ -165,13 +174,16 @@ class OccupationComponent(model_helpers.GalPropModel):
         # if its input is zero, so here we impose a simple workaround
         first_occupation_moment = np.where(first_occupation_moment <=0, 
             model_defaults.default_tiny_poisson_fluctuation, first_occupation_moment)
-        return poisson.rvs(first_occupation_moment)
+
+        result = poisson.rvs(first_occupation_moment)
+        if 'halo_table' in kwargs:
+            kwargs['halo_table']['halo_num_'+self.gal_type] = result
+        return result
 
 class Zheng07Cens(OccupationComponent):
     """ ``Erf`` function model for the occupation statistics of central galaxies, 
     introduced in Zheng et al. 2005, arXiv:0408564. This implementation uses 
     Zheng et al. 2007, arXiv:0703457, to assign fiducial parameter values. 
-
     """
 
     def __init__(self, 
@@ -347,8 +359,7 @@ class Leauthaud11Cens(OccupationComponent):
     """
     def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift = sim_manager.sim_defaults.default_redshift, 
-        **kwargs):
+        redshift = sim_manager.sim_defaults.default_redshift, **kwargs):
         """
         Parameters 
         ----------
@@ -826,11 +837,6 @@ class Leauthaud11Sats(OccupationComponent):
         the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the 
         lowest redshift bin. 
 
-        Notes 
-        -----
-        These values are only for ballpark purposes, and are 
-        not self-consistent with arXiv:1104.0928, 
-        because a different stellar-to-halo-mass relation is used here. 
         """
 
         self.param_dict['alphasat'] = 1.0
@@ -869,7 +875,7 @@ class Leauthaud11Sats(OccupationComponent):
 
 
 class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
-    """
+    """ Assembly-biased modulation of `Zheng07Sats`. 
     """
     def __init__(self, **kwargs):
         """
@@ -922,7 +928,7 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
 
 
 class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
-    """
+    """ Assembly-biased modulation of `Zheng07Cens`. 
     """
     def __init__(self, **kwargs):
         """
@@ -975,8 +981,7 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
 
 
 class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
-    """ HOD-style model for any central galaxy occupation that derives from 
-    a stellar-to-halo-mass relation. 
+    """ Assembly-biased modulation of `Leauthaud11Cens`. 
     """
     def __init__(self, **kwargs):
         """
@@ -1031,8 +1036,7 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
 
 
 class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
-    """ HOD-style model for any central galaxy occupation that derives from 
-    a stellar-to-halo-mass relation. 
+    """ Assembly-biased modulation of `Leauthaud11Sats`. 
     """
     def __init__(self, **kwargs):
         """

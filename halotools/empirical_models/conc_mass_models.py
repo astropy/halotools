@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 
-halotools.halo_prof_param_components contains the classes and functions 
-defining relations between dark matter halos and the parameters 
-governing their internal structure. The classic example of such a component 
-is a relation between halo mass and NFW concentration. More generally, 
-a halo profile parameter model is just a mapping between *any* 
-halo property and *any* profile parameter. 
+Classes and functions defining relations between NFW concentration 
+and halo mass. 
 
 """
 
@@ -14,21 +10,24 @@ import numpy as np
 import model_defaults
 from ..sim_manager import sim_defaults
 import model_defaults
+from ..custom_exceptions import *
+from .model_helpers import bind_default_kwarg_mixin_safe
 
 __all__ = ['ConcMass']
 
 class ConcMass(object):
-    """ Container class for commonly used concentration-mass 
-    relations in the literature. 
+    """ Container class for commonly used concentration-mass relations in the literature. 
 
+    `ConcMass` can be instantiated as a stand-alone class, or used as an orthogonal mix-in 
+    with the `~halotools.empirical_models.NFWProfile` or any of its sub-classes. 
+
+    Notes 
+    ------
     The only currently supported model is `dutton_maccio14`.
 
     """
 
-    def __init__(self, cosmology=sim_defaults.default_cosmology, 
-        redshift = sim_defaults.default_redshift, 
-        prim_haloprop_key = model_defaults.prim_haloprop_key, 
-        conc_mass_model = model_defaults.conc_mass_model, **kwargs):
+    def __init__(self, conc_mass_model = model_defaults.conc_mass_model, **kwargs):
         """
         Parameters 
         ----------
@@ -38,26 +37,31 @@ class ConcMass(object):
         redshift : float, optional  
             Default is set in `~halotools.empirical_models.sim_defaults`.
 
-        prim_haloprop_key : string, optional  
-            Specifies the column name of the mass-like halo property, e.g., 'mvir' or 'm200b'. 
-            Default is set in `~halotools.empirical_models.sim_defaults`.
+        mdef: str, optional 
+            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+             Default is set in `~halotools.empirical_models.model_defaults`.
 
         conc_mass_model : string, optional  
             Specifies the calibrated fitting function used to model the concentration-mass relation. 
-             Default is set in `~halotools.empirical_models.sim_defaults`.
+             Default is set in `~halotools.empirical_models.model_defaults`.
 
         Examples 
         ---------
         >>> conc_mass_model = ConcMass()
-        >>> conc_mass_model = ConcMass(redshift = 2, prim_haloprop_key = 'm500c')
+        >>> conc_mass_model = ConcMass(redshift = 2, mdef = '500c')
 
         """
-        self.cosmology = cosmology
-        self.redshift = redshift
-        self.prim_haloprop_key = prim_haloprop_key
         self.conc_mass_model = conc_mass_model
 
-    def __call__(self, **kwargs):
+        bind_default_kwarg_mixin_safe(self, 'cosmology', kwargs, sim_defaults.default_cosmology)
+        bind_default_kwarg_mixin_safe(self, 'redshift', kwargs, sim_defaults.default_redshift)
+        bind_default_kwarg_mixin_safe(self, 'mdef', kwargs, model_defaults.halo_mass_definition)
+
+        if not hasattr(self, 'halo_mass_key'):
+            self.halo_mass_key = model_defaults.get_halo_mass_key(self.mdef)
+
+
+    def compute_concentration(self, **kwargs):
         """ Method used to evaluate the mean NFW concentration as a function of 
         halo mass. 
 
@@ -74,22 +78,29 @@ class ConcMass(object):
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
+        Returns 
+        -------
+        c : array_like
+            Concentrations of the input halos. 
+
         Notes 
         -----
         The testing for this model can be found in 
-        `~halotools.empirical_models.test_empirical_models.test_halo_prof_param_components`. 
+        `~halotools.empirical_models.test_empirical_models.test_conc_mass`. 
 
         """
         # Retrieve the array storing the mass-like variable
         if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+            mass = kwargs['halo_table'][self.halo_mass_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
-            raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
+            raise KeyError("Must pass one of the following keyword arguments "
+                "to the compute_concentration method:\n"
                 "``halo_table`` or ``prim_haloprop``")
 
-        return getattr(self, self.conc_mass_model)(mass)
+        conc_mass_func = getattr(self, self.conc_mass_model)
+        return conc_mass_func(mass)
 
     def dutton_maccio14(self, mass):
         """ Power-law fit to the concentration-mass relation from 

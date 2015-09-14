@@ -4,15 +4,20 @@
 Module containing some commonly used composite HOD models.
 
 """
+import numpy as np
 from . import model_factories, model_defaults, smhm_components
-from . import preloaded_subhalo_model_blueprints
-from . import preloaded_hod_blueprints
+from . import hod_components as hoc
+from . import smhm_components
+from . import sfr_components
+from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
+from .abunmatch import ConditionalAbunMatch
 
 from ..sim_manager import FakeMock, FakeSim, sim_defaults
 
+
 __all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15', 'Hearin15']
 
-def Zheng07(**kwargs):
+def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     """ Simple HOD-style based on Zheng et al. (2007), arXiv:0703457. 
 
     There are two populations, centrals and satellites. 
@@ -20,16 +25,15 @@ def Zheng07(**kwargs):
     with first moment given by an ``erf`` function; the class governing this 
     behavior is `~halotools.empirical_models.hod_components.Zheng07Cens`. 
     Central galaxies are assumed to reside at the exact center of the host halo; 
-    the class governing this behavior is `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
+    the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`. 
 
     Satellite occupation statistics are given by a Poisson distribution 
     with first moment given by a power law that has been truncated at the low-mass end; 
     the class governing this behavior is `~halotools.empirical_models.hod_components.Zheng07Sats`; 
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
-    `~halotools.empirical_models.halo_prof_components.NFWProfile` class. 
+    `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
-    which followed the instructions contained in `~halotools.empirical_models.Zheng07_blueprint`. 
+    This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`.
 
     Parameters 
     ----------
@@ -61,14 +65,41 @@ def Zheng07(**kwargs):
     load a snapshot into memory and call the built-in ``populate_mock`` method. 
     For illustration purposes, we'll use a small, fake simulation:
 
-    >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot)
+    >>> fake_snapshot = FakeSim() # doctest: +SKIP
+    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     """
-    blueprint = preloaded_hod_blueprints.Zheng07_blueprint(**kwargs)
-    return model_factories.HodModelFactory(blueprint, **kwargs)
 
-def Leauthaud11(**kwargs):
+    ### Build model for centrals
+    cen_key = 'centrals'
+    cen_model_dict = {}
+    # Build the occupation model
+    occu_cen_model = hoc.Zheng07Cens(threshold = threshold, **kwargs)
+    cen_model_dict['occupation'] = occu_cen_model
+    # Build the profile model
+    
+    cen_profile = TrivialPhaseSpace(**kwargs)
+    cen_model_dict['profile'] = cen_profile
+
+    ### Build model for satellites
+    sat_key = 'satellites'
+    sat_model_dict = {}
+    # Build the occupation model
+    occu_sat_model = hoc.Zheng07Sats(threshold = threshold, **kwargs)
+    sat_model_dict['occupation'] = occu_sat_model
+    # Build the profile model
+    sat_profile = NFWPhaseSpace(**kwargs)    
+    sat_model_dict['profile'] = sat_profile
+
+    model_blueprint = {
+        occu_cen_model.gal_type : cen_model_dict,
+        occu_sat_model.gal_type : sat_model_dict 
+        }
+
+    return model_factories.HodModelFactory(model_blueprint)
+
+def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, 
+    central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
     """ HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
 
@@ -77,13 +108,13 @@ def Leauthaud11(**kwargs):
     with first moment given by an ``erf`` function; the class governing this 
     behavior is `~halotools.empirical_models.hod_components.Leauthaud11Cens`. 
     Central galaxies are assumed to reside at the exact center of the host halo; 
-    the class governing this behavior is `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
+    the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`. 
 
     Satellite occupation statistics are given by a Poisson distribution 
     with first moment given by a power law that has been truncated at the low-mass end; 
     the class governing this behavior is `~halotools.empirical_models.hod_components.Leauthaud11Sats`; 
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
-    `~halotools.empirical_models.halo_prof_components.NFWProfile` class. 
+    `~halotools.empirical_models.NFWPhaseSpace` class. 
 
     This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
     which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_blueprint`. 
@@ -93,6 +124,28 @@ def Leauthaud11(**kwargs):
     threshold : float, optional 
         Stellar mass threshold of the mock galaxy sample. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    concentration_binning : tuple, optional 
+        Three-element tuple. The first entry will be the minimum 
+        value of the concentration in the lookup table for the satellite NFW profile, 
+        the second entry the maximum, the third entry 
+        the linear spacing of the grid. 
+        Default is set in `~halotools.empirical_models.model_defaults`.  
+        If high-precision is not required, the lookup tables will build much faster if 
+        ``concentration_binning`` is set to (1, 25, 0.5).
+
+    central_velocity_bias : bool, optional 
+        Boolean specifying whether the central galaxy velocities are biased 
+        with respect to the halo velocities. If True, ``param_dict`` will have a 
+        parameter called ``velbias_centrals`` that multiplies the underlying 
+        halo velocities. Default is False. 
+
+    satellite_velocity_bias : bool, optional 
+        Boolean specifying whether the satellite galaxy velocities are biased 
+        with respect to the halo velocities. If True, ``param_dict`` will have a 
+        parameter called ``velbias_satellites`` that multiplies the underlying 
+        Jeans solution for the halo radial velocity dispersion by an overall factor. 
+        Default is False. 
 
     Returns 
     -------
@@ -116,19 +169,51 @@ def Leauthaud11(**kwargs):
     For illustration purposes, we'll use a small, fake simulation:
 
     >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot)
+    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     """
-    blueprint = preloaded_hod_blueprints.Leauthaud11_blueprint(**kwargs)
-    return model_factories.HodModelFactory(blueprint, **kwargs)
+    ### Build model for centrals
+    cen_key = 'centrals'
+    cen_model_dict = {}
+    # Build the occupation model
+    occu_cen_model = hoc.Leauthaud11Cens(threshold = threshold, **kwargs)
+    cen_model_dict['occupation'] = occu_cen_model
+    # Build the profile model
+    
+    cen_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
+
+    cen_model_dict['profile'] = cen_profile
+
+    ### Build model for satellites
+    sat_key = 'satellites'
+    sat_model_dict = {}
+    # Build the occupation model
+    occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold, **kwargs)
+    sat_model_dict['occupation'] = occu_sat_model
+    # Build the profile model
+    sat_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
+    sat_model_dict['profile'] = sat_profile
+
+    model_blueprint = {
+        occu_cen_model.gal_type : cen_model_dict,
+        occu_sat_model.gal_type : sat_model_dict
+        }
+
+    return model_factories.HodModelFactory(model_blueprint)
 
 
-def SmHmBinarySFR(**kwargs):
-    """ Blueprint for a very simple model assigning stellar mass and 
+def SmHmBinarySFR(
+    prim_haloprop_key = model_defaults.default_smhm_haloprop, 
+    smhm_model=smhm_components.Moster13SmHm, 
+    scatter_level = 0.2, 
+    redshift = sim_defaults.default_redshift, 
+    sfr_abcissa = [12, 15], sfr_ordinates = [0.25, 0.75], logparam=True, 
+    **kwargs):
+    """ Very simple model assigning stellar mass and 
     quiescent/active designation to a subhalo catalog. 
 
     Stellar masses are assigned according to a parameterized relation, 
-    Moster et al. (2013) by default. SFR designation is determined by 
+    Behroozi et al. (2010) by default. SFR designation is determined by 
     interpolating between a set of input control points, with default 
     behavior being a 25% quiescent fraction for galaxies 
     residing in Milky Way halos, and 75% for cluster galaxies. 
@@ -188,11 +273,19 @@ def SmHmBinarySFR(**kwargs):
     For illustration purposes, we'll use a small, fake simulation:
 
     >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot)
+    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     """
 
-    blueprint = preloaded_subhalo_model_blueprints.SmHmBinarySFR_blueprint(**kwargs)
+    sfr_model = sfr_components.BinaryGalpropInterpolModel(
+        galprop_key='quiescent', prim_haloprop_key=prim_haloprop_key, 
+        abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam, **kwargs)
+
+    sm_model = smhm_components.Behroozi10SmHm(
+        prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
+        scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
+
+    blueprint = {sm_model.galprop_key: sm_model, sfr_model.galprop_key: sfr_model}
 
     if 'threshold' in kwargs.keys():
         galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
@@ -203,7 +296,11 @@ def SmHmBinarySFR(**kwargs):
 
     return model
 
-def Hearin15(**kwargs):
+def Hearin15(central_assembias_strength = 1, 
+    central_assembias_strength_abcissa = [1e12], 
+    satellite_assembias_strength = 0.2, 
+    satellite_assembias_strength_abcissa = [1e12], 
+    **kwargs):
     """ 
     HOD-style model in which central and satellite occupations statistics are assembly-biased. 
 
@@ -220,19 +317,19 @@ def Hearin15(**kwargs):
 
     central_assembias_strength : float or list, optional 
         Fraction or list of fractions between -1 and 1 defining 
-        the assembly bias correlation strength. Default is 0.5. 
+        the assembly bias correlation strength. Default is a constant strength of 0.5. 
 
     central_assembias_strength_abcissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
-        Default is to assume a constant strength of 0.5. 
+        Default is a constant strength of 0.5. 
 
     satellite_assembias_strength : float or list, optional 
         Fraction or list of fractions between -1 and 1 defining 
-        the assembly bias correlation strength. Default is 0.5. 
+        the assembly bias correlation strength. Default is a constant strength of 0.5. 
 
     satellite_assembias_strength_abcissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
-        Default is to assume a constant strength of 0.5. 
+        Default is a constant strength of 0.5. 
 
     split : float, optional 
         Fraction between 0 and 1 defining how 
@@ -243,12 +340,72 @@ def Hearin15(**kwargs):
     redshift : float, optional  
         Default is set in the `~halotools.sim_manager.sim_defaults` module. 
 
+    concentration_binning : tuple, optional 
+        Three-element tuple. The first entry will be the minimum 
+        value of the concentration in the lookup table for the satellite NFW profile, 
+        the second entry the maximum, the third entry 
+        the linear spacing of the grid. 
+        Default is set in `~halotools.empirical_models.model_defaults`.  
+        If high-precision is not required, the lookup tables will build much faster if 
+        ``concentration_binning`` is set to (1, 25, 0.5).
+
+    Examples 
+    --------
+    >>> model = Hearin15()
+
+    To use our model to populate a simulation with mock galaxies, we only need to 
+    load a snapshot into memory and call the built-in ``populate_mock`` method:
+
+    >>> model.populate_mock() # doctest: +SKIP
+
     """     
-    blueprint = preloaded_hod_blueprints.Hearin15_blueprint(**kwargs)
-    return model_factories.HodModelFactory(blueprint, **kwargs)
+    ##############################
+    ### Build the occupation model
+    if central_assembias_strength == 0:
+        cen_ab_component = hoc.Leauthaud11Cens(**kwargs)
+    else:
+        cen_ab_component = hoc.AssembiasLeauthaud11Cens(
+            assembias_strength = central_assembias_strength, 
+            assembias_strength_abcissa = central_assembias_strength_abcissa, 
+            **kwargs)
+    cen_model_dict = {}
+    cen_model_dict['occupation'] = cen_ab_component
+
+    # Build the profile model
+    cen_profile = TrivialPhaseSpace(**kwargs)
+    cen_model_dict['profile'] = cen_profile
+
+    ##############################
+    ### Build the occupation model
+    if satellite_assembias_strength == 0:
+        sat_ab_component = hoc.Leauthaud11Sats(**kwargs)
+    else:
+        sat_ab_component = hoc.AssembiasLeauthaud11Sats(
+            assembias_strength = satellite_assembias_strength, 
+            assembias_strength_abcissa = satellite_assembias_strength_abcissa, 
+            **kwargs)
+        # There is no need for a redundant new_haloprop_func_dict 
+        # if this is already possessed by the central model
+        if hasattr(cen_ab_component, 'new_haloprop_func_dict'):
+            del sat_ab_component.new_haloprop_func_dict
+
+    sat_model_dict = {}
+    sat_model_dict['occupation'] = sat_ab_component
+
+    # Build the profile model
+    sat_profile = NFWPhaseSpace(**kwargs)    
+    sat_model_dict['profile'] = sat_profile
+
+    model_blueprint = {'centrals': cen_model_dict, 'satellites': sat_model_dict}
+    return model_factories.HodModelFactory(model_blueprint)
 
 
-def Campbell15(**kwargs):
+def Campbell15(
+    prim_haloprop_key = model_defaults.default_smhm_haloprop, 
+    sec_galprop_key = 'ssfr', sec_haloprop_key = 'halo_vpeak', 
+    smhm_model=smhm_components.Moster13SmHm, 
+    scatter_level = 0.2, 
+    redshift = sim_defaults.default_redshift, **kwargs):
     """ Conditional abundance matching model based on Campbell et al. (2015). 
 
     Parameters
@@ -331,18 +488,35 @@ def Campbell15(**kwargs):
     `~halotools.sim_manager.HaloCatalog` class. 
 
     >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot)
+    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     We can easily build alternative versions of models and mocks by calling the 
     `Campbell15` function with different arguments:
 
     >>> model_with_scatter = Campbell15(correlation_strength = 0.8, sec_haloprop_key = 'halo_zhalf')
-    >>> model_with_scatter.populate_mock(snapshot = fake_snapshot)
+    >>> model_with_scatter.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
 
     """
 
-    blueprint = preloaded_subhalo_model_blueprints.Campbell15_blueprint(**kwargs)
+    stellar_mass_model = smhm_model(
+        prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
+        scatter_abcissa = [12], scatter_ordinates = [scatter_level])
+
+    fake_mock = FakeMock(approximate_ngals = 1e5)
+    input_galaxy_table = fake_mock.galaxy_table
+    prim_galprop_bins = np.logspace(8, 12, num=15)    
+
+    ssfr_model = ConditionalAbunMatch(input_galaxy_table=input_galaxy_table, 
+                                      prim_galprop_key=stellar_mass_model.galprop_key, 
+                                      galprop_key=sec_galprop_key, 
+                                      sec_haloprop_key=sec_haloprop_key, 
+                                      prim_galprop_bins=prim_galprop_bins, 
+                                      **kwargs)
+    blueprint = (
+        {stellar_mass_model.galprop_key: stellar_mass_model, 
+        ssfr_model.galprop_key: ssfr_model}
+        )
 
     if 'threshold' in kwargs.keys():
         galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']

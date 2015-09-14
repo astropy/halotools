@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
 
-from .. import preloaded_hod_blueprints
 from .. import model_defaults
 from .. import hod_components
-from .. import gal_prof_factory
 
 from astropy.table import Table
 from copy import copy
