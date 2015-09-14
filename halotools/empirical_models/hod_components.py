@@ -57,13 +57,6 @@ class OccupationComponent(model_helpers.GalPropModel):
         prim_haloprop_key : string, keyword argument 
             String giving the column name of the primary halo property governing 
             the occupation statistics of gal_type galaxies, e.g., ``halo_mvir``. 
-
-        sec_haloprop_key : string, optional 
-            String giving the column name of the secondary halo property governing 
-            the occupation statistics of gal_type galaxies, e.g., ``halo_nfw_conc``.
-            Only pertains to galaxy populations with assembly-biased occupations. 
-            Default is None. 
-
         """
         super(OccupationComponent, self).__init__(galprop_key='occupation')
 
@@ -72,9 +65,6 @@ class OccupationComponent(model_helpers.GalPropModel):
 
         self._upper_bound = kwargs['upper_bound']
         self._lower_bound = 0
-
-        if 'sec_haloprop_key' in kwargs.keys():
-            self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
         self.param_dict = {}
 
