@@ -21,7 +21,7 @@ import warnings
 from ..custom_exceptions import HalotoolsError
 
 @six.add_metaclass(ABCMeta)
-class BinaryGalpropModel(model_helpers.GalPropModel):
+class BinaryGalpropModel(object):
     """
     Container class for any component model of a binary-valued galaxy property. 
 
@@ -40,9 +40,6 @@ class BinaryGalpropModel(model_helpers.GalPropModel):
             String giving the column name of the primary halo property governing 
             the galaxy propery being modeled.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
-
-        gal_type : string, optional  
-            Name of the galaxy population being modeled. Default is None. 
 
         new_haloprop_func_dict : function object, optional  
             Dictionary of function objects used to create additional halo properties 
@@ -66,9 +63,6 @@ class BinaryGalpropModel(model_helpers.GalPropModel):
         if 'sec_haloprop_key' in kwargs.keys():
             self.sec_haloprop_key = kwargs['sec_haloprop_key']
 
-        if 'gal_type' in kwargs.keys():
-            self.gal_type = kwargs['gal_type']
-
         if 'new_haloprop_func_dict' in kwargs.keys():
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
@@ -79,7 +73,6 @@ class BinaryGalpropModel(model_helpers.GalPropModel):
                 "implement a method named %s " % required_method_name)
 
         setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
-        super(BinaryGalpropModel, self).__init__(galprop_key=self.galprop_key)
 
 
     def _mc_galprop(self, seed=None, **kwargs):
@@ -149,12 +142,6 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             stellar mass.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        gal_type : string, optional 
-            Name of the galaxy population being modeled, e.g., 'centrals'. 
-            This is only necessary to specify in cases where 
-            the `BinaryGalpropInterpolModel` instance is part of a composite model, 
-            with multiple population types. Default is None. 
-
         galprop_abcissa : array, optional  
             Values of the primary halo property at which the galprop fraction is specified. 
             Default is [12, 15], in accord with the default True value for ``logparam``. 
@@ -190,7 +177,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         We can use the `BinaryGalpropInterpolModel` to implement this as follows:
 
         >>> abcissa, ordinates = [12, 15], [1/3., 0.9]
-        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_key='quiescent', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='mvir', gal_type='cens')
+        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_key='quiescent', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='mvir')
 
         The ``cen_quiescent_model`` has a built-in method that computes the quiescent fraction 
         as a function of mass:
@@ -200,7 +187,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         There is also a built-in method to return a Monte Carlo realization of quiescent/star-forming galaxies:
 
         >>> masses = np.logspace(10, 15, num=100)
-        >>> quiescent_realization = cen_quiescent_model.mc_quiescent(prim_haloprop =masses)
+        >>> quiescent_realization = cen_quiescent_model.mc_quiescent(prim_haloprop = masses)
 
         Now ``quiescent_realization`` is a boolean-valued array of the same length as ``masses``. 
         Entries of ``quiescent_realization`` that are ``True`` correspond to central galaxies that are quiescent. 
@@ -209,7 +196,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         to construct a simple model for satellite morphology, where the early- vs. late-type 
         of the satellite depends on :math:`V_{\\mathrm{peak}}` value of the host halo
 
-        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_key='late_type', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host', gal_type='sats')
+        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_key='late_type', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host')
         >>> vmax_array = np.logspace(2, 3, num=100)
         >>> morphology_realization = sat_morphology_model.mc_late_type(prim_haloprop =vmax_array)
 
@@ -239,14 +226,8 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
                 [scipy_maxdegree, self._input_spline_degree, 
                 custom_len(self._abcissa)-1])
 
-        if hasattr(self, 'gal_type'):
-            self._abcissa_key = self.galprop_key+'_abcissa_'+self.gal_type
-            self._ordinates_key_prefix = self.galprop_key+'_ordinates_'+self.gal_type
-        else:
-            self._abcissa_key = self.galprop_key+'_abcissa'
-            self._ordinates_key_prefix = self.galprop_key+'_ordinates'
-
-
+        self._abcissa_key = self.galprop_key+'_abcissa'
+        self._ordinates_key_prefix = self.galprop_key+'_ordinates'
         self._build_param_dict()
 
         setattr(self, self.galprop_key+'_abcissa', self._abcissa)
