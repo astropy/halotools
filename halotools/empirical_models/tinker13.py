@@ -5,10 +5,8 @@ HOD-style models of the galaxy-halo connection.
 
 """
 
-__all__ = (['OccupationComponent','Zheng07Cens','Zheng07Sats', 
-    'Leauthaud11Cens', 'Leauthaud11Sats', 'AssembiasZheng07Cens', 'AssembiasZheng07Sats', 
-    'AssembiasLeauthaud11Cens', 'AssembiasLeauthaud11Sats']
-    )
+__all__ = ['Tinker13Cens']
+
 
 from functools import partial
 from copy import copy
@@ -39,7 +37,8 @@ class Tinker13Cens(OccupationComponent):
     """
     def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
         prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift = sim_manager.sim_defaults.default_redshift, **kwargs):
+        redshift = sim_manager.sim_defaults.default_redshift, 
+        **kwargs):
         """
         Parameters 
         ----------
@@ -56,6 +55,14 @@ class Tinker13Cens(OccupationComponent):
             Redshift of the stellar-to-halo-mass relation. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
+        quiescent_fraction_abcissa : array, optional  
+            Values of the primary halo property at which the quiescent fraction is specified. 
+            Default is [10**12, 10**13.5, 10**15].  
+
+        quiescent_fraction_ordinates : array, optional  
+            Values of the quiescent fraction when evaluated at the input abcissa. 
+            Default is [0.25, 0.7, 0.95]
+
         """
         upper_bound = 1.0
 
@@ -71,11 +78,7 @@ class Tinker13Cens(OccupationComponent):
         self.smhm_model = smhm_components.Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
-        for key, value in self.smhm_model.param_dict.iteritems():
-            active_key = key + '_active'
-            quiescent_key = key + '_quiescent'
-            self.param_dict[active_key] = value
-            self.param_dict[quiescent_key] = value
+        self._initialize_param_dict(**kwargs)
 
         self.sfr_designation_key = 'sfr_designation'
 
@@ -99,15 +102,54 @@ class Tinker13Cens(OccupationComponent):
             ('central_sfr_designation', object), 
             ])
 
-    def quiescent_central_fraction(self, **kwargs):
+    def _initialize_param_dict(self, 
+        quiescent_fraction_abcissa = [10.**12, 10.**13.5, 10.**15], 
+        quiescent_fraction_ordinates = [0.25, 0.7, 0.95], **kwargs):
         """
         """
-        pass
+        self.param_dict = {}
+        for key, value in self.smhm_model.param_dict.iteritems():
+            active_key = key + '_active'
+            quiescent_key = key + '_quiescent'
+            self.param_dict[active_key] = value
+            self.param_dict[quiescent_key] = value
+
+        self._quiescent_fraction_abcissa = quiescent_fraction_abcissa
+        ordinates_key_prefix = 'quiescent_fraction_ordinates'
+        self._ordinates_keys = (
+            [ordinates_key_prefix + '_param' + str(i+1) 
+            for i in range(custom_len(self._quiescent_fraction_abcissa))]
+            )
+        for key, value in zip(self._ordinates_keys, quiescent_fraction_ordinates):
+            self.param_dict[key] = value
+
+    def mean_quiescent_fraction(self, **kwargs):
+        """
+        """
+        model_ordinates = [self.param_dict[ordinate_key] for ordinate_key in self._ordinates_keys]
+        spline_function = model_helpers.custom_spline(
+            np.log10(self._quiescent_fraction_abcissa), model_ordinates)
+
+        if 'prim_haloprop' in kwargs:
+            prim_haloprop = kwargs['prim_haloprop']
+        elif 'halo_table' in kwargs:
+            halo_table = kwargs['halo_table']
+            try:
+                prim_haloprop = halo_table[self.prim_haloprop_key]
+            except KeyError:
+                msg = ("The ``halo_table`` passed as a keyword argument to the mean_quiescent_fraction method\n"
+                    "does not have the requested ``%s`` key")
+                raise HalotoolsError(msg % self.prim_haloprop_key)
+
+        fraction = spline_function(np.log10(prim_haloprop))
+
+        return fraction
+
 
     def mc_sfr_designation(self, **kwargs):
         """
         """
-        quiescent_fraction = self.quiescent_central_fraction(**kwargs)
+        quiescent_fraction = self.mean_quiescent_fraction(**kwargs)
 
         if 'seed' in kwargs:
             np.random.seed(seed=kwargs['seed'])
@@ -167,7 +209,7 @@ class Tinker13Cens(OccupationComponent):
 
         mean_ncen = 0.5*(1.0 - 
             erf((self.threshold - logmstar)/logscatter))
-        mean_ncen *= (1. - self.quiescent_central_fraction(**kwargs))
+        mean_ncen *= (1. - self.mean_quiescent_fraction(**kwargs))
 
         return mean_ncen
 
@@ -182,7 +224,7 @@ class Tinker13Cens(OccupationComponent):
 
         mean_ncen = 0.5*(1.0 - 
             erf((self.threshold - logmstar)/logscatter))
-        mean_ncen *= self.quiescent_central_fraction(**kwargs)
+        mean_ncen *= self.mean_quiescent_fraction(**kwargs)
 
         return mean_ncen
 
@@ -214,7 +256,7 @@ class Tinker13Cens(OccupationComponent):
 
     def _update_smhm_param_dict(self, sfr_key):
         for key, value in self.param_dict.iteritems():
-            stripped_key = key[[:-len('sfr_key')-1]]
+            stripped_key = key[:-len('sfr_key')-1]
             if stripped_key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[stripped_key] = value 
 
