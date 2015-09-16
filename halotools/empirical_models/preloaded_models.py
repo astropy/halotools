@@ -86,6 +86,7 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     sat_model_dict = {}
     # Build the occupation model
     occu_sat_model = hoc.Zheng07Sats(threshold = threshold, **kwargs)
+    occu_sat_model._suppress_repeated_param_warning = True
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
     sat_profile = NFWPhaseSpace(**kwargs)    
@@ -96,7 +97,8 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
         occu_sat_model.gal_type : sat_model_dict 
         }
 
-    return model_factories.HodModelFactory(model_blueprint)
+    composite_model = model_factories.HodModelFactory(model_blueprint)
+    return composite_model
 
 def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, 
     central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
@@ -177,6 +179,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     cen_model_dict = {}
     # Build the occupation model
     occu_cen_model = hoc.Leauthaud11Cens(threshold = threshold, **kwargs)
+    occu_cen_model._suppress_repeated_param_warning = True
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
@@ -199,7 +202,8 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
         occu_sat_model.gal_type : sat_model_dict
         }
 
-    return model_factories.HodModelFactory(model_blueprint)
+    composite_model = model_factories.HodModelFactory(model_blueprint)
+    return composite_model
 
 
 def SmHmBinarySFR(
@@ -393,11 +397,13 @@ def Hearin15(central_assembias_strength = 1,
     sat_model_dict['occupation'] = sat_ab_component
 
     # Build the profile model
-    sat_profile = NFWPhaseSpace(**kwargs)    
+    sat_profile = NFWPhaseSpace(**kwargs) 
+    sat_profile._suppress_repeated_param_warning = True   
     sat_model_dict['profile'] = sat_profile
 
     model_blueprint = {'centrals': cen_model_dict, 'satellites': sat_model_dict}
-    return model_factories.HodModelFactory(model_blueprint)
+    composite_model = model_factories.HodModelFactory(model_blueprint)
+    return composite_model
 
 
 def Campbell15(

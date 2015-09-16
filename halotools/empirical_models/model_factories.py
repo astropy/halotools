@@ -756,12 +756,12 @@ class HodModelFactory(ModelFactory):
 
         self._set_model_redshift()
 
+        # Build up and bind several lists from the component models
+        self._build_composite_lists()
+
         # Build the composite model dictionary, 
         # whose keys are parameters of our model
         self._set_init_param_dict()
-
-        # Build up and bind several lists from the component models
-        self._build_composite_lists()
 
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
@@ -887,13 +887,17 @@ class HodModelFactory(ModelFactory):
 
         self.param_dict = {}
 
-        def test_expected_key_repetition(model, key):
-            if hasattr(model, 'ancillary_model_param_keys'):
-                if key in model.ancillary_model_param_keys:
-                    return 
-                    
-            raise HalotoolsError("The param_dict key %s appears in more "
-                "than one component model" % key)
+        try:
+            suppress_warning = self._suppress_repeated_param_warning
+        except AttributeError:
+            suppress_warning = False
+        msg = ("\n\nThe param_dict key %s appears in more than one component model.\n"
+            "This is permissible, but if you are seeing this message you should be sure you "
+            "understand it.\nIn particular, double-check that this parameter does not have "
+            "conflicting meanings across components.\n"
+            "\nIf you do not wish to see this message every time you instantiate, \n"
+            "simply attach a _suppress_repeated_param_warning attribute to any of your component models, \n"
+            "and set this variable to ``True``.\n")
 
         # Loop over all galaxy types in the composite model
         for gal_type in self.gal_types:
@@ -906,7 +910,8 @@ class HodModelFactory(ModelFactory):
                 intersection = set(self.param_dict) & set(model_instance.param_dict)
                 if intersection != set():
                     for key in intersection:
-                        test_expected_key_repetition(model_instance, key)
+                        if suppress_warning is False:
+                            warn(msg % key)
 
                 for key, value in model_instance.param_dict.iteritems():
                     self.param_dict[key] = value
@@ -961,6 +966,7 @@ class HodModelFactory(ModelFactory):
         pub_list = []
         dtype_list = []
         new_haloprop_func_dict = {}
+        self._suppress_repeated_param_warning = False
 
         for gal_type in self.gal_types:
             component_dict = self.model_blueprint[gal_type]
@@ -984,6 +990,10 @@ class HodModelFactory(ModelFactory):
                 # Reference list
                 if hasattr(component_model, 'publications'):
                     pub_list.extend(component_model.publications)
+
+                # Warning suppressions 
+                if hasattr(component_model, '_suppress_repeated_param_warning'):
+                    self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
                 # Haloprop function dictionaries
                 if hasattr(component_model, 'new_haloprop_func_dict'):
@@ -1026,6 +1036,7 @@ class HodModelFactory(ModelFactory):
         self.publications = list(set(pub_list))
         self.new_haloprop_func_dict = new_haloprop_func_dict
         self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
+        self._suppress_repeated_param_warning = bool(self._suppress_repeated_param_warning)
 
     def _set_calling_sequence(self, **kwargs):
         """
