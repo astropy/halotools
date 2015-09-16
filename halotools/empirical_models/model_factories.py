@@ -584,17 +584,17 @@ class SubhaloModelFactory(ModelFactory):
                 if composite_key in self.param_dict.keys():
                     component_model.param_dict[key] = self.param_dict[composite_key]
 
-            # Also update the param dict of ancillary models, if applicable
-            if hasattr(component_model, 'ancillary_model_dependencies'):
-                for model_name in component_model.ancillary_model_dependencies:
+            # # Also update the param dict of ancillary models, if applicable
+            # if hasattr(component_model, 'ancillary_model_dependencies'):
+            #     for model_name in component_model.ancillary_model_dependencies:
 
-                    dependent_galprop_key = getattr(component_model, model_name).galprop_key
-                    for key in getattr(component_model, model_name).param_dict.keys():
-                        composite_key = composite_key = dependent_galprop_key + '_' + key
-                        if composite_key in self.param_dict.keys():
-                            getattr(component_model, model_name).param_dict[key] = (
-                                self.param_dict[composite_key]
-                                )
+            #         dependent_galprop_key = getattr(component_model, model_name).galprop_key
+            #         for key in getattr(component_model, model_name).param_dict.keys():
+            #             composite_key = composite_key = dependent_galprop_key + '_' + key
+            #             if composite_key in self.param_dict.keys():
+            #                 getattr(component_model, model_name).param_dict[key] = (
+            #                     self.param_dict[composite_key]
+            #                     )
 
             func = getattr(component_model, func_name)
             return func(*args, **kwargs)
