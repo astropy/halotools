@@ -28,11 +28,11 @@ def test_Leauthaud11Cens():
 	ncen2 = model.mean_occupation(prim_haloprop = 1.e12)
 	assert ncen2 < ncen1
 #
-	model.param_dict['m1_0'] *= 1.1
+	model.param_dict['smhm_m1_0'] *= 1.1
 	ncen3 = model.mean_occupation(prim_haloprop = 1.e12)
 	assert ncen3 < ncen2
 #
-	model.param_dict['m1_a'] *= 1.1
+	model.param_dict['smhm_m1_a'] *= 1.1
 	ncen4 = model.mean_occupation(prim_haloprop = 1.e12)
 	assert ncen4 == ncen3
 

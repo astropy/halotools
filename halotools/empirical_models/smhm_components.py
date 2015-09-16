@@ -508,16 +508,16 @@ class Behroozi10SmHm(PrimGalpropModel):
         # mean_stellar_mass methods use accept and return arguments in h=1 units. 
 
         d = {
-        'm0_0': 10.72, 
-        'm0_a': 0.59, 
-        'm1_0': 12.35, 
-        'm1_a': 0.3,
-        'beta_0': 0.43,
-        'beta_a': 0.18, 
-        'delta_0': 0.56, 
-        'delta_a': 0.18, 
-        'gamma_0': 1.54,  
-        'gamma_a': 2.52}
+        'smhm_m0_0': 10.72, 
+        'smhm_m0_a': 0.59, 
+        'smhm_m1_0': 12.35, 
+        'smhm_m1_a': 0.3,
+        'smhm_beta_0': 0.43,
+        'smhm_beta_a': 0.18, 
+        'smhm_delta_0': 0.56, 
+        'smhm_delta_a': 0.18, 
+        'smhm_gamma_0': 1.54,  
+        'smhm_gamma_a': 2.52}
 
         return d
 
@@ -543,12 +543,12 @@ class Behroozi10SmHm(PrimGalpropModel):
         stellar_mass = (10.**log_stellar_mass)*(self.littleh**2)
         a = 1./(1. + redshift)
 
-        logm0 = self.param_dict['m0_0'] + self.param_dict['m0_a']*(a - 1)
+        logm0 = self.param_dict['smhm_m0_0'] + self.param_dict['smhm_m0_a']*(a - 1)
         m0 = 10.**logm0
-        logm1 = self.param_dict['m1_0'] + self.param_dict['m1_a']*(a - 1)
-        beta = self.param_dict['beta_0'] + self.param_dict['beta_a']*(a - 1)
-        delta = self.param_dict['delta_0'] + self.param_dict['delta_a']*(a - 1)
-        gamma = self.param_dict['gamma_0'] + self.param_dict['gamma_a']*(a - 1)
+        logm1 = self.param_dict['smhm_m1_0'] + self.param_dict['smhm_m1_a']*(a - 1)
+        beta = self.param_dict['smhm_beta_0'] + self.param_dict['smhm_beta_a']*(a - 1)
+        delta = self.param_dict['smhm_delta_0'] + self.param_dict['smhm_delta_a']*(a - 1)
+        gamma = self.param_dict['smhm_gamma_0'] + self.param_dict['smhm_gamma_a']*(a - 1)
 
         stellar_mass_by_m0 = stellar_mass/m0
         term3_numerator = (stellar_mass_by_m0)**delta
