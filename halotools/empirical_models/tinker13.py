@@ -81,7 +81,8 @@ class Tinker13Cens(OccupationComponent):
 
         self._initialize_param_dict(**kwargs)
 
-        self.sfr_designation_key = 'sfr_designation'
+        # self.sfr_designation_key = 'sfr_designation'
+        self.sfr_designation_key = 'central_sfr_designation'
 
         self.publications = ['arXiv:1308.2974', 'arXiv:1103.2077', 'arXiv:1104.0928']
 
@@ -100,7 +101,7 @@ class Tinker13Cens(OccupationComponent):
         self._mock_generation_calling_sequence = ['mc_sfr_designation', 'mc_occupation']
         self._galprop_dtypes_to_allocate = np.dtype([
             ('halo_num_'+ self.gal_type, 'i4'), 
-            ('central_sfr_designation', object), 
+            (self.sfr_designation_key, object), 
             ])
 
     def _initialize_param_dict(self, 
@@ -158,7 +159,7 @@ class Tinker13Cens(OccupationComponent):
 
         result = np.where(mc_generator < quiescent_fraction, 'quiescent', 'active')
         if 'halo_table' in kwargs:
-            kwargs['halo_table'][central_sfr_designation] = result
+            kwargs['halo_table'][self.sfr_designation_key] = result
         return result
 
     def mean_occupation(self, **kwargs):
