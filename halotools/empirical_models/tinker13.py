@@ -5,7 +5,7 @@ HOD-style models of the galaxy-halo connection.
 
 """
 
-__all__ = ['Tinker13Cens']
+__all__ = ['Tinker13Cens', 'Tinker13QuiescentSats']
 
 
 from functools import partial
@@ -263,9 +263,6 @@ class Tinker13Cens(OccupationComponent):
 
 
 
-
-
-
 class Tinker13QuiescentSats(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from 
     two distinct active/quiescent stellar-to-halo-mass relations. 
@@ -276,6 +273,8 @@ class Tinker13QuiescentSats(OccupationComponent):
         """
         """
         upper_bound = float("inf")
+
+        self.littleh = 0.72
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
@@ -311,10 +310,232 @@ class Tinker13QuiescentSats(OccupationComponent):
             ])
 
     def mean_occupation(self, **kwargs):
-        return None
+        """ Expected number of central galaxies in a halo of mass halo_mass.
+        See Equation 12-14 of arXiv:1103.2077.
 
-    def _initialize_param_dict(self, **kwargs):
-        self.param_dict = {}
+        Parameters
+        ----------        
+        prim_haloprop : array, optional 
+            array of masses of halo_table in the catalog
+
+        halo_table : object, optional  
+            Data table storing halo catalog. 
+
+        Returns
+        -------
+        mean_nsat : array
+            Mean number of central galaxies in the halo of the input mass. 
+
+        Examples 
+        --------
+        >>> sat_model = Tinker13QuiescentSats()
+        >>> mean_nsat = sat_model.mean_occupation(prim_haloprop = 1.e13)
+
+        Notes 
+        -----
+        Assumes constant scatter in the stellar-to-halo-mass relation. 
+        """
+        # Retrieve the array storing the mass-like variable
+        if 'halo_table' in kwargs.keys():
+            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
+        else:
+            function_name = "Tinker13QuiescentSats.mean_occupation"
+            raise HalotoolsModelInputError(function_name)
+
+        self._update_satellite_params()
+
+        power_law_factor = (mass*self.littleh/self._msat)**self.param_dict['alphasat_quiescent']
+
+        exp_arg_numerator = self._mcut + 10.**self.smhm_model.mean_log_halo_mass(
+            log_stellar_mass = self.threshold, redshift = self.redshift)
+        exp_factor = np.exp(-exp_arg_numerator/(mass*self.littleh))
+
+        mean_nsat = exp_factor*power_law_factor
+
+        return mean_nsat
+
+
+    def _initialize_param_dict(self):
+        """ Set the initial values of ``self.param_dict`` according to 
+        the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the 
+        lowest redshift bin. 
+
+        """
+
+        self.param_dict['alphasat_quiescent'] = 1.0
+        self.param_dict['bsat_quiescent'] = 10.62
+        self.param_dict['bcut_quiescent'] = 1.47
+        self.param_dict['betacut_quiescent'] = -0.13
+        self.param_dict['betasat_quiescent'] = 0.859
+
+        for key, value in self.smhm_model.param_dict.iteritems():
+            quiescent_key = key + '_quiescent'
+            self.param_dict[quiescent_key] = value
+
+        self._update_satellite_params()
+
+
+    def _update_satellite_params(self):
+        """ Private method to update the model parameters. 
+
+        """
+        for key, value in self.param_dict.iteritems():
+            stripped_key = key[:-len('_quiescent')]
+            if stripped_key in self.smhm_model.param_dict:
+                self.smhm_model.param_dict[stripped_key] = value
+
+        log_halo_mass_threshold = self.smhm_model.mean_log_halo_mass(
+            log_stellar_mass = self.threshold, redshift = self.redshift)
+        knee_threshold = (10.**log_halo_mass_threshold)*self.littleh
+
+        knee_mass = 1.e12
+
+        self._msat = (
+            knee_mass*self.param_dict['bsat_quiescent']*
+            (knee_threshold / knee_mass)**self.param_dict['betasat_quiescent'])
+
+        self._mcut = (
+            knee_mass*self.param_dict['bcut_quiescent']*
+            (knee_threshold / knee_mass)**self.param_dict['betacut_quiescent'])
+
+class Tinker13ActiveSats(OccupationComponent):
+    """ HOD-style model for a central galaxy occupation that derives from 
+    two distinct active/active stellar-to-halo-mass relations. 
+    """
+    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
+        prim_haloprop_key=model_defaults.prim_haloprop_key, 
+        redshift = sim_defaults.default_redshift, **kwargs):
+        """
+        """
+        upper_bound = float("inf")
+
+        self.littleh = 0.72
+
+        # Call the super class constructor, which binds all the 
+        # arguments to the instance.  
+        super(Tinker13ActiveSats, self).__init__(
+            gal_type='active_satellites', threshold=threshold, 
+            upper_bound=upper_bound, 
+            prim_haloprop_key = prim_haloprop_key, **kwargs)
+        self.redshift = redshift
+
+        self.smhm_model = smhm_components.Behroozi10SmHm(
+            prim_haloprop_key = prim_haloprop_key, **kwargs)
+
+        self._initialize_param_dict(**kwargs)
+
+        self.sfr_designation_key = 'sfr_designation'
+
+        self.publications = ['arXiv:1308.2974', 'arXiv:1103.2077', 'arXiv:1104.0928']
+
+        # The _methods_to_inherit determines which methods will be directly callable 
+        # by the composite model built by the HodModelFactory
+        # Here we are overriding this attribute that is normally defined 
+        # in the OccupationComponent super class
+        self._methods_to_inherit = (
+            ['mc_occupation', 'mean_occupation', 
+            'mean_stellar_mass', 'mean_log_halo_mass']
+            )
+
+        # The _mock_generation_calling_sequence determines which methods 
+        # will be called during mock population, as well as in what order they will be called
+        self._mock_generation_calling_sequence = ['mc_occupation']
+        self._galprop_dtypes_to_allocate = np.dtype([
+            ('halo_num_'+ self.gal_type, 'i4'), 
+            ])
+
+    def mean_occupation(self, **kwargs):
+        """ Expected number of central galaxies in a halo of mass halo_mass.
+        See Equation 12-14 of arXiv:1103.2077.
+
+        Parameters
+        ----------        
+        prim_haloprop : array, optional 
+            array of masses of halo_table in the catalog
+
+        halo_table : object, optional  
+            Data table storing halo catalog. 
+
+        Returns
+        -------
+        mean_nsat : array
+            Mean number of central galaxies in the halo of the input mass. 
+
+        Examples 
+        --------
+        >>> sat_model = Tinker13ActiveSats()
+        >>> mean_nsat = sat_model.mean_occupation(prim_haloprop = 1.e13)
+
+        Notes 
+        -----
+        Assumes constant scatter in the stellar-to-halo-mass relation. 
+        """
+        # Retrieve the array storing the mass-like variable
+        if 'halo_table' in kwargs.keys():
+            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        elif 'prim_haloprop' in kwargs.keys():
+            mass = kwargs['prim_haloprop']
+        else:
+            function_name = "Tinker13ActiveSats.mean_occupation"
+            raise HalotoolsModelInputError(function_name)
+
+        self._update_satellite_params()
+
+        power_law_factor = (mass*self.littleh/self._msat)**self.param_dict['alphasat_active']
+
+        exp_arg_numerator = self._mcut + 10.**self.smhm_model.mean_log_halo_mass(
+            log_stellar_mass = self.threshold, redshift = self.redshift)
+        exp_factor = np.exp(-exp_arg_numerator/(mass*self.littleh))
+
+        mean_nsat = exp_factor*power_law_factor
+
+        return mean_nsat
+
+
+    def _initialize_param_dict(self):
+        """ Set the initial values of ``self.param_dict`` according to 
+        the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the 
+        lowest redshift bin. 
+
+        """
+
+        self.param_dict['alphasat_active'] = 1.0
+        self.param_dict['bsat_active'] = 10.62
+        self.param_dict['bcut_active'] = 1.47
+        self.param_dict['betacut_active'] = -0.13
+        self.param_dict['betasat_active'] = 0.859
+
+        for key, value in self.smhm_model.param_dict.iteritems():
+            active_key = key + '_active'
+            self.param_dict[active_key] = value
+
+        self._update_satellite_params()
+
+
+    def _update_satellite_params(self):
+        """ Private method to update the model parameters. 
+
+        """
+        for key, value in self.param_dict.iteritems():
+            stripped_key = key[:-len('_active')]
+            if stripped_key in self.smhm_model.param_dict:
+                self.smhm_model.param_dict[stripped_key] = value
+
+        log_halo_mass_threshold = self.smhm_model.mean_log_halo_mass(
+            log_stellar_mass = self.threshold, redshift = self.redshift)
+        knee_threshold = (10.**log_halo_mass_threshold)*self.littleh
+
+        knee_mass = 1.e12
+
+        self._msat = (
+            knee_mass*self.param_dict['bsat_active']*
+            (knee_threshold / knee_mass)**self.param_dict['betasat_active'])
+
+        self._mcut = (
+            knee_mass*self.param_dict['bcut_active']*
+            (knee_threshold / knee_mass)**self.param_dict['betacut_active'])
 
 
 
