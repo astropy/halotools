@@ -540,7 +540,7 @@ class SubhaloModelFactory(ModelFactory):
 
         self.model_blueprint = copy(self._input_model_blueprint)
         
-        self._build_composite_lists(**kwargs)
+        self._build_composite_attrs(**kwargs)
 
         self._set_init_param_dict()
 
@@ -608,7 +608,7 @@ class SubhaloModelFactory(ModelFactory):
         behavior_function = getattr(component_model, 'mc_'+galprop_key) 
         return behavior_function
 
-    def _build_composite_lists(self, **kwargs):
+    def _build_composite_attrs(self, **kwargs):
         """ A composite model has several bookkeeping devices that are built up from 
         the components: ``_haloprop_list``, ``publications``, and ``new_haloprop_func_dict``. 
         """
@@ -749,28 +749,33 @@ class HodModelFactory(ModelFactory):
         """
 
         super(HodModelFactory, self).__init__(input_model_blueprint, **kwargs)
-
-        # Create attributes for galaxy types and their occupation bounds
-        self._set_gal_types()
-        self.model_blueprint = self._input_model_blueprint
-
-        self._set_model_redshift()
+        self.model_blueprint = copy(self._input_model_blueprint)
 
         # Build up and bind several lists from the component models
-        self._build_composite_lists()
-
-        # Build the composite model dictionary, 
-        # whose keys are parameters of our model
-        self._set_init_param_dict()
+        self._build_composite_attrs(**kwargs)
 
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
-        self._set_primary_behaviors()
-        self._set_calling_sequence(**kwargs)
-        self._test_blueprint_consistency()
+        self._set_primary_behaviors(**kwargs)
 
         self.mock_factory = mock_factories.HodMockFactory
 
+    def _build_composite_attrs(self, **kwargs):
+        """ A composite model has several lists that are built up from 
+        the components: ``_haloprop_list``, ``publications``, and 
+        ``new_haloprop_func_dict``. 
+        """
+
+        self._set_gal_types()
+        self._build_haloprop_list()
+        self._build_prof_param_keys()
+        self._build_publication_list()
+        self._build_dtype_list()
+        self._build_new_haloprop_func_dict()
+        self._set_warning_suppressions()
+        self._set_inherited_methods()
+        self._set_model_redshift()
+        self._set_init_param_dict()
 
     def _set_gal_types(self):
         """ Private method binding the ``gal_types`` list attribute. 
@@ -788,7 +793,8 @@ class HodModelFactory(ModelFactory):
         self.gal_types.extend(middle)
         self.gal_types.extend(last)
 
-    def _set_primary_behaviors(self):
+
+    def _set_primary_behaviors(self, **kwargs):
         """ Creates names and behaviors for the primary methods of `HodModelFactory` 
         that will be used by the outside world.  
 
@@ -840,6 +846,9 @@ class HodModelFactory(ModelFactory):
             # This is harmless provided that all gal_types are ensured to have the same threshold, 
             # which is guaranteed by the _test_blueprint_consistency method
             self.threshold = getattr(self, 'threshold_' + gal_type)
+
+        self._set_calling_sequence(**kwargs)
+        self._test_blueprint_consistency()
 
 
     def _update_param_dict_decorator(self, component_model, func_name):
@@ -955,46 +964,74 @@ class HodModelFactory(ModelFactory):
 
         self.redshift = redshift
 
-    def _build_composite_lists(self):
-        """ A composite model has several lists that are built up from 
-        the components: ``_haloprop_list``, ``publications``, and 
-        ``new_haloprop_func_dict``. 
-        """
 
+    def _build_haloprop_list(self):
+        """
+        """
         haloprop_list = []
+        for gal_type in self.gal_types:
+            component_dict = self.model_blueprint[gal_type]
+            for component_key in component_dict.keys():
+                component_model = component_dict[component_key]
+
+                if hasattr(component_model, 'prim_haloprop_key'):
+                    haloprop_list.append(component_model.prim_haloprop_key)
+                if hasattr(component_model, 'sec_haloprop_key'):
+                    haloprop_list.append(component_model.sec_haloprop_key)
+
+        self._haloprop_list = list(set(haloprop_list))
+
+    def _build_prof_param_keys(self):
+        """
+        """
         prof_param_keys = []
-        pub_list = []
-        dtype_list = []
-        new_haloprop_func_dict = {}
-        self._suppress_repeated_param_warning = False
 
         for gal_type in self.gal_types:
             component_dict = self.model_blueprint[gal_type]
             for component_key in component_dict.keys():
                 component_model = component_dict[component_key]
 
-                # haloprop keys
-                if hasattr(component_model, 'prim_haloprop_key'):
-                    haloprop_list.append(component_model.prim_haloprop_key)
-                if hasattr(component_model, 'sec_haloprop_key'):
-                    haloprop_list.append(component_model.sec_haloprop_key)
-
-                # halo profile parameter keys
                 if hasattr(component_model, 'prof_param_keys'):
                     prof_param_keys.extend(component_model.prof_param_keys)
 
+        self.prof_param_keys = list(set(prof_param_keys))
+
+    def _build_publication_list(self):
+        """
+        """
+        pub_list = []
+        for gal_type in self.gal_types:
+            component_dict = self.model_blueprint[gal_type]
+            for component_key in component_dict.keys():
+                component_model = component_dict[component_key]
+
+                if hasattr(component_model, 'publications'):
+                    pub_list.extend(component_model.publications)
+
+        self.publications = list(set(pub_list))
+
+    def _build_dtype_list(self):
+        """
+        """
+        dtype_list = []
+        for gal_type in self.gal_types:
+            component_dict = self.model_blueprint[gal_type]
+            for component_key in component_dict.keys():
+                component_model = component_dict[component_key]
                 # Column dtypes to add to mock galaxy_table
                 if hasattr(component_model, '_galprop_dtypes_to_allocate'):
                     dtype_list.append(component_model._galprop_dtypes_to_allocate)
 
-                # Reference list
-                if hasattr(component_model, 'publications'):
-                    pub_list.extend(component_model.publications)
+        self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
 
-                # Warning suppressions 
-                if hasattr(component_model, '_suppress_repeated_param_warning'):
-                    self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
-
+    def _build_new_haloprop_func_dict(self):
+        """
+        """
+        new_haloprop_func_dict = {}
+        for gal_type in self.gal_types:
+            component_dict = self.model_blueprint[gal_type]
+            for component_key in component_dict.keys():
+                component_model = component_dict[component_key]
                 # Haloprop function dictionaries
                 if hasattr(component_model, 'new_haloprop_func_dict'):
                     dict_intersection = set(new_haloprop_func_dict).intersection(
@@ -1012,6 +1049,27 @@ class HodModelFactory(ModelFactory):
                             "component for %s galaxies")
                         warn(msg % (example_repeated_element, component_key, gal_type))
 
+        self.new_haloprop_func_dict = new_haloprop_func_dict
+
+    def _set_warning_suppressions(self):
+        """
+        """
+        self._suppress_repeated_param_warning = False
+        for gal_type in self.gal_types:
+            component_dict = self.model_blueprint[gal_type]
+            for component_key in component_dict.keys():
+                component_model = component_dict[component_key]
+                if hasattr(component_model, '_suppress_repeated_param_warning'):
+                    self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
+
+    def _set_inherited_methods(self):
+        """
+        """
+
+        for gal_type in self.gal_types:
+            component_dict = self.model_blueprint[gal_type]
+            for component_key in component_dict.keys():
+                component_model = component_dict[component_key]
                 # Ensure that all methods in the calling sequence are inherited
                 try:
                     mock_making_methods = component_model._mock_generation_calling_sequence
@@ -1030,13 +1088,6 @@ class HodModelFactory(ModelFactory):
                 if not hasattr(component_model, '_attrs_to_inherit'):
                     component_model._attrs_to_inherit = []
 
-
-        self._haloprop_list = list(set(haloprop_list))
-        self.prof_param_keys = list(set(prof_param_keys))
-        self.publications = list(set(pub_list))
-        self.new_haloprop_func_dict = new_haloprop_func_dict
-        self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
-        self._suppress_repeated_param_warning = bool(self._suppress_repeated_param_warning)
 
     def _set_calling_sequence(self, **kwargs):
         """
