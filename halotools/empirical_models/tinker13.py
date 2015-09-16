@@ -102,6 +102,7 @@ class Tinker13Cens(OccupationComponent):
         self._galprop_dtypes_to_allocate = np.dtype([
             ('halo_num_'+ self.gal_type, 'i4'), 
             (self.sfr_designation_key, object), 
+            ('sfr_designation', object), 
             ])
 
     def _initialize_param_dict(self, 
@@ -160,6 +161,7 @@ class Tinker13Cens(OccupationComponent):
         result = np.where(mc_generator < quiescent_fraction, 'quiescent', 'active')
         if 'halo_table' in kwargs:
             kwargs['halo_table'][self.sfr_designation_key] = result
+            kwargs['halo_table']['sfr_designation'] = result
         return result
 
     def mean_occupation(self, **kwargs):
@@ -305,9 +307,10 @@ class Tinker13QuiescentSats(OccupationComponent):
 
         # The _mock_generation_calling_sequence determines which methods 
         # will be called during mock population, as well as in what order they will be called
-        self._mock_generation_calling_sequence = ['mc_occupation']
+        self._mock_generation_calling_sequence = ['mc_occupation', 'mc_sfr_designation']
         self._galprop_dtypes_to_allocate = np.dtype([
             ('halo_num_'+ self.gal_type, 'i4'), 
+            (self.sfr_designation_key, object), 
             ])
 
     def mean_occupation(self, **kwargs):
@@ -356,6 +359,12 @@ class Tinker13QuiescentSats(OccupationComponent):
         mean_nsat = exp_factor*power_law_factor
 
         return mean_nsat
+
+
+    def mc_sfr_designation(self, halo_table):
+        """
+        """
+        halo_table[self.sfr_designation_key][:] = 'quiescent'
 
 
     def _initialize_param_dict(self):
@@ -442,9 +451,10 @@ class Tinker13ActiveSats(OccupationComponent):
 
         # The _mock_generation_calling_sequence determines which methods 
         # will be called during mock population, as well as in what order they will be called
-        self._mock_generation_calling_sequence = ['mc_occupation']
+        self._mock_generation_calling_sequence = ['mc_occupation','mc_sfr_designation']
         self._galprop_dtypes_to_allocate = np.dtype([
             ('halo_num_'+ self.gal_type, 'i4'), 
+            (self.sfr_designation_key, object), 
             ])
 
     def mean_occupation(self, **kwargs):
@@ -494,6 +504,10 @@ class Tinker13ActiveSats(OccupationComponent):
 
         return mean_nsat
 
+    def mc_sfr_designation(self, halo_table):
+        """
+        """
+        halo_table[self.sfr_designation_key][:] = 'active'
 
     def _initialize_param_dict(self):
         """ Set the initial values of ``self.param_dict`` according to 
