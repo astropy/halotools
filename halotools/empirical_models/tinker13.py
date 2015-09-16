@@ -19,17 +19,18 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 from . import model_defaults, model_helpers, smhm_components
 from .assembias import HeavisideAssembias
+from .hod_components import OccupationComponent
 
 from ..utils.array_utils import custom_len
 from ..utils.table_utils import compute_conditional_percentiles
 from ..  import sim_manager
 from ..custom_exceptions import *
+from ..sim_manager import sim_defaults
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
-from .hod_components import OccupationComponent
 
 class Tinker13Cens(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from 
@@ -262,49 +263,59 @@ class Tinker13Cens(OccupationComponent):
 
 
 
-# class Tinker13Sats(OccupationComponent):
-#     """ HOD-style model for a central galaxy occupation that derives from 
-#     two distinct active/quiescent stellar-to-halo-mass relations. 
-#     """
-#     def __init__(self, **kwargs):
-#         """
-#         """
-#         upper_bound = float("inf")
 
-#         # Call the super class constructor, which binds all the 
-#         # arguments to the instance.  
-#         super(Tinker13Sats, self).__init__(
-#             gal_type='satellites', threshold=threshold, 
-#             upper_bound=upper_bound, 
-#             prim_haloprop_key = prim_haloprop_key, **kwargs)
-#         self.redshift = redshift
 
-#         self.smhm_model = smhm_components.Behroozi10SmHm(
-#             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
-#         self._initialize_param_dict(**kwargs)
+class Tinker13QuiescentSats(OccupationComponent):
+    """ HOD-style model for a central galaxy occupation that derives from 
+    two distinct active/quiescent stellar-to-halo-mass relations. 
+    """
+    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
+        prim_haloprop_key=model_defaults.prim_haloprop_key, 
+        redshift = sim_defaults.default_redshift, **kwargs):
+        """
+        """
+        upper_bound = float("inf")
 
-#         self.sfr_designation_key = 'sfr_designation'
+        # Call the super class constructor, which binds all the 
+        # arguments to the instance.  
+        super(Tinker13QuiescentSats, self).__init__(
+            gal_type='quiescent_satellites', threshold=threshold, 
+            upper_bound=upper_bound, 
+            prim_haloprop_key = prim_haloprop_key, **kwargs)
+        self.redshift = redshift
 
-#         self.publications = ['arXiv:1308.2974', 'arXiv:1103.2077', 'arXiv:1104.0928']
+        self.smhm_model = smhm_components.Behroozi10SmHm(
+            prim_haloprop_key = prim_haloprop_key, **kwargs)
 
-#         # The _methods_to_inherit determines which methods will be directly callable 
-#         # by the composite model built by the HodModelFactory
-#         # Here we are overriding this attribute that is normally defined 
-#         # in the OccupationComponent super class
-#         self._methods_to_inherit = (
-#             ['mc_occupation', 'mean_occupation', 'mean_occupation_active', 'mean_occupation_quiescent', 
-#             'mean_stellar_mass_active', 'mean_stellar_mass_quiescent', 
-#             'mean_log_halo_mass_active', 'mean_log_halo_mass_quiescent']
-#             )
+        self._initialize_param_dict(**kwargs)
 
-#         # The _mock_generation_calling_sequence determines which methods 
-#         # will be called during mock population, as well as in what order they will be called
-#         self._mock_generation_calling_sequence = ['mc_sfr_designation', 'mc_occupation']
-#         self._galprop_dtypes_to_allocate = np.dtype([
-#             ('halo_num_'+ self.gal_type, 'i4'), 
-#             ('central_sfr_designation', object), 
-#             ])
+        self.sfr_designation_key = 'sfr_designation'
+
+        self.publications = ['arXiv:1308.2974', 'arXiv:1103.2077', 'arXiv:1104.0928']
+
+        # The _methods_to_inherit determines which methods will be directly callable 
+        # by the composite model built by the HodModelFactory
+        # Here we are overriding this attribute that is normally defined 
+        # in the OccupationComponent super class
+        self._methods_to_inherit = (
+            ['mc_occupation', 'mean_occupation', 
+            'mean_stellar_mass', 'mean_log_halo_mass']
+            )
+
+        # The _mock_generation_calling_sequence determines which methods 
+        # will be called during mock population, as well as in what order they will be called
+        self._mock_generation_calling_sequence = ['mc_occupation']
+        self._galprop_dtypes_to_allocate = np.dtype([
+            ('halo_num_'+ self.gal_type, 'i4'), 
+            ])
+
+    def mean_occupation(self, **kwargs):
+        return None
+
+    def _initialize_param_dict(self, **kwargs):
+        self.param_dict = {}
+
 
 
 
