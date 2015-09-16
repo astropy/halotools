@@ -779,18 +779,14 @@ class HodModelFactory(ModelFactory):
         model components with explicit dependence on the central population. 
         """
         gal_types = [key for key in self._input_model_blueprint.keys()]
-        if len(gal_types) == 1:
-            self.gal_types = gal_types
-        elif len(gal_types) == 2:
-            self.gal_types = ['centrals', 'satellites']
-        else:
-            raise HalotoolsError("The HOD _input_model_blueprint currently only permits "
-                "gal_types = 'centrals' and 'sateliltes'")
 
-        for gal_type in self.gal_types:
-            if gal_type not in self._input_model_blueprint.keys():
-                raise HalotoolsError("The HOD _input_model_blueprint currently only permits "
-                    "gal_types = 'centrals' and 'sateliltes'")
+        first = [g for g in gal_types if 'central' in g]
+        middle = [g for g in gal_types if 'satellite' in g]
+        last = [g for g in gal_types if 'central' not in g and 'satellite' not in g]
+
+        self.gal_types = first 
+        self.gal_types.extend(middle)
+        self.gal_types.extend(last)
 
     def _set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `HodModelFactory` 
