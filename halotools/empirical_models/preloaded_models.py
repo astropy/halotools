@@ -558,7 +558,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     sat_model_dict1['occupation'] = occu_sat_model1
     # Build the profile model
     sat_profile1 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
-                                 concentration_binning = (1, 35, 5), **kwargs)    
+                                 concentration_binning = (1, 35, 1), **kwargs)    
     sat_model_dict1['profile'] = sat_profile1
 
     sat_key2 = 'active_satellites'
@@ -568,7 +568,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     sat_model_dict2['occupation'] = occu_sat_model2
     # Build the profile model
     sat_profile2 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
-                                 concentration_binning = (1, 35, 5), **kwargs)  
+                                 concentration_binning = (1, 35, 1), **kwargs)  
     del sat_profile2.new_haloprop_func_dict
     sat_model_dict2['profile'] = sat_profile2
     
