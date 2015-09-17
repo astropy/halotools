@@ -8,13 +8,16 @@ used by many of the hod model components.
 
 __all__ = (
     ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
-    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 'bind_default_kwarg_mixin_safe']
+    'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 'bind_default_kwarg_mixin_safe', 
+    'custom_incomplete_gamma']
     )
 
+__author__ = ['Andrew Hearin', 'Surhud More']
 import numpy as np
 from copy import copy
 
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
+from scipy.special import gammaincc, gamma, expi
 
 from . import model_defaults
 from ..utils.array_utils import custom_len, convert_to_ndarray
@@ -410,6 +413,40 @@ def bind_default_kwarg_mixin_safe(obj, keyword_argument, constructor_kwargs, def
             setattr(obj, keyword_argument, default_value)
 
 
+def custom_incomplete_gamma(a, x):
+    """ Incomplete gamma function. 
+    
+    For the case covered by scipy, a > 0, scipy is called. Otherwise the gamma function 
+    recurrence relations are called, extending the scipy behavior. The only other difference from the 
+    scipy function is that in `custom_incomplete_gamma` only supports the case where the input ``a`` is a scalar.
+    
+    Parameters
+    -----------
+    a : float 
+    
+    x : array_like 
+    
+    Returns 
+    --------
+    gamma : array_like 
+
+    Examples 
+    --------
+    >>> a, x = 1, np.linspace(1, 10, 100)
+    >>> g = custom_incomplete_gamma(a, x)
+    >>> a = 0
+    >>> g = custom_incomplete_gamma(a, x)
+    >>> a = -1
+    >>> g = custom_incomplete_gamma(a, x)
+    """
+
+    if a<0:
+        return (custom_incomplete_gamma(a+1, x) - x**a * np.exp(-x))/a
+    elif a==0:
+        return -expi(-x)
+    else:
+        return gammaincc(a, x) * gamma(a)
+custom_incomplete_gamma.__author__ = ['Surhud More']
 
 
 
