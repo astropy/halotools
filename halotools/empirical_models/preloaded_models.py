@@ -11,6 +11,7 @@ from . import smhm_components
 from . import sfr_components
 from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from .abunmatch import ConditionalAbunMatch
+from . import tinker13 
 
 from ..sim_manager import FakeMock, FakeSim, sim_defaults
 
@@ -534,6 +535,48 @@ def Campbell15(
     return model
 
 
+def Tinker13(threshold = model_defaults.default_stellar_mass_threshold, 
+    central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
+    """
+    """
+    cen_key = 'centrals'
+    cen_model_dict = {}
+    # Build the occupation model
+    occu_cen_model = tinker13.Tinker13Cens(threshold = threshold, **kwargs)
+    occu_cen_model._suppress_repeated_param_warning = True
+    cen_model_dict['occupation'] = occu_cen_model
+    # Build the profile model
+    
+    cen_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
+
+    cen_model_dict['profile'] = cen_profile
+    
+    sat_key1 = 'quiescent_satellites'
+    sat_model_dict1 = {}
+    # Build the occupation model
+    occu_sat_model1 = tinker13.Tinker13QuiescentSats(threshold = threshold, **kwargs)
+    sat_model_dict1['occupation'] = occu_sat_model1
+    # Build the profile model
+    sat_profile1 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
+                                 concentration_binning = (1, 35, 5), **kwargs)    
+    sat_model_dict1['profile'] = sat_profile1
+
+    sat_key2 = 'active_satellites'
+    sat_model_dict2 = {}
+    # Build the occupation model
+    occu_sat_model2 = tinker13.Tinker13ActiveSats(threshold = threshold, **kwargs)
+    sat_model_dict2['occupation'] = occu_sat_model2
+    # Build the profile model
+    sat_profile2 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
+                                 concentration_binning = (1, 35, 5), **kwargs)  
+    del sat_profile2.new_haloprop_func_dict
+    sat_model_dict2['profile'] = sat_profile2
+    
+    blueprint = {cen_key: cen_model_dict, 
+                 sat_key1: sat_model_dict1, 
+                 sat_key2: sat_model_dict2}
+    
+    return model_factories.HodModelFactory(blueprint)
 
 
 
