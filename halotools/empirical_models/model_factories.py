@@ -267,7 +267,16 @@ class ModelFactory(object):
         else:
             summary_func = np.median
 
-        snapshot = HaloCatalog(preload_halo_table = True, **kwargs)
+
+        halocat_kwargs = {}
+        if 'simname' in kwargs:
+            halocat_kwargs['simname'] = kwargs['simname']
+        if 'desired_redshift' in kwargs:
+            halocat_kwargs['redshift'] = kwargs['desired_redshift']
+        if 'halo_finder' in kwargs:
+            halocat_kwargs['halo_finder'] = kwargs['halo_finder']
+
+        snapshot = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
@@ -434,7 +443,15 @@ class ModelFactory(object):
         else:
             summary_func = np.median
 
-        snapshot = HaloCatalog(preload_halo_table = True, **kwargs)
+        halocat_kwargs = {}
+        if 'simname' in kwargs:
+            halocat_kwargs['simname'] = kwargs['simname']
+        if 'desired_redshift' in kwargs:
+            halocat_kwargs['redshift'] = kwargs['desired_redshift']
+        if 'halo_finder' in kwargs:
+            halocat_kwargs['halo_finder'] = kwargs['halo_finder']
+
+        snapshot = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
