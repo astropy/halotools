@@ -50,7 +50,7 @@ class OccupationComponent(object):
             Threshold value defining the selection function of the galaxy population 
             being modeled. Typically refers to absolute magnitude or stellar mass. 
 
-        upper_bound : float, keyword argument
+        upper_occupation_bound : float, keyword argument
             Upper bound on the number of gal_type galaxies per halo. 
             The only currently supported values are unity or infinity. 
 
@@ -61,8 +61,8 @@ class OccupationComponent(object):
         required_kwargs = ['gal_type', 'threshold', 'prim_haloprop_key']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
-        self._upper_bound = kwargs['upper_bound']
-        self._lower_bound = 0
+        self._upper_occupation_bound = kwargs['upper_occupation_bound']
+        self._lower_occupation_bound = 0
 
         self.param_dict = {}
 
@@ -117,12 +117,12 @@ class OccupationComponent(object):
             Integer array giving the number of galaxies in each of the input halo_table.     
         """ 
         first_occupation_moment = self.mean_occupation(**kwargs)
-        if self._upper_bound == 1:
+        if self._upper_occupation_bound == 1:
             return self._nearest_integer_distribution(first_occupation_moment, seed=seed, **kwargs)
-        elif self._upper_bound == float("inf"):
+        elif self._upper_occupation_bound == float("inf"):
             return self._poisson_distribution(first_occupation_moment, seed=seed, **kwargs)
         else:
-            raise KeyError("The only permissible values of upper_bound for instances "
+            raise KeyError("The only permissible values of upper_occupation_bound for instances "
                 "of OccupationComponent are unity and infinity.")
 
     def _nearest_integer_distribution(self, first_occupation_moment, seed=None, **kwargs):
@@ -215,12 +215,12 @@ class Zheng07Cens(OccupationComponent):
         The test suite for this model is documented at 
         `~halotools.empirical_models.test_empirical_models.test_Zheng07Cens`
         """
-        upper_bound = 1.0
+        upper_occupation_bound = 1.0
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Zheng07Cens, self).__init__(gal_type='centrals', 
-            threshold=threshold, upper_bound=upper_bound, 
+            threshold=threshold, upper_occupation_bound=upper_occupation_bound, 
             prim_haloprop_key=prim_haloprop_key, 
             **kwargs)
 
@@ -383,14 +383,14 @@ class Leauthaud11Cens(OccupationComponent):
         >>> cen_model = Leauthaud11Cens(prim_haloprop_key = 'halo_m200b')
 
         """
-        upper_bound = 1.0
+        upper_occupation_bound = 1.0
 
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Leauthaud11Cens, self).__init__(
             gal_type='centrals', threshold=threshold, 
-            upper_bound=upper_bound, 
+            upper_occupation_bound=upper_occupation_bound, 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
         self.redshift = redshift
@@ -562,13 +562,13 @@ class Zheng07Sats(OccupationComponent):
         `~halotools.empirical_models.test_empirical_models.test_Zheng07Sats`
 
         """
-        upper_bound = float("inf")
+        upper_occupation_bound = float("inf")
 
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Zheng07Sats, self).__init__(
             gal_type='satellites', threshold=threshold, 
-            upper_bound=upper_bound, 
+            upper_occupation_bound=upper_occupation_bound, 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
 
@@ -774,7 +774,7 @@ class Leauthaud11Sats(OccupationComponent):
 
         super(Leauthaud11Sats, self).__init__(
             gal_type='satellites', threshold=threshold, 
-            upper_bound=float("inf"), 
+            upper_occupation_bound=float("inf"), 
             prim_haloprop_key = prim_haloprop_key, 
             **kwargs)
         self.redshift = redshift
@@ -924,7 +924,10 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
         """
         Zheng07Sats.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self, 
-            method_name_to_decorate = 'mean_occupation', **kwargs)
+            method_name_to_decorate = 'mean_occupation', 
+            lower_assembias_bound = self._lower_occupation_bound, 
+            upper_assembias_bound = self._upper_occupation_bound, 
+            **kwargs)
 
 
 class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
@@ -977,6 +980,8 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
         """
         Zheng07Cens.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self, 
+            lower_assembias_bound = self._lower_occupation_bound, 
+            upper_assembias_bound = self._upper_occupation_bound, 
             method_name_to_decorate = 'mean_occupation', **kwargs)
 
 
@@ -1032,6 +1037,8 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
         """
         Leauthaud11Cens.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self, 
+            lower_assembias_bound = self._lower_occupation_bound, 
+            upper_assembias_bound = self._upper_occupation_bound, 
             method_name_to_decorate = 'mean_occupation', **kwargs)
 
 
@@ -1088,5 +1095,7 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
         """
         Leauthaud11Sats.__init__(self, **kwargs)
         HeavisideAssembias.__init__(self, 
+            lower_assembias_bound = self._lower_occupation_bound, 
+            upper_assembias_bound = self._upper_occupation_bound, 
             method_name_to_decorate = 'mean_occupation', **kwargs)
 
