@@ -7,7 +7,6 @@ from copy import copy
 import numpy as np 
 from astropy.table import Table
 
-from ..assembias import HeavisideAssembias
 from ..hod_components import AssembiasZheng07Cens, AssembiasZheng07Sats, AssembiasLeauthaud11Cens, AssembiasLeauthaud11Sats
 
 from .. import model_defaults
@@ -43,8 +42,11 @@ class TestAssembias(TestCase):
 
         assert hasattr(model, 'prim_haloprop_key')
         assert hasattr(model, 'sec_haloprop_key')
-        assert hasattr(model, '_lower_bound')
-        assert hasattr(model, '_upper_bound')
+        assert hasattr(model, '_method_name_to_decorate')
+        assert hasattr(model, 'gal_type')
+
+        lower_bound_key = 'lower_bound_' + model._method_name_to_decorate + '_' + model.gal_type
+        assert hasattr(model, lower_bound_key)
 
     def baseline_recovery_test(self, model):
 
