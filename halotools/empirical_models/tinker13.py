@@ -106,8 +106,8 @@ class Tinker13Cens(OccupationComponent):
             ])
 
     def _initialize_param_dict(self, 
-        quiescent_fraction_abcissa = [10.**12, 10.**13.5, 10.**15], 
-        quiescent_fraction_ordinates = [0.25, 0.7, 0.95], **kwargs):
+        quiescent_fraction_abcissa = [6.31e10, 3.98e11, 2.51e12, 1.58e13, 1.e14], 
+        quiescent_fraction_ordinates = [0.052, 0.14, 0.54, 0.63, 0.77], **kwargs):
         """
         """
         self.param_dict = {}
@@ -116,6 +116,18 @@ class Tinker13Cens(OccupationComponent):
             quiescent_key = key + '_quiescent'
             self.param_dict[active_key] = value
             self.param_dict[quiescent_key] = value
+
+        ### From Table 2 of Tinker+13
+        self.param_dict['smhm_m1_0_active'] = 12.56
+        self.param_dict['smhm_m1_0_quiescent'] = 12.08
+        self.param_dict['smhm_m0_0_active'] = 10.96
+        self.param_dict['smhm_m0_0_quiescent'] = 10.7
+        self.param_dict['smhm_beta_0_active'] = 0.44
+        self.param_dict['smhm_beta_0_quiescent'] = 0.32
+        self.param_dict['smhm_delta_0_active'] = 0.52
+        self.param_dict['smhm_delta_0_quiescent'] = 0.93
+        self.param_dict['smhm_gamma_0_active'] = 1.48
+        self.param_dict['smhm_gamma_0_quiescent'] = 0.81
 
         self._quiescent_fraction_abcissa = quiescent_fraction_abcissa
         ordinates_key_prefix = 'quiescent_fraction_ordinates'
@@ -268,6 +280,77 @@ class Tinker13Cens(OccupationComponent):
             if stripped_key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[stripped_key] = value 
 
+class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
+    """ HOD-style model for a central galaxy occupation that derives from 
+    two distinct active/quiescent stellar-to-halo-mass relations. 
+    """
+    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
+        prim_haloprop_key=model_defaults.prim_haloprop_key,
+        redshift = sim_manager.sim_defaults.default_redshift, 
+        **kwargs):
+        """
+        Parameters 
+        ----------
+        threshold : float, optional 
+            Stellar mass threshold of the mock galaxy sample in h=1 solar mass units. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        prim_haloprop_key : string, optional  
+            String giving the column name of the primary halo property governing 
+            the occupation statistics of gal_type galaxies. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        redshift : float, optional  
+            Redshift of the stellar-to-halo-mass relation. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        quiescent_fraction_abcissa : array, optional  
+            Values of the primary halo property at which the quiescent fraction is specified. 
+            Default is [10**12, 10**13.5, 10**15].  
+
+        quiescent_fraction_ordinates : array, optional  
+            Values of the quiescent fraction when evaluated at the input abcissa. 
+            Default is [0.25, 0.7, 0.95]
+
+        sec_haloprop_key : string, optional 
+            String giving the column name of the secondary halo property 
+            governing the assembly bias. Must be a key in the halo_table 
+            passed to the methods of `HeavisideAssembiasComponent`. 
+            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+        split : float or list, optional 
+            Fraction or list of fractions between 0 and 1 defining how 
+            we split halos into two groupings based on 
+            their conditional secondary percentiles. 
+            Default is 0.5 for a constant 50/50 split. 
+
+        split_abcissa : list, optional 
+            Values of the primary halo property at which the halos are split as described above in 
+            the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
+            the interpolation will be done in the logarithm of the primary halo property. 
+            Default is to assume a constant 50/50 split. 
+
+        assembias_strength : float or list, optional 
+            Fraction or sequence of fractions between -1 and 1 
+            defining the assembly bias correlation strength. 
+            Default is 0.5. 
+
+        assembias_strength_abcissa : list, optional 
+            Values of the primary halo property at which the assembly bias strength is specified. 
+            Default is to assume a constant strength of 0.5. If passing a list, the strength 
+            will interpreted at the input ``assembias_strength_abcissa``.
+            Default is to assume a constant strength of 0.5. 
+
+        """
+        Tinker13Cens.__init__(self, **kwargs)
+        HeavisideAssembias.__init__(self, 
+            method_name_to_decorate = 'mean_quiescent_fraction', 
+            lower_assembias_bound = 0., 
+            upper_assembias_bound = 1., 
+            **kwargs)
+
+
+
 
 class Tinker13QuiescentSats(OccupationComponent):
     """ HOD-style model for a central galaxy occupation that derives from 
@@ -386,6 +469,12 @@ class Tinker13QuiescentSats(OccupationComponent):
         for key, value in self.smhm_model.param_dict.iteritems():
             quiescent_key = key + '_quiescent'
             self.param_dict[quiescent_key] = value
+
+        self.param_dict['smhm_m1_0_quiescent'] = 12.08
+        self.param_dict['smhm_m0_0_quiescent'] = 10.7
+        self.param_dict['smhm_beta_0_quiescent'] = 0.32
+        self.param_dict['smhm_delta_0_quiescent'] = 0.93
+        self.param_dict['smhm_gamma_0_quiescent'] = 0.81
 
         self._update_satellite_params()
 
@@ -529,6 +618,12 @@ class Tinker13ActiveSats(OccupationComponent):
             active_key = key + '_active'
             self.param_dict[active_key] = value
 
+        self.param_dict['smhm_m1_0_active'] = 12.56
+        self.param_dict['smhm_m0_0_active'] = 10.96
+        self.param_dict['smhm_beta_0_active'] = 0.44
+        self.param_dict['smhm_delta_0_active'] = 0.52
+        self.param_dict['smhm_gamma_0_active'] = 1.48
+
         self._update_satellite_params()
 
 
@@ -554,83 +649,6 @@ class Tinker13ActiveSats(OccupationComponent):
         self._mcut = (
             knee_mass*self.param_dict['bcut_active']*
             (knee_threshold / knee_mass)**self.param_dict['betacut_active'])
-
-
-
-class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
-    """ HOD-style model for a central galaxy occupation that derives from 
-    two distinct active/quiescent stellar-to-halo-mass relations. 
-    """
-    def __init__(self, threshold = model_defaults.default_stellar_mass_threshold, 
-        prim_haloprop_key=model_defaults.prim_haloprop_key,
-        redshift = sim_manager.sim_defaults.default_redshift, 
-        **kwargs):
-        """
-        Parameters 
-        ----------
-        threshold : float, optional 
-            Stellar mass threshold of the mock galaxy sample in h=1 solar mass units. 
-            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
-
-        prim_haloprop_key : string, optional  
-            String giving the column name of the primary halo property governing 
-            the occupation statistics of gal_type galaxies. 
-            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
-
-        redshift : float, optional  
-            Redshift of the stellar-to-halo-mass relation. 
-            Default is set in `~halotools.sim_manager.sim_defaults`. 
-
-        quiescent_fraction_abcissa : array, optional  
-            Values of the primary halo property at which the quiescent fraction is specified. 
-            Default is [10**12, 10**13.5, 10**15].  
-
-        quiescent_fraction_ordinates : array, optional  
-            Values of the quiescent fraction when evaluated at the input abcissa. 
-            Default is [0.25, 0.7, 0.95]
-
-        sec_haloprop_key : string, optional 
-            String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the halo_table 
-            passed to the methods of `HeavisideAssembiasComponent`. 
-            Default value is specified in the `~halotools.empirical_models.model_defaults` module.
-
-        split : float or list, optional 
-            Fraction or list of fractions between 0 and 1 defining how 
-            we split halos into two groupings based on 
-            their conditional secondary percentiles. 
-            Default is 0.5 for a constant 50/50 split. 
-
-        split_abcissa : list, optional 
-            Values of the primary halo property at which the halos are split as described above in 
-            the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
-            the interpolation will be done in the logarithm of the primary halo property. 
-            Default is to assume a constant 50/50 split. 
-
-        assembias_strength : float or list, optional 
-            Fraction or sequence of fractions between -1 and 1 
-            defining the assembly bias correlation strength. 
-            Default is 0.5. 
-
-        assembias_strength_abcissa : list, optional 
-            Values of the primary halo property at which the assembly bias strength is specified. 
-            Default is to assume a constant strength of 0.5. If passing a list, the strength 
-            will interpreted at the input ``assembias_strength_abcissa``.
-            Default is to assume a constant strength of 0.5. 
-
-        """
-        Tinker13Cens.__init__(self, **kwargs)
-        HeavisideAssembias.__init__(self, 
-            method_name_to_decorate = 'mean_quiescent_fraction', 
-            lower_assembias_bound = 0., 
-            upper_assembias_bound = 1., 
-            **kwargs)
-
-
-
-
-
-
 
 
 
