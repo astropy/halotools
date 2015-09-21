@@ -267,7 +267,6 @@ class ModelFactory(object):
         else:
             summary_func = np.median
 
-
         halocat_kwargs = {}
         if 'simname' in kwargs:
             halocat_kwargs['simname'] = kwargs['simname']
