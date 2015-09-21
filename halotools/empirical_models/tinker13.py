@@ -259,11 +259,14 @@ class Tinker13Cens(OccupationComponent):
             redshift = self.redshift)
 
     def _update_smhm_param_dict(self, sfr_key):
+
         for key, value in self.param_dict.iteritems():
-            stripped_key = key[:-len('sfr_key')-1]
+            if sfr_key in key:
+                stripped_key = key[:-len(sfr_key)-1]
+            else:
+                stripped_key = key
             if stripped_key in self.smhm_model.param_dict:
                 self.smhm_model.param_dict[stripped_key] = value 
-
 
 
 class Tinker13QuiescentSats(OccupationComponent):
