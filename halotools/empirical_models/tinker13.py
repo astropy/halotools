@@ -204,12 +204,18 @@ class Tinker13Cens(OccupationComponent):
         result = np.zeros(custom_len(prim_haloprop))
 
         quiescent_central_idx = np.where(sfr_designation == 'quiescent')[0]
-        result[quiescent_central_idx] = self.mean_occupation_quiescent(
-            prim_haloprop = prim_haloprop[quiescent_central_idx])        
-
         active_central_idx = np.invert(quiescent_central_idx)
-        result[active_central_idx] = self.mean_occupation_active(
-            prim_haloprop = prim_haloprop[active_central_idx])        
+
+        if 'halo_table' in kwargs:
+            result[quiescent_central_idx] = self.mean_occupation_quiescent(
+                halo_table = halo_table[quiescent_central_idx])
+            result[active_central_idx] = self.mean_occupation_active(
+                halo_table = halo_table[active_central_idx])        
+        else:
+            result[quiescent_central_idx] = self.mean_occupation_quiescent(
+                prim_haloprop = prim_haloprop[quiescent_central_idx])
+            result[active_central_idx] = self.mean_occupation_active(
+                prim_haloprop = prim_haloprop[active_central_idx])        
 
         return result
 
