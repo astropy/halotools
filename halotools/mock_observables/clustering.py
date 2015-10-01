@@ -131,7 +131,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         np.random.shuffle(inds)
         inds = inds[0:max_sample_size]
         sample1 = sample1[inds]
-        sample2 = sample1[inds]
+        sample2 = sample2[inds]
         print('downsampling sample1...')
     if len(sample2)>max_sample_size:
         inds = np.arange(0,len(sample2))
@@ -1256,7 +1256,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         np.random.shuffle(inds)
         inds = inds[0:max_sample_size]
         sample1 = sample1[inds]
-        sample2 = sample1[inds]
+        sample2 = sample2[inds]
         print('downsampling sample1...')
     if len(sample2)>max_sample_size:
         inds = np.arange(0,len(sample2))
