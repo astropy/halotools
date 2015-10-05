@@ -451,7 +451,7 @@ class MockFactory(object):
     def satellite_fraction(self):
         """ Fraction of mock galaxies that are satellites. 
         """
-        satmask = self.galaxy_table['gal_type'] == 'satellites'
+        satmask = self.galaxy_table['gal_type'] != 'centrals'
         return len(self.galaxy_table[satmask]) / float(len(self.galaxy_table))
 
 class HodMockFactory(MockFactory):
