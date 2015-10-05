@@ -20,6 +20,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from . import model_defaults, model_helpers, smhm_components
 from .assembias import HeavisideAssembias
 from .hod_components import OccupationComponent
+from .model_helpers import bounds_enforcing_decorator_factory
 
 from ..utils.array_utils import custom_len
 from ..utils.table_utils import compute_conditional_percentiles
@@ -138,6 +139,7 @@ class Tinker13Cens(OccupationComponent):
         for key, value in zip(self._ordinates_keys, quiescent_fraction_ordinates):
             self.param_dict[key] = value
 
+    @bounds_enforcing_decorator_factory(0, 1)
     def mean_quiescent_fraction(self, **kwargs):
         """
         """
@@ -174,6 +176,7 @@ class Tinker13Cens(OccupationComponent):
         if 'halo_table' in kwargs:
             kwargs['halo_table'][self.sfr_designation_key] = result
             kwargs['halo_table']['sfr_designation'] = result
+
         return result
 
     def mean_occupation(self, **kwargs):
@@ -203,19 +206,17 @@ class Tinker13Cens(OccupationComponent):
                 raise HalotoolsError(msg)
 
         result = np.zeros(custom_len(prim_haloprop))
-        quiescent_central_idx = np.where(sfr_designation == 'quiescent')[0]
-        active_central_idx = np.invert(quiescent_central_idx)
+        quiescent_central_idx = sfr_designation == 'quiescent'
+        active_central_idx = ~quiescent_central_idx
 
         if 'halo_table' in kwargs:
-            result[quiescent_central_idx] = self.mean_occupation_quiescent(
-                halo_table = halo_table[quiescent_central_idx])
-            result[active_central_idx] = self.mean_occupation_active(
-                halo_table = halo_table[active_central_idx])        
+            quiescent_result = self.mean_occupation_quiescent(halo_table = halo_table)
+            active_result = self.mean_occupation_active(halo_table = halo_table)        
         else:
-            result[quiescent_central_idx] = self.mean_occupation_quiescent(
-                prim_haloprop = prim_haloprop[quiescent_central_idx])
-            result[active_central_idx] = self.mean_occupation_active(
-                prim_haloprop = prim_haloprop[active_central_idx])        
+            quiescent_result = self.mean_occupation_quiescent(prim_haloprop = prim_haloprop)
+            active_result = self.mean_occupation_quiescent(prim_haloprop = prim_haloprop)
+
+        result = np.where(sfr_designation == 'quiescent', quiescent_result, active_result)
 
         return result
 
