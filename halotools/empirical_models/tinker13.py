@@ -129,6 +129,8 @@ class Tinker13Cens(OccupationComponent):
         self.param_dict['smhm_delta_0_quiescent'] = 0.93
         self.param_dict['smhm_gamma_0_active'] = 1.48
         self.param_dict['smhm_gamma_0_quiescent'] = 0.81
+        self.param_dict['scatter_model_param1_active'] = 0.21
+        self.param_dict['scatter_model_param1_quiescent'] = 0.28
 
         self._quiescent_fraction_abcissa = quiescent_fraction_abcissa
         ordinates_key_prefix = 'quiescent_fraction_ordinates'
@@ -204,17 +206,18 @@ class Tinker13Cens(OccupationComponent):
                 msg = ("If not passing a ``halo_table`` keyword argument to the mean_occupation method,\n"
                     "you must pass both ``prim_haloprop`` and ``sfr_designation`` keyword arguments")
                 raise HalotoolsError(msg)
-
-        result = np.zeros(custom_len(prim_haloprop))
-        quiescent_central_idx = sfr_designation == 'quiescent'
-        active_central_idx = ~quiescent_central_idx
+            if type(sfr_designation) == str:
+                sfr_designation = np.repeat(sfr_designation, custom_len(prim_haloprop))
+                if sfr_designation[0] not in ['active', 'quiescent']:
+                    msg = ("The only acceptable values of ``sfr_designation`` are ``active`` or ``quiescent``")
+                    raise HalotoolsError(msg)
 
         if 'halo_table' in kwargs:
             quiescent_result = self.mean_occupation_quiescent(halo_table = halo_table)
             active_result = self.mean_occupation_active(halo_table = halo_table)        
         else:
             quiescent_result = self.mean_occupation_quiescent(prim_haloprop = prim_haloprop)
-            active_result = self.mean_occupation_quiescent(prim_haloprop = prim_haloprop)
+            active_result = self.mean_occupation_active(prim_haloprop = prim_haloprop)
 
         result = np.where(sfr_designation == 'quiescent', quiescent_result, active_result)
 
