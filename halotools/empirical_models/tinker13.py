@@ -467,11 +467,11 @@ class Tinker13QuiescentSats(OccupationComponent):
 
         """
 
-        self.param_dict['alphasat_quiescent'] = 1.0
-        self.param_dict['bsat_quiescent'] = 10.62
-        self.param_dict['bcut_quiescent'] = 1.47
-        self.param_dict['betacut_quiescent'] = -0.13
-        self.param_dict['betasat_quiescent'] = 0.859
+        self.param_dict['bcut_quiescent'] = 21.42
+        self.param_dict['bsat_quiescent'] = 17.9
+        self.param_dict['betacut_quiescent'] = -0.12
+        self.param_dict['betasat_quiescent'] = 0.62
+        self.param_dict['alphasat_quiescent'] = 1.08
 
         for key, value in self.smhm_model.param_dict.iteritems():
             quiescent_key = key + '_quiescent'
@@ -610,16 +610,14 @@ class Tinker13ActiveSats(OccupationComponent):
 
     def _initialize_param_dict(self):
         """ Set the initial values of ``self.param_dict`` according to 
-        the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the 
-        lowest redshift bin. 
-
+        the z1 values of Table 2 of arXiv:1308.2974.
         """
 
-        self.param_dict['alphasat_active'] = 1.0
-        self.param_dict['bsat_active'] = 10.62
-        self.param_dict['bcut_active'] = 1.47
-        self.param_dict['betacut_active'] = -0.13
-        self.param_dict['betasat_active'] = 0.859
+        self.param_dict['bcut_active'] = 0.28
+        self.param_dict['bsat_active'] = 33.96
+        self.param_dict['betacut_active'] = 0.77
+        self.param_dict['betasat_active'] = 1.05
+        self.param_dict['alphasat_active'] = 0.99
 
         for key, value in self.smhm_model.param_dict.iteritems():
             active_key = key + '_active'
