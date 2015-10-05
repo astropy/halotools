@@ -200,9 +200,9 @@ class Tinker13Cens(OccupationComponent):
             except KeyError:
                 msg = ("If not passing a ``halo_table`` keyword argument to the mean_occupation method,\n"
                     "you must pass both ``prim_haloprop`` and ``sfr_designation`` keyword arguments")
+                raise HalotoolsError(msg)
 
         result = np.zeros(custom_len(prim_haloprop))
-
         quiescent_central_idx = np.where(sfr_designation == 'quiescent')[0]
         active_central_idx = np.invert(quiescent_central_idx)
 
