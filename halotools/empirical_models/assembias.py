@@ -24,6 +24,15 @@ class HeavisideAssembias(object):
         """
         Parameters 
         ----------
+        method_name_to_decorate : string 
+            Name of the method in the primary class whose behavior is being decorated 
+
+        lower_assembias_bound : float 
+            lower bound on the method being decorated with assembly bias 
+
+        upper_assembias_bound : float 
+            upper bound on the method being decorated with assembly bias 
+
         sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property 
             governing the assembly bias. Must be a key in the halo_table 
@@ -94,6 +103,14 @@ class HeavisideAssembias(object):
         self._loginterp = loginterp
         self.sec_haloprop_key = sec_haloprop_key
 
+        required_attr_list = ['prim_haloprop_key', 'gal_type']
+        for attr in required_attr_list:
+            if not hasattr(self, attr):
+                msg = ("In order to use the HeavisideAssembias class " 
+                    "to decorate your model component with assembly bias, \n"
+                    "the component instance must have a %s attribute")
+                raise HalotoolsError(msg % attr)
+
         try:
             self._method_name_to_decorate = kwargs['method_name_to_decorate']
         except KeyError:
@@ -102,13 +119,18 @@ class HeavisideAssembias(object):
                 "``%s``")
             raise HalotoolsError(msg % ('_method_name_to_decorate'))
 
-        required_attr_list = ['prim_haloprop_key', '_lower_bound', '_upper_bound']
-        for attr in required_attr_list:
-            if not hasattr(self, attr):
-                msg = ("In order to use the HeavisideAssembias class " 
-                    "to decorate your model component with assembly bias, \n"
-                    "the component instance must have a %s attribute")
-                raise HalotoolsError(msg % attr)
+        try:
+            lower_bound = float(kwargs['lower_assembias_bound'])
+            lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type 
+            setattr(self, lower_bound_key, lower_bound)
+            upper_bound = float(kwargs['upper_assembias_bound'])
+            upper_bound_key = 'upper_bound_' + self._method_name_to_decorate + '_' + self.gal_type 
+            setattr(self, upper_bound_key, upper_bound)
+        except KeyError:
+            msg = ("The constructor to the HeavisideAssembiasComponent class "
+                "must be called with the following keyword arguments:\n" 
+                "``%s``, ``%s``")
+            raise HalotoolsError(msg % ('lower_assembias_bound', 'upper_assembias_bound'))
 
         self._set_percentile_splitting(**kwargs)
         self._initialize_assembias_param_dict(**kwargs)
@@ -315,6 +337,11 @@ class HeavisideAssembias(object):
         boost allowable by the requirement that the all-halo baseline 
         function be preserved. 
         """
+        lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
+        baseline_lower_bound = getattr(self, lower_bound_key)
+        upper_bound_key = 'upper_bound_' + self._method_name_to_decorate + '_' + self.gal_type
+        baseline_upper_bound = getattr(self, upper_bound_key)
+
         try:
             baseline_result = kwargs['baseline_result']
             prim_haloprop = kwargs['prim_haloprop']
@@ -336,8 +363,8 @@ class HeavisideAssembias(object):
             split_pos = splitting_result[positive_strength_idx]
             strength_pos = strength[positive_strength_idx]
 
-            upper_bound1 = self._upper_bound - base_pos
-            upper_bound2 = ((1 - split_pos)/split_pos)*(base_pos - self._lower_bound)
+            upper_bound1 = baseline_upper_bound - base_pos
+            upper_bound2 = ((1 - split_pos)/split_pos)*(base_pos - baseline_lower_bound)
             upper_bound = np.minimum(upper_bound1, upper_bound2)
             result[positive_strength_idx] = strength_pos*upper_bound
 
@@ -346,8 +373,8 @@ class HeavisideAssembias(object):
             split_neg = splitting_result[negative_strength_idx]
             strength_neg = strength[negative_strength_idx]
 
-            lower_bound1 = self._lower_bound - base_neg
-            lower_bound2 = (1 - split_neg)/split_neg*(base_neg - self._upper_bound)
+            lower_bound1 = baseline_lower_bound - base_neg
+            lower_bound2 = (1 - split_neg)/split_neg*(base_neg - baseline_upper_bound)
             lower_bound = np.maximum(lower_bound1, lower_bound2)
             result[negative_strength_idx] = np.abs(strength_neg)*lower_bound
 
@@ -369,6 +396,10 @@ class HeavisideAssembias(object):
         wrapper : function object 
             Decorated function that includes assembly bias effects. 
         """
+        lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
+        baseline_lower_bound = getattr(self, lower_bound_key)
+        upper_bound_key = 'upper_bound_' + self._method_name_to_decorate + '_' + self.gal_type
+        baseline_upper_bound = getattr(self, upper_bound_key)
 
         def wrapper(*args, **kwargs):
             try:
@@ -386,7 +417,7 @@ class HeavisideAssembias(object):
             # We will only apply decorate values that are not edge cases
             no_edge_mask = (
                 (split > 0) & (split < 1) & 
-                (result > self._lower_bound) & (result < self._upper_bound)
+                (result > baseline_lower_bound) & (result < baseline_upper_bound)
                 )
             no_edge_result = result[no_edge_mask]
             no_edge_split = split[no_edge_mask]
