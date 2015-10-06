@@ -11,12 +11,11 @@ from . import smhm_components
 from . import sfr_components
 from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from .abunmatch import ConditionalAbunMatch
-from . import tinker13 
 
 from ..sim_manager import FakeMock, FakeSim, sim_defaults
 
 
-__all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15', 'Hearin15']
+__all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15', 'Hearin15', 'Tinker13']
 
 def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     """ Simple HOD-style based on Zheng et al. (2007), arXiv:0703457. 
@@ -542,7 +541,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = tinker13.Tinker13Cens(threshold = threshold, **kwargs)
+    occu_cen_model = hoc.Tinker13Cens(threshold = threshold, **kwargs)
     occu_cen_model._suppress_repeated_param_warning = True
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
@@ -554,7 +553,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     sat_key1 = 'quiescent_satellites'
     sat_model_dict1 = {}
     # Build the occupation model
-    occu_sat_model1 = tinker13.Tinker13QuiescentSats(threshold = threshold, **kwargs)
+    occu_sat_model1 = hoc.Tinker13QuiescentSats(threshold = threshold, **kwargs)
     sat_model_dict1['occupation'] = occu_sat_model1
     # Build the profile model
     sat_profile1 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
@@ -564,7 +563,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     sat_key2 = 'active_satellites'
     sat_model_dict2 = {}
     # Build the occupation model
-    occu_sat_model2 = tinker13.Tinker13ActiveSats(threshold = threshold, **kwargs)
+    occu_sat_model2 = hoc.Tinker13ActiveSats(threshold = threshold, **kwargs)
     sat_model_dict2['occupation'] = occu_sat_model2
     # Build the profile model
     sat_profile2 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
