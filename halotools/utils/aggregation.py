@@ -5,7 +5,7 @@ Modules to support 'grouped' array calculations; aggregation operations.
 
 """
 
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
 import numpy as np
 from astropy.table import Table, Column
 
@@ -238,7 +238,7 @@ def group_by(members, keys=None, function=None, append_id_field=None):
     #if there is no function, assign groups by unique combination of keys
     if function is None:
         #get an array with each grouping key value per object
-        GroupIDs=np.empty((len(members),len(keys)))
+        GroupIDs=np.zeros((len(members),len(keys)))
         for i,key in enumerate(keys):
             GroupIDs[:,i] = members[key]
         #get the unique rows in the resulting array

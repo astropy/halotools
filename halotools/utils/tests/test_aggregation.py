@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import, unicode_literals
 import numpy as np
 from astropy.table import Table
 import sys
