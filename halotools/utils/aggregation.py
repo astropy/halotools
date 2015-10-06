@@ -5,7 +5,7 @@ Modules to support 'grouped' array calculations; aggregation operations.
 
 """
 
-from __future__ import division, print_function, absolute_import
+from __future__ import division, print_function, absolute_import, unicode_literals
 import numpy as np
 from astropy.table import Table, Column
 
