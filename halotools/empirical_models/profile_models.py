@@ -4,6 +4,8 @@ This module contains the components for
 the radial profiles of galaxies 
 inside their halos. 
 """
+from __future__ import (
+    division, print_function, absolute_import, unicode_literals)
 
 import numpy as np 
 from astropy.extern import six 

@@ -6,6 +6,8 @@ The result of using `MonteCarloGalProf` as an orthogonal mix-in class
 is a composite class that can be used to generate Monte Carlo realizations 
 of the full phase space distribution of galaxies within their halos. 
 """
+# from __future__ import (
+#     division, print_function, absolute_import, unicode_literals)
 
 __author__ = ['Andrew Hearin']
 __all__ = ['MonteCarloGalProf']
