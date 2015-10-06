@@ -9,13 +9,15 @@ __author__ = ['Andrew Hearin']
 __all__ = ['NFWPhaseSpace', 'TrivialPhaseSpace']
 
 import numpy as np
+from astropy.table import Table
+
 from .profile_models import *
 from .velocity_models import *
 from .monte_carlo_phase_space import *
 from . import model_defaults
+
 from ..sim_manager import sim_defaults
 
-from astropy.table import Table
 
 class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
     """ NFW halo profile, based on Navarro, Frenk and White (1999).

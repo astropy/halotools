@@ -9,6 +9,8 @@ __all__ = ['CatalogManager']
 import numpy as np
 from warnings import warn
 from time import time
+from astropy.tests.helper import remote_data
+from astropy.table import Table
 
 try:
     from bs4 import BeautifulSoup
@@ -21,17 +23,8 @@ except ImportError:
     raise("Must have requests package installed to use the catalog_manager module")
 import posixpath
 import urlparse
-
 import datetime 
 
-from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import custom_len, convert_to_ndarray
-from ..utils.io_utils import download_file_from_url
-
-from astropy.tests.helper import remote_data
-from astropy.table import Table
-
-from . import cache_config, sim_defaults
 import os, fnmatch, re
 from functools import partial
 
@@ -42,6 +35,14 @@ try:
 except ImportError:
     warn("Most of the functionality of the catalog_manager module requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda")
+
+from . import cache_config, sim_defaults
+
+from ..utils.array_utils import find_idx_nearest_val
+from ..utils.array_utils import custom_len, convert_to_ndarray
+from ..utils.io_utils import download_file_from_url
+
+
 
 unsupported_simname_msg = "Input simname ``%s`` is not recognized by Halotools"
 

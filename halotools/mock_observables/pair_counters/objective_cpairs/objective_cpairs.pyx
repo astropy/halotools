@@ -11,7 +11,8 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin
-from objective_weights cimport *
+
+from .objective_weights cimport *
 
 
 __author__ = ['Duncan Campbell']

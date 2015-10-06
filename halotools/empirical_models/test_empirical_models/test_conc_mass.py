@@ -4,10 +4,10 @@ from __future__ import (absolute_import, division, print_function,
 __all__ = ['test_ConcMass']
 
 import numpy as np
-
-from ..conc_mass_models import ConcMass
 from astropy import cosmology
 from astropy.table import Table
+
+from ..conc_mass_models import ConcMass
 
 from ...sim_manager import FakeSim, FakeMock
 

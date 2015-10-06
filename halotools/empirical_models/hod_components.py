@@ -19,6 +19,9 @@ from scipy.special import erf
 from scipy.stats import poisson
 from scipy.optimize import brentq
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
+from astropy.extern import six
+from abc import ABCMeta, abstractmethod, abstractproperty
+import warnings
 
 from . import model_defaults, model_helpers, smhm_components
 from .assembias import HeavisideAssembias
@@ -28,10 +31,6 @@ from ..utils.array_utils import custom_len
 from ..utils.table_utils import compute_conditional_percentiles
 from ..  import sim_manager
 from ..custom_exceptions import *
-
-from astropy.extern import six
-from abc import ABCMeta, abstractmethod, abstractproperty
-import warnings
 
 @six.add_metaclass(ABCMeta)
 class OccupationComponent(object):

@@ -15,16 +15,16 @@ __all__ = (
 __author__ = ['Andrew Hearin', 'Surhud More']
 import numpy as np
 from copy import copy
-
+from astropy.extern import six
+from abc import ABCMeta
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.special import gammaincc, gamma, expi
 
 from . import model_defaults
+
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
-from astropy.extern import six
-from abc import ABCMeta
 
 @six.add_metaclass(ABCMeta)
 class GalPropModel(object):

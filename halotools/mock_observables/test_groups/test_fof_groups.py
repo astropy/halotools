@@ -4,13 +4,15 @@
 from __future__ import division, print_function
 import numpy as np
 import sys
-from ..groups import FoFGroups
 from scipy.sparse import coo_matrix
+
 igraph_available=True
 try: import igraph
 except ImportError:
     igraph_available=False
     print("igraph package not installed.  Some functions will not be available.")
+
+from ..groups import FoFGroups
 
 __all__=['test_fof_groups_init','test_fof_group_IDs','test_igraph_functionality']
 

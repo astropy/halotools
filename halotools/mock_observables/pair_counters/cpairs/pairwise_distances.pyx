@@ -10,8 +10,9 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin
-from distances cimport *
 from libcpp.vector cimport vector
+
+from .distances cimport *
 
 __all__ = ['pairwise_distance_no_pbc', 'pairwise_distance_pbc',\
            'pairwise_xy_z_distance_no_pbc', 'pairwise_xy_z_distance_pbc']

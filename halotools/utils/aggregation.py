@@ -7,8 +7,9 @@ Modules to support 'grouped' array calculations; aggregation operations.
 
 from __future__ import division, print_function
 import numpy as np
-from halotools.utils.match import crossmatch
 from astropy.table import Table, Column
+
+from .match import crossmatch
 
 __all__=['add_group_property','add_members_property','group_by',\
          'binned_aggregation_group_property', 'binned_aggregation_members_property',\

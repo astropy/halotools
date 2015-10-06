@@ -3,6 +3,7 @@
 from __future__ import division, print_function
 import numpy as np
 import sys
+
 from ..mock_survey import distant_observer_redshift, ra_dec_z
 
 def test_distant_observer():

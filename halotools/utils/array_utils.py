@@ -10,8 +10,9 @@ __all__ = (['custom_len', 'find_idx_nearest_val',
 
 import numpy as np
 import collections
-from ..custom_exceptions import HalotoolsError
 from astropy.table import Table
+
+from ..custom_exceptions import HalotoolsError
 
 def convert_to_ndarray(x):
     """ Method checks to see in the input array x is an ndarray 

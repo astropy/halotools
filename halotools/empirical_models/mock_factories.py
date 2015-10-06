@@ -11,10 +11,8 @@ Currently only composite HOD models are supported.
 import numpy as np
 from multiprocessing import cpu_count
 from copy import copy 
-
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
-
 from astropy.table import Table 
 
 from . import model_helpers, model_defaults
@@ -30,7 +28,6 @@ except ImportError:
 
 from ..sim_manager import sim_defaults
 from ..utils.array_utils import randomly_downsample_data
-
 from ..sim_manager import FakeSim, FakeMock
 
 

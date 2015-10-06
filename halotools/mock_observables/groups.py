@@ -10,6 +10,7 @@ import sys
 import numpy as np
 from scipy.sparse import csgraph, csr_matrix, coo_matrix
 from math import pi, gamma
+
 from .pair_counters.fof_pairs import fof_pairs, xy_z_fof_pairs
 igraph_available=True
 try: import igraph
