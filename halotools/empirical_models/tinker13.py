@@ -68,6 +68,8 @@ class Tinker13Cens(OccupationComponent):
         """
         upper_occupation_bound = 1.0
 
+        self.littleh = 0.72
+
         # Call the super class constructor, which binds all the 
         # arguments to the instance.  
         super(Tinker13Cens, self).__init__(
@@ -132,7 +134,7 @@ class Tinker13Cens(OccupationComponent):
         self.param_dict['scatter_model_param1_active'] = 0.21
         self.param_dict['scatter_model_param1_quiescent'] = 0.28
 
-        self._quiescent_fraction_abcissa = quiescent_fraction_abcissa
+        self._quiescent_fraction_abcissa = np.array(quiescent_fraction_abcissa)/self.littleh
         ordinates_key_prefix = 'quiescent_fraction_ordinates'
         self._ordinates_keys = (
             [ordinates_key_prefix + '_param' + str(i+1) 
