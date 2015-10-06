@@ -4,7 +4,8 @@
 cell structure object used for efficient pairwise operations on simulation boxes.
 """
 
-from __future__ import print_function, division
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import numpy as np
 
 __all__=['rect_cuboid_cells']

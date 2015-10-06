@@ -6,7 +6,8 @@ is as a sanity check on more complex pair counting techniques.  These functions 
 be used on large data sets, as memory usage is very large, and runtimes can be very slow.
 """
 
-from __future__ import division, print_function
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import numpy as np
 
 __all__=['npairs','wnpairs','pairs']
