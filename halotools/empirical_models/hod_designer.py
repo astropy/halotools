@@ -6,9 +6,11 @@ from an existing model.
 """
 
 from copy import copy 
-from ..custom_exceptions import HalotoolsError
-from .model_factories import HodModelFactory 
 from warnings import warn 
+
+from .model_factories import HodModelFactory 
+
+from ..custom_exceptions import *
 
 __all__ = ['HodModelArchitect']
 

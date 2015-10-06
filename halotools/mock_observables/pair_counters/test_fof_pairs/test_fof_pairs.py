@@ -2,12 +2,13 @@ import pytest
 slow = pytest.mark.slow
 
 import numpy as np
-#load comparison simple pair counters
-from .. fof_pairs import fof_pairs, xy_z_fof_pairs
 import scipy
 from scipy import spatial
 from scipy.sparse import coo_matrix
 import matplotlib.pyplot as plt
+
+#load comparison simple pair counters
+from ..fof_pairs import fof_pairs, xy_z_fof_pairs
 
 @slow
 def test_fof_pairs_periodic():

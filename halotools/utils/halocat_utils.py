@@ -6,9 +6,9 @@ Common functions applied to halo catalogs.
 """
 
 import numpy as np
-from .match import crossmatch
 from warnings import warn
 
+from .match import crossmatch
 
 def host_status(halos):
 	"""

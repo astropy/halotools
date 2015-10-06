@@ -13,7 +13,8 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin, sqrt
-from distances cimport *
+
+from .distances cimport *
 
 __all__ = ['npairs_no_pbc', 'npairs_pbc', 'wnpairs_no_pbc', 'wnpairs_pbc',\
            'jnpairs_no_pbc', 'jnpairs_pbc',\

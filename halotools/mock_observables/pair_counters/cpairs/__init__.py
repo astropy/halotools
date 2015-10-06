@@ -1,2 +1,2 @@
 
-from cpairs import *
+from .cpairs import *

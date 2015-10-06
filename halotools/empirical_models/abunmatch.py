@@ -10,6 +10,8 @@ from scipy.stats import pearsonr
 from scipy.optimize import minimize_scalar
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
+from warnings import warn
+from functools import partial
 
 from . import model_defaults
 from . import model_helpers
@@ -19,11 +21,8 @@ from . import smhm_components
 from ..utils.array_utils import custom_len
 from ..sim_manager import sim_defaults
 from .. import sim_manager
-
 from ..utils import array_utils 
 
-from warnings import warn
-from functools import partial
 
 __all__ = ['ConditionalAbunMatch']
 

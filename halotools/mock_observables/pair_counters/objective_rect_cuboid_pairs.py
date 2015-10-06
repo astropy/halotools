@@ -11,13 +11,13 @@ The weighting is done using special user specified objective weighting functions
 
 from __future__ import print_function, division
 import numpy as np
-from rect_cuboid import *
-from objective_cpairs import *
 from time import time
 import sys
 import multiprocessing
 from functools import partial
 
+from .rect_cuboid import *
+from .objective_cpairs import *
 
 __all__=['obj_wnpairs']
 __author__=['Duncan Campbell']

@@ -10,9 +10,9 @@ from copy import copy
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
 
-import model_defaults
+from . import model_defaults
 from ..utils.array_utils import custom_len
-import model_helpers as model_helpers
+from . import model_helpers
 
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
