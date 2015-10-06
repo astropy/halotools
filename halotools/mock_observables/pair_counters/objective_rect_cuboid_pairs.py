@@ -9,7 +9,8 @@ separations less than or equal to r, optimized for simulation boxes.
 The weighting is done using special user specified objective weighting functions.
 """
 
-from __future__ import print_function, division
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import numpy as np
 from time import time
 import sys
