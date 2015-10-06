@@ -686,9 +686,6 @@ class HodMockFactory(MockFactory):
             self.galaxy_table[key] = np.zeros(self.Ngals, dtype = dt[key].type)
 
 
-
-
-
 class SubhaloMockFactory(MockFactory):
     """ Class responsible for populating a simulation with a 
     population of mock galaxies.
