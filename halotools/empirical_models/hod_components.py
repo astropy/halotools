@@ -401,13 +401,28 @@ class Leauthaud11Cens(OccupationComponent):
         for key, value in self.smhm_model.param_dict.iteritems():
             self.param_dict[key] = value
 
-
         self._methods_to_inherit = (
             ['mc_occupation', 'mean_occupation', 
             'mean_stellar_mass', 'mean_log_halo_mass']
             )
 
         self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
+
+    def get_published_parameters(self):
+        """ Return the values of ``self.param_dict`` according to 
+        the SIG_MOD1 values of Table 5 of arXiv:1104.0928 for the 
+        lowest redshift bin. 
+
+        """
+        d = {}
+        d['smhm_m1_0'] = 12.52
+        d['smhm_m0_0'] = 10.916
+        d['smhm_beta_0'] = 0.457
+        d['smhm_delta_0'] = 0.566
+        d['smhm_gamma_0'] = 1.54
+        d['scatter_model_param1'] = 0.206
+        return d
+
 
     def mean_occupation(self, **kwargs):
         """ Expected number of central galaxies in a halo.
