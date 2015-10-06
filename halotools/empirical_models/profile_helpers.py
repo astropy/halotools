@@ -6,6 +6,9 @@ relations with cosmology and redshift.
 The functions contained in this module borrow heavily from the Colossus 
 package developed by Benedikt Diemer, http://bdiemer.bitbucket.org. 
 """
+from __future__ import (
+	division, print_function, absolute_import, unicode_literals)
+
 import numpy as np 
 from astropy import cosmology
 from astropy import units as u

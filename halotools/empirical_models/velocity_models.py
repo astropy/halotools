@@ -3,6 +3,8 @@
 Module contains the classes used to model the velocities 
 of galaxies within their halos. 
 """
+from __future__ import (
+    division, print_function, absolute_import, unicode_literals)
 
 import numpy as np 
 from scipy.integrate import quad as quad_integration

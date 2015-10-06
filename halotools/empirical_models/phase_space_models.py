@@ -4,6 +4,8 @@ Module composes the behavior of the profile models
 and the velocity models to produce models for the 
 full phase space distribution of galaxies within their halos. 
 """
+from __future__ import (
+    division, print_function, absolute_import)
 
 __author__ = ['Andrew Hearin']
 __all__ = ['NFWPhaseSpace', 'TrivialPhaseSpace']
