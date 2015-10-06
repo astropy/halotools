@@ -5,6 +5,9 @@ Common functions applied to halo catalogs.
 
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import numpy as np
 from warnings import warn
 

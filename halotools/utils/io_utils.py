@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+
 import sys, urllib
 
 __all__ = ['file_len', 'download_file_from_url']
@@ -29,7 +34,7 @@ def download_file_from_url(url, fname):
     print(" ... Saving the data with the following filename: \n%s\n" % fname) 
 
     def reporthook(a,b,c): 
-        print "% 3.1f%% of %d bytes\r" % (min(100, float(a * b) / c * 100), c),
+        print("% 3.1f%% of %d bytes\r" % (min(100, float(a * b) / c * 100), c),)
         sys.stdout.flush()
 
     urllib.urlretrieve(url, fname, reporthook)

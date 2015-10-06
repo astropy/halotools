@@ -4,6 +4,8 @@
 Modules performing small, commonly used tasks throughout the package.
 
 """
+# from __future__ import (absolute_import, division, print_function,
+#                         unicode_literals)
 
 __all__ = (['custom_len', 'find_idx_nearest_val', 
     'randomly_downsample_data', 'array_is_monotonic', 'convert_to_ndarray'])
