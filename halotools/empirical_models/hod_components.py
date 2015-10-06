@@ -401,6 +401,12 @@ class Leauthaud11Cens(OccupationComponent):
         for key, value in self.smhm_model.param_dict.iteritems():
             self.param_dict[key] = value
 
+
+        self._methods_to_inherit = (
+            ['mc_occupation', 'mean_occupation', 
+            'mean_stellar_mass', 'mean_log_halo_mass']
+            )
+
         self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
 
     def mean_occupation(self, **kwargs):
