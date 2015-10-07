@@ -7,13 +7,15 @@ should be used with care as there are no 'checks' preformed to ensure the argume
 of the correct format.
 """
 
-from __future__ import print_function, division
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import sys
 cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin, sqrt
-from distances cimport *
+
+from .distances cimport *
 
 __all__ = ['npairs_no_pbc', 'npairs_pbc', 'wnpairs_no_pbc', 'wnpairs_pbc',\
            'jnpairs_no_pbc', 'jnpairs_pbc',\

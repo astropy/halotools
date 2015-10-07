@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-from .. import model_helpers as occuhelp 
+
 import numpy as np 
+
+from .. import model_helpers as occuhelp 
 
 def test_enforce_periodicity_of_box():
 

@@ -7,8 +7,8 @@ All hard-coding should be restricted to this module, whenever possible.
 
 import os, sys
 import numpy as np
-
 from astropy import cosmology
+
 from . import raw_halocat_column_info
 from ..custom_exceptions import UnsupportedSimError, HalotoolsCacheError
 

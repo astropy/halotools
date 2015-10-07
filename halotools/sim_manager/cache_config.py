@@ -10,10 +10,10 @@ supported_sim_list = ['bolshoi', 'bolplanck', 'consuelo', 'multidark']
 import os
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 from astropy.config.paths import _find_home
-
 import warnings
 
 from . import sim_defaults
+
 from ..custom_exceptions import UnsupportedSimError, CatalogTypeError
 
 def simname_is_supported(simname):

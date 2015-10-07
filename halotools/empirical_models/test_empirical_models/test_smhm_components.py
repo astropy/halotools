@@ -5,12 +5,12 @@ from astropy.table import Table
 from astropy.io.ascii import read as astropy_ascii_read
 from astropy.utils.data import get_pkg_data_filename, get_pkg_data_fileobj
 from astropy.tests.helper import remote_data, pytest
+from unittest import TestCase
+from copy import copy
+
+
 from .. import smhm_components
 from .. import model_defaults
-
-from unittest import TestCase
-
-from copy import copy
 
 __all__ = ['test_Moster13SmHm_initialization', 'test_LogNormalScatterModel_initialization']
 

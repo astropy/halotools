@@ -3,11 +3,12 @@
 import numpy as np 
 from unittest import TestCase
 from functools import partial
-
-from ..table_utils import SampleSelector, compute_conditional_percentiles
 from astropy.table import Table
 
+from ..table_utils import SampleSelector, compute_conditional_percentiles
+
 from ...sim_manager.generate_random_sim import FakeSim
+
 
 class TestSampleSelector(TestCase):
 	"""

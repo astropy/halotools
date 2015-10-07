@@ -3,11 +3,11 @@ import numpy as np
 import os
 import unittest
 from astropy.tests.helper import pytest
+from astropy.config.paths import _find_home
 
 from .. import cache_config
 from ...custom_exceptions import UnsupportedSimError
 
-from astropy.config.paths import _find_home
 
 __all__ = (
 	['test_cache_config', 'test_catalogs_config', 

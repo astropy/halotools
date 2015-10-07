@@ -5,13 +5,15 @@ objective pair counter.
 """
 
 
-from __future__ import print_function, division
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import sys
 cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin
-from objective_weights cimport *
+
+from .objective_weights cimport *
 
 
 __author__ = ['Duncan Campbell']

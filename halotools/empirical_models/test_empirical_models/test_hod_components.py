@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import numpy as np
+from astropy.table import Table
+from copy import copy
 
 from .. import model_defaults
 from .. import hod_components
 
-from astropy.table import Table
-from copy import copy
 
 __all__ = ['test_Zheng07Cens','test_Zheng07Sats']
 

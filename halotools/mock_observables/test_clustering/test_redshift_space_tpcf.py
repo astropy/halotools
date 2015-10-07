@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-from __future__ import division, print_function
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import numpy as np
 import sys
+
 from ..clustering import redshift_space_tpcf
 
 __all__=['test_rs_tpcf_auto','test_rs_tpcf_auto_periodic','test_rs_tpcf_cross_periodic',]

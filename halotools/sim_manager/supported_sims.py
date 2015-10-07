@@ -19,16 +19,8 @@ except ImportError:
 import posixpath
 import urlparse
 
-from . import sim_defaults, catalog_manager
-
-from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import custom_len
-
-from ..custom_exceptions import *
-
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.extern import six
-
 from astropy import cosmology
 from astropy import units as u
 from astropy.table import Table
@@ -38,6 +30,14 @@ try:
 except ImportError:
     warn("Most of the functionality of the catalog_manager module requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda")
+
+from . import sim_defaults, catalog_manager
+
+from ..utils.array_utils import find_idx_nearest_val
+from ..utils.array_utils import custom_len
+
+from ..custom_exceptions import *
+
 
 __all__ = (
     ['NbodySimulation', 'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo', 
