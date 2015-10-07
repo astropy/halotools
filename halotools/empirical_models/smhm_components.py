@@ -3,6 +3,9 @@
 Module containing classes used to model the mapping between 
 stellar mass and subhalo_table. 
 """
+from __future__ import (
+    division, print_function, absolute_import, unicode_literals)
+
 import numpy as np
 
 from scipy.interpolate import UnivariateSpline

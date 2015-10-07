@@ -4,11 +4,13 @@
 functions to calculate clustering statistics, e.g. two point correlation functions.
 """
 
-from __future__ import division, print_function
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 ####import modules########################################################################
 import sys
 import numpy as np
 from math import pi, gamma
+
 from .pair_counters.rect_cuboid_pairs import npairs, xy_z_npairs, jnpairs, s_mu_npairs
 ##########################################################################################
 

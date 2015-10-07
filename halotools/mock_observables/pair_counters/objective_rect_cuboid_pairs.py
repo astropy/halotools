@@ -9,15 +9,16 @@ separations less than or equal to r, optimized for simulation boxes.
 The weighting is done using special user specified objective weighting functions.
 """
 
-from __future__ import print_function, division
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import numpy as np
-from rect_cuboid import *
-from objective_cpairs import *
 from time import time
 import sys
 import multiprocessing
 from functools import partial
 
+from .rect_cuboid import *
+from .objective_cpairs import *
 
 __all__=['obj_wnpairs']
 __author__=['Duncan Campbell']

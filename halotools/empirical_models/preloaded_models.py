@@ -4,7 +4,11 @@
 Module containing some commonly used composite HOD models.
 
 """
+from __future__ import (
+    division, print_function, absolute_import, unicode_literals)
+
 import numpy as np
+
 from . import model_factories, model_defaults, smhm_components
 from . import hod_components as hoc
 from . import smhm_components

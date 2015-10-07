@@ -1,2 +1,2 @@
 
-from objective_cpairs import *
+from .objective_cpairs import *

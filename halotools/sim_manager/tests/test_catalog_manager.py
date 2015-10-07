@@ -3,15 +3,13 @@
 
 import os, fnmatch
 import numpy as np
-
-from ..catalog_manager import CatalogManager
 from astropy.config.paths import _find_home 
-
 from astropy.tests.helper import remote_data, pytest
-
 from unittest import TestCase
 
-from halotools.custom_exceptions import UnsupportedSimError
+from ..catalog_manager import CatalogManager
+
+from ...custom_exceptions import UnsupportedSimError
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 

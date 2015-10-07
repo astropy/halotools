@@ -9,15 +9,17 @@ separations less than or equal to r, optimized for simulation boxes.
 This module also contains a 'main' function which runs speed tests.
 """
 
-from __future__ import print_function, division
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import numpy as np
-from rect_cuboid import *
-from cpairs import *
 from time import time
 import sys
 import multiprocessing
 from functools import partial
 
+from .rect_cuboid import *
+from .cpairs import *
 
 __all__=['npairs', 'wnpairs', 'jnpairs', 'xy_z_npairs', 'xy_z_wnpairs', 'xy_z_jnpairs']
 __author__=['Duncan Campbell']

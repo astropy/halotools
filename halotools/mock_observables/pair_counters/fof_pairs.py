@@ -4,16 +4,17 @@
 Cuboid FoF pair search
 """
 
-from __future__ import print_function, division
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import numpy as np
-from rect_cuboid import *
-from cpairs.pairwise_distances import *
 from time import time
 import sys
 import multiprocessing
 from functools import partial
 from scipy.sparse import coo_matrix
 
+from .rect_cuboid import *
+from .cpairs.pairwise_distances import *
 
 __all__=['fof_pairs', 'xy_z_fof_pairs']
 __author__=['Duncan Campbell']

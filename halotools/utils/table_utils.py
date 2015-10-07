@@ -5,6 +5,10 @@ Modules performing small, commonly used tasks throughout the package.
 
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+
 __all__ = ['SampleSelector']
 
 import numpy as np
@@ -308,7 +312,7 @@ class SampleSelector(object):
         d = np.diff(indices)
         d[-1] -= 1
         if 0 in d:
-            print "Raise exception: too many percentile bins"
+            print("Raise exception: too many percentile bins")
             idx_too_few = np.nanargmin(d)
             raise ValueError("The input percentiles spacing is too fine.\n"
                 "For example, there are no table elements in the percentile range (%.2f, %.2f)" % 

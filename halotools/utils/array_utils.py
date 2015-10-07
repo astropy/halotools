@@ -5,13 +5,16 @@ Modules performing small, commonly used tasks throughout the package.
 
 """
 
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 __all__ = (['custom_len', 'find_idx_nearest_val', 
     'randomly_downsample_data', 'array_is_monotonic', 'convert_to_ndarray'])
 
 import numpy as np
 import collections
-from ..custom_exceptions import HalotoolsError
 from astropy.table import Table
+
+from ..custom_exceptions import HalotoolsError
 
 def convert_to_ndarray(x):
     """ Method checks to see in the input array x is an ndarray 
@@ -36,10 +39,6 @@ def convert_to_ndarray(x):
     >>> t, u, v = np.array(1), np.array([1]), np.array('abc')
     >>> tarr, uarr, varr = convert_to_ndarray(t), convert_to_ndarray(u), convert_to_ndarray(v) 
     >>> assert len(tarr) == len(uarr) == len(varr) == 1 
-
-    >>> s = 'abc'
-    >>> sarr = convert_to_ndarray(s)
-    >>> assert len(sarr) == 1
 
     """
     if type(x) is np.ndarray:

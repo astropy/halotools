@@ -4,14 +4,16 @@
 calculate and return the pairwise distances between two sets of points.
 """
 
-from __future__ import print_function, division
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import sys
 cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin
-from distances cimport *
 from libcpp.vector cimport vector
+
+from .distances cimport *
 
 __all__ = ['pairwise_distance_no_pbc', 'pairwise_distance_pbc',\
            'pairwise_xy_z_distance_no_pbc', 'pairwise_xy_z_distance_pbc']

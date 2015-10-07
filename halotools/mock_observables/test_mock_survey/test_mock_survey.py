@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-from __future__ import division, print_function
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import numpy as np
 import sys
+
 from ..mock_survey import distant_observer_redshift, ra_dec_z
 
 def test_distant_observer():
