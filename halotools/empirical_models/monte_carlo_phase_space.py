@@ -95,9 +95,6 @@ class MonteCarloGalProf(object):
         if not hasattr(self, '_' + key + '_lookup_table_min'):
             raise HalotoolsError("You must first call _setup_lookup_tables"
                 "to determine the grids before building the lookup tables")
-
-        modelname = self.__class__.__name__
-        print("\n...Building lookup tables for the %s radial profile." % modelname)
         
         radius_array = np.logspace(logrmin, logrmax, Npts_radius_table)
         self.logradius_array = np.log10(radius_array)
@@ -138,7 +135,10 @@ class MonteCarloGalProf(object):
                         current_lookup_time*
                         len(list(product(*profile_params_list)))/(2.*float(ii)+1.)
                         )
-                    print("    (This will take about %.0f seconds, and only needs to be done once)" % runtime)
+                    if runtime > 5:
+                        modelname = self.__class__.__name__
+                        print("\n...Building lookup tables for the %s radial profile." % modelname)
+                        print("    (This will take about %.0f seconds, and only needs to be done once)" % runtime)
 
             profile_params_dimensions = [len(profile_params) for profile_params in profile_params_list]
             self.rad_prof_func_table = np.array(func_table).reshape(profile_params_dimensions)
