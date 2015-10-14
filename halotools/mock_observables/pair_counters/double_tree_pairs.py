@@ -121,11 +121,6 @@ def double_tree_npairs(x1, y1, z1, x2, y2, z2,
             raise HalotoolsError(msg)
 
     rmax = np.max(rbins)
-    if np.any(rmax >= period/2.):
-        msg = ("It is not permissible to attempt to count pairs with seperations "
-            "larger than Lbox/2. \nIf you need to count pairs on such a length scale, "
-            "you should use a larger simulation. ")
-        raise HalotoolsError(msg)
     
     #build grids for data1 and data2
     ### THIS PART NEEDS TO BE INTEGRATED INTO THE FUNCTION SIGNATURE
