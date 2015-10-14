@@ -22,14 +22,13 @@ from .double_tree import FlatRectanguloidDoubleTree
 from .cpairs import *
 
 from ...custom_exceptions import *
-from ...utils.array_utils import convert_to_ndarray
+from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ['double_tree_npairs']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
-
-def double_tree_npairs(x1, y1, z1, x2, y2, z2,  
-    rbins, period = None, verbose = False, num_threads = 1):
+def double_tree_npairs(data1, data2, rbins, period = None, 
+    verbose = False, num_threads = 1, approx_cell1_size = None, approx_cell2_size = None):
     """
     real-space pair counter.
     
@@ -38,11 +37,15 @@ def double_tree_npairs(x1, y1, z1, x2, y2, z2,
     
     Parameters
     ----------
-    x1, y1, z1: array_like
-        Length-Npts1 arrays giving the 3d position of the points in sample 1. 
-
-    x2, y2, z2: array_like
-        Length-Npts2 arrays giving the 3d position of the points in sample 2. 
+    data1: array_like
+        N1 by 3 numpy array of 3-dimensional positions. 
+        Values of each dimension should be between zero and the corresponding dimension 
+        of the input period.
+            
+    data2: array_like
+        N2 by 3 numpy array of 3-dimensional positions.
+        Values of each dimension should be between zero and the corresponding dimension 
+        of the input period.
             
     rbins: array_like
         Boundaries defining the bins in which pairs are counted.
@@ -79,28 +82,21 @@ def double_tree_npairs(x1, y1, z1, x2, y2, z2,
             raise HalotoolsError(msg)
     
     # Passively enforce that we are working with ndarrays
-    x1 = convert_to_ndarray(x1)
-    y1 = convert_to_ndarray(y1)
-    z1 = convert_to_ndarray(z1)
-    x2 = convert_to_ndarray(x2)
-    y2 = convert_to_ndarray(y2)
-    z2 = convert_to_ndarray(z2)
+    x1 = data1[:,0]
+    y1 = data1[:,1]
+    z1 = data1[:,2]
+    x2 = data2[:,0]
+    y2 = data2[:,1]
+    z2 = data2[:,2]
     rbins = convert_to_ndarray(rbins)
 
     try:
-        assert len(x1) == len(y1) == len(z1)
-    except AssertionError:
-        msg = ("Input x1, y1, z1 must all be the same length")
-        raise HalotoolsError(msg)
-    try:
-        assert len(x2) == len(y2) == len(z2)
-    except AssertionError:
-        msg = ("Input x2, y2, z2 must all be the same length")
-        raise HalotoolsError(msg)
-    try:
         assert rbins.ndim == 1
+        assert len(rbins) > 1
+        if len(rbins) > 2:
+            assert array_is_monotonic(rbins, strict = True) == 1
     except AssertionError:
-        msg = "Input ``rbins`` must be a 1D array"
+        msg = "Input ``rbins`` must be a monotonically increasing 1D array with at least two entries"
         raise HalotoolsError(msg)
 
     # Set the boolean value for the PBCs variable
@@ -117,20 +113,43 @@ def double_tree_npairs(x1, y1, z1, x2, y2, z2,
             assert np.all(period < np.inf)
             assert np.all(period > 0)
         except AssertionError:
-            msg = "Input ``period`` cannot be zero or unbounded in any dimension"
+            msg = "Input ``period`` must be a bounded positive number in all dimensions"
             raise HalotoolsError(msg)
+    xperiod, yperiod, zperiod = period 
 
     rmax = np.max(rbins)
     
-    #build grids for data1 and data2
-    ### THIS PART NEEDS TO BE INTEGRATED INTO THE FUNCTION SIGNATURE
-    cell_size1 = period[0]/10.
-    cell_size2 = period[0]/10.
+    if approx_cell1_size is None:
+        approx_x1cell_size = period[0]/10.
+        approx_y1cell_size = period[1]/10.
+        approx_z1cell_size = period[2]/10.
+    else:
+        approx_cell1_size = convert_to_ndarray(approx_cell1_size)
+        try:
+            assert len(approx_cell1_size) == 3
+            approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
+        except AssertionError:
+            msg = ("Input ``approx_cell1_size`` must be a length-3 sequence")
+            raise HalotoolsError(msg)
+
+    if approx_cell2_size is None:
+        approx_x2cell_size = period[0]/10.
+        approx_y2cell_size = period[1]/10.
+        approx_z2cell_size = period[2]/10.
+    else:
+        approx_cell2_size = convert_to_ndarray(approx_cell2_size)
+        try:
+            assert len(approx_cell2_size) == 3
+            approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
+        except AssertionError:
+            msg = ("Input ``approx_cell2_size`` must be a length-3 sequence")
+            raise HalotoolsError(msg)
 
     double_tree = FlatRectanguloidDoubleTree(
-        x1, y1, z1, x2, y2, z2,  cell_size1, cell_size1, cell_size1, 
-        cell_size2, cell_size2, cell_size2, 
-        rmax, rmax, rmax, *period)
+        x1, y1, z1, x2, y2, z2,  
+        approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
+        approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
+        rmax, rmax, rmax, xperiod, yperiod, zperiod, PBCs=PBCs)
 
     #square radial bins to make distance calculation cheaper
     rbins_squared = rbins**2.0
