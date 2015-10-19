@@ -72,8 +72,6 @@ User Documentation
 
    tutorials/index
 
-.. _developer-docs:
-
 ***********************
 Developer Documentation
 ***********************
@@ -86,6 +84,7 @@ the publicly available code base with other Halotools contributors.
 .. toctree::
    :maxdepth: 1
 
+   development/index
    development/contributors
  
 
