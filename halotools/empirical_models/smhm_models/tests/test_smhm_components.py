@@ -10,7 +10,8 @@ from copy import copy
 
 
 from .. import smhm_components
-from .. import model_defaults
+
+from ... import model_defaults
 
 __all__ = ['test_Moster13SmHm_initialization', 'test_LogNormalScatterModel_initialization']
 

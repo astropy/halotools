@@ -3,9 +3,9 @@ import numpy as np
 from astropy.table import Table
 from copy import copy
 
-from .. import model_defaults
-from .. import hod_components
+from .. import hod_components, zheng07_components
 
+from ... import model_defaults
 
 __all__ = ['test_Zheng07Cens','test_Zheng07Sats']
 
@@ -93,7 +93,7 @@ def test_Zheng07Cens():
 		assert np.all(mcocc_from_array == mcocc_from_halos)
 
 	### First test the model with all default settings
-	default_model = hod_components.Zheng07Cens()
+	default_model = zheng07_components.Zheng07Cens()
 	test_attributes(default_model)
 	test_mean_occupation(default_model)
 	test_mc_occupation(default_model)
@@ -101,7 +101,7 @@ def test_Zheng07Cens():
 
 	### Now test the various threshold settings
 	for threshold in np.arange(-22, -17.5, 0.5):
-		thresh_model = hod_components.Zheng07Cens(threshold = threshold)
+		thresh_model = zheng07_components.Zheng07Cens(threshold = threshold)
 		test_attributes(thresh_model)
 		test_mean_occupation(thresh_model)
 		test_mc_occupation(thresh_model)
@@ -112,14 +112,14 @@ def test_Zheng07Cens():
 	# decreases <Ncen> at fixed mass, and so there should be fewer total centrals in <Ncen> < 1 regime
 	model2_dict = copy(default_dict)
 	model2_dict['logMmin'] += np.log10(2.)
-	model2 = hod_components.Zheng07Cens()
+	model2 = zheng07_components.Zheng07Cens()
 	model2.param_dict = model2_dict
 	#
 	# Increase sigma_logM by a factor of 2: 
 	# broadens <Ncen> ==> more centrals in halos with Mvir < Mmin, no change whatsoever to mid-mass abundance 
 	model3_dict = copy(default_dict)
 	model3_dict['sigma_logM'] *= 2.0
-	model3 = hod_components.Zheng07Cens()
+	model3 = zheng07_components.Zheng07Cens()
 	model3.param_dict = model3_dict
 	### First test to make sure models run ok
 	test_attributes(model2)
@@ -216,9 +216,9 @@ def test_Zheng07Sats():
 		np.testing.assert_allclose(mc_occ.mean(), expected_result, rtol=1e-2, atol=1.e-2)
 
 	def test_ncen_inheritance():
-		satmodel_nocens = hod_components.Zheng07Sats()
-		cenmodel = hod_components.Zheng07Cens()
-		satmodel_cens = hod_components.Zheng07Sats(modulate_with_cenocc=True)
+		satmodel_nocens = zheng07_components.Zheng07Sats()
+		cenmodel = zheng07_components.Zheng07Cens()
+		satmodel_cens = zheng07_components.Zheng07Sats(modulate_with_cenocc=True)
 
 		Npts = 1e2 
 		masses = np.logspace(10, 15, Npts)
@@ -233,14 +233,14 @@ def test_Zheng07Sats():
 		assert np.all(mean_occ_satmodel_cens == mean_occ_satmodel_nocens*mean_occ_cens)
 
 	### First test the model with all default settings
-	default_model = hod_components.Zheng07Sats()
+	default_model = zheng07_components.Zheng07Sats()
 	test_attributes(default_model)
 	test_mean_occupation(default_model)
 	test_mc_occupation(default_model)
 
 	### Now test the various threshold settings
 	for threshold in np.arange(-22, -17.5, 0.5):
-		thresh_model = hod_components.Zheng07Sats(threshold = threshold)
+		thresh_model = zheng07_components.Zheng07Sats(threshold = threshold)
 		test_attributes(thresh_model)
 		test_mean_occupation(thresh_model)
 
@@ -253,7 +253,7 @@ def test_Zheng07Sats():
 	# Increase steepness of high-mass-end power law
 	model2_dict = copy(default_dict)
 	model2_dict['alpha'] *= 1.25
-	model2 = hod_components.Zheng07Sats()
+	model2 = zheng07_components.Zheng07Sats()
 	model2.param_dict = model2_dict
 
 	logmass = model2.param_dict['logM1'] + np.log10(5)
@@ -270,7 +270,7 @@ def test_Zheng07Sats():
 	###### Increase in M0 ######
 	model2_dict = copy(default_dict)
 	model2_dict['logM0'] += np.log10(2)
-	model2 = hod_components.Zheng07Sats()
+	model2 = zheng07_components.Zheng07Sats()
 	model2.param_dict = model2_dict
 
 	# At very low mass, both models should have zero satellites 
@@ -289,7 +289,7 @@ def test_Zheng07Sats():
 	###### Increase in M1 ######
 	model2_dict = copy(default_dict)
 	model2_dict['logM0'] += np.log10(2)
-	model2 = hod_components.Zheng07Sats()
+	model2 = zheng07_components.Zheng07Sats()
 	model2.param_dict = model2_dict
 	# At very low mass, both models should have zero satellites 
 	lowmass = 1e10
