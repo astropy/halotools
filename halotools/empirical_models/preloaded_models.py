@@ -11,6 +11,7 @@ import numpy as np
 
 from . import model_factories, model_defaults, smhm_components
 from .occupation_models import hod_components as hoc
+from .occupation_models import zheng07_components
 from . import smhm_components
 from .sfr_models import BinaryGalpropInterpolModel
 from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
@@ -78,7 +79,7 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Zheng07Cens(threshold = threshold, **kwargs)
+    occu_cen_model = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
@@ -89,7 +90,7 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Zheng07Sats(threshold = threshold, **kwargs)
+    occu_sat_model = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
     occu_sat_model._suppress_repeated_param_warning = True
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
