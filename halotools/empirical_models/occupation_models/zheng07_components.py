@@ -21,6 +21,8 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
+from .hod_components import OccupationComponent
+
 from .. import model_defaults, model_helpers, smhm_components
 from ..assembias_models import HeavisideAssembias
 from ..model_helpers import bounds_enforcing_decorator_factory
