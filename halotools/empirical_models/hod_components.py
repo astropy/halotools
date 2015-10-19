@@ -24,7 +24,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
 from . import model_defaults, model_helpers, smhm_components
-from .assembias import HeavisideAssembias
+from .assembias_models import HeavisideAssembias
 from .model_helpers import bounds_enforcing_decorator_factory
 
 from ..utils.array_utils import custom_len
