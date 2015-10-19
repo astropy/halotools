@@ -10,7 +10,7 @@ from astropy.table import Table
 from ..hod_components import AssembiasZheng07Cens, AssembiasZheng07Sats, AssembiasLeauthaud11Cens, AssembiasLeauthaud11Sats
 from .. import model_defaults
 from ..hod_components import Zheng07Cens, Leauthaud11Cens
-from ..sfr_components import BinaryGalpropInterpolModel
+from ..sfr_models import BinaryGalpropInterpolModel
 
 from ...sim_manager import FakeSim
 from ...utils.table_utils import SampleSelector, compute_conditional_percentiles
