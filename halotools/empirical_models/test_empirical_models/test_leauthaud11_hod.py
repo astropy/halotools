@@ -3,7 +3,7 @@ import numpy as np
 from astropy.table import Table
 from copy import copy
 
-from ..occupation_models.hod_components import Leauthaud11Cens, Leauthaud11Sats
+from ..occupation_models import Leauthaud11Cens, Leauthaud11Sats
 from ..preloaded_models import Leauthaud11
 from .. import model_defaults
 

@@ -7,7 +7,7 @@ from copy import copy
 import numpy as np 
 from astropy.table import Table
 
-from ..occupation_models.hod_components import *
+from ..occupation_models import *
 from .. import model_defaults
 from ..sfr_models import BinaryGalpropInterpolModel
 
