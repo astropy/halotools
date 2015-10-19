@@ -13,7 +13,7 @@ from . import model_factories, model_defaults, smhm_components
 from . import hod_components as hoc
 from . import smhm_components
 from .sfr_models import BinaryGalpropInterpolModel
-from .phase_space_marf import NFWPhaseSpace, TrivialPhaseSpace
+from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from .abunmatch import ConditionalAbunMatch
 
 from ..sim_manager import FakeMock, FakeSim, sim_defaults
