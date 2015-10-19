@@ -1,9 +1,9 @@
 
 .. _model_building:
 
-*********************************************
-Building models of the Galaxy-Halo connection
-*********************************************
+*************************************************
+Overview of modeling the Galaxy-Halo connection
+*************************************************
 
 .. currentmodule:: halotools.empirical_models
 
@@ -21,6 +21,14 @@ Finally, for the most flexibility,
 there are modules allowing you create a composite model by 
 composing the behavior of a set of component models. 
 We describe each of these three modes of model-building below. 
+
+.. toctree::
+   :maxdepth: 1
+
+   preloaded_models/index
+   composing_models/index
+   models_from_scratch/index
+   
 
 Pre-loaded halo occupation models 
 =================================
