@@ -7,8 +7,8 @@ from astropy.table import Table
 
 from ..phase_space_models import NFWPhaseSpace
 
-from ...sim_manager import HaloCatalog
-from ...custom_exceptions import HalotoolsError
+from ....sim_manager import HaloCatalog
+from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestNFWPhaseSpace']
 
