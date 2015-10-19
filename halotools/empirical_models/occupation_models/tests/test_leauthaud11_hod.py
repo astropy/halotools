@@ -3,9 +3,10 @@ import numpy as np
 from astropy.table import Table
 from copy import copy
 
-from ..hod_components import Leauthaud11Cens, Leauthaud11Sats
-from ..preloaded_models import Leauthaud11
-from .. import model_defaults
+from .. import Leauthaud11Cens, Leauthaud11Sats
+
+from ...composite_models import Leauthaud11
+from ... import model_defaults
 
 
 __all__ = ['test_Leauthaud11Cens', 'test_Leauthaud11Sats']

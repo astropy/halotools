@@ -15,8 +15,7 @@ from functools import partial
 
 from . import model_defaults
 from . import model_helpers
-from .smhm_components import PrimGalpropModel
-from . import smhm_components
+from .smhm_models import smhm_components
 
 from ..utils.array_utils import custom_len
 from ..sim_manager import sim_defaults
@@ -26,7 +25,7 @@ from ..utils import array_utils
 
 __all__ = ['ConditionalAbunMatch']
 
-class AbunMatchSmHm(PrimGalpropModel):
+class AbunMatchSmHm(smhm_components.PrimGalpropModel):
     """ Stellar-to-halo-mass relation based on traditional abundance matching. 
     """
 

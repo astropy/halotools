@@ -9,14 +9,18 @@ from __future__ import (
 
 import numpy as np
 
-from . import model_factories, model_defaults, smhm_components
-from . import hod_components as hoc
-from . import smhm_components
-from . import sfr_components
-from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
-from .abunmatch import ConditionalAbunMatch
+from .. import model_factories, model_defaults
+from ..occupation_models import hod_components as hoc
+from ..occupation_models import zheng07_components
+from ..occupation_models import leauthaud11_components 
+from ..occupation_models import tinker13_components 
 
-from ..sim_manager import FakeMock, FakeSim, sim_defaults
+from ..smhm_models import smhm_components
+from ..sfr_models import BinaryGalpropInterpolModel
+from ..phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
+from ..abunmatch import ConditionalAbunMatch
+
+from ...sim_manager import FakeMock, FakeSim, sim_defaults
 
 
 __all__ = ['Zheng07', 'SmHmBinarySFR', 'Leauthaud11', 'Campbell15', 'Hearin15', 'Tinker13']
@@ -27,13 +31,13 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
     with first moment given by an ``erf`` function; the class governing this 
-    behavior is `~halotools.empirical_models.hod_components.Zheng07Cens`. 
+    behavior is `~halotools.empirical_models.occupation_components.Zheng07Cens`. 
     Central galaxies are assumed to reside at the exact center of the host halo; 
     the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`. 
 
     Satellite occupation statistics are given by a Poisson distribution 
     with first moment given by a power law that has been truncated at the low-mass end; 
-    the class governing this behavior is `~halotools.empirical_models.hod_components.Zheng07Sats`; 
+    the class governing this behavior is `~halotools.empirical_models.occupation_components.Zheng07Sats`; 
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
@@ -78,7 +82,7 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Zheng07Cens(threshold = threshold, **kwargs)
+    occu_cen_model = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
     
@@ -89,7 +93,7 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Zheng07Sats(threshold = threshold, **kwargs)
+    occu_sat_model = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
     occu_sat_model._suppress_repeated_param_warning = True
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
@@ -112,13 +116,13 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
     with first moment given by an ``erf`` function; the class governing this 
-    behavior is `~halotools.empirical_models.hod_components.Leauthaud11Cens`. 
+    behavior is `~halotools.empirical_models.occupation_components.Leauthaud11Cens`. 
     Central galaxies are assumed to reside at the exact center of the host halo; 
     the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`. 
 
     Satellite occupation statistics are given by a Poisson distribution 
     with first moment given by a power law that has been truncated at the low-mass end; 
-    the class governing this behavior is `~halotools.empirical_models.hod_components.Leauthaud11Sats`; 
+    the class governing this behavior is `~halotools.empirical_models.occupation_components.Leauthaud11Sats`; 
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
@@ -182,7 +186,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Leauthaud11Cens(threshold = threshold, **kwargs)
+    occu_cen_model = leauthaud11_components.Leauthaud11Cens(threshold = threshold, **kwargs)
     occu_cen_model._suppress_repeated_param_warning = True
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
@@ -195,7 +199,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold, **kwargs)
+    occu_sat_model = leauthaud11_components.Leauthaud11Sats(threshold = threshold, **kwargs)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
     sat_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
@@ -285,7 +289,7 @@ def SmHmBinarySFR(
 
     """
 
-    sfr_model = sfr_components.BinaryGalpropInterpolModel(
+    sfr_model = BinaryGalpropInterpolModel(
         galprop_key='quiescent', prim_haloprop_key=prim_haloprop_key, 
         abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam, **kwargs)
 
@@ -370,9 +374,9 @@ def Hearin15(central_assembias_strength = 1,
     ##############################
     ### Build the occupation model
     if central_assembias_strength == 0:
-        cen_ab_component = hoc.Leauthaud11Cens(**kwargs)
+        cen_ab_component = leauthaud11_components.Leauthaud11Cens(**kwargs)
     else:
-        cen_ab_component = hoc.AssembiasLeauthaud11Cens(
+        cen_ab_component = leauthaud11_components.AssembiasLeauthaud11Cens(
             assembias_strength = central_assembias_strength, 
             assembias_strength_abcissa = central_assembias_strength_abcissa, 
             **kwargs)
@@ -386,9 +390,9 @@ def Hearin15(central_assembias_strength = 1,
     ##############################
     ### Build the occupation model
     if satellite_assembias_strength == 0:
-        sat_ab_component = hoc.Leauthaud11Sats(**kwargs)
+        sat_ab_component = leauthaud11_components.Leauthaud11Sats(**kwargs)
     else:
-        sat_ab_component = hoc.AssembiasLeauthaud11Sats(
+        sat_ab_component = leauthaud11_components.AssembiasLeauthaud11Sats(
             assembias_strength = satellite_assembias_strength, 
             assembias_strength_abcissa = satellite_assembias_strength_abcissa, 
             **kwargs)
@@ -545,7 +549,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Tinker13Cens(threshold = threshold, **kwargs)
+    occu_cen_model = tinker13_components.Tinker13Cens(threshold = threshold, **kwargs)
     occu_cen_model._suppress_repeated_param_warning = True
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
@@ -557,7 +561,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     sat_key1 = 'quiescent_satellites'
     sat_model_dict1 = {}
     # Build the occupation model
-    occu_sat_model1 = hoc.Tinker13QuiescentSats(threshold = threshold, **kwargs)
+    occu_sat_model1 = tinker13_components.Tinker13QuiescentSats(threshold = threshold, **kwargs)
     sat_model_dict1['occupation'] = occu_sat_model1
     # Build the profile model
     sat_profile1 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
@@ -567,7 +571,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     sat_key2 = 'active_satellites'
     sat_model_dict2 = {}
     # Build the occupation model
-    occu_sat_model2 = hoc.Tinker13ActiveSats(threshold = threshold, **kwargs)
+    occu_sat_model2 = tinker13_components.Tinker13ActiveSats(threshold = threshold, **kwargs)
     sat_model_dict2['occupation'] = occu_sat_model2
     # Build the profile model
     sat_profile2 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 

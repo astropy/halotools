@@ -5,7 +5,7 @@ from copy import copy
 
 from .. import preloaded_models
 from .. import model_factories
-from .. import hod_components
+from ..occupation_models import *
 
 from ...sim_manager import FakeSim
 
@@ -59,7 +59,7 @@ def test_alt_Zheng07_composites():
 	default_model_blueprint = default_model._input_model_blueprint
 	default_satocc_component = default_model_blueprint['satellites']['occupation']
 	assert not hasattr(default_satocc_component, 'ancillary_model_dependencies')
-	cenmod_satocc_compoent = hod_components.Zheng07Sats(
+	cenmod_satocc_compoent = Zheng07Sats(
 		threshold = default_satocc_component.threshold, modulate_with_cenocc = True, 
 		gal_type_centrals = 'centrals')
 	assert hasattr(cenmod_satocc_compoent, 'ancillary_model_dependencies')

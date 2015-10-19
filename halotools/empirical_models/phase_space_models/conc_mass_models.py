@@ -7,13 +7,12 @@ and halo mass.
 """
 
 import numpy as np
-import model_defaults
 
-from . import model_defaults
-from .model_helpers import bind_default_kwarg_mixin_safe
+from .. import model_defaults
+from ..model_helpers import bind_default_kwarg_mixin_safe
 
-from ..sim_manager import sim_defaults
-from ..custom_exceptions import *
+from ...sim_manager import sim_defaults
+from ...custom_exceptions import *
 
 __all__ = ['ConcMass']
 
