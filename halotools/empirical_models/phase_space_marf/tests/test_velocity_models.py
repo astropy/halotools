@@ -5,9 +5,9 @@ from unittest import TestCase
 import numpy as np 
 from astropy.table import Table 
 
-from ...sim_manager import HaloCatalog
-from ..phase_space_models import NFWPhaseSpace
-from ...custom_exceptions import HalotoolsError
+from ....sim_manager import HaloCatalog
+from ...phase_space_models import NFWPhaseSpace
+from ....custom_exceptions import HalotoolsError
 from ..velocity_models import NFWJeansVelocity
 
 class TestNFWJeansVelocity(TestCase):

@@ -14,7 +14,7 @@ import numpy as np
 from astropy.table import Table
 
 from .profile_models import *
-from .velocity_models import *
+from .phase_space_marf.velocity_models import *
 from .phase_space_marf.monte_carlo_phase_space import *
 from . import model_defaults
 
