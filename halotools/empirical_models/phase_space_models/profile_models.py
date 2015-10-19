@@ -83,7 +83,7 @@ class AnalyticDensityProf(object):
         where :math:`x\\equiv r/R_{\\rm vir}`, and :math:`\\rho_{\\rm thresh}` is 
         a function of the halo mass definition, cosmology and redshift, 
         and is computed via the 
-        `~halotools.empirical_models.phase_space_marf.profile_helpers.density_threshold` function. 
+        `~halotools.empirical_models.phase_space_models.profile_helpers.density_threshold` function. 
 
         Parameters 
         -----------
@@ -537,7 +537,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         where :math:`x\\equiv r/R_{\\rm vir}`, and :math:`\\rho_{\\rm thresh}` is 
         a function of the halo mass definition, cosmology and redshift, 
         and is computed via the 
-        `~halotools.empirical_models.phase_space_marf.profile_helpers.density_threshold` function. 
+        `~halotools.empirical_models.phase_space_models.profile_helpers.density_threshold` function. 
 
         Parameters 
         -----------
