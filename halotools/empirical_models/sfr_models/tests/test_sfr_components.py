@@ -4,7 +4,8 @@ import numpy as np
 from astropy.table import Table 
 
 from ..sfr_components import BinaryGalpropInterpolModel as BinaryModel
-from .. import model_defaults
+
+from ... import model_defaults
 
 def test_BinaryGalpropInterpolModel():
     """ Function testing the initialization of 

@@ -12,7 +12,7 @@ import numpy as np
 from . import model_factories, model_defaults, smhm_components
 from . import hod_components as hoc
 from . import smhm_components
-from . import sfr_components
+from .sfr_models import BinaryGalpropInterpolModel
 from .phase_space_marf import NFWPhaseSpace, TrivialPhaseSpace
 from .abunmatch import ConditionalAbunMatch
 
@@ -285,7 +285,7 @@ def SmHmBinarySFR(
 
     """
 
-    sfr_model = sfr_components.BinaryGalpropInterpolModel(
+    sfr_model = BinaryGalpropInterpolModel(
         galprop_key='quiescent', prim_haloprop_key=prim_haloprop_key, 
         abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam, **kwargs)
 
