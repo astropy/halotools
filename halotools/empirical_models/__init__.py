@@ -8,8 +8,8 @@ from .model_factories import *
 from .model_defaults import *
 from .abunmatch import *
 from .model_helpers import *
-from .assembias_models import *
 
+from .assembias_models import *
 from .phase_space_models import *
 from .sfr_models import *
 from .occupation_models import *
