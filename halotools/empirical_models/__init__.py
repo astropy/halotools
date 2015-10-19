@@ -12,7 +12,7 @@ from .smhm_components import *
 from .sfr_components import *
 from .abunmatch import *
 from .model_helpers import *
-from .assembias import *
+from .assembias_models import *
 from .hod_designer import *
 from .conc_mass_models import *
 from .monte_carlo_phase_space import *
