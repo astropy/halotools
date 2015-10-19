@@ -18,11 +18,11 @@ from functools import partial
 from itertools import product
 from time import time
 
-from .model_helpers import custom_spline, call_func_table
-from . import model_defaults
+from ..model_helpers import custom_spline, call_func_table
+from .. import model_defaults
 
-from ..utils.array_utils import custom_len, convert_to_ndarray
-from ..custom_exceptions import HalotoolsError 
+from ...utils.array_utils import custom_len, convert_to_ndarray
+from ...custom_exceptions import HalotoolsError 
 
 
 class MonteCarloGalProf(object):
