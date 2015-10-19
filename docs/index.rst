@@ -76,10 +76,9 @@ User Documentation
 Developer Documentation
 ***********************
 
-The developer documentation contains guidlines for how to contribute to
-Halotools. This includes instructions for how to build new science
-features into the package, as well as how to effectively co-develop
-the publicly available code base with other Halotools contributors.
+The developer documentation contains guidlines for how to 
+stay up-to-date on Halotools development, submit bug reports and 
+contribute to the Halotools code base. 
 
 .. toctree::
    :maxdepth: 1
