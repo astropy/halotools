@@ -7,13 +7,13 @@ from copy import copy
 import numpy as np 
 from astropy.table import Table
 
-from ..occupation_models import *
-from .. import model_defaults
-from ..sfr_models import BinaryGalpropInterpolModel
+from ...occupation_models import *
+from ... import model_defaults
+from ...sfr_models import BinaryGalpropInterpolModel
 
-from ...sim_manager import FakeSim
-from ...utils.table_utils import SampleSelector, compute_conditional_percentiles
-from ...utils.array_utils import custom_len
+from ....sim_manager import FakeSim
+from ....utils.table_utils import SampleSelector, compute_conditional_percentiles
+from ....utils.array_utils import custom_len
 
 class TestAssembias(TestCase):
     """
