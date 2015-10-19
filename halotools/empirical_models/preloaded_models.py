@@ -13,6 +13,7 @@ from . import model_factories, model_defaults, smhm_components
 from .occupation_models import hod_components as hoc
 from .occupation_models import zheng07_components
 from .occupation_models import leauthaud11_components 
+from .occupation_models import tinker13_components 
 
 from . import smhm_components
 from .sfr_models import BinaryGalpropInterpolModel
@@ -548,7 +549,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Tinker13Cens(threshold = threshold, **kwargs)
+    occu_cen_model = tinker13_components.Tinker13Cens(threshold = threshold, **kwargs)
     occu_cen_model._suppress_repeated_param_warning = True
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
@@ -560,7 +561,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     sat_key1 = 'quiescent_satellites'
     sat_model_dict1 = {}
     # Build the occupation model
-    occu_sat_model1 = hoc.Tinker13QuiescentSats(threshold = threshold, **kwargs)
+    occu_sat_model1 = tinker13_components.Tinker13QuiescentSats(threshold = threshold, **kwargs)
     sat_model_dict1['occupation'] = occu_sat_model1
     # Build the profile model
     sat_profile1 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
@@ -570,7 +571,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     sat_key2 = 'active_satellites'
     sat_model_dict2 = {}
     # Build the occupation model
-    occu_sat_model2 = hoc.Tinker13ActiveSats(threshold = threshold, **kwargs)
+    occu_sat_model2 = tinker13_components.Tinker13ActiveSats(threshold = threshold, **kwargs)
     sat_model_dict2['occupation'] = occu_sat_model2
     # Build the profile model
     sat_profile2 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
