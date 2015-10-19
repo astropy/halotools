@@ -11,16 +11,15 @@ from functools import partial
 from copy import copy
 import numpy as np
 from scipy.interpolate import UnivariateSpline as spline
-
-from . import model_defaults
-from ..utils.array_utils import custom_len
-from . import model_helpers
-
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
-from ..custom_exceptions import HalotoolsError
+from .. import model_defaults
+from .. import model_helpers
+
+from ...utils.array_utils import custom_len
+from ...custom_exceptions import HalotoolsError
 
 @six.add_metaclass(ABCMeta)
 class BinaryGalpropModel(object):
