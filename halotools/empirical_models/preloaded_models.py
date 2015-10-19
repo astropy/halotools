@@ -12,6 +12,8 @@ import numpy as np
 from . import model_factories, model_defaults, smhm_components
 from .occupation_models import hod_components as hoc
 from .occupation_models import zheng07_components
+from .occupation_models import leauthaud11_components 
+
 from . import smhm_components
 from .sfr_models import BinaryGalpropInterpolModel
 from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
@@ -183,7 +185,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     cen_key = 'centrals'
     cen_model_dict = {}
     # Build the occupation model
-    occu_cen_model = hoc.Leauthaud11Cens(threshold = threshold, **kwargs)
+    occu_cen_model = leauthaud11_components.Leauthaud11Cens(threshold = threshold, **kwargs)
     occu_cen_model._suppress_repeated_param_warning = True
     cen_model_dict['occupation'] = occu_cen_model
     # Build the profile model
@@ -196,7 +198,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     sat_key = 'satellites'
     sat_model_dict = {}
     # Build the occupation model
-    occu_sat_model = hoc.Leauthaud11Sats(threshold = threshold, **kwargs)
+    occu_sat_model = leauthaud11_components.Leauthaud11Sats(threshold = threshold, **kwargs)
     sat_model_dict['occupation'] = occu_sat_model
     # Build the profile model
     sat_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
@@ -371,9 +373,9 @@ def Hearin15(central_assembias_strength = 1,
     ##############################
     ### Build the occupation model
     if central_assembias_strength == 0:
-        cen_ab_component = hoc.Leauthaud11Cens(**kwargs)
+        cen_ab_component = leauthaud11_components.Leauthaud11Cens(**kwargs)
     else:
-        cen_ab_component = hoc.AssembiasLeauthaud11Cens(
+        cen_ab_component = leauthaud11_components.AssembiasLeauthaud11Cens(
             assembias_strength = central_assembias_strength, 
             assembias_strength_abcissa = central_assembias_strength_abcissa, 
             **kwargs)
@@ -387,9 +389,9 @@ def Hearin15(central_assembias_strength = 1,
     ##############################
     ### Build the occupation model
     if satellite_assembias_strength == 0:
-        sat_ab_component = hoc.Leauthaud11Sats(**kwargs)
+        sat_ab_component = leauthaud11_components.Leauthaud11Sats(**kwargs)
     else:
-        sat_ab_component = hoc.AssembiasLeauthaud11Sats(
+        sat_ab_component = leauthaud11_components.AssembiasLeauthaud11Sats(
             assembias_strength = satellite_assembias_strength, 
             assembias_strength_abcissa = satellite_assembias_strength_abcissa, 
             **kwargs)
