@@ -6,7 +6,6 @@ from __future__ import (absolute_import, division, print_function,
 from .mock_factories import *
 from .model_factories import *
 from .preloaded_models import *
-from .hod_components import *
 from .model_defaults import *
 from .smhm_components import *
 from .abunmatch import *
@@ -16,3 +15,4 @@ from .hod_designer import *
 
 from .phase_space_models import *
 from .sfr_models import *
+from .occupation_models import *

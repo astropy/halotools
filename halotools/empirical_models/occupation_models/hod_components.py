@@ -23,14 +23,14 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
-from . import model_defaults, model_helpers, smhm_components
-from .assembias_models import HeavisideAssembias
-from .model_helpers import bounds_enforcing_decorator_factory
+from .. import model_defaults, model_helpers, smhm_components
+from ..assembias_models import HeavisideAssembias
+from ..model_helpers import bounds_enforcing_decorator_factory
 
-from ..utils.array_utils import custom_len
-from ..utils.table_utils import compute_conditional_percentiles
-from ..  import sim_manager
-from ..custom_exceptions import *
+from ...utils.array_utils import custom_len
+from ...utils.table_utils import compute_conditional_percentiles
+from ...  import sim_manager
+from ...custom_exceptions import *
 
 @six.add_metaclass(ABCMeta)
 class OccupationComponent(object):

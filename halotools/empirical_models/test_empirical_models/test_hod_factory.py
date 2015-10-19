@@ -5,7 +5,7 @@ from copy import copy
 
 from .. import preloaded_models
 from .. import model_factories
-from .. import hod_components
+from ..occupation_models import hod_components
 
 from ...sim_manager import FakeSim
 
