@@ -9,13 +9,13 @@ from __future__ import (
 
 import numpy as np
 
-from . import model_factories, model_defaults, smhm_components
+from . import model_factories, model_defaults
 from .occupation_models import hod_components as hoc
 from .occupation_models import zheng07_components
 from .occupation_models import leauthaud11_components 
 from .occupation_models import tinker13_components 
 
-from . import smhm_components
+from .smhm_models import smhm_components
 from .sfr_models import BinaryGalpropInterpolModel
 from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from .abunmatch import ConditionalAbunMatch
