@@ -10,7 +10,7 @@ from __future__ import (
 import numpy as np
 
 from . import model_factories, model_defaults, smhm_components
-from . import hod_components as hoc
+from .occupation_models import hod_components as hoc
 from . import smhm_components
 from .sfr_models import BinaryGalpropInterpolModel
 from .phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
@@ -27,13 +27,13 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
     with first moment given by an ``erf`` function; the class governing this 
-    behavior is `~halotools.empirical_models.hod_components.Zheng07Cens`. 
+    behavior is `~halotools.empirical_models.occupation_components.Zheng07Cens`. 
     Central galaxies are assumed to reside at the exact center of the host halo; 
     the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`. 
 
     Satellite occupation statistics are given by a Poisson distribution 
     with first moment given by a power law that has been truncated at the low-mass end; 
-    the class governing this behavior is `~halotools.empirical_models.hod_components.Zheng07Sats`; 
+    the class governing this behavior is `~halotools.empirical_models.occupation_components.Zheng07Sats`; 
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
@@ -112,13 +112,13 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
     with first moment given by an ``erf`` function; the class governing this 
-    behavior is `~halotools.empirical_models.hod_components.Leauthaud11Cens`. 
+    behavior is `~halotools.empirical_models.occupation_components.Leauthaud11Cens`. 
     Central galaxies are assumed to reside at the exact center of the host halo; 
     the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`. 
 
     Satellite occupation statistics are given by a Poisson distribution 
     with first moment given by a power law that has been truncated at the low-mass end; 
-    the class governing this behavior is `~halotools.empirical_models.hod_components.Leauthaud11Sats`; 
+    the class governing this behavior is `~halotools.empirical_models.occupation_components.Leauthaud11Sats`; 
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 

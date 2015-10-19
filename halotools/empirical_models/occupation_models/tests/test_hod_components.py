@@ -3,9 +3,9 @@ import numpy as np
 from astropy.table import Table
 from copy import copy
 
-from .. import model_defaults
 from .. import hod_components
 
+from ... import model_defaults
 
 __all__ = ['test_Zheng07Cens','test_Zheng07Sats']
 
