@@ -17,6 +17,6 @@ from .hod_designer import *
 from .conc_mass_models import *
 from .monte_carlo_phase_space import *
 from .phase_space_models import *
-from .profile_helpers import *
+# from .profile_helpers import *
 from .profile_models import *
 from .velocity_models import *
