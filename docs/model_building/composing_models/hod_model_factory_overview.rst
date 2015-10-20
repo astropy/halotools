@@ -28,15 +28,64 @@ With the above picture in mind, let's now look at a specific example of how a co
 All the functions in the `~halotools.empirical_models.composite_models` sub-package do the same thing: they build a composite model blueprint, pass the blueprint to the relevant factory, and return an instance of a composite model, as diagrammed in :ref:`model_factory_flowchart`. To help understand this example, have a look at the source code for the `~halotools.empirical_models.Zheng07` composite model while you read this section of the documentation. 
 
 
-For definiteness, let’s look at how the Zheng07 composite model is built. The first chunk of code builds a dictionary called `cen_model_dict`; this is our subpopulation_blueprint for a population of ‘centrals’. The first key added to cen_model_dict is ‘occupation’, and the value bound to this key is an instance of Zheng07Cens. Note how the arguments passed to the Zheng07 function are in turn passed on to Zheng07Cens. The basic behavior that Zheng07Cens controls is the mean number of central galaxies found in a halo; see the docstring of Zheng07Cens for specific details of its options and implementation. The second key added to cen_model_dict is ‘profile’, and the value bound to this key is an instance of the TrivialPhaseSpace class. The behavior of TrivialPhaseSpace is simple: our population of ‘centrals’ will reside at the exact center of its host halo and will be at rest in the frame of the halo.
+For definiteness, let’s look at how the Zheng07 composite model is built. The first chunk of code builds a dictionary called `subpopulation_blueprint_centrals`:
+
+.. code:: python
+
+    ### Build subpopulation blueprint for centrals
+    subpopulation_blueprint_centrals = {}
+
+    # Build the `occupation` feature
+    occupation_feature_centrals = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
+    subpopulation_blueprint_centrals['occupation'] = occupation_feature_centrals
+
+    # Build the `profile` feature
+    profile_feature_centrals = TrivialPhaseSpace(**kwargs)
+    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
+
+
+The first key added to this subpopulation blueprint is `occupation`, and the value bound to this key is an instance of `~halotools.empirical_models.Zheng07Cens`. Note how the arguments passed to the Zheng07 function are in turn passed on to `~halotools.empirical_models.Zheng07Cens`, allowing you to customize the behavior of the central occupation statistics via the keyword arguments you pass to `~halotools.empirical_models.Zheng07`. The basic behavior that `~halotools.empirical_models.Zheng07Cens` controls is the mean number of central galaxies found in a halo; see the docstring of `~halotools.empirical_models.Zheng07Cens` for specific details of its options and implementation. 
+
+The second key added to `subpopulation_blueprint_centrals` is `profile`, and the value bound to this key is an instance of the `~halotools.empirical_models.TrivialPhaseSpace` class. The behavior of `~halotools.empirical_models.TrivialPhaseSpace` is simple: our population of `centrals` will reside at the exact center of its host halo and will be at rest in the frame of the halo.
+
+In principle, the keys to a subpopulation blueprint can be any string that you like. For the sake of consistency, the Halotools convention for HOD-style model blueprints is to use the string `occupation` to contain the instructions for the occupation statistics of a given population, and the string `profile` to contain the instructions for modeling the intra-halo phase space distribution.
+
+At this point, we have finished building the subpopulation blueprint for centrals and we move on to satellites. The process is exactly the same as before, only now we build `subpopulation_blueprint_satellits`, and use `~halotools.empirical_models.Zheng07Sats` and `~halotools.empirical_models.NFWPhaseSpace` as our component models:
+
+.. code:: python
+
+    ### Build subpopulation blueprint for satellites
+    subpopulation_blueprint_centrals = {}
+
+    # Build the occupation model
+    occupation_feature_satellites = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
+    occupation_feature_satellites._suppress_repeated_param_warning = True
+    subpopulation_blueprint_satellites['occupation'] = occupation_feature_satellites
+
+    # Build the profile model
+    profile_feature_satellites = NFWPhaseSpace(**kwargs)    
+    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
+
+In a `~halotools.empirical_models.Zheng07` universe, galaxies are either `centrals` or `satellites`, and the only attributes they have are position and velocity. So the above two dictionaries are all we need to build a composite model dictionary. This building process is simple: we just create a new dictionary with one key for `centrals` and another for `satellites`, and bind the subpopulation dictioaries to these keys:
+
+.. code:: python
+
+    ### Compose subpopulation blueprints together into a composite blueprint
+    composite_model_blueprint = {
+        'centrals' : subpopulation_blueprint_centrals,
+        'satellites' : subpopulation_blueprint_satellites 
+        }
+
+
+The final line of code in the `~halotools.empirical_models.Zheng07` function is to pass this composite model blueprint to the `~halotools.empirical_models.HodModelFactory`, which now has all the information necessary to build an instance of a composite model. 
+
+.. code:: python 
+
+    composite_model = model_factories.HodModelFactory(composite_model_blueprint)
+    return composite_model
 
 
 
-
-Loose ends
------------
-
-The arguments you pass to these functions are in turn passed on to the component models; as we will see, this allows you to customize the behavior of the pre-built models.
 
 
 
