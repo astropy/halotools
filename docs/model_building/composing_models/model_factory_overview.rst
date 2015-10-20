@@ -11,7 +11,7 @@ In this section of the documentation, we will give a detailed description of the
 Halotools employs a factory design pattern to build *composite models* from a set of independently-defined *component models*. A component model governs one particular feature of one particular galaxy population. For example, 
 `~halotools.empirical_models.NFWPhaseSpace` class is a component model that governs the intra-halo positions and velocities of satellites; `~halotools.empirical_models.Behroozi10SmHm` governs the stellar mass of centrals. On the other hand, a composite model governs *all* of the features of *every* galaxy population in your model universe. 
 
-
+.. _model_factory_flowchart:
 
 Flowchart of the model factory design pattern
 -----------------------------------------------
