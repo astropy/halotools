@@ -25,6 +25,7 @@ Core Package Contributors
 * Shany Danieli
 * Benedikt Diemer
 * Andrew Hearin
+* Elise Jennings
 * Alexie Leauthaud
 * Surhud More
 * John Parejko

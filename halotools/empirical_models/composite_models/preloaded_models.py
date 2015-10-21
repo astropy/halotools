@@ -78,35 +78,41 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
 
     """
 
-    ### Build model for centrals
-    cen_key = 'centrals'
-    cen_model_dict = {}
-    # Build the occupation model
-    occu_cen_model = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
-    cen_model_dict['occupation'] = occu_cen_model
-    # Build the profile model
-    
-    cen_profile = TrivialPhaseSpace(**kwargs)
-    cen_model_dict['profile'] = cen_profile
+    ####################################
+    ### Build subpopulation blueprint for centrals
+    subpopulation_blueprint_centrals = {}
 
-    ### Build model for satellites
-    sat_key = 'satellites'
-    sat_model_dict = {}
-    # Build the occupation model
-    occu_sat_model = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
-    occu_sat_model._suppress_repeated_param_warning = True
-    sat_model_dict['occupation'] = occu_sat_model
-    # Build the profile model
-    sat_profile = NFWPhaseSpace(**kwargs)    
-    sat_model_dict['profile'] = sat_profile
+    # Build the `occupation` feature
+    occupation_feature_centrals = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
+    subpopulation_blueprint_centrals['occupation'] = occupation_feature_centrals
 
-    model_blueprint = {
-        occu_cen_model.gal_type : cen_model_dict,
-        occu_sat_model.gal_type : sat_model_dict 
+    # Build the `profile` feature
+    profile_feature_centrals = TrivialPhaseSpace(**kwargs)
+    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
+
+    ####################################
+    ### Build subpopulation blueprint for satellites
+    subpopulation_blueprint_satellites = {}
+
+    # Build the occupation model
+    occupation_feature_satellites = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
+    occupation_feature_satellites._suppress_repeated_param_warning = True
+    subpopulation_blueprint_satellites['occupation'] = occupation_feature_satellites
+
+    # Build the profile model
+    profile_feature_satellites = NFWPhaseSpace(**kwargs)    
+    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
+
+    ####################################
+    ### Compose subpopulation blueprints together into a composite blueprint
+    composite_model_blueprint = {
+        'centrals' : subpopulation_blueprint_centrals,
+        'satellites' : subpopulation_blueprint_satellites 
         }
 
-    composite_model = model_factories.HodModelFactory(model_blueprint)
+    composite_model = model_factories.HodModelFactory(composite_model_blueprint)
     return composite_model
+
 
 def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, 
     central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
@@ -184,30 +190,30 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     """
     ### Build model for centrals
     cen_key = 'centrals'
-    cen_model_dict = {}
+    subpopulation_blueprint_centrals = {}
     # Build the occupation model
-    occu_cen_model = leauthaud11_components.Leauthaud11Cens(threshold = threshold, **kwargs)
-    occu_cen_model._suppress_repeated_param_warning = True
-    cen_model_dict['occupation'] = occu_cen_model
+    occupation_feature_centrals = leauthaud11_components.Leauthaud11Cens(threshold = threshold, **kwargs)
+    occupation_feature_centrals._suppress_repeated_param_warning = True
+    subpopulation_blueprint_centrals['occupation'] = occupation_feature_centrals
     # Build the profile model
     
-    cen_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
+    profile_feature_centrals = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
 
-    cen_model_dict['profile'] = cen_profile
+    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
 
     ### Build model for satellites
     sat_key = 'satellites'
-    sat_model_dict = {}
+    subpopulation_blueprint_satellites = {}
     # Build the occupation model
-    occu_sat_model = leauthaud11_components.Leauthaud11Sats(threshold = threshold, **kwargs)
-    sat_model_dict['occupation'] = occu_sat_model
+    occupation_feature_satellites = leauthaud11_components.Leauthaud11Sats(threshold = threshold, **kwargs)
+    subpopulation_blueprint_satellites['occupation'] = occupation_feature_satellites
     # Build the profile model
-    sat_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
-    sat_model_dict['profile'] = sat_profile
+    profile_feature_satellites = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
+    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
 
     model_blueprint = {
-        occu_cen_model.gal_type : cen_model_dict,
-        occu_sat_model.gal_type : sat_model_dict
+        'centrals' : subpopulation_blueprint_centrals,
+        'satellites' : subpopulation_blueprint_satellites
         }
 
     composite_model = model_factories.HodModelFactory(model_blueprint)
@@ -380,12 +386,12 @@ def Hearin15(central_assembias_strength = 1,
             assembias_strength = central_assembias_strength, 
             assembias_strength_abcissa = central_assembias_strength_abcissa, 
             **kwargs)
-    cen_model_dict = {}
-    cen_model_dict['occupation'] = cen_ab_component
+    subpopulation_blueprint_centrals = {}
+    subpopulation_blueprint_centrals['occupation'] = cen_ab_component
 
     # Build the profile model
-    cen_profile = TrivialPhaseSpace(**kwargs)
-    cen_model_dict['profile'] = cen_profile
+    profile_feature_centrals = TrivialPhaseSpace(**kwargs)
+    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
 
     ##############################
     ### Build the occupation model
@@ -401,15 +407,15 @@ def Hearin15(central_assembias_strength = 1,
         if hasattr(cen_ab_component, 'new_haloprop_func_dict'):
             del sat_ab_component.new_haloprop_func_dict
 
-    sat_model_dict = {}
-    sat_model_dict['occupation'] = sat_ab_component
+    subpopulation_blueprint_satellites = {}
+    subpopulation_blueprint_satellites['occupation'] = sat_ab_component
 
     # Build the profile model
-    sat_profile = NFWPhaseSpace(**kwargs) 
-    sat_profile._suppress_repeated_param_warning = True   
-    sat_model_dict['profile'] = sat_profile
+    profile_feature_satellites = NFWPhaseSpace(**kwargs) 
+    profile_feature_satellites._suppress_repeated_param_warning = True   
+    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
 
-    model_blueprint = {'centrals': cen_model_dict, 'satellites': sat_model_dict}
+    model_blueprint = {'centrals': subpopulation_blueprint_centrals, 'satellites': subpopulation_blueprint_satellites}
     composite_model = model_factories.HodModelFactory(model_blueprint)
     return composite_model
 
@@ -547,41 +553,41 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     """
     """
     cen_key = 'centrals'
-    cen_model_dict = {}
+    subpopulation_blueprint_centrals = {}
     # Build the occupation model
-    occu_cen_model = tinker13_components.Tinker13Cens(threshold = threshold, **kwargs)
-    occu_cen_model._suppress_repeated_param_warning = True
-    cen_model_dict['occupation'] = occu_cen_model
+    occupation_feature_centrals = tinker13_components.Tinker13Cens(threshold = threshold, **kwargs)
+    occupation_feature_centrals._suppress_repeated_param_warning = True
+    subpopulation_blueprint_centrals['occupation'] = occupation_feature_centrals
     # Build the profile model
     
-    cen_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
+    profile_feature_centrals = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
 
-    cen_model_dict['profile'] = cen_profile
+    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
     
     sat_key1 = 'quiescent_satellites'
-    sat_model_dict1 = {}
+    subpopulation_blueprint_satellites1 = {}
     # Build the occupation model
-    occu_sat_model1 = tinker13_components.Tinker13QuiescentSats(threshold = threshold, **kwargs)
-    sat_model_dict1['occupation'] = occu_sat_model1
+    occupation_feature_satellites1 = tinker13_components.Tinker13QuiescentSats(threshold = threshold, **kwargs)
+    subpopulation_blueprint_satellites1['occupation'] = occupation_feature_satellites1
     # Build the profile model
-    sat_profile1 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
+    profile_feature_satellites1 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
                                  concentration_binning = (1, 35, 1), **kwargs)    
-    sat_model_dict1['profile'] = sat_profile1
+    subpopulation_blueprint_satellites1['profile'] = profile_feature_satellites1
 
     sat_key2 = 'active_satellites'
-    sat_model_dict2 = {}
+    subpopulation_blueprint_satellites2 = {}
     # Build the occupation model
-    occu_sat_model2 = tinker13_components.Tinker13ActiveSats(threshold = threshold, **kwargs)
-    sat_model_dict2['occupation'] = occu_sat_model2
+    occupation_feature_satellites2 = tinker13_components.Tinker13ActiveSats(threshold = threshold, **kwargs)
+    subpopulation_blueprint_satellites2['occupation'] = occupation_feature_satellites2
     # Build the profile model
-    sat_profile2 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
+    profile_feature_satellites2 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
                                  concentration_binning = (1, 35, 1), **kwargs)  
-    del sat_profile2.new_haloprop_func_dict
-    sat_model_dict2['profile'] = sat_profile2
+    del profile_feature_satellites2.new_haloprop_func_dict
+    subpopulation_blueprint_satellites2['profile'] = profile_feature_satellites2
     
-    blueprint = {cen_key: cen_model_dict, 
-                 sat_key1: sat_model_dict1, 
-                 sat_key2: sat_model_dict2}
+    blueprint = {cen_key: subpopulation_blueprint_centrals, 
+                 sat_key1: subpopulation_blueprint_satellites1, 
+                 sat_key2: subpopulation_blueprint_satellites2}
     
     return model_factories.HodModelFactory(blueprint)
 
