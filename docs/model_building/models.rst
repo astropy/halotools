@@ -48,22 +48,6 @@ For a complete listing of the optional features supported by this pre-built mode
 see the `~halotools.empirical_models.Zheng07` 
 documentation `~halotools.empirical_models`.
 
-.. _list_of_default_models: 
-
-List of pre-loaded models 
---------------------------------
-
-* `~halotools.empirical_models.Moster13SmHm` - parameterized abundance matching
-* `~halotools.empirical_models.Zheng07` - simple HOD-style model based on arXiv:0703457.
-* `~halotools.empirical_models.Leauthaud11` - HOD-style model based on arXiv:1103.2077 whose behavior derives from a central-galaxy stellar-to-halo mass relation
-
-Many more models currently reside in development branches where they are being tested before 
-incorporating into the main repository. Such models can always be provided to eager users upon request. 
-
-Composing your own galaxy-halo model
-====================================
-
-Instructions coming soon!
 
 Reference/API
 =============
