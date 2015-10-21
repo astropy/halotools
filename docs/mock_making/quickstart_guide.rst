@@ -18,7 +18,7 @@ In this quickstart guide, we'll use a simple HOD-style model based on
 >>> hod_model = empirical_models.preloaded_models.Leauthaud11()
 
 For a list of other out-of-the-box model options you can choose from, see 
-:ref:`list_of_default_models`. 
+:ref:`preloaded_models_overview`. 
 
 All models in Halotools come with a built-in ``populate_mock`` method that 
 allows you to create a synthetic galaxy catalog with one line of code:
