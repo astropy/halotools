@@ -8,7 +8,7 @@ used to provide convenience wrappers for mock objects
 import numpy as np 
 from warnings import warn
 
-from ..custom_exceptions import HalotoolsError
+from ...custom_exceptions import HalotoolsError
 
 def three_dim_pos_bundle(table, key1, key2, key3, 
     return_complement=False, **kwargs):

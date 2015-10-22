@@ -13,15 +13,15 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 from warnings import warn 
 
-from . import model_helpers
-from . import model_defaults 
+from .. import model_helpers
+from .. import model_defaults 
 from . import mock_factories
 
-from ..sim_manager.supported_sims import HaloCatalog
-from ..sim_manager import sim_defaults
-from ..sim_manager.generate_random_sim import FakeSim
-from ..utils.array_utils import custom_len
-from ..custom_exceptions import *
+from ...sim_manager.supported_sims import HaloCatalog
+from ...sim_manager import sim_defaults
+from ...sim_manager.generate_random_sim import FakeSim
+from ...utils.array_utils import custom_len
+from ...custom_exceptions import *
 
 @six.add_metaclass(ABCMeta)
 class ModelFactory(object):

@@ -15,20 +15,20 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.table import Table 
 
-from . import model_helpers, model_defaults
 from .mock_helpers import three_dim_pos_bundle, infer_mask_from_kwargs
 
-from ..custom_exceptions import *
+from .. import model_helpers, model_defaults
 
 try:
-    from .. import mock_observables
+    from ... import mock_observables
     HAS_MOCKOBS = True
 except ImportError:
     HAS_MOCKOBS = False
 
-from ..sim_manager import sim_defaults
-from ..utils.array_utils import randomly_downsample_data
-from ..sim_manager import FakeSim, FakeMock
+from ...sim_manager import sim_defaults
+from ...utils.array_utils import randomly_downsample_data
+from ...sim_manager import FakeSim, FakeMock
+from ...custom_exceptions import *
 
 
 __all__ = ['MockFactory', 'HodMockFactory', 'SubhaloMockFactory']
