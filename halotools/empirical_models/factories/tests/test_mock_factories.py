@@ -6,7 +6,7 @@ from ...composite_models import preloaded_models
 from .. import model_factories
 from .. import mock_factories
 
-from ...sim_manager.generate_random_sim import FakeSim
+from ....sim_manager.generate_random_sim import FakeSim
 
 __all__ = ['test_preloaded_hod_mocks']
 
