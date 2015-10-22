@@ -15,7 +15,7 @@ from ..occupation_models import zheng07_components
 from ..occupation_models import leauthaud11_components 
 from ..occupation_models import tinker13_components 
 
-from ..smhm_models import smhm_components
+from ..smhm_models import Moster13SmHm, Behroozi10SmHm
 from ..sfr_models import BinaryGalpropInterpolModel
 from ..phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from ..abunmatch import ConditionalAbunMatch
@@ -222,7 +222,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
 
 def SmHmBinarySFR(
     prim_haloprop_key = model_defaults.default_smhm_haloprop, 
-    smhm_model=smhm_components.Moster13SmHm, 
+    smhm_model=Moster13SmHm, 
     scatter_level = 0.2, 
     redshift = sim_defaults.default_redshift, 
     sfr_abcissa = [12, 15], sfr_ordinates = [0.25, 0.75], logparam=True, 
@@ -299,7 +299,7 @@ def SmHmBinarySFR(
         galprop_key='quiescent', prim_haloprop_key=prim_haloprop_key, 
         abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam, **kwargs)
 
-    sm_model = smhm_components.Behroozi10SmHm(
+    sm_model = Behroozi10SmHm(
         prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
         scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
 
@@ -423,7 +423,7 @@ def Hearin15(central_assembias_strength = 1,
 def Campbell15(
     prim_haloprop_key = model_defaults.default_smhm_haloprop, 
     sec_galprop_key = 'ssfr', sec_haloprop_key = 'halo_vpeak', 
-    smhm_model=smhm_components.Moster13SmHm, 
+    smhm_model = Moster13SmHm, 
     scatter_level = 0.2, 
     redshift = sim_defaults.default_redshift, **kwargs):
     """ Conditional abundance matching model based on Campbell et al. (2015). 
