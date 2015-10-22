@@ -225,7 +225,8 @@ class HodModelFactory(ModelFactory):
             "understand it.\nIn particular, double-check that this parameter does not have "
             "conflicting meanings across components.\n"
             "\nIf you do not wish to see this message every time you instantiate, \n"
-            "simply attach a _suppress_repeated_param_warning attribute to any of your component models, \n"
+            "simply attach a _suppress_repeated_param_warning attribute \n"
+            "to each of your component models that have this parameter, \n"
             "and set this variable to ``True``.\n")
 
         # Loop over all galaxy types in the composite model
