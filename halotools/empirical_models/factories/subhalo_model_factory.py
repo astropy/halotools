@@ -75,18 +75,28 @@ class SubhaloModelFactory(ModelFactory):
         """
 
         super(SubhaloModelFactory, self).__init__(input_model_blueprint, **kwargs)
+        self.model_blueprint = copy(self._input_model_blueprint)
+        
+        # Build up and bind several lists from the component models
+        self._build_composite_attrs(**kwargs)
+
+        # Create a set of bound methods with specific names 
+        # that will be called by the mock factory 
+        self._set_primary_behaviors()
 
         self.mock_factory = SubhaloMockFactory
 
-        self.model_blueprint = copy(self._input_model_blueprint)
+    def _build_composite_attrs(self, **kwargs):
+        """ A composite model has several bookkeeping devices that are built up from 
+        the components: ``_haloprop_list``, ``publications``, and ``new_haloprop_func_dict``. 
+        """
 
         self._feature_list = self.model_blueprint.keys()
-        
-        self._build_composite_attrs(**kwargs)
 
+        self._build_haloprop_list()
+        self._build_publication_list()
+        self._build_new_haloprop_func_dict()
         self._set_init_param_dict()
-
-        self._set_primary_behaviors()
 
     def _set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
@@ -104,25 +114,25 @@ class SubhaloModelFactory(ModelFactory):
         `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
-        for galprop_key in self.galprop_list:
+        for feature_key in self._feature_list:
             
-            behavior_name = 'mc_'+galprop_key
-            behavior_function = self._update_param_dict_decorator(galprop_key, behavior_name)
+            behavior_name = 'mc_'+feature_key
+            behavior_function = self._update_param_dict_decorator(feature_key, behavior_name)
             setattr(self, behavior_name, behavior_function)
 
-    def _update_param_dict_decorator(self, galprop_key, func_name):
+    def _update_param_dict_decorator(self, feature_key, func_name):
         """ Decorator used to propagate any possible changes 
         in the composite model param_dict 
         down to the appropriate component model param_dict. 
         """
 
-        component_model = self.model_blueprint[galprop_key]
+        component_model = self.model_blueprint[feature_key]
 
         def decorated_func(*args, **kwargs):
 
             # Update the param_dict as necessary
             for key in component_model.param_dict.keys():
-                composite_key = galprop_key + '_' + key
+                composite_key = feature_key + '_' + key
                 if composite_key in self.param_dict.keys():
                     component_model.param_dict[key] = self.param_dict[composite_key]
 
@@ -130,7 +140,7 @@ class SubhaloModelFactory(ModelFactory):
             # if hasattr(component_model, 'ancillary_model_dependencies'):
             #     for model_name in component_model.ancillary_model_dependencies:
 
-            #         dependent_galprop_key = getattr(component_model, model_name).galprop_key
+            #         dependent_galprop_key = getattr(component_model, model_name).feature_key
             #         for key in getattr(component_model, model_name).param_dict.keys():
             #             composite_key = composite_key = dependent_galprop_key + '_' + key
             #             if composite_key in self.param_dict.keys():
@@ -143,11 +153,11 @@ class SubhaloModelFactory(ModelFactory):
 
         return decorated_func
 
-    def _galprop_func(self, galprop_key):
+    def _galprop_func(self, feature_key):
         """
         """
-        component_model = self.model_blueprint[galprop_key]
-        behavior_function = getattr(component_model, 'mc_'+galprop_key) 
+        component_model = self.model_blueprint[feature_key]
+        behavior_function = getattr(component_model, 'mc_'+feature_key) 
         return behavior_function
 
     def _build_haloprop_list(self):
@@ -213,30 +223,6 @@ class SubhaloModelFactory(ModelFactory):
 
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
-    def _build_composite_attrs(self, **kwargs):
-        """ A composite model has several bookkeeping devices that are built up from 
-        the components: ``_haloprop_list``, ``publications``, and ``new_haloprop_func_dict``. 
-        """
-
-        self._build_haloprop_list()
-        self._build_publication_list()
-        self._build_new_haloprop_func_dict()
-
-        unordered_galprop_list = [key for key in self.model_blueprint.keys()]
-        if 'galprop_sequence' in kwargs.keys():
-            if set(kwargs['galprop_sequence']) != set(unordered_galprop_list):
-                raise KeyError("The input galprop_sequence keyword argument must "
-                    "have the same list of galprops as the input model blueprint")
-            else:
-                self.galprop_list = kwargs['galprop_sequence']
-        else:
-            self.galprop_list = unordered_galprop_list
-
-        haloprop_list = []
-        pub_list = []
-        new_haloprop_func_dict = {}
-
-
     def _set_init_param_dict(self):
         """ Method used to build a dictionary of parameters for the composite model. 
 
@@ -245,41 +231,44 @@ class SubhaloModelFactory(ModelFactory):
 
         Notes 
         -----
-        In MCMC applications, the items of ``param_dict`` define the 
+        In MCMC applications, the items of ``param_dict`` define the possible 
         parameter set explored by the likelihood engine. 
         Changing the values of the parameters in ``param_dict`` 
-        will propagate to the behavior of the component models. 
-
-        Each component model has its own ``param_dict`` bound to it. 
-        When changing the values of ``param_dict`` bound to `HodModelFactory`, 
-        the corresponding values of the component model ``param_dict`` will *not* change.  
-
+        will propagate to the behavior of the component models 
+        when the relevant methods are called. 
         """
 
         self.param_dict = {}
 
-        # Loop over all galaxy types in the composite model
-        for galprop in self.galprop_list:
-            galprop_model = self.model_blueprint[galprop]
+        try:
+            suppress_warning = self._suppress_repeated_param_warning
+        except AttributeError:
+            suppress_warning = False
+        msg = ("\n\nThe param_dict key %s appears in more than one component model.\n"
+            "This is permissible, but if you are seeing this message you should be sure you "
+            "understand it.\nIn particular, double-check that this parameter does not have "
+            "conflicting meanings across components.\n"
+            "\nIf you do not wish to see this message every time you instantiate, \n"
+            "simply attach a _suppress_repeated_param_warning attribute \n"
+            "to each of your component models that have this parameter, \n"
+            "and set this variable to ``True``.\n")
 
-            if hasattr(galprop_model, 'param_dict'):
-                galprop_model_param_dict = (
-                    {galprop_model.galprop_key+'_'+key:val for key, val in galprop_model.param_dict.items()}
-                    )
-            else:
-                galprop_model_param_dict = {}
+        # Loop over all component features in the composite model
+        for feature_key in self._feature_list:
+            component_model = self.model_blueprint[feature_key]
 
-            intersection = set(self.param_dict) & set(galprop_model_param_dict)
+            if not hasattr(component_model, 'param_dict'):
+                component_model.param_dict = {}
+
+            intersection = set(self.param_dict) & set(component_model.param_dict)
+
             if intersection != set():
-                repeated_key = list(intersection)[0]
-                raise KeyError("The param_dict key %s appears in more "
-                    "than one component model" % repeated_key)
-            else:
+                for key in intersection:
+                    if suppress_warning is False:
+                        warn(msg % key)
 
-                self.param_dict = dict(
-                    galprop_model_param_dict.items() + 
-                    self.param_dict.items()
-                    )
+            for key, value in component_model.param_dict.iteritems():
+                self.param_dict[key] = value
 
         self._init_param_dict = copy(self.param_dict)
 
