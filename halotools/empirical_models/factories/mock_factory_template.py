@@ -75,12 +75,12 @@ class MockFactory(object):
             self.halo_table = self.snapshot.halo_table            
 
         try:
-            self.ptcl_table = self.snapshot.ptcl_table
+            self.ptcl_table = self.snapshot.ptcl_table # pre-retrieve the particles from disk, if available
         except:
             pass   
             
         try:
-            self.gal_types = self.model.gal_types
+            self.gal_types = self.model.gal_types 
         except:
             pass   
 
