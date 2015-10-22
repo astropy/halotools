@@ -80,7 +80,12 @@ class SubhaloMockFactory(MockFactory):
         For example, in subhalo-based models, the phase space coordinates of the 
         galaxies are hard-wired to be equal to the phase space coordinates of the 
         parent subhalos, so these keys of the galaxy_table 
-        can be pre-computed once and for all
+        can be pre-computed once and for all. 
+
+        Additionally, a feature of some composite models may have explicit dependence 
+        upon the type of halo/galaxy. The `gal_type_func` mechanism addresses this potential need 
+        by adding an additional column(s) to the galaxy_table. These additional columns 
+        can also be pre-computed as halo types do not depend upon model parameter values. 
         """
 
         for key in self.additional_haloprops:
@@ -94,11 +99,24 @@ class SubhaloMockFactory(MockFactory):
 
         for galprop in self.model.galprop_list:
             component_model = self.model.model_blueprint[galprop]
-            if hasattr(component_model, 'gal_type_func'):
+
+            try:
+                f = component_model.gal_type_func
                 newkey = galprop + '_gal_type'
-                self.galaxy_table[newkey] = (
-                    component_model.gal_type_func(halo_table=self.galaxy_table)
-                    )
+                self.galaxy_table[newkey] = f(halo_table=self.galaxy_table)
+            except AttributeError:
+                pass
+            except:
+                clname = component_model.__class__.__name__
+                msg = ("\nThe `gal_type_func` attribute of the " + clname + 
+                    "\nraises an unexpected exception when passed a halo table as a "
+                    "halo_table keyword argument. \n"
+                    "If the features in your component model have explicit dependence "
+                    "on galaxy type, \nthen you must implement the `gal_type_func` mechanism "
+                    "in such a way that\nthis function accepts a "
+                    "length-N halo table as a ``halo_table`` keyword argument, \n"
+                    "and returns a length-N array of strings.\n")
+                raise HalotoolsError(msg)
 
     def populate(self):
         """ Method populating subhalos with mock galaxies. 
