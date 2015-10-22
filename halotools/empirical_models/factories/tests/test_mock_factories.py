@@ -3,8 +3,7 @@
 import numpy as np 
 
 from ...composite_models import preloaded_models
-from .. import model_factories
-from .. import mock_factories
+from ...factories import *
 
 from ....sim_manager.generate_random_sim import FakeSim
 
