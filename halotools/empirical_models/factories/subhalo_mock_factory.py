@@ -128,6 +128,7 @@ class SubhaloMockFactory(MockFactory):
         """ Method populating subhalos with mock galaxies. 
         """
         self._allocate_memory()
+        
         for galprop_key in self.model.galprop_list:
             
             model_func_name = 'mc_'+galprop_key
