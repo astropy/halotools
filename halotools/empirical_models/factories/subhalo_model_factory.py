@@ -9,6 +9,7 @@ __author__ = ['Andrew Hearin']
 import numpy as np
 from copy import copy
 from warnings import warn 
+import collections 
 
 from ..factories import ModelFactory, SubhaloMockFactory
 
@@ -124,6 +125,9 @@ class SubhaloModelFactory(ModelFactory):
         even if these lists were forgotten or irrelevant to that particular component. 
         """
 
+        _method_repetition_check = []
+        _attrs_repetition_check = []
+
         # Loop over all component features in the composite model
         for feature in self._feature_list:
             component_model = self.model_blueprint[feature]
@@ -143,8 +147,38 @@ class SubhaloModelFactory(ModelFactory):
             for methodname in missing_methods:
                 component_model._methods_to_inherit.append(methodname)
 
+            _method_repetition_check.extend(component_model._methods_to_inherit)
+
             if not hasattr(component_model, '_attrs_to_inherit'):
                 component_model._attrs_to_inherit = []
+
+            _attrs_repetition_check.extend(component_model._attrs_to_inherit)
+
+
+        # Check that we do not have any method names to inherit that appear 
+        # in more than one component model
+        repeated_method_msg = ("\n The method name ``%s`` appears "
+            "in more than one component model.\n You should rename this method in one of your "
+            "component models to disambiguate.\n")
+        repeated_method_list = ([methodname for methodname, count in 
+            collections.Counter(_method_repetition_check).items() if count > 1]
+            )
+        if repeated_method_list != []:
+            example_repeated_methodname = repeated_method_list[0]
+            raise HalotoolsError(repeated_method_msg % example_repeated_methodname)
+
+        # Check that we do not have any attributes to inherit that appear 
+        # in more than one component model
+        repeated_attr_msg = ("\n The attribute name ``%s`` appears "
+            "in more than one component model.\n "
+            "Only ignore this message if you are confident "
+            "that this will not result in unintended behavior\n")
+        repeated_attr_list = ([attr for attr, count in 
+            collections.Counter(_attrs_repetition_check).items() if count > 1]
+            )
+        if repeated_attr_list != []:
+            example_repeated_attr = repeated_attr_list[0]
+            warn(repeated_attr_msg % example_repeated_attr)
 
     def _set_primary_behaviors(self, **kwargs):
         """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
@@ -163,13 +197,51 @@ class SubhaloModelFactory(ModelFactory):
         """
 
         # Loop over all component features in the composite model
-        for feature_key in self._feature_list:
-            
-            behavior_name = 'mc_'+feature_key
-            behavior_function = self._update_param_dict_decorator(feature_key, behavior_name)
-            setattr(self, behavior_name, behavior_function)
+        for feature in self._feature_list:
+            component_model = self.model_blueprint[feature]
+
+            try:
+                component_model_galprop_dtype = component_model._galprop_dtypes_to_allocate
+            except AttributeError:
+                component_model_galprop_dtype = np.dtype([])
+
+            methods_to_inherit = list(set(
+                component_model._methods_to_inherit))
+
+            for methodname in methods_to_inherit:
+                new_method_name = methodname
+                new_method_behavior = self._update_param_dict_decorator(
+                    component_model, methodname)
+                setattr(self, new_method_name, new_method_behavior)
+                setattr(getattr(self, new_method_name), 
+                    '_galprop_dtypes_to_allocate', component_model_galprop_dtype)
+
+            attrs_to_inherit = list(set(
+                component_model._attrs_to_inherit))
+            for attrname in attrs_to_inherit:
+                new_attr_name = attrname
+                attr = getattr(component_model, attrname)
+                setattr(self, new_attr_name, attr)
 
         self._set_calling_sequence(**kwargs)
+
+    def _update_param_dict_decorator(self, component_model, func_name):
+        """ Decorator used to propagate any possible changes 
+        in the composite model param_dict 
+        down to the appropriate component model param_dict. 
+        """
+
+        def decorated_func(*args, **kwargs):
+
+            # Update the param_dict as necessary
+            for key in self.param_dict.keys():
+                if key in component_model.param_dict:
+                    component_model.param_dict[key] = self.param_dict[key]
+
+            func = getattr(component_model, func_name)
+            return func(*args, **kwargs)
+
+        return decorated_func
 
     def _set_calling_sequence(self, **kwargs):
         """
@@ -217,47 +289,6 @@ class SubhaloModelFactory(ModelFactory):
                 self._mock_generation_calling_sequence.extend(component_method_list)
             else:
                 warn(missing_calling_sequence_msg % component_model.__class__.__name__)
-
-
-    def _update_param_dict_decorator(self, feature_key, func_name):
-        """ Decorator used to propagate any possible changes 
-        in the composite model param_dict 
-        down to the appropriate component model param_dict. 
-        """
-
-        component_model = self.model_blueprint[feature_key]
-
-        def decorated_func(*args, **kwargs):
-
-            # Update the param_dict as necessary
-            for key in component_model.param_dict.keys():
-                composite_key = feature_key + '_' + key
-                if composite_key in self.param_dict.keys():
-                    component_model.param_dict[key] = self.param_dict[composite_key]
-
-            # # Also update the param dict of ancillary models, if applicable
-            # if hasattr(component_model, 'ancillary_model_dependencies'):
-            #     for model_name in component_model.ancillary_model_dependencies:
-
-            #         dependent_galprop_key = getattr(component_model, model_name).feature_key
-            #         for key in getattr(component_model, model_name).param_dict.keys():
-            #             composite_key = composite_key = dependent_galprop_key + '_' + key
-            #             if composite_key in self.param_dict.keys():
-            #                 getattr(component_model, model_name).param_dict[key] = (
-            #                     self.param_dict[composite_key]
-            #                     )
-
-            func = getattr(component_model, func_name)
-            return func(*args, **kwargs)
-
-        return decorated_func
-
-    def _galprop_func(self, feature_key):
-        """
-        """
-        component_model = self.model_blueprint[feature_key]
-        behavior_function = getattr(component_model, 'mc_'+feature_key) 
-        return behavior_function
 
     def _set_model_redshift(self):
         """ 
