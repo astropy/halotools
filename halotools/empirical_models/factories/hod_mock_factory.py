@@ -62,18 +62,10 @@ class HodMockFactory(MockFactory):
 
         additional_haloprops : list of strings, optional   
             Each entry in this list must be a column key of ``snapshot.halo_table``. 
-            For each entry of ``additional_haloprops``, each member of the mock galaxy population 
-            will have an attribute storing this property of its host halo. 
-            The corresponding mock galaxy attribute name will be pre-pended by ``halo_``. 
+            For each entry of ``additional_haloprops``, each member of 
+            `mock.galaxy_table` will have a column key storing this property of its host halo. 
             If ``additional_haloprops`` is set to the string value ``all``, 
             the galaxy table will inherit every halo property in the catalog. Default is None. 
-
-        halocut_funcobj : function object, optional   
-            Function object used to place a cut on the input ``snapshot.halo_table`` table. 
-            Default behavior depends on the sub-class of `MockFactory`. 
-            If the ``halocut_funcobj`` keyword argument is passed, 
-            the input to the function must be a length-Nsubhalos structured numpy array or Astropy table; 
-            the function output must be a length-Nsubhalos boolean array that will be used as a mask. 
 
         populate : boolean, optional   
             If set to ``False``, the class will perform all pre-processing tasks 
@@ -121,9 +113,6 @@ class HodMockFactory(MockFactory):
         mass_cut = (self.halo_table['halo_mvir'] > cutoff_mvir)
         self.halo_table = self.halo_table[mass_cut]
 
-        # Make any additional cuts requested by the composite model
-        if hasattr(self.model, 'halocut_funcobj'):
-            self.halo_table = self.model.halocut_funcobj(halo_table=self.halo_table)
         ############################################################
 
         ### Create new columns of the halo catalog, if applicable
