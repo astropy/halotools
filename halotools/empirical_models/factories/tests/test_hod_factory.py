@@ -4,7 +4,7 @@ import numpy as np
 from copy import copy 
 
 from ...composite_models import preloaded_models
-from .. import model_factories
+from ...factories import *
 from ...occupation_models import *
 
 from ....sim_manager import FakeSim
