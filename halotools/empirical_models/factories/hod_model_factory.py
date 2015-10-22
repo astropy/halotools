@@ -61,11 +61,12 @@ class HodModelFactory(ModelFactory):
             ``input_model_blueprint`` into ``self.model_blueprint``.
 
         halo_selection_func : function object, optional   
-            Function object used to place a cut on the input ``snapshot.halo_table`` table. 
-            Default behavior depends on the sub-class of `MockFactory`. 
+            Function object used to place a cut on the input ``halo_table``. 
             If the ``halo_selection_func`` keyword argument is passed, 
-            the input to the function must be a length-Nsubhalos structured numpy array or Astropy table; 
-            the function output must be a length-Nsubhalos boolean array that will be used as a mask. 
+            the input to the function must be a single positional argument storing a 
+            length-N structured numpy array or Astropy table; 
+            the function output must be a length-N boolean array that will be used as a mask. 
+            Halos that are masked will be entirely neglected during mock population.
         """
 
         super(HodModelFactory, self).__init__(input_model_blueprint, **kwargs)
