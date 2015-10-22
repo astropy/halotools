@@ -15,8 +15,7 @@ from functools import partial
 
 from . import model_defaults
 from . import model_helpers
-from .smhm_models import smhm_components
-from .smhm_models import LogNormalScatterModel
+from .smhm_models import PrimGalpropModel, LogNormalScatterModel, Moster13SmHm
 
 from ..utils.array_utils import custom_len
 from ..sim_manager import sim_defaults
@@ -26,7 +25,7 @@ from ..utils import array_utils
 
 __all__ = ['ConditionalAbunMatch']
 
-class AbunMatchSmHm(smhm_components.PrimGalpropModel):
+class AbunMatchSmHm(PrimGalpropModel):
     """ Stellar-to-halo-mass relation based on traditional abundance matching. 
     """
 
@@ -204,7 +203,7 @@ class ConditionalAbunMatch(model_helpers.GalPropModel):
         model for stellar mass can work with CAM, the following example is based on 
         `~halotools.empirical_models.Moster13SmHm`:
 
-        >>> moster_model = smhm_components.Moster13SmHm(redshift=0)
+        >>> moster_model = Moster13SmHm(redshift=0)
         >>> halo_table['stellar_mass'] = moster_model.mc_stellar_mass(halo_table=halo_table)
 
         To assign values of ``gr_color`` to our halo_table, we call the ``mc_gr_color`` method 

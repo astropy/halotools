@@ -23,7 +23,7 @@ import warnings
 from .hod_components import OccupationComponent 
 
 from .. import model_defaults, model_helpers
-from ..smhm_models import smhm_components
+from ..smhm_models import Behroozi10SmHm
 
 from ..assembias_models import HeavisideAssembias
 from ..model_helpers import bounds_enforcing_decorator_factory
@@ -81,7 +81,7 @@ class Tinker13Cens(OccupationComponent):
             **kwargs)
         self.redshift = redshift
 
-        self.smhm_model = smhm_components.Behroozi10SmHm(
+        self.smhm_model = Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
         self._initialize_param_dict(**kwargs)
@@ -387,7 +387,7 @@ class Tinker13QuiescentSats(OccupationComponent):
             prim_haloprop_key = prim_haloprop_key, **kwargs)
         self.redshift = redshift
 
-        self.smhm_model = smhm_components.Behroozi10SmHm(
+        self.smhm_model = Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
         self._initialize_param_dict(**kwargs)
@@ -537,7 +537,7 @@ class Tinker13ActiveSats(OccupationComponent):
             prim_haloprop_key = prim_haloprop_key, **kwargs)
         self.redshift = redshift
 
-        self.smhm_model = smhm_components.Behroozi10SmHm(
+        self.smhm_model = Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
         self._initialize_param_dict(**kwargs)

@@ -24,7 +24,6 @@ import warnings
 from .hod_components import OccupationComponent
 
 from .. import model_defaults, model_helpers
-from ..smhm_models import smhm_components
 from ..assembias_models import HeavisideAssembias
 from ..model_helpers import bounds_enforcing_decorator_factory
 
