@@ -57,25 +57,23 @@ class MockFactory(object):
 
         additional_haloprops : list of strings, optional   
             Each entry in this list must be a column key of ``snapshot.halo_table``. 
-            For each entry of ``additional_haloprops``, each member of the mock galaxy population 
-            will have an attribute storing this property of its host halo. 
-            The corresponding mock galaxy attribute name will be pre-pended by ``halo_``. 
+            For each entry of ``additional_haloprops``, each member of 
+            `mock.galaxy_table` will have a column key storing this property of its host halo. 
             If ``additional_haloprops`` is set to the string value ``all``, 
             the galaxy table will inherit every halo property in the catalog. Default is None. 
-
-        halocut_funcobj : function object, optional   
-            Function object used to place a cut on the input ``snapshot.halo_table`` table. 
-            Default behavior depends on the sub-class of `MockFactory`. 
-            If the ``halocut_funcobj`` keyword argument is passed, 
-            the input to the function must be a length-Nsubhalos structured numpy array or Astropy table; 
-            the function output must be a length-Nsubhalos boolean array that will be used as a mask. 
 
         """
 
         required_kwargs = ['snapshot', 'model']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
-        self.halo_table = self.snapshot.halo_table
+        # Make any cuts on the halo catalog requested by the model
+        try: 
+            f = self.model.halo_selection_func
+            self.halo_table = f(self.snapshot.halo_table)
+        except AttributeError:
+            self.halo_table = self.snapshot.halo_table            
+
         try:
             self.ptcl_table = self.snapshot.ptcl_table
         except:
@@ -87,9 +85,6 @@ class MockFactory(object):
             pass   
 
         self._build_additional_haloprops_list(**kwargs)
-
-        if 'halocut_funcobj' in kwargs.keys():
-            self.halocut_funcobj = kwargs['halocut_funcobj']
 
         self.galaxy_table = Table() 
 

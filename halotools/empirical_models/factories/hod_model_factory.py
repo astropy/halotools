@@ -59,6 +59,13 @@ class HodModelFactory(ModelFactory):
             and values are class instances of that type of model. 
             The `interpret_input_model_blueprint` translates 
             ``input_model_blueprint`` into ``self.model_blueprint``.
+
+        halo_selection_func : function object, optional   
+            Function object used to place a cut on the input ``snapshot.halo_table`` table. 
+            Default behavior depends on the sub-class of `MockFactory`. 
+            If the ``halo_selection_func`` keyword argument is passed, 
+            the input to the function must be a length-Nsubhalos structured numpy array or Astropy table; 
+            the function output must be a length-Nsubhalos boolean array that will be used as a mask. 
         """
 
         super(HodModelFactory, self).__init__(input_model_blueprint, **kwargs)
