@@ -4,7 +4,7 @@ import numpy as np
 from copy import copy 
 
 from ...composite_models import preloaded_models
-from ...factories import *
+from ... import factories
 from ...occupation_models import *
 
 from ....sim_manager import FakeSim
@@ -15,13 +15,13 @@ def test_Zheng07_composite():
 	""" Method to test the basic behavior of 
 	`~halotools.empirical_models.preloaded_models.Zheng07`, 
 	a specific pre-loaded model of 
-	`~halotools.empirical_models.model_factories.HodModelFactory`. 
+	`~halotools.empirical_models.factories.HodModelFactory`. 
 
 	The suite includes the following tests:
 
 		* Changes to ``self.param_dict`` properly propagate through to occupation component models. 
 
-		* Default behavior is recovered after calling the `~halotools.empirical_models.model_factories.HodModelFactory.restore_init_param_dict` method. 
+		* Default behavior is recovered after calling the `~halotools.empirical_models.factories.HodModelFactory.restore_init_param_dict` method. 
 	"""
 	model = preloaded_models.Zheng07(threshold = -18)
 
@@ -65,7 +65,7 @@ def test_alt_Zheng07_composites():
 	assert hasattr(cenmod_satocc_compoent, 'ancillary_model_dependencies')
 	cenmod_model_blueprint = copy(default_model_blueprint)
 	cenmod_model_blueprint['satellites']['occupation'] = cenmod_satocc_compoent
-	cenmod_model = model_factories.HodModelFactory(cenmod_model_blueprint)
+	cenmod_model = factories.HodModelFactory(cenmod_model_blueprint)
 
 	# Now we test whether changes to the param_dict keys of the composite model 
 	# that pertain to the centrals properly propagate through to the behavior 
