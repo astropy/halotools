@@ -7,4 +7,6 @@ from .mock_factory_template import *
 from .subhalo_mock_factory import *
 from .hod_mock_factory import *
 
-from .model_factories import *
+from .model_factory_template import *
+from .hod_model_factory import *
+from .subhalo_model_factory import *

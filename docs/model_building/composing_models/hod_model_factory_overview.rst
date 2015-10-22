@@ -81,7 +81,7 @@ The final line of code in the `~halotools.empirical_models.Zheng07` function is 
 
 .. code:: python 
 
-    composite_model = model_factories.HodModelFactory(composite_model_blueprint)
+    composite_model = factories.HodModelFactory(composite_model_blueprint)
     return composite_model
 
 

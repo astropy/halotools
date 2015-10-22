@@ -9,7 +9,7 @@ from __future__ import (
 
 import numpy as np
 
-from .. import model_factories, model_defaults
+from .. import factories, model_defaults
 from ..occupation_models import hod_components as hoc
 from ..occupation_models import zheng07_components
 from ..occupation_models import leauthaud11_components 
@@ -41,7 +41,7 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`.
+    This composite model was built by the `~halotools.empirical_models.factories.HodModelFactory`.
 
     Parameters 
     ----------
@@ -52,7 +52,7 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     Returns 
     -------
     model : object 
-        Instance of `~halotools.empirical_models.model_factories.HodModelFactory`
+        Instance of `~halotools.empirical_models.factories.HodModelFactory`
 
     Examples 
     --------
@@ -110,7 +110,7 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
         'satellites' : subpopulation_blueprint_satellites 
         }
 
-    composite_model = model_factories.HodModelFactory(composite_model_blueprint)
+    composite_model = factories.HodModelFactory(composite_model_blueprint)
     return composite_model
 
 
@@ -132,7 +132,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model was built by the `~halotools.empirical_models.model_factories.HodModelFactory`, 
+    This composite model was built by the `~halotools.empirical_models.factories.HodModelFactory`, 
     which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_blueprint`. 
 
     Parameters 
@@ -166,7 +166,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     Returns 
     -------
     model : object 
-        Instance of `~halotools.empirical_models.model_factories.HodModelFactory`
+        Instance of `~halotools.empirical_models.factories.HodModelFactory`
 
     Examples 
     --------
@@ -216,7 +216,7 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
         'satellites' : subpopulation_blueprint_satellites
         }
 
-    composite_model = model_factories.HodModelFactory(model_blueprint)
+    composite_model = factories.HodModelFactory(model_blueprint)
     return composite_model
 
 
@@ -279,7 +279,7 @@ def SmHmBinarySFR(
     Returns 
     -------
     model : object 
-        Instance of `~halotools.empirical_models.model_factories.SubhaloModelFactory`
+        Instance of `~halotools.empirical_models.factories.SubhaloModelFactory`
 
     Examples 
     --------
@@ -307,10 +307,10 @@ def SmHmBinarySFR(
 
     if 'threshold' in kwargs.keys():
         galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
-        model = model_factories.SubhaloModelFactory(blueprint, 
+        model = factories.SubhaloModelFactory(blueprint, 
             galaxy_selection_func=galaxy_selection_func)
     else:
-        model = model_factories.SubhaloModelFactory(blueprint)
+        model = factories.SubhaloModelFactory(blueprint)
 
     return model
 
@@ -416,7 +416,7 @@ def Hearin15(central_assembias_strength = 1,
     subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
 
     model_blueprint = {'centrals': subpopulation_blueprint_centrals, 'satellites': subpopulation_blueprint_satellites}
-    composite_model = model_factories.HodModelFactory(model_blueprint)
+    composite_model = factories.HodModelFactory(model_blueprint)
     return composite_model
 
 
@@ -540,10 +540,10 @@ def Campbell15(
 
     if 'threshold' in kwargs.keys():
         galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
-        model = model_factories.SubhaloModelFactory(blueprint, 
+        model = factories.SubhaloModelFactory(blueprint, 
             galaxy_selection_func=galaxy_selection_func)
     else:
-        model = model_factories.SubhaloModelFactory(blueprint)
+        model = factories.SubhaloModelFactory(blueprint)
 
     return model
 
@@ -589,7 +589,7 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
                  sat_key1: subpopulation_blueprint_satellites1, 
                  sat_key2: subpopulation_blueprint_satellites2}
     
-    return model_factories.HodModelFactory(blueprint)
+    return factories.HodModelFactory(blueprint)
 
 
 
