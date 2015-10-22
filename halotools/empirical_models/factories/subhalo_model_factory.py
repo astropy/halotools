@@ -102,9 +102,6 @@ class SubhaloModelFactory(ModelFactory):
         self._set_inherited_methods()
         self._set_init_param_dict()
 
-
-        # self._set_calling_sequence()??? when is this called in the hod model factory?
-
     def _set_inherited_methods(self):
         """ Each component model *should* have a `_mock_generation_calling_sequence` attribute 
         that provides the sequence of method names to call during mock population. Additionally, 
@@ -149,7 +146,7 @@ class SubhaloModelFactory(ModelFactory):
             if not hasattr(component_model, '_attrs_to_inherit'):
                 component_model._attrs_to_inherit = []
 
-    def _set_primary_behaviors(self):
+    def _set_primary_behaviors(self, **kwargs):
         """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
         that will be used by the outside world.  
 
@@ -171,6 +168,56 @@ class SubhaloModelFactory(ModelFactory):
             behavior_name = 'mc_'+feature_key
             behavior_function = self._update_param_dict_decorator(feature_key, behavior_name)
             setattr(self, behavior_name, behavior_function)
+
+        self._set_calling_sequence(**kwargs)
+
+    def _set_calling_sequence(self, **kwargs):
+        """
+        """
+        self._mock_generation_calling_sequence = []
+
+        missing_calling_sequence_msg = ("\nComponent models typically have a list attribute called "
+            "_mock_generation_calling_sequence.\nThis list determines the methods that are called "
+            "by the mock factory, and the order in which they are called.\n"
+            "The ``%s`` component model has no such method.\n"
+            "Only ignore this warning if you are sure this is not an error.\n")
+
+        repeated_calling_sequence_element_msg = ("\n The method name ``%s`` that appears "
+            "in the calling sequence of the \n``%s`` component model also appears in the "
+            "calling sequence of another model.\nYou should rename this method in one of your "
+            "component models to disambiguate.\n")
+
+        ###############
+        # If provided, retrieve the input list defining the calling sequence.
+        # Otherwise, it will be assumed that specifying the calling sequence is not necessary 
+        # and an effectively random sequence will be chosen
+        try:
+            feature_sequence = kwargs['mock_generation_calling_sequence']
+        except KeyError:
+            feature_sequence = self.model_blueprint.keys()
+
+        ###############
+        # Loop over feature_sequence and successively append each component model's
+        # calling sequence to the composite model calling sequence
+        for feature in feature_sequence:
+            component_model = self.model_blueprint[feature]
+            if hasattr(component_model, '_mock_generation_calling_sequence'):
+
+                component_method_list = (
+                    [name for name in component_model._mock_generation_calling_sequence]
+                    )
+
+                # test to make sure we have no repeated method names
+                intersection = set(component_method_list) & set(self._mock_generation_calling_sequence)
+                if intersection != set():
+                    methodname = list(intersection)[0]
+                    t = (methodname, component_model.__class__.__name__)
+                    raise HalotoolsError(repeated_calling_sequence_element_msg % t)
+
+                self._mock_generation_calling_sequence.extend(component_method_list)
+            else:
+                warn(missing_calling_sequence_msg % component_model.__class__.__name__)
+
 
     def _update_param_dict_decorator(self, feature_key, func_name):
         """ Decorator used to propagate any possible changes 
