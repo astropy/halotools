@@ -226,8 +226,7 @@ class HodModelFactory(ModelFactory):
             "conflicting meanings across components.\n"
             "\nIf you do not wish to see this message every time you instantiate, \n"
             "simply attach a _suppress_repeated_param_warning attribute \n"
-            "to each of your component models that have this parameter, \n"
-            "and set this variable to ``True``.\n")
+            "to any of your component models and set this variable to ``True``.\n")
 
         # Loop over all galaxy types in the composite model
         for gal_type in self.gal_types:
@@ -384,7 +383,25 @@ class HodModelFactory(ModelFactory):
                     self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
     def _set_inherited_methods(self):
-        """
+        """ Each component model *should* have a `_mock_generation_calling_sequence` attribute 
+        that provides the sequence of method names to call during mock population. Additionally, 
+        each component *should* have a `_methods_to_inherit` attribute that determines 
+        which methods will be inherited by the composite model. 
+        The `_mock_generation_calling_sequence` list *should* be a subset of `_methods_to_inherit`. 
+        If any of the above conditions fail, no exception will be raised during the construction 
+        of the composite model. Instead, an empty list will be forcibly attached to each 
+        component model for which these lists may have been missing. 
+        Also, for each component model, if there are any elements of `_mock_generation_calling_sequence` 
+        that were missing from `_methods_to_inherit`, all such elements will be forcibly added to 
+        that component model's `_methods_to_inherit`.
+
+        Finally, each component model *should* have an `_attrs_to_inherit` attribute that determines 
+        which attributes will be inherited by the composite model. If any component models did not 
+        implement the `_attrs_to_inherit`, an empty list is forcibly added to the component model. 
+
+        After calling the _set_inherited_methods method, it will be therefore be entirely safe to 
+        run a for loop over each component model's `_methods_to_inherit` and `_attrs_to_inherit`, 
+        even if these lists were forgotten or irrelevant to that particular component. 
         """
 
         for gal_type in self.gal_types:

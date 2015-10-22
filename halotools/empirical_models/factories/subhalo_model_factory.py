@@ -96,7 +96,58 @@ class SubhaloModelFactory(ModelFactory):
         self._build_haloprop_list()
         self._build_publication_list()
         self._build_new_haloprop_func_dict()
+        self._build_dtype_list()
+        self._set_warning_suppressions()
+        self._set_model_redshift()
+        self._set_inherited_methods()
         self._set_init_param_dict()
+
+
+        # self._set_calling_sequence()??? when is this called in the hod model factory?
+
+    def _set_inherited_methods(self):
+        """ Each component model *should* have a `_mock_generation_calling_sequence` attribute 
+        that provides the sequence of method names to call during mock population. Additionally, 
+        each component *should* have a `_methods_to_inherit` attribute that determines 
+        which methods will be inherited by the composite model. 
+        The `_mock_generation_calling_sequence` list *should* be a subset of `_methods_to_inherit`. 
+        If any of the above conditions fail, no exception will be raised during the construction 
+        of the composite model. Instead, an empty list will be forcibly attached to each 
+        component model for which these lists may have been missing. 
+        Also, for each component model, if there are any elements of `_mock_generation_calling_sequence` 
+        that were missing from `_methods_to_inherit`, all such elements will be forcibly added to 
+        that component model's `_methods_to_inherit`.
+
+        Finally, each component model *should* have an `_attrs_to_inherit` attribute that determines 
+        which attributes will be inherited by the composite model. If any component models did not 
+        implement the `_attrs_to_inherit`, an empty list is forcibly added to the component model. 
+
+        After calling the _set_inherited_methods method, it will be therefore be entirely safe to 
+        run a for loop over each component model's `_methods_to_inherit` and `_attrs_to_inherit`, 
+        even if these lists were forgotten or irrelevant to that particular component. 
+        """
+
+        # Loop over all component features in the composite model
+        for feature in self._feature_list:
+            component_model = self.model_blueprint[feature]
+
+            # Ensure that all methods in the calling sequence are inherited
+            try:
+                mock_making_methods = component_model._mock_generation_calling_sequence
+            except AttributeError:
+                mock_making_methods = []
+            try:
+                inherited_methods = component_model._methods_to_inherit
+            except AttributeError:
+                inherited_methods = []
+                component_model._methods_to_inherit = []
+
+            missing_methods = set(mock_making_methods) - set(inherited_methods).intersection(set(mock_making_methods))
+            for methodname in missing_methods:
+                component_model._methods_to_inherit.append(methodname)
+
+            if not hasattr(component_model, '_attrs_to_inherit'):
+                component_model._attrs_to_inherit = []
 
     def _set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
@@ -114,6 +165,7 @@ class SubhaloModelFactory(ModelFactory):
         `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
+        # Loop over all component features in the composite model
         for feature_key in self._feature_list:
             
             behavior_name = 'mc_'+feature_key
@@ -160,10 +212,36 @@ class SubhaloModelFactory(ModelFactory):
         behavior_function = getattr(component_model, 'mc_'+feature_key) 
         return behavior_function
 
+    def _set_model_redshift(self):
+        """ 
+        """
+        msg = ("Inconsistency between the redshifts of the component models:\n"
+            "    For component model 1 = ``%s``, the model has redshift = %.2f.\n"
+            "    For component model 2 = ``%s``, the model has redshift = %.2f.\n")
+
+        # Loop over all component features in the composite model
+        for feature in self._feature_list:
+            component_model = self.model_blueprint[feature]
+
+            if hasattr(component_model, 'redshift'):
+                redshift = component_model.redshift 
+                try:
+                    if redshift != existing_redshift:
+                        t = (component_model.__class__.__name__, redshift, 
+                            last_component.__class__.__name__, existing_redshift)
+                        raise HalotoolsError(msg % t)
+                except NameError:
+                    existing_redshift = redshift 
+
+            last_component = component_model
+
+        self.redshift = redshift
+
     def _build_haloprop_list(self):
         """
         """
         haloprop_list = []
+        # Loop over all component features in the composite model
         for feature in self._feature_list:
             component_model = self.model_blueprint[feature]
 
@@ -178,6 +256,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         """
         pub_list = []
+        # Loop over all component features in the composite model
         for feature in self._feature_list:
             component_model = self.model_blueprint[feature]
 
@@ -201,6 +280,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         """
         new_haloprop_func_dict = {}
+        # Loop over all component features in the composite model
         for feature in self._feature_list:
             component_model = self.model_blueprint[feature]
 
@@ -222,6 +302,16 @@ class SubhaloModelFactory(ModelFactory):
                     warn(msg % (example_repeated_element, clname))
 
         self.new_haloprop_func_dict = new_haloprop_func_dict
+
+    def _set_warning_suppressions(self):
+        """
+        """
+        self._suppress_repeated_param_warning = False
+        # Loop over all component features in the composite model
+        for feature_key in self._feature_list:
+            component_model = self.model_blueprint[feature_key]
+            if hasattr(component_model, '_suppress_repeated_param_warning'):
+                self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
     def _set_init_param_dict(self):
         """ Method used to build a dictionary of parameters for the composite model. 
@@ -250,8 +340,7 @@ class SubhaloModelFactory(ModelFactory):
             "conflicting meanings across components.\n"
             "\nIf you do not wish to see this message every time you instantiate, \n"
             "simply attach a _suppress_repeated_param_warning attribute \n"
-            "to each of your component models that have this parameter, \n"
-            "and set this variable to ``True``.\n")
+            "to any of your component models and set this variable to ``True``.\n")
 
         # Loop over all component features in the composite model
         for feature_key in self._feature_list:
@@ -271,6 +360,20 @@ class SubhaloModelFactory(ModelFactory):
                 self.param_dict[key] = value
 
         self._init_param_dict = copy(self.param_dict)
+
+    def _build_dtype_list(self):
+        """
+        """
+        dtype_list = []
+        # Loop over all component features in the composite model
+        for feature_key in self._feature_list:
+            component_model = self.model_blueprint[feature_key]
+
+            # Column dtypes to add to mock galaxy_table
+            if hasattr(component_model, '_galprop_dtypes_to_allocate'):
+                dtype_list.append(component_model._galprop_dtypes_to_allocate)
+
+        self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
 
     def restore_init_param_dict(self):
         """ Reset all values of the current ``param_dict`` to the values 
