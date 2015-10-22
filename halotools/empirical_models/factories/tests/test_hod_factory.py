@@ -3,11 +3,11 @@
 import numpy as np 
 from copy import copy 
 
-from .. import preloaded_models
+from ...composite_models import preloaded_models
 from .. import model_factories
-from ..occupation_models import *
+from ...occupation_models import *
 
-from ...sim_manager import FakeSim
+from ....sim_manager import FakeSim
 
 __all__ = ['test_Zheng07_composite']
 
