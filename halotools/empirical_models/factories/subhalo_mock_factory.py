@@ -88,14 +88,19 @@ class SubhaloMockFactory(MockFactory):
         can also be pre-computed as halo types do not depend upon model parameter values. 
         """
 
+        self._precomputed_galprop_list = []
+
         for key in self.additional_haloprops:
             self.galaxy_table[key] = self.halo_table[key]
+            self._precomputed_galprop_list.append(key)
 
         phase_space_keys = ['x', 'y', 'z', 'vx', 'vy', 'vz']
         for newkey in phase_space_keys:
             self.galaxy_table[newkey] = self.galaxy_table[model_defaults.host_haloprop_prefix+newkey]
+            self._precomputed_galprop_list.append(newkey)
 
         self.galaxy_table['galid'] = np.arange(len(self.galaxy_table))
+        self._precomputed_galprop_list.append('galid')
 
         for galprop in self.model.galprop_list:
             component_model = self.model.model_blueprint[galprop]
@@ -104,6 +109,7 @@ class SubhaloMockFactory(MockFactory):
                 f = component_model.gal_type_func
                 newkey = galprop + '_gal_type'
                 self.galaxy_table[newkey] = f(halo_table=self.galaxy_table)
+                self._precomputed_galprop_list.append(newkey)
             except AttributeError:
                 pass
             except:
@@ -121,6 +127,7 @@ class SubhaloMockFactory(MockFactory):
     def populate(self):
         """ Method populating subhalos with mock galaxies. 
         """
+        self._allocate_memory()
         for galprop_key in self.model.galprop_list:
             
             model_func_name = 'mc_'+galprop_key
@@ -130,6 +137,24 @@ class SubhaloMockFactory(MockFactory):
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)
             self.galaxy_table = self.galaxy_table[mask]
+
+    # def _allocate_memory(self):
+    #     """
+    #     """
+    #     Ngals = len(self.galaxy_table)
+
+    #     # Reset any non-static galaxy propery 
+
+    #     for key in self.galaxy_table.keys():
+    #         if key not in self._precomputed_galprop_list:
+    #             dt = self.galaxy_table[key]
+    #             self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
+
+    #     # We will keep track of the calling sequence with a list called _remaining_methods_to_call
+    #     # Each time a function in this list is called, we will remove that function from the list
+    #     # Mock generation will be complete when _remaining_methods_to_call is exhausted
+    #     self._remaining_methods_to_call = copy(self.model._mock_generation_calling_sequence)
+
 
 
 
