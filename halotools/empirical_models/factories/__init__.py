@@ -3,5 +3,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-from .mock_factories import *
+from .mock_factory_template import *
+from .subhalo_mock_factory import *
+from .hod_mock_factory import *
+
 from .model_factories import *

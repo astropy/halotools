@@ -13,9 +13,11 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 from warnings import warn 
 
+from .hod_mock_factory import HodMockFactory
+from .subhalo_mock_factory import SubhaloMockFactory
+
 from .. import model_helpers
 from .. import model_defaults 
-from . import mock_factories
 
 from ...sim_manager.supported_sims import HaloCatalog
 from ...sim_manager import sim_defaults
@@ -121,7 +123,7 @@ class ModelFactory(object):
         else:
             if 'snapshot' in kwargs.keys():
                 snapshot = kwargs['snapshot']
-                del kwargs['snapshot'] # otherwise the call to mock_factories below has multiple snapshot arguments
+                del kwargs['snapshot'] # otherwise the call to the mock factory below has multiple snapshot kwargs
             else:
                 snapshot = HaloCatalog(**kwargs)
 
@@ -532,7 +534,7 @@ class SubhaloModelFactory(ModelFactory):
 
         super(SubhaloModelFactory, self).__init__(input_model_blueprint, **kwargs)
 
-        self.mock_factory = mock_factories.SubhaloMockFactory
+        self.mock_factory = SubhaloMockFactory
 
         self.model_blueprint = copy(self._input_model_blueprint)
         
@@ -754,7 +756,7 @@ class HodModelFactory(ModelFactory):
         # that will be called by the mock factory 
         self._set_primary_behaviors(**kwargs)
 
-        self.mock_factory = mock_factories.HodMockFactory
+        self.mock_factory = HodMockFactory
 
     def _build_composite_attrs(self, **kwargs):
         """ A composite model has several lists that are built up from 
