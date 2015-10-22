@@ -36,7 +36,7 @@ class SubhaloMockFactory(MockFactory):
         model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.SubhaloModelFactory`. 
 
-        additional_haloprops : list of strings, optional   
+        additional_haloprops : string or list of strings, optional   
             Each entry in this list must be a column key of ``snapshot.halo_table``. 
             For each entry of ``additional_haloprops``, each member of 
             `mock.galaxy_table` will have a column key storing this property of its host halo. 
@@ -76,6 +76,11 @@ class SubhaloMockFactory(MockFactory):
     def precompute_galprops(self):
         """ Method pre-processes the input subhalo catalog, and pre-computes 
         all halo properties that will be inherited by the ``galaxy_table``. 
+
+        For example, in subhalo-based models, the phase space coordinates of the 
+        galaxies are hard-wired to be equal to the phase space coordinates of the 
+        parent subhalos, so these keys of the galaxy_table 
+        can be pre-computed once and for all
         """
 
         for key in self.additional_haloprops:

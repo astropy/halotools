@@ -55,7 +55,7 @@ class MockFactory(object):
         model : object 
             A model built by a sub-class of `~halotools.empirical_models.ModelFactory`. 
 
-        additional_haloprops : list of strings, optional   
+        additional_haloprops : string or list of strings, optional   
             Each entry in this list must be a column key of ``snapshot.halo_table``. 
             For each entry of ``additional_haloprops``, each member of 
             `mock.galaxy_table` will have a column key storing this property of its host halo. 
@@ -99,16 +99,38 @@ class MockFactory(object):
         " must include a populate method")
 
     def _build_additional_haloprops_list(self, **kwargs):
+        """
+        Parameters 
+        -----------
+        additional_haloprops : string or list of strings, optional   
+            Each entry in this list must be a column key of ``snapshot.halo_table``. 
+            For each entry of ``additional_haloprops``, each member of 
+            `mock.galaxy_table` will have a column key storing this property of its host halo. 
+            If ``additional_haloprops`` is set to the string value ``all``, 
+            the galaxy table will inherit every halo property in the catalog. Default is None. 
+        """
 
         # Create a list of halo properties that will be inherited by the mock galaxies
-        self.additional_haloprops = model_defaults.haloprop_list
+        self.additional_haloprops = model_defaults.default_haloprop_list_inherited_by_mock
+
         if hasattr(self.model, '_haloprop_list'):
             self.additional_haloprops.extend(self.model._haloprop_list)
+
         if 'additional_haloprops' in kwargs.keys():
             if kwargs['additional_haloprops'] == 'all':
                 self.additional_haloprops.extend(self.halo_table.keys())
             else:
-                self.additional_haloprops.extend(kwargs['additional_haloprops'])
+                proplist = kwargs['additional_haloprops']
+                if type(proplist) in [str, unicode]:
+                    self.additional_haloprops.append(proplist)
+                elif type(proplist) is list:
+                    self.additional_haloprops.extend(proplist)
+                else:
+                    msg = ("Input keyword argument `additional_haloprops` must be "
+                        "a string or list of strings")
+                    raise HalotoolsError(msg)                
+
+        # Eliminate any possible redundancies 
         self.additional_haloprops = list(set(self.additional_haloprops))
 
     @property 

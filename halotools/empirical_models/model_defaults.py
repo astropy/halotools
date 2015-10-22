@@ -50,7 +50,11 @@ default_binary_galprop_haloprop = default_smhm_haloprop
 # will be bound to each mock galaxy 
 host_haloprop_prefix = 'halo_'
 galprop_prefix = 'gal_'
-haloprop_list = ['halo_id', 'halo_x', 'halo_y', 'halo_z', 'halo_vx', 'halo_vy', 'halo_vz', 'halo_mvir', 'halo_rvir']
+default_haloprop_list_inherited_by_mock = (
+    ['halo_id', 'halo_x', 'halo_y', 'halo_z', 
+    'halo_vx', 'halo_vy', 'halo_vz', 
+    'halo_mvir', 'halo_rvir']
+    )
 
 prim_haloprop_key = 'halo_mvir'
 sec_haloprop_key = 'halo_nfw_conc'

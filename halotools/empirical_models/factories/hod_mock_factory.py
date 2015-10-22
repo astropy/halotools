@@ -61,7 +61,7 @@ class HodMockFactory(MockFactory):
         model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.HodModelFactory`. 
 
-        additional_haloprops : list of strings, optional   
+        additional_haloprops : string or list of strings, optional   
             Each entry in this list must be a column key of ``snapshot.halo_table``. 
             For each entry of ``additional_haloprops``, each member of 
             `mock.galaxy_table` will have a column key storing this property of its host halo. 
