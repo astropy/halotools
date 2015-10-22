@@ -164,7 +164,7 @@ class SampleSelector(object):
         if return_subhalos is False:
             return table[mask]
         else:
-            return table[mask], table[np.invert(mask)]
+            return table[mask], table[~mask]
 
     @staticmethod
     def property_range(lower_bound = -float("inf"), upper_bound = float("inf"), 

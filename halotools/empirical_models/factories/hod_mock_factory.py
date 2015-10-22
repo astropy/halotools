@@ -28,6 +28,7 @@ except ImportError:
 
 from ...sim_manager import sim_defaults
 from ...utils.array_utils import randomly_downsample_data
+from ...utils.table_utils import SampleSelector
 from ...sim_manager import FakeSim, FakeMock
 from ...custom_exceptions import *
 
@@ -71,6 +72,11 @@ class HodMockFactory(MockFactory):
             If set to ``False``, the class will perform all pre-processing tasks 
             but will not call the ``model`` to populate the ``galaxy_table`` 
             with mock galaxies and their observable properties. Default is ``True``. 
+
+        apply_completeness_cut : bool, optional 
+            If True, only halos passing the mass completeness cut defined in 
+            `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
+            Default is True. 
         """
 
         super(HodMockFactory, self).__init__(populate=populate, **kwargs)
@@ -80,7 +86,7 @@ class HodMockFactory(MockFactory):
         if populate is True:
             self.populate()
 
-    def preprocess_halo_catalog(self, **kwargs):
+    def preprocess_halo_catalog(self, apply_completeness_cut = True, **kwargs):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. This pre-processing includes identifying the 
         catalog columns that will be used by the model to create the mock, 
@@ -101,25 +107,34 @@ class HodMockFactory(MockFactory):
             Number of control points used in the lookup table for the halo profile.
             Default is set in `~halotools.empirical_models.model_defaults`. 
 
+        apply_completeness_cut : bool, optional 
+            If True, only halos passing the mass completeness cut defined in 
+            `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
+            Default is True. 
         """
 
         ################ Make cuts on halo catalog ################
         # Select host halos only, since this is an HOD-style model
-        self.halo_table = self.snapshot.host_halos
+        self.halo_table = SampleSelector.host_halo_selection(
+            table = self.halo_table)
 
         # make a conservative mvir completeness cut 
-        # This can be relaxed by changing sim_defaults.Num_ptcl_requirement
-        cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
-        mass_cut = (self.halo_table['halo_mvir'] > cutoff_mvir)
-        self.halo_table = self.halo_table[mass_cut]
+        # This cut can be controlled by changing sim_defaults.Num_ptcl_requirement
+        if apply_completeness_cut is True:
+            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
+            mass_cut = (self.halo_table['halo_mvir'] > cutoff_mvir)
+            self.halo_table = self.halo_table[mass_cut]
 
         ############################################################
 
         ### Create new columns of the halo catalog, if applicable
-        if hasattr(self.model, 'new_haloprop_func_dict'):
-            for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table=self.halo_table)
+        try:
+            d = self.model.new_haloprop_func_dict
+            for new_haloprop_key, new_haloprop_func in d.iteritems():
+                self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table = self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
+        except AttributeError:
+            pass
 
         self.model.build_lookup_tables(**kwargs)
 

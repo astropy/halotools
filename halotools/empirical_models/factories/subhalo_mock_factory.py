@@ -64,10 +64,13 @@ class SubhaloMockFactory(MockFactory):
         """
 
         ### Create new columns of the halo catalog, if applicable
-        if hasattr(self.model, 'new_haloprop_func_dict'):
-            for new_haloprop_key, new_haloprop_func in self.model.new_haloprop_func_dict.iteritems():
+        try:
+            d = self.model.new_haloprop_func_dict
+            for new_haloprop_key, new_haloprop_func in d.iteritems():
                 self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table = self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
+        except AttributeError:
+            pass
 
 
     def precompute_galprops(self):
