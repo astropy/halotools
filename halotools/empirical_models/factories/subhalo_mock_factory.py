@@ -128,33 +128,25 @@ class SubhaloMockFactory(MockFactory):
         """ Method populating subhalos with mock galaxies. 
         """
         self._allocate_memory()
-        
-        for galprop_key in self.model.galprop_list:
-            
-            model_func_name = 'mc_'+galprop_key
-            model_func = getattr(self.model, model_func_name)
-            self.galaxy_table[galprop_key] = model_func(halo_table=self.galaxy_table)
+
+        for method in self.model._mock_generation_calling_sequence:
+            func = getattr(self.model, method)
+            func(halo_table = self.galaxy_table)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)
             self.galaxy_table = self.galaxy_table[mask]
 
-    # def _allocate_memory(self):
-    #     """
-    #     """
-    #     Ngals = len(self.galaxy_table)
+    def _allocate_memory(self):
+        """
+        """
+        Ngals = len(self.galaxy_table)
 
-    #     # Reset any non-static galaxy propery 
-
-    #     for key in self.galaxy_table.keys():
-    #         if key not in self._precomputed_galprop_list:
-    #             dt = self.galaxy_table[key]
-    #             self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
-
-    #     # We will keep track of the calling sequence with a list called _remaining_methods_to_call
-    #     # Each time a function in this list is called, we will remove that function from the list
-    #     # Mock generation will be complete when _remaining_methods_to_call is exhausted
-    #     self._remaining_methods_to_call = copy(self.model._mock_generation_calling_sequence)
+        # Allocate or overwrite any non-static galaxy propery 
+        for key in self.model._galprop_dtypes_to_allocate.names:
+            if key not in self._precomputed_galprop_list:
+                dt = self.model._galprop_dtypes_to_allocate[key]
+                self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
 
 
 
