@@ -227,8 +227,11 @@ class HeavisideAssembias(object):
                 )
 
         key = self.sec_haloprop_key + '_percentile'
-        self.new_haloprop_func_dict = {}
-        self.new_haloprop_func_dict[key] = assembias_percentile_calculator
+        try:
+            self.new_haloprop_func_dict[key] = assembias_percentile_calculator
+        except AttributeError:
+            self.new_haloprop_func_dict = {}
+            self.new_haloprop_func_dict[key] = assembias_percentile_calculator
 
         self._methods_to_inherit.extend(['assembias_strength'])
 
@@ -335,7 +338,7 @@ class HeavisideAssembias(object):
         Method determines how much to boost the baseline function 
         according to the strength of assembly bias and the min/max 
         boost allowable by the requirement that the all-halo baseline 
-        function be preserved. 
+        function be preserved. The returned perturbation applies to type-1 halos. 
         """
         lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
         baseline_lower_bound = getattr(self, lower_bound_key)
@@ -356,7 +359,7 @@ class HeavisideAssembias(object):
 
         strength = self.assembias_strength(prim_haloprop=prim_haloprop)
         positive_strength_idx = strength > 0
-        negative_strength_idx = np.invert(positive_strength_idx)
+        negative_strength_idx = ~positive_strength_idx
 
         if len(baseline_result[positive_strength_idx]) > 0:
             base_pos = baseline_result[positive_strength_idx]
@@ -414,13 +417,16 @@ class HeavisideAssembias(object):
             split = self.percentile_splitting_function(halo_table = halo_table)
             result = func(*args, **kwargs)
 
-            # We will only apply decorate values that are not edge cases
+            # We will only decorate values that are not edge cases
             no_edge_mask = (
                 (split > 0) & (split < 1) & 
                 (result > baseline_lower_bound) & (result < baseline_upper_bound)
                 )
             no_edge_result = result[no_edge_mask]
             no_edge_split = split[no_edge_mask]
+            # print("\nPrinting no-edge-split min/max")
+            # print(no_edge_split.min(), no_edge_split.max())
+            # print("\n")
 
             # Determine the type1_mask that divides the halo sample into two subsamples
             if hasattr(self, 'halo_type_tuple'):
@@ -452,8 +458,16 @@ class HeavisideAssembias(object):
                     prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask], 
                     baseline_result = no_edge_result, 
                     splitting_result = no_edge_split)
-            perturbation[np.invert(type1_mask)] *= (-no_edge_split[np.invert(type1_mask)]/
-                (1 - no_edge_split[np.invert(type1_mask)]))
+
+            # This is the version in master that does not preserve the HOD
+            ### but passes my test suite
+            # perturbation[~type1_mask] *= (-no_edge_split[~type1_mask]/
+            #     (1 - no_edge_split[~type1_mask]))
+
+            # This is the new fix that seems to give correct results 
+            ### but fails the test suite
+            perturbation[type1_mask] *= (-no_edge_split[type1_mask]/
+                (1 - no_edge_split[type1_mask]))
 
             no_edge_result += perturbation
 
