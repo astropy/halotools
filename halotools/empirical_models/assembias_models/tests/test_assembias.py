@@ -55,13 +55,10 @@ class TestAssembias(TestCase):
         method = getattr(model, model._method_name_to_decorate)
         result = method(halo_table = self.toy_halo_table2)
 
-        mask = self.toy_halo_table2['halo_zform_percentile'] >= model._split_ordinates[0]
-        oldmean = result[mask].mean()
-        youngmean = result[np.invert(mask)].mean()
+        oldmask = self.toy_halo_table2['halo_zform_percentile'] >= model._split_ordinates[0]
+        oldmean = result[oldmask].mean()
+        youngmean = result[~oldmask].mean()
         baseline_mean = baseline_result.mean()
-        assert oldmean != youngmean
-        assert oldmean != baseline_mean
-        assert youngmean != baseline_mean 
 
         param_key = model._get_assembias_param_dict_key(0)
         param = model.param_dict[param_key]
@@ -73,10 +70,10 @@ class TestAssembias(TestCase):
             assert oldmean == youngmean 
 
         split = model.percentile_splitting_function(halo_table = self.toy_halo_table2)
-        split = np.where(mask, split, 1-split)
+        split = np.where(oldmask, split, 1-split)
         derived_result = split*oldmean
-        derived_result[np.invert(mask)] = split[np.invert(mask)]*youngmean
-        derived_mean = derived_result[mask].mean() + derived_result[np.invert(mask)].mean()
+        derived_result[~oldmask] = split[~oldmask]*youngmean
+        derived_mean = derived_result[oldmask].mean() + derived_result[~oldmask].mean()
         baseline_mean = baseline_result.mean()
         np.testing.assert_allclose(baseline_mean, derived_mean, rtol=1e-3)
 
