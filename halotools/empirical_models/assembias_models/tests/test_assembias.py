@@ -102,8 +102,7 @@ class TestAssembias(TestCase):
         abz = AssembiasZheng07Cens(sec_haloprop_key = 'halo_zform')
         self.baseline_preservation_test(abz)
 
-        abz2 = AssembiasZheng07Cens(sec_haloprop_key = 'halo_zform', 
-            split=0.75)
+        abz2 = AssembiasZheng07Cens(sec_haloprop_key = 'halo_zform', split=0.75)
         self.baseline_preservation_test(abz2)
 
 

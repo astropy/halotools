@@ -284,10 +284,12 @@ class HeavisideAssembias(object):
 
 
     @model_helpers.bounds_enforcing_decorator_factory(-1, 1)
-    def assembias_strength(self, **kwargs):
+    def assembias_strength(self, prim_haloprop):
         """
-        Method returns the strength of assembly bias as a function of the input halos, 
-        where the strength varies between -1 and 1. 
+        Method returns the strength of assembly bias as a function of the primary halo property. 
+
+        The `bounds_enforcing_decorator_factory` guarantees that the assembly bias 
+        strength is enforced to be between -1 and 1. 
 
         Parameters 
         ----------
@@ -299,12 +301,6 @@ class HeavisideAssembias(object):
         strength : array_like 
             Strength of assembly bias as a function of the input halo property. 
         """
-        try:
-            prim_haloprop = kwargs['prim_haloprop']
-        except KeyError:
-            raise HalotoolsError("The ``assembias_strength`` method requires a "
-                "``prim_haloprop`` input keyword argument")
-
         model_ordinates = (self.param_dict[self._get_assembias_param_dict_key(ipar)] 
             for ipar in range(len(self._assembias_strength_abcissa)))
         spline_function = model_helpers.custom_spline(
@@ -347,7 +343,7 @@ class HeavisideAssembias(object):
 
         result = np.zeros(len(prim_haloprop))
 
-        strength = self.assembias_strength(prim_haloprop=prim_haloprop)
+        strength = self.assembias_strength(prim_haloprop)
         positive_strength_idx = strength > 0
         negative_strength_idx = ~positive_strength_idx
 
