@@ -28,26 +28,9 @@ We describe each of these three modes of model-building below.
    preloaded_models/index
    composing_models/index
    models_from_scratch/index
-   
 
-Pre-loaded halo occupation models 
-=================================
-There are numerous specific models that come pre-built 
-into the model building package. After importing 
-the module, each pre-built model can be loaded into 
-memory with a single line of code. 
-
-	>>> from halotools.empirical_models import preloaded_models
-	>>> zheng07 = preloaded_models.Zheng07()
-
-This simple call with no arguments builds an 
-instance of a model based on the formulation of the HOD introduced in 
-Kravtsov, et al. (2004), with default settings to use 
-best-fit parameter values taken from the subsequent literature. 
-For a complete listing of the optional features supported by this pre-built model, 
-see the `~halotools.empirical_models.Zheng07` 
-documentation `~halotools.empirical_models`.
-
+If you are looking for a tutorial on a specific component model, 
+see :ref:`model_components_tutorials`. 
 
 Reference/API
 =============
