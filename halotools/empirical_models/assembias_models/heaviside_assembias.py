@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Decorator class for implementing generalized assembly bias
+This module contains the `~halotools.empirical_models.HeavisideAssembias` class. 
+The purpose of this class is to introduce step function-type assembly bias into 
+any method of any component model. 
 """
 
 __all__ = ['HeavisideAssembias']
@@ -16,12 +18,14 @@ from ...custom_exceptions import HalotoolsError
 from ...utils.table_utils import compute_conditional_percentiles
 
 class HeavisideAssembias(object):
-    """ Class used as an orthogonal mix-in to introduce 
-    assembly-biased behavior into the class whose behavior is being supplemented class.  
+    """ Class used as an orthogonal mix-in to introduce step function-style 
+    assembly-biased behavior into any component model. 
 
     """
     def __init__(self, **kwargs):
         """
+        No positional arguments accepted; all argument are strictly keyword arguments. 
+
         Parameters 
         ----------
         method_name_to_decorate : string 
