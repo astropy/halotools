@@ -30,7 +30,7 @@ def compute_conditional_percentiles(**kwargs):
         a keyword argument that stores halo catalog being used to make mock galaxy population
         If a `halo_table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys 
         must also be passed. If not passing a `halo_table`, you must directly pass the 
-        `prim_haloprop_array` and `sec_haloprop_array` keyword arguments. 
+        `prim_haloprop` and `sec_haloprop` keyword arguments. 
 
     prim_haloprop_key : string, optional 
         Name of the column of the input ``halo_table`` that will be used to access the 
@@ -43,13 +43,13 @@ def compute_conditional_percentiles(**kwargs):
         ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key`` 
         to compute the ``prim_haloprop``-conditioned rank-order percentile. 
 
-    prim_haloprop_array : array_like, optional 
+    prim_haloprop : array_like, optional 
         Array storing the primary halo property used to bin the input points. 
-        If a `prim_haloprop_array` is passed, you must also pass a `sec_haloprop_array`. 
+        If a `prim_haloprop` is passed, you must also pass a `sec_haloprop`. 
 
-    sec_haloprop_array : array_like, optional 
+    sec_haloprop : array_like, optional 
         Array storing the secondary halo property used to define the conditional percentiles 
-        in each bin of `prim_haloprop_array`. 
+        in each bin of `prim_haloprop`. 
 
     prim_haloprop_bin_boundaries : array, optional 
         Array defining the boundaries by which we will bin the input ``halo_table``. 
@@ -88,11 +88,11 @@ def compute_conditional_percentiles(**kwargs):
             raise HalotoolsError(msg)
     else:
         try:
-            prim_haloprop = kwargs['prim_haloprop_array']
-            sec_haloprop = kwargs['sec_haloprop_array']
+            prim_haloprop = kwargs['prim_haloprop']
+            sec_haloprop = kwargs['sec_haloprop']
         except KeyError:
             msg = ("\nIf not passing an input ``halo_table`` to the ``compute_conditional_percentiles`` method,\n"
-                "you must pass a ``prim_haloprop_array`` and ``sec_haloprop_array`` arguments\n")
+                "you must pass a ``prim_haloprop`` and ``sec_haloprop`` arguments\n")
             raise HalotoolsError(msg)
 
 

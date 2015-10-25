@@ -69,7 +69,8 @@ class TestAssembias(TestCase):
         else:
             assert oldmean == youngmean 
 
-        split = model.percentile_splitting_function(halo_table = self.toy_halo_table2)
+        split = model.percentile_splitting_function(
+            self.toy_halo_table2['halo_mvir'])
         split = np.where(oldmask, split, 1-split)
         derived_result = split*oldmean
         derived_result[~oldmask] = split[~oldmask]*youngmean
