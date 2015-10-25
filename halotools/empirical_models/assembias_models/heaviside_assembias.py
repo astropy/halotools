@@ -283,7 +283,7 @@ class HeavisideAssembias(object):
         return result
 
 
-
+    @model_helpers.bounds_enforcing_decorator_factory(-1, 1)
     def assembias_strength(self, **kwargs):
         """
         Method returns the strength of assembly bias as a function of the input halos, 
@@ -314,9 +314,6 @@ class HeavisideAssembias(object):
             result = spline_function(np.log10(prim_haloprop))
         else:
             result = spline_function(prim_haloprop)
-
-        result = np.where(result > 1, 1, result)
-        result = np.where(result < -1, -1, result)
 
         return result
 
@@ -403,6 +400,8 @@ class HeavisideAssembias(object):
 
             #################################################################################
             ### Retrieve the arrays storing prim_haloprop and sec_haloprop
+            ### The control flow below is what permits accepting an input 
+            ### halo_table or a directly inputting prim_haloprop and sec_haloprop arrays
             _HAS_HALO_TABLE = False
             if 'halo_table' in kwargs:
                 try:
