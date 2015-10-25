@@ -239,30 +239,22 @@ class HeavisideAssembias(object):
 
         self._methods_to_inherit.extend(['assembias_strength'])
 
-
-    def percentile_splitting_function(self, **kwargs):
+    @model_helpers.bounds_enforcing_decorator_factory(0, 1)
+    def percentile_splitting_function(self, prim_haloprop):
         """
-        Method returns the fraction of halos that are ``type1`` 
+        Method returns the fraction of halos that are ``type-2`` 
         as a function of the input primary halo property. 
 
         Parameters 
         -----------
-        halo_table : object, optional  
-            Data table storing halo catalog. 
+        prim_haloprop : array_like 
+            Array storing the primary halo property. 
 
         Returns 
         -------
         split : float
-            Fraction of ``type1`` halos at the input primary halo property. 
+            Fraction of ``type2`` halos at the input primary halo property. 
         """
-        try:
-            halo_table = kwargs['halo_table']
-            prim_haloprop = halo_table[self.prim_haloprop_key]
-        except KeyError:
-            msg = ("The ``percentile_splitting_function`` method requires a "
-                "``halo_table`` input keyword argument.\n"
-                "The input halo_table must have a column with name %s")
-            raise HalotoolsError(msg % self.prim_haloprop_key)
 
         if hasattr(self, '_input_split_func'):
             result = self._input_split_func(halo_table = halo_table)
@@ -287,9 +279,6 @@ class HeavisideAssembias(object):
             spline_function = model_helpers.custom_spline(
                 self._split_abcissa, self._split_ordinates)
             result = spline_function(prim_haloprop)
-
-        result = np.where(result < 0, 0, result)
-        result = np.where(result > 1, 1, result)
 
         return result
 
@@ -411,16 +400,29 @@ class HeavisideAssembias(object):
         baseline_upper_bound = getattr(self, upper_bound_key)
 
         def wrapper(*args, **kwargs):
-            try:
-                halo_table = kwargs['halo_table']
-                prim_haloprop = halo_table[self.prim_haloprop_key]
-            except KeyError:
-                msg = ("The ``assembias_decorator`` method requires a "
-                    "``halo_table`` input keyword argument.\n"
-                    "The input halo_table must have a column with name %s")
-                raise HalotoolsError(msg % self.prim_haloprop_key)
+            if 'halo_table' in kwargs:
+                try:
+                    halo_table = kwargs['halo_table']
+                    prim_haloprop = halo_table[self.prim_haloprop_key]
+                    sec_haloprop = halo_table[self.sec_haloprop_key]
+                except KeyError:
+                    msg = ("When passing an input ``halo_table`` to the "
+                        " ``assembias_decorator`` method,\n"
+                        "the input halo_table must have a column with name ``%s``"
+                        "and a column with name ``%s``.\n")
+                    raise HalotoolsError(msg % (self.prim_haloprop_key), self.sec_haloprop_key)
+            else:
+                try:
+                    prim_haloprop = kwargs['prim_haloprop']
+                    sec_haloprop = kwargs['sec_haloprop']
+                except KeyError:
+                    msg = ("\nIf not passing an input ``halo_table`` to the "
+                        "``assembias_decorator`` method,\n"
+                        "you must pass ``prim_haloprop`` and ``sec_haloprop`` arguments.\n")
+                    raise HalotoolsError(msg)
 
-            split = self.percentile_splitting_function(halo_table = halo_table)
+
+            split = self.percentile_splitting_function(prim_haloprop)
             result = func(*args, **kwargs)
 
             # We will only decorate values that are not edge cases
@@ -450,15 +452,14 @@ class HeavisideAssembias(object):
                 warn(msg % (key, key))
 
                 percentiles = compute_conditional_percentiles(
-                    halo_table = halo_table, 
-                    prim_haloprop_key = self.prim_haloprop_key, 
-                    sec_haloprop_key = self.sec_haloprop_key
+                    prim_haloprop = prim_haloprop, 
+                    sec_haloprop = sec_haloprop
                     )
                 no_edge_percentiles = percentiles[no_edge_mask]
                 type1_mask = no_edge_percentiles > no_edge_split
 
             perturbation = self._galprop_perturbation(
-                    prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask], 
+                    prim_haloprop = prim_haloprop[no_edge_mask], 
                     baseline_result = no_edge_result, 
                     splitting_result = no_edge_split)
 
