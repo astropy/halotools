@@ -364,20 +364,22 @@ class HeavisideAssembias(object):
         if len(baseline_result[positive_strength_idx]) > 0:
             base_pos = baseline_result[positive_strength_idx]
             split_pos = splitting_result[positive_strength_idx]
+            type1_frac_pos = 1 - split_pos
             strength_pos = strength[positive_strength_idx]
 
             upper_bound1 = baseline_upper_bound - base_pos
-            upper_bound2 = ((1 - split_pos)/split_pos)*(base_pos - baseline_lower_bound)
+            upper_bound2 = ((1 - type1_frac_pos)/type1_frac_pos)*(base_pos - baseline_lower_bound)
             upper_bound = np.minimum(upper_bound1, upper_bound2)
             result[positive_strength_idx] = strength_pos*upper_bound
 
         if len(baseline_result[negative_strength_idx]) > 0:
             base_neg = baseline_result[negative_strength_idx]
             split_neg = splitting_result[negative_strength_idx]
+            type1_frac_neg = 1 - split_neg
             strength_neg = strength[negative_strength_idx]
 
             lower_bound1 = baseline_lower_bound - base_neg
-            lower_bound2 = (1 - split_neg)/split_neg*(base_neg - baseline_upper_bound)
+            lower_bound2 = (1 - type1_frac_neg)/type1_frac_neg*(base_neg - baseline_upper_bound)
             lower_bound = np.maximum(lower_bound1, lower_bound2)
             result[negative_strength_idx] = np.abs(strength_neg)*lower_bound
 
@@ -424,9 +426,6 @@ class HeavisideAssembias(object):
                 )
             no_edge_result = result[no_edge_mask]
             no_edge_split = split[no_edge_mask]
-            # print("\nPrinting no-edge-split min/max")
-            # print(no_edge_split.min(), no_edge_split.max())
-            # print("\n")
 
             # Determine the type1_mask that divides the halo sample into two subsamples
             if hasattr(self, 'halo_type_tuple'):
@@ -459,15 +458,8 @@ class HeavisideAssembias(object):
                     baseline_result = no_edge_result, 
                     splitting_result = no_edge_split)
 
-            # This is the version in master that does not preserve the HOD
-            ### but passes my test suite
-            # perturbation[~type1_mask] *= (-no_edge_split[~type1_mask]/
-            #     (1 - no_edge_split[~type1_mask]))
-
-            # This is the new fix that seems to give correct results 
-            ### but fails the test suite
-            perturbation[type1_mask] *= (-no_edge_split[type1_mask]/
-                (1 - no_edge_split[type1_mask]))
+            perturbation[~type1_mask] *= (-no_edge_split[~type1_mask]/
+                (1 - no_edge_split[~type1_mask]))
 
             no_edge_result += perturbation
 
