@@ -13,6 +13,7 @@ __all__ = ['SampleSelector']
 
 import numpy as np
 import collections
+from warnings import warn 
 from astropy.table import Table
 
 from ..sim_manager.generate_random_sim import FakeSim
@@ -25,19 +26,30 @@ def compute_conditional_percentiles(**kwargs):
 
     Parameters
     ----------
-    halo_table : astropy table 
+    halo_table : astropy table, optional 
         a keyword argument that stores halo catalog being used to make mock galaxy population
+        If a `halo_table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys 
+        must also be passed. If not passing a `halo_table`, you must directly pass the 
+        `prim_haloprop_array` and `sec_haloprop_array` keyword arguments. 
 
-    prim_haloprop_key : string 
+    prim_haloprop_key : string, optional 
         Name of the column of the input ``halo_table`` that will be used to access the 
         primary halo property. `compute_conditional_percentiles` bins the ``halo_table`` by 
         ``prim_haloprop_key`` when computing the result. 
 
-    sec_haloprop_key : string 
+    sec_haloprop_key : string, optional 
         Name of the column of the input ``halo_table`` that will be used to access the 
         secondary halo property. `compute_conditional_percentiles` bins the ``halo_table`` by 
         ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key`` 
         to compute the ``prim_haloprop``-conditioned rank-order percentile. 
+
+    prim_haloprop_array : array_like, optional 
+        Array storing the primary halo property used to bin the input points. 
+        If a `prim_haloprop_array` is passed, you must also pass a `sec_haloprop_array`. 
+
+    sec_haloprop_array : array_like, optional 
+        Array storing the secondary halo property used to define the conditional percentiles 
+        in each bin of `prim_haloprop_array`. 
 
     prim_haloprop_bin_boundaries : array, optional 
         Array defining the boundaries by which we will bin the input ``halo_table``. 
@@ -62,22 +74,27 @@ def compute_conditional_percentiles(**kwargs):
 
     """
 
-    try:
+    if 'halo_table' in kwargs:
         halo_table = kwargs['halo_table']
-        prim_haloprop_key = kwargs['prim_haloprop_key']
-        sec_haloprop_key = kwargs['sec_haloprop_key']
-    except KeyError:
-        msg = ("The ``compute_conditional_percentiles`` method requires the following arguments:\n"
-            "``halo_table``, ``prim_haloprop_key`` and ``sec_haloprop_key``.")
-        raise HalotoolsError(msg)
+        try:
+            prim_haloprop_key = kwargs['prim_haloprop_key']
+            prim_haloprop = halo_table[prim_haloprop_key]
+            sec_haloprop_key = kwargs['sec_haloprop_key']
+            sec_haloprop = halo_table[sec_haloprop_key]
+        except KeyError:
+            msg = ("\nWhen passing an input ``halo_table`` to the ``compute_conditional_percentiles`` method,\n"
+                "you must also pass ``prim_haloprop_key`` and ``sec_haloprop_key`` keyword arguments\n"
+                "whose values are column keys of the input ``halo_table``\n")
+            raise HalotoolsError(msg)
+    else:
+        try:
+            prim_haloprop = kwargs['prim_haloprop_array']
+            sec_haloprop = kwargs['sec_haloprop_array']
+        except KeyError:
+            msg = ("\nIf not passing an input ``halo_table`` to the ``compute_conditional_percentiles`` method,\n"
+                "you must pass a ``prim_haloprop_array`` and ``sec_haloprop_array`` arguments\n")
+            raise HalotoolsError(msg)
 
-    try:
-        prim_haloprop = halo_table[prim_haloprop_key]
-        sec_haloprop = halo_table[sec_haloprop_key]
-    except KeyError:
-        msg = ("Input halo catalog to ``compute_conditional_percentiles`` method " 
-            "must contain prim_haloprop_key = %s and sec_haloprop_key = %s")
-        raise HalotoolsError(msg % (prim_haloprop_key, sec_haloprop_key))
 
     def compute_prim_haloprop_bins(dlog10_prim_haloprop=0.05, **kwargs):
         """
@@ -122,6 +139,17 @@ def compute_conditional_percentiles(**kwargs):
 
         # digitize the masses so that we can access them bin-wise
         output = np.digitize(prim_haloprop, prim_haloprop_bin_boundaries)
+
+        # Use the largest bin for any points larger than the largest bin boundary, 
+        ### and raise a warning if such points are found
+        Nbins = len(prim_haloprop_bin_boundaries)
+        if Nbins in output:
+            msg = ("\n\nThe ``compute_prim_haloprop_bins`` function detected points in the \n"
+                "input array of primary halo property that were larger than the largest value\n"
+                "of the input ``prim_haloprop_bin_boundaries``. All such points will be assigned\n"
+                "to the largest bin.\nBe sure that this is the behavior you expect for your application.\n\n")
+            warn(msg)
+            output = np.where(output == Nbins, Nbins-1, output)
 
         return output
 
