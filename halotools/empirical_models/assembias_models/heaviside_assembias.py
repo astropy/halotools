@@ -345,7 +345,7 @@ class HeavisideAssembias(object):
 
         strength = self.assembias_strength(prim_haloprop)
         positive_strength_idx = strength > 0
-        negative_strength_idx = ~positive_strength_idx
+        negative_strength_idx = strength < 0
 
         if len(baseline_result[positive_strength_idx]) > 0:
             base_pos = baseline_result[positive_strength_idx]
