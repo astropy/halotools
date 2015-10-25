@@ -56,8 +56,9 @@ def compute_conditional_percentiles(**kwargs):
 
     Notes
     -----
-    Takes the input halo catalog and uses the assembly bias model to assign percentiles 
-    of the property in sec_haloprop_key to each halo.
+    The sign of the result is such that in bins of the primary property, 
+    *smaller* values of the secondary property 
+    receive *smaller* values of the returned percentile. 
 
     """
 
