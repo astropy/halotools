@@ -84,7 +84,7 @@ class TestAssembias(TestCase):
         decorated_result_type2 = decorated_method(
             prim_haloprop = prim_haloprop, 
             sec_haloprop_percentile = 0)
-        type1_frac = model.percentile_splitting_function(prim_haloprop)
+        type1_frac = 1 - model.percentile_splitting_function(prim_haloprop)
         type2_frac = 1 - type1_frac
 
         derived_result = type1_frac*decorated_result_type1 + type2_frac*decorated_result_type2
