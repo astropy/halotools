@@ -63,11 +63,11 @@ class TestAssembias(TestCase):
             sec_haloprop_percentile = 1)
 
         assembias_sign = model.assembias_strength(self.prim_haloprop)
-        positive_assembias = assembias_sign > 0
-        negative_assembias = assembias_sign < 0
+        positive_assembias_idx = assembias_sign > 0
+        negative_assembias_idx = assembias_sign < 0
         diff = decorated_result_type1 - decorated_result_type2
-        assert np.all(diff[positive_assembias] <= 0)            
-        assert np.all(diff[negative_assembias] >= 0)
+        assert np.all(diff[positive_assembias_idx] <= 0)            
+        assert np.all(diff[negative_assembias_idx] >= 0)
         assert np.any(diff != 0)
 
     def baseline_preservation_test(self, model):
