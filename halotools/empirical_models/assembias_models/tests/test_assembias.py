@@ -57,17 +57,17 @@ class TestAssembias(TestCase):
         decorated_method = getattr(model, model._method_name_to_decorate)
         decorated_result_type1 = decorated_method(
             prim_haloprop = self.prim_haloprop, 
-            sec_haloprop_percentile = 0)
+            sec_haloprop_percentile = 1)
         decorated_result_type2 = decorated_method(
             prim_haloprop = self.prim_haloprop, 
-            sec_haloprop_percentile = 1)
+            sec_haloprop_percentile = 0)
 
         assembias_sign = model.assembias_strength(self.prim_haloprop)
         positive_assembias_idx = assembias_sign > 0
         negative_assembias_idx = assembias_sign < 0
         diff = decorated_result_type1 - decorated_result_type2
-        assert np.all(diff[positive_assembias_idx] <= 0)            
-        assert np.all(diff[negative_assembias_idx] >= 0)
+        assert np.all(diff[positive_assembias_idx] >= 0)            
+        assert np.all(diff[negative_assembias_idx] <= 0)
         assert np.any(diff != 0)
 
     def baseline_preservation_test(self, model):
@@ -80,12 +80,12 @@ class TestAssembias(TestCase):
         decorated_method = getattr(model, model._method_name_to_decorate)
         decorated_result_type1 = decorated_method(
             prim_haloprop = prim_haloprop, 
-            sec_haloprop_percentile = 0)
+            sec_haloprop_percentile = 1)
         decorated_result_type2 = decorated_method(
             prim_haloprop = prim_haloprop, 
-            sec_haloprop_percentile = 1)
-        type2_frac = model.percentile_splitting_function(prim_haloprop)
-        type1_frac = 1 - type2_frac
+            sec_haloprop_percentile = 0)
+        type1_frac = model.percentile_splitting_function(prim_haloprop)
+        type2_frac = 1 - type1_frac
 
         derived_result = type1_frac*decorated_result_type1 + type2_frac*decorated_result_type2
         np.testing.assert_allclose(baseline_result, derived_result, rtol=1e-3)
