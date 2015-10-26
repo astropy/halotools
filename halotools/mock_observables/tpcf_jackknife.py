@@ -17,7 +17,7 @@ from .pair_counters.double_tree_pairs import jnpairs
 ##########################################################################################
 
 
-__all__=['tpcf']
+__all__=['tpcf_jackknife']
 __author__ = ['Duncan Campbell']
 
 

@@ -29,7 +29,7 @@ def test_npairs_periodic():
     
     rbins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
 
-    result = npairs(data1, data1, rbins, Lbox=Lbox, period=period, verbose=True, N_threads=1)
+    result = npairs(data1, data1, rbins, Lbox=Lbox, period=period, verbose=True, num_threads=1)
     
     test_result = simp_npairs(data1, data1, rbins, period=period)
 

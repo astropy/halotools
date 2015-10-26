@@ -20,7 +20,7 @@ __all__=['fof_pairs', 'xy_z_fof_pairs']
 __author__=['Duncan Campbell']
 
 
-def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_threads=1):
+def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, num_threads=1):
     """
     real-space FoF pair finder.
     
@@ -50,9 +50,9 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
     
     Returns
     -------
@@ -60,12 +60,12 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
         N1 x N2 sparse matrix in COO format containing distances between points.
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -150,10 +150,10 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
     engine = partial(_fof_pairs_engine, grid1, grid2, r_max, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         result = pool.map(engine,range(Ncell1))
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         result = map(engine,range(Ncell1))
     
     #arrays to store result
@@ -228,7 +228,7 @@ def _fof_pairs_engine(grid1, grid2, r_max, period, PBCs, icell1):
 
 
 def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose=False,\
-                   N_threads=1):
+                   num_threads=1):
     """
     redshift-space FoF pair finder.
     
@@ -258,9 +258,9 @@ def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
     
     Returns
     -------
@@ -268,12 +268,12 @@ def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose
         N1 x N2 sparse matrix in COO format containing distances between points.
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -364,10 +364,10 @@ def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose
     engine = partial(_xy_z_fof_pairs_engine, grid1, grid2, rp_max, pi_max, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         result = pool.map(engine,range(Ncell1))
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         result = map(engine,range(Ncell1))
     
     #arrays to store result

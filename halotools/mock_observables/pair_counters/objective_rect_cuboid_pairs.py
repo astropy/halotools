@@ -26,7 +26,7 @@ __author__=['Duncan Campbell']
 
 def obj_wnpairs(data1, data2, rbins, Lbox=None, period=None,\
                 weights1=None, weights2=None, aux1=None, aux2=None,\
-                wfunc=0, verbose=False, N_threads=1):
+                wfunc=0, verbose=False, num_threads=1):
     """
     weighted real-space pair counter.
     
@@ -73,9 +73,9 @@ def obj_wnpairs(data1, data2, rbins, Lbox=None, period=None,\
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
         
     Returns
     -------
@@ -83,12 +83,12 @@ def obj_wnpairs(data1, data2, rbins, Lbox=None, period=None,\
         number counts of pairs
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     if type(wfunc) is not int:
         raise ValueError("wfunc ID must be an integer")
@@ -204,10 +204,10 @@ def obj_wnpairs(data1, data2, rbins, Lbox=None, period=None,\
     engine = partial(_wnpairs_engine, grid1, grid2, weights1, weights2, aux1, aux2, rbins, period, PBCs, wfunc)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
     return counts

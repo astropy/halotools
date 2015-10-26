@@ -17,11 +17,13 @@ igraph_available=True
 try: import igraph
 except ImportError:
     igraph_available=False
-    print("igraph package not installed.  Some functions will not be available.")
+    print("igraph package not installed.  Some functions will not be available. \n"
+          "See http://igraph.org/ and note that there are two packages called 'igraph'.")
 if igraph_available==True: #there is another package called igraph--need to distinguish.
     if not hasattr(igraph,'Graph'):
         igraph_available==False
-        print("igraph package is not installed.  Some functions will not be available.")
+        print("igraph package not installed.  Some functions will not be available. \n"
+              "See http://igraph.org/ and note that there are two packages called 'igraph'.")
 ##########################################################################################
 
 __all__=['FoFGroups']
@@ -34,7 +36,7 @@ class FoFGroups(object):
     redshift space groups assuming the distant observer approximation.
     """
     
-    def __init__(self, positions, b_perp, b_para, period=None, Lbox=None, N_threads=1):
+    def __init__(self, positions, b_perp, b_para, period=None, Lbox=None, num_threads=1):
         """
         create friends-of-friends groups object.
     
@@ -62,7 +64,7 @@ class FoFGroups(object):
         Lbox: array_like, optional
             length 3 array defining cuboid boundaries of the simulation box.
         
-        N_threads: int, optional
+        num_threads: int, optional
             number of threads to use in calculation. Default is 1. A string 'max' may be 
             used to indicate that the pair counters should use all available cores on the 
             machine.
@@ -100,7 +102,7 @@ class FoFGroups(object):
         self.m_perp, self.m_para = xy_z_fof_pairs(self.positions, self.positions,\
                                                   self.d_perp, self.d_para,\
                                                   period=self.period, Lbox=self.Lbox,\
-                                                  N_threads=N_threads)
+                                                  num_threads=num_threads)
         
         self.m = self.m_perp.multiply(self.m_perp)+self.m_para.multiply(self.m_para)
         self.m = self.m.sqrt()
