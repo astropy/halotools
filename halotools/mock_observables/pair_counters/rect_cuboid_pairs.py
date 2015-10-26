@@ -25,7 +25,7 @@ __all__=['npairs', 'wnpairs', 'jnpairs', 'xy_z_npairs', 'xy_z_wnpairs', 'xy_z_jn
 __author__=['Duncan Campbell']
 
 
-def npairs(data1, data2, rbins, Lbox=None, period=None, verbose=False, N_threads=1):
+def npairs(data1, data2, rbins, Lbox=None, period=None, verbose=False, num_threads=1):
     """
     real-space pair counter.
     
@@ -56,9 +56,9 @@ def npairs(data1, data2, rbins, Lbox=None, period=None, verbose=False, N_threads
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
     
     Returns
     -------
@@ -66,12 +66,12 @@ def npairs(data1, data2, rbins, Lbox=None, period=None, verbose=False, N_threads
         number of pairs
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -151,10 +151,10 @@ def npairs(data1, data2, rbins, Lbox=None, period=None, verbose=False, N_threads
     engine = partial(_npairs_engine, grid1, grid2, rbins, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
 
 
@@ -202,7 +202,7 @@ def _npairs_engine(grid1, grid2, rbins, period, PBCs, icell1):
 
 
 def wnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2=None,\
-            verbose=False, N_threads=1):
+            verbose=False, num_threads=1):
     """
     weighted real-space pair counter.
     
@@ -240,9 +240,9 @@ def wnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
         
     Returns
     -------
@@ -250,12 +250,12 @@ def wnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2
         number counts of pairs
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -348,10 +348,10 @@ def wnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2
     engine = partial(_wnpairs_engine, grid1, grid2, weights1, weights2, rbins, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
     return counts
@@ -405,7 +405,7 @@ def _wnpairs_engine(grid1, grid2, weights1, weights2, rbins, period, PBCs, icell
 
 
 def jnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2=None,\
-            jtags1=None, jtags2=None, N_samples=0, verbose=False, N_threads=1):
+            jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1):
     """
     jackknife weighted real-space pair counter.
     
@@ -456,9 +456,9 @@ def jnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  If set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
         
     Returns
     -------
@@ -474,12 +474,12 @@ def jnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2
     if one point is inside, and the other is outside return 0.5*(w1 * w2)
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -606,10 +606,10 @@ def jnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2
                      N_samples, rbins, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
     return counts
@@ -672,7 +672,7 @@ def _jnpairs_engine(grid1, grid2, weights1, weights2, jtags1, jtags2, N_samples,
     return counts
 
 
-def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, verbose=False, N_threads=1):
+def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, verbose=False, num_threads=1):
     """
     real-space pair counter.
     
@@ -707,9 +707,9 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, verbose=
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
     
     Returns
     -------
@@ -717,12 +717,12 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, verbose=
         number of pairs
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -809,10 +809,10 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, verbose=
     engine = partial(_xy_z_npairs_engine, grid1, grid2, rp_bins, pi_bins, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
     return counts
@@ -856,7 +856,7 @@ def _xy_z_npairs_engine(grid1, grid2, rp_bins, pi_bins, period, PBCs, icell1):
     return counts
 
 
-def s_mu_npairs(data1, data2, s_bins, mu_bins, Lbox=None, period=None, verbose=False, N_threads=1):
+def s_mu_npairs(data1, data2, s_bins, mu_bins, Lbox=None, period=None, verbose=False, num_threads=1):
     """
     real-space pair counter.
     
@@ -891,9 +891,9 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, Lbox=None, period=None, verbose=F
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
     
     Returns
     -------
@@ -902,12 +902,12 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, Lbox=None, period=None, verbose=F
         separations less than or equal to s_bins[i], mu_bins[j].
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -989,10 +989,10 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, Lbox=None, period=None, verbose=F
     engine = partial(_s_mu_npairs_engine, grid1, grid2, s_bins, mu_bins, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
     return counts
@@ -1038,7 +1038,7 @@ def _s_mu_npairs_engine(grid1, grid2, s_bins, mu_bins, period, PBCs, icell1):
 
 
 def xy_z_wnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights1=None, weights2=None,\
-            verbose=False, N_threads=1):
+            verbose=False, num_threads=1):
     """
     weighted real-space pair counter.
     
@@ -1080,9 +1080,9 @@ def xy_z_wnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
         
     Returns
     -------
@@ -1090,12 +1090,12 @@ def xy_z_wnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights
         number counts of pairs
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -1195,10 +1195,10 @@ def xy_z_wnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights
     engine = partial(_xy_z_wnpairs_engine, grid1, grid2, weights1, weights2, rp_bins, pi_bins, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
     return counts
@@ -1252,7 +1252,7 @@ def _xy_z_wnpairs_engine(grid1, grid2, weights1, weights2, rp_bins, pi_bins, per
 
 
 def xy_z_jnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights1=None, weights2=None,\
-            jtags1=None, jtags2=None, N_samples=0, verbose=False, N_threads=1):
+            jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1):
     """
     jackknife weighted real-space pair counter.
     
@@ -1307,9 +1307,9 @@ def xy_z_jnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  If set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
         
     Returns
     -------
@@ -1325,12 +1325,12 @@ def xy_z_jnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights
     if one point is inside, and the other is outside return 0.5*(w1 * w2)
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -1469,10 +1469,10 @@ def xy_z_jnpairs(data1, data2, rp_bins, pi_bins, Lbox=None, period=None, weights
                      N_samples, rp_bins, pi_bins, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
     
     return counts
@@ -1580,7 +1580,7 @@ def main():
 def _test_npairs_speed():
 
     "bolshoi like test out to ~20 Mpc"
-    N_threads=4
+    num_threads=4
     Npts = 1e5
     Lbox = [250.0,250.0,250.0]
     period = np.array(Lbox)
@@ -1593,21 +1593,21 @@ def _test_npairs_speed():
     rbins = np.logspace(-2,1.3)
     
     print("##########npairs##########")
-    print("running with {0}/{1} cores".format(N_threads,multiprocessing.cpu_count()))
+    print("running with {0}/{1} cores".format(num_threads,multiprocessing.cpu_count()))
     print("running speed test with {0} points".format(Npts))
     print("in {0} x {1} x {2} box.".format(Lbox[0],Lbox[1],Lbox[2]))
     print("to maximum seperation {0}".format(np.max(rbins)))
 
     #w/ PBCs
     start = time()
-    result = npairs(data1, data1, rbins, Lbox=Lbox, period=period, verbose=False, N_threads=N_threads)
+    result = npairs(data1, data1, rbins, Lbox=Lbox, period=period, verbose=False, num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (PBCs) = %.1f seconds" % runtime)
 
     #w/o PBCs
     start = time()
-    result = npairs(data1, data1, rbins, Lbox=Lbox, period=None, verbose=False, N_threads=N_threads)
+    result = npairs(data1, data1, rbins, Lbox=Lbox, period=None, verbose=False, num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (no PBCs) = %.1f seconds" % runtime)
@@ -1617,7 +1617,7 @@ def _test_npairs_speed():
 def _test_wnpairs_speed():
 
     "bolshoi like test out to ~20 Mpc"
-    N_threads=4
+    num_threads=4
     Npts = 1e5
     Lbox = [250.0,250.0,250.0]
     period = np.array(Lbox)
@@ -1631,7 +1631,7 @@ def _test_wnpairs_speed():
     rbins = np.logspace(-2,1.3)
     
     print("##########wnpairs##########")
-    print("running with {0}/{1} cores".format(N_threads,multiprocessing.cpu_count()))
+    print("running with {0}/{1} cores".format(num_threads,multiprocessing.cpu_count()))
     print("running speed test with {0} points".format(Npts))
     print("in {0} x {1} x {2} box.".format(Lbox[0],Lbox[1],Lbox[2]))
     print("to maximum seperation {0}".format(np.max(rbins)))
@@ -1640,7 +1640,7 @@ def _test_wnpairs_speed():
     start = time()
     result = wnpairs(data1, data1, rbins, Lbox=Lbox, period=period,\
                      weights1=weights1, weights2=weights1, verbose=True,\
-                     N_threads=N_threads)
+                     num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (PBCs) = %.1f seconds" % runtime)
@@ -1649,7 +1649,7 @@ def _test_wnpairs_speed():
     start = time()
     result = wnpairs(data1, data1, rbins, Lbox=Lbox, period=None,\
                      weights1=weights1, weights2=weights1, verbose=True,\
-                     N_threads=N_threads)
+                     num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (no PBCs) = %.1f seconds" % runtime)
@@ -1659,7 +1659,7 @@ def _test_wnpairs_speed():
 def _test_jnpairs_speed():
 
     "bolshoi like test out to ~20 Mpc"
-    N_threads=4
+    num_threads=4
     Npts = 1e5
     Nsamples=5*5*5
     Lbox = [250.0,250.0,250.0]
@@ -1675,7 +1675,7 @@ def _test_jnpairs_speed():
     rbins = np.logspace(-2,1.3)
     
     print("##########jnpairs##########")
-    print("running with {0}/{1} cores".format(N_threads,multiprocessing.cpu_count()))
+    print("running with {0}/{1} cores".format(num_threads,multiprocessing.cpu_count()))
     print("running speed test with {0} points".format(Npts))
     print("{0} jackknife samples".format(Nsamples))
     print("in {0} x {1} x {2} box.".format(Lbox[0],Lbox[1],Lbox[2]))
@@ -1685,7 +1685,7 @@ def _test_jnpairs_speed():
     start = time()
     result = jnpairs(data1, data1, rbins, Lbox=Lbox, period=period,\
                      weights1=weights1, weights2=weights1, jtags1=jtags1, jtags2=jtags1,\
-                     N_samples=Nsamples, verbose=True, N_threads=N_threads)
+                     N_samples=Nsamples, verbose=True, num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (PBCs) = %.1f seconds" % runtime)
@@ -1694,7 +1694,7 @@ def _test_jnpairs_speed():
     start = time()
     result = jnpairs(data1, data1, rbins, Lbox=Lbox, period=None,\
                      weights1=weights1, weights2=weights1, jtags1=jtags1, jtags2=jtags1,\
-                     N_samples=Nsamples, verbose=True, N_threads=N_threads)
+                     N_samples=Nsamples, verbose=True, num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (no PBCs) = %.1f seconds" % runtime)
@@ -1704,7 +1704,7 @@ def _test_jnpairs_speed():
 def _test_xy_z_npairs_speed():
 
     "bolshoi like test out to ~20 Mpc"
-    N_threads=4
+    num_threads=4
     Npts = 1e5
     Lbox = [250.0,250.0,250.0]
     period = np.array(Lbox)
@@ -1718,21 +1718,21 @@ def _test_xy_z_npairs_speed():
     pi_bins = np.linspace(0,50,20)
     
     print("##########xy_z_npairs##########")
-    print("running with {0}/{1} cores".format(N_threads,multiprocessing.cpu_count()))
+    print("running with {0}/{1} cores".format(num_threads,multiprocessing.cpu_count()))
     print("running speed test with {0} points".format(Npts))
     print("in {0} x {1} x {2} box.".format(Lbox[0],Lbox[1],Lbox[2]))
     print("to maximum seperation {0}, {1}".format(np.max(rp_bins),np.max(pi_bins)))
 
     #w/ PBCs
     start = time()
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period, verbose=False, N_threads=N_threads)
+    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period, verbose=False, num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (PBCs) = %.1f seconds" % runtime)
 
     #w/o PBCs
     start = time()
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=None, verbose=False, N_threads=N_threads)
+    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=None, verbose=False, num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (no PBCs) = %.1f seconds" % runtime)
@@ -1742,7 +1742,7 @@ def _test_xy_z_npairs_speed():
 def _test_xy_z_wnpairs_speed():
 
     "bolshoi like test out to ~20 Mpc"
-    N_threads=4
+    num_threads=4
     Npts = 1e5
     Lbox = [250.0,250.0,250.0]
     period = np.array(Lbox)
@@ -1757,7 +1757,7 @@ def _test_xy_z_wnpairs_speed():
     pi_bins = np.linspace(0,50,20)
     
     print("##########xy_z_wnpairs##########")
-    print("running with {0}/{1} cores".format(N_threads,multiprocessing.cpu_count()))
+    print("running with {0}/{1} cores".format(num_threads,multiprocessing.cpu_count()))
     print("running speed test with {0} points".format(Npts))
     print("in {0} x {1} x {2} box.".format(Lbox[0],Lbox[1],Lbox[2]))
     print("to maximum seperation {0}, {1}".format(np.max(rp_bins),np.max(pi_bins)))
@@ -1766,7 +1766,7 @@ def _test_xy_z_wnpairs_speed():
     start = time()
     result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
                      weights1=weights1, weights2=weights1, verbose=True,\
-                     N_threads=N_threads)
+                     num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (PBCs) = %.1f seconds" % runtime)
@@ -1775,7 +1775,7 @@ def _test_xy_z_wnpairs_speed():
     start = time()
     result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=None,\
                      weights1=weights1, weights2=weights1, verbose=True,\
-                     N_threads=N_threads)
+                     num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (no PBCs) = %.1f seconds" % runtime)
@@ -1785,7 +1785,7 @@ def _test_xy_z_wnpairs_speed():
 def _test_xy_z_jnpairs_speed():
 
     "bolshoi like test out to ~20 Mpc"
-    N_threads=4
+    num_threads=4
     Npts = 1e5
     Nsamples=5*5*5
     Lbox = [250.0,250.0,250.0]
@@ -1802,7 +1802,7 @@ def _test_xy_z_jnpairs_speed():
     pi_bins = np.linspace(0,50,20)
     
     print("##########xy_z_jnpairs##########")
-    print("running with {0}/{1} cores".format(N_threads,multiprocessing.cpu_count()))
+    print("running with {0}/{1} cores".format(num_threads,multiprocessing.cpu_count()))
     print("running speed test with {0} points".format(Npts))
     print("{0} jackknife samples".format(Nsamples))
     print("in {0} x {1} x {2} box.".format(Lbox[0],Lbox[1],Lbox[2]))
@@ -1812,7 +1812,7 @@ def _test_xy_z_jnpairs_speed():
     start = time()
     result = xy_z_jnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
                      weights1=weights1, weights2=weights1, jtags1=jtags1, jtags2=jtags1,\
-                     N_samples=Nsamples, verbose=True, N_threads=N_threads)
+                     N_samples=Nsamples, verbose=True, num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (PBCs) = %.1f seconds" % runtime)
@@ -1821,7 +1821,7 @@ def _test_xy_z_jnpairs_speed():
     start = time()
     result = xy_z_jnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=None,\
                      weights1=weights1, weights2=weights1, jtags1=jtags1, jtags2=jtags1,\
-                     N_samples=Nsamples, verbose=True, N_threads=N_threads)
+                     N_samples=Nsamples, verbose=True, num_threads=num_threads)
     end = time()
     runtime = end-start
     print("Total runtime (no PBCs) = %.1f seconds" % runtime)
