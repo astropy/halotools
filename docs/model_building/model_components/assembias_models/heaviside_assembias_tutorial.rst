@@ -10,6 +10,10 @@ This tutorial gives a detailed explanation of the
 
 Example Usage
 ==============
+
+Assembly-biased occupation statistics 
+---------------------------------------
+
 Suppose you have a component model whose behavior you'd like to 
 decorate with assembly bias. Let's use the 
 `~halotools.empirical_models.Zheng07Sats` as a specific example. 
@@ -56,6 +60,35 @@ You can also use `~halotools.empirical_models.HeavisideAssembias` to decorate ba
 that you write yourself, not just component models that are already in Haltools. 
 The `~halotools.empirical_models.HeavisideAssembias` class is a very general tool 
 for studying how assembly bias influences large-scale structure. 
+
+Assembly-biased quiescent fractions 
+-------------------------------------
+
+Now let's look at one more example of how 
+the `~halotools.empirical_models.HeavisideAssembias` class can be used to decorate 
+some underlying behavior with assembly bias. In this next example, we'll work with 
+the `~halotools.empirical_models.Tinker13Cens` as our baseline class. 
+This is an HOD-style model for central galaxy abundance as a function of halo mass, 
+where the occupation statistics are different for quiescent/star-forming centrals. 
+The star formation rate designation is controlled by the 
+`~halotools.empirical_models.Tinker13Cens.mean_quiescent_fraction` method, which 
+is naturally bounded by zero and unity. Matching the pattern above allows us to 
+construct a new model in which the SFR-designation has assembly bias:
+
+
+.. code:: python
+
+    class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
+
+        def __init__(self, **kwargs):
+
+            Tinker13Cens.__init__(self, **kwargs)
+        
+            HeavisideAssembias.__init__(self, 
+                method_name_to_decorate = 'mean_quiescent_fraction', 
+                lower_assembias_bound = 0., 
+                upper_assembias_bound = 1., 
+                **kwargs)
 
 
 
