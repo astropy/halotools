@@ -320,7 +320,7 @@ def _jnpairs_engine(double_tree, weights1, weights2, jtags1, jtags2,
     """
     """
 
-    counts = np.zeros((N_samples+1,len(rbins)))
+    counts = np.zeros((N_samples+1,len(rbins_squared)))
     
     #extract the points in the cell
     s1 = double_tree.tree1.slice_array[icell1]
@@ -360,7 +360,7 @@ def _jnpairs_engine(double_tree, weights1, weights2, jtags1, jtags2,
         counts += jnpairs_no_pbc(x_icell1, y_icell1, z_icell1,
             x_icell2, y_icell2, z_icell2,
             w_icell1, w_icell2, j_icell1, j_icell2, 
-            N_samples+1, rbins)
+            N_samples+1, rbins_squared)
             
     return counts
 
