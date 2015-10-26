@@ -87,79 +87,22 @@ def npairs(data1, data2, rbins, period = None,\
     num_pairs : array of length len(rbins)
         number of pairs
     """
-    
-    if num_threads is not 1:
-        if num_threads=='max':
-            num_threads = multiprocessing.cpu_count()
-        if isinstance(num_threads,int):
-            pool = multiprocessing.Pool(num_threads)
-        else: 
-            msg = "Input ``num_threads`` argument must be an integer or 'max'"
-            raise HalotoolsError(msg)
-    
-    # Passively enforce that we are working with ndarrays
-    x1 = data1[:,0]
-    y1 = data1[:,1]
-    z1 = data1[:,2]
-    x2 = data2[:,0]
-    y2 = data2[:,1]
-    z2 = data2[:,2]
-    rbins = convert_to_ndarray(rbins)
 
-    try:
-        assert rbins.ndim == 1
-        assert len(rbins) > 1
-        if len(rbins) > 2:
-            assert array_is_monotonic(rbins, strict = True) == 1
-    except AssertionError:
-        msg = "Input ``rbins`` must be a monotonically increasing 1D array with at least two entries"
-        raise HalotoolsError(msg)
-
-    # Set the boolean value for the PBCs variable
-    if period is None:
-        PBCs = False
-        x1, y1, z1, x2, y2, z2, period = (
-            _enclose_in_box(x1, y1, z1, x2, y2, z2))
-    else:
-        PBCs = True
-        period = convert_to_ndarray(period)
-        if len(period) == 1:
-            period = np.array([period[0]]*3)
-        try:
-            assert np.all(period < np.inf)
-            assert np.all(period > 0)
-        except AssertionError:
-            msg = "Input ``period`` must be a bounded positive number in all dimensions"
-            raise HalotoolsError(msg)
+    ### Process the inputs with the helper function
+    x1, y1, z1, x2, y2, z2, rbins, period, num_threads, PBCs = (
+        _npairs_process_args(data1, data2, rbins, period, 
+            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+        )        
+    
     xperiod, yperiod, zperiod = period 
-
     rmax = np.max(rbins)
     
-    if approx_cell1_size is None:
-        approx_x1cell_size = rmax
-        approx_y1cell_size = rmax
-        approx_z1cell_size = rmax
-    else:
-        approx_cell1_size = convert_to_ndarray(approx_cell1_size)
-        try:
-            assert len(approx_cell1_size) == 3
-            approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
-        except AssertionError:
-            msg = ("Input ``approx_cell1_size`` must be a length-3 sequence")
-            raise HalotoolsError(msg)
-
-    if approx_cell2_size is None:
-        approx_x2cell_size = copy(approx_x1cell_size)
-        approx_y2cell_size = copy(approx_y1cell_size)
-        approx_z2cell_size = copy(approx_z1cell_size)
-    else:
-        approx_cell2_size = convert_to_ndarray(approx_cell2_size)
-        try:
-            assert len(approx_cell2_size) == 3
-            approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
-        except AssertionError:
-            msg = ("Input ``approx_cell2_size`` must be a length-3 sequence")
-            raise HalotoolsError(msg)
+    ### Compute the estimates for the cell sizes
+    approx_cell1_size, approx_cell2_size = (
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax)
+        )
+    approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
+    approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
 
     double_tree = FlatRectanguloidDoubleTree(
         x1, y1, z1, x2, y2, z2,  
@@ -178,10 +121,11 @@ def npairs(data1, data2, rbins, period = None,\
         double_tree, rbins_squared, period, PBCs)
     
     #do the pair counting
-    if num_threads>1:
+    if num_threads > 1:
+        pool = multiprocessing.Pool(num_threads)
         counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
         pool.close()
-    if num_threads==1:
+    if num_threads == 1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
 
     return counts.astype(int)
@@ -298,6 +242,7 @@ def jnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2
     if both points are inside the sample, return (w1 * w2)
     if one point is inside, and the other is outside return 0.5*(w1 * w2)
     """
+    pass
 
 
 
