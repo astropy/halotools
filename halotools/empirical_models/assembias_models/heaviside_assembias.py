@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Decorator class for implementing generalized assembly bias
+This module contains the `~halotools.empirical_models.HeavisideAssembias` class. 
+The purpose of this class is to introduce step function-type assembly bias into 
+any method of any component model. 
 """
 
 __all__ = ['HeavisideAssembias']
@@ -11,17 +13,19 @@ from time import time
 
 from .. import model_defaults, model_helpers
 
-from ...utils.array_utils import custom_len
+from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 from ...utils.table_utils import compute_conditional_percentiles
 
 class HeavisideAssembias(object):
-    """ Class used as an orthogonal mix-in to introduce 
-    assembly-biased behavior into the class whose behavior is being supplemented class.  
+    """ Class used as an orthogonal mix-in to introduce step function-style 
+    assembly-biased behavior into any component model. 
 
     """
     def __init__(self, **kwargs):
         """
+        No positional arguments accepted; all argument are strictly keyword arguments. 
+
         Parameters 
         ----------
         method_name_to_decorate : string 
@@ -227,35 +231,30 @@ class HeavisideAssembias(object):
                 )
 
         key = self.sec_haloprop_key + '_percentile'
-        self.new_haloprop_func_dict = {}
-        self.new_haloprop_func_dict[key] = assembias_percentile_calculator
+        try:
+            self.new_haloprop_func_dict[key] = assembias_percentile_calculator
+        except AttributeError:
+            self.new_haloprop_func_dict = {}
+            self.new_haloprop_func_dict[key] = assembias_percentile_calculator
 
         self._methods_to_inherit.extend(['assembias_strength'])
 
-
-    def percentile_splitting_function(self, **kwargs):
+    @model_helpers.bounds_enforcing_decorator_factory(0, 1)
+    def percentile_splitting_function(self, prim_haloprop):
         """
-        Method returns the fraction of halos that are ``type1`` 
+        Method returns the fraction of halos that are ``type-2`` 
         as a function of the input primary halo property. 
 
         Parameters 
         -----------
-        halo_table : object, optional  
-            Data table storing halo catalog. 
+        prim_haloprop : array_like 
+            Array storing the primary halo property. 
 
         Returns 
         -------
         split : float
-            Fraction of ``type1`` halos at the input primary halo property. 
+            Fraction of ``type2`` halos at the input primary halo property. 
         """
-        try:
-            halo_table = kwargs['halo_table']
-            prim_haloprop = halo_table[self.prim_haloprop_key]
-        except KeyError:
-            msg = ("The ``percentile_splitting_function`` method requires a "
-                "``halo_table`` input keyword argument.\n"
-                "The input halo_table must have a column with name %s")
-            raise HalotoolsError(msg % self.prim_haloprop_key)
 
         if hasattr(self, '_input_split_func'):
             result = self._input_split_func(halo_table = halo_table)
@@ -281,17 +280,16 @@ class HeavisideAssembias(object):
                 self._split_abcissa, self._split_ordinates)
             result = spline_function(prim_haloprop)
 
-        result = np.where(result < 0, 0, result)
-        result = np.where(result > 1, 1, result)
-
         return result
 
 
-
-    def assembias_strength(self, **kwargs):
+    @model_helpers.bounds_enforcing_decorator_factory(-1, 1)
+    def assembias_strength(self, prim_haloprop):
         """
-        Method returns the strength of assembly bias as a function of the input halos, 
-        where the strength varies between -1 and 1. 
+        Method returns the strength of assembly bias as a function of the primary halo property. 
+
+        The `bounds_enforcing_decorator_factory` guarantees that the assembly bias 
+        strength is enforced to be between -1 and 1. 
 
         Parameters 
         ----------
@@ -303,12 +301,6 @@ class HeavisideAssembias(object):
         strength : array_like 
             Strength of assembly bias as a function of the input halo property. 
         """
-        try:
-            prim_haloprop = kwargs['prim_haloprop']
-        except KeyError:
-            raise HalotoolsError("The ``assembias_strength`` method requires a "
-                "``prim_haloprop`` input keyword argument")
-
         model_ordinates = (self.param_dict[self._get_assembias_param_dict_key(ipar)] 
             for ipar in range(len(self._assembias_strength_abcissa)))
         spline_function = model_helpers.custom_spline(
@@ -318,9 +310,6 @@ class HeavisideAssembias(object):
             result = spline_function(np.log10(prim_haloprop))
         else:
             result = spline_function(prim_haloprop)
-
-        result = np.where(result > 1, 1, result)
-        result = np.where(result < -1, -1, result)
 
         return result
 
@@ -335,7 +324,7 @@ class HeavisideAssembias(object):
         Method determines how much to boost the baseline function 
         according to the strength of assembly bias and the min/max 
         boost allowable by the requirement that the all-halo baseline 
-        function be preserved. 
+        function be preserved. The returned perturbation applies to type-1 halos. 
         """
         lower_bound_key = 'lower_bound_' + self._method_name_to_decorate + '_' + self.gal_type
         baseline_lower_bound = getattr(self, lower_bound_key)
@@ -354,27 +343,29 @@ class HeavisideAssembias(object):
 
         result = np.zeros(len(prim_haloprop))
 
-        strength = self.assembias_strength(prim_haloprop=prim_haloprop)
+        strength = self.assembias_strength(prim_haloprop)
         positive_strength_idx = strength > 0
-        negative_strength_idx = np.invert(positive_strength_idx)
+        negative_strength_idx = strength < 0
 
         if len(baseline_result[positive_strength_idx]) > 0:
             base_pos = baseline_result[positive_strength_idx]
             split_pos = splitting_result[positive_strength_idx]
+            type1_frac_pos = 1 - split_pos
             strength_pos = strength[positive_strength_idx]
 
             upper_bound1 = baseline_upper_bound - base_pos
-            upper_bound2 = ((1 - split_pos)/split_pos)*(base_pos - baseline_lower_bound)
+            upper_bound2 = ((1 - type1_frac_pos)/type1_frac_pos)*(base_pos - baseline_lower_bound)
             upper_bound = np.minimum(upper_bound1, upper_bound2)
             result[positive_strength_idx] = strength_pos*upper_bound
 
         if len(baseline_result[negative_strength_idx]) > 0:
             base_neg = baseline_result[negative_strength_idx]
             split_neg = splitting_result[negative_strength_idx]
+            type1_frac_neg = 1 - split_neg
             strength_neg = strength[negative_strength_idx]
 
             lower_bound1 = baseline_lower_bound - base_neg
-            lower_bound2 = (1 - split_neg)/split_neg*(base_neg - baseline_upper_bound)
+            lower_bound2 = (1 - type1_frac_neg)/type1_frac_neg*(base_neg - baseline_upper_bound)
             lower_bound = np.maximum(lower_bound1, lower_bound2)
             result[negative_strength_idx] = np.abs(strength_neg)*lower_bound
 
@@ -402,62 +393,122 @@ class HeavisideAssembias(object):
         baseline_upper_bound = getattr(self, upper_bound_key)
 
         def wrapper(*args, **kwargs):
-            try:
-                halo_table = kwargs['halo_table']
-                prim_haloprop = halo_table[self.prim_haloprop_key]
-            except KeyError:
-                msg = ("The ``assembias_decorator`` method requires a "
-                    "``halo_table`` input keyword argument.\n"
-                    "The input halo_table must have a column with name %s")
-                raise HalotoolsError(msg % self.prim_haloprop_key)
 
-            split = self.percentile_splitting_function(halo_table = halo_table)
+            #################################################################################
+            ### Retrieve the arrays storing prim_haloprop and sec_haloprop
+            ### The control flow below is what permits accepting an input 
+            ### halo_table or a directly inputting prim_haloprop and sec_haloprop arrays
+            _HAS_HALO_TABLE = False
+            if 'halo_table' in kwargs:
+                try:
+                    halo_table = kwargs['halo_table']
+                    prim_haloprop = halo_table[self.prim_haloprop_key]
+                    sec_haloprop = halo_table[self.sec_haloprop_key]
+                    _HAS_HALO_TABLE = True
+                except KeyError:
+                    msg = ("When passing an input ``halo_table`` to the "
+                        " ``assembias_decorator`` method,\n"
+                        "the input halo_table must have a column with name ``%s``"
+                        "and a column with name ``%s``.\n")
+                    raise HalotoolsError(msg % (self.prim_haloprop_key), self.sec_haloprop_key)
+            else:
+                try:
+                    prim_haloprop = convert_to_ndarray(kwargs['prim_haloprop'])
+                except KeyError:
+                    msg = ("\nIf not passing an input ``halo_table`` to the "
+                        "``assembias_decorator`` method,\n"
+                        "you must pass ``prim_haloprop`` argument.\n")
+                    raise HalotoolsError(msg)
+                try:
+                    sec_haloprop = convert_to_ndarray(kwargs['sec_haloprop'])
+                except KeyError:
+                    if 'sec_haloprop_percentile' not in kwargs:
+                        msg = ("\nIf not passing an input ``halo_table`` to the "
+                            "``assembias_decorator`` method,\n"
+                            "you must pass either a ``sec_haloprop`` or "
+                            "``sec_haloprop_percentile`` argument.\n")
+                        raise HalotoolsError(msg)
+
+            #################################################################################
+
+            ### Compute the fraction of type-2 halos as a function of the input prim_haloprop
+            split = self.percentile_splitting_function(prim_haloprop)
+
+            ### Compute the baseline, undecorated result
             result = func(*args, **kwargs)
 
-            # We will only apply decorate values that are not edge cases
+            # We will only decorate values that are not edge cases, 
+            ### so first compute the mask for non-edge cases
             no_edge_mask = (
                 (split > 0) & (split < 1) & 
                 (result > baseline_lower_bound) & (result < baseline_upper_bound)
                 )
+            # Now create convenient references to the non-edge-case sub-arrays 
             no_edge_result = result[no_edge_mask]
             no_edge_split = split[no_edge_mask]
 
-            # Determine the type1_mask that divides the halo sample into two subsamples
-            if hasattr(self, 'halo_type_tuple'):
-                halo_type_key = self.halo_type_tuple[0]
-                halo_type1_val = self.halo_type_tuple[1]
-                type1_mask = halo_table[halo_type_key][no_edge_mask] == halo_type1_val
-            elif self.sec_haloprop_key + '_percentile' in halo_table.keys():
-                no_edge_percentiles = halo_table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
-                type1_mask = no_edge_percentiles > no_edge_split
-            else:
-                msg = ("\nThe HeavisideAssembias class implements assembly bias \n" 
-                    "by altering the behavior of the model according to the value of " 
-                    "``%s``.\n This quantity can be pre-computed using the "
-                    "new_haloprop_func_dict mechanism, making your mock population run faster.\n"
-                    "See the MockFactory documentation for detailed instructions.\n "
-                    "Now computing %s from scratch.\n")
-                key = self.sec_haloprop_key + '_percentile'
-                warn(msg % (key, key))
+            #################################################################################
+            # Compute the array type1_mask 
+            # This array will serve as a boolean mask that divides the halo sample into two subsamples
+            # There are several possible ways that the type1_mask can be computed, depending on 
+            # what the decorator was passed as input
 
-                percentiles = compute_conditional_percentiles(
-                    halo_table = halo_table, 
-                    prim_haloprop_key = self.prim_haloprop_key, 
-                    sec_haloprop_key = self.sec_haloprop_key
-                    )
+            if _HAS_HALO_TABLE is True:
+                # we were passed halo_type_tuple:
+                if hasattr(self, 'halo_type_tuple'): 
+                    halo_type_key = self.halo_type_tuple[0]
+                    halo_type1_val = self.halo_type_tuple[1]
+                    type1_mask = halo_table[halo_type_key][no_edge_mask] == halo_type1_val
+
+                # the value of sec_haloprop_percentile is already stored as a column of the halo_table
+                elif self.sec_haloprop_key + '_percentile' in halo_table.keys():
+                    no_edge_percentiles = halo_table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
+                    type1_mask = no_edge_percentiles > no_edge_split
+                else:
+                    msg = ("\nThe HeavisideAssembias class implements assembly bias \n" 
+                        "by altering the behavior of the model according to the value of " 
+                        "``%s``.\n This quantity can be pre-computed using the "
+                        "new_haloprop_func_dict mechanism, making your mock population run faster.\n"
+                        "See the MockFactory documentation for detailed instructions.\n "
+                        "Now computing %s from scratch.\n")
+                    key = self.sec_haloprop_key + '_percentile'
+                    warn(msg % (key, key))
+
+                    percentiles = compute_conditional_percentiles(
+                        prim_haloprop = prim_haloprop, 
+                        sec_haloprop = sec_haloprop
+                        )
+                    no_edge_percentiles = percentiles[no_edge_mask]
+                    type1_mask = no_edge_percentiles > no_edge_split
+            else:
+                try:
+                    percentiles = kwargs['sec_haloprop_percentile']
+                    if custom_len(percentiles) == 1:
+                        percentiles = np.zeros(custom_len(prim_haloprop)) + percentiles
+                except KeyError:
+                    percentiles = compute_conditional_percentiles(
+                        prim_haloprop = prim_haloprop, 
+                        sec_haloprop = sec_haloprop
+                        )
                 no_edge_percentiles = percentiles[no_edge_mask]
                 type1_mask = no_edge_percentiles > no_edge_split
 
+            # type1_mask has now been computed for all possible branchings 
+            #################################################################################
+
             perturbation = self._galprop_perturbation(
-                    prim_haloprop = halo_table[self.prim_haloprop_key][no_edge_mask], 
+                    prim_haloprop = prim_haloprop[no_edge_mask], 
                     baseline_result = no_edge_result, 
                     splitting_result = no_edge_split)
-            perturbation[np.invert(type1_mask)] *= (-no_edge_split[np.invert(type1_mask)]/
-                (1 - no_edge_split[np.invert(type1_mask)]))
+
+            frac_type1 = 1 - no_edge_split
+            frac_type2 = 1 - frac_type1
+            perturbation[~type1_mask] *= (-frac_type1[~type1_mask]/
+                (frac_type2[~type1_mask]))
 
             no_edge_result += perturbation
-
             result[no_edge_mask] = no_edge_result
+
             return result
 
         return wrapper
