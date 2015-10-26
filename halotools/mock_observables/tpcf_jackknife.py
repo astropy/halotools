@@ -12,8 +12,8 @@ import numpy as np
 from math import pi, gamma
 
 from .clustering_helpers import *
-from .pair_counters.rect_cuboid_pairs import npairs, xy_z_npairs, jnpairs, s_mu_npairs
-from .pair_counters.double_tree_pairs import npairs
+#from .pair_counters.double_tree_pairs import jnpairs
+from .pair_counters.rect_cuboid_pairs import jnpairs
 ##########################################################################################
 
 
@@ -24,7 +24,7 @@ __author__ = ['Duncan Campbell']
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 
-def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.0],\
+def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                    sample2=None, period=None, do_auto=True, do_cross=True,\
                    estimator='Natural', num_threads=1, max_sample_size=int(1e6)):
     """
@@ -41,7 +41,8 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
         Npts x 3 numpy array containing 3-D positions of points.
     
     randoms : array_like
-        Nran x 3 numpy array containing 3-D positions of points.
+        Nran x 3 numpy array containing 3-D positions of points.  Alternatively, this can 
+        be an integer when `period` is specified, indicating peridoic boundary conditions.
     
     rbins : array_like
         numpy array of boundaries defining the bins in which pairs are counted. 
@@ -50,9 +51,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
         numpy array of number of divisions along each dimension defining jackknife 
         subvolumes.  If single integer is given, assumed to be equivalent for each 
         dimension.  Total number of jackknife samples is numpy.prod(`Nsub`).
-    
-    Lbox : array_like, optional
-        length of data volume along each dimension.
     
     sample2 : array_like, optional
         Npts x 3 numpy array containing 3-D positions of points.
@@ -108,85 +106,27 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     counts, and if both are outside, +0 counts.
     """
     
-    estimators = _list_estimators()
+    sample1, rbins, Nsub, sample2, randoms, period, do_auto, do_cross, num_threads,\
+        _sample1_is_sample2, PBCs = _tpcf_jackknife_process_args(sample1, randoms,\
+                                       rbins, Nsub, sample2, period, do_auto,\
+                                       do_cross, estimator, num_threads, max_sample_size)
     
-    #process input parameters
-    sample1 = np.asarray(sample1)
-    if sample2 != None: 
-        sample2 = np.asarray(sample2)
-        if np.all(sample1==sample2):
-            do_cross==False
-            print("Warning: sample1 and sample2 are exactly the same, only the\
-                   auto-correlation will be returned.")
-    else: sample2 = sample1
-    randoms = np.asarray(randoms)
-    rbins = np.asarray(rbins)
-    if type(Nsub) is int: Nsub = np.array([Nsub]*np.shape(sample1)[-1])
-    else: Nsub = np.asarray(Nsub)
-    if type(Lbox) in (int,float): Lbox = np.array([Lbox]*np.shape(sample1)[-1])
-    else: Lbox = np.asarray(Lbox)
-    #Process period entry and check for consistency.
-    if period is None:
-            PBCs = False
-            period = np.array([np.inf]*np.shape(sample1)[-1])
-    else:
-        PBCs = True
-        period = np.asarray(period).astype("float64")
-        if np.shape(period) == ():
-            period = np.array([period]*np.shape(sample1)[-1])
-        elif np.shape(period)[0] != np.shape(sample1)[-1]:
-            raise ValueError("period should have shape (k,)")
-            return None
-    #down sample is sample size exceeds max_sample_size.
-    if (len(sample2)>max_sample_size) & (not np.all(sample1==sample2)):
-        inds = np.arange(0,len(sample2))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample2 = sample2[inds]
-        print('down sampling sample2...')
-    if len(sample1)>max_sample_size:
-        inds = np.arange(0,len(sample1))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample1 = sample1[inds]
-        print('down sampling sample1...')
-    if len(randoms)>max_sample_size:
-        inds = np.arange(0,len(randoms))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample1 = randoms[inds]
-        print('down sampling randoms...')
-    if np.shape(Nsub)[0]!=np.shape(sample1)[-1]:
-        raise ValueError("Nsub should have shape (k,) or be a single integer")
+    #process randoms parameter
+    if np.shape(randoms) == (1,):
+        N_randoms = randoms[0]
+        if PBCs == True:
+            randoms = np.random.random((N_randoms,3))*period
+        else:
+            msg = ("when no period parameter is passed, the user must \n"
+                   "provide true randoms, and not just the number of randoms desired.")
+            raise HalotoolsError(msg)
     
-    #check radial bins
-    if np.shape(rbins) == ():
-        rbins = np.array([rbins])
-    if rbins.ndim != 1:
-        raise ValueError('rbins must be a 1-D array')
-    if len(rbins)<2:
-        raise ValueError('rbins must be of lenght >=2.')
+    #determine box size the data occupies.  This is used in determining jackknife samples.
+    if PBCs==False: 
+        sample1, sample2, randoms, Lbox = _enclose_in_box(sample1, sample2, randoms)
+    else: 
+        Lbox = period
     
-    k = np.shape(sample1)[-1] #dimensionality of data
-    if k!=3:
-        raise ValueError('data must be 3-dimensional.')
-        
-    N1 = len(sample1)
-    N2 = len(sample2)
-    Nran = len(randoms)
-    
-    #check for input parameter consistency
-    if (period is not None) & (np.max(rbins)>np.min(period)/2.0):
-        raise ValueError('Cannot calculate for seperations larger than Lbox/2.')
-    if (sample2 is not None) & (sample1.shape[-1]!=sample2.shape[-1]):
-        raise ValueError('Sample 1 and sample 2 must have same dimension.')
-    if estimator not in estimators: 
-        raise ValueError('Must specify a supported estimator. Supported estimators are:{0}'
-        .value(estimators))
-    if (PBCs==True) & (max(period)==np.inf):
-        raise ValueError('If a non-infinte PBC specified, all PBCs must be non-infinte.')
-    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
-        raise ValueError('do_auto and do_cross keywords must be of type boolean.')
     
     def get_subvolume_labels(sample1, sample2, randoms, Nsub, Lbox):
         """
@@ -204,21 +144,31 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
         #tag each particle with an integer indicating which jackknife subvolume it is in
         #subvolume indices for the sample1 particle's positions
         index_1 = np.floor(sample1/dL).astype(int)
+        for i in range(3): #take care of the case where a point falls on the boundary
+            index_1[:, i] = np.where(index_1[:, i] == Nsub[i], Nsub[i] - 1, index_1[:, i])
         j_index_1 = inds[index_1[:,0],index_1[:,1],index_1[:,2]].astype(int)
     
         #subvolume indices for the random particle's positions
         index_random = np.floor(randoms/dL).astype(int)
+        for i in range(3): #take care of the case where a point falls on the boundary
+            index_random[:, i] = np.where(index_random[:, i] == Nsub[i], Nsub[i] - 1, index_random[:, i])
         j_index_random = inds[index_random[:,0],\
                               index_random[:,1],\
                               index_random[:,2]].astype(int)
         
         #subvolume indices for the sample2 particle's positions
         index_2 = np.floor(sample2/dL).astype(int)
+        for i in range(3): #take care of the case where a point falls on the boundary
+            index_2[:, i] = np.where(index_2[:, i] == Nsub[i], Nsub[i] - 1, index_2[:, i])
         j_index_2 = inds[index_2[:,0],index_2[:,1],index_2[:,2]].astype(int)
         
         return j_index_1, j_index_2, j_index_random, int(N_sub_vol)
     
-    def get_subvolume_numbers(j_index,N_sub_vol):
+    def get_subvolume_numbers(j_index, N_sub_vol):
+        """
+        get the list of subvolume labels
+        """
+        
         #need every label to be in there at least once
         temp = np.hstack((j_index,np.arange(1,N_sub_vol+1,1)))
         labels, N = np.unique(temp,return_counts=True)
@@ -226,7 +176,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
         return N
     
     def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,\
-                      period, N_thread, do_auto, do_cross, do_DD):
+                      period, N_thread, do_auto, do_cross, _sample1_is_sample2):
         """
         Count jackknife data pairs: DD
         """
@@ -239,7 +189,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
             D1D1=None
             D2D2=None
         
-        if np.all(sample1 == sample2):
+        if _sample1_is_sample2:
             D1D2 = D1D1
             D2D2 = D1D1
         else:
@@ -278,17 +228,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
 
         return DR, RR
     
-    def jackknife_errors(sub,full,N_sub_vol):
-        """
-        Calculate jackknife errors.
-        """
-        after_subtraction =  sub - np.mean(sub,axis=0)
-        squared = after_subtraction**2.0
-        error2 = ((N_sub_vol-1)/N_sub_vol)*squared.sum(axis=0)
-        error = error2**0.5
-        
-        return error
-    
     def covariance_matrix(sub,full,N_sub_vol):
         """
         Calculate the full covariance matrix.
@@ -303,12 +242,14 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
                 for k in range(N_sub_vol):
                     tmp = tmp + after_subtraction[k,i]*after_subtraction[k,j]
                 cov[i,j] = (((N_sub_vol-1)/N_sub_vol)*tmp)
-    
         return cov
     
     def TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
         """
-        two point correlation function estimator
+        two point correlation function estimator.
+        
+        This is different from the function included in clustering_helpers in order to 
+        deal with ndarrays.  This is not ideal, and would be nice to fix.
         """
         if estimator == 'Natural':
             factor = ND1*ND2/(NR1*NR2)
@@ -355,13 +296,18 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     
     #calculate all the pair counts
     D1D1, D1D2, D2D2 = jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol,\
-                                     rbins, period, num_threads, do_auto, do_cross, do_DD)
+                                     rbins, period, num_threads, do_auto, do_cross,\
+                                      _sample1_is_sample2)
+    
+    #pull out the full and sub sample results
     D1D1_full = D1D1[0,:]
     D1D1_sub = D1D1[1:,:]
     D1D2_full = D1D2[0,:]
     D1D2_sub = D1D2[1:,:]
     D2D2_full = D2D2[0,:]
     D2D2_sub = D2D2[1:,:]
+    
+    #do random counts
     D1R, RR = jrandom_counts(sample1, randoms, j_index_1, j_index_random, N_sub_vol,\
                              rbins, period, num_threads, do_DR, do_RR)
     if np.all(sample1==sample2):
@@ -373,7 +319,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
                                           do_RR=False)
         else: D2R = None
     
-    if do_DR==True:    
+    if do_DR==True:
         D1R_full = D1R[0,:]
         D1R_sub = D1R[1:,:]
         D2R_full = D2R[0,:]
@@ -392,9 +338,10 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     
     
     #calculate the correlation function for the full sample
-    xi_11_full = TP_estimator(D1D1_full, D1R_full, RR_full, N1, N1, NR, NR, estimator)
-    xi_12_full = TP_estimator(D1D2_full, D1R_full, RR_full, N1, N2, NR, NR, estimator)
-    xi_22_full = TP_estimator(D2D2_full, D2R_full, RR_full, N2, N2, NR, NR, estimator)
+    xi_11_full = _TP_estimator(D1D1_full, D1R_full, RR_full, N1, N1, NR, NR, estimator)
+    xi_12_full = _TP_estimator(D1D2_full, D1R_full, RR_full, N1, N2, NR, NR, estimator)
+    xi_22_full = _TP_estimator(D2D2_full, D2R_full, RR_full, N2, N2, NR, NR, estimator)
+    
     #calculate the correlation function for the subsamples
     xi_11_sub = TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs,\
                              NR_subs, estimator)
@@ -403,17 +350,12 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
     xi_22_sub = TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs,\
                              NR_subs, estimator)
     
-    #calculate the errors
-    xi_11_err = jackknife_errors(xi_11_sub,xi_11_full,N_sub_vol)
-    xi_12_err = jackknife_errors(xi_12_sub,xi_12_full,N_sub_vol)
-    xi_22_err = jackknife_errors(xi_22_sub,xi_22_full,N_sub_vol)
-    
     #calculate the covariance matrix
-    xi_11_cov = covariance_matrix(xi_11_sub,xi_11_full,N_sub_vol)
-    xi_12_cov = covariance_matrix(xi_12_sub,xi_12_full,N_sub_vol)
-    xi_22_cov = covariance_matrix(xi_22_sub,xi_22_full,N_sub_vol)
+    xi_11_cov = covariance_matrix(xi_11_sub, xi_11_full, N_sub_vol)
+    xi_12_cov = covariance_matrix(xi_12_sub, xi_12_full, N_sub_vol)
+    xi_22_cov = covariance_matrix(xi_22_sub, xi_22_full, N_sub_vol)
     
-    if np.all(sample1==sample2):
+    if _sample1_is_sample2:
         return xi_11_full,xi_11_cov
     else:
         if (do_auto==True) & (do_cross==True):
@@ -422,3 +364,43 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5], Lbox=[250.0,250.0,250.
             return xi_11_full,xi_22_full,xi_11_cov,xi_22_cov
         elif do_cross==True:
             return xi_12_full,xi_12_cov
+
+
+def _enclose_in_box(data1, data2, data3):
+    """
+    build axis aligned box which encloses all points. 
+    shift points so cube's origin is at 0,0,0.
+    """
+    
+    x1,y1,z1 = data1[:,0],data1[:,1],data1[:,2]
+    x2,y3,z2 = data2[:,0],data2[:,1],data2[:,2]
+    x3,y3,z3 = data3[:,0],data3[:,1],data3[:,2]
+    
+    xmin = np.min([np.min(x1),np.min(x2), np.min(x3)])
+    ymin = np.min([np.min(y1),np.min(y2), np.min(y3)])
+    zmin = np.min([np.min(z1),np.min(z2), np.min(z3)])
+    xmax = np.max([np.max(x1),np.max(x2), np.min(x3)])
+    ymax = np.max([np.max(y1),np.max(y2), np.min(y3)])
+    zmax = np.max([np.max(z1),np.max(z2), np.min(z3)])
+    
+    xyzmin = np.min([xmin,ymin,zmin])
+    xyzmax = np.min([xmax,ymax,zmax])-xyzmin
+    
+    x1 = x1 - xyzmin
+    y1 = y1 - xyzmin
+    z1 = z1 - xyzmin
+    x2 = x2 - xyzmin
+    y2 = y2 - xyzmin
+    z2 = z2 - xyzmin
+    x3 = x3 - xyzmin
+    y3 = y3 - xyzmin
+    z3 = z3 - xyzmin
+    
+    Lbox = np.array([xyzmax, xyzmax, xyzmax])
+    
+    return np.vstack((x1, y1, z1)).T,\
+           np.vstack((x2, y2, z2)).T,\
+           np.vstack((x3, y3, z3)).T, Lbox
+
+
+
