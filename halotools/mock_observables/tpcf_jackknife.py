@@ -13,7 +13,7 @@ from math import pi, gamma
 
 from .clustering_helpers import *
 #from .pair_counters.double_tree_pairs import jnpairs
-from .pair_counters.rect_cuboid_pairs import jnpairs
+from .pair_counters.double_tree_pairs import jnpairs
 ##########################################################################################
 
 
