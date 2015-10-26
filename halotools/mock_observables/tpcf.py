@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-functions to calculate clustering statistics, e.g. two point correlation functions.
+Calculate two point correlation functions.
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -10,9 +10,7 @@ from __future__ import (absolute_import, division, print_function,
 import sys
 import numpy as np
 from math import pi, gamma
-
 from .clustering_helpers import *
-from .pair_counters.rect_cuboid_pairs import npairs, xy_z_npairs, jnpairs, s_mu_npairs
 from .pair_counters.double_tree_pairs import npairs
 ##########################################################################################
 
@@ -85,11 +83,11 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         returned: :math:`\\xi_{11}(r)`, :math:`\\xi_{12}(r)`, :math:`\\xi_{22}(r)`,
         the autocorrelation of sample1, the cross-correlation between `sample1` and 
         `sample2`, and the autocorrelation of `sample2`.  If `do_auto` or `do_cross` is 
-        set to False, the appropriate result(s) is not returned.
+        set to False, the appropriate result(s) are returned.
 
     Notes
     -----
-    Pairs are counted using the pair_counters.rect_cuboid_pairs module.  This pair 
+    Pairs are counted using the pair_counters.double_tree_pairs module.  This pair 
     counter is optimized to work on points distributed in a rectangular cuboid volume, 
     e.g. a simulation box.  This optimization restricts this function to work on 3-D 
     point distributions.
@@ -102,84 +100,15 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     coordinates be negative.
     """
     
-    estimators = _list_estimators()
+    #check input arguments using helper function
+    sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
+        _sample1_is_sample2 = _tpcf_process_args(sample1, rbins, sample2, randoms,\
+                                                 period, do_auto, do_cross,\
+                                                 estimator, num_threads, max_sample_size)
     
-    #process input parameters
-    sample1 = np.asarray(sample1)
-    if sample2 is not None: 
-        sample2 = np.asarray(sample2)
-        if np.all(sample1==sample2):
-            do_cross==False
-            print("Warning: sample1 and sample2 are exactly the same, only the\
-                   auto-correlation will be returned.")
-    else: sample2 = sample1
-    if randoms is not None: randoms = np.asarray(randoms)
-    rbins = np.asarray(rbins)
     
-    #Process period entry and check for consistency.
-    if period is None:
-            PBCs = False
-    else:
-        PBCs = True
-        period = np.asarray(period).astype("float64")
-        if np.shape(period) == ():
-            period = np.array([period]*np.shape(sample1)[-1])
-        elif np.shape(period)[0] != np.shape(sample1)[-1]:
-            raise ValueError("period should have shape (k,)")
-    
-    #down sample if sample size exceeds max_sample_size.
-    if (len(sample1)>max_sample_size) & (np.all(sample1==sample2)):
-        inds = np.arange(0,len(sample1))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample1 = sample1[inds]
-        sample2 = sample2[inds]
-        print('downsampling sample1...')
-    if len(sample2)>max_sample_size:
-        inds = np.arange(0,len(sample2))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample2 = sample2[inds]
-        print('down sampling sample2...')
-    if len(sample1)>max_sample_size:
-        inds = np.arange(0,len(sample1))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample1 = sample1[inds]
-        print('down sampling sample1...')
-    
-    #check radial bins
-    if np.shape(rbins) == ():
-        rbins = np.array([rbins])
-    if rbins.ndim != 1:
-        raise ValueError('rbins must be a 1-D array')
-    if len(rbins)<2:
-        raise ValueError('rbins must be of lenght >=2.')
-    
-    #check dimensionality of data. currently, points must be 3D.
-    k = np.shape(sample1)[-1]
-    if k!=3:
-        raise ValueError('data must be 3-dimensional.')
-    
-    #check for input parameter consistency
-    if (period is not None):
-        if (np.max(rbins)>np.min(period)/2.0):
-            raise ValueError('cannot calculate for seperations larger than Lbox/2.')
-    if (sample2 is not None) & (sample1.shape[-1]!=sample2.shape[-1]):
-        raise ValueError('sample1 and sample2 must have same dimension.')
-    if (randoms is None) & (period is None):
-        raise ValueError('if no PBCs are specified, randoms must be provided.')
-    if estimator not in estimators: 
-        raise ValueError('user must specify a supported estimator. Supported estimators \
-        are:{0}'.value(estimators))
-    if (PBCs==True):
-        if (max(period)==np.inf):
-            raise ValueError('if a non-infinte PBC specified, all PBCs must be non-infinte.')
-    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
-        raise ValueError('do_auto and do_cross keywords must be of type boolean.')
-
-    def random_counts(sample1, sample2, randoms, rbins, period, PBCs, k, num_threads,\
-                      do_RR, do_DR):
+    def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
+                      do_RR, do_DR, _sample1_is_sample2):
         """
         Count random pairs.  There are three high level branches: 
 
@@ -195,7 +124,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         If no randoms are passes, calculate analytical randoms; otherwise, do it the old 
         fashioned way.
         """
-        def nball_volume(R,k):
+        def nball_volume(R,k=3):
             """
             Calculate the volume of a n-shpere.  This is used for the analytical randoms.
             """
@@ -207,7 +136,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
             RR = np.diff(RR)
             D1R = npairs(sample1, randoms, rbins, period=period, num_threads=num_threads)
             D1R = np.diff(D1R)
-            if np.all(sample1 == sample2): #calculating the cross-correlation
+            if _sample1_is_sample2: #calculating the cross-correlation
                 D2R = None
             else:
                 D2R = npairs(sample2, randoms, rbins, period=period, num_threads=num_threads)
@@ -224,7 +153,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
                 D1R = npairs(sample1, randoms, rbins, period=period, num_threads=num_threads)
                 D1R = np.diff(D1R)
             else: D1R=None
-            if np.all(sample1 == sample2): #calculating the cross-correlation
+            if _sample1_is_sample2: #calculating the cross-correlation
                 D2R = None
             else:
                 if do_DR==True:
@@ -237,7 +166,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         #PBCs and no randoms--calculate randoms analytically.
         elif randoms is None:
             #do volume calculations
-            dv = nball_volume(rbins,k) #volume of spheres
+            dv = nball_volume(rbins) #volume of spheres
             dv = np.diff(dv) #volume of shells
             global_volume = period.prod() #sexy
             
@@ -247,7 +176,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
             D1R = (N1)*(dv*rho1) #read note about pair counter
             
             #if not calculating cross-correlation, set RR exactly equal to D1R.
-            if np.all(sample1 == sample2):
+            if _sample1_is_sample2:
                 D2R = None
                 RR = D1R #in the analytic case, for the auto-correlation, DR==RR.
             else: #if there is a sample2, calculate randoms for it.
@@ -265,7 +194,9 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         else:
             raise ValueError('Un-supported combination of PBCs and randoms provided.')
     
-    def pair_counts(sample1, sample2, rbins, period, N_thread, do_auto, do_cross, do_DD):
+    
+    def pair_counts(sample1, sample2, rbins, period, N_thread, do_auto, do_cross,\
+                    _sample1_is_sample2):
         """
         Count data pairs.
         """
@@ -276,7 +207,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
             D1D1=None
             D2D2=None
         
-        if np.all(sample1 == sample2):
+        if _sample1_is_sample2:
             D1D2 = D1D1
             D2D2 = D1D1
         else:
@@ -288,8 +219,9 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
                 D2D2 = npairs(sample2, sample2, rbins, period=period, num_threads=num_threads)
                 D2D2 = np.diff(D2D2)
             else: D2D2=None
-
+        
         return D1D1, D1D2, D2D2
+    
     
     #what needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
@@ -297,8 +229,11 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     #how many points are there? (for normalization purposes)
     if randoms is not None:
         N1 = len(sample1)
-        N2 = len(sample2)
         NR = len(randoms)
+        if _sample1_is_sample2:
+            N2 = N1
+        else:
+            N2 = len(sample2)
     else: #this is taken care of in the analytical randoms case.
         N1 = 1.0
         N2 = 1.0
@@ -306,15 +241,15 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     
     #count pairs
     D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rbins, period,\
-                                 num_threads, do_auto, do_cross, do_DD)
+                                 num_threads, do_auto, do_cross, _sample1_is_sample2)
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,\
-                                 PBCs, k, num_threads, do_RR, do_DR)
+                                 PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2)
     
-    #return results
-    if np.all(sample2==sample1):
+    #run through estimator and return relavent results
+    if _sample1_is_sample2: #only do auto
         xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
-    else:
+    else: #else, follow the user's input
         if (do_auto==True) & (do_cross==True): 
             xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
             xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
