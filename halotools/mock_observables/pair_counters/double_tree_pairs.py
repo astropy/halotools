@@ -11,6 +11,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
+from copy import copy 
+
 from time import time
 import sys
 import multiprocessing
@@ -134,9 +136,9 @@ def npairs(data1, data2, rbins, period = None,\
     rmax = np.max(rbins)
     
     if approx_cell1_size is None:
-        approx_x1cell_size = period[0]/10.
-        approx_y1cell_size = period[1]/10.
-        approx_z1cell_size = period[2]/10.
+        approx_x1cell_size = rmax
+        approx_y1cell_size = rmax
+        approx_z1cell_size = rmax
     else:
         approx_cell1_size = convert_to_ndarray(approx_cell1_size)
         try:
@@ -147,9 +149,9 @@ def npairs(data1, data2, rbins, period = None,\
             raise HalotoolsError(msg)
 
     if approx_cell2_size is None:
-        approx_x2cell_size = period[0]/10.
-        approx_y2cell_size = period[1]/10.
-        approx_z2cell_size = period[2]/10.
+        approx_x2cell_size = copy(approx_x1cell_size)
+        approx_y2cell_size = copy(approx_y1cell_size)
+        approx_z2cell_size = copy(approx_z1cell_size)
     else:
         approx_cell2_size = convert_to_ndarray(approx_cell2_size)
         try:
