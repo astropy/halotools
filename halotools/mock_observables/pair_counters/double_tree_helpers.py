@@ -12,6 +12,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import numpy as np
 from time import time
+from copy import copy 
 import sys
 import multiprocessing
 from functools import partial
@@ -19,7 +20,7 @@ from functools import partial
 from ...custom_exceptions import *
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
-__all__ = ['_npairs_process_args', '_enclose_in_box']
+__all__ = ['_npairs_process_args', '_enclose_in_box', '_set_approximate_cell_sizes']
 
 def _npairs_process_args(data1, data2, rbins, period, 
     verbose, num_threads, approx_cell1_size, approx_cell2_size):
@@ -28,10 +29,8 @@ def _npairs_process_args(data1, data2, rbins, period,
     if num_threads is not 1:
         if num_threads=='max':
             num_threads = multiprocessing.cpu_count()
-        if isinstance(num_threads,int):
-            pool = multiprocessing.Pool(num_threads)
-        else: 
-            msg = "Input ``num_threads`` argument must be an integer or 'max'"
+        if not isinstance(num_threads,int):
+            msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
             raise HalotoolsError(msg)
     
     # Passively enforce that we are working with ndarrays
@@ -69,7 +68,7 @@ def _npairs_process_args(data1, data2, rbins, period,
             msg = "Input ``period`` must be a bounded positive number in all dimensions"
             raise HalotoolsError(msg)
 
-    return x1, y1, z1, x2, y2, z2, rbins, period, num_threads
+    return x1, y1, z1, x2, y2, z2, rbins, period, num_threads, PBCs
 
 
 def _enclose_in_box(x1, y1, z1, x2, y2, z2):
@@ -98,6 +97,40 @@ def _enclose_in_box(x1, y1, z1, x2, y2, z2):
     period = np.array([xyzmax, xyzmax, xyzmax])
     
     return x1, y1, z1, x2, y2, z2, period
+
+def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax):
+    """
+    """
+
+    #################################################
+    ### Set the approximate cell sizes of the trees
+    if approx_cell1_size is None:
+        approx_cell1_size = np.array([rmax, rmax, rmax])
+    else:
+        approx_cell1_size = convert_to_ndarray(approx_cell1_size)
+        try:
+            assert len(approx_cell1_size) == 3
+            assert type(approx_cell1_size) is np.ndarray
+            assert approx_cell1_size.ndim == 1
+        except AssertionError:
+            msg = ("Input ``approx_cell1_size`` must be a length-3 sequence")
+            raise HalotoolsError(msg)
+
+    if approx_cell2_size is None:
+        approx_cell2_size = copy(approx_cell1_size)
+    else:
+        approx_cell2_size = convert_to_ndarray(approx_cell2_size)
+        try:
+            assert len(approx_cell2_size) == 3
+            assert type(approx_cell2_size) is np.ndarray
+            assert approx_cell2_size.ndim == 1
+        except AssertionError:
+            msg = ("Input ``approx_cell2_size`` must be a length-3 sequence")
+            raise HalotoolsError(msg)
+
+    return approx_cell1_size, approx_cell2_size
+
+
 
 
 
