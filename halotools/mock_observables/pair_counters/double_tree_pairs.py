@@ -25,8 +25,9 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 __all__ = ['double_tree_npairs']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
-def double_tree_npairs(data1, data2, rbins, period = None, 
-    verbose = False, num_threads = 1, approx_cell1_size = None, approx_cell2_size = None):
+def npairs(data1, data2, rbins, period = None,\
+           verbose = False, num_threads = 1,\
+           approx_cell1_size = None, approx_cell2_size = None):
     """
     real-space pair counter.
     
