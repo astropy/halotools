@@ -9,38 +9,54 @@ from __future__ import (absolute_import, division, print_function,
 
 __all__ = ['_list_estimators', '_TP_estimator', '_TP_estimator_requirements']
 
-####import modules########################################################################
 import numpy as np
+from warnings import warn
+
+from ..custom_exceptions import *
+from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
+
+
 
 def tpcf_process_args(sample1, rbins, sample2=None, randoms=None, period=None,
-	do_auto=True, do_cross=True, estimator='Natural', N_threads=1,
-	max_sample_size=int(1e6)):
+    do_auto=True, do_cross=True, estimator='Natural', N_threads=1,
+    max_sample_size=int(1e6)):
 
 
     #process input parameters
-    sample1 = np.asarray(sample1)
+    sample1 = convert_to_ndarray(sample1)
+
     if sample2 is not None: 
-        sample2 = np.asarray(sample2)
+        sample2 = convert_to_ndarray(sample2)
+
         if np.all(sample1==sample2):
+            _sample1_equals_sample2 = True
+            msg = ("Warning: sample1 and sample2 are exactly the same, \n"
+                   "auto-correlation will be returned.\n")
+            warn(msg)
             do_cross==False
-            print("Warning: sample1 and sample2 are exactly the same, only the\
-                   auto-correlation will be returned.")
-    else: sample2 = sample1
-    if randoms is not None: randoms = np.asarray(randoms)
-    rbins = np.asarray(rbins)
+    else: 
+        sample2 = sample1
+
+    if randoms is not None: 
+        randoms = convert_to_ndarray(randoms)
+
+    rbins = convert_to_ndarray(rbins)
     
     #Process period entry and check for consistency.
     if period is None:
             PBCs = False
-            period = np.array([np.inf]*np.shape(sample1)[-1])
     else:
         PBCs = True
-        period = np.asarray(period).astype("float64")
-        if np.shape(period) == ():
-            period = np.array([period]*np.shape(sample1)[-1])
-        elif np.shape(period)[0] != np.shape(sample1)[-1]:
-            raise ValueError("period should have shape (k,)")
-            return None
+        period = convert_to_ndarray(period)
+        if len(period) == 1:
+            period = np.array([period[0]]*3)
+        try:
+            assert np.all(period < np.inf)
+            assert np.all(period > 0)
+        except AssertionError:
+            msg = "Input ``period`` must be a bounded positive number in all dimensions"
+            raise HalotoolsError(msg)
+    xperiod, yperiod, zperiod = period 
     
     #down sample if sample size exceeds max_sample_size.
     if (len(sample1)>max_sample_size) & (np.all(sample1==sample2)):
