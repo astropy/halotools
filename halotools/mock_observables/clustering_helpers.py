@@ -7,90 +7,123 @@ functions to calculate clustering statistics, e.g. two point correlation functio
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-__all__ = ['_list_estimators', '_TP_estimator', '_TP_estimator_requirements']
+__all__ = ['_tpcf_process_args', '_list_estimators', '_TP_estimator', '_TP_estimator_requirements']
 
-####import modules########################################################################
 import numpy as np
+from warnings import warn
+from multiprocessing import cpu_count 
 
-def tpcf_process_args(sample1, rbins, sample2=None, randoms=None, period=None,
-	do_auto=True, do_cross=True, estimator='Natural', N_threads=1,
-	max_sample_size=int(1e6)):
+from ..custom_exceptions import *
+from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 
-    #process input parameters
-    sample1 = np.asarray(sample1)
+
+def _tpcf_process_args(sample1, rbins, sample2, randoms, 
+    period, do_auto, do_cross, estimator, num_threads, max_sample_size):
+    """ Private method to do bounds-checking on the arguments passed to `~halotools.mock_observables.tpcf`. 
+    """
+
+    sample1 = convert_to_ndarray(sample1)
+
     if sample2 is not None: 
-        sample2 = np.asarray(sample2)
+        sample2 = convert_to_ndarray(sample2)
+
         if np.all(sample1==sample2):
+            _sample1_is_sample2 = True
+            msg = ("Warning: sample1 and sample2 are exactly the same, \n"
+                   "auto-correlation will be returned.\n")
+            warn(msg)
             do_cross==False
-            print("Warning: sample1 and sample2 are exactly the same, only the\
-                   auto-correlation will be returned.")
-    else: sample2 = sample1
-    if randoms is not None: randoms = np.asarray(randoms)
-    rbins = np.asarray(rbins)
+    else: 
+        sample2 = sample1
+
+    if randoms is not None: 
+        randoms = convert_to_ndarray(randoms)
     
+    # down sample if sample size exceeds max_sample_size.
+    if _sample1_is_sample2 is True:
+        if (len(sample1) > max_sample_size) & ():
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            print('downsampling sample1...')
+    else:
+        if len(sample1) > max_sample_size:
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            print('down sampling sample1...')
+        if len(sample2) > max_sample_size:
+            inds = np.arange(0,len(sample2))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample2 = sample2[inds]
+            print('down sampling sample2...')
+    
+    rbins = convert_to_ndarray(rbins)
+    rmax = np.max(rbins)
+    try:
+        assert rbins.ndim == 1
+        assert len(rbins) > 1
+        if len(rbins) > 2:
+            assert array_is_monotonic(rbins, strict = True) == 1
+    except AssertionError:
+        msg = "Input ``rbins`` must be a monotonically increasing 1D array with at least two entries"
+        raise HalotoolsError(msg)
+        
     #Process period entry and check for consistency.
     if period is None:
-            PBCs = False
-            period = np.array([np.inf]*np.shape(sample1)[-1])
+        PBCs = False
     else:
         PBCs = True
-        period = np.asarray(period).astype("float64")
-        if np.shape(period) == ():
-            period = np.array([period]*np.shape(sample1)[-1])
-        elif np.shape(period)[0] != np.shape(sample1)[-1]:
-            raise ValueError("period should have shape (k,)")
-            return None
-    
-    #down sample if sample size exceeds max_sample_size.
-    if (len(sample1)>max_sample_size) & (np.all(sample1==sample2)):
-        inds = np.arange(0,len(sample1))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample1 = sample1[inds]
-        sample2 = sample2[inds]
-        print('downsampling sample1...')
-    if len(sample2)>max_sample_size:
-        inds = np.arange(0,len(sample2))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample2 = sample2[inds]
-        print('down sampling sample2...')
-    if len(sample1)>max_sample_size:
-        inds = np.arange(0,len(sample1))
-        np.random.shuffle(inds)
-        inds = inds[0:max_sample_size]
-        sample1 = sample1[inds]
-        print('down sampling sample1...')
-    
-    #check radial bins
-    if np.shape(rbins) == ():
-        rbins = np.array([rbins])
-    if rbins.ndim != 1:
-        raise ValueError('rbins must be a 1-D array')
-    if len(rbins)<2:
-        raise ValueError('rbins must be of lenght >=2.')
-    
-    #check dimensionality of data. currently, points must be 3D.
-    k = np.shape(sample1)[-1]
-    if k!=3:
-        raise ValueError('data must be 3-dimensional.')
-    
-    #check for input parameter consistency
-    if (period is not None) & (np.max(rbins)>np.min(period)/2.0):
-        raise ValueError('cannot calculate for seperations larger than Lbox/2.')
-    if (sample2 is not None) & (sample1.shape[-1]!=sample2.shape[-1]):
-        raise ValueError('sample1 and sample2 must have same dimension.')
-    if (randoms is None) & (min(period)==np.inf):
-        raise ValueError('if no PBCs are specified, randoms must be provided.')
-    if estimator not in estimators: 
-        raise ValueError('user must specify a supported estimator. Supported estimators \
-        are:{0}'.value(estimators))
-    if (PBCs==True) & (max(period)==np.inf):
-        raise ValueError('if a non-infinte PBC specified, all PBCs must be non-infinte.')
-    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
-        raise ValueError('do_auto and do_cross keywords must be of type boolean.')
+        period = convert_to_ndarray(period)
+        if len(period) == 1:
+            period = np.array([period[0]]*3)
+        try:
+            assert np.all(period < np.inf)
+            assert np.all(period > 0)
+        except AssertionError:
+            msg = "Input ``period`` must be a bounded positive number in all dimensions"
+            raise HalotoolsError(msg)
+    xperiod, yperiod, zperiod = period 
 
+    #check for input parameter consistency
+    if (period is not None) & (rmax >= np.min(period)/3.0):
+        msg = ("\n The maximum length over which you search for pairs of points \n"
+            "cannot be larger than Lbox/3 in any dimension. \n"
+            "If you need to count pairs on these length scales, \n"
+            "you should use a larger simulation.\n")
+        raise HalotoolsError(msg)
+
+    if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
+        msg = '\nSample1 and sample2 must have same dimension.\n')
+        raise HalotoolsError(msg)
+
+    if (randoms is None) & (PBCs == False):
+        msg = ('\nIf no PBCs are specified, randoms must be provided.\n')
+        raise HalotoolsError(msg)
+
+    if estimator not in estimators: 
+        msg = ('\nUser must specify a supported estimator. Supported estimators \
+        are:{0}'.value(estimators))
+        raise HalotoolsError(msg)
+
+    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
+        msg = ('do_auto and do_cross keywords must be of type boolean.')
+        raise HalotoolsError(msg)
+
+    if num_threads == 'max':
+        num_threads = cpu_count()
+
+    available_estimators = _list_estimators()
+    if estimator not in available_estimators:
+        msg = ("Input `estimator` must be one of the following:{0}".value(available_estimators))
+        raise HalotoolsError(msg)
+
+
+return sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads, PBCs
 
 
 def _list_estimators():
@@ -164,7 +197,11 @@ def _TP_estimator_requirements(estimator):
         do_DR = True
         do_RR = True
     else: 
-        raise ValueError("unsupported estimator!")
+        available_estimators = _list_estimators()
+        if estimator not in available_estimators:
+            msg = ("Input `estimator` must be one of the following:{0}".value(available_estimators))
+            raise HalotoolsError(msg)
+
     return do_DD, do_DR, do_RR
 
 
