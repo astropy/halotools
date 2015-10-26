@@ -133,7 +133,7 @@ class FoFGroups(object):
     ####the following methods are igraph package dependent###
     def create_graph(self):
         """
-        Create graph from FoF sparse matrix.
+        Create graph from FoF sparse matrix.  requires igraph package.
         """
         if igraph_available==True:
             self.g = _scipy_to_igraph(self.m, self.positions, directed=False)
@@ -141,7 +141,7 @@ class FoFGroups(object):
     
     def get_degree(self):
         """
-        return the degree of each galaxy vertex
+        return the degree of each galaxy vertex.  requires igraph package.
         """
         if igraph_available==True:
             self.degree = self.g.degree()
@@ -150,7 +150,7 @@ class FoFGroups(object):
     
     def get_betweenness(self):
         """
-        return the betweenness of each galaxy vertex
+        return the betweenness of each galaxy vertex.  requires igraph package.
         """
         if igraph_available==True:
             self.betweenness = self.g.betweenness()
@@ -159,7 +159,7 @@ class FoFGroups(object):
     
     def get_multiplicity(self):
         """
-        return the multiplicity of galaxies' group
+        return the multiplicity of galaxies' group.  requires igraph package.
         """
         if igraph_available==True:
             clusters = self.g.clusters()
@@ -170,7 +170,7 @@ class FoFGroups(object):
     
     def get_edges(self):
         """
-        return all edges of the graph
+        return all edges of the graph.  requires igraph package.
         
         Returns
         -------
@@ -185,7 +185,7 @@ class FoFGroups(object):
     
     def get_edge_lengths(self):
         """
-        return the length of all edges
+        return the length of all edges.  requires igraph package.
         
         length = sqrt(r_perp**2 + r_para**2)
         """
@@ -199,7 +199,7 @@ class FoFGroups(object):
 
 def _scipy_to_igraph(matrix, coords, directed=False):
     """
-    convert a scipy sparse matrix to an igraph graph object
+    convert a scipy sparse matrix to an igraph graph object.  requires igraph package.
     """
     
     matrix = csr_matrix(matrix)
