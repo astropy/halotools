@@ -12,6 +12,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import numpy as np
 from time import time
+from warnings import warn 
 from copy import copy 
 import sys
 import multiprocessing
@@ -20,7 +21,10 @@ from functools import partial
 from ...custom_exceptions import *
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
-__all__ = ['_npairs_process_args', '_enclose_in_box', '_set_approximate_cell_sizes']
+__all__ = (
+    ['_npairs_process_args', '_enclose_in_box', '_set_approximate_cell_sizes', 
+    '_jnpairs_process_weights_jtags']
+    )
 
 def _npairs_process_args(data1, data2, rbins, period, 
     verbose, num_threads, approx_cell1_size, approx_cell2_size):
@@ -58,7 +62,7 @@ def _npairs_process_args(data1, data2, rbins, period,
             _enclose_in_box(x1, y1, z1, x2, y2, z2))
     else:
         PBCs = True
-        period = convert_to_ndarray(period)
+        period = convert_to_ndarray(period).astype(float)
         if len(period) == 1:
             period = np.array([period[0]]*3)
         try:
@@ -69,6 +73,66 @@ def _npairs_process_args(data1, data2, rbins, period,
             raise HalotoolsError(msg)
 
     return x1, y1, z1, x2, y2, z2, rbins, period, num_threads, PBCs
+
+def _jnpairs_process_weights_jtags(data1, data2, weights1, weights2, jtags1, jtags2, N_samples):
+    """
+    """
+
+    #Process weights1 entry and check for consistency.
+    if weights1 is None:
+        weights1 = np.array([1.0]*np.shape(data1)[0], dtype=np.float64)
+    else:
+        weights1 = np.asarray(weights1).astype("float64")
+        if np.shape(weights1)[0] != np.shape(data1)[0]:
+            raise HalotoolsError("weights1 should have same len as data1")
+    #Process weights2 entry and check for consistency.
+    if weights2 is None:
+        weights2 = np.array([1.0]*np.shape(data2)[0], dtype=np.float64)
+    else:
+        weights2 = np.asarray(weights2).astype("float64")
+        if np.shape(weights2)[0] != np.shape(data2)[0]:
+            raise HalotoolsError("weights2 should have same len as data2")
+    
+    #Process jtags_1 entry and check for consistency.
+    if jtags1 is None:
+        jtags1 = np.array([0]*np.shape(data1)[0], dtype=np.int)
+    else:
+        jtags1 = np.asarray(jtags1).astype("int")
+        if np.shape(jtags1)[0] != np.shape(data1)[0]:
+            raise HalotoolsError("jtags1 should have same len as data1")
+    #Process jtags_2 entry and check for consistency.
+    if jtags2 is None:
+        jtags2 = np.array([0]*np.shape(data2)[0], dtype=np.int)
+    else:
+        jtags2 = np.asarray(jtags2).astype("int")
+        if np.shape(jtags2)[0] != np.shape(data2)[0]:
+            raise HalotoolsError("jtags2 should have same len as data2")
+    
+    #Check bounds of jackknife tags
+    if np.min(jtags1) < 1: 
+        raise HalotoolsError("jtags1 must be >= 1")
+    if np.min(jtags2) < 1: 
+        raise HalotoolsError("jtags2 must be >= 1")
+    if np.max(jtags1) > N_samples: 
+        raise HalotoolsError("jtags1 must be <= N_samples")
+    if np.max(jtags2) > N_samples: 
+        raise HalotoolsError("jtags2 must be <= N_samples")
+    
+    #throw warning if some tags do not exist
+    if not np.array_equal(np.unique(jtags1),np.arange(1,N_samples+1)):
+        warn("Warning: data1 does not contain points in every jackknife sample.")
+    if not np.array_equal(np.unique(jtags1),np.arange(1,N_samples+1)):
+        warn("Warning: data2 does not contain points in every jackknife sample.")
+    
+    if type(N_samples) is not int: 
+        raise HalotoolsError("There must be an integer number of jackknife samples")
+    if np.max(jtags1)>N_samples:
+        raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
+    if np.max(jtags2)>N_samples:
+        raise HalotoolsError("There are more jackknife samples than indicated by N_samples")
+
+    return weights1, weights2, jtags1, jtags2
+
 
 
 def _enclose_in_box(x1, y1, z1, x2, y2, z2):
