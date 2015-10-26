@@ -7,7 +7,7 @@ import numpy as np
 from ..pairs import npairs as simp_npairs
 from ..pairs import wnpairs as simp_wnpairs
 #load rect_cuboid_pairs pair counters
-from ..double_tree_pairs import npairs
+from ..double_tree_pairs import npairs, jnpairs
 #from ..double_tree_pairs import xy_z_npairs, xy_z_wnpairs, xy_z_jnpairs
 #from ..double_tree_pairs import s_mu_npairs
 
@@ -344,7 +344,7 @@ def test_xy_z_wnpairs_nonperiodic():
     binned_result = np.diff(np.diff(result,axis=1),axis=0)
     
     assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
-
+"""
 
 def test_jnpairs_periodic():
     
@@ -357,18 +357,19 @@ def test_jnpairs_periodic():
     z = np.random.uniform(0, Lbox[2], Npts)
     data1 = np.vstack((x,y,z)).T
     weights1 = np.random.random(Npts)
-    jtags1 = np.sort(np.random.random_integers(1,10,size=Npts))
+    N_jsamples=10
+    jtags1 = np.sort(np.random.random_integers(1,N_jsamples,size=Npts))
     
-    rbins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    rbins = np.array([0.0,0.1,0.2,0.3])
 
-    result = jnpairs(data1, data1, rbins, Lbox=Lbox, period=period,\
+    result = jnpairs(data1, data1, rbins, period=period,\
                      jtags1=jtags1, jtags2=jtags1, N_samples=10,\
                      weights1=weights1, weights2=weights1)
     
     print(result)
 
     assert result.ndim==2, 'result is the wrong dimension'
-    assert np.shape(result)==(11,6), 'result is the wrong shape'
+    assert np.shape(result)==(N_jsamples+1,len(rbins)), 'result is the wrong shape'
 
 
 def test_jnpairs_nonperiodic():
@@ -382,19 +383,20 @@ def test_jnpairs_nonperiodic():
     z = np.random.uniform(0, Lbox[2], Npts)
     data1 = np.vstack((x,y,z)).T
     weights1 = np.random.random(Npts)
-    jtags1 = np.sort(np.random.random_integers(1,10,size=Npts))
+    N_jsamples=10
+    jtags1 = np.sort(np.random.random_integers(1,N_jsamples,size=Npts))
     
-    rbins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    rbins = np.array([0.0,0.1,0.2,0.3])
 
-    result = jnpairs(data1, data1, rbins, Lbox=Lbox, period=period,\
+    result = jnpairs(data1, data1, rbins, period=period,\
                      jtags1=jtags1, jtags2=jtags1, N_samples=10,\
                      weights1=weights1, weights2=weights1)
     
     print(result)
 
     assert result.ndim==2, 'result is the wrong dimension'
-    assert np.shape(result)==(11,6), 'result is the wrong shape'
-
+    assert np.shape(result)==(N_jsamples+1,len(rbins)), 'result is the wrong shape'
+"""
 
 def test_xy_z_jnpairs_periodic():
     
