@@ -36,7 +36,6 @@ Reference/API
 =============
 
 .. automodapi:: halotools.empirical_models
-.. automodapi:: halotools.empirical_models.test_empirical_models
 
 
 

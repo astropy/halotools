@@ -6,7 +6,16 @@ Tutorial on the HeavisideAssembias model
 
 This tutorial gives a detailed explanation of the 
 `~halotools.empirical_models.HeavisideAssembias` class. 
+In the :ref:`example_heaviside_usage` section we'll provide 
+a couple of examples of how you can use the orthogonal 
+mix-in pattern to create new, assembly-biased models from existing models. 
+You can learn how to hand-tailor the features of the 
+`~halotools.empirical_models.HeavisideAssembias` class in the section on 
+:ref:`heaviside_feature_customization`. To understand the underlying 
+python implementation, see :ref:`heaviside_assembias_source_code_notes`. 
 
+
+.. _example_heaviside_usage: 
 
 Example Usage
 ==============
@@ -91,7 +100,10 @@ construct a new model in which the SFR-designation has assembly bias:
                 **kwargs)
 
 
+.. _heaviside_feature_customization: 
 
+Customizing the behavior of an assembly-biased model 
+=======================================================
 
 
 
