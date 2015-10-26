@@ -38,7 +38,8 @@ class TestAssembias(TestCase):
         self.fake_halo_table = fakesim.halo_table
 
         self.model_class_list = (AssembiasZheng07Cens, AssembiasZheng07Sats, 
-            AssembiasLeauthaud11Cens, AssembiasLeauthaud11Sats)
+            AssembiasLeauthaud11Cens, AssembiasLeauthaud11Sats, 
+            AssembiasTinker13Cens)
 
         self.prim_haloprop = np.logspace(10, 15, 6)
 
