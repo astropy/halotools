@@ -17,6 +17,8 @@ import multiprocessing
 from functools import partial
 
 from .double_tree import FlatRectanguloidDoubleTree
+from .double_tree_helpers import *
+
 from .cpairs import *
 
 from ...custom_exceptions import *
@@ -24,6 +26,8 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = ['double_tree_npairs']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
+
+##########################################################################
 
 def npairs(data1, data2, rbins, period = None,\
            verbose = False, num_threads = 1,\
@@ -220,29 +224,88 @@ def _npairs_engine(double_tree, rbins_squared, period, PBCs, icell1):
     return counts
 
 
-def _enclose_in_box(x1, y1, z1, x2, y2, z2):
+
+##########################################################################
+
+def jnpairs(data1, data2, rbins, Lbox=None, period=None, weights1=None, weights2=None,\
+            jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1):
     """
-    build axis aligned box which encloses all points. 
-    shift points so cube's origin is at 0,0,0.
+    jackknife weighted real-space pair counter.
+    
+    Count the weighted number of pairs (x1,x2) that can be formed, with x1 drawn from 
+    data1 and x2 drawn from data2, and where distance(x1, x2) <= rbins[i].  Weighted 
+    counts are calculated as w1*w2. Jackknife sampled pair counts are returned.
+    
+    Parameters
+    ----------
+    data1: array_like
+        N1 by 3 numpy array of 3-dimensional positions. Should be between zero and 
+        period. This cython implementation requires data1.ndim==2.
+            
+    data2: array_like
+        N2 by 3 numpy array of 3-dimensional positions. Should be between zero and 
+        period. This cython implementation requires data2.ndim==2.
+            
+    rbins: array_like
+        numpy array of boundaries defining the bins in which pairs are counted. 
+    
+    Lbox: array_like, optional
+        length of cube sides which encloses data1 and data2.
+    
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.  If True, period is set to be Lbox
+    
+    weights1: array_like, optional
+        length N1 array containing weights used for weighted pair counts
+        
+    weights2: array_like, optional
+        length N2 array containing weights used for weighted pair counts.
+    
+    jtags1: array_like, optional
+        length N1 array containing integer tags used to define jackknife sample 
+        membership. Tags are in the range [1,N_samples]. '0' is a reserved tag and should 
+        not be used.
+        
+    jtags2: array_like, optional
+        length N2 array containing integer tags used to define jackknife sample 
+        membership. Tags are in the range [1,N_samples]. '0' is a reserved tag and should 
+        not be used.
+    
+    N_samples: int, optional
+        number of jackknife samples
+    
+    verbose: Boolean, optional
+        If True, print out information and progress.
+    
+    num_threads: int, optional
+        number of 'threads' to use in the pair counting.  If set to 'max', use all 
+        available cores.  num_threads=0 is the default.
+        
+    Returns
+    -------
+    N_pairs : ndarray of shape (N_samples+1,len(rbins))
+        number counts of pairs with seperations <=rbins[i]
+    
+    Notes
+    -----
+    Jackknife weights are calculated using a weighting function.
+    
+    if both points are outside the sample, return 0.0
+    if both points are inside the sample, return (w1 * w2)
+    if one point is inside, and the other is outside return 0.5*(w1 * w2)
     """
-    
-    xmin = np.min([np.min(x1),np.min(x2)])
-    ymin = np.min([np.min(y1),np.min(y2)])
-    zmin = np.min([np.min(z1),np.min(z2)])
-    xmax = np.max([np.max(x1),np.max(x2)])
-    ymax = np.max([np.max(y1),np.max(y2)])
-    zmax = np.max([np.max(z1),np.max(z2)])
-    
-    xyzmin = np.min([xmin,ymin,zmin])
-    xyzmax = np.min([xmax,ymax,zmax])-xyzmin
-    
-    x1 = x1 - xyzmin
-    y1 = y1 - xyzmin
-    z1 = z1 - xyzmin
-    x2 = x2 - xyzmin
-    y2 = y2 - xyzmin
-    z2 = z2 - xyzmin
-    
-    period = np.array([xyzmax, xyzmax, xyzmax])
-    
-    return x1, y1, z1, x2, y2, z2, period
+
+
+
+
+
+
+
+
+##########################################################################
+
+
+
+
