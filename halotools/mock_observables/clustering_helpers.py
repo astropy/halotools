@@ -34,15 +34,18 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
                    "auto-correlation will be returned.\n")
             warn(msg)
             do_cross==False
+        else: 
+            _sample1_is_sample2 = False
     else: 
         sample2 = sample1
+        _sample1_is_sample2 = True
 
     if randoms is not None: 
         randoms = convert_to_ndarray(randoms)
     
     # down sample if sample size exceeds max_sample_size.
     if _sample1_is_sample2 is True:
-        if (len(sample1) > max_sample_size) & ():
+        if (len(sample1) > max_sample_size):
             inds = np.arange(0,len(sample1))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
@@ -87,27 +90,22 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
         except AssertionError:
             msg = "Input ``period`` must be a bounded positive number in all dimensions"
             raise HalotoolsError(msg)
-    xperiod, yperiod, zperiod = period 
 
     #check for input parameter consistency
-    if (period is not None) & (rmax >= np.min(period)/3.0):
-        msg = ("\n The maximum length over which you search for pairs of points \n"
-            "cannot be larger than Lbox/3 in any dimension. \n"
-            "If you need to count pairs on these length scales, \n"
-            "you should use a larger simulation.\n")
-        raise HalotoolsError(msg)
+    if (period is not None):
+        if (rmax >= np.min(period)/3.0):
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                "cannot be larger than Lbox/3 in any dimension. \n"
+                "If you need to count pairs on these length scales, \n"
+                "you should use a larger simulation.\n")
+            raise HalotoolsError(msg)
 
     if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
-        msg = '\nSample1 and sample2 must have same dimension.\n')
+        msg = ('\nSample1 and sample2 must have same dimension.\n')
         raise HalotoolsError(msg)
 
     if (randoms is None) & (PBCs == False):
         msg = ('\nIf no PBCs are specified, randoms must be provided.\n')
-        raise HalotoolsError(msg)
-
-    if estimator not in estimators: 
-        msg = ('\nUser must specify a supported estimator. Supported estimators \
-        are:{0}'.value(estimators))
         raise HalotoolsError(msg)
 
     if (type(do_auto) is not bool) | (type(do_cross) is not bool):
@@ -123,7 +121,7 @@ def _tpcf_process_args(sample1, rbins, sample2, randoms,
         raise HalotoolsError(msg)
 
 
-return sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads, PBCs
+    return sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
 
 
 def _list_estimators():
