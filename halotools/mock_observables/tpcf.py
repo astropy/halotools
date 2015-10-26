@@ -102,9 +102,10 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     
     #check input arguments using helper function
     sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2 = _tpcf_process_args(sample1, rbins, sample2, randoms,\
-                                                 period, do_auto, do_cross,\
-                                                 estimator, num_threads, max_sample_size)
+        _sample1_is_sample2, PBCs = _tpcf_process_args(sample1, rbins, sample2, randoms,\
+                                                       period, do_auto, do_cross,\
+                                                       estimator, num_threads,\
+                                                       max_sample_size)
     
     
     def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
