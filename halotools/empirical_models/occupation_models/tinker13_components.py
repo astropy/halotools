@@ -5,7 +5,8 @@ HOD-style models of the galaxy-halo connection.
 
 """
 
-__all__ = (['Tinker13Cens', 'Tinker13QuiescentSats', 'Tinker13ActiveSats']
+__all__ = (['Tinker13Cens', 'Tinker13QuiescentSats', 'Tinker13ActiveSats', 
+    'AssembiasTinker13Cens']
     )
 
 from functools import partial
