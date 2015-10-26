@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import sys
 
-from ..clustering import tpcf
+from ..tpcf import tpcf
 
 import pytest
 slow = pytest.mark.slow
@@ -16,11 +16,12 @@ __all__=['test_TPCF_auto', 'test_TPCF_estimator', 'test_TPCF_sample_size_limit',
 ####two point correlation function########################################################
 
 def test_TPCF_auto():
+    
     sample1 = np.random.random((100,3))
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
-    period = np.array([1,1,1])
-    rbins = np.linspace(0,0.5,5)
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0,0.3,5)
     
     #with randoms
     result = tpcf(sample1, rbins, sample2 = None, 
@@ -34,7 +35,7 @@ def test_TPCF_estimator():
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
     period = np.array([1,1,1])
-    rbins = np.linspace(0,0.5,5)
+    rbins = np.linspace(0,0.3,5)
     
     result_1 = tpcf(sample1, rbins, sample2 = sample2, 
                     randoms=randoms, period = None, 
@@ -65,8 +66,8 @@ def test_TPCF_sample_size_limit():
     sample1 = np.random.random((1000,3))
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
-    period = np.array([1,1,1])
-    rbins = np.linspace(0,0.5,5)
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0,0.3,5)
     
     result_1 = tpcf(sample1, rbins, sample2 = sample2, 
                                               randoms=randoms, period = None, 
@@ -80,8 +81,8 @@ def test_TPCF_randoms():
     sample1 = np.random.random((100,3))
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
-    period = np.array([1,1,1])
-    rbins = np.linspace(0,0.4,5)
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0,0.3,5)
     
     #No PBCs w/ randoms
     result_1 = tpcf(sample1, rbins, sample2 = sample2, 
@@ -114,13 +115,13 @@ def test_TPCF_period_API():
     sample1 = np.random.random((1000,3))
     sample2 = np.random.random((100,3))
     randoms = np.random.random((100,3))
-    period = np.array([1,1,1])
-    rbins = np.linspace(0,0.4,5)
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0,0.3,5)
     
     result_1 = tpcf(sample1, rbins, sample2 = sample2, 
                                             randoms=randoms, period = period, 
                                             max_sample_size=int(1e4), estimator='Natural')
-    period = 1
+    period = 1.0
     result_2 = tpcf(sample1, rbins, sample2 = sample2, 
                                             randoms=randoms, period = period, 
                                             max_sample_size=int(1e4), estimator='Natural')

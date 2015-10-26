@@ -6,7 +6,8 @@ import numpy as np
 import sys
 import pytest 
 
-from ..clustering import tpcf_jackknife, tpcf
+from ..tpcf_jackknife import tpcf_jackknife
+from ..tpcf import tpcf
 
 __all__=['test_tpcf_jackknife']
 
@@ -20,8 +21,8 @@ def test_tpcf_jackknife():
     Lbox = np.array([1,1,1])
     rbins = np.linspace(0.0,0.1,5)
     
-    result_1,err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=Lbox, period = period, N_threads=1)
-    result_2 = tpcf(sample1, rbins, randoms=randoms, period = period, N_threads=1)
+    result_1,err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=Lbox, period = period, num_threads=1)
+    result_2 = tpcf(sample1, rbins, randoms=randoms, period = period, num_threads=1)
     
     print(result_1)
     print(err)
@@ -40,7 +41,7 @@ def test_tpcf_jackknife_cov_matrix():
     rbins = np.linspace(0.0,0.1,5)
     nbins = len(rbins)-1
     
-    result_1,err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=Lbox, period = period, N_threads=1)
+    result_1,err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, Lbox=Lbox, period = period, num_threads=1)
     
     print(err)
     assert np.shape(err)==(nbins,nbins), "correlation functions do not match"
