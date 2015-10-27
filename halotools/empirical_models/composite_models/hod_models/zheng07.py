@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-Module containing some commonly used composite HOD models.
+Module containing the HOD-style composite model published in Zheng et al. (2007)
 
 """
 from __future__ import (
@@ -9,15 +9,11 @@ from __future__ import (
 
 import numpy as np
 
-from .. import factories, model_defaults
-from ..occupation_models import hod_components as hoc
-from ..occupation_models import zheng07_components
-from ..occupation_models import leauthaud11_components 
-from ..occupation_models import tinker13_components 
+from ... import factories, model_defaults
+from ...occupation_models import zheng07_components
+from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
-from ..phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
-
-from ...sim_manager import FakeMock, FakeSim, sim_defaults
+from ....sim_manager import FakeSim
 
 
 __all__ = ['Zheng07']
