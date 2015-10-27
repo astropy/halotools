@@ -549,15 +549,15 @@ class HodModelArchitect(object):
         for new_component in args:
             try:
                 gal_type = new_component.gal_type
-                galprop_key = new_component.galprop_key
+                galprop_name = new_component.galprop_name
             except AttributeError:
                 msg = ("\nEvery argument of the customize_model method of HodModelArchitect "
-                    "must be a model instance that has a ``gal_type`` and a ``galprop_key`` attribute.\n")
+                    "must be a model instance that has a ``gal_type`` and a ``galprop_name`` attribute.\n")
                 raise HalotoolsError(msg)
 
             # Enforce self-consistency in the thresholds of new and old components
-            if galprop_key == 'occupation':
-                old_component = baseline_blueprint[gal_type][galprop_key]
+            if galprop_name == 'occupation':
+                old_component = baseline_blueprint[gal_type][galprop_name]
                 if new_component.threshold != old_component.threshold:
                     msg = ("\n\nYou tried to swap in a %s occupation component \nthat has a different " 
                         "threshold than the original %s occupation component.\n"
@@ -567,7 +567,7 @@ class HodModelArchitect(object):
                         "for all gal_types, the resulting composite model will raise an exception and not build.\n")
                     warn(msg % (gal_type, gal_type)) 
 
-            new_blueprint[gal_type][galprop_key] = new_component
+            new_blueprint[gal_type][galprop_name] = new_component
 
         new_model = HodModelFactory(new_blueprint)
         return new_model

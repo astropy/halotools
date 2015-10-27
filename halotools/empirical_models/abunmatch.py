@@ -29,12 +29,12 @@ class AbunMatchSmHm(PrimGalpropModel):
     """ Stellar-to-halo-mass relation based on traditional abundance matching. 
     """
 
-    def __init__(self, galaxy_abundance_abcissa, galaxy_abundance_ordinates, 
+    def __init__(self, galprop_name, galaxy_abundance_abcissa, galaxy_abundance_ordinates, 
         scatter_level = 0.2, **kwargs):
         """
         Parameters 
         ----------
-        galprop_key : string, optional  
+        galprop_name : string  
             Name of the galaxy property being assigned. Default is ``stellar mass``, 
             though another common case may be ``luminosity``. 
 
@@ -80,7 +80,7 @@ class AbunMatchSmHm(PrimGalpropModel):
         kwargs['scatter_abcissa'] = [12]
         kwargs['scatter_ordinates'] = [scatter_level]
 
-        super(AbunMatchSmHm, self).__init__(**kwargs)
+        super(AbunMatchSmHm, self).__init__(galprop_name, **kwargs)
 
         self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
 

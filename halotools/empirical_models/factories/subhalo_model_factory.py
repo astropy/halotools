@@ -39,10 +39,10 @@ class SubhaloModelFactory(ModelFactory):
         ----------
         input_model_blueprint : dict 
             The main dictionary keys of ``input_model_blueprint`` 
-            are ``galprop_key`` strings, the names of 
+            are ``galprop_name`` strings, the names of 
             properties that will be assigned to galaxies 
             e.g., ``stellar_mass``, ``sfr``, ``morphology``, etc. 
-            The dictionary value associated with each ``galprop_key``  
+            The dictionary value associated with each ``galprop_name``  
             is a class instance of the type of model that 
             maps that property onto subhalos. 
 

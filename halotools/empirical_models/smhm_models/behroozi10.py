@@ -107,7 +107,7 @@ class Behroozi10SmHm(PrimGalpropModel):
         self.littleh = 0.7
 
         super(Behroozi10SmHm, self).__init__(
-            galprop_key='stellar_mass', **kwargs)
+            galprop_name='stellar_mass', **kwargs)
 
         self.publications = ['arXiv:1001.0015']
 

@@ -12,7 +12,7 @@ def test_BinaryGalpropInterpolModel():
     `~halotools.empirical_models.sfr_components.BinaryGalpropInterpolModel`. 
     """
     abcissa, ordinates = [12, 15], [1/3., 0.9]
-    m = BinaryModel(galprop_key='late_type', 
+    m = BinaryModel(galprop_name='late_type', 
         galprop_abcissa = abcissa, galprop_ordinates = ordinates, 
         prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
 
