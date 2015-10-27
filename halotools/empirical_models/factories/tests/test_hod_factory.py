@@ -3,7 +3,7 @@
 import numpy as np 
 from copy import copy 
 
-from ...composite_models import preloaded_models, Zheng07
+from ...composite_models import Zheng07, Leauthaud11
 from ... import factories
 from ...occupation_models import *
 
@@ -94,7 +94,7 @@ def test_alt_Zheng07_composites():
 def test_Leauthaud11_composite():
 	"""
 	"""
-	model = preloaded_models.Leauthaud11(threshold = 10.5)
+	model = Leauthaud11(threshold = 10.5)
 
 	# Verify that changes param_dict properly propagate
 	testmass1 = 5.e11
