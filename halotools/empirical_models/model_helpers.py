@@ -7,7 +7,7 @@ used by many of the hod model components.
 """
 
 __all__ = (
-    ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
+    ['solve_for_polynomial_coefficients', 'polynomial_from_table', 
     'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 'bind_default_kwarg_mixin_safe', 
     'custom_incomplete_gamma', 'bounds_enforcing_decorator_factory']
     )
@@ -25,14 +25,6 @@ from . import model_defaults
 
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
-
-
-@six.add_metaclass(ABCMeta)
-class GalPropModel(object):
-    """ Abstact container class for any model of any galaxy property. 
-    """
-    def __init__(self, galprop_key):
-        self.galprop_key = galprop_key
 
 def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
