@@ -87,9 +87,9 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         :math:`\\mathcal{M}(r)` 
         computed in each of the bins defined by input `rbins`.
         
-        :math:`1 + \\mathcal{M}(r) \\equiv \\mathrm{WW} / \\mathrm{DD}`, where  
+        :math:`1 + \\mathcal{M}(r) \\equiv \\mathrm{WW} / \\mathrm{RR}`, where  
         :math:`\\mathrm{WW}` is the weighted paircounts, and 
-        :math:`\\mathrm{DD}` is the unweighted pair counts.
+        :math:`\\mathrm{RR}` is the randomized weighted pair counts.
         
         If `sample2` is passed as input, three arrays of length len(`rbins`)-1 are 
         returned: :math:`\\mathcal{M}_{11}(r)`, :math:`\\mathcal{M}_{12}(r)`, 
