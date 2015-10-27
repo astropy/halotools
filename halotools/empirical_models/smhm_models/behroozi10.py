@@ -181,7 +181,7 @@ class Behroozi10SmHm(PrimGalpropModel):
             Data table storing halo catalog. 
             If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
-        redshift : float or array
+        redshift : float or array, optional 
             Redshift of the halo hosting the galaxy. If passing an array, 
             must be of the same length as the input ``stellar_mass``. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
@@ -192,7 +192,7 @@ class Behroozi10SmHm(PrimGalpropModel):
             Array containing stellar masses living in the input halo_table, 
             in solar mass units assuming h = 1.
         """
-        redshift = safely_retrieve_redshift(self, 'mean_log_halo_mass', **kwargs)
+        redshift = safely_retrieve_redshift(self, 'mean_stellar_mass', **kwargs)
 
         # Retrieve the array storing the mass-like variable
         if 'halo_table' in kwargs.keys():
