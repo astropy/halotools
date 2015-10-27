@@ -9,21 +9,16 @@ from __future__ import (
 
 import numpy as np
 
-from .. import factories, model_defaults
-from ..occupation_models import hod_components as hoc
-from ..occupation_models import zheng07_components
-from ..occupation_models import leauthaud11_components 
-from ..occupation_models import tinker13_components 
+from ... import factories, model_defaults
+from ...occupation_models import leauthaud11_components 
 
-from ..smhm_models import Moster13SmHm, Behroozi10SmHm
-from ..sfr_models import BinaryGalpropInterpolModel
-from ..phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
-from ..abunmatch import ConditionalAbunMatch
+from ...smhm_models import Behroozi10SmHm
+from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
-from ...sim_manager import FakeMock, FakeSim, sim_defaults
+from ....sim_manager import FakeSim, sim_defaults
 
 
-__all__ = ['SmHmBinarySFR', 'Leauthaud11', 'Campbell15', 'Hearin15', 'Tinker13']
+__all__ = ['Leauthaud11']
 
 
 def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, 
