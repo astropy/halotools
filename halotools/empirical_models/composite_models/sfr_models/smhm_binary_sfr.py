@@ -10,7 +10,7 @@ from __future__ import (
 import numpy as np
 
 from ... import factories, model_defaults
-from ...occupation_models import hod_components as hoc
+from ...occupation_models import occupation_model_template as occu_template
 from ...occupation_models import zheng07_components
 from ...occupation_models import leauthaud11_components 
 from ...occupation_models import tinker13_components 
