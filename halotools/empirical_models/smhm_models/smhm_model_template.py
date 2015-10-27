@@ -109,8 +109,16 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         # The _mock_generation_calling_sequence determines which methods 
         # will be called during mock population, as well as in what order they will be called
         self._mock_generation_calling_sequence = ['mc_stellar_mass']
-        key = str(self.galprop_key)
-        self._galprop_dtypes_to_allocate = np.dtype([(key, 'f4')])
+        self._galprop_dtypes_to_allocate = np.dtype([(str(self.galprop_key), 'f4')])
+
+        # The _methods_to_inherit determines which methods will be directly callable 
+        # by the composite model built by the HodModelFactory
+        method_names_to_inherit = ['mc_' + self.galprop_key, 'mean_' + self.galprop_key]
+        try:
+            self._methods_to_inherit.extend(method_names_to_inherit)
+        except AttributeError:
+            self._methods_to_inherit = method_names_to_inherit
+
 
 
     def mean_scatter(self, **kwargs):
@@ -191,12 +199,16 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         galprop_first_moment = prim_galprop_func(**kwargs)
 
         if include_scatter is False:
-            return galprop_first_moment
+            result = galprop_first_moment
         else:
             log10_galprop_with_scatter = (
                 np.log10(galprop_first_moment) + 
                 self.scatter_realization(**kwargs)
                 )
-            return 10.**log10_galprop_with_scatter
+            result = 10.**log10_galprop_with_scatter
 
+        if 'halo_table' in kwargs:
+            kwargs['halo_table'][self.galprop_key][:] = result
+
+        return result
 
