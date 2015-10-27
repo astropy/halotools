@@ -14,13 +14,7 @@ from ...smhm_models import Behroozi10SmHm
 
 from ....sim_manager import sim_defaults
 
-
-
-
 __all__ = ['Behroozi10']
-
-
-
 
 def Behroozi10(redshift = sim_defaults.default_redshift, **kwargs):
 	"""

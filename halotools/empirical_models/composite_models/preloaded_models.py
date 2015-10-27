@@ -27,7 +27,7 @@ __all__ = ['SmHmBinarySFR']
 
 def SmHmBinarySFR(
     prim_haloprop_key = model_defaults.default_smhm_haloprop, 
-    smhm_model=Moster13SmHm, 
+    smhm_model=Behroozi10SmHm, 
     scatter_level = 0.2, 
     redshift = sim_defaults.default_redshift, 
     sfr_abcissa = [12, 15], sfr_ordinates = [0.25, 0.75], logparam=True, 
@@ -104,7 +104,7 @@ def SmHmBinarySFR(
         galprop_key='quiescent', prim_haloprop_key=prim_haloprop_key, 
         abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam, **kwargs)
 
-    sm_model = Behroozi10SmHm(
+    sm_model = smhm_model(
         prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
         scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
 
