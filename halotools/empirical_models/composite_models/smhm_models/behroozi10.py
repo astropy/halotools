@@ -22,10 +22,15 @@ __all__ = ['Behroozi10']
 
 
 
-def Behroozi10(**kwargs):
+def Behroozi10(redshift = sim_defaults.default_redshift, **kwargs):
 	"""
     Parameters 
     ----------
+    redshift : float, optional 
+    	Redshift of the stellar-to-halo-mass relation of the model. Must be consistent 
+    	with the redshift of the halo catalog you populate. Default value is set by 
+    	sim_defaults.default_redshift. 
+
     prim_haloprop_key : string, optional  
         String giving the column name of the primary halo property governing stellar mass. 
         Default is set in the `~halotools.empirical_models.model_defaults` module. 
@@ -46,10 +51,10 @@ def Behroozi10(**kwargs):
         `~halotools.empirical_models.model_defaults` module. 
 	"""
 
-	stellar_mass_model = Behroozi10SmHm(**kwargs)
+	stellar_mass_model = Behroozi10SmHm(redshift = redshift, **kwargs)
 	model_blueprint = {'stellar_mass': stellar_mass_model}
 	composite_model = factories.SubhaloModelFactory(model_blueprint)
-	
+
 	return composite_model
 
 
