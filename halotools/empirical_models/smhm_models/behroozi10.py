@@ -102,6 +102,7 @@ class Behroozi10SmHm(PrimGalpropModel):
         some mechanism by which the redshift-dependence of the `Behroozi10SmHm` can be held fixed. 
         The option to provide a specific redshift to the constructor of `Behroozi10SmHm` 
         provides this mechanism. 
+        
         """
         
         self.littleh = 0.7
