@@ -71,6 +71,19 @@ class Behroozi10SmHm(PrimGalpropModel):
             exception if you attempt to pass in a redshift to these methods. 
             See the Notes below to understand the motivation for this behavior. 
 
+        new_haloprop_func_dict : function object, optional  
+            Dictionary of function objects used to create additional halo properties 
+            that may be needed by the model component. 
+            Used strictly by the `MockFactory` during call to the `process_halo_catalog` method. 
+            Each dict key of ``new_haloprop_func_dict`` will 
+            be the name of a new column of the halo catalog; each dict value is a function 
+            object that returns a length-N numpy array when passed a length-N Astropy table 
+            via the ``halo_table`` keyword argument. 
+            The input ``model`` model object has its own new_haloprop_func_dict; 
+            if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
+            contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
+            ``model``, and exception will be raised. 
+
         Notes 
         ------
         Note that the `Behroozi10SmHm` class is a distinct from the `Behroozi10` model 
@@ -91,9 +104,6 @@ class Behroozi10SmHm(PrimGalpropModel):
         provides this mechanism. 
         """
         self.littleh = 0.7
-
-        if 'redshift' in kwargs:
-            self.redshift = float(max(0, kwargs['redshift']))
 
         super(Behroozi10SmHm, self).__init__(
             galprop_key='stellar_mass', **kwargs)

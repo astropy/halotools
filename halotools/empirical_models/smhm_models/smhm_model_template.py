@@ -29,22 +29,22 @@ __all__ = ['PrimGalpropModel']
 
 
 @six.add_metaclass(ABCMeta)
-class PrimGalpropModel(model_helpers.GalPropModel):
+class PrimGalpropModel(object):
     """ Abstract container class for models connecting halo_table to their primary
     galaxy property, e.g., stellar mass or luminosity. 
 
     """
 
-    def __init__(self, galprop_key = 'stellar_mass', 
+    def __init__(self, galprop_key, 
         prim_haloprop_key = model_defaults.default_smhm_haloprop, 
-        scatter_model = LogNormalScatterModel, 
-        **kwargs):
+        scatter_model = LogNormalScatterModel, **kwargs):
         """
         Parameters 
         ----------
-        galprop_key : string, optional  
-            Name of the galaxy property being assigned. Default is ``stellar mass``, 
-            though another common case may be ``luminosity``. 
+        galprop_key : string  
+            Name of the galaxy property being assigned. Most likely, 
+            this is either ``stellar mass`` or ``luminosity``. This will be name of the 
+            column assigned to your mock galaxy catalog. 
 
         prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
@@ -85,8 +85,8 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         self.galprop_key = galprop_key
         self.prim_haloprop_key = prim_haloprop_key
 
-        if 'redshift' in kwargs.keys():
-            self.redshift = kwargs['redshift']
+        if 'redshift' in kwargs:
+            self.redshift = float(max(0, kwargs['redshift']))
 
         if 'new_haloprop_func_dict' in kwargs.keys():
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
@@ -106,8 +106,6 @@ class PrimGalpropModel(model_helpers.GalPropModel):
         # then use _mc_galprop and give it the usual name
         if not hasattr(self, 'mc_'+self.galprop_key):
             setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
-
-        super(PrimGalpropModel, self).__init__(galprop_key=self.galprop_key)
 
         # The _mock_generation_calling_sequence determines which methods 
         # will be called during mock population, as well as in what order they will be called
