@@ -4,10 +4,12 @@ from unittest import TestCase
 import pytest
 import numpy as np
 from astropy.table import Table
-from .. import preloaded_models
-from ...utils.table_utils import compute_conditional_percentiles
-from ...sim_manager import HaloCatalog
-from ...custom_exceptions import *
+
+from ...composite_models import *
+
+from ....utils.table_utils import compute_conditional_percentiles
+from ....sim_manager import HaloCatalog
+from ....custom_exceptions import *
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
@@ -48,16 +50,16 @@ class TestHearin15(TestCase):
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Hearin15(self):
 
-		model = preloaded_models.Hearin15(concentration_binning = (1, 35, 5))
+		model = Hearin15(concentration_binning = (1, 35, 5))
 		model.populate_mock(snapshot = self.snapshot)
 
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11(self):
 
-		model = preloaded_models.Leauthaud11(concentration_binning = (1, 35, 5))
+		model = Leauthaud11(concentration_binning = (1, 35, 5))
 		model.populate_mock(snapshot = self.snapshot)
 
-		model2 = preloaded_models.Leauthaud11(concentration_binning = (1, 35, 5), 
+		model2 = Leauthaud11(concentration_binning = (1, 35, 5), 
 			central_velocity_bias = True, satellite_velocity_bias = True)
 		model2.param_dict['velbias_centrals'] = 10
 		model2.populate_mock(snapshot = self.snapshot)
@@ -89,7 +91,7 @@ class TestHearin15(TestCase):
 		with pytest.raises(HalotoolsError) as exc:
 			model2.populate_mock(halo_finder='bdm')
 
-		model_highz = preloaded_models.Leauthaud11(redshift = 2., 
+		model_highz = Leauthaud11(redshift = 2., 
 			concentration_binning = (1, 35, 5))
 		model_highz.populate_mock(snapshot = self.snapshot2)
 		with pytest.raises(HalotoolsError) as exc:
