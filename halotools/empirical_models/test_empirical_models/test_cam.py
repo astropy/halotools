@@ -7,7 +7,7 @@ import numpy as np
 from astropy.table import Table 
 from scipy.stats import spearmanr
 
-from ..abunmatch import ConditionalAbunMatch
+from ..conditional_abunmatch import ConditionalAbunMatch
 from .. import model_defaults
 from ...sim_manager import FakeMock
 
