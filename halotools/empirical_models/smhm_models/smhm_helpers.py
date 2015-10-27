@@ -8,7 +8,7 @@ unspecified_redshift_warning_msg = ("\nYou did not specify a redshift."
     "and/or change the default behavior by modifying the value of sim_defaults.default_redshift.\n")
 
 inconsistent_redshift_msg = ("\nYou passed a redshift = %.2f argument to the constructor of the "
-    "``%s`` class.\nThis choice implies that your instance of ``%s`` can only be used "
+    "``%s`` class.\nThis choice implies that your instance of ``%s`` can only be used \n"
     "to study the stellar-to-halo-mass relation at this redshift. "
     "\nHowever, you just passed a redshift = %.2f to the ``%s`` method, which is inconsistent.\n"
     "Depending on what you are trying to do, you should do one of the following:\n"
