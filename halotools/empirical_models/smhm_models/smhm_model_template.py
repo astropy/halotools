@@ -81,7 +81,9 @@ class PrimGalpropModel(object):
             if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
             contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
             ``model``, and exception will be raised. 
+            
         """
+
         self.galprop_key = galprop_key
         self.prim_haloprop_key = prim_haloprop_key
 

@@ -103,6 +103,7 @@ class Behroozi10SmHm(PrimGalpropModel):
         The option to provide a specific redshift to the constructor of `Behroozi10SmHm` 
         provides this mechanism. 
         """
+        
         self.littleh = 0.7
 
         super(Behroozi10SmHm, self).__init__(
