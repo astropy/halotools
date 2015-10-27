@@ -3,27 +3,27 @@
 import numpy as np 
 from copy import copy 
 
-from .. import preloaded_models
-from .. import model_factories
-from ..occupation_models import *
+from ...composite_models import Zheng07, Leauthaud11
+from ... import factories
+from ...occupation_models import *
 
-from ...sim_manager import FakeSim
+from ....sim_manager import FakeSim
 
 __all__ = ['test_Zheng07_composite']
 
 def test_Zheng07_composite():
 	""" Method to test the basic behavior of 
-	`~halotools.empirical_models.preloaded_models.Zheng07`, 
+	`~halotools.empirical_models.Zheng07`, 
 	a specific pre-loaded model of 
-	`~halotools.empirical_models.model_factories.HodModelFactory`. 
+	`~halotools.empirical_models.factories.HodModelFactory`. 
 
 	The suite includes the following tests:
 
 		* Changes to ``self.param_dict`` properly propagate through to occupation component models. 
 
-		* Default behavior is recovered after calling the `~halotools.empirical_models.model_factories.HodModelFactory.restore_init_param_dict` method. 
+		* Default behavior is recovered after calling the `~halotools.empirical_models.factories.HodModelFactory.restore_init_param_dict` method. 
 	"""
-	model = preloaded_models.Zheng07(threshold = -18)
+	model = Zheng07(threshold = -18)
 
 	# Verify that changes param_dict properly propagate
 	testmass1 = 5.e11
@@ -55,7 +55,7 @@ def test_Zheng07_composite():
 def test_alt_Zheng07_composites():
 
 	# First build two models that are identical except for the satellite occupations
-	default_model = preloaded_models.Zheng07()
+	default_model = Zheng07()
 	default_model_blueprint = default_model._input_model_blueprint
 	default_satocc_component = default_model_blueprint['satellites']['occupation']
 	assert not hasattr(default_satocc_component, 'ancillary_model_dependencies')
@@ -65,7 +65,7 @@ def test_alt_Zheng07_composites():
 	assert hasattr(cenmod_satocc_compoent, 'ancillary_model_dependencies')
 	cenmod_model_blueprint = copy(default_model_blueprint)
 	cenmod_model_blueprint['satellites']['occupation'] = cenmod_satocc_compoent
-	cenmod_model = model_factories.HodModelFactory(cenmod_model_blueprint)
+	cenmod_model = factories.HodModelFactory(cenmod_model_blueprint)
 
 	# Now we test whether changes to the param_dict keys of the composite model 
 	# that pertain to the centrals properly propagate through to the behavior 
@@ -94,7 +94,7 @@ def test_alt_Zheng07_composites():
 def test_Leauthaud11_composite():
 	"""
 	"""
-	model = preloaded_models.Leauthaud11(threshold = 10.5)
+	model = Leauthaud11(threshold = 10.5)
 
 	# Verify that changes param_dict properly propagate
 	testmass1 = 5.e11
