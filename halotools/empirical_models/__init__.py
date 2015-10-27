@@ -5,7 +5,6 @@ from __future__ import (absolute_import, division, print_function,
 
 
 from .model_defaults import *
-from .abunmatch import *
 from .model_helpers import *
 
 from .factories import *
