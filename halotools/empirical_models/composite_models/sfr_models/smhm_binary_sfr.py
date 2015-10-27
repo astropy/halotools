@@ -101,14 +101,14 @@ def SmHmBinarySFR(
     """
 
     sfr_model = BinaryGalpropInterpolModel(
-        galprop_key='quiescent', prim_haloprop_key=prim_haloprop_key, 
+        galprop_name='quiescent', prim_haloprop_key=prim_haloprop_key, 
         abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam, **kwargs)
 
     sm_model = smhm_model(
         prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
         scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
 
-    blueprint = {sm_model.galprop_key: sm_model, sfr_model.galprop_key: sfr_model}
+    blueprint = {sm_model.galprop_name: sm_model, sfr_model.galprop_name: sfr_model}
 
     if 'threshold' in kwargs.keys():
         galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']

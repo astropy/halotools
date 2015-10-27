@@ -70,7 +70,7 @@ class Moster13SmHm(PrimGalpropModel):
         """
 
         super(Moster13SmHm, self).__init__(
-            galprop_key='stellar_mass', **kwargs)
+            galprop_name='stellar_mass', **kwargs)
 
         self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
 

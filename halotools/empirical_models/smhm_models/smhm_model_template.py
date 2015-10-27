@@ -35,13 +35,13 @@ class PrimGalpropModel(object):
 
     """
 
-    def __init__(self, galprop_key, 
+    def __init__(self, galprop_name, 
         prim_haloprop_key = model_defaults.default_smhm_haloprop, 
         scatter_model = LogNormalScatterModel, **kwargs):
         """
         Parameters 
         ----------
-        galprop_key : string  
+        galprop_name : string  
             Name of the galaxy property being assigned. Most likely, 
             this is either ``stellar mass`` or ``luminosity``. This will be name of the 
             column assigned to your mock galaxy catalog. 
@@ -84,7 +84,7 @@ class PrimGalpropModel(object):
             
         """
 
-        self.galprop_key = galprop_key
+        self.galprop_name = galprop_name
         self.prim_haloprop_key = prim_haloprop_key
 
         if 'redshift' in kwargs:
@@ -99,24 +99,24 @@ class PrimGalpropModel(object):
         self._build_param_dict(**kwargs)
 
         # Enforce the requirement that sub-classes have been configured properly
-        required_method_name = 'mean_'+self.galprop_key
+        required_method_name = 'mean_'+self.galprop_name
         if not hasattr(self, required_method_name):
             raise SyntaxError("Any sub-class of PrimGalpropModel must "
                 "implement a method named %s " % required_method_name)
 
         # If the sub-class did not implement their own Monte Carlo method mc_galprop, 
         # then use _mc_galprop and give it the usual name
-        if not hasattr(self, 'mc_'+self.galprop_key):
-            setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
+        if not hasattr(self, 'mc_'+self.galprop_name):
+            setattr(self, 'mc_'+self.galprop_name, self._mc_galprop)
 
         # The _mock_generation_calling_sequence determines which methods 
         # will be called during mock population, as well as in what order they will be called
         self._mock_generation_calling_sequence = ['mc_stellar_mass']
-        self._galprop_dtypes_to_allocate = np.dtype([(str(self.galprop_key), 'f4')])
+        self._galprop_dtypes_to_allocate = np.dtype([(str(self.galprop_name), 'f4')])
 
         # The _methods_to_inherit determines which methods will be directly callable 
         # by the composite model built by the HodModelFactory
-        method_names_to_inherit = ['mc_' + self.galprop_key, 'mean_' + self.galprop_key]
+        method_names_to_inherit = ['mc_' + self.galprop_name, 'mean_' + self.galprop_name]
         try:
             self._methods_to_inherit.extend(method_names_to_inherit)
         except AttributeError:
@@ -198,7 +198,7 @@ class PrimGalpropModel(object):
                 "Choosing the default redshift z = %.2f\n" % sim_defaults.default_redshift)
                 kwargs['redshift'] = sim_defaults.default_redshift
 
-        prim_galprop_func = getattr(self, 'mean_'+self.galprop_key)
+        prim_galprop_func = getattr(self, 'mean_'+self.galprop_name)
         galprop_first_moment = prim_galprop_func(**kwargs)
 
         if include_scatter is False:
@@ -211,7 +211,7 @@ class PrimGalpropModel(object):
             result = 10.**log10_galprop_with_scatter
 
         if 'halo_table' in kwargs:
-            kwargs['halo_table'][self.galprop_key][:] = result
+            kwargs['halo_table'][self.galprop_name][:] = result
 
         return result
 
