@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-Module containing some commonly used composite HOD models.
+Module containing the HOD-style composite model based on Leauthaud et al. (2011).
 
 """
 from __future__ import (

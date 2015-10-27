@@ -16,15 +16,18 @@ from functools import partial
 
 from .scatter_models import LogNormalScatterModel
 from .smhm_model_template import PrimGalpropModel
+from .smhm_helpers import safely_retrieve_redshift
 
 from .. import model_defaults
 from .. import model_helpers as model_helpers
 
 from ...utils.array_utils import custom_len
 from ...sim_manager import sim_defaults 
+from ...custom_exceptions import *
 
 
 __all__ = ['Behroozi10SmHm']
+
 
 class Behroozi10SmHm(PrimGalpropModel):
     """ Stellar-to-halo-mass relation based on 
@@ -53,8 +56,44 @@ class Behroozi10SmHm(PrimGalpropModel):
             Array of values defining the level of scatter at the input abcissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
+
+        redshift : float, optional 
+            Redshift of the stellar-to-halo-mass relation. Recommended default behavior 
+            is to leave this argument unspecified.
+
+            If no ``redshift`` argument is given to the constructor, you will be free to use the 
+            analytical relations bound to `Behroozi10SmHm` to study the redshift-dependence 
+            of the SMHM by passing in a ``redshift`` argument to the `mean_log_halo_mass` 
+            and `mean_stellar_mass` methods. 
+            
+            If you do pass a ``redshift`` argument to the constructor, the instance of the 
+            `Behroozi10SmHm` will only return results for this redshift, and will raise an 
+            exception if you attempt to pass in a redshift to these methods. 
+            See the Notes below to understand the motivation for this behavior. 
+
+        Notes 
+        ------
+        Note that the `Behroozi10SmHm` class is a distinct from the `Behroozi10` model 
+        in several respects. The most important distinction to understand is that 
+        `Behroozi10` is a composite model that has been built to populate simulations 
+        with mock galaxies, whereas `Behroozi10SmHm` is a component model 
+        that is just a collection of analytical functions. 
+
+        Related to the above, the `Behroozi10` composite model has a single redshift 
+        hard-wired into its behavior to guarantee consistency with the 
+        halo catalog into which `Behroozi10` will sprinkle mock galaxies. On the other hand, 
+        the `Behroozi10SmHm` model need not have a ``redshift`` attribute bound to it at all, which permits 
+        you to use the analytical functions bound to `Behroozi10SmHm` to study the redshift-dependence 
+        of the stellar-to-halo-mass relation. However, since the `Behroozi10` composite model 
+        uses an instance of the `Behroozi10SmHm` for its stellar-to-halo-mass feature, then there must be 
+        some mechanism by which the redshift-dependence of the `Behroozi10SmHm` can be held fixed. 
+        The option to provide a specific redshift to the constructor of `Behroozi10SmHm` 
+        provides this mechanism. 
         """
         self.littleh = 0.7
+
+        if 'redshift' in kwargs:
+            self.redshift = float(max(0, kwargs['redshift']))
 
         super(Behroozi10SmHm, self).__init__(
             galprop_key='stellar_mass', **kwargs)
@@ -89,7 +128,7 @@ class Behroozi10SmHm(PrimGalpropModel):
 
         return d
 
-    def mean_log_halo_mass(self, log_stellar_mass, redshift=sim_defaults.default_redshift):
+    def mean_log_halo_mass(self, log_stellar_mass, **kwargs):
         """ Return the halo mass of a central galaxy as a function 
         of the stellar mass.  
 
@@ -108,6 +147,8 @@ class Behroozi10SmHm(PrimGalpropModel):
         log_halo_mass : array_like 
             Array containing 10-base logarithm of halo mass in h=1 solar mass units. 
         """
+        redshift = safely_retrieve_redshift(self, 'mean_log_halo_mass', **kwargs)                            
+
         stellar_mass = (10.**log_stellar_mass)*(self.littleh**2)
         a = 1./(1. + redshift)
 
@@ -151,6 +192,8 @@ class Behroozi10SmHm(PrimGalpropModel):
             Array containing stellar masses living in the input halo_table, 
             in solar mass units assuming h = 1.
         """
+        redshift = safely_retrieve_redshift(self, 'mean_log_halo_mass', **kwargs)
+
         # Retrieve the array storing the mass-like variable
         if 'halo_table' in kwargs.keys():
             halo_mass = kwargs['halo_table'][self.prim_haloprop_key]
@@ -159,11 +202,6 @@ class Behroozi10SmHm(PrimGalpropModel):
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
                 "``halo_table`` or ``prim_haloprop``")
-
-        if 'redshift' in kwargs:
-            redshift = kwargs['redshift']
-        else:
-            redshift = sim_defaults.default_redshift
 
         log_stellar_mass_table = np.linspace(8.5, 12.5, 100)
         log_halo_mass_table = self.mean_log_halo_mass(log_stellar_mass_table, redshift=redshift)
