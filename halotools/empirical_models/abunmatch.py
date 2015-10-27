@@ -32,14 +32,9 @@ class AbunMatchSmHm(PrimGalpropModel):
 
     def __init__(self, galprop_name, galaxy_abundance_abcissa, galaxy_abundance_ordinates, 
         scatter_level = 0.2, **kwargs):
-    
-        kwargs['scatter_model'] = LogNormalScatterModel
-        kwargs['scatter_abcissa'] = [12]
-        kwargs['scatter_ordinates'] = [scatter_level]
-
-        super(AbunMatchSmHm, self).__init__(galprop_name, **kwargs)
-
-        self.publications = ['arXiv:0903.4682', 'arXiv:1205.5807']
+        """
+        """
+        pass
 
     def mean_stellar_mass(self, **kwargs):
         return None
