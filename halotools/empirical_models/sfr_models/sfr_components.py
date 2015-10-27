@@ -34,7 +34,7 @@ class BinaryGalpropModel(object):
         """
         Parameters 
         ----------
-        galprop_key : string, keyword argument 
+        galprop_name : string, keyword argument 
             Name of the galaxy property being assigned. 
 
         prim_haloprop_key : string, optional  
@@ -56,7 +56,7 @@ class BinaryGalpropModel(object):
             ``model``, and exception will be raised. 
 
         """
-        required_kwargs = ['galprop_key']
+        required_kwargs = ['galprop_name']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         self.prim_haloprop_key = prim_haloprop_key
@@ -68,12 +68,12 @@ class BinaryGalpropModel(object):
             self.new_haloprop_func_dict = kwargs['new_haloprop_func_dict']
 
         # Enforce the requirement that sub-classes have been configured properly
-        required_method_name = 'mean_'+self.galprop_key+'_fraction'
+        required_method_name = 'mean_'+self.galprop_name+'_fraction'
         if not hasattr(self, required_method_name):
             raise HalotoolsError("Any sub-class of BinaryGalpropModel must "
                 "implement a method named %s " % required_method_name)
 
-        setattr(self, 'mc_'+self.galprop_key, self._mc_galprop)
+        setattr(self, 'mc_'+self.galprop_name, self._mc_galprop)
 
 
     def _mc_galprop(self, seed=None, **kwargs):
@@ -109,7 +109,7 @@ class BinaryGalpropModel(object):
         """
         np.random.seed(seed=seed)
 
-        mean_func = getattr(self, 'mean_'+self.galprop_key+'_fraction')
+        mean_func = getattr(self, 'mean_'+self.galprop_name+'_fraction')
         mean_galprop_fraction = mean_func(**kwargs)
         mc_generator = np.random.random(custom_len(mean_galprop_fraction))
         return np.where(mc_generator < mean_galprop_fraction, True, False)
@@ -135,7 +135,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         """ 
         Parameters 
         ----------
-        galprop_key : array, keyword argument
+        galprop_name : array, keyword argument
             String giving the name of galaxy property being assigned a binary value. 
 
         prim_haloprop_key : string, optional  
@@ -178,7 +178,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         We can use the `BinaryGalpropInterpolModel` to implement this as follows:
 
         >>> abcissa, ordinates = [12, 15], [1/3., 0.9]
-        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_key='quiescent', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='mvir')
+        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_name='quiescent', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='mvir')
 
         The ``cen_quiescent_model`` has a built-in method that computes the quiescent fraction 
         as a function of mass:
@@ -197,19 +197,19 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         to construct a simple model for satellite morphology, where the early- vs. late-type 
         of the satellite depends on :math:`V_{\\mathrm{peak}}` value of the host halo
 
-        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_key='late_type', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host')
+        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_name='late_type', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host')
         >>> vmax_array = np.logspace(2, 3, num=100)
         >>> morphology_realization = sat_morphology_model.mc_late_type(prim_haloprop =vmax_array)
 
         .. automethod:: _mean_galprop_fraction
         """
         try:
-            galprop_key = kwargs['galprop_key']
+            galprop_name = kwargs['galprop_name']
         except KeyError:
             raise HalotoolsError("\nAll sub-classes of BinaryGalpropInterpolModel must pass "
-                "a ``galprop_key`` keyword argument to the constructor\n")
+                "a ``galprop_name`` keyword argument to the constructor\n")
 
-        setattr(self, 'mean_'+galprop_key+'_fraction', self._mean_galprop_fraction)
+        setattr(self, 'mean_'+galprop_name+'_fraction', self._mean_galprop_fraction)
         super(BinaryGalpropInterpolModel, self).__init__(**kwargs)
 
         self._interpol_method = interpol_method
@@ -227,11 +227,11 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
                 [scipy_maxdegree, self._input_spline_degree, 
                 custom_len(self._abcissa)-1])
 
-        self._abcissa_key = self.galprop_key+'_abcissa'
-        self._ordinates_key_prefix = self.galprop_key+'_ordinates'
+        self._abcissa_key = self.galprop_name+'_abcissa'
+        self._ordinates_key_prefix = self.galprop_name+'_ordinates'
         self._build_param_dict()
 
-        setattr(self, self.galprop_key+'_abcissa', self._abcissa)
+        setattr(self, self.galprop_name+'_abcissa', self._abcissa)
 
     def _build_param_dict(self):
 
@@ -271,7 +271,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             prim_haloprop = np.log10(prim_haloprop)
 
         # Update self._abcissa, in case the user has changed it
-        self._abcissa = getattr(self, self.galprop_key+'_abcissa')
+        self._abcissa = getattr(self, self.galprop_name+'_abcissa')
 
         model_ordinates = [self.param_dict[ordinate_key] for ordinate_key in self._ordinates_keys]
         if self._interpol_method=='polynomial':

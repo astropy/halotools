@@ -21,10 +21,10 @@ from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 import warnings
 
-from .hod_components import OccupationComponent 
+from .occupation_model_template import OccupationComponent 
 
 from .. import model_defaults, model_helpers
-from ..smhm_models import smhm_components
+from ..smhm_models import Behroozi10SmHm
 
 from ..assembias_models import HeavisideAssembias
 from ..model_helpers import bounds_enforcing_decorator_factory
@@ -82,7 +82,7 @@ class Tinker13Cens(OccupationComponent):
             **kwargs)
         self.redshift = redshift
 
-        self.smhm_model = smhm_components.Behroozi10SmHm(
+        self.smhm_model = Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
         self._initialize_param_dict(**kwargs)
@@ -146,7 +146,7 @@ class Tinker13Cens(OccupationComponent):
         for key, value in zip(self._ordinates_keys, quiescent_fraction_ordinates):
             self.param_dict[key] = value
 
-    @bounds_enforcing_decorator_factory(0, 1)
+    @bounds_enforcing_decorator_factory(0, 1, warning=False)
     def mean_quiescent_fraction(self, **kwargs):
         """
         """
@@ -388,7 +388,7 @@ class Tinker13QuiescentSats(OccupationComponent):
             prim_haloprop_key = prim_haloprop_key, **kwargs)
         self.redshift = redshift
 
-        self.smhm_model = smhm_components.Behroozi10SmHm(
+        self.smhm_model = Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
         self._initialize_param_dict(**kwargs)
@@ -538,7 +538,7 @@ class Tinker13ActiveSats(OccupationComponent):
             prim_haloprop_key = prim_haloprop_key, **kwargs)
         self.redshift = redshift
 
-        self.smhm_model = smhm_components.Behroozi10SmHm(
+        self.smhm_model = Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
         self._initialize_param_dict(**kwargs)

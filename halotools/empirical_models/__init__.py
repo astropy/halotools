@@ -3,12 +3,11 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-from .mock_factories import *
-from .model_factories import *
+
 from .model_defaults import *
-from .abunmatch import *
 from .model_helpers import *
 
+from .factories import *
 from .assembias_models import *
 from .phase_space_models import *
 from .sfr_models import *

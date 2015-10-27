@@ -3,7 +3,7 @@ import numpy as np
 from astropy.table import Table
 from copy import copy
 
-from .. import hod_components, zheng07_components
+from .. import occupation_model_template, zheng07_components
 
 from ... import model_defaults
 
@@ -29,7 +29,7 @@ def test_Zheng07Cens():
 	"""
 
 	def test_attributes(model):
-		assert isinstance(model, hod_components.OccupationComponent)
+		assert isinstance(model, occupation_model_template.OccupationComponent)
 		assert model.gal_type == 'centrals'
 
 		assert hasattr(model, 'prim_haloprop_key')
@@ -179,7 +179,7 @@ def test_Zheng07Sats():
 	"""
 
 	def test_attributes(model):
-		assert isinstance(model, hod_components.OccupationComponent)
+		assert isinstance(model, occupation_model_template.OccupationComponent)
 		assert model.gal_type == 'satellites'
 
 		assert hasattr(model, 'prim_haloprop_key')
