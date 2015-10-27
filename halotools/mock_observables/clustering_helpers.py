@@ -567,7 +567,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
     if len(aux1) != len(aux1):
         msg = ("aux1 must have same length as sample1")
         warn(msg)
-    if len(makrs2) != len(marks2):
+    if len(marks2) != len(marks2):
         msg = ("marks2 must have same length as sample2")
         warn(msg)
     if len(aux2) != len(aux2):
@@ -660,12 +660,6 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
 
     if num_threads == 'max':
         num_threads = cpu_count()
-
-    available_estimators = _list_estimators()
-    if estimator not in available_estimators:
-        msg = ("Input `estimator` must be one of the following:{0}".value(available_estimators))
-        raise HalotoolsError(msg)
-
 
     return sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
            num_threads, aux1, aux2, wfunc, _sample1_is_sample2, PBCs

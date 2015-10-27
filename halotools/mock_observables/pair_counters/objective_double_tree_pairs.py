@@ -55,9 +55,6 @@ def obj_wnpairs(data1, data2, rbins, period=None,\
     rbins: array_like
         numpy array of boundaries defining the bins in which pairs are counted. 
     
-    Lbox: array_like, optional
-        length of cube sides which encloses data1 and data2.
-    
     period: array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
