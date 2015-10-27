@@ -7,7 +7,7 @@ used by many of the hod model components.
 """
 
 __all__ = (
-    ['GalPropModel', 'solve_for_polynomial_coefficients', 'polynomial_from_table', 
+    ['solve_for_polynomial_coefficients', 'polynomial_from_table', 
     'enforce_periodicity_of_box', 'custom_spline', 'create_composite_dtype', 'bind_default_kwarg_mixin_safe', 
     'custom_incomplete_gamma', 'bounds_enforcing_decorator_factory']
     )
@@ -19,19 +19,12 @@ from astropy.extern import six
 from abc import ABCMeta
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.special import gammaincc, gamma, expi
+from warnings import warn 
 
 from . import model_defaults
 
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
-
-
-@six.add_metaclass(ABCMeta)
-class GalPropModel(object):
-    """ Abstact container class for any model of any galaxy property. 
-    """
-    def __init__(self, galprop_key):
-        self.galprop_key = galprop_key
 
 def solve_for_polynomial_coefficients(abcissa, ordinates):
     """ Solves for coefficients of the unique, 
@@ -449,7 +442,7 @@ def custom_incomplete_gamma(a, x):
 custom_incomplete_gamma.__author__ = ['Surhud More']
 
 
-def bounds_enforcing_decorator_factory(lower_bound, upper_bound):
+def bounds_enforcing_decorator_factory(lower_bound, upper_bound, warning = True):
     """
     Function returns a decorator that can be used to clip the values 
     of an original function to produce a modified function whose 
@@ -463,6 +456,10 @@ def bounds_enforcing_decorator_factory(lower_bound, upper_bound):
 
     upper_bound : float or int 
         Upper bound defining the output decorator 
+
+    warning : bool, optional 
+        If True, decorator will raise a warning for cases where the values of the 
+        undecorated function fall outside the boundaries. Default is True. 
 
     Returns 
     --------
@@ -492,6 +489,15 @@ def bounds_enforcing_decorator_factory(lower_bound, upper_bound):
             unbounded_result = np.array(input_func(*args, **kwargs))
             lower_bounded_result = np.where(unbounded_result < lower_bound, lower_bound, unbounded_result)
             bounded_result = np.where(lower_bounded_result > upper_bound, upper_bound, lower_bounded_result)
+
+            if warning is True:
+                raise_warning = np.any(unbounded_result != bounded_result)
+                if raise_warning is True:
+                    func_name = input_func.__name__
+                    msg = ("The " + func_name + " function \nreturned at least one value that was "
+                        "outside the range (%.2f, %.2f)\n. The bounds_enforcing_decorator_factory "
+                        "manually set all such values equal to \nthe appropriate boundary condition.\n")
+                    warn(msg)
 
             return bounded_result
 

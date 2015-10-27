@@ -9,8 +9,8 @@ into the model building package. After importing
 the module, each pre-built model can be loaded into 
 memory with a single line of code. For example: 
 
-	>>> from halotools.empirical_models import preloaded_models
-	>>> zheng07 = preloaded_models.Zheng07()
+	>>> from halotools.empirical_models import Zheng07
+	>>> zheng07 = Zheng07()
 
 All pre-built models can be used to directly populate dark matter halos 
 with mock galaxies using a single line of code:

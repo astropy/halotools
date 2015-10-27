@@ -9,7 +9,7 @@ from unittest import TestCase
 from copy import copy
 
 
-from .. import smhm_components
+from ...smhm_models import *
 
 from ... import model_defaults
 
@@ -17,7 +17,7 @@ __all__ = ['test_Moster13SmHm_initialization', 'test_LogNormalScatterModel_initi
 
 def test_Moster13SmHm_initialization():
 	""" Function testing the initialization of 
-	`~halotools.empirical_models.smhm_components.Moster13SmHm`. 
+	`~halotools.empirical_models.Moster13SmHm`. 
 	Summary of tests:
 
 		* Class successfully instantiates when called with no arguments. 
@@ -29,11 +29,11 @@ def test_Moster13SmHm_initialization():
 		* The scatter model bound to Moster13SmHm correctly inherits each of the above arguments. 
 	"""
 
-	default_model = smhm_components.Moster13SmHm()
+	default_model = Moster13SmHm()
 	assert default_model.prim_haloprop_key == model_defaults.default_smhm_haloprop
 	assert default_model.scatter_model.prim_haloprop_key == model_defaults.default_smhm_haloprop
 	assert hasattr(default_model, 'redshift') == False
-	assert isinstance(default_model.scatter_model, smhm_components.LogNormalScatterModel)
+	assert isinstance(default_model.scatter_model, LogNormalScatterModel)
 
 	keys = ['m10', 'm11', 'n10', 'n11', 'beta10', 'beta11', 'gamma10', 'gamma11', 'scatter_model_param1']
 	for key in keys:
@@ -44,19 +44,19 @@ def test_Moster13SmHm_initialization():
 	assert default_model.scatter_model.param_dict == default_scatter_dict
 	assert default_model.scatter_model.ordinates == [model_defaults.default_smhm_scatter]
 
-	z0_model = smhm_components.Moster13SmHm(redshift=0)
+	z0_model = Moster13SmHm(redshift=0)
 	assert z0_model.redshift == 0
-	z1_model = smhm_components.Moster13SmHm(redshift=1)
+	z1_model = Moster13SmHm(redshift=1)
 	assert z1_model.redshift == 1
 
-	macc_model = smhm_components.Moster13SmHm(prim_haloprop_key='macc')
+	macc_model = Moster13SmHm(prim_haloprop_key='macc')
 	assert macc_model.prim_haloprop_key == 'macc'
 	assert macc_model.scatter_model.prim_haloprop_key == 'macc'
 
 def test_Moster13SmHm_behavior():
 	"""
 	"""
-	default_model = smhm_components.Moster13SmHm()
+	default_model = Moster13SmHm()
 	mstar1 = default_model.mean_stellar_mass(prim_haloprop = 1.e12)
 	ratio1 = mstar1/3.4275e10
 	np.testing.assert_array_almost_equal(ratio1, 1.0, decimal=3)
@@ -92,7 +92,7 @@ def test_Moster13SmHm_behavior():
 
 def test_LogNormalScatterModel_initialization():
 	""" Function testing the initialization of 
-	`~halotools.empirical_models.smhm_components.LogNormalScatterModel`. 
+	`~halotools.empirical_models.LogNormalScatterModel`. 
 	Summary of tests:
 
 		* Class successfully instantiates when called with no arguments. 
@@ -102,7 +102,7 @@ def test_LogNormalScatterModel_initialization():
 		* When the above arguments are passed to the constructor, the instance is correctly initialized with the input values.
 
 	"""
-	default_scatter_model = smhm_components.LogNormalScatterModel()
+	default_scatter_model = LogNormalScatterModel()
 	assert default_scatter_model.prim_haloprop_key == model_defaults.default_smhm_haloprop
 	assert default_scatter_model.abcissa == [12]
 	assert default_scatter_model.ordinates == [model_defaults.default_smhm_scatter]
@@ -111,7 +111,7 @@ def test_LogNormalScatterModel_initialization():
 
 	input_abcissa = [12, 15]
 	input_ordinates = [0.3, 0.1]
-	scatter_model2 = smhm_components.LogNormalScatterModel(
+	scatter_model2 = LogNormalScatterModel(
 		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
 
 	assert scatter_model2.abcissa == input_abcissa
@@ -122,7 +122,7 @@ def test_LogNormalScatterModel_initialization():
 
 def test_LogNormalScatterModel_behavior():
 	""" Function testing the behavior of 
-	`~halotools.empirical_models.smhm_components.LogNormalScatterModel`. 
+	`~halotools.empirical_models.LogNormalScatterModel`. 
 
 	Summary of tests:
 
@@ -139,7 +139,7 @@ def test_LogNormalScatterModel_behavior():
 
 	testing_seed = 43
 
-	default_scatter_model = smhm_components.LogNormalScatterModel()
+	default_scatter_model = LogNormalScatterModel()
 
 	Npts = 1e4
 	testmass12 = 1e12
@@ -167,7 +167,7 @@ def test_LogNormalScatterModel_behavior():
 
 	input_abcissa = [12, 15]
 	input_ordinates = [0.3, 0.1]
-	scatter_model2 = smhm_components.LogNormalScatterModel(
+	scatter_model2 = LogNormalScatterModel(
 		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
 
 	assert len(scatter_model2.abcissa) == 2
@@ -260,7 +260,7 @@ class TestBehroozi10SmHm(TestCase):
 		as a blackbox test of the implementation. 
 		"""
 
-		self.model = smhm_components.Behroozi10SmHm()
+		self.model = Behroozi10SmHm()
 
 		self.logmratio_z1 = np.array(
 			[-2.145909, -2.020974, -1.924020, -1.852937, 
