@@ -145,7 +145,7 @@ class Tinker13Cens(OccupationComponent):
         for key, value in zip(self._ordinates_keys, quiescent_fraction_ordinates):
             self.param_dict[key] = value
 
-    @bounds_enforcing_decorator_factory(0, 1)
+    @bounds_enforcing_decorator_factory(0, 1, warning=False)
     def mean_quiescent_fraction(self, **kwargs):
         """
         """
