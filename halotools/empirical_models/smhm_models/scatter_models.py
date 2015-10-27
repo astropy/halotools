@@ -66,6 +66,7 @@ class LogNormalScatterModel(object):
         >>> scatter_model = LogNormalScatterModel(scatter_abcissa=scatter_abcissa, scatter_ordinates=scatter_ordinates)
 
         """
+        
         default_scatter = model_defaults.default_smhm_scatter
         self.prim_haloprop_key = prim_haloprop_key
 
