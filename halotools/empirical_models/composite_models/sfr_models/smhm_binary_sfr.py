@@ -9,17 +9,17 @@ from __future__ import (
 
 import numpy as np
 
-from .. import factories, model_defaults
-from ..occupation_models import hod_components as hoc
-from ..occupation_models import zheng07_components
-from ..occupation_models import leauthaud11_components 
-from ..occupation_models import tinker13_components 
+from ... import factories, model_defaults
+from ...occupation_models import hod_components as hoc
+from ...occupation_models import zheng07_components
+from ...occupation_models import leauthaud11_components 
+from ...occupation_models import tinker13_components 
 
-from ..smhm_models import Moster13SmHm, Behroozi10SmHm
-from ..sfr_models import BinaryGalpropInterpolModel
-from ..phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
+from ...smhm_models import Moster13SmHm, Behroozi10SmHm
+from ...sfr_models import BinaryGalpropInterpolModel
+from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
-from ...sim_manager import FakeMock, FakeSim, sim_defaults
+from ....sim_manager import FakeMock, FakeSim, sim_defaults
 
 
 __all__ = ['SmHmBinarySFR']
