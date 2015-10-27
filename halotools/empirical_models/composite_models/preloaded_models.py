@@ -18,7 +18,7 @@ from ..occupation_models import tinker13_components
 from ..smhm_models import Moster13SmHm, Behroozi10SmHm
 from ..sfr_models import BinaryGalpropInterpolModel
 from ..phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
-from ..abunmatch import ConditionalAbunMatch
+from ..conditional_abunmatch import ConditionalAbunMatch
 
 from ...sim_manager import FakeMock, FakeSim, sim_defaults
 
