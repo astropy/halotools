@@ -37,8 +37,8 @@ into the model building package. After importing
 the module, each pre-built model can be loaded into 
 memory with a single line of code. 
 
-	>>> from halotools.empirical_models import preloaded_models
-	>>> zheng07 = preloaded_models.Zheng07()
+	>>> from halotools.empirical_models import Zheng07
+	>>> zheng07 = Zheng07()
 
 This simple call with no arguments builds an 
 instance of a model based on the formulation of the HOD introduced in 
