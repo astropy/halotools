@@ -102,12 +102,12 @@ class SubhaloMockFactory(MockFactory):
         self.galaxy_table['galid'] = np.arange(len(self.galaxy_table))
         self._precomputed_galprop_list.append('galid')
 
-        for galprop in self.model.galprop_list:
-            component_model = self.model.model_blueprint[galprop]
+        for feature in self.model._feature_list:
+            component_model = self.model.model_blueprint[feature]
 
             try:
                 f = component_model.gal_type_func
-                newkey = galprop + '_gal_type'
+                newkey = feature + '_gal_type'
                 self.galaxy_table[newkey] = f(halo_table=self.galaxy_table)
                 self._precomputed_galprop_list.append(newkey)
             except AttributeError:
