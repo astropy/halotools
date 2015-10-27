@@ -106,6 +106,13 @@ class PrimGalpropModel(model_helpers.GalPropModel):
 
         super(PrimGalpropModel, self).__init__(galprop_key=self.galprop_key)
 
+        # The _mock_generation_calling_sequence determines which methods 
+        # will be called during mock population, as well as in what order they will be called
+        self._mock_generation_calling_sequence = ['mc_stellar_mass']
+        key = str(self.galprop_key)
+        self._galprop_dtypes_to_allocate = np.dtype([(key, 'f4')])
+
+
     def mean_scatter(self, **kwargs):
         """ Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict`` 
         of the scatter model, and then call the `mean_scatter` method of 
