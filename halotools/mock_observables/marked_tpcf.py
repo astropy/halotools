@@ -11,7 +11,7 @@ import sys
 import numpy as np
 from math import pi, gamma
 from .clustering_helpers import *
-from .pair_counters.objective_rect_cuboid_pairs import obj_wnpairs
+from .pair_counters.objective_double_tree_pairs import obj_wnpairs
 from .pair_counters.double_tree_pairs import npairs
 ##########################################################################################
 
@@ -116,7 +116,7 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
             num_threads, max_sample_size, aux1, aux2, wfunc)
     
     
-    def marked_pair_counts(sample1, sample2, rbins, period, N_thread,\
+    def marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
                            do_auto, do_cross, marks1, marks2, aux1, aux2,\
                            wfunc, _sample1_is_sample2):
         """
@@ -128,6 +128,7 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
                                weights1=marks1, weights2=marks1,\
                                aux1=aux1, aux2=aux1, wfunc = wfunc,\
                                period=period, num_threads=num_threads)
+            print(D1D1)
             D1D1 = np.diff(D1D1)
         else:
             D1D1=None
@@ -154,7 +155,7 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
 
         return D1D1, D1D2, D2D2
     
-    def random_counts(sample1, sample2, rbins, period, N_thread,\
+    def random_counts(sample1, sample2, rbins, period, num_threads,\
                       do_auto, do_cross, marks1, marks2, aux1, aux2, wfunc,\
                       _sample1_is_sample2, permutate1, permutate2):
         """
@@ -166,6 +167,7 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
                                weights1=marks1, weights2=marks1[permutate1],\
                                aux1=aux1, aux2=aux1[permutate1], wfunc = wfunc,\
                                period=period, num_threads=num_threads)
+            print(R1R1)
             R1R1 = np.diff(R1R1)
         else:
             R1R1=None
@@ -204,10 +206,10 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
                                         _sample1_is_sample2)
     
     #calculate randomized marked pairs
-    R1R1,R1R2,R2R2 = marked_pair_counts(sample1, sample2, rbins, period,\
-                                        num_threads, do_auto, do_cross,\
-                                        marks1, marks2, aux1, aux2, wfunc,\
-                                        _sample1_is_sample2, permutate1, permutate2)
+    R1R1,R1R2,R2R2 = random_counts(sample1, sample2, rbins, period,\
+                                   num_threads, do_auto, do_cross,\
+                                   marks1, marks2, aux1, aux2, wfunc,\
+                                   _sample1_is_sample2, permutate1, permutate2)
     
     #return results
     if _sample1_is_sample2:
