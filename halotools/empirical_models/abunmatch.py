@@ -2,8 +2,8 @@
 """
 Module containing classes used to perform abundance matching (SHAM)
 and conditional abundance matching (CAM). 
-
 """
+
 import numpy as np
 
 from scipy.stats import pearsonr

@@ -2,7 +2,9 @@
 """
 Module containing classes used to model the mapping between 
 stellar mass and subhalo_table. 
+
 """
+
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
@@ -30,6 +32,7 @@ __all__ = ['PrimGalpropModel']
 class PrimGalpropModel(model_helpers.GalPropModel):
     """ Abstract container class for models connecting halo_table to their primary
     galaxy property, e.g., stellar mass or luminosity. 
+
     """
 
     def __init__(self, galprop_key = 'stellar_mass', 
