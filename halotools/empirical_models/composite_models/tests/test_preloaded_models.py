@@ -25,6 +25,7 @@ else:
 
 class TestHearin15(TestCase):
 
+	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')
 	def setup_class(self):
 
@@ -47,12 +48,14 @@ class TestHearin15(TestCase):
 
 		self.snapshot2 = HaloCatalog(preload_halo_table = True, redshift = 2.)
 
+	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Hearin15(self):
 
 		model = Hearin15(concentration_binning = (1, 35, 5))
 		model.populate_mock(snapshot = self.snapshot)
 
+	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11(self):
 
