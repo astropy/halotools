@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function,
 
 __all__ = ['_tpcf_process_args', '_tpcf_jackknife_process_args',\
            '_redshift_space_tpcf_process_args', '_s_mu_tpcf_process_args',\
+           '_marked_tpcf_process_args',\
            '_list_estimators', '_TP_estimator', '_TP_estimator_requirements']
 
 import numpy as np
@@ -509,6 +510,165 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
 
     return sample1, s_bins, mu_bins, sample2, randoms, period, do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
 
+
+def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
+                              period, do_auto, do_cross, num_threads,\
+                              max_sample_size, aux1, aux2, wfunc):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.mared_tpcf`. 
+    """
+
+    sample1 = convert_to_ndarray(sample1)
+
+    if sample2 is not None: 
+        sample2 = convert_to_ndarray(sample2)
+
+        if np.all(sample1==sample2):
+            _sample1_is_sample2 = True
+            msg = ("Warning: sample1 and sample2 are exactly the same, \n"
+                   "auto-correlation will be returned.\n")
+            warn(msg)
+            do_cross==False
+        else: 
+            _sample1_is_sample2 = False
+    else: 
+        sample2 = sample1
+        _sample1_is_sample2 = True
+
+    #process wfunc parameter
+    if type(wfunc) is not int:
+        raise ValueError('wfunc parameter must be an integer ID of the desired function.')
+
+    #process marks
+    if marks1 is not None: 
+        marks1 = convert_to_ndarray(marks1).astype(float)
+    else:
+        marks1 = np.ones(len(sample1)).astype(float)
+    if marks2 is not None: 
+        marks2 = convert_to_ndarray(marks2).astype(float)
+    else:
+        marks2 = np.ones(len(sample2)).astype(float)
+    
+    #process aux parameters
+    if aux1 is not None: 
+        aux1 = convert_to_ndarray(aux1).astype(float)
+    else:
+        aux1 = np.ones(len(sample1)).astype(float)
+    if aux2 is not None: 
+        aux2 = convert_to_ndarray(aux2).astype(float)
+    else:
+        aux2 = np.ones(len(sample2)).astype(float)
+    
+    #check for consistency between marks and samples
+    if len(marks1) != len(sample1):
+        msg = ("marks1 must have same length as sample1")
+        warn(msg)
+    if len(aux1) != len(aux1):
+        msg = ("aux1 must have same length as sample1")
+        warn(msg)
+    if len(makrs2) != len(marks2):
+        msg = ("marks2 must have same length as sample2")
+        warn(msg)
+    if len(aux2) != len(aux2):
+        msg = ("aux1 must have same length as sample2")
+        warn(msg)
+    if marks1.ndim != 1:
+        msg = "marks1 must be a one dimensional array"
+        raise HalotoolsError(msg)
+    if aux1.ndim != 1:
+        msg = "aux1 must be a one dimensional array"
+        raise HalotoolsError(msg)
+    if marks2.ndim != 1:
+        msg = "marks2 must be a one dimensional array"
+        raise HalotoolsError(msg)
+    if aux2.ndim != 1:
+        msg = "aux2 must be a one dimensional array"
+        raise HalotoolsError(msg)
+        
+    
+    # down sample if sample size exceeds max_sample_size.
+    if _sample1_is_sample2 is True:
+        if (len(sample1) > max_sample_size):
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            marks1 = marks1[inds]
+            aux1 = aux1[inds]
+            print('downsampling sample1...')
+    else:
+        if len(sample1) > max_sample_size:
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            marks1 = marks1[inds]
+            aux1 = aux1[inds]
+            print('down sampling sample1...')
+        if len(sample2) > max_sample_size:
+            inds = np.arange(0,len(sample2))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample2 = sample2[inds]
+            marks2 = marks2[inds]
+            aux2 = aux2[inds]
+            print('down sampling sample2...')
+    
+    rbins = convert_to_ndarray(rbins)
+    rmax = np.max(rbins)
+    try:
+        assert rbins.ndim == 1
+        assert len(rbins) > 1
+        if len(rbins) > 2:
+            assert array_is_monotonic(rbins, strict = True) == 1
+    except AssertionError:
+        msg = "Input ``rbins`` must be a monotonically increasing 1D array with at least two entries"
+        raise HalotoolsError(msg)
+        
+    #Process period entry and check for consistency.
+    if period is None:
+        PBCs = False
+    else:
+        PBCs = True
+        period = convert_to_ndarray(period)
+        if len(period) == 1:
+            period = np.array([period[0]]*3)
+        try:
+            assert np.all(period < np.inf)
+            assert np.all(period > 0)
+        except AssertionError:
+            msg = "Input ``period`` must be a bounded positive number in all dimensions"
+            raise HalotoolsError(msg)
+
+    #check for input parameter consistency
+    if (period is not None):
+        if (rmax >= np.min(period)/3.0):
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                "cannot be larger than Lbox/3 in any dimension. \n"
+                "If you need to count pairs on these length scales, \n"
+                "you should use a larger simulation.\n")
+            raise HalotoolsError(msg)
+
+    if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
+        msg = ('\nSample1 and sample2 must have same dimension.\n')
+        raise HalotoolsError(msg)
+
+    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
+        msg = ('do_auto and do_cross keywords must be of type boolean.')
+        raise HalotoolsError(msg)
+
+    if num_threads == 'max':
+        num_threads = cpu_count()
+
+    available_estimators = _list_estimators()
+    if estimator not in available_estimators:
+        msg = ("Input `estimator` must be one of the following:{0}".value(available_estimators))
+        raise HalotoolsError(msg)
+
+
+    return sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
+           num_threads, aux1, aux2, wfunc, _sample1_is_sample2, PBCs
 
 
 def _list_estimators():
