@@ -25,44 +25,35 @@ def Tinker13(threshold = model_defaults.default_stellar_mass_threshold,
     central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
     """
     """
-    cen_key = 'centrals'
-    subpopulation_blueprint_centrals = {}
     # Build the occupation model
-    occupation_feature_centrals = tinker13_components.Tinker13Cens(threshold = threshold, **kwargs)
-    occupation_feature_centrals._suppress_repeated_param_warning = True
-    subpopulation_blueprint_centrals['occupation'] = occupation_feature_centrals
+    centrals_occupation = tinker13_components.Tinker13Cens(threshold = threshold, **kwargs)
+    centrals_occupation._suppress_repeated_param_warning = True
     # Build the profile model
     
-    profile_feature_centrals = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
+    centrals_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
 
-    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
     
-    sat_key1 = 'quiescent_satellites'
-    subpopulation_blueprint_satellites1 = {}
     # Build the occupation model
-    occupation_feature_satellites1 = tinker13_components.Tinker13QuiescentSats(threshold = threshold, **kwargs)
-    subpopulation_blueprint_satellites1['occupation'] = occupation_feature_satellites1
+    quiescent_satellites_occupation = tinker13_components.Tinker13QuiescentSats(threshold = threshold, **kwargs)
     # Build the profile model
-    profile_feature_satellites1 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
+    quiescent_satellites_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
                                  concentration_binning = (1, 35, 1), **kwargs)    
-    subpopulation_blueprint_satellites1['profile'] = profile_feature_satellites1
 
-    sat_key2 = 'active_satellites'
-    subpopulation_blueprint_satellites2 = {}
     # Build the occupation model
-    occupation_feature_satellites2 = tinker13_components.Tinker13ActiveSats(threshold = threshold, **kwargs)
-    subpopulation_blueprint_satellites2['occupation'] = occupation_feature_satellites2
+    active_satellites_occupation = tinker13_components.Tinker13ActiveSats(threshold = threshold, **kwargs)
     # Build the profile model
-    profile_feature_satellites2 = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
+    active_satellites_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
                                  concentration_binning = (1, 35, 1), **kwargs)  
-    del profile_feature_satellites2.new_haloprop_func_dict
-    subpopulation_blueprint_satellites2['profile'] = profile_feature_satellites2
+    del active_satellites_profile.new_haloprop_func_dict
     
-    blueprint = {cen_key: subpopulation_blueprint_centrals, 
-                 sat_key1: subpopulation_blueprint_satellites1, 
-                 sat_key2: subpopulation_blueprint_satellites2}
+    composite_model = factories.HodModelFactory(centrals_occupation = centrals_occupation, 
+        centrals_profile = centrals_profile, quiescent_satellites_profile = quiescent_satellites_profile, 
+        quiescent_satellites_occupation = quiescent_satellites_occupation, 
+        active_satellites_profile = active_satellites_profile, 
+        active_satellites_occupation = active_satellites_occupation, 
+        gal_type_list = ['centrals', 'active_satellites', 'quiescent_satellites'])
     
-    return factories.HodModelFactory(blueprint)
+    return composite_model
 
 
 
