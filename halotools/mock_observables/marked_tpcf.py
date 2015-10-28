@@ -100,13 +100,30 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
 
     Notes
     -----
-    Pairs are counted using the pair_counters.objective_rect_cuboid_pairs module.  This pair 
+    Pairs are counted using the pair_counters.objective_double_pairs module.  This pair 
     counter is optimized to work on points distributed in a rectangular cuboid volume, 
     e.g. a simulation box.  This optimization restricts this function to work on 3-D 
     point distributions.
     
     If the `period` argument is passed, points may not have any component of their 
     coordinates be negative.
+    
+    The available wfunc functions are:
+    func ID 0: custom user-defined and compiled weighting function
+    func ID 1: multiplicative weights, return w1*w2
+    func ID 2: summed weights, return w1+w2
+    func ID 3: equality weights, return r1*r2 if w1==w2
+    func ID 4: greater than weights, return r1*r2 if w2>w1
+    func ID 5: less than weights, return r1*r2 if w2<w1")
+    func ID 6: greater than tolerance weights, return r2 if w2>(w1+r1)
+    func ID 7: less than tolerance weights, return r2 if w2<(w1-r1)
+    func ID 8: tolerance weights, return r2 if |w1-w2|<r1
+    func ID 9: exclusion weights, return r2 if |w1-w2|>r1
+    
+    where w1, w2 are weights1 and weights2 parameters respectively, and r1, r2 are the 
+    aux1 and aux2 paraemeters.
+    
+    These functions are defined in .pair_counters.objective_cpiars.objective_weights.pyx
     """
     
     #process parameters
