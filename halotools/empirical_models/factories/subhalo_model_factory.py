@@ -33,28 +33,28 @@ class SubhaloModelFactory(ModelFactory):
     populate a simulation with a Monte Carlo realization of the model. 
     """
 
-    def __init__(self, input_model_blueprint, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters
         ----------
-        input_model_blueprint : dict 
-            The main dictionary keys of ``input_model_blueprint`` 
-            are ``galprop_name`` strings, the names of 
-            properties that will be assigned to galaxies 
-            e.g., ``stellar_mass``, ``sfr``, ``morphology``, etc. 
-            The dictionary value associated with each ``galprop_name``  
-            is a class instance of the type of model that 
-            maps that property onto subhalos. 
+        *model_features : sequence of keyword arguments, optional 
+            The standard way to call the `SubhaloModelFactory` is 
+            with a sequence of keyword arguments providing the set of 
+            features that you want to build your composite model with. 
+            Each keyword you use will be interpreted as the name of the feature; 
+            the value bound to each keyword must be an instance of a 
+            component model governing the behavior of that feature. 
+            See the ``Examples`` below. 
 
-        galprop_sequence : list, optional
+        model_feature_sequence : list, optional
             Some model components may have explicit dependence upon 
             the value of some other galaxy model property. A classic 
             example is if the stellar mass of a central galaxy has explicit 
             dependence on whether or not the central is active or quiescent. 
             In such a case, you must pass a list of the galaxy properties 
-            of the composite model; the first galprop in ``galprop_sequence`` 
+            of the composite model; the first galprop in ``model_feature_sequence`` 
             will be assigned first by the ``mock_factory``; the second galprop 
-            in ``galprop_sequence`` will be assigned second, and its computation 
+            in ``model_feature_sequence`` will be assigned second, and its computation 
             may depend on the first galprop, and so forth. Default behavior is 
             to assume that no galprop has explicit dependence upon any other. 
 
@@ -76,7 +76,7 @@ class SubhaloModelFactory(ModelFactory):
             Halos that are masked will be entirely neglected during mock population.
         """
 
-        super(SubhaloModelFactory, self).__init__(input_model_blueprint, **kwargs)
+        self._interpret_constructor_inputs(**kwargs)
         self.model_blueprint = copy(self._input_model_blueprint)
         
         # Build up and bind several lists from the component models
@@ -88,12 +88,36 @@ class SubhaloModelFactory(ModelFactory):
 
         self.mock_factory = SubhaloMockFactory
 
+    def _interpret_constructor_inputs(self, **kwargs):
+        """
+        """
+        additional_kwargs = {}
+
+        possible_supplementary_kwargs = ('galaxy_selection_func', 
+            'halo_selection_func', 'model_feature_sequence')
+
+        for key in possible_supplementary_kwargs:
+            try:
+                additional_kwargs[key] = copy(kwargs[key])
+                del kwargs[key]
+            except KeyError:
+                pass
+
+        input_model_blueprint = collections.OrderedDict()
+        try:
+            self._feature_list = additional_kwargs['model_feature_sequence']
+        except KeyError:
+            self._feature_list = list(kwargs.keys())
+        for key in self._feature_list:
+            input_model_blueprint[key] = copy(kwargs[key])
+
+        super(SubhaloModelFactory, self).__init__(input_model_blueprint, **additional_kwargs)
+        
+
     def _build_composite_attrs(self, **kwargs):
         """ A composite model has several bookkeeping devices that are built up from 
         the components: ``_haloprop_list``, ``publications``, and ``new_haloprop_func_dict``. 
         """
-
-        self._feature_list = self.model_blueprint.keys()
 
         self._build_haloprop_list()
         self._build_publication_list()
