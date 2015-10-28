@@ -43,11 +43,15 @@ def Behroozi10(redshift = sim_defaults.default_redshift, **kwargs):
         Array of values defining the level of scatter at the input abcissa.
         Default behavior will result in constant scatter at a level set in the 
         `~halotools.empirical_models.model_defaults` module. 
+
+    Examples 
+    --------
+    >>> model = Behroozi10()
+
 	"""
 
 	stellar_mass_model = Behroozi10SmHm(redshift = redshift, **kwargs)
-	model_blueprint = {'stellar_mass': stellar_mass_model}
-	composite_model = factories.SubhaloModelFactory(model_blueprint)
+	composite_model = factories.SubhaloModelFactory(stellar_mass = stellar_mass_model)
 
 	return composite_model
 

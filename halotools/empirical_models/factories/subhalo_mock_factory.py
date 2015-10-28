@@ -102,8 +102,7 @@ class SubhaloMockFactory(MockFactory):
         self.galaxy_table['galid'] = np.arange(len(self.galaxy_table))
         self._precomputed_galprop_list.append('galid')
 
-        for feature in self.model._feature_list:
-            component_model = self.model.model_blueprint[feature]
+        for feature, component_model in self.model.model_blueprint.iteritems():
 
             try:
                 f = component_model.gal_type_func
