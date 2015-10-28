@@ -66,11 +66,20 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     :math:`\\Sigma(r_p) = \\bar{\\rho}\\int_0^{\\pi_{\\rm max}} \\left[1+\\xi_{\\rm g,m}(\\sqrt{r_p^2+\\pi^2}) \\right]\\mathrm{d}\\pi`
     and then,
     :math:`\\Delta\\Sigma(r_p) = \\bar{\\Sigma}(<r_p) - \\Sigma(r_p)`
+    where,
+    :math:`\\bar{\\Sigma}(<r_p) = \\frac{1}{\\pi r_p^2}\\int_0^{r_p}\\Sigma(r_p^{\\prime})2\\pi r_p^{\\prime} \\mathrm{d}r_p^{\\prime}`
+    
+    Numerically,
+    :math: `\\xi` is calculated in `n_bins` evenly spaced linearly or log-linearly as
+    indicated by `log_bins`.
+    
+    All integrals are done use scipy.integrate.quad.
     """
     
     #process the input parameters
     galaxies, particles, rp_bins, period, num_threads, PBCs = \
-        _delta_sigma_process_args(galaxies, particles, rp_bins, pi_max, period, estimator, num_threads)
+        _delta_sigma_process_args(galaxies, particles, rp_bins, pi_max, period,\
+                                  estimator, num_threads)
     
     mean_rho = len(particles)/period.prod()
     
@@ -78,6 +87,15 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     rp_max = np.max(rp_bins)
     rp_min = np.min(rp_bins)
     rmax = np.sqrt(rp_max**2 + pi_max**2)
+    
+    #check to make sure rmax is not too large
+    if (period is not None):
+        if (rmax >= np.min(period)/3.0):
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                   "cannot be larger than Lbox/3 in any dimension. \n"
+                   "If you need to count pairs on these length scales, \n"
+                   "you should use a larger simulation.\n")
+            raise HalotoolsError(msg)
     
     if log_bins==True:
         rbins = np.logspace(np.log10(rp_min), np.log10(rmax), n_bins)
@@ -104,14 +122,17 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     for i in range(0,len(rp_bins)):
         sigma[i] = integrate.quad(f,0.0,pi_max,args=(rp_bins[i],))[0]
     
-    #integrate sigma to the mean internal surface density
+    #integrate sigma to get the mean internal surface density
+    #define function to integrate
     sigma = InterpolatedUnivariateSpline(rp_bins, sigma, ext=0)
     def f(rp):
         return sigma(rp)*2.0*np.pi*rp
     
+    #do integral
     mean_internal_sigma = np.zeros(len(rp_bins))
     for i in range(0,len(rp_bins)):
-        mean_internal_sigma[i] = integrate.quad(f,0.0,rp_bins[i])[0]/(np.pi*rp_bins[i]**2.0)
+        internal_area = np.pi*rp_bins[i]**2.0
+        mean_internal_sigma[i] = integrate.quad(f,0.0,rp_bins[i])[0]/(internal_area)
         
     delta_sigma = mean_internal_sigma - sigma(rp_bins)
     
