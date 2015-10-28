@@ -58,6 +58,35 @@ class HodModelFactory(ModelFactory):
             must be an instance of a component model governing 
             the behavior of that feature. See the ``Examples`` below. 
 
+        model_feature_sequence : list, optional
+            Determines the order in which your component features  
+            will be called during mock population. 
+
+            Some component models may have explicit dependence upon 
+            the value of some other galaxy model property. 
+            In such a case, you must pass a ``model_feature_sequence`` list, 
+            ordered in the desired calling sequence. 
+            A classic example is if the stellar mass of a central galaxy has explicit 
+            dependence on whether or not the central is active or quiescent. 
+            In such a case, an example ``model_feature_sequence`` could be 
+            model_feature_sequence = ['centrals_quiescent', 'centrals_occupation', ...]
+
+            Default behavior is to assume that no model feature  
+            has explicit dependence upon any other, in which case the component 
+            models appearing in the ``model_features`` keyword arguments 
+            will be called in random order. 
+
+        gal_type_list : list, optional 
+            List of strings providing the names of the galaxy types in the 
+            composite model. This is only necessary to provide if you have 
+            a gal_type in your model that is neither ``centrals`` nor ``satellites``. 
+
+            For example, if you have entirely separate models for ``red_satellites`` and 
+            ``blue_satellites``, then your ``gal_type_list`` might be, 
+            gal_type_list = ['centrals', 'red_satellites', 'blue_satellites']. 
+            Another possible example would be 
+            gal_type_list = ['centrals', 'satellites', 'orphans']. 
+
         halo_selection_func : function object, optional   
             Function object used to place a cut on the input ``halo_table``. 
             If the ``halo_selection_func`` keyword argument is passed, 
@@ -66,9 +95,11 @@ class HodModelFactory(ModelFactory):
             the function output must be a length-N boolean array that will be used as a mask. 
             Halos that are masked will be entirely neglected during mock population.
         """
+        self._interpret_constructor_inputs(**kwargs)
 
-        super(HodModelFactory, self).__init__(input_model_blueprint, **kwargs)
-        self.model_blueprint = copy(self._input_model_blueprint)
+        self.model_blueprint = collections.OrderedDict()
+        for key, value in self._input_model_blueprint.iteritems():
+            self.model_blueprint[key] = value
 
         # Build up and bind several lists from the component models
         self._build_composite_attrs(**kwargs)
@@ -82,9 +113,13 @@ class HodModelFactory(ModelFactory):
     def _interpret_constructor_inputs(self, **kwargs):
         """
         """
+
+        ###########################################################
+        ### First parse the supplementary keyword arguments (such as 'threshold') 
+        ### from the keywords that are bound to component model instances
         additional_kwargs = {}
 
-        possible_supplementary_kwargs = ('halo_selection_func', )
+        possible_supplementary_kwargs = ('halo_selection_func', 'model_feature_sequence')
 
         for key in possible_supplementary_kwargs:
             try:
@@ -93,19 +128,112 @@ class HodModelFactory(ModelFactory):
             except KeyError:
                 pass
 
-        input_model_blueprint = collections.OrderedDict()
         try:
-            model_feature_sequence = additional_kwargs['model_feature_sequence']
+            known_gal_type_list = copy(kwargs['gal_type_list'])
+            del kwargs['gal_type_list']
+        except KeyError:
+            known_gal_type_list = None
+
+        ### Check that we got consistent keyword arguments
+        try:
+            model_feature_sequence = list(additional_kwargs['model_feature_sequence'])
+            for model_feature in model_feature_sequence:
+                try:
+                    assert model_feature in kwargs.keys()
+                except AssertionError:
+                    msg = ("\nYour input ``model_feature_sequence`` has a ``%s`` element\n"
+                    "that does not appear in the keyword arguments you passed to the HodModelFactory.\n"
+                    "For every element of the input ``model_feature_sequence``, there must be a corresponding \n"
+                    "keyword argument to which a component model instance is bound.\n")
+                    raise HalotoolsError(msg % model_feature)
         except KeyError:
             model_feature_sequence = list(kwargs.keys())
-        for key in model_feature_sequence:
-            input_model_blueprint[key] = copy(kwargs[key])
+
+        for constructor_kwarg in kwargs:
+            try:
+                assert constructor_kwarg in model_feature_sequence
+            except AssertionError:
+                msg = ("\nYou passed ``%s`` as a keyword argument to the HodModelFactory constructor.\n"
+                    "This keyword argument does not appear in your input ``model_feature_sequence``\n"
+                    "and is otherwise not recognized.\n")
+                raise HalotoolsError(msg % constructor_kwarg)
+        ### At this point the kwargs dictionary should only have 
+        ### keywords that are bound to component model instances
+        ###########################################################
+
+        _gal_type_list = []
+        for model_feature_sequence_element in model_feature_sequence:
+
+            try:
+                component_model = kwargs[model_feature_sequence_element]
+            except KeyError:
+                msg = ("\nYour input ``model_feature_sequence`` has a ``%s`` element\n"
+                    "that does not appear in the keyword arguments passed to \n"
+                    "the constructor of the HodModelFactory.\n")
+                raise HalotoolsError(msg % model_feature_sequence_element)
+
+            component_model_class_name = component_model.__class__.__name__
+
+            gal_type, feature_name = _infer_gal_type_and_feature_name(
+                model_blueprint_key, known_gal_type_list = known_gal_type_list, 
+                known_gal_type = None, known_feature_name = None)
+
+            try:
+                component_model_gal_type = component_model.gal_type
+                component_model_feature_name = component_model.feature_name 
+            except AttributeError:
+                msg = ("\nThe ``%s`` component model instance must have both ``gal_type`` "
+                    "and ``feature_name`` attributes.\nIf you wrote your own component model, \n"
+                    "simply assign these attributes within your __init__ constructor.\n"
+                    "If you are seeing this message and you have only used Halotools-provided components,\n"
+                    "this is a bug in Halotools - please raise an Issue on https://github.com/astropy/halotools.\n")
+                raise HalotoolsError(msg % component_model_class_name)
+
+            try:
+                assert gal_type == component_model_gal_type
+            except AssertionError:
+                msg = ("\nThe ``%s`` component model instance has ``gal_type`` = %s.\n"
+                    "However, you used a keyword argument = ``%s`` when passing this component model \n"
+                    "to the constructor of the HodModelFactory, \nfrom which it was inferred that your intended"
+                    "``gal_type`` = %s, which is inconsistent.\nIf this inferred ``gal_type`` seems incorrect,\n"
+                    "please raise an Issue on https://github.com/astropy/halotools.\n"
+                    "Otherwise, either change the ``%s`` keyword argument to conform to the Halotools convention \n"
+                    "to use keyword arguments that are composed of a ``gal_type`` and ``feature_name`` substring,\n"
+                    "separated by a '_', in that order.\n")
+                raise HalotoolsError(msg % 
+                    (component_model_class_name, component_model_gal_type, model_feature_sequence_element, 
+                        gal_type, model_feature_sequence_element))
+
+            try:
+                assert feature_name == component_model_feature_name
+            except AssertionError:
+                msg = ("\nThe ``%s`` component model instance has ``feature_name`` = %s.\n"
+                    "However, you used a keyword argument = ``%s`` when passing this component model \n"
+                    "to the constructor of the HodModelFactory, \nfrom which it was inferred that your intended"
+                    "``feature_name`` = %s, which is inconsistent.\nIf this inferred ``feature_name`` seems incorrect,\n"
+                    "please raise an Issue on https://github.com/astropy/halotools.\n"
+                    "Otherwise, either change the ``%s`` keyword argument to conform to the Halotools convention \n"
+                    "to use keyword arguments that are composed of a ``gal_type`` and ``feature_name`` substring,\n"
+                    "separated by a '_', in that order.\n")
+                raise HalotoolsError(msg % 
+                    (component_model_class_name, component_model_feature_name, model_feature_sequence_element, 
+                        feature_name, model_feature_sequence_element))
+
+
+            _gal_type_list.append(gal_type)
+
+        self.gal_types = list(set(_gal_type_list))
+
+        input_model_blueprint = collections.OrderedDict()
+
+        for model_feature in model_feature_sequence:
+            input_model_blueprint = copy(kwargs[model_feature])
 
         super(HodModelFactory, self).__init__(input_model_blueprint, **additional_kwargs)
 
 
     def _infer_gal_type_and_feature_name(self, model_blueprint_key, 
-        known_gal_type = None, known_feature_name = None):
+        known_gal_type = None, known_feature_name = None, known_gal_type_list = None):
         
         processed_key = model_blueprint_key.lower()
         
@@ -156,9 +284,9 @@ class HodModelFactory(ModelFactory):
                 gal_type = processed_key
             return gal_type, feature_name
         else:
-            try:
-                gal_type_guess_list = self.gal_types
-            except AttributeError:
+            if known_gal_type_list is not None:
+                gal_type_guess_list = known_gal_type_list 
+            else:
                 gal_type_guess_list = ('centrals', 'satellites')
 
             for gal_type_guess in gal_type_guess_list:
@@ -199,15 +327,18 @@ class HodModelFactory(ModelFactory):
         will always be built first, out of consideration for satellite 
         model components with explicit dependence on the central population. 
         """
-        gal_types = [key for key in self._input_model_blueprint.keys()]
+        if hasattr(self, 'gal_types'):
+            pass
+        else:
+            gal_types = [key for key in self._input_model_blueprint.keys()]
 
-        first = [g for g in gal_types if 'central' in g]
-        middle = [g for g in gal_types if 'satellite' in g]
-        last = [g for g in gal_types if 'central' not in g and 'satellite' not in g]
+            first = [g for g in gal_types if 'central' in g]
+            middle = [g for g in gal_types if 'satellite' in g]
+            last = [g for g in gal_types if 'central' not in g and 'satellite' not in g]
 
-        self.gal_types = first 
-        self.gal_types.extend(middle)
-        self.gal_types.extend(last)
+            self.gal_types = first 
+            self.gal_types.extend(middle)
+            self.gal_types.extend(last)
 
 
     def _set_primary_behaviors(self, **kwargs):
