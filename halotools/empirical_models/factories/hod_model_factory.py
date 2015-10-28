@@ -420,10 +420,9 @@ class HodModelFactory(ModelFactory):
         the phase space component models. 
         """
 
-        for gal_type in self.gal_types:
-            profile_model = self.model_blueprint[gal_type]['profile']
-            if hasattr(profile_model, 'build_lookup_tables'):
-                profile_model.build_lookup_tables()
+        for component_model in self.model_blueprint.values():
+            if hasattr(component_model, 'build_lookup_tables'):
+                component_model.build_lookup_tables()
 
     def _set_init_param_dict(self):
         """ Method used to build a dictionary of parameters for the composite model. 

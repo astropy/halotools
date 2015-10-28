@@ -57,15 +57,15 @@ def test_alt_Zheng07_composites():
 	# First build two models that are identical except for the satellite occupations
 	default_model = Zheng07()
 	default_model_blueprint = default_model._input_model_blueprint
-	default_satocc_component = default_model_blueprint['satellites']['occupation']
+	default_satocc_component = default_model_blueprint['satellites_occupation']
 	assert not hasattr(default_satocc_component, 'ancillary_model_dependencies')
 	cenmod_satocc_compoent = Zheng07Sats(
 		threshold = default_satocc_component.threshold, modulate_with_cenocc = True, 
 		gal_type_centrals = 'centrals')
 	assert hasattr(cenmod_satocc_compoent, 'ancillary_model_dependencies')
 	cenmod_model_blueprint = copy(default_model_blueprint)
-	cenmod_model_blueprint['satellites']['occupation'] = cenmod_satocc_compoent
-	cenmod_model = factories.HodModelFactory(cenmod_model_blueprint)
+	cenmod_model_blueprint['satellites_occupation'] = cenmod_satocc_compoent
+	cenmod_model = factories.HodModelFactory(**cenmod_model_blueprint)
 
 	# Now we test whether changes to the param_dict keys of the composite model 
 	# that pertain to the centrals properly propagate through to the behavior 
