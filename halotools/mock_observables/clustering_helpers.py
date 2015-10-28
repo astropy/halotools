@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function,
 
 __all__ = ['_tpcf_process_args', '_tpcf_jackknife_process_args',\
            '_redshift_space_tpcf_process_args', '_s_mu_tpcf_process_args',\
-           '_marked_tpcf_process_args',\
+           '_marked_tpcf_process_args','_delta_sigma_process_args',\
            '_list_estimators', '_TP_estimator', '_TP_estimator_requirements']
 
 import numpy as np
