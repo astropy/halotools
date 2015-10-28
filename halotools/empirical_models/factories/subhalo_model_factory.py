@@ -77,8 +77,11 @@ class SubhaloModelFactory(ModelFactory):
         """
 
         self._interpret_constructor_inputs(**kwargs)
-        self.model_blueprint = copy(self._input_model_blueprint)
-        
+
+        self.model_blueprint = collections.OrderedDict()
+        for key, value in self._input_model_blueprint.iteritems():
+            self.model_blueprint[key] = value
+
         # Build up and bind several lists from the component models
         self._build_composite_attrs(**kwargs)
 
@@ -105,10 +108,10 @@ class SubhaloModelFactory(ModelFactory):
 
         input_model_blueprint = collections.OrderedDict()
         try:
-            self._feature_list = additional_kwargs['model_feature_sequence']
+            model_feature_sequence = additional_kwargs['model_feature_sequence']
         except KeyError:
-            self._feature_list = list(kwargs.keys())
-        for key in self._feature_list:
+            model_feature_sequence = list(kwargs.keys())
+        for key in model_feature_sequence:
             input_model_blueprint[key] = copy(kwargs[key])
 
         super(SubhaloModelFactory, self).__init__(input_model_blueprint, **additional_kwargs)
@@ -154,8 +157,7 @@ class SubhaloModelFactory(ModelFactory):
         _attrs_repetition_check = []
 
         # Loop over all component features in the composite model
-        for feature in self._feature_list:
-            component_model = self.model_blueprint[feature]
+        for feature, component_model in self.model_blueprint.iteritems():
 
             # Ensure that all methods in the calling sequence are inherited
             try:
@@ -222,8 +224,7 @@ class SubhaloModelFactory(ModelFactory):
         """
 
         # Loop over all component features in the composite model
-        for feature in self._feature_list:
-            component_model = self.model_blueprint[feature]
+        for feature, component_model in self.model_blueprint.iteritems():
 
             try:
                 component_model_galprop_dtype = component_model._galprop_dtypes_to_allocate
@@ -323,8 +324,7 @@ class SubhaloModelFactory(ModelFactory):
             "    For component model 2 = ``%s``, the model has redshift = %.2f.\n")
 
         # Loop over all component features in the composite model
-        for feature in self._feature_list:
-            component_model = self.model_blueprint[feature]
+        for feature, component_model in self.model_blueprint.iteritems():
 
             if hasattr(component_model, 'redshift'):
                 redshift = component_model.redshift 
@@ -345,8 +345,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         haloprop_list = []
         # Loop over all component features in the composite model
-        for feature in self._feature_list:
-            component_model = self.model_blueprint[feature]
+        for feature, component_model in self.model_blueprint.iteritems():
 
             if hasattr(component_model, 'prim_haloprop_key'):
                 haloprop_list.append(component_model.prim_haloprop_key)
@@ -360,8 +359,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         pub_list = []
         # Loop over all component features in the composite model
-        for feature in self._feature_list:
-            component_model = self.model_blueprint[feature]
+        for feature, component_model in self.model_blueprint.iteritems():
 
             try:
                 pubs = component_model.publications 
@@ -384,8 +382,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         new_haloprop_func_dict = {}
         # Loop over all component features in the composite model
-        for feature in self._feature_list:
-            component_model = self.model_blueprint[feature]
+        for feature, component_model in self.model_blueprint.iteritems():
 
             # Haloprop function dictionaries
             if hasattr(component_model, 'new_haloprop_func_dict'):
@@ -411,8 +408,8 @@ class SubhaloModelFactory(ModelFactory):
         """
         self._suppress_repeated_param_warning = False
         # Loop over all component features in the composite model
-        for feature_key in self._feature_list:
-            component_model = self.model_blueprint[feature_key]
+        for feature, component_model in self.model_blueprint.iteritems():
+
             if hasattr(component_model, '_suppress_repeated_param_warning'):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
@@ -446,8 +443,7 @@ class SubhaloModelFactory(ModelFactory):
             "to any of your component models and set this variable to ``True``.\n")
 
         # Loop over all component features in the composite model
-        for feature_key in self._feature_list:
-            component_model = self.model_blueprint[feature_key]
+        for feature, component_model in self.model_blueprint.iteritems():
 
             if not hasattr(component_model, 'param_dict'):
                 component_model.param_dict = {}
@@ -469,8 +465,7 @@ class SubhaloModelFactory(ModelFactory):
         """
         dtype_list = []
         # Loop over all component features in the composite model
-        for feature_key in self._feature_list:
-            component_model = self.model_blueprint[feature_key]
+        for feature, component_model in self.model_blueprint.iteritems():
 
             # Column dtypes to add to mock galaxy_table
             if hasattr(component_model, '_galprop_dtypes_to_allocate'):
