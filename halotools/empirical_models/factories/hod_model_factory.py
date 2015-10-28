@@ -48,17 +48,15 @@ class HodModelFactory(ModelFactory):
         """
         Parameters
         ----------
-        input_model_blueprint : dict 
-            The main dictionary keys of ``input_model_blueprint`` 
-            are the names of the types of galaxies 
-            found in the halos, 
-            e.g., ``centrals``, ``satellites``, ``orphans``, etc. 
-            The dictionary value associated with each ``gal_type`` key 
-            is itself a dictionary whose keys 
-            specify the type of model component, e.g., ``occupation``, 
-            and values are class instances of that type of model. 
-            The `interpret_input_model_blueprint` translates 
-            ``input_model_blueprint`` into ``self.model_blueprint``.
+        *model_features : sequence of keyword arguments, optional 
+            The standard way to call the `HodModelFactory` is 
+            with a sequence of keyword arguments providing the set of 
+            features that you want to build your composite model with. 
+            Each keyword you use will be simultaneously interpreted as 
+            the name of the feature and the name of the galaxy population 
+            with that feature; the value bound to each keyword 
+            must be an instance of a component model governing 
+            the behavior of that feature. See the ``Examples`` below. 
 
         halo_selection_func : function object, optional   
             Function object used to place a cut on the input ``halo_table``. 
@@ -80,6 +78,103 @@ class HodModelFactory(ModelFactory):
         self._set_primary_behaviors(**kwargs)
 
         self.mock_factory = HodMockFactory
+
+    def _interpret_constructor_inputs(self, **kwargs):
+        """
+        """
+        additional_kwargs = {}
+
+        possible_supplementary_kwargs = ('halo_selection_func', )
+
+        for key in possible_supplementary_kwargs:
+            try:
+                additional_kwargs[key] = copy(kwargs[key])
+                del kwargs[key]
+            except KeyError:
+                pass
+
+        input_model_blueprint = collections.OrderedDict()
+        try:
+            model_feature_sequence = additional_kwargs['model_feature_sequence']
+        except KeyError:
+            model_feature_sequence = list(kwargs.keys())
+        for key in model_feature_sequence:
+            input_model_blueprint[key] = copy(kwargs[key])
+
+        super(HodModelFactory, self).__init__(input_model_blueprint, **additional_kwargs)
+
+
+    def _infer_gal_type_and_feature_name(self, model_blueprint_key, 
+        known_gal_type = None, known_feature_name = None):
+        
+        processed_key = model_blueprint_key.lower()
+        
+        if known_gal_type is not None:
+            gal_type = known_gal_type
+            
+            # Ensure that the gal_type appears first in the string
+            if processed_key[0:len(gal_type)] != gal_type:
+                msg = ("\nThe first substring of each key of the ``model_blueprint`` \n"
+                    "must be the ``gal_type`` substring. So the first substring of the ``%s`` key \n"
+                    "should be %s")
+                raise HalotoolsError(msg % (model_blueprint_key, gal_type))
+                    
+            # Remove the gal_type substring
+            processed_key = processed_key.replace(gal_type, '')
+            
+            # Ensure that the gal_type and feature_name were separated by a '_'
+            if processed_key[0] != '_':
+                msg = ("\nThe model_blueprint key ``%s`` must be comprised of \n"
+                    "the ``gal_type`` and ``feature_name`` substrings, separated by a '_', in that order.\n")
+                raise HalotoolsError(msg % model_blueprint_key)
+            else:
+                processed_key = processed_key[1:]
+                feature_name = processed_key
+            return gal_type, feature_name
+        
+        elif known_feature_name is not None:
+            feature_name = known_feature_name
+            
+            # Ensure that the feature_name appears last in the string
+            feature_name_first_idx = processed_key.find(feature_name)
+            if processed_key[feature_name_first_idx:] != feature_name:
+                msg = ("\nThe second substring of each key of the ``model_blueprint`` \n"
+                    "must be the ``feature_name`` substring. So the second substring of the ``%s`` key \n"
+                    "should be %s")
+                raise HalotoolsError(msg % (model_blueprint_key, feature_name))
+                
+            # Remove the feature_name substring
+            processed_key = processed_key.replace(feature_name, '')
+         
+            # Ensure that the gal_type and feature_name were separated by a '_'
+            if processed_key[-1] != '_':
+                msg = ("\nThe model_blueprint key ``%s`` must be comprised of \n"
+                    "the ``gal_type`` and ``feature_name`` substrings, separated by a '_', in that order.\n")
+                raise HalotoolsError(msg % model_blueprint_key)
+            else:
+                processed_key = processed_key[:-1]
+                gal_type = processed_key
+            return gal_type, feature_name
+        else:
+            try:
+                gal_type_guess_list = self.gal_types
+            except AttributeError:
+                gal_type_guess_list = ('centrals', 'satellites')
+
+            for gal_type_guess in gal_type_guess_list:
+                if gal_type_guess in processed_key:
+                    known_gal_type = gal_type_guess
+                    gal_type, feature_name = _infer_gal_type_and_feature_name(
+                        processed_key, known_gal_type = known_gal_type)
+                    return gal_type, feature_name
+                else:
+                    msg = ("\nThe ``_infer_gal_type_and_feature_name`` method was unable to identify\n"
+                        "the name of your galaxy population from the ``%s`` key of the model_blueprint.\n"
+                        "If you are modeling a population whose name is neither ``centrals`` nor ``satellites``,\n"
+                        "then you must provide a ``gal_type_list`` keyword argument to \n"
+                        "the constructor of the HodModelFactory.\n")
+                    raise HalotoolsError(msg % model_blueprint_key)
+
 
     def _build_composite_attrs(self, **kwargs):
         """ A composite model has several lists that are built up from 
