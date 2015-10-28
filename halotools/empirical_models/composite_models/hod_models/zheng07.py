@@ -76,32 +76,30 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     subpopulation_blueprint_centrals = {}
 
     # Build the `occupation` feature
-    occupation_feature_centrals = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
-    subpopulation_blueprint_centrals['occupation'] = occupation_feature_centrals
+    centrals_occupation = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
 
     # Build the `profile` feature
-    profile_feature_centrals = TrivialPhaseSpace(**kwargs)
-    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
+    centrals_profile = TrivialPhaseSpace(**kwargs)
 
     ####################################
     ### Build subpopulation blueprint for satellites
     subpopulation_blueprint_satellites = {}
 
     # Build the occupation model
-    occupation_feature_satellites = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
-    occupation_feature_satellites._suppress_repeated_param_warning = True
-    subpopulation_blueprint_satellites['occupation'] = occupation_feature_satellites
+    satellites_occupation = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
+    satellites_occupation._suppress_repeated_param_warning = True
 
     # Build the profile model
-    profile_feature_satellites = NFWPhaseSpace(**kwargs)    
-    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
+    satellites_profile = NFWPhaseSpace(**kwargs)    
 
-    ####################################
-    ### Compose subpopulation blueprints together into a composite blueprint
-    composite_model_blueprint = {
-        'centrals' : subpopulation_blueprint_centrals,
-        'satellites' : subpopulation_blueprint_satellites 
-        }
 
-    composite_model = factories.HodModelFactory(composite_model_blueprint)
+    composite_model = factories.HodModelFactory(centrals_occupation = centrals_occupation, 
+        centrals_profile = centrals_profile, satellites_occupation = satellites_occupation, 
+        satellites_profile = satellites_profile)
+
     return composite_model
+
+
+
+
+    
