@@ -12,6 +12,7 @@ from functools import partial
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 from warnings import warn 
+import collections 
 
 from .model_factory_template import ModelFactory
 from .hod_mock_factory import HodMockFactory
@@ -44,7 +45,7 @@ class HodModelFactory(ModelFactory):
     
     """
 
-    def __init__(self, input_model_blueprint, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters
         ----------
@@ -110,8 +111,6 @@ class HodModelFactory(ModelFactory):
 
 
         # Build up and bind several lists from the component models
-        self._build_composite_attrs(**kwargs)
-
         self._set_gal_types()
         self._build_prim_sec_haloprop_list()
         self._build_prof_param_keys()
@@ -318,19 +317,18 @@ class HodModelFactory(ModelFactory):
             else:
                 gal_type_guess_list = ('centrals', 'satellites')
 
-            for gal_type_guess in gal_type_guess_list:
+            for gal_type_guess in gal_type_guess_list:                
                 if gal_type_guess in processed_key:
                     known_gal_type = gal_type_guess
-                    gal_type, feature_name = _infer_gal_type_and_feature_name(
-                        processed_key, known_gal_type = known_gal_type)
+                    gal_type, feature_name = self._infer_gal_type_and_feature_name(
+                        processed_key, gal_type_guess_list, known_gal_type = known_gal_type)
                     return gal_type, feature_name
-                else:
-                    msg = ("\nThe ``_infer_gal_type_and_feature_name`` method was unable to identify\n"
-                        "the name of your galaxy population from the ``%s`` key of the model_blueprint.\n"
-                        "If you are modeling a population whose name is neither ``centrals`` nor ``satellites``,\n"
-                        "then you must provide a ``gal_type_list`` keyword argument to \n"
-                        "the constructor of the HodModelFactory.\n")
-                    raise HalotoolsError(msg % model_blueprint_key)
+            msg = ("\nThe ``_infer_gal_type_and_feature_name`` method was unable to identify\n"
+                "the name of your galaxy population from the ``%s`` key of the model_blueprint.\n"
+                "If you are modeling a population whose name is neither ``centrals`` nor ``satellites``,\n"
+                "then you must provide a ``gal_type_list`` keyword argument to \n"
+                "the constructor of the HodModelFactory.\n")
+            raise HalotoolsError(msg % model_blueprint_key)
 
 
 
@@ -490,6 +488,7 @@ class HodModelFactory(ModelFactory):
 
 
         for component_model in self.model_blueprint.values():
+            gal_type = component_model.gal_type
 
             if hasattr(component_model, 'redshift'):
                 redshift = component_model.redshift 
