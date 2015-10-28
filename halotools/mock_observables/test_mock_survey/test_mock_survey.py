@@ -4,9 +4,11 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
 import sys
+import pytest 
 
 from ..mock_survey import distant_observer_redshift, ra_dec_z
 
+@pytest.mark.slow
 def test_distant_observer():
     
     N=100
@@ -28,6 +30,7 @@ def test_distant_observer():
     assert np.max(redshifts)<=z_cos_max, "PBC is not handeled correctly for redshifts"
 
 
+@pytest.mark.slow
 def test_ra_dec_z():
     
     

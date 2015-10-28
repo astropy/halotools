@@ -6,6 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import sys
 from scipy.sparse import coo_matrix
+import pytest 
 
 igraph_available=True
 try: import igraph
@@ -20,6 +21,7 @@ __all__=['test_fof_groups_init','test_fof_group_IDs','test_igraph_functionality'
 #set random seed to get consistent behavior
 np.random.seed(1)
 
+@pytest.mark.slow
 def test_fof_groups_init():
     
     N=1.0e3
@@ -34,7 +36,7 @@ def test_fof_groups_init():
     assert isinstance(fof_group.m_perp,coo_matrix)
     assert isinstance(fof_group.m_para,coo_matrix)
 
-
+@pytest.mark.slow
 def test_fof_group_IDs():
     
     N=1e3
@@ -55,6 +57,7 @@ def test_fof_group_IDs():
     assert N_groups==fof_group.n_groups, "number of groups is incorrect"
 
 
+@pytest.mark.slow
 def test_igraph_functionality():
 
     N=1e3
