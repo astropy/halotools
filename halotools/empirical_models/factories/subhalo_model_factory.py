@@ -47,16 +47,22 @@ class SubhaloModelFactory(ModelFactory):
             See the ``Examples`` below. 
 
         model_feature_sequence : list, optional
-            Some model components may have explicit dependence upon 
-            the value of some other galaxy model property. A classic 
-            example is if the stellar mass of a central galaxy has explicit 
-            dependence on whether or not the central is active or quiescent. 
-            In such a case, you must pass a list of the galaxy properties 
-            of the composite model; the first galprop in ``model_feature_sequence`` 
-            will be assigned first by the ``mock_factory``; the second galprop 
-            in ``model_feature_sequence`` will be assigned second, and its computation 
-            may depend on the first galprop, and so forth. Default behavior is 
-            to assume that no galprop has explicit dependence upon any other. 
+            Determines the order in which your component features  
+            will be called during mock population. 
+
+            Some component models may have explicit dependence upon 
+            the value of some other galaxy model property. 
+            In such a case, you must pass a ``model_feature_sequence`` list, 
+            ordered in the desired calling sequence. 
+            A classic example is if the stellar-to-halo-mass relation 
+            has explicit dependence on whether or not the galaxy is active or quiescent. 
+            In such a case, an example ``model_feature_sequence`` could be 
+            model_feature_sequence = ['sfr', 'stellar_mass', ...]. 
+
+            Default behavior is to assume that no model feature  
+            has explicit dependence upon any other, in which case the component 
+            models appearing in the ``model_features`` keyword arguments 
+            will be called in random order. 
 
         galaxy_selection_func : function object, optional  
             Function object that imposes a cut on the mock galaxies. 
