@@ -4,12 +4,13 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
 import sys
+import pytest 
 
 from ..clustering import tpcf_jackknife, tpcf
 
 __all__=['test_tpcf_jackknife']
 
-
+@pytest.mark.slow
 def test_tpcf_jackknife():
     
     Npts=100
@@ -28,6 +29,7 @@ def test_tpcf_jackknife():
     assert np.allclose(result_1,result_2,rtol=1e-09), "correlation functions do not match"
 
 
+@pytest.mark.slow
 def test_tpcf_jackknife_cov_matrix():
     
     Npts=100
