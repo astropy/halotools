@@ -665,6 +665,54 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
            num_threads, aux1, aux2, wfunc, _sample1_is_sample2, PBCs
 
 
+def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\
+                              estimator, num_threads):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.delta_sigma`. 
+    """
+
+    galaxies = convert_to_ndarray(galaxies)
+    particles = convert_to_ndarray(particles)
+
+    rp_bins = convert_to_ndarray(rp_bins)
+    rp_max = np.max(rp_bins)
+    try:
+        assert rp_bins.ndim == 1
+        assert len(rp_bins) > 1
+        if len(rp_bins) > 2:
+            assert array_is_monotonic(rp_bins, strict = True) == 1
+    except AssertionError:
+        msg = "Input ``rp_bins`` must be a monotonically increasing 1D array with at least two entries"
+        raise HalotoolsError(msg)
+        
+    #Process period entry and check for consistency.
+    if period is None:
+        PBCs = False
+    else:
+        PBCs = True
+        period = convert_to_ndarray(period)
+        if len(period) == 1:
+            period = np.array([period[0]]*3)
+        try:
+            assert np.all(period < np.inf)
+            assert np.all(period > 0)
+        except AssertionError:
+            msg = "Input ``period`` must be a bounded positive number in all dimensions"
+            raise HalotoolsError(msg)
+
+    if num_threads == 'max':
+        num_threads = cpu_count()
+
+    available_estimators = _list_estimators()
+    if estimator not in available_estimators:
+        msg = ("Input `estimator` must be one of the following:{0}".value(available_estimators))
+        raise HalotoolsError(msg)
+
+
+    return galaxies, particles, rp_bins, period, num_threads, PBCs
+
+
 def _list_estimators():
     """
     private internal function.
