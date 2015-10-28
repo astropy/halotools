@@ -112,10 +112,15 @@ def SmHmBinarySFR(
 
     if 'threshold' in kwargs.keys():
         galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
-        model = factories.SubhaloModelFactory(blueprint, 
-            galaxy_selection_func=galaxy_selection_func)
+        model = factories.SubhaloModelFactory(
+            stellar_mass = sm_model, 
+            quiescent = sfr_model, 
+            galaxy_selection_func = galaxy_selection_func)
     else:
-        model = factories.SubhaloModelFactory(blueprint)
+        model = factories.SubhaloModelFactory(
+            stellar_mass = sm_model,
+            quiescent = sfr_model
+            )
 
     return model
 
