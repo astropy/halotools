@@ -9,8 +9,10 @@ from __future__ import division, print_function
 import sys
 import numpy as np
 from math import pi, gamma
-from .pair_counters.rect_cuboid_pairs import npairs
-from scipy.interpolate import interp1d
+from .tpcf import tpcf
+from scipy.interpolate import InterpolatedUnivariateSpline
+from scipy import integrate
+from .clustering_helpers import *
 ##########################################################################################
 
 __all__=['delta_sigma']
@@ -61,13 +63,16 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     Notes
     -----
     :math:`\\Delta\\Sigma` is calculated by first calculating,
-    :math:`\\Sigma(r_p) = \\bar{\\rho}\\int_0^{\\chi_{\\rm max}} \\left[1+\\xi_{\\rm g,m}(\\sqrt{r_p^2+\\pi^2}) \\right]\\mathrm{d}\\pi`
+    :math:`\\Sigma(r_p) = \\bar{\\rho}\\int_0^{\\pi_{\\rm max}} \\left[1+\\xi_{\\rm g,m}(\\sqrt{r_p^2+\\pi^2}) \\right]\\mathrm{d}\\pi`
     and then,
-    :math:`\\Delta\\Sigma = \\bar{\\Sigma}(<r_p) - \\Sigma(r_p)`
+    :math:`\\Delta\\Sigma(r_p) = \\bar{\\Sigma}(<r_p) - \\Sigma(r_p)`
     """
     
+    #process the input parameters
     galaxies, particles, rp_bins, period, num_threads, PBCs = \
         _delta_sigma_process_args(galaxies, particles, rp_bins, pi_max, period, estimator, num_threads)
+    
+    mean_rho = len(particles)/period.prod()
     
     #determine radial bins to calculate tpcf in
     rp_max = np.max(rp_bins)
@@ -78,18 +83,39 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
         rbins = np.logspace(np.log10(rp_min), np.log10(rmax), n_bins)
     else: 
         rbins = np.linspace(rp_min, rmax, n_bins)
-        
+    
+    #calculate the cross-correlation between galaxies and particles
     xi = tpcf(galaxies, rbins, sample2=particles, randoms=None, period=period,\
               do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads)
     
     #fit a spline to the tpcf
+    #note that we fit the log of xi
     rbin_centers = (rbins[:-1]+rbins[1:])/2.0
     rmax = np.max(rbin_centers)
-    xi = interp1d(rbin_centers, xi, kind='linear')
+    xi = InterpolatedUnivariateSpline(np.log10(rbin_centers), np.log10(xi), ext=0)
     
+    #define function to integrate
+    def f(pi,rp):
+        x = np.sqrt(rp**2+pi**2)
+        return mean_rho*(1.0+10.0**xi(np.log10(x)))
     
+    #integrate xi to get the surface density as a function of r_p
+    sigma = np.zeros(len(rp_bins))
+    for i in range(0,len(rp_bins)):
+        sigma[i] = integrate.quad(f,0.0,pi_max,args=(rp_bins[i],))[0]
+    
+    #integrate sigma to the mean internal surface density
+    sigma = InterpolatedUnivariateSpline(rp_bins, sigma, ext=0)
+    def f(rp):
+        return sigma(rp)*2.0*np.pi*rp
+    
+    mean_internal_sigma = np.zeros(len(rp_bins))
+    for i in range(0,len(rp_bins)):
+        mean_internal_sigma[i] = integrate.quad(f,0.0,rp_bins[i])[0]/(np.pi*rp_bins[i]**2.0)
         
-        
+    delta_sigma = mean_internal_sigma - sigma(rp_bins)
+    
+    return delta_sigma
         
         
         
