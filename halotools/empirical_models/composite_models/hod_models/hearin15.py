@@ -86,42 +86,36 @@ def Hearin15(central_assembias_strength = 1,
     ##############################
     ### Build the occupation model
     if central_assembias_strength == 0:
-        cen_ab_component = leauthaud11_components.Leauthaud11Cens(**kwargs)
+        centrals_occupation = leauthaud11_components.Leauthaud11Cens(**kwargs)
     else:
-        cen_ab_component = leauthaud11_components.AssembiasLeauthaud11Cens(
+        centrals_occupation = leauthaud11_components.AssembiasLeauthaud11Cens(
             assembias_strength = central_assembias_strength, 
             assembias_strength_abcissa = central_assembias_strength_abcissa, 
             **kwargs)
-    subpopulation_blueprint_centrals = {}
-    subpopulation_blueprint_centrals['occupation'] = cen_ab_component
 
     # Build the profile model
-    profile_feature_centrals = TrivialPhaseSpace(**kwargs)
-    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
+    centrals_profile = TrivialPhaseSpace(**kwargs)
 
     ##############################
     ### Build the occupation model
     if satellite_assembias_strength == 0:
-        sat_ab_component = leauthaud11_components.Leauthaud11Sats(**kwargs)
+        satellites_occupation = leauthaud11_components.Leauthaud11Sats(**kwargs)
     else:
-        sat_ab_component = leauthaud11_components.AssembiasLeauthaud11Sats(
+        satellites_occupation = leauthaud11_components.AssembiasLeauthaud11Sats(
             assembias_strength = satellite_assembias_strength, 
             assembias_strength_abcissa = satellite_assembias_strength_abcissa, 
             **kwargs)
         # There is no need for a redundant new_haloprop_func_dict 
         # if this is already possessed by the central model
-        if hasattr(cen_ab_component, 'new_haloprop_func_dict'):
-            del sat_ab_component.new_haloprop_func_dict
-
-    subpopulation_blueprint_satellites = {}
-    subpopulation_blueprint_satellites['occupation'] = sat_ab_component
+        if hasattr(centrals_occupation, 'new_haloprop_func_dict'):
+            del satellites_occupation.new_haloprop_func_dict
 
     # Build the profile model
-    profile_feature_satellites = NFWPhaseSpace(**kwargs) 
-    profile_feature_satellites._suppress_repeated_param_warning = True   
-    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
+    satellites_profile = NFWPhaseSpace(**kwargs) 
+    satellites_profile._suppress_repeated_param_warning = True   
 
-    model_blueprint = {'centrals': subpopulation_blueprint_centrals, 'satellites': subpopulation_blueprint_satellites}
-    composite_model = factories.HodModelFactory(model_blueprint)
+    composite_model = factories.HodModelFactory(centrals_occupation = centrals_occupation, 
+        centrals_profile = centrals_profile, satellites_occupation = satellites_occupation, 
+        satellites_profile = satellites_profile)
     return composite_model
 

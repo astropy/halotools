@@ -96,32 +96,23 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
 
     """
     ### Build model for centrals
-    cen_key = 'centrals'
-    subpopulation_blueprint_centrals = {}
     # Build the occupation model
-    occupation_feature_centrals = leauthaud11_components.Leauthaud11Cens(threshold = threshold, **kwargs)
-    occupation_feature_centrals._suppress_repeated_param_warning = True
-    subpopulation_blueprint_centrals['occupation'] = occupation_feature_centrals
+    centrals_occupation = leauthaud11_components.Leauthaud11Cens(threshold = threshold, **kwargs)
+    centrals_occupation._suppress_repeated_param_warning = True
     # Build the profile model
     
-    profile_feature_centrals = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
-
-    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
+    centrals_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
 
     ### Build model for satellites
-    sat_key = 'satellites'
-    subpopulation_blueprint_satellites = {}
     # Build the occupation model
-    occupation_feature_satellites = leauthaud11_components.Leauthaud11Sats(threshold = threshold, **kwargs)
-    subpopulation_blueprint_satellites['occupation'] = occupation_feature_satellites
+    satellites_occupation = leauthaud11_components.Leauthaud11Sats(threshold = threshold, **kwargs)
     # Build the profile model
-    profile_feature_satellites = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
-    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
+    satellites_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
 
-    model_blueprint = {
-        'centrals' : subpopulation_blueprint_centrals,
-        'satellites' : subpopulation_blueprint_satellites
-        }
 
-    composite_model = factories.HodModelFactory(model_blueprint)
+    composite_model = factories.HodModelFactory(centrals_occupation = centrals_occupation, 
+        centrals_profile = centrals_profile, satellites_occupation = satellites_occupation, 
+        satellites_profile = satellites_profile)
     return composite_model
+
+    
