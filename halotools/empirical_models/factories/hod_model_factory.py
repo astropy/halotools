@@ -720,7 +720,8 @@ class HodModelFactory(ModelFactory):
             "The ``%s`` component of the gal_type = ``%s`` population has no such method.\n"
             "Only ignore this warning if you are sure this is not an error.\n")
 
-        for component_model in self.model_blueprint.values():
+        for model_feature in self._model_feature_calling_sequence:
+            component_model = self.model_blueprint[model_feature]
 
             if hasattr(component_model, '_mock_generation_calling_sequence'):
                 component_method_list = (

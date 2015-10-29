@@ -193,13 +193,13 @@ class Tinker13Cens(OccupationComponent):
             try:
                 prim_haloprop = halo_table[self.prim_haloprop_key]
             except KeyError:
-                msg = ("The ``halo_table`` passed as a keyword argument to the mean_occupation method\n"
+                msg = ("The ``halo_table`` passed as a keyword argument to the ``mean_occupation`` method\n"
                     "does not have the requested ``%s`` key")
                 raise HalotoolsError(msg % self.prim_haloprop_key)
             try:
                 sfr_designation = halo_table[self.sfr_designation_key]
             except KeyError:
-                msg = ("The ``halo_table`` passed as a keyword argument to the mean_occupation method\n"
+                msg = ("The ``halo_table`` passed as a keyword argument to the ``mean_occupation`` method\n"
                     "does not have the requested ``%s`` key")
                 raise HalotoolsError(msg % self.sfr_designation_key)
         else:
@@ -207,7 +207,7 @@ class Tinker13Cens(OccupationComponent):
                 prim_haloprop = kwargs['prim_haloprop']
                 sfr_designation = kwargs['sfr_designation']
             except KeyError:
-                msg = ("If not passing a ``halo_table`` keyword argument to the mean_occupation method,\n"
+                msg = ("If not passing a ``halo_table`` keyword argument to the ``mean_occupation`` method,\n"
                     "you must pass both ``prim_haloprop`` and ``sfr_designation`` keyword arguments")
                 raise HalotoolsError(msg)
             if type(sfr_designation) == str:
