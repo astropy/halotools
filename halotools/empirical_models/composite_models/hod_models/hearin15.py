@@ -76,14 +76,14 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
     Examples 
     --------
 
-    >>> model_blueprint = hearin15_model_dictionary()
-    >>> model_instance = factories.HodModelFactory(**model_blueprint)
+    >>> model_dictionary = hearin15_model_dictionary()
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
     To load a model based on a different threshold and redshift:
 
-    >>> model_blueprint = hearin15_model_dictionary(threshold = 11, redshift = 1)
-    >>> model_instance = factories.HodModelFactory(**model_blueprint)
+    >>> model_dictionary = hearin15_model_dictionary(threshold = 11, redshift = 1)
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
     For this model, you can also use the following syntax candy, 
     which accomplishes the same task as the above:

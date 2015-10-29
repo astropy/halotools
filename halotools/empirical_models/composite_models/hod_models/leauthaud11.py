@@ -22,7 +22,7 @@ __all__ = ['leauthaud11_model_dictionary']
     
 def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
     central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
-    """ Blueprint for an HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
+    """ dictionary for an HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
 
     There are two populations, centrals and satellites. 
@@ -39,7 +39,7 @@ def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
     This composite model is built by the `~halotools.empirical_models.factories.HodModelFactory`, 
-    which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_blueprint`. 
+    which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_dictionary`. 
 
     Parameters 
     ----------
@@ -71,20 +71,20 @@ def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass
 
     Returns 
     -------
-    model_blueprint : dict 
+    model_dictionary : dict 
         Dictionary passed to `~halotools.empirical_models.factories.HodModelFactory`
 
     Examples 
     --------
 
-    >>> model_blueprint = leauthaud11_model_dictionary()
-    >>> model_instance = factories.HodModelFactory(**model_blueprint)
+    >>> model_dictionary = leauthaud11_model_dictionary()
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
     To load a model based on a different threshold and redshift:
 
-    >>> model_blueprint = leauthaud11_model_dictionary(threshold = 11, redshift = 1)
-    >>> model_instance = factories.HodModelFactory(**model_blueprint)
+    >>> model_dictionary = leauthaud11_model_dictionary(threshold = 11, redshift = 1)
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
     For this model, you can also use the following syntax candy, 
     which accomplishes the same task as the above:
