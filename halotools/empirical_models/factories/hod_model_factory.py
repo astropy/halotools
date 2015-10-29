@@ -45,7 +45,7 @@ class HodModelFactory(ModelFactory):
     
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, model_nickname = None, **kwargs):
         """
         Parameters
         ----------
@@ -97,7 +97,8 @@ class HodModelFactory(ModelFactory):
             Halos that are masked will be entirely neglected during mock population.
         """
 
-        input_model_blueprint, supplementary_kwargs = self._parse_constructor_kwargs(**kwargs)
+        input_model_blueprint, supplementary_kwargs = self._parse_constructor_kwargs(
+            model_nickname, **kwargs)
 
         super(HodModelFactory, self).__init__(input_model_blueprint, **supplementary_kwargs)
         self.mock_factory = HodMockFactory
@@ -130,6 +131,80 @@ class HodModelFactory(ModelFactory):
 
         ############################################################
 
+    def _parse_constructor_kwargs(self, model_nickname, **kwargs):
+        """
+        """
+        if model_nickname is None:
+            input_model_blueprint = copy(kwargs)
+
+            ### First parse the supplementary keyword arguments, 
+            # such as 'model_feature_calling_sequence', 
+            ### from the keywords that are bound to component model instances, 
+            # such as 'centrals_occupation'
+            supplementary_kwargs = {}
+
+            possible_supplementary_kwargs = (
+                'halo_selection_func', 
+                'model_feature_calling_sequence', 
+                'gal_type_list'
+                )
+
+            for key in possible_supplementary_kwargs:
+                try:
+                    supplementary_kwargs[key] = copy(input_model_blueprint[key])
+                    del input_model_blueprint[key]
+                except KeyError:
+                    pass
+
+            if 'gal_type_list' not in supplementary_kwargs:
+                supplementary_kwargs['gal_type_list'] = None
+
+            return input_model_blueprint, supplementary_kwargs
+
+        else:
+            input_model_blueprint, supplementary_kwargs = (
+                self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
+                )
+            return input_model_blueprint, supplementary_kwargs 
+
+    def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
+        """
+        """
+        from ..composite_models import hod_models
+
+        model_nickname = model_nickname.lower()
+
+        if model_nickname == 'zheng07':
+            input_model_blueprint = hod_models.return_zheng07_model_dictionary(**constructor_kwargs)
+        elif model_nickname == 'leauthaud11':
+            input_model_blueprint = hod_models.return_leauthaud11_model_dictionary(**constructor_kwargs)
+        elif model_nickname == 'hearin15':
+            input_model_blueprint = hod_models.return_hearin15_model_dictionary(**constructor_kwargs)
+        elif model_nickname == 'tinker13':
+            input_model_blueprint = hod_models.return_tinker13_model_dictionary(**constructor_kwargs)
+        else:
+            msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
+            raise HalotoolsError(msg)
+
+
+        forbidden_constructor_kwargs = ('gal_type_list', )
+        for kwarg in forbidden_constructor_kwargs:
+            if kwarg in constructor_kwargs:
+                msg = ("\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
+                    "do not pass a ``%s`` keyword argument to the HodModelFactory constructor.\n"
+                    "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
+                raise HalotoolsError(msg % kwarg)
+
+        supplementary_kwargs = copy(constructor_kwargs)
+        for key in input_model_blueprint:
+            if key in supplementary_kwargs:
+                del supplementary_kwargs[key]
+
+        if 'gal_type_list' in input_model_blueprint:
+            supplementary_kwargs['gal_type_list'] = copy(input_model_blueprint['gal_type_list'])
+            del input_model_blueprint['gal_type_list']
+
+        return input_model_blueprint, supplementary_kwargs
 
     def _retrieve_model_feature_calling_sequence(self, supplementary_kwargs):
         """
@@ -171,37 +246,9 @@ class HodModelFactory(ModelFactory):
         return model_feature_calling_sequence
 
 
-    def _parse_constructor_kwargs(self, **kwargs):
-        """
-        """
-        input_model_blueprint = copy(kwargs)
-
-        ###########################################################
-        ### First parse the supplementary keyword arguments (such as 'model_feature_calling_sequence') 
-        ### from the keywords that are bound to component model instances (such as 'centrals_occupation')
-        supplementary_kwargs = {}
-
-        possible_supplementary_kwargs = (
-            'halo_selection_func', 'model_feature_calling_sequence', 'gal_type_list'
-            )
-
-        for key in possible_supplementary_kwargs:
-            try:
-                supplementary_kwargs[key] = copy(input_model_blueprint[key])
-                del input_model_blueprint[key]
-            except KeyError:
-                pass
-
-        if 'gal_type_list' not in supplementary_kwargs:
-            supplementary_kwargs['gal_type_list'] = None
-
-        return input_model_blueprint, supplementary_kwargs
-
-
     def _test_model_feature_calling_sequence_consistency(self, model_feature_calling_sequence, gal_type_list):
         """
         """
-
         for model_feature_calling_sequence_element in model_feature_calling_sequence:
 
             try:
