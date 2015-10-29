@@ -732,20 +732,31 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
     note: This buisness of using np.outer is to make this work for the jackknife function
     which returns an numpy.ndarray.
     """
+    
+    ND1 = convert_to_ndarray(ND1)
+    ND2 = convert_to_ndarray(ND2)
+    NR1 = convert_to_ndarray(NR1)
+    NR2 = convert_to_ndarray(NR2)
+    Ns = np.array([len(ND1),len(ND2),len(NR1),len(NR2)])
+    
+    if np.any(Ns>1):
+        mult = np.outer #used for the jackknife calculations
+    else:
+        mult = lambda x,y: x*y #used for all else
+    
     if estimator == 'Natural':
         factor = ND1*ND2/(NR1*NR2)
         #DD/RR-1
-        #xi = np.outer(1.0/factor,DD/RR) - 1.0
-        xi = (1.0/factor)*DD/RR - 1.0
+        xi = mult(1.0/factor,DD/RR) - 1.0
     elif estimator == 'Davis-Peebles':
         factor = ND1*ND2/(ND1*NR2)
         #DD/DR-1
-        xi = np.outer(1.0/factor,DD/DR) - 1.0
+        xi = mult(1.0/factor,DD/DR) - 1.0
     elif estimator == 'Hewett':
         factor1 = ND1*ND2/(NR1*NR2)
         factor2 = ND1*NR2/(NR1*NR2)
         #(DD-DR)/RR
-        xi = np.outer(1.0/factor1,DD/RR) - np.outer(1.0/factor2,DR/RR)
+        xi = mult(1.0/factor1,DD/RR) - mult(1.0/factor2,DR/RR)
     elif estimator == 'Hamilton':
         #DDRR/DRDR-1
         xi = (DD*RR)/(DR*DR) - 1.0
@@ -753,10 +764,10 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
         factor1 = ND1*ND2/(NR1*NR2)
         factor2 = ND1*NR2/(NR1*NR2)
         #(DD - 2.0*DR + RR)/RR
-        xi = np.outer(1.0/factor1,DD/RR) - np.outer(1.0/factor2,2.0*DR/RR) + 1.0
+        xi = mult(1.0/factor1,DD/RR) - mult(1.0/factor2,2.0*DR/RR) + 1.0
     else: 
         raise ValueError("unsupported estimator!")
-    print(factor)
+    
     if np.shape(xi)[0]==1: return xi[0]
     else: return xi
 
