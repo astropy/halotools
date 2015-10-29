@@ -12,6 +12,7 @@ import numpy as np
 from ... import model_defaults
 from ...occupation_models import zheng07_components
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
+from ... import factories
 
 from ....sim_manager import FakeSim
 
@@ -21,7 +22,7 @@ __all__ = ['return_zheng07_model_dictionary']
 
 def return_zheng07_model_dictionary(
     threshold = model_defaults.default_luminosity_threshold, **kwargs):
-    """ Simple HOD-style based on Zheng et al. (2007), arXiv:0703457. 
+    """ Blueprint for an HOD-style based on Zheng et al. (2007), arXiv:0703457. 
 
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
@@ -36,7 +37,7 @@ def return_zheng07_model_dictionary(
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model was built by the `~halotools.empirical_models.factories.HodModelFactory`.
+    This composite model is built by the `~halotools.empirical_models.factories.HodModelFactory`.
 
     Parameters 
     ----------
@@ -46,30 +47,34 @@ def return_zheng07_model_dictionary(
 
     Returns 
     -------
-    model : object 
-        Instance of `~halotools.empirical_models.factories.HodModelFactory`
+    model_blueprint : dict 
+        Dictionary of keywords to be passed to 
+        `~halotools.empirical_models.factories.HodModelFactory`
 
     Examples 
     --------
-    Calling the `Zheng07` class with no arguments instantiates a model based on the 
-    default luminosity threshold: 
 
-    >>> model = Zheng07()
+    >>> model_blueprint = return_zheng07_model_dictionary()
+    >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
     To load a model based on a different threshold, use the ``threshold`` keyword argument:
 
-    >>> model = Zheng07(threshold = -20.5)
+    >>> model_blueprint = return_zheng07_model_dictionary(threshold = -21)
+    >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
     This call will create a model whose parameter values are set according to the best-fit 
     values given in Table 1 of arXiv:0703457. 
 
-    To use our model to populate a simulation with mock galaxies, we only need to 
-    load a snapshot into memory and call the built-in ``populate_mock`` method. 
-    For illustration purposes, we'll use a small, fake simulation:
+    For this model, you can also use the following syntax candy, 
+    which accomplishes the same task as the above:
 
-    >>> fake_snapshot = FakeSim() # doctest: +SKIP
-    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
+    >>> model_instance = factories.HodModelFactory('zheng07', threshold = -21)
+
+    As with all instances of the `~halotools.empirical_models.HodModelFactory`, 
+    you can populate a mock with one line of code: 
+
+    >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 0) # doctest: +SKIP
 
     """
 

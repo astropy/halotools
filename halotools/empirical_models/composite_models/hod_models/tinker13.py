@@ -12,7 +12,7 @@ import numpy as np
 from ... import model_defaults
 from ...occupation_models import leauthaud11_components 
 from ...occupation_models import tinker13_components 
-
+from ... import factories 
 from ...smhm_models import Behroozi10SmHm
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 

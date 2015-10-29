@@ -390,7 +390,6 @@ class HodModelFactory(ModelFactory):
             if gal_type_list is not None:
                 gal_type_guess_list = gal_type_list 
             else:
-                raise HalotoolsError("gal_type_guess_list is None!")
                 gal_type_guess_list = ('centrals', 'satellites')
 
             for gal_type_guess in gal_type_guess_list:                
