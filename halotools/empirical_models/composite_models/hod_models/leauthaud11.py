@@ -11,7 +11,7 @@ import numpy as np
 
 from ... import model_defaults
 from ...occupation_models import leauthaud11_components 
-
+from ... import factories
 from ...smhm_models import Behroozi10SmHm
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
@@ -22,7 +22,7 @@ __all__ = ['return_leauthaud11_model_dictionary']
     
 def return_leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
     central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
-    """ HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
+    """ Blueprint for an HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
 
     There are two populations, centrals and satellites. 
@@ -38,7 +38,7 @@ def return_leauthaud11_model_dictionary(threshold = model_defaults.default_stell
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model was built by the `~halotools.empirical_models.factories.HodModelFactory`, 
+    This composite model is built by the `~halotools.empirical_models.factories.HodModelFactory`, 
     which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_blueprint`. 
 
     Parameters 
@@ -71,27 +71,30 @@ def return_leauthaud11_model_dictionary(threshold = model_defaults.default_stell
 
     Returns 
     -------
-    model : object 
-        Instance of `~halotools.empirical_models.factories.HodModelFactory`
+    model_blueprint : dict 
+        Dictionary passed to `~halotools.empirical_models.factories.HodModelFactory`
 
     Examples 
     --------
-    Calling the `Leauthaud11` class with no arguments instantiates a model based on the 
-    default stellar mass threshold: 
 
-    >>> model = Leauthaud11()
+    >>> model_blueprint = return_leauthaud11_model_dictionary()
+    >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
-    To load a model based on a different threshold, use the ``threshold`` keyword argument:
+    To load a model based on a different threshold and redshift:
 
-    >>> model = Leauthaud11(threshold = 11.25)
+    >>> model_blueprint = return_leauthaud11_model_dictionary(threshold = 11, redshift = 1)
+    >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
-    To use our model to populate a simulation with mock galaxies, we only need to 
-    load a snapshot into memory and call the built-in ``populate_mock`` method. 
-    For illustration purposes, we'll use a small, fake simulation:
+    For this model, you can also use the following syntax candy, 
+    which accomplishes the same task as the above:
 
-    >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
+    >>> model_instance = factories.HodModelFactory('leauthaud11', threshold = 11, redshift = 1)
+
+    As with all instances of the `~halotools.empirical_models.HodModelFactory`, 
+    you can populate a mock with one line of code: 
+
+    >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 1) # doctest: +SKIP
 
     """
     ### Build model for centrals
