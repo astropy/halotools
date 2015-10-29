@@ -292,7 +292,6 @@ class HodModelFactory(ModelFactory):
 
         self._test_model_feature_calling_sequence_consistency(model_feature_calling_sequence, gal_type_list)
 
-
         return model_feature_calling_sequence
 
 
