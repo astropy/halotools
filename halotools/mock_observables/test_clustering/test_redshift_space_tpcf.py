@@ -11,7 +11,7 @@ __all__=['test_rs_tpcf_auto','test_rs_tpcf_auto_periodic','test_rs_tpcf_cross_pe
 
 ####two point correlation function########################################################
 
-def test_wp_auto():
+def test_rs_tpcf_auto():
     Npts=100
     
     sample1 = np.random.random((Npts,3))
@@ -25,11 +25,13 @@ def test_wp_auto():
     result = redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, 
                                  randoms=randoms, period = None, 
                                  max_sample_size=int(1e4), estimator='Natural')
-
+    
+    print(result)
+    
     assert result.ndim == 2, "More than one correlation function returned erroneously."
 
-
-def test_wp_auto_periodic():
+"""
+def test_rs_tpcf_auto_periodic():
     Npts=100
     
     sample1 = np.random.random((Npts,3))
@@ -47,7 +49,7 @@ def test_wp_auto_periodic():
     assert result.ndim == 2, "More than one correlation function returned erroneously."
 
 
-def test_wp_cross_periodic():
+def test_rs_tpcf_cross_periodic():
     Npts=100
     
     sample1 = np.random.random((Npts,3))
@@ -66,5 +68,5 @@ def test_wp_cross_periodic():
     assert result[0].ndim == 2, "dimension of auto incorrect"
     assert result[1].ndim == 2, "dimension of cross incorrect"
     assert result[2].ndim == 2, "dimension auto incorrect"
-
+"""
 

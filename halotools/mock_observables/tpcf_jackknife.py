@@ -244,38 +244,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                 cov[i,j] = (((N_sub_vol-1)/N_sub_vol)*tmp)
         return cov
     
-    def TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
-        """
-        two point correlation function estimator.
-        
-        This is different from the function included in clustering_helpers in order to 
-        deal with ndarrays.  This is not ideal, and would be nice to fix.
-        """
-        if estimator == 'Natural':
-            factor = ND1*ND2/(NR1*NR2)
-            #DD/RR-1
-            xi = (1.0/factor)*(DD/RR).T - 1.0
-        elif estimator == 'Davis-Peebles':
-            factor = ND1*ND2/(ND1*NR2)
-            #DD/DR-1
-            xi = (1.0/factor)*(DD/DR).T - 1.0
-        elif estimator == 'Hewett':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD-DR)/RR
-            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*(DR/RR).T
-        elif estimator == 'Hamilton':
-            #DDRR/DRDR-1
-            xi = (DD*RR)/(DR*DR) - 1.0
-        elif estimator == 'Landy-Szalay':
-            factor1 = ND1*ND2/(NR1*NR2)
-            factor2 = ND1*NR2/(NR1*NR2)
-            #(DD - 2.0*DR + RR)/RR
-            xi = (1.0/factor1)*(DD/RR).T - (1.0/factor2)*2.0*(DR/RR).T + 1.0
-        else: 
-            raise ValueError("unsupported estimator!")
-        return xi.T #transpose 2 times to get the multiplication to work
-    
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
     N1 = len(sample1)
@@ -343,12 +311,12 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     xi_22_full = _TP_estimator(D2D2_full, D2R_full, RR_full, N2, N2, NR, NR, estimator)
     
     #calculate the correlation function for the subsamples
-    xi_11_sub = TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs,\
-                             NR_subs, estimator)
-    xi_12_sub = TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs,\
-                             NR_subs, estimator)
-    xi_22_sub = TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs,\
-                             NR_subs, estimator)
+    xi_11_sub = _TP_estimator(D1D1_sub, D1R_sub, RR_sub, N1_subs, N1_subs, NR_subs,\
+                              NR_subs, estimator)
+    xi_12_sub = _TP_estimator(D1D2_sub, D1R_sub, RR_sub, N1_subs, N2_subs, NR_subs,\
+                              NR_subs, estimator)
+    xi_22_sub = _TP_estimator(D2D2_sub, D2R_sub, RR_sub, N2_subs, N2_subs, NR_subs,\
+                              NR_subs, estimator)
     
     #calculate the covariance matrix
     xi_11_cov = covariance_matrix(xi_11_sub, xi_11_full, N_sub_vol)

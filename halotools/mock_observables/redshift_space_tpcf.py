@@ -11,7 +11,8 @@ import sys
 import numpy as np
 from math import pi, gamma
 from .clustering_helpers import *
-from .pair_counters.rect_cuboid_pairs import xy_z_npairs
+from .pair_counters.double_tree_pairs import xy_z_npairs
+#from .pair_counters.rect_cuboid_pairs import xy_z_npairs
 ##########################################################################################
 
 
