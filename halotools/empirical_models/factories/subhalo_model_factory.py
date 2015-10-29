@@ -150,8 +150,50 @@ class SubhaloModelFactory(ModelFactory):
             return input_model_blueprint, supplementary_kwargs
 
         else:
-            raise HalotoolsError("Not implemented yet!")
+            input_model_blueprint, supplementary_kwargs = (
+                self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
+                )
+            return input_model_blueprint, supplementary_kwargs 
 
+    def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
+        """
+        """
+        forbidden_constructor_kwargs = ('model_feature_calling_sequence')
+        for kwarg in forbidden_constructor_kwargs:
+            if kwarg in constructor_kwargs:
+                msg = ("\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
+                    "do not pass a ``%s`` keyword argument to the SubhaloModelFactory constructor.\n"
+                    "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
+                raise HalotoolsError(msg % kwarg)
+
+
+        model_nickname = model_nickname.lower()
+
+        if model_nickname == 'behroozi10':
+            from ..composite_models import smhm_models
+            blueprint_retriever = smhm_models.behroozi10_model_dictionary
+        elif model_nickname == 'smhm_binary_sfr':
+            from ..composite_models import sfr_models
+            blueprint_retriever = sfr_models.smhm_binary_sfr_model_dictionary
+        else:
+            msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
+            raise HalotoolsError(msg)
+
+        result = blueprint_retriever(**constructor_kwargs)
+        if type(result) is dict:
+            input_model_blueprint = result
+            supplementary_kwargs = {}
+            supplementary_kwargs['model_feature_calling_sequence'] = None 
+        elif type(result) is tuple:
+            input_model_blueprint = result[0]
+            supplementary_kwargs = result[1]
+        else:
+            raise HalotoolsError("Unexpected result returned from ``%s``\n"
+            "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
+             % blueprint_retriever.__name__)
+
+        return input_model_blueprint, supplementary_kwargs
+        
     def _retrieve_model_feature_calling_sequence(self, supplementary_kwargs):
         """
         """
