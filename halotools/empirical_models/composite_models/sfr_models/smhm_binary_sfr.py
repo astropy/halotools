@@ -88,8 +88,8 @@ def smhm_binary_sfr_model_dictionary(
 
     Examples 
     --------
-    >>> model_blueprint = smhm_binary_sfr_model_dictionary()
-    >>> model_instance = factories.SubhaloModelFactory(**model_blueprint)
+    >>> model_dictionary = smhm_binary_sfr_model_dictionary()
+    >>> model_instance = factories.SubhaloModelFactory(**model_dictionary)
 
 
     """
@@ -102,7 +102,7 @@ def smhm_binary_sfr_model_dictionary(
         prim_haloprop_key = prim_haloprop_key, redshift = redshift, 
         scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
 
-    model_blueprint = {'stellar_mass': sm_model, 'quiescent': sfr_model}
+    model_dictionary = {'stellar_mass': sm_model, 'quiescent': sfr_model}
 
     # supplementary_dictionary = {}
 
@@ -110,6 +110,6 @@ def smhm_binary_sfr_model_dictionary(
     #     galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
     #     supplementary_dictionary['galaxy_selection_func'] = galaxy_selection_func
 
-    return model_blueprint
+    return model_dictionary
 
 

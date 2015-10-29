@@ -48,7 +48,7 @@ def tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_th
     del active_satellites_profile.new_haloprop_func_dict
     
 
-    model_blueprint = (
+    model_dictionary = (
         {'centrals_occupation': centrals_occupation, 
         'centrals_profile': centrals_profile, 
         'quiescent_satellites_profile': quiescent_satellites_profile, 
@@ -66,7 +66,7 @@ def tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_th
         'model_feature_calling_sequence': model_feature_calling_sequence}
         )
 
-    return model_blueprint, supplementary_dictionary
+    return model_dictionary, supplementary_dictionary
 
 
 

@@ -22,7 +22,7 @@ __all__ = ['zheng07_model_dictionary']
 
 def zheng07_model_dictionary(
     threshold = model_defaults.default_luminosity_threshold, **kwargs):
-    """ Blueprint for an HOD-style based on Zheng et al. (2007), arXiv:0703457. 
+    """ dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457. 
 
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
@@ -47,21 +47,21 @@ def zheng07_model_dictionary(
 
     Returns 
     -------
-    model_blueprint : dict 
+    model_dictionary : dict 
         Dictionary of keywords to be passed to 
         `~halotools.empirical_models.factories.HodModelFactory`
 
     Examples 
     --------
 
-    >>> model_blueprint = zheng07_model_dictionary()
-    >>> model_instance = factories.HodModelFactory(**model_blueprint)
+    >>> model_dictionary = zheng07_model_dictionary()
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
     To load a model based on a different threshold, use the ``threshold`` keyword argument:
 
-    >>> model_blueprint = zheng07_model_dictionary(threshold = -21)
-    >>> model_instance = factories.HodModelFactory(**model_blueprint)
+    >>> model_dictionary = zheng07_model_dictionary(threshold = -21)
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
     This call will create a model whose parameter values are set according to the best-fit 
     values given in Table 1 of arXiv:0703457. 
@@ -79,8 +79,8 @@ def zheng07_model_dictionary(
     """
 
     ####################################
-    ### Build subpopulation blueprint for centrals
-    subpopulation_blueprint_centrals = {}
+    ### Build subpopulation dictionary for centrals
+    subpopulation_dictionary_centrals = {}
 
     # Build the `occupation` feature
     centrals_occupation = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
@@ -89,8 +89,8 @@ def zheng07_model_dictionary(
     centrals_profile = TrivialPhaseSpace(**kwargs)
 
     ####################################
-    ### Build subpopulation blueprint for satellites
-    subpopulation_blueprint_satellites = {}
+    ### Build subpopulation dictionary for satellites
+    subpopulation_dictionary_satellites = {}
 
     # Build the occupation model
     satellites_occupation = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)

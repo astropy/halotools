@@ -47,8 +47,8 @@ def behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwar
 
     Examples 
     --------
-    >>> model_blueprint = behroozi10_model_dictionary()
-    >>> model_instance = factories.SubhaloModelFactory(**model_blueprint)
+    >>> model_dictionary = behroozi10_model_dictionary()
+    >>> model_instance = factories.SubhaloModelFactory(**model_dictionary)
 
     """
 

@@ -32,11 +32,11 @@ from ...custom_exceptions import *
 class HodModelFactory(ModelFactory):
     """ Class used to build HOD-style models of the galaxy-halo connection. 
 
-    Can be thought of as a factory that takes an HOD model blueprint as input, 
+    Can be thought of as a factory that takes an HOD model dictionary as input, 
     and generates an HOD Model object. The returned object can be used directly to 
     populate a simulation with a Monte Carlo realization of the model. 
 
-    Most behavior is derived from external classes bound up in the input ``model_blueprint``. 
+    Most behavior is derived from external classes bound up in the input ``model_dictionary``. 
     So the purpose of `HodModelFactory` is mostly to compose these external 
     behaviors together into a composite model. 
     The aim is to provide a standardized model object 
@@ -120,18 +120,18 @@ class HodModelFactory(ModelFactory):
 
         """
 
-        input_model_blueprint, supplementary_kwargs = self._parse_constructor_kwargs(
+        input_model_dictionary, supplementary_kwargs = self._parse_constructor_kwargs(
             model_nickname, **kwargs)
 
-        super(HodModelFactory, self).__init__(input_model_blueprint, **supplementary_kwargs)
+        super(HodModelFactory, self).__init__(input_model_dictionary, **supplementary_kwargs)
         self.mock_factory = HodMockFactory
 
         self._model_feature_calling_sequence = (
             self._retrieve_model_feature_calling_sequence(supplementary_kwargs))
 
-        self.model_blueprint = collections.OrderedDict()
+        self.model_dictionary = collections.OrderedDict()
         for key in self._model_feature_calling_sequence:
-            self.model_blueprint[key] = copy(self._input_model_blueprint[key])
+            self.model_dictionary[key] = copy(self._input_model_dictionary[key])
 
         # Build up and bind several lists from the component models
         self._set_gal_types()
@@ -149,7 +149,7 @@ class HodModelFactory(ModelFactory):
         # that will be called by the mock factory 
         self._set_primary_behaviors()
         self._set_calling_sequence()
-        self._test_blueprint_consistency()
+        self._test_dictionary_consistency()
 
         ############################################################
 
@@ -157,7 +157,7 @@ class HodModelFactory(ModelFactory):
         """
         """
         if model_nickname is None:
-            input_model_blueprint = copy(kwargs)
+            input_model_dictionary = copy(kwargs)
 
             ### First parse the supplementary keyword arguments, 
             # such as 'model_feature_calling_sequence', 
@@ -173,8 +173,8 @@ class HodModelFactory(ModelFactory):
             supplementary_kwargs = {}
             for key in possible_supplementary_kwargs:
                 try:
-                    supplementary_kwargs[key] = copy(input_model_blueprint[key])
-                    del input_model_blueprint[key]
+                    supplementary_kwargs[key] = copy(input_model_dictionary[key])
+                    del input_model_dictionary[key]
                 except KeyError:
                     pass
 
@@ -184,13 +184,13 @@ class HodModelFactory(ModelFactory):
             if 'model_feature_calling_sequence' not in supplementary_kwargs:
                 supplementary_kwargs['model_feature_calling_sequence'] = None
 
-            return input_model_blueprint, supplementary_kwargs
+            return input_model_dictionary, supplementary_kwargs
 
         else:
-            input_model_blueprint, supplementary_kwargs = (
+            input_model_dictionary, supplementary_kwargs = (
                 self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
                 )
-            return input_model_blueprint, supplementary_kwargs 
+            return input_model_dictionary, supplementary_kwargs 
 
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
         """
@@ -209,32 +209,32 @@ class HodModelFactory(ModelFactory):
         model_nickname = model_nickname.lower()
 
         if model_nickname == 'zheng07':
-            blueprint_retriever = hod_models.zheng07_model_dictionary
+            dictionary_retriever = hod_models.zheng07_model_dictionary
         elif model_nickname == 'leauthaud11':
-            blueprint_retriever = hod_models.leauthaud11_model_dictionary
+            dictionary_retriever = hod_models.leauthaud11_model_dictionary
         elif model_nickname == 'hearin15':
-            blueprint_retriever = hod_models.hearin15_model_dictionary
+            dictionary_retriever = hod_models.hearin15_model_dictionary
         elif model_nickname == 'tinker13':
-            blueprint_retriever = hod_models.tinker13_model_dictionary
+            dictionary_retriever = hod_models.tinker13_model_dictionary
         else:
             msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
             raise HalotoolsError(msg)
 
-        result = blueprint_retriever(**constructor_kwargs)
+        result = dictionary_retriever(**constructor_kwargs)
         if type(result) is dict:
-            input_model_blueprint = result
+            input_model_dictionary = result
             supplementary_kwargs = {}
             supplementary_kwargs['gal_type_list'] = None 
             supplementary_kwargs['model_feature_calling_sequence'] = None 
         elif type(result) is tuple:
-            input_model_blueprint = result[0]
+            input_model_dictionary = result[0]
             supplementary_kwargs = result[1]
         else:
             raise HalotoolsError("Unexpected result returned from ``%s``\n"
             "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
-             % blueprint_retriever.__name__)
+             % dictionary_retriever.__name__)
 
-        return input_model_blueprint, supplementary_kwargs
+        return input_model_dictionary, supplementary_kwargs
 
     def _retrieve_model_feature_calling_sequence(self, supplementary_kwargs):
         """
@@ -247,7 +247,7 @@ class HodModelFactory(ModelFactory):
             model_feature_calling_sequence = list(supplementary_kwargs['model_feature_calling_sequence'])
             for model_feature in model_feature_calling_sequence:
                 try:
-                    assert model_feature in self._input_model_blueprint.keys()
+                    assert model_feature in self._input_model_dictionary.keys()
                 except AssertionError:
                     msg = ("\nYour input ``model_feature_calling_sequence`` has a ``%s`` element\n"
                     "that does not appear in the keyword arguments you passed to the HodModelFactory.\n"
@@ -261,24 +261,24 @@ class HodModelFactory(ModelFactory):
             # then any possible additional occupation features, then any possible remaining features
             model_feature_calling_sequence = []
 
-            occupation_keys = [key for key in self._input_model_blueprint if 'occupation' in key]
+            occupation_keys = [key for key in self._input_model_dictionary if 'occupation' in key]
             centrals_occupation_keys = [key for key in occupation_keys if 'central' in key]
             remaining_occupation_keys = [key for key in occupation_keys if key not in centrals_occupation_keys]
 
             model_feature_calling_sequence.extend(centrals_occupation_keys)
             model_feature_calling_sequence.extend(remaining_occupation_keys)
 
-            remaining_model_blueprint_keys = (
-                [key for key in self._input_model_blueprint if key not in model_feature_calling_sequence]
+            remaining_model_dictionary_keys = (
+                [key for key in self._input_model_dictionary if key not in model_feature_calling_sequence]
                 )
-            model_feature_calling_sequence.extend(remaining_model_blueprint_keys)
+            model_feature_calling_sequence.extend(remaining_model_dictionary_keys)
 
         ########################
 
         ########################
         ### Now conversely require that all remaining __init__ constructor keyword arguments 
         ### appear in the model_feature_calling_sequence
-        for constructor_kwarg in self._input_model_blueprint:
+        for constructor_kwarg in self._input_model_dictionary:
             try:
                 assert constructor_kwarg in model_feature_calling_sequence
             except AssertionError:
@@ -301,7 +301,7 @@ class HodModelFactory(ModelFactory):
         for model_feature_calling_sequence_element in model_feature_calling_sequence:
 
             try:
-                component_model = self._input_model_blueprint[model_feature_calling_sequence_element]
+                component_model = self._input_model_dictionary[model_feature_calling_sequence_element]
             except KeyError:
                 msg = ("\nYour input ``model_feature_calling_sequence`` has a ``%s`` element\n"
                     "that does not appear in the keyword arguments passed to \n"
@@ -316,13 +316,13 @@ class HodModelFactory(ModelFactory):
             try:
                 component_model_gal_type = component_model.gal_type
             except AttributeError:
-                self._input_model_blueprint[model_feature_calling_sequence_element].gal_type = gal_type
+                self._input_model_dictionary[model_feature_calling_sequence_element].gal_type = gal_type
                 component_model_gal_type = gal_type
 
             try:
                 component_model_feature_name = component_model.feature_name
             except AttributeError:
-                self._input_model_blueprint[model_feature_calling_sequence_element].feature_name = feature_name
+                self._input_model_dictionary[model_feature_calling_sequence_element].feature_name = feature_name
                 component_model_feature_name = feature_name
 
             try:
@@ -356,29 +356,29 @@ class HodModelFactory(ModelFactory):
                         feature_name, model_feature_calling_sequence_element))
 
 
-    def _infer_gal_type_and_feature_name(self, model_blueprint_key, gal_type_list, 
+    def _infer_gal_type_and_feature_name(self, model_dictionary_key, gal_type_list, 
         known_gal_type = None, known_feature_name = None):
         
-        processed_key = model_blueprint_key.lower()
+        processed_key = model_dictionary_key.lower()
         
         if known_gal_type is not None:
             gal_type = known_gal_type
             
             # Ensure that the gal_type appears first in the string
             if processed_key[0:len(gal_type)] != gal_type:
-                msg = ("\nThe first substring of each key of the ``model_blueprint`` \n"
+                msg = ("\nThe first substring of each key of the ``model_dictionary`` \n"
                     "must be the ``gal_type`` substring. So the first substring of the ``%s`` key \n"
                     "should be %s")
-                raise HalotoolsError(msg % (model_blueprint_key, gal_type))
+                raise HalotoolsError(msg % (model_dictionary_key, gal_type))
                     
             # Remove the gal_type substring
             processed_key = processed_key.replace(gal_type, '')
             
             # Ensure that the gal_type and feature_name were separated by a '_'
             if processed_key[0] != '_':
-                msg = ("\nThe model_blueprint key ``%s`` must be comprised of \n"
+                msg = ("\nThe model_dictionary key ``%s`` must be comprised of \n"
                     "the ``gal_type`` and ``feature_name`` substrings, separated by a '_', in that order.\n")
-                raise HalotoolsError(msg % model_blueprint_key)
+                raise HalotoolsError(msg % model_dictionary_key)
             else:
                 processed_key = processed_key[1:]
                 feature_name = processed_key
@@ -390,19 +390,19 @@ class HodModelFactory(ModelFactory):
             # Ensure that the feature_name appears last in the string
             feature_name_first_idx = processed_key.find(feature_name)
             if processed_key[feature_name_first_idx:] != feature_name:
-                msg = ("\nThe second substring of each key of the ``model_blueprint`` \n"
+                msg = ("\nThe second substring of each key of the ``model_dictionary`` \n"
                     "must be the ``feature_name`` substring. So the second substring of the ``%s`` key \n"
                     "should be %s")
-                raise HalotoolsError(msg % (model_blueprint_key, feature_name))
+                raise HalotoolsError(msg % (model_dictionary_key, feature_name))
                 
             # Remove the feature_name substring
             processed_key = processed_key.replace(feature_name, '')
          
             # Ensure that the gal_type and feature_name were separated by a '_'
             if processed_key[-1] != '_':
-                msg = ("\nThe model_blueprint key ``%s`` must be comprised of \n"
+                msg = ("\nThe model_dictionary key ``%s`` must be comprised of \n"
                     "the ``gal_type`` and ``feature_name`` substrings, separated by a '_', in that order.\n")
-                raise HalotoolsError(msg % model_blueprint_key)
+                raise HalotoolsError(msg % model_dictionary_key)
             else:
                 processed_key = processed_key[:-1]
                 gal_type = processed_key
@@ -420,11 +420,11 @@ class HodModelFactory(ModelFactory):
                         processed_key, gal_type_guess_list, known_gal_type = known_gal_type)
                     return gal_type, feature_name
             msg = ("\nThe ``_infer_gal_type_and_feature_name`` method was unable to identify\n"
-                "the name of your galaxy population from the ``%s`` key of the model_blueprint.\n"
+                "the name of your galaxy population from the ``%s`` key of the model_dictionary.\n"
                 "If you are modeling a population whose name is neither ``centrals`` nor ``satellites``,\n"
                 "then you must provide a ``gal_type_list`` keyword argument to \n"
                 "the constructor of the HodModelFactory.\n")
-            raise HalotoolsError(msg % model_blueprint_key)
+            raise HalotoolsError(msg % model_dictionary_key)
 
 
 
@@ -435,7 +435,7 @@ class HodModelFactory(ModelFactory):
         model components with explicit dependence on the central population. 
         """
         _gal_type_list = []
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
             _gal_type_list.append(component_model.gal_type)
         self.gal_types = set(list(_gal_type_list))
 
@@ -456,7 +456,7 @@ class HodModelFactory(ModelFactory):
         `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
             gal_type = component_model.gal_type
             feature_name = component_model.feature_name
 
@@ -487,7 +487,7 @@ class HodModelFactory(ModelFactory):
 
             # Repeatedly overwrite self.threshold 
             # This is harmless provided that all gal_types are ensured to have the same threshold, 
-            # which is guaranteed by the _test_blueprint_consistency method
+            # which is guaranteed by the _test_dictionary_consistency method
             if hasattr(component_model, 'threshold'):
                 setattr(self, 'threshold_' + gal_type, component_model.threshold)
                 self.threshold = getattr(self, 'threshold_' + gal_type)
@@ -516,7 +516,7 @@ class HodModelFactory(ModelFactory):
         the phase space component models. 
         """
 
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
             if hasattr(component_model, 'build_lookup_tables'):
                 component_model.build_lookup_tables()
 
@@ -549,7 +549,7 @@ class HodModelFactory(ModelFactory):
             "simply attach a _suppress_repeated_param_warning attribute \n"
             "to any of your component models and set this variable to ``True``.\n")
 
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
 
             if not hasattr(component_model, 'param_dict'):
                 component_model.param_dict = {}
@@ -582,7 +582,7 @@ class HodModelFactory(ModelFactory):
             "    For gal_type = ``%s``, the %s model has redshift = %.2f.\n")
 
 
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
             gal_type = component_model.gal_type
 
             if hasattr(component_model, 'redshift'):
@@ -605,7 +605,7 @@ class HodModelFactory(ModelFactory):
         """
         """
         haloprop_list = []
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
 
             if hasattr(component_model, 'prim_haloprop_key'):
                 haloprop_list.append(component_model.prim_haloprop_key)
@@ -619,7 +619,7 @@ class HodModelFactory(ModelFactory):
         """
         prof_param_keys = []
 
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
             if hasattr(component_model, 'prof_param_keys'):
                 prof_param_keys.extend(component_model.prof_param_keys)
 
@@ -629,7 +629,7 @@ class HodModelFactory(ModelFactory):
         """
         """
         pub_list = []
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
 
             if hasattr(component_model, 'publications'):
                 pub_list.extend(component_model.publications)
@@ -640,7 +640,7 @@ class HodModelFactory(ModelFactory):
         """
         """
         dtype_list = []
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
 
             # Column dtypes to add to mock galaxy_table
             if hasattr(component_model, '_galprop_dtypes_to_allocate'):
@@ -653,7 +653,7 @@ class HodModelFactory(ModelFactory):
         """
         new_haloprop_func_dict = {}
 
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
             feature_name, gal_type = component_model.feature_name, component_model.gal_type
 
             # Haloprop function dictionaries
@@ -680,7 +680,7 @@ class HodModelFactory(ModelFactory):
         """
         self._suppress_repeated_param_warning = False
 
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
 
             if hasattr(component_model, '_suppress_repeated_param_warning'):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
@@ -707,7 +707,7 @@ class HodModelFactory(ModelFactory):
         even if these lists were forgotten or irrelevant to that particular component. 
         """
 
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
 
             # Ensure that all methods in the calling sequence are inherited
             try:
@@ -741,7 +741,7 @@ class HodModelFactory(ModelFactory):
             "Only ignore this warning if you are sure this is not an error.\n")
 
         for model_feature in self._model_feature_calling_sequence:
-            component_model = self.model_blueprint[model_feature]
+            component_model = self.model_dictionary[model_feature]
 
             if hasattr(component_model, '_mock_generation_calling_sequence'):
                 component_method_list = (
@@ -753,9 +753,9 @@ class HodModelFactory(ModelFactory):
                 warn(missing_calling_sequence_msg % (component_model.feature_name, component_model.gal_type))
 
 
-    def _test_blueprint_consistency(self):
+    def _test_dictionary_consistency(self):
         """
-        Impose the following requirements on the blueprint: 
+        Impose the following requirements on the dictionary: 
 
             * All occupation components have the same threshold. 
 
@@ -777,7 +777,7 @@ class HodModelFactory(ModelFactory):
             "which determines which methods of the component model are inherited by the composite model.\n"
             "The former must be a subset of the latter. However, for ``gal_type`` = %s,\n"
             "the following method was not inherited:\n%s")
-        for component_model in self.model_blueprint.values():
+        for component_model in self.model_dictionary.values():
 
             mock_generation_methods = set(component_model._mock_generation_calling_sequence)
             inherited_methods = set(component_model._methods_to_inherit)
