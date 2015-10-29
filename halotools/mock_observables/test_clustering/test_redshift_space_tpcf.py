@@ -30,7 +30,6 @@ def test_rs_tpcf_auto():
     
     assert result.ndim == 2, "More than one correlation function returned erroneously."
 
-"""
 def test_rs_tpcf_auto_periodic():
     Npts=100
     
@@ -68,5 +67,4 @@ def test_rs_tpcf_cross_periodic():
     assert result[0].ndim == 2, "dimension of auto incorrect"
     assert result[1].ndim == 2, "dimension of cross incorrect"
     assert result[2].ndim == 2, "dimension auto incorrect"
-"""
 
