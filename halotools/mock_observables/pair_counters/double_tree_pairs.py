@@ -434,8 +434,9 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     """
     ### Process the inputs with the helper function
     x1, y1, z1, x2, y2, z2, rp_bins, pi_bins, period, num_threads, PBCs = (
-        _npairs_process_args(data1, data2, rp_bins, pi_bins, period, 
-            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+        _xy_z_npairs_process_args(data1, data2, rp_bins, pi_bins, period, 
+            verbose, num_threads, approx_rp_cell1_size, approx_pi_cell1_size, 
+            approx_rp_cell2_size, approx_pi_cell2_size)
         )        
     
     xperiod, yperiod, zperiod = period 
@@ -444,11 +445,14 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
 
     ### Compute the estimates for the cell sizes
 
-    (approx_rp_cell1_size, approx_pi_cell1_size, 
-        approx_rp_cell2_size, approx_pi_cell2_size = 
-        _set_approximate_xy_z_cell_sizes(approx_rp_cell1_size, approx_pi_cell1_size, 
-            approx_rp_cell2_size, approx_pi_cell2_size, rp_max, pi_max)
-        )
+    result = _set_approximate_xy_z_cell_sizes(
+        approx_rp_cell1_size, approx_pi_cell1_size, 
+        approx_rp_cell2_size, approx_pi_cell2_size, rp_max, pi_max)
+    approx_rp_cell1_size = result[0]
+    approx_pi_cell1_size = result[1]
+    approx_rp_cell2_size = result[2]
+    approx_pi_cell2_size = result[3]
+
 
     approx_x1cell_size, approx_y1cell_size = approx_rp_cell1_size
     approx_z1cell_size = approx_pi_cell1_size
@@ -468,10 +472,6 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
 
     #number of cells
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
-
-    #create a function to call with only one argument
-    engine = partial(_npairs_engine, 
-        double_tree, rbins_squared, period, PBCs)
     
     #create a function to call with only one argument
     engine = partial(_xy_z_npairs_engine, double_tree, rp_bins_squared, 
@@ -502,8 +502,8 @@ def _xy_z_npairs_engine(double_tree, rp_bins_squared, pi_bins_squared, period, P
         double_tree.tree1.y[s1],
         double_tree.tree1.z[s1])
         
-    xsearch_length = np.sqrt(rbins_squared[-1])
-    ysearch_length = np.sqrt(rbins_squared[-1])
+    xsearch_length = np.sqrt(rp_bins_squared[-1])
+    ysearch_length = np.sqrt(rp_bins_squared[-1])
     zsearch_length = np.sqrt(pi_bins_squared[-1])
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)

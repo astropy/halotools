@@ -23,7 +23,7 @@ from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__ = (
     ['_npairs_process_args', '_enclose_in_box', '_set_approximate_cell_sizes', 
-    '_jnpairs_process_weights_jtags']
+    '_jnpairs_process_weights_jtags', '_xy_z_npairs_process_args', '_set_approximate_xy_z_cell_sizes']
     )
 
 def _npairs_process_args(data1, data2, rbins, period, 
