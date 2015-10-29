@@ -232,8 +232,25 @@ class HodModelFactory(ModelFactory):
                     "For every element of the input ``model_feature_calling_sequence``, there must be a corresponding \n"
                     "keyword argument to which a component model instance is bound.\n")
                     raise HalotoolsError(msg % model_feature)
-        except KeyError:
-            model_feature_calling_sequence = list(self.model_blueprint.keys())
+        except TypeError:
+            # The supplementary_kwargs['model_feature_calling_sequence'] was None, triggering a TypeError, 
+            # so we will use the default calling sequence instead
+            # The default sequence will be to first use the centrals_occupation (if relevant), 
+            # then any possible additional occupation features, then any possible remaining features
+            model_feature_calling_sequence = []
+
+            occupation_keys = [key for key in self.model_blueprint if 'occupation' in key]
+            centrals_occupation_keys = [key for key in occupation_keys if 'central' in key]
+            remaining_occupation_keys = [key for key in occupation_keys if key not in centrals_occupation_keys]
+
+            model_feature_calling_sequence.extend(centrals_occupation_keys)
+            model_feature_calling_sequence.extend(remaining_occupation_keys)
+
+            remaining_model_blueprint_keys = (
+                [key for key in self.model_blueprint if key not in model_feature_calling_sequence]
+                )
+            model_feature_calling_sequence.extend(remaining_model_blueprint_keys)
+
         ########################
 
         ########################
