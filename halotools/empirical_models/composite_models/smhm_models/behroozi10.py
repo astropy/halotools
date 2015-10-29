@@ -9,21 +9,21 @@ from __future__ import (
 
 import numpy as np
 
-from ... import factories
 from ...smhm_models import Behroozi10SmHm
 
 from ....sim_manager import sim_defaults
 
-__all__ = ['Behroozi10']
+__all__ = ['return_behroozi10_model_dictionary']
 
-def Behroozi10(redshift = sim_defaults.default_redshift, **kwargs):
-	"""
+
+def return_behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwargs):
+    """
     Parameters 
     ----------
     redshift : float, optional 
-    	Redshift of the stellar-to-halo-mass relation of the model. Must be consistent 
-    	with the redshift of the halo catalog you populate. Default value is set by 
-    	sim_defaults.default_redshift. 
+        Redshift of the stellar-to-halo-mass relation of the model. Must be consistent 
+        with the redshift of the halo catalog you populate. Default value is set by 
+        sim_defaults.default_redshift. 
 
     prim_haloprop_key : string, optional  
         String giving the column name of the primary halo property governing stellar mass. 
@@ -48,11 +48,10 @@ def Behroozi10(redshift = sim_defaults.default_redshift, **kwargs):
     --------
     >>> model = Behroozi10()
 
-	"""
+    """
 
-	stellar_mass_model = Behroozi10SmHm(redshift = redshift, **kwargs)
-	composite_model = factories.SubhaloModelFactory(stellar_mass = stellar_mass_model)
+    stellar_mass_model = Behroozi10SmHm(redshift = redshift, **kwargs)
+    return {'stellar_mass': stellar_mass_model}
 
-	return composite_model
 
 

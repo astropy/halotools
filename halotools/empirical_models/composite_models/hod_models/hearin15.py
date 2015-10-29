@@ -17,7 +17,7 @@ from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from ....sim_manager import FakeSim, sim_defaults
 
 
-__all__ = ['Hearin15']
+__all__ = ['Hearin15', 'return_hearin15_model_dictionary']
 
 def Hearin15(central_assembias_strength = 1, 
     central_assembias_strength_abcissa = [1e12], 
