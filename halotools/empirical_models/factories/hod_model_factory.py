@@ -99,6 +99,9 @@ class HodModelFactory(ModelFactory):
 
         input_model_blueprint, supplementary_kwargs = self._parse_constructor_kwargs(
             model_nickname, **kwargs)
+        print("\n...printing supplementary kwargs...\n")
+        for key, value in supplementary_kwargs.iteritems():
+            print key, value
 
         super(HodModelFactory, self).__init__(input_model_blueprint, **supplementary_kwargs)
         self.mock_factory = HodMockFactory
@@ -170,23 +173,6 @@ class HodModelFactory(ModelFactory):
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
         """
         """
-        from ..composite_models import hod_models
-
-        model_nickname = model_nickname.lower()
-
-        if model_nickname == 'zheng07':
-            input_model_blueprint = hod_models.return_zheng07_model_dictionary(**constructor_kwargs)
-        elif model_nickname == 'leauthaud11':
-            input_model_blueprint = hod_models.return_leauthaud11_model_dictionary(**constructor_kwargs)
-        elif model_nickname == 'hearin15':
-            input_model_blueprint = hod_models.return_hearin15_model_dictionary(**constructor_kwargs)
-        elif model_nickname == 'tinker13':
-            input_model_blueprint = hod_models.return_tinker13_model_dictionary(**constructor_kwargs)
-        else:
-            msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
-            raise HalotoolsError(msg)
-
-
         forbidden_constructor_kwargs = ('gal_type_list', )
         for kwarg in forbidden_constructor_kwargs:
             if kwarg in constructor_kwargs:
@@ -195,14 +181,37 @@ class HodModelFactory(ModelFactory):
                     "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
                 raise HalotoolsError(msg % kwarg)
 
+
+        from ..composite_models import hod_models
+
+        model_nickname = model_nickname.lower()
+
+        if model_nickname == 'zheng07':
+            blueprint_retriever = hod_models.return_zheng07_model_dictionary
+        elif model_nickname == 'leauthaud11':
+            blueprint_retriever = hod_models.return_leauthaud11_model_dictionary
+        elif model_nickname == 'hearin15':
+            blueprint_retriever = hod_models.return_hearin15_model_dictionary
+        elif model_nickname == 'tinker13':
+            blueprint_retriever = hod_models.return_tinker13_model_dictionary
+        else:
+            msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
+            raise HalotoolsError(msg)
+
+        input_model_blueprint = blueprint_retriever(**constructor_kwargs)
+
         supplementary_kwargs = copy(constructor_kwargs)
         for key in input_model_blueprint:
             if key in supplementary_kwargs:
                 del supplementary_kwargs[key]
 
-        if 'gal_type_list' in input_model_blueprint:
-            supplementary_kwargs['gal_type_list'] = copy(input_model_blueprint['gal_type_list'])
-            del input_model_blueprint['gal_type_list']
+        keys_to_relocate = ['gal_type_list', 'model_feature_calling_sequence']
+        for key in keys_to_relocate:
+            if key in input_model_blueprint:
+                supplementary_kwargs[key] = copy(input_model_blueprint[key])
+                del input_model_blueprint[key]
+            else:
+                supplementary_kwargs[key] = None
 
         return input_model_blueprint, supplementary_kwargs
 
@@ -360,6 +369,7 @@ class HodModelFactory(ModelFactory):
             return gal_type, feature_name
         else:
             if gal_type_list is not None:
+                print("gal_type_guess_list is None!")
                 gal_type_guess_list = gal_type_list 
             else:
                 gal_type_guess_list = ('centrals', 'satellites')

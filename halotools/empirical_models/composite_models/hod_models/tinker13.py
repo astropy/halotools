@@ -47,13 +47,19 @@ def return_tinker13_model_dictionary(threshold = model_defaults.default_stellar_
                                  concentration_binning = (1, 35, 1), **kwargs)  
     del active_satellites_profile.new_haloprop_func_dict
     
+    gal_type_list = ['centrals', 'active_satellites', 'quiescent_satellites']
+    model_feature_calling_sequence = ('centrals_occupation', 'quiescent_satellites_occupation', 
+        'active_satellites_occupation', 'centrals_profile', 'quiescent_satellites_profile', 
+        'active_satellites_profile')
+
     return ({'centrals_occupation': centrals_occupation, 
         'centrals_profile': centrals_profile, 
         'quiescent_satellites_profile': quiescent_satellites_profile, 
         'quiescent_satellites_occupation': quiescent_satellites_occupation, 
         'active_satellites_profile': active_satellites_profile, 
         'active_satellites_occupation': active_satellites_occupation, 
-        'gal_type_list': ['centrals', 'active_satellites', 'quiescent_satellites']})
+        'gal_type_list': gal_type_list, 
+        'model_feature_calling_sequence': model_feature_calling_sequence})
 
 
 
