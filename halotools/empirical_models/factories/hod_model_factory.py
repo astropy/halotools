@@ -99,9 +99,6 @@ class HodModelFactory(ModelFactory):
 
         input_model_blueprint, supplementary_kwargs = self._parse_constructor_kwargs(
             model_nickname, **kwargs)
-        print("\n...printing supplementary kwargs...\n")
-        for key, value in supplementary_kwargs.iteritems():
-            print key, value
 
         super(HodModelFactory, self).__init__(input_model_blueprint, **supplementary_kwargs)
         self.mock_factory = HodMockFactory
@@ -162,6 +159,9 @@ class HodModelFactory(ModelFactory):
             if 'gal_type_list' not in supplementary_kwargs:
                 supplementary_kwargs['gal_type_list'] = None
 
+            if 'model_feature_calling_sequence' not in supplementary_kwargs:
+                supplementary_kwargs['model_feature_calling_sequence'] = None
+
             return input_model_blueprint, supplementary_kwargs
 
         else:
@@ -173,7 +173,7 @@ class HodModelFactory(ModelFactory):
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
         """
         """
-        forbidden_constructor_kwargs = ('gal_type_list', )
+        forbidden_constructor_kwargs = ('gal_type_list', 'model_feature_calling_sequence')
         for kwarg in forbidden_constructor_kwargs:
             if kwarg in constructor_kwargs:
                 msg = ("\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
@@ -198,26 +198,26 @@ class HodModelFactory(ModelFactory):
             msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
             raise HalotoolsError(msg)
 
-        input_model_blueprint = blueprint_retriever(**constructor_kwargs)
-
-        supplementary_kwargs = copy(constructor_kwargs)
-        for key in input_model_blueprint:
-            if key in supplementary_kwargs:
-                del supplementary_kwargs[key]
-
-        keys_to_relocate = ['gal_type_list', 'model_feature_calling_sequence']
-        for key in keys_to_relocate:
-            if key in input_model_blueprint:
-                supplementary_kwargs[key] = copy(input_model_blueprint[key])
-                del input_model_blueprint[key]
-            else:
-                supplementary_kwargs[key] = None
+        result = blueprint_retriever(**constructor_kwargs)
+        if type(result) is dict:
+            input_model_blueprint = result
+            supplementary_kwargs = {}
+            supplementary_kwargs['gal_type_list'] = None 
+            supplementary_kwargs['model_feature_calling_sequence'] = None 
+        elif type(result) is tuple:
+            input_model_blueprint = result[0]
+            supplementary_kwargs = result[1]
+        else:
+            raise HalotoolsError("Unexpected result returned from ``%s``\n"
+            "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
+             % blueprint_retriever.__name__)
 
         return input_model_blueprint, supplementary_kwargs
 
     def _retrieve_model_feature_calling_sequence(self, supplementary_kwargs):
         """
         """
+
         ########################
         ### Require that all elements of the input model_feature_calling_sequence 
         ### were also keyword arguments to the __init__ constructor 
@@ -267,14 +267,16 @@ class HodModelFactory(ModelFactory):
         ########################
 
         gal_type_list = supplementary_kwargs['gal_type_list']
+
         self._test_model_feature_calling_sequence_consistency(model_feature_calling_sequence, gal_type_list)
+
 
         return model_feature_calling_sequence
 
 
     def _test_model_feature_calling_sequence_consistency(self, model_feature_calling_sequence, gal_type_list):
         """
-        """
+        """        
         for model_feature_calling_sequence_element in model_feature_calling_sequence:
 
             try:
@@ -386,9 +388,9 @@ class HodModelFactory(ModelFactory):
             return gal_type, feature_name
         else:
             if gal_type_list is not None:
-                print("gal_type_guess_list is None!")
                 gal_type_guess_list = gal_type_list 
             else:
+                raise HalotoolsError("gal_type_guess_list is None!")
                 gal_type_guess_list = ('centrals', 'satellites')
 
             for gal_type_guess in gal_type_guess_list:                
