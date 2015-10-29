@@ -10,13 +10,14 @@ from __future__ import (
 import numpy as np
 
 from ...smhm_models import Behroozi10SmHm
+from ... import factories 
 
 from ....sim_manager import sim_defaults
 
-__all__ = ['return_behroozi10_model_dictionary']
+__all__ = ['behroozi10_model_dictionary']
 
 
-def return_behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwargs):
+def behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwargs):
     """
     Parameters 
     ----------
@@ -46,7 +47,8 @@ def return_behroozi10_model_dictionary(redshift = sim_defaults.default_redshift,
 
     Examples 
     --------
-    >>> model = Behroozi10()
+    >>> model_blueprint = behroozi10_model_dictionary()
+    >>> model_instance = factories.SubhaloModelFactory(**model_blueprint)
 
     """
 

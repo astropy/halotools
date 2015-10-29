@@ -18,9 +18,9 @@ from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from ....sim_manager import FakeSim, sim_defaults
 
 
-__all__ = ['return_leauthaud11_model_dictionary']
+__all__ = ['leauthaud11_model_dictionary']
     
-def return_leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
+def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
     central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
     """ Blueprint for an HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
@@ -77,13 +77,13 @@ def return_leauthaud11_model_dictionary(threshold = model_defaults.default_stell
     Examples 
     --------
 
-    >>> model_blueprint = return_leauthaud11_model_dictionary()
+    >>> model_blueprint = leauthaud11_model_dictionary()
     >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
     To load a model based on a different threshold and redshift:
 
-    >>> model_blueprint = return_leauthaud11_model_dictionary(threshold = 11, redshift = 1)
+    >>> model_blueprint = leauthaud11_model_dictionary(threshold = 11, redshift = 1)
     >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
     For this model, you can also use the following syntax candy, 

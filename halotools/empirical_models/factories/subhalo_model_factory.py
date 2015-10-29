@@ -33,10 +33,15 @@ class SubhaloModelFactory(ModelFactory):
     populate a simulation with a Monte Carlo realization of the model. 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, model_nickname = None, **kwargs):
         """
         Parameters
         ----------
+        model_nickname : string, optional 
+            If passed to the constructor, the appropriate prebuilt 
+            model_dictionary will be used to build the instance. 
+            See the ``Examples`` below. 
+
         *model_features : sequence of keyword arguments, optional 
             The standard way to call the `SubhaloModelFactory` is 
             with a sequence of keyword arguments providing the set of 
@@ -46,18 +51,18 @@ class SubhaloModelFactory(ModelFactory):
             component model governing the behavior of that feature. 
             See the ``Examples`` below. 
 
-        model_feature_sequence : list, optional
+        model_feature_calling_sequence : list, optional
             Determines the order in which your component features  
             will be called during mock population. 
 
             Some component models may have explicit dependence upon 
             the value of some other galaxy model property. 
-            In such a case, you must pass a ``model_feature_sequence`` list, 
+            In such a case, you must pass a ``model_feature_calling_sequence`` list, 
             ordered in the desired calling sequence. 
             A classic example is if the stellar-to-halo-mass relation 
             has explicit dependence on whether or not the galaxy is active or quiescent. 
-            In such a case, an example ``model_feature_sequence`` could be 
-            model_feature_sequence = ['sfr', 'stellar_mass', ...]. 
+            In such a case, an example ``model_feature_calling_sequence`` could be 
+            model_feature_calling_sequence = ['sfr', 'stellar_mass', ...]. 
 
             Default behavior is to assume that no model feature  
             has explicit dependence upon any other, in which case the component 
@@ -80,10 +85,21 @@ class SubhaloModelFactory(ModelFactory):
             length-N structured numpy array or Astropy table; 
             the function output must be a length-N boolean array that will be used as a mask. 
             Halos that are masked will be entirely neglected during mock population.
+
+        Examples 
+        ---------
+
+        >>> model_instance = SubhaloModelFactory('behroozi10', redshift = 2, threshold = 10.5)
+
         """
 
-        self._interpret_constructor_inputs(**kwargs)
+        input_model_blueprint, supplementary_kwargs = (
+            self._parse_constructor_kwargs(model_nickname, **kwargs)
+            )
 
+        super(SubhaloModelFactory, self).__init__(input_model_blueprint, **supplementary_kwargs)
+        self.mock_factory = SubhaloMockFactory
+        
         self.model_blueprint = collections.OrderedDict()
         for key, value in self._input_model_blueprint.iteritems():
             self.model_blueprint[key] = value
@@ -95,32 +111,46 @@ class SubhaloModelFactory(ModelFactory):
         # that will be called by the mock factory 
         self._set_primary_behaviors()
 
-        self.mock_factory = SubhaloMockFactory
+        
 
-    def _interpret_constructor_inputs(self, **kwargs):
+    def _parse_constructor_kwargs(self, model_nickname, **kwargs):
         """
         """
-        additional_kwargs = {}
+        if model_nickname is None:
+            input_model_blueprint = copy(kwargs)
 
-        possible_supplementary_kwargs = ('galaxy_selection_func', 
-            'halo_selection_func', 'model_feature_sequence')
+            ### First parse the supplementary keyword arguments, 
+            # such as 'model_feature_calling_sequence', 
+            ### from the keywords that are bound to component model instances, 
+            # such as 'stellar_mass'
 
-        for key in possible_supplementary_kwargs:
-            try:
-                additional_kwargs[key] = copy(kwargs[key])
-                del kwargs[key]
-            except KeyError:
-                pass
+            possible_supplementary_kwargs = ('galaxy_selection_func', 
+                'halo_selection_func', 'model_feature_calling_sequence')
 
-        input_model_blueprint = collections.OrderedDict()
-        try:
-            model_feature_sequence = additional_kwargs['model_feature_sequence']
-        except KeyError:
-            model_feature_sequence = list(kwargs.keys())
-        for key in model_feature_sequence:
-            input_model_blueprint[key] = copy(kwargs[key])
+            supplementary_kwargs = {}
+            for key in possible_supplementary_kwargs:
+                try:
+                    supplementary_kwargs[key] = copy(input_model_blueprint[key])
+                    del input_model_blueprint[key]
+                except KeyError:
+                    pass
 
-        super(SubhaloModelFactory, self).__init__(input_model_blueprint, **additional_kwargs)
+            if 'model_feature_calling_sequence' not in supplementary_kwargs:
+                supplementary_kwargs['model_feature_calling_sequence'] = None
+
+            return input_model_blueprint, supplementary_kwargs
+
+            # try:
+            #     model_feature_calling_sequence = supplementary_kwargs['model_feature_calling_sequence']
+            # except KeyError:
+            #     model_feature_calling_sequence = list(input_model_blueprint.keys())
+
+            # for key in model_feature_calling_sequence:
+            #     input_model_blueprint[key] = copy(input_model_blueprint[key])
+
+        else:
+            raise HalotoolsError("Not implemented yet!")
+
         
 
     def _build_composite_attrs(self, **kwargs):
