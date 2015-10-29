@@ -6,6 +6,7 @@ import numpy as np
 from astropy.table import Table
 
 from ...composite_models import *
+from ...factories import HodModelFactory, SubhaloModelFactory
 
 from ....utils.table_utils import compute_conditional_percentiles
 from ....sim_manager import HaloCatalog
@@ -52,17 +53,17 @@ class TestHearin15(TestCase):
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Hearin15(self):
 
-		model = Hearin15(concentration_binning = (1, 35, 5))
+		model = HodModelFactory('hearin15', concentration_binning = (1, 35, 5))
 		model.populate_mock(snapshot = self.snapshot)
 
 	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11(self):
 
-		model = Leauthaud11(concentration_binning = (1, 35, 5))
+		model = HodModelFactory('leauthaud11', concentration_binning = (1, 35, 5))
 		model.populate_mock(snapshot = self.snapshot)
 
-		model2 = Leauthaud11(concentration_binning = (1, 35, 5), 
+		model2 = HodModelFactory('leauthaud11', concentration_binning = (1, 35, 5), 
 			central_velocity_bias = True, satellite_velocity_bias = True)
 		model2.param_dict['velbias_centrals'] = 10
 		model2.populate_mock(snapshot = self.snapshot)
@@ -94,7 +95,7 @@ class TestHearin15(TestCase):
 		with pytest.raises(HalotoolsError) as exc:
 			model2.populate_mock(halo_finder='bdm')
 
-		model_highz = Leauthaud11(redshift = 2., 
+		model_highz = HodModelFactory('leauthaud11', redshift = 2., 
 			concentration_binning = (1, 35, 5))
 		model_highz.populate_mock(snapshot = self.snapshot2)
 		with pytest.raises(HalotoolsError) as exc:
