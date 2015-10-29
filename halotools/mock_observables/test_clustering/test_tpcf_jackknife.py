@@ -43,5 +43,8 @@ def test_tpcf_jackknife_cov_matrix():
     
     result_1,err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, period = period, num_threads=1)
     
-    print(err)
-    assert np.shape(err)==(nbins,nbins), "correlation functions do not match"
+    print(result_1,err)
+    assert np.shape(err)==(nbins,nbins), "cov matrix not correct shape"
+    
+    
+    

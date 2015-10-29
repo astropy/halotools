@@ -729,21 +729,23 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
     
     two point correlation function estimator
     
-    note: jackknife_tpcf uses its own intenral version, this is not totally ideal.
+    note: This buisness of using np.outer is to make this work for the jackknife function
+    which returns an numpy.ndarray.
     """
     if estimator == 'Natural':
         factor = ND1*ND2/(NR1*NR2)
         #DD/RR-1
+        #xi = np.outer(1.0/factor,DD/RR) - 1.0
         xi = (1.0/factor)*DD/RR - 1.0
     elif estimator == 'Davis-Peebles':
         factor = ND1*ND2/(ND1*NR2)
         #DD/DR-1
-        xi = (1.0/factor)*DD/DR - 1.0
+        xi = np.outer(1.0/factor,DD/DR) - 1.0
     elif estimator == 'Hewett':
         factor1 = ND1*ND2/(NR1*NR2)
         factor2 = ND1*NR2/(NR1*NR2)
         #(DD-DR)/RR
-        xi = (1.0/factor1)*DD/RR - (1.0/factor2)*DR/RR
+        xi = np.outer(1.0/factor1,DD/RR) - np.outer(1.0/factor2,DR/RR)
     elif estimator == 'Hamilton':
         #DDRR/DRDR-1
         xi = (DD*RR)/(DR*DR) - 1.0
@@ -751,10 +753,12 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
         factor1 = ND1*ND2/(NR1*NR2)
         factor2 = ND1*NR2/(NR1*NR2)
         #(DD - 2.0*DR + RR)/RR
-        xi = (1.0/factor1)*DD/RR - (1.0/factor2)*2.0*DR/RR + 1.0
+        xi = np.outer(1.0/factor1,DD/RR) - np.outer(1.0/factor2,2.0*DR/RR) + 1.0
     else: 
         raise ValueError("unsupported estimator!")
-    return xi
+    print(factor)
+    if np.shape(xi)[0]==1: return xi[0]
+    else: return xi
 
 
 def _TP_estimator_requirements(estimator):
