@@ -134,6 +134,65 @@ def _jnpairs_process_weights_jtags(data1, data2, weights1, weights2, jtags1, jta
     return weights1, weights2, jtags1, jtags2
 
 
+def _xy_z_npairs_process_args(data1, data2, rp_bins, pi_bins, period, 
+    verbose, num_threads, approx_rp_cell1_size, approx_pi_cell1_size, 
+    approx_rp_cell2_size, approx_pi_cell2_size):
+    """
+    """
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if not isinstance(num_threads,int):
+            msg = "Input ``num_threads`` argument must be an integer or the string 'max'"
+            raise HalotoolsError(msg)
+    
+    # Passively enforce that we are working with ndarrays
+    x1 = data1[:,0]
+    y1 = data1[:,1]
+    z1 = data1[:,2]
+    x2 = data2[:,0]
+    y2 = data2[:,1]
+    z2 = data2[:,2]
+
+    rp_bins = convert_to_ndarray(rp_bins)
+    try:
+        assert rp_bins.ndim == 1
+        assert len(rp_bins) > 1
+        if len(rp_bins) > 2:
+            assert array_is_monotonic(rp_bins, strict = True) == 1
+    except AssertionError:
+        msg = "Input ``rp_bins`` must be a monotonically increasing 1D array with at least two entries"
+        raise HalotoolsError(msg)
+
+    pi_bins = convert_to_ndarray(pi_bins)
+    try:
+        assert pi_bins.ndim == 1
+        assert len(pi_bins) > 1
+        if len(pi_bins) > 2:
+            assert array_is_monotonic(pi_bins, strict = True) == 1
+    except AssertionError:
+        msg = "Input ``pi_bins`` must be a monotonically increasing 1D array with at least two entries"
+        raise HalotoolsError(msg)
+
+    # Set the boolean value for the PBCs variable
+    if period is None:
+        PBCs = False
+        x1, y1, z1, x2, y2, z2, period = (
+            _enclose_in_box(x1, y1, z1, x2, y2, z2))
+    else:
+        PBCs = True
+        period = convert_to_ndarray(period).astype(float)
+        if len(period) == 1:
+            period = np.array([period[0]]*3)
+        try:
+            assert np.all(period < np.inf)
+            assert np.all(period > 0)
+        except AssertionError:
+            msg = "Input ``period`` must be a bounded positive number in all dimensions"
+            raise HalotoolsError(msg)
+
+    return x1, y1, z1, x2, y2, z2, rp_bins, pi_bins, period, num_threads, PBCs
+
 
 def _enclose_in_box(x1, y1, z1, x2, y2, z2):
     """
@@ -194,6 +253,66 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax):
 
     return approx_cell1_size, approx_cell2_size
 
+def _set_approximate_xy_z_cell_sizes(approx_rp_cell1_size, approx_pi_cell1_size, 
+    approx_rp_cell2_size, approx_pi_cell2_size, rp_max, pi_max):
+    """
+    """
+
+    #################################################
+    ### Set the approximate cell sizes of the trees
+    if approx_rp_cell1_size is None:
+        approx_rp_cell1_size = np.array([rp_max, rp_max]).astype(float)
+    else:
+        approx_rp_cell1_size = convert_to_ndarray(approx_rp_cell1_size)
+        try:
+            assert len(approx_rp_cell1_size) == 2
+            assert type(approx_rp_cell1_size) is np.ndarray
+            assert approx_rp_cell1_size.ndim == 1
+        except AssertionError:
+            msg = ("Input ``approx_rp_cell1_size`` must be a length-2 sequence")
+            raise HalotoolsError(msg)
+
+    if approx_rp_cell2_size is None:
+        approx_rp_cell2_size = np.array([rp_max, rp_max]).astype(float)
+    else:
+        approx_rp_cell2_size = convert_to_ndarray(approx_rp_cell2_size)
+        try:
+            assert len(approx_rp_cell2_size) == 2
+            assert type(approx_rp_cell2_size) is np.ndarray
+            assert approx_rp_cell2_size.ndim == 1
+        except AssertionError:
+            msg = ("Input ``approx_rp_cell2_size`` must be a length-2 sequence")
+            raise HalotoolsError(msg)
+
+    if approx_pi_cell1_size is None:
+        approx_pi_cell1_size = np.array([pi_max]).astype(float)
+    else:
+        msg = ("Input ``approx_pi_cell1_size`` must be a float")
+        raise HalotoolsError(msg)
+        approx_pi_cell1_size = convert_to_ndarray(approx_pi_cell1_size)
+        try:
+            assert len(approx_pi_cell1_size) == 1
+            assert type(approx_pi_cell1_size) is np.ndarray
+            assert approx_pi_cell1_size.ndim == 1
+        except AssertionError:
+            msg = ("Input ``approx_pi_cell1_size`` must be a float")
+            raise HalotoolsError(msg)
+            
+    if approx_pi_cell2_size is None:
+        approx_pi_cell2_size = np.array([pi_max]).astype(float)
+    else:
+        msg = ("Input ``approx_pi_cell2_size`` must be a float")
+        raise HalotoolsError(msg)
+        approx_pi_cell2_size = convert_to_ndarray(approx_pi_cell2_size)
+        try:
+            assert len(approx_pi_cell2_size) == 1
+            assert type(approx_pi_cell2_size) is np.ndarray
+            assert approx_pi_cell2_size.ndim == 1
+        except AssertionError:
+            msg = ("Input ``approx_pi_cell2_size`` must be a float")
+            raise HalotoolsError(msg)
+            
+    return approx_rp_cell1_size, approx_pi_cell1_size, approx_rp_cell2_size, approx_pi_cell2_size
 
 
 
