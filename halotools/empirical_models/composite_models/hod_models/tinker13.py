@@ -19,10 +19,10 @@ from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from ....sim_manager import FakeSim, sim_defaults
 
 
-__all__ = ['return_tinker13_model_dictionary']
+__all__ = ['tinker13_model_dictionary']
 
 
-def return_tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
+def tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
     central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
     """
     """

@@ -49,6 +49,11 @@ class HodModelFactory(ModelFactory):
         """
         Parameters
         ----------
+        model_nickname : string, optional 
+            If passed to the constructor, the appropriate prebuilt 
+            model_dictionary will be used to build the instance. 
+            See the ``Examples`` below. 
+
         *model_features : sequence of keyword arguments, optional 
             The standard way to call the `HodModelFactory` is 
             with a sequence of keyword arguments providing the set of 
@@ -95,6 +100,24 @@ class HodModelFactory(ModelFactory):
             length-N structured numpy array or Astropy table; 
             the function output must be a length-N boolean array that will be used as a mask. 
             Halos that are masked will be entirely neglected during mock population.
+
+        Examples 
+        ---------
+
+        >>> model_instance = HodModelFactory('leauthaud11', redshift = 2, threshold = 10.5)
+
+        All model instance have a `populate_mock` method that allows you to generate Monte Carlo 
+        realizations of galaxy populations based on the underlying analytical functions: 
+
+        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
+
+        There also convenience functions for estimating the clustering signal predicted by the model. 
+        For example, the following method repeatedly populates the Bolshoi simulation with 
+        galaxies, computes the 3-d galaxy clustering signal of each mock, computes the median 
+        clustering signal in each bin, and returns the result:
+
+        >>> r, xi = model_instance.compute_average_galaxy_clustering(num_iterations = 5, redshift = 2) # doctest: +SKIP
+
         """
 
         input_model_blueprint, supplementary_kwargs = self._parse_constructor_kwargs(
@@ -103,13 +126,12 @@ class HodModelFactory(ModelFactory):
         super(HodModelFactory, self).__init__(input_model_blueprint, **supplementary_kwargs)
         self.mock_factory = HodMockFactory
 
-        self.model_blueprint = collections.OrderedDict()
-        for key, value in self._input_model_blueprint.iteritems():
-            self.model_blueprint[key] = value
-
         self._model_feature_calling_sequence = (
             self._retrieve_model_feature_calling_sequence(supplementary_kwargs))
 
+        self.model_blueprint = collections.OrderedDict()
+        for key in self._model_feature_calling_sequence:
+            self.model_blueprint[key] = copy(self._input_model_blueprint[key])
 
         # Build up and bind several lists from the component models
         self._set_gal_types()
@@ -141,7 +163,6 @@ class HodModelFactory(ModelFactory):
             # such as 'model_feature_calling_sequence', 
             ### from the keywords that are bound to component model instances, 
             # such as 'centrals_occupation'
-            supplementary_kwargs = {}
 
             possible_supplementary_kwargs = (
                 'halo_selection_func', 
@@ -149,6 +170,7 @@ class HodModelFactory(ModelFactory):
                 'gal_type_list'
                 )
 
+            supplementary_kwargs = {}
             for key in possible_supplementary_kwargs:
                 try:
                     supplementary_kwargs[key] = copy(input_model_blueprint[key])
@@ -187,13 +209,13 @@ class HodModelFactory(ModelFactory):
         model_nickname = model_nickname.lower()
 
         if model_nickname == 'zheng07':
-            blueprint_retriever = hod_models.return_zheng07_model_dictionary
+            blueprint_retriever = hod_models.zheng07_model_dictionary
         elif model_nickname == 'leauthaud11':
-            blueprint_retriever = hod_models.return_leauthaud11_model_dictionary
+            blueprint_retriever = hod_models.leauthaud11_model_dictionary
         elif model_nickname == 'hearin15':
-            blueprint_retriever = hod_models.return_hearin15_model_dictionary
+            blueprint_retriever = hod_models.hearin15_model_dictionary
         elif model_nickname == 'tinker13':
-            blueprint_retriever = hod_models.return_tinker13_model_dictionary
+            blueprint_retriever = hod_models.tinker13_model_dictionary
         else:
             msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
             raise HalotoolsError(msg)
@@ -225,7 +247,7 @@ class HodModelFactory(ModelFactory):
             model_feature_calling_sequence = list(supplementary_kwargs['model_feature_calling_sequence'])
             for model_feature in model_feature_calling_sequence:
                 try:
-                    assert model_feature in self.model_blueprint.keys()
+                    assert model_feature in self._input_model_blueprint.keys()
                 except AssertionError:
                     msg = ("\nYour input ``model_feature_calling_sequence`` has a ``%s`` element\n"
                     "that does not appear in the keyword arguments you passed to the HodModelFactory.\n"
@@ -239,7 +261,7 @@ class HodModelFactory(ModelFactory):
             # then any possible additional occupation features, then any possible remaining features
             model_feature_calling_sequence = []
 
-            occupation_keys = [key for key in self.model_blueprint if 'occupation' in key]
+            occupation_keys = [key for key in self._input_model_blueprint if 'occupation' in key]
             centrals_occupation_keys = [key for key in occupation_keys if 'central' in key]
             remaining_occupation_keys = [key for key in occupation_keys if key not in centrals_occupation_keys]
 
@@ -247,7 +269,7 @@ class HodModelFactory(ModelFactory):
             model_feature_calling_sequence.extend(remaining_occupation_keys)
 
             remaining_model_blueprint_keys = (
-                [key for key in self.model_blueprint if key not in model_feature_calling_sequence]
+                [key for key in self._input_model_blueprint if key not in model_feature_calling_sequence]
                 )
             model_feature_calling_sequence.extend(remaining_model_blueprint_keys)
 
@@ -256,7 +278,7 @@ class HodModelFactory(ModelFactory):
         ########################
         ### Now conversely require that all remaining __init__ constructor keyword arguments 
         ### appear in the model_feature_calling_sequence
-        for constructor_kwarg in self.model_blueprint:
+        for constructor_kwarg in self._input_model_blueprint:
             try:
                 assert constructor_kwarg in model_feature_calling_sequence
             except AssertionError:
@@ -280,7 +302,7 @@ class HodModelFactory(ModelFactory):
         for model_feature_calling_sequence_element in model_feature_calling_sequence:
 
             try:
-                component_model = self.model_blueprint[model_feature_calling_sequence_element]
+                component_model = self._input_model_blueprint[model_feature_calling_sequence_element]
             except KeyError:
                 msg = ("\nYour input ``model_feature_calling_sequence`` has a ``%s`` element\n"
                     "that does not appear in the keyword arguments passed to \n"
@@ -295,13 +317,13 @@ class HodModelFactory(ModelFactory):
             try:
                 component_model_gal_type = component_model.gal_type
             except AttributeError:
-                self.model_blueprint[model_feature_calling_sequence_element].gal_type = gal_type
+                self._input_model_blueprint[model_feature_calling_sequence_element].gal_type = gal_type
                 component_model_gal_type = gal_type
 
             try:
                 component_model_feature_name = component_model.feature_name
             except AttributeError:
-                self.model_blueprint[model_feature_calling_sequence_element].feature_name = feature_name
+                self._input_model_blueprint[model_feature_calling_sequence_element].feature_name = feature_name
                 component_model_feature_name = feature_name
 
             try:

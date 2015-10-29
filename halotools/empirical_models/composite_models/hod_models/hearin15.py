@@ -17,10 +17,10 @@ from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from ....sim_manager import FakeSim, sim_defaults
 
 
-__all__ = ['return_hearin15_model_dictionary']
+__all__ = ['hearin15_model_dictionary']
 
 
-def return_hearin15_model_dictionary(central_assembias_strength = 1, 
+def hearin15_model_dictionary(central_assembias_strength = 1, 
     central_assembias_strength_abcissa = [1e12], 
     satellite_assembias_strength = 0.2, 
     satellite_assembias_strength_abcissa = [1e12], 
@@ -76,13 +76,13 @@ def return_hearin15_model_dictionary(central_assembias_strength = 1,
     Examples 
     --------
 
-    >>> model_blueprint = return_hearin15_model_dictionary()
+    >>> model_blueprint = hearin15_model_dictionary()
     >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
     To load a model based on a different threshold and redshift:
 
-    >>> model_blueprint = return_hearin15_model_dictionary(threshold = 11, redshift = 1)
+    >>> model_blueprint = hearin15_model_dictionary(threshold = 11, redshift = 1)
     >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
     For this model, you can also use the following syntax candy, 

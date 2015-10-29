@@ -17,10 +17,10 @@ from ... import factories
 from ....sim_manager import FakeSim
 
 
-__all__ = ['return_zheng07_model_dictionary']
+__all__ = ['zheng07_model_dictionary']
 
 
-def return_zheng07_model_dictionary(
+def zheng07_model_dictionary(
     threshold = model_defaults.default_luminosity_threshold, **kwargs):
     """ Blueprint for an HOD-style based on Zheng et al. (2007), arXiv:0703457. 
 
@@ -54,13 +54,13 @@ def return_zheng07_model_dictionary(
     Examples 
     --------
 
-    >>> model_blueprint = return_zheng07_model_dictionary()
+    >>> model_blueprint = zheng07_model_dictionary()
     >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
     To load a model based on a different threshold, use the ``threshold`` keyword argument:
 
-    >>> model_blueprint = return_zheng07_model_dictionary(threshold = -21)
+    >>> model_blueprint = zheng07_model_dictionary(threshold = -21)
     >>> model_instance = factories.HodModelFactory(**model_blueprint)
 
     This call will create a model whose parameter values are set according to the best-fit 

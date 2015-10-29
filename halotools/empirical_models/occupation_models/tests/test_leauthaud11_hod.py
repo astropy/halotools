@@ -5,7 +5,7 @@ from copy import copy
 
 from .. import Leauthaud11Cens, Leauthaud11Sats
 
-from ...composite_models import Leauthaud11
+from ...factories import HodModelFactory
 from ... import model_defaults
 
 

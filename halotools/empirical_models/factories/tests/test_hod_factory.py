@@ -3,7 +3,7 @@
 import numpy as np 
 from copy import copy 
 
-from ...composite_models import Zheng07, Leauthaud11
+from ...factories import HodModelFactory
 from ... import factories
 from ...occupation_models import *
 
@@ -23,7 +23,7 @@ def test_Zheng07_composite():
 
 		* Default behavior is recovered after calling the `~halotools.empirical_models.factories.HodModelFactory.restore_init_param_dict` method. 
 	"""
-	model = Zheng07(threshold = -18)
+	model = HodModelFactory('zheng07', threshold = -18)
 
 	# Verify that changes param_dict properly propagate
 	testmass1 = 5.e11
@@ -55,7 +55,7 @@ def test_Zheng07_composite():
 def test_alt_Zheng07_composites():
 
 	# First build two models that are identical except for the satellite occupations
-	default_model = Zheng07()
+	default_model = HodModelFactory('zheng07')
 	default_model_blueprint = default_model._input_model_blueprint
 	default_satocc_component = default_model_blueprint['satellites_occupation']
 	assert not hasattr(default_satocc_component, 'ancillary_model_dependencies')
@@ -94,7 +94,7 @@ def test_alt_Zheng07_composites():
 def test_Leauthaud11_composite():
 	"""
 	"""
-	model = Leauthaud11(threshold = 10.5)
+	model = HodModelFactory('leauthaud11', threshold = 10.5)
 
 	# Verify that changes param_dict properly propagate
 	testmass1 = 5.e11
