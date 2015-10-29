@@ -87,7 +87,6 @@ class Tinker13Cens(OccupationComponent):
 
         self._initialize_param_dict(**kwargs)
 
-        # self.sfr_designation_key = 'sfr_designation'
         self.sfr_designation_key = 'central_sfr_designation'
 
         self.publications = ['arXiv:1308.2974', 'arXiv:1103.2077', 'arXiv:1104.0928']
