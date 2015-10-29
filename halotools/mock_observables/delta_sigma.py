@@ -70,7 +70,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     :math:`\\bar{\\Sigma}(<r_p) = \\frac{1}{\\pi r_p^2}\\int_0^{r_p}\\Sigma(r_p^{\\prime})2\\pi r_p^{\\prime} \\mathrm{d}r_p^{\\prime}`
     
     Numerically,
-    :math: `\\xi` is calculated in `n_bins` evenly spaced linearly or log-linearly as
+    :math:`\\xi` is calculated in `n_bins` evenly spaced linearly or log-linearly as
     indicated by `log_bins`.
     
     All integrals are done use scipy.integrate.quad.
