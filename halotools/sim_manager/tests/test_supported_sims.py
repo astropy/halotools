@@ -17,6 +17,7 @@ else:
 from .. import cache_config
 from ..supported_sims import HaloCatalog 
 
+@pytest.mark.slow
 @pytest.mark.skipif('not APH_MACHINE')
 def test_load_halo_catalogs():
     """

@@ -9,21 +9,20 @@ from __future__ import (
 
 import numpy as np
 
-from ... import factories, model_defaults
+from ... import model_defaults
 from ...occupation_models import leauthaud11_components 
-
+from ... import factories
 from ...smhm_models import Behroozi10SmHm
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
 from ....sim_manager import FakeSim, sim_defaults
 
 
-__all__ = ['Leauthaud11']
-
-
-def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold, 
+__all__ = ['leauthaud11_model_dictionary']
+    
+def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
     central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
-    """ HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
+    """ Dictionary to build an HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
 
     There are two populations, centrals and satellites. 
@@ -39,8 +38,8 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model was built by the `~halotools.empirical_models.factories.HodModelFactory`, 
-    which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_blueprint`. 
+    This composite model is built by the `~halotools.empirical_models.factories.HodModelFactory`, 
+    which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_dictionary`. 
 
     Parameters 
     ----------
@@ -72,56 +71,51 @@ def Leauthaud11(threshold = model_defaults.default_stellar_mass_threshold,
 
     Returns 
     -------
-    model : object 
-        Instance of `~halotools.empirical_models.factories.HodModelFactory`
+    model_dictionary : dict 
+        Dictionary passed to `~halotools.empirical_models.factories.HodModelFactory`
 
     Examples 
     --------
-    Calling the `Leauthaud11` class with no arguments instantiates a model based on the 
-    default stellar mass threshold: 
 
-    >>> model = Leauthaud11()
+    >>> model_dictionary = leauthaud11_model_dictionary()
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
-    To load a model based on a different threshold, use the ``threshold`` keyword argument:
+    To load a model based on a different threshold and redshift:
 
-    >>> model = Leauthaud11(threshold = 11.25)
+    >>> model_dictionary = leauthaud11_model_dictionary(threshold = 11, redshift = 1)
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
-    To use our model to populate a simulation with mock galaxies, we only need to 
-    load a snapshot into memory and call the built-in ``populate_mock`` method. 
-    For illustration purposes, we'll use a small, fake simulation:
+    For this model, you can also use the following syntax candy, 
+    which accomplishes the same task as the above:
 
-    >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
+    >>> model_instance = factories.HodModelFactory('leauthaud11', threshold = 11, redshift = 1)
+
+    As with all instances of the `~halotools.empirical_models.HodModelFactory`, 
+    you can populate a mock with one line of code: 
+
+    >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 1) # doctest: +SKIP
 
     """
     ### Build model for centrals
-    cen_key = 'centrals'
-    subpopulation_blueprint_centrals = {}
     # Build the occupation model
-    occupation_feature_centrals = leauthaud11_components.Leauthaud11Cens(threshold = threshold, **kwargs)
-    occupation_feature_centrals._suppress_repeated_param_warning = True
-    subpopulation_blueprint_centrals['occupation'] = occupation_feature_centrals
+    centrals_occupation = leauthaud11_components.Leauthaud11Cens(threshold = threshold, **kwargs)
+    centrals_occupation._suppress_repeated_param_warning = True
     # Build the profile model
     
-    profile_feature_centrals = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
-
-    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
+    centrals_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
 
     ### Build model for satellites
-    sat_key = 'satellites'
-    subpopulation_blueprint_satellites = {}
     # Build the occupation model
-    occupation_feature_satellites = leauthaud11_components.Leauthaud11Sats(threshold = threshold, **kwargs)
-    subpopulation_blueprint_satellites['occupation'] = occupation_feature_satellites
+    satellites_occupation = leauthaud11_components.Leauthaud11Sats(threshold = threshold, **kwargs)
     # Build the profile model
-    profile_feature_satellites = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
-    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
+    satellites_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
 
-    model_blueprint = {
-        'centrals' : subpopulation_blueprint_centrals,
-        'satellites' : subpopulation_blueprint_satellites
-        }
 
-    composite_model = factories.HodModelFactory(model_blueprint)
-    return composite_model
+    return ({'centrals_occupation': centrals_occupation, 
+        'centrals_profile': centrals_profile, 
+        'satellites_occupation': satellites_occupation, 
+        'satellites_profile': satellites_profile})
+
+    
+

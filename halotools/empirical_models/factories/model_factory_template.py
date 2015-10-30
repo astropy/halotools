@@ -31,12 +31,12 @@ class ModelFactory(object):
     any composite model of the galaxy-halo connection. 
     """
 
-    def __init__(self, input_model_blueprint, **kwargs):
+    def __init__(self, input_model_dictionary, **kwargs):
         """
         Parameters
         ----------
-        input_model_blueprint : dict 
-            Blueprint providing instructions for how to build the composite 
+        input_model_dictionary : dict 
+            dictionary providing instructions for how to build the composite 
             model from a set of components. 
 
         galaxy_selection_func : function object, optional  
@@ -58,7 +58,7 @@ class ModelFactory(object):
         """
 
         # Bind the model-building instructions to the composite model
-        self._input_model_blueprint = input_model_blueprint
+        self._input_model_dictionary = input_model_dictionary
 
         try:
             self.galaxy_selection_func = kwargs['galaxy_selection_func']
@@ -543,8 +543,8 @@ class HodModelArchitect(object):
             msg = ("\nThe customize_model method of HodModelArchitect "
                 "requires a baseline_model keyword argument\n")
             raise HalotoolsError(msg)
-        baseline_blueprint = baseline_model.model_blueprint
-        new_blueprint = copy(baseline_blueprint)
+        baseline_dictionary = baseline_model.model_dictionary
+        new_dictionary = copy(baseline_dictionary)
 
         for new_component in args:
             try:
@@ -557,7 +557,7 @@ class HodModelArchitect(object):
 
             # Enforce self-consistency in the thresholds of new and old components
             if galprop_name == 'occupation':
-                old_component = baseline_blueprint[gal_type][galprop_name]
+                old_component = baseline_dictionary[gal_type][galprop_name]
                 if new_component.threshold != old_component.threshold:
                     msg = ("\n\nYou tried to swap in a %s occupation component \nthat has a different " 
                         "threshold than the original %s occupation component.\n"
@@ -567,9 +567,9 @@ class HodModelArchitect(object):
                         "for all gal_types, the resulting composite model will raise an exception and not build.\n")
                     warn(msg % (gal_type, gal_type)) 
 
-            new_blueprint[gal_type][galprop_name] = new_component
+            new_dictionary[gal_type][galprop_name] = new_component
 
-        new_model = HodModelFactory(new_blueprint)
+        new_model = HodModelFactory(new_dictionary)
         return new_model
 
 

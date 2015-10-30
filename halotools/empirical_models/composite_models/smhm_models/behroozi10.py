@@ -9,21 +9,25 @@ from __future__ import (
 
 import numpy as np
 
-from ... import factories
 from ...smhm_models import Behroozi10SmHm
+from ... import factories 
 
 from ....sim_manager import sim_defaults
 
-__all__ = ['Behroozi10']
+__all__ = ['behroozi10_model_dictionary']
 
-def Behroozi10(redshift = sim_defaults.default_redshift, **kwargs):
-	"""
+
+def behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwargs):
+    """
+    Dictionary to build a subhalo-based model using the stellar-to-halo-mass relation 
+    published in Behroozi et al. (2010), arXiv:1205.5807. 
+
     Parameters 
     ----------
     redshift : float, optional 
-    	Redshift of the stellar-to-halo-mass relation of the model. Must be consistent 
-    	with the redshift of the halo catalog you populate. Default value is set by 
-    	sim_defaults.default_redshift. 
+        Redshift of the stellar-to-halo-mass relation of the model. Must be consistent 
+        with the redshift of the halo catalog you populate. Default value is set by 
+        sim_defaults.default_redshift. 
 
     prim_haloprop_key : string, optional  
         String giving the column name of the primary halo property governing stellar mass. 
@@ -43,12 +47,16 @@ def Behroozi10(redshift = sim_defaults.default_redshift, **kwargs):
         Array of values defining the level of scatter at the input abcissa.
         Default behavior will result in constant scatter at a level set in the 
         `~halotools.empirical_models.model_defaults` module. 
-	"""
 
-	stellar_mass_model = Behroozi10SmHm(redshift = redshift, **kwargs)
-	model_blueprint = {'stellar_mass': stellar_mass_model}
-	composite_model = factories.SubhaloModelFactory(model_blueprint)
+    Examples 
+    --------
+    >>> model_dictionary = behroozi10_model_dictionary()
+    >>> model_instance = factories.SubhaloModelFactory(**model_dictionary)
 
-	return composite_model
+    """
+
+    stellar_mass_model = Behroozi10SmHm(redshift = redshift, **kwargs)
+    return {'stellar_mass': stellar_mass_model}
+
 
 

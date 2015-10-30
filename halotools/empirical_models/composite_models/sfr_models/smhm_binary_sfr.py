@@ -22,27 +22,29 @@ from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from ....sim_manager import FakeMock, FakeSim, sim_defaults
 
 
-__all__ = ['SmHmBinarySFR']
+__all__ = ['smhm_binary_sfr_model_dictionary']
 
 
-def SmHmBinarySFR(
+def smhm_binary_sfr_model_dictionary(
     prim_haloprop_key = model_defaults.default_smhm_haloprop, 
-    smhm_model=Behroozi10SmHm, 
+    smhm_model = Behroozi10SmHm, 
     scatter_level = 0.2, 
     redshift = sim_defaults.default_redshift, 
-    sfr_abcissa = [12, 15], sfr_ordinates = [0.25, 0.75], logparam=True, 
+    sfr_abcissa = [12, 15], sfr_ordinates = [0.25, 0.75], logparam = True, 
     **kwargs):
-    """ Very simple model assigning stellar mass and 
-    quiescent/active designation to a subhalo catalog. 
+    """ Dictionary to build a subhalo-based model for both stellar mass 
+    and star-formation rate. 
 
-    Stellar masses are assigned according to a parameterized relation, 
-    Behroozi et al. (2010) by default. SFR designation is determined by 
+    Stellar masses are based on `~halotools.empirical_models.Behroozi10SmHm` by default. 
+    SFR-designation is binary and is based on an input quenched fraction as a function 
+    of some halo property such as virial mass. In particular, SFR designation is determined by 
     interpolating between a set of input control points, with default 
     behavior being a 25% quiescent fraction for galaxies 
     residing in Milky Way halos, and 75% for cluster galaxies. 
 
-    Since `SmHmBinarySFR` does not discriminate between centrals and satellites 
-    in the SFR assignment, this model is physically unrealistic and is 
+    Since `smhm_binary_sfr_model_dictionary` does not discriminate 
+    between centrals and satellites in the SFR assignment, 
+    this model is physically unrealistic and is 
     included here primarily for demonstration purposes. 
 
     Parameters 
@@ -88,35 +90,28 @@ def SmHmBinarySFR(
 
     Examples 
     --------
-    >>> model = SmHmBinarySFR()
-    >>> model = SmHmBinarySFR(threshold = 10**10.5)
+    >>> model_dictionary = smhm_binary_sfr_model_dictionary()
+    >>> model_instance = factories.SubhaloModelFactory(**model_dictionary)
 
-    To use our model to populate a simulation with mock galaxies, we only need to 
-    load a snapshot into memory and call the built-in ``populate_mock`` method. 
-    For illustration purposes, we'll use a small, fake simulation:
-
-    >>> fake_snapshot = FakeSim()
-    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
 
     """
 
     sfr_model = BinaryGalpropInterpolModel(
-        galprop_name='quiescent', prim_haloprop_key=prim_haloprop_key, 
-        abcissa=sfr_abcissa, ordinates=sfr_ordinates, logparam=logparam, **kwargs)
+        galprop_name = 'quiescent', prim_haloprop_key=prim_haloprop_key, 
+        abcissa = sfr_abcissa, ordinates = sfr_ordinates, logparam = logparam, **kwargs)
 
     sm_model = smhm_model(
-        prim_haloprop_key=prim_haloprop_key, redshift=redshift, 
+        prim_haloprop_key = prim_haloprop_key, redshift = redshift, 
         scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
 
-    blueprint = {sm_model.galprop_name: sm_model, sfr_model.galprop_name: sfr_model}
+    model_dictionary = {'stellar_mass': sm_model, 'quiescent': sfr_model}
 
-    if 'threshold' in kwargs.keys():
-        galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
-        model = factories.SubhaloModelFactory(blueprint, 
-            galaxy_selection_func=galaxy_selection_func)
-    else:
-        model = factories.SubhaloModelFactory(blueprint)
+    # supplementary_dictionary = {}
 
-    return model
+    # if 'threshold' in kwargs.keys():
+    #     galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
+    #     supplementary_dictionary['galaxy_selection_func'] = galaxy_selection_func
+
+    return model_dictionary
 
 
