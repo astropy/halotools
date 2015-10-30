@@ -14,6 +14,7 @@ cimport numpy as np
 from libc.math cimport fabs, fmin
 
 from .weighting_functions cimport *
+from .custom_weighting_func cimport *
 
 
 __author__ = ['Duncan Campbell']
@@ -169,7 +170,7 @@ cdef inline radial_wbinning(np.float64_t* counts, np.float64_t* bins,\
         if k<0: break
 
 
-return_weighting_function(weight_func_id):
+def return_weighting_function(weight_func_id):
     """
     returns a pointer to the user-specified weighting function
     """
