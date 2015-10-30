@@ -290,12 +290,14 @@ class HodModelFactory(ModelFactory):
 
         gal_type_list = supplementary_kwargs['gal_type_list']
 
-        self._test_model_feature_calling_sequence_consistency(model_feature_calling_sequence, gal_type_list)
+        self._test_model_feature_calling_sequence_consistency(
+            model_feature_calling_sequence, gal_type_list)
 
         return model_feature_calling_sequence
 
 
-    def _test_model_feature_calling_sequence_consistency(self, model_feature_calling_sequence, gal_type_list):
+    def _test_model_feature_calling_sequence_consistency(self, 
+        model_feature_calling_sequence, gal_type_list):
         """
         """        
         for model_feature_calling_sequence_element in model_feature_calling_sequence:
@@ -425,7 +427,6 @@ class HodModelFactory(ModelFactory):
                 "then you must provide a ``gal_type_list`` keyword argument to \n"
                 "the constructor of the HodModelFactory.\n")
             raise HalotoolsError(msg % model_dictionary_key)
-
 
 
     def _set_gal_types(self):
