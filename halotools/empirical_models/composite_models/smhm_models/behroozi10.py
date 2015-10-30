@@ -19,6 +19,9 @@ __all__ = ['behroozi10_model_dictionary']
 
 def behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwargs):
     """
+    Dictionary to build a subhalo-based model using the stellar-to-halo-mass relation 
+    published in Behroozi et al. (2010), arXiv:1205.5807. 
+
     Parameters 
     ----------
     redshift : float, optional 

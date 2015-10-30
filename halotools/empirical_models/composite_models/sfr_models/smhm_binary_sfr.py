@@ -32,17 +32,19 @@ def smhm_binary_sfr_model_dictionary(
     redshift = sim_defaults.default_redshift, 
     sfr_abcissa = [12, 15], sfr_ordinates = [0.25, 0.75], logparam = True, 
     **kwargs):
-    """ Very simple model assigning stellar mass and 
-    quiescent/active designation to a subhalo catalog. 
+    """ Dictionary to build a subhalo-based model for both stellar mass 
+    and star-formation rate. 
 
-    Stellar masses are assigned according to a parameterized relation, 
-    Behroozi et al. (2010) by default. SFR designation is determined by 
+    Stellar masses are based on `~halotools.empirical_models.Behroozi10SmHm` by default. 
+    SFR-designation is binary and is based on an input quenched fraction as a function 
+    of some halo property such as virial mass. In particular, SFR designation is determined by 
     interpolating between a set of input control points, with default 
     behavior being a 25% quiescent fraction for galaxies 
     residing in Milky Way halos, and 75% for cluster galaxies. 
 
-    Since `SmHmBinarySFR` does not discriminate between centrals and satellites 
-    in the SFR assignment, this model is physically unrealistic and is 
+    Since `smhm_binary_sfr_model_dictionary` does not discriminate 
+    between centrals and satellites in the SFR assignment, 
+    this model is physically unrealistic and is 
     included here primarily for demonstration purposes. 
 
     Parameters 

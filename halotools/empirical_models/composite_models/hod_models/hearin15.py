@@ -26,7 +26,8 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
     satellite_assembias_strength_abcissa = [1e12], 
     **kwargs):
     """ 
-    HOD-style model in which central and satellite occupations statistics are assembly-biased. 
+    Dictionary to build an HOD-style model in which 
+    central and satellite occupations statistics are assembly-biased. 
 
     Parameters 
     ----------
