@@ -2,5 +2,5 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .rect_cuboid_pairs import *
-from .objective_rect_cuboid_pairs import *
+from .double_tree_pairs import *
+from .marked_double_tree_pairs import *

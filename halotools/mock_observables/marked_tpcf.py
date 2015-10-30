@@ -11,7 +11,7 @@ import sys
 import numpy as np
 from math import pi, gamma
 from .clustering_helpers import *
-from .pair_counters.objective_double_tree_pairs import obj_wnpairs
+from .pair_counters.marked_double_tree_pairs import marked_npairs as obj_wnpairs
 from .pair_counters.double_tree_pairs import npairs
 ##########################################################################################
 

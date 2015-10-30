@@ -26,7 +26,7 @@ from .cpairs import *
 from ...custom_exceptions import *
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
-__all__ = ['double_tree_npairs']
+__all__ = ['npairs', 'jnpairs', 'xy_z_npairs', '']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 ##########################################################################

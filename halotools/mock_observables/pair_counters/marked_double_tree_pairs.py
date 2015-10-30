@@ -20,9 +20,9 @@ from functools import partial
 
 from .double_tree import FlatRectanguloidDoubleTree
 from .double_tree_helpers import *
-from .objective_double_tree_helpers import *
+from .marked_double_tree_helpers import *
 
-from .objective_cpairs import *
+from .marked_cpairs import *
 
 from ...custom_exceptions import *
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
@@ -186,7 +186,7 @@ def _wnpairs_engine(double_tree, weights1, weights2,
         w_icell2 = weights2[s2, :]
             
         #use cython functions to do pair counting
-        counts += obj_wnpairs_no_pbc(x_icell1, y_icell1, z_icell1,
+        counts += marked_npairs_no_pbc(x_icell1, y_icell1, z_icell1,
                                      x_icell2, y_icell2, z_icell2,
                                      w_icell1, w_icell2, 
                                      rbins_squared, wfunc)
