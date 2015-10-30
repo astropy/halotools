@@ -9,17 +9,20 @@ from __future__ import (
 
 import numpy as np
 
-from ... import factories, model_defaults
+from ... import model_defaults
 from ...occupation_models import zheng07_components
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
+from ... import factories
 
 from ....sim_manager import FakeSim
 
 
-__all__ = ['Zheng07']
+__all__ = ['zheng07_model_dictionary']
 
-def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
-    """ Simple HOD-style based on Zheng et al. (2007), arXiv:0703457. 
+
+def zheng07_model_dictionary(
+    threshold = model_defaults.default_luminosity_threshold, **kwargs):
+    """ Dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457. 
 
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
@@ -34,7 +37,7 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model was built by the `~halotools.empirical_models.factories.HodModelFactory`.
+    This composite model is built by the `~halotools.empirical_models.factories.HodModelFactory`.
 
     Parameters 
     ----------
@@ -44,64 +47,68 @@ def Zheng07(threshold = model_defaults.default_luminosity_threshold, **kwargs):
 
     Returns 
     -------
-    model : object 
-        Instance of `~halotools.empirical_models.factories.HodModelFactory`
+    model_dictionary : dict 
+        Dictionary of keywords to be passed to 
+        `~halotools.empirical_models.factories.HodModelFactory`
 
     Examples 
     --------
-    Calling the `Zheng07` class with no arguments instantiates a model based on the 
-    default luminosity threshold: 
 
-    >>> model = Zheng07()
+    >>> model_dictionary = zheng07_model_dictionary()
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
     The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
     To load a model based on a different threshold, use the ``threshold`` keyword argument:
 
-    >>> model = Zheng07(threshold = -20.5)
+    >>> model_dictionary = zheng07_model_dictionary(threshold = -21)
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
     This call will create a model whose parameter values are set according to the best-fit 
     values given in Table 1 of arXiv:0703457. 
 
-    To use our model to populate a simulation with mock galaxies, we only need to 
-    load a snapshot into memory and call the built-in ``populate_mock`` method. 
-    For illustration purposes, we'll use a small, fake simulation:
+    For this model, you can also use the following syntax candy, 
+    which accomplishes the same task as the above:
 
-    >>> fake_snapshot = FakeSim() # doctest: +SKIP
-    >>> model.populate_mock(snapshot = fake_snapshot) # doctest: +SKIP
+    >>> model_instance = factories.HodModelFactory('zheng07', threshold = -21)
+
+    As with all instances of the `~halotools.empirical_models.HodModelFactory`, 
+    you can populate a mock with one line of code: 
+
+    >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 0) # doctest: +SKIP
 
     """
 
     ####################################
-    ### Build subpopulation blueprint for centrals
-    subpopulation_blueprint_centrals = {}
+    ### Build subpopulation dictionary for centrals
+    subpopulation_dictionary_centrals = {}
 
     # Build the `occupation` feature
-    occupation_feature_centrals = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
-    subpopulation_blueprint_centrals['occupation'] = occupation_feature_centrals
+    centrals_occupation = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
 
     # Build the `profile` feature
-    profile_feature_centrals = TrivialPhaseSpace(**kwargs)
-    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
+    centrals_profile = TrivialPhaseSpace(**kwargs)
 
     ####################################
-    ### Build subpopulation blueprint for satellites
-    subpopulation_blueprint_satellites = {}
+    ### Build subpopulation dictionary for satellites
+    subpopulation_dictionary_satellites = {}
 
     # Build the occupation model
-    occupation_feature_satellites = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
-    occupation_feature_satellites._suppress_repeated_param_warning = True
-    subpopulation_blueprint_satellites['occupation'] = occupation_feature_satellites
+    satellites_occupation = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
+    satellites_occupation._suppress_repeated_param_warning = True
 
     # Build the profile model
-    profile_feature_satellites = NFWPhaseSpace(**kwargs)    
-    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
+    satellites_profile = NFWPhaseSpace(**kwargs)    
 
-    ####################################
-    ### Compose subpopulation blueprints together into a composite blueprint
-    composite_model_blueprint = {
-        'centrals' : subpopulation_blueprint_centrals,
-        'satellites' : subpopulation_blueprint_satellites 
-        }
 
-    composite_model = factories.HodModelFactory(composite_model_blueprint)
-    return composite_model
+    return ({'centrals_occupation': centrals_occupation, 
+        'centrals_profile': centrals_profile, 
+        'satellites_occupation': satellites_occupation, 
+        'satellites_profile': satellites_profile})
+
+
+
+
+    
+
+
+    

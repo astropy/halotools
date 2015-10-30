@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
+import pytest 
 #load comparison simple pair counters
 from ..pairs import npairs as simp_npairs
 from ..pairs import wnpairs as simp_wnpairs
@@ -11,8 +12,10 @@ from ..rect_cuboid_pairs import npairs, wnpairs, jnpairs
 from ..rect_cuboid_pairs import xy_z_npairs, xy_z_wnpairs, xy_z_jnpairs
 from ..rect_cuboid_pairs import s_mu_npairs
 
+
 np.random.seed(1)
 
+@pytest.mark.slow
 def test_npairs_periodic():
     
     Npts = 1e3
@@ -35,6 +38,7 @@ def test_npairs_periodic():
     assert np.all(test_result==result), "pair counts are incorrect"
 
 
+@pytest.mark.slow
 def test_npairs_nonperiodic():
     
     Npts = 1e3
@@ -54,6 +58,7 @@ def test_npairs_nonperiodic():
     assert np.all(test_result==result), "pair counts are incorrect"
 
 
+@pytest.mark.slow
 def test_xy_z_npairs_periodic():
     
     Lbox = [1.0,1.0,1.0]
@@ -98,6 +103,7 @@ def test_xy_z_npairs_periodic():
     assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
 
 
+@pytest.mark.slow
 def test_xy_z_npairs_nonperiodic():
     
     Lbox = [1.0,1.0,1.0]
@@ -142,6 +148,7 @@ def test_xy_z_npairs_nonperiodic():
     assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
 
 
+@pytest.mark.slow
 def test_s_mu_npairs_periodic():
     
     Lbox = [1.0,1.0,1.0]
@@ -172,6 +179,7 @@ def test_s_mu_npairs_periodic():
     assert np.all(xi==comp_result), "pair counts don't match simple pair counts"
 
 
+@pytest.mark.slow
 def test_s_mu_npairs_nonperiodic():
     
     Lbox = [1.0,1.0,1.0]
@@ -204,6 +212,7 @@ def test_s_mu_npairs_nonperiodic():
     
 
 
+@pytest.mark.slow
 def test_wnpairs_periodic():
     
     Npts = 1e3
@@ -226,6 +235,7 @@ def test_wnpairs_periodic():
     assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
 
 
+@pytest.mark.slow
 def test_wnpairs_nonperiodic():
     
     Npts = 1e3
@@ -247,6 +257,7 @@ def test_wnpairs_nonperiodic():
     assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
 
 
+@pytest.mark.slow
 def test_xy_z_wnpairs_periodic():
     
     Lbox = [1.0,1.0,1.0]
@@ -296,6 +307,7 @@ def test_xy_z_wnpairs_periodic():
     assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
 
 
+@pytest.mark.slow
 def test_xy_z_wnpairs_nonperiodic():
     
     Lbox = [1.0,1.0,1.0]
@@ -345,6 +357,7 @@ def test_xy_z_wnpairs_nonperiodic():
     assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
 
 
+@pytest.mark.slow
 def test_jnpairs_periodic():
     
     Npts = 1e3
@@ -370,6 +383,7 @@ def test_jnpairs_periodic():
     assert np.shape(result)==(11,6), 'result is the wrong shape'
 
 
+@pytest.mark.slow
 def test_jnpairs_nonperiodic():
     
     Npts = 1e3
@@ -395,6 +409,7 @@ def test_jnpairs_nonperiodic():
     assert np.shape(result)==(11,6), 'result is the wrong shape'
 
 
+@pytest.mark.slow
 def test_xy_z_jnpairs_periodic():
     
     Npts=100
@@ -422,6 +437,7 @@ def test_xy_z_jnpairs_periodic():
     assert np.all(result[0]==result_compare), "shape xy_z jackknife pair counts of result is incorrect"
 
 
+@pytest.mark.slow
 def test_xy_z_jnpairs_nonperiodic():
     
     Npts=100

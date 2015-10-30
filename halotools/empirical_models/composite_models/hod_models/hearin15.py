@@ -11,22 +11,23 @@ import numpy as np
 
 from ... import factories, model_defaults
 from ...occupation_models import leauthaud11_components 
-
+from ... import factories
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
 from ....sim_manager import FakeSim, sim_defaults
 
 
-__all__ = ['Hearin15']
+__all__ = ['hearin15_model_dictionary']
 
 
-def Hearin15(central_assembias_strength = 1, 
+def hearin15_model_dictionary(central_assembias_strength = 1, 
     central_assembias_strength_abcissa = [1e12], 
     satellite_assembias_strength = 0.2, 
     satellite_assembias_strength_abcissa = [1e12], 
     **kwargs):
     """ 
-    HOD-style model in which central and satellite occupations statistics are assembly-biased. 
+    Dictionary to build an HOD-style model in which 
+    central and satellite occupations statistics are assembly-biased. 
 
     Parameters 
     ----------
@@ -75,53 +76,69 @@ def Hearin15(central_assembias_strength = 1,
 
     Examples 
     --------
-    >>> model = Hearin15()
 
-    To use our model to populate a simulation with mock galaxies, we only need to 
-    load a snapshot into memory and call the built-in ``populate_mock`` method:
+    >>> model_dictionary = hearin15_model_dictionary()
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
 
-    >>> model.populate_mock() # doctest: +SKIP
+    The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
+    To load a model based on a different threshold and redshift:
+
+    >>> model_dictionary = hearin15_model_dictionary(threshold = 11, redshift = 1)
+    >>> model_instance = factories.HodModelFactory(**model_dictionary)
+
+    For this model, you can also use the following syntax candy, 
+    which accomplishes the same task as the above:
+
+    >>> model_instance = factories.HodModelFactory('hearin15', threshold = 11, redshift = 1)
+
+    As with all instances of the `~halotools.empirical_models.HodModelFactory`, 
+    you can populate a mock with one line of code: 
+
+    >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 1) # doctest: +SKIP
 
     """     
     ##############################
     ### Build the occupation model
     if central_assembias_strength == 0:
-        cen_ab_component = leauthaud11_components.Leauthaud11Cens(**kwargs)
+        centrals_occupation = leauthaud11_components.Leauthaud11Cens(**kwargs)
     else:
-        cen_ab_component = leauthaud11_components.AssembiasLeauthaud11Cens(
+        centrals_occupation = leauthaud11_components.AssembiasLeauthaud11Cens(
             assembias_strength = central_assembias_strength, 
             assembias_strength_abcissa = central_assembias_strength_abcissa, 
             **kwargs)
-    subpopulation_blueprint_centrals = {}
-    subpopulation_blueprint_centrals['occupation'] = cen_ab_component
 
     # Build the profile model
-    profile_feature_centrals = TrivialPhaseSpace(**kwargs)
-    subpopulation_blueprint_centrals['profile'] = profile_feature_centrals
+    centrals_profile = TrivialPhaseSpace(**kwargs)
 
     ##############################
     ### Build the occupation model
     if satellite_assembias_strength == 0:
-        sat_ab_component = leauthaud11_components.Leauthaud11Sats(**kwargs)
+        satellites_occupation = leauthaud11_components.Leauthaud11Sats(**kwargs)
     else:
-        sat_ab_component = leauthaud11_components.AssembiasLeauthaud11Sats(
+        satellites_occupation = leauthaud11_components.AssembiasLeauthaud11Sats(
             assembias_strength = satellite_assembias_strength, 
             assembias_strength_abcissa = satellite_assembias_strength_abcissa, 
             **kwargs)
         # There is no need for a redundant new_haloprop_func_dict 
         # if this is already possessed by the central model
-        if hasattr(cen_ab_component, 'new_haloprop_func_dict'):
-            del sat_ab_component.new_haloprop_func_dict
-
-    subpopulation_blueprint_satellites = {}
-    subpopulation_blueprint_satellites['occupation'] = sat_ab_component
+        if hasattr(centrals_occupation, 'new_haloprop_func_dict'):
+            del satellites_occupation.new_haloprop_func_dict
 
     # Build the profile model
-    profile_feature_satellites = NFWPhaseSpace(**kwargs) 
-    profile_feature_satellites._suppress_repeated_param_warning = True   
-    subpopulation_blueprint_satellites['profile'] = profile_feature_satellites
+    satellites_profile = NFWPhaseSpace(**kwargs) 
+    satellites_profile._suppress_repeated_param_warning = True   
 
-    model_blueprint = {'centrals': subpopulation_blueprint_centrals, 'satellites': subpopulation_blueprint_satellites}
-    composite_model = factories.HodModelFactory(model_blueprint)
-    return composite_model
+    composite_model = factories.HodModelFactory(centrals_occupation = centrals_occupation, 
+        centrals_profile = centrals_profile, satellites_occupation = satellites_occupation, 
+        satellites_profile = satellites_profile)
+
+    return ({'centrals_occupation': centrals_occupation, 
+        'centrals_profile': centrals_profile, 
+        'satellites_occupation': satellites_occupation, 
+        'satellites_profile': satellites_profile})
+
+
+
+
+
 
