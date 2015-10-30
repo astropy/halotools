@@ -218,7 +218,7 @@ class HodModelFactory(ModelFactory):
             dictionary_retriever = hod_models.tinker13_model_dictionary
         else:
             msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
-            raise HalotoolsError(msg)
+            raise HalotoolsError(msg % model_nickname)
 
         result = dictionary_retriever(**constructor_kwargs)
         if type(result) is dict:
