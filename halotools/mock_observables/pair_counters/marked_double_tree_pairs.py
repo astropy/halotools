@@ -27,14 +27,14 @@ from .objective_cpairs import *
 from ...custom_exceptions import *
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
-__all__ = ['double_tree_npairs']
+__all__ = ['marked_npairs']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 
-def obj_wnpairs(data1, data2, rbins, period=None,\
-                weights1=None, weights2=None, aux1=None, aux2=None,\
-                wfunc=0, verbose=False, num_threads=1,\
-                approx_cell1_size = None, approx_cell2_size = None):
+def marked_npairs(data1, data2, rbins, period=None, 
+    weights1 = None, weights2 = None, 
+    wfunc = 0, verbose = False, num_threads = 1,
+    approx_cell1_size = None, approx_cell2_size = None):
     """
     weighted real-space pair counter.
     
@@ -61,17 +61,13 @@ def obj_wnpairs(data1, data2, rbins, period=None,\
         If none, PBCs are set to infinity.  If True, period is set to be Lbox
     
     weights1: array_like, optional
-        length N1 array containing weights used for weighted pair counts
+        Either a 1-d array of length N1, or a 2-d array of length N1 x N_weights, 
+        containing weights used for weighted pair counts
         
     weights2: array_like, optional
-        length N2 array containing weights used for weighted pair counts.
-    
-    aux1: array_like, optional
-        length N1 array containing auxiliary weights used for weighted pair counts
+        Either a 1-d array of length N2, or a 2-d array of length N2 x N_weights, 
+        containing weights used for weighted pair counts
         
-    aux2: array_like, optional
-        length N2 array containing auxiliary weights used for weighted pair counts.
-    
     wfunc: int, optional
         weighting function ID.
     
@@ -111,9 +107,9 @@ def obj_wnpairs(data1, data2, rbins, period=None,\
     rmax = np.max(rbins)
 
     # Process the input weights and with the helper function
-    weights1, weights2, aux1, aux2 = (
+    weights1, weights2 = (
         _wnpairs_process_weights(data1, data2, 
-            weights1, weights2, aux1, aux2, wfunc))
+            weights1, weights2, wfunc))
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
@@ -129,10 +125,8 @@ def obj_wnpairs(data1, data2, rbins, period=None,\
         rmax, rmax, rmax, xperiod, yperiod, zperiod, PBCs=PBCs)
 
     #sort the weights arrays
-    weights1 = weights1[double_tree.tree1.idx_sorted]
-    weights2 = weights2[double_tree.tree2.idx_sorted]
-    aux1 = aux1[double_tree.tree1.idx_sorted]
-    aux2 = aux2[double_tree.tree2.idx_sorted]
+    weights1 = weights1[double_tree.tree1.idx_sorted, :]
+    weights2 = weights2[double_tree.tree2.idx_sorted, :]
     
     #square radial bins to make distance calculation cheaper
     rbins_squared = rbins**2.0
@@ -142,7 +136,7 @@ def obj_wnpairs(data1, data2, rbins, period=None,\
 
     #create a function to call with only one argument
     engine = partial(_wnpairs_engine, double_tree, 
-        weights1, weights2, aux1, aux2, rbins_squared, period, PBCs, wfunc)
+        weights1, weights2, rbins_squared, period, PBCs, wfunc)
     
     #do the pair counting
     if num_threads > 1:
@@ -155,7 +149,7 @@ def obj_wnpairs(data1, data2, rbins, period=None,\
     return counts
 
 
-def _wnpairs_engine(double_tree, weights1, weights2, aux1, aux2, 
+def _wnpairs_engine(double_tree, weights1, weights2, 
                     rbins_squared, period, PBCs, wfunc, icell1):
     """
     engine that calls cython function to count pairs
@@ -171,10 +165,7 @@ def _wnpairs_engine(double_tree, weights1, weights2, aux1, aux2,
         double_tree.tree1.z[s1])
 
     #extract the weights in the cell
-    w_icell1 = weights1[s1]
-        
-    #extract the jackknife tags in the cell
-    a_icell1 = aux1[s1]
+    w_icell1 = weights1[s1, :]
 
     xsearch_length = np.sqrt(rbins_squared[-1])
     ysearch_length = np.sqrt(rbins_squared[-1])
@@ -192,15 +183,12 @@ def _wnpairs_engine(double_tree, weights1, weights2, aux1, aux2,
         z_icell2 = double_tree.tree2.z[s2] + zshift
 
         #extract the weights in the cell
-        w_icell2 = weights2[s2]
+        w_icell2 = weights2[s2, :]
             
-        #extract the jackknife tags in the cell
-        a_icell2 = aux2[s2]
-
         #use cython functions to do pair counting
         counts += obj_wnpairs_no_pbc(x_icell1, y_icell1, z_icell1,
                                      x_icell2, y_icell2, z_icell2,
-                                     w_icell1, w_icell2, a_icell1, a_icell2, 
+                                     w_icell1, w_icell2, 
                                      rbins_squared, wfunc)
             
     return counts
