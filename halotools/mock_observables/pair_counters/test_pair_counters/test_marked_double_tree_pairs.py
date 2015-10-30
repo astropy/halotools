@@ -3,10 +3,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
-#load comparison simple pair counters
 from ..pairs import wnpairs as simp_wnpairs
-#load rect_cuboid_pairs pair counters
-from ..objective_double_tree_pairs import obj_wnpairs as wnpairs
+from ..marked_double_tree_pairs import marked_npairs as wnpairs
 
 
 def test_wnpairs_periodic():
