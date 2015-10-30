@@ -15,6 +15,8 @@ from libc.math cimport fabs, fmin
 
 from .weighting_functions cimport *
 from .custom_weighting_func cimport *
+
+#definition of weighting function type
 ctypedef double (*f_type)(np.float64_t* w1, np.float64_t* w2)
 
 __author__ = ['Duncan Campbell']
@@ -53,9 +55,6 @@ def marked_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int Nj = len(x_icell2)
     cdef f_type wfunc
     
-    cdef np.ndarray[np.float64_t, ndim=1] subw1 = np.zeros((n_weights1,), dtype=np.float64)
-    cdef np.ndarray[np.float64_t, ndim=1] subw2 = np.zeros((n_weights2,), dtype=np.float64)
-    
     #choose weighting function
     wfunc = return_weighting_function(weight_func_id)
     
@@ -69,13 +68,9 @@ def marked_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
             d = square_distance(x_icell1[i],y_icell1[i],z_icell1[i],\
                                 x_icell2[j],y_icell2[j],z_icell2[j])
             
-            #get the weighting vectors for each point
-            subw1 = w_icell1[i,:]
-            subw2 = w_icell2[j,:]
-            
             radial_wbinning(<np.float64_t*>counts.data,\
                             <np.float64_t*>rbins.data, d, nbins_minus_one,\
-                            <np.float64_t*>subw1.data, <np.float64_t*>subw2.data,\
+                            &w_icell1[i,0], &w_icell2[j,0],\
                             <f_type>wfunc)
     
     return counts
@@ -113,9 +108,6 @@ def marked_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int Nj = len(x_icell2)
     cdef f_type wfunc
     
-    cdef np.ndarray[np.float64_t, ndim=1] subw1 = np.zeros((n_weights1,), dtype=np.float64)
-    cdef np.ndarray[np.float64_t, ndim=1] subw2 = np.zeros((n_weights2,), dtype=np.float64)
-    
     #choose weighting function
     wfunc = return_weighting_function(weight_func_id)
     
@@ -130,13 +122,10 @@ def marked_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                                          x_icell2[j],y_icell2[j],z_icell2[j],\
                                          <np.float64_t*>period.data)
             
-            #get the weighting vectors for each point
-            subw1 = w_icell1[i,:]
-            subw2 = w_icell2[j,:]
             
             radial_wbinning(<np.float64_t*>counts.data,\
                             <np.float64_t*>rbins.data, d, nbins_minus_one,\
-                            <np.float64_t*>subw1.data, <np.float64_t*>subw2.data,\
+                            &w_icell1[i,0], &w_icell2[j,0],\
                             <f_type>wfunc)
     
     return counts
