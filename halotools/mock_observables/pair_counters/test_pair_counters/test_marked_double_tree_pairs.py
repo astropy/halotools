@@ -46,6 +46,7 @@ def test_wnpairs_nonperiodic():
     result = wnpairs(data1, data1, rbins, period=None, weights1=weights1, weights2=weights1, wfunc=1)
     
     test_result = simp_wnpairs(data1, data1, rbins, period=None, weights1=weights1, weights2=weights1)
-
+    
+    print(test_result,result)
     assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
 
