@@ -23,28 +23,50 @@ __all__ = ['tinker13_model_dictionary']
 
 
 def tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
-    central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
+    **kwargs):
     """ Dictionary to build an HOD-style based on Tinker et al. (2013), arXiv:1308.2974. 
+
+    Parameters 
+    ----------
+    threshold : float, optional 
+        Stellar mass threshold of the mock galaxy sample in h=1 solar mass units. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    prim_haloprop_key : string, optional  
+        String giving the column name of the primary halo property governing 
+        the occupation statistics of gal_type galaxies. 
+        Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    redshift : float, optional  
+        Redshift of the stellar-to-halo-mass relation. 
+        Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+    quiescent_fraction_abcissa : array, optional  
+        Values of the primary halo property at which the quiescent fraction is specified. 
+        Default is [10**12, 10**13.5, 10**15].  
+
+    quiescent_fraction_ordinates : array, optional  
+        Values of the quiescent fraction when evaluated at the input abcissa. 
+        Default is [0.25, 0.7, 0.95]
+
     """
+
     # Build the occupation model
     centrals_occupation = tinker13_components.Tinker13Cens(threshold = threshold, **kwargs)
     centrals_occupation._suppress_repeated_param_warning = True
     # Build the profile model
     
-    centrals_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
-
+    centrals_profile = TrivialPhaseSpace(**kwargs)
     
     # Build the occupation model
     quiescent_satellites_occupation = tinker13_components.Tinker13QuiescentSats(threshold = threshold, **kwargs)
     # Build the profile model
-    quiescent_satellites_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
-                                 concentration_binning = (1, 35, 1), **kwargs)    
+    quiescent_satellites_profile = NFWPhaseSpace(concentration_binning = (1, 35, 1), **kwargs)    
 
     # Build the occupation model
     active_satellites_occupation = tinker13_components.Tinker13ActiveSats(threshold = threshold, **kwargs)
     # Build the profile model
-    active_satellites_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, 
-                                 concentration_binning = (1, 35, 1), **kwargs)  
+    active_satellites_profile = NFWPhaseSpace(concentration_binning = (1, 35, 1), **kwargs)  
     del active_satellites_profile.new_haloprop_func_dict
     
 
