@@ -513,7 +513,7 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
 
 def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
                               period, do_auto, do_cross, num_threads,\
-                              max_sample_size, aux1, aux2, wfunc):
+                              max_sample_size, wfunc):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.mared_tpcf`. 
@@ -550,40 +550,18 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
     else:
         marks2 = np.ones(len(sample2)).astype(float)
     
-    #process aux parameters
-    if aux1 is not None: 
-        aux1 = convert_to_ndarray(aux1).astype(float)
-    else:
-        aux1 = np.ones(len(sample1)).astype(float)
-    if aux2 is not None: 
-        aux2 = convert_to_ndarray(aux2).astype(float)
-    else:
-        aux2 = np.ones(len(sample2)).astype(float)
-    
     #check for consistency between marks and samples
     if len(marks1) != len(sample1):
         msg = ("marks1 must have same length as sample1")
         warn(msg)
-    if len(aux1) != len(aux1):
-        msg = ("aux1 must have same length as sample1")
-        warn(msg)
     if len(marks2) != len(marks2):
         msg = ("marks2 must have same length as sample2")
-        warn(msg)
-    if len(aux2) != len(aux2):
-        msg = ("aux1 must have same length as sample2")
         warn(msg)
     if marks1.ndim != 1:
         msg = "marks1 must be a one dimensional array"
         raise HalotoolsError(msg)
-    if aux1.ndim != 1:
-        msg = "aux1 must be a one dimensional array"
-        raise HalotoolsError(msg)
     if marks2.ndim != 1:
         msg = "marks2 must be a one dimensional array"
-        raise HalotoolsError(msg)
-    if aux2.ndim != 1:
-        msg = "aux2 must be a one dimensional array"
         raise HalotoolsError(msg)
         
     
@@ -595,7 +573,6 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
             marks1 = marks1[inds]
-            aux1 = aux1[inds]
             print('downsampling sample1...')
     else:
         if len(sample1) > max_sample_size:
@@ -604,7 +581,6 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
             marks1 = marks1[inds]
-            aux1 = aux1[inds]
             print('down sampling sample1...')
         if len(sample2) > max_sample_size:
             inds = np.arange(0,len(sample2))
@@ -612,7 +588,6 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
             inds = inds[0:max_sample_size]
             sample2 = sample2[inds]
             marks2 = marks2[inds]
-            aux2 = aux2[inds]
             print('down sampling sample2...')
     
     rbins = convert_to_ndarray(rbins)
@@ -662,7 +637,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
         num_threads = cpu_count()
 
     return sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
-           num_threads, aux1, aux2, wfunc, _sample1_is_sample2, PBCs
+           num_threads, wfunc, _sample1_is_sample2, PBCs
 
 
 def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\

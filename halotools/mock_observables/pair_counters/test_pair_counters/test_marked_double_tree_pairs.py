@@ -18,6 +18,7 @@ def test_wnpairs_periodic():
     z = np.random.uniform(0, Lbox[2], Npts)
     data1 = np.vstack((x,y,z)).T
     weights1 = np.random.random(Npts)
+    #weights1 = np.ones(Npts)
     
     rbins = np.array([0.0,0.1,0.2,0.3])
 
@@ -40,6 +41,7 @@ def test_wnpairs_nonperiodic():
     z = np.random.uniform(0, Lbox[2], Npts)
     data1 = np.vstack((x,y,z)).T
     weights1 = np.random.random(Npts)
+    #weights1 = np.ones(Npts)
     
     rbins = np.array([0.0,0.1,0.2,0.3])
 
