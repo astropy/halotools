@@ -22,7 +22,7 @@ __all__ = ['zheng07_model_dictionary']
 
 def zheng07_model_dictionary(
     threshold = model_defaults.default_luminosity_threshold, **kwargs):
-    """ dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457. 
+    """ Dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457. 
 
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 

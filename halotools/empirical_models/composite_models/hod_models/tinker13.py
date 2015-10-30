@@ -24,7 +24,7 @@ __all__ = ['tinker13_model_dictionary']
 
 def tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
     central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
-    """
+    """ Dictionary to build an HOD-style based on Tinker et al. (2013), arXiv:1308.2974. 
     """
     # Build the occupation model
     centrals_occupation = tinker13_components.Tinker13Cens(threshold = threshold, **kwargs)
