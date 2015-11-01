@@ -3,87 +3,28 @@ Halotools Documentation
 =======================
 
 
-Halotools is a python package
-designed to study large-scale structure, cosmology, and galaxy evolution
-using N-body simulations and halo models. The code is publicly available
-at https://github.com/astropy/halotools. You can find the latest build of
-the documentation at http://halotools.readthedocs.org.
+Halotools is a specialized python package for building and testing models of the 
+galaxy-halo connection, and analyzing halo catalogs. 
+The core functionality of the package includes (among other things):
 
+* Fast generation of synthetic galaxy populations using HODs, abundance matching, and related methods
+* Efficient algorithms for calculating galaxy clustering, lensing, z-space distortions, and other astronomical statistics 
+* A modular, object-oriented framework for designing your own galaxy evolution model
+* End-to-end support for downloading publicly-available halo catalogs and reducing them to fast-loading hdf5 files
 
-.. _user-docs:
+The source code is publicly available at https://github.com/astropy/halotools. 
+
 
 ******************
-User Documentation
+Getting Started 
 ******************
-
-
-**Halotools Overview**
-----------------------------
 
 .. toctree::
    :maxdepth: 1
 
-   overview
    install
-   getting_started
-
-**Mock-Making Tools**
-----------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   mock_making/quickstart_guide
-   mock_making/overview
-
-**Model-Building Tools**
--------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   model_building/quickstart_guide
-   model_building/models
-
-
-**Managing Halo Catalogs**
---------------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   managing_catalogs/index
-   managing_catalogs/supported_sim_list
-
-**Making Mock Observations**
---------------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   mock_observations/overview
-   mock_observations/quickstart_guide
-
-**Tutorials**
---------------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   tutorials/index
-
-***********************
-Developer Documentation
-***********************
-
-The developer documentation contains guidlines for how to 
-stay up-to-date on Halotools development, submit bug reports and 
-contribute to the Halotools code base. 
-
-.. toctree::
-   :maxdepth: 1
-
-   development/index
+   docs_and_tutorials
+   cheat_sheet/overview
    development/contributors
  
 
