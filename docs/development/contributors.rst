@@ -1,8 +1,8 @@
 .. _contributor_list:
 
-*******************
-Authors and Credits
-*******************
+**************************
+Package Contributors
+**************************
 
 Halotools Project Coordinator
 ===============================

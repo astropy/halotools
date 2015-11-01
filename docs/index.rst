@@ -27,7 +27,14 @@ Getting Started
    cheat_sheet/overview
    development/contributors
  
+*********************
+License and Credits
+*********************
 
+.. toctree::
+   :maxdepth: 1
 
+   development/contributors
+   development/citing_halotools
 
 
