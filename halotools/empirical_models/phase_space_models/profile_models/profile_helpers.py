@@ -20,7 +20,7 @@ __author__ = ['Benedikt Diemer', 'Andrew Hearin']
 
 def density_threshold(cosmology, redshift, mdef):
 	"""
-	The threshold density for a given spherical overdensity mass definition.
+	The threshold density for a given spherical-overdensity mass definition.
 	
 	Parameters
 	--------------
