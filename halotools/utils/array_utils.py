@@ -16,7 +16,7 @@ from astropy.table import Table
 
 from ..custom_exceptions import HalotoolsError
 
-def convert_to_ndarray(x):
+def convert_to_ndarray(x, dt = None):
     """ Method checks to see in the input array x is an ndarray 
     or an Astropy Table. If not, returns an array version of x. 
 
@@ -24,6 +24,10 @@ def convert_to_ndarray(x):
     -----------
     x : array_like 
         Any sequence or scalar. 
+
+    t : numpy dtype, optional 
+        np.dtype of the returned array. 
+        Default is to return the same dtype as the input ``x``
 
     Returns 
     -------
@@ -41,23 +45,46 @@ def convert_to_ndarray(x):
     >>> assert len(tarr) == len(uarr) == len(varr) == 1 
 
     """
+    if dt is not None:
+        if type(dt) != type(np.dtype):
+            raise HalotoolsError("The input dt must be a numpy dtype object")
+
     if type(x) is np.ndarray:
         try:
             iterator = iter(x)
-            return x
+            if dt is None:
+                return x.astype(type(x[0]))
+            else:
+                return x.astype(dt)
         except TypeError:
             x = x.reshape(1)
-            return x
+            if dt is None:
+                return x.astype(type(x[0]))
+            else:
+                return x.astype(dt)
     elif type(x) is Table:
         return x
-    elif type(x) is str:
-        return np.array([x])
+    elif (type(x) is str) or (type(x) is unicode):
+        x = np.array([x])
+        if dt is None:
+            return x.astype(type(x[0]))
+        else:
+            return x.astype(dt)
     else:
         try:
             l = len(x)
-            return np.array(x)
+            x = np.array(x)
+            if dt is None:
+                return x.astype(type(x[0]))
+            else:
+                return x.astype(dt)
         except TypeError:
-            return np.array([x])
+            x = np.array([x])
+            if dt is None:
+                return x.astype(type(x[0]))
+            else:
+                return x.astype(dt)
+
 
 
 def custom_len(x):
