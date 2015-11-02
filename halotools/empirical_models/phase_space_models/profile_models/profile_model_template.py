@@ -17,7 +17,7 @@ from astropy.constants import G
 newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 from .conc_mass_models import ConcMass
-from .profile_helpers import *
+from . import profile_helpers
 
 from ... import model_defaults
 
@@ -66,7 +66,7 @@ class AnalyticDensityProf(object):
         self.halo_mass_key = model_defaults.get_halo_mass_key(self.mdef)
         self.prim_haloprop_key = self.halo_mass_key 
 
-        self.density_threshold = density_threshold(
+        self.density_threshold = profile_helpers.density_threshold(
             cosmology = self.cosmology, 
             redshift = self.redshift, mdef = self.mdef)
 
@@ -384,7 +384,8 @@ class AnalyticDensityProf(object):
             Radius of the halo in Mpc/h units. 
             Will have the same dimension as the input ``total_mass``.
         """
-        return halo_mass_to_halo_radius(total_mass, cosmology = self.cosmology, 
+        return profile_helpers.halo_mass_to_halo_radius(
+            total_mass, cosmology = self.cosmology, 
             redshift = self.redshift, mdef = self.mdef)
 
     def halo_radius_to_halo_mass(self, radius):
@@ -405,5 +406,6 @@ class AnalyticDensityProf(object):
             Will have the same dimension as the input ``radius``.
 
         """
-        return halo_radius_to_halo_mass(radius, cosmology = self.cosmology, 
+        return profile_helpers.halo_radius_to_halo_mass(
+            radius, cosmology = self.cosmology, 
             redshift = self.redshift, mdef = self.mdef)
