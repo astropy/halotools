@@ -11,7 +11,7 @@ import sys
 import numpy as np
 from math import pi, gamma
 from .clustering_helpers import *
-from .pair_counters.marked_double_tree_pairs import marked_npairs as obj_wnpairs
+from .pair_counters.marked_double_tree_pairs import marked_npairs
 from .pair_counters.double_tree_pairs import npairs
 ##########################################################################################
 
@@ -23,7 +23,7 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
                 period=None, do_auto=True, do_cross=True, num_threads=1,\
-                max_sample_size=int(1e6), wfunc=1):
+                max_sample_size=int(1e6), wfunc=1, iterations=1):
     """ 
     Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
     
@@ -40,12 +40,14 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         Npts x 3 array containing 3-D positions of points.
     
     marks1: array_like, optional
-        length N1 array containing weights used for weighted pair counts.
-        deafult is an array one ones.
+        Either a 1-d array of length N1, or a 2-d array of length N1 x N_weights, 
+        containing weights used for weighted pair counts.  The suplied marks array must
+        have the appropiate shape for the chosen wfunc (see notes).
         
     marks2: array_like, optional
-        length N2 array containing weights used for weighted pair counts.
-        deafult is an array one ones.
+        Either a 1-d array of length N2, or a 2-d array of length N1 x N_weights, 
+        containing weights used for weighted pair counts.  The suplied marks array must
+        have the appropiate shape for the chosen wfunc (see notes).
     
     period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only
@@ -70,7 +72,11 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
     
     wfunc: int, optional
         integer indicating which marking function should be used.  See notes for an 
-        explanation.  default is 1.
+        explanation.
+    
+    iterations : int, optional
+        integer number indicating the number of times to calculate the random weigths,
+        taking the mean of the outcomes.
     
     Returns 
     -------
@@ -102,27 +108,27 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
     
     The available wfunc functions are:
     func ID 0: custom user-defined and compiled weighting function
-    func ID 1: multiplicative weights, return w1*w2
-    func ID 2: summed weights, return w1+w2
-    func ID 3: equality weights, return r1*r2 if w1==w2
-    func ID 4: greater than weights, return r1*r2 if w2>w1
-    func ID 5: less than weights, return r1*r2 if w2<w1")
-    func ID 6: greater than tolerance weights, return r2 if w2>(w1+r1)
-    func ID 7: less than tolerance weights, return r2 if w2<(w1-r1)
-    func ID 8: tolerance weights, return r2 if |w1-w2|<r1
-    func ID 9: exclusion weights, return r2 if |w1-w2|>r1
+    func ID 1: multiplicative weights, return w1[0]*w2[0]
+    func ID 2: summed weights, return w1[0]+w2[0]
+    func ID 3: equality weights, return w1[1]*w2[1] if w1[0]==w2[0]
+    func ID 4: greater than weights, return w1[1]*w2[1] if w2[0]>w1[0]
+    func ID 5: less than weights, return w1[1]*w2[1] if w2[0]<w1[0]")
+    func ID 6: greater than tolerance weights, return w2[1] if w2[0]>(w1[0]+w1[1])
+    func ID 7: less than tolerance weights, return w2[1] if w2[0]<(w1[0]-w1[1])
+    func ID 8: tolerance weights, return w2[1] if |w1[0]-w2[0]|<w1[1]
+    func ID 9: exclusion weights, return w2[1] if |w1[0]-w2[0]|>w1[1]
     
-    where w1, w2 are weights1 and weights2 parameters respectively, and r1, r2 are the 
-    aux1 and aux2 paraemeters.
+    where w1, w2 are the weights for the pair of points.
+    w1[0] refers to the first weight, w1[1] the second, etc.
     
     These functions are defined in .pair_counters.objective_cpiars.objective_weights.pyx
     """
     
     #process parameters
+    function_args = [sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
+                     num_threads, max_sample_size, wfunc, iterations]
     sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross, num_threads,\
-        wfunc, _sample1_is_sample2, PBCs = _marked_tpcf_process_args(\
-            sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
-            num_threads, max_sample_size, wfunc)
+        wfunc, _sample1_is_sample2, PBCs = _marked_tpcf_process_args(*function_args)
     
     
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
@@ -133,10 +139,10 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         """
         
         if do_auto==True:
-            D1D1 = obj_wnpairs(sample1, sample1, rbins,\
-                               weights1=marks1, weights2=marks1,\
-                               wfunc = wfunc,\
-                               period=period, num_threads=num_threads)
+            D1D1 = marked_npairs(sample1, sample1, rbins,\
+                                 weights1=marks1, weights2=marks1,\
+                                 wfunc = wfunc,\
+                                 period=period, num_threads=num_threads)
             D1D1 = np.diff(D1D1)
         else:
             D1D1=None
@@ -147,17 +153,17 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
             D2D2 = D1D1
         else:
             if do_cross==True:
-                D1D2 = obj_wnpairs(sample1, sample2, rbins,\
-                                   weights1=marks1, weights2=marks2,\
-                                   wfunc = wfunc,\
-                                   period=period, num_threads=num_threads)
+                D1D2 = marked_npairs(sample1, sample2, rbins,\
+                                     weights1=marks1, weights2=marks2,\
+                                     wfunc = wfunc,\
+                                     period=period, num_threads=num_threads)
                 D1D2 = np.diff(D1D2)
             else: D1D2=None
             if do_auto==True:
-                D2D2 = obj_wnpairs(sample2, sample2, rbins,\
-                                   weights1=marks2, weights2=marks2,\
-                                   wfunc = wfunc,\
-                                   period=period, num_threads=num_threads)
+                D2D2 = marked_npairs(sample2, sample2, rbins,\
+                                     weights1=marks2, weights2=marks2,\
+                                     wfunc = wfunc,\
+                                     period=period, num_threads=num_threads)
                 D2D2 = np.diff(D2D2)
             else: D2D2=None
 
@@ -171,10 +177,10 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         """
         
         if do_auto==True:
-            R1R1 = obj_wnpairs(sample1, sample1, rbins,\
-                               weights1=marks1, weights2=marks1[permutate1],\
-                               wfunc = wfunc,\
-                               period=period, num_threads=num_threads)
+            R1R1 = marked_npairs(sample1, sample1, rbins,\
+                                 weights1=marks1, weights2=marks1[permutate1],\
+                                 wfunc = wfunc,\
+                                 period=period, num_threads=num_threads)
             R1R1 = np.diff(R1R1)
         else:
             R1R1=None
@@ -185,17 +191,17 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
             R2R2 = R1R1
         else:
             if do_cross==True:
-                R1R2 = obj_wnpairs(sample1, sample2, rbins,\
-                                   weights1=marks1[permutate1], weights2=marks2[permutate2],\
-                                   wfunc = wfunc,\
-                                   period=period, num_threads=num_threads)
+                R1R2 = marked_npairs(sample1, sample2, rbins,\
+                                     weights1=marks1[permutate1], weights2=marks2[permutate2],\
+                                     wfunc = wfunc,\
+                                     period=period, num_threads=num_threads)
                 R1R2 = np.diff(R1R2)
             else: R1R2=None
             if do_auto==True:
-                R2R2 = obj_wnpairs(sample2, sample2, rbins,\
-                                   weights1=marks2, weights2=marks2[permutate2],\
-                                   wfunc = wfunc,\
-                                   period=period, num_threads=num_threads)
+                R2R2 = marked_npairs(sample2, sample2, rbins,\
+                                     weights1=marks2, weights2=marks2[permutate2],\
+                                     wfunc = wfunc,\
+                                     period=period, num_threads=num_threads)
                 R2R2 = np.diff(R2R2)
             else: R2R2=None
 
@@ -213,10 +219,35 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
                                         _sample1_is_sample2)
     
     #calculate randomized marked pairs
-    R1R1,R1R2,R2R2 = random_counts(sample1, sample2, rbins, period,\
-                                   num_threads, do_auto, do_cross,\
-                                   marks1, marks2, wfunc,\
-                                   _sample1_is_sample2, permutate1, permutate2)
+    if iterations > 1:
+        #create storage arrays of the right shape
+        R1R1 = np.zeros((iterations,len(rbins)-1))
+        R1R2 = np.zeros((iterations,len(rbins)-1))
+        R2R2 = np.zeros((iterations,len(rbins)-1))
+        for i in range(iterations):
+            print(i)
+            #get arrays to randomize marks
+            permutate1 = np.random.permutation(np.arange(0,len(sample1)))
+            permutate2 = np.random.permutation(np.arange(0,len(sample2)))
+            R1R1[i,:],R1R2[i,:],R2R2[i,:] = random_counts(sample1, sample2, rbins, period,\
+                                                num_threads, do_auto, do_cross,\
+                                                marks1, marks2, wfunc,\
+                                                _sample1_is_sample2, permutate1, permutate2)
+        #take mean of the iterations
+        R1R1_err = np.std(R1R1, axis=0)
+        R1R1 = np.mean(R1R1, axis=0)
+        R1R2_err = np.std(R1R2, axis=0)
+        R1R2 = np.mean(R1R2, axis=0)
+        R2R2_err = np.std(R2R2, axis=0)
+        R2R2 = np.mean(R2R2, axis=0)
+    else:
+        #get arrays to randomize marks
+        permutate1 = np.random.permutation(np.arange(0,len(sample1)))
+        permutate2 = np.random.permutation(np.arange(0,len(sample2)))
+        R1R1,R1R2,R2R2 = random_counts(sample1, sample2, rbins, period,\
+                                       num_threads, do_auto, do_cross,\
+                                       marks1, marks2, wfunc,\
+                                       _sample1_is_sample2, permutate1, permutate2)
     
     #return results
     if _sample1_is_sample2:
