@@ -24,7 +24,7 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
          do_auto=True, do_cross=True, estimator='Natural', num_threads=1,\
-         max_sample_size=int(1e6)):
+         max_sample_size=int(1e6), approx_cell1_size = None, approx_cell2_size = None):
     """ 
     Calculate the real space two-point correlation function, :math:`\\xi(r)`.
     
@@ -68,6 +68,25 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         If sample size exeeds max_sample_size, the sample will be randomly down-sampled
         such that the subsample is equal to max_sample_size. 
     
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
+        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+        will apportion the sample1 points into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use max(rbins) in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
+
+    approx_cell2_size : array_like, optional 
+        Analgous to ``approx_cell1_size``, but for sample2.  See comments for 
+        ``approx_cell1_size`` for details. 
+    
+    approx_cellran_size : array_like, optional 
+        Analgous to ``approx_cell1_size``, but for randoms.  See comments for 
+        ``approx_cell1_size`` for details. 
+    
     Returns 
     -------
     correlation_function : numpy.array
@@ -109,57 +128,49 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     
     
     def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
-                      do_RR, do_DR, _sample1_is_sample2):
+                      do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,\
+                      approx_cell2_size , approx_cellran_size):
         """
-        Count random pairs.  There are three high level branches: 
-
-            1. no PBCs w/ randoms.
-
-            2. PBCs w/ randoms
-
-            3. PBCs and analytical randoms
-
-        There are also logical bits to do RR and DR pair counts, as not all estimators 
+        Count random pairs.  There are two high level branches:
+            1. w/ or wo/ PBCs and randoms.
+            2. PBCs and analytical randoms
+        There are also logical bits to do RR and DR pair counts, as not all estimators
         need one or the other, and not doing these can save a lot of calculation.
         
-        If no randoms are passes, calculate analytical randoms; otherwise, do it the old 
-        fashioned way.
+        Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
+        shells, which is the correct volume to use for a continious cubic volume with PBCs
         """
         def nball_volume(R,k=3):
             """
-            Calculate the volume of a n-shpere.  This is used for the analytical randoms.
+            Calculate the volume of a n-shpere.
+            This is used for the analytical randoms.
             """
             return (np.pi**(k/2.0)/gamma(k/2.0+1.0))*R**k
         
-        #No PBCs, randoms must have been provided.
-        if PBCs==False:
-            RR = npairs(randoms, randoms, rbins, period=period, num_threads=num_threads)
-            RR = np.diff(RR)
-            D1R = npairs(sample1, randoms, rbins, period=period, num_threads=num_threads)
-            D1R = np.diff(D1R)
-            if _sample1_is_sample2: #calculating the cross-correlation
-                D2R = None
-            else:
-                D2R = npairs(sample2, randoms, rbins, period=period, num_threads=num_threads)
-                D2R = np.diff(D2R)
-            
-            return D1R, D2R, RR
-        #PBCs and randoms.
-        elif randoms is not None:
+        #randoms provided, so calculate random pair counts.
+        if randoms is not None:
             if do_RR==True:
-                RR = npairs(randoms, randoms, rbins, period=period, num_threads=num_threads)
+                RR = npairs(randoms, randoms, rbins, period=period,
+                            num_threads=num_threads,
+                            approx_cell1_size=approx_cellran_size,
+                            approx_cell2_size=approx_cellran_size)
                 RR = np.diff(RR)
             else: RR=None
             if do_DR==True:
-                D1R = npairs(sample1, randoms, rbins, period=period, num_threads=num_threads)
+                D1R = npairs(sample1, randoms, rbins, period=period,
+                             num_threads=num_threads,
+                             approx_cell1_size=approx_cell1_size,
+                             approx_cell2_size=approx_cellran_size)
                 D1R = np.diff(D1R)
             else: D1R=None
-            if _sample1_is_sample2: #calculating the cross-correlation
+            if _sample1_is_sample2:
                 D2R = None
             else:
                 if do_DR==True:
-                    D2R = npairs(sample2, randoms, rbins, period=period,\
-                                 num_threads=num_threads)
+                    D2R = npairs(sample2, randoms, rbins, period=period,
+                                 num_threads=num_threads,
+                                 approx_cell1_size=approx_cell2_size,
+                                 approx_cell2_size=approx_cellran_size)
                     D2R = np.diff(D2R)
                 else: D2R=None
             
@@ -169,12 +180,12 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
             #do volume calculations
             dv = nball_volume(rbins) #volume of spheres
             dv = np.diff(dv) #volume of shells
-            global_volume = period.prod() #sexy
+            global_volume = period.prod() #volume of simulation
             
             #calculate randoms for sample1
-            N1 = np.shape(sample1)[0]
-            rho1 = N1/global_volume
-            D1R = (N1)*(dv*rho1) #read note about pair counter
+            N1 = np.shape(sample1)[0] #number of points in sample1
+            rho1 = N1/global_volume #number density of points
+            D1R = (N1)*(dv*rho1) #random counts are N**2*dv*rho
             
             #if not calculating cross-correlation, set RR exactly equal to D1R.
             if _sample1_is_sample2:
@@ -182,8 +193,8 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
                 RR = D1R #in the analytic case, for the auto-correlation, DR==RR.
             else: #if there is a sample2, calculate randoms for it.
                 N2 = np.shape(sample2)[0]
-                rho2 = N2/global_volume
-                D2R = N2*(dv*rho2) #read note about pair counter
+                rho2 = N2/global_volume #number density of points
+                D2R = N2*(dv*rho2)
                 #calculate the random-random pairs.
                 #RR is only the RR for the cross-correlation when using analytical randoms
                 #for the non-cross case, DR==RR (in analytical world).
@@ -192,17 +203,17 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
                 RR = (dv*rhor)
 
             return D1R, D2R, RR
-        else:
-            raise ValueError('Un-supported combination of PBCs and randoms provided.')
     
     
     def pair_counts(sample1, sample2, rbins, period, N_thread, do_auto, do_cross,\
-                    _sample1_is_sample2):
+                    _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
         """
-        Count data pairs.
+        Count data-data pairs.
         """
         if do_auto==True:
-            D1D1 = npairs(sample1, sample1, rbins, period=period, num_threads=num_threads)
+            D1D1 = npairs(sample1, sample1, rbins, period=period, num_threads=num_threads,
+                          approx_cell1_size=approx_cell1_size,
+                          approx_cell2_size=approx_cell1_size)
             D1D1 = np.diff(D1D1)
         else:
             D1D1=None
@@ -213,11 +224,17 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
             D2D2 = D1D1
         else:
             if do_cross==True:
-                D1D2 = npairs(sample1, sample2, rbins, period=period, num_threads=num_threads)
+                D1D2 = npairs(sample1, sample2, rbins, period=period,
+                              num_threads=num_threads,
+                              approx_cell1_size=approx_cell1_size,
+                              approx_cell2_size=approx_cell2_size)
                 D1D2 = np.diff(D1D2)
             else: D1D2=None
             if do_auto==True:
-                D2D2 = npairs(sample2, sample2, rbins, period=period, num_threads=num_threads)
+                D2D2 = npairs(sample2, sample2, rbins, period=period,
+                              num_threads=num_threads,
+                              approx_cell1_size=approx_cell2_size,
+                              approx_cell2_size=approx_cell2_size)
                 D2D2 = np.diff(D2D2)
             else: D2D2=None
         
@@ -241,10 +258,13 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         NR = 1.0
     
     #count pairs
-    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rbins, period,\
-                                 num_threads, do_auto, do_cross, _sample1_is_sample2)
-    D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,\
-                                 PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2)
+    D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rbins, period,
+                                 num_threads, do_auto, do_cross, _sample1_is_sample2,
+                                 approx_cell1_size, approx_cell2_size)
+    D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,
+                                 PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
+                                 approx_cell1_size, approx_cell2_size,
+                                 approx_cellran_size)
     
     #run through estimator and return relavent results
     if _sample1_is_sample2: #only do auto
@@ -263,5 +283,4 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
             xi_11 = _TP_estimator(D1D1,D1R,D1R,N1,N1,NR,NR,estimator)
             xi_22 = _TP_estimator(D2D2,D2R,D2R,N2,N2,NR,NR,estimator)
             return xi_11
-
 
