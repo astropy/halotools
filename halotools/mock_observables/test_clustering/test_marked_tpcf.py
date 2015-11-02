@@ -31,8 +31,7 @@ def test_TPCF_auto():
     
     #with randoms
     result = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,\
-                         period=None, num_threads=1,\
-                         aux1=None, aux2=None, wfunc=wfunc)
+                         period=None, num_threads=1, wfunc=wfunc)
     
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
@@ -48,15 +47,15 @@ def test_wfuncs():
     
     weights1 = np.random.random(N_pts)
     weights2 = np.random.random(N_pts)
-    aux1 = np.random.random(N_pts)
-    aux2 = np.random.random(N_pts)
     
     result = np.zeros((10-1,4))
     for i in range(1,10):
-        print(i)
-        result[i-1,:] = marked_tpcf(sample1, rbins, sample2=None, marks1=weights1, marks2=None,\
-                                    period=None, num_threads=1,\
-                                    aux1=None, aux2=None, wfunc=i)
+        if i in [1,2]:
+            marks = weights1 = np.random.random((N_pts,1))
+        if i in [3,4,5,6,7,8,9]:
+            marks = weights1 = np.random.random((N_pts,2))
+        result[i-1,:] = marked_tpcf(sample1, rbins, sample2=None, marks1=marks,
+                                    marks2=None, period=None, num_threads=1, wfunc=i)
         assert result[i-1,:].ndim == 1, "More than one correlation function returned erroneously."
 
 

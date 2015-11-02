@@ -558,13 +558,6 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
     if len(marks2) != len(marks2):
         msg = ("marks2 must have same length as sample2")
         warn(msg)
-    if marks1.ndim != 1:
-        msg = "marks1 must be a one dimensional array"
-        raise HalotoolsError(msg)
-    if marks2.ndim != 1:
-        msg = "marks2 must be a one dimensional array"
-        raise HalotoolsError(msg)
-        
     
     # down sample if sample size exceeds max_sample_size.
     if _sample1_is_sample2 is True:
