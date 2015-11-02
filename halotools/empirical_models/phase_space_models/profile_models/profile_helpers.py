@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Module containing functions related to halo mass definitions, 
 the relations between halo mass and radius, and the variation of these 
-relations with cosmology_obj and redshift. 
+relations with cosmology and redshift. 
 
 The functions contained in this module borrow heavily from the Colossus 
 package developed by Benedikt Diemer, http://bdiemer.bitbucket.org. 
@@ -10,7 +10,7 @@ from __future__ import (
 	division, print_function, absolute_import, unicode_literals)
 
 import numpy as np 
-from astropy import cosmology
+from astropy import cosmology as astropy_cosmology_obj
 from astropy import units as u
 
 from ....custom_exceptions import *
@@ -20,13 +20,13 @@ __all__ = (['density_threshold', 'delta_vir',
 
 __author__ = ['Benedikt Diemer', 'Andrew Hearin']
 
-def density_threshold(cosmology_obj, redshift, mdef):
+def density_threshold(cosmology, redshift, mdef):
 	"""
 	The threshold density for a given spherical-overdensity mass definition.
 	
 	Parameters
 	--------------
-	cosmology_obj : object 
+	cosmology : object 
 		Instance of an `~astropy.cosmology` object. 
 
 	redshift: array_like
@@ -47,9 +47,9 @@ def density_threshold(cosmology_obj, redshift, mdef):
 	"""
 
 	try:
-		assert isinstance(cosmology_obj, cosmology.core.FLRW)
+		assert isinstance(cosmology, astropy_cosmology_obj.core.FLRW)
 	except AssertionError:
-		msg = ("\nYour input ``cosmology_obj`` must be an instance of "
+		msg = ("\nYour input ``cosmology`` must be an instance of "
 			"`~astropy.cosmology.core.FLRW`\n")
 		raise HalotoolsError(msg)
 
@@ -77,22 +77,22 @@ def density_threshold(cosmology_obj, redshift, mdef):
 			raise HalotoolsError(mdef_msg)
 
 
-	rho_crit = cosmology_obj.critical_density(redshift)
-	rho_crit = rho_crit.to(u.Msun/u.Mpc**3).value/cosmology_obj.h**2
+	rho_crit = cosmology.critical_density(redshift)
+	rho_crit = rho_crit.to(u.Msun/u.Mpc**3).value/cosmology.h**2
 
 	if mdef[-1] == 'c':
 		delta = int(mdef[:-1])
 		rho_threshold = rho_crit * delta
 
 	elif mdef[-1] == 'm':
-		rho_crit0 = cosmology_obj.critical_density0
-		rho_crit0 = rho_crit0.to(u.Msun/u.Mpc**3).value/cosmology_obj.h**2
+		rho_crit0 = cosmology.critical_density0
+		rho_crit0 = rho_crit0.to(u.Msun/u.Mpc**3).value/cosmology.h**2
 		delta = int(mdef[:-1])
-		rho_m = cosmology_obj.Om(redshift)*rho_crit0
+		rho_m = cosmology.Om(redshift)*rho_crit0
 		rho_threshold = delta * rho_m
 
 	elif mdef == 'vir':
-		delta = delta_vir(cosmology_obj, redshift)
+		delta = delta_vir(cosmology, redshift)
 		rho_threshold = rho_crit * delta
 
 	else:
@@ -100,14 +100,14 @@ def density_threshold(cosmology_obj, redshift, mdef):
 
 	return rho_threshold
 
-def delta_vir(cosmology_obj, redshift):
+def delta_vir(cosmology, redshift):
 	"""
 	The virial overdensity in units of the critical density, 
 	using the fitting formula of Bryan & Norman 1998.
 	
 	Parameters
 	--------------
-	cosmology_obj : object 
+	cosmology : object 
 		Instance of an `~astropy.cosmology` object. 
 
 	redshift: array_like
@@ -123,12 +123,12 @@ def delta_vir(cosmology_obj, redshift):
 	density_threshold: The threshold density for a given mass definition.
 	"""
 	
-	x = cosmology_obj.Om(redshift) - 1.0
+	x = cosmology.Om(redshift) - 1.0
 	delta = 18 * np.pi**2 + 82.0 * x - 39.0 * x**2
 
 	return delta
 
-def halo_mass_to_halo_radius(mass, cosmology_obj, redshift, mdef):
+def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 	"""
 	Spherical overdensity radius as a function of the input mass. 
 
@@ -139,7 +139,7 @@ def halo_mass_to_halo_radius(mass, cosmology_obj, redshift, mdef):
 	mass: array_like
 		Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
 
-	cosmology_obj : object 
+	cosmology : object 
 		Instance of an `~astropy.cosmology` object. 
 
 	redshift: array_like
@@ -158,12 +158,12 @@ def halo_mass_to_halo_radius(mass, cosmology_obj, redshift, mdef):
 	halo_radius_to_halo_mass: Spherical overdensity radius from mass.
 	"""
 	
-	rho = density_threshold(cosmology_obj, redshift, mdef)
+	rho = density_threshold(cosmology, redshift, mdef)
 	radius = (mass * 3.0 / 4.0 / np.pi / rho)**(1.0 / 3.0)
 
 	return radius
 
-def halo_radius_to_halo_mass(radius, cosmology_obj, redshift, mdef):
+def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
 	"""
 	Spherical overdensity mass as a function of the input radius. 
 
@@ -174,7 +174,7 @@ def halo_radius_to_halo_mass(radius, cosmology_obj, redshift, mdef):
 	radius: array_like
 		Halo radius in physical Mpc/h; can be a scalar or a numpy array.
 
-	cosmology_obj : object 
+	cosmology : object 
 		Instance of an `~astropy.cosmology` object. 
 
 	redshift: array_like
@@ -190,7 +190,7 @@ def halo_radius_to_halo_mass(radius, cosmology_obj, redshift, mdef):
 
 	"""
 	
-	rho = density_threshold(cosmology_obj, redshift, mdef)
+	rho = density_threshold(cosmology, redshift, mdef)
 	mass = 4.0 / 3.0 * np.pi * rho * radius**3
 	return mass
 
