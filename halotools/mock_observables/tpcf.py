@@ -91,7 +91,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     
     Returns 
     -------
-    correlation_function : numpy.array
+    correlation_function(s) : numpy.array
         len(`rbins`)-1 length array containing the correlation function :math:`\\xi(r)` 
         computed in each of the bins defined by input `rbins`.
         
@@ -113,9 +113,9 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     e.g. a simulation box.  This optimization restricts this function to work on 3-D 
     point distributions.
     
-    If the points are distributed in a 'periodic box', then `randoms` are not necessary, 
-    as the geometry is very simple, and the monte carlo integration that randoms are used 
-    for in complex geometries can be done analytically.
+    If the points are distributed in a continuous 'periodic box', then `randoms` are not 
+    necessary, as the geometry is very simple, and the monte carlo integration that 
+    randoms are used for in complex geometries can be done analytically.
     
     If the `period` argument is passed, points may not have any component of their 
     coordinates be negative.
