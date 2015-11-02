@@ -22,7 +22,8 @@ from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 
 def _tpcf_process_args(sample1, rbins, sample2, randoms, 
-    period, do_auto, do_cross, estimator, num_threads, max_sample_size):
+    period, do_auto, do_cross, estimator, num_threads, max_sample_size,
+    approx_cell1_size, approx_cell2_size, approx_cellran_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.tpcf`. 
