@@ -13,6 +13,7 @@ from .tpcf import tpcf
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import integrate
 from .clustering_helpers import *
+from ..custom_exceptions import *
 ##########################################################################################
 
 __all__=['delta_sigma']
@@ -24,6 +25,10 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     """ 
     Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)`.
     
+    This function computes the cross correlation between `galaxies` and `particles`
+    to get :math:`\\xi_{\\rm galaxies, matter}(r)`, and integrates the result to 
+    get :math:`\\Delta\\Sigma(r_p)`.
+    
     Parameters
     ----------
     galaxies : array_like
@@ -34,7 +39,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     
     rp_bins : array_like
         array of projected radial boundaries defining the bins in which the result is 
-        calculated.
+        calculated.  The minimum of rp_bins must be > 0.0.
     
     pi_max: float
         maximum integration parameter, :math:`\\pi_{\\rm max}` (see notes).
@@ -45,10 +50,10 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
         If none, PBCs are set to infinity.
     
     log_bins : boolean, optional
-        integration parameter
+        integration parameter (see notes)
     
     n_bins : int, optional
-        integration parameter
+        integration parameter (see notes)
     
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
@@ -58,7 +63,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     -------
     Delta_Sigma: np.array
         :math:`\\Delta\\Sigma(r_p)` calculated in projected radial bins defined by 
-        rp_bins.
+        rp_bins.  The units are units(particles)/units(rp_bins)**2.
     
     Notes
     -----
@@ -70,31 +75,34 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     :math:`\\bar{\\Sigma}(<r_p) = \\frac{1}{\\pi r_p^2}\\int_0^{r_p}\\Sigma(r_p^{\\prime})2\\pi r_p^{\\prime} \\mathrm{d}r_p^{\\prime}`
     
     Numerically,
-    :math:`\\xi` is calculated in `n_bins` evenly spaced linearly or log-linearly as
+    :math:`\\xi(r)` is calculated in `n_bins` evenly spaced linearly or log-linearly as
     indicated by `log_bins`.
     
     All integrals are done use scipy.integrate.quad.
     """
     
     #process the input parameters
-    galaxies, particles, rp_bins, period, num_threads, PBCs = \
-        _delta_sigma_process_args(galaxies, particles, rp_bins, pi_max, period,\
-                                  estimator, num_threads)
+    function_args = [galaxies, particles, rp_bins, pi_max, period, estimator, num_threads]
+    galaxies, particles, rp_bins, period, num_threads,\
+        PBCs = _delta_sigma_process_args(*function_args)
     
-    mean_rho = len(particles)/period.prod()
+    mean_rho = len(particles)/period.prod() #number density of particles
     
     #determine radial bins to calculate tpcf in
     rp_max = np.max(rp_bins)
     rp_min = np.min(rp_bins)
-    rmax = np.sqrt(rp_max**2 + pi_max**2)
+    rmax = np.sqrt(rp_max**2 + pi_max**2) #maximum radial distance to calculate TPCF.
     
     #check to make sure rmax is not too large
     if (period is not None):
         if (rmax >= np.min(period)/3.0):
-            msg = ("\n The maximum length over which you search for pairs of points \n"
-                   "cannot be larger than Lbox/3 in any dimension. \n"
-                   "If you need to count pairs on these length scales, \n"
-                   "you should use a larger simulation.\n")
+            msg = ("\n"
+                   "rmax = sqrt(max(rp_bins)**2 + pi_max**2)>Lbox/3 \n"
+                   "The DeltaSigma calculation requires the correlation function \n"
+                   "to be calculated out to rmax. The maximum length over which you \n"
+                   "search for pairs of points cannot be larger than Lbox/3 \n"
+                   "in any dimension. If you need to count pairs on these \n"
+                   "length scales, you should use a larger simulation.")
             raise HalotoolsError(msg)
     
     if log_bins==True:
@@ -137,20 +145,5 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     delta_sigma = mean_internal_sigma - sigma(rp_bins)
     
     return delta_sigma
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
-    
-    
+
+
