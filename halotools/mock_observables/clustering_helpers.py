@@ -157,6 +157,19 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins, Nsub, sample2, period,
 
     if randoms is not None: 
         randoms = convert_to_ndarray(randoms)
+    else:
+        msg = ("user must provide randoms.")
+        raise HalotoolsError(msg)
+    
+    #process randoms parameter
+    if np.shape(randoms) == (1,):
+        N_randoms = randoms[0]
+        if PBCs == True:
+            randoms = np.random.random((N_randoms,3))*period
+        else:
+            msg = ("when no period parameter is passed, the user must \n"
+                   "provide true randoms, and not just the number of randoms desired.")
+            raise HalotoolsError(msg)
     
     # down sample if sample size exceeds max_sample_size.
     if _sample1_is_sample2 is True:
@@ -514,7 +527,7 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
 
 def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
                               period, do_auto, do_cross, num_threads,\
-                              max_sample_size, wfunc):
+                              max_sample_size, wfunc, iterations):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.mared_tpcf`. 
@@ -528,7 +541,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
         if np.all(sample1==sample2):
             _sample1_is_sample2 = True
             msg = ("Warning: sample1 and sample2 are exactly the same, \n"
-                   "auto-correlation will be returned.\n")
+                   "only the auto-correlation will be returned.\n")
             warn(msg)
             do_cross==False
         else: 
@@ -654,6 +667,9 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\
     except AssertionError:
         msg = "Input ``rp_bins`` must be a monotonically increasing 1D array with at least two entries"
         raise HalotoolsError(msg)
+    if np.min(rp_bins)==0.0:
+        msg = "Input ``rp_bins`` minimum must be greater than 0.0"
+        raise HalotoolsError(msg)
         
     #Process period entry and check for consistency.
     if period is None:
@@ -709,7 +725,11 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
     Ns = np.array([len(ND1),len(ND2),len(NR1),len(NR2)])
     
     if np.any(Ns>1):
-        mult = np.outer #used for the jackknife calculations
+        #used for the jackknife calculations
+        #the outer dimension is the number of samples.
+        #the N arrays are the number of points in each dimension.
+        #so, what we want to do is multiple each row of e.g. DD by the number of 1/N
+        mult = lambda x,y: (x*y.T).T #annoying and ugly, but works.
     else:
         mult = lambda x,y: x*y #used for all else
     
@@ -738,7 +758,7 @@ def _TP_estimator(DD,DR,RR,ND1,ND2,NR1,NR2,estimator):
         raise ValueError("unsupported estimator!")
     
     if np.shape(xi)[0]==1: return xi[0]
-    else: return xi
+    else: return xi #for jackknife 
 
 
 def _TP_estimator_requirements(estimator):

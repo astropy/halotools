@@ -10,14 +10,16 @@ from __future__ import (absolute_import, division, print_function,
 import sys
 import numpy as np
 from math import pi, gamma
-
+from warnings import warn
+from ..custom_exceptions import *
+from ..utils.array_utils import convert_to_ndarray
 from .clustering_helpers import *
 #from .pair_counters.double_tree_pairs import jnpairs
 from .pair_counters.double_tree_pairs import jnpairs
 ##########################################################################################
 
 
-__all__=['tpcf_jackknife']
+__all__=['tpcf_jackknife', 'covariance_matrix']
 __author__ = ['Duncan Campbell']
 
 
@@ -106,22 +108,14 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     counts, and if both are outside, +0 counts.
     """
     
+    #process input parameters
+    function_args = [sample1, randoms, rbins, Nsub, sample2, period, do_auto,\
+                     do_cross, estimator, num_threads, max_sample_size]
     sample1, rbins, Nsub, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _tpcf_jackknife_process_args(sample1, randoms,\
-                                       rbins, Nsub, sample2, period, do_auto,\
-                                       do_cross, estimator, num_threads, max_sample_size)
+        _sample1_is_sample2, PBCs = _tpcf_jackknife_process_args(*function_args)
     
-    #process randoms parameter
-    if np.shape(randoms) == (1,):
-        N_randoms = randoms[0]
-        if PBCs == True:
-            randoms = np.random.random((N_randoms,3))*period
-        else:
-            msg = ("when no period parameter is passed, the user must \n"
-                   "provide true randoms, and not just the number of randoms desired.")
-            raise HalotoolsError(msg)
-    
-    #determine box size the data occupies.  This is used in determining jackknife samples.
+    #determine box size the data occupies.
+    #This is used in determining jackknife samples.
     if PBCs==False: 
         sample1, sample2, randoms, Lbox = _enclose_in_box(sample1, sample2, randoms)
     else: 
@@ -216,7 +210,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
         if do_DR==True:
             DR = jnpairs(sample, randoms, rbins, period=period,\
                          jtags1=j_index, jtags2=j_index_randoms,\
-                          N_samples=N_sub_vol, num_threads=num_threads)
+                         N_samples=N_sub_vol, num_threads=num_threads)
             DR = np.diff(DR,axis=1)
         else: DR=None
         if do_RR==True:
@@ -227,22 +221,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
         else: RR=None
 
         return DR, RR
-    
-    def covariance_matrix(sub,full,N_sub_vol):
-        """
-        Calculate the full covariance matrix.
-        """
-        Nr = full.shape[0] # Nr is the number of radial bins
-        cov = np.zeros((Nr,Nr)) # 2D array that keeps the covariance matrix 
-        after_subtraction = sub - np.mean(sub,axis=0)
-        tmp = 0
-        for i in range(Nr):
-            for j in range(Nr):
-                tmp = 0.0
-                for k in range(N_sub_vol):
-                    tmp = tmp + after_subtraction[k,i]*after_subtraction[k,j]
-                cov[i,j] = (((N_sub_vol-1)/N_sub_vol)*tmp)
-        return cov
     
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
@@ -319,12 +297,12 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                               NR_subs, estimator)
     
     #calculate the covariance matrix
-    xi_11_cov = covariance_matrix(xi_11_sub, xi_11_full, N_sub_vol)
-    xi_12_cov = covariance_matrix(xi_12_sub, xi_12_full, N_sub_vol)
-    xi_22_cov = covariance_matrix(xi_22_sub, xi_22_full, N_sub_vol)
+    xi_11_cov = covariance_matrix(xi_11_sub)
+    xi_12_cov = covariance_matrix(xi_12_sub)
+    xi_22_cov = covariance_matrix(xi_22_sub)
     
     if _sample1_is_sample2:
-        return xi_11_full,xi_11_cov
+        return xi_11_full, xi_11_cov
     else:
         if (do_auto==True) & (do_cross==True):
             return xi_11_full,xi_12_full,xi_22_full,xi_11_cov,xi_12_cov,xi_22_cov
@@ -332,6 +310,48 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
             return xi_11_full,xi_22_full,xi_11_cov,xi_22_cov
         elif do_cross==True:
             return xi_12_full,xi_12_cov
+
+
+def covariance_matrix(corr_funcs):
+    """
+    Calculate the covariance matrix.
+    
+    Parameters
+    ----------
+    corr_funcs : np.array
+        shape (N_sample, N_bins) numpy array of jackknife sample correlation functions.
+    
+    Returns
+    -------
+    cov: numpy.ndarray
+        covaraince matrix
+    """
+    
+    corr_funcs =  convert_to_ndarray(corr_funcs)
+    
+    if corr_funcs.ndim !=2:
+        msg = ("corr_funcs array must be 2-dimensional")
+        HalotoolsError(msg)
+    
+    N_samples = corr_funcs.shape[0]
+    Nr = corr_funcs.shape[1]
+    after_subtraction = corr_funcs - np.mean(corr_funcs, axis=0) # subtract the mean
+    
+    #raise a warning if N_samples < Nr
+    if N_samples<Nr:
+        msg = ("Number of samples is smaller than the number of bins. \n"
+               "It is recommended to increase the number of samples, \n"
+               "or decrease the number of bins.")
+        warn(msg)
+    
+    cov = np.zeros((Nr,Nr)) # 2D array that keeps the covariance matrix 
+    for i in range(Nr):
+        for j in range(Nr):
+            tmp = 0.0
+            for k in range(N_samples):
+                tmp = tmp + after_subtraction[k,i]*after_subtraction[k,j]
+                cov[i,j] = (((N_samples-1)/N_samples)*tmp)
+    return cov
 
 
 def _enclose_in_box(data1, data2, data3):

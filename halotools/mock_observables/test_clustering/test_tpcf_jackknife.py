@@ -9,7 +9,10 @@ import pytest
 from ..tpcf_jackknife import tpcf_jackknife
 from ..tpcf import tpcf
 
-__all__=['test_tpcf_jackknife']
+import pytest
+slow = pytest.mark.slow
+
+__all__=['test_tpcf_jackknife', 'test_tpcf_jackknife_cov_matrix']
 
 @pytest.mark.slow
 def test_tpcf_jackknife():
@@ -18,7 +21,6 @@ def test_tpcf_jackknife():
     sample1 = np.random.random((Npts,3))
     randoms = np.random.random((Npts*10,3))
     period = np.array([1.0,1.0,1.0])
-    Lbox = np.array([1.0,1.0,1.0])
     rbins = np.linspace(0.0,0.3,5).astype(float)
     
     result_1,err = tpcf_jackknife(sample1, randoms, rbins, Nsub=5, period = period, num_threads=1)
@@ -28,7 +30,6 @@ def test_tpcf_jackknife():
     print(err)
     print(result_2)
     assert np.allclose(result_1,result_2,rtol=1e-09), "correlation functions do not match"
-
 
 @pytest.mark.slow
 def test_tpcf_jackknife_cov_matrix():
@@ -45,6 +46,6 @@ def test_tpcf_jackknife_cov_matrix():
     
     print(result_1,err)
     assert np.shape(err)==(nbins,nbins), "cov matrix not correct shape"
-    
-    
-    
+
+
+
