@@ -20,15 +20,22 @@ from .....custom_exceptions import HalotoolsError
 __all__ = ['TestAnalyticDensityProf']
 
 class TestAnalyticDensityProf(TestCase):
-    """
+    """ Test the existence and reasonableness of all instances of 
+    sub-classes of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`. 
     """
 
     def setup_class(self):
+        """
+        """
         self.prof_model_list = (
             profile_models.NFWProfile, profile_models.TrivialProfile
             )
 
     def test_attr_inheritance(self):
+        """ Test that all sub-classes of 
+        `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` 
+        correctly inherit the necessary attributes and methods.
+        """
 
         # Test that all sub-classes inherit the correct attributes
         for model_class in self.prof_model_list:
