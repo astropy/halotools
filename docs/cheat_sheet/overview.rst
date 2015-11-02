@@ -5,4 +5,20 @@
 Function-usage examples by category 
 ****************************************
 
-coming soon!
+Here we present docstrings grouped together by functionality. 
+Many docstrings contain example code to demonstrate basic usage. 
+
+Modeling the Galaxy-Halo Connection
+=====================================
+
+Models of the 1-halo term
+-------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   halo_phase_space_cheat_sheet
+
+
+
+
