@@ -15,7 +15,8 @@ from .....custom_exceptions import HalotoolsError
 
 
 class TestProfileHelpers(TestCase):
-	"""
+	""" Container class for test of 
+	all the methods in the profile_helpers module 
 	"""
 
 	def setup_class(self):
@@ -24,7 +25,8 @@ class TestProfileHelpers(TestCase):
 
 	def test_halo_radius_to_halo_mass(self):
 		""" Check that the radius <==> mass functions are 
-		proper inverses of one another for a range of mdef, cosmology, and redshift
+		proper inverses of one another for a range of 
+		mdef, cosmology, and redshift
 		"""
 		r0 = 0.25
 
@@ -36,28 +38,54 @@ class TestProfileHelpers(TestCase):
 					assert np.allclose(r1, r0, rtol = 1e-3)
 
 	def test_delta_vir(self):
-		bn98_result = delta_vir(WMAP9, 5.0)
+		""" Compare the calculated delta_vir at high-redshift where Om = 1 
+		should be a good approximation, 
+		comparing it to the analytical top-hat collapse 
+		result in this regime.
+		"""
+		bn98_result = delta_vir(WMAP9, 10.0)
 		assert np.allclose(bn98_result, 18.*np.pi**2, rtol=0.01)
 
-
-	def test_density_threshold(self):
-
-		z = 5.0
+		# Choose a high-redshift where Om = 1 is a good approximation
+		z = 10
 		rho_crit = WMAP9.critical_density(z)
 		rho_crit = rho_crit.to(u.Msun/u.Mpc**3).value/WMAP9.h**2
 		rho_m = WMAP9.Om(z)*rho_crit
+		wmap9_delta_vir_z10 = density_threshold(WMAP9, z, 'vir')/rho_m
 
-		wmap9_200c_z5 = density_threshold(WMAP9, z, '200c')/rho_crit
-		assert np.allclose(wmap9_200c_z5, 200.0, rtol=0.01)
+		assert np.allclose(wmap9_delta_vir_z10, bn98_result, rtol=0.01)
 
-		wmap9_2500c_z5 = density_threshold(WMAP9, z, '2500c')/rho_crit
-		assert np.allclose(wmap9_2500c_z5, 2500.0, rtol=0.01)
 
-		wmap9_200m_z5 = density_threshold(WMAP9, z, '200m')/rho_m
-		assert np.allclose(wmap9_200m_z5, 200.0, rtol=0.01)
-		
+
+	def test_density_threshold(self):
+		""" Verify that we get back the appropriate multiple of the 
+		appropriate density contrast over a range 
+		of redshifts and cosmologies
+
+		"""
+
+		zlist = [0, 1, 5, 10]
+		for z in zlist:
+			for cosmo in (WMAP9, Planck13):
+				rho_crit = WMAP9.critical_density(z)
+				rho_crit = rho_crit.to(u.Msun/u.Mpc**3).value/WMAP9.h**2
+				rho_m = WMAP9.Om(z)*rho_crit
+
+				wmap9_200c = density_threshold(WMAP9, z, '200c')/rho_crit
+				assert np.allclose(wmap9_200c, 200.0, rtol=0.01)
+
+				wmap9_2500c = density_threshold(WMAP9, z, '2500c')/rho_crit
+				assert np.allclose(wmap9_2500c, 2500.0, rtol=0.01)
+
+				wmap9_200m = density_threshold(WMAP9, z, '200m')/rho_m
+				assert np.allclose(wmap9_200m, 200.0, rtol=0.01)
+
+
 
 	def test_density_threshold_error_handling(self):
+		""" Verify that we raise a HalotoolsError when nonsense 
+		inputs are received.
+		"""
 
 		with pytest.raises(HalotoolsError):
 			result = density_threshold(WMAP9, 0.0, 'Jose Canseco')
