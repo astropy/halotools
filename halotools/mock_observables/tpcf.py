@@ -12,6 +12,7 @@ import numpy as np
 from math import pi, gamma
 from .clustering_helpers import *
 from .pair_counters.double_tree_pairs import npairs
+from warnings import warn
 ##########################################################################################
 
 
@@ -22,9 +23,10 @@ __author__ = ['Duncan Campbell']
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 
-def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
-         do_auto=True, do_cross=True, estimator='Natural', num_threads=1,\
-         max_sample_size=int(1e6), approx_cell1_size = None, approx_cell2_size = None):
+def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
+         do_auto=True, do_cross=True, estimator='Natural', num_threads=1,
+         max_sample_size=int(1e6), approx_cell1_size = None,
+         approx_cell2_size = None, approx_cellran_size = None):
     """ 
     Calculate the real space two-point correlation function, :math:`\\xi(r)`.
     
@@ -80,11 +82,11 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         performance-critical calculations. 
 
     approx_cell2_size : array_like, optional 
-        Analgous to ``approx_cell1_size``, but for sample2.  See comments for 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
         ``approx_cell1_size`` for details. 
     
     approx_cellran_size : array_like, optional 
-        Analgous to ``approx_cell1_size``, but for randoms.  See comments for 
+        Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
         ``approx_cell1_size`` for details. 
     
     Returns 
@@ -119,13 +121,19 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
     coordinates be negative.
     """
     
-    #check input arguments using helper function
-    sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _tpcf_process_args(sample1, rbins, sample2, randoms,\
-                                                       period, do_auto, do_cross,\
-                                                       estimator, num_threads,\
-                                                       max_sample_size)
+    #check input arguments using clustering helper functions
+    function_args = [sample1, rbins, sample2, randoms, period, do_auto, do_cross,\
+                     estimator, num_threads, max_sample_size, approx_cell1_size,\
+                     approx_cell2_size, approx_cellran_size]
     
+    #pass arguments in, and get out processed arguments, plus some control flow variables
+    sample1, rbins, sample2, randoms, period, do_auto, do_cross, num_threads,\
+    _sample1_is_sample2, PBCs = _tpcf_process_args(*function_args)
+    
+    #Below we define functions to count data-data pairs and random pairs.
+    #After that, we get to work. The pair counting functions here actually call outside
+    #pair counters that are highly optimized. Beware that the control flow inside 
+    #these functions here can look a bit complicated, but don't des-pair!
     
     def random_counts(sample1, sample2, randoms, rbins, period, PBCs, num_threads,\
                       do_RR, do_DR, _sample1_is_sample2, approx_cell1_size,\
@@ -241,10 +249,10 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
         return D1D1, D1D2, D2D2
     
     
-    #what needs to be done?
+    # What needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
-    #how many points are there? (for normalization purposes)
+    # How many points are there (for normalization purposes)?
     if randoms is not None:
         N1 = len(sample1)
         NR = len(randoms)
@@ -252,39 +260,43 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
             N2 = N1
         else:
             N2 = len(sample2)
-    else: #this is taken care of in the analytical randoms case.
+    else: # This is taken care of in the analytical case.  See comments in random_pairs().
         N1 = 1.0
         N2 = 1.0
         NR = 1.0
     
-    #count pairs
+    #count data pairs
     D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rbins, period,
                                  num_threads, do_auto, do_cross, _sample1_is_sample2,
                                  approx_cell1_size, approx_cell2_size)
+    #count random pairs
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,
                                  PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,
                                  approx_cell1_size, approx_cell2_size,
                                  approx_cellran_size)
     
-    #check to see if any of the RR counts contain 0 pairs.
+    #check to see if any of the random counts contain 0 pairs.
     if D1R is not None:
         if np.any(D1R==0):
-            msg = "sample1 cross randoms has radial bin(s) which contain no points."
-            raise HalotoolsError(msg)
+            msg = ("sample1 cross randoms has radial bin(s) which contain no points. \n"
+                   "Consider increasing the number of randoms, or using larger bins.")
+            warn(msg)
     if D2R is not None:
         if np.any(D2R==0):
-            msg = "sample2 cross randoms has radial bin(s) which contain no points."
-            raise HalotoolsError(msg)
+            msg = ("sample2 cross randoms has radial bin(s) which contain no points. \n"
+                   "Consider increasing the number of randoms, or using larger bins.")
+            warn(msg)
     if RR is not None:
         if np.any(RR==0):
-            msg = "randoms cross randoms has radial bin(s) which contain no points."
-            raise HalotoolsError(msg)
+            msg = ("randoms cross randoms has radial bin(s) which contain no points. \n"
+                   "Consider increasing the number of randoms, or using larger bins.")
+            warn(msg)
     
-    #run through estimator and return relavent results
-    if _sample1_is_sample2: #only do auto
+    #run results through the estimator and return relavent/user specified results.
+    if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
-    else: #else, follow the user's input
+    else:
         if (do_auto==True) & (do_cross==True): 
             xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
             xi_12 = _TP_estimator(D1D2,D1R,RR,N1,N2,NR,NR,estimator)
