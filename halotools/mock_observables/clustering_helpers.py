@@ -266,7 +266,9 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins, Nsub, sample2, period,
 
 def _redshift_space_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,\
                                       period, do_auto, do_cross, estimator,\
-                                      num_threads, max_sample_size=int(1e6)):
+                                      num_threads, max_sample_size,
+                                      approx_cell1_size, approx_cell2_size,\
+                                      approx_cellran_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.redshift_space_tpcf`. 
@@ -395,7 +397,9 @@ def _redshift_space_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, random
 
 def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
                             period, do_auto, do_cross, estimator,\
-                            num_threads, max_sample_size=int(1e6)):
+                            num_threads, max_sample_size,
+                            approx_cell1_size, approx_cell2_size,\
+                            approx_cellran_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.s_mu_tpcf`. 
