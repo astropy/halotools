@@ -9,7 +9,7 @@ from astropy.table import Table
 
 from ..conc_mass_models import ConcMass
 
-from ....sim_manager import FakeSim, FakeMock
+from .....sim_manager import FakeSim, FakeMock
 
 def test_ConcMass():
 	""" Test the `~halotools.empirical_models.ConcMass` module. 
