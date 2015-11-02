@@ -13,9 +13,9 @@ __all__ = ['NFWPhaseSpace', 'TrivialPhaseSpace']
 import numpy as np
 from astropy.table import Table
 
-from .profile_models import *
-from .velocity_models import *
-from .monte_carlo_phase_space import *
+from .profile_models import NFWProfile
+from .velocity_models import NFWJeansVelocity
+from .monte_carlo_phase_space import MonteCarloGalProf
 
 from .. import model_defaults
 
