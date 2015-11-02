@@ -37,8 +37,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
     """
 
     def __init__(self, 
-        cosmology=sim_defaults.default_cosmology, 
-        redshift=sim_defaults.default_redshift,
+        cosmology = sim_defaults.default_cosmology, 
+        redshift = sim_defaults.default_redshift,
         mdef = model_defaults.halo_mass_definition,
         **kwargs):
         """

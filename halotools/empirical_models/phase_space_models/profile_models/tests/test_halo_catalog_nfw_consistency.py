@@ -11,6 +11,7 @@ from astropy.cosmology import WMAP9, Planck13
 from astropy import units as u
 
 from .. import profile_helpers
+from ..nfw_profile import NFWProfile
 
 from .....sim_manager import HaloCatalog
 from .....utils import table_utils
@@ -43,7 +44,7 @@ class TestHaloCatalogNFWConsistency(TestCase):
     def setup_class(self):
         """
         """
-        halocat = HaloCatalog(simname = 'bolshoi', redshift = 0)
+        halocat = HaloCatalog(simname = 'bolshoi', redshift = 0.)
         hosts = table_utils.SampleSelector.host_halo_selection(
             table = halocat.halo_table)
 
@@ -56,11 +57,23 @@ class TestHaloCatalogNFWConsistency(TestCase):
         mask_mvir_1e13 = (hosts['halo_mvir'] > 1e13) & (hosts['halo_mvir'] < 2e13)
         self.halos_mvir_1e13 = hosts[mask_mvir_1e13]
 
+        self.halo_sample_names = ['halos_mvir_1e11', 'halos_mvir_1e12', 'halos_mvir_1e13']
+
+        self.nfw_profile = NFWProfile(cosmology = halocat.cosmology, 
+            redshift = 0., mdef = 'vir')
+
 
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
-    def test_vmax_consistency(self):
-        pass
+    def test_conc_nfw_consistency(self):
+
+        for sample_name in self.halo_sample_names:
+            halos = getattr(self, sample_name)
+            median_conc = np.median(halos['halo_nfw_conc'])
+            median_mass = np.median(halos['halo_mvir'])
+            predicted_conc = self.nfw_profile.conc_NFWmodel(prim_haloprop = median_mass)
+            assert np.allclose(median_conc, predicted_conc, rtol = 0.25)
+        
         
 
 
