@@ -15,13 +15,11 @@ from .....custom_exceptions import HalotoolsError
 
 
 class TestProfileHelpers(TestCase):
+	"""
+	"""
 
 	def setup_class(self):
-		rho_crit = WMAP9.critical_density(0.)
-		self.rho_crit_wmap9 = rho_crit.to(u.Msun/u.Mpc**3).value/WMAP9.h**2
-
-		rho_crit = Planck13.critical_density(0.)
-		self.rho_crit_planck13 = rho_crit.to(u.Msun/u.Mpc**3).value/Planck13.h**2
+		pass
 
 
 	def test_halo_radius_to_halo_mass(self):
@@ -35,19 +33,29 @@ class TestProfileHelpers(TestCase):
 				for mdef in ('vir', '200m', '2500c'):
 					m1 = halo_radius_to_halo_mass(r0, cosmology, redshift, mdef)
 					r1 = halo_mass_to_halo_radius(m1, cosmology, redshift, mdef)
-					assert r1 == r0
+					assert np.allclose(r1, r0, rtol = 1e-3)
 
 	def test_delta_vir(self):
-		bn98_result = delta_vir(WMAP9, 0.0)
-		# assert np.allclose(bn98_result, 198, rtol=0.1)
+		bn98_result = delta_vir(WMAP9, 5.0)
+		assert np.allclose(bn98_result, 18.*np.pi**2, rtol=0.01)
 
 
 	def test_density_threshold(self):
-		result10_wmap9 = density_threshold(WMAP9, 3., 'vir')
-		result10_wmap9b = delta_vir(WMAP9, 3.)
 
-		x = result10_wmap9/self.rho_crit_wmap9
-		# assert np.allclose(x, result10_wmap9b, rtol=0.1)
+		z = 5.0
+		rho_crit = WMAP9.critical_density(z)
+		rho_crit = rho_crit.to(u.Msun/u.Mpc**3).value/WMAP9.h**2
+		rho_m = WMAP9.Om(z)*rho_crit
+
+		wmap9_200c_z5 = density_threshold(WMAP9, z, '200c')/rho_crit
+		assert np.allclose(wmap9_200c_z5, 200.0, rtol=0.01)
+
+		wmap9_2500c_z5 = density_threshold(WMAP9, z, '2500c')/rho_crit
+		assert np.allclose(wmap9_2500c_z5, 2500.0, rtol=0.01)
+
+		wmap9_200m_z5 = density_threshold(WMAP9, z, '200m')/rho_m
+		assert np.allclose(wmap9_200m_z5, 200.0, rtol=0.01)
+		
 
 	def test_density_threshold_error_handling(self):
 

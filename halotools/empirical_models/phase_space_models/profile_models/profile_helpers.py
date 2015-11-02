@@ -85,11 +85,9 @@ def density_threshold(cosmology, redshift, mdef):
 		rho_threshold = rho_crit * delta
 
 	elif mdef[-1] == 'm':
-		rho_crit0 = cosmology.critical_density0
-		rho_crit0 = rho_crit0.to(u.Msun/u.Mpc**3).value/cosmology.h**2
 		delta = int(mdef[:-1])
-		rho_m = cosmology.Om(redshift)*rho_crit0
-		rho_threshold = delta * rho_m
+		rho_m = cosmology.Om(redshift)*rho_crit
+		rho_threshold = rho_m * delta
 
 	elif mdef == 'vir':
 		delta = delta_vir(cosmology, redshift)
@@ -122,7 +120,13 @@ def delta_vir(cosmology, redshift):
 	-----------
 	density_threshold: The threshold density for a given mass definition.
 	"""
-	
+	try:
+		assert isinstance(cosmology, astropy_cosmology_obj.core.FLRW)
+	except AssertionError:
+		msg = ("\nYour input ``cosmology`` must be an instance of "
+			"`~astropy.cosmology.core.FLRW`\n")
+		raise HalotoolsError(msg)
+
 	x = cosmology.Om(redshift) - 1.0
 	delta = 18 * np.pi**2 + 82.0 * x - 39.0 * x**2
 
@@ -157,7 +161,13 @@ def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 	---------------
 	halo_radius_to_halo_mass: Spherical overdensity radius from mass.
 	"""
-	
+	try:
+		assert isinstance(cosmology, astropy_cosmology_obj.core.FLRW)
+	except AssertionError:
+		msg = ("\nYour input ``cosmology`` must be an instance of "
+			"`~astropy.cosmology.core.FLRW`\n")
+		raise HalotoolsError(msg)
+
 	rho = density_threshold(cosmology, redshift, mdef)
 	radius = (mass * 3.0 / 4.0 / np.pi / rho)**(1.0 / 3.0)
 
@@ -189,7 +199,13 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
 		Total halo mass in :math:`M_{\odot}/h`; has the same dimensions as the input ``radius``. 
 
 	"""
-	
+	try:
+		assert isinstance(cosmology, astropy_cosmology_obj.core.FLRW)
+	except AssertionError:
+		msg = ("\nYour input ``cosmology`` must be an instance of "
+			"`~astropy.cosmology.core.FLRW`\n")
+		raise HalotoolsError(msg)
+
 	rho = density_threshold(cosmology, redshift, mdef)
 	mass = 4.0 / 3.0 * np.pi * rho * radius**3
 	return mass
