@@ -29,7 +29,7 @@ from ....sim_manager import sim_defaults
 
 __author__ = ['Andrew Hearin', 'Benedikt Diemer']
 
-__all__ = ['TrivialProfile', 'NFWProfile']
+__all__ = ['TrivialProfile']
 
 class TrivialProfile(AnalyticDensityProf):
     """ Profile of dark matter halos with all their mass concentrated at exactly the halo center. 
