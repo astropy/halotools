@@ -7,10 +7,13 @@ import numpy as np
 from unittest import TestCase
 import pytest 
 
-from astropy.cosmology import WMAP9, Planck13
+from astropy.cosmology import WMAP9, Planck13, FLRW
 from astropy import units as u
 
 from ..profile_helpers import *
+
+from ... import profile_models
+
 from .....custom_exceptions import HalotoolsError
 
 
@@ -21,33 +24,21 @@ class TestAnalyticDensityProf(TestCase):
     """
 
     def setup_class(self):
-        pass
-    # The following tests are useful but need to be rewritten according to 
-    # the changes made by the prof_overhaul branch 
+        self.prof_model_list = (
+            profile_models.NFWProfile, profile_models.TrivialProfile
+            )
 
-    # prof_model_list = hpc.__all__
-    # parent_class = hpc.HaloProfileModel
+    def test_attrs(self):
 
-    # # First create a list of all sub-classes to test
-    # component_models_to_test = []
-    # for clname in prof_model_list:
-    #     cl = getattr(hpc, clname)
+        # Test that all sub-classes inherit the correct attributes
+        for model_class in self.prof_model_list:
+            model_instance = model_class(cosmology = WMAP9, redshift = 2, mdef = 'vir')
 
-    #     if (issubclass(cl, parent_class)) & (cl != parent_class):
-    #         component_models_to_test.append(cl)
 
-    # # Now we will test that all sub-classes inherit the correct behavior
-    # for model_class in component_models_to_test:
-    #     model_instance = model_class(cosmology=cosmology.WMAP7, redshift=2)
+            assert hasattr(model_instance, 'cosmology')
+            assert isinstance(model_instance.cosmology, FLRW)
+            assert hasattr(model_instance, 'redshift')
+            assert hasattr(model_instance, 'mdef')
 
-    #     assert hasattr(model_instance, 'cosmology')
-    #     assert isinstance(model_instance.cosmology, cosmology.FlatLambdaCDM)
-    #     assert hasattr(model_instance, 'redshift')
 
-    #     assert hasattr(model_instance, 'build_inv_cumu_lookup_table')
-    #     model_instance.build_inv_cumu_lookup_table()
-    #     assert hasattr(model_instance, 'cumu_inv_func_table')
-    #     assert type(model_instance.cumu_inv_func_table) == np.ndarray
-    #     assert hasattr(model_instance, 'func_table_indices')
-    #     assert type(model_instance.func_table_indices) == np.ndarray
 
