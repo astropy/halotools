@@ -135,8 +135,7 @@ def _jnpairs_process_weights_jtags(data1, data2, weights1, weights2, jtags1, jta
 
 
 def _xy_z_npairs_process_args(data1, data2, rp_bins, pi_bins, period, 
-    verbose, num_threads, approx_rp_cell1_size, approx_pi_cell1_size, 
-    approx_rp_cell2_size, approx_pi_cell2_size):
+    verbose, num_threads, approx_cell1_size, approx_cellw_size):
     """
     """
     if num_threads is not 1:
@@ -253,66 +252,38 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax):
 
     return approx_cell1_size, approx_cell2_size
 
-def _set_approximate_xy_z_cell_sizes(approx_rp_cell1_size, approx_pi_cell1_size, 
-    approx_rp_cell2_size, approx_pi_cell2_size, rp_max, pi_max):
+def _set_approximate_xy_z_cell_sizes(approx_cell1_size, approx_cell2_size,
+                                     rp_max, pi_max):
     """
     """
 
     #################################################
     ### Set the approximate cell sizes of the trees
-    if approx_rp_cell1_size is None:
-        approx_rp_cell1_size = np.array([rp_max, rp_max]).astype(float)
+    if approx_cell1_size is None:
+        approx_cell1_size = np.array([rp_max, rp_max, pi_max]).astype(float)
     else:
-        approx_rp_cell1_size = convert_to_ndarray(approx_rp_cell1_size)
+        approx_cell1_size = convert_to_ndarray(approx_cell1_size)
         try:
-            assert len(approx_rp_cell1_size) == 2
-            assert type(approx_rp_cell1_size) is np.ndarray
-            assert approx_rp_cell1_size.ndim == 1
+            assert len(approx_cell1_size) == 3
+            assert type(approx_cell1_size) is np.ndarray
+            assert approx_cell1_size.ndim == 1
         except AssertionError:
-            msg = ("Input ``approx_rp_cell1_size`` must be a length-2 sequence")
+            msg = ("Input ``approx_cell1_size`` must be a length-3 sequence")
             raise HalotoolsError(msg)
 
-    if approx_rp_cell2_size is None:
-        approx_rp_cell2_size = np.array([rp_max, rp_max]).astype(float)
+    if approx_cell2_size is None:
+        approx_cell2_size = np.array([rp_max, rp_max, pi_max]).astype(float)
     else:
-        approx_rp_cell2_size = convert_to_ndarray(approx_rp_cell2_size)
+        approx_cell2_size = convert_to_ndarray(approx_cell2_size)
         try:
-            assert len(approx_rp_cell2_size) == 2
-            assert type(approx_rp_cell2_size) is np.ndarray
-            assert approx_rp_cell2_size.ndim == 1
+            assert len(approx_cell2_size) == 3
+            assert type(approx_cell2_size) is np.ndarray
+            assert approx_cell2_size.ndim == 1
         except AssertionError:
-            msg = ("Input ``approx_rp_cell2_size`` must be a length-2 sequence")
-            raise HalotoolsError(msg)
-
-    if approx_pi_cell1_size is None:
-        approx_pi_cell1_size = np.array([pi_max]).astype(float)
-    else:
-        msg = ("Input ``approx_pi_cell1_size`` must be a float")
-        raise HalotoolsError(msg)
-        approx_pi_cell1_size = convert_to_ndarray(approx_pi_cell1_size)
-        try:
-            assert len(approx_pi_cell1_size) == 1
-            assert type(approx_pi_cell1_size) is np.ndarray
-            assert approx_pi_cell1_size.ndim == 1
-        except AssertionError:
-            msg = ("Input ``approx_pi_cell1_size`` must be a float")
+            msg = ("Input ``approx_cell2_size`` must be a length-3 sequence")
             raise HalotoolsError(msg)
             
-    if approx_pi_cell2_size is None:
-        approx_pi_cell2_size = np.array([pi_max]).astype(float)
-    else:
-        msg = ("Input ``approx_pi_cell2_size`` must be a float")
-        raise HalotoolsError(msg)
-        approx_pi_cell2_size = convert_to_ndarray(approx_pi_cell2_size)
-        try:
-            assert len(approx_pi_cell2_size) == 1
-            assert type(approx_pi_cell2_size) is np.ndarray
-            assert approx_pi_cell2_size.ndim == 1
-        except AssertionError:
-            msg = ("Input ``approx_pi_cell2_size`` must be a float")
-            raise HalotoolsError(msg)
-            
-    return approx_rp_cell1_size, approx_pi_cell1_size, approx_rp_cell2_size, approx_pi_cell2_size
+    return approx_cell2_size, approx_cell2_size
 
 
 

@@ -26,7 +26,7 @@ from .cpairs import *
 from ...custom_exceptions import *
 from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
-__all__ = ['npairs', 'jnpairs', 'xy_z_npairs']
+__all__ = ['npairs', 'jnpairs', 'xy_z_npairs', 's_mu_npairs']
 __author__ = ['Duncan Campbell', 'Andrew Hearin']
 
 ##########################################################################
@@ -367,8 +367,7 @@ def _jnpairs_engine(double_tree, weights1, weights2, jtags1, jtags2,
 ##########################################################################
 
 def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_threads=1, 
-    approx_rp_cell1_size = None, approx_pi_cell1_size = None, 
-    approx_rp_cell2_size = None, approx_pi_cell2_size = None):
+                approx_cell1_size = None, approx_cell2_size = None):
 
     """
     real-space pair counter.
@@ -405,26 +404,19 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
         available cores.  num_threads=0 is the default.
 
-    approx_rp_cell1_size : array_like, optional 
-        Length-2 array serving as a guess for the optimal manner by which 
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
         the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
         will apportion the ``data`` points into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use 1/10 of the box size in each dimension, 
-        which will return reasonable result performance for most use-cases. 
+        Default choice is to use [rp_max,rp_max,pi_max] of the box size in each
+        dimension, which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
         
-    approx_rp_cell2_size : array_like, optional 
+    approx_cell2_size : array_like, optional 
         See comments for ``approx_cell1_size``. 
-
-    approx_pi_cell1_size : float, optional 
-        See comments for ``approx_rp_cell1_size``, 
-        but here the input is a single float for the optimal choice in the line-of-sight direction. 
-
-    approx_pi_cell2_size : float, optional 
-        See comments for ``approx_pi_cell1_size``, 
 
 
     Returns
@@ -435,8 +427,7 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     ### Process the inputs with the helper function
     x1, y1, z1, x2, y2, z2, rp_bins, pi_bins, period, num_threads, PBCs = (
         _xy_z_npairs_process_args(data1, data2, rp_bins, pi_bins, period, 
-            verbose, num_threads, approx_rp_cell1_size, approx_pi_cell1_size, 
-            approx_rp_cell2_size, approx_pi_cell2_size)
+            verbose, num_threads, approx_cell1_size, approx_cell2_size)
         )        
     
     xperiod, yperiod, zperiod = period 
@@ -446,19 +437,16 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     ### Compute the estimates for the cell sizes
 
     result = _set_approximate_xy_z_cell_sizes(
-        approx_rp_cell1_size, approx_pi_cell1_size, 
-        approx_rp_cell2_size, approx_pi_cell2_size, rp_max, pi_max)
-    approx_rp_cell1_size = result[0]
-    approx_pi_cell1_size = result[1]
-    approx_rp_cell2_size = result[2]
-    approx_pi_cell2_size = result[3]
+        approx_cell1_size, approx_cell2_size, rp_max, pi_max)
+    approx_cell1_size = result[0]
+    approx_cell2_size = result[1]
 
 
-    approx_x1cell_size, approx_y1cell_size = approx_rp_cell1_size
-    approx_z1cell_size = approx_pi_cell1_size
+    approx_x1cell_size, approx_y1cell_size = approx_cell1_size[:2]
+    approx_z1cell_size = approx_cell1_size[2]
 
-    approx_x2cell_size, approx_y2cell_size = approx_rp_cell2_size
-    approx_z2cell_size = approx_pi_cell2_size
+    approx_x2cell_size, approx_y2cell_size = approx_cell2_size[:2]
+    approx_z2cell_size = approx_cell2_size[2]
 
     double_tree = FlatRectanguloidDoubleTree(
         x1, y1, z1, x2, y2, z2,  
@@ -527,6 +515,174 @@ def _xy_z_npairs_engine(double_tree, rp_bins_squared, pi_bins_squared, period, P
     return counts
 
 
+def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
+                verbose = False, num_threads = 1,\
+                approx_cell1_size = None, approx_cell2_size = None):
+    """
+    Calculate the number of pairs with separations :math:`(s, \\mu)`.
+    
+    .. math:: s^2 = r_{\\parallel}^2+r_{\\perp}^2
+    and, 
+    .. math:: `\\mu = r_{\\perp}/s`
+    
+    i.e. math::`s` is the radial seperation, and 
+    math:: `\\mu` is the math::`\\sin(\\theta_{\rm los})`, where 
+    math::`\\theta_{\rm los}` is the line-of-sight angle between points.
+    
+    Parameters
+    ----------
+    data1: array_like
+        N1 by 3 numpy array of 3-dimensional positions. 
+        Values of each dimension should be between zero and the corresponding dimension 
+        of the input period.
+            
+    data2: array_like
+        N2 by 3 numpy array of 3-dimensional positions.
+        Values of each dimension should be between zero and the corresponding dimension 
+        of the input period.
+            
+    s_bins: array_like
+        numpy array of boundaries defining the radial bins in which pairs are counted.
+    
+    mu_bins: array_like
+        numpy array of boundaries defining sin(angle) from the line of sight that pairs 
+        are counted in.  Note that using the sine is not common convention for 
+        calculating the two point correlation function (see notes).
+    
+    period: array_like, optional
+        Length-3 array defining the periodic boundary conditions. 
+        If only one number is specified, the enclosing volume is assumed to 
+        be a periodic cube (by far the most common case). 
+        If period is set to None, the default option, 
+        PBCs are set to infinity.  
+    
+    verbose: Boolean, optional
+        If True, print out information and progress.
+    
+    num_threads: int, optional
+        Number of CPU cores to use in the pair counting. 
+        If ``num_threads`` is set to the string 'max', use all available cores. 
+        Default is 1 thread for a serial calculation that 
+        does not open a multiprocessing pool. 
+
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
+        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+        will apportion the ``data`` points into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use 1/10 of the box size in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
+
+    approx_cell2_size : array_like, optional 
+        See comments for ``approx_cell1_size``. 
+    
+    Returns
+    -------
+    num_pairs : array of length len(rbins)
+        number of pairs
+        
+    Notes
+    -----
+    math:: `\\mu` is defined as the sine of the LOS angle and not the conventional cosine
+    because the pair counter needs math:: `\\mu` to increase as the LOS angle increases.
+    """
+    
+    #the parameters for this are similar to npairs, except mu_bins needs to be processed.
+    # Process the inputs with the helper function
+    x1, y1, z1, x2, y2, z2, rbins, period, num_threads, PBCs = (
+        _npairs_process_args(data1, data2, s_bins, period, 
+            verbose, num_threads, approx_cell1_size, approx_cell2_size)
+        )        
+    
+    xperiod, yperiod, zperiod = period 
+    rmax = np.max(s_bins)
+    
+    #process mu_bins parameter separately
+    mu_bins = convert_to_ndarray(mu_bins)
+    try:
+        assert mu_bins.ndim == 1
+        assert len(mu_bins) > 1
+        if len(mu_bins) > 2:
+            assert array_is_monotonic(mu_bins, strict = True) == 1
+    except AssertionError:
+        msg = ("Input ``mu_bins`` must be a monotonically increasing \n"
+              "1D array with at least two entries")
+        raise HalotoolsError(msg)
+    
+    
+    ### Compute the estimates for the cell sizes
+    approx_cell1_size, approx_cell2_size = (
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax)
+        )
+    approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
+    approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
+
+    double_tree = FlatRectanguloidDoubleTree(
+        x1, y1, z1, x2, y2, z2,  
+        approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
+        approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
+        rmax, rmax, rmax, xperiod, yperiod, zperiod, PBCs=PBCs)
+
+    #square radial bins to make distance calculation cheaper
+    rbins_squared = rbins**2.0
+        
+    #number of cells
+    Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
+
+    #create a function to call with only one argument
+    engine = partial(_s_mu_npairs_engine, double_tree, s_bins, mu_bins, period, PBCs)
+    
+    #do the pair counting
+    if num_threads > 1:
+        pool = multiprocessing.Pool(num_threads)
+        counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        pool.close()
+    if num_threads == 1:
+        counts = np.sum(map(engine,range(Ncell1)),axis=0)
+
+    return counts
+
+def _s_mu_npairs_engine(double_tree, s_bins, mu_bins, period, PBCs, icell1):
+    """
+    pair counting engine for npairs function.  This code calls a cython function.
+    """
+    # print("...working on icell1 = %i" % icell1)
+    
+    counts = np.zeros((len(s_bins), len(mu_bins)))
+    
+    #extract the points in the cell
+    s1 = double_tree.tree1.slice_array[icell1]
+    x_icell1, y_icell1, z_icell1 = (
+        double_tree.tree1.x[s1],
+        double_tree.tree1.y[s1],
+        double_tree.tree1.z[s1])
+        
+    xsearch_length = s_bins[-1]
+    ysearch_length = s_bins[-1]
+    zsearch_length = s_bins[-1]
+    adj_cell_generator = double_tree.adjacent_cell_generator(
+        icell1, xsearch_length, ysearch_length, zsearch_length)
+            
+    adj_cell_counter = 0
+    for icell2, xshift, yshift, zshift in adj_cell_generator:
+                
+        #extract the points in the cell
+        s2 = double_tree.tree2.slice_array[icell2]
+        x_icell2 = double_tree.tree2.x[s2] + xshift
+        y_icell2 = double_tree.tree2.y[s2] + yshift 
+        z_icell2 = double_tree.tree2.z[s2] + zshift
+
+
+        #use cython functions to do pair counting
+        counts += s_mu_npairs_no_pbc(
+            x_icell1, y_icell1, z_icell1,
+            x_icell2, y_icell2, z_icell2,
+            s_bins, mu_bins)
+            
+    return counts
 
 
 
