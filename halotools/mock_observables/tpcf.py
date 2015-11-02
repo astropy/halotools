@@ -266,6 +266,20 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,\
                                  approx_cell1_size, approx_cell2_size,
                                  approx_cellran_size)
     
+    #check to see if any of the RR counts contain 0 pairs.
+    if D1R is not None:
+        if np.any(D1R==0):
+            msg = "sample1 cross randoms has radial bin(s) which contain no points."
+            raise HalotoolsError(msg)
+    if D2R is not None:
+        if np.any(D2R==0):
+            msg = "sample2 cross randoms has radial bin(s) which contain no points."
+            raise HalotoolsError(msg)
+    if RR is not None:
+        if np.any(RR==0):
+            msg = "randoms cross randoms has radial bin(s) which contain no points."
+            raise HalotoolsError(msg)
+    
     #run through estimator and return relavent results
     if _sample1_is_sample2: #only do auto
         xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
