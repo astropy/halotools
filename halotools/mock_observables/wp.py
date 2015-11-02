@@ -25,7 +25,8 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
        do_auto=True, do_cross=True, estimator='Natural', num_threads=1,\
-       max_sample_size=int(1e6)):
+       max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,\
+       approx_cellran_size=None):
     """ 
     Calculate the projected correlation function, :math:`w_{p}(r_p)`.
     
@@ -73,6 +74,25 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         
         If sample size exceeds max_sample_size, the sample will be randomly down-sampled 
         such that the subsample is equal to max_sample_size.
+    
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
+        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+        will apportion the sample1 points into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use [max(rp_bins),max(rp_bins),max(pi_bins)] in each 
+        dimension, which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
+
+    approx_cell2_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        ``approx_cell1_size`` for details. 
+    
+    approx_cellran_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
+        ``approx_cell1_size`` for details. 
 
     Returns 
     -------
@@ -91,9 +111,9 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     -----
     The projected correlation function is calculated by:
     
-    .. math:: `w_p{r_p} = \\int_0^{\\pi_{\\rm max}}\\xi(r_p,\\pi)\\mathrm{d}\\pi`
+    math:: `w_p{r_p} = \\int_0^{\\pi_{\\rm max}}\\xi(r_p,\\pi)\\mathrm{d}\\pi`
     
-    where :math:`\\pi_{\\rm max} = \\mathrm{maximum(pi_bins)}` and :math:`\\xi(r_p,\\pi)` 
+    where :math:`\\pi_{\\rm max} = \\mathrm{maximum}(pi_bins)` and :math:`\\xi(r_p,\\pi)` 
     is the redshift space correlation function.  See the documentation on 
     redshift_space_tpcf() for further details.
     
@@ -101,21 +121,26 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     
     """
     
+    #process input parameters
+    function_args = [sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,\
+                     do_cross, estimator, num_threads, max_sample_size,\
+                     approx_cell1_size, approx_cell2_size, approx_cellran_size]
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _redshift_space_tpcf_process_args(sample1, rp_bins,\
-        pi_bins, sample2, randoms, period, do_auto, do_cross, estimator, num_threads,\
-        max_sample_size)
+        _sample1_is_sample2, PBCs = _redshift_space_tpcf_process_args(*function_args)
     
     #pass the arguments into the redshift space TPCF function
     result = redshift_space_tpcf(sample1, rp_bins, pi_bins,\
                                  sample2 = sample2, randoms=randoms,\
                                  period = period, do_auto=do_auto, do_cross=do_cross,\
                                  estimator=estimator, num_threads=num_threads,\
-                                 max_sample_size=max_sample_size)
+                                 max_sample_size=max_sample_size,\
+                                 approx_cell1_size=approx_cell1_size,\
+                                 approx_cell2_size=approx_cell2_size,\
+                                 approx_cellran_size=approx_cellran_size)
     
     #integrate the redshift space TPCF to get w_p
     def integrate_2D_xi(x,pi_bins):
-        return 2.0*np.sum(x*np.diff(pi_bins),axis=1)
+        return 2.0*np.sum(x*np.diff(pi_bins), axis=1)
 
     #return the results.
     if _sample1_is_sample2:

@@ -168,7 +168,8 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
                 D1R = npairs(sample1, randoms, rbins, period=period,
                              num_threads=num_threads,
                              approx_cell1_size=approx_cell1_size,
-                             approx_cell2_size=approx_cellran_size)
+                             approx_cell2_size=approx_cellran_size
+                             )
                 D1R = np.diff(D1R)
             else: D1R=None
             if _sample1_is_sample2:
