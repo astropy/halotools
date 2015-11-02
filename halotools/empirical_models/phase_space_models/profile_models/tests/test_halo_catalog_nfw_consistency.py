@@ -15,6 +15,7 @@ from ..nfw_profile import NFWProfile
 
 from .....sim_manager import HaloCatalog
 from .....utils import table_utils
+from .....utils.array_utils import convert_to_ndarray
 
 from .....custom_exceptions import HalotoolsError
 
@@ -45,8 +46,7 @@ class TestHaloCatalogNFWConsistency(TestCase):
         """
         """
         halocat = HaloCatalog(simname = 'bolshoi', redshift = 0.)
-        hosts = table_utils.SampleSelector.host_halo_selection(
-            table = halocat.halo_table)
+        hosts = table_utils.SampleSelector.host_halo_selection(table = halocat.halo_table)
 
         mask_mvir_1e11 = (hosts['halo_mvir'] > 1e11) & (hosts['halo_mvir'] < 2e11)
         self.halos_mvir_1e11 = hosts[mask_mvir_1e11]
@@ -69,11 +69,33 @@ class TestHaloCatalogNFWConsistency(TestCase):
 
         for sample_name in self.halo_sample_names:
             halos = getattr(self, sample_name)
+
             median_conc = np.median(halos['halo_nfw_conc'])
             median_mass = np.median(halos['halo_mvir'])
-            predicted_conc = self.nfw_profile.conc_NFWmodel(prim_haloprop = median_mass)
+
+            predicted_conc = self.nfw_profile.conc_NFWmodel(
+                prim_haloprop = median_mass)
+
             assert np.allclose(median_conc, predicted_conc, rtol = 0.25)
-        
+
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_vmax_consistency(self):
+
+        for sample_name in self.halo_sample_names:
+            halos = getattr(self, sample_name)
+
+            median_vmax = np.median(halos['halo_vmax'])
+            median_mass = np.median(halos['halo_mvir'])
+            median_conc = np.median(halos['halo_nfw_conc'])
+
+            predicted_vmax = self.nfw_profile.vmax(
+                median_mass, median_conc)
+
+            assert np.allclose(median_vmax, predicted_vmax, rtol = 0.25)
+
+      
         
 
 
