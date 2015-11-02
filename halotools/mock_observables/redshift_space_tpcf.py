@@ -23,9 +23,10 @@ __author__ = ['Duncan Campbell']
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 
-def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
-                        period=None, do_auto=True, do_cross=True, estimator='Natural',\
-                        num_threads=1, max_sample_size=int(1e6)):
+def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
+                        period=None, do_auto=True, do_cross=True, estimator='Natural',
+                        num_threads=1, max_sample_size=int(1e6), approx_cell1_size = None,
+                        approx_cell2_size = None, approx_cellran_size = None):
     """ 
     Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`.
     
@@ -73,7 +74,26 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
         Defines maximum size of the sample that will be passed to the pair counter. 
         
         If sample size exceeds `max_sample_size`, the sample will be randomly down-sampled 
-        such that the subsample is equal to `max_sample_size`. 
+        such that the subsample is equal to `max_sample_size`.
+    
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
+        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+        will apportion the sample1 points into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use [max(rp_bins),max(rp_bins),max(pi_bins)] in each 
+        dimension, which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
+
+    approx_cell2_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        ``approx_cell1_size`` for details. 
+    
+    approx_cellran_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
+        ``approx_cell1_size`` for details. 
 
     Returns 
     -------
@@ -98,26 +118,27 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
 
     """
     
-    sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _redshift_space_tpcf_process_args(sample1, rp_bins,\
-        pi_bins, sample2, randoms, period, do_auto, do_cross, estimator, num_threads,\
-        max_sample_size)
+    function_args = [sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,\
+                     do_cross, estimator, num_threads, max_sample_size,\
+                     approx_cell1_size, approx_cell2_size, approx_cellran_size]
     
+    sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
+        _sample1_is_sample2, PBCs = _redshift_space_tpcf_process_args(*function_args)
     
     def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,\
-                      PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2):
+                      PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,\
+                      approx_cell1_size, approx_cell2_size, approx_cellran_size):
         """
-        Count random pairs.  There are three high level branches: 
-
-            1. no PBCs w/ randoms.
-
-            2. PBCs w/ randoms
-            
-            3. PBCs and analytical randoms
-
-        There are also logical bits to do RR and DR pair counts, as not all estimators 
+        Count random pairs.  There are two high level branches:
+            1. w/ or wo/ PBCs and randoms.
+            2. PBCs and analytical randoms
+        There are also logical bits to do RR and DR pair counts, as not all estimators
         need one or the other, and not doing these can save a lot of calculation.
+        
+        Analytical counts are N**2*dv*rho, where dv can is the volume of the spherical 
+        shells, which is the correct volume to use for a continious cubic volume with PBCs
         """
+        
         def cylinder_volume(R,h):
             """
             Calculate the volume of a cylinder(s), used for the analytical randoms.
@@ -125,31 +146,19 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
             return pi*np.outer(R**2.0,h)
         
         #No PBCs, randoms must have been provided.
-        if PBCs==False:
-            RR = xy_z_npairs(randoms, randoms, rp_bins, pi_bins, period=period,\
-                             num_threads=num_threads)
-            RR = np.diff(np.diff(RR,axis=0),axis=1)
-            D1R = xy_z_npairs(sample1, randoms, rp_bins, pi_bins, period=period,\
-                              num_threads=num_threads)
-            D1R = np.diff(np.diff(D1R,axis=0),axis=1)
-            if _sample1_is_sample2: #calculating the cross-correlation
-                D2R = None
-            else:
-                D2R = xy_z_npairs(sample2, randoms, rp_bins, pi_bins, period=period,\
-                                  num_threads=num_threads)
-                D2R = np.diff(np.diff(D2R,axis=0),axis=1)
-            
-            return D1R, D2R, RR
-        #PBCs and randoms.
-        elif randoms is not None:
+        if randoms is not None:
             if do_RR==True:
                 RR = xy_z_npairs(randoms, randoms, rp_bins, pi_bins, period=period,\
-                                 num_threads=num_threads)
+                                 num_threads=num_threads,\
+                                 approx_cell1_size=approx_cellran_size,\
+                                 approx_cell2_size=approx_cellran_size)
                 RR = np.diff(np.diff(RR,axis=0),axis=1)
             else: RR=None
             if do_DR==True:
                 D1R = xy_z_npairs(sample1, randoms, rp_bins, pi_bins, period=period,\
-                                  num_threads=num_threads)
+                                  num_threads=num_threads,\
+                                  approx_cell1_size=approx_cell1_size,\
+                                  approx_cell2_size=approx_cellran_size)
                 D1R = np.diff(np.diff(D1R,axis=0),axis=1)
             else: D1R=None
             if _sample1_is_sample2: #calculating the cross-correlation
@@ -157,7 +166,9 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
             else:
                 if do_DR==True:
                     D2R = xy_z_npairs(sample2, randoms, rp_bins, pi_bins, period=period,\
-                                      num_threads=num_threads)
+                                      num_threads=num_threads,\
+                                      approx_cell1_size=approx_cell2_size,\
+                                      approx_cell2_size=approx_cellran_size)
                     D2R = np.diff(np.diff(D2R,axis=0),axis=1)
                 else: D2R=None
             
@@ -188,27 +199,36 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
                 RR = (dv*rhor) #RR is only the RR for the cross-correlation.
 
             return D1R, D2R, RR
-        else:
-            raise ValueError('Un-supported combination of PBCs and randoms provided.')
     
     def pair_counts(sample1, sample2, rp_bins, pi_bins, period,\
-                    N_thread, do_auto, do_cross, _sample1_is_sample2):
+                    N_thread, do_auto, do_cross, _sample1_is_sample2,\
+                    approx_cell1_size, approx_cell2_size):
         """
         Count data pairs.
         """
         D1D1 = xy_z_npairs(sample1, sample1, rp_bins, pi_bins, period=period,\
-                           num_threads=num_threads)
+                           num_threads=num_threads,\
+                           approx_cell1_size=approx_cell1_size,\
+                           approx_cell2_size=approx_cell1_size)
         D1D1 = np.diff(np.diff(D1D1,axis=0),axis=1)
         if _sample1_is_sample2:
             D1D2 = D1D1
             D2D2 = D1D1
         else:
-            D1D2 = xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=period,\
-                               num_threads=num_threads)
-            D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
-            D2D2 = xy_z_npairs(sample2, sample2, rp_bins, pi_bins, period=period,\
-                               num_threads=num_threads)
-            D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
+            if do_cross==True:
+                D1D2 = xy_z_npairs(sample1, sample2, rp_bins, pi_bins, period=period,\
+                                  num_threads=num_threads,\
+                                  approx_cell1_size=approx_cell1_size,\
+                                  approx_cell2_size=approx_cell2_size)
+            else: D1D2=None
+            if do_auto==True:
+                D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
+                D2D2 = xy_z_npairs(sample2, sample2, rp_bins, pi_bins, period=period,\
+                                   num_threads=num_threads,\
+                                   approx_cell1_size=approx_cell2_size,\
+                                   approx_cell2_size=approx_cell2_size)
+                D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
+            else: D2D2=None
 
         return D1D1, D1D2, D2D2
     
@@ -229,10 +249,12 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,\
     
     #count pairs
     D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, rp_bins, pi_bins, period,\
-                                 num_threads, do_auto, do_cross, _sample1_is_sample2)
+                                 num_threads, do_auto, do_cross, _sample1_is_sample2,\
+                                 approx_cell1_size, approx_cell2_size)
     
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,\
-                                 PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2)
+                                 PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,\
+                                 approx_cell1_size, approx_cell2_size, approx_cellran_size)
     
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
