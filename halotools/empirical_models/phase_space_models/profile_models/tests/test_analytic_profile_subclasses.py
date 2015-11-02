@@ -17,6 +17,8 @@ from .....custom_exceptions import HalotoolsError
 __all__ = ['TestAnalyticDensityProf']
 
 class TestAnalyticDensityProf(TestCase):
+    """
+    """
 
     def setup_class(self):
         pass
