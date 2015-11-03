@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the components for 
-the radial profiles of galaxies 
-inside their halos. 
+This module contains the `AnalyticalDensityProf` class, 
+a container class for the distribution of mass and/or galaxies 
+within dark matter halos.  
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
