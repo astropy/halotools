@@ -41,6 +41,18 @@ class TrivialProfile(AnalyticDensityProf):
         mdef = model_defaults.halo_mass_definition,
         **kwargs):
         """
+        Parameters 
+        ----------
+        cosmology : object, optional 
+            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        redshift : float, optional  
+            Default is set in `~halotools.empirical_models.sim_defaults`.
+
+        mdef: str, optional 
+            String specifying the halo mass definition, e.g., 'vir' or '200m'. 
+            Default is set in `~halotools.empirical_models.model_defaults`.
+
         Notes 
         -----
         Testing done by `~halotools.empirical_models.test_empirical_models.test_TrivialProfile`
