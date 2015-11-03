@@ -137,8 +137,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
             :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
 
-        conc : array_like
-            Concentrations of the input halos. 
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``scaled_radius``. 
 
         Returns 
         -------
@@ -169,8 +170,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             Total mass of the halo; can be a scalar or numpy array of the same 
             dimension as the input ``radius``. 
 
-        conc : array_like
-            Concentrations of the input halos. 
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``radius``. 
 
         Returns 
         -------
@@ -259,4 +261,68 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         scaled_radius = np.where(scaled_radius > 1, 1, scaled_radius)
         scaled_radius = np.where(scaled_radius < 0, 0, scaled_radius)
         return self.g(conc*scaled_radius) / self.g(conc)
+
+    def enclosed_mass(self, radius, total_mass, conc):
+        """
+        The mass enclosed within the input radius. 
+
+        :math:`M(<r) = 4\\pi\\int_{0}^{r}dr'r'^{2}\\rho(r)`. 
+
+        Parameters 
+        -----------
+        radius : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
+
+        total_mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``radius``. 
+            
+        Returns
+        ----------
+        enclosed_mass: array_like
+            The mass enclosed within radius r, in :math:`M_{\odot}/h`; 
+            has the same dimensions as the input ``radius``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> radius = np.logspace(-2, -1, Npts)
+        >>> total_mass = np.zeros(Npts) + 1e12
+        >>> conc = 5
+        >>> result = model.enclosed_mass(radius, total_mass, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.enclosed_mass(radius, total_mass, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+        """
+        return AnalyticDensityProf.enclosed_mass(self, radius, total_mass, conc)
+
+    def virial_velocity(self, total_mass):
+        """ The circular velocity evaluated at the halo boundary, 
+        :math:`V_{\\rm vir} \\equiv \\sqrt{GM_{\\rm halo}/R_{\\rm halo}}`.
+
+        Parameters
+        --------------
+        total_mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        Returns 
+        --------
+        vvir : array_like 
+            Virial velocity in km/s.
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        """
+        return AnalyticDensityProf.virial_velocity(self, total_mass)
 
