@@ -115,7 +115,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """
         return ConcMass.compute_concentration(self, **kwargs)
 
-    def dimensionless_mass_density(self, x, conc):
+    def dimensionless_mass_density(self, scaled_radius, conc):
         """
         Physical density of the halo scaled by the density threshold of the 
         mass definition:
@@ -128,9 +128,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         Parameters 
         -----------
-        x : array_like 
-            Halo-centric distance scaled by the halo boundary, so that 
-            :math:`0 <= x <= 1`. Can be a scalar or numpy array
+        scaled_radius : array_like 
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
 
         conc : array_like
             Concentrations of the input halos. 
@@ -147,7 +147,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         """
         numerator = conc**3/(3.*self.g(conc))
-        denominator = conc*x*(1 + conc*x)**2
+        denominator = conc*scaled_radius*(1 + conc*scaled_radius)**2
         return numerator/denominator
 
     def g(self, x):
@@ -164,36 +164,52 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         Examples 
         --------
-        >>> model = NFWProfile() # doctest: +SKIP 
-        >>> g = model.g(1) # doctest: +SKIP 
-        >>> Npts = 25 # doctest: +SKIP 
-        >>> g = model.g(np.logspace(-1, 1, Npts)) # doctest: +SKIP 
+        >>> model = NFWProfile() 
+        >>> result = model.g(1) 
+        >>> Npts = 25 
+        >>> result = model.g(np.logspace(-1, 1, Npts)) 
         """
+        x = convert_to_ndarray(x, dt = np.float64)
         return np.log(1.0+x) - (x/(1.0+x))
 
-    def cumulative_mass_PDF(self, x, conc):
+    def cumulative_mass_PDF(self, scaled_radius, conc):
         """
         The fraction of the total mass enclosed within 
-        dimensionless radius :math:`x = r / R_{\\rm halo}`.
+        dimensionless radius :math:`\\tilde{r} \\equiv r / R_{\\rm halo}`.
 
         Parameters
         -------------
-        x: array_like
-            Halo-centric distance scaled by the halo boundary, such that :math:`0 < x < 1`. 
-            Can be a scalar or a numpy array.
+        scaled_radius : array_like 
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
 
         conc : array_like 
             Value of the halo concentration. Can either be a scalar, or a numpy array 
-            of the same dimension as the input ``x``. 
+            of the same dimension as the input ``scaled_radius``. 
             
         Returns
         -------------
         p: array_like
             The fraction of the total mass enclosed 
-            within radius x, in :math:`M_{\odot}/h`; 
-            has the same dimensions as the input ``x``.
+            within the input ``scaled_radius``, in :math:`M_{\odot}/h`; 
+            has the same dimensions as the input ``scaled_radius``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> scaled_radius = np.logspace(-2, 0, Npts)
+        >>> conc = 5
+        >>> result = model.cumulative_mass_PDF(scaled_radius, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.cumulative_mass_PDF(scaled_radius, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
         """     
-        x = np.where(x > 1, 1, x)
-        x = np.where(x < 0, 0, x)
-        return self.g(conc*x) / self.g(conc)
+        scaled_radius = np.where(scaled_radius > 1, 1, scaled_radius)
+        scaled_radius = np.where(scaled_radius < 0, 0, scaled_radius)
+        return self.g(conc*scaled_radius) / self.g(conc)
 
