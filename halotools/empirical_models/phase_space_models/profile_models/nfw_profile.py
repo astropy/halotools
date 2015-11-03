@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-This module contains the components for 
-the radial profiles of galaxies 
-inside their halos. 
+This module contains the `NFWProfile` class, 
+a sub-class of `~halotools.empirical_models.phase_space_models.AnalyticDensityProf`. 
+The `NFWProfile` class is used to model the distribution of mass and/or galaxies 
+inside dark matter halos according to the fitting function introduced in 
+Navarry, Frenk and White (1999). 
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
@@ -34,6 +36,10 @@ __all__ = ['NFWProfile']
 class NFWProfile(AnalyticDensityProf, ConcMass):
     """ NFW halo profile, based on Navarro, Frenk and White (1999).
 
+    For a review of the mathematics underlying the NFW profile, 
+    including descriptions of how the relevant equations are 
+    implemented in the Halotools code base, see 
+
     """
 
     def __init__(self, 
@@ -45,7 +51,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         Parameters 
         ----------
         cosmology : object, optional 
-            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
+            Instance of an astropy `~astropy.cosmology`. 
+            Default cosmology is set in `~halotools.empirical_models.sim_manager.sim_defaults`.
 
         redshift : float, optional  
             Default is set in `~halotools.empirical_models.sim_defaults`.
@@ -63,12 +70,17 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         You can load a NFW profile model with the default settings simply by calling 
         the class constructor with no arguments:
 
-        >>> nfw_halo_prof_model = NFWProfile() # doctest: +SKIP 
+        >>> nfw_halo_prof_model = NFWProfile() 
 
         For an NFW profile with an alternative cosmology and redshift:
 
         >>> from astropy.cosmology import WMAP9
-        >>> nfw_halo_prof_model = NFWProfile(cosmology = WMAP9, redshift = 2) # doctest: +SKIP 
+        >>> nfw_halo_prof_model = NFWProfile(cosmology = WMAP9, redshift = 2) 
+
+        For a profile based on an alternative mass definition:
+
+        >>> nfw_halo_prof_model = NFWProfile(mdef = '2500c') 
+
         """
 
         super(NFWProfile, self).__init__(cosmology, redshift, mdef)
