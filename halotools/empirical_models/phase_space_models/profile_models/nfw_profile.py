@@ -319,10 +319,149 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         vvir : array_like 
             Virial velocity in km/s.
 
+        Examples
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> mass_array = np.logspace(11, 15, Npts)
+        >>> vvir_array = model.virial_velocity(mass_array)
+
         Notes 
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
         """
         return AnalyticDensityProf.virial_velocity(self, total_mass)
+
+    def circular_velocity(self, radius, total_mass, conc):
+        """
+        The circular velocity, :math:`V_{\\rm cir} \\equiv \\sqrt{GM(<r)/r}`, 
+        as a function of halo-centric distance r. 
+
+        Parameters
+        --------------
+        radius : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
+
+        total_mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``radius``. 
+
+        Returns
+        ----------
+        vc: array_like
+            The circular velocity in km/s; has the same dimensions as the input ``radius``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> radius = np.logspace(-2, -1, Npts)
+        >>> total_mass = np.zeros(Npts) + 1e12
+        >>> conc = 5
+        >>> result = model.circular_velocity(radius, total_mass, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.circular_velocity(radius, total_mass, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        """    
+        return AnalyticDensityProf.circular_velocity(self, radius, total_mass, conc)
+
+    def vmax(self, total_mass, conc):
+        """ Maximum circular velocity of the halo profile. 
+
+        Parameters 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``radius``. 
+
+        Returns 
+        --------
+        vmax : array_like 
+            :math:`V_{\\rm max}` in km/s.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> total_mass = np.zeros(Npts) + 1e12
+        >>> conc = 5
+        >>> result = model.vmax(total_mass, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.vmax(total_mass, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        """
+        halo_radius = self.halo_mass_to_halo_radius(total_mass)
+        scale_radius = halo_radius/conc
+
+        rmax = 2.16258 * scale_radius
+        vmax = self.circular_velocity(rmax, total_mass, conc)
+        return vmax
+
+    def halo_mass_to_halo_radius(self, total_mass):
+        """
+        Spherical overdensity radius as a function of the input mass. 
+
+        Note that this function is independent of the form of the density profile.
+
+        Parameters 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+
+        Returns 
+        -------
+        radius : array_like 
+            Radius of the halo in Mpc/h units. 
+            Will have the same dimension as the input ``total_mass``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> halo_radius = model.halo_mass_to_halo_radius(1e13)
+
+        """
+        return AnalyticDensityProf.halo_mass_to_halo_radius(self, total_mass)
+
+    def halo_radius_to_halo_mass(self, radius):
+        """
+        Spherical overdensity mass as a function of the input radius. 
+
+        Note that this function is independent of the form of the density profile.
+
+        Parameters 
+        ------------
+        radius : array_like 
+            Radius of the halo in Mpc/h units; can be a number or a numpy array.
+
+        Returns 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`. 
+            Will have the same dimension as the input ``radius``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> halo_mass = model.halo_mass_to_halo_radius(500.)
+
+        """
+        return AnalyticDensityProf.halo_radius_to_halo_mass(self, radius)
+
+
 
