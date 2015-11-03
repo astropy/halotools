@@ -57,7 +57,23 @@ Once a choice is made for :math:`\Delta_{\rm ref}(z)`, the mass of a spherically
 Computing the relevant quantities
 -----------------------------------
 
-In Halotools, 
+In Halotools, the reference densities are computed using the `~astropy.cosmology` sub-package, 
+and the remaining quantities are computed in the 
+`~halotools.empirical_models.phase_space_models.profile_models` sub-package. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
