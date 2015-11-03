@@ -4,11 +4,11 @@
 Tutorial on the AnalyticDensityProf Template Model
 ****************************************************
 
-The purpose of the `~halotools.empirical_models.phase_space_models.AnalyticDensityProf` 
+The purpose of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` 
 class is to provide a template for any Halotools model of the spatial distribution 
 of points within a halo. So in Halotools, any model for how either matter or galaxies 
 are spatially distributed within their halos will subclass from the 
-`~halotools.empirical_models.phase_space_models.AnalyticDensityProf` class. This tutorial 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class. This tutorial 
 reviews the mathematics of halo profiles, and describes how the relevant equations 
 are implemented in the code base. 
 
@@ -21,7 +21,7 @@ Halo Mass and Radius Definitions
 Basic Equations
 -----------------------------------
 
-The `~halotools.empirical_models.phase_space_models.AnalyticDensityProf` class models 
+The `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class models 
 a dark matter halo to be a spherically symmetric overdensity relative to some reference 
 density, :math:`\rho_{\rm ref}(z)`. The reference density is typically either the critical 
 energy density of the universe, :math:`\rho_{\rm crit}(z)`, or the mean matter density 
@@ -67,7 +67,8 @@ Computing the relevant quantities
 
 In Halotools, the reference densities are computed using the `~astropy.cosmology` sub-package, 
 and the remaining quantities are computed in the 
-`~halotools.empirical_models.phase_space_models.profile_models` sub-package. 
+`~halotools.empirical_models.phase_space_models.profile_models` sub-package, 
+specifically the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers` module. 
 
 ============================================  ========================================================================================================= 
 Quantity                                      Source Code                 
@@ -76,8 +77,8 @@ Quantity                                      Source Code
 :math:`\Delta_{\rm vir}(z)`                   `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.delta_vir`
 :math:`M_{\Delta}(z)`                         `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_radius_to_halo_mass`
 :math:`R_{\Delta}(z)`                         `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_mass_to_halo_radius`
-:math:`\rho_{\rm crit}(z)`                    `~astropy.cosmology.critical_density`
-:math:`\Omega_{\rm m}(z)`                     `~astropy.cosmology.Om`
+:math:`\rho_{\rm crit}(z)`                    `~astropy.cosmology.FLRW.critical_density`
+:math:`\Omega_{\rm m}(z)`                     `~astropy.cosmology.FLRW.Om`
 ============================================  =========================================================================================================
 
 .. _halo_profile_definitions:
