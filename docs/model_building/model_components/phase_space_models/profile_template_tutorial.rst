@@ -19,6 +19,12 @@ are spatially distributed within their halos will subclass from the
 reviews the mathematics of halo profiles, and describes how the relevant equations 
 are implemented in the code base. 
 
+For a similar tutorial on sub-classes of 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`, see:
+
+	* :ref:`nfw_profile_tutorial`
+
+
 .. _halo_mass_definitions:
 
 Halo Mass and Radius Definitions
