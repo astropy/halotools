@@ -34,6 +34,10 @@ __all__ = ['AnalyticDensityProf']
 class AnalyticDensityProf(object):
     """ Container class for any analytical radial profile model. 
 
+    See :ref:`profile_template_tutorial` for a review of the mathematics of 
+    halo profiles, and a thorough description of how the relevant equations 
+    are implemented in the `AnalyticDensityProf` source code. 
+
     Notes 
     -----
     The primary behavior of the `AnalyticDensityProf` class is governed by the 

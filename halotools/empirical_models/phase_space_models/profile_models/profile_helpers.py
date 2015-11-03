@@ -23,11 +23,15 @@ __author__ = ['Benedikt Diemer', 'Andrew Hearin']
 def density_threshold(cosmology, redshift, mdef):
 	"""
 	The threshold density for a given spherical-overdensity mass definition.
-	
+
+	:math:`\\rho_{\\rm thresh}(z) = \\Delta_{\\rm ref}(z)\\rho_{\\rm ref}(z)`. 
+
+	See :ref:`halo_profile_definitions` for details. 
+
 	Parameters
 	--------------
 	cosmology : object 
-		Instance of an `~astropy.cosmology` object. 
+		Instance of an Astropy `~astropy.cosmology` object. 
 
 	redshift: array_like
 		Can be a scalar or a numpy array.
@@ -101,12 +105,18 @@ def density_threshold(cosmology, redshift, mdef):
 def delta_vir(cosmology, redshift):
 	"""
 	The virial overdensity in units of the critical density, 
-	using the fitting formula of Bryan & Norman 1998.
+	using the fitting formula of Bryan & Norman 1998, assuming 
+	:math:`\Omega_{\\Lambda} = 0.`
+
+	:math:`\\Delta_{\\rm vir}(x) = 18\\pi^{2} + 82x - 39x^{2}`, 
+	where :math:`x \\equiv \\Omega_{m}(z)-1`. 
 	
+	See :ref:`halo_profile_definitions` for details. 
+
 	Parameters
 	--------------
 	cosmology : object 
-		Instance of an `~astropy.cosmology` object. 
+		Instance of an Astropy `~astropy.cosmology` object. 
 
 	redshift: array_like
 		Can be a scalar or a numpy array.
@@ -138,13 +148,15 @@ def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 
 	Note that this function is independent of the form of the density profile.
 
+	See :ref:`halo_profile_definitions` for details. 
+
 	Parameters
 	------------
 	mass: array_like
 		Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
 
 	cosmology : object 
-		Instance of an `~astropy.cosmology` object. 
+		Instance of an Astropy `~astropy.cosmology` object. 
 
 	redshift: array_like
 		Can either be a scalar, or a numpy array of the same dimension as the input ``mass``. 
@@ -179,13 +191,15 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
 
 	Note that this function is independent of the form of the density profile.
 
+	See :ref:`halo_profile_definitions` for details. 
+
 	Parameters
 	------------
 	radius: array_like
 		Halo radius in physical Mpc/h; can be a scalar or a numpy array.
 
 	cosmology : object 
-		Instance of an `~astropy.cosmology` object. 
+		Instance of an Astropy `~astropy.cosmology` object. 
 
 	redshift: array_like
 		Can either be a scalar, or a numpy array of the same dimension as the input ``radius``. 
