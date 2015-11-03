@@ -11,13 +11,15 @@ from astropy.cosmology import WMAP9, Planck13
 from astropy import units as u
 
 from ..profile_helpers import *
+from ..nfw_profile import NFWProfile
+
 from .....custom_exceptions import HalotoolsError
 
 
 __all__ = ['TestNFWProfile']
 
 class TestNFWProfile(TestCase):
-    """ Tests of `~halotools.empirical_models.halo_prof_components.NFWProfile`. 
+    """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile`. 
 
     Basic summary of tests:
 
@@ -29,7 +31,16 @@ class TestNFWProfile(TestCase):
     """
 
     def setup_class(self):
-        pass
+        self.default_nfw = NFWProfile()
+        self.wmap9_nfw = NFWProfile(cosmology = WMAP9)
+        self.m200_nfw = NFWProfile(mdef = '200m')
+
+    def test_behavior_consistency(self):
+        """
+        """
+        
+
+
 
     # The following tests are useful but need to be rewritten according to 
     # the changes made by the prof_overhaul branch 
