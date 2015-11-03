@@ -18,7 +18,7 @@ Halo Mass and Radius Definitions
 ===================================
 
 
-Basic Equations
+Basic equations
 -----------------------------------
 
 The `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class models 
@@ -86,7 +86,7 @@ Quantity                                      Source Code
 Spatial Profiles of Halos
 ===================================
 
-Basic Equations
+Basic equations
 -----------------------------------
 
 For a given choice is made for :math:`\Delta_{\rm ref}(z)`, the mass of a spherically symmetric halo is 
@@ -94,16 +94,78 @@ is related to the spatial profile of the matter in its interior via:
 
 .. math::
 
-	M_{\Delta}(z) \equiv 4\pi\int_{0}^{R_{\Delta}}dr r^{2}\rho_{\rm prof}(r)
+	M_{\Delta}(z) \equiv 4\pi\int_{0}^{R_{\Delta}}dr' r'^{2}\rho_{\rm prof}(r')
 
-This equation defines the normalization of the halo profile :math:`\rho_{\rm prof}(r)`. 
+This equation defines the normalization of the halo profile :math:`\rho_{\rm prof}(r)`, which for any 
+sub-class of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` is 
+computed with the 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.mass_density` method. 
 
-For numerical stability, it is always preferable to work with order-unity quantities rather than astronomical numbers. So throughout the `~halotools.empirical_models.phase_space_models` sub-package, most methods 
-work with the "scaled radius", defined as:
+For numerical stability, it is always preferable to work with order-unity quantities rather than astronomical numbers. So throughout the `~halotools.empirical_models.phase_space_models.profile_models` sub-package, most methods 
+work with the *scaled radius*, :math:`\tilde{r}`, defined as:
 
 .. math::
 
-	\tilde{r} \equiv r/R_{\Delta}
+	\tilde{r} \equiv r/R_{\Delta}, 
+
+and the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_mass_density`, 
+:math:`\tilde{\rho}_{\rm prof}`, defined as:
+
+.. math::
+
+	\tilde{\rho}_{\rm prof}(\tilde{r}) \equiv \rho_{\rm prof}(\tilde{r})/\rho_{\rm thresh}
+
+In the implementation of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`, 
+for reasons of numerical stability a profile is actually defined by :math:`\tilde{\rho}_{\rm prof}(\tilde{r})`, 
+and :math:`\rho_{\rm prof}(r)` is a derived quantity. 
+
+In fact, in order to define a new 
+profile model, one only need define a sub-class 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` and provide an 
+implementation of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_mass_density` method, as *all* other profile quantities can be computed from this function. 
+
+Convenience functions 
+-----------------------
+
+In addition to the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_mass_density` method that defines the profile, instances of the 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class 
+have a number of other useful bound methods:
+
+Enclosed mass
+~~~~~~~~~~~~~~
+
+The mass enclosed within a given radius is defined as:
+
+.. math::
+
+	M_{\Delta}(<r) \equiv 4\pi\int_{0}^{r}dr' r'^{2}\rho_{\rm prof}(r'), 
+
+which can be computed via the 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.enclosed_mass` method. 
+
+Cumulative mass PDF
+~~~~~~~~~~~~~~~~~~~~
+
+One particularly important quantity is the :math:`P_{\rm prof}(<\tilde{r})`, 
+the cumulative probability of finding a randomly selected 
+particle at a scaled-radius position less than :math:`\tilde{r}`:
+
+.. math::
+
+	P_{\rm prof}(<\tilde{r}) \equiv \frac{4\pi}{M_{\Delta}}\int_{0}^{\tilde{r}}d\tilde{r}' \tilde{r}'^{2}\rho_{\rm prof}(\tilde{r}').
+
+
+
+Circular velocity 
+~~~~~~~~~~~~~~~~~~
+
+marf 
+
+Maximum circular velocity 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+marf 
+
 
 
 
