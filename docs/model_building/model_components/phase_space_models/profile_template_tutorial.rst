@@ -48,11 +48,19 @@ and :math:`\Delta_{\rm ref}(z) = 200m` is shorthand for
 
 	\rho_{\rm thresh}(z) = 200\rho_{\rm m}(z). 
 
+The other common choice for the :math:`\Delta_{\rm ref}(z)` is :math:`\Delta_{\rm vir}(z)`, 
+which defined by the solution of the gravitational collapse of a top-hat overdensity evolving in an 
+expanding background. 
+
 Once a choice is made for :math:`\Delta_{\rm ref}(z)`, the mass of a spherically symmetric halo is defined by:
 
 .. math::
 
-	M_{\Delta}(z) \equiv \frac{4\pi}{3}R_{\Delta}^{3}\Delta_{\rm ref}(z)\rho_{\rm ref}(z) \equiv 4\pi\int_{0}^{R_{\Delta}}dr r^{2}\rho_{\rm prof}(r)
+	M_{\Delta}(z) \equiv \frac{4\pi}{3}R_{\Delta}^{3}\Delta_{\rm ref}(z)\rho_{\rm ref}(z) 
+
+This equation defines the relationship between the total mass of a halo :math:`M_{\Delta}` 
+and the halo boundary :math:`R_{\Delta}`. 
+
 
 Computing the relevant quantities
 -----------------------------------
@@ -61,13 +69,37 @@ In Halotools, the reference densities are computed using the `~astropy.cosmology
 and the remaining quantities are computed in the 
 `~halotools.empirical_models.phase_space_models.profile_models` sub-package. 
 
+============================================  ========================================================================================================= 
+Quantity                                      Source Code                 
+============================================  ========================================================================================================= 
+:math:`\rho_{\rm thresh}(z)`                  `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold`
+:math:`\Delta_{\rm vir}(z)`                   `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.delta_vir`
+:math:`M_{\Delta}(z)`                         `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_radius_to_halo_mass`
+:math:`R_{\Delta}(z)`                         `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_mass_to_halo_radius`
+:math:`\rho_{\rm crit}(z)`                    `~astropy.cosmology.critical_density`
+:math:`\Omega_{\rm m}(z)`                     `~astropy.cosmology.Om`
+============================================  =========================================================================================================
+
+.. _halo_profile_definitions:
+
+Spatial Profiles of Halos
+===================================
+
+Basic Equations
+-----------------------------------
+
+For a given choice is made for :math:`\Delta_{\rm ref}(z)`, the mass of a spherically symmetric halo is 
+is related to the spatial profile of the matter in its interior via:
+
+.. math::
+
+	M_{\Delta}(z) \equiv 4\pi\int_{0}^{R_{\Delta}}dr r^{2}\rho_{\rm prof}(r)
+
+This equation defines the normalization of the halo profile :math:`\rho_{\rm prof}(r)`. 
 
 
-
-
-
-
-
+Computing the relevant quantities
+-----------------------------------
 
 
 
