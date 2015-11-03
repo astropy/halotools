@@ -186,5 +186,6 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             has the same dimensions as the input ``x``.
         """     
         x = np.where(x > 1, 1, x)
+        x = np.where(x < 0, 0, x)
         return self.g(conc*x) / self.g(conc)
 
