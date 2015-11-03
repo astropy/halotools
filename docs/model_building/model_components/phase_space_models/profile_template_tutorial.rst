@@ -131,6 +131,8 @@ In addition to the `~halotools.empirical_models.phase_space_models.profile_model
 `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class 
 have a number of other useful bound methods:
 
+.. _computing_enclosed_mass:
+
 Enclosed mass
 ~~~~~~~~~~~~~~
 
@@ -144,6 +146,8 @@ which can be computed via the
 `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.enclosed_mass` method 
 of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
 or any of its sub-classes. 
+
+.. _computing_cumulative_mass_PDF:
 
 Cumulative mass PDF
 ~~~~~~~~~~~~~~~~~~~~
@@ -168,6 +172,8 @@ of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDe
 the quantity :math:`M_{\Delta}(<r)` is computed as 
 :math:`M_{\Delta}(<r) = P_{\rm prof}(<\tilde{r})M_{\Delta}`. 
 
+.. _computing_virial_velocity:
+
 Virial velocity 
 ~~~~~~~~~~~~~~~~~
 
@@ -184,6 +190,7 @@ the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensi
 of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
 or any of its subclasses. 
 
+.. _computing_circular_velocity:
 
 Circular velocity profile 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -236,7 +243,7 @@ Since the numerator is :math:`P_{\rm prof}(<r)` and the denominator is :math:`\t
 This is why in the source code for the 
 `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_circular_velocity` method, the returned quantity is :math:`\sqrt{P_{\rm prof}(<\tilde{r})/\tilde{r}}`. Then the source code for the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.circular_velocity` method simply multiplies the returned value of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_circular_velocity` by :math:`V_{\rm vir}`. 
 
-
+.. _computing_vmax:
 
 Maximum circular velocity 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -251,6 +258,18 @@ or any of its sub-classes.
 Computing the relevant quantities
 -----------------------------------
 
+
+============================================  ====================================================================================================================================================== 
+Quantity                                      Source Code                 
+============================================  ====================================================================================================================================================== 
+:math:`\rho_{\rm prof}(r)`                    `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.mass_density`
+:math:`\tilde{\rho}_{\rm prof}(\tilde{r})`                    `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_mass_density`
+:math:`M_{\Delta}(<r)`                    	  `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.enclosed_mass`
+:math:`P_{\rm prof}(<\tilde{r})`              `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.cumulative_mass_PDF`
+:math:`V_{\rm vir}`                           `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.virial_velocity`
+:math:`V_{\rm circ}(r)`                       `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.circular_velocity`
+:math:`\tilde{V}_{\rm circ}(r)`               `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_circular_velocity`
+============================================  ======================================================================================================================================================
 
 
 
