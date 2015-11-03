@@ -141,34 +141,111 @@ The mass enclosed within a given radius is defined as:
 	M_{\Delta}(<r) \equiv 4\pi\int_{0}^{r}dr' r'^{2}\rho_{\rm prof}(r'), 
 
 which can be computed via the 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.enclosed_mass` method. 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.enclosed_mass` method 
+of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
+or any of its sub-classes. 
 
 Cumulative mass PDF
 ~~~~~~~~~~~~~~~~~~~~
 
-One particularly important quantity is the :math:`P_{\rm prof}(<\tilde{r})`, 
+One particularly important quantity in making mocks is :math:`P_{\rm prof}(<\tilde{r})`, 
 the cumulative probability of finding a randomly selected 
 particle at a scaled-radius position less than :math:`\tilde{r}`:
 
 .. math::
 
-	P_{\rm prof}(<\tilde{r}) \equiv \frac{4\pi}{M_{\Delta}}\int_{0}^{\tilde{r}}d\tilde{r}' \tilde{r}'^{2}\rho_{\rm prof}(\tilde{r}').
+	P_{\rm prof}(<\tilde{r}) \equiv M_{\Delta}(<\tilde{r}) / M_{\Delta}.  
+
+This function is computed by 
+the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.cumulative_mass_PDF` method 
+of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class. 
+The :math:`P_{\rm prof}(<\tilde{r})` is used by 
+`~halotools.empirical_models.phase_space_models.MonteCarloGalProf` 
+to help generate Monte Carlo realizations of halo density profiles. 
+
+For reasons of numerical stability, in the Halotools implementation 
+of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.enclosed_mass` method
+the quantity :math:`M_{\Delta}(<r)` is computed as 
+:math:`M_{\Delta}(<r) = P_{\rm prof}(<\tilde{r})M_{\Delta}`. 
+
+Virial velocity 
+~~~~~~~~~~~~~~~~~
+
+A halo's *virial velocity* :math:`V_{\rm vir}` is defined as:
+
+.. math::
+
+	V^{2}_{\rm vir} \equiv GM_{\Delta}/R_{\Delta}
+
+Intuitively, the virial velocity is the speed of a tracer particle on a 
+circular orbit at a distance :math:`R_{\Delta}` from the center of a halo in virial equilibrium. 
+You can compute :math:`V_{\rm vir}` via 
+the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.virial_velocity` method 
+of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
+or any of its subclasses. 
 
 
+Circular velocity profile 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Circular velocity 
-~~~~~~~~~~~~~~~~~~
+The circular velocity profile, :math:`V_{\rm circ}(r)`, is defined as:
 
-marf 
+.. math::
+
+	V^{2}_{\rm circ}(r) \equiv GM_{\Delta}(<r)/r, 
+
+where *G* is Newton's constant. Intuitively, :math:`V_{\rm circ}(r)` is the speed of  
+a tracer particle on a bound circular orbit at a distance *r* from the 
+center of a virialized halo. You can compute :math:`V_{\rm circ}(r)` with  
+the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.circular_velocity` method 
+of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
+or any of its sub-classes. 
+
+For reasons of numerical stability, when computing :math:`V_{\rm circ}(r)` 
+it is useful to use the *dimensionless-circular velocity*, 
+:math:`\tilde{V}_{\rm circ}(r)`, defined as 
+
+.. math::
+
+	\tilde{V}_{\rm circ}(r) \equiv V_{\rm circ}(r) / V_{\rm vir}, 
+
+so that :math:`V_{\rm circ}(r) = \tilde{V}_{\rm circ}(r)V_{\rm vir}`.
+
+In the actual Halotools implementation :math:`\tilde{V}_{\rm circ}(r)` is computed using 
+
+.. math::
+
+	\tilde{V}^{2}_{\rm circ}(\tilde{r}) = \frac{P_{\rm prof}(<\tilde{r})}{\tilde{r}}
+
+To see that this is correct:
+
+.. math:: 
+
+	\tilde{V}_{\rm circ}(r) \equiv \frac{V_{\rm circ}(r)}{V_{\rm vir}} \\
+
+	\tilde{V}_{\rm circ}(r) = \frac{GM_{\Delta}(<r)/r}{GM_{\Delta}/R_{\Delta}} \\
+
+	\tilde{V}_{\rm circ}(r) = \frac{M_{\Delta}(<r)/M_{\Delta}}{r/R_{\Delta}}
+
+Since the numerator is :math:`P_{\rm prof}(<r)` and the denominator is :math:`\tilde{r}`, we arrive at  
+
+.. math::
+
+	\tilde{V}^{2}_{\rm circ}(\tilde{r}) = \frac{P_{\rm prof}(<\tilde{r})}{\tilde{r}}
+
+This is why in the source code for the 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_circular_velocity` method, the returned quantity is :math:`\sqrt{P_{\rm prof}(<\tilde{r})/\tilde{r}}`. Then the source code for the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.circular_velocity` method simply multiplies the returned value of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_circular_velocity` by :math:`V_{\rm vir}`. 
+
+
 
 Maximum circular velocity 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-marf 
-
-
-
-
+The maximum circular velocity :math:`V_{\rm max}` is defined as the maximum value attained by 
+:math:`V_{\rm circ}(r)` over the entire profile of the halo. Halotools computes :math:`V_{\rm max}` 
+by using Scipy's zero-finder `~scipy.optimize.minimize`. You can compute :math:`V_{\rm max}` 
+using the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.vmax` method of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
+or any of its sub-classes. 
 
 
 Computing the relevant quantities
