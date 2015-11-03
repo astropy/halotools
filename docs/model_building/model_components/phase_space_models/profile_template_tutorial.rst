@@ -98,10 +98,19 @@ is related to the spatial profile of the matter in its interior via:
 
 This equation defines the normalization of the halo profile :math:`\rho_{\rm prof}(r)`. 
 
+For numerical stability, it is always preferable to work with order-unity quantities rather than astronomical numbers. So throughout the `~halotools.empirical_models.phase_space_models` sub-package, most methods 
+work with the "scaled radius", defined as:
+
+.. math::
+
+	\tilde{r} \equiv r/R_{\Delta}
+
+
+
+
 
 Computing the relevant quantities
 -----------------------------------
-
 
 
 
