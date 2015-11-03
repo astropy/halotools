@@ -85,9 +85,9 @@ class AnalyticDensityProf(object):
         mass definition. 
 
         `dimensionless_mass_density` :math:`\\equiv \\rho(\\tilde{r}) / \\rho_{\\rm thresh}`, 
-        where :math:`\\tilde{r}\\equiv r/R_{\\rm vir}`, and :math:`\\rho_{\\rm thresh}` is 
-        a function of the halo mass definition, cosmology and redshift, 
-        and is computed via the 
+        where :math:`\\tilde{r}\\equiv r/R_{\\rm vir}`. 
+        The quantity:math:`\\rho_{\\rm thresh}` is a function of 
+        the halo mass definition, cosmology and redshift, and is computed via the 
         `~halotools.empirical_models.phase_space_models.profile_helpers.density_threshold` function. 
 
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
