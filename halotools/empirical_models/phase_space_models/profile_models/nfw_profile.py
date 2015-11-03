@@ -117,7 +117,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         The behavior of this function is not defined here, but in the 
         `~halotools.empirical_models.ConcMass` class.
         """
-        return self.compute_concentration(**kwargs)
+        return ConcMass.compute_concentration(self, **kwargs)
 
     def dimensionless_mass_density(self, x, conc):
         """
