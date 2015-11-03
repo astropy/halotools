@@ -10,13 +10,7 @@ from __future__ import (
     division, print_function, absolute_import, unicode_literals)
 
 import numpy as np 
-from astropy.extern import six 
-from abc import ABCMeta, abstractmethod
-from scipy.integrate import quad as quad_integration
-from scipy.optimize import minimize as scipy_minimize
 from astropy import units as u
-from astropy.constants import G
-newtonG = G.to(u.km*u.km*u.Mpc/(u.Msun*u.s*u.s))
 
 from .conc_mass_models import ConcMass
 from .profile_helpers import *
@@ -52,7 +46,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         ----------
         cosmology : object, optional 
             Instance of an astropy `~astropy.cosmology`. 
-            Default cosmology is set in `~halotools.empirical_models.sim_manager.sim_defaults`.
+            Default cosmology is set in 
+            `~halotools.empirical_models.sim_manager.sim_defaults`.
 
         redshift : float, optional  
             Default is set in `~halotools.empirical_models.sim_defaults`.
@@ -62,7 +57,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             Default is set in `~halotools.empirical_models.model_defaults`.
 
         conc_mass_model : string, optional  
-            Specifies the calibrated fitting function used to model the concentration-mass relation. 
+            Specifies the calibrated fitting function used 
+            to model the concentration-mass relation. 
             Default is set in `~halotools.empirical_models.model_defaults`.
 
         Examples 
