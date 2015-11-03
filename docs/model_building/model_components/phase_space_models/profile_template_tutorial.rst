@@ -4,6 +4,13 @@
 Tutorial on the AnalyticDensityProf Template Model
 ****************************************************
 
+This section of the documentation provides background material and detailed implementation notes 
+on the functions and methods of the primary base class used to model the spatial distribution 
+of matter and galaxies within halos,  
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`. 
+This as an abstract base class and so it cannot itself be instantiated; only concrete 
+sub-classes can be used to directly model the spatial profile of halos. 
+
 The purpose of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` 
 class is to provide a template for any Halotools model of the spatial distribution 
 of points within a halo. So in Halotools, any model for how either matter or galaxies 
@@ -31,11 +38,15 @@ the spherical shell has a fixed density
 
 .. math::
 
-	\rho_{\rm thresh}(z) \equiv \Delta_{\rm ref}(z)\rho_{\rm ref}(z)
+	\rho_{\rm thresh}(z) \equiv \Delta_{\rm ref}(z)\rho_{\rm ref}(z); 
 
-The cosmological model determines :math:`\rho_{\rm ref}(z)`, and so the choice of a halo mass 
+the redshift-dependence of :math:`\rho_{\rm thresh}` reflects both the evolution of the reference 
+density :math:`\rho_{\rm ref}` as well as any possible redshift-dependence in the scalar multiple 
+:math:`\Delta_{\rm ref}`. 
+
+The cosmological model determines :math:`\rho_{\rm ref}(z)`; the choice of a halo mass 
 definition is determined by how one chooses :math:`\Delta_{\rm ref}(z)`. Typically, one chooses 
-:math:`\Delta_{\rm ref}` to be some constant multiple of the reference density. In the conventional 
+:math:`\Delta_{\rm ref}` to be some redshift-independent multiple of the reference density. In the conventional 
 notation for this choice, :math:`\Delta_{\rm ref}(z) = 500c` refers to the case where 
 
 .. math::
@@ -48,7 +59,7 @@ and :math:`\Delta_{\rm ref}(z) = 200m` is shorthand for
 
 	\rho_{\rm thresh}(z) = 200\rho_{\rm m}(z). 
 
-The other common choice for the :math:`\Delta_{\rm ref}(z)` is :math:`\Delta_{\rm vir}(z)`, 
+The other common choice for :math:`\Delta_{\rm ref}(z)` is :math:`\Delta_{\rm vir}(z)`, 
 which defined by the solution of the gravitational collapse of a top-hat overdensity evolving in an 
 expanding background. 
 
@@ -65,7 +76,7 @@ and the halo boundary :math:`R_{\Delta}`.
 Computing the relevant quantities
 -----------------------------------
 
-In Halotools, the reference densities are computed using the `~astropy.cosmology` sub-package, 
+In Halotools, the reference densities are computed using the `~astropy.cosmology` sub-package of Astropy, 
 and the remaining quantities are computed in the 
 `~halotools.empirical_models.phase_space_models.profile_models` sub-package, 
 specifically the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers` module. 
