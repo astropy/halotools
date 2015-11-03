@@ -90,18 +90,22 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         self.conc_NFWmodel.__func__.__doc__ = getattr(self, self.conc_mass_model).__doc__
 
     def conc_NFWmodel(self, **kwargs):
-        """ Method computes the NFW concentration as a function of the input halos according to the 
+        """ Method computes the NFW concentration 
+        as a function of the input halos according to the 
         ``conc_mass_model`` bound to the `NFWProfile` instance. 
 
         Parameters
         ----------        
         prim_haloprop : array, optional  
-            Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            Array of mass-like variable upon which 
+            occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, 
+            then ``halo_table`` keyword argument must be passed. 
 
         halo_table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``halo_table`` is not passed, 
+            then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
         -------
@@ -120,9 +124,10 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         Physical density of the halo scaled by the density threshold of the 
         mass definition:
 
-        `dimensionless_mass_density` :math:`\\equiv \\rho(x) / \\rho_{\\rm thresh}`, 
-        where :math:`x\\equiv r/R_{\\rm vir}`, and :math:`\\rho_{\\rm thresh}` is 
-        a function of the halo mass definition, cosmology and redshift, 
+        `dimensionless_mass_density` :math:`\\equiv \\rho(\\tilde{r}) / \\rho_{\\rm thresh}`, 
+        where :math:`\\tilde{r}\\equiv r/R_{\\rm vir}`. 
+        The quantity:math:`\\rho_{\\rm thresh}` is a function of 
+        the halo mass definition, cosmology and redshift, 
         and is computed via the 
         `~halotools.empirical_models.phase_space_models.profile_helpers.density_threshold` function. 
 
@@ -149,6 +154,48 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         numerator = conc**3/(3.*self.g(conc))
         denominator = conc*scaled_radius*(1 + conc*scaled_radius)**2
         return numerator/denominator
+
+    def mass_density(self, radius, mass, conc):
+        """
+        Physical density of the halo at the input radius, 
+        given in units of :math:`h^{3}/{\\rm Mpc}^{3}`. 
+        
+        Parameters 
+        -----------
+        radius : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
+
+        mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        conc : array_like
+            Concentrations of the input halos. 
+
+        Returns 
+        -------
+        density: array_like 
+            Physical density of a dark matter halo of the input ``mass`` 
+            at the input ``radius``. Result is an array of the 
+            dimension as the input ``radius``, reported in units of :math:`h^{3}/Mpc^{3}`. 
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> radius = np.logspace(-2, -1, Npts)
+        >>> mass = np.zeros(Npts) + 1e12
+        >>> conc = 5
+        >>> result = model.mass_density(radius, mass, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.mass_density(radius, mass, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        """
+        return AnalyticDensityProf.mass_density(self, radius, mass, conc)
 
     def g(self, x):
         """ Convenience function used to evaluate the profile. 
