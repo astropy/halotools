@@ -13,9 +13,10 @@ from astropy import units as u
 from ..profile_helpers import *
 from .....custom_exceptions import HalotoolsError
 
+__all__ = ['TestProfileHelpers']
 
 class TestProfileHelpers(TestCase):
-	""" Container class for test of 
+	""" Container class for tests of 
 	all the methods in the profile_helpers module 
 	"""
 

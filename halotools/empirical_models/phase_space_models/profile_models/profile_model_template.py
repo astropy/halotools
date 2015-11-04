@@ -305,8 +305,7 @@ class AnalyticDensityProf(object):
         Parameters
         --------------
         total_mass : array_like 
-            Total mass of the halo; can be a scalar or numpy array of the same 
-            dimension as the input ``radius``. 
+            Total mass of the halo; can be a scalar or numpy array.
 
         Returns 
         --------
@@ -435,6 +434,14 @@ class AnalyticDensityProf(object):
             Radius of the halo in Mpc/h units. 
             Will have the same dimension as the input ``total_mass``.
 
+        Notes 
+        ------
+        The behavior of this function derives from 
+        `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_mass_to_halo_radius`. 
+
+        This function is tested by the 
+        `~halotools.empirical_models.phase_space_models.profile_models.tests.TestProfileHelpers` class. 
+
         """
         return profile_helpers.halo_mass_to_halo_radius(
             total_mass, cosmology = self.cosmology, 
@@ -456,6 +463,14 @@ class AnalyticDensityProf(object):
         total_mass: array_like
             Total halo mass in :math:`M_{\odot}/h`. 
             Will have the same dimension as the input ``radius``.
+
+        Notes 
+        ------
+        The behavior of this function derives from 
+        `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_radius_to_halo_mass`. 
+
+        This function is tested by the 
+        `~halotools.empirical_models.phase_space_models.profile_models.tests.TestProfileHelpers` class. 
 
         """
         return profile_helpers.halo_radius_to_halo_mass(

@@ -5,6 +5,10 @@ relations with cosmology and redshift.
 
 The functions contained in this module borrow heavily from the Colossus 
 package developed by Benedikt Diemer, http://bdiemer.bitbucket.org. 
+
+Testing for this module is done in the 
+`~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers` module. 
+
 """
 from __future__ import (
 	division, print_function, absolute_import, unicode_literals)

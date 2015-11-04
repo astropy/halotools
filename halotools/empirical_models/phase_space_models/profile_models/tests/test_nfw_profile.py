@@ -196,6 +196,23 @@ class TestNFWProfile(TestCase):
             derived_enclosed_mass = result*total_mass
             assert np.allclose(enclosed_mass, derived_enclosed_mass, rtol = 1e-4)
 
+    def test_vmax(self):
+        """ Require that the analytic approximation used to estimate the NFW :math:`V_{\\rm max}` 
+        by the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.vmax` method 
+        agrees with the maximum value of :math:`V_{\\rm circ}(r)` computed over the entire profile 
+        of the halo computed using the super-class method 
+        `~halotools.empirical_models.phase_space_models.profile_models.profile_model_template.AnalyticDensityProf.dimensionless_circular_velocity` method. 
+        """
+        npts = 1000
+        total_mass = np.zeros(npts) + 1e12
+        conc_list = [5, 10, 25]
+        radius_array = np.logspace(-2, 0, npts)
+
+        for model in self.model_list:
+            for conc in conc_list:
+                analytic_vmax = model.vmax(total_mass, conc)
+                derived_vmax = model.circular_velocity(radius_array, total_mass, conc).max()
+                assert np.allclose(analytic_vmax, derived_vmax, rtol = 0.01)
 
     @pytest.mark.slow
     def test_mc_generate_radial_positions(self):
@@ -223,11 +240,11 @@ class TestNFWProfile(TestCase):
         `monte_carlo_density_outer_shell_normalization` method computes this ratio for the 
         Monte Carlo realization. As shown in the source code, these two quantities agree with each other 
         to better than 2% when using 20 bins linearly-spaced between 0.05 and 1 and 
-        5e6 Monte Carlo-generated points, for NFW concentrations of 5, 10, and 25.
+        2e6 Monte Carlo-generated points, for NFW concentrations of 5, 10, and 25.
 
         """
         halo_radius = 0.5
-        num_pts = 5e6
+        num_pts = 2e6
         num_rbins = 20
         rbins = np.linspace(0.05, 1, num_rbins)
 
@@ -249,7 +266,6 @@ class TestNFWProfile(TestCase):
                     analytic_nfw_density_outer_shell_normalization(rbin_midpoints, conc))
 
                 assert np.allclose(monte_carlo_ratio, analytical_ratio, 0.02)
-
 
 
 
