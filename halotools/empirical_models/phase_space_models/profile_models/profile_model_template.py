@@ -223,13 +223,13 @@ class AnalyticDensityProf(object):
         for i in range(len(x)):
             enclosed_mass[i], _ = quad_integration(
                 self._enclosed_dimensionless_mass_integrand, 0., x[i], epsrel = 1e-5, 
-                prof_params = prof_params)
+                args = prof_params)
     
         total, _ = quad_integration(
                 self._enclosed_dimensionless_mass_integrand, 0., 1.0, epsrel = 1e-5, 
-                prof_params = prof_params)
+                args = prof_params)
 
-        return enclosed_mass / total
+        return enclosed_mass / total 
 
     def enclosed_mass(self, radius, total_mass, *prof_params):
         """
@@ -263,7 +263,7 @@ class AnalyticDensityProf(object):
         """
         radius = convert_to_ndarray(radius, dt = np.float64)
         scaled_radius = radius / self.halo_mass_to_halo_radius(total_mass)
-        mass = self.cumulative_mass_PDF(scaled_radius, *prof_params)*total_mass
+        mass = self.cumulative_mass_PDF(scaled_radius, *prof_params)*total_mass 
 
         return mass
 
