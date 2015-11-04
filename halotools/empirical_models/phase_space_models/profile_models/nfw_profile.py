@@ -331,8 +331,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         Parameters
         --------------
         total_mass : array_like 
-            Total mass of the halo; can be a scalar or numpy array of the same 
-            dimension as the input ``radius``. 
+            Total mass of the halo; can be a scalar or numpy array. 
 
         Returns 
         --------
@@ -404,7 +403,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         conc : array_like 
             Value of the halo concentration. Can either be a scalar, or a numpy array 
-            of the same dimension as the input ``radius``. 
+            of the same dimension as the input ``total_mass``. 
 
         Returns 
         --------
@@ -424,6 +423,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         Notes 
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile` class. 
 
         """
         halo_radius = self.halo_mass_to_halo_radius(total_mass)

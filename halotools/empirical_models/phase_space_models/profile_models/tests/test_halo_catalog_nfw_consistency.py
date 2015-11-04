@@ -93,7 +93,7 @@ class TestHaloCatalogNFWConsistency(TestCase):
             predicted_vmax = self.nfw_profile.vmax(
                 median_mass, median_conc)
 
-            assert np.allclose(median_vmax, predicted_vmax, rtol = 0.25)
+            assert np.allclose(median_vmax, predicted_vmax, rtol = 0.05)
 
       
         
