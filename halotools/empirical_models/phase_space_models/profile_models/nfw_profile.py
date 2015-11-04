@@ -13,13 +13,12 @@ import numpy as np
 from astropy import units as u
 
 from .conc_mass_models import ConcMass
-from .profile_helpers import *
 from .profile_model_template import AnalyticDensityProf
 
 from ... import model_defaults
 
 from ....utils.array_utils import convert_to_ndarray
-from ....custom_exceptions import *
+from ....custom_exceptions import HalotoolsError
 from ....sim_manager import sim_defaults 
 
 
