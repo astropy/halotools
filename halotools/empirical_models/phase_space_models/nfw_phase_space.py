@@ -82,15 +82,15 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
                 model_defaults.min_permitted_conc, model_defaults.max_permitted_conc, 0.5
                 )
 
-        self._setup_lookup_tables((cmin, cmax, dc))
+        MonteCarloGalProf._setup_lookup_tables(self, (cmin, cmax, dc))
 
         self._mock_generation_calling_sequence = ['assign_phase_space']
 
     def assign_phase_space(self, halo_table):
         """
         """
-        self.mc_pos(halo_table = halo_table)
-        self.mc_vel(halo_table = halo_table)
+        MonteCarloGalProf.mc_pos(self, halo_table = halo_table)
+        MonteCarloGalProf.mc_vel(self, halo_table = halo_table)
 
 
     def mc_generate_phase_space_points(self, Ngals = 1e4, conc=5, mass = 1e12):
@@ -128,20 +128,20 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         m = np.zeros(Ngals) + mass
         c = np.zeros(Ngals) + conc
-        vvir = self.virial_velocity(total_mass = m)
-        rvir = self.halo_mass_to_halo_radius(total_mass = m)
+        vvir = NFWProfile.virial_velocity(self, total_mass = m)
+        rvir = NFWProfile.halo_mass_to_halo_radius(self, total_mass = m)
 
-        x, y, z = self.mc_halo_centric_pos(
+        x, y, z = MonteCarloGalProf.mc_halo_centric_pos(self, 
             profile_params = [c], halo_radius = rvir)
         r = np.sqrt(x**2 + y**2 + z**2)
 
-        vrad = self.mc_radial_velocity(x = r/rvir, 
+        vrad = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
             virial_velocities = vvir, profile_params = [c])
-        vx = self.mc_radial_velocity(x = r/rvir, 
+        vx = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
             virial_velocities = vvir, profile_params = [c])
-        vy = self.mc_radial_velocity(x = r/rvir, 
+        vy = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
             virial_velocities = vvir, profile_params = [c])
-        vz = self.mc_radial_velocity(x = r/rvir, 
+        vz = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
             virial_velocities = vvir, profile_params = [c])
 
         t = Table()
