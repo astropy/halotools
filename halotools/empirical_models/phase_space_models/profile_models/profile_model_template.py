@@ -48,7 +48,7 @@ class AnalyticDensityProf(object):
     the profile is the necessary and sufficient ingredient. 
     """
 
-    def __init__(self, cosmology, redshift, mdef, **kwprof_params):
+    def __init__(self, cosmology, redshift, mdef, **kwargs):
         """
         Parameters 
         -----------
@@ -81,14 +81,17 @@ class AnalyticDensityProf(object):
     @abstractmethod
     def dimensionless_mass_density(self, scaled_radius, *prof_params):
         """
-        Physical density of the halo scaled by the density threshold of the 
-        mass definition. 
+        Physical density of the halo scaled by the density threshold of the mass definition:
 
-        `dimensionless_mass_density` :math:`\\equiv \\rho(\\tilde{r}) / \\rho_{\\rm thresh}`, 
-        where :math:`\\tilde{r}\\equiv r/R_{\\rm vir}`. 
-        The quantity:math:`\\rho_{\\rm thresh}` is a function of 
-        the halo mass definition, cosmology and redshift, and is computed via the 
-        `~halotools.empirical_models.phase_space_models.profile_helpers.density_threshold` function. 
+        The `dimensionless_mass_density` is defined as 
+        :math:`\\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`, 
+        where :math:`\\tilde{r}\\equiv r/R_{\\Delta}`. 
+        The quantity :math:`\\rho_{\\rm thresh}` is a function of 
+        the halo mass definition, cosmology and redshift, 
+        and is computed via the 
+        `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` function. 
+        The quantity :math:`\\rho_{\\rm prof}` is the physical mass density of the 
+        halo profile and is computed via the `mass_density` function. 
 
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
@@ -107,11 +110,11 @@ class AnalyticDensityProf(object):
         -------
         dimensionless_density: array_like 
             Dimensionless density of a dark matter halo 
-            at the input ``x``, scaled by the density threshold for this 
+            at the input ``scaled_radius``, normalized by the 
+            `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` 
+            :math:`\\rho_{\\rm thresh}` for the 
             halo mass definition, cosmology, and redshift. 
-            Result is an array of the dimension as the input ``x``. 
-            The physical `mass_density` is simply the `dimensionless_mass_density` 
-            multiplied by the appropriate physical density threshold. 
+            Result is an array of the dimension as the input ``scaled_radius``. 
 
         Notes 
         -----

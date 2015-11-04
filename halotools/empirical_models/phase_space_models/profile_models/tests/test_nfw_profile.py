@@ -35,12 +35,20 @@ class TestNFWProfile(TestCase):
         self.wmap9_nfw = NFWProfile(cosmology = WMAP9)
         self.m200_nfw = NFWProfile(mdef = '200m')
 
-    def test_behavior_consistency(self):
+    def test_instance_attrs(self):
         """
         """
-        
+        assert hasattr(self.default_nfw, 'cosmology')
+        assert hasattr(self.wmap9_nfw, 'cosmology')
+        assert hasattr(self.m200_nfw, 'cosmology')
 
+        assert hasattr(self.default_nfw, 'redshift')
+        assert hasattr(self.wmap9_nfw, 'redshift')
+        assert hasattr(self.m200_nfw, 'redshift')
 
+        assert hasattr(self.default_nfw, 'mdef')
+        assert hasattr(self.wmap9_nfw, 'mdef')
+        assert hasattr(self.m200_nfw, 'mdef')
 
     # The following tests are useful but need to be rewritten according to 
     # the changes made by the prof_overhaul branch 
