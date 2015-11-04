@@ -31,14 +31,6 @@ def test_ConcMass():
     assert np.all(conc < 100)
     assert np.all(np.diff(conc) < 0)
 
-    # fake_sim = FakeSim()
-    # fake_mock = FakeMock()
-    # model_z0 = ConcMass(prim_haloprop_key = 'halo_mvir', redshift=0)
-    # conc_z0_arg1 = model_z0.compute_concentration(prim_haloprop = fake_sim.halo_table[model_z0.prim_haloprop_key])
-    # conc_z0_arg2 = model_z0.compute_concentration(halo_table = fake_sim.halo_table)
-    # assert np.all(conc_z0_arg1 == conc_z0_arg2)
-    # conc_z0_arg3 = model_z0.compute_concentration(halo_table = fake_mock.galaxy_table)
-    # assert np.all(conc_z0_arg3 == model_z0.compute_concentration(prim_haloprop=fake_mock.galaxy_table['halo_mvir']))
 
 
 
