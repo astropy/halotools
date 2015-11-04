@@ -13,7 +13,7 @@ from scipy.special import spence
 from astropy.extern import six 
 from abc import ABCMeta, abstractmethod
 
-from ...utils.array_utils import convert_to_ndarray
+from ....utils.array_utils import convert_to_ndarray
 
 __author__ = ['Andrew Hearin']
 
