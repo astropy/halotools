@@ -139,15 +139,35 @@ class TestNFWProfile(TestCase):
 
         """
         halo_radius = 0.5
+        num_pts = 1e6
+        num_rbins = 10
         for model in self.model_list:
-            result_c5 = model.mc_generate_radial_positions(halo_radius = halo_radius, conc = 5)
-            result_c15 = model.mc_generate_radial_positions(halo_radius = halo_radius, conc = 5)
+            result_c5 = model.mc_generate_radial_positions(
+                halo_radius = halo_radius, conc = 5, num_pts = num_pts)
+            result_c15 = model.mc_generate_radial_positions(
+                halo_radius = halo_radius, conc = 5, num_pts = num_pts)
 
-            # Verify that the result is between (0, halo_radius)
+            # Verify that the result is between (0, halo_radius) and has correct length
             assert np.all(result_c5 > 0)
             assert np.all(result_c15 > 0)
             assert np.all(result_c5 < halo_radius)
             assert np.all(result_c15 < halo_radius)
+            assert len(result_c5) == num_pts
+            assert len(result_c15) == num_pts
+
+            rbins = np.linspace(0, 1, num_rbins)
+            rbin_midpoints = 0.5*(rbins[:1] + rbins[1:])
+            counts_c5 = np.histogram(result_c5/halo_radius, bins = rbins)[0]
+            monte_carlo_n2_by_n1 = counts_c5[-2]/counts_c5[-1]
+
+            analytic_n2_by_n1_numerator_c5 = rbin_midpoints[-2]*(1 + 5*rbin_midpoints[-1])**2
+            analytic_n2_by_n1_denominator_c5 = rbin_midpoints[-1]*(1 + 5*rbin_midpoints[-2])**2
+
+            analytic_n2_by_n1 = analytic_n2_by_n1_numerator_c5/analytic_n2_by_n1_denominator_c5
+
+            assert np.allclose(monte_carlo_n2_by_n1, analytic_n2_by_n1, rtol = 1e-2)
+
+
 
 
 
