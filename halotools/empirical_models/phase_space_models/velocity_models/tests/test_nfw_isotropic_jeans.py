@@ -5,7 +5,7 @@ from unittest import TestCase
 import numpy as np 
 from astropy.table import Table 
 
-from ..velocity_models import NFWJeansVelocity
+from ..nfw_isotropic_jeans import NFWJeansVelocity
 
 from ...phase_space_models import NFWPhaseSpace
 
