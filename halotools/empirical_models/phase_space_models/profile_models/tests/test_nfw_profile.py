@@ -14,6 +14,7 @@ from ..profile_helpers import *
 from ..nfw_profile import NFWProfile
 
 from .....custom_exceptions import HalotoolsError
+from .....utils.array_utils import array_is_monotonic
 
 
 __all__ = ['TestNFWProfile']
@@ -75,4 +76,50 @@ class TestNFWProfile(TestCase):
                 model.dimensionless_mass_density(scaled_radius, conc)
                 )
             assert np.allclose(derived_result, result, rtol = 1e-4)
+
+
+    def test_cumulative_mass_PDF(self):
+        """
+        """
+        Npts = 100
+        total_mass = np.zeros(Npts) + 1e12
+        scaled_radius = np.logspace(-2, -0.01, Npts)
+        conc = 5
+
+        for model in self.model_list:
+            result = model.cumulative_mass_PDF(scaled_radius, conc)
+
+            # Verify that the result is monotonically increasing between (0, 1)
+            assert np.all(result > 0)
+            assert np.all(result < 1)
+            assert array_is_monotonic(result, strict=True) == 1
+
+            # Enforce self-consistency between the analytic expression for cumulative_mass_PDF 
+            ### and the direct numerical integral of the analytical expression for 
+            ### dimensionless_mass_density
+            super_class_result = super(NFWProfile, model).cumulative_mass_PDF(
+                scaled_radius, conc)
+            assert np.allclose(super_class_result, result, rtol = 1e-4)
+
+            # Verify that we get a self-consistent result between 
+            ### enclosed_mass and cumulative_mass_PDF
+            halo_radius = model.halo_mass_to_halo_radius(total_mass)
+            radius = scaled_radius*halo_radius
+            enclosed_mass = model.enclosed_mass(radius, total_mass, conc)
+            derived_enclosed_mass = result*total_mass
+            assert np.allclose(enclosed_mass, derived_enclosed_mass, rtol = 1e-4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
