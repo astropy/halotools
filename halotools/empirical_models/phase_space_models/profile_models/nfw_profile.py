@@ -528,6 +528,10 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         >>> radial_positions = nfw.mc_generate_radial_positions(halo_mass = 1e12, conc = 10)
         >>> radial_positions = nfw.mc_generate_radial_positions(halo_radius = 0.25)
 
+        Notes 
+        ------
+        The correctness of this function is tested with the 
+        `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_mc_generate_radial_positions` function. 
         """
         if ('halo_radius' in kwargs) and ('halo_mass' in kwargs):
             msg = ("\nDo not specify both ``halo_mass`` and ``halo_radius``. \n"

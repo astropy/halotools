@@ -199,9 +199,32 @@ class TestNFWProfile(TestCase):
 
     @pytest.mark.slow
     def test_mc_generate_radial_positions(self):
-        """ Require that the points returned by the `~halotools.empirical_models.phase_space_models.profile_models.mc_generate_radial_positions function do indeed trace an NFW profile`. 
+        """ Require that the points returned by the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.mc_generate_radial_positions` function do indeed trace an NFW profile. 
 
-        This test makes use of the `analytic_nfw_density_outer_shell_normalization` method. 
+        The basic idea is as follows. By the method of transformation of random variates, 
+        we can generate a Monte Carlo realization of an NFW profile provided that we have the mapping 
+        :math:`P^{-1}_{\\rm NFW}(<\\tilde{r})`. The method 
+        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.mc_generate_radial_positions`
+        obtains this mapping by first computing :math:`P_{\\rm NFW}(<\\tilde{r})` at a set of abcissa, 
+        and then using `~scipy.interpolate.InterpolatedUnivariateSpline` to tabulate the inverse mapping. 
+        In the Halotools implementation, the code calling the inverse mapping is 
+        `~halotools.empirical_models.model_helpers.custom_spline`, which is just a convenience wrapper 
+        around `~scipy.interpolate.InterpolatedUnivariateSpline` that handles edge cases a bit more intuitively. 
+
+        For volume elements evenly spaced in :math:`\\tilde{r}`, any NFW profile must respect the following relation:
+
+        :math:`\\rho(r_{2})/\\rho(r_{1}) = \\frac{r_{1}(1+cr_{1})^{2}}{r_{2}(1+cr_{2})^{2}}`, 
+
+        The `test_mc_generate_radial_positions` function enforces that this relation holds using 
+        :math:`\\tilde{r}_{1} \\approx 1`. 
+        After generating a set of radial positions, the 
+        `analytic_nfw_density_outer_shell_normalization` returns the analytical result for 
+        :math:`\\rho(r_{2})/\\rho(r_{1})` for the given ``rbins``, and the 
+        `monte_carlo_density_outer_shell_normalization` method computes this ratio for the 
+        Monte Carlo realization. As shown in the source code, these two quantities agree with each other 
+        to better than 2% when using 20 bins linearly-spaced between 0.05 and 1 and 
+        5e6 Monte Carlo-generated points, for NFW concentrations of 5, 10, and 25.
+
         """
         halo_radius = 0.5
         num_pts = 5e6
@@ -226,33 +249,6 @@ class TestNFWProfile(TestCase):
                     analytic_nfw_density_outer_shell_normalization(rbin_midpoints, conc))
 
                 assert np.allclose(monte_carlo_ratio, analytical_ratio, 0.02)
-
-
-            # result_c15 = model.mc_generate_radial_positions(
-            #     halo_radius = halo_radius, conc = 5, num_pts = num_pts)
-
-            # # Verify that the result is between (0, halo_radius) and has correct length
-            # assert np.all(result_c5 > 0)
-            # assert np.all(result_c15 > 0)
-            # assert np.all(result_c5 < halo_radius)
-            # assert np.all(result_c15 < halo_radius)
-            # assert len(result_c5) == num_pts
-            # assert len(result_c15) == num_pts
-
-            # rbins = np.linspace(0, 1, num_rbins)
-            # rbin_midpoints = 0.5*(rbins[:1] + rbins[1:])
-            # counts_c5 = np.histogram(result_c5/halo_radius, bins = rbins)[0]
-            # monte_carlo_n2_by_n1 = counts_c5[-2]/counts_c5[-1]
-
-            # analytic_n2_by_n1_numerator_c5 = rbin_midpoints[-2]*(1 + 5*rbin_midpoints[-1])**2
-            # analytic_n2_by_n1_denominator_c5 = rbin_midpoints[-1]*(1 + 5*rbin_midpoints[-2])**2
-
-            # analytic_n2_by_n1 = analytic_n2_by_n1_numerator_c5/analytic_n2_by_n1_denominator_c5
-
-            # assert np.allclose(monte_carlo_n2_by_n1, analytic_n2_by_n1, rtol = 1e-2)
-
-
-
 
 
 
