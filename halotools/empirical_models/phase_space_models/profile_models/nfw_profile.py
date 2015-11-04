@@ -34,8 +34,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
     including descriptions of how the relevant equations are 
     implemented in the Halotools code base, see 
 
-    Testing for this class is done by the 
-    `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile` class. 
+    Testing for this class is done in the 
+    `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile` module. 
 
     """
 
@@ -513,6 +513,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             outer boundary of the halo will be determined according to the mass definition 
             bound to the NFWProfile instance as ``mdef``. 
 
+        seed : int, optional
+            Random number seed used in the Monte Carlo realization. Default is None. 
+
         Returns 
         --------
         radial_positions : array_like  
@@ -556,6 +559,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         except AssertionError:
             msg = ("Input ``conc`` must be a float")
             raise HalotoolsError(msg)
+
+        if 'seed' in kwargs:
+            np.random.seed(kwargs['seed'])
 
         # Build lookup table from which to tabulate the inverse cumulative_mass_PDF
         Npts_radius_table = 1e3
