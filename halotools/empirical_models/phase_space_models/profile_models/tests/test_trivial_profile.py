@@ -10,8 +10,12 @@ import pytest
 from astropy.cosmology import WMAP9, Planck13
 from astropy import units as u
 
-from ..profile_helpers import *
+from ..trivial_profile import TrivialProfile
+
+from .... import model_defaults 
+
 from .....custom_exceptions import HalotoolsError
+from .....sim_manager import sim_defaults
 
 
 __all__ = ['TestTrivialProfile']
@@ -30,17 +34,25 @@ class TestTrivialProfile(TestCase):
 
     """
     def setup_class(self):
-        pass
+        """ Pre-load various arrays into memory for use by all tests. 
+        """
+        self.default_model = TrivialProfile()
+        self.wmap9_model = TrivialProfile(cosmology = WMAP9)
+        self.m200_model = TrivialProfile(mdef = '200m')
 
-    # The following tests are useful but need to be rewritten according to 
-    # the changes made by the prof_overhaul branch 
+    def test_instance_attrs(self):
+        """ Require that all model variants have ``cosmology``, ``redshift`` and ``mdef`` attributes. 
+        """
+        assert self.default_model.cosmology == sim_defaults.default_cosmology
+        assert self.m200_model.cosmology == sim_defaults.default_cosmology
+        assert self.wmap9_model.cosmology == WMAP9
 
-    # # Check that the initialized attributes are correct
-    # model_instance = hpc.TrivialProfile()
-    # assert model_instance.prof_param_keys == []
-    
-    # # Check that the lookup table attributes are correct
-    # model_instance.build_inv_cumu_lookup_table()
-    # assert len(model_instance.cumu_inv_func_table) == 0
-    # assert len(model_instance.func_table_indices) == 0
+        assert self.default_model.redshift == sim_defaults.default_redshift
+        assert self.m200_model.redshift == sim_defaults.default_redshift
+        assert self.wmap9_model.redshift == sim_defaults.default_redshift
+
+        assert self.default_model.mdef == model_defaults.halo_mass_definition
+        assert self.m200_model.mdef == '200m'
+        assert self.wmap9_model.mdef == model_defaults.halo_mass_definition
+
 
