@@ -4,7 +4,7 @@ Halotools Documentation
 
 
 Halotools is a specialized python package for building and testing models of the 
-galaxy-halo connection, and analyzing halo catalogs. 
+galaxy-halo connection, and analyzing catalogs of dark matter halos. 
 The core functionality of the package includes:
 
 * Fast generation of synthetic galaxy populations using HODs, abundance matching, and related methods
