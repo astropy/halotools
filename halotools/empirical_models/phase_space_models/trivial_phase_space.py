@@ -15,7 +15,7 @@ from astropy.table import Table
 
 from .profile_models import NFWProfile
 from .velocity_models import NFWJeansVelocity
-from .monte_carlo_phase_space import MonteCarloGalProf
+from .monte_carlo_helpers import MonteCarloGalProf
 
 from .. import model_defaults
 
