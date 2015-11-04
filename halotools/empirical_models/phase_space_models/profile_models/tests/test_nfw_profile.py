@@ -32,6 +32,8 @@ class TestNFWProfile(TestCase):
     """
 
     def setup_class(self):
+        """ Pre-load various arrays into memory for use by all tests. 
+        """
         self.default_nfw = NFWProfile()
         self.wmap9_nfw = NFWProfile(cosmology = WMAP9)
         self.m200_nfw = NFWProfile(mdef = '200m')
@@ -39,7 +41,7 @@ class TestNFWProfile(TestCase):
         self.model_list = [self.default_nfw, self.wmap9_nfw, self.m200_nfw]
 
     def test_instance_attrs(self):
-        """
+        """ Require that all model variants have ``cosmology``, ``redshift`` and ``mdef`` attributes. 
         """
         assert hasattr(self.default_nfw, 'cosmology')
         assert hasattr(self.wmap9_nfw, 'cosmology')
@@ -54,12 +56,7 @@ class TestNFWProfile(TestCase):
         assert hasattr(self.m200_nfw, 'mdef')
 
     def test_mass_density(self):
-        """ Require the returned value of the 
-        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.mass_density` 
-        function to be self-consistent with the 
-        returned value of the 
-        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.dimensionless_mass_density` 
-        function. 
+        """ Require the returned value of the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.mass_density` function to be self-consistent with the returned value of the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.dimensionless_mass_density` function. 
         """
         Npts = 100
         radius = np.logspace(-2, -1, Npts)
@@ -79,19 +76,16 @@ class TestNFWProfile(TestCase):
 
 
     def test_cumulative_mass_PDF(self):
-        """ Require the 
-        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.cumulative_mass_PDF` 
-        method in all model variants to respect the following: 
+        """ Require the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.cumulative_mass_PDF` method in all model variants to respect a number of consistency conditions. 
 
         1. Returned value is a strictly monotonically increasing array between 0 and 1. 
 
         2. Returned value is consistent with the following expression, 
-        verified via direct numerical integration of the 
-        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.dimensionless_mass_density`:
 
-        :math:`P_{\\rm NFW}(<\\tilde{r}) = 4\\pi\\int_{0}^{\\tilde{r}}d\\tilde{r}\\tilde{r}'^{2}\\tilde{\\rho}_{\\NFW}(\\tilde{r}),`
+        :math:`P_{\\rm NFW}(<\\tilde{r}) = 4\\pi\\int_{0}^{\\tilde{r}}d\\tilde{r}\\tilde{r}'^{2}\\tilde{\\rho}_{NFW}(\\tilde{r}),`
 
-        In the above equation, the LHS is computed by the analytical expression given in 
+        In the test suite implementation of the above equation, 
+        the LHS is computed by the analytical expression given in 
         `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.cumulative_mass_PDF`, 
         :math:`P_{\\rm NFW}(<\\tilde{r}) = g(c\\tilde{r})/g(\\tilde{r})`, where the function 
         :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)` 
@@ -99,11 +93,16 @@ class TestNFWProfile(TestCase):
         `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.g` method of the
         `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` class.
 
-        The RHS of the above equation is computed by performing a numerical integral of 
+        The RHS of the consistency equation is computed by performing a direct numerical integral of 
 
-        :math:`\\tilde{\\rho}_{\\rm NFW}(\\tilde{r}) \equiv \\rho_{\\rm NFW}(\\tilde{r})/\\rho_{\\rm thresh} = 
+        :math:`\\tilde{\\rho}_{\\rm NFW}(\\tilde{r}) \equiv \\rho_{\\rm NFW}(\\tilde{r})/\\rho_{\\rm thresh} = \\frac{c^{3}}{3g(c)}\\times\\frac{1}{c\\tilde{r}(1 + c\\tilde{r})^{2}}.`
+        where in the test suite implementation :math:`\\tilde{\\rho}_{\\rm NFW}(\\tilde{r})` is computed 
+        using the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.dimensionless_mass_density` 
+        method of the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` class.
 
 
+
+        3. :math:`M_{\\Delta}(<r) = M_{\\Delta}\\times P_{\\rm NFW}(<r)`. 
 
         """
         Npts = 100

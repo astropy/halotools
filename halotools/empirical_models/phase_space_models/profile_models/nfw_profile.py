@@ -33,6 +33,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
     including descriptions of how the relevant equations are 
     implemented in the Halotools code base, see 
 
+    Testing for this class is done by the 
+    `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile` class. 
+
     """
 
     def __init__(self, 
@@ -237,7 +240,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """
         Analytical result for the fraction of the total mass enclosed within dimensionless radius of an NFW halo, 
 
-        :math:`P_{\\rm prof}(<\\tilde{r}) \equiv M_{\\Delta}(<\\tilde{r}) / M_{\\Delta} = g(c\\tilde{r})/g(\\tilde{r}),`
+        :math:`P_{\\rm NFW}(<\\tilde{r}) \equiv M_{\\Delta}(<\\tilde{r}) / M_{\\Delta} = g(c\\tilde{r})/g(\\tilde{r}),`
         
         where :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)` is computed 
         using `g`, and where :math:`\\tilde{r} \\equiv r / R_{\\Delta}`.
