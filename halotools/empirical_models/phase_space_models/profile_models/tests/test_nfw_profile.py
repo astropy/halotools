@@ -14,10 +14,24 @@ from ..profile_helpers import *
 from ..nfw_profile import NFWProfile
 
 from .....custom_exceptions import HalotoolsError
-from .....utils.array_utils import array_is_monotonic
+from .....utils.array_utils import array_is_monotonic, convert_to_ndarray
 
 
-__all__ = ['TestNFWProfile']
+__all__ = ['TestNFWProfile', 'analytic_nfw_density_outer_shell_normalization']
+
+def analytic_nfw_density_outer_shell_normalization(radii, conc):
+    """ Density of an NFW profile normalized by the density evaluated at the outermost value of the input ``radii`` array. 
+
+    For an NFW profile we have the following relation:
+
+    :math:`\\rho(r_{2})/\\rho(r_{1}) = \\frac{r_{1}(1+cr_{1})^{2}}{r_{2}(1+cr_{2})^{2}}`. 
+
+    """
+    outer_radius = radii[-1]
+    numerator = outer_radius*(1 + conc*outer_radius)**2
+    denominator = radii*(1 + conc*radii)**2
+    return numerator/denominator
+
 
 class TestNFWProfile(TestCase):
     """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile`. 
@@ -137,6 +151,7 @@ class TestNFWProfile(TestCase):
     def test_mc_generate_radial_positions(self):
         """ Require that the points returned by the `~halotools.empirical_models.phase_space_models.profile_models.mc_generate_radial_positions function do indeed trace an NFW profile`. 
 
+        This test makes use of the `analytic_nfw_density_outer_shell_normalization` method. 
         """
         halo_radius = 0.5
         num_pts = 1e6
