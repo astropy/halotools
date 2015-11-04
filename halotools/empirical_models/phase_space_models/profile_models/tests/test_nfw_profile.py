@@ -134,6 +134,23 @@ class TestNFWProfile(TestCase):
             assert np.allclose(enclosed_mass, derived_enclosed_mass, rtol = 1e-4)
 
 
+    def test_mc_generate_radial_positions(self):
+        """ Require that the points returned by the `~halotools.empirical_models.phase_space_models.profile_models.mc_generate_radial_positions function do indeed trace an NFW profile`. 
+
+        """
+        halo_radius = 0.5
+        for model in self.model_list:
+            result_c5 = model.mc_generate_radial_positions(halo_radius = halo_radius, conc = 5)
+            result_c15 = model.mc_generate_radial_positions(halo_radius = halo_radius, conc = 5)
+
+            # Verify that the result is between (0, halo_radius)
+            assert np.all(result_c5 > 0)
+            assert np.all(result_c15 > 0)
+            assert np.all(result_c5 < halo_radius)
+            assert np.all(result_c15 < halo_radius)
+
+
+
 
 
 

@@ -16,6 +16,7 @@ from .conc_mass_models import ConcMass
 from .profile_model_template import AnalyticDensityProf
 
 from ... import model_defaults
+from ...model_helpers import custom_spline
 
 from ....utils.array_utils import convert_to_ndarray
 from ....custom_exceptions import HalotoolsError
@@ -481,6 +482,109 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         """
         return AnalyticDensityProf.halo_radius_to_halo_mass(self, radius)
+
+    def mc_generate_radial_positions(self, num_pts = 1e4, conc = 5, **kwargs):
+        """ Stand-alone convenience function for returning a Monte Carlo realization of the radial positions of points tracing an NFW profile.
+
+        Parameters 
+        -----------
+        num_pts : int, optional 
+            Number of points in the Monte Carlo realization of the profile. 
+            Default is 1e4. 
+
+        conc : float, optional 
+            Concentration of the NFW profile being realized. 
+            Default is 5.
+
+        halo_mass : float, optional 
+            Total mass of the halo whose profile is being realized, 
+            used to define the halo boundary for the mass definition 
+            bound to the NFWProfile instance as ``mdef``. 
+
+            If ``halo_mass`` is unspecified, 
+            keyword argument ``halo_radius`` must be specified. 
+
+        halo_radius : float, optional 
+            Physical boundary of the halo whose profile is being realized 
+            in units of Mpc/h. 
+
+            If ``halo_radius`` is unspecified, 
+            keyword argument ``halo_mass`` must be specified, in which case the 
+            outer boundary of the halo will be determined according to the mass definition 
+            bound to the NFWProfile instance as ``mdef``. 
+
+        Returns 
+        --------
+        radial_positions : array_like  
+            Numpy array storing a Monte Carlo realization of the halo profile. 
+            All values will lie strictly between 0 and the halo boundary. 
+
+        Examples 
+        ---------
+        >>> nfw = NFWProfile()
+        >>> radial_positions = nfw.mc_generate_radial_positions(halo_mass = 1e12, conc = 10)
+        >>> radial_positions = nfw.mc_generate_radial_positions(halo_radius = 0.25)
+
+        """
+        if ('halo_radius' in kwargs) and ('halo_mass' in kwargs):
+            msg = ("\nDo not specify both ``halo_mass`` and ``halo_radius``. \n"
+                "Pick a single option, and the other will be determined self-consistently\n"
+                "from the halo mass definition bound to the NFWProfile instance via the ``mdef`` attribute.\n")
+            raise HalotoolsError(msg)
+
+        try:
+            halo_radius = kwargs['halo_radius']
+        except KeyError:
+            try:
+                halo_mass = kwargs['halo_mass']
+                halo_radius = self.halo_mass_to_halo_radius(halo_mass)
+            except KeyError:
+                msg = ("\nIf keyword argument ``halo_radius`` is unspecified, "
+                    "argument ``halo_mass`` must be specified.\n")
+                raise HalotoolsError(msg)
+
+        halo_radius = convert_to_ndarray(halo_radius, dt = np.float64)
+        try:
+            assert len(halo_radius) == 1
+        except AssertionError:
+            msg = ("Input ``halo_radius`` or ``halo_mass`` must be a float")
+            raise HalotoolsError(msg)
+
+        conc = convert_to_ndarray(conc, dt = np.float64)
+        try:
+            assert len(conc) == 1
+        except AssertionError:
+            msg = ("Input ``conc`` must be a float")
+            raise HalotoolsError(msg)
+
+        # Build lookup table from which to tabulate the inverse cumulative_mass_PDF
+        Npts_radius_table = 1e3
+        radius_array = np.logspace(-4, 0, Npts_radius_table)
+        logradius_array = np.log10(radius_array)
+        table_ordinates = self.cumulative_mass_PDF(radius_array, conc)
+        log_table_ordinates = np.log10(table_ordinates)
+        funcobj = custom_spline(log_table_ordinates, logradius_array, k=4)
+
+        # Use method of transformation of random variates to generate a Monte Carlo realization 
+        ### of the radial positions 
+        randoms = np.random.uniform(0, 1, num_pts)
+        log_randoms = np.log10(randoms)
+        log_scaled_radial_positions = funcobj(log_randoms)
+        scaled_radial_positions = 10.**log_scaled_radial_positions
+        radial_positions = scaled_radial_positions*halo_radius
+
+        return radial_positions
+
+
+
+
+
+
+
+
+
+
+
 
 
 
