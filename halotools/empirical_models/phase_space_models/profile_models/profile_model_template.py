@@ -84,7 +84,7 @@ class AnalyticDensityProf(object):
         Physical density of the halo scaled by the density threshold of the mass definition:
 
         The `dimensionless_mass_density` is defined as 
-        :math:`\\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`, 
+        :math:`\\tilde{\\rho}_{\\rm prof}(\\tilde{r}) \\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`, 
         where :math:`\\tilde{r}\\equiv r/R_{\\Delta}`. 
         The quantity :math:`\\rho_{\\rm thresh}` is a function of 
         the halo mass definition, cosmology and redshift, 
@@ -193,8 +193,10 @@ class AnalyticDensityProf(object):
 
     def cumulative_mass_PDF(self, scaled_radius, *prof_params):
         """
-        The fraction of the total mass enclosed within 
-        dimensionless radius :math:`\\tilde{r} \\equiv r / R_{\\rm halo}`.
+        The fraction of the total mass enclosed within dimensionless radius, 
+
+        :math:`P_{\\rm prof}(<\\tilde{r}) \equiv M_{\\Delta}(<\\tilde{r}) / M_{\\Delta},`
+        where :math:`\\tilde{r} \\equiv r / R_{\\Delta}`.
 
         Parameters 
         -----------

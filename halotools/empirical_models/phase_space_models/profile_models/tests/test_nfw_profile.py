@@ -79,7 +79,32 @@ class TestNFWProfile(TestCase):
 
 
     def test_cumulative_mass_PDF(self):
-        """
+        """ Require the 
+        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.cumulative_mass_PDF` 
+        method in all model variants to respect the following: 
+
+        1. Returned value is a strictly monotonically increasing array between 0 and 1. 
+
+        2. Returned value is consistent with the following expression, 
+        verified via direct numerical integration of the 
+        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.dimensionless_mass_density`:
+
+        :math:`P_{\\rm NFW}(<\\tilde{r}) = 4\\pi\\int_{0}^{\\tilde{r}}d\\tilde{r}\\tilde{r}'^{2}\\tilde{\\rho}_{\\NFW}(\\tilde{r}),`
+
+        In the above equation, the LHS is computed by the analytical expression given in 
+        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.cumulative_mass_PDF`, 
+        :math:`P_{\\rm NFW}(<\\tilde{r}) = g(c\\tilde{r})/g(\\tilde{r})`, where the function 
+        :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)` 
+        is computed using the 
+        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.g` method of the
+        `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` class.
+
+        The RHS of the above equation is computed by performing a numerical integral of 
+
+        :math:`\\tilde{\\rho}_{\\rm NFW}(\\tilde{r}) \equiv \\rho_{\\rm NFW}(\\tilde{r})/\\rho_{\\rm thresh} = 
+
+
+
         """
         Npts = 100
         total_mass = np.zeros(Npts) + 1e12
