@@ -124,11 +124,17 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
     def dimensionless_mass_density(self, scaled_radius, conc):
         """
-        Physical density of the halo scaled by the density threshold of the mass definition:
+        Physical density of the NFW halo scaled by the density threshold of the mass definition:
 
         The `dimensionless_mass_density` is defined as 
-        :math:`\\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`, 
+        :math:`\\tilde{\\rho}_{\\rm prof}(\\tilde{r}) \\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`, 
         where :math:`\\tilde{r}\\equiv r/R_{\\Delta}`. 
+
+        For an NFW halo, 
+        :math:`\\tilde{\\rho}_{\\rm NFW}(\\tilde{r}, c) = \\frac{c^{3}}{3g(c)}\\times\\frac{1}{c\\tilde{r}(1 + c\\tilde{r})^{2}},`
+        
+        where :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)` is computed using the `g` function. 
+
         The quantity :math:`\\rho_{\\rm thresh}` is a function of 
         the halo mass definition, cosmology and redshift, 
         and is computed via the 
@@ -205,7 +211,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         return AnalyticDensityProf.mass_density(self, radius, mass, conc)
 
     def g(self, x):
-        """ Convenience function used to evaluate the profile. 
+        """ Convenience function used to evaluate the profile:
+
+            :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)`
 
         Parameters 
         ----------
@@ -214,7 +222,6 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         Returns 
         -------
         g : array_like 
-            :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)`
 
         Examples 
         --------
@@ -228,8 +235,12 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
     def cumulative_mass_PDF(self, scaled_radius, conc):
         """
-        The fraction of the total mass enclosed within 
-        dimensionless radius :math:`\\tilde{r} \\equiv r / R_{\\rm halo}`.
+        Analytical result for the fraction of the total mass enclosed within dimensionless radius of an NFW halo, 
+
+        :math:`P_{\\rm prof}(<\\tilde{r}) \equiv M_{\\Delta}(<\\tilde{r}) / M_{\\Delta} = g(c\\tilde{r})/g(\\tilde{r}),`
+        
+        where :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)` is computed 
+        using `g`, and where :math:`\\tilde{r} \\equiv r / R_{\\Delta}`.
 
         Parameters
         -------------
