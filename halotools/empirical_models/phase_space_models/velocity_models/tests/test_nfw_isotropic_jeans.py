@@ -7,7 +7,7 @@ from astropy.table import Table
 
 from ..nfw_isotropic_jeans import NFWJeansVelocity
 
-from ...phase_space_models import NFWPhaseSpace
+from ...nfw_phase_space import NFWPhaseSpace
 
 from .....sim_manager import HaloCatalog
 from .....custom_exceptions import HalotoolsError

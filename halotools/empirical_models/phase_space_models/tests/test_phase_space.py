@@ -5,7 +5,7 @@ from unittest import TestCase
 import numpy as np 
 from astropy.table import Table 
 
-from ..phase_space_models import NFWPhaseSpace
+from ..nfw_phase_space import NFWPhaseSpace
 
 from ....sim_manager import HaloCatalog
 from ....custom_exceptions import HalotoolsError
