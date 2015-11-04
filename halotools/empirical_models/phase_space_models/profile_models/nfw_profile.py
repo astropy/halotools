@@ -62,11 +62,15 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         Examples 
         --------
-        You can load a NFW profile model with the default settings simply by calling 
+        You can load an NFW profile model with the default settings simply by calling 
         the class constructor with no arguments:
 
         >>> nfw_halo_prof_model = NFWProfile() 
 
+        The density threshold used to define the halo boundary depends on cosmology, 
+        redshift, and the chosen halo mass definition. If you are using 
+        the `NFWProfile` class to build a mock, you should choose values for these 
+        inputs that are consistent with the halo catalog you are populating. 
         For an NFW profile with an alternative cosmology and redshift:
 
         >>> from astropy.cosmology import WMAP9
@@ -78,12 +82,12 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         """
 
-        super(NFWProfile, self).__init__(cosmology, redshift, mdef)
+        AnalyticDensityProf.__init__(self, cosmology, redshift, mdef)
         ConcMass.__init__(self, **kwargs)
 
         self.prof_param_keys = ['conc_NFWmodel']
 
-        self.publications = ['arXiv:9611107', 'arXiv:0002395', 'arXiv:1402.7073']
+        self.publications = ['arXiv:9611107', 'arXiv:0002395']
 
         # Grab the docstring of the ConcMass function and bind it to the conc_NFWmodel function
         self.conc_NFWmodel.__func__.__doc__ = getattr(self, self.conc_mass_model).__doc__
@@ -114,21 +118,23 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         Notes 
         ------
         The behavior of this function is not defined here, but in the 
-        `~halotools.empirical_models.ConcMass` class.
+        `~halotools.empirical_models.phase_space_models.profile_models.ConcMass` class.
         """
         return ConcMass.compute_concentration(self, **kwargs)
 
     def dimensionless_mass_density(self, scaled_radius, conc):
         """
-        Physical density of the halo scaled by the density threshold of the 
-        mass definition:
+        Physical density of the halo scaled by the density threshold of the mass definition:
 
-        `dimensionless_mass_density` :math:`\\equiv \\rho(\\tilde{r}) / \\rho_{\\rm thresh}`, 
-        where :math:`\\tilde{r}\\equiv r/R_{\\rm vir}`. 
-        The quantity:math:`\\rho_{\\rm thresh}` is a function of 
+        The `dimensionless_mass_density` is defined as 
+        :math:`\\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`, 
+        where :math:`\\tilde{r}\\equiv r/R_{\\Delta}`. 
+        The quantity :math:`\\rho_{\\rm thresh}` is a function of 
         the halo mass definition, cosmology and redshift, 
         and is computed via the 
-        `~halotools.empirical_models.phase_space_models.profile_helpers.density_threshold` function. 
+        `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` function. 
+        The quantity :math:`\\rho_{\\rm prof}` is the physical mass density of the 
+        halo profile and is computed via the `mass_density` function. 
 
         Parameters 
         -----------
@@ -144,11 +150,11 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         -------
         dimensionless_density: array_like 
             Dimensionless density of a dark matter halo 
-            at the input ``x``, scaled by the density threshold for this 
+            at the input ``scaled_radius``, normalized by the 
+            `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` 
+            :math:`\\rho_{\\rm thresh}` for the 
             halo mass definition, cosmology, and redshift. 
-            Result is an array of the dimension as the input ``x``. 
-            The physical `mass_density` is simply the `dimensionless_mass_density` 
-            multiplied by the appropriate physical density threshold. 
+            Result is an array of the dimension as the input ``scaled_radius``. 
 
         """
         numerator = conc**3/(3.*self.g(conc))
