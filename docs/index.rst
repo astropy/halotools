@@ -25,6 +25,7 @@ Getting Started
    install
    docs_and_tutorials
    cheat_sheet/overview
+   tutorials/index
  
 *********************
 License and Credits

@@ -6,12 +6,12 @@ Halotools Science Overview
 
 In this section of the documentation we give a qualitative description of the motivation and functionality of Halotools in broad strokes. You can get a more detailed picture of the package from the rest of the :ref:`user-docs`. 
 
-Halotools is a fully open-source project, and is the product of collaboration by many scientists from numerous universities. If you are interested in contributing to Halotools, and/or in learning more about how the package works under the hood, see the :ref:`tutorial_list` and :ref:`developer-docs`. 
+Halotools is a fully open-source project, and is the product of collaboration by many scientists from numerous universities. If you are interested in contributing to Halotools, and/or in learning more about how the package works under the hood, see the :ref:`tutorials_by_category`. 
 
 Core Science Aim
 =====================
 
-The core science aim of Halotools is to provide a generalized platform for building and testing models of cosmological structure formation. Halotools achieves this via a standardized interface for generating mock galaxy populations. The interface has been built with the following considerations:
+The core science aim of Halotools is to provide a generalized platform for building and testing models of the galaxy-halo connection. Halotools achieves this via a standardized interface for generating mock galaxy populations. The interface has been built with the following considerations:
 
 	**Simplicity:** Building a model, generating a synthetic galaxy population, and making mock observations can be accomplished in just a few lines of easy-to-read python code. 
 
@@ -24,7 +24,7 @@ For convenience, Halotools comes pre-loaded with traditional models such as the 
 Cosmology 
 =====================
 
-The Halotools approach is to directly populate simulated dark matter halos with mock galaxies, and then make measurements on each Monte Carlo-realized universe as you would on an observed galaxy catalog. Direct mock population offers a powerful way to expand the set of cosmological observables deep into the nonlinear regime, while still maintaining the rigor of the precision cosmology program. This approach offers three distinct advantages:
+The Halotools approach is to directly populate simulated dark matter halos with mock galaxies, and then make measurements on each Monte Carlo-realized universe as you would on an observed galaxy catalog. Direct mock population offers a powerful way to expand the set of cosmological observables deep into the nonlinear regime, while still maintaining the rigor of the precision-cosmology program. This approach offers three distinct advantages:
 
 	**New observables:** Freed from the restrictions of calibrated fitting functions, direct mock population permits the study of any statistic that can be computed from a mock, such as marked correlations, void probabilty functions, and group-based statistics. 
 
