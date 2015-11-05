@@ -7,12 +7,12 @@ Package Installation
 Installing Halotools
 ====================
 
-There are two simple options for how to install Halotools on your machine. In both cases, once you install the package you will be able to import the Halotools package from a python terminal running from any location on your machine.
+There are two simple options for how to install Halotools on your machine. In both cases, once you install the package you will be able to import the Halotools package from a python interpreter running from any location on your machine.
 
 Using pip
 -------------
 
-The pip install option is not yet available - coming soon!
+The pip install option will become available upon the package beta-release - coming soon!
 
 Building from source 
 --------------------------
@@ -22,6 +22,17 @@ The other option for installing Halotools is to clone the source code from githu
 	git clone https://github.com/astropy/halotools.git
 	cd halotools
 	python setup.py install
+
+Verifying your installation 
+-----------------------------
+
+After installing the code, you should navigate to the root directory of the package and run the full test suite to make sure your copy of Halotools is science-ready:
+
+	python setup.py test 
+
+Depending on how you have configured your copy of the gcc compiler, Mac users may need to instead run 
+
+	CC=clang python setup.py test 
 
 Dependencies
 ============
@@ -52,18 +63,6 @@ All of the above come pre-installed with a modern python distribution such as An
 - `h5py <http://h5py.org/>`_: 2.5 or later
 
 Use pip to install h5py and the other core packages, as necessary. 
-
-
-Optional Dependencies
----------------------
-
-Halotools also depends on other packages for optional features and enhanced performance:
-
-- `mpi4py <http://mpi4py.scipy.org/>`_: For parallelizing MCMCs and various expensive simulation analyses.
-
-- `numba <http://numba.pydata.org/>`_: For speeding up calculations using vectorization and just-in-time compiling. 
-
-For each item in the list above, you only need to install the package if you wish to use the associated feature/enhancement. Halotools will import even if these dependencies are not installed. All optional and core dependencies can be installed with pip. 
 
 
 

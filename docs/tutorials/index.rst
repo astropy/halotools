@@ -1,7 +1,7 @@
-.. _tutorial_list:
+.. _tutorials_by_category:
 
 ********************************************
-List of Halotools tutorials
+Tutorials grouped by category
 ********************************************
 
 
@@ -13,7 +13,3 @@ Managing simulations
 
    using_halocat_binaries.rst
 
-Building cosmological models
-====================================
-
-Coming soon!
