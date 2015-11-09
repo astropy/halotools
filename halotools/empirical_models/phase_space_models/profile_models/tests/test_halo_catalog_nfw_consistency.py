@@ -13,10 +13,11 @@ from astropy import units as u
 from .. import profile_helpers
 from ..nfw_profile import NFWProfile
 
+from .... import model_defaults 
+
 from .....sim_manager import HaloCatalog
 from .....utils import table_utils
 from .....utils.array_utils import convert_to_ndarray
-
 from .....custom_exceptions import HalotoolsError
 
 
@@ -70,13 +71,17 @@ class TestHaloCatalogNFWConsistency(TestCase):
         for sample_name in self.halo_sample_names:
             halos = getattr(self, sample_name)
 
-            median_conc = np.median(halos['halo_nfw_conc'])
-            median_mass = np.median(halos['halo_mvir'])
+            cmin = model_defaults.min_permitted_conc
+            cmax = model_defaults.max_permitted_conc
+            carr = halos[model_defaults.concentration_key]
+            mask = (carr >= cmin) & (carr <= cmax)
+
+            median_conc = np.median(carr[mask])
 
             predicted_conc = self.nfw_profile.conc_NFWmodel(
-                prim_haloprop = median_mass)
+                halo_table = halos[mask])
 
-            assert np.allclose(median_conc, predicted_conc, rtol = 0.25)
+            assert np.allclose(carr[mask], predicted_conc, rtol = 0.001)
 
 
     @pytest.mark.slow
