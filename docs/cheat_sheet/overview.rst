@@ -17,7 +17,7 @@ Models of the 1-halo term
 .. toctree::
    :maxdepth: 2
 
-   halo_phase_space_cheat_sheet
+   empirical_models/phase_space_models/halo_phase_space_cheat_sheet
 
 
 
