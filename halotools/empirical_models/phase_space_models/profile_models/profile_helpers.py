@@ -108,9 +108,7 @@ def density_threshold(cosmology, redshift, mdef):
 
 def delta_vir(cosmology, redshift):
 	"""
-	The virial overdensity in units of the critical density, 
-	using the fitting formula of Bryan & Norman 1998, assuming 
-	:math:`\Omega_{\\Lambda} = 0.`
+	The virial overdensity in units of the critical density, using the fitting formula of Bryan & Norman 1998, assuming :math:`\Omega_{\\Lambda} = 0.`
 
 	:math:`\\Delta_{\\rm vir}(x) = 18\\pi^{2} + 82x - 39x^{2}`, 
 	where :math:`x \\equiv \\Omega_{m}(z)-1`. 
