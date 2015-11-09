@@ -149,8 +149,11 @@ class TestNFWPhaseSpace(TestCase):
         pos10 = np.vstack([x10, y10, z10]).T
         norm10 = np.linalg.norm(pos10, axis=1)
 
-        assert np.mean(norm5) > np.mean(norm10) > np.mean(norm15)
-        assert np.median(norm5) > np.median(norm10) > np.median(norm15)
+        assert np.mean(norm5) > np.mean(norm10)
+        assert np.mean(norm10) > np.mean(norm15)
+        
+        assert np.median(norm5) > np.median(norm10) 
+        assert np.median(norm10) > np.median(norm15)
 
         x10a, y10a, z10a = self.nfw.mc_halo_centric_pos(
             halo_radius=halo_radius*2, profile_params=[self.c10], seed=43)

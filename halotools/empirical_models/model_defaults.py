@@ -93,14 +93,15 @@ def get_halo_mass_key(mdef):
 
 # Number of bins to use in the lookup table attached to the NFWProfile. 
 # Used primarily by HODMockFactory.
-min_permitted_conc = 0.1
+min_permitted_conc = 1
 max_permitted_conc = 30.0
 default_high_prec_dconc = 0.025
 
 Npts_radius_table = 101
 default_lograd_min = -3
 default_lograd_max = 0
-conc_mass_model = 'dutton_maccio14'
+conc_mass_model = 'direct_from_halo_catalog'
+concentration_key = 'halo_nfw_conc'
 
 
 default_rbins = np.logspace(-1, 1.25, 15)
