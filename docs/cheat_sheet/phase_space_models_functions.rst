@@ -2,14 +2,31 @@
 
 .. _phase_space_models_functions:
 
+Phase Space Models 
+====================
+
+.. _halo_boundary_functions: 
 
 Halo Mass Definitions
-=======================
+------------------------
 
-.. currentmodule:: halotools.empirical_models.phase_space_models
+.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models.profile_helpers
+
 .. autosummary::
 
    halo_mass_to_halo_radius
    halo_radius_to_halo_mass
    delta_vir
    density_threshold
+
+.. _nfw_profile_functions: 
+
+NFW Profile 
+------------------------
+
+.. currentmodule:: halotools.empirical_models.phase_space_models
+
+.. autosummary::
+
+	NFWProfile
+	NFWPhaseSpace
