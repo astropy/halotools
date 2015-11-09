@@ -11,13 +11,10 @@ Many docstrings contain example code to demonstrate basic usage.
 Modeling the Galaxy-Halo Connection
 =====================================
 
-Models of the 1-halo term
--------------------------
-
 .. toctree::
    :maxdepth: 1
 
-   empirical_models/phase_space_models/halo_phase_space_cheat_sheet
+   empirical_models/phase_space_models/mass_definitions
 
 
 
