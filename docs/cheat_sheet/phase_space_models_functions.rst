@@ -1,4 +1,6 @@
-.. _mass_definitions:
+:orphan:
+
+.. _phase_space_models_functions:
 
 
 Halo Mass Definitions

@@ -15,7 +15,7 @@ Modeling the Galaxy-Halo Connection
 .. toctree::
    :maxdepth: 2
 
-   empirical_models/phase_space_models/mass_definitions
+   phase_space_models_functions
 
 
 
