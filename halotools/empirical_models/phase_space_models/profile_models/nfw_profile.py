@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 This module contains the `NFWProfile` class, 
-a sub-class of `~halotools.empirical_models.phase_space_models.AnalyticDensityProf`. 
-The `NFWProfile` class is used to model the distribution of mass and/or galaxies 
+which is used to model the spatial distribution of mass and/or galaxies 
 inside dark matter halos according to the fitting function introduced in 
 Navarry, Frenk and White (1999). 
+a sub-class of `~halotools.empirical_models.phase_space_models.AnalyticDensityProf`. 
+
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
@@ -28,11 +29,11 @@ __author__ = ['Andrew Hearin', 'Benedikt Diemer']
 __all__ = ['NFWProfile']
 
 class NFWProfile(AnalyticDensityProf, ConcMass):
-    """ NFW halo profile, based on Navarro, Frenk and White (1999).
+    """ Model for the spatial distribution of mass and/or galaxies residing in an NFW halo profile, based on Navarro, Frenk and White (1999).
 
     For a review of the mathematics underlying the NFW profile, 
     including descriptions of how the relevant equations are 
-    implemented in the Halotools code base, see 
+    implemented in the Halotools code base, see :ref:`nfw_profile_tutorial`. 
 
     Testing for this class is done in the 
     `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile` module. 
@@ -50,10 +51,10 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         cosmology : object, optional 
             Instance of an astropy `~astropy.cosmology`. 
             Default cosmology is set in 
-            `~halotools.empirical_models.sim_manager.sim_defaults`.
+            `~halotools.sim_manager.sim_defaults`.
 
         redshift : float, optional  
-            Default is set in `~halotools.empirical_models.sim_defaults`.
+            Default is set in `~halotools.sim_manager.sim_defaults`.
 
         mdef: str, optional 
             String specifying the halo mass definition, e.g., 'vir' or '200m'. 
