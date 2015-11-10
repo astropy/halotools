@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Module composes the behavior of the profile models 
-and the velocity models to produce models for the 
-full phase space distribution of galaxies within their halos. 
+Module defining the `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` class 
+governing the phase space distribution of massless tracers of an NFW potential. 
 """
 from __future__ import (
     division, print_function, absolute_import)
@@ -23,7 +22,14 @@ from ...sim_manager import sim_defaults
 
 
 class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
-    """ NFW halo profile, based on Navarro, Frenk and White (1999).
+    """ Model for the phase space distribution of mass and/or galaxies in isotropic Jeans equilibrium in an NFW halo profile, based on Navarro, Frenk and White (1999).
+
+    For a review of the mathematics underlying the NFW profile, 
+    including descriptions of how the relevant equations are 
+    implemented in the Halotools code base, see :ref:`nfw_profile_tutorial`. 
+
+    Testing for this class is done in the 
+    `~halotools.empirical_models.phase_space_models.tests.TestNFWPhaseSpace` class. 
 
     """
 
@@ -33,13 +39,13 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ----------
         conc_mass_model : string, optional  
             Specifies the calibrated fitting function used to model the concentration-mass relation. 
-             Default is set in `~halotools.empirical_models.sim_defaults`.
+             Default is set in `~halotools.sim_manager.sim_defaults`.
 
         cosmology : object, optional 
-            Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
+            Astropy cosmology object. Default is set in `~halotools.sim_manager.sim_defaults`.
 
         redshift : float, optional  
-            Default is set in `~halotools.empirical_models.sim_defaults`.
+            Default is set in `~halotools.sim_manager.sim_defaults`.
 
         mdef: str
             String specifying the halo mass definition, e.g., 'vir' or '200m'. 
@@ -47,8 +53,9 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         velocity_bias : bool, optional 
             Boolean specifying whether the galaxy velocities are biased 
-            with respect to the halo velocities. If True, ``param_dict`` will have a 
-            parameter called ``velbias_satellites`` that multiplies the underlying 
+            with respect to the halo velocities. If True, the ``param_dict`` attribute of the 
+            `NFWPhaseSpace` instance will have a parameter called ``velbias_satellites`` 
+            that multiplies the underlying 
             Jeans solution for the halo radial velocity dispersion by an overall factor. 
             Default is False. 
 
@@ -57,7 +64,6 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             value of the concentration in the lookup table, 
             the second entry the maximum, the third entry 
             the linear spacing of the grid. 
-            
 
         high_precision : bool, optional
             If set to True, concentration binning width is equal to 
@@ -91,15 +97,31 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         self._mock_generation_calling_sequence = ['assign_phase_space']
 
     def assign_phase_space(self, halo_table):
-        """
+        """ Primary method of the `NFWPhaseSpace` class called during the mock-population sequence. 
+
+        Parameters 
+        -----------
+        halo_table : object, optional  
+            Data table storing halo catalog. 
+            After calling the `assign_phase_space` method, the `x`, `y`, `z`, `vx`, `vy`, and `vz` 
+            columns of the input ``halo_table`` will be over-written. 
+
+        Notes 
+        ------
+        The behavior of this method is actually defined in the following two methods of the 
+        `~halotools.empirical_models.phase_space_models.monte_carlo_helpers.MonteCarloGalProf` class: 
+
+        * `~halotools.empirical_models.phase_space_models.monte_carlo_helpers.MonteCarloGalProf.mc_pos`
+
+        * `~halotools.empirical_models.phase_space_models.monte_carlo_helpers.MonteCarloGalProf.mc_vel`
+
         """
         MonteCarloGalProf.mc_pos(self, halo_table = halo_table)
         MonteCarloGalProf.mc_vel(self, halo_table = halo_table)
 
 
     def mc_generate_phase_space_points(self, Ngals = 1e4, conc=5, mass = 1e12):
-        """ Stand-alone convenience function for returning a Monte Carlo 
-        realization of NFW phase space.
+        """ Stand-alone convenience function for returning a Monte Carlo realization of points in the phase space of an NFW halo in isotropic Jeans equilibrium.
 
         Parameters 
         -----------
@@ -125,8 +147,28 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         Examples 
         ---------
         >>> nfw = NFWPhaseSpace()
-        >>> data = nfw.mc_generate_phase_space_points(Ngals = 1e2) # doctest: +SKIP
-        >>> data = nfw.mc_generate_phase_space_points(Ngals = 1e3, mass = 1e15) # doctest: +SKIP
+        >>> mass, conc = 1e13, 8.
+        >>> data = nfw.mc_generate_phase_space_points(Ngals = 1e2, mass = mass, conc = conc) 
+
+        Now suppose you wish to compute the radial velocity dispersion of all the returned points:
+
+        >>> vrad_disp = np.std(data['radial_velocity'])
+
+        If you wish to do the same calculation but for points in a specific range of radius:
+
+        >>> mask = data['radial_position'] < 0.1
+        >>> vrad_disp_inner_points = np.std(data['radial_velocity'][mask])
+
+        You may also wish to select points according to their distance to the halo center 
+        in units of the virial radius. In such as case, you can use the 
+        `halo_mass_to_halo_radius` method to scale the halo-centric distances. Here is an example 
+        of how to compute the velocity dispersion in the z-dimension of all points 
+        residing within :math:`R_{\\rm vir}/2`:
+
+        >>> halo_radius = nfw.halo_mass_to_halo_radius(mass)
+        >>> scaled_radial_positions = data['radial_position']/halo_radius
+        >>> mask = scaled_radial_positions < 0.5
+        >>> vz_disp_inner_half = np.std(data['vz'][mask])
 
         """
 
@@ -187,6 +229,9 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ------
         The behavior of this function is not defined here, but in the 
         `~halotools.empirical_models.phase_space_models.profile_models.ConcMass` class.
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_conc_mass.TestConcMass` class. 
+
         """
         return NFWProfile.compute_concentration(self, **kwargs)
 
@@ -230,6 +275,11 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             halo mass definition, cosmology, and redshift. 
             Result is an array of the dimension as the input ``scaled_radius``. 
 
+        Notes 
+        -----
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
+
         """
         return NFWProfile.dimensionless_mass_density(self, scaled_radius, conc)
 
@@ -246,6 +296,65 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         """
         return MonteCarloGalProf.mc_vel(self, halo_table)
 
+    def halo_mass_to_halo_radius(self, total_mass):
+        """
+        Spherical overdensity radius as a function of the input mass. 
+
+        Note that this function is independent of the form of the density profile.
+
+        Parameters 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+
+        Returns 
+        -------
+        radius : array_like 
+            Radius of the halo in Mpc/h units. 
+            Will have the same dimension as the input ``total_mass``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> halo_radius = model.halo_mass_to_halo_radius(1e13)
+
+        Notes 
+        ------
+        This function is tested with the 
+        `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestProfileHelpers.test_halo_mass_to_halo_radius` function. 
+
+        """
+        return NFWProfile.halo_mass_to_halo_radius(self, total_mass)
+
+    def halo_radius_to_halo_mass(self, radius):
+        """
+        Spherical overdensity mass as a function of the input radius. 
+
+        Note that this function is independent of the form of the density profile.
+
+        Parameters 
+        ------------
+        radius : array_like 
+            Radius of the halo in Mpc/h units; can be a number or a numpy array.
+
+        Returns 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`. 
+            Will have the same dimension as the input ``radius``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> halo_mass = model.halo_mass_to_halo_radius(500.)
+
+        Notes 
+        ------
+        This function is tested with the 
+        `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestProfileHelpers.test_halo_radius_to_halo_mass` function. 
+
+        """
+        return NFWProfile.halo_radius_to_halo_mass(self, radius)
 
 
 

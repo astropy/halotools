@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 The `MonteCarloGalProf` class defined in this module is 
-used to augment the analytic profile and velocity models. 
+used as an orthogonal mix-in class to supplement the behavior of 
+the analytic profile and velocity models. 
 The result of using `MonteCarloGalProf` as an orthogonal mix-in class 
 is a composite class that can be used to generate Monte Carlo realizations 
 of the full phase space distribution of galaxies within their halos. 
@@ -27,7 +28,7 @@ from ...custom_exceptions import HalotoolsError
 
 class MonteCarloGalProf(object):
     """ Orthogonal mix-in class used to turn an analytical 
-    phase space model (e.g., `~halotools.empirical_models.NFWPhaseSpace`)
+    phase space model (e.g., `~halotools.empirical_models.phase_space_models.NFWPhaseSpace`)
     into a class that can generate the phase space distribution 
     of a mock galaxy population. 
     """
@@ -38,7 +39,9 @@ class MonteCarloGalProf(object):
         # For each function computing a profile parameter, 
         # add it to new_haloprop_func_dict so that the profile parameter 
         # will be pre-computed for each halo prior to mock population
-        self.new_haloprop_func_dict = {}
+        if not hasattr(self, 'new_haloprop_func_dict'):
+            self.new_haloprop_func_dict = {}
+
         for key in self.prof_param_keys:
             self.new_haloprop_func_dict[key] = getattr(self, key)
 
