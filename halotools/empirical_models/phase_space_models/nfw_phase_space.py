@@ -231,7 +231,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Result is an array of the dimension as the input ``scaled_radius``. 
 
         """
-        return NFWProfile.dimensionless_mass_density(scaled_radius, conc)
+        return NFWProfile.dimensionless_mass_density(self, scaled_radius, conc)
 
     def mc_vel(self, halo_table):
         """ Method assigns a Monte Carlo realization of the Jeans velocity 
@@ -244,7 +244,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Calling the `mc_vel` method will over-write the existing values of 
             the ``vx``, ``vy`` and ``vz`` columns. 
         """
-        return MonteCarloGalProf.mc_vel(halo_table)
+        return MonteCarloGalProf.mc_vel(self, halo_table)
 
 
 

@@ -21,16 +21,12 @@ from .....sim_manager import sim_defaults
 __all__ = ['TestTrivialProfile']
 
 class TestTrivialProfile(TestCase):
-    """ Tests of `~halotools.empirical_models.halo_prof_components.TrivialProfile`. 
+    """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.TrivialProfile`. 
 
-    Mostly this function checks that the each of the following attributes is present, 
-    and is an empty array, list, or dictionary:
-
-        * ``cumu_inv_func_table``
-
-        * ``cumu_inv_func_table_dict``
-
-        * ``cumu_inv_param_table``
+    The TrivialProfile has very little functionality. It is mostly just a standard-form class 
+    called during mock population to assign the positions of central galaxies to be equal 
+    to the positions of their host halos. So `TestTrivialProfile` mostly 
+    just enforces that the necessary attributes of ``TrivialProfile`` instances exist. 
 
     """
     def setup_class(self):
