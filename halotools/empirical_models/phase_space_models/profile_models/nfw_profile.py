@@ -284,9 +284,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
     def enclosed_mass(self, radius, total_mass, conc):
         """
-        The mass enclosed within the input radius. 
-
-        :math:`M(<r) = 4\\pi\\int_{0}^{r}dr'r'^{2}\\rho(r)`. 
+        The mass enclosed within the input radius, :math:`M(<r) = 4\\pi\\int_{0}^{r}dr'r'^{2}\\rho(r)`. 
 
         Parameters 
         -----------
