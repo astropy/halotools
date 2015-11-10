@@ -55,7 +55,7 @@ class TrivialProfile(AnalyticDensityProf):
 
         Notes 
         -----
-        Testing done by `~halotools.empirical_models.test_empirical_models.test_TrivialProfile`
+        Testing done by `~halotools.empirical_models.phase_space_models.profile_models.tests.TestTrivialProfile`
 
         Examples 
         --------

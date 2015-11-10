@@ -24,7 +24,7 @@ Getting Started
 
    install
    docs_and_tutorials
-   cheat_sheet/index
+   function_usage/index
    tutorials/index
  
 *********************
