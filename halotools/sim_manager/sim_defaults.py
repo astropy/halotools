@@ -8,6 +8,8 @@ descriptions of the purpose of each variable defined in this module.
 
 """
 
+__all__ = ['return_dtype_and_header']
+
 import os, sys
 import numpy as np
 from astropy import cosmology
@@ -67,6 +69,8 @@ dtype_bolshoi_bdm = raw_halocat_column_info.dtype_slac_bolshoi_bdm_july19_2015
 header_bolshoi_bdm = raw_halocat_column_info.header_slac_bolshoi_bdm_july19_2015
 
 def return_dtype_and_header(simname, halo_finder):
+	"""
+	"""
 	if halo_finder == 'rockstar':
 		if simname == 'bolshoi':
 			return dtype_bolshoi_rockstar, header_bolshoi_rockstar
