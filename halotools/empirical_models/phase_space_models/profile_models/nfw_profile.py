@@ -125,6 +125,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         ------
         The behavior of this function is not defined here, but in the 
         `~halotools.empirical_models.phase_space_models.profile_models.ConcMass` class.
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_conc_mass.TestConcMass` class. 
         """
         return ConcMass.compute_concentration(self, **kwargs)
 
@@ -167,6 +169,11 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             :math:`\\rho_{\\rm thresh}` for the 
             halo mass definition, cosmology, and redshift. 
             Result is an array of the dimension as the input ``scaled_radius``. 
+
+        Notes 
+        -----
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
 
         """
         numerator = conc**3/(3.*self.g(conc))
@@ -212,6 +219,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         Notes 
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
 
         """
         return AnalyticDensityProf.mass_density(self, radius, mass, conc)
@@ -279,6 +288,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_cumulative_mass_PDF` function. 
+
         """     
         scaled_radius = np.where(scaled_radius > 1, 1, scaled_radius)
         scaled_radius = np.where(scaled_radius < 0, 0, scaled_radius)
@@ -321,6 +332,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         Notes 
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_cumulative_mass_PDF` function. 
+
         """
         return AnalyticDensityProf.enclosed_mass(self, radius, total_mass, conc)
 
@@ -390,6 +404,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_vmax` function. 
         """    
         return AnalyticDensityProf.circular_velocity(self, radius, total_mass, conc)
 
@@ -424,7 +439,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
-        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_vmax` method. 
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_vmax` function, 
+        and also the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_halo_catalog_nfw_consistency.TestHaloCatalogNFWConsistency.test_vmax_consistency` function. 
 
         """
         halo_radius = self.halo_mass_to_halo_radius(total_mass)
@@ -456,6 +472,11 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         >>> model = NFWProfile() 
         >>> halo_radius = model.halo_mass_to_halo_radius(1e13)
 
+        Notes 
+        ------
+        This function is tested with the 
+        `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestNFWProfile.test_halo_mass_to_halo_radius` function. 
+
         """
         return AnalyticDensityProf.halo_mass_to_halo_radius(self, total_mass)
 
@@ -480,6 +501,11 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         --------
         >>> model = NFWProfile() 
         >>> halo_mass = model.halo_mass_to_halo_radius(500.)
+
+        Notes 
+        ------
+        This function is tested with the 
+        `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestNFWProfile.test_halo_radius_to_halo_mass` function. 
 
         """
         return AnalyticDensityProf.halo_radius_to_halo_mass(self, radius)
@@ -531,7 +557,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         Notes 
         ------
-        The correctness of this function is tested with the 
+        This function is tested with the 
         `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_mc_generate_radial_positions` function. 
         """
         if ('halo_radius' in kwargs) and ('halo_mass' in kwargs):
