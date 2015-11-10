@@ -37,14 +37,13 @@ else:
 __all__ = ['TestHaloCatalogNFWConsistency']
 
 class TestHaloCatalogNFWConsistency(TestCase):
-    """ Tests of `~halotools.empirical_models.halo_prof_components.NFWProfile` 
-    in which comparisons are made to a halo catalog. 
+    """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` in which comparisons are made to a Bolshoi halo catalog. 
 
     """
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
     def setup_class(self):
-        """
+        """ Pre-load various arrays into memory for use by all tests. 
         """
         halocat = HaloCatalog(simname = 'bolshoi', redshift = 0.)
         hosts = table_utils.SampleSelector.host_halo_selection(table = halocat.halo_table)

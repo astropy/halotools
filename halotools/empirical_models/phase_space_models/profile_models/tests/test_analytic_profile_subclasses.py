@@ -25,7 +25,7 @@ class TestAnalyticDensityProf(TestCase):
     """
 
     def setup_class(self):
-        """
+        """ Pre-load various arrays into memory for use by all tests. 
         """
         self.prof_model_list = (
             profile_models.NFWProfile, profile_models.TrivialProfile

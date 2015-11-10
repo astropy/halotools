@@ -5,6 +5,8 @@ the empirical models sub-package.
 All hard-coding should be restricted to this module, whenever possible.
 """
 
+__all__ = ['get_halo_boundary_key', 'get_halo_mass_key']
+
 import os, sys
 import numpy as np
 from astropy import cosmology
