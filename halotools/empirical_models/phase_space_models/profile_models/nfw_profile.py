@@ -99,8 +99,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
     def conc_NFWmodel(self, **kwargs):
         """ Method computes the NFW concentration 
-        as a function of the input halos according to the 
-        ``conc_mass_model`` bound to the `NFWProfile` instance. 
+        as a function of the input halos according to the behavior of the 
+        `~halotools.empirical_models.phase_space_models.profile_models.ConcMass` instance 
+        bound to the ``NFWProfile.conc_mass_model`` attribute. 
 
         Parameters
         ----------        
@@ -129,7 +130,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
     def dimensionless_mass_density(self, scaled_radius, conc):
         """
-        Physical density of the NFW halo scaled by the density threshold of the mass definition:
+        Physical density of the NFW halo scaled by the density threshold of the mass definition.
 
         The `dimensionless_mass_density` is defined as 
         :math:`\\tilde{\\rho}_{\\rm prof}(\\tilde{r}) \\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`, 
@@ -216,7 +217,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         return AnalyticDensityProf.mass_density(self, radius, mass, conc)
 
     def g(self, x):
-        """ Convenience function used to evaluate the profile:
+        """ Convenience function used to evaluate the profile.
 
             :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)`
 
@@ -423,7 +424,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         ------
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
-        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile` class. 
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_vmax` method. 
 
         """
         halo_radius = self.halo_mass_to_halo_radius(total_mass)

@@ -85,13 +85,6 @@ def monte_carlo_density_outer_shell_normalization(rbins, radial_positions):
 class TestNFWProfile(TestCase):
     """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile`. 
 
-    Basic summary of tests:
-
-        * Default settings for lookup table arrays all have reasonable values and ranges. 
-
-        * Discretization of NFW Profile with lookup table attains better than 0.1 percent accuracy for all relevant radii and concentrations
-
-        * Lookup table recomputes properly when manually passed alternate discretizations 
     """
 
     def setup_class(self):
