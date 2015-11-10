@@ -6,6 +6,8 @@ the analytic profile and velocity models.
 The result of using `MonteCarloGalProf` as an orthogonal mix-in class 
 is a composite class that can be used to generate Monte Carlo realizations 
 of the full phase space distribution of galaxies within their halos. 
+
+Testing for this module is done in `~halotools.empirical_models.phase_space_models.tests.test_phase_space` module. 
 """
 # from __future__ import (
 #     division, print_function, absolute_import, unicode_literals)
@@ -15,7 +17,6 @@ __all__ = ['MonteCarloGalProf']
 
 import numpy as np 
 
-from functools import partial
 from itertools import product
 from time import time
 
@@ -31,6 +32,9 @@ class MonteCarloGalProf(object):
     phase space model (e.g., `~halotools.empirical_models.phase_space_models.NFWPhaseSpace`)
     into a class that can generate the phase space distribution 
     of a mock galaxy population. 
+
+    Testing for this module is done in `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace` class. 
+
     """
 
     def __init__(self):
@@ -41,7 +45,6 @@ class MonteCarloGalProf(object):
         # will be pre-computed for each halo prior to mock population
         if not hasattr(self, 'new_haloprop_func_dict'):
             self.new_haloprop_func_dict = {}
-
         for key in self.prof_param_keys:
             self.new_haloprop_func_dict[key] = getattr(self, key)
 
@@ -56,16 +59,37 @@ class MonteCarloGalProf(object):
         """
         Private method used to set up the lookup table grid. 
 
+        Each analytical profile has profile parameters associated with it. This method 
+        sets up how we will digitize the value of each such parameter for the purposes of 
+        mock population. 
+
+        As an example, the `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` 
+        model has a single profile parameter, ``conc_NFWmodel``. After calling the 
+        `_setup_lookup_tables` method, there will be three new attributes bound to the 
+        `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` instance:
+
+        * ``_conc_NFWmodel_lookup_table_min``
+
+        * ``_conc_NFWmodel_lookup_table_max``
+
+        * ``_conc_NFWmodel_lookup_table_spacing``
+
+        These three attributes define the linearly spacing of the ``conc_NFWmodel`` parameter 
+        lookup table created by the `build_lookup_tables` method.
+
         Parameters 
         ----------
-        lookup_table_binning : sequence 
-            Sequence of tuples, with one tuple per radial profile parameter. 
+        *lookup_table_binning : sequence 
+            Sequence of tuples, with one tuple per radial profile parameter, 
+            and each tuple having three elements. 
             The first entry of each tuple will be the minimum 
             value of the profile parameter in the lookup table, 
             the second entry the maximum, the third entry 
             the linear spacing of the grid. The i^th element of 
             the input ``lookup_table_binning`` sequence 
-            is assumed to correspond to the i^th element of ``self.prof_param_keys``. 
+            is assumed to correspond to the i^th element of ``self.prof_param_keys``, 
+            which is defined in the 
+            `~halotools.empirical_models.phase_space_models.profile_params.profile_model_template.AnalyticalDensityProf` sub-class. 
         """
         for ipar, prof_param_key in enumerate(self.prof_param_keys):
             setattr(self, '_' + prof_param_key + '_lookup_table_min', lookup_table_binning[ipar][0])
@@ -76,8 +100,7 @@ class MonteCarloGalProf(object):
         logrmin = model_defaults.default_lograd_min, 
         logrmax = model_defaults.default_lograd_max, 
         Npts_radius_table = model_defaults.Npts_radius_table):
-        """ Method used to create a lookup table of the radial profile 
-        and velocity profile.  
+        """ Method used to create a lookup table of the spatial and velocity radial profiles.  
 
         Parameters 
         ----------
@@ -171,6 +194,10 @@ class MonteCarloGalProf(object):
         r : array 
             Length-Ngals array containing the radial position of galaxies within their halos, 
             scaled by the size of the halo's boundary, so that :math:`0 < r < 1`. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_dimensionless_radial_distance` function. 
         """
         profile_params = kwargs['profile_params']
 
@@ -236,6 +263,10 @@ class MonteCarloGalProf(object):
         x, y, z : array_like  
             Length-Npts arrays of the coordinate positions. 
 
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_unit_sphere` function. 
+
         """
         if 'seed' in kwargs:
             np.random.seed(kwargs['seed'])
@@ -274,6 +305,10 @@ class MonteCarloGalProf(object):
         -------
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_solid_sphere` function. 
         """
         # Retrieve the list of profile_params
         if 'halo_table' in kwargs:
@@ -348,6 +383,10 @@ class MonteCarloGalProf(object):
         -------
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_halo_centric_pos` function. 
         """
 
         x, y, z = self.mc_solid_sphere(**kwargs)
@@ -409,6 +448,10 @@ class MonteCarloGalProf(object):
             When ``halo_table`` is passed as an argument, the method 
             assumes that the ``x``, ``y``, and ``z`` columns already store 
             the position of the host halo center. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_pos` function. 
         """
 
         if 'halo_table' in kwargs:
