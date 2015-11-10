@@ -39,7 +39,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ----------
         conc_mass_model : string, optional  
             Specifies the calibrated fitting function used to model the concentration-mass relation. 
-             Default is set in `~halotools.sim_manager.sim_defaults`.
+            Default is set in `~halotools.sim_manager.sim_defaults`.
 
         cosmology : object, optional 
             Astropy cosmology object. Default is set in `~halotools.sim_manager.sim_defaults`.
@@ -283,18 +283,267 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         """
         return NFWProfile.dimensionless_mass_density(self, scaled_radius, conc)
 
-    def mc_vel(self, halo_table):
-        """ Method assigns a Monte Carlo realization of the Jeans velocity 
-        solution to the halos in the input ``halo_table``. 
+    def mass_density(self, radius, mass, conc):
+        """
+        Physical density of the halo at the input radius, 
+        given in units of :math:`h^{3}/{\\rm Mpc}^{3}`. 
+        
+        Parameters 
+        -----------
+        radius : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
+
+        mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``radius``. 
+
+        Returns 
+        -------
+        density: array_like 
+            Physical density of a dark matter halo of the input ``mass`` 
+            at the input ``radius``. Result is an array of the 
+            dimension as the input ``radius``, reported in units of :math:`h^{3}/Mpc^{3}`. 
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> radius = np.logspace(-2, -1, Npts)
+        >>> mass = np.zeros(Npts) + 1e12
+        >>> conc = 5
+        >>> result = model.mass_density(radius, mass, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.mass_density(radius, mass, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_mass_density` function. 
+
+        """
+        return NFWProfile.mass_density(self, radius, mass, conc)
+
+    def g(self, x):
+        """ Convenience function used to evaluate the profile.
+
+            :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)`
+
+        Parameters 
+        ----------
+        x : array_like 
+
+        Returns 
+        -------
+        g : array_like 
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> result = model.g(1) 
+        >>> Npts = 25 
+        >>> result = model.g(np.logspace(-1, 1, Npts)) 
+        """
+        return NFWProfile.g(self, x)
+
+    def cumulative_mass_PDF(self, scaled_radius, conc):
+        """
+        Analytical result for the fraction of the total mass enclosed within dimensionless radius of an NFW halo, 
+
+        :math:`P_{\\rm NFW}(<\\tilde{r}) \equiv M_{\\Delta}(<\\tilde{r}) / M_{\\Delta} = g(c\\tilde{r})/g(\\tilde{r}),`
+        
+        where :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)` is computed 
+        using `g`, and where :math:`\\tilde{r} \\equiv r / R_{\\Delta}`.
+
+        Parameters
+        -------------
+        scaled_radius : array_like 
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``scaled_radius``. 
+            
+        Returns
+        -------------
+        p: array_like
+            The fraction of the total mass enclosed 
+            within the input ``scaled_radius``, in :math:`M_{\odot}/h`; 
+            has the same dimensions as the input ``scaled_radius``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> scaled_radius = np.logspace(-2, 0, Npts)
+        >>> conc = 5
+        >>> result = model.cumulative_mass_PDF(scaled_radius, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.cumulative_mass_PDF(scaled_radius, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_cumulative_mass_PDF` function. 
+
+        """     
+        return NFWProfile.cumulative_mass_PDF(self, scaled_radius, conc)
+
+    def enclosed_mass(self, radius, total_mass, conc):
+        """
+        The mass enclosed within the input radius, :math:`M(<r) = 4\\pi\\int_{0}^{r}dr'r'^{2}\\rho(r)`. 
 
         Parameters 
         -----------
-        halo_table : Astropy Table 
-            `astropy.table.Table` object storing the halo catalog. 
-            Calling the `mc_vel` method will over-write the existing values of 
-            the ``vx``, ``vy`` and ``vz`` columns. 
+        radius : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
+
+        total_mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``radius``. 
+            
+        Returns
+        ----------
+        enclosed_mass: array_like
+            The mass enclosed within radius r, in :math:`M_{\odot}/h`; 
+            has the same dimensions as the input ``radius``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> radius = np.logspace(-2, -1, Npts)
+        >>> total_mass = np.zeros(Npts) + 1e12
+        >>> conc = 5
+        >>> result = model.enclosed_mass(radius, total_mass, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.enclosed_mass(radius, total_mass, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_cumulative_mass_PDF` function. 
+
         """
-        return MonteCarloGalProf.mc_vel(self, halo_table)
+        return NFWProfile.enclosed_mass(self, radius, total_mass, conc)
+
+    def virial_velocity(self, total_mass):
+        """ The circular velocity evaluated at the halo boundary, 
+        :math:`V_{\\rm vir} \\equiv \\sqrt{GM_{\\rm halo}/R_{\\rm halo}}`.
+
+        Parameters
+        --------------
+        total_mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array. 
+
+        Returns 
+        --------
+        vvir : array_like 
+            Virial velocity in km/s.
+
+        Examples
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> mass_array = np.logspace(11, 15, Npts)
+        >>> vvir_array = model.virial_velocity(mass_array)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        """
+        return NFWProfile.virial_velocity(self, total_mass)
+
+    def circular_velocity(self, radius, total_mass, conc):
+        """
+        The circular velocity, :math:`V_{\\rm cir} \\equiv \\sqrt{GM(<r)/r}`, 
+        as a function of halo-centric distance r. 
+
+        Parameters
+        --------------
+        radius : array_like 
+            Halo-centric distance in Mpc/h units; can be a scalar or numpy array
+
+        total_mass : array_like 
+            Total mass of the halo; can be a scalar or numpy array of the same 
+            dimension as the input ``radius``. 
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``radius``. 
+
+        Returns
+        ----------
+        vc: array_like
+            The circular velocity in km/s; has the same dimensions as the input ``radius``.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> radius = np.logspace(-2, -1, Npts)
+        >>> total_mass = np.zeros(Npts) + 1e12
+        >>> conc = 5
+        >>> result = model.circular_velocity(radius, total_mass, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.circular_velocity(radius, total_mass, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_vmax` function. 
+        """    
+        return NFWProfile.circular_velocity(self, radius, total_mass, conc)
+
+    def vmax(self, total_mass, conc):
+        """ Maximum circular velocity of the halo profile. 
+
+        Parameters 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``total_mass``. 
+
+        Returns 
+        --------
+        vmax : array_like 
+            :math:`V_{\\rm max}` in km/s.
+
+        Examples 
+        --------
+        >>> model = NFWProfile() 
+        >>> Npts = 100
+        >>> total_mass = np.zeros(Npts) + 1e12
+        >>> conc = 5
+        >>> result = model.vmax(total_mass, conc)
+        >>> concarr = np.linspace(1, 100, Npts)
+        >>> result = model.vmax(total_mass, concarr)
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_vmax` function, 
+        and also the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_halo_catalog_nfw_consistency.TestHaloCatalogNFWConsistency.test_vmax_consistency` function. 
+
+        """
+        return NFWProfile.vmax(self, total_mass, conc)
 
     def halo_mass_to_halo_radius(self, total_mass):
         """
