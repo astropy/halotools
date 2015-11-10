@@ -6,6 +6,8 @@ inside dark matter halos according to the fitting function introduced in
 Navarry, Frenk and White (1999). 
 a sub-class of `~halotools.empirical_models.phase_space_models.AnalyticDensityProf`. 
 
+Testing for this module is primarily done by the 
+`~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile` class. 
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)

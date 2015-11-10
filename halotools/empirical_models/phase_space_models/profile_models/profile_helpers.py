@@ -52,6 +52,11 @@ def density_threshold(cosmology, redshift, mdef):
 	See also
 	----------
 	delta_vir: The virial overdensity in units of the critical density.
+
+	Notes 
+	------
+	This function is tested by the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.test_density_threshold` function  
+	and the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.test_density_threshold_error_handling` function. 
 	"""
 
 	try:
@@ -131,6 +136,10 @@ def delta_vir(cosmology, redshift):
 	See also
 	-----------
 	density_threshold: The threshold density for a given mass definition.
+
+	Notes 
+	------
+	This function is tested by the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.test_delta_vir` function. 	
 	"""
 	try:
 		assert isinstance(cosmology, astropy_cosmology_obj.core.FLRW)
@@ -174,6 +183,10 @@ def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 	See also
 	---------------
 	halo_radius_to_halo_mass: Spherical overdensity radius from mass.
+
+	Notes 
+	------
+	This function is tested by the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.test_halo_radius_to_halo_mass` function. 	
 	"""
 	try:
 		assert isinstance(cosmology, astropy_cosmology_obj.core.FLRW)
@@ -213,6 +226,10 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
 	---------
 	mass: array_like
 		Total halo mass in :math:`M_{\odot}/h`; has the same dimensions as the input ``radius``. 
+
+	Notes 
+	------
+	This function is tested by the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.test_halo_radius_to_halo_mass` function. 	
 
 	"""
 	try:
