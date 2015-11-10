@@ -28,14 +28,6 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
 
     def __init__(self, **kwargs):
         """
-        Parameters 
-        -----------
-        velocity_bias : bool, optional 
-            Boolean specifying whether the galaxy velocities are biased 
-            with respect to the halo velocities. If True, ``param_dict`` will have a 
-            parameter called ``velbias_satellites`` that multiplies the underlying 
-            Jeans solution for the halo radial velocity dispersion by an overall factor. 
-            Default is False. 
         """
         IsotropicJeansVelocity.__init__(self, **kwargs)
 

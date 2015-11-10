@@ -63,37 +63,13 @@ class TestHearin15(TestCase):
 		model = HodModelFactory('leauthaud11', concentration_binning = (1, 35, 5))
 		model.populate_mock(snapshot = self.snapshot)
 
-		model2 = HodModelFactory('leauthaud11', concentration_binning = (1, 35, 5), 
-			central_velocity_bias = True, satellite_velocity_bias = True)
-		model2.param_dict['velbias_centrals'] = 10
-		model2.populate_mock(snapshot = self.snapshot)
-
-		# Test that the velocity bias is actually operative
-		central_mask = ( 
-			(model.mock.galaxy_table['gal_type'] == 'centrals') & 
-			(model.mock.galaxy_table['halo_mvir'] > 5e12) & 
-			(model.mock.galaxy_table['halo_mvir'] > 1e13)
-			)
-		cens1 = model.mock.galaxy_table[central_mask]
-
-		central_mask = ( 
-			(model2.mock.galaxy_table['gal_type'] == 'centrals') & 
-			(model2.mock.galaxy_table['halo_mvir'] > 5e12) & 
-			(model2.mock.galaxy_table['halo_mvir'] > 1e13)
-			)
-		cens2 = model2.mock.galaxy_table[central_mask]
-
-		assert np.std(cens1['vx']) < np.std(cens2['vx'])
-		assert np.std(cens1['vy']) < np.std(cens2['vy'])
-		assert np.std(cens1['vz']) < np.std(cens2['vz'])
-
 		# Test that an attempt to repopulate with a different snapshot raises an exception
 		with pytest.raises(HalotoolsError) as exc:
-			model2.populate_mock(redshift=2)
+			model.populate_mock(redshift=2)
 		with pytest.raises(HalotoolsError) as exc:
-			model2.populate_mock(simname='consuelo')
+			model.populate_mock(simname='consuelo')
 		with pytest.raises(HalotoolsError) as exc:
-			model2.populate_mock(halo_finder='bdm')
+			model.populate_mock(halo_finder='bdm')
 
 		model_highz = HodModelFactory('leauthaud11', redshift = 2., 
 			concentration_binning = (1, 35, 5))
