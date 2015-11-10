@@ -30,3 +30,14 @@ NFW Profile
 
 	NFWProfile
 	NFWPhaseSpace
+
+.. _central_galaxy_profile_functions: 
+
+Central Galaxy Profiles
+---------------------------
+
+.. autosummary:: 
+
+	TrivialProfile
+	TrivialPhaseSpace
+
