@@ -64,6 +64,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             to ``default_high_prec_dconc`` in `~halotools.empirical_models.model_defaults`.
             If False, spacing is 0.5. Default is False. 
 
+        Notes 
+        ------
+        This model is tested by `~halotools.empirical_models.phase_space_models.tests.TestNFWPhaseSpace`. 
+
         """        
         NFWProfile.__init__(self, **kwargs)
         NFWJeansVelocity.__init__(self, **kwargs)
@@ -155,5 +159,99 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         t['radial_position'] = r 
         t['radial_velocity'] = vrad 
         return t
+
+    def conc_NFWmodel(self, **kwargs):
+        """ Method computes the NFW concentration 
+        as a function of the input halos according to the 
+        ``conc_mass_model`` bound to the `NFWProfile` instance. 
+
+        Parameters
+        ----------        
+        prim_haloprop : array, optional  
+            Array of mass-like variable upon which 
+            occupation statistics are based. 
+            If ``prim_haloprop`` is not passed, 
+            then ``halo_table`` keyword argument must be passed. 
+
+        halo_table : object, optional  
+            Data table storing halo catalog. 
+            If ``halo_table`` is not passed, 
+            then ``prim_haloprop`` keyword argument must be passed. 
+
+        Returns 
+        -------
+        c : array_like
+            Concentrations of the input halos. 
+
+        Notes 
+        ------
+        The behavior of this function is not defined here, but in the 
+        `~halotools.empirical_models.phase_space_models.profile_models.ConcMass` class.
+        """
+        return NFWProfile.compute_concentration(self, **kwargs)
+
+    def dimensionless_mass_density(self, scaled_radius, conc):
+        """
+        Physical density of the NFW halo scaled by the density threshold of the mass definition:
+
+        The `dimensionless_mass_density` is defined as 
+        :math:`\\tilde{\\rho}_{\\rm prof}(\\tilde{r}) \\equiv \\rho_{\\rm prof}(\\tilde{r}) / \\rho_{\\rm thresh}`, 
+        where :math:`\\tilde{r}\\equiv r/R_{\\Delta}`. 
+
+        For an NFW halo, 
+        :math:`\\tilde{\\rho}_{\\rm NFW}(\\tilde{r}, c) = \\frac{c^{3}}{3g(c)}\\times\\frac{1}{c\\tilde{r}(1 + c\\tilde{r})^{2}},`
+        
+        where :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)` is computed using the `g` function. 
+
+        The quantity :math:`\\rho_{\\rm thresh}` is a function of 
+        the halo mass definition, cosmology and redshift, 
+        and is computed via the 
+        `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` function. 
+        The quantity :math:`\\rho_{\\rm prof}` is the physical mass density of the 
+        halo profile and is computed via the `mass_density` function. 
+
+        Parameters 
+        -----------
+        scaled_radius : array_like 
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``scaled_radius``. 
+
+        Returns 
+        -------
+        dimensionless_density: array_like 
+            Dimensionless density of a dark matter halo 
+            at the input ``scaled_radius``, normalized by the 
+            `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` 
+            :math:`\\rho_{\\rm thresh}` for the 
+            halo mass definition, cosmology, and redshift. 
+            Result is an array of the dimension as the input ``scaled_radius``. 
+
+        """
+        return NFWProfile.dimensionless_mass_density(scaled_radius, conc)
+
+    def mc_vel(self, halo_table):
+        """ Method assigns a Monte Carlo realization of the Jeans velocity 
+        solution to the halos in the input ``halo_table``. 
+
+        Parameters 
+        -----------
+        halo_table : Astropy Table 
+            `astropy.table.Table` object storing the halo catalog. 
+            Calling the `mc_vel` method will over-write the existing values of 
+            the ``vx``, ``vy`` and ``vz`` columns. 
+        """
+        return MonteCarloGalProf.mc_vel(halo_table)
+
+
+
+
+
+
+
+
 
 

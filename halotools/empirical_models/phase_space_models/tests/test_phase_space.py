@@ -19,8 +19,6 @@ class TestNFWPhaseSpace(TestCase):
     def setup_class(self):
         """ Load the NFW model and build a coarse lookup table.
         """
-        # self.halocat = HaloCatalog()
-
         self.nfw = NFWPhaseSpace()
         cmin, cmax, dc = 1, 25, 0.5
         self.nfw._setup_lookup_tables((cmin, cmax, dc))
@@ -77,8 +75,7 @@ class TestNFWPhaseSpace(TestCase):
         assert hasattr(self.nfw, 'conc_mass_model')
 
     def test_mc_unit_sphere(self):
-        """ Method used to test 
-        `~halotools.empirical_models.NFWPhaseSpace.mc_unit_sphere`. 
+        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_unit_sphere`. 
         """
         x, y, z = self.nfw.mc_unit_sphere(100, seed=43)
         pos = np.vstack([x, y, z]).T 
@@ -86,8 +83,7 @@ class TestNFWPhaseSpace(TestCase):
         assert np.allclose(norm, 1, rtol=1e-4)
 
     def test_mc_dimensionless_radial_distance(self):
-        """ Method used to test 
-        `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
+        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
         """
         r15 = self.nfw._mc_dimensionless_radial_distance(profile_params=[self.c15], seed=43)
         r10 = self.nfw._mc_dimensionless_radial_distance(profile_params=[self.c10], seed=43)
@@ -104,8 +100,7 @@ class TestNFWPhaseSpace(TestCase):
         assert np.median(r15) < np.median(r10) < np.median(r5)
 
     def test_mc_solid_sphere(self):
-        """ Method used to test 
-        `~halotools.empirical_models.NFWPhaseSpace.mc_solid_sphere`. 
+        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_solid_sphere`. 
         """
         x, y, z = self.nfw.mc_solid_sphere(profile_params=[self.c15], seed=43)
         pos = np.vstack([x, y, z]).T
@@ -120,8 +115,7 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(z < 1)
 
     def test_mc_halo_centric_pos(self):
-        """ Method used to test 
-        `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`. 
+        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_halo_centric_pos`. 
         """
         r = 0.25
         halo_radius = np.zeros(len(self.c15)) + r
@@ -175,8 +169,7 @@ class TestNFWPhaseSpace(TestCase):
         # assert np.all(norm < halo_radius)
 
     def test_mc_pos(self):
-        """ Method used to test 
-        `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`. 
+        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_halo_centric_pos`. 
         """
         r = 0.25
         halo_radius = np.zeros(len(self.c15)) + r
@@ -191,8 +184,7 @@ class TestNFWPhaseSpace(TestCase):
         self.nfw.mc_pos(halo_table = self._dummy_halo_table)
 
     def test_vrad_disp_from_lookup(self):
-        """ Method used to test 
-        `~halotools.empirical_models.NFWPhaseSpace._vrad_disp_from_lookup`. 
+        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._vrad_disp_from_lookup`. 
         """
         x = np.random.uniform(0, 1, len(self.c15))
         vr_disp = self.nfw._vrad_disp_from_lookup(
@@ -202,7 +194,7 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(vr_disp > 0)
 
     def test_mc_radial_velocity(self):
-        """
+        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_radial_velocity`. 
         """
         npts = 1e2
         conc = 10
@@ -226,6 +218,8 @@ class TestNFWPhaseSpace(TestCase):
 
 
     def test_mc_vel(self):
+        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_vel`. 
+        """
 
 
         self.nfw.mc_vel(self._dummy_halo_table)
