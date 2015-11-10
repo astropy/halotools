@@ -51,14 +51,6 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             String specifying the halo mass definition, e.g., 'vir' or '200m'. 
             Default is set in `~halotools.empirical_models.model_defaults`.  
 
-        velocity_bias : bool, optional 
-            Boolean specifying whether the galaxy velocities are biased 
-            with respect to the halo velocities. If True, the ``param_dict`` attribute of the 
-            `NFWPhaseSpace` instance will have a parameter called ``velbias_satellites`` 
-            that multiplies the underlying 
-            Jeans solution for the halo radial velocity dispersion by an overall factor. 
-            Default is False. 
-
         concentration_binning : tuple, optional 
             Three-element tuple. The first entry will be the minimum 
             value of the concentration in the lookup table, 

@@ -24,7 +24,7 @@ from ...sim_manager import sim_defaults
 class TrivialPhaseSpace(object):
     """
     """
-    def __init__(self, velocity_bias = False, 
+    def __init__(self, 
         cosmology = sim_defaults.default_cosmology, 
         redshift = sim_defaults.default_redshift, 
         mdef = model_defaults.halo_mass_definition, 
@@ -32,12 +32,6 @@ class TrivialPhaseSpace(object):
         """
         Parameters 
         ----------
-        velocity_bias : bool, optional 
-            Boolean specifying whether the galaxy velocities are biased 
-            with respect to the halo velocities. If True, ``param_dict`` will have a 
-            parameter called ``velbias_centrals`` that multiplies the underlying 
-            halo velocity by an overall factor. Default is False. 
-
         cosmology : object, optional 
             Astropy cosmology object. Default is set in `~halotools.empirical_models.sim_defaults`.
 
@@ -55,8 +49,6 @@ class TrivialPhaseSpace(object):
             ])
 
         self.param_dict = {}
-        if velocity_bias is True:
-            self.param_dict['velbias_centrals'] = 1.
 
         self.cosmology = cosmology
         self.redshift = redshift 
@@ -69,8 +61,6 @@ class TrivialPhaseSpace(object):
         phase_space_keys = ['x', 'y', 'z', 'vx', 'vy', 'vz']
         for key in phase_space_keys:
             halo_table[key] = halo_table['halo_'+key]
-            if 'velbias_centrals' in self.param_dict:
-                halo_table[key] *= self.param_dict['velbias_centrals']
 
 
 

@@ -21,7 +21,7 @@ from ....sim_manager import FakeSim, sim_defaults
 __all__ = ['leauthaud11_model_dictionary']
     
 def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
-    central_velocity_bias = False, satellite_velocity_bias = False, **kwargs):
+    **kwargs):
     """ Dictionary to build an HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
 
@@ -55,19 +55,6 @@ def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass
         Default is set in `~halotools.empirical_models.model_defaults`.  
         If high-precision is not required, the lookup tables will build much faster if 
         ``concentration_binning`` is set to (1, 25, 0.5).
-
-    central_velocity_bias : bool, optional 
-        Boolean specifying whether the central galaxy velocities are biased 
-        with respect to the halo velocities. If True, ``param_dict`` will have a 
-        parameter called ``velbias_centrals`` that multiplies the underlying 
-        halo velocities. Default is False. 
-
-    satellite_velocity_bias : bool, optional 
-        Boolean specifying whether the satellite galaxy velocities are biased 
-        with respect to the halo velocities. If True, ``param_dict`` will have a 
-        parameter called ``velbias_satellites`` that multiplies the underlying 
-        Jeans solution for the halo radial velocity dispersion by an overall factor. 
-        Default is False. 
 
     Returns 
     -------
@@ -103,13 +90,13 @@ def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass
     centrals_occupation._suppress_repeated_param_warning = True
     # Build the profile model
     
-    centrals_profile = TrivialPhaseSpace(velocity_bias = central_velocity_bias, **kwargs)
+    centrals_profile = TrivialPhaseSpace(**kwargs)
 
     ### Build model for satellites
     # Build the occupation model
     satellites_occupation = leauthaud11_components.Leauthaud11Sats(threshold = threshold, **kwargs)
     # Build the profile model
-    satellites_profile = NFWPhaseSpace(velocity_bias = satellite_velocity_bias, **kwargs)    
+    satellites_profile = NFWPhaseSpace(**kwargs)    
 
 
     return ({'centrals_occupation': centrals_occupation, 
