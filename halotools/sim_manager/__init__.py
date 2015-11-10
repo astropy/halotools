@@ -7,3 +7,4 @@ from .generate_random_sim import *
 from .cache_config import *
 from .supported_sims import *
 from .catalog_manager import *
+from .sim_defaults import *

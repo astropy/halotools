@@ -163,8 +163,6 @@ class TestNFWProfile(TestCase):
         using the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.dimensionless_mass_density` 
         method of the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` class.
 
-
-
         3. :math:`M_{\\Delta}(<r) = M_{\\Delta}\\times P_{\\rm NFW}(<r)`. 
 
         """
