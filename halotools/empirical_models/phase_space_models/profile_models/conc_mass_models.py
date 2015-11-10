@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-Classes and functions defining relations between NFW concentration 
-and halo mass. 
+Classes and functions defining relations between NFW concentration and halo mass. 
 
 """
 
@@ -20,11 +19,11 @@ class ConcMass(object):
     """ Container class for commonly used concentration-mass relations in the literature. 
 
     `ConcMass` can be instantiated as a stand-alone class, or used as an orthogonal mix-in 
-    with the `~halotools.empirical_models.NFWProfile` or any of its sub-classes. 
+    with the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` or any of its sub-classes. 
 
     Notes 
     ------
-    The only currently supported model is `dutton_maccio14`.
+    Testing for this class is done by the `~halotools.empirical_models.phase_space_models.profile_models.tests.TestConcMass` class. 
 
     """
 
@@ -96,9 +95,8 @@ class ConcMass(object):
             Concentrations of the input halos. 
 
         Notes 
-        -----
-        The testing for this model can be found in 
-        `~halotools.empirical_models.test_empirical_models.test_conc_mass`. 
+        ------
+        Testing for this class is done by the `~halotools.empirical_models.phase_space_models.profile_models.tests.TestConcMass` class. 
 
         """
         conc_mass_func = getattr(self, self.conc_mass_model)
@@ -116,6 +114,11 @@ class ConcMass(object):
         -------
         c : array_like
             Concentrations of the input halos. 
+
+        Notes 
+        ------
+        Testing for this class is done by the `~halotools.empirical_models.phase_space_models.profile_models.tests.TestConcMass` class. 
+
         """
         key = self.concentration_key
 
@@ -145,6 +148,14 @@ class ConcMass(object):
         """ Power-law fit to the concentration-mass relation from 
         Equations 12 & 13 of Dutton & Maccio 2014, arXiv:1402.7073.
 
+        :math:`a = 0.537 + (1.025 - 0.537)\\exp(-0.718z^{1.08})`
+
+        :math:`b = -0.097 + 0.024z`
+
+        :math:`M_{0} = 10^{12}M_{\odot}/h`
+
+        :math:`\\log_{10}c(M) = a + b\\log_{10}(M / M_{0})`
+
         Parameters 
         ----------
         prim_haloprop : array, optional  
@@ -166,13 +177,7 @@ class ConcMass(object):
 
         Model assumes that halo mass definition is Mvir.
 
-        :math:`a = 0.537 + (1.025 - 0.537)\\exp(-0.718z^{1.08})`
-
-        :math:`b = -0.097 + 0.024z`
-
-        :math:`M_{0} = 10^{12}M_{\odot}/h`
-
-        :math:`\\log_{10}c(M) = a + b\\log_{10}(M / M_{0})`
+        Testing for this class is done by the `~halotools.empirical_models.phase_space_models.profile_models.tests.TestConcMass` class. 
 
         """
 
@@ -182,7 +187,7 @@ class ConcMass(object):
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
-            raise KeyError("Must pass one of the following keyword arguments "
+            raise HalotoolsError("Must pass one of the following keyword arguments "
                 "to the compute_concentration method:\n"
                 "``halo_table`` or ``prim_haloprop``")
 

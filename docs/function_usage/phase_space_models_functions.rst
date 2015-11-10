@@ -30,6 +30,7 @@ NFW Profile
 
 	NFWProfile
 	NFWPhaseSpace
+	ConcMass
 
 .. _central_galaxy_profile_functions: 
 
