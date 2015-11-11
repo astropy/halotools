@@ -6,6 +6,8 @@ import numpy as np
 from astropy.table import Table 
 
 from ..nfw_phase_space import NFWPhaseSpace
+from ..profile_models.tests import analytic_nfw_density_outer_shell_normalization
+from ..profile_models.tests import monte_carlo_density_outer_shell_normalization
 
 from ....sim_manager import HaloCatalog
 from ....custom_exceptions import HalotoolsError
@@ -24,10 +26,10 @@ class TestNFWPhaseSpace(TestCase):
         self.nfw.setup_prof_lookup_tables((cmin, cmax, dc))
         self.nfw.build_lookup_tables()
 
-        Npts = 1e3
-        self.c15 = np.ones(Npts) + 15
-        self.c10 = np.ones(Npts) + 10
-        self.c5 = np.ones(Npts) + 5
+        Npts = 5e4
+        self.c15 = np.zeros(Npts) + 15
+        self.c10 = np.zeros(Npts) + 10
+        self.c5 = np.zeros(Npts) + 5
 
         npts = 1e3
         Lbox = 250
@@ -51,7 +53,7 @@ class TestNFWPhaseSpace(TestCase):
 
 
     def test_constructor(self):
-        """
+        """ Test that composite phase space models have all the appropriate attributes. 
         """
         ### MonteCarloGalProf attributes
         assert hasattr(self.nfw, 'logradius_array')
@@ -75,7 +77,9 @@ class TestNFWPhaseSpace(TestCase):
         assert hasattr(self.nfw, 'conc_mass_model')
 
     def test_mc_unit_sphere(self):
-        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_unit_sphere`. 
+        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_unit_sphere`.
+
+        This test verifies that all returned 3d points are at unit distance from the origin.   
         """
         x, y, z = self.nfw.mc_unit_sphere(100, seed=43)
         pos = np.vstack([x, y, z]).T 
@@ -84,10 +88,17 @@ class TestNFWPhaseSpace(TestCase):
 
     def test_mc_dimensionless_radial_distance(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
+
+        Method uses the `~halotools.empirical_models.phase_space_models.profile_models.tests.analytic_nfw_density_outer_shell_normalization` function 
+        and the `~halotools.empirical_models.phase_space_models.profile_models.tests.monte_carlo_density_outer_shell_normalization` function 
+        to verify that the points returned by `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._mc_dimensionless_radial_distance` 
+        do indeed trace an NFW profile. 
+
         """
-        r15 = self.nfw._mc_dimensionless_radial_distance(profile_params=[self.c15], seed=43)
-        r10 = self.nfw._mc_dimensionless_radial_distance(profile_params=[self.c10], seed=43)
-        r5 = self.nfw._mc_dimensionless_radial_distance(profile_params=[self.c5], seed=43)
+
+        r15 = self.nfw._mc_dimensionless_radial_distance(self.c15, seed=43)
+        r10 = self.nfw._mc_dimensionless_radial_distance(self.c10, seed=43)
+        r5 = self.nfw._mc_dimensionless_radial_distance(self.c5, seed=43)
 
         assert np.all(r15 <= 1)
         assert np.all(r15 >= 0)
@@ -98,6 +109,16 @@ class TestNFWPhaseSpace(TestCase):
 
         assert np.mean(r15) < np.mean(r10) < np.mean(r5)
         assert np.median(r15) < np.median(r10) < np.median(r5)
+
+        num_rbins = 15
+        rbins = np.linspace(0.05, 1, num_rbins)
+        for r, c in zip([r5, r10, r15], [5, 10, 15]):
+            rbin_midpoints, monte_carlo_ratio = (
+                monte_carlo_density_outer_shell_normalization(rbins, r))
+            analytical_ratio = (
+                analytic_nfw_density_outer_shell_normalization(rbin_midpoints, c))
+            assert np.allclose(monte_carlo_ratio, analytical_ratio, 0.05)
+
 
     def test_mc_solid_sphere(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_solid_sphere`. 

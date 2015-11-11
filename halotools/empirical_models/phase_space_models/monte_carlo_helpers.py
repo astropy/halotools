@@ -174,16 +174,16 @@ class MonteCarloGalProf(object):
                 np.arange(np.prod(profile_params_dimensions)).reshape(profile_params_dimensions)
                 )
 
-    def _mc_dimensionless_radial_distance(self, **kwargs):
+    def _mc_dimensionless_radial_distance(self, *profile_params, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
         ----------
-        profile_params : list
-            List of length-Ngals array(s) containing the input profile parameter(s). 
-            In the simplest case, this list has a single element, 
-            e.g. a single array of the NFW concentration values. 
-            There should be a ``profile_params`` list item for 
+        *profile_params : Sequence of arrays
+            Sequence of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this sequence has a single element, 
+            e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
+            More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
 
         seed : int, optional  
@@ -199,7 +199,6 @@ class MonteCarloGalProf(object):
         ------
         This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_dimensionless_radial_distance` function. 
         """
-        profile_params = kwargs['profile_params']
 
         if not hasattr(self, 'rad_prof_func_table'):
             self.build_lookup_tables()
@@ -207,7 +206,7 @@ class MonteCarloGalProf(object):
         # Draw random values for the cumulative mass PDF         
         # These will be turned into random radial positions 
         # by inverting the tabulated cumulative_mass_PDF
-        if 'seed' in kwargs.keys():
+        if 'seed' in kwargs:
             np.random.seed(kwargs['seed'])
         rho = np.random.random(len(profile_params[0]))
 
@@ -334,7 +333,7 @@ class MonteCarloGalProf(object):
         else:
             seed = None
         dimensionless_radial_distance = self._mc_dimensionless_radial_distance(
-            profile_params = profile_params, seed = seed) 
+            *profile_params, seed = seed) 
 
         # get random positions within the solid sphere
         x *= dimensionless_radial_distance
