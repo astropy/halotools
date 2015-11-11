@@ -21,7 +21,7 @@ class TestNFWPhaseSpace(TestCase):
         """
         self.nfw = NFWPhaseSpace()
         cmin, cmax, dc = 1, 25, 0.5
-        self.nfw._setup_lookup_tables((cmin, cmax, dc))
+        self.nfw.setup_prof_lookup_tables((cmin, cmax, dc))
         self.nfw.build_lookup_tables()
 
         Npts = 1e3
