@@ -174,33 +174,15 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         r = np.sqrt(x**2 + y**2 + z**2)
         scaled_radius = r/rvir
 
-        vrad = MonteCarloGalProf.mc_radial_velocity(self, 
-            scaled_radius, c, virial_velocities = vvir)
-        vx = MonteCarloGalProf.mc_radial_velocity(self, 
-            scaled_radius, c, virial_velocities = vvir)
-        vy = MonteCarloGalProf.mc_radial_velocity(self, 
-            scaled_radius, c, virial_velocities = vvir)
-        vz = MonteCarloGalProf.mc_radial_velocity(self, 
-            scaled_radius, c, virial_velocities = vvir)
-        # vrad = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
-        #     virial_velocities = vvir, profile_params = [c])
-        # vx = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
-        #     virial_velocities = vvir, profile_params = [c])
-        # vy = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
-        #     virial_velocities = vvir, profile_params = [c])
-        # vz = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
-        #     virial_velocities = vvir, profile_params = [c])
+        vrad = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
+        vx = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
+        vy = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
+        vz = MonteCarloGalProf.mc_radial_velocity(self, scaled_radius, m, c)
 
-        t = Table()
-        t['x'] = x 
-        t['y'] = y
-        t['z'] = z 
-        t['vx'] = vx 
-        t['vy'] = vy
-        t['vz'] = vz 
+        t = Table({'x':x, 'y':y, 'z':z, 
+            'vx':vx, 'vy':vy, 'vz':vz, 
+            'radial_position': r, 'radial_velocity': vrad})
 
-        t['radial_position'] = r 
-        t['radial_velocity'] = vrad 
         return t
 
     def conc_NFWmodel(self, **kwargs):

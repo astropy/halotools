@@ -216,31 +216,27 @@ class TestNFWPhaseSpace(TestCase):
     def test_mc_radial_velocity(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_radial_velocity`. 
         """
-        npts = 1e2
+        npts = 1e4
         conc = 10
-        carr = np.ones(npts) + conc
+        carr = np.zeros(npts) + conc
 
         mass = 1e12
-        v = self.nfw.virial_velocity(mass)
         rmax = self.nfw.rmax(mass, conc)
         vmax = self.nfw.vmax(mass, conc)
         r = np.zeros(npts) + rmax
         rvir = self.nfw.halo_mass_to_halo_radius(mass)
         scaled_radius = r/rvir
 
-        v = 250.
-        vvir = np.zeros_like(scaled_radius) + v
-        mc_vr = self.nfw.mc_radial_velocity(scaled_radius, carr, 
-            virial_velocities = vvir, seed=43)
-
+        mc_vr = self.nfw.mc_radial_velocity(scaled_radius, mass, carr, seed=43)
         vr_dispersion_from_monte_carlo = np.std(mc_vr)
-        assert np.allclose(vr_dispersion_from_monte_carlo, vmax, rtol=0.05)
+
+        analytical_result = vmax[0]/np.sqrt(3.)
+        assert np.allclose(vr_dispersion_from_monte_carlo, analytical_result, rtol=0.1)
 
 
     def test_mc_vel(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_vel`. 
         """
-
 
         self.nfw.mc_vel(self._dummy_halo_table)
 

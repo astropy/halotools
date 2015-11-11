@@ -185,6 +185,7 @@ class MonteCarloGalProf(object):
             e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
             More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -291,6 +292,7 @@ class MonteCarloGalProf(object):
             e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
             More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         halo_table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
@@ -370,6 +372,7 @@ class MonteCarloGalProf(object):
             More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
             If ``profile_params`` is passed, ``halo_radius`` must be passed as a keyword argument.
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         halo_radius : array_like, optional 
             Length-Ngals array storing the radial boundary of the halo 
@@ -427,6 +430,7 @@ class MonteCarloGalProf(object):
             More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
             If ``profile_params`` is passed, ``halo_radius`` must be passed as a keyword argument.
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         halo_radius : array_like, optional 
             Length-Ngals array storing the radial boundary of the halo 
@@ -490,6 +494,7 @@ class MonteCarloGalProf(object):
             e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
             More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         Returns 
         -------
@@ -542,7 +547,7 @@ class MonteCarloGalProf(object):
 
         return dimensionless_radial_dispersions
 
-    def mc_radial_velocity(self, scaled_radius, *profile_params, **kwargs):
+    def mc_radial_velocity(self, scaled_radius, total_mass, *profile_params, **kwargs):
         """
         Parameters 
         ----------
@@ -550,15 +555,16 @@ class MonteCarloGalProf(object):
             Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
             :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
 
+        total_mass: array_like
+            Length-Ngals numpy array storing the halo mass in :math:`M_{\odot}/h`. 
+
         *profile_params : Sequence of arrays
             Sequence of length-Ngals array(s) containing the input profile parameter(s). 
             In the simplest case, this sequence has a single element, 
             e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
             More generally, there should be a ``profile_params`` sequence item for 
-            every parameter in the profile model, each item a length-Ngals array.
-
-        virial_velocities : array_like 
-            Array storing the virial velocity of the halos hosting the galaxies. 
+            every parameter in the profile model, each item a length-Ngals array. 
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -573,7 +579,7 @@ class MonteCarloGalProf(object):
         dimensionless_radial_dispersions = (
             self._vrad_disp_from_lookup(scaled_radius, *profile_params, **kwargs))
 
-        virial_velocities = convert_to_ndarray(kwargs['virial_velocities'])
+        virial_velocities = self.virial_velocity(total_mass)
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
 
         if 'seed' in kwargs.keys():
@@ -607,16 +613,12 @@ class MonteCarloGalProf(object):
         scaled_radius = d/rhalo
 
         profile_params = [halo_table[key] for key in self.prof_param_keys]
-        virial_velocities = self.virial_velocity(
-            total_mass = halo_table[self.halo_mass_key])
     
-        vx = self.mc_radial_velocity(scaled_radius, *profile_params, 
-            virial_velocities = virial_velocities)
-        vy = self.mc_radial_velocity(scaled_radius, *profile_params, 
-            virial_velocities = virial_velocities)
-        vz = self.mc_radial_velocity(scaled_radius, *profile_params, 
-            virial_velocities = virial_velocities)
+        total_mass = halo_table[self.halo_mass_key]
 
+        vx = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
+        vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
+        vz = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
 
         halo_table['vx'][:] = halo_table['halo_vx'] + vx
         halo_table['vy'][:] = halo_table['halo_vy'] + vy
