@@ -84,7 +84,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
                 model_defaults.min_permitted_conc, model_defaults.max_permitted_conc, 0.5
                 )
 
-        MonteCarloGalProf._setup_lookup_tables(self, (cmin, cmax, dc))
+        MonteCarloGalProf.setup_prof_lookup_tables(self, (cmin, cmax, dc))
 
         self._mock_generation_calling_sequence = ['assign_phase_space']
 

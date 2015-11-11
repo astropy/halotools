@@ -55,7 +55,7 @@ class MonteCarloGalProf(object):
             ])
 
 
-    def _setup_lookup_tables(self, *lookup_table_binning):
+    def setup_prof_lookup_tables(self, *lookup_table_binning):
         """
         Private method used to set up the lookup table grid. 
 
@@ -65,7 +65,7 @@ class MonteCarloGalProf(object):
 
         As an example, the `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` 
         model has a single profile parameter, ``conc_NFWmodel``. After calling the 
-        `_setup_lookup_tables` method, there will be three new attributes bound to the 
+        `setup_prof_lookup_tables` method, there will be three new attributes bound to the 
         `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` instance:
 
         * ``_conc_NFWmodel_lookup_table_min``
@@ -119,7 +119,7 @@ class MonteCarloGalProf(object):
         """
         key = self.prof_param_keys[0]
         if not hasattr(self, '_' + key + '_lookup_table_min'):
-            raise HalotoolsError("You must first call _setup_lookup_tables"
+            raise HalotoolsError("You must first call setup_prof_lookup_tables"
                 "to determine the grids before building the lookup tables")
         
         radius_array = np.logspace(logrmin, logrmax, Npts_radius_table)
