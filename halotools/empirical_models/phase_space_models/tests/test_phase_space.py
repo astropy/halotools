@@ -48,7 +48,7 @@ class TestNFWPhaseSpace(TestCase):
 
         self._dummy_halo_table = Table({'halo_x': x, 'halo_y': y, 'halo_z': z, 
             'host_centric_distance': d, 'halo_rvir': rvir, 'conc_NFWmodel': conc_nfw, 
-            'halo_vx': halo_vx, 'halo_vy': halo_vy, 'halo_vz': halo_vz, 'halo_vvir': vvir, 
+            'halo_vx': halo_vx, 'halo_vy': halo_vy, 'halo_vz': halo_vz, 'halo_mvir': mass, 
             'x': zeros, 'y': zeros, 'z': zeros, 'vx': zeros, 'vy': zeros, 'vz': zeros})
 
 

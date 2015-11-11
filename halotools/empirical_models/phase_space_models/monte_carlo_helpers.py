@@ -607,11 +607,8 @@ class MonteCarloGalProf(object):
         scaled_radius = d/rhalo
 
         profile_params = [halo_table[key] for key in self.prof_param_keys]
-        try:
-            virial_velocities = halo_table['halo_vvir']
-        except KeyError:
-            virial_velocities = self.virial_velocity(
-                total_mass = halo_table[self.halo_mass_key])
+        virial_velocities = self.virial_velocity(
+            total_mass = halo_table[self.halo_mass_key])
     
         vx = self.mc_radial_velocity(scaled_radius, *profile_params, 
             virial_velocities = virial_velocities)
