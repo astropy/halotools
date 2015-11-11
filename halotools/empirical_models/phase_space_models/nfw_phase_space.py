@@ -814,6 +814,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Length-Ngals array containing the radial velocity dispersion 
             of galaxies within their halos, 
             scaled by the size of the halo's virial velocity. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_vrad_disp_from_lookup` function. 
         """
         return MonteCarloGalProf._vrad_disp_from_lookup(self, 
             scaled_radius, *concentration_array, **kwargs)
@@ -840,6 +844,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         radial_velocities : array_like 
             Array of radial velocities drawn from Gaussians with a width determined by the 
             solution to the Jeans equation. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_radial_velocity` function. 
         """
         return MonteCarloGalProf.mc_radial_velocity(self, 
             scaled_radius, total_mass, *concentration_array, **kwargs)
@@ -854,6 +862,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             `astropy.table.Table` object storing the halo catalog. 
             Calling the `mc_vel` method will over-write the existing values of 
             the ``vx``, ``vy`` and ``vz`` columns. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_vel` function. 
         """
         MonteCarloGalProf.mc_vel(self, halo_table)
 

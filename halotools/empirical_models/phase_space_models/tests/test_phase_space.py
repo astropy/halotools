@@ -49,7 +49,7 @@ class TestNFWPhaseSpace(TestCase):
         self._dummy_halo_table = Table({'halo_x': x, 'halo_y': y, 'halo_z': z, 
             'host_centric_distance': d, 'halo_rvir': rvir, 'conc_NFWmodel': conc_nfw, 
             'halo_vx': halo_vx, 'halo_vy': halo_vy, 'halo_vz': halo_vz, 'halo_mvir': mass, 
-            'x': zeros, 'y': zeros, 'z': zeros, 'vx': zeros, 'vy': zeros, 'vz': zeros})
+            'x': zeros, 'y': zeros, 'z': zeros, 'vx': halo_vx, 'vy': halo_vy, 'vz': halo_vz})
 
 
     def test_constructor(self):
@@ -122,6 +122,8 @@ class TestNFWPhaseSpace(TestCase):
 
     def test_mc_solid_sphere(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_solid_sphere`. 
+
+        Method ensures that all returned points lie inside the unit sphere. 
         """
         x, y, z = self.nfw.mc_solid_sphere(self.c15, seed=43)
         pos = np.vstack([x, y, z]).T
@@ -137,6 +139,13 @@ class TestNFWPhaseSpace(TestCase):
 
     def test_mc_halo_centric_pos(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_halo_centric_pos`. 
+
+        Method verifies 
+
+        1. All returned points lie within the correct radial distance
+
+        2. Increasing the input concentration decreases the mean and median radial distance of the returned points. 
+
         """
         r = 0.25
         halo_radius = np.zeros(len(self.c15)) + r
@@ -191,6 +200,13 @@ class TestNFWPhaseSpace(TestCase):
 
     def test_mc_pos(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_halo_centric_pos`. 
+        
+        Method verifies that passing an input ``seed`` results in deterministic behavior. 
+
+        Notes 
+        -----
+        Clearly this particular function would benefit from more robust unit-testing. 
+
         """
         r = 0.25
         halo_radius = np.zeros(len(self.c15)) + r
@@ -206,6 +222,13 @@ class TestNFWPhaseSpace(TestCase):
 
     def test_vrad_disp_from_lookup(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._vrad_disp_from_lookup`. 
+        
+        Method verifies that all scaled velocities are between zero and unity. 
+
+        Notes 
+        -----
+        Clearly this particular function would benefit from more robust unit-testing. 
+
         """
         scaled_radius = np.random.uniform(0, 1, len(self.c15))
         vr_disp = self.nfw._vrad_disp_from_lookup(scaled_radius, self.c15, seed=43)
@@ -215,6 +238,11 @@ class TestNFWPhaseSpace(TestCase):
 
     def test_mc_radial_velocity(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_radial_velocity`. 
+        
+        Method generates a Monte Carlo velocity profile realization with all points at :math:`R_{\\rm max}`, 
+        and compares the manually computed velocity dispersion to the analytical expectation for :math:`V_{\\rm max}`, 
+        as computed by the `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.vmax`. Method 
+        verifies that these two results agree within the expected random noise level. 
         """
         npts = 1e4
         conc = 10
@@ -236,9 +264,16 @@ class TestNFWPhaseSpace(TestCase):
 
     def test_mc_vel(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_vel`. 
-        """
 
+        Method verifies that the ``vx`` column of an input ``halo_table`` is in fact over-written. 
+
+        Notes 
+        -----
+        Clearly this particular function would benefit from more robust unit-testing. 
+        """
+        assert np.all(self._dummy_halo_table['vx'] == self._dummy_halo_table['halo_vx'])
         self.nfw.mc_vel(self._dummy_halo_table)
+        assert np.any(self._dummy_halo_table['vx'] != self._dummy_halo_table['halo_vx'])
 
 
     ### OLD TESTS OF THE NFW PROFILE MODEL
