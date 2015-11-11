@@ -106,7 +106,7 @@ Spatial Profiles of Halos
 Basic equations
 -----------------------------------
 
-For a given choice is made for :math:`\Delta_{\rm ref}(z)`, the mass of a spherically symmetric halo is 
+For a given choice of :math:`\Delta_{\rm ref}(z)`, the mass of a spherically symmetric halo is 
 is related to the spatial profile of the matter in its interior via:
 
 .. math::
@@ -241,7 +241,7 @@ In the actual Halotools implementation :math:`\tilde{V}_{\rm circ}(r)` is comput
 
 	\tilde{V}^{2}_{\rm circ}(\tilde{r}) = \frac{P_{\rm prof}(<\tilde{r})}{\tilde{r}}
 
-To see that this is correct:
+To see that this alternative method of calculation is correct:
 
 .. math:: 
 
@@ -249,9 +249,11 @@ To see that this is correct:
 
 	\tilde{V}_{\rm circ}(r) = \frac{GM_{\Delta}(<r)/r}{GM_{\Delta}/R_{\Delta}} \\
 
-	\tilde{V}_{\rm circ}(r) = \frac{M_{\Delta}(<r)/M_{\Delta}}{r/R_{\Delta}}
+	\tilde{V}_{\rm circ}(r) = \frac{M_{\Delta}(<r)/M_{\Delta}}{r/R_{\Delta}}, 
 
-Since the numerator is :math:`P_{\rm prof}(<r)` and the denominator is :math:`\tilde{r}`, we arrive at  
+where the second equality follows from the definition of :math:`V_{\rm circ}`. 
+Since the numerator in the final expression is :math:`P_{\rm prof}(<r)` 
+and the denominator is :math:`\tilde{r}`, we arrive at  
 
 .. math::
 
