@@ -600,6 +600,12 @@ class MonteCarloGalProf(object):
             `astropy.table.Table` object storing the halo catalog. 
             Calling the `mc_vel` method will over-write the existing values of 
             the ``vx``, ``vy`` and ``vz`` columns. 
+        
+        Notes 
+        -------
+        The method assumes that the ``vx``, ``vy``, and ``vz`` columns already store 
+        the position of the host halo center. 
+
         """
         try:
             d = halo_table['host_centric_distance']
@@ -621,9 +627,9 @@ class MonteCarloGalProf(object):
         vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
         vz = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
 
-        halo_table['vx'][:] = halo_table['halo_vx'] + vx
-        halo_table['vy'][:] = halo_table['halo_vy'] + vy
-        halo_table['vz'][:] = halo_table['halo_vz'] + vz
+        halo_table['vx'][:] += vx
+        halo_table['vy'][:] += vy
+        halo_table['vz'][:] += vz
 
 
 
