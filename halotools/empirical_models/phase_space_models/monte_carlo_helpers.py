@@ -57,7 +57,7 @@ class MonteCarloGalProf(object):
 
     def setup_prof_lookup_tables(self, *lookup_table_binning):
         """
-        Private method used to set up the lookup table grid. 
+        Method used to set up the lookup table grid. 
 
         Each analytical profile has profile parameters associated with it. This method 
         sets up how we will digitize the value of each such parameter for the purposes of 
@@ -192,9 +192,10 @@ class MonteCarloGalProf(object):
 
         Returns 
         -------
-        r : array 
-            Length-Ngals array containing the radial position of galaxies within their halos, 
-            scaled by the size of the halo's boundary, so that :math:`0 < r < 1`. 
+        scaled_radius : array_like 
+            Length-Ngals array storing the halo-centric distance *r* scaled 
+            by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`.
 
         Notes 
         ------

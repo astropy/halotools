@@ -588,9 +588,274 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         """
         return NFWProfile.halo_radius_to_halo_mass(self, radius)
 
+    def setup_prof_lookup_tables(self, *concentration_binning):
+        """
+        This method sets up how we will digitize halo concentrations during mock population. 
+
+        After calling the `setup_prof_lookup_tables` method, the 
+        `NFWPhaseSpace` instance will have three new private attributes bound to it:
+
+        * ``_conc_NFWmodel_lookup_table_min``
+
+        * ``_conc_NFWmodel_lookup_table_max``
+
+        * ``_conc_NFWmodel_lookup_table_spacing``
+
+        These three attributes define the linear spacing of the ``conc_NFWmodel`` parameter 
+        lookup table created by the `build_lookup_tables` method.
+
+        Parameters 
+        ----------
+        *concentration_binning : sequence 
+            Sequence of three inputs determining the binning. 
+            The first entry will be the minimum 
+            value of the concentration in the lookup table, 
+            the second entry the maximum, the third entry 
+            the linear spacing of the grid. 
+
+        """
+
+        MonteCarloGalProf.setup_prof_lookup_tables(self, *concentration_binning)
+
+    def build_lookup_tables(self, 
+        logrmin = model_defaults.default_lograd_min, 
+        logrmax = model_defaults.default_lograd_max, 
+        Npts_radius_table = model_defaults.Npts_radius_table):
+        """ Method used to create a lookup table of the spatial and velocity radial profiles.  
+
+        Parameters 
+        ----------
+        logrmin : float, optional 
+            Minimum radius used to build the spline table. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        logrmax : float, optional 
+            Maximum radius used to build the spline table
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        Npts_radius_table : int, optional 
+            Number of control points used in the spline. 
+            Default is set in `~halotools.empirical_models.model_defaults`. 
+
+        """
+        MonteCarloGalProf.build_lookup_tables(self, logrmin, logrmax, Npts_radius_table)
+
+    def _mc_dimensionless_radial_distance(self, concentration_array, **kwargs):
+        """ Method to generate Monte Carlo realizations of the profile model. 
+
+        Parameters 
+        ----------
+        concentration_array : array_like 
+            Length-Ngals numpy array storing the concentrations of the mock galaxies. 
+
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization. Default is None. 
+
+        Returns 
+        -------
+        scaled_radius : array_like 
+            Length-Ngals array storing the halo-centric distance *r* scaled 
+            by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`.
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_dimensionless_radial_distance` function. 
+        """
+        return MonteCarloGalProf._mc_dimensionless_radial_distance(
+            self, concentration_array, **kwargs)
 
 
+    def mc_unit_sphere(self, Npts, **kwargs):
+        """ Returns Npts random points on the unit sphere. 
 
+        Parameters 
+        ----------
+        Npts : int 
+            Number of 3d points to generate
+
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization. Default is None. 
+
+        Returns 
+        -------
+        x, y, z : array_like  
+            Length-Npts arrays of the coordinate positions. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_unit_sphere` function. 
+
+        """
+        return MonteCarloGalProf.mc_unit_sphere(self, Npts, **kwargs)
+
+    def mc_solid_sphere(self, *concentration_array, **kwargs):
+        """ Method to generate random, three-dimensional, halo-centric positions of galaxies. 
+
+        Parameters 
+        ----------
+        concentration_array : array_like, optional 
+            Length-Ngals numpy array storing the concentrations of the mock galaxies. 
+
+        halo_table : data table, optional 
+            Astropy Table storing a length-Ngals galaxy catalog. 
+            If ``halo_table`` is not passed, ``concentration_array`` must be passed. 
+
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization. Default is None. 
+
+        Returns 
+        -------
+        x, y, z : arrays 
+            Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_solid_sphere` function. 
+        """
+        return MonteCarloGalProf.mc_solid_sphere(self, *concentration_array, **kwargs)
+
+    def mc_halo_centric_pos(self, *concentration_array, **kwargs):
+        """ Method to generate random, three-dimensional 
+        halo-centric positions of galaxies. 
+
+        Parameters 
+        ----------
+        halo_table : data table, optional 
+            Astropy Table storing a length-Ngals galaxy catalog. 
+            If ``halo_table`` is not passed, ``concentration_array`` and 
+            keyword argument ``halo_radius`` must be passed. 
+
+        concentration_array : array_like, optional 
+            Length-Ngals numpy array storing the concentrations of the mock galaxies. 
+            If ``halo_table`` is not passed, ``concentration_array`` and 
+            keyword argument ``halo_radius`` must be passed. 
+
+        halo_radius : array_like, optional 
+            Length-Ngals array storing the radial boundary of the halo 
+            hosting each galaxy. Units assumed to be in Mpc/h. 
+            If ``concentration_array`` and ``halo_radius`` are not passed, 
+            ``halo_table`` must be passed. 
+
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization. Default is None. 
+
+        Returns 
+        -------
+        x, y, z : arrays 
+            Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_halo_centric_pos` function. 
+        """
+        return MonteCarloGalProf.mc_halo_centric_pos(self, *concentration_array, **kwargs)
+
+    def mc_pos(self, *concentration_array, **kwargs):
+        """ Method to generate random, three-dimensional positions of galaxies. 
+
+        Parameters 
+        ----------
+        halo_table : data table, optional 
+            Astropy Table storing a length-Ngals galaxy catalog. 
+            If ``halo_table`` is not passed, ``concentration_array`` and ``halo_radius`` must be passed. 
+
+        concentration_array : array_like, optional 
+            Length-Ngals numpy array storing the concentrations of the mock galaxies. 
+            If ``halo_table`` is not passed, ``concentration_array`` and 
+            keyword argument ``halo_radius`` must be passed. 
+            If ``concentration_array`` is passed, ``halo_radius`` must be passed as a keyword argument.
+            The sequence must have the same order as ``self.prof_param_keys``. 
+
+        halo_radius : array_like, optional 
+            Length-Ngals array storing the radial boundary of the halo 
+            hosting each galaxy. Units assumed to be in Mpc/h. 
+            If ``concentration_array`` and ``halo_radius`` are not passed, 
+            ``halo_table`` must be passed. 
+
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization. Default is None. 
+
+        Returns 
+        -------
+        x, y, z : arrays, optional 
+            For the case where no ``halo_table`` is passed as an argument, 
+            method will return x, y and z points distributed about the 
+            origin according to the profile model. 
+
+            For the case where ``halo_table`` is passed as an argument 
+            (this is the use case of populating halos with mock galaxies), 
+            the ``x``, ``y``, and ``z`` columns of the table will be over-written.
+            When ``halo_table`` is passed as an argument, the method 
+            assumes that the ``x``, ``y``, and ``z`` columns already store 
+            the position of the host halo center. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_pos` function. 
+        """
+        return MonteCarloGalProf.mc_pos(self, *concentration_array, **kwargs)
+
+    def _vrad_disp_from_lookup(self, scaled_radius, *concentration_array, **kwargs):
+        """ Method to generate Monte Carlo realizations of the profile model. 
+
+        Parameters 
+        ----------
+        scaled_radius : array_like 
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
+
+        concentration_array : array_like 
+            Length-Ngals numpy array storing the concentrations of the mock galaxies. 
+
+        Returns 
+        -------
+        sigma_vr : array 
+            Length-Ngals array containing the radial velocity dispersion 
+            of galaxies within their halos, 
+            scaled by the size of the halo's virial velocity. 
+        """
+        return MonteCarloGalProf._vrad_disp_from_lookup(self, 
+            scaled_radius, *concentration_array, **kwargs)
+
+    def mc_radial_velocity(self, scaled_radius, total_mass, *concentration_array, **kwargs):
+        """
+        Parameters 
+        ----------
+        scaled_radius : array_like 
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
+
+        total_mass: array_like
+            Length-Ngals numpy array storing the halo mass in :math:`M_{\odot}/h`. 
+
+        concentration_array : array_like 
+            Length-Ngals numpy array storing the concentrations of the mock galaxies. 
+
+        seed : int, optional  
+            Random number seed used in Monte Carlo realization. Default is None. 
+
+        Returns 
+        -------
+        radial_velocities : array_like 
+            Array of radial velocities drawn from Gaussians with a width determined by the 
+            solution to the Jeans equation. 
+        """
+        return MonteCarloGalProf.mc_radial_velocity(self, 
+            scaled_radius, total_mass, *concentration_array, **kwargs)
+
+    def mc_vel(self, halo_table):
+        """ Method assigns a Monte Carlo realization of the Jeans velocity 
+        solution to the halos in the input ``halo_table``. 
+
+        Parameters 
+        -----------
+        halo_table : Astropy Table 
+            `astropy.table.Table` object storing the halo catalog. 
+            Calling the `mc_vel` method will over-write the existing values of 
+            the ``vx``, ``vy`` and ``vz`` columns. 
+        """
+        MonteCarloGalProf.mc_vel(self, halo_table)
 
 
 
