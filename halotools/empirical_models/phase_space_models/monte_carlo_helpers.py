@@ -150,7 +150,7 @@ class MonteCarloGalProf(object):
                 funcobj = custom_spline(log_table_ordinates, self.logradius_array, k=4)
                 func_table.append(funcobj)
 
-                velocity_table_ordinates = self.dimensionless_velocity_dispersion(
+                velocity_table_ordinates = self.dimensionless_radial_velocity_dispersion(
                     radius_array, *items)
                 velocity_funcobj = custom_spline(self.logradius_array, velocity_table_ordinates)
                 velocity_func_table.append(velocity_funcobj)
@@ -550,6 +550,9 @@ class MonteCarloGalProf(object):
 
     def mc_radial_velocity(self, scaled_radius, total_mass, *profile_params, **kwargs):
         """
+        Method returns a Monte Carlo realization of radial velocities drawn from Gaussians 
+        with a width determined by the solution to the isotropic Jeans equation. 
+
         Parameters 
         ----------
         scaled_radius : array_like 
@@ -574,7 +577,7 @@ class MonteCarloGalProf(object):
         -------
         radial_velocities : array_like 
             Array of radial velocities drawn from Gaussians with a width determined by the 
-            solution to the Jeans equation. 
+            solution to the isotropic Jeans equation. 
         """
 
         dimensionless_radial_dispersions = (
