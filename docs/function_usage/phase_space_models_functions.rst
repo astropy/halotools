@@ -21,7 +21,7 @@ Halo Mass Definitions
 
 .. _nfw_profile_functions: 
 
-NFW Profile 
+NFW Profile Models
 ------------------------
 
 .. currentmodule:: halotools.empirical_models.phase_space_models
@@ -34,11 +34,23 @@ NFW Profile
 
 .. _central_galaxy_profile_functions: 
 
-Central Galaxy Profiles
----------------------------
+Central Galaxy Profile Models
+-------------------------------
 
 .. autosummary:: 
 
 	TrivialProfile
 	TrivialPhaseSpace
+
+.. _monte_carlo_galaxy_profiles: 
+
+Monte Carlo Realizations of Galaxy Profiles 
+---------------------------------------------
+
+.. autosummary::
+
+	NFWPhaseSpace.mc_generate_nfw_phase_space_points
+	profile_models.NFWProfile.mc_generate_nfw_radial_positions
+
+
 

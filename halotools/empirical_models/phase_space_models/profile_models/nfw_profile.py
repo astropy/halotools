@@ -512,7 +512,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """
         return AnalyticDensityProf.halo_radius_to_halo_mass(self, radius)
 
-    def mc_generate_radial_positions(self, num_pts = 1e4, conc = 5, **kwargs):
+    def mc_generate_nfw_radial_positions(self, num_pts = 1e4, conc = 5, **kwargs):
         """ Stand-alone convenience function for returning a Monte Carlo realization of the radial positions of points tracing an NFW profile.
 
         Parameters 
@@ -554,13 +554,13 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         Examples 
         ---------
         >>> nfw = NFWProfile()
-        >>> radial_positions = nfw.mc_generate_radial_positions(halo_mass = 1e12, conc = 10)
-        >>> radial_positions = nfw.mc_generate_radial_positions(halo_radius = 0.25)
+        >>> radial_positions = nfw.mc_generate_nfw_radial_positions(halo_mass = 1e12, conc = 10)
+        >>> radial_positions = nfw.mc_generate_nfw_radial_positions(halo_radius = 0.25)
 
         Notes 
         ------
         This function is tested with the 
-        `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_mc_generate_radial_positions` function. 
+        `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_mc_generate_nfw_radial_positions` function. 
         """
         if ('halo_radius' in kwargs) and ('halo_mass' in kwargs):
             msg = ("\nDo not specify both ``halo_mass`` and ``halo_radius``. \n"

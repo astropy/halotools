@@ -41,25 +41,31 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
         """
         return 1/(y**2*(1+y)**3)
 
-    def dimensionless_velocity_dispersion(self, x, conc):
+    def dimensionless_radial_velocity_dispersion(self, scaled_radius, *conc):
         """
+        Analytical solution to the isotropic jeans equation for an NFW potential, 
+        rendered dimensionless via scaling by the virial velocity. 
+
         Parameters 
         -----------
-        x : array_like 
-            Halo-centric distance scaled by the halo boundary, so that 
-            :math:`0 <= x <= 1`. Can be a scalar or numpy array
+        scaled_radius : array_like 
+            Length-Ngals numpy array storing the halo-centric distance 
+            *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`.  
 
-        conc : float 
-            Concentration of the halo.
+        total_mass: array_like
+            Length-Ngals numpy array storing the halo mass in :math:`M_{\odot}/h`. 
+
+        conc : float  
+            Concentration of the halo. 
 
         Returns 
         -------
         result : array_like 
             Radial velocity dispersion profile scaled by the virial velocity. 
-            The returned result has the same dimension as the input ``x``. 
+            The returned result has the same dimension as the input ``scaled_radius``. 
         """
-        x = convert_to_ndarray(x)
-        x = x.astype(float)
+        x = convert_to_ndarray(scaled_radius, dt = np.float64)
         result = np.zeros_like(x)
 
         prefactor = conc*(conc*x)*(1. + conc*x)**2/self.g(conc)
@@ -75,6 +81,28 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
 
         return np.sqrt(result*prefactor)
 
+    def radial_velocity_dispersion(self, radius, total_mass, conc):
+        """
+        Method returns the radial velocity dispersion scaled by 
+        the virial velocity as a function of the halo-centric distance.
+
+        Parameters 
+        ----------
+        radius : array_like 
+            Radius of the halo in Mpc/h units; can be a number or a numpy array.
+
+        conc : float  
+            Concentration of the halo. 
+
+        Returns 
+        -------
+        result : array_like 
+            Radial velocity dispersion profile as a function of the input ``radius``, 
+            in units of km/s. 
+
+        """
+        return IsotropicJeansVelocity.radial_velocity_dispersion(
+            self, radius, total_mass, conc)
 
 
 
