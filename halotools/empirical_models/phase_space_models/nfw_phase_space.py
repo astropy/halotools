@@ -169,18 +169,27 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         vvir = NFWProfile.virial_velocity(self, total_mass = m)
         rvir = NFWProfile.halo_mass_to_halo_radius(self, total_mass = m)
 
-        x, y, z = MonteCarloGalProf.mc_halo_centric_pos(self, 
-            profile_params = [c], halo_radius = rvir)
+        x, y, z = MonteCarloGalProf.mc_halo_centric_pos(self, c, 
+            halo_radius = rvir)
         r = np.sqrt(x**2 + y**2 + z**2)
+        scaled_radius = r/rvir
 
-        vrad = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
-            virial_velocities = vvir, profile_params = [c])
-        vx = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
-            virial_velocities = vvir, profile_params = [c])
-        vy = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
-            virial_velocities = vvir, profile_params = [c])
-        vz = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
-            virial_velocities = vvir, profile_params = [c])
+        vrad = MonteCarloGalProf.mc_radial_velocity(self, 
+            scaled_radius, c, virial_velocities = vvir)
+        vx = MonteCarloGalProf.mc_radial_velocity(self, 
+            scaled_radius, c, virial_velocities = vvir)
+        vy = MonteCarloGalProf.mc_radial_velocity(self, 
+            scaled_radius, c, virial_velocities = vvir)
+        vz = MonteCarloGalProf.mc_radial_velocity(self, 
+            scaled_radius, c, virial_velocities = vvir)
+        # vrad = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
+        #     virial_velocities = vvir, profile_params = [c])
+        # vx = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
+        #     virial_velocities = vvir, profile_params = [c])
+        # vy = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
+        #     virial_velocities = vvir, profile_params = [c])
+        # vz = MonteCarloGalProf.mc_radial_velocity(self, x = r/rvir, 
+        #     virial_velocities = vvir, profile_params = [c])
 
         t = Table()
         t['x'] = x 

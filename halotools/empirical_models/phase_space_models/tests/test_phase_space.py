@@ -123,7 +123,7 @@ class TestNFWPhaseSpace(TestCase):
     def test_mc_solid_sphere(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_solid_sphere`. 
         """
-        x, y, z = self.nfw.mc_solid_sphere(profile_params=[self.c15], seed=43)
+        x, y, z = self.nfw.mc_solid_sphere(self.c15, seed=43)
         pos = np.vstack([x, y, z]).T
         norm = np.linalg.norm(pos, axis=1)
         assert np.all(norm < 1)
@@ -140,8 +140,8 @@ class TestNFWPhaseSpace(TestCase):
         """
         r = 0.25
         halo_radius = np.zeros(len(self.c15)) + r
-        x15, y15, z15 = self.nfw.mc_halo_centric_pos(
-            halo_radius=halo_radius, profile_params=[self.c15], seed=43)
+        x15, y15, z15 = self.nfw.mc_halo_centric_pos(self.c15, 
+            halo_radius=halo_radius, seed=43)
         assert np.all(x15 > -r)
         assert np.all(x15 < r)
         assert np.all(y15 > -r)
@@ -154,13 +154,13 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(norm15 < r)
         assert np.all(norm15 > 0)
 
-        x5, y5, z5 = self.nfw.mc_halo_centric_pos(
-            halo_radius=halo_radius, profile_params=[self.c5], seed=43)
+        x5, y5, z5 = self.nfw.mc_halo_centric_pos(self.c5, 
+            halo_radius=halo_radius, seed=43)
         pos5 = np.vstack([x5, y5, z5]).T
         norm5 = np.linalg.norm(pos5, axis=1)
 
-        x10, y10, z10 = self.nfw.mc_halo_centric_pos(
-            halo_radius=halo_radius, profile_params=[self.c10], seed=43)
+        x10, y10, z10 = self.nfw.mc_halo_centric_pos(self.c10, 
+            halo_radius=halo_radius,  seed=43)
         pos10 = np.vstack([x10, y10, z10]).T
         norm10 = np.linalg.norm(pos10, axis=1)
 
@@ -170,8 +170,8 @@ class TestNFWPhaseSpace(TestCase):
         assert np.median(norm5) > np.median(norm10) 
         assert np.median(norm10) > np.median(norm15)
 
-        x10a, y10a, z10a = self.nfw.mc_halo_centric_pos(
-            halo_radius=halo_radius*2, profile_params=[self.c10], seed=43)
+        x10a, y10a, z10a = self.nfw.mc_halo_centric_pos(self.c10, 
+            halo_radius=halo_radius*2, seed=43)
         pos10a = np.vstack([x10a, y10a, z10a]).T
         norm10a = np.linalg.norm(pos10a, axis=1)
 
@@ -194,10 +194,10 @@ class TestNFWPhaseSpace(TestCase):
         """
         r = 0.25
         halo_radius = np.zeros(len(self.c15)) + r
-        x1, y1, z1 = self.nfw.mc_pos(
-            halo_radius=halo_radius, profile_params=[self.c15], seed=43)
-        x2, y2, z2 = self.nfw.mc_halo_centric_pos(
-            halo_radius=halo_radius, profile_params=[self.c15], seed=43)
+        x1, y1, z1 = self.nfw.mc_pos(self.c15, 
+            halo_radius=halo_radius, seed=43)
+        x2, y2, z2 = self.nfw.mc_halo_centric_pos(self.c15, 
+            halo_radius=halo_radius, seed=43)
         assert np.all(x1 == x2)
         assert np.all(y1 == y2)
         assert np.all(z1 == z2)
@@ -207,9 +207,8 @@ class TestNFWPhaseSpace(TestCase):
     def test_vrad_disp_from_lookup(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._vrad_disp_from_lookup`. 
         """
-        x = np.random.uniform(0, 1, len(self.c15))
-        vr_disp = self.nfw._vrad_disp_from_lookup(
-            x = x, profile_params=[self.c15], seed=43)
+        scaled_radius = np.random.uniform(0, 1, len(self.c15))
+        vr_disp = self.nfw._vrad_disp_from_lookup(scaled_radius, self.c15, seed=43)
     
         assert np.all(vr_disp < 1)
         assert np.all(vr_disp > 0)
@@ -227,12 +226,12 @@ class TestNFWPhaseSpace(TestCase):
         vmax = self.nfw.vmax(mass, conc)
         r = np.zeros(npts) + rmax
         rvir = self.nfw.halo_mass_to_halo_radius(mass)
-        x = r/rvir
+        scaled_radius = r/rvir
 
         v = 250.
-        vvir = np.zeros_like(x) + v
-        mc_vr = self.nfw.mc_radial_velocity(
-            x = x, virial_velocities = vvir, profile_params = [carr], seed=43)
+        vvir = np.zeros_like(scaled_radius) + v
+        mc_vr = self.nfw.mc_radial_velocity(scaled_radius, carr, 
+            virial_velocities = vvir, seed=43)
 
         vr_dispersion_from_monte_carlo = np.std(mc_vr)
         assert np.allclose(vr_dispersion_from_monte_carlo, vmax, rtol=0.05)
