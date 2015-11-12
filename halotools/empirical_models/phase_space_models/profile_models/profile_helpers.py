@@ -3,6 +3,9 @@
 the relations between halo mass and radius, and the variation of these 
 relations with cosmology and redshift. 
 
+For a tutorial containing derivations and implementation notes on the 
+functions defined in this module, see :ref:`halo_mass_definitions`. 
+
 The functions contained in this module borrow heavily from the Colossus 
 package developed by Benedikt Diemer, http://bdiemer.bitbucket.org. 
 
@@ -30,7 +33,7 @@ def density_threshold(cosmology, redshift, mdef):
 
 	:math:`\\rho_{\\rm thresh}(z) = \\Delta_{\\rm ref}(z)\\rho_{\\rm ref}(z)`. 
 
-	See :ref:`halo_profile_definitions` for details. 
+	See :ref:`halo_mass_definitions` for details. 
 
 	Parameters
 	--------------
@@ -118,7 +121,7 @@ def delta_vir(cosmology, redshift):
 	:math:`\\Delta_{\\rm vir}(x) = 18\\pi^{2} + 82x - 39x^{2}`, 
 	where :math:`x \\equiv \\Omega_{m}(z)-1`. 
 	
-	See :ref:`halo_profile_definitions` for details. 
+	See :ref:`halo_mass_definitions` for details. 
 
 	Parameters
 	--------------
@@ -159,7 +162,7 @@ def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 
 	Note that this function is independent of the form of the density profile.
 
-	See :ref:`halo_profile_definitions` for details. 
+	See :ref:`halo_mass_definitions` for details. 
 
 	Parameters
 	------------
@@ -206,7 +209,7 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
 
 	Note that this function is independent of the form of the density profile.
 
-	See :ref:`halo_profile_definitions` for details. 
+	See :ref:`halo_mass_definitions` for details. 
 
 	Parameters
 	------------
