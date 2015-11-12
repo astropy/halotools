@@ -34,6 +34,8 @@ Depending on how you have configured your copy of the gcc compiler, Mac users ma
 
 	CC=clang python setup.py test 
 
+If you are working from the master branch of Haltools, there should not be any errors or test failures. If you encounter problems when running the test suite, please be sure you have installed the package dependencies first before raising a Github Issue and/or contacting the Halotools developers.  
+
 Dependencies
 ============
 
