@@ -201,7 +201,7 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
 
 
 def custom_spline(table_abcissa, table_ordinates, **kwargs):
-    """ Convenience wrapper around scipy.InterpolatedUnivariateSpline, 
+    """ Convenience wrapper around `~scipy.interpolate.InterpolatedUnivariateSpline`, 
     written specifically to handle the edge case of a spline table being 
     built from a single point.  
 
@@ -224,11 +224,14 @@ def custom_spline(table_abcissa, table_ordinates, **kwargs):
 
     Notes 
     -----
-    Only differs from the scipy.interpolate.UnivariateSpline for 
-    the case where the input tables have a single element. The default behavior 
-    of the scipy function is to raise an exception, which is silly: clearly 
-    the desired behavior in this case is to simply return the input value 
-    table_ordinates[0] for all values of the input abcissa. 
+    Only differs from `~scipy.interpolate.UnivariateSpline` in two respects. 
+    First, the degree of the spline interpolation is automatically chosen to 
+    be the maximum allowable degree permitted by the number of abcissa points. 
+    Second, the behavior differs for the case where the input tables 
+    have only a single element. In this case, the default behavior 
+    of the scipy function is to raise an exception.  
+    The `custom_spline` instead returns a constant-valued function 
+    where the returned value is simply the scalar value of the input ordinates. 
 
     """
     if custom_len(table_abcissa) != custom_len(table_ordinates):

@@ -122,12 +122,14 @@ and use the definition of :math:`g(x) \equiv {\rm ln}(1+x) - x/(1+x) = \int_{0}^
 
 The above equation is the exact expression used to calculate :math:`P_{\rm NFW}(<\tilde{r})` via the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.cumulative_mass_PDF` function. 
 
+.. _monte_carlo_nfw_spatial_profile:
 
 Monte Carlo realizations of the NFW profile
 ------------------------------------------------
 
-How are things computed in practice (lookup tables, etc.)
+Halotools uses `Inverse Transform Sampling <https://en.wikipedia.org/wiki/Inverse_transform_sampling>`_, a standard Monte Carlo technique, to produce random realizations of halo profiles. The basic idea of this technique is to draw a random uniform number, *u*, and intrepret *u* as the probability :math:`u = P(<r)` of finding a  point tracing an NFW radial profile interior to position *r*. The mapping between *u* and *r* is already implemented via the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.cumulative_mass_PDF` function, so we only need to use this function to provide the inverse mapping. This we do numerically by tabulating :math:`P_{\rm NFW}(<\tilde{r})` at a set of control points :math:`0<\tilde{r}<1` and then using the `scipy <http://www.scipy.org/>`_ function `~scipy.interpolate.InterpolatedUnivariateSpline`. This technique is used ubiquitously throughout the package, and the interpolation is actually implemented using the `~halotools.empirical_models.model_helpers.custom_spline` function, which is just a wrapper that customizes the edge case behavior of `~scipy.interpolate.InterpolatedUnivariateSpline`. 
 
+The simplest place in the code base to see where Inverse Transform Sampling gives Monte Carlo realizations of the NFW profile is in the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.mc_generate_nfw_radial_positions` source code. Here the implementation is basically straightforward. Because NFW profiles are power laws, the interpolation is more stable when it is done in log-space. 
 
 .. _nfw_jeans_velocity_profile_derivations:
 

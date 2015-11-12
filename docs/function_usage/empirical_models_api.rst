@@ -12,3 +12,4 @@ Reference/API
 .. automodapi:: halotools.empirical_models.phase_space_models.velocity_models
 
 .. automodapi:: halotools.empirical_models.model_defaults
+.. automodapi:: halotools.empirical_models.model_helpers
