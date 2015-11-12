@@ -73,15 +73,52 @@ If we now substitute :math:`r/r_{s} = cr/R_{\Delta}` and define the *scaled radi
 
 The above expression is the exact equation implemented in the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.dimensionless_mass_density` method of the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` class. The quantity :math:`\rho_{\rm thresh}` is calculated in Halotools using the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` function, and :math:`g(c)` is computed using the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.g` method of the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` class. 
 
+For any sub-class of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`, 
+once the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.dimensionless_mass_density` method is defined, in principle all subsequent behavior is derived. In practice, if the associated integrals and derivatives can be computed analytically it is more efficient and numerically stable to implement the analytical results as over-rides of the super-class-defined methods. The subsections below derive the analytical equations used in all over-rides implemented in the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` class. 
+
 Derivation of the NFW cumulative mass PDF 
 ------------------------------------------------
 
-For any sub-class of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`, 
-once :math:`\tilde{\rho}_{\rm prof}(\tilde{r})` is defined, in principle all subsequent behavior is derived. In practice, if the associated integrals and derivatives can be computed analytically it is more efficient and numerically stable to implement the analytical results as over-rides of the super-class-defined methods. 
+The cumulative mass PDF, :math:`P_{\rm prof}(<\tilde{r})`, 
+the cumulative probability of finding a randomly selected 
+particle at a scaled-radius position less than :math:`\tilde{r}`, is defined as:
 
 .. math::
 
-	g(cx) / g(c)
+	P_{\rm NFW}(<\tilde{r}) \equiv M_{\rm NFW}(<\tilde{r}) / M_{\Delta}.
+
+In the above expression, 
+
+.. math::
+
+	M_{\rm NFW}(<\tilde{r}) \equiv 4\pi\rho_{\rm thresh}\int_{0}^{\tilde{r}}d\tilde{r}' \tilde{r}'^{2}\tilde{\rho}_{\rm NFW}(\tilde{r}') 
+
+and 
+
+.. math::
+
+	M_{\Delta} \equiv 4\pi\rho_{\rm thresh}\int_{0}^{1}d\tilde{r}' \tilde{r}'^{2}\tilde{\rho}_{\rm NFW}(\tilde{r}'). 
+
+Plugging in the definition of :math:`\tilde{\rho}_{\rm NFW}` and canceling the common pre-factors of 
+:math:`4\pi\rho_{\rm thresh}c^{3}/3g(c)` gives:
+
+.. math::
+
+	P_{\rm NFW}(<\tilde{r}) = \frac{\int_{0}^{\tilde{r}}d\tilde{r}' \tilde{r}'^{2}1/c\tilde{r}'(1 + c\tilde{r}')^{2}}{\int_{0}^{1}d\tilde{r}' \tilde{r}'^{2}1/c\tilde{r}'(1 + c\tilde{r}')^{2}}
+
+Now we change integration variables :math:`\tilde{r}'\rightarrow c\tilde{r}'=y`:
+
+.. math::
+
+	P_{\rm NFW}(<\tilde{r}) = \frac{\int_{0}^{c\tilde{r}}dy\frac{y}{(1 + y)^{2}}}{\int_{0}^{1}dy\frac{y}{(1 + y)^{2}}}
+
+and use the definition of :math:`g(x) \equiv {\rm ln}(1+x) - x/(1+x) = \int_{0}^{x}dy\frac{y}{(1+y)^{2}}` to write the above expression as
+
+.. math::
+
+	P_{\rm NFW}(<\tilde{r}) = g(c\tilde{r}) / g(c)
+
+The above equation is the exact expression used to calculate :math:`P_{\rm NFW}(<\tilde{r})` via the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.cumulative_mass_PDF` function. 
 
 
 Monte Carlo realizations of the NFW profile
