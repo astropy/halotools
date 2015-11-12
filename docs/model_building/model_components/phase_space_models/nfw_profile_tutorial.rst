@@ -76,6 +76,8 @@ The above expression is the exact equation implemented in the `~halotools.empiri
 For any sub-class of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`, 
 once the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile.dimensionless_mass_density` method is defined, in principle all subsequent behavior is derived. In practice, if the associated integrals and derivatives can be computed analytically it is more efficient and numerically stable to implement the analytical results as over-rides of the super-class-defined methods. The subsections below derive the analytical equations used in all over-rides implemented in the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` class. 
 
+.. _nfw_cumulative_mass_pdf_derivation:
+
 Derivation of the NFW cumulative mass PDF 
 ------------------------------------------------
 
