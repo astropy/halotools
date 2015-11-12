@@ -151,6 +151,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` function. 
         The quantity :math:`\\rho_{\\rm prof}` is the physical mass density of the 
         halo profile and is computed via the `mass_density` function. 
+        See :ref:`nfw_spatial_profile_derivations` for a derivation of this expression. 
 
         Parameters 
         -----------
@@ -257,7 +258,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         :math:`P_{\\rm NFW}(<\\tilde{r}) \equiv M_{\\Delta}(<\\tilde{r}) / M_{\\Delta} = g(c\\tilde{r})/g(\\tilde{r}),`
         
         where :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)` is computed 
-        using `g`, and where :math:`\\tilde{r} \\equiv r / R_{\\Delta}`.
+        using `g`, and where :math:`\\tilde{r} \\equiv r / R_{\\Delta}`. See :ref:`nfw_cumulative_mass_pdf_derivation` for a derivation of this analytical expression. 
 
         Parameters
         -------------
@@ -288,7 +289,6 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
 
         Notes 
         ------
-        See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
         This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_cumulative_mass_PDF` function. 
 
@@ -410,8 +410,34 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         """    
         return AnalyticDensityProf.circular_velocity(self, radius, total_mass, conc)
 
+    def rmax(self, total_mass, conc):
+        """ Radius at which the halo attains its maximum circular velocity, :math:`R_{\\rm max}^{\\rm NFW} = 2.16258R_{\Delta}/c`. 
+
+        Parameters 
+        ----------
+        total_mass: array_like
+            Total halo mass in :math:`M_{\odot}/h`; can be a number or a numpy array.
+
+        conc : array_like 
+            Value of the halo concentration. Can either be a scalar, or a numpy array 
+            of the same dimension as the input ``total_mass``. 
+
+        Returns 
+        --------
+        rmax : array_like 
+            :math:`R_{\\rm max}` in Mpc/h.
+
+        Notes 
+        ------
+        See :ref:`halo_profile_definitions` for derivations and implementation details. 
+
+        """
+        halo_radius = self.halo_mass_to_halo_radius(total_mass)
+        scale_radius = halo_radius / conc
+        return 2.16258*scale_radius
+
     def vmax(self, total_mass, conc):
-        """ Maximum circular velocity of the halo profile. 
+        """ Maximum circular velocity of the halo profile, :math:`V_{\\rm max}^{\\rm NFW} = V_{\\rm cir}^{\\rm NFW}(r = 2.16258R_{\Delta}/c)`. 
 
         Parameters 
         ----------
@@ -445,11 +471,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         and also the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_halo_catalog_nfw_consistency.TestHaloCatalogNFWConsistency.test_vmax_consistency` function. 
 
         """
-        halo_radius = self.halo_mass_to_halo_radius(total_mass)
-        scale_radius = halo_radius/conc
-
-        rmax = 2.16258 * scale_radius
-        vmax = self.circular_velocity(rmax, total_mass, conc)
+        Rmax = self.rmax(total_mass, conc)
+        vmax = self.circular_velocity(Rmax, total_mass, conc)
         return vmax
 
     def halo_mass_to_halo_radius(self, total_mass):
