@@ -39,9 +39,10 @@ If you are working from the master branch of Haltools, there should not be any e
 Dependencies
 ============
 
-Whether you installed the code with pip or using setup.py, all of the package dependencies 
-will be automatically handled for you. However, if you did not install the code with 
-either of the above two methods, then you will need to be aware of the following dependencies.
+If you installed the code with pip then all of the package dependencies 
+will be automatically handled for you. However, if you installed using setup.py after 
+cloning the main repository (currently the only available method), 
+then you will need to be aware of the following dependencies.
 
 Core Dependencies
 ---------------------
