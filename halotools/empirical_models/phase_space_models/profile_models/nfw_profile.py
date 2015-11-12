@@ -538,6 +538,8 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
     def mc_generate_nfw_radial_positions(self, num_pts = 1e4, conc = 5, **kwargs):
         """ Stand-alone convenience function for returning a Monte Carlo realization of the radial positions of points tracing an NFW profile.
 
+        See :ref:`monte_carlo_nfw_spatial_profile` for a discussion of this technique. 
+        
         Parameters 
         -----------
         num_pts : int, optional 
@@ -627,7 +629,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         log_table_ordinates = np.log10(table_ordinates)
         funcobj = custom_spline(log_table_ordinates, logradius_array, k=4)
 
-        # Use method of transformation of random variates to generate a Monte Carlo realization 
+        # Use method of Inverse Transform Sampling to generate a Monte Carlo realization 
         ### of the radial positions 
         randoms = np.random.uniform(0, 1, num_pts)
         log_randoms = np.log10(randoms)
