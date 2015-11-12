@@ -1,8 +1,11 @@
 """
-Module expressing various default settings of 
-the empirical models sub-package. 
+Module expressing various default settings of the empirical modeling sub-package. 
 
-All hard-coding should be restricted to this module, whenever possible.
+All values hard-coded here appear as unique variables throughout the entire Halotools code base. 
+This allows you to customize your default settings and be guaranteed that whatever changes you make 
+will correctly propagate to all relevant behavior. See the in-line comments in the 
+``halotools/empirical_models/model_defaults.py`` source code for 
+descriptions of the purpose of each variable defined in this module. 
 """
 
 __all__ = ['get_halo_boundary_key', 'get_halo_mass_key']

@@ -3,7 +3,8 @@ Module expressing various default settings of the simulation manager sub-package
 
 All values hard-coded here appear as unique variables throughout the entire Halotools code base. 
 This allows you to customize your default settings and be guaranteed that whatever changes you make 
-will correctly propagate to all relevant behavior. See the in-line comments in the source code for 
+will correctly propagate to all relevant behavior. See the in-line comments in the 
+``halotools/sim_manager/sim_defaults.py`` source code for 
 descriptions of the purpose of each variable defined in this module. 
 
 """
