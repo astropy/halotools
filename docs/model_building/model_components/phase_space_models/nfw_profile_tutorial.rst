@@ -21,11 +21,31 @@ and defer discussion of all super-class-derived behavior to the :ref:`profile_te
 Spatial Profile  
 ======================================
 
+Derivation of the NFW dimensionless mass density 
+--------------------------------------------------
+
+.. math::
+
+	\frac{c^{3}/3g(c)}{cx(1 + cx)^{2}}
+
+
+Derivation of the NFW cumulative mass PDF 
+------------------------------------------------
+
+.. math::
+
+	g(cx) / g(c)
+
+
+Monte Carlo realizations of the NFW profile
+------------------------------------------------
+
+How are things computed in practice (lookup tables, etc.)
 
 Velocity Profile 
 ===========================================
 
-
+How are things computed in practice (lookup tables, etc.)
 
 
 
