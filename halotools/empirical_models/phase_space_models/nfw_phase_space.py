@@ -22,7 +22,7 @@ from ...sim_manager import sim_defaults
 
 
 class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
-    """ Model for the phase space distribution of mass and/or galaxies in isotropic Jeans equilibrium in an NFW halo profile, based on Navarro, Frenk and White (1999).
+    """ Model for the phase space distribution of mass and/or galaxies in isotropic Jeans equilibrium in an NFW halo profile, based on Navarro, Frenk and White (1995).
 
     For a review of the mathematics underlying the NFW profile, 
     including descriptions of how the relevant equations are 

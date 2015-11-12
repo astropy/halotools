@@ -3,7 +3,7 @@
 This module contains the `NFWProfile` class, 
 which is used to model the spatial distribution of mass and/or galaxies 
 inside dark matter halos according to the fitting function introduced in 
-Navarry, Frenk and White (1999). 
+Navarry, Frenk and White (1995). 
 a sub-class of `~halotools.empirical_models.phase_space_models.AnalyticDensityProf`. 
 
 Testing for this module is primarily done by the 
@@ -31,7 +31,7 @@ __author__ = ['Andrew Hearin', 'Benedikt Diemer']
 __all__ = ['NFWProfile']
 
 class NFWProfile(AnalyticDensityProf, ConcMass):
-    """ Model for the spatial distribution of mass and/or galaxies residing in an NFW halo profile, based on Navarro, Frenk and White (1999).
+    """ Model for the spatial distribution of mass and/or galaxies residing in an NFW halo profile, based on Navarro, Frenk and White (1995).
 
     For a review of the mathematics underlying the NFW profile, 
     including descriptions of how the relevant equations are 
@@ -141,9 +141,9 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         where :math:`\\tilde{r}\\equiv r/R_{\\Delta}`. 
 
         For an NFW halo, 
-        :math:`\\tilde{\\rho}_{\\rm NFW}(\\tilde{r}, c) = \\frac{c^{3}}{3g(c)}\\times\\frac{1}{c\\tilde{r}(1 + c\\tilde{r})^{2}},`
+        :math:`\\tilde{\\rho}_{\\rm NFW}(\\tilde{r}, c) = \\frac{c^{3}/3g(c)}{c\\tilde{r}(1 + c\\tilde{r})^{2}},`
         
-        where :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)` is computed using the `g` function. 
+        where :math:`g(x) \\equiv \\log(1+x) - x / (1+x)` is computed using the `g` function. 
 
         The quantity :math:`\\rho_{\\rm thresh}` is a function of 
         the halo mass definition, cosmology and redshift, 
@@ -230,7 +230,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
     def g(self, x):
         """ Convenience function used to evaluate the profile.
 
-            :math:`g(x) \\equiv \\int_{0}^{x}dy\\frac{y}{(1+y)^{2}} = \\log(1+x) - x / (1+x)`
+            :math:`g(x) \\equiv \\rm{ln}(1+x) - x / (1+x)`
 
         Parameters 
         ----------
