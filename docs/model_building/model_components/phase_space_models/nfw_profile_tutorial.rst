@@ -136,7 +136,31 @@ The simplest place in the code base to see where Inverse Transform Sampling give
 Modeling the NFW Velocity Profile 
 ===========================================
 
-How are things computed in practice (lookup tables, etc.)
+The `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` model solves for the velocity profile of satellite galaxies by making the following assumptions: 
+
+	1. satellites trace the same spatial profile as their underlying gravitational potential well,
+	2. satellites are in virial equilibrium with their potential, and 
+	3. satellite orbits are isotropic. 
+
+In any such system, the first moment of the radial velocity distribution of the satellites 
+is zero (there is no net infall or outflow), and the second moment :math:`\sigma^{2}_{r}(r)` 
+can be calculated analytically by solving the Jeans equation, 
+which under these assumptions takes the following form:
+
+.. math::
+
+	\sigma^{2}_{r}(r) = \frac{1}{\rho_{\rm sat}(r)}\int_{r}^{\infty}\rho_{\rm sat}(r)\frac{{\rm d}\Phi(r)}{{\rm d}r},
+
+In the above equation, :math:`\rho_{\rm sat}` is the number density profile of the satellite galaxies and :math:`\Phi` is the gravitational potential. For a justification of this simplification of the Jeans equation, see :ref:`jeans_equation_derivations`. 
+
+
+For the case of an NFW potential, the above form of the Jeans equation can be integrated analytically. The solution is provided by the `~halotools.empirical_models.phase_space_models.velocity_models.NFWJeansVelocity.radial_velocity_dispersion` method of the `~halotools.empirical_models.phase_space_models.velocity_models.NFWJeansVelocity` class. 
+
+
+.. math::
+
+	\sigma_{r}^{2}(\tilde{r}) = V_{\rm vir}^{2}\frac{c^{2}\tilde{r}(1+c\tilde{r})^{2}}{g(c)}\int_{c\tilde{r}}^{\infty}dy\left[\frac{{\rm ln}(1+y)}{y^{3}(1+y)^{2}} + \frac{1}{y^{2}(1+y)^{3}}\right]
+
 
 
 .. _nfw_monte_carlo_derivations:
