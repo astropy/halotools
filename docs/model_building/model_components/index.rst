@@ -21,7 +21,12 @@ Tutorial coming soon!
 
 Halo profile component models  
 ===============================
-Tutorial coming soon!
+
+.. toctree::
+   :maxdepth: 1
+
+   phase_space_models/profile_template_tutorial
+   
 
 Assembly bias component models 
 ================================

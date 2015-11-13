@@ -5,11 +5,12 @@ from unittest import TestCase
 import numpy as np 
 from astropy.table import Table 
 
-from ..phase_space_models import NFWPhaseSpace
+from ..nfw_isotropic_jeans import NFWJeansVelocity
 
-from ....sim_manager import HaloCatalog
-from ....custom_exceptions import HalotoolsError
-from ..velocity_models import NFWJeansVelocity
+from ...nfw_phase_space import NFWPhaseSpace
+
+from .....sim_manager import HaloCatalog
+from .....custom_exceptions import HalotoolsError
 
 class TestNFWJeansVelocity(TestCase):
     """ Class used to test `~halotools.empirical_models.NFWPhaseSpace`. 

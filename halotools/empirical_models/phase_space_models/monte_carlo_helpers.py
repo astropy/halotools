@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 The `MonteCarloGalProf` class defined in this module is 
-used to augment the analytic profile and velocity models. 
+used as an orthogonal mix-in class to supplement the behavior of 
+the analytic profile and velocity models. 
 The result of using `MonteCarloGalProf` as an orthogonal mix-in class 
 is a composite class that can be used to generate Monte Carlo realizations 
 of the full phase space distribution of galaxies within their halos. 
+
+Testing for this module is done in `~halotools.empirical_models.phase_space_models.tests.test_phase_space` module. 
 """
 # from __future__ import (
 #     division, print_function, absolute_import, unicode_literals)
@@ -14,7 +17,6 @@ __all__ = ['MonteCarloGalProf']
 
 import numpy as np 
 
-from functools import partial
 from itertools import product
 from time import time
 
@@ -27,9 +29,12 @@ from ...custom_exceptions import HalotoolsError
 
 class MonteCarloGalProf(object):
     """ Orthogonal mix-in class used to turn an analytical 
-    phase space model (e.g., `~halotools.empirical_models.NFWPhaseSpace`)
+    phase space model (e.g., `~halotools.empirical_models.phase_space_models.NFWPhaseSpace`)
     into a class that can generate the phase space distribution 
     of a mock galaxy population. 
+
+    Testing for this module is done in `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace` class. 
+
     """
 
     def __init__(self):
@@ -38,7 +43,8 @@ class MonteCarloGalProf(object):
         # For each function computing a profile parameter, 
         # add it to new_haloprop_func_dict so that the profile parameter 
         # will be pre-computed for each halo prior to mock population
-        self.new_haloprop_func_dict = {}
+        if not hasattr(self, 'new_haloprop_func_dict'):
+            self.new_haloprop_func_dict = {}
         for key in self.prof_param_keys:
             self.new_haloprop_func_dict[key] = getattr(self, key)
 
@@ -49,20 +55,41 @@ class MonteCarloGalProf(object):
             ])
 
 
-    def _setup_lookup_tables(self, *lookup_table_binning):
+    def setup_prof_lookup_tables(self, *lookup_table_binning):
         """
-        Private method used to set up the lookup table grid. 
+        Method used to set up the lookup table grid. 
+
+        Each analytical profile has profile parameters associated with it. This method 
+        sets up how we will digitize the value of each such parameter for the purposes of 
+        mock population. 
+
+        As an example, the `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` 
+        model has a single profile parameter, ``conc_NFWmodel``. After calling the 
+        `setup_prof_lookup_tables` method, there will be three new attributes bound to the 
+        `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` instance:
+
+        * ``_conc_NFWmodel_lookup_table_min``
+
+        * ``_conc_NFWmodel_lookup_table_max``
+
+        * ``_conc_NFWmodel_lookup_table_spacing``
+
+        These three attributes define the linearly spacing of the ``conc_NFWmodel`` parameter 
+        lookup table created by the `build_lookup_tables` method.
 
         Parameters 
         ----------
-        lookup_table_binning : sequence 
-            Sequence of tuples, with one tuple per radial profile parameter. 
+        *lookup_table_binning : sequence 
+            Sequence of tuples, with one tuple per radial profile parameter, 
+            and each tuple having three elements. 
             The first entry of each tuple will be the minimum 
             value of the profile parameter in the lookup table, 
             the second entry the maximum, the third entry 
             the linear spacing of the grid. The i^th element of 
             the input ``lookup_table_binning`` sequence 
-            is assumed to correspond to the i^th element of ``self.prof_param_keys``. 
+            is assumed to correspond to the i^th element of ``self.prof_param_keys``, 
+            which is defined in the 
+            `~halotools.empirical_models.phase_space_models.profile_params.profile_model_template.AnalyticalDensityProf` sub-class. 
         """
         for ipar, prof_param_key in enumerate(self.prof_param_keys):
             setattr(self, '_' + prof_param_key + '_lookup_table_min', lookup_table_binning[ipar][0])
@@ -73,8 +100,7 @@ class MonteCarloGalProf(object):
         logrmin = model_defaults.default_lograd_min, 
         logrmax = model_defaults.default_lograd_max, 
         Npts_radius_table = model_defaults.Npts_radius_table):
-        """ Method used to create a lookup table of the radial profile 
-        and velocity profile.  
+        """ Method used to create a lookup table of the spatial and velocity radial profiles.  
 
         Parameters 
         ----------
@@ -93,7 +119,7 @@ class MonteCarloGalProf(object):
         """
         key = self.prof_param_keys[0]
         if not hasattr(self, '_' + key + '_lookup_table_min'):
-            raise HalotoolsError("You must first call _setup_lookup_tables"
+            raise HalotoolsError("You must first call setup_prof_lookup_tables"
                 "to determine the grids before building the lookup tables")
         
         radius_array = np.logspace(logrmin, logrmax, Npts_radius_table)
@@ -124,7 +150,7 @@ class MonteCarloGalProf(object):
                 funcobj = custom_spline(log_table_ordinates, self.logradius_array, k=4)
                 func_table.append(funcobj)
 
-                velocity_table_ordinates = self.dimensionless_velocity_dispersion(
+                velocity_table_ordinates = self.dimensionless_radial_velocity_dispersion(
                     radius_array, *items)
                 velocity_funcobj = custom_spline(self.logradius_array, velocity_table_ordinates)
                 velocity_func_table.append(velocity_funcobj)
@@ -148,28 +174,33 @@ class MonteCarloGalProf(object):
                 np.arange(np.prod(profile_params_dimensions)).reshape(profile_params_dimensions)
                 )
 
-    def _mc_dimensionless_radial_distance(self, **kwargs):
+    def _mc_dimensionless_radial_distance(self, *profile_params, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
         ----------
-        profile_params : list
-            List of length-Ngals array(s) containing the input profile parameter(s). 
-            In the simplest case, this list has a single element, 
-            e.g. a single array of the NFW concentration values. 
-            There should be a ``profile_params`` list item for 
+        *profile_params : Sequence of arrays
+            Sequence of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this sequence has a single element, 
+            e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
+            More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
 
         Returns 
         -------
-        r : array 
-            Length-Ngals array containing the radial position of galaxies within their halos, 
-            scaled by the size of the halo's boundary, so that :math:`0 < r < 1`. 
+        scaled_radius : array_like 
+            Length-Ngals array storing the halo-centric distance *r* scaled 
+            by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`.
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_dimensionless_radial_distance` function. 
         """
-        profile_params = kwargs['profile_params']
 
         if not hasattr(self, 'rad_prof_func_table'):
             self.build_lookup_tables()
@@ -177,7 +208,7 @@ class MonteCarloGalProf(object):
         # Draw random values for the cumulative mass PDF         
         # These will be turned into random radial positions 
         # by inverting the tabulated cumulative_mass_PDF
-        if 'seed' in kwargs.keys():
+        if 'seed' in kwargs:
             np.random.seed(kwargs['seed'])
         rho = np.random.random(len(profile_params[0]))
 
@@ -188,7 +219,8 @@ class MonteCarloGalProf(object):
         for param_index, param_key in enumerate(self.prof_param_keys):
             input_profile_params = convert_to_ndarray(profile_params[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
-            digitized_params = np.digitize(input_profile_params, param_bins)
+            digitized_params = np.digitize(input_profile_params, param_bins, right=True)
+            digitized_params[digitized_params==len(param_bins)] -= 1
             digitized_param_list.append(digitized_params)
         # Each element of digitized_param_list is a length-Ngals array. 
         # The i^th element of each array contains the bin index of 
@@ -232,6 +264,10 @@ class MonteCarloGalProf(object):
         x, y, z : array_like  
             Length-Npts arrays of the coordinate positions. 
 
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_unit_sphere` function. 
+
         """
         if 'seed' in kwargs:
             np.random.seed(kwargs['seed'])
@@ -246,18 +282,18 @@ class MonteCarloGalProf(object):
 
         return x, y, z
 
-    def mc_solid_sphere(self, **kwargs):
+    def mc_solid_sphere(self, *profile_params, **kwargs):
         """ Method to generate random, three-dimensional, halo-centric positions of galaxies. 
 
         Parameters 
         ----------
-        profile_params : list, optional 
-            List of length-Ngals array(s) containing the input profile parameter(s). 
-            In the simplest case, this list has a single element, 
-            e.g. a single array of the NFW concentration values. 
-            There should be a ``profile_params`` list item for 
+        *profile_params : Sequence of arrays
+            Sequence of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this sequence has a single element, 
+            e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
+            More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
-            If ``profile_params`` is not passed, ``halo_table`` must be passed. 
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         halo_table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
@@ -270,6 +306,10 @@ class MonteCarloGalProf(object):
         -------
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_solid_sphere` function. 
         """
         # Retrieve the list of profile_params
         if 'halo_table' in kwargs:
@@ -279,8 +319,9 @@ class MonteCarloGalProf(object):
             halo_radius = halo_table[self.halo_boundary_key]
         else:
             try:
-                profile_params = kwargs['profile_params']
-            except KeyError:
+                # profile_params = kwargs['profile_params']
+                assert len(profile_params) > 0
+            except AssertionError:
                 raise HalotoolsError("If not passing an input ``halo_table`` "
                     "keyword argument to mc_solid_sphere,\n"
                     "must pass a ``profile_params`` keyword argument")
@@ -295,7 +336,7 @@ class MonteCarloGalProf(object):
         else:
             seed = None
         dimensionless_radial_distance = self._mc_dimensionless_radial_distance(
-            profile_params = profile_params, seed = seed) 
+            *profile_params, seed = seed) 
 
         # get random positions within the solid sphere
         x *= dimensionless_radial_distance
@@ -314,7 +355,7 @@ class MonteCarloGalProf(object):
            
         return x, y, z
 
-    def mc_halo_centric_pos(self, **kwargs):
+    def mc_halo_centric_pos(self, *profile_params, **kwargs):
         """ Method to generate random, three-dimensional 
         halo-centric positions of galaxies. 
 
@@ -322,20 +363,23 @@ class MonteCarloGalProf(object):
         ----------
         halo_table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
-            If ``halo_table`` is not passed, ``profile_params`` and ``halo_radius`` must be passed. 
+            If ``halo_table`` is not passed, ``profile_params`` and 
+            keyword argument ``halo_radius`` must be passed. 
 
-        profile_params : list, optional 
-            List of length-Ngals array(s) containing the input profile parameter(s). 
-            In the simplest case, this list has a single element, 
-            e.g. a single array of the NFW concentration values. 
-            There should be a ``profile_params`` list item for 
+        *profile_params : Sequence of arrays
+            Sequence of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this sequence has a single element, 
+            e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
+            More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
-            If ``profile_params`` and ``halo_radius`` are not passed, ``halo_table`` must be passed. 
+            If ``profile_params`` is passed, ``halo_radius`` must be passed as a keyword argument.
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         halo_radius : array_like, optional 
             Length-Ngals array storing the radial boundary of the halo 
             hosting each galaxy. Units assumed to be in Mpc/h. 
-            If ``profile_params`` and ``halo_radius`` are not passed, ``halo_table`` must be passed. 
+            If ``profile_params`` and ``halo_radius`` are not passed, 
+            ``halo_table`` must be passed. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -344,9 +388,13 @@ class MonteCarloGalProf(object):
         -------
         x, y, z : arrays 
             Length-Ngals array storing a Monte Carlo realization of the galaxy positions. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_halo_centric_pos` function. 
         """
 
-        x, y, z = self.mc_solid_sphere(**kwargs)
+        x, y, z = self.mc_solid_sphere(*profile_params, **kwargs)
 
         ### Retrieve the halo_radius
         if 'halo_table' in kwargs:    
@@ -367,7 +415,7 @@ class MonteCarloGalProf(object):
         return x, y, z
 
 
-    def mc_pos(self, **kwargs):
+    def mc_pos(self, *profile_params, **kwargs):
         """ Method to generate random, three-dimensional positions of galaxies. 
 
         Parameters 
@@ -376,18 +424,28 @@ class MonteCarloGalProf(object):
             Astropy Table storing a length-Ngals galaxy catalog. 
             If ``halo_table`` is not passed, ``profile_params`` and ``halo_radius`` must be passed. 
 
-        profile_params : list, optional 
-            List of length-Ngals array(s) containing the input profile parameter(s). 
-            In the simplest case, this list has a single element, 
-            e.g. a single array of the NFW concentration values. 
-            There should be a ``profile_params`` list item for 
+        *profile_params : Sequence of arrays
+            Sequence of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this sequence has a single element, 
+            e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
+            More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
-            If ``profile_params`` and ``halo_radius`` are not passed, ``halo_table`` must be passed. 
+            If ``profile_params`` is passed, ``halo_radius`` must be passed as a keyword argument.
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         halo_radius : array_like, optional 
             Length-Ngals array storing the radial boundary of the halo 
             hosting each galaxy. Units assumed to be in Mpc/h. 
-            If ``profile_params`` and ``halo_radius`` are not passed, ``halo_table`` must be passed. 
+            If ``profile_params`` and ``halo_radius`` are not passed, 
+            ``halo_table`` must be passed. 
+
+        overwrite_table_pos : bool, optional 
+            If True, the `mc_pos` method will over-write the existing values of 
+            the ``x``, ``y`` and ``z`` halo_table columns. Default is True
+
+        return_pos : bool, optional 
+            If True, method will return the computed host-centric 
+            values of ``x``, ``y`` and ``z``. Default is False.
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -405,41 +463,59 @@ class MonteCarloGalProf(object):
             When ``halo_table`` is passed as an argument, the method 
             assumes that the ``x``, ``y``, and ``z`` columns already store 
             the position of the host halo center. 
+
+        Notes 
+        ------
+        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_pos` function. 
         """
+        try:
+            overwrite_table_pos = kwargs['overwrite_table_pos']
+        except KeyError:
+            overwrite_table_pos = True
+
+        try:
+            return_pos = kwargs['return_pos']
+        except KeyError:
+            return_pos = False
 
         if 'halo_table' in kwargs:
             halo_table = kwargs['halo_table']
-            x, y, z = self.mc_halo_centric_pos(**kwargs)
-            halo_table['x'][:] += x
-            halo_table['y'][:] += y
-            halo_table['z'][:] += z
+            x, y, z = self.mc_halo_centric_pos(*profile_params, **kwargs)
+            if overwrite_table_pos is True:
+                halo_table['x'][:] += x
+                halo_table['y'][:] += y
+                halo_table['z'][:] += z
+            if return_pos is True:
+                return x, y, z
         else:
             try:
-                profile_params = kwargs['profile_params']
+                # profile_params = kwargs['profile_params']
                 halo_radius = convert_to_ndarray(kwargs['halo_radius'])
-            except KeyError:
+                assert len(halo_radius) == len(profile_params[0])
+            except KeyError, AssertionError:
                 raise HalotoolsError("\nIf not passing a ``halo_table`` keyword argument "
                     "to mc_pos, must pass the following keyword arguments:\n"
                     "``profile_params``, ``halo_radius``.")
-            x, y, z = self.mc_halo_centric_pos(**kwargs)
+            x, y, z = self.mc_halo_centric_pos(*profile_params, **kwargs)
             return x, y, z
 
 
-    def _vrad_disp_from_lookup(self, **kwargs):
+    def _vrad_disp_from_lookup(self, scaled_radius, *profile_params, **kwargs):
         """ Method to generate Monte Carlo realizations of the profile model. 
 
         Parameters 
         ----------
-        x : array_like 
-            Halo-centric distance scaled by the halo boundary, so that 
-            :math:`0 <= x <= 1`. Can be a scalar or length-Ngals numpy array
+        scaled_radius : array_like 
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
 
-        profile_params : list
-            List of length-Ngals array(s) containing the input profile parameter(s). 
-            In the simplest case, this list has a single element, 
-            e.g. a single array of the NFW concentration values. 
-            There should be a ``profile_params`` list item for 
+        *profile_params : Sequence of arrays
+            Sequence of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this sequence has a single element, 
+            e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
+            More generally, there should be a ``profile_params`` sequence item for 
             every parameter in the profile model, each item a length-Ngals array.
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         Returns 
         -------
@@ -448,9 +524,10 @@ class MonteCarloGalProf(object):
             of galaxies within their halos, 
             scaled by the size of the halo's virial velocity. 
         """
-        x = convert_to_ndarray(kwargs['x'])
-        x = x.astype(float)
-        profile_params = kwargs['profile_params']
+        scaled_radius = convert_to_ndarray(scaled_radius, dt = np.float64)
+        # x = convert_to_ndarray(kwargs['x'])
+        # x = x.astype(float)
+        # profile_params = kwargs['profile_params']
 
         if not hasattr(self, 'vel_prof_func_table'):
             self.build_lookup_tables()
@@ -461,7 +538,8 @@ class MonteCarloGalProf(object):
         for param_index, param_key in enumerate(self.prof_param_keys):
             input_profile_params = convert_to_ndarray(profile_params[param_index])
             param_bins = getattr(self, '_' + param_key + '_lookup_table_bins')
-            digitized_params = np.digitize(input_profile_params, param_bins)
+            digitized_params = np.digitize(input_profile_params, param_bins, right=True)
+            digitized_params[digitized_params==len(param_bins)] -= 1
             digitized_param_list.append(digitized_params)
         # Each element of digitized_param_list is a length-Ngals array. 
         # The i^th element of each array contains the bin index of 
@@ -486,27 +564,31 @@ class MonteCarloGalProf(object):
         # the i^th function on the i^th element of rho. 
         # Call the model_helpers module to access generic code for doing this.
         dimensionless_radial_dispersions = call_func_table(
-            self.vel_prof_func_table, np.log10(x), vel_prof_func_table_indices)
+            self.vel_prof_func_table, np.log10(scaled_radius), vel_prof_func_table_indices)
 
         return dimensionless_radial_dispersions
 
-    def mc_radial_velocity(self, **kwargs):
+    def mc_radial_velocity(self, scaled_radius, total_mass, *profile_params, **kwargs):
         """
+        Method returns a Monte Carlo realization of radial velocities drawn from Gaussians 
+        with a width determined by the solution to the isotropic Jeans equation. 
+
         Parameters 
         ----------
-        x : array_like 
-            Halo-centric distance scaled by the halo boundary, so that 
-            :math:`0 <= x <= 1`. Can be a scalar or length-Ngals numpy array
+        scaled_radius : array_like 
+            Halo-centric distance *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`. Can be a scalar or numpy array. 
 
-        virial_velocities : array_like 
-            Array storing the virial velocity of the halos hosting the galaxies. 
+        total_mass: array_like
+            Length-Ngals numpy array storing the halo mass in :math:`M_{\odot}/h`. 
 
-        profile_params : list
-            List of length-Ngals array(s) containing the input profile parameter(s). 
-            In the simplest case, this list has a single element, 
-            e.g. a single array of the NFW concentration values. 
-            There should be a ``profile_params`` list item for 
-            every parameter in the profile model, each item a length-Ngals array.
+        *profile_params : Sequence of arrays
+            Sequence of length-Ngals array(s) containing the input profile parameter(s). 
+            In the simplest case, this sequence has a single element, 
+            e.g. a single array storing values of the NFW concentrations of the Ngals galaxies. 
+            More generally, there should be a ``profile_params`` sequence item for 
+            every parameter in the profile model, each item a length-Ngals array. 
+            The sequence must have the same order as ``self.prof_param_keys``. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -515,13 +597,13 @@ class MonteCarloGalProf(object):
         -------
         radial_velocities : array_like 
             Array of radial velocities drawn from Gaussians with a width determined by the 
-            solution to the Jeans equation. 
+            solution to the isotropic Jeans equation. 
         """
 
         dimensionless_radial_dispersions = (
-            self._vrad_disp_from_lookup(**kwargs))
+            self._vrad_disp_from_lookup(scaled_radius, *profile_params, **kwargs))
 
-        virial_velocities = convert_to_ndarray(kwargs['virial_velocities'])
+        virial_velocities = self.virial_velocity(total_mass)
         radial_dispersions = virial_velocities*dimensionless_radial_dispersions
 
         if 'seed' in kwargs.keys():
@@ -531,7 +613,8 @@ class MonteCarloGalProf(object):
 
         return radial_velocities
 
-    def mc_vel(self, halo_table):
+    def mc_vel(self, halo_table, overwrite_table_velocities = True, 
+        return_velocities = False):
         """ Method assigns a Monte Carlo realization of the Jeans velocity 
         solution to the halos in the input ``halo_table``. 
 
@@ -539,8 +622,20 @@ class MonteCarloGalProf(object):
         -----------
         halo_table : Astropy Table 
             `astropy.table.Table` object storing the halo catalog. 
-            Calling the `mc_vel` method will over-write the existing values of 
-            the ``vx``, ``vy`` and ``vz`` columns. 
+
+        overwrite_table_velocities : bool, optional 
+            If True, the `mc_vel` method will over-write the existing values of 
+            the ``vx``, ``vy`` and ``vz`` columns. Default is True
+
+        return_velocities : bool, optional 
+            If True, method will return the computed values of ``vx``, ``vy`` and ``vz``. 
+            Default is False.
+        
+        Notes 
+        -------
+        The method assumes that the ``vx``, ``vy``, and ``vz`` columns already store 
+        the position of the host halo center. 
+
         """
         try:
             d = halo_table['host_centric_distance']
@@ -552,32 +647,23 @@ class MonteCarloGalProf(object):
         except KeyError:
             msg = ("halo_boundary_key = %s must be a key of the input halo catalog")
             raise HalotoolsError(msg % self.halo_boundary_key)
-        x = d/rhalo
+        scaled_radius = d/rhalo
 
         profile_params = [halo_table[key] for key in self.prof_param_keys]
-        try:
-            virial_velocities = halo_table['halo_vvir']
-        except KeyError:
-            virial_velocities = self.virial_velocity(
-                total_mass = halo_table[self.halo_mass_key])
-
-        if 'velbias_satellites' in self.param_dict:
-            virial_velocities *= self.param_dict['velbias_satellites']
     
-        vx = self.mc_radial_velocity(
-            virial_velocities = virial_velocities, 
-            x = x, profile_params = profile_params)
-        vy = self.mc_radial_velocity(
-            virial_velocities = virial_velocities, 
-            x = x, profile_params = profile_params)
-        vz = self.mc_radial_velocity(
-            virial_velocities = virial_velocities, 
-            x = x, profile_params = profile_params)
+        total_mass = halo_table[self.prim_haloprop_key]
 
+        vx = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
+        vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
+        vz = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
 
-        halo_table['vx'][:] = halo_table['halo_vx'] + vx
-        halo_table['vy'][:] = halo_table['halo_vy'] + vy
-        halo_table['vz'][:] = halo_table['halo_vz'] + vz
+        if overwrite_table_velocities is True:
+            halo_table['vx'][:] += vx
+            halo_table['vy'][:] += vy
+            halo_table['vz'][:] += vz
+
+        if return_velocities is True:
+            return vx, vy, vz
 
 
 
