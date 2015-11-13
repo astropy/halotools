@@ -16,8 +16,9 @@ class is to provide a template for any Halotools model of the spatial distributi
 of points within a halo. So in Halotools, any model for how either matter or galaxies 
 are spatially distributed within their halos will subclass from the 
 `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class. This tutorial 
-reviews the mathematics of halo profiles, and describes how the relevant equations 
-are implemented in the code base. 
+reviews the mathematics of halo profiles, describes how the relevant equations 
+are implemented in the code base, and concludes by describing how the 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.__init__` constructor standardizes the attributes and behavior of the class to facilitate mock-making. 
 
 For a similar tutorial on sub-classes of 
 `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`, see:
@@ -291,6 +292,10 @@ Quantity                                      Source Code
 ============================================  ======================================================================================================================================================
 
 
+.. _analytic_density_prof_constructor:
+
+Constructor of the `~AnalyticDensityProf` class 
+=================================================
 
 
 

@@ -227,9 +227,33 @@ At this point, random positions and velocities have been drawn for the satellite
 Making mocks with NFWPhaseSpace satellites 
 ---------------------------------------------------------
 
+As described in :ref:`generic_model_component_tutorial`, there are a small number of boilerplate lines of code that must go into the constructor of any class in order for the class instance to be integrated into the factory design pattern of Halotools composite models. In this final section of the tutorial, we will look closely at the `~NFWPhaseSpace` constructor to see how the analytical functions and Monte Carlo methods described above get incorporated into the Halotools framework. 
+
+As `~NFWPhaseSpace` is primarily a container class for externally-defined behavior, the primary task of its constructor is to call the constructors of its super-classes. There are three super-classes whose behavior is being composed, `~NFWProfile`, `~NFWJeansVelocity` and `~MonteCarloGalProf`, whose roles we will now describe in turn. 
+
+.. _nfw_profile_class_constructor:
+
+Constructor of the `~NFWProfile` class 
+------------------------------------------
+
+The `~NFWProfile` class is a sub-class of `~AnalyticDensityProf`. 
+
+:ref:`analytic_density_prof_constructor`
+
+See :ref:`prof_param_keys_mechanism`. 
+
+
+.. _nfw_jeans_velocity_class_constructor:
+
+Constructor of the `~NFWJeansVelocity` class 
+------------------------------------------------
 
 
 
+.. _monte_carlo_galprof_class_constructor:
+
+Constructor of the `~MonteCarloGalProf` class 
+-------------------------------------------------
 
 
 
