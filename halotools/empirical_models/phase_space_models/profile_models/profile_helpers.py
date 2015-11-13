@@ -59,7 +59,7 @@ def density_threshold(cosmology, redshift, mdef):
 	Notes 
 	------
 	This function is tested by the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestProfileHelpers.test_density_threshold` function  
-	and the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.test_density_threshold_error_handling` function. 
+	and the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestProfileHelpers.test_density_threshold_error_handling` function. 
 	"""
 
 	try:

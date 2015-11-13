@@ -70,6 +70,11 @@ def get_halo_boundary_key(mdef):
     return the string used to access halo table column 
     storing the halo radius. 
 
+    For example, the function will return ``halo_rvir`` if passed the string ``vir``, 
+    and will return ``halo_r200m`` if passed ``200m``, each of which correspond to the 
+    Halotools convention for the column storing the distance between the host halo center 
+    and host halo boundary in `~halotools.sim_manager.HaloCatalog` data tables. 
+
     Parameters 
     -----------
     mdef: str
@@ -84,6 +89,11 @@ def get_halo_mass_key(mdef):
     """ For the input mass definition, 
     return the string used to access halo table column 
     storing the halo mass. 
+
+    For example, the function will return ``halo_mvir`` if passed the string ``vir``, 
+    and will return ``halo_m200m`` if passed ``200m``, each of which correspond to the 
+    Halotools convention for the column storing the halo mass in 
+    `~halotools.sim_manager.HaloCatalog` data tables. 
 
     Parameters 
     -----------

@@ -291,11 +291,32 @@ Quantity                                      Source Code
 :math:`\tilde{V}_{\rm circ}(r)`               `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_circular_velocity`
 ============================================  ======================================================================================================================================================
 
+.. currentmodule:: halotools.empirical_models.phase_space_models
 
 .. _analytic_density_prof_constructor:
 
 Constructor of the `~AnalyticDensityProf` class 
 =================================================
+
+In this final section of the tutorial, we will look closely at the ``__init__`` constructor to see how it creates a standardized interface for the purpose of making mock catalogs with the Halotools factories. 
+
+The `~AnalyticDensityProf` constructor has three required arguments: ``cosmology``, ``redshift`` and ``mdef``. Binding these attributes to the instance accomplishes several things:
+
+1. When an instance of an `~AnalyticDensityProf` sub-class is incorporated into a composite model, these attributes will be compared against the corresponding attributes of other component models so that composite model consistency is ensured. 
+
+.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models
+
+2. A fixed value for the ``density_threshold`` attribute can be bound to the instance that is consistent with the returned value of the `profile_helpers.density_threshold` function.
+
+.. currentmodule:: halotools.empirical_models
+
+3. The string ``mdef`` is parsed with the `model_defaults.get_halo_boundary_key` function and the returned value is bound to the ``halo_boundary_key`` instance attribute. This guarantees that during mock-making, the appropriate column of the `~halotools.sim_manager.HaloCatalog` halo_table will be automatically chosen for all methods of the `~AnalyticDensityProf` sub-class instance requiring this knowledge. 
+
+4. Likewise, ``mdef`` is parsed with the `model_defaults.get_halo_mass_key` function so that the `~AnalyticDensityProf` sub-class instance will be guaranteed to use the halo_table column that is consistent with the input mass definition. 
+
+
+
+
 
 
 

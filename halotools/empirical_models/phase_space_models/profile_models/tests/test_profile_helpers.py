@@ -81,11 +81,9 @@ class TestProfileHelpers(TestCase):
                 wmap9_200m = density_threshold(WMAP9, z, '200m')/rho_m
                 assert np.allclose(wmap9_200m, 200.0, rtol=0.01)
 
-
-
     def test_density_threshold_error_handling(self):
         """ Verify that we raise a `~halotools.custom_exceptions.HalotoolsError` when nonsense 
-        inputs are passed to the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` method.
+        inputs such as 'Jose Canseco' are passed to the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` method.
         """
 
         with pytest.raises(HalotoolsError):
