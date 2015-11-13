@@ -16,6 +16,7 @@ Modeling the Galaxy-Halo Connection
    :maxdepth: 2
 
    phase_space_models_functions
+   hod_occupation_functions
 
 
 
