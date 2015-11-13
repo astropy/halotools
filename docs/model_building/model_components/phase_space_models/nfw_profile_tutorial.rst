@@ -259,7 +259,7 @@ As described in the :ref:`prof_param_keys_mechanism`, one of the boilerplate sta
 Constructor of the `~NFWJeansVelocity` class 
 ------------------------------------------------
 
-
+This constructor currently has no functionality whatsoever. It is currently only acting as a placeholder for potential future options. 
 
 .. _monte_carlo_galprof_class_constructor:
 
