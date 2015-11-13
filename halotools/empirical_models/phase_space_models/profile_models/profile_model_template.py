@@ -66,13 +66,14 @@ class AnalyticDensityProf(object):
         self.redshift = redshift
         self.mdef = mdef
 
-        self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
-        self.halo_mass_key = model_defaults.get_halo_mass_key(self.mdef)
-        self.prim_haloprop_key = self.halo_mass_key 
-
+        # The following four attributes are derived quantities from the above, 
+        # so that self-consistency between them is ensured 
         self.density_threshold = profile_helpers.density_threshold(
             cosmology = self.cosmology, 
             redshift = self.redshift, mdef = self.mdef)
+        self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
+        self.halo_mass_key = model_defaults.get_halo_mass_key(self.mdef)
+        self.prim_haloprop_key = self.halo_mass_key 
 
         self.prof_param_keys = []
         self.publications = []
