@@ -245,11 +245,13 @@ As `~NFWPhaseSpace` is primarily a container class for externally-defined behavi
 Constructor of the `~NFWProfile` class 
 ------------------------------------------
 
-The `~NFWProfile` class is a sub-class of `~AnalyticDensityProf`. 
+The `~NFWProfile` class is a sub-class of `~AnalyticDensityProf`. Calling the constructor of this super-class is the first thing the `~NFWProfile` constructor does. See the :ref:`analytic_density_prof_constructor` section for what this accomplishes. 
 
-:ref:`analytic_density_prof_constructor`
+The `~NFWProfile` class is also a sub-class of `~ConcMass`. Calling the constructor of `~ConcMass` is the next thing done by the `~NFWProfile` constructor. Any NFW profile is specified entirely by the mass and concentration of the halo, and there exist many different calibrated models for the mapping between halo mass and halo concentration. The `~ConcMass` class is responsible for providing access to such models. 
 
-See :ref:`prof_param_keys_mechanism`. 
+When using the `~NFWProfile` class in stand-alone fashion, all the analytical functions bound to the instance require that the halo concentration be supplied as an independent argument, and so the behavior inherited by the `~ConcMass` class is irrelevant in such cases. However, when the `~NFWProfile` class is used as a component model in the mock-making framework, the mapping between a halo catalog and the halo concentration must be provided. For such a use-case, the `~ConcMass` class provides the user with the ``direct_from_halo_catalog`` model option to simply use the concentration in the halo_table itself; the user also has the option to instead choose an analytical model connecting halo concentration to the halos in the halo_table. See the docstring of `~ConcMass` for further details about the available options. 
+
+As described in the :ref:`prof_param_keys_mechanism`, one of the boilerplate standardizations of halo profile models is that all sub-classes of the `~profile_models.AnalyticalDensityProf` class must have a bound method with the same name as every element in the ``prof_param_keys`` list of strings bound to the instance. In the case of the `~NFWProfile`, there is only a single profile parameter: ``conc_NFWmodel``. Accordingly, there is a `NFWProfile.conc_NFWmodel` method; the behavior of this method derives entirely from the `ConcMass.compute_concentration` method.  
 
 
 .. _nfw_jeans_velocity_class_constructor:
