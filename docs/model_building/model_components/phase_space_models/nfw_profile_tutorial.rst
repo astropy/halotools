@@ -46,6 +46,8 @@ Here we only document the functionality and implementation that is unique to the
 `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` model, 
 and defer discussion of all super-class-derived behavior to the :ref:`profile_template_tutorial`. 
 
+.. _nfw_dimensionless_mass_density:
+
 Halotools implementation of the NFW mass density 
 --------------------------------------------------
 
@@ -149,18 +151,46 @@ which under these assumptions takes the following form:
 
 .. math::
 
-	\sigma^{2}_{r}(r) = \frac{1}{\rho_{\rm sat}(r)}\int_{r}^{\infty}\rho_{\rm sat}(r)\frac{{\rm d}\Phi(r)}{{\rm d}r},
+	\sigma^{2}_{r}(r) = \frac{1}{\rho_{\rm sat}(r)}\int_{r}^{\infty}{\rm d}r\rho_{\rm sat}(r)\frac{{\rm d}\Phi(r)}{{\rm d}r},
 
 In the above equation, :math:`\rho_{\rm sat}` is the number density profile of the satellite galaxies and :math:`\Phi` is the gravitational potential. For a justification of this simplification of the Jeans equation, see :ref:`jeans_equation_derivations`. 
 
-
-For the case of an NFW potential, the above form of the Jeans equation can be integrated analytically. The solution is provided by the `~halotools.empirical_models.phase_space_models.velocity_models.NFWJeansVelocity.radial_velocity_dispersion` method of the `~halotools.empirical_models.phase_space_models.velocity_models.NFWJeansVelocity` class. 
-
+The `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` model assumes that :math:`\rho_{\rm sat} = \rho_{\rm NFW}`. So we can rewrite the above equation using the dimensionless quantities :math:`\tilde{r}\equiv r/R_{\Delta}` and :math:`\tilde{\rho}_{\rm NFW}(\tilde{r}) \equiv \rho_{\rm NFW}(\tilde{r})/\rho_{\rm thresh}` and canceling the common factors of :math:`\rho_{\rm thresh}`:
 
 .. math::
 
-	\sigma_{r}^{2}(\tilde{r}) = V_{\rm vir}^{2}\frac{c^{2}\tilde{r}(1+c\tilde{r})^{2}}{g(c)}\int_{c\tilde{r}}^{\infty}dy\left[\frac{{\rm ln}(1+y)}{y^{3}(1+y)^{2}} + \frac{1}{y^{2}(1+y)^{3}}\right]
+	\sigma^{2}_{r}(\tilde{r}) = \frac{1}{\tilde{\rho}_{\rm NFW}(\tilde{r})}\int_{\tilde{r}}^{\infty}{\rm d}\tilde{r}\tilde{\rho}_{\rm NFW}(\tilde{r})\frac{{\rm d}\Phi(\tilde{r})}{{\rm d}\tilde{r}},
 
+For any spherically symmetric gravitational potential, 
+
+.. math::
+
+	\Phi(x) = \frac{-GM_{\Delta}(<x)}{x} \\
+
+	\Rightarrow \frac{{\rm d}\Phi(\tilde{r})}{{\rm d}\tilde{r}} = \frac{GM_{\Delta}(<\tilde{r})}{\tilde{r}^{2}} \equiv \frac{V_{\rm circ}^{2}(\tilde{r})}{\tilde{r}} = V_{\rm vir}^{2}\frac{P_{\rm NFW}(<\tilde{r})}{\tilde{r}^{2}}, 
+
+where in the second-to-last equality we have used the definition of :math:`V^{2}_{\rm circ}`, and in the last equality we have used the derivation provided in the :ref:`computing_circular_velocity` section of the :ref:`profile_template_tutorial`. 
+
+From the :ref:`nfw_cumulative_mass_pdf_derivation` we have that :math:`P_{\rm NFW}(<\tilde{r}) = g(c\tilde{r}) / g(c)`, and using the expression for :math:`\tilde{\rho}_{\rm NFW}` given in :ref:`nfw_dimensionless_mass_density`, we can plug in these expressions to the above equation: 
+
+.. math::
+
+	\sigma^{2}_{r}(\tilde{r}) = \frac{c\tilde{r}(1 + c\tilde{r})^{2}}{c^{3}/3g(c)}\int_{\tilde{r}}^{\infty}{\rm d}\tilde{r}\frac{c^{3}/3g(c)}{c\tilde{r}(1 + c\tilde{r})^{2}}V_{\rm vir}^{2}\frac{g(c\tilde{r})}{g(c)\tilde{r}^{2}}. 
+
+Canceling common factors of :math:`c^{3}/3g(c)` and rearranging terms gives us:
+
+.. math::
+
+	\Rightarrow \sigma^{2}_{r}(\tilde{r}) = V_{\rm vir}^{2}\frac{c\tilde{r}(1 + c\tilde{r})^{2}}{g(c)}\int_{\tilde{r}}^{\infty}{\rm d}\tilde{r}\frac{g(c\tilde{r})}{c\tilde{r}^{3}(1 + c\tilde{r})^{2}}
+
+Finally, we change integration variables :math:`\tilde{r}\rightarrow c\tilde{r}=y` to give:
+
+.. math::
+
+	\Rightarrow \sigma^{2}_{r}(\tilde{r}) = V_{\rm vir}^{2}\frac{c^{2}\tilde{r}(1 + c\tilde{r})^{2}}{g(c)}\int_{c\tilde{r}}^{\infty}{\rm d}y\frac{g(y)}{y^{3}(1 + y)^{2}}
+
+Defining the *dimensionless radial velocity dispersion* :math:`\tilde{\sigma}_{r}\equiv\sigma_{r}/V_{\rm vir}`, the above equation is the exact expression used in the `~halotools.empirical_models.phase_space_models.velocity_models.NFWJeansVelocity.dimensionless_radial_velocity_dispersion` method of the 
+`~halotools.empirical_models.phase_space_models.velocity_models.NFWJeansVelocity` class, which is where the velocity profile behavior of the `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` class is defined. The above expression is also the same expression appearing in Eq. 24 of More et al. (2008), `arXiv:0807.4529 <http://arxiv.org/abs/0807.4529/>`_, with the only differences being of notation: :math:`g(c) \leftrightarrow \mu(c)` and :math:`c\tilde{r} \leftrightarrow r/r_{\rm s}`. 
 
 
 .. _nfw_monte_carlo_derivations:

@@ -588,6 +588,36 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         """
         return NFWProfile.halo_radius_to_halo_mass(self, radius)
 
+    def dimensionless_radial_velocity_dispersion(self, scaled_radius, *conc):
+        """
+        Analytical solution to the isotropic jeans equation for an NFW potential, 
+        rendered dimensionless via scaling by the virial velocity. 
+
+        :math:`\\tilde{\\sigma}^{2}_{r}(\\tilde{r})\\equiv\\sigma^{2}_{r}(\\tilde{r})/V_{\\rm vir}^{2} = \\frac{c^{2}\\tilde{r}(1 + c\\tilde{r})^{2}}{g(c)}\int_{c\\tilde{r}}^{\infty}{\\rm d}y\\frac{g(y)}{y^{3}(1 + y)^{2}}`
+
+        See :ref:`nfw_jeans_velocity_profile_derivations` for derivations and implementation details.  
+
+        Parameters 
+        -----------
+        scaled_radius : array_like 
+            Length-Ngals numpy array storing the halo-centric distance 
+            *r* scaled by the halo boundary :math:`R_{\\Delta}`, so that 
+            :math:`0 <= \\tilde{r} \\equiv r/R_{\\Delta} <= 1`.  
+
+        total_mass: array_like
+            Length-Ngals numpy array storing the halo mass in :math:`M_{\odot}/h`. 
+
+        conc : float  
+            Concentration of the halo. 
+
+        Returns 
+        -------
+        result : array_like 
+            Radial velocity dispersion profile scaled by the virial velocity. 
+            The returned result has the same dimension as the input ``scaled_radius``. 
+        """
+        return NFWJeansVelocity.dimensionless_radial_velocity_dispersion(self, scaled_radius, *conc)
+
     def setup_prof_lookup_tables(self, *concentration_binning):
         """
         This method sets up how we will digitize halo concentrations during mock population. 
