@@ -13,3 +13,6 @@ Reference/API
 
 .. automodapi:: halotools.empirical_models.model_defaults
 .. automodapi:: halotools.empirical_models.model_helpers
+
+.. automodapi:: halotools.empirical_models.occupation_models
+
