@@ -166,6 +166,9 @@ class HodMockFactory(MockFactory):
         self.galaxy_table['x'] = self.galaxy_table['halo_x']
         self.galaxy_table['y'] = self.galaxy_table['halo_y']
         self.galaxy_table['z'] = self.galaxy_table['halo_z']
+        self.galaxy_table['vx'] = self.galaxy_table['halo_vx']
+        self.galaxy_table['vy'] = self.galaxy_table['halo_vy']
+        self.galaxy_table['vz'] = self.galaxy_table['halo_vz']
 
         for method in self._remaining_methods_to_call:
             func = getattr(self.model, method)

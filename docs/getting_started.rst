@@ -25,13 +25,17 @@ First steps with Halotools
 
 Running the test suite
 ------------------------
-The simplest way to verify that the code is up-to-date and science-ready 
-is to navigate to the root directory of the package and run the test suite::
+After installing the code, you should navigate to the root directory of the package and run the full test suite to make sure your copy of Halotools is science-ready:
 
 	python setup.py test
 
-This will trigger Cython compilation of various package components, as well as 
-soup-to-nuts testing of all sub-packages. This typically takes less than a minute. 
+Depending on how you have configured your copy of the gcc compiler, Mac users may need to instead run 
+
+	CC=clang python setup.py test 
+
+This will trigger Cython compilation of various package components, 
+and the execution of every function in the test suite of every sub-package. 
+This typically takes less than a minute. 
 At the end, you will see a short summary of the outcome of the test suite. 
 
 .. _download_default_halos:
@@ -49,7 +53,7 @@ download script::
 
 Running this script will set up the Halotools cache directory system on your local machine, 
 and then download the default halo catalog to the cache (Bolshoi z=0 rockstar halos), 
-storing the catalog as a pre-processed binary file. The default catalog is ~400Mb, and if 
+storing the catalog as a pre-processed hdf5 file. The default catalog is ~400Mb, and if 
 you are on a fast university connection the download time should be less than a minute. 
 
 If you want to start playing with this catalog right away:

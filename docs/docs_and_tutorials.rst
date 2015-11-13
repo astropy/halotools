@@ -1,7 +1,7 @@
 .. _docs_and_tutorials:
 
 ==============================================
-Halotools Documentation and Tutorials
+Quickstart Guides and Demos
 ==============================================
 
 .. _user-docs:
@@ -18,7 +18,6 @@ User Documentation
    :maxdepth: 1
 
    overview
-   install
    getting_started
 
 **Mock-Making Tools**

@@ -54,7 +54,6 @@ Using ``sim_manager``
 .. toctree::
    :maxdepth: 1
 
-   sim_manager_api.rst
    sim_manager_step_by_step.rst
    alternate_catalogs.rst
 

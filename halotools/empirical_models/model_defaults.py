@@ -1,9 +1,14 @@
 """
-Module expressing various default settings of 
-the empirical models sub-package. 
+Module expressing various default settings of the empirical modeling sub-package. 
 
-All hard-coding should be restricted to this module, whenever possible.
+All values hard-coded here appear as unique variables throughout the entire Halotools code base. 
+This allows you to customize your default settings and be guaranteed that whatever changes you make 
+will correctly propagate to all relevant behavior. See the in-line comments in the 
+``halotools/empirical_models/model_defaults.py`` source code for 
+descriptions of the purpose of each variable defined in this module. 
 """
+
+__all__ = ['get_halo_boundary_key', 'get_halo_mass_key']
 
 import os, sys
 import numpy as np
@@ -65,6 +70,11 @@ def get_halo_boundary_key(mdef):
     return the string used to access halo table column 
     storing the halo radius. 
 
+    For example, the function will return ``halo_rvir`` if passed the string ``vir``, 
+    and will return ``halo_r200m`` if passed ``200m``, each of which correspond to the 
+    Halotools convention for the column storing the distance between the host halo center 
+    and host halo boundary in `~halotools.sim_manager.HaloCatalog` data tables. 
+
     Parameters 
     -----------
     mdef: str
@@ -80,6 +90,11 @@ def get_halo_mass_key(mdef):
     return the string used to access halo table column 
     storing the halo mass. 
 
+    For example, the function will return ``halo_mvir`` if passed the string ``vir``, 
+    and will return ``halo_m200m`` if passed ``200m``, each of which correspond to the 
+    Halotools convention for the column storing the halo mass in 
+    `~halotools.sim_manager.HaloCatalog` data tables. 
+
     Parameters 
     -----------
     mdef: str
@@ -93,14 +108,15 @@ def get_halo_mass_key(mdef):
 
 # Number of bins to use in the lookup table attached to the NFWProfile. 
 # Used primarily by HODMockFactory.
-min_permitted_conc = 0.1
+min_permitted_conc = 1
 max_permitted_conc = 30.0
 default_high_prec_dconc = 0.025
 
 Npts_radius_table = 101
 default_lograd_min = -3
 default_lograd_max = 0
-conc_mass_model = 'dutton_maccio14'
+conc_mass_model = 'direct_from_halo_catalog'
+concentration_key = 'halo_nfw_conc'
 
 
 default_rbins = np.logspace(-1, 1.25, 15)
