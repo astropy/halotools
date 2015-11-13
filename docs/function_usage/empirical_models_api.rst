@@ -15,4 +15,5 @@ Reference/API
 .. automodapi:: halotools.empirical_models.model_helpers
 
 .. automodapi:: halotools.empirical_models.occupation_models
+.. automodapi:: halotools.empirical_models.factories
 

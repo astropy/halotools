@@ -266,7 +266,7 @@ This constructor currently has no functionality whatsoever. It is currently only
 Constructor of the `~MonteCarloGalProf` class 
 -------------------------------------------------
 
-The final super-class constructor called is `MonteCarloGalProf.__init__`, which performs just two functions:
+The final super-class constructor called is `MonteCarloGalProf.__init__`, which performs four functions:
 
 1. A python dictionary called ``new_haloprop_func_dict`` is created and bound to the instance. 
 
@@ -274,6 +274,17 @@ As described in :ref:`new_haloprop_func_dict_mechanism`, the purpose of ``new_ha
 
 In the case of our `~NFWPhaseSpace` model, we calculate the ``conc_NFWmodel`` property with ``new_haloprop_func_dict``. The newly created halo_table key will be called ``conc_NFWmodel``, and the value bound to this key will be whatever result is returned by the `NFWPhaseSpace.conc_NFWmodel` function.  
 
+2. A `numpy.dtype` object called ``_galprop_dtypes_to_allocate`` is created and bound to the instance. 
+
+As described in :ref:`galprop_dtypes_to_allocate_mechanism`, the purpose of ``_galprop_dtypes_to_allocate`` is to inform the `~halotools.empirical_models.factories.HodModelFactory` the name and data type of the galaxy attributes that will be created by the component model, so that the appropriate memory can be pre-allocated without any hard-coding in the `~halotools.empirical_models.factories.HodModelFactory`. For the case of our `~NFWPhaseSpace` model, we require *x, y, z, vx, vy, vz*, and we also allocate *host_centric_distance* as this is an interesting physical characteristic of satellite galaxies upon which other properties defined elsewhere may depend. 
+
+3. Build lookup tables for the spatial and velocity profiles using `MonteCarloGalProf.setup_prof_lookup_tables`. 
+
+The purpose of these lookup tables is to improve performance of the Monte Carlo generation of mock galaxy spatial positions and velocities. See :ref:`monte_carlo_galprof_lookup_tables` for details.
+
+4. A python list called ``_mock_generation_calling_sequence`` is created and bound to the instance. 
+
+This list determines which bound methods of `NFWPhaseSpace` will be called during mock-population, and in which order. The `NFWPhaseSpace` model only has a single such method, `~NFWPhaseSpace.assign_phase_space`, which itself simply calls the `~NFWPhaseSpace.mc_pos` and `~NFWPhaseSpace.mc_vel` methods in turn. See :ref:`mock_generation_calling_sequence_mechanism` for details. 
 
 
 
