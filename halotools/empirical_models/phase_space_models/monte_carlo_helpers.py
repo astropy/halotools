@@ -439,6 +439,14 @@ class MonteCarloGalProf(object):
             If ``profile_params`` and ``halo_radius`` are not passed, 
             ``halo_table`` must be passed. 
 
+        overwrite_table_pos : bool, optional 
+            If True, the `mc_pos` method will over-write the existing values of 
+            the ``x``, ``y`` and ``z`` halo_table columns. Default is True
+
+        return_pos : bool, optional 
+            If True, method will return the computed host-centric 
+            values of ``x``, ``y`` and ``z``. Default is False.
+
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
 
@@ -460,13 +468,25 @@ class MonteCarloGalProf(object):
         ------
         This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_pos` function. 
         """
+        try:
+            overwrite_table_pos = kwargs['overwrite_table_pos']
+        except KeyError:
+            overwrite_table_pos = True
+
+        try:
+            return_pos = kwargs['return_pos']
+        except KeyError:
+            return_pos = False
 
         if 'halo_table' in kwargs:
             halo_table = kwargs['halo_table']
             x, y, z = self.mc_halo_centric_pos(*profile_params, **kwargs)
-            halo_table['x'][:] += x
-            halo_table['y'][:] += y
-            halo_table['z'][:] += z
+            if overwrite_table_pos is True:
+                halo_table['x'][:] += x
+                halo_table['y'][:] += y
+                halo_table['z'][:] += z
+            if return_pos is True:
+                return x, y, z
         else:
             try:
                 # profile_params = kwargs['profile_params']
@@ -593,7 +613,8 @@ class MonteCarloGalProf(object):
 
         return radial_velocities
 
-    def mc_vel(self, halo_table):
+    def mc_vel(self, halo_table, overwrite_table_velocities = True, 
+        return_velocities = False):
         """ Method assigns a Monte Carlo realization of the Jeans velocity 
         solution to the halos in the input ``halo_table``. 
 
@@ -601,8 +622,14 @@ class MonteCarloGalProf(object):
         -----------
         halo_table : Astropy Table 
             `astropy.table.Table` object storing the halo catalog. 
-            Calling the `mc_vel` method will over-write the existing values of 
-            the ``vx``, ``vy`` and ``vz`` columns. 
+
+        overwrite_table_velocities : bool, optional 
+            If True, the `mc_vel` method will over-write the existing values of 
+            the ``vx``, ``vy`` and ``vz`` columns. Default is True
+
+        return_velocities : bool, optional 
+            If True, method will return the computed values of ``vx``, ``vy`` and ``vz``. 
+            Default is False.
         
         Notes 
         -------
@@ -630,9 +657,13 @@ class MonteCarloGalProf(object):
         vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
         vz = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
 
-        halo_table['vx'][:] += vx
-        halo_table['vy'][:] += vy
-        halo_table['vz'][:] += vz
+        if overwrite_table_velocities is True:
+            halo_table['vx'][:] += vx
+            halo_table['vy'][:] += vy
+            halo_table['vz'][:] += vz
+
+        if return_velocities is True:
+            return vx, vy, vz
 
 
 
