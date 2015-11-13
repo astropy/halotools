@@ -16,6 +16,11 @@ Tutorial on the `~MonteCarloGalProf` Mix-In Class
 Monte Carlo Generation of Spatial Positions 
 ==============================================
 
+.. _prof_param_keys_mechanism:
+
+****************************************************
+Expalanation of the ``prof_param_keys`` mechanism
+****************************************************
 
 
 
