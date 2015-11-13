@@ -46,6 +46,10 @@ class NFWJeansVelocity(IsotropicJeansVelocity):
         Analytical solution to the isotropic jeans equation for an NFW potential, 
         rendered dimensionless via scaling by the virial velocity. 
 
+        :math:`\\tilde{\\sigma}^{2}_{r}(\\tilde{r})\\equiv\\sigma^{2}_{r}(\\tilde{r})/V_{\\rm vir}^{2} = \\frac{c^{2}\\tilde{r}(1 + c\\tilde{r})^{2}}{g(c)}\int_{c\\tilde{r}}^{\infty}{\\rm d}y\\frac{g(y)}{y^{3}(1 + y)^{2}}`
+
+        See :ref:`nfw_jeans_velocity_profile_derivations` for derivations and implementation details.  
+
         Parameters 
         -----------
         scaled_radius : array_like 
