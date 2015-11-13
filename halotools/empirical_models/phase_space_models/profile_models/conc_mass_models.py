@@ -64,8 +64,8 @@ class ConcMass(object):
         bind_default_kwarg_mixin_safe(self, 'redshift', kwargs, sim_defaults.default_redshift)
         bind_default_kwarg_mixin_safe(self, 'mdef', kwargs, model_defaults.halo_mass_definition)
 
-        if not hasattr(self, 'halo_mass_key'):
-            self.halo_mass_key = model_defaults.get_halo_mass_key(self.mdef)
+        if not hasattr(self, 'prim_haloprop_key'):
+            self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
 
         if 'concentration_key' in kwargs:
             self.concentration_key = kwargs['concentration_key']
@@ -183,7 +183,7 @@ class ConcMass(object):
 
         # Retrieve the array storing the mass-like variable
         if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.halo_mass_key]
+            mass = kwargs['halo_table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:

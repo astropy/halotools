@@ -651,7 +651,7 @@ class MonteCarloGalProf(object):
 
         profile_params = [halo_table[key] for key in self.prof_param_keys]
     
-        total_mass = halo_table[self.halo_mass_key]
+        total_mass = halo_table[self.prim_haloprop_key]
 
         vx = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
         vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)

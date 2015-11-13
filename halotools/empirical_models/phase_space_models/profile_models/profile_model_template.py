@@ -72,8 +72,7 @@ class AnalyticDensityProf(object):
             cosmology = self.cosmology, 
             redshift = self.redshift, mdef = self.mdef)
         self.halo_boundary_key = model_defaults.get_halo_boundary_key(self.mdef)
-        self.halo_mass_key = model_defaults.get_halo_mass_key(self.mdef)
-        self.prim_haloprop_key = self.halo_mass_key 
+        self.prim_haloprop_key = model_defaults.get_halo_mass_key(self.mdef)
 
         self.prof_param_keys = []
         self.publications = []

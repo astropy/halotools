@@ -56,9 +56,6 @@ class TestAnalyticDensityProf(TestCase):
             assert hasattr(model_instance, 'prim_haloprop_key')
             assert model_instance.prim_haloprop_key == 'halo_mvir'
 
-            assert hasattr(model_instance, 'halo_mass_key')
-            assert model_instance.halo_mass_key == 'halo_mvir'
-
             assert hasattr(model_instance, 'param_dict')
             assert hasattr(model_instance, 'publications')
             assert hasattr(model_instance, 'prof_param_keys')
