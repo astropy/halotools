@@ -4,6 +4,8 @@
 Tutorial on the AnalyticDensityProf Template Model
 ****************************************************
 
+.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models
+
 This section of the documentation provides background material and detailed implementation notes 
 on the functions and methods of the primary base class used to model the spatial distribution 
 of matter and galaxies within halos,  
@@ -13,18 +15,18 @@ sub-classes can be used to directly model the spatial profile of halos.
 
 The purpose of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` 
 class is to provide a template for any Halotools model of the spatial distribution 
-of points within a halo. So in Halotools, any model for how either matter or galaxies 
+of points within a halo. So in Halotools, any analytical model for how either matter or galaxies 
 are spatially distributed within their halos will subclass from the 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class. This tutorial 
-reviews the mathematics of halo profiles, describes how the relevant equations 
-are implemented in the code base, and concludes by describing how the 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.__init__` constructor standardizes the attributes and behavior of the class to facilitate mock-making. 
+`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class. 
 
-For a similar tutorial on sub-classes of 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`, see:
-
-	* :ref:`nfw_profile_tutorial`
-
+This tutorial is organized as follows. The :ref:`halo_mass_definitions` section 
+reviews how halo boundaries and masses are defined with respect to a cosmologically 
+evolving reference density. The :ref:`halo_profile_definitions` section covers 
+the mathematics of halo density profiles, including explicit derivations 
+of the exact form of all equations are they are implemented in code. 
+The tutorial concludes with the :ref:`analytic_density_prof_constructor` section by describing how the 
+`__init__` constructor standardizes the attributes and behavior 
+of the class to facilitate mock-making with a uniform syntax. 
 
 .. _halo_mass_definitions:
 
@@ -314,7 +316,7 @@ The `~AnalyticDensityProf` constructor has three required arguments: ``cosmology
 
 4. Likewise, ``mdef`` is parsed with the `model_defaults.get_halo_mass_key` function and the returned value is bound to the ``prim_haloprop_key`` instance attribute. This guarantees that the `~AnalyticDensityProf` sub-class instance will use the halo_table column that is consistent with the input mass definition. 
 
-At the conclusion of the constructor, three empty sequences are bound to the instance. 
+At the conclusion of the constructor, a few empty sequences are bound to the instance. These are documented in the :ref:`param_dict_mechanism` and :ref:`prof_param_keys_mechanism`. 
 
 
 

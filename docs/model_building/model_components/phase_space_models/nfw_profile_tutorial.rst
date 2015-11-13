@@ -6,12 +6,21 @@
 Tutorial on the NFWProfile and NFWPhaseSpace Models
 ****************************************************
 
+.. currentmodule:: halotools.empirical_models.phase_space_models
+
 This section of the documentation provides background material 
 and detailed implementation notes on the functions and methods of the 
 `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` 
 and `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` models. 
-We will start out with an overview of the class design before moving into 
-the analytical derivations of the code implementation. 
+We will start in :ref:`nfw_phase_space_class_structure` with an overview 
+of the orthogonal mix-in class design. The :ref:`nfw_spatial_profile_derivations` 
+section covers the mathematics of NFW spatial profiles and their Monte Carlo realizations, 
+including explicit derivations of the exact form of all equations are they are implemented in code. 
+The section :ref:`nfw_jeans_velocity_profile_derivations` goes into the same level of detail but 
+for the velocity profiles. The tutorial concludes in :ref:`nfw_monte_carlo_derivations`  
+by describing how the `~NFWPhaseSpace` class can be used in both stand-alone fashion and 
+as part of the Halotools mock-making framework to generate Monte Carlo realizations of 
+points in NFW phase space. 
 
 .. _nfw_phase_space_class_structure:
 
