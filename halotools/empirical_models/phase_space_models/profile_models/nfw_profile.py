@@ -3,7 +3,7 @@
 This module contains the `NFWProfile` class, 
 which is used to model the spatial distribution of mass and/or galaxies 
 inside dark matter halos according to the fitting function introduced in 
-Navarry, Frenk and White (1995). 
+Navarry, Frenk and White (1995), `arXiv:9508025 <http://arxiv.org/abs/astro-ph/9508025/>`_. 
 a sub-class of `~halotools.empirical_models.phase_space_models.AnalyticDensityProf`. 
 
 Testing for this module is primarily done by the 
@@ -31,7 +31,7 @@ __author__ = ['Andrew Hearin', 'Benedikt Diemer']
 __all__ = ['NFWProfile']
 
 class NFWProfile(AnalyticDensityProf, ConcMass):
-    """ Model for the spatial distribution of mass and/or galaxies residing in an NFW halo profile, based on Navarro, Frenk and White (1995).
+    """ Model for the spatial distribution of mass and/or galaxies residing in an NFW halo profile, based on Navarro, Frenk and White (1995), `arXiv:9508025 <http://arxiv.org/abs/astro-ph/9508025/>`_.
 
     For a review of the mathematics underlying the NFW profile, 
     including descriptions of how the relevant equations are 

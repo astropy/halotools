@@ -50,8 +50,7 @@ and defer discussion of all super-class-derived behavior to the :ref:`profile_te
 
 Halotools implementation of the NFW mass density 
 --------------------------------------------------
-
-Equation 3 of Navarro, Frenk and White (1995), arXiv:9508025, gives the original definition of the NFW profile:
+Equation 3 of Navarro, Frenk and White (1995), `arXiv:9508025 <http://arxiv.org/abs/astro-ph/9508025/>`_, gives the original definition of the NFW profile:
 
 .. math::
 
@@ -198,5 +197,42 @@ Defining the *dimensionless radial velocity dispersion* :math:`\tilde{\sigma}_{r
 Monte Carlo realizations of the NFW profile
 ===========================================
 
-How are things computed in practice (lookup tables, etc.)
+The `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` model can either be used as a stand-alone class to generate an arbitrary number of points in NFW phase space, or as part of a composite galaxy-halo model that generates full-scale mock galaxy catalogs. We document each of these options in turn. 
+
+.. _stand_alone_mc_nfw_phase_space:
+
+Stand-alone Monte Carlo realizations of NFW phase space 
+---------------------------------------------------------
+.. currentmodule:: halotools.empirical_models.phase_space_models
+
+The `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_generate_nfw_phase_space_points` 
+method can be used to create an Astropy `~astropy.table.Table` storing a collection of points in NFW phase space. 
+
+>>> from halotools.empirical_models.phase_space_models import NFWPhaseSpace
+>>> nfw = NFWPhaseSpace()
+>>> data = nfw.mc_generate_nfw_phase_space_points(Ngals = 100, mass = 1e13, conc = 10) 
+
+In the source code, the generation of these points happens in two steps. First, *x, y, z* points are drawn using the `~NFWPhaseSpace.mc_halo_centric_pos` method defined in the `~MonteCarloGalProf` orthogonal mix-in class. Following the same methodology described in :ref:`monte_carlo_nfw_spatial_profile`, the `~NFWPhaseSpace.mc_halo_centric_pos` method uses inverse transform sampling together with the `~NFWPhaseSpace.cumulative_mass_PDF` function to draw random realizations of dimensionless NFW profile radii; these dimensionless radii are then scaled according to the halo mass and radius definition selected by the keyword arguments passed to the `~NFWPhaseSpace` constructor. See the :ref:`monte_carlo_galprof_spatial_positions` section of the :ref:`monte_carlo_galprof_mixin_tutorial` for a detailed explanation of how this method works. 
+
+Once dimensionless radial positions have been drawn, the `~NFWPhaseSpace.mc_generate_nfw_phase_space_points` method passes these positions to the `~MonteCarloGalProf.mc_radial_velocity` method of the `~MonteCarloGalProf` orthogonal mix-in class. This method works differently than the `~NFWPhaseSpace.mc_halo_centric_pos` method: the `~MonteCarloGalProf.mc_radial_velocity` method does *not* use inverse transform sampling. This is because radial velocity distributions are assumed to be Gaussian, and there is an optimized function `numpy.random.normal` in the Numpy code base for directly drawing from a Gaussian distribution. A Gaussian distribution is specified by its first two moments: the first moment is centered at the velocity of the host halo, and the second moment is calculated using the `~NFWPhaseSpace.dimensionless_radial_velocity_dispersion` method described in the previous section. 
+
+In practice, for performance reasons the `~MonteCarloGalProf.mc_radial_velocity` method actually uses a lookup table tabulated from `~NFWPhaseSpace.dimensionless_radial_velocity_dispersion` rather than the actual `~NFWPhaseSpace.dimensionless_radial_velocity_dispersion` method itself. For further information concerning this detail, see the :ref:`monte_carlo_galprof_mixin_tutorial`. 
+
+At this point, random positions and velocities have been drawn for the satellites and the `~NFWPhaseSpace.mc_generate_nfw_phase_space_points` method bundles these arrays into an Astropy `~astropy.table.Table` and returns the result. 
+
+
+
+.. _making_mocks_nfw_phasespace_satellites:
+
+Making mocks with NFWPhaseSpace satellites 
+---------------------------------------------------------
+
+
+
+
+
+
+
+
+
 

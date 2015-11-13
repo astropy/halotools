@@ -166,7 +166,6 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         m = np.zeros(Ngals) + mass
         c = np.zeros(Ngals) + conc
-        vvir = NFWProfile.virial_velocity(self, total_mass = m)
         rvir = NFWProfile.halo_mass_to_halo_radius(self, total_mass = m)
 
         x, y, z = MonteCarloGalProf.mc_halo_centric_pos(self, c, 
