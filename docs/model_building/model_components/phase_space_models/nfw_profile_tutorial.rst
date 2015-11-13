@@ -266,6 +266,22 @@ This constructor currently has no functionality whatsoever. It is currently only
 Constructor of the `~MonteCarloGalProf` class 
 -------------------------------------------------
 
+The final super-class constructor called is `MonteCarloGalProf.__init__`, which performs just two functions:
+
+1. A python dictionary called ``new_haloprop_func_dict`` is created and bound to the instance. 
+
+As described in :ref:`new_haloprop_func_dict_mechanism`, the purpose of ``new_haloprop_func_dict`` is to create a new column in the halo_table *before* mock-population begins, and to automatically guarantee that all galaxies in the galaxy_table created during mock-population will inherit whatever new halo property is created. The keys of ``new_haloprop_func_dict`` are the names of the to-be-inherited property, the values are function objects that operate on the original halo_table and return the value of the newly created halo property. If component models require access to a halo property that is not already in the halo_table and this quantity is expensive to calculate, this mechanism can save considerable runtime during mock-population as it can be computed in advance. 
+
+In the case of our `~NFWPhaseSpace` model, we calculate the ``conc_NFWmodel`` property with ``new_haloprop_func_dict``. The newly created halo_table key will be called ``conc_NFWmodel``, and the value bound to this key will be whatever result is returned by the `NFWPhaseSpace.conc_NFWmodel` function.  
+
+
+
+
+
+
+
+
+
 
 
 
