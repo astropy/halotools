@@ -115,6 +115,8 @@ class ModelFactory(object):
         def test_consistency_with_existing_mock(**kwargs):
             if 'redshift' in kwargs:
                 redshift = kwargs['redshift']
+            elif 'snapshot' in kwargs:
+                redshift = kwargs['snapshot'].redshift
             else:
                 redshift = sim_defaults.default_redshift
             if abs(redshift - self.mock.snapshot.redshift) > 0.05:
@@ -122,6 +124,8 @@ class ModelFactory(object):
 
             if 'simname' in kwargs:
                 simname = kwargs['simname']
+            elif 'snapshot' in kwargs:
+                simname = kwargs['snapshot'].simname
             else:
                 simname = sim_defaults.default_simname
             if simname != self.mock.snapshot.simname:
@@ -129,6 +133,8 @@ class ModelFactory(object):
 
             if 'halo_finder' in kwargs:
                 halo_finder = kwargs['halo_finder']
+            elif 'snapshot' in kwargs:
+                halo_finder = kwargs['snapshot'].halo_finder
             else:
                 halo_finder = sim_defaults.default_halo_finder
             if halo_finder != self.mock.snapshot.halo_finder:
