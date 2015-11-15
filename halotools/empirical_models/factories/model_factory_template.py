@@ -125,14 +125,14 @@ class ModelFactory(object):
             else:
                 simname = sim_defaults.default_simname
             if simname != self.mock.snapshot.simname:
-                raise HalotoolsError(inconsistent_simname_error_msg)
+                raise HalotoolsError(inconsistent_simname_error_msg % (self.mock.snapshot.simname, simname))
 
             if 'halo_finder' in kwargs:
                 halo_finder = kwargs['halo_finder']
             else:
                 halo_finder = sim_defaults.default_halo_finder
             if halo_finder != self.mock.snapshot.halo_finder:
-                raise HalotoolsError(inconsistent_halo_finder_error_msg)
+                raise HalotoolsError(inconsistent_halo_finder_error_msg % (self.mock.snapshot.halo_finder,halo_finder ))
 
         if hasattr(self, 'mock'):
             test_consistency_with_existing_mock(**kwargs)
