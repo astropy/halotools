@@ -14,7 +14,7 @@ from libc.math cimport fabs
 
 __author__ = ["Duncan Campbell"]
 
-cdef double custom_func(np.float64_t* w1, np.float64_t* w2):
+cdef double custom_func(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     use this function to edit and compile to get a custom function
     """

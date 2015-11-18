@@ -123,6 +123,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     #define function to integrate
     def f(pi,rp):
         x = np.sqrt(rp**2+pi**2)
+        #note that we take 10**xi, because xi returns the log value
         return mean_rho*(1.0+10.0**xi(np.log10(x)))
     
     #integrate xi to get the surface density as a function of r_p

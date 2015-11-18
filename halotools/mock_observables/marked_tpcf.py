@@ -23,7 +23,7 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
                 period=None, do_auto=True, do_cross=True, num_threads=1,\
-                max_sample_size=int(1e6), wfunc=1, iterations=1):
+                max_sample_size=int(1e6), wfunc=1, iterations=1, randomize_marks=None):
     """ 
     Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
     
@@ -78,6 +78,10 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         integer number indicating the number of times to calculate the random weigths,
         taking the mean of the outcomes.
     
+    randomize_marks : array_like, optional
+        boolean array of N_weights indicating which weights should be randomized for the 
+        random counts.  default is all.
+    
     Returns 
     -------
     marked_correlation_function : numpy.array
@@ -126,10 +130,10 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
     
     #process parameters
     function_args = [sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
-                     num_threads, max_sample_size, wfunc, iterations]
+                     num_threads, max_sample_size, wfunc, iterations, randomize_marks]
     sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross, num_threads,\
-        wfunc, _sample1_is_sample2, PBCs = _marked_tpcf_process_args(*function_args)
-    
+        wfunc, _sample1_is_sample2, PBCs,\
+        randomize_marks = _marked_tpcf_process_args(*function_args)
     
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
                            do_auto, do_cross, marks1, marks2,\
@@ -171,14 +175,23 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
     
     def random_counts(sample1, sample2, rbins, period, num_threads,\
                       do_auto, do_cross, marks1, marks2, wfunc,\
-                      _sample1_is_sample2, permutate1, permutate2):
+                      _sample1_is_sample2, permutate1, permutate2, randomize_marks):
         """
         Count random weighted data pairs.
         """
         
+        permuted_marks1 = marks1
+        permuted_marks2 = marks2
+        for i in range(marks1.shape[1]):
+            if randomize_marks[i]:
+                permuted_marks1[:,i] = marks1[permutate1,i]
+        for i in range(marks2.shape[1]):
+            if randomize_marks[i]:
+                permuted_marks2[:,i] = marks2[permutate2,i]
+        
         if do_auto==True:
             R1R1 = marked_npairs(sample1, sample1, rbins,\
-                                 weights1=marks1, weights2=marks1[permutate1],\
+                                 weights1=marks1, weights2=permuted_marks1,\
                                  wfunc = wfunc,\
                                  period=period, num_threads=num_threads)
             R1R1 = np.diff(R1R1)
@@ -192,14 +205,16 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         else:
             if do_cross==True:
                 R1R2 = marked_npairs(sample1, sample2, rbins,\
-                                     weights1=marks1[permutate1], weights2=marks2[permutate2],\
+                                     weights1=permuted_marks1,\
+                                     weights2=permuted_marks2,\
                                      wfunc = wfunc,\
                                      period=period, num_threads=num_threads)
                 R1R2 = np.diff(R1R2)
             else: R1R2=None
             if do_auto==True:
                 R2R2 = marked_npairs(sample2, sample2, rbins,\
-                                     weights1=marks2, weights2=marks2[permutate2],\
+                                     weights1=marks2,\
+                                     weights2=permuted_marks2,\
                                      wfunc = wfunc,\
                                      period=period, num_threads=num_threads)
                 R2R2 = np.diff(R2R2)
@@ -207,10 +222,6 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
 
         return R1R1, R1R2, R2R2
     
-    
-    #get arrays to randomize marks
-    permutate1 = np.random.permutation(np.arange(0,len(sample1)))
-    permutate2 = np.random.permutation(np.arange(0,len(sample2)))
     
     #calculate marked pairs
     W1W1,W1W2,W2W2 = marked_pair_counts(sample1, sample2, rbins, period,\
@@ -232,14 +243,15 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
             R1R1[i,:],R1R2[i,:],R2R2[i,:] = random_counts(sample1, sample2, rbins, period,\
                                                 num_threads, do_auto, do_cross,\
                                                 marks1, marks2, wfunc,\
-                                                _sample1_is_sample2, permutate1, permutate2)
+                                                _sample1_is_sample2,\
+                                                permutate1, permutate2, randomize_marks)
         #take mean of the iterations
         R1R1_err = np.std(R1R1, axis=0)
-        R1R1 = np.mean(R1R1, axis=0)
+        R1R1 = np.median(R1R1, axis=0)
         R1R2_err = np.std(R1R2, axis=0)
-        R1R2 = np.mean(R1R2, axis=0)
+        R1R2 = np.median(R1R2, axis=0)
         R2R2_err = np.std(R2R2, axis=0)
-        R2R2 = np.mean(R2R2, axis=0)
+        R2R2 = np.median(R2R2, axis=0)
     else:
         #get arrays to randomize marks
         permutate1 = np.random.permutation(np.arange(0,len(sample1)))
@@ -247,7 +259,11 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         R1R1,R1R2,R2R2 = random_counts(sample1, sample2, rbins, period,\
                                        num_threads, do_auto, do_cross,\
                                        marks1, marks2, wfunc,\
-                                       _sample1_is_sample2, permutate1, permutate2)
+                                       _sample1_is_sample2, permutate1, permutate2,\
+                                       randomize_marks)
+    
+    print(W1W1)
+    print(R1R1)
     
     #return results
     if _sample1_is_sample2:
