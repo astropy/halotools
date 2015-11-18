@@ -531,7 +531,7 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
 
 def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
                               period, do_auto, do_cross, num_threads,\
-                              max_sample_size, wfunc, iterations):
+                              max_sample_size, wfunc, iterations, randomize_marks):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.mared_tpcf`. 
@@ -567,6 +567,30 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
         marks2 = convert_to_ndarray(marks2).astype(float)
     else:
         marks2 = np.ones(len(sample2)).astype(float)
+        
+    if marks1.ndim == 1:
+        _converted_to_2d_from_1d = True
+        npts1 = len(marks1)
+        marks1 = marks1.reshape((npts1, 1))
+    elif marks1.ndim == 2:
+        pass
+    else:
+        ndim1 = marks1.ndim
+        msg = ("You must either pass in a 1-d or 2-d array for the input ``weights1``\n"
+                "The ``_wnpairs_process_weights`` function received a ``weights1`` array of dimension %i")
+        raise HalotoolsError(msg % ndim1)
+    
+    if marks2.ndim == 1:
+        _converted_to_2d_from_1d = True
+        npts2 = len(marks2)
+        marks2 = marks2.reshape((npts2, 1))
+    elif marks2.ndim == 2:
+        pass
+    else:
+        ndim2 = marks2.ndim
+        msg = ("You must either pass in a 1-d or 2-d array for the input ``weights1``\n"
+                "The ``_wnpairs_process_weights`` function received a ``weights1`` array of dimension %i")
+        raise HalotoolsError(msg % ndim2)
     
     #check for consistency between marks and samples
     if len(marks1) != len(sample1):
@@ -574,6 +598,18 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
         warn(msg)
     if len(marks2) != len(marks2):
         msg = ("marks2 must have same length as sample2")
+        warn(msg)
+    
+    if randomize_marks is not None: 
+        randomize_marks = convert_to_ndarray(randomize_marks)
+    else:
+        randomize_marks = np.ones([True]*marks1.shape[1])
+    if randomize_marks.ndim == 1:
+        if len(randomize_marks)!=marks1.shape[1]:
+            msg = ("randomize_marks must have same length as the number of weights per point.")
+            warn(msg)
+    else:
+        msg = ("random_marks must be one dimensional")
         warn(msg)
     
     # down sample if sample size exceeds max_sample_size.
@@ -648,7 +684,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
         num_threads = cpu_count()
 
     return sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
-           num_threads, wfunc, _sample1_is_sample2, PBCs
+           num_threads, wfunc, _sample1_is_sample2, PBCs, randomize_marks
 
 
 def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\

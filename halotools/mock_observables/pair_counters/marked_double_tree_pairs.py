@@ -125,8 +125,8 @@ def marked_npairs(data1, data2, rbins, period=None,
         rmax, rmax, rmax, xperiod, yperiod, zperiod, PBCs=PBCs)
 
     #sort the weights arrays
-    weights1 = weights1[double_tree.tree1.idx_sorted, :]
-    weights2 = weights2[double_tree.tree2.idx_sorted, :]
+    weights1 = np.ascontiguousarray(weights1[double_tree.tree1.idx_sorted, :])
+    weights2 = np.ascontiguousarray(weights2[double_tree.tree2.idx_sorted, :])
     
     #square radial bins to make distance calculation cheaper
     rbins_squared = rbins**2.0
@@ -175,7 +175,10 @@ def _wnpairs_engine(double_tree, weights1, weights2,
             
     adj_cell_counter = 0
     for icell2, xshift, yshift, zshift in adj_cell_generator:
-                
+        
+        #set shift array as -1,1,0 depending on direction of/if cell shifted.
+        shift = np.array([xshift,zshift,yshift]).astype(float)
+        
         #extract the points in the cell
         s2 = double_tree.tree2.slice_array[icell2]
         x_icell2 = double_tree.tree2.x[s2] + xshift
@@ -187,9 +190,9 @@ def _wnpairs_engine(double_tree, weights1, weights2,
             
         #use cython functions to do pair counting
         counts += marked_npairs_no_pbc(x_icell1, y_icell1, z_icell1,
-                                     x_icell2, y_icell2, z_icell2,
-                                     w_icell1, w_icell2, 
-                                     rbins_squared, wfunc)
+                                       x_icell2, y_icell2, z_icell2,
+                                       w_icell1, w_icell2, 
+                                       rbins_squared, wfunc, shift)
             
     return counts
 
