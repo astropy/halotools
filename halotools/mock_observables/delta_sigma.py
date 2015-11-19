@@ -14,6 +14,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import integrate
 from .clustering_helpers import *
 from ..custom_exceptions import *
+from warnings import warn
 ##########################################################################################
 
 __all__=['delta_sigma']
@@ -115,6 +116,23 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     #calculate the cross-correlation between galaxies and particles
     xi = tpcf(galaxies, rbins, sample2=particles, randoms=None, period=period,\
               do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads)
+    
+    #Check to see if xi ever is equal to -1
+    #if so, there are radial bins with 0 matter particles.
+    #This could mean that the user has under-sampled the particles.
+    if np.any(xi==-1.0):
+        msg = ("\n"
+               "Some raidal bins contain 0 particles in the \n"
+               "galaxy-matter cross cross correlation calculation. \n"
+               "If you downsampled the amount of matter particles, \n"
+               "consider using more particles. Alternatively, you \n"
+               "may (also) want to use fewer bins in the calculation. \n"
+               "Set the `n_bins` parameter to a smaller number. \n"
+               "Finally, you may want to calculate Delta_Sigma to \n"
+               "a larger minimum projected distance, min(`rp_bins`)."
+               )
+        warn(msg)
+    
     
     #fit a spline to the tpcf
     #note that we fit the log10 of xi+1.0
