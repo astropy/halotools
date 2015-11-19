@@ -83,15 +83,16 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     
     #process the input parameters
     function_args = [galaxies, particles, rp_bins, pi_max, period, estimator, num_threads]
-    galaxies, particles, rp_bins, period, num_threads,\
-        PBCs = _delta_sigma_process_args(*function_args)
+    galaxies, particles, rp_bins, period, num_threads, PBCs =\
+        _delta_sigma_process_args(*function_args)
     
     mean_rho = len(particles)/period.prod() #number density of particles
     
     #determine radial bins to calculate tpcf in
     rp_max = np.max(rp_bins)
     rp_min = np.min(rp_bins)
-    rmax = np.sqrt(rp_max**2 + pi_max**2) #maximum radial distance to calculate TPCF.
+    #maximum radial distance to calculate TPCF out to:
+    rmax = np.sqrt(rp_max**2 + pi_max**2)
     
     #check to make sure rmax is not too large
     if (period is not None):
@@ -105,6 +106,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
                    "length scales, you should use a larger simulation.")
             raise HalotoolsError(msg)
     
+    #define radial bins using either log or linear spacing
     if log_bins==True:
         rbins = np.logspace(np.log10(rp_min), np.log10(rmax), n_bins)
     else: 
@@ -115,35 +117,40 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
               do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads)
     
     #fit a spline to the tpcf
-    #note that we fit the log of xi
-    rbin_centers = (rbins[:-1]+rbins[1:])/2.0
-    rmax = np.max(rbin_centers)
-    xi = InterpolatedUnivariateSpline(np.log10(rbin_centers), np.log10(xi), ext=0)
+    #note that we fit the log10 of xi+1.0
+    rbin_centers = (rbins[:-1]+rbins[1:])/2.0 #note these are the true centers, not log
+    xi = InterpolatedUnivariateSpline(rbin_centers, np.log10(xi+1.0), ext=0)
     
     #define function to integrate
     def f(pi,rp):
-        x = np.sqrt(rp**2+pi**2)
-        #note that we take 10**xi, because xi returns the log value
-        return mean_rho*(1.0+10.0**xi(np.log10(x)))
+        r = np.sqrt(rp**2+pi**2)
+        #note that we take 10**xi-1,
+        #because we fit the log xi
+        return mean_rho*(1.0+(10.0**xi(r)-1.0))
     
     #integrate xi to get the surface density as a function of r_p
-    sigma = np.zeros(len(rp_bins))
+    surface_density = np.zeros(len(rp_bins)) #initialize to 0.0
     for i in range(0,len(rp_bins)):
-        sigma[i] = integrate.quad(f,0.0,pi_max,args=(rp_bins[i],))[0]
+        surface_density[i] = integrate.quad(f,0.0,pi_max,args=(rp_bins[i],))[0]
     
-    #integrate sigma to get the mean internal surface density
+    #fit a spline to the surface density
+    surface_density = InterpolatedUnivariateSpline(rp_bins, np.log10(surface_density), ext=0)
+    
+    #integrate surface density to get the mean internal surface density
     #define function to integrate
-    sigma = InterpolatedUnivariateSpline(rp_bins, sigma, ext=0)
     def f(rp):
-        return sigma(rp)*2.0*np.pi*rp
+        #note that we take 10**surface_density,
+        #because we fit the log of surface density
+        return 10.0**surface_density(rp)*2.0*np.pi*rp
     
-    #do integral
-    mean_internal_sigma = np.zeros(len(rp_bins))
+    #do integral to get mean internal surface density
+    mean_internal_surface_density = np.zeros(len(rp_bins))
     for i in range(0,len(rp_bins)):
         internal_area = np.pi*rp_bins[i]**2.0
-        mean_internal_sigma[i] = integrate.quad(f,0.0,rp_bins[i])[0]/(internal_area)
-        
-    delta_sigma = mean_internal_sigma - sigma(rp_bins)
+        mean_internal_surface_density[i] = integrate.quad(f,0.0,rp_bins[i])[0]/(internal_area)
+    
+    #calculate an return the change in surface density, delta sigma
+    delta_sigma = mean_internal_surface_density - 10**surface_density(rp_bins)
     
     return delta_sigma
 
