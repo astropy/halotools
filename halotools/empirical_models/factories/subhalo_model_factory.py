@@ -121,13 +121,19 @@ class SubhaloModelFactory(ModelFactory):
         whether galaxies are quiescent or star-forming. 
 
         >>> from halotools.empirical_models.smhm_models import Behroozi10SmHm
-        >>> stellar_mass_model = Behroozi10SmHm()
+        >>> stellar_mass_model = Behroozi10SmHm(redshift = 0.5)
 
         >>> from halotools.empirical_models.sfr_models import BinaryGalpropInterpolModel
-        >>> sfr_model = BinaryGalpropInterpolModel(galprop_name = 'quiescent')
+        >>> sfr_model = BinaryGalpropInterpolModel(galprop_name = 'quiescent_designation')
 
         >>> model_instance = SubhaloModelFactory(stellar_mass = stellar_mass_model, sfr = sfr_model)
 
+        In the above call to the factory, note that we do not need to pass in a 
+        `mock_generation_calling_sequence` argument because in this model, neither the 
+        ``quiescent_designation`` nor the ``stellar_mass`` models have explicit dependence 
+        upon one another. 
+
+        >>> model_instance.populate_mock(simname = 'bolplanck', redshift = 0.5) # doctest: +SKIP
 
         """
 
