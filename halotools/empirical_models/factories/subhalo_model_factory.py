@@ -108,6 +108,13 @@ class SubhaloModelFactory(ModelFactory):
         function. When doing so, the remaining arguments that were passed to the `SubhaloModelFactory` 
         will in turn be passed on to 
         `~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary`. 
+
+        Now that we have built an instance of a composite model, we can use it to 
+        populate any simulation in the Halotools cache: 
+
+        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
+
+        
         """
 
         input_model_dictionary, supplementary_kwargs = (
