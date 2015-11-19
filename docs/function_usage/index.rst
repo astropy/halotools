@@ -17,7 +17,7 @@ Modeling the Galaxy-Halo Connection
 
    phase_space_models_functions
    hod_occupation_functions
-
+   empirical_model_factory_functions
 
 
 
