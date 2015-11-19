@@ -599,7 +599,10 @@ class HodModelFactory(ModelFactory):
             last_component = component_model
             last_gal_type = gal_type
 
-        self.redshift = redshift
+        try:
+            self.redshift = redshift
+        except NameError:
+            self.redshift = sim_defaults.default_redshift
 
 
     def _build_prim_sec_haloprop_list(self):
