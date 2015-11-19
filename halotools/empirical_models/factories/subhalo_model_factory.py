@@ -490,7 +490,10 @@ class SubhaloModelFactory(ModelFactory):
 
             last_component = component_model
 
-        self.redshift = redshift
+        try:
+            self.redshift = redshift
+        except NameError:
+            self.redshift = sim_defaults.default_redshift
 
     def _build_haloprop_list(self):
         """
