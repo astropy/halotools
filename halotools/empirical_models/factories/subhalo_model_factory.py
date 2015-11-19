@@ -126,6 +126,7 @@ class SubhaloModelFactory(ModelFactory):
         >>> from halotools.empirical_models.sfr_models import BinaryGalpropInterpolModel
         >>> sfr_model = BinaryGalpropInterpolModel(galprop_name = 'quiescent')
 
+        >>> model_instance = SubhaloModelFactory(stellar_mass = stellar_mass_model, sfr = sfr_model)
 
 
         """
