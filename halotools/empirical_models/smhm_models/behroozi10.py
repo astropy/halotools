@@ -44,7 +44,7 @@ class Behroozi10SmHm(PrimGalpropModel):
 
         scatter_model : object, optional  
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
-            implemented by the `LogNormalScatterModel` class. 
+            implemented by the `~halotools.empirical_models.smhm_models.LogNormalScatterModel` class. 
 
         scatter_abcissa : array_like, optional  
             Array of values giving the abcissa at which
