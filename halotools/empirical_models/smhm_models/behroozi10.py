@@ -30,8 +30,8 @@ __all__ = ['Behroozi10SmHm']
 
 
 class Behroozi10SmHm(PrimGalpropModel):
-    """ Stellar-to-halo-mass relation based on 
-    Behroozi et al. (2010), arXiv:1205.5807. 
+    """ Stellar-to-halo-mass relation based on Behroozi et al. (2010), 
+    `arXiv:1205.5807 <http://arxiv.org/abs/astro-ph/1205.5807/>`_.
     """
 
     def __init__(self, **kwargs):
