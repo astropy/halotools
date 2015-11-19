@@ -41,6 +41,10 @@ class SubhaloModelFactory(ModelFactory):
     to directly populate subhalos with mock galaxies. Explicit examples of each use-case appear in the 
     `Examples` section below. 
 
+    Notes 
+    -------
+    See :ref:`subhalo_model_factory_tutorial` for thorough documentation on the internals of the factory. 
+
     """
 
     def __init__(self, model_nickname = None, **kwargs):
