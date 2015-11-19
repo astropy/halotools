@@ -25,12 +25,22 @@ from ...custom_exceptions import *
 
 
 class SubhaloModelFactory(ModelFactory):
-    """ Class used to build any model of the galaxy-halo connection 
-    in which there is a one-to-one correspondence between subhalos and galaxies.  
+    """ Class used to build models of the galaxy-halo connection in which galaxies live at the centers of subhalos.  
 
-    Can be thought of as a factory that takes a model dictionary as input, 
-    and generates a composite model object. The returned object can be used directly to 
-    populate a simulation with a Monte Carlo realization of the model. 
+    The arguments passed to the `SubhaloModelFactory` constructor determine 
+    the features of the model that are returned 
+    by the factory. There are three sets of options for these arguments:
+
+    * The ``model_nickname`` string argument can be used to return composite models that have already been pre-built by the Halotools package.
+
+    * A sequence of ``model_features`` can be passed, each of which are instances of component models. In this case the factory composes these independently-defined components into a composite model. 
+
+    * By combining the ``baseline_model_instance`` and ``model_features`` arguments, you can swap out features of the baseline composite model with new component models you pass in.  
+
+    Regardless what set of instructions you pass to factory, the returned object can be used 
+    to directly populate subhalos with mock galaxies. Explicit examples of each use-case appear in the 
+    `Examples` section below. 
+
     """
 
     def __init__(self, model_nickname = None, **kwargs):
@@ -43,10 +53,7 @@ class SubhaloModelFactory(ModelFactory):
             See the ``Examples`` below. 
 
         *model_features : sequence of keyword arguments, optional 
-            The standard way to call the `SubhaloModelFactory` is 
-            with a sequence of keyword arguments providing the set of 
-            features that you want to build your composite model with. 
-            Each keyword you use will be interpreted as the name of the feature; 
+            Each keyword you use will be interpreted as the name of a feature in the composite model; 
             the value bound to each keyword must be an instance of a 
             component model governing the behavior of that feature. 
             See the ``Examples`` below. 
@@ -56,18 +63,21 @@ class SubhaloModelFactory(ModelFactory):
             will be called during mock population. 
 
             Some component models may have explicit dependence upon 
-            the value of some other galaxy model property. 
+            the value of some other galaxy property being modeled. 
             In such a case, you must pass a ``model_feature_calling_sequence`` list, 
             ordered in the desired calling sequence. 
+
             A classic example is if the stellar-to-halo-mass relation 
-            has explicit dependence on whether or not the galaxy is active or quiescent. 
-            In such a case, an example ``model_feature_calling_sequence`` could be 
-            model_feature_calling_sequence = ['sfr', 'stellar_mass', ...]. 
+            has explicit dependence on the star formation rate of the galaxy 
+            (active or quiescent). For this example, the
+            ``model_feature_calling_sequence`` would be 
+            model_feature_calling_sequence = ['sfr_designation', 'stellar_mass', ...]. 
 
             Default behavior is to assume that no model feature  
             has explicit dependence upon any other, in which case the component 
             models appearing in the ``model_features`` keyword arguments 
-            will be called in random order. 
+            will be called in random order, giving primacy to the potential presence 
+            of `stellar_mass` and/or `luminosity` features. 
 
         galaxy_selection_func : function object, optional  
             Function object that imposes a cut on the mock galaxies. 
@@ -88,9 +98,16 @@ class SubhaloModelFactory(ModelFactory):
 
         Examples 
         ---------
+        First let's see how we can use the ``model_nickname`` argument to return the 
+        pre-built `behroozi10` composite model:
 
-        >>> model_instance = SubhaloModelFactory('behroozi10', redshift = 2, threshold = 10.5)
+        >>> model_instance = SubhaloModelFactory(model_nickname = 'behroozi10', redshift = 2)
 
+        Passing in `behroozi10` as the ``model_nickname`` argument triggers the factory to 
+        call the `~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary` 
+        function. When doing so, the remaining arguments that were passed to the `SubhaloModelFactory` 
+        will in turn be passed on to 
+        `~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary`. 
         """
 
         input_model_dictionary, supplementary_kwargs = (
