@@ -38,12 +38,11 @@ class SubhaloModelFactory(ModelFactory):
     * By combining the ``baseline_model_instance`` and ``model_features`` arguments, you can swap out features of the baseline composite model with new component models you pass in.  
 
     Regardless what set of instructions you pass to factory, the returned object can be used 
-    to directly populate subhalos with mock galaxies. Explicit examples of each use-case appear in the 
-    `Examples` section below. 
+    to directly populate subhalos with mock galaxies. 
 
-    Notes 
-    -------
-    See :ref:`subhalo_model_factory_tutorial` for thorough documentation on the internals of the factory. 
+    Explicit examples of each use-case appear in the 
+    `Examples` section below. See :ref:`subhalo_model_factory_tutorial` 
+    for thorough documentation on the internals of the factory. 
 
     """
 
