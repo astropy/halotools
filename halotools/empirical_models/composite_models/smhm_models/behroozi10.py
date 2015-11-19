@@ -55,8 +55,17 @@ def behroozi10_model_dictionary(redshift = sim_defaults.default_redshift, **kwar
 
     Examples 
     --------
+    Calling the `behroozi10_model_dictionary` with no arguments retrieves a python dictionary 
+    that can be passed to the `~halotools.empirical_models.SubhaloModelFactory` to build the 
+    `behroozi10` composite model with default settings: 
+
     >>> model_dictionary = behroozi10_model_dictionary()
     >>> model_instance = factories.SubhaloModelFactory(**model_dictionary)
+
+    As with all composite model instances, you can now use the model to directly populate 
+    any Halotools-formatted halo catalog with mock galaxies:
+
+    >>> model_instance.populate_mock(simname = 'bolshoi') # doctest: +SKIP
 
     """
 

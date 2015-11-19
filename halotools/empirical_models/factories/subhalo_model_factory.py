@@ -114,7 +114,20 @@ class SubhaloModelFactory(ModelFactory):
 
         >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
 
-        
+        Next we'll show an example of how to call the `~SubhaloModelFactory` using the `model_features` 
+        keyword argument(s). In this next model, we'll use the 
+        `~halotools.empirical_models.smhm_models.Behroozi10SmHm` class to model stellar mass, 
+        and the `~halotools.empirical_models.sfr_models.BinaryGalpropModel` class to model 
+        whether galaxies are quiescent or star-forming. 
+
+        >>> from halotools.empirical_models.smhm_models import Behroozi10SmHm
+        >>> stellar_mass_model = Behroozi10SmHm()
+
+        >>> from halotools.empirical_models.sfr_models import BinaryGalpropInterpolModel
+        >>> sfr_model = BinaryGalpropInterpolModel(galprop_name = 'quiescent')
+
+
+
         """
 
         input_model_dictionary, supplementary_kwargs = (
