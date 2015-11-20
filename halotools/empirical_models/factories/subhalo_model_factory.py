@@ -613,7 +613,19 @@ class SubhaloModelFactory(ModelFactory):
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
     def set_warning_suppressions(self):
-        """ Method used to determine whether a warning should be issued if the param_dict of multiple component models possess a parameter with the same name. 
+        """ Method used to determine whether a warning should be issued if the 
+        `build_init_param_dict` method detects the presence of multiple appearances 
+        of the same parameter name. 
+
+        If *any* of the component model instances have a 
+        `_suppress_repeated_param_warning` attribute that is set to the boolean True value, 
+        then no warning will be issued even if there are multiple appearances of the same 
+        parameter name. This allows the user to not be bothered with warning messages for cases 
+        where it is understood that there will be no conflicting behavior. 
+
+        See also 
+        ---------
+        build_init_param_dict
         """
         self._suppress_repeated_param_warning = False
         # Loop over all component features in the composite model
@@ -623,18 +635,26 @@ class SubhaloModelFactory(ModelFactory):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
     def build_init_param_dict(self):
-        """ Method used to build a dictionary of parameters for the composite model by collecting each component model's param_dict. 
+        """ Create the `param_dict` attribute of the instance. The `param_dict` is a dictionary storing 
+        the full collection of parameters controlling the behavior of the composite model. 
 
-        Accomplished by retrieving all the parameters of the component models. 
-        Method returns nothing, but binds ``param_dict`` to the class instance. 
+        The `param_dict` dictionary is determined by examining the 
+        `param_dict` attribute of every component model, and building up a composite 
+        dictionary from them. It is permissible for the same parameter name to appear more than once 
+        amongst a set of component models, but a warning will be issued in such cases. 
 
         Notes 
         -----
-        In MCMC applications, the items of ``param_dict`` define the possible 
+        In MCMC applications, the items of ``param_dict`` defines the possible 
         parameter set explored by the likelihood engine. 
         Changing the values of the parameters in ``param_dict`` 
         will propagate to the behavior of the component models 
         when the relevant methods are called. 
+
+        See also 
+        ---------
+        set_warning_suppressions
+
         """
 
         self.param_dict = {}
@@ -670,7 +690,13 @@ class SubhaloModelFactory(ModelFactory):
         self._init_param_dict = copy(self.param_dict)
 
     def build_dtype_list(self):
-        """
+        """ Create the `_galprop_dtypes_to_allocate` attribute that determines 
+        the name and data type of every galaxy property that will appear in the mock ``galaxy_table``. 
+
+        This attribute is determined by examining the 
+        `_galprop_dtypes_to_allocate` attribute of every component model, and building a composite 
+        set of all these dtypes, enforcing self-consistency in cases where the same galaxy property 
+        appears more than once. 
         """
         dtype_list = []
         # Loop over all component features in the composite model
