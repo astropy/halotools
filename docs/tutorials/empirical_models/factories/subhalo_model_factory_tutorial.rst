@@ -78,6 +78,7 @@ Inferring a model dictionary from the constructor inputs
 
 The first thing the `__init__` constructor of `~SubhaloModelFactory` does is to 
 pass all its arguments to the `~SubhaloModelFactory._parse_constructor_kwargs` method. 
+The behavior of this private method is relatively 
 
 
 

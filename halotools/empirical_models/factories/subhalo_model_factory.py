@@ -171,8 +171,7 @@ class SubhaloModelFactory(ModelFactory):
 
     def _parse_constructor_kwargs(self, model_nickname, **kwargs):
         """ Private method used to parse the arguments passed to 
-        the constructor into a model dictionary and supplementary arguments that 
-        will be in turn passed on to the component models. 
+        the constructor into a model dictionary and supplementary arguments. 
 
         """
         if model_nickname is None:
