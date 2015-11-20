@@ -77,16 +77,35 @@ Inferring a model dictionary from the constructor inputs
 ===========================================================
 
 The first thing the `__init__` constructor of `~SubhaloModelFactory` does is to 
-pass all its arguments to the `~SubhaloModelFactory.parse_constructor_kwargs` method. 
-The behavior of this private method is relatively straightforward: it simply extracts 
-``galaxy_selection_func``, ``halo_selection_func`` and ``model_feature_calling_sequence`` from 
-the remaining arguments passed to ``__init__``; all remaining arguments will be interpeted 
-as model dictionary inputs. For an explanation of ``galaxy_selection_func`` and ``halo_selection_func``, 
+pass all its arguments to the `~SubhaloModelFactory.parse_constructor_kwargs` method, 
+which simply extracts (if present) ``galaxy_selection_func``, ``halo_selection_func`` and ``model_feature_calling_sequence`` from the arguments passed to ``__init__``; 
+all remaining arguments will be interpeted as model dictionary inputs. 
+For an explanation of ``galaxy_selection_func`` and ``halo_selection_func``, 
 see the `~ModelFactory` docstring. 
+
+When calling the constructor of the `~ModelFactory` super-class after parsing the inputs, 
+exact copies of all arguments passed to `~SubhaloModelFactory` are bound to the instance. 
+This allows all composite model instances to remember the 
+exact set of instructions from which they were built. 
+As we will see, this is useful because it simplifies the process of building 
+alternate versions of any particular composite model instance. 
 
 As described in REF, ``model_feature_calling_sequence`` determines 
 the order in which the component models will be called during mock population. This order is 
-determined by the `~SubhaloModelFactory._retrieve_model_feature_calling_sequence` method. 
+determined by the `~SubhaloModelFactory.build_model_feature_calling_sequence` method. 
+
+Once this order is determined, the ``model_dictionary`` attribute is bound to the instance
+using the appropriate order:
+
+.. code-block:: python
+
+	self.model_dictionary = collections.OrderedDict()
+	for key in self._model_feature_calling_sequence:
+	    self.model_dictionary[key] = copy(self._input_model_dictionary[key])
+
+In the next section, we will see how the ``model_dictionary`` attribute is used to create a 
+number of bookkeeping mechanisms used to verify self-consistency between the model features, 
+and also to facilitate communication between the composite model and the `~SubhaloMockFactory`. 
 
 
 

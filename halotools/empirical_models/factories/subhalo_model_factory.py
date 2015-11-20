@@ -148,7 +148,7 @@ class SubhaloModelFactory(ModelFactory):
         self.mock_factory = SubhaloMockFactory
 
         self._model_feature_calling_sequence = (
-            self._retrieve_model_feature_calling_sequence(supplementary_kwargs))
+            self.build_model_feature_calling_sequence(supplementary_kwargs))
 
         self.model_dictionary = collections.OrderedDict()
         for key in self._model_feature_calling_sequence:
@@ -283,8 +283,11 @@ class SubhaloModelFactory(ModelFactory):
 
         return input_model_dictionary, supplementary_kwargs
         
-    def _retrieve_model_feature_calling_sequence(self, supplementary_kwargs):
-        """
+    def build_model_feature_calling_sequence(self, supplementary_kwargs):
+        """ Method uses the ``model_feature_calling_sequence`` passed to __init__, if available. 
+        If no such argument was passed, the method chooses a *mostly* random order for the calling sequence, 
+        excepting only for cases where either there is a feature named ``stellar_mass`` or ``luminosity``, 
+        which are always called first in the absence of explicit instructions to the contrary. 
         """
         ########################
         ### Require that all elements of the input model_feature_calling_sequence 

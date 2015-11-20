@@ -127,7 +127,7 @@ class HodModelFactory(ModelFactory):
         self.mock_factory = HodMockFactory
 
         self._model_feature_calling_sequence = (
-            self._retrieve_model_feature_calling_sequence(supplementary_kwargs))
+            self.build_model_feature_calling_sequence(supplementary_kwargs))
 
         self.model_dictionary = collections.OrderedDict()
         for key in self._model_feature_calling_sequence:
@@ -236,7 +236,7 @@ class HodModelFactory(ModelFactory):
 
         return input_model_dictionary, supplementary_kwargs
 
-    def _retrieve_model_feature_calling_sequence(self, supplementary_kwargs):
+    def build_model_feature_calling_sequence(self, supplementary_kwargs):
         """
         """
 
