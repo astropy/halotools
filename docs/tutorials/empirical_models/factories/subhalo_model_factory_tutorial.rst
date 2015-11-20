@@ -29,14 +29,21 @@ Overview of the factory design
 The `SubhaloModelFactory` has virtually no behavior of its own; 
 it should instead be thought of as a container class that collects together 
 behaviors that are defined elsewhere. These behaviors are defined in 
-*component models*, which are instances of Halotools classes that provide mappings 
-between halo catalogs and galaxy properties. Although there are numerous options 
+*component models*, which are instances of Halotools classes that typically provide 
+a single, specialized mapping between halos and some specific galaxy property. 
+By composing these individual mappings together, 
+the output of the factory is a composite model for the galaxy-halo connection in which 
+any number of user-defined galaxy properties is simultaneously modeled. 
+
+Although there are numerous options 
 for the form of the arguments passed to `SubhaloModelFactory`, 
-the basic input is a *model dictionary*. The attributes of the component models 
-and the structure of the model dictionary inform the `SubhaloModelFactory` 
+the basic input is a *model dictionary*. 
+A model dictionary is just an ordinary python dictionary that stores the collection of 
+component model instances whose behaviors are being unified together by the factory. 
+The model dictionary contains all of the necessary information inform the `SubhaloModelFactory` 
 how to build a composite model from the components. 
 
-A component model typically has each of the following three private attributes:
+Each component model in a model dictionary typically has each of the following three private attributes:
 
 	1. `_methods_to_inherit`
 
@@ -58,7 +65,7 @@ For now, simply observe what is accomplished by these three pieces of informatio
 Each component model is effectively giving the factory the following message:
 "I want you to know about the following methods, and only the following methods, and I will take care of how they will be computed: `_methods_to_inherit`; 
 I need you to make sure that the when you call these methods, the following arrays that will be passed to them: `_galprop_dtypes_to_allocate`; when you use me to make a mock, I need you to call these
-methods in the following sequence: `_mock_generation_calling_sequence`". In this way, not only is all the physically relevant behavior defined in the component models, but the component models themselves provide the instructions for how they should be used. The task of the `~SubhaloModelFactory` is simply to follow these instructions. 
+methods in the following sequence: `_mock_generation_calling_sequence`". In this way, not only is all the physically relevant behavior defined in the component models, but the component models themselves provide the instructions for how they should be used. The task of the `~SubhaloModelFactory` is simply to follow these instructions, and to ensure that mutually consistent messages are received from the set of components in the model dictionary. 
 
 
 
