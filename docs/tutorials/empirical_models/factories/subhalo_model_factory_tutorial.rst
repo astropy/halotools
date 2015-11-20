@@ -18,7 +18,9 @@ Outline
 
 We will start in :ref:`subhalo_model_factory_design_overview` with a high-level 
 description of how the class creates a composite model from 
-a set of independently-defined features. 
+a set of independently-defined features. In :ref:`subhalo_model_factory_parsing_kwargs` we describe 
+how the factory's `__init__` constructor parses the large number of optional inputs into a *model dictionary*. 
+In :ref:`subhalo_model_factory_bookkeeping_mechanisms` we outline the various bookkeeping devices and consistency checks that the factory does to 1. ensure that the input model dictionary provides sufficient and self-consistent information, and 2. place the instance into a form that can directly talk to the `~SubhaloMockFactory`. In :ref:`subhalo_model_factory_inheriting_behaviors` we cover the process by which the appropriate methods of the component models are inherited by the composite model. We conclude in :ref:`subhalo_model_factory_further_reading` by pointing to related sections of documentation on other aspects of composite models, such as how to use them to populate mocks and how to build new ones from scratch. 
 
 
 .. _subhalo_model_factory_design_overview:
@@ -65,16 +67,29 @@ For now, simply observe what is accomplished by these three pieces of informatio
 Each component model is effectively giving the factory the following message:
 "I want you to know about the following methods, and only the following methods, and I will take care of how they will be computed: `_methods_to_inherit`; 
 I need you to make sure that the when you call these methods, the following arrays that will be passed to them: `_galprop_dtypes_to_allocate`; when you use me to make a mock, I need you to call these
-methods in the following sequence: `_mock_generation_calling_sequence`". In this way, not only is all the physically relevant behavior defined in the component models, but the component models themselves provide the instructions for how they should be used. The task of the `~SubhaloModelFactory` is simply to follow these instructions, and to ensure that mutually consistent messages are received from the set of components in the model dictionary. 
+methods in the following sequence: `_mock_generation_calling_sequence`". In this way, not only is all the physically relevant behavior defined in the component models, but the component models themselves provide the instructions for how they should be used. 
+
+The job of the `~SubhaloModelFactory` is simply to follow these instructions, and to ensure that mutually consistent messages are received from the set of components in the model dictionary. In the remaining sections of this tutorial, we will walk through step-by-step the tasks carried out when a new composite model is built bu instantiating an instance of the `~SubhaloModelFactory` class. 
+
+.. _subhalo_model_factory_parsing_kwargs:
+
+Inferring a model dictionary from the constructor inputs 
+===========================================================
 
 
+.. _subhalo_model_factory_bookkeeping_mechanisms:
 
+Consistency checks and mock-population bookkeeping  
+================================================================
 
+.. _subhalo_model_factory_inheriting_behaviors:
 
+Inheriting behaviors from the component models
+=================================================
 
+.. _subhalo_model_factory_further_reading:
 
-
-
-
+Further reading 
+================
 
 
