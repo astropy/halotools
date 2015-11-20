@@ -155,7 +155,7 @@ class SubhaloModelFactory(ModelFactory):
             self.model_dictionary[key] = copy(self._input_model_dictionary[key])
 
         # Build up and bind several lists from the component models
-        self._build_haloprop_list()
+        self._build_prim_sec_haloprop_list()
         self._build_publication_list()
         self._build_new_haloprop_func_dict()
         self._build_dtype_list()
@@ -170,7 +170,10 @@ class SubhaloModelFactory(ModelFactory):
 
 
     def _parse_constructor_kwargs(self, model_nickname, **kwargs):
-        """
+        """ Private method used to parse the arguments passed to 
+        the constructor into a model dictionary and supplementary arguments that 
+        will be in turn passed on to the component models. 
+
         """
         if model_nickname is None:
             input_model_dictionary = copy(kwargs)
@@ -504,7 +507,7 @@ class SubhaloModelFactory(ModelFactory):
         except NameError:
             self.redshift = sim_defaults.default_redshift
 
-    def _build_haloprop_list(self):
+    def _build_prim_sec_haloprop_list(self):
         """
         """
         haloprop_list = []
