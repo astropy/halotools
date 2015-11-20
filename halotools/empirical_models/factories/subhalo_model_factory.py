@@ -141,7 +141,7 @@ class SubhaloModelFactory(ModelFactory):
         """
 
         input_model_dictionary, supplementary_kwargs = (
-            self._parse_constructor_kwargs(model_nickname, **kwargs)
+            self.parse_constructor_kwargs(model_nickname, **kwargs)
             )
 
         super(SubhaloModelFactory, self).__init__(input_model_dictionary, **supplementary_kwargs)
@@ -169,9 +169,17 @@ class SubhaloModelFactory(ModelFactory):
         self.set_primary_behaviors()
 
 
-    def _parse_constructor_kwargs(self, model_nickname, **kwargs):
+    def parse_constructor_kwargs(self, model_nickname, **kwargs):
         """ Private method used to parse the arguments passed to 
-        the constructor into a model dictionary and supplementary arguments. 
+        the constructor into a model dictionary and supplementary arguments.
+
+        The behavior is straightforward. If an input `model_nickname` was passed to `__init__`, 
+        then `parse_constructor_kwargs` calls the `_retrieve_prebuilt_model_dictionary` method. 
+        Otherwise, `parse_constructor_kwargs` examines the keyword arguments passed to `__init__`, 
+        and identifies the possible presence of ``galaxy_selection_func``, ``halo_selection_func`` and 
+        ``model_feature_calling_sequence``; all other keyword arguments will be treated as 
+        component models, and it is enforced that the values bound to all such arguments 
+        at the very least have a ``_methods_to_inherit`` attribute. 
 
         """
         if model_nickname is None:
@@ -196,6 +204,7 @@ class SubhaloModelFactory(ModelFactory):
             if 'model_feature_calling_sequence' not in supplementary_kwargs:
                 supplementary_kwargs['model_feature_calling_sequence'] = None
 
+            self._enforce_component_model_format(input_model_dictionary)
             return input_model_dictionary, supplementary_kwargs
 
         else:
@@ -203,6 +212,37 @@ class SubhaloModelFactory(ModelFactory):
                 self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
                 )
             return input_model_dictionary, supplementary_kwargs 
+
+    def _enforce_component_model_format(self, candidate_model_dictionary):
+        """ Private method to ensure that the input model dictionary is properly formatted.
+        """
+        msg_preface = ("\nYou passed the following keyword argument "
+            "to the SubhaloModelFactory: ``%s``\n")
+        msg_conclusion = ("See the `~halotools.empirical_models.SubhaloModelFactory` "
+            "docstring for further details.\n")
+
+        for feature_key, component_model in candidate_model_dictionary.iteritems():
+            cl = component_model.__class__
+            clname = cl.__name__
+
+            if isinstance(component_model, cl):
+                pass
+            elif issubclass(component_model, cl):
+                msg = (msg_preface + "Instead of binding an instance of ``" + clname + 
+                    "`` to this keyword,\n"
+                    "instead you bound the ``"+clname+"`` itself.\n"
+                    "The structure of Halotools model dictionaries is strictly to accept \n"
+                    "component model instances, not component model classes. \n" + msg_conclusion)
+                raise HalotoolsError(msg % feature_key)
+
+            try:
+                assert hasattr(component_model, '_methods_to_inherit')
+            except AssertionError:
+                msg = (msg_preface + "You bound an instance of the ``"+clname+"`` to this keyword,\n"
+                    "but the instance does not have the required ``_methods_to_inherit`` attribute.\n"
+                    "At a minimum, all component models must have this attribute, \n"
+                    "even if there is only an empty list bound to it.\n" + msg_conclusion)
+                raise HalotoolsError(msg % feature_key)
 
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
         """
