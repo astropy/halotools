@@ -6,11 +6,6 @@
 Comprehensive Halotools Reference/API
 ***************************************
 
-.. _complete_reference_api_empirical_models:
-
-Empirical Models sub-package
-==============================
-
 .. automodapi:: halotools.empirical_models
 
 .. automodapi:: halotools.empirical_models.assembias_models
