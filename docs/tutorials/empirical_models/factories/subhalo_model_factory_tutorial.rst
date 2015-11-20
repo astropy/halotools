@@ -77,8 +77,16 @@ Inferring a model dictionary from the constructor inputs
 ===========================================================
 
 The first thing the `__init__` constructor of `~SubhaloModelFactory` does is to 
-pass all its arguments to the `~SubhaloModelFactory._parse_constructor_kwargs` method. 
-The behavior of this private method is relatively 
+pass all its arguments to the `~SubhaloModelFactory.parse_constructor_kwargs` method. 
+The behavior of this private method is relatively straightforward: it simply extracts 
+``galaxy_selection_func``, ``halo_selection_func`` and ``model_feature_calling_sequence`` from 
+the remaining arguments passed to ``__init__``; all remaining arguments will be interpeted 
+as model dictionary inputs. For an explanation of ``galaxy_selection_func`` and ``halo_selection_func``, 
+see the `~ModelFactory` docstring. 
+
+As described in REF, ``model_feature_calling_sequence`` determines 
+the order in which the component models will be called during mock population. This order is 
+determined by the `~SubhaloModelFactory._retrieve_model_feature_calling_sequence` method. 
 
 
 

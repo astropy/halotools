@@ -33,5 +33,12 @@ Explanation of the ``galprop_dtypes_to_allocate`` mechanism
 Explanation of the ``mock_generation_calling_sequence`` mechanism
 ======================================================================
 
+.. _model_feature_calling_sequence_mechanism:
+
+Explanation of the ``model_feature_calling_sequence`` mechanism
+======================================================================
+
+
+
 
 
