@@ -75,6 +75,8 @@ class BinaryGalpropModel(object):
 
         setattr(self, 'mc_'+self.galprop_name, self._mc_galprop)
 
+        self._methods_to_inherit = ['mc_'+self.galprop_name]
+
 
     def _mc_galprop(self, seed=None, **kwargs):
         """ Return a Monte Carlo realization of the galaxy property 
