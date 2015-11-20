@@ -69,12 +69,16 @@ Each component model is effectively giving the factory the following message:
 I need you to make sure that the when you call these methods, the following arrays that will be passed to them: `_galprop_dtypes_to_allocate`; when you use me to make a mock, I need you to call these
 methods in the following sequence: `_mock_generation_calling_sequence`". In this way, not only is all the physically relevant behavior defined in the component models, but the component models themselves provide the instructions for how they should be used. 
 
-The job of the `~SubhaloModelFactory` is simply to follow these instructions, and to ensure that mutually consistent messages are received from the set of components in the model dictionary. In the remaining sections of this tutorial, we will walk through step-by-step the tasks carried out when a new composite model is built bu instantiating an instance of the `~SubhaloModelFactory` class. 
+The job of the `~SubhaloModelFactory` is simply to follow these instructions, and to ensure that mutually consistent messages are received from the set of components in the model dictionary. In the remaining sections of this tutorial, we will walk step-by-step through the tasks carried out when a new composite model is built by instantiating an instance of the `~SubhaloModelFactory` class. 
 
 .. _subhalo_model_factory_parsing_kwargs:
 
 Inferring a model dictionary from the constructor inputs 
 ===========================================================
+
+The first thing the `__init__` constructor of `~SubhaloModelFactory` does is to 
+pass all its arguments to the `~SubhaloModelFactory._parse_constructor_kwargs` method. 
+
 
 
 .. _subhalo_model_factory_bookkeeping_mechanisms:
