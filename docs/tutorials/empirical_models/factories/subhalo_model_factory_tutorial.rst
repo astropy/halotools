@@ -90,7 +90,8 @@ exact set of instructions from which they were built.
 As we will see, this is useful because it simplifies the process of building 
 alternate versions of any particular composite model instance. 
 
-As described in REF, ``model_feature_calling_sequence`` determines 
+As described in :ref:`model_feature_calling_sequence_mechanism`, 
+the ``model_feature_calling_sequence`` determines 
 the order in which the component models will be called during mock population. This order is 
 determined by the `~SubhaloModelFactory.build_model_feature_calling_sequence` method. 
 
@@ -107,12 +108,13 @@ In the next section, we will see how the ``model_dictionary`` attribute is used 
 number of bookkeeping mechanisms used to verify self-consistency between the model features, 
 and also to facilitate communication between the composite model and the `~SubhaloMockFactory`. 
 
-
-
 .. _subhalo_model_factory_bookkeeping_mechanisms:
 
 Consistency checks and mock-population bookkeeping  
 ================================================================
+
+* The 
+
 
 .. _subhalo_model_factory_inheriting_behaviors:
 
