@@ -84,7 +84,7 @@ class MockFactory(object):
         except:
             pass   
 
-        self._build_additional_haloprops_list(**kwargs)
+        self.build_additional_haloprops_list(**kwargs)
 
         self.galaxy_table = Table() 
 
@@ -98,7 +98,7 @@ class MockFactory(object):
         raise NotImplementedError("All subclasses of MockFactory"
         " must include a populate method")
 
-    def _build_additional_haloprops_list(self, **kwargs):
+    def build_additional_haloprops_list(self, **kwargs):
         """
         Parameters 
         -----------

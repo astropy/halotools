@@ -135,15 +135,15 @@ class HodModelFactory(ModelFactory):
 
         # Build up and bind several lists from the component models
         self._set_gal_types()
-        self._build_prim_sec_haloprop_list()
-        self._build_prof_param_keys()
-        self._build_publication_list()
-        self._build_dtype_list()
-        self._build_new_haloprop_func_dict()
+        self.build_prim_sec_haloprop_list()
+        self.build_prof_param_keys()
+        self.build_publication_list()
+        self.build_dtype_list()
+        self.build_new_haloprop_func_dict()
         self._set_warning_suppressions()
         self._set_inherited_methods()
         self._set_model_redshift()
-        self._set_init_param_dict()
+        self.build_init_param_dict()
 
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
@@ -521,7 +521,7 @@ class HodModelFactory(ModelFactory):
             if hasattr(component_model, 'build_lookup_tables'):
                 component_model.build_lookup_tables()
 
-    def _set_init_param_dict(self):
+    def build_init_param_dict(self):
         """ Method used to build a dictionary of parameters for the composite model. 
 
         Accomplished by retrieving all the parameters of the component models. 
@@ -605,7 +605,7 @@ class HodModelFactory(ModelFactory):
             self.redshift = sim_defaults.default_redshift
 
 
-    def _build_prim_sec_haloprop_list(self):
+    def build_prim_sec_haloprop_list(self):
         """
         """
         haloprop_list = []
@@ -618,7 +618,7 @@ class HodModelFactory(ModelFactory):
 
         self._haloprop_list = list(set(haloprop_list))
 
-    def _build_prof_param_keys(self):
+    def build_prof_param_keys(self):
         """
         """
         prof_param_keys = []
@@ -629,7 +629,7 @@ class HodModelFactory(ModelFactory):
 
         self.prof_param_keys = list(set(prof_param_keys))
 
-    def _build_publication_list(self):
+    def build_publication_list(self):
         """
         """
         pub_list = []
@@ -640,7 +640,7 @@ class HodModelFactory(ModelFactory):
 
         self.publications = list(set(pub_list))
 
-    def _build_dtype_list(self):
+    def build_dtype_list(self):
         """
         """
         dtype_list = []
@@ -652,7 +652,7 @@ class HodModelFactory(ModelFactory):
 
         self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
 
-    def _build_new_haloprop_func_dict(self):
+    def build_new_haloprop_func_dict(self):
         """
         """
         new_haloprop_func_dict = {}

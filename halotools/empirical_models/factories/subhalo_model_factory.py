@@ -155,14 +155,14 @@ class SubhaloModelFactory(ModelFactory):
             self.model_dictionary[key] = copy(self._input_model_dictionary[key])
 
         # Build up and bind several lists from the component models
-        self._build_prim_sec_haloprop_list()
-        self._build_publication_list()
-        self._build_new_haloprop_func_dict()
-        self._build_dtype_list()
+        self.build_prim_sec_haloprop_list()
+        self.build_publication_list()
+        self.build_new_haloprop_func_dict()
+        self.build_dtype_list()
         self._set_warning_suppressions()
         self._set_model_redshift()
         self._set_inherited_methods()
-        self._set_init_param_dict()
+        self.build_init_param_dict()
 
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
@@ -506,7 +506,7 @@ class SubhaloModelFactory(ModelFactory):
         except NameError:
             self.redshift = sim_defaults.default_redshift
 
-    def _build_prim_sec_haloprop_list(self):
+    def build_prim_sec_haloprop_list(self):
         """
         """
         haloprop_list = []
@@ -520,7 +520,7 @@ class SubhaloModelFactory(ModelFactory):
 
         self._haloprop_list = list(set(haloprop_list))
 
-    def _build_publication_list(self):
+    def build_publication_list(self):
         """
         """
         pub_list = []
@@ -543,8 +543,8 @@ class SubhaloModelFactory(ModelFactory):
 
         self.publications = list(set(pub_list))
 
-    def _build_new_haloprop_func_dict(self):
-        """
+    def build_new_haloprop_func_dict(self):
+        """ Method used to build a dictionary of functions 
         """
         new_haloprop_func_dict = {}
         # Loop over all component features in the composite model
@@ -570,7 +570,7 @@ class SubhaloModelFactory(ModelFactory):
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
     def _set_warning_suppressions(self):
-        """
+        """ Method used to determine whether a warning should be issued if the param_dict of multiple component models possess a parameter with the same name. 
         """
         self._suppress_repeated_param_warning = False
         # Loop over all component features in the composite model
@@ -579,8 +579,8 @@ class SubhaloModelFactory(ModelFactory):
             if hasattr(component_model, '_suppress_repeated_param_warning'):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
-    def _set_init_param_dict(self):
-        """ Method used to build a dictionary of parameters for the composite model. 
+    def build_init_param_dict(self):
+        """ Method used to build a dictionary of parameters for the composite model by collecting each component model's param_dict. 
 
         Accomplished by retrieving all the parameters of the component models. 
         Method returns nothing, but binds ``param_dict`` to the class instance. 
@@ -626,7 +626,7 @@ class SubhaloModelFactory(ModelFactory):
 
         self._init_param_dict = copy(self.param_dict)
 
-    def _build_dtype_list(self):
+    def build_dtype_list(self):
         """
         """
         dtype_list = []
