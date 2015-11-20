@@ -159,14 +159,14 @@ class SubhaloModelFactory(ModelFactory):
         self.build_publication_list()
         self.build_new_haloprop_func_dict()
         self.build_dtype_list()
-        self._set_warning_suppressions()
-        self._set_model_redshift()
-        self._set_inherited_methods()
+        self.set_warning_suppressions()
+        self.set_model_redshift()
+        self.set_inherited_methods()
         self.build_init_param_dict()
 
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
-        self._set_primary_behaviors()
+        self.set_primary_behaviors()
 
 
     def _parse_constructor_kwargs(self, model_nickname, **kwargs):
@@ -294,7 +294,7 @@ class SubhaloModelFactory(ModelFactory):
         return model_feature_calling_sequence
 
 
-    def _set_inherited_methods(self):
+    def set_inherited_methods(self):
         """ Each component model *should* have a `_mock_generation_calling_sequence` attribute 
         that provides the sequence of method names to call during mock population. Additionally, 
         each component *should* have a `_methods_to_inherit` attribute that determines 
@@ -311,7 +311,7 @@ class SubhaloModelFactory(ModelFactory):
         which attributes will be inherited by the composite model. If any component models did not 
         implement the `_attrs_to_inherit`, an empty list is forcibly added to the component model. 
 
-        After calling the _set_inherited_methods method, it will be therefore be entirely safe to 
+        After calling the set_inherited_methods method, it will be therefore be entirely safe to 
         run a for loop over each component model's `_methods_to_inherit` and `_attrs_to_inherit`, 
         even if these lists were forgotten or irrelevant to that particular component. 
         """
@@ -370,7 +370,7 @@ class SubhaloModelFactory(ModelFactory):
             example_repeated_attr = repeated_attr_list[0]
             warn(repeated_attr_msg % example_repeated_attr)
 
-    def _set_primary_behaviors(self, **kwargs):
+    def set_primary_behaviors(self, **kwargs):
         """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
         that will be used by the outside world.  
 
@@ -383,7 +383,7 @@ class SubhaloModelFactory(ModelFactory):
         regardless of the complexity of the model. 
 
         The behaviors of the methods created here are defined elsewhere; 
-        `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
+        `set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
         # Loop over all component features in the composite model
@@ -412,7 +412,7 @@ class SubhaloModelFactory(ModelFactory):
                 attr = getattr(component_model, attrname)
                 setattr(self, new_attr_name, attr)
 
-        self._set_calling_sequence(**kwargs)
+        self.set_calling_sequence(**kwargs)
 
     def _update_param_dict_decorator(self, component_model, func_name):
         """ Decorator used to propagate any possible changes 
@@ -432,7 +432,7 @@ class SubhaloModelFactory(ModelFactory):
 
         return decorated_func
 
-    def _set_calling_sequence(self, **kwargs):
+    def set_calling_sequence(self, **kwargs):
         """
         """
         self._mock_generation_calling_sequence = []
@@ -479,7 +479,7 @@ class SubhaloModelFactory(ModelFactory):
             else:
                 warn(missing_calling_sequence_msg % component_model.__class__.__name__)
 
-    def _set_model_redshift(self):
+    def set_model_redshift(self):
         """ 
         """
         msg = ("Inconsistency between the redshifts of the component models:\n"
@@ -569,7 +569,7 @@ class SubhaloModelFactory(ModelFactory):
 
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
-    def _set_warning_suppressions(self):
+    def set_warning_suppressions(self):
         """ Method used to determine whether a warning should be issued if the param_dict of multiple component models possess a parameter with the same name. 
         """
         self._suppress_repeated_param_warning = False
@@ -647,4 +647,4 @@ class SubhaloModelFactory(ModelFactory):
         inherited behaviors get bound to the values in ``param_dict``. 
         """
         self.param_dict = self._init_param_dict
-        self._set_primary_behaviors()
+        self.set_primary_behaviors()
