@@ -138,6 +138,10 @@ class SubhaloModelFactory(ModelFactory):
 
         >>> model_instance.populate_mock(simname = 'bolplanck', redshift = 0.5) # doctest: +SKIP
 
+        Notes 
+        ------
+        This factory is tested by the `~halotools.empirical_models.factories.tests.TestSubhaloModelFactory` class. 
+
         """
 
         input_model_dictionary, supplementary_kwargs = (
