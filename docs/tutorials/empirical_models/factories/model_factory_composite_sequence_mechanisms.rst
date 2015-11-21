@@ -83,23 +83,41 @@ If you are writing your own model component of any kind, the model factories req
 
 For example implementations, see the constructors of `~halotools.empirical_models.smhm_models.PrimGalpropModel` and `~halotools.empirical_models.occupation_models.OccupationComponent`. 
 
+.. _model_feature_calling_sequence_mechanism:
 
-.. _haloprop_list_mechanism:
+The ``model feature calling sequence`` mechanism
+======================================================================
 
-The ``build prim_sec haloprop list`` mechanism
-============================================================
+When the mock factories create a synthetic galaxy population, a sequence of methods of the composite model are called in the order determined by the ``_mock_generation_calling_sequence`` list attribute bound to the *composite* model. For subhalo-based models, this list is determined by `SubhaloModelFactory.set_calling_sequence`, whereas for HOD-style models this list is determined by `HodModelFactory.set_calling_sequence`. 
 
+As described in :ref:`mock_generation_calling_sequence_mechanism`, each *component* model also has a ``_mock_generation_calling_sequence`` attribute. The composite model sequence is built up as a succession 
+of the component model sequences. The sequential ordering of component models in this succession is determined by the ``_model_feature_calling_sequence`` attribute, which is set by the `build_model_feature_calling_sequence` factory method. Thus the composite model ``_mock_generation_calling_sequence`` is determined according to the following schematic:
+
+.. code-block:: python
+
+	composite_model._mock_generation_calling_sequence = []
+	for component_model_name in composite_model._model_feature_calling_sequence:
+		component_model = composite_model.model_dictionary[component_model_name]
+		for method_name in component_model._mock_generation_calling_sequence:
+			composite_model._mock_generation_calling_sequence.append(method_name)
+
+Thus each component model's methods are always called one right after the other. The order in which each component model is called upon is determined by the ``_model_feature_calling_sequence`` attribute. The user is free to explicitly specify this sequence via the model_feature_calling_sequence keyword argument passed to the factory constructor. This may be useful for cases where the model for one galaxy property has explicit dependende on another galaxy property defined in an independent model component. If the model_feature_calling_sequence keyword is not passed, the order in which the component models are called should be assumed to be random. 
 
 .. _mock_generation_calling_sequence_mechanism:
 
 The ``mock generation calling sequence`` mechanism
 ======================================================================
 
+Each component model has a ``_mock_generation_calling_sequence`` attribute storing a list of strings. Each string is the name of a method bound to the component model instance. The order in which these names appear determines the order in which the methods will be called during mock population. This mechanism works together with :ref:`model_feature_calling_sequence_mechanism` to determine the entire sequence of functions that are called when populating a mock. 
 
-.. _model_feature_calling_sequence_mechanism:
 
-The ``model feature calling sequence`` mechanism
-======================================================================
+
+
+
+
+
+
+
 
 
 
