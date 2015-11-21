@@ -40,5 +40,5 @@ Managing simulations
 .. toctree::
    :maxdepth: 1
 
-   using_halocat_binaries.rst
+   sim_manager/using_halocat_binaries
 
