@@ -263,11 +263,14 @@ class SubhaloModelFactory(ModelFactory):
 
             try:
                 assert hasattr(component_model, '_methods_to_inherit')
+                for methodname in component_model._methods_to_inherit:
+                    assert hasattr(component_model, methodname)
             except AssertionError:
                 msg = (msg_preface + "You bound an instance of the ``"+clname+"`` to this keyword,\n"
-                    "but the instance does not have the required ``_methods_to_inherit`` attribute.\n"
+                    "but the instance does not have a properly defined ``_methods_to_inherit`` attribute.\n"
                     "At a minimum, all component models must have this attribute, \n"
-                    "even if there is only an empty list bound to it.\n" + msg_conclusion)
+                    "even if there is only an empty list bound to it.\n"
+                    "Any items in this list must be names of methods bound to the component model.\n" + msg_conclusion)
                 raise HalotoolsError(msg % feature_key)
 
             try:
@@ -494,21 +497,14 @@ class SubhaloModelFactory(ModelFactory):
         # Loop over all component features in the composite model
         for feature, component_model in self.model_dictionary.iteritems():
 
-            try:
-                component_model_galprop_dtype = component_model._galprop_dtypes_to_allocate
-            except AttributeError:
-                component_model_galprop_dtype = np.dtype([])
-
-            methods_to_inherit = list(set(
-                component_model._methods_to_inherit))
-
-            for methodname in methods_to_inherit:
+            for methodname in component_model._methods_to_inherit:
                 new_method_name = methodname
                 new_method_behavior = self._update_param_dict_decorator(
                     component_model, methodname)
                 setattr(self, new_method_name, new_method_behavior)
                 setattr(getattr(self, new_method_name), 
-                    '_galprop_dtypes_to_allocate', component_model_galprop_dtype)
+                    '_galprop_dtypes_to_allocate', 
+                    component_model._galprop_dtypes_to_allocate)
 
             attrs_to_inherit = list(set(
                 component_model._attrs_to_inherit))
