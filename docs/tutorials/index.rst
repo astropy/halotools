@@ -24,6 +24,14 @@ Phase Space Component Models
    empirical_models/phase_space_models/profile_template_tutorial
    empirical_models/phase_space_models/nfw_profile_tutorial
 
+Model Factories
+-------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   empirical_models/factories/subhalo_model_factory_tutorial
+
 Assembly Bias Component Models 
 -------------------------------
 
