@@ -147,6 +147,15 @@ Once all of the above lists and dictionaries of the composite model have been cr
 the `~SubhaloModelFactory` finally inherits the behaviors of the component models. 
 This is done using with the `~SubhaloModelFactory.set_primary_behaviors` method. 
 
+
+
+
+
+
+
+
+
+
 .. _subhalo_model_factory_further_reading:
 
 Further reading 
