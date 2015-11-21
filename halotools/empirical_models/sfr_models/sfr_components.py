@@ -3,7 +3,7 @@
 
 """
 from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+    division, print_function, absolute_import)
 
 __all__ = ['BinaryGalpropModel', 'BinaryGalpropInterpolModel']
 
@@ -76,6 +76,8 @@ class BinaryGalpropModel(object):
         setattr(self, 'mc_'+self.galprop_name, self._mc_galprop)
 
         self._methods_to_inherit = ['mc_'+self.galprop_name]
+
+        self._galprop_dtypes_to_allocate = np.dtype([(self.galprop_name, bool)])
 
 
     def _mc_galprop(self, seed=None, **kwargs):

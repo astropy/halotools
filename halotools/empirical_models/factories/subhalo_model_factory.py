@@ -244,6 +244,20 @@ class SubhaloModelFactory(ModelFactory):
                     "even if there is only an empty list bound to it.\n" + msg_conclusion)
                 raise HalotoolsError(msg % feature_key)
 
+            try:
+                assert hasattr(component_model, '_galprop_dtypes_to_allocate')
+                dt = component_model._galprop_dtypes_to_allocate
+                assert type(dt) == np.dtype
+            except AssertionError:
+                msg = (msg_preface + "You bound an instance of the ``"+clname+"`` to this keyword,\n"
+                    "but the instance does not have a np.dtype object"
+                    "bound to the ``_galprop_dtypes_to_allocate`` attribute.\n"
+                    "At a minimum, all component models must have this attribute, \n"
+                    "and it must be numpy.dtype object,"
+                    "even if the dtype is empty.\n" + msg_conclusion)
+                raise HalotoolsError(msg % feature_key)
+
+
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
         """
         """

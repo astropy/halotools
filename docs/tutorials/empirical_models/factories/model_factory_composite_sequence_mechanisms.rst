@@ -69,8 +69,19 @@ and make sure that the dictionary bound to this attribute conforms to the above 
 The ``galprop dtypes to allocate`` mechanism
 ============================================================
 
-Whenever a component model is used during mock population, the mock factory passes a ``halo_table`` keyword 
-argument to the methods of the component. 
+Whenever a component model is used during mock population, the mock factory passes a ``table`` keyword 
+argument to the methods of the component. Depending on what stage of the mock-making algorithm 
+this happens, the Astropy `~astropy.table.Table` bound to this keyword argument could either be a 
+``halo_table`` from a `~halotools.sim_manager.HaloCatalog`, or a ``galaxy_table`` bound to a mock. 
+In either case, it is important that the table passed to the function has the necessary columns assumed 
+by the function. :ref:`new_haloprop_func_dict_mechanism` addresses the case where the ``table`` keyword 
+is a ``halo_table``; as described below, the ``_galprop_dtypes_to_allocate`` mechanism addresses the ``galaxy_table`` case. 
+
+Every component model assigns some property or set of properties to the mock population of galaxies. In mock population, the synthetic galaxy population is stored in the ``galaxy_table`` bound to the mock object. The ``galaxy_table`` is an Astropy `~astropy.table.Table` object, with columns storing every galaxy property assigned by the composite model. The ``_galprop_dtypes_to_allocate`` mechanism is responsible for creating the columns of the ``galaxy_table`` and making sure they are appropriately formatted. 
+
+If you are writing your own model component of any kind, the model factories require that instances of your model have a ``_galprop_dtypes_to_allocate`` attribute. You can meet this specification by assigning any `numpy.dtype` object to the ``_galprop_dtypes_to_allocate`` attribute during the `__init__` constructor of your componenent model, even if the dtype is empty. 
+
+For example implementations, see the constructors of `~halotools.empirical_models.smhm_models.PrimGalpropModel` and `~halotools.empirical_models.occupation_models.OccupationComponent`. 
 
 
 .. _haloprop_list_mechanism:

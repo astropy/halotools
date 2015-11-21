@@ -5,7 +5,7 @@ Module containing some commonly used composite HOD models.
 
 """
 from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+    division, print_function, absolute_import)
 
 import numpy as np
 
