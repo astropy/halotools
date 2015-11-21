@@ -69,11 +69,21 @@ and make sure that the dictionary bound to this attribute conforms to the above 
 The ``galprop dtypes to allocate`` mechanism
 ============================================================
 
+Whenever a component model is used during mock population, the mock factory passes a ``halo_table`` keyword 
+argument to the methods of the component. 
+
+
+.. _haloprop_list_mechanism:
+
+The ``build prim_sec haloprop list`` mechanism
+============================================================
+
 
 .. _mock_generation_calling_sequence_mechanism:
 
 The ``mock generation calling sequence`` mechanism
 ======================================================================
+
 
 .. _model_feature_calling_sequence_mechanism:
 
