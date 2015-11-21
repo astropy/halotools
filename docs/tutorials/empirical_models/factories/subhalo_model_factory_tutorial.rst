@@ -113,7 +113,29 @@ and also to facilitate communication between the composite model and the `~Subha
 Consistency checks and mock-population bookkeeping  
 ================================================================
 
-* The 
+After the model dictionary has been built, the `__init__` constructor 
+creates a handful of lists and dictionaries and binds these to the instance 
+with the following lines of code: 
+
+.. code-block:: python
+
+	# Build up and bind several lists from the component models
+	self.build_prim_sec_haloprop_list()
+	self.build_publication_list()
+	self.build_new_haloprop_func_dict()
+	self.build_dtype_list()
+	self.set_warning_suppressions()
+	self.set_model_redshift()
+	self.set_inherited_methods()
+	self.build_init_param_dict()
+
+These methods examine each of the component models, perform various self-consistency 
+tests, and create standardized attributes that allow the 
+composite model to communicate with the `~SubhaloMockFactory` to populate mocks. 
+For a description of the most important methods in this standardization process, 
+see :ref:`composite_model_constructor_bookkeeping_mechanisms`. At the end of this 
+sequence of function calls, the instance is prepared to inherit the behavior of 
+the primary methods of the component models, which we cover in the next section. 
 
 
 .. _subhalo_model_factory_inheriting_behaviors:
