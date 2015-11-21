@@ -24,6 +24,13 @@ Phase Space Component Models
    empirical_models/phase_space_models/profile_template_tutorial
    empirical_models/phase_space_models/nfw_profile_tutorial
 
+Assembly Bias Component Models 
+-------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   empirical_models/assembias_models/heaviside_assembias_tutorial
 
 
 

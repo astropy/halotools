@@ -20,13 +20,6 @@ Stellar-to-halo-mass component models
 Tutorial coming soon!
    
 
-Assembly bias component models 
-================================
-
-.. toctree::
-   :maxdepth: 1
-
-   assembias_models/heaviside_assembias_tutorial
 
 
 
