@@ -90,16 +90,16 @@ class Zheng07Cens(OccupationComponent):
         ----------        
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns
         -------
         mean_ncen : array
-            Mean number of central galaxies in the input halo_table. 
+            Mean number of central galaxies in the input table. 
 
         Examples 
         --------
@@ -119,7 +119,7 @@ class Zheng07Cens(OccupationComponent):
         (much larger) full one:
 
         >>> fake_sim = sim_manager.FakeSim()
-        >>> mean_ncen = cen_model.mean_occupation(halo_table=fake_sim.halo_table)
+        >>> mean_ncen = cen_model.mean_occupation(table=fake_sim.halo_table)
 
         Notes 
         -----
@@ -132,8 +132,8 @@ class Zheng07Cens(OccupationComponent):
 
         """
         # Retrieve the array storing the mass-like variable
-        if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        if 'table' in kwargs.keys():
+            mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
@@ -315,12 +315,12 @@ class Zheng07Sats(OccupationComponent):
         ----------        
         prim_haloprop : array, optional 
             Array storing a mass-like variable that governs the occupation statistics. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` 
+            If ``prim_haloprop`` is not passed, then ``table`` 
             keyword arguments must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` 
+            If ``table`` is not passed, then ``prim_haloprop`` 
             keyword arguments must be passed. 
 
         Returns
@@ -353,7 +353,7 @@ class Zheng07Sats(OccupationComponent):
         (much larger) full one:
 
         >>> fake_sim = sim_manager.FakeSim()
-        >>> mean_nsat = sat_model.mean_occupation(halo_table=fake_sim.halo_table)
+        >>> mean_nsat = sat_model.mean_occupation(table=fake_sim.halo_table)
 
         """
         if self.modulate_with_cenocc is True:
@@ -362,8 +362,8 @@ class Zheng07Sats(OccupationComponent):
                     self.central_occupation_model.param_dict[key] = value 
 
         # Retrieve the array storing the mass-like variable
-        if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        if 'table' in kwargs.keys():
+            mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
@@ -470,7 +470,7 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
 
         sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the halo_table 
+            governing the assembly bias. Must be a key in the table 
             passed to the methods of `HeavisideAssembiasComponent`. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
@@ -526,7 +526,7 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
 
         sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the halo_table 
+            governing the assembly bias. Must be a key in the table 
             passed to the methods of `HeavisideAssembiasComponent`. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 

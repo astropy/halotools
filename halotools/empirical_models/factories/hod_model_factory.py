@@ -94,7 +94,7 @@ class HodModelFactory(ModelFactory):
             gal_type_list = ['centrals', 'satellites', 'orphans']. 
 
         halo_selection_func : function object, optional   
-            Function object used to place a cut on the input ``halo_table``. 
+            Function object used to place a cut on the input ``table``. 
             If the ``halo_selection_func`` keyword argument is passed, 
             the input to the function must be a single positional argument storing a 
             length-N structured numpy array or Astropy table; 

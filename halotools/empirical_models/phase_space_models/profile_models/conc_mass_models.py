@@ -46,7 +46,7 @@ class ConcMass(object):
              Default is set in `~halotools.empirical_models.model_defaults`.
 
         concentration_key : string, optional 
-            Key of the ``halo_table`` column storing the halo catalog concentration. 
+            Key of the ``table`` column storing the halo catalog concentration. 
             The only concentration-mass model requiring this constructor input is the 
             ``direct_from_halo_catalog`` model. Default is ``halo_nfw_conc``, which is consistent 
             with all halo catalogs provided by Halotools but may differ from the convention
@@ -83,11 +83,11 @@ class ConcMass(object):
         ----------        
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
         -------
@@ -106,9 +106,9 @@ class ConcMass(object):
         """
         Parameters 
         ----------
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
         -------
@@ -123,17 +123,17 @@ class ConcMass(object):
         key = self.concentration_key
 
         try:
-            c = kwargs['halo_table'][key]
+            c = kwargs['table'][key]
         except KeyError:
             msg = ("\nIf you are using the ``direct_from_halo_catalog`` concentration-mass model,\n"
                 "you must pass a ``concentration_key`` keyword argument to the ConcMass constructor\n"
-                "that corresponds to a key in the input ``halo_table``. \n"
+                "that corresponds to a key in the input ``table``. \n"
                 "For all Halotools-provided processed halo catalogs, the appropriate key is ``halo_nfw_conc``,\n"
                 "which is the default choice for this model.\n"
                 "However, if you are using a halo catalog of your own, \n"
                 "you must make sure that you specify the appropriate ``concentration_key`` for your catalog.\n"
                 "The current ConcMass instance is set to use %s as the ``concentration_key``, \n"
-                "which does not correspond to a column of the input ``halo_table``.\n")
+                "which does not correspond to a column of the input ``table``.\n")
             raise HalotoolsError(msg % key)
         
         ### Impose the model_defaults constraints
@@ -160,11 +160,11 @@ class ConcMass(object):
         ----------
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
         -------
@@ -182,14 +182,14 @@ class ConcMass(object):
         """
 
         # Retrieve the array storing the mass-like variable
-        if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        if 'table' in kwargs.keys():
+            mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
             raise HalotoolsError("Must pass one of the following keyword arguments "
                 "to the compute_concentration method:\n"
-                "``halo_table`` or ``prim_haloprop``")
+                "``table`` or ``prim_haloprop``")
 
         a = 0.537 + (1.025 - 0.537) * np.exp(-0.718 * self.redshift**1.08)
         b = -0.097 + 0.024 * self.redshift

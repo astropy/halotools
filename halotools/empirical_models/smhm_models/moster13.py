@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Module containing classes used to model the mapping between 
-stellar mass and subhalo_table. 
+stellar mass and subtable. 
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
@@ -61,7 +61,7 @@ class Moster13SmHm(PrimGalpropModel):
             Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
             object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halo_table`` keyword argument. 
+            via the ``table`` keyword argument. 
             The input ``model`` model object has its own new_haloprop_func_dict; 
             if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
             contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
@@ -76,38 +76,38 @@ class Moster13SmHm(PrimGalpropModel):
 
     def mean_stellar_mass(self, **kwargs):
         """ Return the stellar mass of a central galaxy as a function 
-        of the input halo_table.  
+        of the input table.  
 
         Parameters 
         ----------
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         redshift : float or array, optional 
             Redshift of the halo hosting the galaxy. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
             If passing an array, must be of the same length as 
-            the ``prim_haloprop`` or ``halo_table`` argument. 
+            the ``prim_haloprop`` or ``table`` argument. 
 
         Returns 
         -------
         mstar : array_like 
-            Array containing stellar masses living in the input halo_table. 
+            Array containing stellar masses living in the input table. 
         """
 
         # Retrieve the array storing the mass-like variable
-        if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        if 'table' in kwargs.keys():
+            mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halo_table`` or ``prim_haloprop``")
+                "``table`` or ``prim_haloprop``")
 
         if 'redshift' in kwargs.keys():
             redshift = kwargs['redshift']

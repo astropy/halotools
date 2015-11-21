@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Module containing classes used to model the mapping between 
-stellar mass and subhalo_table. 
+stellar mass and subtable. 
 
 """
 
@@ -30,7 +30,7 @@ __all__ = ['PrimGalpropModel']
 
 @six.add_metaclass(ABCMeta)
 class PrimGalpropModel(object):
-    """ Abstract container class for models connecting halo_table to their primary
+    """ Abstract container class for models connecting table to their primary
     galaxy property, e.g., stellar mass or luminosity. 
 
     """
@@ -76,7 +76,7 @@ class PrimGalpropModel(object):
             Each dict key of ``new_haloprop_func_dict`` will 
             be the name of a new column of the halo catalog; each dict value is a function 
             object that returns a length-N numpy array when passed a length-N Astropy table 
-            via the ``halo_table`` keyword argument. 
+            via the ``table`` keyword argument. 
             The input ``model`` model object has its own new_haloprop_func_dict; 
             if the keyword argument ``new_haloprop_func_dict`` passed to `MockFactory` 
             contains a key that already appears in the ``new_haloprop_func_dict`` bound to 
@@ -160,17 +160,17 @@ class PrimGalpropModel(object):
             self.param_dict[key] = value
 
     def _mc_galprop(self, include_scatter = True, **kwargs):
-        """ Return the prim_galprop of the galaxies living in the input halo_table. 
+        """ Return the prim_galprop of the galaxies living in the input table. 
 
         Parameters 
         ----------
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         redshift : float, optional 
             Redshift of the halo hosting the galaxy. 
@@ -185,7 +185,7 @@ class PrimGalpropModel(object):
         -------
         prim_galprop : array_like 
             Array storing the values of the primary galaxy property 
-            of the galaxies living in the input halo_table. 
+            of the galaxies living in the input table. 
         """
 
         # Interpret the inputs to determine the appropriate redshift
@@ -210,8 +210,8 @@ class PrimGalpropModel(object):
                 )
             result = 10.**log10_galprop_with_scatter
 
-        if 'halo_table' in kwargs:
-            kwargs['halo_table'][self.galprop_name][:] = result
+        if 'table' in kwargs:
+            kwargs['table'][self.galprop_name][:] = result
 
         return result
 

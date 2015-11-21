@@ -85,11 +85,11 @@ def test_Zheng07Cens():
 		halo_catalog = Table(mvir_dict)
 		# First test mean occupations
 		meanocc_from_array = model.mean_occupation(prim_haloprop=mvir_array)
-		meanocc_from_halos = model.mean_occupation(halo_table=halo_catalog)
+		meanocc_from_halos = model.mean_occupation(table=halo_catalog)
 		assert np.all(meanocc_from_array == meanocc_from_halos)
 		# Now test Monte Carlo occupations
 		mcocc_from_array = model.mc_occupation(prim_haloprop=mvir_array,seed=43)
-		mcocc_from_halos = model.mc_occupation(halo_table=halo_catalog,seed=43)
+		mcocc_from_halos = model.mc_occupation(table=halo_catalog,seed=43)
 		assert np.all(mcocc_from_array == mcocc_from_halos)
 
 	### First test the model with all default settings
