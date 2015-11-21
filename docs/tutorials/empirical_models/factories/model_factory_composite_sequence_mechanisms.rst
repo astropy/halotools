@@ -36,6 +36,34 @@ To protect against this ambiguity, whenever a repeated parameter is detected dur
 The ``new haloprop func dict`` mechanism
 ============================================================
 
+The basic job of any component model is to provide some mapping between a halo catalog and 
+some property (or set of properties) of the galaxies that live in those halos. There are many 
+cases where the underlying halo property that is the independent variable in the mapping 
+is not a pre-existing column in your halo catalog. For example, assigning positions to satellite 
+galaxies may depend on an analytical model for the NFW concentration-mass relation. If this particular 
+definition of the concentration is not already in the halo catalog, this quantity would need to be 
+computed for every halo before the satellite positions could be assigned. 
+
+There are several possible solutions to this problem. First, the composite model could simply compute 
+the desired halo property on-the-fly as part of the galaxy property assignment. However, if the 
+calculation is expensive then this needlessly adds runtime to mock-population with any composite model that uses this component. Second, you could always add the desired column to the halo table and then over-write the existing halo catalog data file with an updated one that includes the new column. 
+However, for the sake of reproducibility it is best to minimize the number of times 
+a halo catalog is over-written, as keeping track of each over-write quickly becomes a headache 
+and mistakes in that bookkeeping can lead to hidden buggy behavior.  
+
+The ``new_haloprop_func_dict`` mechanism helps address this problem. When model factories 
+build composite models, each component model is examined for the possible presence of a 
+``new_haloprop_func_dict`` attribute, to which a python dictionary must be bound. 
+The keys of this dictionary serve as the names of the new columns that will be added to the halo catalog 
+in a pre-processing phase of the mock-population algorithm. 
+The values bound to these keys are python function objects; each function object must accept a length-*Nhalos*
+Astropy `~astropy.table.Table` or Numpy structured array as input, and it must return a length-*Nhalos* array as output; the returned array will be the data in the newly created column of the halo catalog. 
+
+To take advantage of this mechanism in your component model, the only thing you need to do is create a 
+``new_haloprop_func_dict`` attribute somewhere in the `__init__` constructor of your component model, 
+and make sure that the dictionary bound to this attribute conforms to the above specifications. After doing this, you can safely assume that the halo catalog column needed by your component model will be in any halo catalog used to populate mock galaxies with a composite model using your component. 
+
+
 .. _galprop_dtypes_to_allocate_mechanism:
 
 The ``galprop dtypes to allocate`` mechanism
