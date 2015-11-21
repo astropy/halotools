@@ -112,11 +112,11 @@ class Leauthaud11Cens(OccupationComponent):
         ----------        
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns
         -------
@@ -142,22 +142,22 @@ class Leauthaud11Cens(OccupationComponent):
 
     def mean_stellar_mass(self, **kwargs):
         """ Return the stellar mass of a central galaxy as a function 
-        of the input halo_table.  
+        of the input table.  
 
         Parameters 
         ----------
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
         -------
         mstar : array_like 
-            Array containing stellar masses living in the input halo_table. 
+            Array containing stellar masses living in the input table. 
         """
 
         for key, value in self.param_dict.iteritems():
@@ -249,9 +249,9 @@ class Leauthaud11Sats(OccupationComponent):
         Parameters
         ----------        
         prim_haloprop : array, optional 
-            array of masses of halo_table in the catalog
+            array of masses of table in the catalog
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
 
         Returns
@@ -269,8 +269,8 @@ class Leauthaud11Sats(OccupationComponent):
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        if 'table' in kwargs.keys():
+            mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
@@ -349,7 +349,7 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
 
         sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the halo_table 
+            governing the assembly bias. Must be a key in the table 
             passed to the methods of `HeavisideAssembiasComponent`. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
@@ -406,7 +406,7 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
 
         sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the halo_table 
+            governing the assembly bias. Must be a key in the table 
             passed to the methods of `HeavisideAssembiasComponent`. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 

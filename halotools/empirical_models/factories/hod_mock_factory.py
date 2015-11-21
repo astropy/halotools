@@ -131,7 +131,7 @@ class HodMockFactory(MockFactory):
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table = self.halo_table)
+                self.halo_table[new_haloprop_key] = new_haloprop_func(table = self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
             pass
@@ -173,7 +173,7 @@ class HodMockFactory(MockFactory):
         for method in self._remaining_methods_to_call:
             func = getattr(self.model, method)
             gal_type_slice = self._gal_type_indices[func.gal_type]
-            func(halo_table = self.galaxy_table[gal_type_slice])
+            func(table = self.galaxy_table[gal_type_slice])
                 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
@@ -206,7 +206,7 @@ class HodMockFactory(MockFactory):
         self._remaining_methods_to_call = copy(self.model._mock_generation_calling_sequence)
 
         # Call all composite model methods that should be called prior to mc_occupation 
-        # All such function calls must be applied to the halo_table, since we do not yet know 
+        # All such function calls must be applied to the table, since we do not yet know 
         # how much memory we need for the mock galaxy_table
         galprops_assigned_to_halo_table = []
         for func_name in self.model._mock_generation_calling_sequence:
@@ -214,7 +214,7 @@ class HodMockFactory(MockFactory):
                 break
             else:
                 func = getattr(self.model, func_name)
-                func(halo_table = self.halo_table)
+                func(table = self.halo_table)
                 galprops_assigned_to_halo_table_by_func = func._galprop_dtypes_to_allocate.names
                 galprops_assigned_to_halo_table.extend(galprops_assigned_to_halo_table_by_func)
                 self._remaining_methods_to_call.remove(func_name)
@@ -239,7 +239,7 @@ class HodMockFactory(MockFactory):
             occupation_func = getattr(self.model, occupation_func_name)
             # Call the component model to get a Monte Carlo
             # realization of the abundance of gal_type galaxies
-            self._occupation[gal_type] = occupation_func(halo_table=self.halo_table)
+            self._occupation[gal_type] = occupation_func(table=self.halo_table)
 
             # Now use the above result to set up the indexing scheme
             self._total_abundance[gal_type] = (

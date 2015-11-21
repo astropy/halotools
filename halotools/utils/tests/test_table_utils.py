@@ -83,7 +83,7 @@ class TestComputeConditionalPercentiles(TestCase):
     def test_fake_halo_table(self):
 
     	percentiles = compute_conditional_percentiles(
-    		halo_table = self.fake_halo_table, 
+    		table = self.fake_halo_table, 
     		prim_haloprop_key = 'halo_mvir', 
     		sec_haloprop_key = 'halo_vmax')
     	split = percentiles < 0.5
@@ -104,7 +104,7 @@ class TestComputeConditionalPercentiles(TestCase):
         assert manual_high_mass['halo_zform'].min() == 20 
 
     	percentiles = compute_conditional_percentiles(
-    		halo_table = self.custom_halo_table, 
+    		table = self.custom_halo_table, 
     		prim_haloprop_key = 'halo_mvir', 
     		sec_haloprop_key = 'halo_zform', 
     		prim_haloprop_bin_boundaries = prim_haloprop_bin_boundaries)

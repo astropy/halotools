@@ -36,7 +36,7 @@ class TestHearin15(TestCase):
 		d = {'halo_mvir': mass, 'halo_nfw_conc': conc}
 		self.toy_halo_table = Table(d)
 		self.toy_halo_table['halo_nfw_conc_percentile'] = compute_conditional_percentiles(
-			halo_table = self.toy_halo_table, 
+			table = self.toy_halo_table, 
 			prim_haloprop_key = 'halo_mvir', 
 			sec_haloprop_key = 'halo_nfw_conc', 
 			dlog10_prim_haloprop = 0.05)

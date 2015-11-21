@@ -295,9 +295,9 @@ class MonteCarloGalProf(object):
             every parameter in the profile model, each item a length-Ngals array.
             The sequence must have the same order as ``self.prof_param_keys``. 
 
-        halo_table : data table, optional 
+        table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
-            If ``halo_table`` is not passed, ``profile_params`` must be passed. 
+            If ``table`` is not passed, ``profile_params`` must be passed. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -312,17 +312,17 @@ class MonteCarloGalProf(object):
         This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_solid_sphere` function. 
         """
         # Retrieve the list of profile_params
-        if 'halo_table' in kwargs:
-            halo_table = kwargs['halo_table']
-            profile_params = ([halo_table[profile_param_key] 
+        if 'table' in kwargs:
+            table = kwargs['table']
+            profile_params = ([table[profile_param_key] 
                 for profile_param_key in self.prof_param_keys])
-            halo_radius = halo_table[self.halo_boundary_key]
+            halo_radius = table[self.halo_boundary_key]
         else:
             try:
                 # profile_params = kwargs['profile_params']
                 assert len(profile_params) > 0
             except AssertionError:
-                raise HalotoolsError("If not passing an input ``halo_table`` "
+                raise HalotoolsError("If not passing an input ``table`` "
                     "keyword argument to mc_solid_sphere,\n"
                     "must pass a ``profile_params`` keyword argument")
 
@@ -343,14 +343,14 @@ class MonteCarloGalProf(object):
         y *= dimensionless_radial_distance
         z *= dimensionless_radial_distance
             
-        # Assign the value of the host_centric_distance halo_table column
-        if 'halo_table' in kwargs:    
+        # Assign the value of the host_centric_distance table column
+        if 'table' in kwargs:    
             try:
-                halo_table['host_centric_distance'][:] = dimensionless_radial_distance
-                halo_table['host_centric_distance'][:] *= halo_radius
+                table['host_centric_distance'][:] = dimensionless_radial_distance
+                table['host_centric_distance'][:] *= halo_radius
             except KeyError:
                 msg = ("The mc_solid_sphere method of the MonteCarloGalProf class "
-                    "requires a halo_table key ``host_centric_distance`` to be pre-allocated ")
+                    "requires a table key ``host_centric_distance`` to be pre-allocated ")
                 raise HalotoolsError(msg)
            
         return x, y, z
@@ -361,9 +361,9 @@ class MonteCarloGalProf(object):
 
         Parameters 
         ----------
-        halo_table : data table, optional 
+        table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
-            If ``halo_table`` is not passed, ``profile_params`` and 
+            If ``table`` is not passed, ``profile_params`` and 
             keyword argument ``halo_radius`` must be passed. 
 
         *profile_params : Sequence of arrays
@@ -379,7 +379,7 @@ class MonteCarloGalProf(object):
             Length-Ngals array storing the radial boundary of the halo 
             hosting each galaxy. Units assumed to be in Mpc/h. 
             If ``profile_params`` and ``halo_radius`` are not passed, 
-            ``halo_table`` must be passed. 
+            ``table`` must be passed. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -397,14 +397,14 @@ class MonteCarloGalProf(object):
         x, y, z = self.mc_solid_sphere(*profile_params, **kwargs)
 
         ### Retrieve the halo_radius
-        if 'halo_table' in kwargs:    
-            halo_table = kwargs['halo_table']
-            halo_radius = halo_table[self.halo_boundary_key]
+        if 'table' in kwargs:    
+            table = kwargs['table']
+            halo_radius = table[self.halo_boundary_key]
         else:
             try:
                 halo_radius = convert_to_ndarray(kwargs['halo_radius'])
             except KeyError:
-                raise HalotoolsError("If not passing an input ``halo_table`` "
+                raise HalotoolsError("If not passing an input ``table`` "
                     "keyword argument to mc_halo_centric_pos,\n"
                     "must pass the following keyword arguments:\n"
                     "``halo_radius``, ``profile_params``.")
@@ -420,9 +420,9 @@ class MonteCarloGalProf(object):
 
         Parameters 
         ----------
-        halo_table : data table, optional 
+        table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
-            If ``halo_table`` is not passed, ``profile_params`` and ``halo_radius`` must be passed. 
+            If ``table`` is not passed, ``profile_params`` and ``halo_radius`` must be passed. 
 
         *profile_params : Sequence of arrays
             Sequence of length-Ngals array(s) containing the input profile parameter(s). 
@@ -437,11 +437,11 @@ class MonteCarloGalProf(object):
             Length-Ngals array storing the radial boundary of the halo 
             hosting each galaxy. Units assumed to be in Mpc/h. 
             If ``profile_params`` and ``halo_radius`` are not passed, 
-            ``halo_table`` must be passed. 
+            ``table`` must be passed. 
 
         overwrite_table_pos : bool, optional 
             If True, the `mc_pos` method will over-write the existing values of 
-            the ``x``, ``y`` and ``z`` halo_table columns. Default is True
+            the ``x``, ``y`` and ``z`` table columns. Default is True
 
         return_pos : bool, optional 
             If True, method will return the computed host-centric 
@@ -453,14 +453,14 @@ class MonteCarloGalProf(object):
         Returns 
         -------
         x, y, z : arrays, optional 
-            For the case where no ``halo_table`` is passed as an argument, 
+            For the case where no ``table`` is passed as an argument, 
             method will return x, y and z points distributed about the 
             origin according to the profile model. 
 
-            For the case where ``halo_table`` is passed as an argument 
+            For the case where ``table`` is passed as an argument 
             (this is the use case of populating halos with mock galaxies), 
             the ``x``, ``y``, and ``z`` columns of the table will be over-written.
-            When ``halo_table`` is passed as an argument, the method 
+            When ``table`` is passed as an argument, the method 
             assumes that the ``x``, ``y``, and ``z`` columns already store 
             the position of the host halo center. 
 
@@ -478,13 +478,13 @@ class MonteCarloGalProf(object):
         except KeyError:
             return_pos = False
 
-        if 'halo_table' in kwargs:
-            halo_table = kwargs['halo_table']
+        if 'table' in kwargs:
+            table = kwargs['table']
             x, y, z = self.mc_halo_centric_pos(*profile_params, **kwargs)
             if overwrite_table_pos is True:
-                halo_table['x'][:] += x
-                halo_table['y'][:] += y
-                halo_table['z'][:] += z
+                table['x'][:] += x
+                table['y'][:] += y
+                table['z'][:] += z
             if return_pos is True:
                 return x, y, z
         else:
@@ -493,7 +493,7 @@ class MonteCarloGalProf(object):
                 halo_radius = convert_to_ndarray(kwargs['halo_radius'])
                 assert len(halo_radius) == len(profile_params[0])
             except KeyError, AssertionError:
-                raise HalotoolsError("\nIf not passing a ``halo_table`` keyword argument "
+                raise HalotoolsError("\nIf not passing a ``table`` keyword argument "
                     "to mc_pos, must pass the following keyword arguments:\n"
                     "``profile_params``, ``halo_radius``.")
             x, y, z = self.mc_halo_centric_pos(*profile_params, **kwargs)
@@ -613,14 +613,14 @@ class MonteCarloGalProf(object):
 
         return radial_velocities
 
-    def mc_vel(self, halo_table, overwrite_table_velocities = True, 
+    def mc_vel(self, table, overwrite_table_velocities = True, 
         return_velocities = False):
         """ Method assigns a Monte Carlo realization of the Jeans velocity 
-        solution to the halos in the input ``halo_table``. 
+        solution to the halos in the input ``table``. 
 
         Parameters 
         -----------
-        halo_table : Astropy Table 
+        table : Astropy Table 
             `astropy.table.Table` object storing the halo catalog. 
 
         overwrite_table_velocities : bool, optional 
@@ -638,29 +638,29 @@ class MonteCarloGalProf(object):
 
         """
         try:
-            d = halo_table['host_centric_distance']
+            d = table['host_centric_distance']
         except KeyError:
             raise HalotoolsError("The mc_vel method requires ``host_centric_distance`` "
-                "to be an existing column of the input halo_table")
+                "to be an existing column of the input table")
         try:
-            rhalo = halo_table[self.halo_boundary_key]
+            rhalo = table[self.halo_boundary_key]
         except KeyError:
             msg = ("halo_boundary_key = %s must be a key of the input halo catalog")
             raise HalotoolsError(msg % self.halo_boundary_key)
         scaled_radius = d/rhalo
 
-        profile_params = [halo_table[key] for key in self.prof_param_keys]
+        profile_params = [table[key] for key in self.prof_param_keys]
     
-        total_mass = halo_table[self.prim_haloprop_key]
+        total_mass = table[self.prim_haloprop_key]
 
         vx = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
         vy = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
         vz = self.mc_radial_velocity(scaled_radius, total_mass, *profile_params)
 
         if overwrite_table_velocities is True:
-            halo_table['vx'][:] += vx
-            halo_table['vy'][:] += vy
-            halo_table['vz'][:] += vz
+            table['vx'][:] += vx
+            table['vy'][:] += vy
+            table['vz'][:] += vz
 
         if return_velocities is True:
             return vx, vy, vz

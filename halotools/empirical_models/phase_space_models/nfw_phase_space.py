@@ -87,15 +87,15 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         self._mock_generation_calling_sequence = ['assign_phase_space']
 
-    def assign_phase_space(self, halo_table):
+    def assign_phase_space(self, table):
         """ Primary method of the `NFWPhaseSpace` class called during the mock-population sequence. 
 
         Parameters 
         -----------
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
             After calling the `assign_phase_space` method, the `x`, `y`, `z`, `vx`, `vy`, and `vz` 
-            columns of the input ``halo_table`` will be over-written. 
+            columns of the input ``table`` will be over-written. 
 
         Notes 
         ------
@@ -107,8 +107,8 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         * `~halotools.empirical_models.phase_space_models.monte_carlo_helpers.MonteCarloGalProf.mc_vel`
 
         """
-        MonteCarloGalProf.mc_pos(self, halo_table = halo_table)
-        MonteCarloGalProf.mc_vel(self, halo_table = halo_table)
+        MonteCarloGalProf.mc_pos(self, table = table)
+        MonteCarloGalProf.mc_vel(self, table = table)
 
 
     def mc_generate_nfw_phase_space_points(self, Ngals = 1e4, conc=5, mass = 1e12):
@@ -194,11 +194,11 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Array of mass-like variable upon which 
             occupation statistics are based. 
             If ``prim_haloprop`` is not passed, 
-            then ``halo_table`` keyword argument must be passed. 
+            then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, 
+            If ``table`` is not passed, 
             then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
@@ -725,9 +725,9 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         concentration_array : array_like, optional 
             Length-Ngals numpy array storing the concentrations of the mock galaxies. 
 
-        halo_table : data table, optional 
+        table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
-            If ``halo_table`` is not passed, ``concentration_array`` must be passed. 
+            If ``table`` is not passed, ``concentration_array`` must be passed. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -749,21 +749,21 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         Parameters 
         ----------
-        halo_table : data table, optional 
+        table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
-            If ``halo_table`` is not passed, ``concentration_array`` and 
+            If ``table`` is not passed, ``concentration_array`` and 
             keyword argument ``halo_radius`` must be passed. 
 
         concentration_array : array_like, optional 
             Length-Ngals numpy array storing the concentrations of the mock galaxies. 
-            If ``halo_table`` is not passed, ``concentration_array`` and 
+            If ``table`` is not passed, ``concentration_array`` and 
             keyword argument ``halo_radius`` must be passed. 
 
         halo_radius : array_like, optional 
             Length-Ngals array storing the radial boundary of the halo 
             hosting each galaxy. Units assumed to be in Mpc/h. 
             If ``concentration_array`` and ``halo_radius`` are not passed, 
-            ``halo_table`` must be passed. 
+            ``table`` must be passed. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -784,13 +784,13 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
 
         Parameters 
         ----------
-        halo_table : data table, optional 
+        table : data table, optional 
             Astropy Table storing a length-Ngals galaxy catalog. 
-            If ``halo_table`` is not passed, ``concentration_array`` and ``halo_radius`` must be passed. 
+            If ``table`` is not passed, ``concentration_array`` and ``halo_radius`` must be passed. 
 
         concentration_array : array_like, optional 
             Length-Ngals numpy array storing the concentrations of the mock galaxies. 
-            If ``halo_table`` is not passed, ``concentration_array`` and 
+            If ``table`` is not passed, ``concentration_array`` and 
             keyword argument ``halo_radius`` must be passed. 
             If ``concentration_array`` is passed, ``halo_radius`` must be passed as a keyword argument.
             The sequence must have the same order as ``self.prof_param_keys``. 
@@ -799,7 +799,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Length-Ngals array storing the radial boundary of the halo 
             hosting each galaxy. Units assumed to be in Mpc/h. 
             If ``concentration_array`` and ``halo_radius`` are not passed, 
-            ``halo_table`` must be passed. 
+            ``table`` must be passed. 
 
         seed : int, optional  
             Random number seed used in Monte Carlo realization. Default is None. 
@@ -807,14 +807,14 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         Returns 
         -------
         x, y, z : arrays, optional 
-            For the case where no ``halo_table`` is passed as an argument, 
+            For the case where no ``table`` is passed as an argument, 
             method will return x, y and z points distributed about the 
             origin according to the profile model. 
 
-            For the case where ``halo_table`` is passed as an argument 
+            For the case where ``table`` is passed as an argument 
             (this is the use case of populating halos with mock galaxies), 
             the ``x``, ``y``, and ``z`` columns of the table will be over-written.
-            When ``halo_table`` is passed as an argument, the method 
+            When ``table`` is passed as an argument, the method 
             assumes that the ``x``, ``y``, and ``z`` columns already store 
             the position of the host halo center. 
 
@@ -883,13 +883,13 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         return MonteCarloGalProf.mc_radial_velocity(self, 
             scaled_radius, total_mass, *concentration_array, **kwargs)
 
-    def mc_vel(self, halo_table):
+    def mc_vel(self, table):
         """ Method assigns a Monte Carlo realization of the Jeans velocity 
-        solution to the halos in the input ``halo_table``. 
+        solution to the halos in the input ``table``. 
 
         Parameters 
         -----------
-        halo_table : Astropy Table 
+        table : Astropy Table 
             `astropy.table.Table` object storing the halo catalog. 
             Calling the `mc_vel` method will over-write the existing values of 
             the ``vx``, ``vy`` and ``vz`` columns. 
@@ -898,7 +898,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ------
         This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_vel` function. 
         """
-        MonteCarloGalProf.mc_vel(self, halo_table)
+        MonteCarloGalProf.mc_vel(self, table)
 
 
 

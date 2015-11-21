@@ -49,7 +49,7 @@ class ModelFactory(object):
             Default is None.  
 
         halo_selection_func : function object, optional   
-            Function object used to place a cut on the input ``halo_table``. 
+            Function object used to place a cut on the input ``table``. 
             If the ``halo_selection_func`` keyword argument is passed, 
             the input to the function must be a single positional argument storing a 
             length-N structured numpy array or Astropy table; 
@@ -75,7 +75,7 @@ class ModelFactory(object):
         """ Method used to populate a simulation using the model. 
 
         After calling this method, ``self`` will have a new ``mock`` attribute, 
-        which has a ``halo_table`` bound to it containing the Monte Carlo 
+        which has a ``table`` bound to it containing the Monte Carlo 
         realization of the model. 
 
         Parameters 

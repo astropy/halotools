@@ -67,7 +67,7 @@ class SubhaloMockFactory(MockFactory):
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table = self.halo_table)
+                self.halo_table[new_haloprop_key] = new_haloprop_func(table = self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
             pass
@@ -107,7 +107,7 @@ class SubhaloMockFactory(MockFactory):
             try:
                 f = component_model.gal_type_func
                 newkey = feature + '_gal_type'
-                self.galaxy_table[newkey] = f(halo_table=self.galaxy_table)
+                self.galaxy_table[newkey] = f(table=self.galaxy_table)
                 self._precomputed_galprop_list.append(newkey)
             except AttributeError:
                 pass
@@ -115,11 +115,11 @@ class SubhaloMockFactory(MockFactory):
                 clname = component_model.__class__.__name__
                 msg = ("\nThe `gal_type_func` attribute of the " + clname + 
                     "\nraises an unexpected exception when passed a halo table as a "
-                    "halo_table keyword argument. \n"
+                    "table keyword argument. \n"
                     "If the features in your component model have explicit dependence "
                     "on galaxy type, \nthen you must implement the `gal_type_func` mechanism "
                     "in such a way that\nthis function accepts a "
-                    "length-N halo table as a ``halo_table`` keyword argument, \n"
+                    "length-N halo table as a ``table`` keyword argument, \n"
                     "and returns a length-N array of strings.\n")
                 raise HalotoolsError(msg)
 
@@ -130,7 +130,7 @@ class SubhaloMockFactory(MockFactory):
 
         for method in self.model._mock_generation_calling_sequence:
             func = getattr(self.model, method)
-            func(halo_table = self.galaxy_table)
+            func(table = self.galaxy_table)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)

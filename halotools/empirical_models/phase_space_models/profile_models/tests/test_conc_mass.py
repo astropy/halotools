@@ -61,7 +61,7 @@ class TestConcMass(TestCase):
         mass = np.logspace(10, 15, Npts)
         conc = np.random.uniform(0, 100, Npts)
         t = Table({'conc': conc, 'halo_mvir': mass})
-        conc_result = self.direct_model.compute_concentration(halo_table = t)
+        conc_result = self.direct_model.compute_concentration(table = t)
 
         within_bounds_mask = (conc >= model_defaults.min_permitted_conc) & (conc <= model_defaults.max_permitted_conc)
         assert np.all(conc_result[within_bounds_mask] == t['conc'][within_bounds_mask])
