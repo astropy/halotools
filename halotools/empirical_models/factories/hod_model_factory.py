@@ -574,6 +574,7 @@ class HodModelFactory(ModelFactory):
         """
         self.param_dict = self._init_param_dict
         self.set_primary_behaviors()
+        self.set_calling_sequence()
 
     def set_model_redshift(self):
         """ 
