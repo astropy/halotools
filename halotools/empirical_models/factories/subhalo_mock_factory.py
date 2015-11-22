@@ -59,8 +59,15 @@ class SubhaloMockFactory(MockFactory):
             self.populate()
 
     def preprocess_halo_catalog(self):
-        """ Method to pre-process a halo catalog upon instantiation of 
-        the mock object. 
+        """ Method to pre-process a halo catalog upon instantiation of the mock object. 
+
+        New columns are added to the ``halo_table`` according to any entries in the 
+        ``new_haloprop_func_dict``. 
+
+        See also 
+        ---------
+        :ref:`new_haloprop_func_dict_mechanism`
+
         """
 
         ### Create new columns of the halo catalog, if applicable
