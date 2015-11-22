@@ -160,6 +160,28 @@ class ModelFactory(object):
 
         self.mock.populate()
 
+    def update_param_dict_decorator(self, component_model, func_name):
+        """ Decorator used to propagate any possible changes 
+        in the composite model param_dict 
+        down to the appropriate component model param_dict. 
+
+        See also 
+        --------
+        :ref:`update_param_dict_decorator_mechanism`
+        """
+
+        def decorated_func(*args, **kwargs):
+
+            # Update the param_dict as necessary
+            for key in self.param_dict.keys():
+                if key in component_model.param_dict:
+                    component_model.param_dict[key] = self.param_dict[key]
+
+            func = getattr(component_model, func_name)
+            return func(*args, **kwargs)
+
+        return decorated_func
+
     def compute_average_galaxy_clustering(self, num_iterations=5, summary_statistic = 'median', **kwargs):
         """
         Method repeatedly populates a simulation with a mock galaxy catalog, computes the clustering 
