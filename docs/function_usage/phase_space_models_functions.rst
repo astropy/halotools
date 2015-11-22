@@ -5,8 +5,6 @@
 Phase Space Component Models 
 ===============================
 
-.. _halo_boundary_functions: 
-
 Halo Mass Definitions
 ------------------------
 
@@ -19,8 +17,6 @@ Halo Mass Definitions
    delta_vir
    density_threshold
 
-.. _nfw_profile_functions: 
-
 NFW Profile Models
 ------------------------
 
@@ -32,8 +28,6 @@ NFW Profile Models
 	NFWPhaseSpace
 	ConcMass
 
-.. _central_galaxy_profile_functions: 
-
 Central Galaxy Profile Models
 -------------------------------
 
@@ -41,8 +35,6 @@ Central Galaxy Profile Models
 
 	TrivialProfile
 	TrivialPhaseSpace
-
-.. _monte_carlo_galaxy_profiles: 
 
 Monte Carlo Realizations of Galaxy Profiles 
 ---------------------------------------------
