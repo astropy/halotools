@@ -502,9 +502,6 @@ class SubhaloModelFactory(ModelFactory):
                 new_method_behavior = self.update_param_dict_decorator(
                     component_model, methodname)
                 setattr(self, new_method_name, new_method_behavior)
-                setattr(getattr(self, new_method_name), 
-                    '_galprop_dtypes_to_allocate', 
-                    component_model._galprop_dtypes_to_allocate)
 
             attrs_to_inherit = list(set(
                 component_model._attrs_to_inherit))
