@@ -175,8 +175,8 @@ the flexibility of the model factories.
 For each method that we inherit, line 3 binds the newly-defined method to the composite model instance. 
 Line 1 chooses for the name of this newly-defined method to keep the same name 
 as appears in the component model. Line 2 modifies the component model method behavior with the 
-`update_param_dict_decorator` decorator. This is very important for the reasons described in 
-:ref:`update_param_dict_decorator_mechanism`. 
+`~ModelFactory.update_param_dict_decorator` decorator. 
+This modification is very important for the reasons described in :ref:`update_param_dict_decorator_mechanism`. 
 
 
 

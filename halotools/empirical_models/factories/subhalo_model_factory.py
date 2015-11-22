@@ -524,18 +524,7 @@ class SubhaloModelFactory(ModelFactory):
         :ref:`update_param_dict_decorator_mechanism`
         
         """
-
-        def decorated_func(*args, **kwargs):
-
-            # Update the param_dict as necessary
-            for key in self.param_dict.keys():
-                if key in component_model.param_dict:
-                    component_model.param_dict[key] = self.param_dict[key]
-
-            func = getattr(component_model, func_name)
-            return func(*args, **kwargs)
-
-        return decorated_func
+        return ModelFactory.update_param_dict_decorator(self, component_model, func_name)
 
     def set_calling_sequence(self):
         """ Method used to determine the sequence of function calls that will be made during 
