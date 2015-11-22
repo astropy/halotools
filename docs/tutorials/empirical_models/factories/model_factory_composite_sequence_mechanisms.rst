@@ -118,7 +118,24 @@ The ``update param_dict decorator`` mechanism
 
 As described in :ref:`param_dict_mechanism`, the composite model ``param_dict`` is simply a collection of the parameters in the ``param_dict`` of all the component models. While this collection process is simple, it creates the following problem. The component and composite ``param_dict`` are separate dictionaries, and even though they share keys in common, the keys point to different locations in memory. So if the user decides to change the value bound to a key in the ``param_dict`` of the composite model, this change does nothing at all to the value bound to the corresponding key the component model. And yet, the behavior is *entirley* governed by the component model, so unless some action is taken to propagate the change from the composite ``param_dict`` to the component ``param_dict``, then the composite model will not change behavior when its ``param_dict`` is changed. 
 
-The `~SubhaloModelFactory.update_param_dict_decorator` addresses this problem. 
+The `ModelFactory.update_param_dict_decorator` addresses this problem. When the model factories inherit the methods of the component models, they actually inherited modified versions of the methods, where the modification comes from decorating the inherited methods with the `~ModelFactory.update_param_dict_decorator`, whose source code appears below:
+
+.. code-block:: python
+
+    def update_param_dict_decorator(self, component_model, func_name):
+
+        def decorated_func(*args, **kwargs):
+
+            # Update the param_dict as necessary
+            for key in self.param_dict.keys():
+                if key in component_model.param_dict:
+                    component_model.param_dict[key] = self.param_dict[key]
+
+            func = getattr(component_model, func_name)
+            return func(*args, **kwargs)
+
+        return decorated_func
+
 
 
 
