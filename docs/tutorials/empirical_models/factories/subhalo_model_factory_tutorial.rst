@@ -20,8 +20,7 @@ We will start in :ref:`subhalo_model_factory_design_overview` with a high-level
 description of how the class creates a composite model from 
 a set of independently-defined features. In :ref:`subhalo_model_factory_parsing_kwargs` we describe 
 how the factory's `__init__` constructor parses the large number of optional inputs into a *model dictionary*. 
-In :ref:`subhalo_model_factory_bookkeeping_mechanisms` we outline the various bookkeeping devices and consistency checks that the factory does to 1. ensure that the input model dictionary provides sufficient and self-consistent information, and 2. place the instance into a form that can directly talk to the `~SubhaloMockFactory`. In :ref:`subhalo_model_factory_inheriting_behaviors` we cover the process by which the appropriate methods of the component models are inherited by the composite model. We conclude in :ref:`subhalo_model_factory_further_reading` by pointing to related sections of documentation on other aspects of composite models, such as how to use them to populate mocks and how to build new ones from scratch. 
-
+In :ref:`subhalo_model_factory_bookkeeping_mechanisms` we outline the various bookkeeping devices and consistency checks that the factory does to 1. ensure that the input model dictionary provides sufficient and self-consistent information, and 2. place the instance into a form that can directly talk to the `~SubhaloMockFactory`. In :ref:`subhalo_model_factory_inheriting_behaviors` we cover the process by which the appropriate methods of the component models are inherited by the composite model. 
 
 .. _subhalo_model_factory_design_overview:
 
@@ -162,29 +161,24 @@ First, we reproduce the source below:
                 component_model, methodname) # line 2
             setattr(self, new_method_name, new_method_behavior) # line 3
 
-            setattr(getattr(self, new_method_name), 
-                '_galprop_dtypes_to_allocate', 
-                component_model._galprop_dtypes_to_allocate) # line 4
 
 In this double-for loop, we iterate over every method that the composite model 
-should inherit from the collection of component models. Before unpacking these 4 lines, 
-first note how the use of getattr and setattr allows the component models to entirely dictate 
-what is inherited by the composite model. This high-level python feature is what makes possible 
-the flexibility of the model factories. 
-
+should inherit from the collection of component models. 
 For each method that we inherit, line 3 binds the newly-defined method to the composite model instance. 
 Line 1 chooses for the name of this newly-defined method to keep the same name 
 as appears in the component model. Line 2 modifies the component model method behavior with the 
 `~ModelFactory.update_param_dict_decorator` decorator. 
 This modification is very important for the reasons described in :ref:`update_param_dict_decorator_mechanism`. 
 
+Note how the use of getattr and setattr allows the component models to entirely dictate 
+what is inherited by the composite model. This high-level python feature is what makes possible 
+the flexibility of the model factories. 
 
 
 
 
-.. _subhalo_model_factory_further_reading:
 
-Further reading 
-================
+
+
 
 
