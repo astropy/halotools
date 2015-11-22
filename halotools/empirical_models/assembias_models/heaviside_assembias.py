@@ -39,7 +39,7 @@ class HeavisideAssembias(object):
 
         sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the halo_table 
+            governing the assembly bias. Must be a key in the table 
             passed to the methods of `HeavisideAssembiasComponent`. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
@@ -64,14 +64,14 @@ class HeavisideAssembias(object):
             two types. 
 
         halo_type_tuple : tuple, optional 
-            Tuple providing the information about how elements of the input ``halo_table`` 
+            Tuple providing the information about how elements of the input ``table`` 
             have been pre-divided into types. The first tuple entry must be a 
-            string giving the column name of the input ``halo_table`` that provides the halo-typing. 
+            string giving the column name of the input ``table`` that provides the halo-typing. 
             The second entry gives the value that will be stored in this column for halos 
             that are above the percentile split, the third entry gives the value for halos 
             below the split. 
 
-            If provided, you must ensure that the splitting of the ``halo_table`` 
+            If provided, you must ensure that the splitting of the ``table`` 
             was self-consistently performed with the 
             input ``split``, or ``split_abcissa`` and ``split_ordinates``, or 
             ``split_func`` keyword arguments. 
@@ -223,9 +223,9 @@ class HeavisideAssembias(object):
         """
         """
 
-        def assembias_percentile_calculator(halo_table):
+        def assembias_percentile_calculator(table):
             return compute_conditional_percentiles(
-                halo_table = halo_table, 
+                table = table, 
                 prim_haloprop_key = self.prim_haloprop_key, 
                 sec_haloprop_key = self.sec_haloprop_key
                 )
@@ -257,7 +257,7 @@ class HeavisideAssembias(object):
         """
 
         if hasattr(self, '_input_split_func'):
-            result = self._input_split_func(halo_table = halo_table)
+            result = self._input_split_func(table = table)
 
             if np.any(result < 0):
                 msg = ("The input split_func passed to the HeavisideAssembias class"
@@ -397,25 +397,25 @@ class HeavisideAssembias(object):
             #################################################################################
             ### Retrieve the arrays storing prim_haloprop and sec_haloprop
             ### The control flow below is what permits accepting an input 
-            ### halo_table or a directly inputting prim_haloprop and sec_haloprop arrays
-            _HAS_HALO_TABLE = False
-            if 'halo_table' in kwargs:
+            ### table or a directly inputting prim_haloprop and sec_haloprop arrays
+            _HAS_table = False
+            if 'table' in kwargs:
                 try:
-                    halo_table = kwargs['halo_table']
-                    prim_haloprop = halo_table[self.prim_haloprop_key]
-                    sec_haloprop = halo_table[self.sec_haloprop_key]
-                    _HAS_HALO_TABLE = True
+                    table = kwargs['table']
+                    prim_haloprop = table[self.prim_haloprop_key]
+                    sec_haloprop = table[self.sec_haloprop_key]
+                    _HAS_table = True
                 except KeyError:
-                    msg = ("When passing an input ``halo_table`` to the "
+                    msg = ("When passing an input ``table`` to the "
                         " ``assembias_decorator`` method,\n"
-                        "the input halo_table must have a column with name ``%s``"
+                        "the input table must have a column with name ``%s``"
                         "and a column with name ``%s``.\n")
                     raise HalotoolsError(msg % (self.prim_haloprop_key), self.sec_haloprop_key)
             else:
                 try:
                     prim_haloprop = convert_to_ndarray(kwargs['prim_haloprop'])
                 except KeyError:
-                    msg = ("\nIf not passing an input ``halo_table`` to the "
+                    msg = ("\nIf not passing an input ``table`` to the "
                         "``assembias_decorator`` method,\n"
                         "you must pass ``prim_haloprop`` argument.\n")
                     raise HalotoolsError(msg)
@@ -423,7 +423,7 @@ class HeavisideAssembias(object):
                     sec_haloprop = convert_to_ndarray(kwargs['sec_haloprop'])
                 except KeyError:
                     if 'sec_haloprop_percentile' not in kwargs:
-                        msg = ("\nIf not passing an input ``halo_table`` to the "
+                        msg = ("\nIf not passing an input ``table`` to the "
                             "``assembias_decorator`` method,\n"
                             "you must pass either a ``sec_haloprop`` or "
                             "``sec_haloprop_percentile`` argument.\n")
@@ -453,16 +453,16 @@ class HeavisideAssembias(object):
             # There are several possible ways that the type1_mask can be computed, depending on 
             # what the decorator was passed as input
 
-            if _HAS_HALO_TABLE is True:
+            if _HAS_table is True:
                 # we were passed halo_type_tuple:
                 if hasattr(self, 'halo_type_tuple'): 
                     halo_type_key = self.halo_type_tuple[0]
                     halo_type1_val = self.halo_type_tuple[1]
-                    type1_mask = halo_table[halo_type_key][no_edge_mask] == halo_type1_val
+                    type1_mask = table[halo_type_key][no_edge_mask] == halo_type1_val
 
-                # the value of sec_haloprop_percentile is already stored as a column of the halo_table
-                elif self.sec_haloprop_key + '_percentile' in halo_table.keys():
-                    no_edge_percentiles = halo_table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
+                # the value of sec_haloprop_percentile is already stored as a column of the table
+                elif self.sec_haloprop_key + '_percentile' in table.keys():
+                    no_edge_percentiles = table[self.sec_haloprop_key + '_percentile'][no_edge_mask]
                     type1_mask = no_edge_percentiles > no_edge_split
                 else:
                     msg = ("\nThe HeavisideAssembias class implements assembly bias \n" 

@@ -2,7 +2,7 @@
 """
 
 Module used to construct mock galaxy populations. 
-Each mock factory only has knowledge of a simulation snapshot 
+Each mock factory only has knowledge of a simulation halocat 
 and composite model object. 
 Currently only composite HOD models are supported. 
 
@@ -42,7 +42,7 @@ class HodMockFactory(MockFactory):
     population of mock galaxies based on an HOD-style model. 
 
     Can be thought of as a factory that takes a model  
-    and simulation snapshot as input, 
+    and simulation halocat as input, 
     and generates a mock galaxy population. 
     The returned collection of galaxies possesses whatever 
     attributes were requested by the model, such as xyz position,  
@@ -54,7 +54,7 @@ class HodMockFactory(MockFactory):
         """
         Parameters 
         ----------
-        snapshot : object, keyword argument
+        halocat : object, keyword argument
             Object containing the halo catalog and other associated data.  
             Produced by `~halotools.sim_manager.supported_sims.HaloCatalog`
 
@@ -62,7 +62,7 @@ class HodMockFactory(MockFactory):
             A model built by a sub-class of `~halotools.empirical_models.HodModelFactory`. 
 
         additional_haloprops : string or list of strings, optional   
-            Each entry in this list must be a column key of ``snapshot.halo_table``. 
+            Each entry in this list must be a column key of ``halocat.halo_table``. 
             For each entry of ``additional_haloprops``, each member of 
             `mock.galaxy_table` will have a column key storing this property of its host halo. 
             If ``additional_haloprops`` is set to the string value ``all``, 
@@ -121,7 +121,7 @@ class HodMockFactory(MockFactory):
         # make a conservative mvir completeness cut 
         # This cut can be controlled by changing sim_defaults.Num_ptcl_requirement
         if apply_completeness_cut is True:
-            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
+            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.halocat.particle_mass
             mass_cut = (self.halo_table['halo_mvir'] > cutoff_mvir)
             self.halo_table = self.halo_table[mass_cut]
 
@@ -131,7 +131,7 @@ class HodMockFactory(MockFactory):
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table = self.halo_table)
+                self.halo_table[new_haloprop_key] = new_haloprop_func(table = self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
             pass
@@ -173,16 +173,16 @@ class HodMockFactory(MockFactory):
         for method in self._remaining_methods_to_call:
             func = getattr(self.model, method)
             gal_type_slice = self._gal_type_indices[func.gal_type]
-            func(halo_table = self.galaxy_table[gal_type_slice])
+            func(table = self.galaxy_table[gal_type_slice])
                 
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
         self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['x'], self.snapshot.Lbox)
+            self.galaxy_table['x'], self.halocat.Lbox)
         self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['y'], self.snapshot.Lbox)
+            self.galaxy_table['y'], self.halocat.Lbox)
         self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['z'], self.snapshot.Lbox)
+            self.galaxy_table['z'], self.halocat.Lbox)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)
@@ -206,7 +206,7 @@ class HodMockFactory(MockFactory):
         self._remaining_methods_to_call = copy(self.model._mock_generation_calling_sequence)
 
         # Call all composite model methods that should be called prior to mc_occupation 
-        # All such function calls must be applied to the halo_table, since we do not yet know 
+        # All such function calls must be applied to the table, since we do not yet know 
         # how much memory we need for the mock galaxy_table
         galprops_assigned_to_halo_table = []
         for func_name in self.model._mock_generation_calling_sequence:
@@ -214,7 +214,7 @@ class HodMockFactory(MockFactory):
                 break
             else:
                 func = getattr(self.model, func_name)
-                func(halo_table = self.halo_table)
+                func(table = self.halo_table)
                 galprops_assigned_to_halo_table_by_func = func._galprop_dtypes_to_allocate.names
                 galprops_assigned_to_halo_table.extend(galprops_assigned_to_halo_table_by_func)
                 self._remaining_methods_to_call.remove(func_name)
@@ -239,7 +239,7 @@ class HodMockFactory(MockFactory):
             occupation_func = getattr(self.model, occupation_func_name)
             # Call the component model to get a Monte Carlo
             # realization of the abundance of gal_type galaxies
-            self._occupation[gal_type] = occupation_func(halo_table=self.halo_table)
+            self._occupation[gal_type] = occupation_func(table=self.halo_table)
 
             # Now use the above result to set up the indexing scheme
             self._total_abundance[gal_type] = (

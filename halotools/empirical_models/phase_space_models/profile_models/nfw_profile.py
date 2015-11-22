@@ -111,11 +111,11 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
             Array of mass-like variable upon which 
             occupation statistics are based. 
             If ``prim_haloprop`` is not passed, 
-            then ``halo_table`` keyword argument must be passed. 
+            then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, 
+            If ``table`` is not passed, 
             then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 

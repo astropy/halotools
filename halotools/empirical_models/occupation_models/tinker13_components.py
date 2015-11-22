@@ -155,12 +155,12 @@ class Tinker13Cens(OccupationComponent):
 
         if 'prim_haloprop' in kwargs:
             prim_haloprop = kwargs['prim_haloprop']
-        elif 'halo_table' in kwargs:
-            halo_table = kwargs['halo_table']
+        elif 'table' in kwargs:
+            table = kwargs['table']
             try:
-                prim_haloprop = halo_table[self.prim_haloprop_key]
+                prim_haloprop = table[self.prim_haloprop_key]
             except KeyError:
-                msg = ("The ``halo_table`` passed as a keyword argument to the mean_quiescent_fraction method\n"
+                msg = ("The ``table`` passed as a keyword argument to the mean_quiescent_fraction method\n"
                     "does not have the requested ``%s`` key")
                 raise HalotoolsError(msg % self.prim_haloprop_key)
 
@@ -179,27 +179,27 @@ class Tinker13Cens(OccupationComponent):
         mc_generator = np.random.random(custom_len(quiescent_fraction))
 
         result = np.where(mc_generator < quiescent_fraction, 'quiescent', 'active')
-        if 'halo_table' in kwargs:
-            kwargs['halo_table'][self.sfr_designation_key] = result
-            kwargs['halo_table']['sfr_designation'] = result
+        if 'table' in kwargs:
+            kwargs['table'][self.sfr_designation_key] = result
+            kwargs['table']['sfr_designation'] = result
 
         return result
 
     def mean_occupation(self, **kwargs):
         """
         """
-        if 'halo_table' in kwargs:
-            halo_table = kwargs['halo_table']
+        if 'table' in kwargs:
+            table = kwargs['table']
             try:
-                prim_haloprop = halo_table[self.prim_haloprop_key]
+                prim_haloprop = table[self.prim_haloprop_key]
             except KeyError:
-                msg = ("The ``halo_table`` passed as a keyword argument to the ``mean_occupation`` method\n"
+                msg = ("The ``table`` passed as a keyword argument to the ``mean_occupation`` method\n"
                     "does not have the requested ``%s`` key")
                 raise HalotoolsError(msg % self.prim_haloprop_key)
             try:
-                sfr_designation = halo_table[self.sfr_designation_key]
+                sfr_designation = table[self.sfr_designation_key]
             except KeyError:
-                msg = ("The ``halo_table`` passed as a keyword argument to the ``mean_occupation`` method\n"
+                msg = ("The ``table`` passed as a keyword argument to the ``mean_occupation`` method\n"
                     "does not have the requested ``%s`` key")
                 raise HalotoolsError(msg % self.sfr_designation_key)
         else:
@@ -207,7 +207,7 @@ class Tinker13Cens(OccupationComponent):
                 prim_haloprop = kwargs['prim_haloprop']
                 sfr_designation = kwargs['sfr_designation']
             except KeyError:
-                msg = ("If not passing a ``halo_table`` keyword argument to the ``mean_occupation`` method,\n"
+                msg = ("If not passing a ``table`` keyword argument to the ``mean_occupation`` method,\n"
                     "you must pass both ``prim_haloprop`` and ``sfr_designation`` keyword arguments")
                 raise HalotoolsError(msg)
             if type(sfr_designation) == str:
@@ -216,9 +216,9 @@ class Tinker13Cens(OccupationComponent):
                     msg = ("The only acceptable values of ``sfr_designation`` are ``active`` or ``quiescent``")
                     raise HalotoolsError(msg)
 
-        if 'halo_table' in kwargs:
-            quiescent_result = self.mean_occupation_quiescent(halo_table = halo_table)
-            active_result = self.mean_occupation_active(halo_table = halo_table)        
+        if 'table' in kwargs:
+            quiescent_result = self.mean_occupation_quiescent(table = table)
+            active_result = self.mean_occupation_active(table = table)        
         else:
             quiescent_result = self.mean_occupation_quiescent(prim_haloprop = prim_haloprop)
             active_result = self.mean_occupation_active(prim_haloprop = prim_haloprop)
@@ -328,7 +328,7 @@ class AssembiasTinker13Cens(Tinker13Cens, HeavisideAssembias):
 
         sec_haloprop_key : string, optional 
             String giving the column name of the secondary halo property 
-            governing the assembly bias. Must be a key in the halo_table 
+            governing the assembly bias. Must be a key in the table 
             passed to the methods of `HeavisideAssembiasComponent`. 
             Default value is specified in the `~halotools.empirical_models.model_defaults` module.
 
@@ -435,9 +435,9 @@ class Tinker13QuiescentSats(OccupationComponent):
         Parameters
         ----------        
         prim_haloprop : array, optional 
-            array of masses of halo_table in the catalog
+            array of masses of table in the catalog
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
 
         Returns
@@ -455,8 +455,8 @@ class Tinker13QuiescentSats(OccupationComponent):
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        if 'table' in kwargs.keys():
+            mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
@@ -476,10 +476,10 @@ class Tinker13QuiescentSats(OccupationComponent):
         return mean_nsat
 
 
-    def mc_sfr_designation(self, halo_table):
+    def mc_sfr_designation(self, table):
         """
         """
-        halo_table[self.sfr_designation_key][:] = 'quiescent'
+        table[self.sfr_designation_key][:] = 'quiescent'
 
 
     def _initialize_param_dict(self):
@@ -599,9 +599,9 @@ class Tinker13ActiveSats(OccupationComponent):
         Parameters
         ----------        
         prim_haloprop : array, optional 
-            array of masses of halo_table in the catalog
+            array of masses of table in the catalog
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
 
         Returns
@@ -619,8 +619,8 @@ class Tinker13ActiveSats(OccupationComponent):
         Assumes constant scatter in the stellar-to-halo-mass relation. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        if 'table' in kwargs.keys():
+            mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
@@ -639,10 +639,10 @@ class Tinker13ActiveSats(OccupationComponent):
 
         return mean_nsat
 
-    def mc_sfr_designation(self, halo_table):
+    def mc_sfr_designation(self, table):
         """
         """
-        halo_table[self.sfr_designation_key][:] = 'active'
+        table[self.sfr_designation_key][:] = 'active'
 
     def _initialize_param_dict(self):
         """ Set the initial values of ``self.param_dict`` according to 

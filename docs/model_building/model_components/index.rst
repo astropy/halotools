@@ -18,23 +18,8 @@ Tutorial coming soon!
 Stellar-to-halo-mass component models  
 =======================================
 Tutorial coming soon!
-
-Halo profile component models  
-===============================
-
-.. toctree::
-   :maxdepth: 1
-
-   phase_space_models/profile_template_tutorial
    
 
-Assembly bias component models 
-================================
-
-.. toctree::
-   :maxdepth: 1
-
-   assembias_models/heaviside_assembias_tutorial
 
 
 

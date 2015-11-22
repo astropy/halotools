@@ -190,10 +190,10 @@ class TestNFWPhaseSpace(TestCase):
         t = Table({'c': self.c15})
         # with pytest.raises(HalotoolsError) as exc:
         #     x, y, z = self.nfw.mc_halo_centric_pos(
-        #     halo_radius=halo_radius, profile_params=[self.c10], seed=43, halo_table = t)
+        #     halo_radius=halo_radius, profile_params=[self.c10], seed=43, table = t)
         # t['host_centric_distance'] = 0.
         # x, y, z = self.nfw.mc_halo_centric_pos(
-        #     halo_radius=halo_radius, profile_params=[self.c10], seed=43, halo_table = t)
+        #     halo_radius=halo_radius, profile_params=[self.c10], seed=43, table = t)
         # norm = t['host_centric_distance']
         # assert np.all(norm > 0)
         # assert np.all(norm < halo_radius)
@@ -218,7 +218,7 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(y1 == y2)
         assert np.all(z1 == z2)
 
-        self.nfw.mc_pos(halo_table = self._dummy_halo_table)
+        self.nfw.mc_pos(table = self._dummy_halo_table)
 
     def test_vrad_disp_from_lookup(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._vrad_disp_from_lookup`. 
@@ -265,7 +265,7 @@ class TestNFWPhaseSpace(TestCase):
     def test_mc_vel(self):
         """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_vel`. 
 
-        Method verifies that the ``vx`` column of an input ``halo_table`` is in fact over-written. 
+        Method verifies that the ``vx`` column of an input ``table`` is in fact over-written. 
 
         Notes 
         -----

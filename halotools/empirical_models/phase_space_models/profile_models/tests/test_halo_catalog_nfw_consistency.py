@@ -78,7 +78,7 @@ class TestHaloCatalogNFWConsistency(TestCase):
             median_conc = np.median(carr[mask])
 
             predicted_conc = self.nfw_profile.conc_NFWmodel(
-                halo_table = halos[mask])
+                table = halos[mask])
 
             assert np.allclose(carr[mask], predicted_conc, rtol = 0.001)
 

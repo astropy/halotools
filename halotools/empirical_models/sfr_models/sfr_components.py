@@ -3,7 +3,7 @@
 
 """
 from __future__ import (
-    division, print_function, absolute_import, unicode_literals)
+    division, print_function, absolute_import)
 
 __all__ = ['BinaryGalpropModel', 'BinaryGalpropInterpolModel']
 
@@ -74,6 +74,10 @@ class BinaryGalpropModel(object):
                 "implement a method named %s " % required_method_name)
 
         setattr(self, 'mc_'+self.galprop_name, self._mc_galprop)
+
+        self._methods_to_inherit = ['mc_'+self.galprop_name]
+
+        self._galprop_dtypes_to_allocate = np.dtype([(self.galprop_name, bool)])
 
 
     def _mc_galprop(self, seed=None, **kwargs):
@@ -246,11 +250,11 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         ----------
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
         -------
@@ -259,13 +263,13 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         """
         # Retrieve the array storing the mass-like variable
-        if 'halo_table' in kwargs.keys():
-            prim_haloprop = kwargs['halo_table'][self.prim_haloprop_key]
+        if 'table' in kwargs.keys():
+            prim_haloprop = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             prim_haloprop = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halo_table`` or  ``prim_haloprop``")
+                "``table`` or  ``prim_haloprop``")
 
         if self._logparam is True:
             prim_haloprop = np.log10(prim_haloprop)

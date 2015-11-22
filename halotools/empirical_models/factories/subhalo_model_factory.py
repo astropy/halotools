@@ -25,12 +25,24 @@ from ...custom_exceptions import *
 
 
 class SubhaloModelFactory(ModelFactory):
-    """ Class used to build any model of the galaxy-halo connection 
-    in which there is a one-to-one correspondence between subhalos and galaxies.  
+    """ Class used to build models of the galaxy-halo connection in which galaxies live at the centers of subhalos.  
 
-    Can be thought of as a factory that takes a model dictionary as input, 
-    and generates a composite model object. The returned object can be used directly to 
-    populate a simulation with a Monte Carlo realization of the model. 
+    The arguments passed to the `SubhaloModelFactory` constructor determine 
+    the features of the model that are returned 
+    by the factory. There are three sets of options for these arguments:
+
+    * The ``model_nickname`` string argument can be used to return composite models that have already been pre-built by the Halotools package.
+
+    * A sequence of ``model_features`` can be passed, each of which are instances of component models. In this case the factory composes these independently-defined components into a composite model. 
+
+    * By combining the ``baseline_model_instance`` and ``model_features`` arguments, you can swap out features of the baseline composite model with new component models you pass in.  
+
+    Regardless what set of instructions you pass to factory, the returned object can be used 
+    to directly populate subhalos with mock galaxies. 
+
+    Explicit examples of each use-case appear in the documentation below. 
+    See :ref:`subhalo_model_factory_tutorial` for thorough documentation on the internals of the factory. 
+
     """
 
     def __init__(self, model_nickname = None, **kwargs):
@@ -43,10 +55,7 @@ class SubhaloModelFactory(ModelFactory):
             See the ``Examples`` below. 
 
         *model_features : sequence of keyword arguments, optional 
-            The standard way to call the `SubhaloModelFactory` is 
-            with a sequence of keyword arguments providing the set of 
-            features that you want to build your composite model with. 
-            Each keyword you use will be interpreted as the name of the feature; 
+            Each keyword you use will be interpreted as the name of a feature in the composite model; 
             the value bound to each keyword must be an instance of a 
             component model governing the behavior of that feature. 
             See the ``Examples`` below. 
@@ -56,18 +65,21 @@ class SubhaloModelFactory(ModelFactory):
             will be called during mock population. 
 
             Some component models may have explicit dependence upon 
-            the value of some other galaxy model property. 
+            the value of some other galaxy property being modeled. 
             In such a case, you must pass a ``model_feature_calling_sequence`` list, 
             ordered in the desired calling sequence. 
+
             A classic example is if the stellar-to-halo-mass relation 
-            has explicit dependence on whether or not the galaxy is active or quiescent. 
-            In such a case, an example ``model_feature_calling_sequence`` could be 
-            model_feature_calling_sequence = ['sfr', 'stellar_mass', ...]. 
+            has explicit dependence on the star formation rate of the galaxy 
+            (active or quiescent). For this example, the
+            ``model_feature_calling_sequence`` would be 
+            model_feature_calling_sequence = ['sfr_designation', 'stellar_mass', ...]. 
 
             Default behavior is to assume that no model feature  
             has explicit dependence upon any other, in which case the component 
             models appearing in the ``model_features`` keyword arguments 
-            will be called in random order. 
+            will be called in random order, giving primacy to the potential presence 
+            of `stellar_mass` and/or `luminosity` features. 
 
         galaxy_selection_func : function object, optional  
             Function object that imposes a cut on the mock galaxies. 
@@ -79,7 +91,7 @@ class SubhaloModelFactory(ModelFactory):
             Default is None.  
 
         halo_selection_func : function object, optional   
-            Function object used to place a cut on the input ``halo_table``. 
+            Function object used to place a cut on the input ``table``. 
             If the ``halo_selection_func`` keyword argument is passed, 
             the input to the function must be a single positional argument storing a 
             length-N structured numpy array or Astropy table; 
@@ -88,42 +100,113 @@ class SubhaloModelFactory(ModelFactory):
 
         Examples 
         ---------
+        First let's see how we can use the ``model_nickname`` argument to return the 
+        pre-built `behroozi10` composite model:
 
-        >>> model_instance = SubhaloModelFactory('behroozi10', redshift = 2, threshold = 10.5)
+        >>> model_instance = SubhaloModelFactory(model_nickname = 'behroozi10', redshift = 2)
+
+        Passing in `behroozi10` as the ``model_nickname`` argument triggers the factory to 
+        call the `~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary` 
+        function. When doing so, the remaining arguments that were passed to the `SubhaloModelFactory` 
+        will in turn be passed on to 
+        `~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary`. 
+
+        Now that we have built an instance of a composite model, we can use it to 
+        populate any simulation in the Halotools cache: 
+
+        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
+
+        Next we'll show an example of how to call the `~SubhaloModelFactory` using the `model_features` 
+        keyword argument(s). In this next model, we'll use the 
+        `~halotools.empirical_models.smhm_models.Behroozi10SmHm` class to model stellar mass, 
+        and the `~halotools.empirical_models.sfr_models.BinaryGalpropModel` class to model 
+        whether galaxies are quiescent or star-forming. 
+
+        >>> from halotools.empirical_models.smhm_models import Behroozi10SmHm
+        >>> stellar_mass_model = Behroozi10SmHm(redshift = 0.5)
+
+        >>> from halotools.empirical_models.sfr_models import BinaryGalpropInterpolModel
+        >>> sfr_model = BinaryGalpropInterpolModel(galprop_name = 'quiescent_designation')
+
+        >>> model_instance = SubhaloModelFactory(stellar_mass = stellar_mass_model, sfr = sfr_model)
+
+        In the above call to the factory, note that we do not need to pass in a 
+        `mock_generation_calling_sequence` argument because in this model, neither the 
+        ``quiescent_designation`` nor the ``stellar_mass`` models have explicit dependence 
+        upon one another. 
+
+        >>> model_instance.populate_mock(simname = 'bolplanck', redshift = 0.5) # doctest: +SKIP
+
+        Notes 
+        ------
+        This factory is tested by the `~halotools.empirical_models.factories.tests.TestSubhaloModelFactory` class. 
 
         """
 
         input_model_dictionary, supplementary_kwargs = (
-            self._parse_constructor_kwargs(model_nickname, **kwargs)
+            self.parse_constructor_kwargs(model_nickname, **kwargs)
             )
 
         super(SubhaloModelFactory, self).__init__(input_model_dictionary, **supplementary_kwargs)
         self.mock_factory = SubhaloMockFactory
 
         self._model_feature_calling_sequence = (
-            self._retrieve_model_feature_calling_sequence(supplementary_kwargs))
+            self.build_model_feature_calling_sequence(supplementary_kwargs))
 
         self.model_dictionary = collections.OrderedDict()
         for key in self._model_feature_calling_sequence:
             self.model_dictionary[key] = copy(self._input_model_dictionary[key])
 
         # Build up and bind several lists from the component models
-        self._build_haloprop_list()
-        self._build_publication_list()
-        self._build_new_haloprop_func_dict()
-        self._build_dtype_list()
-        self._set_warning_suppressions()
-        self._set_model_redshift()
-        self._set_inherited_methods()
-        self._set_init_param_dict()
+        self.build_prim_sec_haloprop_list()
+        self.build_publication_list()
+        self.build_new_haloprop_func_dict()
+        self.build_dtype_list()
+        self.set_warning_suppressions()
+        self.set_model_redshift()
+        self.set_inherited_methods()
+        self.build_init_param_dict()
 
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
-        self._set_primary_behaviors()
+        self.set_primary_behaviors()
+        self.set_calling_sequence()
 
+    def parse_constructor_kwargs(self, model_nickname, **kwargs):
+        """ Method used to parse the arguments passed to 
+        the constructor into a model dictionary and supplementary arguments.
 
-    def _parse_constructor_kwargs(self, model_nickname, **kwargs):
-        """
+        The behavior is straightforward. If an input `model_nickname` was passed to `__init__`, 
+        then `parse_constructor_kwargs` calls the `_retrieve_prebuilt_model_dictionary` method. 
+        Otherwise, `parse_constructor_kwargs` examines the keyword arguments passed to `__init__`, 
+        and identifies the possible presence of ``galaxy_selection_func``, ``halo_selection_func`` and 
+        ``model_feature_calling_sequence``; all other keyword arguments will be treated as 
+        component models, and it is enforced that the values bound to all such arguments 
+        at the very least have a ``_methods_to_inherit`` attribute. 
+
+        Parameters 
+        -----------
+        model_nickname : string 
+            Nickname of the prebuilt composite model. If None, a full model dictionary 
+            must be supplied with the remaining keyword arguments. If not None, 
+            the string must correspond to one of the prebuilt models provided by Halotools. 
+
+        **kwargs : optional keyword arguments 
+            keywords will be interpreted as the ``feature name``; values must be instances of 
+            Halotools component models 
+
+        Returns 
+        --------
+        input_model_dictionary : dict 
+            Model dictionary defining the composite model. 
+
+        supplementary_kwargs : dict 
+            Dictionary of any possible remaining keyword arguments passed to the `__init__` constructor 
+            that are not part of the composite model dictionary, e.g., ``model_feature_calling_sequence``. 
+
+        See also 
+        ---------
+        :ref:`subhalo_model_factory_parsing_kwargs`
         """
         if model_nickname is None:
             input_model_dictionary = copy(kwargs)
@@ -147,6 +230,7 @@ class SubhaloModelFactory(ModelFactory):
             if 'model_feature_calling_sequence' not in supplementary_kwargs:
                 supplementary_kwargs['model_feature_calling_sequence'] = None
 
+            self._enforce_component_model_format(input_model_dictionary)
             return input_model_dictionary, supplementary_kwargs
 
         else:
@@ -154,6 +238,54 @@ class SubhaloModelFactory(ModelFactory):
                 self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
                 )
             return input_model_dictionary, supplementary_kwargs 
+
+    def _enforce_component_model_format(self, candidate_model_dictionary):
+        """ Private method to ensure that the input model dictionary is properly formatted.
+        """
+        msg_preface = ("\nYou passed the following keyword argument "
+            "to the SubhaloModelFactory: ``%s``\n")
+        msg_conclusion = ("See the `~halotools.empirical_models.SubhaloModelFactory` "
+            "docstring for further details.\n")
+
+        for feature_key, component_model in candidate_model_dictionary.iteritems():
+            cl = component_model.__class__
+            clname = cl.__name__
+
+            if isinstance(component_model, cl):
+                pass
+            elif issubclass(component_model, cl):
+                msg = (msg_preface + "Instead of binding an instance of ``" + clname + 
+                    "`` to this keyword,\n"
+                    "instead you bound the ``"+clname+"`` itself.\n"
+                    "The structure of Halotools model dictionaries is strictly to accept \n"
+                    "component model instances, not component model classes. \n" + msg_conclusion)
+                raise HalotoolsError(msg % feature_key)
+
+            try:
+                assert hasattr(component_model, '_methods_to_inherit')
+                for methodname in component_model._methods_to_inherit:
+                    assert hasattr(component_model, methodname)
+            except AssertionError:
+                msg = (msg_preface + "You bound an instance of the ``"+clname+"`` to this keyword,\n"
+                    "but the instance does not have a properly defined ``_methods_to_inherit`` attribute.\n"
+                    "At a minimum, all component models must have this attribute, \n"
+                    "even if there is only an empty list bound to it.\n"
+                    "Any items in this list must be names of methods bound to the component model.\n" + msg_conclusion)
+                raise HalotoolsError(msg % feature_key)
+
+            try:
+                assert hasattr(component_model, '_galprop_dtypes_to_allocate')
+                dt = component_model._galprop_dtypes_to_allocate
+                assert type(dt) == np.dtype
+            except AssertionError:
+                msg = (msg_preface + "You bound an instance of the ``"+clname+"`` to this keyword,\n"
+                    "but the instance does not have a np.dtype object"
+                    "bound to the ``_galprop_dtypes_to_allocate`` attribute.\n"
+                    "At a minimum, all component models must have this attribute, \n"
+                    "and it must be numpy.dtype object,"
+                    "even if the dtype is empty.\n" + msg_conclusion)
+                raise HalotoolsError(msg % feature_key)
+
 
     def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
         """
@@ -194,8 +326,27 @@ class SubhaloModelFactory(ModelFactory):
 
         return input_model_dictionary, supplementary_kwargs
         
-    def _retrieve_model_feature_calling_sequence(self, supplementary_kwargs):
-        """
+    def build_model_feature_calling_sequence(self, supplementary_kwargs):
+        """ Method uses the ``model_feature_calling_sequence`` passed to __init__, if available. 
+        If no such argument was passed, the method chooses a *mostly* random order for the calling sequence, 
+        excepting only for cases where either there is a feature named ``stellar_mass`` or ``luminosity``, 
+        which are always called first in the absence of explicit instructions to the contrary. 
+
+        Parameters 
+        -----------
+        supplementary_kwargs : dict 
+            Dictionary storing all keyword arguments passed to the `__init__` constructor that were 
+            not part of the input model dictionary. 
+
+        Returns 
+        -------
+        model_feature_calling_sequence : list 
+            List of strings specifying the order in which the component models will be called upon 
+            during mock population to execute their methods. 
+
+        See also 
+        ---------
+        :ref:`model_feature_calling_sequence_mechanism`
         """
         ########################
         ### Require that all elements of the input model_feature_calling_sequence 
@@ -245,8 +396,10 @@ class SubhaloModelFactory(ModelFactory):
         return model_feature_calling_sequence
 
 
-    def _set_inherited_methods(self):
-        """ Each component model *should* have a `_mock_generation_calling_sequence` attribute 
+    def set_inherited_methods(self):
+        """ Function determines which component model methods are inherited by the composite model. 
+
+        Each component model *should* have a `_mock_generation_calling_sequence` attribute 
         that provides the sequence of method names to call during mock population. Additionally, 
         each component *should* have a `_methods_to_inherit` attribute that determines 
         which methods will be inherited by the composite model. 
@@ -262,7 +415,7 @@ class SubhaloModelFactory(ModelFactory):
         which attributes will be inherited by the composite model. If any component models did not 
         implement the `_attrs_to_inherit`, an empty list is forcibly added to the component model. 
 
-        After calling the _set_inherited_methods method, it will be therefore be entirely safe to 
+        After calling the set_inherited_methods method, it will be therefore be entirely safe to 
         run a for loop over each component model's `_methods_to_inherit` and `_attrs_to_inherit`, 
         even if these lists were forgotten or irrelevant to that particular component. 
         """
@@ -321,7 +474,7 @@ class SubhaloModelFactory(ModelFactory):
             example_repeated_attr = repeated_attr_list[0]
             warn(repeated_attr_msg % example_repeated_attr)
 
-    def _set_primary_behaviors(self, **kwargs):
+    def set_primary_behaviors(self, **kwargs):
         """ Creates names and behaviors for the primary methods of `SubhaloModelFactory` 
         that will be used by the outside world.  
 
@@ -334,27 +487,21 @@ class SubhaloModelFactory(ModelFactory):
         regardless of the complexity of the model. 
 
         The behaviors of the methods created here are defined elsewhere; 
-        `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
+        `set_primary_behaviors` just creates a symbolic link to those external behaviors. 
+
+        See also 
+        ---------
+        :ref:`subhalo_model_factory_inheriting_behaviors`
         """
 
         # Loop over all component features in the composite model
         for feature, component_model in self.model_dictionary.iteritems():
 
-            try:
-                component_model_galprop_dtype = component_model._galprop_dtypes_to_allocate
-            except AttributeError:
-                component_model_galprop_dtype = np.dtype([])
-
-            methods_to_inherit = list(set(
-                component_model._methods_to_inherit))
-
-            for methodname in methods_to_inherit:
+            for methodname in component_model._methods_to_inherit:
                 new_method_name = methodname
-                new_method_behavior = self._update_param_dict_decorator(
+                new_method_behavior = self.update_param_dict_decorator(
                     component_model, methodname)
                 setattr(self, new_method_name, new_method_behavior)
-                setattr(getattr(self, new_method_name), 
-                    '_galprop_dtypes_to_allocate', component_model_galprop_dtype)
 
             attrs_to_inherit = list(set(
                 component_model._attrs_to_inherit))
@@ -363,28 +510,45 @@ class SubhaloModelFactory(ModelFactory):
                 attr = getattr(component_model, attrname)
                 setattr(self, new_attr_name, attr)
 
-        self._set_calling_sequence(**kwargs)
 
-    def _update_param_dict_decorator(self, component_model, func_name):
-        """ Decorator used to propagate any possible changes 
-        in the composite model param_dict 
+    def update_param_dict_decorator(self, component_model, func_name):
+        """ Decorator used to propagate any possible changes in the composite model param_dict 
         down to the appropriate component model param_dict. 
+
+        Parameters 
+        -----------
+        component_model : obj 
+            Instance of the component model in which the behavior of the function is defined. 
+
+        func_name : string 
+            Name of the method in the component model whose behavior is being decorated. 
+
+        Returns 
+        --------
+        decorated_func : function 
+            Function object whose behavior is identical 
+            to the behavior of the function in the component model, 
+            except that the component model param_dict is first updated with any 
+            possible changes to corresponding parameters in the composite model param_dict.
+
+        See also 
+        --------
+        :ref:`update_param_dict_decorator_mechanism`
+
+        :ref:`param_dict_mechanism`
         """
+        return ModelFactory.update_param_dict_decorator(self, component_model, func_name)
 
-        def decorated_func(*args, **kwargs):
+    def set_calling_sequence(self):
+        """ Method used to determine the sequence of function calls that will be made during 
+        mock population. The methods of each component model will be called one after the other, 
+        and the order in which the component models are called upon to execute their methods is determined by 
+        the 
 
-            # Update the param_dict as necessary
-            for key in self.param_dict.keys():
-                if key in component_model.param_dict:
-                    component_model.param_dict[key] = self.param_dict[key]
+        See also 
+        ----------
+        :ref:`model_feature_calling_sequence_mechanism`
 
-            func = getattr(component_model, func_name)
-            return func(*args, **kwargs)
-
-        return decorated_func
-
-    def _set_calling_sequence(self, **kwargs):
-        """
         """
         self._mock_generation_calling_sequence = []
 
@@ -399,14 +563,8 @@ class SubhaloModelFactory(ModelFactory):
             "calling sequence of another model.\nYou should rename this method in one of your "
             "component models to disambiguate.\n")
 
-        ###############
-        # If provided, retrieve the input list defining the calling sequence.
-        # Otherwise, it will be assumed that specifying the calling sequence is not necessary 
-        # and an effectively random sequence will be chosen
-        try:
-            feature_sequence = kwargs['mock_generation_calling_sequence']
-        except KeyError:
-            feature_sequence = self.model_dictionary.keys()
+        # The model dictionary is an OrderedDict that is already appropriately structured
+        feature_sequence = self.model_dictionary.keys()
 
         ###############
         # Loop over feature_sequence and successively append each component model's
@@ -430,8 +588,9 @@ class SubhaloModelFactory(ModelFactory):
             else:
                 warn(missing_calling_sequence_msg % component_model.__class__.__name__)
 
-    def _set_model_redshift(self):
-        """ 
+    def set_model_redshift(self):
+        """ Method sets the redshift of the composite model, simultaneously enforcing self-consistency 
+        between the the redshifts of the component models. 
         """
         msg = ("Inconsistency between the redshifts of the component models:\n"
             "    For component model 1 = ``%s``, the model has redshift = %.2f.\n"
@@ -452,10 +611,18 @@ class SubhaloModelFactory(ModelFactory):
 
             last_component = component_model
 
-        self.redshift = redshift
+        try:
+            self.redshift = redshift
+        except NameError:
+            self.redshift = sim_defaults.default_redshift
 
-    def _build_haloprop_list(self):
-        """
+    def build_prim_sec_haloprop_list(self):
+        """ Method builds the ``_haloprop_list`` of strings. 
+
+        This list stores the names of all halo catalog columns 
+        that appear as either ``prim_haloprop_key`` or ``sec_haloprop_key`` of any component model. 
+        For all strings appearing in ``_haloprop_list``, the mock ``galaxy_table`` will have 
+        a corresponding column storing the halo property inherited by the mock galaxy. 
         """
         haloprop_list = []
         # Loop over all component features in the composite model
@@ -468,8 +635,8 @@ class SubhaloModelFactory(ModelFactory):
 
         self._haloprop_list = list(set(haloprop_list))
 
-    def _build_publication_list(self):
-        """
+    def build_publication_list(self):
+        """ Method collects together all publications from each of the component models. 
         """
         pub_list = []
         # Loop over all component features in the composite model
@@ -491,8 +658,14 @@ class SubhaloModelFactory(ModelFactory):
 
         self.publications = list(set(pub_list))
 
-    def _build_new_haloprop_func_dict(self):
-        """
+    def build_new_haloprop_func_dict(self):
+        """ Method used to build a dictionary of functions, ``new_haloprop_func_dict``, 
+        that create new halo catalog columns 
+        during a pre-processing phase of mock population. 
+
+        See also 
+        ---------
+        :ref:`new_haloprop_func_dict_mechanism`
         """
         new_haloprop_func_dict = {}
         # Loop over all component features in the composite model
@@ -517,8 +690,20 @@ class SubhaloModelFactory(ModelFactory):
 
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
-    def _set_warning_suppressions(self):
-        """
+    def set_warning_suppressions(self):
+        """ Method used to determine whether a warning should be issued if the 
+        `build_init_param_dict` method detects the presence of multiple appearances 
+        of the same parameter name. 
+
+        If *any* of the component model instances have a 
+        `_suppress_repeated_param_warning` attribute that is set to the boolean True value, 
+        then no warning will be issued even if there are multiple appearances of the same 
+        parameter name. This allows the user to not be bothered with warning messages for cases 
+        where it is understood that there will be no conflicting behavior. 
+
+        See also 
+        ---------
+        build_init_param_dict
         """
         self._suppress_repeated_param_warning = False
         # Loop over all component features in the composite model
@@ -527,19 +712,29 @@ class SubhaloModelFactory(ModelFactory):
             if hasattr(component_model, '_suppress_repeated_param_warning'):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
-    def _set_init_param_dict(self):
-        """ Method used to build a dictionary of parameters for the composite model. 
+    def build_init_param_dict(self):
+        """ Create the `param_dict` attribute of the instance. The `param_dict` is a dictionary storing 
+        the full collection of parameters controlling the behavior of the composite model. 
 
-        Accomplished by retrieving all the parameters of the component models. 
-        Method returns nothing, but binds ``param_dict`` to the class instance. 
+        The `param_dict` dictionary is determined by examining the 
+        `param_dict` attribute of every component model, and building up a composite 
+        dictionary from them. It is permissible for the same parameter name to appear more than once 
+        amongst a set of component models, but a warning will be issued in such cases. 
 
         Notes 
         -----
-        In MCMC applications, the items of ``param_dict`` define the possible 
+        In MCMC applications, the items of ``param_dict`` defines the possible 
         parameter set explored by the likelihood engine. 
         Changing the values of the parameters in ``param_dict`` 
         will propagate to the behavior of the component models 
         when the relevant methods are called. 
+
+        See also 
+        ---------
+        set_warning_suppressions
+
+        :ref:`param_dict_mechanism` 
+
         """
 
         self.param_dict = {}
@@ -574,8 +769,18 @@ class SubhaloModelFactory(ModelFactory):
 
         self._init_param_dict = copy(self.param_dict)
 
-    def _build_dtype_list(self):
-        """
+    def build_dtype_list(self):
+        """ Create the `_galprop_dtypes_to_allocate` attribute that determines 
+        the name and data type of every galaxy property that will appear in the mock ``galaxy_table``. 
+
+        This attribute is determined by examining the 
+        `_galprop_dtypes_to_allocate` attribute of every component model, and building a composite 
+        set of all these dtypes, enforcing self-consistency in cases where the same galaxy property 
+        appears more than once. 
+
+        See also 
+        ---------
+        :ref:`galprop_dtypes_to_allocate_mechanism` 
         """
         dtype_list = []
         # Loop over all component features in the composite model
@@ -593,6 +798,48 @@ class SubhaloModelFactory(ModelFactory):
 
         Primary behaviors are reset as well, as this is how the 
         inherited behaviors get bound to the values in ``param_dict``. 
+
+        See also 
+        ---------
+        :ref:`param_dict_mechanism` 
         """
         self.param_dict = self._init_param_dict
-        self._set_primary_behaviors()
+        self.set_primary_behaviors()
+        self.set_calling_sequence()
+
+    def populate_mock(self, **kwargs):
+        """ Method used to populate a simulation using the model. 
+
+        After calling this method, ``self`` will have a new ``mock`` attribute, 
+        which has a ``table`` bound to it containing the Monte Carlo 
+        realization of the model. 
+
+        Parameters 
+        ----------
+        halocat : object, optional 
+            Class instance of `~halotools.sim_manager.HaloCatalog`. 
+            This object contains the halo catalog and its metadata.  
+
+        simname : string, optional
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        redshift : float, optional
+            Redshift of the desired catalog. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        See also 
+        -----------
+        :ref:`basic_syntax_subhalo_mocks` 
+        
+        :ref:`populating_mocks_with_alternate_sims_tutorial`
+
+        """
+        ModelFactory.populate_mock(self, **kwargs)
+

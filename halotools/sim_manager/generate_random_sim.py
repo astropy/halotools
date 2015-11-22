@@ -182,9 +182,9 @@ class FakeMock(object):
 				>>> cluster_ssfr = cluster_gals['ssfr']
 		"""
 		nhalos = np.max([100, approximate_ngals/20.]).astype(int)
-		self.snapshot = FakeSim(num_halos_per_massbin=nhalos)
-		self.halo_table = self.snapshot.halo_table
-		self.ptcl_table = self.snapshot.ptcl_table
+		self.halocat = FakeSim(num_halos_per_massbin=nhalos)
+		self.halo_table = self.halocat.halo_table
+		self.ptcl_table = self.halocat.ptcl_table
 		self.create_astropy_table = True
 		self.seed = seed
 
@@ -197,7 +197,7 @@ class FakeMock(object):
 
 		np.random.seed(self.seed)
 
-		central_occupations = np.random.random_integers(0,1,self.snapshot.num_halos)
+		central_occupations = np.random.random_integers(0,1,self.halocat.num_halos)
 		self.num_centrals = central_occupations.sum()
 		central_nickname_array = np.repeat('centrals', self.num_centrals)
 		central_halo_mvir = np.repeat(self.halo_table['halo_mvir'], central_occupations)
@@ -207,7 +207,7 @@ class FakeMock(object):
 		central_halo_z = np.repeat(self.halo_table['halo_z'], central_occupations, axis=0)
 		central_halo_zhalf = np.repeat(self.halo_table['halo_zhalf'], central_occupations)
 
-		satellite_occupations = np.random.random_integers(0,3,self.snapshot.num_halos)
+		satellite_occupations = np.random.random_integers(0,3,self.halocat.num_halos)
 		self.num_satellites = satellite_occupations.sum()
 		satellite_nickname_array = np.repeat('satellites', self.num_satellites)
 		satellite_halo_mvir = np.repeat(self.halo_table['halo_mvir'], satellite_occupations)
@@ -226,7 +226,7 @@ class FakeMock(object):
 		censat_halo_z = np.append(central_halo_z, satellite_halo_z, axis=0)
 		censat_halo_zhalf = np.append(central_halo_zhalf, satellite_halo_zhalf)
 
-		orphan_occupations = np.random.random_integers(0,3,self.snapshot.num_halos)
+		orphan_occupations = np.random.random_integers(0,3,self.halocat.num_halos)
 		self.num_orphans = orphan_occupations.sum()
 		orphan_nickname_array = np.repeat('orphans', self.num_orphans)
 		orphan_halo_mvir = np.repeat(self.halo_table['halo_mvir'], orphan_occupations)
@@ -252,9 +252,9 @@ class FakeMock(object):
 
 		num_gals = self.num_centrals + self.num_satellites + self.num_orphans 
 
-		self.galaxy_table['x'] = np.random.uniform(0, self.snapshot.Lbox, num_gals)
-		self.galaxy_table['y'] = np.random.uniform(0, self.snapshot.Lbox, num_gals)
-		self.galaxy_table['z'] = np.random.uniform(0, self.snapshot.Lbox, num_gals)
+		self.galaxy_table['x'] = np.random.uniform(0, self.halocat.Lbox, num_gals)
+		self.galaxy_table['y'] = np.random.uniform(0, self.halocat.Lbox, num_gals)
+		self.galaxy_table['z'] = np.random.uniform(0, self.halocat.Lbox, num_gals)
 
 		self.galaxy_table['stellar_mass'] = 10.**(np.random.power(0.5, size=num_gals)*4 + 8)
 

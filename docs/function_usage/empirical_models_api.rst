@@ -17,3 +17,9 @@ Reference/API
 .. automodapi:: halotools.empirical_models.occupation_models
 .. automodapi:: halotools.empirical_models.factories
 
+.. automodapi:: halotools.empirical_models.composite_models
+.. automodapi:: halotools.empirical_models.composite_models.hod_models
+.. automodapi:: halotools.empirical_models.composite_models.smhm_models
+
+.. automodapi:: halotools.empirical_models.smhm_models
+.. automodapi:: halotools.empirical_models.sfr_models
