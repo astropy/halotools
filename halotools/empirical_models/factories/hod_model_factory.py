@@ -94,7 +94,7 @@ class HodModelFactory(ModelFactory):
             gal_type_list = ['centrals', 'satellites', 'orphans']. 
 
         halo_selection_func : function object, optional   
-            Function object used to place a cut on the input ``halo_table``. 
+            Function object used to place a cut on the input ``table``. 
             If the ``halo_selection_func`` keyword argument is passed, 
             the input to the function must be a single positional argument storing a 
             length-N structured numpy array or Astropy table; 
@@ -127,28 +127,28 @@ class HodModelFactory(ModelFactory):
         self.mock_factory = HodMockFactory
 
         self._model_feature_calling_sequence = (
-            self._retrieve_model_feature_calling_sequence(supplementary_kwargs))
+            self.build_model_feature_calling_sequence(supplementary_kwargs))
 
         self.model_dictionary = collections.OrderedDict()
         for key in self._model_feature_calling_sequence:
             self.model_dictionary[key] = copy(self._input_model_dictionary[key])
 
         # Build up and bind several lists from the component models
-        self._set_gal_types()
-        self._build_prim_sec_haloprop_list()
-        self._build_prof_param_keys()
-        self._build_publication_list()
-        self._build_dtype_list()
-        self._build_new_haloprop_func_dict()
-        self._set_warning_suppressions()
-        self._set_inherited_methods()
-        self._set_model_redshift()
-        self._set_init_param_dict()
+        self.set_gal_types()
+        self.build_prim_sec_haloprop_list()
+        self.build_prof_param_keys()
+        self.build_publication_list()
+        self.build_dtype_list()
+        self.build_new_haloprop_func_dict()
+        self.set_warning_suppressions()
+        self.set_inherited_methods()
+        self.set_model_redshift()
+        self.build_init_param_dict()
 
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
-        self._set_primary_behaviors()
-        self._set_calling_sequence()
+        self.set_primary_behaviors()
+        self.set_calling_sequence()
         self._test_dictionary_consistency()
 
         ############################################################
@@ -236,7 +236,7 @@ class HodModelFactory(ModelFactory):
 
         return input_model_dictionary, supplementary_kwargs
 
-    def _retrieve_model_feature_calling_sequence(self, supplementary_kwargs):
+    def build_model_feature_calling_sequence(self, supplementary_kwargs):
         """
         """
 
@@ -429,7 +429,7 @@ class HodModelFactory(ModelFactory):
             raise HalotoolsError(msg % model_dictionary_key)
 
 
-    def _set_gal_types(self):
+    def set_gal_types(self):
         """ Private method binding the ``gal_types`` list attribute. 
         If there are both centrals and satellites, method ensures that centrals 
         will always be built first, out of consideration for satellite 
@@ -441,7 +441,7 @@ class HodModelFactory(ModelFactory):
         self.gal_types = set(list(_gal_type_list))
 
 
-    def _set_primary_behaviors(self):
+    def set_primary_behaviors(self):
         """ Creates names and behaviors for the primary methods of `HodModelFactory` 
         that will be used by the outside world.  
 
@@ -454,7 +454,7 @@ class HodModelFactory(ModelFactory):
         regardless of the complexity of the model. 
 
         The behaviors of the methods created here are defined elsewhere; 
-        `_set_primary_behaviors` just creates a symbolic link to those external behaviors. 
+        `set_primary_behaviors` just creates a symbolic link to those external behaviors. 
         """
 
         for component_model in self.model_dictionary.values():
@@ -471,7 +471,7 @@ class HodModelFactory(ModelFactory):
 
             for methodname in methods_to_inherit:
                 new_method_name = methodname + '_' + gal_type
-                new_method_behavior = self._update_param_dict_decorator(
+                new_method_behavior = self.update_param_dict_decorator(
                     component_model, methodname)
                 setattr(self, new_method_name, new_method_behavior)
                 setattr(getattr(self, new_method_name), 
@@ -494,23 +494,33 @@ class HodModelFactory(ModelFactory):
                 self.threshold = getattr(self, 'threshold_' + gal_type)
 
 
-    def _update_param_dict_decorator(self, component_model, func_name):
-        """ Decorator used to propagate any possible changes 
-        in the composite model param_dict 
+    def update_param_dict_decorator(self, component_model, func_name):
+        """ Decorator used to propagate any possible changes in the composite model param_dict 
         down to the appropriate component model param_dict. 
+
+        Parameters 
+        -----------
+        component_model : obj 
+            Instance of the component model in which the behavior of the function is defined. 
+
+        func_name : string 
+            Name of the method in the component model whose behavior is being decorated. 
+
+        Returns 
+        --------
+        decorated_func : function 
+            Function object whose behavior is identical 
+            to the behavior of the function in the component model, 
+            except that the component model param_dict is first updated with any 
+            possible changes to corresponding parameters in the composite model param_dict.
+
+        See also 
+        --------
+        :ref:`update_param_dict_decorator_mechanism`
+
+        :ref:`param_dict_mechanism`
         """
-
-        def decorated_func(*args, **kwargs):
-
-            # Update the param_dict as necessary
-            for key in self.param_dict.keys():
-                if key in component_model.param_dict:
-                    component_model.param_dict[key] = self.param_dict[key]
-
-            func = getattr(component_model, func_name)
-            return func(*args, **kwargs)
-
-        return decorated_func
+        return ModelFactory.update_param_dict_decorator(self, component_model, func_name)
 
     def build_lookup_tables(self):
         """ Method to compute and load lookup tables for each of 
@@ -521,7 +531,7 @@ class HodModelFactory(ModelFactory):
             if hasattr(component_model, 'build_lookup_tables'):
                 component_model.build_lookup_tables()
 
-    def _set_init_param_dict(self):
+    def build_init_param_dict(self):
         """ Method used to build a dictionary of parameters for the composite model. 
 
         Accomplished by retrieving all the parameters of the component models. 
@@ -573,9 +583,10 @@ class HodModelFactory(ModelFactory):
         inherited behaviors get bound to the values in ``param_dict``. 
         """
         self.param_dict = self._init_param_dict
-        self._set_primary_behaviors()
+        self.set_primary_behaviors()
+        self.set_calling_sequence()
 
-    def _set_model_redshift(self):
+    def set_model_redshift(self):
         """ 
         """
         msg = ("Inconsistency between the redshifts of the component models:\n"
@@ -599,10 +610,13 @@ class HodModelFactory(ModelFactory):
             last_component = component_model
             last_gal_type = gal_type
 
-        self.redshift = redshift
+        try:
+            self.redshift = redshift
+        except NameError:
+            self.redshift = sim_defaults.default_redshift
 
 
-    def _build_prim_sec_haloprop_list(self):
+    def build_prim_sec_haloprop_list(self):
         """
         """
         haloprop_list = []
@@ -615,7 +629,7 @@ class HodModelFactory(ModelFactory):
 
         self._haloprop_list = list(set(haloprop_list))
 
-    def _build_prof_param_keys(self):
+    def build_prof_param_keys(self):
         """
         """
         prof_param_keys = []
@@ -626,7 +640,7 @@ class HodModelFactory(ModelFactory):
 
         self.prof_param_keys = list(set(prof_param_keys))
 
-    def _build_publication_list(self):
+    def build_publication_list(self):
         """
         """
         pub_list = []
@@ -637,7 +651,7 @@ class HodModelFactory(ModelFactory):
 
         self.publications = list(set(pub_list))
 
-    def _build_dtype_list(self):
+    def build_dtype_list(self):
         """
         """
         dtype_list = []
@@ -649,7 +663,7 @@ class HodModelFactory(ModelFactory):
 
         self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
 
-    def _build_new_haloprop_func_dict(self):
+    def build_new_haloprop_func_dict(self):
         """
         """
         new_haloprop_func_dict = {}
@@ -676,7 +690,7 @@ class HodModelFactory(ModelFactory):
 
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
-    def _set_warning_suppressions(self):
+    def set_warning_suppressions(self):
         """
         """
         self._suppress_repeated_param_warning = False
@@ -686,7 +700,7 @@ class HodModelFactory(ModelFactory):
             if hasattr(component_model, '_suppress_repeated_param_warning'):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
-    def _set_inherited_methods(self):
+    def set_inherited_methods(self):
         """ Each component model *should* have a `_mock_generation_calling_sequence` attribute 
         that provides the sequence of method names to call during mock population. Additionally, 
         each component *should* have a `_methods_to_inherit` attribute that determines 
@@ -703,7 +717,7 @@ class HodModelFactory(ModelFactory):
         which attributes will be inherited by the composite model. If any component models did not 
         implement the `_attrs_to_inherit`, an empty list is forcibly added to the component model. 
 
-        After calling the _set_inherited_methods method, it will be therefore be entirely safe to 
+        After calling the set_inherited_methods method, it will be therefore be entirely safe to 
         run a for loop over each component model's `_methods_to_inherit` and `_attrs_to_inherit`, 
         even if these lists were forgotten or irrelevant to that particular component. 
         """
@@ -729,7 +743,7 @@ class HodModelFactory(ModelFactory):
                 component_model._attrs_to_inherit = []
 
 
-    def _set_calling_sequence(self):
+    def set_calling_sequence(self):
         """
         """
         # model_feature_calling_sequence

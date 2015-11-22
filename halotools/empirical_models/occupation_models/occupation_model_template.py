@@ -99,11 +99,11 @@ class OccupationComponent(object):
         ----------        
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         seed : int, optional  
             Random number seed used to generate the Monte Carlo realization. 
@@ -112,7 +112,7 @@ class OccupationComponent(object):
         Returns
         -------
         mc_abundance : array
-            Integer array giving the number of galaxies in each of the input halo_table.     
+            Integer array giving the number of galaxies in each of the input table.     
         """ 
         first_occupation_moment = self.mean_occupation(**kwargs)
         if self._upper_occupation_bound == 1:
@@ -139,14 +139,14 @@ class OccupationComponent(object):
         Returns
         -------
         mc_abundance : array
-            Integer array giving the number of galaxies in each of the input halo_table. 
+            Integer array giving the number of galaxies in each of the input table. 
         """
         np.random.seed(seed=seed)
         mc_generator = np.random.random(custom_len(first_occupation_moment))
 
         result = np.where(mc_generator < first_occupation_moment, 1, 0)
-        if 'halo_table' in kwargs:
-            kwargs['halo_table']['halo_num_'+self.gal_type] = result
+        if 'table' in kwargs:
+            kwargs['table']['halo_num_'+self.gal_type] = result
         return result
 
     def _poisson_distribution(self, first_occupation_moment, seed=None, **kwargs):
@@ -165,7 +165,7 @@ class OccupationComponent(object):
         Returns
         -------
         mc_abundance : array
-            Integer array giving the number of galaxies in each of the input halo_table. 
+            Integer array giving the number of galaxies in each of the input table. 
         """
         np.random.seed(seed=seed)
         # The scipy built-in Poisson number generator raises an exception 
@@ -174,8 +174,8 @@ class OccupationComponent(object):
             model_defaults.default_tiny_poisson_fluctuation, first_occupation_moment)
 
         result = poisson.rvs(first_occupation_moment)
-        if 'halo_table' in kwargs:
-            kwargs['halo_table']['halo_num_'+self.gal_type] = result
+        if 'table' in kwargs:
+            kwargs['table']['halo_num_'+self.gal_type] = result
         return result
 
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Module containing classes used to model the mapping between 
-stellar mass and subhalo_table. 
+stellar mass and subtable. 
 """
 from __future__ import (
     division, print_function, absolute_import, unicode_literals)
@@ -59,7 +59,7 @@ class LogNormalScatterModel(object):
         To implement variable scatter, we need to define the level 
         of log-normal scatter at a set of control values 
         of the primary halo property. Here we give an example of a model 
-        in which the scatter is 0.3 dex for Milky Way halo_table and 0.1 dex in cluster halo_table:
+        in which the scatter is 0.3 dex for Milky Way table and 0.1 dex in cluster table:
 
         >>> scatter_abcissa = [12, 15]
         >>> scatter_ordinates = [0.3, 0.1]
@@ -83,32 +83,32 @@ class LogNormalScatterModel(object):
 
     def mean_scatter(self, **kwargs):
         """ Return the amount of log-normal scatter that should be added 
-        to the galaxy property as a function of the input halo_table. 
+        to the galaxy property as a function of the input table. 
 
         Parameters 
         ----------
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         Returns 
         -------
         scatter : array_like 
             Array containing the amount of log-normal scatter evaluated 
-            at the input halo_table. 
+            at the input table. 
         """
         # Retrieve the array storing the mass-like variable
-        if 'halo_table' in kwargs.keys():
-            mass = kwargs['halo_table'][self.prim_haloprop_key]
+        if 'table' in kwargs.keys():
+            mass = kwargs['table'][self.prim_haloprop_key]
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
             raise KeyError("Must pass one of the following keyword arguments to mean_occupation:\n"
-                "``halo_table`` or ``prim_haloprop``")
+                "``table`` or ``prim_haloprop``")
 
         self._update_interpol()
 
@@ -116,17 +116,17 @@ class LogNormalScatterModel(object):
 
     def scatter_realization(self, seed=None, **kwargs):
         """ Return the amount of log-normal scatter that should be added 
-        to the galaxy property as a function of the input halo_table. 
+        to the galaxy property as a function of the input table. 
 
         Parameters 
         ----------
         prim_haloprop : array, optional  
             Array of mass-like variable upon which occupation statistics are based. 
-            If ``prim_haloprop`` is not passed, then ``halo_table`` keyword argument must be passed. 
+            If ``prim_haloprop`` is not passed, then ``table`` keyword argument must be passed. 
 
-        halo_table : object, optional  
+        table : object, optional  
             Data table storing halo catalog. 
-            If ``halo_table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
+            If ``table`` is not passed, then ``prim_haloprop`` keyword argument must be passed. 
 
         seed : int, optional  
             Random number seed. Default is None. 
@@ -146,7 +146,7 @@ class LogNormalScatterModel(object):
 
     def _update_interpol(self):
         """ Private method that updates the interpolating functon used to 
-        define the level of scatter as a function of the input halo_table. 
+        define the level of scatter as a function of the input table. 
         If this method is not called after updating ``self.param_dict``, 
         changes in ``self.param_dict`` will not alter the model behavior. 
         """

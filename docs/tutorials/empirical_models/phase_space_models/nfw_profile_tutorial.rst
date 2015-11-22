@@ -12,6 +12,10 @@ This section of the documentation provides background material
 and detailed implementation notes on the functions and methods of the 
 `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` 
 and `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` models. 
+
+Outline 
+========
+
 We will start in :ref:`nfw_phase_space_class_structure` with an overview 
 of the orthogonal mix-in class design. The :ref:`nfw_spatial_profile_derivations` 
 section covers the mathematics of NFW spatial profiles and their Monte Carlo realizations, 

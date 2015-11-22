@@ -29,7 +29,7 @@ class SubhaloMockFactory(MockFactory):
         """
         Parameters 
         ----------
-        snapshot : object, keyword argument 
+        halocat : object, keyword argument 
             Object containing the halo catalog and other associated data.  
             Produced by `~halotools.sim_manager.supported_sims.HaloCatalog`
 
@@ -37,7 +37,7 @@ class SubhaloMockFactory(MockFactory):
             A model built by a sub-class of `~halotools.empirical_models.SubhaloModelFactory`. 
 
         additional_haloprops : string or list of strings, optional   
-            Each entry in this list must be a column key of ``snapshot.halo_table``. 
+            Each entry in this list must be a column key of ``halocat.halo_table``. 
             For each entry of ``additional_haloprops``, each member of 
             `mock.galaxy_table` will have a column key storing this property of its host halo. 
             If ``additional_haloprops`` is set to the string value ``all``, 
@@ -59,15 +59,22 @@ class SubhaloMockFactory(MockFactory):
             self.populate()
 
     def preprocess_halo_catalog(self):
-        """ Method to pre-process a halo catalog upon instantiation of 
-        the mock object. 
+        """ Method to pre-process a halo catalog upon instantiation of the mock object. 
+
+        New columns are added to the ``halo_table`` according to any entries in the 
+        ``new_haloprop_func_dict``. 
+
+        See also 
+        ---------
+        :ref:`new_haloprop_func_dict_mechanism`
+
         """
 
         ### Create new columns of the halo catalog, if applicable
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(halo_table = self.halo_table)
+                self.halo_table[new_haloprop_key] = new_haloprop_func(table = self.halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
             pass
@@ -102,12 +109,15 @@ class SubhaloMockFactory(MockFactory):
         self.galaxy_table['galid'] = np.arange(len(self.galaxy_table))
         self._precomputed_galprop_list.append('galid')
 
+        # Component models may explicitly distinguish between certain types of halos, 
+        # e.g., subhalos vs. host halos. Since this assignment is not dynamic, 
+        # it can be pre-computed. 
         for feature, component_model in self.model.model_dictionary.iteritems():
 
             try:
                 f = component_model.gal_type_func
                 newkey = feature + '_gal_type'
-                self.galaxy_table[newkey] = f(halo_table=self.galaxy_table)
+                self.galaxy_table[newkey] = f(table=self.galaxy_table)
                 self._precomputed_galprop_list.append(newkey)
             except AttributeError:
                 pass
@@ -115,22 +125,26 @@ class SubhaloMockFactory(MockFactory):
                 clname = component_model.__class__.__name__
                 msg = ("\nThe `gal_type_func` attribute of the " + clname + 
                     "\nraises an unexpected exception when passed a halo table as a "
-                    "halo_table keyword argument. \n"
+                    "table keyword argument. \n"
                     "If the features in your component model have explicit dependence "
                     "on galaxy type, \nthen you must implement the `gal_type_func` mechanism "
                     "in such a way that\nthis function accepts a "
-                    "length-N halo table as a ``halo_table`` keyword argument, \n"
+                    "length-N halo table as a ``table`` keyword argument, \n"
                     "and returns a length-N array of strings.\n")
                 raise HalotoolsError(msg)
 
     def populate(self):
         """ Method populating subhalos with mock galaxies. 
+
+        Each method appearing in the ``_mock_generation_calling_sequence`` attribute 
+        of the composite model is called in sequence, always being passed the 
+        ``galaxy_table`` as the ``table`` argument. 
         """
         self._allocate_memory()
 
         for method in self.model._mock_generation_calling_sequence:
             func = getattr(self.model, method)
-            func(halo_table = self.galaxy_table)
+            func(table = self.galaxy_table)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)
@@ -141,12 +155,34 @@ class SubhaloMockFactory(MockFactory):
         """
         Ngals = len(self.galaxy_table)
 
-        # Allocate or overwrite any non-static galaxy propery 
-        for key in self.model._galprop_dtypes_to_allocate.names:
-            if key not in self._precomputed_galprop_list:
-                dt = self.model._galprop_dtypes_to_allocate[key]
-                self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
+        new_column_generator = (key for key in self.model._galprop_dtypes_to_allocate.names 
+            if key not in self._precomputed_galprop_list)
 
+        for key in new_column_generator:
+            dt = self.model._galprop_dtypes_to_allocate[key]
+            self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
+
+    def build_additional_haloprops_list(self, **kwargs):
+        """
+        Method used to determine which halo properties will be included in the 
+        mock ``galaxy_table``. 
+
+        All halo properties in the ``_haloprop_list`` of the model will automatically be included. 
+        This list stores any ``prim_haloprop_key`` and/or ``sec_haloprop_key`` used in any 
+        component model. All ``halo_table`` keys listed in the ``additional_haloprops`` keyword argument 
+        will also be included. If ``additional_haloprops`` is set to the string ``all``, every single 
+        column of the ``halo_table`` will be included. 
+
+        Parameters 
+        -----------
+        additional_haloprops : string or list of strings, optional   
+            Each entry in this list must be a column key of ``halocat.halo_table``. 
+            For each entry of ``additional_haloprops``, each member of 
+            `mock.galaxy_table` will have a column key storing this property of its host halo. 
+            If ``additional_haloprops`` is set to the string value ``all``, 
+            the galaxy table will inherit every halo property in the catalog. Default is None. 
+        """
+        MockFactory.build_additional_haloprops_list(self, **kwargs)
 
 
 

@@ -36,7 +36,7 @@ class TestHearin15(TestCase):
 		d = {'halo_mvir': mass, 'halo_nfw_conc': conc}
 		self.toy_halo_table = Table(d)
 		self.toy_halo_table['halo_nfw_conc_percentile'] = compute_conditional_percentiles(
-			halo_table = self.toy_halo_table, 
+			table = self.toy_halo_table, 
 			prim_haloprop_key = 'halo_mvir', 
 			sec_haloprop_key = 'halo_nfw_conc', 
 			dlog10_prim_haloprop = 0.05)
@@ -45,25 +45,25 @@ class TestHearin15(TestCase):
 		self.highz_toy_halos = self.toy_halo_table[highz_mask]
 		self.lowz_toy_halos = self.toy_halo_table[np.invert(highz_mask)]
 
-		self.snapshot = HaloCatalog(preload_halo_table = True)
+		self.halocat = HaloCatalog(preload_halo_table = True)
 
-		self.snapshot2 = HaloCatalog(preload_halo_table = True, redshift = 2.)
+		self.halocat2 = HaloCatalog(preload_halo_table = True, redshift = 2.)
 
 	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Hearin15(self):
 
 		model = HodModelFactory('hearin15', concentration_binning = (1, 35, 5))
-		model.populate_mock(snapshot = self.snapshot)
+		model.populate_mock(halocat = self.halocat)
 
 	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11(self):
 
 		model = HodModelFactory('leauthaud11', concentration_binning = (1, 35, 5))
-		model.populate_mock(snapshot = self.snapshot)
+		model.populate_mock(halocat = self.halocat)
 
-		# Test that an attempt to repopulate with a different snapshot raises an exception
+		# Test that an attempt to repopulate with a different halocat raises an exception
 		with pytest.raises(HalotoolsError) as exc:
 			model.populate_mock(redshift=2)
 		with pytest.raises(HalotoolsError) as exc:
@@ -73,11 +73,11 @@ class TestHearin15(TestCase):
 
 		model_highz = HodModelFactory('leauthaud11', redshift = 2., 
 			concentration_binning = (1, 35, 5))
-		model_highz.populate_mock(snapshot = self.snapshot2)
+		model_highz.populate_mock(halocat = self.halocat2)
 		with pytest.raises(HalotoolsError) as exc:
 			model_highz.populate_mock()
 		with pytest.raises(HalotoolsError) as exc:
-			model_highz.populate_mock(snapshot = self.snapshot)
+			model_highz.populate_mock(halocat = self.halocat)
 		model_highz.populate_mock(redshift = 2.)
 
 

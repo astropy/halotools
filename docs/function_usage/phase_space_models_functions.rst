@@ -2,8 +2,8 @@
 
 .. _phase_space_models_functions:
 
-Phase Space Models 
-====================
+Phase Space Component Models 
+===============================
 
 .. _halo_boundary_functions: 
 

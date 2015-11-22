@@ -49,7 +49,7 @@ class ModelFactory(object):
             Default is None.  
 
         halo_selection_func : function object, optional   
-            Function object used to place a cut on the input ``halo_table``. 
+            Function object used to place a cut on the input ``table``. 
             If the ``halo_selection_func`` keyword argument is passed, 
             the input to the function must be a single positional argument storing a 
             length-N structured numpy array or Astropy table; 
@@ -75,12 +75,12 @@ class ModelFactory(object):
         """ Method used to populate a simulation using the model. 
 
         After calling this method, ``self`` will have a new ``mock`` attribute, 
-        which has a ``halo_table`` bound to it containing the Monte Carlo 
+        which has a ``table`` bound to it containing the Monte Carlo 
         realization of the model. 
 
         Parameters 
         ----------
-        snapshot : object, optional 
+        halocat : object, optional 
             Class instance of `~halotools.sim_manager.HaloCatalog`. 
             This object contains the halo catalog and its metadata.  
 
@@ -100,7 +100,7 @@ class ModelFactory(object):
 
         """
         inconsistent_redshift_error_msg = ("Inconsistency between the model redshift = %.2f "
-            "and the snapshot redshift = %.2f.\n"
+            "and the halocat redshift = %.2f.\n"
             "You should instantiate a new model object if you wish to switch halo catalogs.")
         inconsistent_simname_error_msg = ("Inconsistency between the simname "
             "already bound to the existing mock = ``%s`` "
@@ -115,50 +115,89 @@ class ModelFactory(object):
         def test_consistency_with_existing_mock(**kwargs):
             if 'redshift' in kwargs:
                 redshift = kwargs['redshift']
-            elif 'snapshot' in kwargs:
-                redshift = kwargs['snapshot'].redshift
+            elif 'halocat' in kwargs:
+                redshift = kwargs['halocat'].redshift
             else:
                 redshift = sim_defaults.default_redshift
-            if abs(redshift - self.mock.snapshot.redshift) > 0.05:
-                raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, self.mock.snapshot.redshift))
+            if abs(redshift - self.mock.halocat.redshift) > 0.05:
+                raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, self.mock.halocat.redshift))
 
             if 'simname' in kwargs:
                 simname = kwargs['simname']
-            elif 'snapshot' in kwargs:
-                simname = kwargs['snapshot'].simname
+            elif 'halocat' in kwargs:
+                simname = kwargs['halocat'].simname
             else:
                 simname = sim_defaults.default_simname
-            if simname != self.mock.snapshot.simname:
-                raise HalotoolsError(inconsistent_simname_error_msg % (self.mock.snapshot.simname, simname))
+            if simname != self.mock.halocat.simname:
+                raise HalotoolsError(inconsistent_simname_error_msg % (self.mock.halocat.simname, simname))
 
             if 'halo_finder' in kwargs:
                 halo_finder = kwargs['halo_finder']
-            elif 'snapshot' in kwargs:
-                halo_finder = kwargs['snapshot'].halo_finder
+            elif 'halocat' in kwargs:
+                halo_finder = kwargs['halocat'].halo_finder
             else:
                 halo_finder = sim_defaults.default_halo_finder
-            if halo_finder != self.mock.snapshot.halo_finder:
-                raise HalotoolsError(inconsistent_halo_finder_error_msg % (self.mock.snapshot.halo_finder,halo_finder ))
+            if halo_finder != self.mock.halocat.halo_finder:
+                raise HalotoolsError(inconsistent_halo_finder_error_msg % (self.mock.halocat.halo_finder,halo_finder ))
 
         if hasattr(self, 'mock'):
             test_consistency_with_existing_mock(**kwargs)
         else:
-            if 'snapshot' in kwargs.keys():
-                snapshot = kwargs['snapshot']
-                del kwargs['snapshot'] # otherwise the call to the mock factory below has multiple snapshot kwargs
+            if 'halocat' in kwargs.keys():
+                halocat = kwargs['halocat']
+                del kwargs['halocat'] # otherwise the call to the mock factory below has multiple halocat kwargs
             else:
-                snapshot = HaloCatalog(**kwargs)
+                halocat = HaloCatalog(**kwargs)
 
             if hasattr(self, 'redshift'):
-                if abs(self.redshift - snapshot.redshift) > 0.05:
+                if abs(self.redshift - halocat.redshift) > 0.05:
                     raise HalotoolsError("Inconsistency between the model redshift = %.2f" 
-                        " and the snapshot redshift = %.2f" % (self.redshift, snapshot.redshift))
+                        " and the halocat redshift = %.2f" % (self.redshift, halocat.redshift))
 
             mock_factory = self.mock_factory 
-            self.mock = mock_factory(snapshot=snapshot, model=self, populate=False)
+            self.mock = mock_factory(halocat=halocat, model=self, populate=False)
 
 
         self.mock.populate()
+
+    def update_param_dict_decorator(self, component_model, func_name):
+        """ Decorator used to propagate any possible changes in the composite model param_dict 
+        down to the appropriate component model param_dict. 
+
+        Parameters 
+        -----------
+        component_model : obj 
+            Instance of the component model in which the behavior of the function is defined. 
+
+        func_name : string 
+            Name of the method in the component model whose behavior is being decorated. 
+
+        Returns 
+        --------
+        decorated_func : function 
+            Function object whose behavior is identical 
+            to the behavior of the function in the component model, 
+            except that the component model param_dict is first updated with any 
+            possible changes to corresponding parameters in the composite model param_dict.
+
+        See also 
+        --------
+        :ref:`update_param_dict_decorator_mechanism`
+
+        :ref:`param_dict_mechanism`
+        """
+
+        def decorated_func(*args, **kwargs):
+
+            # Update the param_dict as necessary
+            for key in self.param_dict.keys():
+                if key in component_model.param_dict:
+                    component_model.param_dict[key] = self.param_dict[key]
+
+            func = getattr(component_model, func_name)
+            return func(*args, **kwargs)
+
+        return decorated_func
 
     def compute_average_galaxy_clustering(self, num_iterations=5, summary_statistic = 'median', **kwargs):
         """
@@ -185,12 +224,12 @@ class ModelFactory(object):
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         halo_finder : string, optional  
-            Nickname of the halo-finder of the snapshot into which mock galaxies 
+            Nickname of the halo-finder of the halocat into which mock galaxies 
             will be populated, e.g., `rockstar` or `bdm`. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         desired_redshift : float, optional
-            Redshift of the desired snapshot into which mock galaxies will be populated. 
+            Redshift of the desired halocat into which mock galaxies will be populated. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         variable_galaxy_mask : scalar, optional 
@@ -239,7 +278,7 @@ class ModelFactory(object):
         ---------
         The simplest use-case of the `compute_average_galaxy_clustering` function 
         is just to call the function with no arguments. This will generate a sequence 
-        of Monte Carlo realizations of your model into the default snapshot, 
+        of Monte Carlo realizations of your model into the default halocat, 
         calculate the two-point correlation function of all galaxies in your mock, 
         and return the median clustering strength in each radial bin: 
 
@@ -296,7 +335,7 @@ class ModelFactory(object):
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
-        snapshot = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
+        halocat = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
@@ -314,7 +353,7 @@ class ModelFactory(object):
                 (len(rbins)-1)*num_iterations*3).reshape(3, num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
-                self.populate_mock(snapshot = snapshot)
+                self.populate_mock(halocat = halocat)
                 rbin_centers, xi_coll[0, i, :], xi_coll[1, i, :], xi_coll[2, i, :] = (
                     self.mock.compute_galaxy_clustering(**kwargs)
                     )
@@ -328,7 +367,7 @@ class ModelFactory(object):
                 (len(rbins)-1)*num_iterations).reshape(num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
-                self.populate_mock(snapshot = snapshot)
+                self.populate_mock(halocat = halocat)
                 rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_clustering(**kwargs)
             xi = summary_func(xi_coll, axis=0)
             return rbin_centers, xi
@@ -360,12 +399,12 @@ class ModelFactory(object):
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         halo_finder : string, optional  
-            Nickname of the halo-finder of the snapshot into which mock galaxies 
+            Nickname of the halo-finder of the halocat into which mock galaxies 
             will be populated, e.g., `rockstar` or `bdm`. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         desired_redshift : float, optional
-            Redshift of the desired snapshot into which mock galaxies will be populated. 
+            Redshift of the desired halocat into which mock galaxies will be populated. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         variable_galaxy_mask : scalar, optional 
@@ -394,7 +433,7 @@ class ModelFactory(object):
         ---------
         The simplest use-case of the `compute_average_galaxy_matter_cross_clustering` function 
         is just to call the function with no arguments. This will generate a sequence 
-        of Monte Carlo realizations of your model into the default snapshot, 
+        of Monte Carlo realizations of your model into the default halocat, 
         calculate the cross-correlation function between dark matter 
         and all galaxies in your mock, and return the median 
         clustering strength in each radial bin: 
@@ -471,7 +510,7 @@ class ModelFactory(object):
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
-        snapshot = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
+        halocat = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
@@ -489,7 +528,7 @@ class ModelFactory(object):
                 (len(rbins)-1)*num_iterations*2).reshape(2, num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
-                self.populate_mock(snapshot = snapshot)
+                self.populate_mock(halocat = halocat)
                 rbin_centers, xi_coll[0, i, :], xi_coll[1, i, :] = (
                     self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
                     )
@@ -502,7 +541,7 @@ class ModelFactory(object):
                 (len(rbins)-1)*num_iterations).reshape(num_iterations, len(rbins)-1)
 
             for i in range(num_iterations):
-                self.populate_mock(snapshot = snapshot)
+                self.populate_mock(halocat = halocat)
                 rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
             xi = summary_func(xi_coll, axis=0)
             return rbin_centers, xi

@@ -22,24 +22,24 @@ from ..custom_exceptions import HalotoolsError
 def compute_conditional_percentiles(**kwargs):
     """
     In bins of the ``prim_haloprop``, compute the rank-order percentile 
-    of the input ``halo_table`` based on the value of ``sec_haloprop``. 
+    of the input ``table`` based on the value of ``sec_haloprop``. 
 
     Parameters
     ----------
-    halo_table : astropy table, optional 
+    table : astropy table, optional 
         a keyword argument that stores halo catalog being used to make mock galaxy population
-        If a `halo_table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys 
-        must also be passed. If not passing a `halo_table`, you must directly pass the 
+        If a `table` is passed, the `prim_haloprop_key` and `sec_haloprop_key` keys 
+        must also be passed. If not passing a `table`, you must directly pass the 
         `prim_haloprop` and `sec_haloprop` keyword arguments. 
 
     prim_haloprop_key : string, optional 
-        Name of the column of the input ``halo_table`` that will be used to access the 
-        primary halo property. `compute_conditional_percentiles` bins the ``halo_table`` by 
+        Name of the column of the input ``table`` that will be used to access the 
+        primary halo property. `compute_conditional_percentiles` bins the ``table`` by 
         ``prim_haloprop_key`` when computing the result. 
 
     sec_haloprop_key : string, optional 
-        Name of the column of the input ``halo_table`` that will be used to access the 
-        secondary halo property. `compute_conditional_percentiles` bins the ``halo_table`` by 
+        Name of the column of the input ``table`` that will be used to access the 
+        secondary halo property. `compute_conditional_percentiles` bins the ``table`` by 
         ``prim_haloprop_key``, and in each bin uses the value stored in ``sec_haloprop_key`` 
         to compute the ``prim_haloprop``-conditioned rank-order percentile. 
 
@@ -52,7 +52,7 @@ def compute_conditional_percentiles(**kwargs):
         in each bin of `prim_haloprop`. 
 
     prim_haloprop_bin_boundaries : array, optional 
-        Array defining the boundaries by which we will bin the input ``halo_table``. 
+        Array defining the boundaries by which we will bin the input ``table``. 
         Default is None, in which case the binning will be automatically determined using 
         the ``dlog10_prim_haloprop`` keyword. 
 
@@ -63,7 +63,7 @@ def compute_conditional_percentiles(**kwargs):
     Examples 
     --------
     >>> fakesim = FakeSim()
-    >>> result = compute_conditional_percentiles(halo_table = fakesim.halo_table, prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_vmax')
+    >>> result = compute_conditional_percentiles(table = fakesim.halo_table, prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_vmax')
 
 
     Notes
@@ -74,24 +74,24 @@ def compute_conditional_percentiles(**kwargs):
 
     """
 
-    if 'halo_table' in kwargs:
-        halo_table = kwargs['halo_table']
+    if 'table' in kwargs:
+        table = kwargs['table']
         try:
             prim_haloprop_key = kwargs['prim_haloprop_key']
-            prim_haloprop = halo_table[prim_haloprop_key]
+            prim_haloprop = table[prim_haloprop_key]
             sec_haloprop_key = kwargs['sec_haloprop_key']
-            sec_haloprop = halo_table[sec_haloprop_key]
+            sec_haloprop = table[sec_haloprop_key]
         except KeyError:
-            msg = ("\nWhen passing an input ``halo_table`` to the ``compute_conditional_percentiles`` method,\n"
+            msg = ("\nWhen passing an input ``table`` to the ``compute_conditional_percentiles`` method,\n"
                 "you must also pass ``prim_haloprop_key`` and ``sec_haloprop_key`` keyword arguments\n"
-                "whose values are column keys of the input ``halo_table``\n")
+                "whose values are column keys of the input ``table``\n")
             raise HalotoolsError(msg)
     else:
         try:
             prim_haloprop = kwargs['prim_haloprop']
             sec_haloprop = kwargs['sec_haloprop']
         except KeyError:
-            msg = ("\nIf not passing an input ``halo_table`` to the ``compute_conditional_percentiles`` method,\n"
+            msg = ("\nIf not passing an input ``table`` to the ``compute_conditional_percentiles`` method,\n"
                 "you must pass a ``prim_haloprop`` and ``sec_haloprop`` arguments\n")
             raise HalotoolsError(msg)
 
@@ -101,11 +101,11 @@ def compute_conditional_percentiles(**kwargs):
         Parameters
         ----------
         prim_haloprop : array 
-            Array storing the value of the primary halo property column of the ``halo_table`` 
+            Array storing the value of the primary halo property column of the ``table`` 
             passed to ``compute_conditional_percentiles``. 
 
         prim_haloprop_bin_boundaries : array, optional 
-            Array defining the boundaries by which we will bin the input ``halo_table``. 
+            Array defining the boundaries by which we will bin the input ``table``. 
             Default is None, in which case the binning will be automatically determined using 
             the ``dlog10_prim_haloprop`` keyword. 
 
@@ -117,7 +117,7 @@ def compute_conditional_percentiles(**kwargs):
         --------
         output : array 
             Numpy array of integers storing the bin index of the prim_haloprop bin 
-            to which each halo in the input halo_table was assigned. 
+            to which each halo in the input table was assigned. 
 
         """
         try:
@@ -238,8 +238,8 @@ class SampleSelector(object):
         To demonstrate the `property_range` method, we will start out by loading 
         a table of halos into memory using the `FakeSim` class:
 
-        >>> snapshot = FakeSim()
-        >>> halos = snapshot.halo_table
+        >>> halocat = FakeSim()
+        >>> halos = halocat.halo_table
 
         To make a cut on the halo catalog to select halos in a specific mass range:
 
@@ -297,8 +297,8 @@ class SampleSelector(object):
         To demonstrate the `split_sample` method, we will start out by loading 
         a table of halos into memory using the `FakeSim` class:
 
-        >>> snapshot = FakeSim()
-        >>> halos = snapshot.halo_table
+        >>> halocat = FakeSim()
+        >>> halos = halocat.halo_table
 
         We can easily use `split_sample` to divide the sample into a high-Vmax and low-Vmax subsamples:
 

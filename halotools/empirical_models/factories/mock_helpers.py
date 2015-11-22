@@ -20,7 +20,7 @@ def three_dim_pos_bundle(table, key1, key2, key3,
     Parameters 
     ----------
     table : data table 
-        `~astropy.table.Table` object 
+        `~astropy.table.halo_table` object 
 
     key1, key2, key3: strings 
         Keys used to access the relevant columns of the data table. 
