@@ -32,7 +32,7 @@ def test_preloaded_hod_mocks():
 
     # # If factory is called with default settings, 
     # # mock attributes should include/exclude:
-    #     mock1 = mock_factories.HodMockFactory(snapshot=sim, model=model)
+    #     mock1 = mock_factories.HodMockFactory(halocat=sim, model=model)
     #     assert hasattr(mock1, 'galaxy_table')
     #     expected_keys = ['x', 'y', 'z', 'halo_x', 'NFWmodel_conc', 'halo_mvir']
     #     for key in expected_keys:
@@ -42,9 +42,9 @@ def test_preloaded_hod_mocks():
     #     assert np.all(mock1.galaxy_table['x'] >= 0)
     #     assert np.all(mock1.galaxy_table['y'] >= 0)
     #     assert np.all(mock1.galaxy_table['z'] >= 0)
-    #     assert np.all(mock1.galaxy_table['x'] <= mock1.snapshot.Lbox)
-    #     assert np.all(mock1.galaxy_table['y'] <= mock1.snapshot.Lbox)
-    #     assert np.all(mock1.galaxy_table['z'] <= mock1.snapshot.Lbox)
+    #     assert np.all(mock1.galaxy_table['x'] <= mock1.halocat.Lbox)
+    #     assert np.all(mock1.galaxy_table['y'] <= mock1.halocat.Lbox)
+    #     assert np.all(mock1.galaxy_table['z'] <= mock1.halocat.Lbox)
 
     #     assert np.all(mock1.galaxy_table['NFWmodel_conc'] > 0.5)
     #     assert np.all(mock1.galaxy_table['NFWmodel_conc'] < 25)

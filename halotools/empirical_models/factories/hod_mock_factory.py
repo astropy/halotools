@@ -2,7 +2,7 @@
 """
 
 Module used to construct mock galaxy populations. 
-Each mock factory only has knowledge of a simulation snapshot 
+Each mock factory only has knowledge of a simulation halocat 
 and composite model object. 
 Currently only composite HOD models are supported. 
 
@@ -42,7 +42,7 @@ class HodMockFactory(MockFactory):
     population of mock galaxies based on an HOD-style model. 
 
     Can be thought of as a factory that takes a model  
-    and simulation snapshot as input, 
+    and simulation halocat as input, 
     and generates a mock galaxy population. 
     The returned collection of galaxies possesses whatever 
     attributes were requested by the model, such as xyz position,  
@@ -54,7 +54,7 @@ class HodMockFactory(MockFactory):
         """
         Parameters 
         ----------
-        snapshot : object, keyword argument
+        halocat : object, keyword argument
             Object containing the halo catalog and other associated data.  
             Produced by `~halotools.sim_manager.supported_sims.HaloCatalog`
 
@@ -62,7 +62,7 @@ class HodMockFactory(MockFactory):
             A model built by a sub-class of `~halotools.empirical_models.HodModelFactory`. 
 
         additional_haloprops : string or list of strings, optional   
-            Each entry in this list must be a column key of ``snapshot.halo_table``. 
+            Each entry in this list must be a column key of ``halocat.halo_table``. 
             For each entry of ``additional_haloprops``, each member of 
             `mock.galaxy_table` will have a column key storing this property of its host halo. 
             If ``additional_haloprops`` is set to the string value ``all``, 
@@ -121,7 +121,7 @@ class HodMockFactory(MockFactory):
         # make a conservative mvir completeness cut 
         # This cut can be controlled by changing sim_defaults.Num_ptcl_requirement
         if apply_completeness_cut is True:
-            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.snapshot.particle_mass
+            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.halocat.particle_mass
             mass_cut = (self.halo_table['halo_mvir'] > cutoff_mvir)
             self.halo_table = self.halo_table[mass_cut]
 
@@ -178,11 +178,11 @@ class HodMockFactory(MockFactory):
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
         self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['x'], self.snapshot.Lbox)
+            self.galaxy_table['x'], self.halocat.Lbox)
         self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['y'], self.snapshot.Lbox)
+            self.galaxy_table['y'], self.halocat.Lbox)
         self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['z'], self.snapshot.Lbox)
+            self.galaxy_table['z'], self.halocat.Lbox)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)

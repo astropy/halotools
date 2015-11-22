@@ -29,7 +29,7 @@ class SubhaloMockFactory(MockFactory):
         """
         Parameters 
         ----------
-        snapshot : object, keyword argument 
+        halocat : object, keyword argument 
             Object containing the halo catalog and other associated data.  
             Produced by `~halotools.sim_manager.supported_sims.HaloCatalog`
 
@@ -37,7 +37,7 @@ class SubhaloMockFactory(MockFactory):
             A model built by a sub-class of `~halotools.empirical_models.SubhaloModelFactory`. 
 
         additional_haloprops : string or list of strings, optional   
-            Each entry in this list must be a column key of ``snapshot.halo_table``. 
+            Each entry in this list must be a column key of ``halocat.halo_table``. 
             For each entry of ``additional_haloprops``, each member of 
             `mock.galaxy_table` will have a column key storing this property of its host halo. 
             If ``additional_haloprops`` is set to the string value ``all``, 
