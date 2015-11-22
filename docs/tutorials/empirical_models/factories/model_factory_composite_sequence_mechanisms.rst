@@ -136,7 +136,10 @@ The `ModelFactory.update_param_dict_decorator` addresses this problem. When the 
 
         return decorated_func
 
+The behavior of the `decorated_func` is identical in every way to the input function, except for before calling the 
+input function, `decorated_func` first opens up the component model ``param_dict`` and updates any the value of any key that also appears in the composite model ``param_dict``. 
 
+Note that this mechanism does *not* automatically and immediately propagate changes in the composite model ``param_dict`` to the component model ``param_dict``. If you manually change values in the composite model ``param_dict``, nothing happens to the component model by that action alone. The role of the `~ModelFactory.update_param_dict_decorator` is to accomplish this propagation when it counts: when you actually call the methods of the component model that the composite model actually needs. 
 
 
 
