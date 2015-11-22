@@ -7,19 +7,20 @@ Model Factories
 
 .. currentmodule:: halotools.empirical_models.factories
 
-HOD Model Factory 
+HOD Model Factories
 ---------------------
 
 .. autosummary::
 
 	HodModelFactory
+	HodMockFactory
 
-Subhalo Model Factory 
----------------------
+Subhalo Model Factories
+--------------------------
 
 .. autosummary::
 
 	SubhaloModelFactory
+	SubhaloMockFactory
 
-
-
+	
