@@ -104,13 +104,10 @@ def smhm_binary_sfr_model_dictionary(
         prim_haloprop_key = prim_haloprop_key, redshift = redshift, 
         scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
 
+    sm_model._suppress_repeated_param_warning = True
+
     model_dictionary = {'stellar_mass': sm_model, 'quiescent': sfr_model}
 
-    # supplementary_dictionary = {}
-
-    # if 'threshold' in kwargs.keys():
-    #     galaxy_selection_func = lambda x: x['stellar_mass'] > kwargs['threshold']
-    #     supplementary_dictionary['galaxy_selection_func'] = galaxy_selection_func
 
     return model_dictionary
 
