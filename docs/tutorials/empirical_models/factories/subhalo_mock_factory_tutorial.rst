@@ -83,10 +83,16 @@ Pre-processing phase
 ----------------------
 
 The pre-processing phase begins by calling the `__init__` constructor of the `~MockFactory` super-class. 
-The main non-trivial task performed there is to call 
+The main non-trivial task performed by the super-class constructor is to call 
 the `~SubhaloMockFactory.build_additional_haloprops_list` method, 
 which determines the set of halo catalog properties 
 that will be included in the ``galaxy_table``. 
+
+In the `~SubhaloMockFactory.preprocess_halo_catalog`, new columns are added to the ``halo_table`` 
+according to any entries in the ``new_haloprop_func_dict``; any such columns will automatically be included 
+in the ``galaxy_table``. See :ref:`new_haloprop_func_dict_mechanism` for further details. 
+
+The pre-processing phase concludes with the call to the `~SubhaloMockFactory.precompute_galprops` method. 
 
 
 
