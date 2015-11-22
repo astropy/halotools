@@ -100,6 +100,15 @@ class MockFactory(object):
 
     def build_additional_haloprops_list(self, **kwargs):
         """
+        Method used to determine which halo properties will be included in the 
+        mock ``galaxy_table``. 
+
+        All halo properties in the ``_haloprop_list`` of the model will automatically be included. 
+        This list stores any ``prim_haloprop_key`` and/or ``sec_haloprop_key`` used in any 
+        component model. All ``halo_table`` keys listed in the ``additional_haloprops`` keyword argument 
+        will also be included. If ``additional_haloprops`` is set to the string ``all``, every single 
+        column of the ``halo_table`` will be included. 
+
         Parameters 
         -----------
         additional_haloprops : string or list of strings, optional   

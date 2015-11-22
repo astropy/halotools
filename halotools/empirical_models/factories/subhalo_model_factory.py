@@ -806,3 +806,40 @@ class SubhaloModelFactory(ModelFactory):
         self.param_dict = self._init_param_dict
         self.set_primary_behaviors()
         self.set_calling_sequence()
+
+    def populate_mock(self, **kwargs):
+        """ Method used to populate a simulation using the model. 
+
+        After calling this method, ``self`` will have a new ``mock`` attribute, 
+        which has a ``table`` bound to it containing the Monte Carlo 
+        realization of the model. 
+
+        Parameters 
+        ----------
+        halocat : object, optional 
+            Class instance of `~halotools.sim_manager.HaloCatalog`. 
+            This object contains the halo catalog and its metadata.  
+
+        simname : string, optional
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        redshift : float, optional
+            Redshift of the desired catalog. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        See also 
+        -----------
+        :ref:`basic_syntax_subhalo_mocks` 
+        
+        :ref:`populating_mocks_with_alternate_sims_tutorial`
+
+        """
+        ModelFactory.populate_mock(self, **kwargs)
+
