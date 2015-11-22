@@ -109,6 +109,9 @@ class SubhaloMockFactory(MockFactory):
         self.galaxy_table['galid'] = np.arange(len(self.galaxy_table))
         self._precomputed_galprop_list.append('galid')
 
+        # Component models may explicitly distinguish between certain types of halos, 
+        # e.g., subhalos vs. host halos. Since this assignment is not dynamic, 
+        # it can be pre-computed. 
         for feature, component_model in self.model.model_dictionary.iteritems():
 
             try:
@@ -132,6 +135,10 @@ class SubhaloMockFactory(MockFactory):
 
     def populate(self):
         """ Method populating subhalos with mock galaxies. 
+
+        Each method appearing in the ``_mock_generation_calling_sequence`` attribute 
+        of the composite model is called in sequence, always being passed the 
+        ``galaxy_table`` as the ``table`` argument. 
         """
         self._allocate_memory()
 
@@ -148,11 +155,12 @@ class SubhaloMockFactory(MockFactory):
         """
         Ngals = len(self.galaxy_table)
 
-        # Allocate or overwrite any non-static galaxy propery 
-        for key in self.model._galprop_dtypes_to_allocate.names:
-            if key not in self._precomputed_galprop_list:
-                dt = self.model._galprop_dtypes_to_allocate[key]
-                self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
+        new_column_generator = (key for key in self.model._galprop_dtypes_to_allocate.names 
+            if key not in self._precomputed_galprop_list)
+
+        for key in new_column_generator:
+            dt = self.model._galprop_dtypes_to_allocate[key]
+            self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
 
     def build_additional_haloprops_list(self, **kwargs):
         """

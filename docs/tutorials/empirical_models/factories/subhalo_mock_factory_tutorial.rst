@@ -92,18 +92,58 @@ In the `~SubhaloMockFactory.preprocess_halo_catalog`, new columns are added to t
 according to any entries in the ``new_haloprop_func_dict``; any such columns will automatically be included 
 in the ``galaxy_table``. See :ref:`new_haloprop_func_dict_mechanism` for further details. 
 
-The pre-processing phase concludes with the call to the `~SubhaloMockFactory.precompute_galprops` method. 
-
-
+The pre-processing phase concludes with the call to the `~SubhaloMockFactory.precompute_galprops` method, 
+which is the first function that adds columns to the ``galaxy_table``. For `~SubhaloModelFactory` composite 
+models, the spatial positions and velocities of mock galaxies exactly coincide with those of (sub)halos, 
+and so the *x, y, z, vx, vy, vz* columns can all be added to the ``galaxy_table`` in advance. 
 
 .. _subhalo_mock_population_phase:
 
 Mock-population phase
 ----------------------
 
+After pre-processing, the ``galaxy_table`` has been prepared for the assignment of properties that 
+are computed dynamically, e.g., stellar mass and star formation rate. This phase is controlled by 
+the `~SubhaloMockFactory.populate` method. Because the high-level bookkeeping has already been handled 
+by the `~SubhaloModelFactory` class, the source for this phase is quite compact and straightforward. 
 
+First, empty columns are added to the ``galaxy_table`` 
+with by the `~SubhaloMockFactory._allocate_memory` method. We do this by looping over every property 
+in ``_galprop_dtypes_to_allocate`` that has not already been assigned:
 
+.. code-block:: python 
 
+	Ngals = len(self.galaxy_table)
+
+	new_column_generator = (key for key in self.model._galprop_dtypes_to_allocate.names 
+	    if key not in self._precomputed_galprop_list)
+
+	for key in new_column_generator:
+	    dt = self.model._galprop_dtypes_to_allocate[key]
+	    self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
+
+See :ref:`galprop_dtypes_to_allocate_mechanism` for details about this bookkeeping device. 
+
+Once memory has been allocated to the ``galaxy_table``, 
+we successively pass this table to each of the functions in the ``_mock_generation_calling_sequence``:
+
+.. code-block:: python 
+
+	for method in self.model._mock_generation_calling_sequence:
+	    func = getattr(self.model, method)
+	    func(table = self.galaxy_table)
+
+See :ref:`model_feature_calling_sequence_mechanism` for details. Note how the use of *getattr* 
+allows the `~SubhaloMockFactory` to call the appropriate method without knowing its name. This 
+high-level feature of python is what allows the factory work with any arbitrary set of component models. 
+
+Further Reading 
+=================
+
+Once you populate a mock, you can use the functions in the `~halotools.mock_observables` 
+sub-package to "observe" it. However, as described in :ref:`mock_observables_convenience_functions`, 
+there are a number of functions bound to the `~SubhaloMockFactory` instance 
+that provide convenient wrapper behavior around this sub-package. 
 
 
 

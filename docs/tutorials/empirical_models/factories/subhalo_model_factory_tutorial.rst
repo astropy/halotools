@@ -209,8 +209,9 @@ To read more about the options you have for populating mocks, see
 Further reading 
 ================
 
-Detailed documentation on the mock-population 
-algorithm is covered in :ref:`subhalo_mock_factory_tutorial`. 
+Detailed documentation on the mock-population algorithm is covered in :ref:`subhalo_mock_factory_tutorial`. 
+Instances of `~SubhaloModelFactory` have a number of bound methods that provide wrapper behavior around 
+the `~halotools.mock_observables` sub-package, as described in :ref:`mock_observables_convenience_functions`. 
 
 
 
