@@ -18,9 +18,7 @@ Outline
 ========
 
 We will start in :ref:`basic_syntax_subhalo_mocks` with a high-level overview of the functionality 
-of the `SubhaloMockFactory` class. In :ref:`populate_subhalo_mock_convenience_method` we will 
-describe the most common way in which the `SubhaloMockFactory` class is used: by calling the 
-``populate_mock`` method bound to all Halotools composite models. We provide detailed 
+of the `SubhaloMockFactory` class. We provide detailed 
 notes on the source code of the mock factory in :ref:`subhalo_mock_algorithm`. 
 
 
@@ -31,10 +29,10 @@ Basic syntax for making subhalo-based mocks
 
 The `SubhaloMockFactory` is responsible for one task: using a Halotools composite model 
 to populate a simulation with mock galaxies. To fulfill this one task, there are just 
-two required keyword arguments: a ``model`` and a ``snapshot``. The model must be an instance 
-of a `SubhaloModelFactory`, and the snapshot must be an instance of a `~halotools.sim_manager.HaloCatalog`. 
+two required keyword arguments: ``model`` and ``halocat``. The model must be an instance 
+of a `SubhaloModelFactory`, and the halocat must be an instance of a `~halotools.sim_manager.HaloCatalog`. 
 For simplicity, in this tutorial we will assume that you are using the `SubhaloMockFactory`  
-to populate the default snapshot. For documentation on populating alternative catalogs, 
+to populate the default halo catalog. For documentation on populating alternative catalogs, 
 see :ref:`populating_mocks_with_alternate_sims_tutorial`. 
 
 As a simple example, here is how to create an instance of the `SubhaloMockFactory` 
@@ -44,17 +42,34 @@ with a composite model based on the prebuilt
 .. code-block:: python
 
 	behroozi10_model = SubhaloModelFactory('behroozi10')
-	default_snapshot = HaloCatalog()
-	mock = SubhaloMockFactory(model = behroozi10_model, snapshot = default_snapshot)
+	default_halocat = HaloCatalog()
+	mock = SubhaloMockFactory(model = behroozi10_model, halocat = default_halocat)
 
-When you instantiate the `SubhaloMockFactory`, 
+Instantiating the `SubhaloMockFactory` triggers the pre-processing phase of mock population. 
+Briefly, this phase does as many tasks in advance of actual mock population as possible 
+to improve the efficiency of MCMCs (see below for details). 
 
+By default, instantiating the factory also triggers 
+the `SubhaloMockFactory.populate` method to be called. This is the method that actually creates 
+the galaxy population. By calling the `SubhaloMockFactory.populate` method, 
+a new ``galaxy_table`` attribute is created and bound to the instance. 
+The ``galaxy_table`` attribute stores an Astropy `~astropy.table.Table` object with one row 
+per mock galaxy and one column for every property assigned by the chosen composite model. 
 
+An aside on the ``populate_mock`` convenience function 
+---------------------------------------------------------
 
-.. _populate_subhalo_mock_convenience_method:
+Probably the most common way in which you will actually interact with the `~SubhaloMockFactory` is 
+by the `SubhaloModelFactory.populate_mock` method, which is just a convenience wrapper around the 
+`SubhaloMockFactory.populate` method. Consider the following call to this function:
 
-The ``populate_mock`` convenience method
-=====================================================
+.. code-block:: python 
+
+	behroozi10_model.populate_mock()
+
+This is essentially equivalent to the three lines of code written above. The only difference is that 
+in the above line will create a ``mock`` attribute that is bound to ``behroozi10_model``; this ``mock`` 
+attribute is simply an instance of the `~SubhaloMockFactory`. 
 
 
 .. _subhalo_mock_algorithm:
@@ -62,9 +77,23 @@ The ``populate_mock`` convenience method
 Algorithm for populating subhalo-based mocks 
 ================================================
 
+.. _subhalo_mock_preprocessing_phase:
+
+Pre-processing phase
+----------------------
+
+The pre-processing phase begins by calling the `__init__` constructor of the `~MockFactory` super-class. 
+The main non-trivial task performed there is to call 
+the `~SubhaloMockFactory.build_additional_haloprops_list` method, 
+which determines the set of halo catalog properties 
+that will be included in the ``galaxy_table``. 
 
 
 
+.. _subhalo_mock_population_phase:
+
+Mock-population phase
+----------------------
 
 
 

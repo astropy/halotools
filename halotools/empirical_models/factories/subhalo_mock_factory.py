@@ -147,6 +147,27 @@ class SubhaloMockFactory(MockFactory):
                 dt = self.model._galprop_dtypes_to_allocate[key]
                 self.galaxy_table[key] = np.empty(Ngals, dtype = dt)
 
+    def build_additional_haloprops_list(self, **kwargs):
+        """
+        Method used to determine which halo properties will be included in the 
+        mock ``galaxy_table``. 
+
+        All halo properties in the ``_haloprop_list`` of the model will automatically be included. 
+        This list stores any ``prim_haloprop_key`` and/or ``sec_haloprop_key`` used in any 
+        component model. All ``halo_table`` keys listed in the ``additional_haloprops`` keyword argument 
+        will also be included. If ``additional_haloprops`` is set to the string ``all``, every single 
+        column of the ``halo_table`` will be included. 
+
+        Parameters 
+        -----------
+        additional_haloprops : string or list of strings, optional   
+            Each entry in this list must be a column key of ``halocat.halo_table``. 
+            For each entry of ``additional_haloprops``, each member of 
+            `mock.galaxy_table` will have a column key storing this property of its host halo. 
+            If ``additional_haloprops`` is set to the string value ``all``, 
+            the galaxy table will inherit every halo property in the catalog. Default is None. 
+        """
+        MockFactory.build_additional_haloprops_list(self, **kwargs)
 
 
 

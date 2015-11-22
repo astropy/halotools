@@ -10,7 +10,7 @@ Tutorial on the SubhaloModelFactory Class
 
 This section of the documentation provides detailed notes 
 on the source code implementation of the `SubhaloModelFactory` class. 
-The purpose of the `SubhaloModelFactory` class is to provide a flexible, standardized platform for building subhalo-based models that can directly populate simulations with mock galaxies. The goal is to make it easy to swap new modeling features in and out of the framework while maintaining a uniform syntax. This way, when you want to study one particular feature of the galaxy-halo connection, you can focus exclusively on developing that feature, leaving the factory to take care of the remaining aspects of the mock population. This tutorial describes in detail how the `~SubhaloModelFactory` accomplishes this standardization. We conclude in :ref:`subhalo_model_factory_further_reading` by pointing to sections of documentation covering related aspects such as the algorithm for using `SubhaloModelFactory` instances to populate mocks. 
+The purpose of the `SubhaloModelFactory` class is to provide a flexible, standardized platform for building subhalo-based models that can directly populate simulations with mock galaxies. The goal is to make it easy to swap new modeling features in and out of the framework while maintaining a uniform syntax. This way, when you want to study one particular feature of the galaxy-halo connection, you can focus exclusively on developing that feature, leaving the factory to take care of the remaining aspects of the mock population. This tutorial describes in detail how the `~SubhaloModelFactory` accomplishes this standardization. 
 
 Outline 
 ========
@@ -19,7 +19,8 @@ We will start in :ref:`subhalo_model_factory_design_overview` with a high-level
 description of how the class creates a composite model from 
 a set of independently-defined features. In :ref:`subhalo_model_factory_parsing_kwargs` we describe 
 how the factory's `__init__` constructor parses the large number of optional inputs into a *model dictionary*. 
-In :ref:`subhalo_model_factory_bookkeeping_mechanisms` we outline the various bookkeeping devices and consistency checks that the factory does to 1. ensure that the input model dictionary provides sufficient and self-consistent information, and 2. place the instance into a form that can directly talk to the `~SubhaloMockFactory`. In :ref:`subhalo_model_factory_inheriting_behaviors` we cover the process by which the appropriate methods of the component models are inherited by the composite model. 
+In :ref:`subhalo_model_factory_bookkeeping_mechanisms` we outline the various bookkeeping devices and consistency checks that the factory does to 1. ensure that the input model dictionary provides sufficient and self-consistent information, and 2. place the instance into a form that can directly talk to the `~SubhaloMockFactory`. In :ref:`subhalo_model_factory_inheriting_behaviors` we cover the process by which the appropriate methods of the component models are inherited by the composite model. The syntax for using a composite model to create mock catalogs is covered in :ref:`populate_subhalo_mock_convenience_method`. 
+We conclude in :ref:`subhalo_model_factory_further_reading` by pointing to sections of documentation covering related aspects such as the algorithm for using `SubhaloModelFactory` instances to populate mocks. 
 
 .. _subhalo_model_factory_design_overview:
 
@@ -174,12 +175,42 @@ what is inherited by the composite model. This high-level python feature is what
 the flexibility of the model factories. 
 
 
+.. _populate_subhalo_mock_convenience_method:
+
+The ``populate_mock`` convenience method
+=====================================================
+
+No matter what the component model features are, all instances of `SubhaloModelFactory` 
+can directly populate subhalo catalogs with mock galaxies 
+with the `~SubhaloModelFactory.populate_mock` method. To populate the default halo catalog, 
+the syntax for this is:
+
+.. code-block:: python
+
+    model = SubhaloModelFactory(**model_dictionary)
+    model.populate_mock()
+
+The `SubhaloModelFactory.populate_mock` method is just a 
+convenience wrapper around `SubhaloMockFactory.populate` method. 
+
+You can also populate alternative halo catalogs:
+
+.. code-block:: python
+
+    from halotools.sim_manager import HaloCatalog
+    my_halocat = HaloCatalog(simname = my_simname, redshift = my_redshift)
+    model.populate_mock(halocat = my_halocat)
+
+To read more about the options you have for populating mocks, see 
+:ref:`populating_mocks_with_alternate_sims_tutorial`. 
+
 .. _subhalo_model_factory_further_reading:
 
 Further reading 
 ================
 
-No matter what the component model features are, all instances of `SubhaloModelFactory` can be used directly populate subhalo catalogs with mock galaxies. Detailed documentation on the mock-population algorithm is covered in :ref:`subhalo_mock_factory_tutorial`. 
+Detailed documentation on the mock-population 
+algorithm is covered in :ref:`subhalo_mock_factory_tutorial`. 
 
 
 
