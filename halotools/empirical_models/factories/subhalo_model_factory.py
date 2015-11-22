@@ -145,7 +145,18 @@ class SubhaloModelFactory(ModelFactory):
         ``quiescent_designation`` nor the ``stellar_mass`` models have explicit dependence 
         upon one another. 
 
-        >>> model_instance.populate_mock(simname = 'bolplanck', redshift = 0.5) # doctest: +SKIP
+        Finally, the following examples demonstrate how to use the ``baseline_model_instance`` feature. 
+
+        >>> model1 = SubhaloModelFactory(model_nickname = 'behroozi10')
+
+        >>> from halotools.empirical_models.smhm_models import Moster13SmHm
+        >>> moster_component_model = Moster13SmHm()
+
+        >>> model2 = SubhaloModelFactory(baseline_model_instance = model1, stellar_mass = moster_component_model)
+
+        >>> from halotools.empirical_models.sfr_models import BinaryGalpropInterpolModel
+        >>> quenching_model = BinaryGalpropInterpolModel(galprop_name = 'quenching_designation')
+        >>> model3 = SubhaloModelFactory(baseline_model_instance = model1, sfr = quenching_model)
 
         Notes 
         ------
@@ -218,7 +229,7 @@ class SubhaloModelFactory(ModelFactory):
         ---------
         :ref:`subhalo_model_factory_parsing_kwargs`
         """
-        
+
         if 'baseline_model_instance' in kwargs:
             baseline_model_dictionary = kwargs['baseline_model_instance'].model_dictionary
             input_model_dictionary = copy(kwargs)
