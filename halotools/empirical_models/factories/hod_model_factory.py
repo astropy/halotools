@@ -471,7 +471,7 @@ class HodModelFactory(ModelFactory):
 
             for methodname in methods_to_inherit:
                 new_method_name = methodname + '_' + gal_type
-                new_method_behavior = self._update_param_dict_decorator(
+                new_method_behavior = self.update_param_dict_decorator(
                     component_model, methodname)
                 setattr(self, new_method_name, new_method_behavior)
                 setattr(getattr(self, new_method_name), 
@@ -494,10 +494,14 @@ class HodModelFactory(ModelFactory):
                 self.threshold = getattr(self, 'threshold_' + gal_type)
 
 
-    def _update_param_dict_decorator(self, component_model, func_name):
+    def update_param_dict_decorator(self, component_model, func_name):
         """ Decorator used to propagate any possible changes 
         in the composite model param_dict 
         down to the appropriate component model param_dict. 
+
+        See also 
+        --------
+        :ref:`update_param_dict_decorator_mechanism`
         """
 
         def decorated_func(*args, **kwargs):
