@@ -145,18 +145,21 @@ class SubhaloModelFactory(ModelFactory):
         ``quiescent_designation`` nor the ``stellar_mass`` models have explicit dependence 
         upon one another. 
 
-        Finally, the following examples demonstrate how to use the ``baseline_model_instance`` feature. 
+        Finally, the following examples demonstrate how to use the ``baseline_model_instance`` feature, 
+        which allows you to swap out individual features starting from an initial "baseline" model. For 
+        our baseline model, we'll use the pre-built `smhm_binary_sfr` model:
 
-        >>> model1 = SubhaloModelFactory(model_nickname = 'behroozi10')
+        >>> model1 = SubhaloModelFactory(model_nickname = 'smhm_binary_sfr')
+
+        This model has two features: 'stellar_mass' is modeled by `~halotools.empirical_models.smhm_models.Behroozi10SmHm`, 
+        and 'quiescent' is modeled by `~halotools.empirical_models.sfr_models.sfr_components.BinaryGalpropInterpolModel`. 
+        We'll use the ``baseline_model_instance`` feature to construct an identical model which instead uses 
+        the `~halotools.empirical_models.smhm_models.Moster13SmHm` stellar-to-halo-mass relation:
 
         >>> from halotools.empirical_models.smhm_models import Moster13SmHm
         >>> moster_component_model = Moster13SmHm()
 
         >>> model2 = SubhaloModelFactory(baseline_model_instance = model1, stellar_mass = moster_component_model)
-
-        >>> from halotools.empirical_models.sfr_models import BinaryGalpropInterpolModel
-        >>> quenching_model = BinaryGalpropInterpolModel(galprop_name = 'quenching_designation')
-        >>> model3 = SubhaloModelFactory(baseline_model_instance = model1, sfr = quenching_model)
 
         Notes 
         ------
