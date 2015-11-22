@@ -22,7 +22,7 @@ In all such cases, parameters such as :math:`\sigma_{\log M}` are elements of ``
 
 While creating a composite model from a set of component models, the factory classes `~SubhaloModelFactory` and `~HodModelFactory` collect every parameter that appears in each component model ``param_dict``, and create a new composite ``param_dict`` that is bound to the composite model instance. The way that composite model methods are written, in order to change the behavior of the composite model all you need to do is change the values of the parameters in the ``param_dict`` bound to the composite model and the changes propagate down to the component model defining the behavior. 
 
-In most cases this propagation process is unambiguous and straightforwardly accomplished with the `_update_param_dict_decorator` python decorator in the factory. However, if two or more component models have a parameter with the exact same name, then care is required. 
+In most cases this propagation process is unambiguous and straightforwardly accomplished with :ref:`update_param_dict_decorator_mechanism`. However, if two or more component models have a parameter with the exact same name, then care is required. 
 
 As an example, consider the composite model dictionary built by the `~halotools.empirical_models.composite_models.hod_models.leauthaud11_model_dictionary` function. In this composite model, there are two populations of galaxies, *centrals* and *satellites*, whose occupation statistics are governed by `~halotools.empirical_models.occupation_models.Leauthaud11Cens` and `~halotools.empirical_models.occupation_models.Leauthaud11Sats`, respectively. Both of these classes derive much of their behavior from the underlying stellar-to-halo-mass relation of Behroozi et al. (2010), and so all the parameters in the ``param_dict`` of `~halotools.empirical_models.smhm_models.Behroozi10SmHm` appear in both the ``param_dict`` of `~halotools.empirical_models.occupation_models.Leauthaud11Cens` and the ``param_dict`` of `~halotools.empirical_models.occupation_models.Leauthaud11Sats`. 
 
@@ -111,9 +111,14 @@ The ``mock generation calling sequence`` mechanism
 Each component model has a ``_mock_generation_calling_sequence`` attribute storing a list of strings. Each string is the name of a method bound to the component model instance. The order in which these names appear determines the order in which the methods will be called during mock population. This mechanism works together with :ref:`model_feature_calling_sequence_mechanism` to determine the entire sequence of functions that are called when populating a mock. 
 
 
+.. _update_param_dict_decorator_mechanism:
 
+The ``update param_dict decorator`` mechanism
+=================================================
 
+As described in :ref:`param_dict_mechanism`, the composite model ``param_dict`` is simply a collection of the parameters in the ``param_dict`` of all the component models. While this collection process is simple, it creates the following problem. The component and composite ``param_dict`` are separate dictionaries, and even though they share keys in common, the keys point to different locations in memory. So if the user decides to change the value bound to a key in the ``param_dict`` of the composite model, this change does nothing at all to the value bound to the corresponding key the component model. And yet, the behavior is *entirley* governed by the component model, so unless some action is taken to propagate the change from the composite ``param_dict`` to the component ``param_dict``, then the composite model will not change behavior when its ``param_dict`` is changed. 
 
+The `~SubhaloModelFactory.update_param_dict_decorator` addresses this problem. 
 
 
 

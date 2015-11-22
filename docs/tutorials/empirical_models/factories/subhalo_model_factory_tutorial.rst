@@ -47,11 +47,11 @@ how to build a composite model from the components.
 
 Each component model in a model dictionary typically has each of the following three private attributes:
 
-	1. `_methods_to_inherit`
+    1. `_methods_to_inherit`
 
-	2. `_galprop_dtypes_to_allocate`
+    2. `_galprop_dtypes_to_allocate`
 
-	3. `_mock_generation_calling_sequence`
+    3. `_mock_generation_calling_sequence`
 
 Each of these three attributes will be explained in detail below. Briefly, the 
 `_methods_to_inherit` is a list of strings that instructs the `~SubhaloModelFactory` 
@@ -100,9 +100,9 @@ using the appropriate order:
 
 .. code-block:: python
 
-	self.model_dictionary = collections.OrderedDict()
-	for key in self._model_feature_calling_sequence:
-	    self.model_dictionary[key] = copy(self._input_model_dictionary[key])
+    self.model_dictionary = collections.OrderedDict()
+    for key in self._model_feature_calling_sequence:
+        self.model_dictionary[key] = copy(self._input_model_dictionary[key])
 
 In the next section, we will see how the ``model_dictionary`` attribute is used to create a 
 number of bookkeeping mechanisms used to verify self-consistency between the model features, 
@@ -119,15 +119,15 @@ with the following lines of code:
 
 .. code-block:: python
 
-	# Build up and bind several lists from the component models
-	self.build_prim_sec_haloprop_list()
-	self.build_publication_list()
-	self.build_new_haloprop_func_dict()
-	self.build_dtype_list()
-	self.set_warning_suppressions()
-	self.set_model_redshift()
-	self.set_inherited_methods()
-	self.build_init_param_dict()
+    # Build up and bind several lists from the component models
+    self.build_prim_sec_haloprop_list()
+    self.build_publication_list()
+    self.build_new_haloprop_func_dict()
+    self.build_dtype_list()
+    self.set_warning_suppressions()
+    self.set_model_redshift()
+    self.set_inherited_methods()
+    self.build_init_param_dict()
 
 These methods examine each of the component models, perform various self-consistency 
 tests, and create standardized attributes that allow the 
@@ -147,10 +147,36 @@ Once all of the above lists and dictionaries of the composite model have been cr
 the `~SubhaloModelFactory` finally inherits the behaviors of the component models. 
 This is done using with the `~SubhaloModelFactory.set_primary_behaviors` method. 
 
+This is the most important function in the entire factory. Although it is only a few lines, 
+it is sufficiently complicated to warrant detailed discussion. 
+First, we reproduce the source below: 
 
+.. code-block:: python
 
+    for feature, component_model in self.model_dictionary.iteritems():
 
+        for methodname in component_model._methods_to_inherit:
 
+            new_method_name = methodname # line 1
+            new_method_behavior = self.update_param_dict_decorator(
+                component_model, methodname) # line 2
+            setattr(self, new_method_name, new_method_behavior) # line 3
+
+            setattr(getattr(self, new_method_name), 
+                '_galprop_dtypes_to_allocate', 
+                component_model._galprop_dtypes_to_allocate) # line 4
+
+In this double-for loop, we iterate over every method that the composite model 
+should inherit from the collection of component models. Before unpacking these 4 lines, 
+first note how the use of getattr and setattr allows the component models to entirely dictate 
+what is inherited by the composite model. This high-level python feature is what makes possible 
+the flexibility of the model factories. 
+
+For each method that we inherit, line 3 binds the newly-defined method to the composite model instance. 
+Line 1 chooses for the name of this newly-defined method to keep the same name 
+as appears in the component model. Line 2 modifies the component model method behavior with the 
+`update_param_dict_decorator` decorator. This is very important for the reasons described in 
+:ref:`update_param_dict_decorator_mechanism`. 
 
 
 
