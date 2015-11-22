@@ -10,8 +10,7 @@ Tutorial on the SubhaloModelFactory Class
 
 This section of the documentation provides detailed notes 
 on the source code implementation of the `SubhaloModelFactory` class. 
-The purpose of the `SubhaloModelFactory` class is to provide a flexible, standardized platform for building subhalo-based models that can directly populate simulations with mock galaxies. The goal is to make it easy to swap new modeling features in and out of the framework while maintaining a uniform syntax. This way, when you want to study one particular feature of the galaxy-halo connection, you can focus exclusively on developing that feature, leaving the factory to take care of the remaining aspects of the mock population. This tutorial describes in detail how the `~SubhaloModelFactory` accomplishes this standardization. 
-
+The purpose of the `SubhaloModelFactory` class is to provide a flexible, standardized platform for building subhalo-based models that can directly populate simulations with mock galaxies. The goal is to make it easy to swap new modeling features in and out of the framework while maintaining a uniform syntax. This way, when you want to study one particular feature of the galaxy-halo connection, you can focus exclusively on developing that feature, leaving the factory to take care of the remaining aspects of the mock population. This tutorial describes in detail how the `~SubhaloModelFactory` accomplishes this standardization. We conclude in :ref:`subhalo_model_factory_further_reading` by pointing to sections of documentation covering related aspects such as the algorithm for using `SubhaloModelFactory` instances to populate mocks. 
 
 Outline 
 ========
@@ -175,8 +174,12 @@ what is inherited by the composite model. This high-level python feature is what
 the flexibility of the model factories. 
 
 
+.. _subhalo_model_factory_further_reading:
 
+Further reading 
+================
 
+No matter what the component model features are, all instances of `SubhaloModelFactory` can be used directly populate subhalo catalogs with mock galaxies. Detailed documentation on the mock-population algorithm is covered in :ref:`subhalo_mock_factory_tutorial`. 
 
 
 
