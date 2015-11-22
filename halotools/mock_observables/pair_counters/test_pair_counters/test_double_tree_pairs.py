@@ -3,451 +3,190 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
+#load pair counters
+from ..double_tree_pairs import npairs, jnpairs, xy_z_npairs, s_mu_npairs
 #load comparison simple pair counters
 from ..pairs import npairs as simp_npairs
 from ..pairs import wnpairs as simp_wnpairs
-#load rect_cuboid_pairs pair counters
-from ..double_tree_pairs import npairs, jnpairs
-#from ..double_tree_pairs import xy_z_npairs, xy_z_wnpairs, xy_z_jnpairs
-#from ..double_tree_pairs import s_mu_npairs
+from ..pairs import xy_z_npairs as simp_xy_z_npairs
 
+#set up random points to test pair counters
 np.random.seed(1)
+Npts = 1000
+random_sample = np.random.random((Npts,3))
+period = np.array([1.0,1.0,1.0])
+
 
 def test_npairs_periodic():
-    
-    Npts = 1e3
-    Lbox = [1.0,1.0,1.0]
-    period = np.array(Lbox)
-    
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
+    """
+    test npairs with periodic boundary conditons.
+    """
     
     rbins = np.array([0.0,0.1,0.2,0.3])
-
-    result = npairs(data1, data1, rbins, period=period, verbose=True,\
+    
+    result = npairs(random_sample, random_sample, rbins, period=period, verbose=True,\
                     num_threads=1)
     
-    test_result = simp_npairs(data1, data1, rbins, period=period)
-
-    print(result)
-    print(test_result)
-    assert np.all(test_result==result), "pair counts are incorrect"
+    msg = 'The returned result is an unexpected shape.'
+    assert np.shape(result)==(len(rbins),), msg
+    
+    test_result = simp_npairs(random_sample, random_sample, rbins, period=period)
+    
+    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
+    assert np.all(test_result==result), msg
 
 
 def test_npairs_nonperiodic():
-    
-    Npts = 1e3
-    Lbox = [1.0,1.0,1.0]
-    period = np.array(Lbox)
-    
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
+    """
+    test npairs without periodic boundary conditons.
+    """
     
     rbins = np.array([0.0,0.1,0.2,0.3])
-
-    result = npairs(data1, data1, rbins, period=None)
-    test_result = simp_npairs(data1, data1, rbins, period=None)
     
-    assert np.all(test_result==result), "pair counts are incorrect"
+    result = npairs(random_sample, random_sample, rbins, period=None)
+    
+    msg = 'The returned result is an unexpected shape.'
+    assert np.shape(result)==(len(rbins),), msg
+    
+    test_result = simp_npairs(random_sample, random_sample, rbins, period=None)
+    
+    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
+    assert np.all(test_result==result), msg
 
-"""
+
 def test_xy_z_npairs_periodic():
+    """
+    test xy_z_npairs with periodic boundary conditons.
+    """
     
-    Lbox = [1.0,1.0,1.0]
-    period = np.array(Lbox)
+    rp_bins = np.arange(0,0.31,0.1)
+    pi_bins = np.arange(0,0.31,0.1)
     
-    rp_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    pi_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    result = xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins, period=period)
     
-    #two points separated along perpendicular direction, but have exactly 0 separation
-    #in projection.  should return 0 pairs in bins
-    data1 = np.array([[0.5,0.5,0.5],[0.5,0.5,0.3]])
-
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
+    msg = 'The returned result is an unexpected shape.'
+    assert np.shape(result)==(len(rp_bins),len(pi_bins)), msg
     
-    print(result)
-    assert np.all(binned_result==0), "pi seperated, 0 rp seperated incorrect"
+    test_result = simp_xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins,\
+                                   period=period)
     
-    #two points separated along parallel direction, but have exactly 0 separation
-    #in parallel direction.  should return 0 pairs in bins
-    data1 = np.array([[0.5,0.5,0.5],[0.5,0.4,0.5]])
-
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert np.all(binned_result==0), "rp seperated, 0 pi seperated incorrect"
-    
-    #two points separated along parallel direction
-    data1 = np.array([[0.5,0.5,0.5],[0.49,0.49,0.3]])
-    
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert  binned_result[0,1]==2, "pi seperated pairs incorrect"
-    
-    #two points separated along perpendicular direction
-    data1 = np.array([[0.0,0.0,0.0],[0.2,0.0,0.01]])
-    
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
+    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
+    assert np.all(result == test_result), msg
 
 
 def test_xy_z_npairs_nonperiodic():
+    """
+    test xy_z_npairs without periodic boundary conditons.
+    """
     
-    Lbox = [1.0,1.0,1.0]
-    period = None
+    rp_bins = np.arange(0,0.31,0.1)
+    pi_bins = np.arange(0,0.31,0.1)
     
-    rp_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    pi_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    result = xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins, period=None)
     
-    #two points separated along perpendicular direction, but have exactly 0 separation
-    #in projection.  should return 0 pairs in bins
-    data1 = np.array([[0.5,0.5,0.5],[0.5,0.5,0.3]])
-
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
+    msg = 'The returned result is an unexpected shape.'
+    assert np.shape(result)==(len(rp_bins),len(pi_bins)), msg
     
-    print(result)
-    assert np.all(binned_result==0), "pi seperated, 0 rp seperated incorrect"
+    test_result = simp_xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins,\
+                                   period=None)
     
-    #two points separated along parallel direction, but have exactly 0 separation
-    #in parallel direction.  should return 0 pairs in bins
-    data1 = np.array([[0.5,0.5,0.5],[0.5,0.4,0.5]])
-
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert np.all(binned_result==0), "rp seperated, 0 pi seperated incorrect"
-    
-    #two points separated along parallel direction
-    data1 = np.array([[0.5,0.5,0.5],[0.49,0.49,0.3]])
-    
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert  binned_result[0,1]==2, "pi seperated pairs incorrect"
-    
-    #two points separated along perpendicular direction
-    data1 = np.array([[0.0,0.0,0.0],[0.2,0.0,0.01]])
-    
-    result = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
+    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
+    assert np.all(result == test_result), msg
 
 
 def test_s_mu_npairs_periodic():
+    """
+    test s_mu_npairs with periodic boundary conditons.
+    """
     
-    Lbox = [1.0,1.0,1.0]
-    period = np.array(Lbox)
-    
-    s_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    s_bins = np.array([0.0,0.1,0.2,0.3])
     N_mu_bins=100
     mu_bins = np.linspace(0,1.0,N_mu_bins)
+    Npts = len(random_sample)
     
-    Npts = 1e3
+    result = s_mu_npairs(random_sample, random_sample, s_bins, mu_bins, period=period)
     
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
+    msg = 'The returned result is an unexpected shape.'
+    assert np.shape(result)==(len(s_bins),N_mu_bins), msg
     
-    result = s_mu_npairs(data1, data1, s_bins, mu_bins, period=period)
+    result = np.diff(result,axis=1)
+    result = np.sum(result, axis=1)+ Npts
     
-    assert np.shape(result)==(6,N_mu_bins), "result has the wrong shape"
+    test_result = npairs(random_sample, random_sample, s_bins, period=period)
     
-    result = np.diff(np.diff(result,axis=1),axis=0)
+    print(test_result)
+    print(result)
     
-    xi = np.sum(result,axis=1)
-    
-    comp_result = npairs(data1, data1, s_bins, period=period)
-    comp_result = np.diff(comp_result)
-    
-    assert np.all(xi==comp_result), "pair counts don't match simple pair counts"
+    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
+    assert np.all(result == test_result), msg
 
 
 def test_s_mu_npairs_nonperiodic():
+    """
+    test s_mu_npairs without periodic boundary conditons.
+    """
     
-    Lbox = [1.0,1.0,1.0]
-    period = None
-    
-    s_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
+    s_bins = np.array([0.0,0.1,0.2,0.3])
     N_mu_bins=100
     mu_bins = np.linspace(0,1.0,N_mu_bins)
     
-    Npts = 1e3
+    result = s_mu_npairs(random_sample, random_sample, s_bins, mu_bins)
     
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
+    msg = 'The returned result is an unexpected shape.'
+    assert np.shape(result)==(len(s_bins),N_mu_bins), msg
     
-    result = s_mu_npairs(data1, data1, s_bins, mu_bins, period=None, Lbox=Lbox)
+    result = np.diff(result,axis=1)
+    result = np.sum(result, axis=1)+ Npts
     
-    assert np.shape(result)==(6,N_mu_bins), "result has the wrong shape"
+    test_result = npairs(random_sample, random_sample, s_bins)
     
-    result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    xi = np.sum(result,axis=1)
-    
-    comp_result = npairs(data1, data1, s_bins, period=None)
-    comp_result = np.diff(comp_result)
-    
-    print(comp_result, xi)
-    assert np.all(xi==comp_result), "pair counts don't match simple pair counts"
-    
+    msg = "The double tree's result(s) are not equivalent to simple pair counter's."
+    assert np.all(result == test_result), msg
 
-
-def test_wnpairs_periodic():
-    
-    Npts = 1e3
-    Lbox = [1.0,1.0,1.0]
-    period = np.array(Lbox)
-    
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
-    weights1 = np.random.random(Npts)
-    
-    rbins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-
-    result = wnpairs(data1, data1, rbins, Lbox=Lbox, period=period, weights1=weights1, weights2=weights1)
-    
-    test_result = simp_wnpairs(data1, data1, rbins, period=period, weights1=weights1, weights2=weights1)
-
-    print(test_result,result)
-    assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
-
-
-def test_wnpairs_nonperiodic():
-    
-    Npts = 1e3
-    Lbox = [1.0,1.0,1.0]
-    period = np.array(Lbox)
-    
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
-    weights1 = np.random.random(Npts)
-    
-    rbins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-
-    result = wnpairs(data1, data1, rbins, Lbox=Lbox, period=None, weights1=weights1, weights2=weights1)
-    
-    test_result = simp_wnpairs(data1, data1, rbins, period=None, weights1=weights1, weights2=weights1)
-
-    assert np.allclose(test_result,result,rtol=1e-09), "pair counts are incorrect"
-
-
-def test_xy_z_wnpairs_periodic():
-    
-    Lbox = [1.0,1.0,1.0]
-    period = np.array(Lbox)
-    
-    weights1 = np.ones(2)
-    rp_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    pi_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    
-    #two points separated along perpendicular direction, but have exactly 0 separation
-    #in projection.  should return 0 pairs in bins
-    data1 = np.array([[0.5,0.5,0.5],[0.5,0.5,0.3]])
-
-    result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
-                         weights1=weights1, weights2=weights1)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    print(result)
-    assert np.all(binned_result==0), "pi seperated, 0 rp seperated incorrect"
-    
-    #two points separated along parallel direction, but have exactly 0 separation
-    #in parallel direction.  should return 0 pairs in bins
-    data1 = np.array([[0.5,0.5,0.5],[0.5,0.4,0.5]])
-
-    result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
-                         weights1=weights1, weights2=weights1)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert np.all(binned_result==0), "rp seperated, 0 pi seperated incorrect"
-    
-    #two points separated along parallel direction
-    data1 = np.array([[0.5,0.5,0.5],[0.49,0.49,0.3]])
-    
-    result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
-                         weights1=weights1, weights2=weights1)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert  binned_result[0,1]==2, "pi seperated pairs incorrect"
-    
-    #two points separated along perpendicular direction
-    data1 = np.array([[0.0,0.0,0.0],[0.2,0.0,0.01]])
-    
-    result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
-                         weights1=weights1, weights2=weights1)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
-
-
-def test_xy_z_wnpairs_nonperiodic():
-    
-    Lbox = [1.0,1.0,1.0]
-    period = None
-    
-    weights1 = np.ones(2)
-    rp_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    pi_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    
-    #two points separated along perpendicular direction, but have exactly 0 separation
-    #in projection.  should return 0 pairs in bins
-    data1 = np.array([[0.5,0.5,0.5],[0.5,0.5,0.3]])
-
-    result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
-                         weights1=weights1, weights2=weights1)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    print(result)
-    assert np.all(binned_result==0), "pi seperated, 0 rp seperated incorrect"
-    
-    #two points separated along parallel direction, but have exactly 0 separation
-    #in parallel direction.  should return 0 pairs in bins
-    data1 = np.array([[0.5,0.5,0.5],[0.5,0.4,0.5]])
-
-    result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
-                         weights1=weights1, weights2=weights1)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert np.all(binned_result==0), "rp seperated, 0 pi seperated incorrect"
-    
-    #two points separated along parallel direction
-    data1 = np.array([[0.5,0.5,0.5],[0.49,0.49,0.3]])
-    
-    result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
-                         weights1=weights1, weights2=weights1)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert  binned_result[0,1]==2, "pi seperated pairs incorrect"
-    
-    #two points separated along perpendicular direction
-    data1 = np.array([[0.0,0.0,0.0],[0.2,0.0,0.01]])
-    
-    result = xy_z_wnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period,\
-                         weights1=weights1, weights2=weights1)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    assert  binned_result[1,0]==2, "rp seperated pairs incorrect"
-"""
 
 def test_jnpairs_periodic():
-    
-    Npts = 1e3
-    Lbox = [1.0,1.0,1.0]
-    period = np.array(Lbox)
-    
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
-    weights1 = np.random.random(Npts)
-    N_jsamples=10
-    jtags1 = np.sort(np.random.random_integers(1,N_jsamples,size=Npts))
+    """
+    test jnpairs with periodic boundary conditons.
+    """
     
     rbins = np.array([0.0,0.1,0.2,0.3])
-
-    result = jnpairs(data1, data1, rbins, period=period,\
+    
+    #define the jackknife sample labels
+    Npts = len(random_sample)
+    N_jsamples=10
+    jtags1 = np.sort(np.random.random_integers(1, N_jsamples, size=Npts))
+    
+    #define weights
+    weights1 = np.random.random(Npts)
+    
+    result = jnpairs(random_sample, random_sample, rbins, period=period,\
                      jtags1=jtags1, jtags2=jtags1, N_samples=10,\
                      weights1=weights1, weights2=weights1)
     
-    print(result)
-
-    assert result.ndim==2, 'result is the wrong dimension'
-    assert np.shape(result)==(N_jsamples+1,len(rbins)), 'result is the wrong shape'
+    msg = 'The returned result is an unexpected shape.'
+    assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
 
 
 def test_jnpairs_nonperiodic():
-    
-    Npts = 1e3
-    Lbox = [1.0,1.0,1.0]
-    period = None
-    
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
-    weights1 = np.random.random(Npts)
-    N_jsamples=10
-    jtags1 = np.sort(np.random.random_integers(1,N_jsamples,size=Npts))
+    """
+    test jnpairs without periodic boundary conditons.
+    """
     
     rbins = np.array([0.0,0.1,0.2,0.3])
-
-    result = jnpairs(data1, data1, rbins, period=period,\
+    
+    #define the jackknife sample labels
+    Npts = len(random_sample)
+    N_jsamples=10
+    jtags1 = np.sort(np.random.random_integers(1, N_jsamples, size=Npts))
+    
+    #define weights
+    weights1 = np.random.random(Npts)
+    
+    result = jnpairs(random_sample, random_sample, rbins, period=None,\
                      jtags1=jtags1, jtags2=jtags1, N_samples=10,\
                      weights1=weights1, weights2=weights1)
     
-    print(result)
-
-    assert result.ndim==2, 'result is the wrong dimension'
-    assert np.shape(result)==(N_jsamples+1,len(rbins)), 'result is the wrong shape'
-"""
-
-def test_xy_z_jnpairs_periodic():
-    
-    Npts=100
-    Lbox = [1.0,1.0,1.0]
-    period = np.array(Lbox)
-    
-    rp_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    pi_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
-    weights1 = np.random.random(Npts)
-    jtags1 = np.sort(np.random.random_integers(1, 10, size=Npts))
-
-    result = xy_z_jnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period, jtags1=jtags1, jtags2=jtags1, N_samples=10)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    result_compare = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    
-    print(np.shape(result))
-    assert np.shape(result)==(11,6,6), "shape xy_z jackknife pair counts of result is incorrect"
-    
-    assert np.all(result[0]==result_compare), "shape xy_z jackknife pair counts of result is incorrect"
+    msg = 'The returned result is an unexpected shape.'
+    assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
 
 
-def test_xy_z_jnpairs_nonperiodic():
-    
-    Npts=100
-    Lbox = [1.0,1.0,1.0]
-    period = None
-    
-    rp_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    pi_bins = np.array([0.0,0.1,0.2,0.3,0.4,0.5])
-    
-    x = np.random.uniform(0, Lbox[0], Npts)
-    y = np.random.uniform(0, Lbox[1], Npts)
-    z = np.random.uniform(0, Lbox[2], Npts)
-    data1 = np.vstack((x,y,z)).T
-    weights1 = np.random.random(Npts)
-    jtags1 = np.sort(np.random.random_integers(1, 10, size=Npts))
-
-    result = xy_z_jnpairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period, jtags1=jtags1, jtags2=jtags1, N_samples=10)
-    binned_result = np.diff(np.diff(result,axis=1),axis=0)
-    
-    result_compare = xy_z_npairs(data1, data1, rp_bins, pi_bins, Lbox=Lbox, period=period)
-    
-    print(np.shape(result))
-    assert np.shape(result)==(11,6,6), "shape xy_z jackknife pair counts of result is incorrect"
-    
-    assert np.all(result[0]==result_compare), "shape xy_z jackknife pair counts of result is incorrect"
-"""
