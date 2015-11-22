@@ -60,6 +60,16 @@ class SubhaloModelFactory(ModelFactory):
             component model governing the behavior of that feature. 
             See the ``Examples`` below. 
 
+        baseline_model_instance : composite model instance, optional 
+            If passed to the constructor, the model dictionary bound to the 
+            baseline_model_instance will be treated as the baseline dictionary. 
+            Any additional keyword arguments passed to the constructor that appear 
+            in the baseline dictionary will be treated as model features that replace 
+            the corresponding model in the baseline dictionary. Any  
+            model features passed to the constructor as keyword arguments that do not 
+            appear in the baseline dictionary will be treated as new features to 
+            augment the baseline model. See the ``Examples`` below. 
+
         model_feature_calling_sequence : list, optional
             Determines the order in which your component features  
             will be called during mock population. 
@@ -135,7 +145,21 @@ class SubhaloModelFactory(ModelFactory):
         ``quiescent_designation`` nor the ``stellar_mass`` models have explicit dependence 
         upon one another. 
 
-        >>> model_instance.populate_mock(simname = 'bolplanck', redshift = 0.5) # doctest: +SKIP
+        Finally, the following examples demonstrate how to use the ``baseline_model_instance`` feature, 
+        which allows you to swap out individual features starting from an initial "baseline" model. For 
+        our baseline model, we'll use the pre-built `smhm_binary_sfr` model:
+
+        >>> model1 = SubhaloModelFactory(model_nickname = 'smhm_binary_sfr')
+
+        This model has two features: 'stellar_mass' is modeled by `~halotools.empirical_models.smhm_models.Behroozi10SmHm`, 
+        and 'quiescent' is modeled by `~halotools.empirical_models.sfr_models.sfr_components.BinaryGalpropInterpolModel`. 
+        We'll use the ``baseline_model_instance`` feature to construct an identical model which instead uses 
+        the `~halotools.empirical_models.smhm_models.Moster13SmHm` stellar-to-halo-mass relation:
+
+        >>> from halotools.empirical_models.smhm_models import Moster13SmHm
+        >>> moster_component_model = Moster13SmHm()
+
+        >>> model2 = SubhaloModelFactory(baseline_model_instance = model1, stellar_mass = moster_component_model)
 
         Notes 
         ------
@@ -208,7 +232,30 @@ class SubhaloModelFactory(ModelFactory):
         ---------
         :ref:`subhalo_model_factory_parsing_kwargs`
         """
-        if model_nickname is None:
+
+        if 'baseline_model_instance' in kwargs:
+            baseline_model_dictionary = kwargs['baseline_model_instance'].model_dictionary
+            input_model_dictionary = copy(kwargs)
+            del input_model_dictionary['baseline_model_instance']
+
+            possible_supplementary_kwargs = ('galaxy_selection_func', 
+                'halo_selection_func', 'model_feature_calling_sequence')
+            supplementary_kwargs = {}
+            for key in possible_supplementary_kwargs:
+                try:
+                    supplementary_kwargs[key] = copy(input_model_dictionary[key])
+                    del input_model_dictionary[key]
+                except KeyError:
+                    pass
+            if 'model_feature_calling_sequence' not in supplementary_kwargs:
+                supplementary_kwargs['model_feature_calling_sequence'] = None
+
+            new_model_dictionary = copy(baseline_model_dictionary)
+            for key, value in input_model_dictionary.iteritems():
+                new_model_dictionary[key] = value
+            return new_model_dictionary, supplementary_kwargs
+
+        elif model_nickname is None:
             input_model_dictionary = copy(kwargs)
 
             ### First parse the supplementary keyword arguments, 
