@@ -495,15 +495,31 @@ class HodModelFactory(ModelFactory):
 
 
     def update_param_dict_decorator(self, component_model, func_name):
-        """ Decorator used to propagate any possible changes 
-        in the composite model param_dict 
+        """ Decorator used to propagate any possible changes in the composite model param_dict 
         down to the appropriate component model param_dict. 
+
+        Parameters 
+        -----------
+        component_model : obj 
+            Instance of the component model in which the behavior of the function is defined. 
+
+        func_name : string 
+            Name of the method in the component model whose behavior is being decorated. 
+
+        Returns 
+        --------
+        decorated_func : function 
+            Function object whose behavior is identical 
+            to the behavior of the function in the component model, 
+            except that the component model param_dict is first updated with any 
+            possible changes to corresponding parameters in the composite model param_dict.
 
         See also 
         --------
         :ref:`update_param_dict_decorator_mechanism`
-        """
 
+        :ref:`param_dict_mechanism`
+        """
         return ModelFactory.update_param_dict_decorator(self, component_model, func_name)
 
     def build_lookup_tables(self):
