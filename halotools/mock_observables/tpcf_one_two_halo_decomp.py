@@ -12,6 +12,7 @@ import numpy as np
 from math import pi, gamma
 from .clustering_helpers import *
 from .pair_counters.double_tree_pairs import npairs
+from .pair_counters.marked_double_tree_pairs import marked_npairs
 from warnings import warn
 ##########################################################################################
 
@@ -24,7 +25,7 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 
 def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
-                             sample2=None, sample2_host_halo_id,
+                             sample2=None, sample2_host_halo_id=None,
                              randoms=None, period=None,
                              do_auto=True, do_cross=True, estimator='Natural',
                              num_threads=1, max_sample_size=int(1e6),
@@ -154,8 +155,8 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
                      approx_cellran_size]
     
     #pass arguments in, and get out processed arguments, plus some control flow variables
-    sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id, randoms, period,
-    do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs =
+    sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id, randoms, period,\
+    do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs =\
     _tpcf_one_two_halo_decomp_process_args(*function_args)
     
     
@@ -238,8 +239,8 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             return D1R, D2R, RR
     
     
-    def pair_counts(sample1, sample2, rbins, period, num_threads,\
-                    do_auto, do_cross, marks1, marks2, wfunc, _sample1_is_sample2)
+    def marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
+                    do_auto, do_cross, marks1, marks2, wfunc, _sample1_is_sample2):
         """
         Count weighted data pairs.
         """
@@ -299,13 +300,15 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     wfunc=3
     one_halo_D1D1,one_halo_D1D2, one_halo_D2D2 =\
         marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
-                           do_auto, do_cross, marks1, marks2, wfunc, _sample1_is_sample2)
+                           do_auto, do_cross, sample1_host_halo_id,\
+                           sample2_host_halo_id, wfunc, _sample1_is_sample2)
     
     #calculate 2-halo pairs 
     wfunc=13
     two_halo_D1D1,two_halo_D1D2, two_halo_D2D2 =\
         marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
-                           do_auto, do_cross, marks1, marks2, wfunc, _sample1_is_sample2)
+                           do_auto, do_cross, sample1_host_halo_id,\
+                           sample2_host_halo_id, wfunc, _sample1_is_sample2)
     
     #count random pairs
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rbins, period,
