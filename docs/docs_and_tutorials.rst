@@ -1,27 +1,24 @@
 .. _docs_and_tutorials:
 
-==============================================
-Quickstart Guides and Demos
-==============================================
 
-.. _user-docs:
+***************************************
+Quickstart Guides and Tutorials
+***************************************
 
-******************
-User Documentation
-******************
-
+This section of the documentation provides an overview of the 
+core functionality of Halotools, and usage-tutorials to help you 
+quickly get started with the package. 
 
 **Halotools Overview**
-----------------------------
+=================================================
 
 .. toctree::
    :maxdepth: 1
 
-   overview
-   getting_started
+   getting_started/index
 
 **Mock-Making Tools**
-----------------------
+=================================================
 
 .. toctree::
    :maxdepth: 1
@@ -30,7 +27,7 @@ User Documentation
    mock_making/overview
 
 **Model-Building Tools**
--------------------------
+=================================================
 
 .. toctree::
    :maxdepth: 1
@@ -40,7 +37,7 @@ User Documentation
 
 
 **Managing Halo Catalogs**
---------------------------------------------
+=================================================
 
 .. toctree::
    :maxdepth: 1
@@ -49,7 +46,7 @@ User Documentation
    managing_catalogs/supported_sim_list
 
 **Making Mock Observations**
---------------------------------------------
+=================================================
 
 .. toctree::
    :maxdepth: 1
@@ -57,9 +54,9 @@ User Documentation
    mock_observations/overview
    mock_observations/quickstart_guide
 
-***********************
+
 Developer Documentation
-***********************
+=================================================
 
 The developer documentation contains guidlines for how to 
 stay up-to-date on Halotools development, submit bug reports and 

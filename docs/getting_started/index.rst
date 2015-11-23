@@ -1,3 +1,5 @@
+:orphan:
+
 .. _getting_started:
 
 ******************************
@@ -79,7 +81,7 @@ You can read about your download options by running:
 Getting started with subpackages
 ================================
 
-Although the different sub-packages of Halotools are woven together for the science aims of the package (see :ref:`halotools_overview`), individually the sub-packages have very different functionality. 
+Although the different sub-packages of Halotools are woven together for the science aims of the package (see :ref:`halotools_science_overview`), individually the sub-packages have very different functionality. 
 
 Downloading and processing simulations
 ---------------------------------------
