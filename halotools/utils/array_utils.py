@@ -54,7 +54,6 @@ def convert_to_ndarray(x, dt = None):
             iterator = iter(x)
             if dt is None:
                 return x.astype(type(x.flatten()[0]))
-                # return x
             else:
                 return x.astype(dt)
         except TypeError:
