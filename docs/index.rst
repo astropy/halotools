@@ -23,7 +23,7 @@ Getting Started
    :maxdepth: 1
 
    install
-   docs_and_tutorials
+   getting_started/index
    function_usage/index
    source_notes/index
  
@@ -34,7 +34,7 @@ License and Credits
 .. toctree::
    :maxdepth: 1
 
-   development/contributors
-   development/citing_halotools
+   getting_started/development/contributors
+   getting_started/development/citing_halotools
 
 
