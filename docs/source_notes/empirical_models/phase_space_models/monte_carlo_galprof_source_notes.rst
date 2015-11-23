@@ -5,7 +5,7 @@
 .. _monte_carlo_galprof_mixin_tutorial:
 
 ************************************************************
-Source code notes on the `~MonteCarloGalProf` Mix-In Class
+Source code notes on `~MonteCarloGalProf`
 ************************************************************
 
 This tutorial remains to be written. See `Github Issue 209 <https://github.com/astropy/halotools/issues/209/>`_

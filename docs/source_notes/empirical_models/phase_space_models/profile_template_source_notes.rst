@@ -5,7 +5,7 @@
 .. _profile_template_tutorial:
 
 ****************************************************
-Source code notes on the `AnalyticDensityProf` class
+Source code notes on `AnalyticDensityProf`
 ****************************************************
 
 This section of the documentation provides background material and detailed implementation notes 

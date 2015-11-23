@@ -21,8 +21,8 @@ Phase Space Component Models
 .. toctree::
    :maxdepth: 1
 
-   empirical_models/phase_space_models/profile_template_tutorial
-   empirical_models/phase_space_models/nfw_profile_tutorial
+   empirical_models/phase_space_models/profile_template_source_notes
+   empirical_models/phase_space_models/nfw_profile_source_notes
 
 Factories
 -------------------------------

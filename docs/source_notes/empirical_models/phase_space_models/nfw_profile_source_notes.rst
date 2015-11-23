@@ -5,7 +5,7 @@
 .. _nfw_profile_tutorial:
 
 ******************************************************************
-Source code notes on the `NFWProfile` and `NFWPhaseSpace` classes
+Source code notes on `NFWProfile` and `NFWPhaseSpace`
 ******************************************************************
 
 
