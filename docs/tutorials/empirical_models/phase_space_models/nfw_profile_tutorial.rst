@@ -1,12 +1,13 @@
 :orphan:
 
+.. currentmodule:: halotools.empirical_models.phase_space_models
+
 .. _nfw_profile_tutorial:
 
-****************************************************
-Tutorial on the NFWProfile and NFWPhaseSpace Models
-****************************************************
+******************************************************************
+Source code notes on the `NFWProfile` and `NFWPhaseSpace` classes
+******************************************************************
 
-.. currentmodule:: halotools.empirical_models.phase_space_models
 
 This section of the documentation provides background material 
 and detailed implementation notes on the functions and methods of the 

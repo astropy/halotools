@@ -1,11 +1,11 @@
 .. _tutorials_by_category:
 
 ********************************************
-Tutorials grouped by category
+Source code notes grouped by category
 ********************************************
 
-Here we present tutorials on the implementation of 
-the most commonly used functions and classes 
+Here we present notes on the source code implementation of 
+the most commonly used functions and classes, 
 grouped together by functionality. 
 For a quick reference on basic usage, see :ref:`function_usage_examples`. 
 For documentation of the API of all functions and classes in the package, 
