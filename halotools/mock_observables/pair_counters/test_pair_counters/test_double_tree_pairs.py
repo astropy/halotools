@@ -230,11 +230,21 @@ def test_jnpairs_nonperiodic():
     #define weights
     weights1 = np.random.random(Npts)
     
-    result = jnpairs(random_sample, random_sample, rbins, period=period,\
+    result = jnpairs(random_sample, random_sample, rbins, period=None,\
                      jtags1=jtags1, jtags2=jtags1, N_samples=10,\
                      weights1=weights1, weights2=weights1, num_threads=num_threads)
     
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
+
+    grid_result = jnpairs(grid_points, grid_points, rbins, period=None,
+        jtags1=grid_indices, jtags2=grid_indices, N_samples=grid_jackknife_ncells**3,
+        num_threads=num_threads)
+
+    for icell in xrange(1, grid_jackknife_ncells**3-1):
+        assert np.all(grid_result[icell, :] == grid_result[icell+1, :])
+
+
+
 
 
