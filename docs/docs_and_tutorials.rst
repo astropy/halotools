@@ -57,14 +57,6 @@ User Documentation
    mock_observations/overview
    mock_observations/quickstart_guide
 
-**Tutorials**
---------------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   tutorials/index
-
 ***********************
 Developer Documentation
 ***********************

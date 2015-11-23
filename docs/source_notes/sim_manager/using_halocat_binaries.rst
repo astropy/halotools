@@ -166,11 +166,3 @@ method:
     /Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.33030.list.halotools.official.version.hdf5
     
 
-
-Concluding notes
-================
-
-Refer to the :ref:`sim_manager_api` section of the documentation to
-see how to call these and other methods of the
-`~halotools.sim_manager.CatalogManager`.
-
