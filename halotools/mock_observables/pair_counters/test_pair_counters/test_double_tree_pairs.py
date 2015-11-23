@@ -15,6 +15,7 @@ np.random.seed(1)
 Npts = 1000
 random_sample = np.random.random((Npts,3))
 period = np.array([1.0,1.0,1.0])
+num_threads=2
 
 
 def test_npairs_periodic():
@@ -24,8 +25,8 @@ def test_npairs_periodic():
     
     rbins = np.array([0.0,0.1,0.2,0.3])
     
-    result = npairs(random_sample, random_sample, rbins, period=period, verbose=True,\
-                    num_threads=1)
+    result = npairs(random_sample, random_sample, rbins, period=period,\
+                    num_threads=num_threads)
     
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(len(rbins),), msg
@@ -43,7 +44,8 @@ def test_npairs_nonperiodic():
     
     rbins = np.array([0.0,0.1,0.2,0.3])
     
-    result = npairs(random_sample, random_sample, rbins, period=None)
+    result = npairs(random_sample, random_sample, rbins, period=None,\
+                    num_threads=num_threads)
     
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(len(rbins),), msg
@@ -62,7 +64,8 @@ def test_xy_z_npairs_periodic():
     rp_bins = np.arange(0,0.31,0.1)
     pi_bins = np.arange(0,0.31,0.1)
     
-    result = xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins, period=period)
+    result = xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins, period=period,\
+                         num_threads=num_threads)
     
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(len(rp_bins),len(pi_bins)), msg
@@ -82,7 +85,8 @@ def test_xy_z_npairs_nonperiodic():
     rp_bins = np.arange(0,0.31,0.1)
     pi_bins = np.arange(0,0.31,0.1)
     
-    result = xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins, period=None)
+    result = xy_z_npairs(random_sample, random_sample, rp_bins, pi_bins, period=None,\
+                         num_threads=num_threads)
     
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(len(rp_bins),len(pi_bins)), msg
@@ -104,7 +108,8 @@ def test_s_mu_npairs_periodic():
     mu_bins = np.linspace(0,1.0,N_mu_bins)
     Npts = len(random_sample)
     
-    result = s_mu_npairs(random_sample, random_sample, s_bins, mu_bins, period=period)
+    result = s_mu_npairs(random_sample, random_sample, s_bins, mu_bins, period=period,\
+                         num_threads=num_threads)
     
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(len(s_bins),N_mu_bins), msg
@@ -112,7 +117,8 @@ def test_s_mu_npairs_periodic():
     result = np.diff(result,axis=1)
     result = np.sum(result, axis=1)+ Npts
     
-    test_result = npairs(random_sample, random_sample, s_bins, period=period)
+    test_result = npairs(random_sample, random_sample, s_bins, period=period,\
+                         num_threads=num_threads)
     
     print(test_result)
     print(result)
@@ -130,7 +136,8 @@ def test_s_mu_npairs_nonperiodic():
     N_mu_bins=100
     mu_bins = np.linspace(0,1.0,N_mu_bins)
     
-    result = s_mu_npairs(random_sample, random_sample, s_bins, mu_bins)
+    result = s_mu_npairs(random_sample, random_sample, s_bins, mu_bins,\
+                         num_threads=num_threads)
     
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(len(s_bins),N_mu_bins), msg
@@ -138,7 +145,7 @@ def test_s_mu_npairs_nonperiodic():
     result = np.diff(result,axis=1)
     result = np.sum(result, axis=1)+ Npts
     
-    test_result = npairs(random_sample, random_sample, s_bins)
+    test_result = npairs(random_sample, random_sample, s_bins, num_threads=num_threads)
     
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
     assert np.all(result == test_result), msg
@@ -161,7 +168,7 @@ def test_jnpairs_periodic():
     
     result = jnpairs(random_sample, random_sample, rbins, period=period,\
                      jtags1=jtags1, jtags2=jtags1, N_samples=10,\
-                     weights1=weights1, weights2=weights1)
+                     weights1=weights1, weights2=weights1, num_threads=num_threads)
     
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
@@ -184,7 +191,7 @@ def test_jnpairs_nonperiodic():
     
     result = jnpairs(random_sample, random_sample, rbins, period=None,\
                      jtags1=jtags1, jtags2=jtags1, N_samples=10,\
-                     weights1=weights1, weights2=weights1)
+                     weights1=weights1, weights2=weights1, num_threads=num_threads)
     
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(N_jsamples+1,len(rbins)), msg

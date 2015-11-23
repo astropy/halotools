@@ -13,9 +13,10 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 from copy import copy 
 
-from time import time
+import time
 import sys
 import multiprocessing
+from multiprocessing import Value, Lock
 from functools import partial
 
 from .double_tree import FlatRectanguloidDoubleTree
@@ -99,6 +100,11 @@ def npairs(data1, data2, rbins, period = None,\
     xperiod, yperiod, zperiod = period 
     rmax = np.max(rbins)
     
+    if verbose==True:
+        print("runing double_tree_pairs.xy_z_npairs on {0} x {1}\n"
+              "points with PBCs={2}".format(len(data1), len(data2), PBCs))
+        start = time.time()
+    
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax)
@@ -117,7 +123,15 @@ def npairs(data1, data2, rbins, period = None,\
         
     #number of cells
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
-
+    
+    if verbose==True:
+        print("volume 1 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x1divs,\
+              double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
+        print("volume 2 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x2divs,\
+              double_tree.num_y2divs,double_tree.num_z2divs,Ncell1))
+    
     #create a function to call with only one argument
     engine = partial(_npairs_engine, 
         double_tree, rbins_squared, period, PBCs)
@@ -125,12 +139,17 @@ def npairs(data1, data2, rbins, period = None,\
     #do the pair counting
     if num_threads > 1:
         pool = multiprocessing.Pool(num_threads)
-        counts = np.sum(pool.map(engine,range(Ncell1)),axis=0)
+        result = pool.map(engine,range(Ncell1))
         pool.close()
+        counts = np.sum(result,axis=0)
     if num_threads == 1:
         counts = np.sum(map(engine,range(Ncell1)),axis=0)
-
+    
+    if verbose==True:
+        print("total run time: {0} seconds".format(time.time()-start))
+    
     return counts
+
 
 def _npairs_engine(double_tree, rbins_squared, period, PBCs, icell1):
     """
@@ -263,7 +282,15 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
         )
     xperiod, yperiod, zperiod = period 
     rmax = np.max(rbins)
-
+    
+    if verbose==True:
+        print("runing double_tree_pairs.xy_z_npairs on {0} x {1}\n"
+              "points with PBCs={2}".format(len(data1), len(data2), PBCs))
+        search_volume = (2.0*rmax)**3
+        total_volume  = period.prod()
+        print("searching for pairs over {}% of the total volume\n"
+              "for each point.".format(search_volume/total_volume))
+    
     # Process the input weights and jackknife-tags with the helper function
     weights1, weights2, jtags1, jtags2 = (
         _jnpairs_process_weights_jtags(data1, data2, 
@@ -296,8 +323,15 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
         
     #number of cells
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
-
-
+    
+    if verbose==True:
+        print("volume 1 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x1divs,\
+              double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
+        print("volume 2 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x2divs,\
+              double_tree.num_y2divs,double_tree.num_z2divs,Ncell1))
+    
     #create a function to call with only one argument
     engine = partial(_jnpairs_engine, double_tree, 
         weights1, weights2, jtags1, jtags2, N_samples, rbins_squared, period, PBCs)
@@ -433,7 +467,15 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     xperiod, yperiod, zperiod = period 
     rp_max = np.max(rp_bins)
     pi_max = np.max(pi_bins)
-
+    
+    if verbose==True:
+        print("runing double_tree_pairs.xy_z_npairs on {0} x {1}\n"
+              "points with PBCs={2}".format(len(data1), len(data2), PBCs))
+        search_volume = (2.0*rp_max)*(2.0*rp_max)*(2.0*pi_max)
+        total_volume  = period.prod()
+        print("searching for pairs over {}% of the total volume\n"
+              "for each point.".format(search_volume/total_volume))
+    
     ### Compute the estimates for the cell sizes
 
     result = _set_approximate_xy_z_cell_sizes(
@@ -460,6 +502,15 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
 
     #number of cells
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
+    Ncell2 = double_tree.num_x2divs*double_tree.num_y2divs*double_tree.num_z2divs
+    
+    if verbose==True:
+        print("volume 1 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x1divs,\
+              double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
+        print("volume 2 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x2divs,\
+              double_tree.num_y2divs,double_tree.num_z2divs,Ncell1))
     
     #create a function to call with only one argument
     engine = partial(_xy_z_npairs_engine, double_tree, rp_bins_squared, 
@@ -495,16 +546,19 @@ def _xy_z_npairs_engine(double_tree, rp_bins_squared, pi_bins_squared, period, P
     zsearch_length = np.sqrt(pi_bins_squared[-1])
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)
-            
+    
     adj_cell_counter = 0
     for icell2, xshift, yshift, zshift in adj_cell_generator:
-                
+        adj_cell_counter +=1
+        
+        #ix, iy, iz = double_tree.tree2.cell_tuple_from_cell_idx(icell1)
+        #print(adj_cell_counter, icell1, icell2, xshift, yshift, zshift)
+        
         #extract the points in the cell
         s2 = double_tree.tree2.slice_array[icell2]
         x_icell2 = double_tree.tree2.x[s2] + xshift
         y_icell2 = double_tree.tree2.y[s2] + yshift 
         z_icell2 = double_tree.tree2.z[s2] + zshift
-
 
         #use cython functions to do pair counting
         counts += xy_z_npairs_no_pbc(
@@ -683,16 +737,5 @@ def _s_mu_npairs_engine(double_tree, s_bins, mu_bins, period, PBCs, icell1):
             s_bins, mu_bins)
             
     return counts
-
-
-
-
-
-
-
-
-
-
-
 
 
