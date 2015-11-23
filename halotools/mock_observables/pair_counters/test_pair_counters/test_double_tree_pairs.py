@@ -10,6 +10,9 @@ from ..pairs import npairs as simp_npairs
 from ..pairs import wnpairs as simp_wnpairs
 from ..pairs import xy_z_npairs as simp_xy_z_npairs
 
+import pytest
+slow = pytest.mark.slow
+
 #set up random points to test pair counters
 np.random.seed(1)
 Npts = 1000
