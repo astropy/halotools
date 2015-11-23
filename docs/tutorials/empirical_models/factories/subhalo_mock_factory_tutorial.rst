@@ -5,7 +5,7 @@
 .. _subhalo_mock_factory_tutorial:
 
 ********************************************************************
-Tutorial on Making Subhalo-based Mocks
+Source code notes on the `SubhaloMockFactory` class 
 ********************************************************************
 
 This section of the documentation provides detailed notes 

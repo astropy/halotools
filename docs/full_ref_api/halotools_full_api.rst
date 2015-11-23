@@ -8,6 +8,9 @@ Comprehensive Halotools Reference/API
 
 .. automodapi:: halotools.empirical_models
 
+.. automodapi:: halotools.empirical_models.model_defaults
+.. automodapi:: halotools.empirical_models.model_helpers
+
 .. automodapi:: halotools.empirical_models.assembias_models
 .. automodapi:: halotools.empirical_models.assembias_models.tests
 
@@ -25,7 +28,10 @@ Comprehensive Halotools Reference/API
 
 .. automodapi:: halotools.empirical_models.phase_space_models
 .. automodapi:: halotools.empirical_models.phase_space_models.profile_models
+.. automodapi:: halotools.empirical_models.phase_space_models.profile_models.profile_helpers
 .. automodapi:: halotools.empirical_models.phase_space_models.profile_models.tests
+.. automodapi:: halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile
+.. automodapi:: halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers
 .. automodapi:: halotools.empirical_models.phase_space_models.velocity_models
 .. automodapi:: halotools.empirical_models.phase_space_models.velocity_models.tests
 .. automodapi:: halotools.empirical_models.phase_space_models.tests
@@ -39,6 +45,7 @@ Comprehensive Halotools Reference/API
 .. automodapi:: halotools.empirical_models.tests
 
 
+.. automodapi:: halotools.custom_exceptions
 
 
 
