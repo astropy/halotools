@@ -42,11 +42,6 @@ and manage your cache, see :ref:`sim_manager_step_by_step`.
 ============================================
 To see what catalogs Halotools is pre-configured to work with, see :ref:`supported_sim_list`. If you have your own catalog you would like to work with instead, see the :ref:`using_your_own_catalog`. 
 
-**Reference/API**
-======================
-
-For comprehensive documentation of every class, method, and function in the ``sim_manager`` sub-package, see :ref:`sim_manager_api`. 
-
 
 Using ``sim_manager``
 ======================

@@ -25,7 +25,7 @@ Getting Started
    install
    docs_and_tutorials
    function_usage/index
-   tutorials/index
+   source_notes/index
  
 *********************
 License and Credits
