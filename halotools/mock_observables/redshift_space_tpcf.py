@@ -12,7 +12,6 @@ import numpy as np
 from math import pi, gamma
 from .clustering_helpers import *
 from .pair_counters.double_tree_pairs import xy_z_npairs
-#from .pair_counters.rect_cuboid_pairs import xy_z_npairs
 ##########################################################################################
 
 
@@ -178,7 +177,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
             #do volume calculations
             dv = cylinder_volume(rp_bins,2.0*pi_bins) #volume of spheres
             dv = np.diff(np.diff(dv, axis=0),axis=1) #volume of annuli
-            global_volume = period.prod() #sexy
+            global_volume = period.prod()
             
             #calculate randoms for sample1
             N1 = np.shape(sample1)[0]
@@ -220,17 +219,18 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
                                   num_threads=num_threads,\
                                   approx_cell1_size=approx_cell1_size,\
                                   approx_cell2_size=approx_cell2_size)
+                print(np.shape(D1D2))
                 D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
+                print(np.shape(D1D2))
             else: D1D2=None
             if do_auto==True:
-                D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
                 D2D2 = xy_z_npairs(sample2, sample2, rp_bins, pi_bins, period=period,\
                                    num_threads=num_threads,\
                                    approx_cell1_size=approx_cell2_size,\
                                    approx_cell2_size=approx_cell2_size)
                 D2D2 = np.diff(np.diff(D2D2,axis=0),axis=1)
             else: D2D2=None
-
+        
         return D1D1, D1D2, D2D2
     
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
@@ -256,6 +256,8 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     D1R, D2R, RR = random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,\
                                  PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,\
                                  approx_cell1_size, approx_cell2_size, approx_cellran_size)
+    
+    print(np.shape(D1D1),np.shape(D1D2), np.shape(RR), len(rp_bins), len(pi_bins))
     
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
