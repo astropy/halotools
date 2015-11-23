@@ -21,14 +21,12 @@ __author__ = ['Duncan Campbell']
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
-def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
-                period=None, do_auto=True, do_cross=True, num_threads=1,\
-                max_sample_size=int(1e6), wfunc=1, normalize_by='random_marks',
-                iterations=1, randomize_marks=None):
-    """ 
-    Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
-    
-    
+def marked_tpcf(sample1, rbins, sample2=None, 
+    marks1=None, marks2=None, period=None, do_auto=True, do_cross=True, 
+    num_threads=1, max_sample_size=int(1e6), wfunc=1, 
+    normalize_by='random_marks', iterations=1, randomize_marks=None):
+    """ Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
+
     Parameters 
     ----------
     sample1 : array_like
@@ -37,7 +35,7 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
     rbins : array_like
         array of boundaries defining the real space radial bins in which pairs are 
         counted.
-    
+
     sample2 : array_like, optional
         Npts x 3 array containing 3-D positions of points.
     
@@ -55,7 +53,7 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         length 3 array defining axis-aligned periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
         If none, PBCs are set to infinity.
-    
+
     do_auto : boolean, optional
         do auto-correlation?
     
@@ -68,29 +66,27 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
     
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
-        
         If sample size exeeds max_sample_size, the sample will be randomly down-sampled
         such that the subsample is equal to max_sample_size.
-    
+
     wfunc: int, optional
-        integer indicating which marking function should be used.  See notes for an 
-        explanation.
+        integer indicating which marking function should be used.  See notes for an explanation.
     
     normalize_by: string, optional
-         string indicating how to normailze the weighted pair counts in the MCF 
-         calculation.  options are: random_marks, number_counts.  `random_marks` calculates
-         the random pair counts, :math:`\\mathrm{RR}`, as weighted pair counts with the 
-         weights randomized, akin to normailzing by the mean. `number_counts` calculates :math:`\\mathrm{RR}` as the number
-         of pairs,resulting in the mean weight in each radial bin.  
-    
+        string indicating how to normailze the weighted pair counts in the MCF 
+        calculation.  options are: random_marks, number_counts.  `random_marks` calculates
+        the random pair counts, :math:`\\mathrm{RR}`, as weighted pair counts with the 
+        weights randomized, akin to normailzing by the mean. `number_counts` calculates :math:`\\mathrm{RR}` as the number
+        of pairs,resulting in the mean weight in each radial bin.  
+
     iterations : int, optional
-        if  `normalize_by`==random_marks, integer number indicating the number of times 
+        if  ``normalize_by`` is set to ``random_marks``, integer number indicating the number of times 
         to calculate the random weigths, taking the mean of the outcomes.
-    
+
     randomize_marks : array_like, optional
-        if  `normalize_by`==random_marks, boolean array of N_weights indicating which 
-        weights should be randomized for the random counts.  default is all.
-    
+        if  ``normalize_by`` is ``random_marks``, boolean array of N_weights indicating which 
+        weights should be randomized for the random counts.  Default is all.
+
     Returns 
     -------
     marked_correlation_function : numpy.array
@@ -116,27 +112,9 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
     e.g. a simulation box.  This optimization restricts this function to work on 3-D 
     point distributions.
     
-    If the `period` argument is passed, points may not have any component of their 
-    coordinates be negative.
-    
-    The available wfunc functions are:
-    func ID 0: custom user-defined and compiled weighting function
-    func ID 1: multiplicative weights, return w1[0]*w2[0]
-    func ID 2: summed weights, return w1[0]+w2[0]
-    func ID 3: equality weights, return w1[1]*w2[1] if w1[0]==w2[0]
-    func ID 4: greater than weights, return w1[1]*w2[1] if w2[0]>w1[0]
-    func ID 5: less than weights, return w1[1]*w2[1] if w2[0]<w1[0]")
-    func ID 6: greater than tolerance weights, return w2[1] if w2[0]>(w1[0]+w1[1])
-    func ID 7: less than tolerance weights, return w2[1] if w2[0]<(w1[0]-w1[1])
-    func ID 8: tolerance weights, return w2[1] if |w1[0]-w2[0]|<w1[1]
-    func ID 9: exclusion weights, return w2[1] if |w1[0]-w2[0]|>w1[1]
-    
-    where w1, w2 are the weights for the pair of points.
-    w1[0] refers to the first weight, w1[1] the second, etc.
-    
-    These functions are defined in .pair_counters.objective_cpiars.objective_weights.pyx
     """
-    
+
+
     #process parameters
     function_args = [sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
                      num_threads, max_sample_size, wfunc, normalize_by, iterations, randomize_marks]
