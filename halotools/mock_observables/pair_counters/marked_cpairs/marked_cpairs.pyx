@@ -296,6 +296,8 @@ cdef f_type return_weighting_function(weight_func_id):
         return velocity_dot_weights
     elif weight_func_id==12:
         return velocity_angle_weights
+    elif weight_func_id==13:
+        return ineqweights
     else:
         raise ValueError('weighting function does not exist')
 

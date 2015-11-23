@@ -45,6 +45,17 @@ cdef double eqweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     else: return 0.0
 
 
+cdef double ineqweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
+    """
+    equality weights
+    return w1[1]*w2[1] if w1[0]!=w2[0]
+    id: 3
+    expects length 2 arrays
+    """
+    if w1[0]!=w2[0]: return w1[1]*w2[1]
+    else: return 0.0
+
+
 cdef double gweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     greater than weights

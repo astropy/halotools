@@ -7,6 +7,7 @@ cimport numpy as np
 cdef double mweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
 cdef double sweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
 cdef double eqweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
+cdef double ineqweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
 
 cdef double gweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
 cdef double lweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
