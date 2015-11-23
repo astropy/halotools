@@ -49,24 +49,30 @@ Core Dependencies
 
 Halotools is built upon the following core dependencies:
 
-- `Python <http://www.python.org/>`_: 2.7, 3.3, or 3.4
+- `Python <http://www.python.org/>`_: 2.7.x
 
 - `Numpy <http://www.numpy.org/>`_: 1.9 or later
 
 - `Scipy <http://www.scipy.org/>`_: 0.15 or later
 
+- `Cython <http://www.cython.org/>`_: 0.23 or later
+
 - `Astropy`_: 1.0 or later
+
+All of the above come pre-installed with a modern python distribution such as Anaconda. In addition to the above, Halotools also requires the h5py package for fast I/O of large simulated datasets:
+
+- `h5py <http://h5py.org/>`_: 2.5 or later
+
+Optional Dependencies 
+-----------------------
+
+Some of the features in Halotools are enhanced through the use of additional packages. Although most of the  
+Halotools package will run perfectly fine without them, you will need to install the following software 
+to benefit from the full functionality of the code. 
 
 - `BeautifulSoup <http://www.crummy.com/software/BeautifulSoup/>`_: For crawling the web for halo catalogs. 
 
 - `Requests <http://docs.python-requests.org/en/latest/>`_: Also for crawling the web for halo catalogs. 
-
-All of the above come pre-installed with a modern python distribution such as Anaconda. In addition to the above, Halotools also requires the h5py package for fast I/O of large simulated datasets.
-
-- `h5py <http://h5py.org/>`_: 2.5 or later
-
-Use pip to install h5py and the other core packages, as necessary. 
-
 
 
 

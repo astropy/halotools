@@ -1,10 +1,12 @@
-.. _halotools_overview:
+:orphan:
+
+.. _halotools_science_overview:
 
 ***************************
 Halotools Science Overview
 ***************************
 
-In this section of the documentation we give a qualitative description of the motivation and functionality of Halotools in broad strokes. You can get a more detailed picture of the package from the rest of the :ref:`user-docs`. 
+In this section of the documentation we give a qualitative description of the motivation and functionality of Halotools in broad strokes. You can get a more detailed picture of the package by navigating to :ref:`getting_started`. 
 
 Halotools is a fully open-source project, and is the product of collaboration by many scientists from numerous universities. If you are interested in contributing to Halotools, and/or in learning more about how the package works under the hood, see the :ref:`tutorials_by_category`. 
 

@@ -12,7 +12,7 @@ The core functionality of the package includes:
 * A modular, object-oriented framework for designing your own galaxy evolution model
 * End-to-end support for downloading publicly-available halo catalogs and reducing them to fast-loading hdf5 files
 
-The source code is publicly available at https://github.com/astropy/halotools. 
+For more information about the scope of the package, see :ref:`halotools_science_overview`. The source code is publicly available at https://github.com/astropy/halotools. 
 
 
 ******************
@@ -23,9 +23,9 @@ Getting Started
    :maxdepth: 1
 
    install
-   docs_and_tutorials
+   getting_started/index
    function_usage/index
-   tutorials/index
+   source_notes/index
  
 *********************
 License and Credits
@@ -34,7 +34,7 @@ License and Credits
 .. toctree::
    :maxdepth: 1
 
-   development/contributors
-   development/citing_halotools
+   getting_started/development/contributors
+   getting_started/development/citing_halotools
 
 
