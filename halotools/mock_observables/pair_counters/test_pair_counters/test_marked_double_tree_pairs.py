@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import numpy as np
 import pytest 
+from copy import copy 
 
 from ..pairs import wnpairs as pure_python_weighted_pairs
 from ..marked_double_tree_pairs import marked_npairs
@@ -74,7 +75,19 @@ def test_marked_npairs_wfuncs_signatures():
     
     rbins = np.array([0.0,0.1,0.2,0.3])
 
-    for wfunc_index in xrange(1, 12):
+
+    # Determine how many wfuncs have currently been implemented
+    wfunc_index = 1
+    while True:
+        try:
+            _ = _func_signature_int_from_wfunc(wfunc_index)
+            wfunc_index += 1
+        except HalotoolsError:
+            break
+    num_wfuncs = copy(wfunc_index)
+
+    # Now loop over all all available wfunc indices
+    for wfunc_index in xrange(1, num_wfuncs):
         signature = _func_signature_int_from_wfunc(wfunc_index)
         weights = np.random.random(Npts*signature).reshape(Npts, signature) - 0.5
         result = marked_npairs(data1, data1, rbins, period=period, 
