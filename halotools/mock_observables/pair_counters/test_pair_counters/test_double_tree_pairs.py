@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import numpy as np
+
 #load pair counters
 from ..double_tree_pairs import npairs, jnpairs, xy_z_npairs, s_mu_npairs
 #load comparison simple pair counters
@@ -150,10 +151,7 @@ def test_s_mu_npairs_periodic():
     
     test_result = npairs(random_sample, random_sample, s_bins, period=period,\
                          num_threads=num_threads)
-    
-    print(test_result)
-    print(result)
-    
+        
     msg = "The double tree's result(s) are not equivalent to simple pair counter's."
     assert np.all(result == test_result), msg
 
