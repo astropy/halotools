@@ -5,7 +5,7 @@
 .. _subhalo_mock_factory_tutorial:
 
 ********************************************************************
-Source code notes on the `SubhaloMockFactory` class 
+Source code notes on `SubhaloMockFactory` 
 ********************************************************************
 
 This section of the documentation provides detailed notes 

@@ -7,7 +7,8 @@ Source code notes grouped by category
 Here we present notes on the source code implementation of 
 the most commonly used functions and classes, 
 grouped together by functionality. 
-For a quick reference on basic usage, see :ref:`function_usage_examples`. 
+If you are instead looking for a quick reference 
+on basic usage, see :ref:`function_usage_examples`. 
 For documentation of the API of all functions and classes in the package, 
 see :ref:`complete_reference_api`. 
 
