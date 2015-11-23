@@ -5,7 +5,7 @@
 .. _subhalo_model_factory_tutorial:
 
 ****************************************************
-Tutorial on the SubhaloModelFactory Class
+Source code notes on the `SubhaloModelFactory` Class
 ****************************************************
 
 This section of the documentation provides detailed notes 
