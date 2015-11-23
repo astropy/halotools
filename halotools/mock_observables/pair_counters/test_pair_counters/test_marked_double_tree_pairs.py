@@ -100,7 +100,112 @@ def test_marked_npairs_wfuncs_signatures():
                 weights1=weights, weights2=weights, wfunc=wfunc_index)
 
 
+def test_marked_npairs_wfuncs_behavior():
+    """ Verify the behavior of a few wfunc-weighted counters by comparing pure python, unmarked 
+    pairs to the returned result from a uniformly weighted set of points.  
+    """
 
+    Npts = 1e3
+    Lbox = [1.0,1.0,1.0]
+    period = np.array(Lbox)
+
+    x = np.random.uniform(0, Lbox[0], Npts)
+    y = np.random.uniform(0, Lbox[1], Npts)
+    z = np.random.uniform(0, Lbox[2], Npts)
+    data1 = np.vstack((x,y,z)).T
+
+    rbins = np.array([0.0,0.1,0.2,0.3])
+
+    test_result = pure_python_weighted_pairs(data1, data1, 
+        rbins, period=period)
+
+    # wfunc = 1
+    weights = np.ones(Npts)*3
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=1)
+    assert np.all(result == 9.*test_result)
+
+    # wfunc = 2
+    weights = np.ones(Npts)*3
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=2)
+    assert np.all(result == 6.*test_result)
+
+    # wfunc = 3
+    weights2 = np.ones(Npts)*2
+    weights3 = np.ones(Npts)*3
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=3)
+    assert np.all(result == 9.*test_result)
+
+    weights = np.vstack([weights3, weights2]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=3)
+    assert np.all(result == 4.*test_result)
+
+    # wfunc = 4
+    weights2 = np.ones(Npts)*2
+    weights3 = np.ones(Npts)*3
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=4)
+    assert np.all(result == 0)
+
+    # wfunc = 5
+    weights2 = np.ones(Npts)*2
+    weights3 = np.ones(Npts)*3
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=5)
+    assert np.all(result == 0)
+
+    # wfunc = 6
+    weights2 = np.ones(Npts)
+    weights3 = np.zeros(Npts)-1
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=6)
+    assert np.all(result == -test_result)
+
+    # wfunc = 7
+    weights2 = np.ones(Npts)
+    weights3 = np.ones(Npts)*3
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=7)
+    assert np.all(result == 3*test_result)
+
+    # wfunc = 8
+    weights2 = np.ones(Npts)
+    weights3 = np.ones(Npts)*3
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=8)
+    assert np.all(result == 3*test_result)
+
+    # wfunc = 9
+    weights2 = np.ones(Npts)
+    weights3 = np.ones(Npts)*3
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=9)
+    assert np.all(result == 0)
+
+    weights2 = np.ones(Npts)
+    weights3 = -np.ones(Npts)*3
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=9)
+    assert np.all(result == -3*test_result)
 
 
 
