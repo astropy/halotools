@@ -86,12 +86,15 @@ class FlatRectanguloidTree(object):
     def cell_tuple_from_cell_idx(self, icell):
         """
         """
-        nxny = self.num_xdivs*self.num_ydivs
+        
+        nxny = self.num_ydivs*self.num_zdivs
+        
         ix = icell / nxny
-        itemp1 = icell - ix*nxny
-        iy = itemp1 / self.num_ydivs
-        itemp2 = itemp1 - iy*self.num_ydivs
-        iz = itemp2 % self.num_zdivs
+        
+        iy = (icell - ix*nxny) / self.num_zdivs
+        
+        iz = icell - (ix*self.num_ydivs*self.num_zdivs) - (iy*self.num_zdivs)
+        
         return ix, iy, iz
 
     def compute_cell_structure(self, x, y, z):
@@ -419,3 +422,5 @@ class FlatRectanguloidDoubleTree(object):
                     icell2 = self.tree2.cell_idx_from_cell_tuple(ix2, iy2, iz2)
 
                     yield icell2, x2shift*self._PBCs, y2shift*self._PBCs, z2shift*self._PBCs
+                    
+                    
