@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function,
 __all__ = ['_tpcf_process_args', '_tpcf_jackknife_process_args',\
            '_redshift_space_tpcf_process_args', '_s_mu_tpcf_process_args',\
            '_marked_tpcf_process_args','_delta_sigma_process_args',\
+           '_tpcf_one_two_halo_decomp_process_args',\
            '_list_estimators', '_TP_estimator', '_TP_estimator_requirements']
 
 import numpy as np
@@ -690,7 +691,7 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
         num_threads = cpu_count()
 
     return sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
-           num_threads, wfunc, _sample1_is_sample2, PBCs, randomize_marks
+           num_threads, wfunc, normalize_by, _sample1_is_sample2, PBCs, randomize_marks
 
 
 def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\
@@ -745,9 +746,9 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\
 
 
 def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
-    sample2, sample2_host_halo_id, randoms, period, 
-    do_auto, do_cross, estimator, num_threads, max_sample_size,
-    approx_cell1_size, approx_cell2_size, approx_cellran_size):
+                                           sample2, sample2_host_halo_id, randoms, period, 
+                                           do_auto, do_cross, estimator, num_threads, max_sample_size,
+                                           approx_cell1_size, approx_cell2_size, approx_cellran_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.tpcf_one_two_halo_decomp`. 
