@@ -1,3 +1,4 @@
+:orphan:
 
 .. _using_halocat_binaries:
 

@@ -30,24 +30,7 @@ Factories
 .. toctree::
    :maxdepth: 1
 
-   empirical_models/factories/subhalo_model_factory_tutorial
-   empirical_models/factories/subhalo_mock_factory_tutorial
+   empirical_models/factories/subhalo_model_factory_source_notes
+   empirical_models/factories/subhalo_mock_factory_source_notes
 
-Assembly Bias Component Models 
--------------------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   empirical_models/assembias_models/heaviside_assembias_tutorial
-
-
-
-Managing simulations
-====================================
-
-.. toctree::
-   :maxdepth: 1
-
-   sim_manager/using_halocat_binaries
 
