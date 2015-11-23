@@ -10,6 +10,9 @@ from ..pairs import npairs as simp_npairs
 from ..pairs import wnpairs as simp_wnpairs
 from ..pairs import xy_z_npairs as simp_xy_z_npairs
 
+
+from ....custom_exceptions import HalotoolsError
+
 import pytest
 slow = pytest.mark.slow
 
@@ -20,10 +23,35 @@ random_sample = np.random.random((Npts,3))
 period = np.array([1.0,1.0,1.0])
 num_threads=2
 
+#set up a regular grid of points to test pair counters
+Npts2 = 10
+epsilon = 0.001
+gridx = np.linspace(0, 1-epsilon, Npts2)
+gridy = np.linspace(0, 1-epsilon, Npts2)
+gridz = np.linspace(0, 1-epsilon, Npts2)
+
+xx, yy, zz = np.array(np.meshgrid(gridx, gridy, gridz))
+xx = xx.flatten()
+yy = yy.flatten()
+zz = zz.flatten()
+grid_points = np.vstack([xx, yy, zz]).T
+
+grid_jackknife_spacing = 0.5
+grid_jackknife_ncells = int(1/grid_jackknife_spacing)
+ix = np.floor(gridx/grid_jackknife_spacing).astype(int)
+iy = np.floor(gridy/grid_jackknife_spacing).astype(int)
+iz = np.floor(gridz/grid_jackknife_spacing).astype(int)
+ixx, iyy, izz = np.array(np.meshgrid(ix, iy, iz))
+ixx = ixx.flatten()
+iyy = iyy.flatten()
+izz = izz.flatten()
+grid_indices = np.ravel_multi_index([ixx, iyy, izz], 
+    [grid_jackknife_ncells, grid_jackknife_ncells, grid_jackknife_ncells])
+grid_indices += 1
 
 def test_npairs_periodic():
     """
-    test npairs with periodic boundary conditons.
+    Function tests npairs with periodic boundary conditions.
     """
     
     rbins = np.array([0.0,0.1,0.2,0.3])
@@ -42,7 +70,7 @@ def test_npairs_periodic():
 
 def test_npairs_nonperiodic():
     """
-    test npairs without periodic boundary conditons.
+    test npairs without periodic boundary conditions.
     """
     
     rbins = np.array([0.0,0.1,0.2,0.3])
@@ -61,7 +89,7 @@ def test_npairs_nonperiodic():
 
 def test_xy_z_npairs_periodic():
     """
-    test xy_z_npairs with periodic boundary conditons.
+    test xy_z_npairs with periodic boundary conditions.
     """
     
     rp_bins = np.arange(0,0.31,0.1)
@@ -82,7 +110,7 @@ def test_xy_z_npairs_periodic():
 
 def test_xy_z_npairs_nonperiodic():
     """
-    test xy_z_npairs without periodic boundary conditons.
+    test xy_z_npairs without periodic boundary conditions.
     """
     
     rp_bins = np.arange(0,0.31,0.1)
@@ -103,7 +131,7 @@ def test_xy_z_npairs_nonperiodic():
 
 def test_s_mu_npairs_periodic():
     """
-    test s_mu_npairs with periodic boundary conditons.
+    test s_mu_npairs with periodic boundary conditions.
     """
     
     s_bins = np.array([0.0,0.1,0.2,0.3])
@@ -132,7 +160,7 @@ def test_s_mu_npairs_periodic():
 
 def test_s_mu_npairs_nonperiodic():
     """
-    test s_mu_npairs without periodic boundary conditons.
+    test s_mu_npairs without periodic boundary conditions.
     """
     
     s_bins = np.array([0.0,0.1,0.2,0.3])
@@ -156,7 +184,7 @@ def test_s_mu_npairs_nonperiodic():
 
 def test_jnpairs_periodic():
     """
-    test jnpairs with periodic boundary conditons.
+    test jnpairs with periodic boundary conditions.
     """
     
     rbins = np.array([0.0,0.1,0.2,0.3])
@@ -176,10 +204,20 @@ def test_jnpairs_periodic():
     msg = 'The returned result is an unexpected shape.'
     assert np.shape(result)==(N_jsamples+1,len(rbins)), msg
 
+    # Now verify that when computing jackknife pairs on a regularly spaced grid, 
+    # the counts in all subvolumes are identical
+
+    grid_result = jnpairs(grid_points, grid_points, rbins, period=period,
+        jtags1=grid_indices, jtags2=grid_indices, N_samples=grid_jackknife_ncells**3,
+        num_threads=num_threads)
+
+    for icell in xrange(1, grid_jackknife_ncells**3-1):
+        assert np.all(grid_result[icell, :] == grid_result[icell+1, :])
+
 
 def test_jnpairs_nonperiodic():
     """
-    test jnpairs without periodic boundary conditons.
+    test jnpairs without periodic boundary conditions.
     """
     
     rbins = np.array([0.0,0.1,0.2,0.3])
@@ -192,7 +230,7 @@ def test_jnpairs_nonperiodic():
     #define weights
     weights1 = np.random.random(Npts)
     
-    result = jnpairs(random_sample, random_sample, rbins, period=None,\
+    result = jnpairs(random_sample, random_sample, rbins, period=period,\
                      jtags1=jtags1, jtags2=jtags1, N_samples=10,\
                      weights1=weights1, weights2=weights1, num_threads=num_threads)
     
