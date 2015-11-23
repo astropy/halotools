@@ -744,6 +744,138 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\
     return galaxies, particles, rp_bins, period, num_threads, PBCs
 
 
+def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
+    sample2, sample2_host_halo_id, randoms, period, 
+    do_auto, do_cross, estimator, num_threads, max_sample_size,
+    approx_cell1_size, approx_cell2_size, approx_cellran_size):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.tpcf_one_two_halo_decomp`. 
+    """
+
+    sample1 = convert_to_ndarray(sample1)
+    sample1_host_halo_id = convert_to_ndarray(sample1_host_halo_id)
+
+    if sample2 is not None: 
+        sample2 = convert_to_ndarray(sample2)
+        sample2_host_halo_id = convert_to_ndarray(sample2_host_halo_id)
+        if np.all(sample1==sample2):
+            _sample1_is_sample2 = True
+            msg = ("Warning: sample1 and sample2 are exactly the same, \n"
+                   "auto-correlation will be returned.\n")
+            warn(msg)
+            do_cross==False
+        else: 
+            _sample1_is_sample2 = False
+    else: 
+        sample2 = sample1
+        sample2_host_halo_id = sample1_host_halo_id
+        _sample1_is_sample2 = True
+
+    if randoms is not None: 
+        randoms = convert_to_ndarray(randoms)
+    
+    #test to see if halo ids are integers
+    if sample1_host_halo_id.dtype.type is not np.int64:
+        msg = 'sample1_host_halo_id must be an integer array'
+        raise HalotoolsError(msg)
+    if sample2_host_halo_id.dtype.type is not np.int64:
+        msg = 'sample2_host_halo_id must be an integer array'
+        raise HalotoolsError(msg)
+    
+    #test to see if halo ids are the same length as samples
+    if np.shape(sample1_host_halo_id) != (len(sample1),):
+        msg = 'sample1_host_halo_id must be a 1-D array the same length as sample1'
+        raise HalotoolsError(msg)
+    if np.shape(sample2_host_halo_id) != (len(sample2),):
+        msg = 'sample2_host_halo_id must be a 1-D array the same length as sample2'
+        raise HalotoolsError(msg)
+    
+    # down sample if sample size exceeds max_sample_size.
+    if _sample1_is_sample2 is True:
+        if (len(sample1) > max_sample_size):
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            sample1_host_halo_id = sample1_host_halo_id[inds]
+            print('downsampling sample1...')
+    else:
+        if len(sample1) > max_sample_size:
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            sample1_host_halo_id = sample1_host_halo_id[inds]
+            print('down sampling sample1...')
+        if len(sample2) > max_sample_size:
+            inds = np.arange(0,len(sample2))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample2 = sample2[inds]
+            sample2_host_halo_id = sample2_host_halo_id[inds]
+            print('down sampling sample2...')
+    
+    rbins = convert_to_ndarray(rbins)
+    rmax = np.max(rbins)
+    try:
+        assert rbins.ndim == 1
+        assert len(rbins) > 1
+        if len(rbins) > 2:
+            assert array_is_monotonic(rbins, strict = True) == 1
+    except AssertionError:
+        msg = "Input ``rbins`` must be a monotonically increasing 1D array with at least two entries"
+        raise HalotoolsError(msg)
+        
+    #Process period entry and check for consistency.
+    if period is None:
+        PBCs = False
+    else:
+        PBCs = True
+        period = convert_to_ndarray(period)
+        if len(period) == 1:
+            period = np.array([period[0]]*3)
+        try:
+            assert np.all(period < np.inf)
+            assert np.all(period > 0)
+        except AssertionError:
+            msg = "Input ``period`` must be a bounded positive number in all dimensions"
+            raise HalotoolsError(msg)
+
+    #check for input parameter consistency
+    if (period is not None):
+        if (rmax >= np.min(period)/3.0):
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                "cannot be larger than Lbox/3 in any dimension. \n"
+                "If you need to count pairs on these length scales, \n"
+                "you should use a larger simulation.\n")
+            raise HalotoolsError(msg)
+
+    if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
+        msg = ('\nSample1 and sample2 must have same dimension.\n')
+        raise HalotoolsError(msg)
+
+    if (randoms is None) & (PBCs == False):
+        msg = ('\nIf no PBCs are specified, randoms must be provided.\n')
+        raise HalotoolsError(msg)
+
+    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
+        msg = ('do_auto and do_cross keywords must be of type boolean.')
+        raise HalotoolsError(msg)
+
+    if num_threads == 'max':
+        num_threads = cpu_count()
+
+    available_estimators = _list_estimators()
+    if estimator not in available_estimators:
+        msg = ("Input `estimator` must be one of the following:{0}".value(available_estimators))
+        raise HalotoolsError(msg)
+
+
+    return sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,
+        randoms, period, do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
+
+
 def _list_estimators():
     """
     private internal function.

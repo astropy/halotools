@@ -23,11 +23,11 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
                 period=None, do_auto=True, do_cross=True, num_threads=1,\
-                max_sample_size=int(1e6), wfunc=1, normalize_by='mean_number',
+                max_sample_size=int(1e6), wfunc=1, normalize_by='random_marks',
                 iterations=1, randomize_marks=None):
     """ 
-    Calculate the real space marked two-point correlation function,
-    :math:`\\mathcal{M}(r)`.
+    Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
+    
     
     Parameters 
     ----------
@@ -88,8 +88,8 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         to calculate the random weigths, taking the mean of the outcomes.
     
     randomize_marks : array_like, optional
-        boolean array of N_weights indicating which weights should be randomized for the 
-        random counts.  default is all.
+        if  `normalize_by`==random_marks, boolean array of N_weights indicating which 
+        weights should be randomized for the random counts.  default is all.
     
     Returns 
     -------
