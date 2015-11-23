@@ -6,20 +6,21 @@ import numpy as np
 import sys
 from ..wp import wp
 
-__all__=['test_wp_auto','test_wp_auto_periodic','test_wp_cross_periodic',]
+__all__=['test_wp_auto_nonperiodic','test_wp_auto_periodic','test_wp_cross_periodic',]
 
 
 ####two point correlation function########################################################
 
-def test_wp_auto():
-    sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rp_bins = np.linspace(0,0.3,5)
-    pi_bins = np.linspace(0,0.3,5)
+Npts = 100
+sample1 = np.random.random((Npts,3))
+sample2 = np.random.random((Npts,3))
+randoms = np.random.random((Npts,3))
+period = np.array([1.0,1.0,1.0])
+rp_bins = np.linspace(0,0.3,5)
+pi_bins = np.linspace(0,0.3,5)
+
+def test_wp_auto_nonperiodic():
     
-    #with randoms
     result = wp(sample1, rp_bins, pi_bins, sample2 = None, 
                   randoms=randoms, period = None, 
                   max_sample_size=int(1e4), estimator='Natural')
@@ -29,16 +30,9 @@ def test_wp_auto():
 
 
 def test_wp_auto_periodic():
-    sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rp_bins = np.linspace(0,0.3,5)
-    pi_bins = np.linspace(0,0.3,5)
     
-    #with randoms
     result = wp(sample1, rp_bins, pi_bins, sample2 = None, 
-                randoms=randoms, period = period, 
+                randoms=None, period = period, 
                 max_sample_size=int(1e4), estimator='Natural')
     
 
@@ -46,16 +40,9 @@ def test_wp_auto_periodic():
 
 
 def test_wp_cross_periodic():
-    sample1 = np.random.random((100,3))
-    sample2 = np.random.random((100,3))
-    randoms = np.random.random((100,3))
-    period = np.array([1.0,1.0,1.0])
-    rp_bins = np.linspace(0,0.3,5)
-    pi_bins = np.linspace(0,0.3,5)
     
-    #with randoms
     result = wp(sample1, rp_bins, pi_bins, sample2 = sample2, 
-                randoms=randoms, period = period, 
+                randoms=None, period = period, 
                 max_sample_size=int(1e4), estimator='Natural')
 
     assert len(result)==3, "wrong number of correlations returned"

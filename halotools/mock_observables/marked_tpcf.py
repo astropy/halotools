@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Calculate the marked two point correlation function.
+Calculate the marked two point correlation function, MCF.
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -23,9 +23,11 @@ np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/R
 
 def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
                 period=None, do_auto=True, do_cross=True, num_threads=1,\
-                max_sample_size=int(1e6), wfunc=1, iterations=1, randomize_marks=None):
+                max_sample_size=int(1e6), wfunc=1, normalize_by='mean_number',
+                iterations=1, randomize_marks=None):
     """ 
-    Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
+    Calculate the real space marked two-point correlation function,
+    :math:`\\mathcal{M}(r)`.
     
     Parameters 
     ----------
@@ -74,9 +76,16 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         integer indicating which marking function should be used.  See notes for an 
         explanation.
     
+    normalize_by: string, optional
+         string indicating how to normailze the weighted pair counts in the MCF 
+         calculation.  options are: random_marks, number_counts.  `random_marks` calculates
+         the random pair counts, :math:`\\mathrm{RR}`, as weighted pair counts with the 
+         weights randomized, akin to normailzing by the mean. `number_counts` calculates :math:`\\mathrm{RR}` as the number
+         of pairs,resulting in the mean weight in each radial bin.  
+    
     iterations : int, optional
-        integer number indicating the number of times to calculate the random weigths,
-        taking the mean of the outcomes.
+        if  `normalize_by`==random_marks, integer number indicating the number of times 
+        to calculate the random weigths, taking the mean of the outcomes.
     
     randomize_marks : array_like, optional
         boolean array of N_weights indicating which weights should be randomized for the 
@@ -89,9 +98,9 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
         :math:`\\mathcal{M}(r)` 
         computed in each of the bins defined by input `rbins`.
         
-        :math:`1 + \\mathcal{M}(r) \\equiv \\mathrm{WW} / \\mathrm{RR}`, where  
+        :math:`\\mathcal{M}(r) \\equiv \\mathrm{WW} / \\mathrm{RR}`, where  
         :math:`\\mathrm{WW}` is the weighted paircounts, and 
-        :math:`\\mathrm{RR}` is the randomized weighted pair counts.
+        :math:`\\mathrm{RR}` is the randomized pair counts.
         
         If `sample2` is passed as input, three arrays of length len(`rbins`)-1 are 
         returned: :math:`\\mathcal{M}_{11}(r)`, :math:`\\mathcal{M}_{12}(r)`, 
@@ -130,9 +139,9 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
     
     #process parameters
     function_args = [sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross,\
-                     num_threads, max_sample_size, wfunc, iterations, randomize_marks]
+                     num_threads, max_sample_size, wfunc, normalize_by, iterations, randomize_marks]
     sample1, rbins, sample2, marks1, marks2, period, do_auto, do_cross, num_threads,\
-        wfunc, _sample1_is_sample2, PBCs,\
+        wfunc, normalize_by, _sample1_is_sample2, PBCs,\
         randomize_marks = _marked_tpcf_process_args(*function_args)
     
     def marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
@@ -222,6 +231,40 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
 
         return R1R1, R1R2, R2R2
     
+    def pair_counts(sample1, sample2, rbins, period, N_thread, do_auto, do_cross,\
+                    _sample1_is_sample2, approx_cell1_size, approx_cell2_size):
+        """
+        Count data-data pairs.
+        """
+        if do_auto==True:
+            D1D1 = npairs(sample1, sample1, rbins, period=period, num_threads=num_threads,
+                          approx_cell1_size=approx_cell1_size,
+                          approx_cell2_size=approx_cell1_size)
+            D1D1 = np.diff(D1D1)
+        else:
+            D1D1=None
+            D2D2=None
+        
+        if _sample1_is_sample2:
+            D1D2 = D1D1
+            D2D2 = D1D1
+        else:
+            if do_cross==True:
+                D1D2 = npairs(sample1, sample2, rbins, period=period,
+                              num_threads=num_threads,
+                              approx_cell1_size=approx_cell1_size,
+                              approx_cell2_size=approx_cell2_size)
+                D1D2 = np.diff(D1D2)
+            else: D1D2=None
+            if do_auto==True:
+                D2D2 = npairs(sample2, sample2, rbins, period=period,
+                              num_threads=num_threads,
+                              approx_cell1_size=approx_cell2_size,
+                              approx_cell2_size=approx_cell2_size)
+                D2D2 = np.diff(D2D2)
+            else: D2D2=None
+        
+        return D1D1, D1D2, D2D2
     
     #calculate marked pairs
     W1W1,W1W2,W2W2 = marked_pair_counts(sample1, sample2, rbins, period,\
@@ -229,41 +272,46 @@ def marked_tpcf(sample1, rbins, sample2=None, marks1=None, marks2=None,\
                                         marks1, marks2, wfunc,\
                                         _sample1_is_sample2)
     
+    if normalize_by=='number_counts':
+        R1R1,R1R2,R2R2 = pair_counts(sample1, sample2, rbins, period,
+                                     num_threads, do_auto, do_cross, _sample1_is_sample2,
+                                     approx_cell1_size, approx_cell2_size)
     #calculate randomized marked pairs
-    if iterations > 1:
-        #create storage arrays of the right shape
-        R1R1 = np.zeros((iterations,len(rbins)-1))
-        R1R2 = np.zeros((iterations,len(rbins)-1))
-        R2R2 = np.zeros((iterations,len(rbins)-1))
-        for i in range(iterations):
-            print(i)
-            #get arrays to randomize marks
-            permutate1 = np.random.permutation(np.arange(0,len(sample1)))
-            permutate2 = np.random.permutation(np.arange(0,len(sample2)))
-            R1R1[i,:],R1R2[i,:],R2R2[i,:] = random_counts(sample1, sample2, rbins, period,\
+    elif normalize_by=='random_marks':
+        if iterations > 1:
+            #create storage arrays of the right shape
+            R1R1 = np.zeros((iterations,len(rbins)-1))
+            R1R2 = np.zeros((iterations,len(rbins)-1))
+            R2R2 = np.zeros((iterations,len(rbins)-1))
+            for i in range(iterations):
+                print(i)
+                #get arrays to randomize marks
+                permutate1 = np.random.permutation(np.arange(0,len(sample1)))
+                permutate2 = np.random.permutation(np.arange(0,len(sample2)))
+                R1R1[i,:],R1R2[i,:],R2R2[i,:] = random_counts(sample1, sample2, rbins, period,\
                                                 num_threads, do_auto, do_cross,\
                                                 marks1, marks2, wfunc,\
                                                 _sample1_is_sample2,\
                                                 permutate1, permutate2, randomize_marks)
-        #take mean of the iterations
-        R1R1_err = np.std(R1R1, axis=0)
-        R1R1 = np.median(R1R1, axis=0)
-        R1R2_err = np.std(R1R2, axis=0)
-        R1R2 = np.median(R1R2, axis=0)
-        R2R2_err = np.std(R2R2, axis=0)
-        R2R2 = np.median(R2R2, axis=0)
-    else:
-        #get arrays to randomize marks
-        permutate1 = np.random.permutation(np.arange(0,len(sample1)))
-        permutate2 = np.random.permutation(np.arange(0,len(sample2)))
-        R1R1,R1R2,R2R2 = random_counts(sample1, sample2, rbins, period,\
+            #take mean of the iterations
+            R1R1_err = np.std(R1R1, axis=0)
+            R1R1 = np.median(R1R1, axis=0)
+            R1R2_err = np.std(R1R2, axis=0)
+            R1R2 = np.median(R1R2, axis=0)
+            R2R2_err = np.std(R2R2, axis=0)
+            R2R2 = np.median(R2R2, axis=0)
+        else:
+            #get arrays to randomize marks
+            permutate1 = np.random.permutation(np.arange(0,len(sample1)))
+            permutate2 = np.random.permutation(np.arange(0,len(sample2)))
+            R1R1,R1R2,R2R2 = random_counts(sample1, sample2, rbins, period,\
                                        num_threads, do_auto, do_cross,\
                                        marks1, marks2, wfunc,\
                                        _sample1_is_sample2, permutate1, permutate2,\
                                        randomize_marks)
-    
-    print(W1W1)
-    print(R1R1)
+    else: 
+        msg = 'normalize_by parameter not recognized.'
+        raise ValueError(msg)
     
     #return results
     if _sample1_is_sample2:
