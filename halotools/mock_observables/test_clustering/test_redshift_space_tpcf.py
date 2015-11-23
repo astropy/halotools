@@ -7,21 +7,20 @@ import sys
 
 from ..redshift_space_tpcf import redshift_space_tpcf
 
-__all__=['test_rs_tpcf_auto','test_rs_tpcf_auto_periodic','test_rs_tpcf_cross_periodic',]
+__all__=['test_rs_tpcf_auto_nonperiodic','test_rs_tpcf_auto_periodic','test_rs_tpcf_cross_periodic',]
 
 ####two point correlation function########################################################
 
-def test_rs_tpcf_auto():
-    Npts=100
+Npts=100
+sample1 = np.random.random((Npts,3))
+sample2 = np.random.random((Npts,3))
+randoms = np.random.random((Npts,3))
+period = np.array([1.0,1.0,1.0])
+rp_bins = np.linspace(0,0.3,5)
+pi_bins = np.linspace(0,0.3,5)
+
+def test_rs_tpcf_auto_nonperiodic():
     
-    sample1 = np.random.random((Npts,3))
-    sample2 = np.random.random((Npts,3))
-    randoms = np.random.random((Npts,3))
-    period = np.array([1.0,1.0,1.0])
-    rp_bins = np.linspace(0,0.3,5)
-    pi_bins = np.linspace(0,0.3,5)
-    
-    #with randoms
     result = redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, 
                                  randoms=randoms, period = None, 
                                  max_sample_size=int(1e4), estimator='Natural')
@@ -31,36 +30,18 @@ def test_rs_tpcf_auto():
     assert result.ndim == 2, "More than one correlation function returned erroneously."
 
 def test_rs_tpcf_auto_periodic():
-    Npts=100
     
-    sample1 = np.random.random((Npts,3))
-    sample2 = np.random.random((Npts,3))
-    randoms = np.random.random((Npts,3))
-    period = np.array([1.0,1.0,1.0])
-    rp_bins = np.linspace(0,0.3,5)
-    pi_bins = np.linspace(0,0.3,5)
-    
-    #with randoms
     result = redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, 
-                                 randoms=randoms, period = period, 
+                                 randoms=None, period = period, 
                                  max_sample_size=int(1e4), estimator='Natural')
     
     assert result.ndim == 2, "More than one correlation function returned erroneously."
 
 
 def test_rs_tpcf_cross_periodic():
-    Npts=100
     
-    sample1 = np.random.random((Npts,3))
-    sample2 = np.random.random((Npts,3))
-    randoms = np.random.random((Npts,3))
-    period = np.array([1.0,1.0,1.0])
-    rp_bins = np.linspace(0,0.3,5)
-    pi_bins = np.linspace(0,0.3,5)
-    
-    #with randoms
     result = redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = sample2, 
-                                 randoms=randoms, period = period, 
+                                 randoms=None, period = period, 
                                  max_sample_size=int(1e4), estimator='Natural')
     
     assert len(result)==3, "wrong number of correlations returned"
