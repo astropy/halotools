@@ -9,50 +9,27 @@ This section of the documentation provides an overview of the
 core functionality of Halotools, and usage-tutorials to help you 
 quickly get started with the package. 
 
-**Halotools Overview**
+Quickstart Guides
 =================================================
 
 .. toctree::
    :maxdepth: 1
 
-   getting_started_overview.rst
-
-**Mock-Making Tools**
-=================================================
-
-.. toctree::
-   :maxdepth: 1
-
+   getting_started_overview
    mock_making/quickstart_guide
-   mock_making/overview
-
-**Model-Building Tools**
-=================================================
-
-.. toctree::
-   :maxdepth: 1
-
    model_building/quickstart_guide
-   model_building/models
-
-
-**Managing Halo Catalogs**
-=================================================
-
-.. toctree::
-   :maxdepth: 1
-
-   managing_catalogs/index
-   managing_catalogs/supported_sim_list
-
-**Making Mock Observations**
-=================================================
-
-.. toctree::
-   :maxdepth: 1
-
-   mock_observations/overview
    mock_observations/quickstart_guide
+
+Tutorials 
+=====================
+
+.. toctree::
+   :maxdepth: 1
+
+   mock_making/overview
+   model_building/models
+   managing_catalogs/index
+   mock_observations/overview
 
 
 Developer Documentation
