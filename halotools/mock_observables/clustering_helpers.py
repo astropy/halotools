@@ -872,7 +872,7 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
         raise HalotoolsError(msg)
 
 
-    return sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,
+    return sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,\
         randoms, period, do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
 
 
