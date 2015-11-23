@@ -1,12 +1,12 @@
 :orphan:
 
+.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models
+
 .. _profile_template_tutorial:
 
 ****************************************************
-Tutorial on the AnalyticDensityProf Template Model
+Source code notes on the `AnalyticDensityProf` class
 ****************************************************
-
-.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models
 
 This section of the documentation provides background material and detailed implementation notes 
 on the functions and methods of the primary base class used to model the spatial distribution 
