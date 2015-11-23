@@ -35,7 +35,7 @@ def test_TPCF_auto():
     
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
-
+"""
 def test_wfuncs():
     
     N_pts = 1000
@@ -51,11 +51,11 @@ def test_wfuncs():
     result = np.zeros((10-1,4))
     for i in range(1,10):
         if i in [1,2]:
-            marks = weights1 = np.random.random((N_pts,1))
+            marks = np.random.random((N_pts,1))
         if i in [3,4,5,6,7,8,9]:
-            marks = weights1 = np.random.random((N_pts,2))
+            marks = np.random.random((N_pts,2))
         result[i-1,:] = marked_tpcf(sample1, rbins, sample2=None, marks1=marks,
                                     marks2=None, period=None, num_threads=1, wfunc=i)
         assert result[i-1,:].ndim == 1, "More than one correlation function returned erroneously."
-
+"""
 

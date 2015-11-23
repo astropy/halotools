@@ -531,7 +531,8 @@ def _s_mu_tpcf_process_args(sample1, s_bins, mu_bins, sample2, randoms,\
 
 def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
                               period, do_auto, do_cross, num_threads,\
-                              max_sample_size, wfunc, iterations, randomize_marks):
+                              max_sample_size, wfunc, normalize_by,\
+                              iterations, randomize_marks):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.mared_tpcf`. 
@@ -557,6 +558,11 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
     #process wfunc parameter
     if type(wfunc) is not int:
         raise ValueError('wfunc parameter must be an integer ID of the desired function.')
+
+    #process normalize_by parameter
+    if normalize_by not in ['random_marks','number_counts']:
+        msg = 'normalize_by parameter not recognized.'
+        raise ValueError(msg)
 
     #process marks
     if marks1 is not None: 

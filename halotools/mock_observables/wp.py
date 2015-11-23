@@ -128,8 +128,11 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
         _sample1_is_sample2, PBCs = _redshift_space_tpcf_process_args(*function_args)
     
+    if _sample1_is_sample2:
+        sample2=None
+    
     #pass the arguments into the redshift space TPCF function
-    result = redshift_space_tpcf(sample1, rp_bins, pi_bins,\
+    result = redshift_space_tpcf(sample1, rp_bins=rp_bins, pi_bins=pi_bins,\
                                  sample2 = sample2, randoms=randoms,\
                                  period = period, do_auto=do_auto, do_cross=do_cross,\
                                  estimator=estimator, num_threads=num_threads,\
