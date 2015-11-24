@@ -8,14 +8,19 @@ import pytest
 
 from ..mock_survey import distant_observer_redshift, ra_dec_z
 
+__all__=['test_distant_observer','test_ra_dec_z']
+
+#create some toy data to test functions
+N=100
+x = np.random.random((N,3))
+v = np.random.random((N,3))*0.1
+period = np.array([1.0,1.0,1.0])
+
 @pytest.mark.slow
 def test_distant_observer():
-    
-    N=100
-    x = np.random.random((N,3))
-    v = np.random.random((N,3))*0.1
-    period = np.array([1,1,1])
-    
+    """
+    test distant observer function
+    """
     redshifts = distant_observer_redshift(x,v)
     
     assert len(redshifts)==N, "redshift array is not the correct size"
@@ -32,12 +37,9 @@ def test_distant_observer():
 
 @pytest.mark.slow
 def test_ra_dec_z():
-    
-    
-    N=100
-    x = np.random.random((N,3))
-    v = np.random.random((N,3))*0.1
-    period = np.array([1,1,1])
+    """
+    test ra_dec_z function
+    """
     from astropy import cosmology
     cosmo = cosmology.FlatLambdaCDM(H0=0.7, Om0=0.3)
     
