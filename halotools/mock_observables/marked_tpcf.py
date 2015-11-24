@@ -416,7 +416,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     if normalize_by=='number_counts':
         R1R1,R1R2,R2R2 = pair_counts(sample1, sample2, rbins, period,
                                      num_threads, do_auto, do_cross, _sample1_is_sample2,
-                                     approx_cell1_size, approx_cell2_size)
+                                     None, None)
     #calculate randomized marked pairs
     elif normalize_by=='random_marks':
         if iterations > 1:
