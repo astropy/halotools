@@ -43,11 +43,6 @@ class FlatRectanguloidTree(object):
     And equivalently, each point has a unique integer specifying 
     the subvolume containing it, called the *cellID*. 
 
-    In order to access the *x* positions of the points lying in subvolume *i*, 
-    x[idx_sort][slice_array[i]]. 
-    In practice, because fancy indexing with `idx_sort` is not instantaneous, 
-    it is more efficient to use `idx_sort` once to sort the x, y, and z arrays 
-    in-place, and then access the sorted arrays with the relevant slice_array element. 
     """
 
     def __init__(self, x, y, z, 
@@ -70,10 +65,49 @@ class FlatRectanguloidTree(object):
 
         Examples 
         ---------
-        >>> Npts, Lbox = 1e4, 500
+        >>> Npts, Lbox = 1e4, 1000
+        >>> xperiod, yperiod, zperiod = Lbox, Lbox, Lbox
+        >>> approx_xcell_size = Lbox/10.
+        >>> approx_ycell_size = Lbox/10.
+        >>> approx_zcell_size = Lbox/10.
+
+        Let's create some fake data to demonstrate the tree structure:
+
+        >>> np.random.seed(43)
         >>> x = np.random.uniform(0, Lbox, Npts)
         >>> y = np.random.uniform(0, Lbox, Npts) 
         >>> z = np.random.uniform(0, Lbox, Npts) 
+        >>> tree = FlatRectanguloidTree(x, y, z, approx_xcell_size, approx_ycell_size, approx_zcell_size, xperiod, yperiod, zperiod)
+
+        Since we used approximate cell sizes *Lbox/10* that 
+        exactly divided the period in each dimension, 
+        then we know there are *10* subvolumes-per-dimension. 
+        So, for example, based on the discussion above, 
+        *cellID = 0* will correspond to *cell_tupleID = (0, 0, 0)*,  
+        *cellID = 5* will correspond to *cell_tupleID = (0, 0, 5)* and 
+        *cellID = 13* will correspond to *cell_tupleID = (0, 1, 3).* 
+
+        Now that your tree has been built, you can efficiently access 
+        the *x, y, z* positions of the points lying in 
+        the subvolume with *cellID = i* as follows:
+
+        >>> i = 13
+        >>> ith_subvol_slice = tree.slice_array[i]
+        >>> xcoords_ith_subvol = tree.x[ith_subvol_slice]
+        >>> ycoords_ith_subvol = tree.y[ith_subvol_slice]
+        >>> zcoords_ith_subvol = tree.z[ith_subvol_slice]
+
+        Now let's verify that we got the correct results:
+        
+        >>> assert np.all(xcoords_ith_subvol <= 100.)
+        >>> assert np.all(0 <= xcoords_ith_subvol)
+
+        >>> assert np.all(ycoords_ith_subvol <= 200.)
+        >>> assert np.all(100. <= ycoords_ith_subvol)
+
+        >>> assert np.all(zcoords_ith_subvol <= 400.)
+        >>> assert np.all(300. <= zcoords_ith_subvol)
+
         """
 
         self._check_sensible_constructor_inputs()

@@ -22,6 +22,7 @@ import sys
 import multiprocessing
 from multiprocessing import Value, Lock
 from functools import partial
+import pytest
 
 from .double_tree import FlatRectanguloidDoubleTree
 from .double_tree_helpers import *
@@ -91,6 +92,30 @@ def npairs(data1, data2, rbins, period = None,\
     -------
     num_pairs : array_like 
         Numpy array of length len(rbins) storing the numbers of pairs in the input bins. 
+
+    Examples 
+    --------
+    For illustration purposes, we'll create some fake data and call the pair counter:
+
+    >>> Npts1, Npts2, Lbox = 1e3, 1e3, 250.
+    >>> period = [Lbox, Lbox, Lbox]
+    >>> rbins = np.logspace(-1, 1.5, 15)
+
+    >>> x1 = np.random.uniform(0, Lbox, Npts1)
+    >>> y1 = np.random.uniform(0, Lbox, Npts1)
+    >>> z1 = np.random.uniform(0, Lbox, Npts1)
+    >>> x2 = np.random.uniform(0, Lbox, Npts2)
+    >>> y2 = np.random.uniform(0, Lbox, Npts2)
+    >>> z2 = np.random.uniform(0, Lbox, Npts2)
+
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> data1 = np.vstack([x1, y1, z1]).T 
+    >>> data2 = np.vstack([x2, y2, z2]).T 
+
+    >>> result = npairs(data1, data2, rbins, period = period)
     """
 
     ### Process the inputs with the helper function
@@ -303,7 +328,7 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
     >>> z2 = np.random.uniform(0, Lbox, Npts2)
 
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
-    taking the transform of the result of `numpy.vstack`. This boilerplate formatting 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
 
     >>> data1 = np.vstack([x1, y1, z1]).T 
@@ -317,7 +342,7 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
     >>> jtags1 = np.random.random_integers(1, N_samples, Npts1)
     >>> jtags2 = np.random.random_integers(1, N_samples, Npts2)
 
-    >>> result = jnpairs(data1, data2, rbins, jtags1=jtags1, jtags2=jtags2, N_samples = N_samples)
+    >>> result = jnpairs(data1, data2, rbins, period = period, jtags1=jtags1, jtags2=jtags2, N_samples = N_samples)
 
     """
     ### Process the inputs with the helper function
@@ -444,7 +469,6 @@ def _jnpairs_engine(double_tree, weights1, weights2, jtags1, jtags2,
     return counts
 
 ##########################################################################
-
 def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_threads=1, 
                 approx_cell1_size = None, approx_cell2_size = None):
 
@@ -508,6 +532,31 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     -------
     N_pairs : array_like 
         2-d array of length *Num_rp_bins x Num_pi_bins* storing the pair counts in each bin. 
+
+    Examples 
+    --------
+    For illustration purposes, we'll create some fake data and call the pair counter:
+
+    >>> Npts1, Npts2, Lbox = 1e3, 1e3, 1000.
+    >>> period = [Lbox, Lbox, Lbox]
+    >>> rp_bins = np.logspace(-1, 2, 15)
+    >>> pi_bins = np.logspace(1, 2)
+
+    >>> x1 = np.random.uniform(0, Lbox, Npts1)
+    >>> y1 = np.random.uniform(0, Lbox, Npts1)
+    >>> z1 = np.random.uniform(0, Lbox, Npts1)
+    >>> x2 = np.random.uniform(0, Lbox, Npts2)
+    >>> y2 = np.random.uniform(0, Lbox, Npts2)
+    >>> z2 = np.random.uniform(0, Lbox, Npts2)
+
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> data1 = np.vstack([x1, y1, z1]).T 
+    >>> data2 = np.vstack([x2, y2, z2]).T 
+
+    >>> result = xy_z_npairs(data1, data2, rp_bins, pi_bins, period = period)
     """
     ### Process the inputs with the helper function
     x1, y1, z1, x2, y2, z2, rp_bins, pi_bins, period, num_threads, PBCs = (
@@ -684,13 +733,43 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
         number of pairs
 
     Notes
-    -----
-    The quantity `math:`\\mu` is defined as the :math:`\\sin(\\theta_{\\rm los})` 
+    ------
+    The quantity :math:`\\mu` is defined as the :math:`\\sin(\\theta_{\\rm los})` 
     and not the conventional :math:`\\cos(\\theta_{\\rm los})`. This is 
     because the pair counter has been optimized under the assumption that its 
     separation variable (in this case, :math:`\\mu`) *increases* 
     as :math:`\\theta_{\\rm los})` increases. 
-        
+
+    Returns
+    -------
+    N_pairs : array_like 
+        2-d array of length *Num_rp_bins x Num_pi_bins* storing the pair counts in each bin. 
+
+    Examples 
+    --------
+    For illustration purposes, we'll create some fake data and call the pair counter:
+
+    >>> Npts1, Npts2, Lbox = 1e3, 1e3, 200.
+    >>> period = [Lbox, Lbox, Lbox]
+    >>> s_bins = np.logspace(-1, 1.25, 15)
+    >>> mu_bins = np.linspace(-0.5, 0.5)
+
+    >>> x1 = np.random.uniform(0, Lbox, Npts1)
+    >>> y1 = np.random.uniform(0, Lbox, Npts1)
+    >>> z1 = np.random.uniform(0, Lbox, Npts1)
+    >>> x2 = np.random.uniform(0, Lbox, Npts2)
+    >>> y2 = np.random.uniform(0, Lbox, Npts2)
+    >>> z2 = np.random.uniform(0, Lbox, Npts2)
+
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> data1 = np.vstack([x1, y1, z1]).T 
+    >>> data2 = np.vstack([x2, y2, z2]).T 
+
+    >>> result = s_mu_npairs(data1, data2, s_bins, mu_bins, period = period)
+
     """
     
     #the parameters for this are similar to npairs, except mu_bins needs to be processed.
