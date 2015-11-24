@@ -21,8 +21,8 @@ __all__=['delta_sigma']
 __author__ = ['Duncan Campbell']
 
 
-def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True,\
-                n_bins=25, estimator='Natural', num_threads=1):
+def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
+                log_bins=True, n_bins=25, estimator='Natural', num_threads=1):
     """ 
     Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)`.
     
@@ -50,7 +50,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
         maximum integration parameter, :math:`\\pi_{\\rm max}` 
         (see notes for more details).
     
-    period : array_like, optional
+    period : array_like
         Length-3 array defining axis-aligned periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox]*3.
     

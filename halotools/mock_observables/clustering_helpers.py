@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 __all__ = ['_tpcf_process_args', '_tpcf_jackknife_process_args',\
-           '_redshift_space_tpcf_process_args', '_s_mu_tpcf_process_args',\
+           '_rp_pi_tpcf_process_args', '_s_mu_tpcf_process_args',\
            '_marked_tpcf_process_args','_delta_sigma_process_args',\
            '_tpcf_one_two_halo_decomp_process_args',\
            '_list_estimators', '_TP_estimator', '_TP_estimator_requirements']
@@ -265,7 +265,7 @@ def _tpcf_jackknife_process_args(sample1, randoms, rbins, Nsub, sample2, period,
            num_threads, _sample1_is_sample2, PBCs
 
 
-def _redshift_space_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,\
+def _rp_pi_tpcf_process_args(sample1, rp_bins, pi_bins, sample2, randoms,\
                                       period, do_auto, do_cross, estimator,\
                                       num_threads, max_sample_size,
                                       approx_cell1_size, approx_cell2_size,\
@@ -703,7 +703,7 @@ def _delta_sigma_process_args(galaxies, particles, rp_bins, chi_max, period,\
 
     galaxies = convert_to_ndarray(galaxies)
     particles = convert_to_ndarray(particles)
-
+    
     rp_bins = convert_to_ndarray(rp_bins)
     rp_max = np.max(rp_bins)
     try:

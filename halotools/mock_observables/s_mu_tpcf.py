@@ -29,24 +29,9 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
               approx_cell2_size = None, approx_cellran_size = None):
     """ 
     Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)` 
-    in bins of radial seperation and angle to to the line-of-sight (LOS).
-    This is a pre-step for calculating correlation function multipoles.
     
-    
-    :math:`\\vec{s}` is the radial vector connnecting two points.
-    The magnitude, :math:`s`, is:
-    
-    .. math:: 
-        s = \\sqrt{r_{\\parallel}^2+r_{\\perp}^2},
-    
-    where :math:`r_{\\parallel}` is the seperation parallel to the LOS 
-    and :math:`r_{\\perp}` is the seperation perpednicular to the LOS.  :math:`\\mu` is 
-    the cosine of the angle, :math:`\\theta_{\\rm LOS}`, between the LOS 
-    and :math:`\\vec{s}`:
-    
-    .. math::
-        \\mu = \\cos(\\theta_{\\rm LOS}) \\equiv r_{\\parallel}/s.
-    
+    Divide redshift space into bins of radial seperation and angle to to the line-of-sight 
+    (LOS).  This is a pre-step for calculating correlation function multipoles.
     
     The first two dimensions (x, y) define the plane for perpendicular distances. 
     The third dimension (z) is used for parallel distances.  i.e. x,y positions are on 
@@ -147,8 +132,22 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
     
     Notes
     -----
+    Let :math:`\\vec{s}` be the radial vector connnecting two points.
+    The magnitude, :math:`s`, is:
+    
+    .. math:: 
+        s = \\sqrt{r_{\\parallel}^2+r_{\\perp}^2},
+    
+    where :math:`r_{\\parallel}` is the seperation parallel to the LOS 
+    and :math:`r_{\\perp}` is the seperation perpednicular to the LOS.  :math:`\\mu` is 
+    the cosine of the angle, :math:`\\theta_{\\rm LOS}`, between the LOS 
+    and :math:`\\vec{s}`:
+    
+    .. math::
+        \\mu = \\cos(\\theta_{\\rm LOS}) \\equiv r_{\\parallel}/s.
+    
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.double_tree_pairs.s_mu_npairs`.  This pair 
+    `~halotools.mock_observables.pair_counters.s_mu_npairs`.  This pair 
     counter is optimized to work on points distributed in a rectangular cuboid volume, 
     e.g. a simulation box.  This optimization restricts this function to work on 3-D 
     point distributions.

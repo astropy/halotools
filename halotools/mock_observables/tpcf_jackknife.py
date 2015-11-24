@@ -139,7 +139,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     Notes
     -----
     The jackknife sampling of pair counts is done internally in 
-    `~halotools.mock_observables.pair_counters.double_tree_pairs.jnpairs`.
+    `~halotools.mock_observables.pair_counters.jnpairs`.
     
     Pairs are counted such that when 'removing' subvolume :math:`k`, and counting a 
     pair in subvolumes :math:`i` and :math:`j`:
@@ -147,7 +147,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     .. math::
         D_i D_j += \\left \\{
             \\begin{array}{ll}
-                1.0  & : i \\neq k \\\\
+                1.0  & : i \\neq k, j \\neq k \\\\
                 0.5  & : i \\neq k, j=k \\\\
                 0.5  & : i = k, j \\neq k \\\\
                 0.0  & : i=j=k \\\\
@@ -156,17 +156,38 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     
     Examples
     --------
-    >>> #randomly distributed points in a unit cube. 
-    >>> Npts = 1000
-    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
-    >>> coords = np.vstack((x,y,z)).T
-    >>> rx,ry,rz = (np.random.random(3*Npts),np.random.random(3*Npts),np.random.random(3*Npts))
-    >>> randoms = np.vstack((rx,ry,rz)).T
-    >>> period = np.array([1.0,1.0,1.0])
-    >>> rbins = np.logspace(-2,-1,10)
-    >>> Nsub = np.array([4,4,4])
-    >>> xi, cov = tpcf_jackknife(coords, randoms, rbins, Nsub=Nsub, period=period)
+   Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
     
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
+    >>> coords = np.vstack((x,y,z)).T
+    
+    Create some 'randoms' in the same way:
+    
+    >>> x = np.random.random(Npts*3)
+    >>> y = np.random.random(Npts*3)
+    >>> z = np.random.random(Npts*3)
+    >>> ran_coords = np.vstack((x,y,z)).T
+    
+    Divide the volume into 4^3 samples:
+    
+    >>> Nsub = np.array([4,4,4])
+    
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> xi, cov = tpcf_jackknife(coords, ran_coords, rbins, Nsub=Nsub, period=period)
     """
     
     #process input parameters

@@ -6,7 +6,7 @@ from .tpcf import *
 from .tpcf_jackknife import *
 from .tpcf_one_two_halo_decomp import *
 from .marked_tpcf import *
-from .redshift_space_tpcf import *
+from .rp_pi_tpcf import *
 from .wp import *
 from .s_mu_tpcf import *
 from .delta_sigma import *

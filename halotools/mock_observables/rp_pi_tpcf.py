@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-functions to calculate clustering statistics, e.g. two point correlation functions.
+Calculate the redshift space two point correltion function
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -15,21 +15,22 @@ from .pair_counters.double_tree_pairs import xy_z_npairs
 ##########################################################################################
 
 
-__all__=['redshift_space_tpcf']
+__all__=['rp_pi_tpcf']
 __author__ = ['Duncan Campbell']
 
 
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 
-def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
+def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
                         period=None, do_auto=True, do_cross=True, estimator='Natural',
                         num_threads=1, max_sample_size=int(1e6), approx_cell1_size = None,
                         approx_cell2_size = None, approx_cellran_size = None):
     """ 
-    Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`, 
-    in bins of pair seperation perpendicular to the line-of-sight (LOS) and parallel to 
-    the LOS.
+    Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`
+    
+    Calclulate the correlation function as a function of pair seperation perpendicular to 
+    the line-of-sight(LOS) and parallel to the LOS.
     
     The first two dimensions (x, y) define the plane for perpendicular distances. 
     The third dimension (z) is used for parallel distances.  i.e. x,y positions are on 
@@ -37,7 +38,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     observer' approximation.
     
     Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`redshift_space_tpcf_usage_tutorial`. 
+    documentation of all features, see :ref:`sp_pi_space_tpcf_usage_tutorial`. 
     
     Parameters 
     ----------
@@ -129,7 +130,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.double_tree_pairs.xy_z_npairs`.  This pair 
+    `~halotools.mock_observables.pair_counters.xy_z_npairs`.  This pair 
     counter is optimized to work on points distributed in a rectangular cuboid volume, 
     e.g. a simulation box.  This optimization restricts this function to work on 3-D 
     point distributions.
@@ -150,7 +151,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     >>> period = np.array([1.0,1.0,1.0])
     >>> rp_bins = np.logspace(-2,-1,10)
     >>> pi_bins = np.logspace(-2,-1,10)
-    >>> xi = redshift_space_tpcf(coords, rp_bins, pi_bins, period=period)
+    >>> xi = rp_pi_tpcf(coords, rp_bins, pi_bins, period=period)
     
     """
     
@@ -159,7 +160,7 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
                      approx_cell1_size, approx_cell2_size, approx_cellran_size]
     
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _redshift_space_tpcf_process_args(*function_args)
+        _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
     
     def random_counts(sample1, sample2, randoms, rp_bins, pi_bins, period,\
                       PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,\
