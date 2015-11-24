@@ -67,6 +67,13 @@ class FlatRectanguloidTree(object):
         xperiod, yperiod, zperiod : floats
             Length scale defining the periodic boundary conditions in each dimension. 
             In virtually all realistic cases, these are all equal. 
+
+        Examples 
+        ---------
+        >>> Npts, Lbox = 1e4, 500
+        >>> x = np.random.uniform(0, Lbox, Npts)
+        >>> y = np.random.uniform(0, Lbox, Npts) 
+        >>> z = np.random.uniform(0, Lbox, Npts) 
         """
 
         self._check_sensible_constructor_inputs()
