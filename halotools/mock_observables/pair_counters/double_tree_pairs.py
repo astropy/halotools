@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
 """
-rectangular Cuboid Pair Counter. 
-This module contains pair counting functions used to count the number of pairs with 
-separations less than or equal to r, optimized for simulation boxes.
-This module also contains a 'main' function which runs speed tests.
+This module contains functions used to calculate 
+the number of pairs of points as a function of the 
+separation between the points. Many choices for the separation variable(s) are available, 
+including 3-D spherical shells, `~halotools.mock_observables.pair_counters.npairs`, 
+2+1-D cylindrical shells, `~halotools.mock_observables.pair_counters.xy_z_npairs`, 
+and separations :math:`s + \\theta_{\\rm los}` defined by angular & line-of-sight coordinates, 
+`~halotools.mock_observables.pair_counters.s_mu_npairs`. 
+There is also a function `~halotools.mock_observables.pair_counters.jnpairs` used to 
+provide jackknife error estimates on the pair counts. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
 from copy import copy 
@@ -36,11 +40,8 @@ def npairs(data1, data2, rbins, period = None,\
            verbose = False, num_threads = 1,\
            approx_cell1_size = None, approx_cell2_size = None):
     """
-    real-space pair counter.
-    
-    Count the number of pairs (x1,x2) that can be formed, with x1 drawn from data1 and x2
-    drawn from data2, and where distance(x1, x2) <= rbins[i]. 
-    
+    Function counts the number of pairs of points as a function of the 3d spatial separation *r*. 
+        
     Parameters
     ----------
     data1: array_like
@@ -62,6 +63,7 @@ def npairs(data1, data2, rbins, period = None,\
         be a periodic cube (by far the most common case). 
         If period is set to None, the default option, 
         PBCs are set to infinity.  
+
     verbose: Boolean, optional
         If True, print out information and progress.
     
@@ -87,8 +89,8 @@ def npairs(data1, data2, rbins, period = None,\
     
     Returns
     -------
-    num_pairs : array of length len(rbins)
-        number of pairs
+    num_pairs : array_like 
+        Numpy array of length len(rbins) storing the numbers of pairs in the input bins. 
     """
 
     ### Process the inputs with the helper function
@@ -101,7 +103,7 @@ def npairs(data1, data2, rbins, period = None,\
     rmax = np.max(rbins)
     
     if verbose==True:
-        print("runing double_tree_pairs.xy_z_npairs on {0} x {1}\n"
+        print("running double_tree_pairs.xy_z_npairs on {0} x {1}\n"
               "points with PBCs={2}".format(len(data1), len(data2), PBCs))
         start = time.time()
     
@@ -198,65 +200,71 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
     jtags1=None, jtags2=None, N_samples=0, verbose=False, num_threads=1, 
     approx_cell1_size = None, approx_cell2_size = None):
     """
-    jackknife weighted real-space pair counter.
-    
-    Count the weighted number of pairs (x1,x2) that can be formed, with x1 drawn from 
-    data1 and x2 drawn from data2, and where distance(x1, x2) <= rbins[i].  Weighted 
-    counts are calculated as w1*w2. Jackknife sampled pair counts are returned.
-    
+    Pair counter used to make jackknife error estimates of real-space pair counter 
+    `~halotools.mock_observables.pair_counters.npairs`. 
+        
     Parameters
     ----------
     data1: array_like
-        N1 by 3 numpy array of 3-dimensional positions. Should be between zero and 
-        period. This cython implementation requires data1.ndim==2.
+        N1 by 3 numpy array of 3-dimensional positions. 
+        Values of each dimension should be between zero and the corresponding dimension 
+        of the input period.
             
     data2: array_like
-        N2 by 3 numpy array of 3-dimensional positions. Should be between zero and 
-        period. This cython implementation requires data2.ndim==2.
+        N1 by 3 numpy array of 3-dimensional positions. 
+        Values of each dimension should be between zero and the corresponding dimension 
+        of the input period.
             
     rbins: array_like
-        numpy array of boundaries defining the bins in which pairs are counted. 
+        Boundaries defining the bins in which pairs are counted.
         
     period: array_like, optional
-        length k array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-        If none, PBCs are set to infinity.  If True, period is set to be Lbox
+        Length-3 array defining the periodic boundary conditions. 
+        If only one number is specified, the enclosing volume is assumed to 
+        be a periodic cube (by far the most common case). 
+        If period is set to None, the default option, 
+        PBCs are set to infinity.  
     
     weights1: array_like, optional
-        length N1 array containing weights used for weighted pair counts
+        length N1 array containing weights used for weighted pair counts. 
         
     weights2: array_like, optional
         length N2 array containing weights used for weighted pair counts.
     
     jtags1: array_like, optional
         length N1 array containing integer tags used to define jackknife sample 
-        membership. Tags are in the range [1,N_samples]. '0' is a reserved tag and should 
-        not be used.
+        membership. Tags are in the range [1, N_samples]. 
+        The tag '0' is a reserved tag and should not be used.
         
     jtags2: array_like, optional
         length N2 array containing integer tags used to define jackknife sample 
-        membership. Tags are in the range [1,N_samples]. '0' is a reserved tag and should 
-        not be used.
+        membership. Tags are in the range [1, N_samples]. 
+        The tag '0' is a reserved tag and should not be used.
     
     N_samples: int, optional
-        number of jackknife samples
+        Total number of jackknife samples. All values of ``jtags1`` and ``jtags2`` 
+        should be in the range [1, N_samples]. 
     
     verbose: Boolean, optional
         If True, print out information and progress.
     
     num_threads: int, optional
-        number of 'threads' to use in the pair counting.  If set to 'max', use all 
-        available cores.  num_threads=0 is the default.
+        Number of CPU cores to use in the pair counting. 
+        If ``num_threads`` is set to the string 'max', use all available cores. 
+        Default is 1 thread for a serial calculation that 
+        does not open a multiprocessing pool. 
 
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by which 
         the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
         will apportion the ``data`` points into subvolumes of the simulation box. 
+
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use 1/10 of the box size in each dimension, 
-        which will return reasonable result performance for most use-cases. 
+        Default choice is to use 
+        :math:`[r^{\\rm max}, r^{\\rm max}, r^{\\rm max}]`, 
+        which will result in reasonable performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
+        recommended that you experiment with it when carrying out  
         performance-critical calculations. 
         
     approx_cell2_size : array_like, optional 
@@ -264,16 +272,53 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
 
     Returns
     -------
-    N_pairs : ndarray of shape (N_samples+1,len(rbins))
-        number counts of pairs with seperations <=rbins[i]
+    N_pairs : array_like  
+        Numpy array of shape (N_samples+1,len(rbins)). 
+        The sub-array N_pairs[0, :] stores numbers of pairs 
+        in the input bins for the entire sample. 
+        The sub-array N_pairs[i, :] stores numbers of pairs 
+        in the input bins for the :math:`i^{\\rm th}` jackknife sub-sample. 
     
     Notes
     -----
     Jackknife weights are calculated using a weighting function.
     
-    if both points are outside the sample, return 0.0
-    if both points are inside the sample, return (w1 * w2)
-    if one point is inside, and the other is outside return 0.5*(w1 * w2)
+    If both points are outside the sample, the weighting function returns 0.
+    If both points are inside the sample, the weighting function returns (w1 * w2)
+    If one point is inside, and the other is outside, the weighting function returns (w1 * w2)/2
+
+    Examples 
+    --------
+    For illustration purposes, we'll create some fake data and call the pair counter:
+
+    >>> Npts1, Npts2, Lbox = 1e3, 1e3, 250.
+    >>> period = [Lbox, Lbox, Lbox]
+    >>> rbins = np.logspace(-1, 1.5, 15)
+
+    >>> x1 = np.random.uniform(0, Lbox, Npts1)
+    >>> y1 = np.random.uniform(0, Lbox, Npts1)
+    >>> z1 = np.random.uniform(0, Lbox, Npts1)
+    >>> x2 = np.random.uniform(0, Lbox, Npts2)
+    >>> y2 = np.random.uniform(0, Lbox, Npts2)
+    >>> z2 = np.random.uniform(0, Lbox, Npts2)
+
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transform of the result of `numpy.vstack`. This boilerplate formatting 
+    is used throughout the `~halotools.mock_observables` sub-package:
+
+    >>> data1 = np.vstack([x1, y1, z1]).T 
+    >>> data2 = np.vstack([x2, y2, z2]).T 
+
+    Ordinarily, you would create ``jtags`` for the points by properly subdivide 
+    the points into spatial sub-volumes. For illustration purposes, we'll simply 
+    use randomly assigned sub-volumes as this has no impact on the calling signature:
+
+    >>> N_samples = 10
+    >>> jtags1 = np.random.random_integers(1, N_samples, Npts1)
+    >>> jtags2 = np.random.random_integers(1, N_samples, Npts2)
+
+    >>> result = jnpairs(data1, data2, rbins, jtags1=jtags1, jtags2=jtags2, N_samples = N_samples)
+
     """
     ### Process the inputs with the helper function
     x1, y1, z1, x2, y2, z2, rbins, period, num_threads, PBCs = (
@@ -284,7 +329,7 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
     rmax = np.max(rbins)
     
     if verbose==True:
-        print("runing double_tree_pairs.xy_z_npairs on {0} x {1}\n"
+        print("running double_tree_pairs.xy_z_npairs on {0} x {1}\n"
               "points with PBCs={2}".format(len(data1), len(data2), PBCs))
         search_volume = (2.0*rmax)**3
         total_volume  = period.prod()
@@ -404,59 +449,65 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
                 approx_cell1_size = None, approx_cell2_size = None):
 
     """
-    real-space pair counter.
-    
-    Count the number of pairs (x1,x2) that can be formed, with x1 drawn from data1 and x2
-    drawn from data2, and where distance(x1, x2) <= rbins[i]. 
-    
+    Function counts the number of pairs of points as a function of projected separation :math:`r_{\\rm p}` and line-of-sight separation :math:`\\pi`. 
+        
     Parameters
     ----------
     data1: array_like
-        N1 by 3 numpy array of 3-dimensional positions. Should be between zero and 
-        period.
-            
+        N1 by 3 numpy array of 3-dimensional positions. 
+        Values of each dimension should be between zero and the corresponding dimension 
+        of the input period.
+
     data2: array_like
-        N2 by 3 numpy array of 3-dimensional positions. Should be between zero and 
-        period.
-            
+        N2 by 3 numpy array of 3-dimensional positions. 
+        Values of each dimension should be between zero and the corresponding dimension 
+        of the input period.
+
     rp_bins: array_like
-        numpy array of boundaries defining the radial projected bins in which pairs are 
+        numpy array of boundaries defining the projected separation 
+        :math:`r_{\\rm p}` bins in which pairs are 
         counted.
     
     pi_bins: array_like
-        numpy array of boundaries defining the parallel bins in which pairs are counted.
+        numpy array of boundaries defining the line-of-sight separation 
+        :math:`\\pi` bins in which pairs are counted.
     
     period: array_like, optional
-        length k array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
-        If none, PBCs are set to infinity.  If True, period is set to be Lbox
+        Length-3 array defining the periodic boundary conditions. 
+        If only one number is specified, the enclosing volume is assumed to 
+        be a periodic cube (by far the most common case). 
+        If period is set to None, the default option, 
+        PBCs are set to infinity.  
     
     verbose: Boolean, optional
         If True, print out information and progress.
     
     num_threads: int, optional
-        number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  num_threads=0 is the default.
+        Number of CPU cores to use in the pair counting. 
+        If ``num_threads`` is set to the string 'max', use all available cores. 
+        Default is 1 thread for a serial calculation that 
+        does not open a multiprocessing pool. 
 
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by which 
         the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
         will apportion the ``data`` points into subvolumes of the simulation box. 
+
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use [rp_max,rp_max,pi_max] of the box size in each
-        dimension, which will return reasonable result performance for most use-cases. 
+        Default choice is to use 
+        :math:`[r_{\\rm p}^{\\rm max}, r_{\\rm p}^{\\rm max}, \\pi^{\\rm max}]`, 
+        which will result in reasonable performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
+        recommended that you experiment with it when carrying out  
         performance-critical calculations. 
         
     approx_cell2_size : array_like, optional 
         See comments for ``approx_cell1_size``. 
 
-
     Returns
     -------
-    N_pairs : array of length len(rbins)
-        number of pairs
+    N_pairs : array_like 
+        2-d array of length *Num_rp_bins x Num_pi_bins* storing the pair counts in each bin. 
     """
     ### Process the inputs with the helper function
     x1, y1, z1, x2, y2, z2, rp_bins, pi_bins, period, num_threads, PBCs = (
@@ -469,7 +520,7 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     pi_max = np.max(pi_bins)
     
     if verbose==True:
-        print("runing double_tree_pairs.xy_z_npairs on {0} x {1}\n"
+        print("running double_tree_pairs.xy_z_npairs on {0} x {1}\n"
               "points with PBCs={2}".format(len(data1), len(data2), PBCs))
         search_volume = (2.0*rp_max)*(2.0*rp_max)*(2.0*pi_max)
         total_volume  = period.prod()
@@ -573,7 +624,7 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
                 verbose = False, num_threads = 1,\
                 approx_cell1_size = None, approx_cell2_size = None):
     """ 
-    Calculate the number of pairs as a function of radial separation, *s,* and :math:`\\mu\\equiv\\sin(\\theta_{\\rm los})`, where :math:`\\theta_{\\rm los}` is the line-of-sight angle between points and :math:`s^2 = r_{\\rm parallel}^2 + r_{\\rm perp}^2`. 
+    Function counts the number of pairs as a function of radial separation, *s,* and :math:`\\mu\\equiv\\sin(\\theta_{\\rm los})`, where :math:`\\theta_{\\rm los}` is the line-of-sight angle between points and :math:`s^2 = r_{\\rm parallel}^2 + r_{\\rm perp}^2`. 
     
     
     Parameters
@@ -592,8 +643,9 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
         numpy array of boundaries defining the radial bins in which pairs are counted.
     
     mu_bins: array_like
-        numpy array of boundaries defining sin(angle) from the line of sight that pairs 
-        are counted in.  Note that using the sine is not common convention for 
+        numpy array of boundaries defining bins in :math:`\\sin(\\theta_{\\rm los})` 
+        in which the pairs are counted in.  
+        Note that using the sine is not common convention for 
         calculating the two point correlation function (see notes).
     
     period: array_like, optional
@@ -618,9 +670,9 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
         will apportion the ``data`` points into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
         Default choice is to use 1/10 of the box size in each dimension, 
-        which will return reasonable result performance for most use-cases. 
+        which will result in reasonable performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with this parameter when carrying out  
+        recommended that you experiment with it when carrying out  
         performance-critical calculations. 
 
     approx_cell2_size : array_like, optional 
@@ -633,7 +685,7 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
 
     Notes
     -----
-    The quantity math::`\\mu` is defined as the :math:`\\sin(\\theta_{\\rm los})` 
+    The quantity `math:`\\mu` is defined as the :math:`\\sin(\\theta_{\\rm los})` 
     and not the conventional :math:`\\cos(\\theta_{\\rm los})`. This is 
     because the pair counter has been optimized under the assumption that its 
     separation variable (in this case, :math:`\\mu`) *increases* 
