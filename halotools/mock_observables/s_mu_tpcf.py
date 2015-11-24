@@ -28,17 +28,33 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
               num_threads=1, max_sample_size=int(1e6), approx_cell1_size = None,
               approx_cell2_size = None, approx_cellran_size = None):
     """ 
-    Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)`, where
-    .. math:: s^2 = r_{\\parallel}^2+r_{\\perp}^2
-    and, 
-    .. math:: `\\mu = r_{\\parallel}/s`
-    
-    Data must be 3-D.  The first two dimensions define the plane for perpendicular 
-    distances.  The third dimension is used for parallel distances.  i.e. x,y positions 
-    are on the plane of the sky, and z is the redshift coordinate.  This is the distant 
-    observer approximation.
-    
+    Calculate the redshift space correlation function, :math:`\\xi(s, \\mu)` 
+    in bins of radial seperation and angle to to the line-of-sight (LOS).
     This is a pre-step for calculating correlation function multipoles.
+    
+    
+    :math:`\\vec{s}` is the radial vector connnecting two points.
+    The magnitude, :math:`s`, is:
+    
+    .. math:: 
+        s = \\sqrt{r_{\\parallel}^2+r_{\\perp}^2},
+    
+    where :math:`r_{\\parallel}` is the seperation parallel to the LOS 
+    and :math:`r_{\\perp}` is the seperation perpednicular to the LOS.  :math:`\\mu` is 
+    the cosine of the angle, :math:`\\theta_{\\rm LOS}`, between the LOS 
+    and :math:`\\vec{s}`:
+    
+    .. math::
+        \\mu = \\cos(\\theta_{\\rm LOS}) \\equiv r_{\\parallel}/s.
+    
+    
+    The first two dimensions (x, y) define the plane for perpendicular distances. 
+    The third dimension (z) is used for parallel distances.  i.e. x,y positions are on 
+    the plane of the sky, and z is the radial distance coordinate.  This is the 'distant 
+    observer' approximation.
+    
+    Example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`s_mu_tpcf_usage_tutorial`. 
     
     Parameters 
     ----------
@@ -46,10 +62,11 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         Npts x 3 numpy array containing 3-D positions of points. 
     
     s_bins : array_like
-        numpy array of boundaries defining the bins in which pairs are counted. 
+        numpy array of :math:`s` boundaries defining the bins in which pairs are counted. 
     
     mu_bins : array_like
-        numpy array of boundaries defining the bins in which pairs are counted. 
+        numpy array of :math:`\\cos(\\theta_{\\rm LOS})` boundaries defining the bins in 
+        which pairs are counted, and must be between [0,1]. 
     
     sample2 : array_like, optional
         Npts x 3 numpy array containing 3-D positions of points.
@@ -59,8 +76,8 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         provided 'analytic randoms' are used (only valid for periodic boundary conditions).
     
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
+        Length-3 array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
         If none, PBCs are set to infinity.
     
     estimator : string, optional
@@ -94,31 +111,65 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         performance-critical calculations. 
 
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        Analogous to ``approx_cell1_size``, but for ``sample2``.  See comments for 
         ``approx_cell1_size`` for details. 
     
     approx_cellran_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
+        Analogous to ``approx_cell1_size``, but for ``randoms``.  See comments for 
         ``approx_cell1_size`` for details. 
 
     Returns 
     -------
-    correlation_function : np.array
-        ndarray containing correlation function :math:`\\xi(s, \\mu)` computed in each 
-        of the len(`s_bins`)-1 by len(`mu_bins`)-1 bins defined by input `s_bins` and 
-        `mu_bins`.
+    correlation_function : np.ndarray
+        *len(s_bins)-1* by *len(mu_bins)-1* ndarray containing the correlation function
+        :math:`\\xi(s, \\mu)` computed in each of the bins defined by input ``s_bins``
+        and ``mu_bins``.
 
-        :math:`1 + \\xi(s,\\mu) \\equiv \\mathrm{DD} / \\mathrm{RR}`, if the 'Natural' 
-        `estimator` is used, where :math:`\\mathrm{DD}` is calculated by the pair counter, 
-        and :math:`\\mathrm{RR}` is counted internally using analytic randoms if no 
-        `randoms` are passed as an argument.
-
-        If `sample2` is passed as input, three arrays of shape 
-        len(`rp_bins`)-1 by len(`pi_bins`)-1 are returned: 
-        :math:`\\xi_{11}(s, \\mu)`, :math:`\\xi_{12}(s,\\mu)`, :math:`\\xi_{22}(s,\\mu)`,
-        the autocorrelation of `sample1`, the cross-correlation between `sample1` 
-        and `sample2`, and the autocorrelation of sample2.  If `do_auto` or `do_cross` 
-        is set to False, the appropriate result(s) is not returned.
+        .. math::
+            1 + \\xi(s,\\mu) = \\mathrm{DD} / \\mathrm{RR}
+            
+        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}` is calculated by
+        the pair counter, and :math:`\\mathrm{RR}` is counted internally using 
+        "analytic randoms" if ``randoms`` is set to None (see notes for an explanation).
+        
+        
+        If ``sample2`` is not None (and not exactly the same as ``sample1``), 
+        three arrays of shape *len(s_bins)-1* by *len(mu_bins)-1* are returned:
+        
+        .. math::
+            \\xi_{11}(s,\\mu), \\xi_{12}(s,\\mu), \\xi_{22}(s,\\mu),
+        
+        the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and 
+        ``sample2``, and the autocorrelation of ``sample2``, respectively. If 
+        ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) are 
+        returned.
+    
+    Notes
+    -----
+    Pairs are counted using 
+    `~halotools.mock_observables.pair_counters.double_tree_pairs.s_mu_npairs`.  This pair 
+    counter is optimized to work on points distributed in a rectangular cuboid volume, 
+    e.g. a simulation box.  This optimization restricts this function to work on 3-D 
+    point distributions.
+    
+    If the points are distributed in a continuous "periodic box", then ``randoms`` are not 
+    necessary, as the geometry is very simple, and the monte carlo integration that 
+    randoms are used for in complex geometries can be done analytically.
+    
+    If the ``period`` argument is passed in, all points' ith coordinate 
+    must be between 0 and period[i].
+    
+    Examples
+    --------
+    >>> #randomly distributed points in a unit cube. 
+    >>> Npts = 1000
+    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> coords = np.vstack((x,y,z)).T
+    >>> period = np.array([1.0,1.0,1.0])
+    >>> s_bins = np.logspace(-2,-1,10)
+    >>> mu_bins = np.linspace(0,1,50)
+    >>> xi = s_mu_tpcf(coords, s_bins, mu_bins, period=period)
+    
     """
     
     #process arguments

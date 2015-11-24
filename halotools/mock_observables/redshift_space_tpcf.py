@@ -27,7 +27,9 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
                         num_threads=1, max_sample_size=int(1e6), approx_cell1_size = None,
                         approx_cell2_size = None, approx_cellran_size = None):
     """ 
-    Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`, in bins of pair seperation perpendicular to the line-of-sight (LOS) and parallel to the LOS.
+    Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`, 
+    in bins of pair seperation perpendicular to the line-of-sight (LOS) and parallel to 
+    the LOS.
     
     The first two dimensions (x, y) define the plane for perpendicular distances. 
     The third dimension (z) is used for parallel distances.  i.e. x,y positions are on 

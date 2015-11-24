@@ -28,11 +28,20 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
        max_sample_size=int(1e6), approx_cell1_size=None, approx_cell2_size=None,\
        approx_cellran_size=None):
     """ 
-    Calculate the projected correlation function, :math:`w_{p}(r_p)`.
+    Calculate the projected two point correlation function, :math:`w_{p}(r_p)`,
+    where :math:`r_p` is the seperation perpendicular to the line-of-sight (LOS).
+    
+    Calculation of :math:`w_{p}(r_p)` requires the user to supply bins in :math:`\\pi`,
+    the seperation parallel to the line of sight, and the result will in general depend 
+    on both the binning and the maximum :math:`\\pi` seperation integrated over.  See 
+    notes for further details.
     
     The first two dimensions define the plane for perpendicular distances.  The third 
     dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
     sky, and z is the redshift coordinate. This is the 'distant observer' approximation.
+    
+    Example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`wp_usage_tutorial`. 
     
     Parameters 
     ----------
@@ -40,10 +49,12 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         Npts x 3 numpy array containing 3-D positions of points. 
     
     rp_bins : array_like
-        array of boundaries defining the perpendicular bins in which pairs are counted.
+        array of boundaries defining the bins perpendicular to the LOS in which 
+        pairs are counted.
     
     pi_bins : array_like
-        array of boundaries defining the parallel bins in which pairs are counted. 
+        array of boundaries defining the bins parallel to the LOS in which 
+        pairs are counted.
     
     sample2 : array_like, optional
         Npts x 3 numpy array containing 3-D positions of points.
@@ -52,8 +63,8 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
         Nran x 3 numpy array containing 3-D positions of points.
     
     period : array_like, optional
-        length k array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        Length-k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
         If none, PBCs are set to infinity.
     
     do_auto : boolean, optional
@@ -96,28 +107,46 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
 
     Returns 
     -------
-    correlation_function : numpy.array
-        len(`rp_bins`)-1 length array containing the correlation function :math:`w_p(r_p)` 
+    correlation_function(s) : numpy.array
+        *len(rp_bins)-1* length array containing the correlation function :math:`w_p(r_p)` 
         computed in each of the bins defined by input `rp_bins`.
+        
+        
+        If `sample2` is not None (and not exactly the same as ``sample1``), 
+        three arrays of length len(`rbins`)-1 are returned: 
+        
+        .. math::
+            w_{p11}(r_p), \\ w_{p12}(r_p), \\ w_{p22}(r_p),
 
-        If `sample2` is passed as input, three arrays of length len(`rbins`)-1 are 
-        returned: :math:`w_{p11}(r_p)`, :math:`w_{p12}(r_p)`, :math:`w_{p22}(r_p)`.
-
-        The autocorrelation of `sample1`, the cross-correlation between `sample1` 
+        the autocorrelation of `sample1`, the cross-correlation between `sample1` 
         and `sample2`, and the autocorrelation of `sample2`.  If `do_auto` or `do_cross` 
         is set to False, the appropriate result(s) is not returned.
     
     Notes
     -----
-    The projected correlation function is calculated by:
+    The projected correlation function is calculated by integrating the 
+    redshift space two point correlation function using 
+    `~halotools.mock_observables.redshift_space_tpcf`:
     
-    math:: `w_p{r_p} = \\int_0^{\\pi_{\\rm max}}\\xi(r_p,\\pi)\\mathrm{d}\\pi`
+    .. math::
+        w_p(r_p) = \\int_0^{\\pi_{\\rm max}}\\xi(r_p,\\pi)\\mathrm{d}\\pi
     
-    where :math:`\\pi_{\\rm max} = \\mathrm{maximum}(pi_bins)` and :math:`\\xi(r_p,\\pi)` 
-    is the redshift space correlation function.  See the documentation on 
-    redshift_space_tpcf() for further details.
+    where :math:`\\pi_{\\rm max}` is maximum(``pi_bins``) and :math:`\\xi(r_p,\\pi)` 
+    is the redshift space correlation function.
     
-    Notice that the results will generally be sensitive to the choice of `pi_bins`.
+    Notice that the results will generally be sensitive to the choice of ``pi_bins``, as
+    they indicate where to evalulate :math:`\\xi(r_p,\\pi)` and :math:`\\mathrm{d}\\pi`.
+    
+    Examples
+    --------
+    >>> #randomly distributed points in a unit cube. 
+    >>> Npts = 1000
+    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> coords = np.vstack((x,y,z)).T
+    >>> period = np.array([1.0,1.0,1.0])
+    >>> rp_bins = np.logspace(-2,-1,10)
+    >>> pi_bins = np.logspace(-2,-1,10)
+    >>> xi = wp(coords, rp_bins, pi_bins, period=period)
     
     """
     
