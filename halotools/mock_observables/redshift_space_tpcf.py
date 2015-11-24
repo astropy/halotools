@@ -27,43 +27,48 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
                         num_threads=1, max_sample_size=int(1e6), approx_cell1_size = None,
                         approx_cell2_size = None, approx_cellran_size = None):
     """ 
-    Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`.
+    Calculate the redshift space correlation function, :math:`\\xi(r_{p}, \\pi)`, in bins of pair seperation perpendicular to the line-of-sight (LOS) and parallel to the LOS.
     
-    The first two dimensions define the plane for perpendicular distances.  The third 
-    dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
-    sky, and z is the redshift coordinate.  This is the distant observer approximation.
+    The first two dimensions (x, y) define the plane for perpendicular distances. 
+    The third dimension (z) is used for parallel distances.  i.e. x,y positions are on 
+    the plane of the sky, and z is the radial distance coordinate.  This is the 'distant 
+    observer' approximation.
+    
+    Example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`redshift_space_tpcf_usage_tutorial`. 
     
     Parameters 
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points. 
+        Npts x 3 numpy array containing 3-D positions of points.
     
     rp_bins : array_like
-        numpy array of boundaries defining the bins in which pairs are counted. 
+        array of boundaries defining the radial bins perpendicular to the LOS in which 
+        pairs are counted.
     
     pi_bins : array_like
-        numpy array of boundaries defining the bins in which pairs are counted. 
+        array of boundaries defining the p radial bins parallel to the LOS in which 
+        pairs are counted.
     
     sample2 : array_like, optional
         Npts x 3 numpy array containing 3-D positions of points.
     
     randoms : array_like, optional
-        Nran x 3 numpy array containing 3-D positions of points.  If no randoms are 
+        Nran x 3 numpy array containing 3-D positions of points.  If no ``randoms`` are 
         provided analytic randoms are used (only valid for periodic boundary conditions).
     
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
-        If none, PBCs are set to infinity.
+        Length-3 array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
     
     estimator : string, optional
         options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
     
     do_auto : boolean, optional
-        do auto-correlation?  Default is True.
+        do auto-correlation?
     
     do_cross : boolean, optional
-        do cross-correlation?  Default is True.
+        do cross-correlation?
     
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
@@ -71,9 +76,8 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
-        
-        If sample size exceeds `max_sample_size`, the sample will be randomly down-sampled 
-        such that the subsample is equal to `max_sample_size`.
+        If sample size exceeds ``max_sample_size``, the sample will be randomly down-sampled 
+        such that the subsample is equal to ``max_sample_size``.
     
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by which 
@@ -87,34 +91,64 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         performance-critical calculations. 
 
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        Analogous to ``approx_cell1_size``, but for ``sample2``.  See comments for 
         ``approx_cell1_size`` for details. 
     
     approx_cellran_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
+        Analogous to ``approx_cell1_size``, but for ``randoms``.  See comments for 
         ``approx_cell1_size`` for details. 
 
     Returns 
     -------
-    correlation_function : array_like
-        ndarray containing correlation function :math:`\\xi(r_{p}, \\pi)` computed in each 
-        of the len(`rp_bins`)-1 by len(`pi_bins`)-1 bins defined by input `rp_bins` and 
-        `pi_bins`.
-
-        :math:`1 + \\xi(r_{p},\\pi) = \\mathrm{DD} / \\mathrm{RR}`, is the 'Natural' 
-        `estimator` is used, where :math:`\\mathrm{DD}` is calculated by the pair 
-        counter, and :math:`\\mathrm{RR}` is counted internally analytic randoms if no 
-        `randoms` are passed as an argument.
-
-        If sample2 is passed as input, three ndarrays of shape 
-        (len(`rp_bins`)-1,len(`pi_bins`)-1) are returned: 
-        :math:`\\xi_{11}(rp, \\pi)`, :math:`\\xi_{12}(r_{p},\\pi)`, 
-        :math:`\\xi_{22}(r_{p},\\pi)`,
+    correlation_function(s) : numpy.ndarray
+        *len(rp_bins)-1* by *len(pi_bins)-1* ndarray containing the correlation function 
+        :math:`\\xi(r_p, \\pi)` computed in each of the bins defined by input ``rp_bins``
+        and ``pi_bins``.
         
-        The autocorrelation of` sample1`, the cross-correlation between `sample1` 
-        and `sample2`, and the autocorrelation of `sample2`.  If `do_auto` or `do_cross` 
-        is set to False, the appropriate result(s) is not returned.
-
+        .. math::
+            1 + \\xi(r_{p},\\pi) = \\mathrm{DD} / \\mathrm{RR}
+            
+        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}` is calculated by
+        the pair counter, and :math:`\\mathrm{RR}` is counted internally using 
+        "analytic randoms" if ``randoms`` is set to None (see notes for an explanation).
+        
+        If ``sample2`` is passed as input (and not exactly the same as ``sample1``), 
+        three arrays of shape *len(rp_bins)-1* by *len(pi_bins)-1* are returned:
+        
+        .. math::
+            \\xi_{11}(r_{p},\\pi), \\xi_{12}(r_{p},\\pi), \\xi_{22}(r_{p},\\pi),
+        
+        the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and 
+        ``sample2``, and the autocorrelation of ``sample2``, respectively. If 
+        ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) are 
+        returned.
+    
+    Notes
+    -----
+    Pairs are counted using 
+    `~halotools.mock_observables.pair_counters.double_tree_pairs.xy_z_npairs`.  This pair 
+    counter is optimized to work on points distributed in a rectangular cuboid volume, 
+    e.g. a simulation box.  This optimization restricts this function to work on 3-D 
+    point distributions.
+    
+    If the points are distributed in a continuous "periodic box", then ``randoms`` are not 
+    necessary, as the geometry is very simple, and the monte carlo integration that 
+    randoms are used for in complex geometries can be done analytically.
+    
+    If the ``period`` argument is passed in, all points' ith coordinate 
+    must be between 0 and period[i].
+    
+    Examples
+    --------
+    >>> #randomly distributed points in a unit cube. 
+    >>> Npts = 1000
+    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> coords = np.vstack((x,y,z)).T
+    >>> period = np.array([1.0,1.0,1.0])
+    >>> rp_bins = np.logspace(-2,-1,10)
+    >>> pi_bins = np.logspace(-2,-1,10)
+    >>> xi = redshift_space_tpcf(coords, rp_bins, pi_bins, period=period)
+    
     """
     
     function_args = [sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto,\

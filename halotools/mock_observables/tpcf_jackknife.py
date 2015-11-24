@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-functions to calculate clustering statistics, e.g. two point correlation functions.
+Calculate the two point correlation function and covariance matrix.
 """
 
 from __future__ import (absolute_import, division, print_function,
@@ -31,42 +31,47 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                    estimator='Natural', num_threads=1, max_sample_size=int(1e6)):
     """
     Calculate the two-point correlation function, :math:`\\xi(r)` and the covariance 
-    matrix.
+    matrix, :math:`{C}_{ij}`, between ith and jth radial bin.
     
-    The covariance matrix is calculated using spatial jackknife sampling of the simulation 
-    box.  The spatial samples are defined by splitting the box along each dimension set by
-    the `Nsub` argument.
+    The covariance matrix is calculated using spatial jackknife sampling of the data 
+    volume.  The spatial samples are defined by splitting the box along each dimension, 
+    N times, set by the ``Nsub`` argument.
+    
+    Example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`tpcf_jackknife_usage_tutorial`. 
     
     Parameters
     ----------
     sample1 : array_like
         Npts x 3 numpy array containing 3-D positions of points.
     
-    randoms : array_like
-        Nran x 3 numpy array containing 3-D positions of points.  Alternatively, this can 
-        be an integer when `period` is specified, indicating peridoic boundary conditions.
-    
     rbins : array_like
-        numpy array of boundaries defining the bins in which pairs are counted. 
+        array of boundaries defining the real space radial bins in which pairs are 
+        counted.
     
     Nsub : array_like, optional
-        numpy array of number of divisions along each dimension defining jackknife 
-        subvolumes.  If single integer is given, assumed to be equivalent for each 
-        dimension.  Total number of jackknife samples is numpy.prod(`Nsub`).
+        Lenght-3 numpy array of number of divisions along each dimension defining 
+        jackknife sample subvolumes.  If single integer is given, it is assumed to be 
+        equivalent for each dimension.  The total number of samples used is then given by
+        *numpy.prod(Nsub)*.
     
     sample2 : array_like, optional
-        Npts x 3 numpy array containing 3-D positions of points.
+        Npts x 3 array containing 3-D positions of points.
+    
+    randoms : array_like, optional
+        Npts x 3 array containing 3-D positions of points.  If no randoms are provided
+        analytic randoms are used (only valid for periodic boundary conditions).
     
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only 
-        one number, Lbox, is specified, period is assumed to be numpy.array([Lbox]*3).
+        length 3 array defining axis-aligned periodic boundary conditions. If only
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
         If none, PBCs are set to infinity.
     
     do_auto : boolean, optional
-        do auto-correlation?  Default is True.
+        do auto-correlation(s)?
     
     do_cross : boolean, optional
-        do cross-correlation?  Default is True.
+        do cross-correlation?
     
     estimator : string, optional
         options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
@@ -76,36 +81,92 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
         to indicate that the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter. 
-        
-        If sample size exeeds max_sample_size, the sample will be randomly down-sampled 
-        such that the subsample is equal to max_sample_size. 
+        Defines maximum size of the sample that will be passed to the pair counter. If 
+        sample size exeeds max_sample_size, the sample will be randomly down-sampled such
+        that the subsample is equal to ``max_sample_size``. 
+    
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
+        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+        will apportion the ``sample1`` points into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use *max(rbins)* in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
+
+    approx_cell2_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        ``approx_cell1_size`` for details. 
+    
+    approx_cellran_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
+        ``approx_cell1_size`` for details. 
 
     Returns 
     -------
-    correlation_function(s), cov_matrix(ices) : numpy.array, numpy.ndarray
-        len(`rbins`)-1 length array containing correlation function :math:`\\xi(r)` 
-        computed in each of the radial bins defined by input `rbins`.
+    correlation_function(s) : numpy.array
+        *len(rbins)-1* length array containing correlation function :math:`\\xi(r)` 
+        computed in each of the radial bins defined by input ``rbins``.
         
-        len(rbins)-1 x len(rbins)-1 ndarray containing the covariance matrix of `\\xi(r)`
+        If ``sample2`` is passed as input, three arrays of length *len(rbins)-1* are 
+        returned: 
         
-        If `sample2` is passed as input, three arrays of length len(`rbins`)-1 are 
-        returned: :math:`\\xi_{11}(r)`, :math:`\\xi_{12}(r)`, :math:`\\xi_{22}(r)`,
-        and three arrays of shape len(`rbins`)-1 by len(`rbins`)-1
-        :math: `\\mathrm{cov}_{11}`, :math:`\\mathrm{cov}_{12}`, 
-        :math:`\\mathrm{cov}_{22}`, are returned.
+        .. math::
+            \\xi_{11}(r), \\xi_{12}(r), \\xi_{22}(r)
         
-        The autocorrelation of `sample1`, the cross-correlation between `sample1` and 
-        `sample2`, and the autocorrelation of `sample2`, and the associated covariance 
-        matrices.  If `do_auto` or `do_cross` is set to False, the appropriate result(s) 
-        is not returned.
+        The autocorrelation of ``sample1``, the cross-correlation between 
+        ``sample1`` and ``sample2``, and the autocorrelation of ``sample2``. If 
+        ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) is not 
+        returned.
+        
+    cov_matrix(ices) : numpy.ndarray
+    
+        *len(rbins)-1* by *len(rbins)-1* ndarray containing the covariance matrix
+        :math:`C_{ij}`
+        
+        If ``sample2`` is passed as input three ndarrays of shape *len(rbins)-1* by 
+        *len(rbins)-1* are returned:
+        
+        .. math:: 
+            C^{11}_{ij}, C^{12}_{ij}, C^{22}_{ij},
+        
+        the associated covariance matrices of 
+        :math:`\\xi_{11}(r), \\xi_{12}(r), \\xi_{22}(r)`. If ``do_auto`` or ``do_cross`` 
+        is set to False, the appropriate result(s) is not returned.
     
     Notes
     -----
-    The jackknife sampling of pair counts is done internally to the pair counter.  Pairs 
-    are counted for each jackknife sample such that if both pairs are in the current 
-    sample, they contribute +1 count, if one pair is inside, and one outside, +0.5 
-    counts, and if both are outside, +0 counts.
+    The jackknife sampling of pair counts is done internally in 
+    `~halotools.mock_observables.pair_counters.double_tree_pairs.jnpairs`.
+    
+    Pairs are counted such that when 'removing' subvolume :math:`k`, and counting a 
+    pair in subvolumes :math:`i` and :math:`j`:
+    
+    .. math::
+        D_i D_j += \\left \\{
+            \\begin{array}{ll}
+                1.0  & : i \\neq k \\\\
+                0.5  & : i \\neq k, j=k \\\\
+                0.5  & : i = k, j \\neq k \\\\
+                0.0  & : i=j=k \\\\
+            \\end{array}
+                   \\right.
+    
+    Examples
+    --------
+    >>> #randomly distributed points in a unit cube. 
+    >>> Npts = 1000
+    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> coords = np.vstack((x,y,z)).T
+    >>> rx,ry,rz = (np.random.random(3*Npts),np.random.random(3*Npts),np.random.random(3*Npts))
+    >>> randoms = np.vstack((rx,ry,rz)).T
+    >>> period = np.array([1.0,1.0,1.0])
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> Nsub = np.array([4,4,4])
+    >>> xi, cov = tpcf_jackknife(coords, randoms, rbins, Nsub=Nsub, period=period)
+    
     """
     
     #process input parameters
