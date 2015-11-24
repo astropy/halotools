@@ -6,6 +6,22 @@ python:
     - 3.3
     - 3.4
     # This is just for "egg_info".  All other builds are explicitly given in the matrix
+
+# Setting sudo to false opts in to Travis-CI container-based builds.
+sudo: false
+
+# The apt packages below are needed for sphinx builds. A full list of packages 
+# that can be included can be found here:
+#
+# https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
+
+addons:
+    apt:
+        packages:
+            - graphviz
+            - texlive-latex-extra
+            - dvipng
+
 env:
     global:
         # The following versions are the 'default' for tests, unless
@@ -47,13 +63,12 @@ matrix:
           env: SETUP_CMD='test'
 
         # Try older numpy versions
-        # currently these are commented out because the conda copy of astropy is only up-to-date for numpy 1.9
-        #- python: 2.7
-        #  env: NUMPY_VERSION=1.8 SETUP_CMD='test'
-        #- python: 2.7
-        #  env: NUMPY_VERSION=1.7 SETUP_CMD='test'
-        #- python: 2.7
-        #  env: NUMPY_VERSION=1.6 SETUP_CMD='test'
+        - python: 2.7
+          env: NUMPY_VERSION=1.8 SETUP_CMD='test'
+        - python: 2.7
+          env: NUMPY_VERSION=1.7 SETUP_CMD='test'
+        - python: 2.7
+          env: NUMPY_VERSION=1.6 SETUP_CMD='test'
 
 before_install:
 
@@ -61,16 +76,12 @@ before_install:
     # future changes
     - export PYTHONIOENCODING=UTF8
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-    - chmod +x miniconda.sh
-    - ./miniconda.sh -b
-    - export PATH=/home/travis/miniconda/bin:$PATH
-    - conda update --yes conda
-
-    # UPDATE APT-GET LISTINGS
-    - sudo apt-get update
-
-    # DOCUMENTATION DEPENDENCIES
-    - if [[ $SETUP_CMD == build_sphinx* ]]; then sudo apt-get install graphviz texlive-latex-extra dvipng; fi
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - cconda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    - conda info -a
 
 install:
 
@@ -101,7 +112,7 @@ install:
     - if [[ $SETUP_CMD == build_sphinx* ]]; then $CONDA_INSTALL numpy=$NUMPY_VERSION Sphinx matplotlib; fi
 
     # COVERAGE DEPENDENCIES
-    - if [[ $SETUP_CMD == 'test --coverage' ]]; then $PIP_INSTALL coverage coveralls; fi
+    - if [[ $SETUP_CMD == 'test --coverage' ]]; then $PIP_INSTALL coverage==3.7.1 coveralls; fi
 
 script:
    - python setup.py $SETUP_CMD
