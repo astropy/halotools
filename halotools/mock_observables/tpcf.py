@@ -99,11 +99,13 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         
         .. math::
             1 + \\xi(r) \\equiv \\mathrm{DD}(r) / \\mathrm{RR}(r),
-            
-        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}(r)` is the number
-        of pairs with seperations equal to :math:`r`, calculated by the pair counter. 
-        :math:`\\mathrm{RR}(r)` is counted internally using "analytic randoms" if ``randoms``
-        is set to None (see notes for an explanation).
+        
+        if ``estimator`` is set to 'Natural'.  :math:`\\mathrm{DD}(r)` is the number
+        of sample pairs with seperations equal to :math:`r`, calculated by the pair 
+        counter.  :math:`\\mathrm{RR}(r)` is the number of random pairs with seperations 
+        equal to :math:`r`, and is counted internally using "analytic randoms" if 
+        ``randoms`` is set to None (see notes for an explanation), otherwise it is 
+        calculated using the pair counter.
         
         If ``sample2`` is passed as input (and not exactly the same as ``sample1``), 
         three arrays of length *len(rbins)-1* are returned:
@@ -119,10 +121,9 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.double_tree_pairs.npairs`.  This pair 
-    counter is optimized to work on points distributed in a rectangular cuboid volume, 
-    e.g. a simulation box.  This optimization restricts this function to work on 3-D 
-    point distributions.
+    `~halotools.mock_observables.pair_counters.npairs`.  This pair counter is optimized 
+    to work on points distributed in a rectangular cuboid volume, e.g. a simulation box.  
+    This optimization restricts this function to work on 3-D point distributions.
     
     If the points are distributed in a continuous "periodic box", then ``randoms`` are not 
     necessary, as the geometry is very simple, and the monte carlo integration that 
@@ -133,14 +134,28 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     
     Examples
     --------
-    >>> #randomly distributed points in a unit cube. 
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
     >>> Npts = 1000
-    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
     >>> coords = np.vstack((x,y,z)).T
-    >>> period = np.array([1.0,1.0,1.0])
+    
     >>> rbins = np.logspace(-2,-1,10)
     >>> xi = tpcf(coords, rbins, period=period)
     
+    The result should be consistent with zero correlation at all *r* within 
+    statistical errors
     """
     
     #check input arguments using clustering helper functions

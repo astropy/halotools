@@ -143,13 +143,12 @@ def marked_tpcf(sample1, rbins, sample2=None,
     This is:
     
     .. math::
-        \\mathcal{M}(r) \\equiv \\frac{1.0}{\\bar{n}(r)}\\sum_{ij}f(m_i,m_j),
+        \\mathcal{M}(r) \\equiv \\frac{\\sum_{ij}f(m_i,m_j)}{\\sum_{ij} 1},
     
-    where :math:`\\bar{n}(r)` is the mean number density of points as a function of 
-    seperation.
-    
-    
-    The available marking functions, ``wfunc``, are:
+    There are multiple marking functions available.  In general, each requires a different
+    number of marks per point, N_marks.  The marking function gets passed two vectors 
+    per pair, w1 and w2, of length N_marks and return a float.  The available marking 
+    functions, ``wfunc`` and the associated integer ID numbers are:
     
     #. multiplicaitive weights (N_marks = 1)
         .. math::
@@ -164,7 +163,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
             f(w_1,w_2) = 
                 \\left \\{
                 \\begin{array}{ll}
-                    w_1[0]\\times w_2[0] & : w_1[0] = w_2[0] \\\\
+                    w_1[1]\\times w_2[1] & : w_1[0] = w_2[0] \\\\
                     0.0 & : w_1[0] \\neq w_2[0] \\\\
                 \\end{array}
                 \\right.
@@ -174,7 +173,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
             f(w_1,w_2) = 
                 \\left \\{
                 \\begin{array}{ll}
-                    w_1[0]\\times w_2[0] & : w_1[0] \\neq w_2[0] \\\\
+                    w_1[1]\\times w_2[1] & : w_1[0] \\neq w_2[0] \\\\
                     0.0 & : w_1[0] = w_2[0] \\\\
                 \\end{array}
                 \\right.
@@ -184,7 +183,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
             f(w_1,w_2) = 
                 \\left \\{
                 \\begin{array}{ll}
-                    w_1[0]\\times w_2[0] & : w_2[0] > w_1[0] \\\\
+                    w_1[1]\\times w_2[1] & : w_2[0] > w_1[0] \\\\
                     0.0 & : w_2[0] \\leq w_1[0] \\\\
                 \\end{array}
                 \\right.
@@ -251,18 +250,9 @@ def marked_tpcf(sample1, rbins, sample2=None,
             \\end{array}
         .. math::
             f(w_1,w_2) = (\\mathrm{d}r_x \\mathrm{d}v_x+\\mathrm{d}r_y \\mathrm{d}v_y+\\mathrm{d}r_z \\mathrm{d}v_z)/\sqrt{\\mathrm{d}r_x^2+\\mathrm{d}r_y^2+\\mathrm{d}r_z^2}
-    
-    #. vector dot weights (N_marks = 3)
-        .. math::
-            f(w_1,w_2) = (w1[0] + w2[0]) + (w1[1] + w2[1]) + (w1[2] + w2[2])
-    
-    #. vector angle weights (N_marks = 3)
-        .. math::
-            \\begin{array}{ll}
-                {\\rm norm} & = \\sqrt{w1[0]w1[0] + w1[1]w1[1] + w1[2]w1[2]}\\sqrt{w2[0]w2[0] + w2[1]w2[1] + w2[2]w2[2]} \\\\
-                f(w_1,w_2) & = (w1[0] + w2[0]) + (w1[1] + w2[1]) + (w1[2] + w2[2])/{\\rm norm} \\\\
-            \\end{array}
-    
+        This function assumes that w[0:3] is the posotion vecotr, and w[3:] is the 
+        velocity vector, and handles periodic boundary conditions appropriately.
+        
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 

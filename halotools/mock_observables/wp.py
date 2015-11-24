@@ -12,7 +12,7 @@ import numpy as np
 from math import pi, gamma
 
 from .clustering_helpers import *
-from .redshift_space_tpcf import redshift_space_tpcf
+from .rp_pi_tpcf import rp_pi_tpcf
 ##########################################################################################
 
 
@@ -126,7 +126,7 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     -----
     The projected correlation function is calculated by integrating the 
     redshift space two point correlation function using 
-    `~halotools.mock_observables.redshift_space_tpcf`:
+    `~halotools.mock_observables.rp_pi_tpcf`:
     
     .. math::
         w_p(r_p) = \\int_0^{\\pi_{\\rm max}}\\xi(r_p,\\pi)\\mathrm{d}\\pi
@@ -155,13 +155,13 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
                      do_cross, estimator, num_threads, max_sample_size,\
                      approx_cell1_size, approx_cell2_size, approx_cellran_size]
     sample1, rp_bins, pi_bins, sample2, randoms, period, do_auto, do_cross, num_threads,\
-        _sample1_is_sample2, PBCs = _redshift_space_tpcf_process_args(*function_args)
+        _sample1_is_sample2, PBCs = _rp_pi_tpcf_process_args(*function_args)
     
     if _sample1_is_sample2:
         sample2=None
     
     #pass the arguments into the redshift space TPCF function
-    result = redshift_space_tpcf(sample1, rp_bins=rp_bins, pi_bins=pi_bins,\
+    result = rp_pi_tpcf(sample1, rp_bins=rp_bins, pi_bins=pi_bins,\
                                  sample2 = sample2, randoms=randoms,\
                                  period = period, do_auto=do_auto, do_cross=do_cross,\
                                  estimator=estimator, num_threads=num_threads,\

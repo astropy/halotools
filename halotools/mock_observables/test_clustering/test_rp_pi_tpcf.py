@@ -5,9 +5,9 @@ from __future__ import (absolute_import, division, print_function,
 import numpy as np
 import sys
 
-from ..redshift_space_tpcf import redshift_space_tpcf
+from ..rp_pi_tpcf import rp_pi_tpcf
 
-__all__=['test_rs_tpcf_auto_nonperiodic','test_rs_tpcf_auto_periodic','test_rs_tpcf_cross_periodic',]
+__all__=['test_rp_pi_tpcf_auto_nonperiodic','test_rp_pi_tpcf_auto_periodic','test_rp_pi_tpcf_cross_periodic',]
 
 ####two point correlation function########################################################
 
@@ -19,9 +19,9 @@ period = np.array([1.0,1.0,1.0])
 rp_bins = np.linspace(0,0.3,5)
 pi_bins = np.linspace(0,0.3,5)
 
-def test_rs_tpcf_auto_nonperiodic():
+def test_rp_pi_tpcf_auto_nonperiodic():
     
-    result = redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, 
+    result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2 = None, 
                                  randoms=randoms, period = None, 
                                  max_sample_size=int(1e4), estimator='Natural')
     
@@ -29,18 +29,18 @@ def test_rs_tpcf_auto_nonperiodic():
     
     assert result.ndim == 2, "More than one correlation function returned erroneously."
 
-def test_rs_tpcf_auto_periodic():
+def test_rp_pi_tpcf_auto_periodic():
     
-    result = redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = None, 
+    result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2 = None, 
                                  randoms=None, period = period, 
                                  max_sample_size=int(1e4), estimator='Natural')
     
     assert result.ndim == 2, "More than one correlation function returned erroneously."
 
 
-def test_rs_tpcf_cross_periodic():
+def test_rp_pi_tpcf_cross_periodic():
     
-    result = redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2 = sample2, 
+    result = rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2 = sample2, 
                                  randoms=None, period = period, 
                                  max_sample_size=int(1e4), estimator='Natural')
     
