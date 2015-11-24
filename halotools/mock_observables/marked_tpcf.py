@@ -25,7 +25,8 @@ def marked_tpcf(sample1, rbins, sample2=None,
     marks1=None, marks2=None, period=None, do_auto=True, do_cross=True, 
     num_threads=1, max_sample_size=int(1e6), wfunc=1, 
     normalize_by='random_marks', iterations=1, randomize_marks=None):
-    """ Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
+    """ 
+    Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
 
     Parameters 
     ----------
@@ -40,19 +41,16 @@ def marked_tpcf(sample1, rbins, sample2=None,
         Npts x 3 array containing 3-D positions of points.
     
     marks1: array_like, optional
-        Either a 1-d array of length N1, or a 2-d array of length N1 x N_weights, 
-        containing weights used for weighted pair counts.  The suplied marks array must
-        have the appropiate shape for the chosen wfunc (see notes).
+        len(sample1) x N_marks array of marks.  The suplied marks array must have the 
+        appropiate shape for the chosen ``wfunc`` (see notes).
         
     marks2: array_like, optional
-        Either a 1-d array of length N2, or a 2-d array of length N1 x N_weights, 
-        containing weights used for weighted pair counts.  The suplied marks array must
-        have the appropiate shape for the chosen wfunc (see notes).
+        len(sample2) x N_marks array of marks.  The suplied marks array must have the 
+        appropiate shape for the chosen ``wfunc`` (see notes).
     
     period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
-        If none, PBCs are set to infinity.
+        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
 
     do_auto : boolean, optional
         do auto-correlation?
@@ -70,47 +68,201 @@ def marked_tpcf(sample1, rbins, sample2=None,
         such that the subsample is equal to max_sample_size.
 
     wfunc: int, optional
-        integer indicating which marking function should be used.  See notes for an explanation.
+        Integer ID indicating which marking function should be used.  See notes for a 
+        list of available marking functions.
     
     normalize_by: string, optional
-        string indicating how to normailze the weighted pair counts in the MCF 
-        calculation.  options are: random_marks, number_counts.  `random_marks` calculates
-        the random pair counts, :math:`\\mathrm{RR}`, as weighted pair counts with the 
-        weights randomized, akin to normailzing by the mean. `number_counts` calculates :math:`\\mathrm{RR}` as the number
-        of pairs,resulting in the mean weight in each radial bin.  
+        A string indicating how to normailze the weighted pair counts in the marked 
+        correlation function calculation.  Options are: 'random_marks' or `number_counts`.
+        See Notes for more detail.
 
     iterations : int, optional
-        if  ``normalize_by`` is set to ``random_marks``, integer number indicating the number of times 
-        to calculate the random weigths, taking the mean of the outcomes.
+        integer number indicating the number of times to calculate the random weigths, 
+        taking the mean of the outcomes.  Only applicable if ``normalize_by`` is set 
+        to 'random_marks'.  See notes for further explanation.
 
     randomize_marks : array_like, optional
-        if  ``normalize_by`` is ``random_marks``, boolean array of N_weights indicating which 
-        weights should be randomized for the random counts.  Default is all.
+        Boolean array of N_marks indicating which weights should be randomized for 
+        the random counts.  Default is [True]*N_marks.  Only applicable if 
+        ``normalize_by`` is 'random_marks'.
 
     Returns 
     -------
     marked_correlation_function : numpy.array
-        len(`rbins`)-1 length array containing the correlation function 
-        :math:`\\mathcal{M}(r)` 
-        computed in each of the bins defined by input `rbins`.
+        *len(rbins)-1* length array containing the marked correlation function 
+        :math:`\\mathcal{M}(r)` computed in each of the bins defined by ``rbins``.
         
-        :math:`\\mathcal{M}(r) \\equiv \\mathrm{WW} / \\mathrm{RR}`, where  
-        :math:`\\mathrm{WW}` is the weighted paircounts, and 
-        :math:`\\mathrm{RR}` is the randomized pair counts.
+        .. math::
+            \\mathcal{M}(r) \\equiv \\mathrm{WW} / \\mathrm{RR},
         
-        If `sample2` is passed as input, three arrays of length len(`rbins`)-1 are 
-        returned: :math:`\\mathcal{M}_{11}(r)`, :math:`\\mathcal{M}_{12}(r)`, 
-        :math:`\\mathcal{M}_{22}(r)`,
-        the autocorrelation of sample1, the cross-correlation between `sample1` and 
-        `sample2`, and the autocorrelation of `sample2`.  If `do_auto` or `do_cross` is 
-        set to False, the appropriate result(s) is not returned.
+        where :math:`\\mathrm{WW}` are the weighted paircounts, and :math:`\\mathrm{RR}`
+        are the randomized pair counts.
+        
+        If ``sample2`` is passed as input, three arrays of length *len(rbins)-1* are 
+        returned: 
+        
+        .. math::
+            \\mathcal{M}_{11}(r), \\ \\mathcal{M}_{12}(r), \\ \\mathcal{M}_{22}(r),
+        
+        the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and 
+        ``sample2``, and the autocorrelation of ``sample2``.  If ``do_auto`` or 
+        ``do_cross`` is set to False, the appropriate result(s) is not returned.
 
     Notes
     -----
-    Pairs are counted using the pair_counters.objective_double_pairs module.  This pair 
-    counter is optimized to work on points distributed in a rectangular cuboid volume, 
-    e.g. a simulation box.  This optimization restricts this function to work on 3-D 
-    point distributions.
+    Pairs are counted using 
+    `~halotools.mock_observables.pair_counters.marked_double_pairs.marked_npairs`.
+    This pair counter is optimized to work on points distributed in a rectangular cuboid 
+    volume, e.g. a simulation box.  This optimization restricts this function to work on 
+    3-D  point distributions.
+    
+    ``normalize_by`` indicates how to caclulate :math:`\\mathrm{RR}`.  If ``normalize_by``
+    is 'random_marks', then :math:`\\mathrm{RR}` is calculated by randomizing the marks
+    among points accorindg to ``randomize_marks`` mask.  This asymptotes to:
+    
+    .. math::
+        \\mathcal{M}(r) \\equiv \\sum_{ij}\\frac{f(m_i,m_j)}{f(\\bar{m}_i,\\bar{m}_j)}
+    
+    where :math:`\\bar{m}` is the mean mark.  The randomizing process can be iterated, 
+    by setting the ``iterations`` parameter. The mean, 
+    :math:`\\langle f(\\bar{m}_i,\\bar{m}_j) \\rangle`, is then taken amongst iterations.
+    
+    If ``normalize_by`` is 'number_counts', then :math:`\\mathrm{RR}` is calculated by 
+    counting total number of pairs using 
+    `~halotools.mock_observables.pair_counters.marked_double_pairs.marked_npairs`.
+    This is:
+    
+    .. math::
+        \\mathcal{M}(r) \\equiv \\frac{1.0}{\\bar{n}(r)}\\sum_{ij}f(m_i,m_j),
+    
+    where :math:`\\bar{n}(r)` is the mean number density of points as a function of 
+    seperation.
+    
+    The available marking functions, `wfunc`, are:
+    
+    #. multiplicaitive weights (N_marks = 1)
+        .. math::
+            f(w_1,w_2) = w_1[0] \\times w_2[0]
+    
+    #. summed weights (N_marks = 1)
+        .. math::
+            f(w_1,w_2) = w_1[0] + w_2[0]
+    
+    #. equality weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) = 
+                \\left \\{
+                \\begin{array}{ll}
+                    w_1[0]\\times w_2[0] & : w_1[0] = w_2[0] \\\\
+                    0.0 & : w_1[0] \\neq w_2[0] \\\\
+                \\end{array}
+                \\right.
+    
+    #. greater than weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) = 
+                \\left \\{
+                \\begin{array}{ll}
+                    w_1[0]\\times w_2[0] & : w_2[0] > w_1[0] \\\\
+                    0.0 & : w_2[0] \\leq w_1[0] \\\\
+                \\end{array}
+                \\right.
+    
+    #. less than weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) = 
+                \\left \\{
+                \\begin{array}{ll}
+                    w_1[1]\\times w_2[1] & : w_2[0] < w_1[0] \\\\
+                    0.0 & : w_2[0] \\geq w_1[0] \\\\
+                \\end{array}
+                \\right.
+    
+    #. greater than tolerance weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) = 
+                \\left \\{
+                \\begin{array}{ll}
+                    w_2[1] & : w2[0]>(w1[0]+w1[1]) \\\\
+                    0.0 & : w2[0] \\leq (w1[0]+w1[1]) \\\\
+                \\end{array}
+                \\right.
+    
+    #. less than tolerance weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) = 
+                \\left \\{
+                \\begin{array}{ll}
+                    w_2[1] & : w2[0]<(w1[0]+w1[1]) \\\\
+                    0.0 & : w2[0] \\geq (w1[0]+w1[1]) \\\\
+                \\end{array}
+                \\right.
+    
+    #. tolerance weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) = 
+                \\left \\{
+                \\begin{array}{ll}
+                    w_2[1] & : |w1[0]-w2[0]|<w1[1] \\\\
+                    0.0 & : |w1[0]-w2[0]| \\geq w1[1] \\\\
+                \\end{array}
+                \\right.
+    
+    #. exclusion weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) = 
+                \\left \\{
+                \\begin{array}{ll}
+                    w_2[1] & : |w1[0]-w2[0]|>w1[1] \\\\
+                    0.0 & : |w1[0]-w2[0]| \\leq w1[1] \\\\
+                \\end{array}
+                \\right.
+    
+    #. radial velocity weights (N_marks = 6)
+        .. math::
+            \\begin{array}{ll}
+                \\mathrm{d}r_x & = w1[0]-w2[0] \\\\
+                \\mathrm{d}r_y & = w1[1]-w2[1] \\\\
+                \\mathrm{d}r_z & = w1[2]-w2[2] \\\\
+                \\mathrm{d}v_x & = w1[3]-w2[3] \\\\
+                \\mathrm{d}v_y & = w1[4]-w2[4] \\\\
+                \\mathrm{d}v_z & = w1[5]-w2[5] \\\\
+            \\end{array}
+        .. math::
+            f(w_1,w_2) = (\\mathrm{d}r_x \\mathrm{d}v_x+\\mathrm{d}r_y \\mathrm{d}v_y+\\mathrm{d}r_z \\mathrm{d}v_z)/\sqrt{\\mathrm{d}r_x^2+\\mathrm{d}r_y^2+\\mathrm{d}r_z^2}
+    
+    #. vector dot weights (N_marks = 3)
+        .. math::
+            f(w_1,w_2) = (w1[0] + w2[0]) + (w1[1] + w2[1]) + (w1[2] + w2[2])
+    
+    #. vector angle weights (N_marks = 3)
+        .. math::
+            \\begin{array}{ll}
+                {\\rm norm} & = \\sqrt{w1[0]w1[0] + w1[1]w1[1] + w1[2]w1[2]}\\sqrt{w2[0]w2[0] + w2[1]w2[1] + w2[2]w2[2]} \\\\
+                f(w_1,w_2) & = (w1[0] + w2[0]) + (w1[1] + w2[1]) + (w1[2] + w2[2])/{\\rm norm} \\\\
+            \\end{array}
+    
+    #. inequality weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) = 
+                \\left \\{
+                \\begin{array}{ll}
+                    w_1[0]\\times w_2[0] & : w_1[0] \\neq w_2[0] \\\\
+                    0.0 & : w_1[0] = w_2[0] \\\\
+                \\end{array}
+                \\right.
+    
+    
+    Examples
+    --------
+    >>> #randomly distributed points in a unit cube. 
+    >>> Npts = 1000
+    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> coords = np.vstack((x,y,z)).T
+    >>> marks = np.random.random(Npts)
+    >>> period = np.array([1.0,1.0,1.0])
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> MCF = marked_tpcf(coords, rbins, marks1=marks, period=period, normalize_by='number_counts', wfunc=1)
     
     """
 
