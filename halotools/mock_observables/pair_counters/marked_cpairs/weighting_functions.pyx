@@ -49,7 +49,7 @@ cdef double ineqweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
     """
     equality weights
     return w1[1]*w2[1] if w1[0]!=w2[0]
-    id: 3
+    id: 4
     expects length 2 arrays
     """
     if w1[0]!=w2[0]: return w1[1]*w2[1]
@@ -60,7 +60,7 @@ cdef double gweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     greater than weights
     return w1[1]*w2[1] if w2[0]>w1[0]
-    id: 4
+    id: 5
     expects length 2 arrays
     """
     if w2[0]>w1[0]: return w1[1]*w2[1]
@@ -71,7 +71,7 @@ cdef double lweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     less than weights
     return w1[1]*w2[1] if w2[0]<w1[0]
-    id: 5
+    id: 6
     expects length 2 arrays
     """
     if w2[0]<w1[0]: return w1[1]*w2[1]
@@ -82,7 +82,7 @@ cdef double tgweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     greater than tolerance weights
     return w2[1] if w2[0]>(w1[0]+w1[1])
-    id: 6
+    id: 7
     expects length 2 arrays
     """
     if w2[0]>(w1[0]+w1[1]): return w2[1]
@@ -93,7 +93,7 @@ cdef double tlweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     less than tolerance weights
     return w2[1] if w2[0]<(w1[0]-w1[1])
-    id: 7
+    id: 8
     expects length 2 arrays
     """
     if w2[0]<(w1[0]+w1[1]): return w2[1]
@@ -104,7 +104,7 @@ cdef double tweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     tolerance weights
     return w2[1] if |w1[0]-w2[0]|<w1[1]
-    id: 8
+    id: 9
     expects length 2 arrays
     """
     if fabs(w1[0]-w2[0])<w1[1]: return w2[1]
@@ -115,7 +115,7 @@ cdef double exweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     exclusion weights
     return w2[1] if |w1[0]-w2[0]|>w1[1]
-    id: 9
+    id: 10
     expects length 2 arrays
     """
     if fabs(w1[0]-w2[0])>w1[1]: return w2[1]
@@ -125,7 +125,8 @@ cdef double exweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
 cdef double radial_velocity_weights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     expects length 6 arrays
-    
+    id: 11
+
     w[0:2] is the position vector
     w[3:] is the velocity vector
     """
@@ -153,6 +154,7 @@ cdef double radial_velocity_weights(np.float64_t* w1, np.float64_t* w2, np.float
 cdef double velocity_dot_weights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     expects length 3 arrays
+    id: 12
 
     w is the velocity vector
     """
@@ -171,6 +173,7 @@ cdef double velocity_dot_weights(np.float64_t* w1, np.float64_t* w2, np.float64_
 cdef double velocity_angle_weights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     """
     expects length 3 arrays
+    id: 13
 
     w is the velocity vector
     """
