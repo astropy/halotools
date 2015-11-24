@@ -1,8 +1,6 @@
-:orphan:
-
 .. _hod_occupation_functions:
 
-HOD Occupation Component Models 
+HOD Occupation Component Models
 ==================================
 
 Zheng et al. (2007)
