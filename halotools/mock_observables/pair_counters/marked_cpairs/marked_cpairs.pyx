@@ -279,25 +279,25 @@ cdef f_type return_weighting_function(weight_func_id):
     elif weight_func_id==3:
         return eqweights
     elif weight_func_id==4:
-        return gweights
-    elif weight_func_id==5:
-        return lweights
-    elif weight_func_id==6:
-        return tgweights
-    elif weight_func_id==7:
-        return tlweights
-    elif weight_func_id==8:
-        return tweights
-    elif weight_func_id==9:
-        return exweights
-    elif weight_func_id==10:
-        return radial_velocity_weights
-    elif weight_func_id==11:
-        return velocity_dot_weights
-    elif weight_func_id==12:
-        return velocity_angle_weights
-    elif weight_func_id==13:
         return ineqweights
+    elif weight_func_id==5:
+        return gweights
+    elif weight_func_id==6:
+        return lweights
+    elif weight_func_id==7:
+        return tgweights
+    elif weight_func_id==8:
+        return tlweights
+    elif weight_func_id==9:
+        return tweights
+    elif weight_func_id==10:
+        return exweights
+    elif weight_func_id==11:
+        return radial_velocity_weights
+    elif weight_func_id==12:
+        return velocity_dot_weights
+    elif weight_func_id==13:
+        return velocity_angle_weights
     else:
         raise ValueError('weighting function does not exist')
 

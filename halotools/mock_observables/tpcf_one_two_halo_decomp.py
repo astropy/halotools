@@ -144,7 +144,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.marked_npairs`.  
+    `~halotools.mock_observables.pair_counters.marked_npairs`.  
     This pair counter is optimized to work on points distributed in a rectangular cuboid 
     volume, e.g. a simulation box.  This optimization restricts this function to work 
     on 3-D point distributions.
@@ -325,7 +325,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
                            sample2_host_halo_id, wfunc, _sample1_is_sample2)
     
     #calculate 2-halo pairs 
-    wfunc=13
+    wfunc=4
     two_halo_D1D1,two_halo_D1D2, two_halo_D2D2 =\
         marked_pair_counts(sample1, sample2, rbins, period, num_threads,\
                            do_auto, do_cross, sample1_host_halo_id,\
