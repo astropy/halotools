@@ -93,10 +93,15 @@ def marked_tpcf(sample1, rbins, sample2=None,
         :math:`\\mathcal{M}(r)` computed in each of the bins defined by ``rbins``.
         
         .. math::
-            \\mathcal{M}(r) \\equiv \\mathrm{WW} / \\mathrm{RR},
+            \\mathcal{M}(r) \\equiv \\mathrm{WW}(r) / \\mathrm{XX}(r),
         
-        where :math:`\\mathrm{WW}` are the weighted paircounts, and :math:`\\mathrm{RR}`
-        are the randomized pair counts.
+        where :math:`\\mathrm{WW}(r)` is the weighted number of pairs with seperations 
+        equal to :math:`r`, and :math:`\\mathrm{XX}(r)` is dependent on the choice of the 
+        ``normalize_by`` parameter.  If ``normalize_by`` is 'random_marks' 
+        :math:`XX \\equiv \\mathcal{RR}`, the weighted pair counts where the marks have 
+        been randomized marks.  If ``normalize_by`` is 'number_counts' 
+        :math:`XX \\equiv DD`, the unweighted pair counts.  
+        See notes for a further discussion.
         
         If ``sample2`` is passed as input, three arrays of length *len(rbins)-1* are 
         returned: 
@@ -116,20 +121,25 @@ def marked_tpcf(sample1, rbins, sample2=None,
     volume, e.g. a simulation box.  This optimization restricts this function to work on 
     3-D  point distributions.
     
-    ``normalize_by`` indicates how to caclulate :math:`\\mathrm{RR}`.  If ``normalize_by``
-    is 'random_marks', then :math:`\\mathrm{RR}` is calculated by randomizing the marks
-    among points accorindg to ``randomize_marks`` mask.  This asymptotes to:
+    ``normalize_by`` indicates how to caclulate :math:`\\mathrm{XX}`.  If ``normalize_by``
+    is 'random_marks', then :math:`\\mathrm{XX} \\equiv \\mathcal{RR}`, and 
+    :math:`\\mathcal{RR}` is calculated by randomizing the marks among points accorinding 
+    to the ``randomize_marks`` mask.  This marked correlation function is then:
     
     .. math::
-        \\mathcal{M}(r) \\equiv \\sum_{ij}\\frac{f(m_i,m_j)}{f(\\bar{m}_i,\\bar{m}_j)}
+        \\mathcal{M}(r) \\equiv \\frac{\\sum_{ij}f(m_i,m_j)}{\\sum_{kl}f(m_k,m_l)}
     
-    where :math:`\\bar{m}` is the mean mark.  The randomizing process can be iterated, 
-    by setting the ``iterations`` parameter. The mean, 
-    :math:`\\langle f(\\bar{m}_i,\\bar{m}_j) \\rangle`, is then taken amongst iterations.
+    where the sum in the numerator is of pairs :math:`i,j` with seperation :math:`r`, 
+    and marks :math:`m_i,m_j`.  :math:`f()` is the marking function, ``wfunc``.  The sum 
+    in the denominator is over an equal number of random pairs :math:`k,l`. The 
+    calculation of this sum can be done multiple times, by setting the ``iterations`` 
+    parameter. The mean of the sum is then taken amongst iterations and used in the 
+    calculation.
     
-    If ``normalize_by`` is 'number_counts', then :math:`\\mathrm{RR}` is calculated by 
-    counting total number of pairs using 
-    `~halotools.mock_observables.pair_counters.marked_double_pairs.marked_npairs`.
+    
+    If ``normalize_by`` is 'number_counts', then :math:`\\mathrm{XX} \\equiv \\mathrm{DD}`
+    is calculated by counting total number of pairs using 
+    `~halotools.mock_observables.pair_counters.marked_double_pairs.npairs`.
     This is:
     
     .. math::
@@ -138,7 +148,8 @@ def marked_tpcf(sample1, rbins, sample2=None,
     where :math:`\\bar{n}(r)` is the mean number density of points as a function of 
     seperation.
     
-    The available marking functions, `wfunc`, are:
+    
+    The available marking functions, ``wfunc``, are:
     
     #. multiplicaitive weights (N_marks = 1)
         .. math::

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-functions to calculate galaxy-galaxy lensing signal.
+calculate the galaxy-galaxy lensing signal.
 """
 
 from __future__ import division, print_function
@@ -26,9 +26,13 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     """ 
     Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)`.
     
-    This function computes the cross correlation between `galaxies` and `particles`
-    to get :math:`\\xi_{\\rm galaxies, matter}(r)`, and integrates the result to 
-    get :math:`\\Delta\\Sigma(r_p)`.
+    This function computes the cross correlation between ``galaxies`` and ``particles``
+    to get the galaxy-matter cross correlation, :math:`\\xi_{\\rm g, m}(r)`, and 
+    integrates the result to get :math:`\\Delta\\Sigma(r_p)`.  See the notes for details 
+    about the calculation.
+    
+    Example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`delta_sigma_usage_tutorial`. 
     
     Parameters
     ----------
@@ -43,18 +47,18 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
         calculated.  The minimum of rp_bins must be > 0.0.
     
     pi_max: float
-        maximum integration parameter, :math:`\\pi_{\\rm max}` (see notes).
+        maximum integration parameter, :math:`\\pi_{\\rm max}` 
+        (see notes for more details).
     
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
-        If none, PBCs are set to infinity.
+        Length-3 array defining axis-aligned periodic boundary conditions. If only
+        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
     
     log_bins : boolean, optional
-        integration parameter (see notes)
+        integration parameter (see notes for more details).
     
     n_bins : int, optional
-        integration parameter (see notes)
+        integration parameter (see notes for more details).
     
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
@@ -63,23 +67,45 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period=None, log_bins=True
     Returns 
     -------
     Delta_Sigma: np.array
-        :math:`\\Delta\\Sigma(r_p)` calculated in projected radial bins defined by 
-        rp_bins.  The units are units(particles)/units(rp_bins)**2.
+        :math:`\\Delta\\Sigma(r_p)` calculated at projected radial distances ``rp_bins``.
+        The units are units(particles)/units(rp_bins)**2.
     
     Notes
     -----
     :math:`\\Delta\\Sigma` is calculated by first calculating,
-    :math:`\\Sigma(r_p) = \\bar{\\rho}\\int_0^{\\pi_{\\rm max}} \\left[1+\\xi_{\\rm g,m}(\\sqrt{r_p^2+\\pi^2}) \\right]\\mathrm{d}\\pi`
+    
+    .. math::
+        \\Sigma(r_p) = \\bar{\\rho}\\int_0^{\\pi_{\\rm max}} \\left[1+\\xi_{\\rm g,m}(\\sqrt{r_p^2+\\pi^2}) \\right]\\mathrm{d}\\pi
+    
     and then,
-    :math:`\\Delta\\Sigma(r_p) = \\bar{\\Sigma}(<r_p) - \\Sigma(r_p)`
+    
+    .. math::
+        \\Delta\\Sigma(r_p) = \\bar{\\Sigma}(<r_p) - \\Sigma(r_p)
+    
     where,
-    :math:`\\bar{\\Sigma}(<r_p) = \\frac{1}{\\pi r_p^2}\\int_0^{r_p}\\Sigma(r_p^{\\prime})2\\pi r_p^{\\prime} \\mathrm{d}r_p^{\\prime}`
     
-    Numerically,
-    :math:`\\xi(r)` is calculated in `n_bins` evenly spaced linearly or log-linearly as
-    indicated by `log_bins`.
+    .. math::
+        \\bar{\\Sigma}(<r_p) = \\frac{1}{\\pi r_p^2}\\int_0^{r_p}\\Sigma(r_p^{\\prime})2\\pi r_p^{\\prime} \\mathrm{d}r_p^{\\prime}
     
-    All integrals are done use scipy.integrate.quad.
+    Numerically, :math:`\\xi_{\\rm g,m}` is calculated in `n_bins` evenly spaced linearly 
+    or log-linearly as indicated by `log_bins` and integrated between 
+    :math:`{\\rm rp}_{\\rm min}` and 
+    :math:`\\sqrt{{\\rm{rp}_{\\rm max}}^2 + {\\pi_{\\rm max}}^2}`.
+    
+    All integrals are done use `scipy.integrate.quad`.
+    
+    Examples
+    --------
+    >>> #randomly distributed points in a unit cube. 
+    >>> Ngals = 1000
+    >>> x,y,z = (np.random.random(Ngals),np.random.random(Ngals),np.random.random(Ngals))
+    >>> gal_coords = np.vstack((x,y,z)).T
+    >>> Nptcls = 10000
+    >>> x,y,z = (np.random.random(Nptcls),np.random.random(Nptcls),np.random.random(Nptcls))
+    >>> ptcl_coords = np.vstack((x,y,z)).T
+    >>> period = np.array([1.0,1.0,1.0])
+    >>> rp_bins = np.logspace(-2,-1,10)
+    >>> result = delta_sigma(gal_coords, ptcl_coords, rp_bins, pi_max=0.3, period=period)
     """
     
     #process the input parameters
