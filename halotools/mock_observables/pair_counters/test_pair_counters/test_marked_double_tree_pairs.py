@@ -105,6 +105,11 @@ def test_marked_npairs_wfuncs_behavior():
     pairs to the returned result from a uniformly weighted set of points.  
     """
 
+    error_msg = ("\nThe `test_marked_npairs_wfuncs_behavior` function performs \n"
+        "non-trivial checks on the returned values of marked correlation functions\n"
+        "calculated on a set of points with uniform weights.\n"
+        "One such check failed.\n")
+
     Npts = 1e3
     Lbox = [1.0,1.0,1.0]
     period = np.array(Lbox)
@@ -123,13 +128,13 @@ def test_marked_npairs_wfuncs_behavior():
     weights = np.ones(Npts)*3
     result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=1)
-    assert np.all(result == 9.*test_result)
+    assert np.all(result == 9.*test_result), error_msg
 
     # wfunc = 2
     weights = np.ones(Npts)*3
     result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=2)
-    assert np.all(result == 6.*test_result)
+    assert np.all(result == 6.*test_result), error_msg
 
     # wfunc = 3
     weights2 = np.ones(Npts)*2
@@ -138,12 +143,12 @@ def test_marked_npairs_wfuncs_behavior():
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=3)
-    assert np.all(result == 9.*test_result)
+    assert np.all(result == 9.*test_result), error_msg
 
     weights = np.vstack([weights3, weights2]).T
     result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=3)
-    assert np.all(result == 4.*test_result)
+    assert np.all(result == 4.*test_result), error_msg
 
     # wfunc = 4
     weights2 = np.ones(Npts)*2
@@ -152,7 +157,7 @@ def test_marked_npairs_wfuncs_behavior():
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=4)
-    assert np.all(result == 0)
+    assert np.all(result == 0), error_msg
 
     # wfunc = 5
     weights2 = np.ones(Npts)*2
@@ -161,25 +166,25 @@ def test_marked_npairs_wfuncs_behavior():
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=5)
-    assert np.all(result == 0)
+    assert np.all(result == 0), error_msg
 
     # wfunc = 6
+    weights2 = np.ones(Npts)*2
+    weights3 = np.ones(Npts)*3
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=6)
+    assert np.all(result == 0), error_msg
+
+    # wfunc = 7
     weights2 = np.ones(Npts)
     weights3 = np.zeros(Npts)-1
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs(data1, data1, rbins, period=period, 
-    weights1=weights, weights2=weights, wfunc=6)
-    assert np.all(result == -test_result)
-
-    # wfunc = 7
-    weights2 = np.ones(Npts)
-    weights3 = np.ones(Npts)*3
-
-    weights = np.vstack([weights2, weights3]).T
-    result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=7)
-    assert np.all(result == 3*test_result)
+    assert np.all(result == -test_result), error_msg
 
     # wfunc = 8
     weights2 = np.ones(Npts)
@@ -188,7 +193,7 @@ def test_marked_npairs_wfuncs_behavior():
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=8)
-    assert np.all(result == 3*test_result)
+    assert np.all(result == 3*test_result), error_msg
 
     # wfunc = 9
     weights2 = np.ones(Npts)
@@ -197,15 +202,24 @@ def test_marked_npairs_wfuncs_behavior():
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=9)
-    assert np.all(result == 0)
+    assert np.all(result == 3*test_result), error_msg
+
+    # wfunc = 10
+    weights2 = np.ones(Npts)
+    weights3 = np.ones(Npts)*3
+
+    weights = np.vstack([weights2, weights3]).T
+    result = marked_npairs(data1, data1, rbins, period=period, 
+    weights1=weights, weights2=weights, wfunc=10)
+    assert np.all(result == 0), error_msg
 
     weights2 = np.ones(Npts)
     weights3 = -np.ones(Npts)*3
 
     weights = np.vstack([weights2, weights3]).T
     result = marked_npairs(data1, data1, rbins, period=period, 
-    weights1=weights, weights2=weights, wfunc=9)
-    assert np.all(result == -3*test_result)
+    weights1=weights, weights2=weights, wfunc=10)
+    assert np.all(result == -3*test_result), error_msg
 
 
 
