@@ -572,16 +572,9 @@ def _xy_z_npairs_engine(double_tree, rp_bins_squared, pi_bins_squared, period, P
 def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
                 verbose = False, num_threads = 1,\
                 approx_cell1_size = None, approx_cell2_size = None):
-    """
-    Calculate the number of pairs with separations :math:`(s, \\mu)`.
+    """ 
+    Calculate the number of pairs as a function of radial separation, *s,* and :math:`\\mu\\equiv\\sin(\\theta_{\\rm los})`, where :math:`\\theta_{\\rm los}` is the line-of-sight angle between points and :math:`s^2 = r_{\\rm parallel}^2 + r_{\\rm perp}^2`. 
     
-    .. math:: s^2 = r_{\\parallel}^2+r_{\\perp}^2
-    and, 
-    .. math:: `\\mu = r_{\\perp}/s`
-    
-    i.e. math::`s` is the radial seperation, and 
-    math:: `\\mu` is the math::`\\sin(\\theta_{\rm los})`, where 
-    math::`\\theta_{\rm los}` is the line-of-sight angle between points.
     
     Parameters
     ----------
@@ -637,11 +630,15 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
     -------
     num_pairs : array of length len(rbins)
         number of pairs
-        
+
     Notes
     -----
-    math:: `\\mu` is defined as the sine of the LOS angle and not the conventional cosine
-    because the pair counter needs math:: `\\mu` to increase as the LOS angle increases.
+    The quantity math::`\\mu` is defined as the :math:`\\sin(\\theta_{\\rm los})` 
+    and not the conventional :math:`\\cos(\\theta_{\\rm los})`. This is 
+    because the pair counter has been optimized under the assumption that its 
+    separation variable (in this case, :math:`\\mu`) *increases* 
+    as :math:`\\theta_{\\rm los})` increases. 
+        
     """
     
     #the parameters for this are similar to npairs, except mu_bins needs to be processed.
