@@ -11,7 +11,7 @@ from scipy.sparse import coo_matrix
 import matplotlib.pyplot as plt
 
 #load comparison simple pair counters
-from ..fof_pairs import fof_pairs, xy_z_fof_pairs
+from ..double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
 
 #create some toy data to test functions
 Npts = 1e4
@@ -34,12 +34,12 @@ data2 = np.vstack((x,y,z)).T
 def test_fof_pairs_periodic():
     
     r_max = 0.1
-    m = fof_pairs(data1, data1, r_max, period=period)
+    m = pair_matrix(data1, data1, r_max, period=period)
     assert isinstance(m,scipy.sparse.coo.coo_matrix)
     
     #test on a uniform grid
     r_max=0.10001
-    m = fof_pairs(data2, data2, r_max, period=period, Lbox=Lbox)
+    m = pair_matrix(data2, data2, r_max, period=period, Lbox=Lbox)
 
     #each point has 7 connections including 1 self connection
     #includes self connections
@@ -50,12 +50,12 @@ def test_fof_pairs_periodic():
 def test_fof_pairs_non_periodic():
     
     r_max = 0.1
-    m = fof_pairs(data1, data1, r_max, period=None, Lbox=Lbox)
+    m = pair_matrix(data1, data1, r_max, period=None, Lbox=Lbox)
     assert isinstance(m,scipy.sparse.coo.coo_matrix)
     
     #test on a uniform grid
     r_max=0.10001
-    m = fof_pairs(data2, data2, r_max, period=None, Lbox=Lbox)
+    m = pair_matrix(data2, data2, r_max, period=None, Lbox=Lbox)
 
     # connections: inside + faces + edges + corners
     # includes self connections
@@ -79,7 +79,7 @@ def test_xy_z_fof_pairs_periodic():
     rp_max=0.01
     pi_max=0.01
     
-    m_perp, m_para = xy_z_fof_pairs(data1, data1, rp_max, pi_max, period=period)
+    m_perp, m_para = xy_z_pair_matrix(data1, data1, rp_max, pi_max, period=period)
     assert isinstance(m_perp,scipy.sparse.coo.coo_matrix)
     assert isinstance(m_para,scipy.sparse.coo.coo_matrix)
     
@@ -87,7 +87,7 @@ def test_xy_z_fof_pairs_periodic():
     rp_max=0.11
     pi_max=0.11
     
-    m_perp, m_para = xy_z_fof_pairs(data2, data2, rp_max, pi_max, period=period, Lbox=Lbox)
+    m_perp, m_para = xy_z_pair_matrix(data2, data2, rp_max, pi_max, period=period, Lbox=Lbox)
 
     #each point has 7 connections including 1 self connection
     #includes self connections
@@ -101,7 +101,7 @@ def test_xy_z_fof_pairs_non_periodic():
     rp_max=0.01
     pi_max=0.01
     
-    m_perp, m_para = xy_z_fof_pairs(data1, data1, rp_max, pi_max, period=None, Lbox=Lbox)
+    m_perp, m_para = xy_z_pair_matrix(data1, data1, rp_max, pi_max, period=None, Lbox=Lbox)
     
     assert isinstance(m_perp,scipy.sparse.coo.coo_matrix)
     assert isinstance(m_para,scipy.sparse.coo.coo_matrix)
@@ -110,7 +110,7 @@ def test_xy_z_fof_pairs_non_periodic():
     rp_max=0.1001
     pi_max=0.1001
     
-    m_perp, m_para = xy_z_fof_pairs(data2, data2, rp_max, pi_max, period=None, Lbox=Lbox)
+    m_perp, m_para = xy_z_pair_matrix(data2, data2, rp_max, pi_max, period=None, Lbox=Lbox)
 
     # connections: inside + faces + edges + corners
     # includes self connections
