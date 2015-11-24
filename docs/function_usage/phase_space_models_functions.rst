@@ -1,14 +1,14 @@
-:orphan:
-
 .. _phase_space_models_functions:
 
-Phase Space Component Models 
-===============================
+Phase Space Component Models
+============================
+
+All of these can be imported from `halotools.empirical_models`.
+
+.. currentmodule:: halotools.empirical_models
 
 Halo Mass Definitions
-------------------------
-
-.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models.profile_helpers
+---------------------
 
 .. autosummary::
 
@@ -18,54 +18,28 @@ Halo Mass Definitions
    density_threshold
 
 NFW Profile Models
-------------------------
-
-.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models.nfw_profile
+------------------
 
 .. autosummary::
 
 	NFWProfile
-
-.. currentmodule:: halotools.empirical_models.phase_space_models.nfw_phase_space
-
-.. autosummary::
-
 	NFWPhaseSpace
-
-.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models.conc_mass_models
-
-.. autosummary:: 
-
 	ConcMass
 
 Central Galaxy Profile Models
--------------------------------
+-----------------------------
 
-.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models.trivial_profile
-
-.. autosummary:: 
+.. autosummary::
 
 	TrivialProfile
-
-.. currentmodule:: halotools.empirical_models.phase_space_models.trivial_phase_space
-
-.. autosummary:: 
-
 	TrivialPhaseSpace
 
-Monte Carlo Realizations of Galaxy Profiles 
----------------------------------------------
-
-.. currentmodule:: halotools.empirical_models.phase_space_models.nfw_phase_space
+Monte Carlo Realizations of Galaxy Profiles
+-------------------------------------------
 
 .. autosummary::
 
 	NFWPhaseSpace.mc_generate_nfw_phase_space_points
-
-.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models.nfw_profile
-
-.. autosummary::
-
 	NFWProfile.mc_generate_nfw_radial_positions
 
 

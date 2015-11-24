@@ -1,5 +1,3 @@
-:orphan:
-
 .. _empirical_model_factory_functions:
 
 Model Factories
@@ -35,4 +33,4 @@ Subhalo Model Factories
 
 	SubhaloMockFactory
 
-	
+

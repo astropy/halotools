@@ -1,10 +1,8 @@
-:orphan:
-
 .. _complete_reference_api:
 
-***************************************
+*************************************
 Comprehensive Halotools Reference/API
-***************************************
+*************************************
 
 .. automodapi:: halotools.empirical_models
 
