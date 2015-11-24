@@ -54,7 +54,7 @@ setup_cfg = dict(conf.items('metadata'))
 
 # To perform a Sphinx version check that needs to be more specific than
 # major.minor, call `check_sphinx_version("x.y.z")` here.
-# check_sphinx_version("1.2.1")
+check_sphinx_version("1.3.1")
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
