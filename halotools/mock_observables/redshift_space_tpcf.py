@@ -108,11 +108,12 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
         and ``pi_bins``.
         
         .. math::
-            1 + \\xi(r_{p},\\pi) = \\mathrm{DD} / \\mathrm{RR}
+            1 + \\xi(r_{p},\\pi) = \\mathrm{DD}r_{p},\\pi) / \\mathrm{RR}r_{p},\\pi)
             
-        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}` is calculated by
-        the pair counter, and :math:`\\mathrm{RR}` is counted internally using 
-        "analytic randoms" if ``randoms`` is set to None (see notes for an explanation).
+        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}(r_{p},\\pi)`
+        is calculated by the pair counter, and :math:`\\mathrm{RR}(r_{p},\\pi)` is counted 
+        internally using "analytic randoms" if ``randoms`` is set to None 
+        (see notes for further details).
         
         If ``sample2`` is passed as input (and not exactly the same as ``sample1``), 
         three arrays of shape *len(rp_bins)-1* by *len(pi_bins)-1* are returned:

@@ -126,11 +126,12 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
         and ``mu_bins``.
 
         .. math::
-            1 + \\xi(s,\\mu) = \\mathrm{DD} / \\mathrm{RR}
+            1 + \\xi(s,\\mu) = \\mathrm{DD}(s,\\mu) / \\mathrm{RR}(s,\\mu)
             
-        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}` is calculated by
-        the pair counter, and :math:`\\mathrm{RR}` is counted internally using 
-        "analytic randoms" if ``randoms`` is set to None (see notes for an explanation).
+        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}(s,\\mu)` is 
+        calculated by the pair counter, and :math:`\\mathrm{RR}(s,\\mu)` is counted 
+        internally using "analytic randoms" if ``randoms`` is set to None 
+        (see notes for further details).
         
         
         If ``sample2`` is not None (and not exactly the same as ``sample1``), 
