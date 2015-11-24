@@ -11,18 +11,18 @@ from ...custom_exceptions import *
 import pytest
 slow = pytest.mark.slow
 
-__all__=['test_TPCF_auto', 'test_TPCF_cross', 'test_TPCF_estimators',\
-         'test_TPCF_sample_size_limit',\
-         'test_TPCF_randoms', 'test_TPCF_period_API']
+__all__=['test_tpcf_auto', 'test_tpcf_cross', 'test_tpcf_estimators',\
+         'test_tpcf_sample_size_limit',\
+         'test_tpcf_randoms', 'test_tpcf_period_API']
 
 """
 Note that these are almost all unit-tests.  Non tirival tests are a little heard to think
 of here.
 """
 
-def test_TPCF_auto():
+def test_tpcf_auto():
     """
-    test the auto-correlation functionality
+    test the tpcf auto-correlation functionality
     """
     
     sample1 = np.random.random((100,3))
@@ -44,9 +44,9 @@ def test_TPCF_auto():
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
 
-def test_TPCF_cross():
+def test_tpcf_cross():
     """
-    test the cross-correlation functionality
+    test the tpcf cross-correlation functionality
     """
     
     sample1 = np.random.random((100,3))
@@ -68,9 +68,9 @@ def test_TPCF_cross():
     assert result.ndim == 1, "More than one correlation function returned erroneously."
 
 
-def test_TPCF_estimators():
+def test_tpcf_estimators():
     """
-    test the different estimators functionality
+    test the tpcf different estimators functionality
     """
     
     sample1 = np.random.random((100,3))
@@ -103,9 +103,9 @@ def test_TPCF_estimators():
     assert len(result_5)==3, "wrong number of correlation functions returned erroneously."
 
 
-def test_TPCF_sample_size_limit():
+def test_tpcf_sample_size_limit():
     """
-    test the sample size limit functionality functionality
+    test the tpcf sample size limit functionality functionality
     """
     
     sample1 = np.random.random((1000,3))
@@ -121,9 +121,9 @@ def test_TPCF_sample_size_limit():
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
 
 
-def test_TPCF_randoms():
+def test_tpcf_randoms():
     """
-    test the possible randoms + PBCs combinations
+    test the tpcf possible randoms + PBCs combinations
     """
     
     sample1 = np.random.random((100,3))
@@ -158,9 +158,9 @@ def test_TPCF_randoms():
     assert len(result_3)==3, "wrong number of correlation functions returned erroneously."
 
 
-def test_TPCF_period_API():
+def test_tpcf_period_API():
     """
-    test the period API functionality.
+    test the tpcf period API functionality.
     """
     
     sample1 = np.random.random((1000,3))
