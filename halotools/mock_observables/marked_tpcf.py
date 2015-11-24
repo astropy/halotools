@@ -169,6 +169,16 @@ def marked_tpcf(sample1, rbins, sample2=None,
                 \\end{array}
                 \\right.
     
+    #. inequality weights (N_marks = 2)
+        .. math::
+            f(w_1,w_2) = 
+                \\left \\{
+                \\begin{array}{ll}
+                    w_1[0]\\times w_2[0] & : w_1[0] \\neq w_2[0] \\\\
+                    0.0 & : w_1[0] = w_2[0] \\\\
+                \\end{array}
+                \\right.
+    
     #. greater than weights (N_marks = 2)
         .. math::
             f(w_1,w_2) = 
@@ -252,16 +262,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
                 {\\rm norm} & = \\sqrt{w1[0]w1[0] + w1[1]w1[1] + w1[2]w1[2]}\\sqrt{w2[0]w2[0] + w2[1]w2[1] + w2[2]w2[2]} \\\\
                 f(w_1,w_2) & = (w1[0] + w2[0]) + (w1[1] + w2[1]) + (w1[2] + w2[2])/{\\rm norm} \\\\
             \\end{array}
-    
-    #. inequality weights (N_marks = 2)
-        .. math::
-            f(w_1,w_2) = 
-                \\left \\{
-                \\begin{array}{ll}
-                    w_1[0]\\times w_2[0] & : w_1[0] \\neq w_2[0] \\\\
-                    0.0 & : w_1[0] = w_2[0] \\\\
-                \\end{array}
-                \\right.
     
     Examples
     --------
