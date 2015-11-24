@@ -98,7 +98,7 @@ class FlatRectanguloidTree(object):
         >>> zcoords_ith_subvol = tree.z[ith_subvol_slice]
 
         Now let's verify that we got the correct results:
-        
+
         >>> assert np.all(xcoords_ith_subvol <= 100.)
         >>> assert np.all(0 <= xcoords_ith_subvol)
 
@@ -223,8 +223,8 @@ class FlatRectanguloidTree(object):
         return idx_sorted, slice_array
 
 
-class FlatRectanguloidDoubleTree(object):
-    """
+class FlatRectanguloidDoubleTree(object): 
+    """ Double tree structure built up from two instances of `~halotools.mock_observables.pair_counters.FlatRectanguloidTree` used by the `~halotools.mock_observables` sub-package. 
     """
 
     def __init__(self, x1, y1, z1, x2, y2, z2,  
@@ -235,14 +235,39 @@ class FlatRectanguloidDoubleTree(object):
         """
         Parameters 
         ----------
-        x, y, z : arrays
-            Length-Npts arrays containing the spatial position of the Npts points. 
+        x1, y1, z1 : arrays
+            Length-*Npts1* arrays containing the spatial position of the *Npts1* points. 
 
-        Lbox : float
-            Length scale defining the periodic boundary conditions
+        x2, y2, z2 : arrays
+            Length-*Npts2* arrays containing the spatial position of the *Npts2* points. 
 
-        cell_size : float 
-            The approximate cell size into which the box will be divided. 
+        approx_x1cell_size, approx_y1cell_size, approx_z1cell_size : float 
+            approximate cell sizes into which the simulation box will be divided. 
+            These are only approximate because in each dimension, 
+            the actual cell size must be evenly divide the box size. 
+
+        approx_x2cell_size, approx_y2cell_size, approx_z2cell_size : float 
+            An entirely separate tree is built for the *Npts2* points, the structure of 
+            which is dependent on the struture of the *Npts1* tree as described below. 
+
+        search_xlength, search_ylength, search_zlength, floats, optional
+            Maximum length over which a pair of points will searched for. 
+            For example, if using `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+            to compute a 3-D correlation function with radial separation bins 
+            *rbins = [0.1, 1, 10, 25]*, then in this case 
+            all the search lengths will equal 25. 
+            If using `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+            in a projected correlation function with *rp_bins = [0.1, 1, 10, 25]* and 
+            *pi_max = 40*, then *search_xlength = search_ylength = 25* and 
+            *search_zlength = 40*. 
+
+        xperiod, yperiod, zperiod : floats
+            Length scale defining the periodic boundary conditions in each dimension. 
+            In virtually all realistic cases, these are all equal. 
+
+        PBCs : bool, optional 
+            Boolean specifying whether or not the box has periodic boundary conditions. 
+            Default is True. 
         """
 
 
@@ -320,6 +345,7 @@ class FlatRectanguloidDoubleTree(object):
         approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
         max_cells_per_dimension = 25):
         """ Method sets the size of the cells of the first tree structure. 
+
         In each dimension, the cell size is required to evenly divide the 
         size of the box enclosing the points. In order for the bookkeeping 
         of the `adjacent_cell_generator` method to be correct, 
@@ -380,6 +406,7 @@ class FlatRectanguloidDoubleTree(object):
         approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
         max_cells_per_dimension = 25):
         """ Method sets the size of the cells of the second tree structure. 
+
         In each dimension, the cell size is required to evenly divide the 
         cell-size of the corresponding dimension of the first tree structure. 
         In order for the bookkeeping of the `adjacent_cell_generator` method 
@@ -431,12 +458,18 @@ class FlatRectanguloidDoubleTree(object):
 
 
     def leftmost_cell_tuple_idx2(self, tuple_idx1, num_cell2_per_cell1):
+        """
+        """
         return tuple_idx1*num_cell2_per_cell1
 
     def rightmost_cell_tuple_idx2(self, tuple_idx1, num_cell2_per_cell1):
+        """
+        """
         return (tuple_idx1+1)*num_cell2_per_cell1 - 1
 
     def num_cells_to_cover_search_length(self, cell_size, search_length):
+        """
+        """
         return int(np.ceil(search_length/float(cell_size)))
 
     def nonPBC_generator(self, dim_idx, num_covering_steps, num_cell2_per_cell1):
@@ -455,6 +488,9 @@ class FlatRectanguloidDoubleTree(object):
 
     def adjacent_cell_generator(self, icell1, 
         search_xlength, search_ylength, search_zlength):
+        """
+        """
+
 
         # Determine the cell tuple from the input cellID
         ix1, iy1, iz1 = self.tree1.cell_tuple_from_cell_idx(icell1)
