@@ -30,6 +30,9 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     """ 
     Calculate the real space two-point correlation function, :math:`\\xi(r)`.
     
+    Example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`tpcf_usage_tutorial`. 
+    
     Parameters 
     ----------
     sample1 : array_like
@@ -52,7 +55,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         If none, PBCs are set to infinity.
     
     do_auto : boolean, optional
-        do auto-correlation?
+        do auto-correlation(s)?
     
     do_cross : boolean, optional
         do cross-correlation?
@@ -65,17 +68,16 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
         to indicate that the pair counters should use all available cores on the machine.
     
     max_sample_size : int, optional
-        Defines maximum size of the sample that will be passed to the pair counter. 
-        
-        If sample size exeeds max_sample_size, the sample will be randomly down-sampled
-        such that the subsample is equal to max_sample_size. 
+        Defines maximum size of the sample that will be passed to the pair counter. If 
+        sample size exeeds max_sample_size, the sample will be randomly down-sampled such
+        that the subsample is equal to ``max_sample_size``. 
     
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by which 
         the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the sample1 points into subvolumes of the simulation box. 
+        will apportion the ``sample1`` points into subvolumes of the simulation box. 
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use max(rbins) in each dimension, 
+        Default choice is to use *max(rbins)* in each dimension, 
         which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
@@ -92,33 +94,52 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     Returns 
     -------
     correlation_function(s) : numpy.array
-        len(`rbins`)-1 length array containing the correlation function :math:`\\xi(r)` 
-        computed in each of the bins defined by input `rbins`.
+        *len(rbins)-1* length array containing the correlation function :math:`\\xi(r)` 
+        computed in each of the bins defined by input ``rbins``.
         
-        :math:`1 + \\xi(r) \\equiv \\mathrm{DD} / \\mathrm{RR}`, if the 'Natural' 
-        `estimator` is used, where  :math:`\\mathrm{DD}` is calculated by the pair 
-        counter, and :math:`\\mathrm{RR}` is counted internally using 'analytic randoms' 
-        if no `randoms` are passed as an argument (see notes for an explanation).
+        .. math::
+            1 + \\xi(r) \\equiv \\mathrm{DD} / \\mathrm{RR},
+            
+        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}` is calculated by
+        the pair counter, and :math:`\\mathrm{RR}` is counted internally using 
+        "analytic randoms" if ``randoms`` is set to None (see notes for an explanation).
         
-        If `sample2` is passed as input, three arrays of length len(`rbins`)-1 are 
-        returned: :math:`\\xi_{11}(r)`, :math:`\\xi_{12}(r)`, :math:`\\xi_{22}(r)`,
-        the autocorrelation of sample1, the cross-correlation between `sample1` and 
-        `sample2`, and the autocorrelation of `sample2`.  If `do_auto` or `do_cross` is 
-        set to False, the appropriate result(s) are returned.
+        If ``sample2`` is passed as input (and not exactly the same as ``sample1``), 
+        three arrays of length *len(rbins)-1* are returned:
+        
+        .. math::
+            \\xi_{11}(r), \\xi_{12}(r), \\xi_{22}(r),
+        
+        the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` and 
+        ``sample2``, and the autocorrelation of ``sample2``, respectively. If 
+        ``do_auto`` or ``do_cross`` is set to False, the appropriate result(s) are 
+        returned.
 
     Notes
     -----
-    Pairs are counted using the pair_counters.double_tree_pairs module.  This pair 
+    Pairs are counted using 
+    `~halotools.mock_observables.pair_counters.double_tree_pairs.npairs`.  This pair 
     counter is optimized to work on points distributed in a rectangular cuboid volume, 
     e.g. a simulation box.  This optimization restricts this function to work on 3-D 
     point distributions.
     
-    If the points are distributed in a continuous 'periodic box', then `randoms` are not 
+    If the points are distributed in a continuous "periodic box", then ``randoms`` are not 
     necessary, as the geometry is very simple, and the monte carlo integration that 
     randoms are used for in complex geometries can be done analytically.
     
-    If the `period` argument is passed, points may not have any component of their 
-    coordinates be negative.
+    If the ``period`` argument is passed in, all points' ith coordinate 
+    must be between 0 and period[i].
+    
+    Examples
+    --------
+    >>> #randomly distributed points in a unit cube. 
+    >>> Npts = 1000
+    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> coords = np.vstack((x,y,z)).T
+    >>> period = np.array([1.0,1.0,1.0])
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> xi = tpcf(coords, rbins, period=period)
+    
     """
     
     #check input arguments using clustering helper functions
