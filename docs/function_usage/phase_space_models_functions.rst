@@ -1,16 +1,14 @@
-:orphan:
-
 .. _phase_space_models_functions:
 
 Phase Space Component Models
-===============================
+============================
 
 All of these can be imported from `halotools.empirical_models`.
 
 .. currentmodule:: halotools.empirical_models
 
 Halo Mass Definitions
-------------------------
+---------------------
 
 .. fixed_autosummary::
 
@@ -20,7 +18,7 @@ Halo Mass Definitions
    density_threshold
 
 NFW Profile Models
-------------------------
+------------------
 
 .. fixed_autosummary::
 
@@ -29,7 +27,7 @@ NFW Profile Models
 	ConcMass
 
 Central Galaxy Profile Models
--------------------------------
+-----------------------------
 
 .. fixed_autosummary::
 
@@ -37,7 +35,7 @@ Central Galaxy Profile Models
 	TrivialPhaseSpace
 
 Monte Carlo Realizations of Galaxy Profiles
----------------------------------------------
+-------------------------------------------
 
 .. fixed_autosummary::
 
