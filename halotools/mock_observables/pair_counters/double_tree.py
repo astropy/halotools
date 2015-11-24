@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Data structures used for efficient, cache-aware 
-pairwise calculations on simulation boxes.
+Data structures used for efficient, cache-aware pairwise calculations on simulation boxes.
 """
 
 import numpy as np
@@ -13,23 +12,37 @@ __all__=['FlatRectanguloidTree', 'FlatRectanguloidDoubleTree']
 __author__ = ['Andrew Hearin', 'Duncan Campbell']
 
 class FlatRectanguloidTree(object):
-    """ Flat, rectangular grid of the simulation box. 
+    """ Flat, rectangular tree structure for the simulation box used by the `~halotools.mock_observables` sub-package. 
+
     The simulation box is divided into rectanguloid cells whose edges 
     and faces are aligned with the x-, y- and z-axes of the box. 
-    Each 3d point in the simulation belongs to a unique cell. 
+    Each spatial point in the box belongs to a unique cell. 
     Any cell can be identified by either its tuple indices, (ix, iy, iz), 
     or by the unique integer ID assigned it via the dictionary ordering 
     of tuple indices:
+
         * (0, 0, 0) <--> 0
+
         * (0, 0, 1) <--> 1
+
         * (0, 0, 2) <--> 2
+
         * ... 
+
         * (0, 1, 0) <--> num_zdivs
+
         * (0, 1, 1) <--> num_zdivs + 1
-        * ...
-    And so forth. Each of the Npts thus has a unique triplet, 
-    or equivalently, unique integer specifying the subvolume containing the point. 
-    The unique integer is called the *cellID*. 
+
+        * ..., 
+        
+    and so forth. 
+
+    Each point thus has a unique triplet specifying 
+    the subvolume containing it, referred to as the 
+    *cell_tupleIDs* of that point. And equivalently, 
+    And equivalently, each point has a unique integer specifying 
+    the subvolume containing it, called the *cellID*. 
+
     In order to access the *x* positions of the points lying in subvolume *i*, 
     x[idx_sort][slice_array[i]]. 
     In practice, because fancy indexing with `idx_sort` is not instantaneous, 
@@ -44,11 +57,16 @@ class FlatRectanguloidTree(object):
         Parameters 
         ----------
         x, y, z : arrays
-            Length-Npts arrays containing the spatial position of the Npts points. 
-        Lbox : float
-            Length scale defining the periodic boundary conditions
-        cell_size : float 
-            The approximate cell size into which the box will be divided. 
+            Length-*Npts* arrays containing the spatial position of the *Npts* points. 
+
+        approx_xcell_size, approx_ycell_size, approx_zcell_size : float 
+            approximate cell sizes into which the simulation box will be divided. 
+            These are only approximate because in each dimension, 
+            the actual cell size must be evenly divide the box size. 
+
+        xperiod, yperiod, zperiod : floats
+            Length scale defining the periodic boundary conditions in each dimension. 
+            In virtually all realistic cases, these are all equal. 
         """
 
         self._check_sensible_constructor_inputs()
@@ -79,41 +97,64 @@ class FlatRectanguloidTree(object):
         pass
 
     def cell_idx_from_cell_tuple(self, ix, iy, iz):
-        """
+        """ Return the *cellID* from the *cell_tupleIDs*. 
+
+        Parameters 
+        -----------
+        ix, iy, iz : int 
+            Integers providing the *cell_tupleIDs* of the points. 
+
+        Returns 
+        ---------
+        cellID : int 
+            Integers providing the corresponding *cellIDs*. 
         """
         return ix*(self.num_ydivs*self.num_zdivs) + iy*self.num_zdivs + iz
 
-    def cell_tuple_from_cell_idx(self, icell):
-        """
+    def cell_tuple_from_cell_idx(self, cellID):
+        """ Return the *cell_tupleIDs* from the *cellID*. 
+
+        Parameters 
+        -----------
+        cellID : int 
+            Integers providing the corresponding *cellIDs*. 
+
+        Returns 
+        ---------
+        ix, iy, iz : int 
+            Integers providing the *cell_tupleIDs* of the points. 
         """
         
         nxny = self.num_ydivs*self.num_zdivs
         
-        ix = icell / nxny
+        ix = cellID / nxny
         
-        iy = (icell - ix*nxny) / self.num_zdivs
+        iy = (cellID - ix*nxny) / self.num_zdivs
         
-        iz = icell - (ix*self.num_ydivs*self.num_zdivs) - (iy*self.num_zdivs)
+        iz = cellID - (ix*self.num_ydivs*self.num_zdivs) - (iy*self.num_zdivs)
         
         return ix, iy, iz
 
     def compute_cell_structure(self, x, y, z):
         """ 
-        Method divides the periodic box into regular, cubical subvolumes, and assigns a 
+        Method divides the periodic box into rectangular subvolumes, and assigns a 
         subvolume index to each point.  The returned arrays can be used to efficiently 
         access only those points in a given subvolume. 
+
         Parameters 
         ----------
         x, y, z : arrays
-            Length-Npts arrays containing the spatial position of the Npts points. 
+            Length-*Npts* arrays containing the spatial position of the *Npts* points. 
+
         Returns 
         -------
-        idx_sorted : array
+        idx_sorted : array_like 
             Array of indices that sort the points according to the dictionary 
             order of the 3d subvolumes. 
-        slice_array : array 
-            array of slice objects used to access the elements of x, y, and z 
-            of points residing in a given subvolume. 
+
+        slice_array : array_like 
+            array of `slice` objects used to access the elements of the *x, y, z* 
+            values of points residing in a given subvolume. 
         """
 
         ix = np.floor(x/self.xcell_size).astype(int)
@@ -155,8 +196,10 @@ class FlatRectanguloidDoubleTree(object):
         ----------
         x, y, z : arrays
             Length-Npts arrays containing the spatial position of the Npts points. 
+
         Lbox : float
             Length scale defining the periodic boundary conditions
+
         cell_size : float 
             The approximate cell size into which the box will be divided. 
         """
@@ -243,19 +286,26 @@ class FlatRectanguloidDoubleTree(object):
         Furthermore, there should not be too many cells per dimension 
         or performance suffers, so the ``max_cells_per_dimension`` argument 
         limits how small the cell-lengths can be. 
+        
         Parameters 
         -----------
         approx_x1cell_size : float 
             Rough estimate for cell-length in the x-dimension. The exact 
             cell-length will be adjusted to meet the criteria described above. 
+
         approx_y1cell_size : float 
+
         approx_z1cell_size : float 
+
         max_cells_per_dimension : int, optional 
+
         Returns 
         -------
         modified_x1_cellsize : float 
             Exact size of the cell-length in the x-dimension. 
+
         modified_y1_cellsize : float 
+
         modified_z1_cellsize : float 
         """
 
@@ -297,19 +347,26 @@ class FlatRectanguloidDoubleTree(object):
         Furthermore, there should not be too many cells per dimension 
         or performance suffers, so the ``max_cells_per_dimension`` argument 
         limits how small the cell-lengths can be. 
+
         Parameters 
         -----------
         approx_x2cell_size : float 
             Rough estimate for cell-length in the x-dimension. The exact 
             cell-length will be adjusted to meet the criteria described above. 
+
         approx_y2cell_size : float 
+
         approx_z2cell_size : float 
+
         max_cells_per_dimension : int, optional 
+
         Returns 
         -------
         modified_x2_cellsize : float 
             Exact size of the cell-length in the x-dimension. 
+
         modified_y2_cellsize : float 
+
         modified_z2_cellsize : float 
         """
 
