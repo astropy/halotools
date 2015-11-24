@@ -32,15 +32,26 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
                              approx_cell1_size = None, approx_cell2_size = None,
                              approx_cellran_size = None):
     """ 
-    Calculate the real space one-halo and two-halo decomposed two-point correlation functions, :math:`\\xi^{1h}(r)`, :math:`\\xi^{2h}(r)`.
+    Calculate the real space one-halo and two-halo decomposed two-point correlation 
+    functions, :math:`\\xi^{1h}(r)` and :math:`\\xi^{2h}(r)`.
+    
+    This returns the correlation function for galaxies which reside in the same halo, and 
+    those that reside in seperate haloes, as indicated by a host halo ID. 
+    
+    example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`tpcf_one_two_halo_decomp_usage_tutorial`. 
     
     Parameters 
     ----------
     sample1 : array_like
         Npts x 3 numpy array containing 3-D positions of points.
     
-    sample1_host_halo_id: array_like
+    sample1_host_halo_id : array_like, optional
         *len(sample1)* integer array of host halo ids.
+    
+    rbins : array_like
+        array of boundaries defining the real space radial bins in which pairs are 
+        counted.
     
     rbins : array_like
         array of boundaries defining the real space radial bins in which pairs are 
@@ -49,7 +60,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     sample2 : array_like, optional
         Npts x 3 array containing 3-D positions of points.
     
-    sample2_host_halo_id: array_like, optional
+    sample2_host_halo_id : array_like, optional
         *len(sample2)* integer array of host halo ids.
     
     randoms : array_like, optional
@@ -75,7 +86,6 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     
     max_sample_size : int, optional
         Defines maximum size of the sample that will be passed to the pair counter. 
-        
         If sample size exeeds max_sample_size, the sample will be randomly down-sampled
         such that the subsample is equal to max_sample_size. 
     
@@ -100,31 +110,32 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     
     Returns 
     -------
-    correlation_functions : numpy.array
+    correlation_function(s) : numpy.array
         Two *len(rbins)-1* length arrays containing the one and two halo correlation 
         functions, :math:`\\xi^{1h}(r)` and :math:`\\xi^{2h}(r)`, computed in each of the
         radial bins defined by input ``rbins``.
         
         .. math::
-            `1 + \\xi(r) \\equiv \\mathrm{DD} / \\mathrm{RR}`,
+            1 + \\xi(r) \\equiv \\mathrm{DD} / \\mathrm{RR},
         
-        if the "Natural" ``estimator`` is used, where  :math:`\\mathrm{DD}` is calculated 
+        if ``estimator`` is set to 'Natural', where  :math:`\\mathrm{DD}` is calculated 
         by the pair counter, and :math:`\\mathrm{RR}` is counted internally using 
         "analytic randoms" if no ``randoms`` are passed as an argument 
         (see notes for an explanation).  If a different ``estimator`` is specified, the 
         appropiate formula is used.
         
-        If ``sample2`` is passed as input, six arrays of length len(``rbins``)-1 are 
+        
+        If ``sample2`` is passed as input, six arrays of length *len(rbins)-1* are 
         returned:
         
         .. math::
-            `\\xi^{1h}_{11}(r), \\xi^{2h}_{11}(r)`,
+            \\xi^{1h}_{11}(r), \\ \\xi^{2h}_{11}(r),
         .. math::
-            `\\xi^{1h}_{12}(r), \\xi^{2h}_{12}(r)`,
+            \\xi^{1h}_{12}(r), \\ \\xi^{2h}_{12}(r),
         .. math::
-            `\\xi^{1h}_{22}(r), \\xi^{2h}_{22}(r)`,
+            \\xi^{1h}_{22}(r), \\ \\xi^{2h}_{22}(r),
         
-        the autocorrelation of one and two halo autocorrelation of sample1, 
+        the autocorrelation of one and two halo autocorrelation of ``sample1``, 
         the one and two halo cross-correlation between ``sample1`` and ``sample2``,
         and the one and two halo autocorrelation of ``sample2``.  
         If ``do_auto`` or ``do_cross`` is set to False, only the appropriate result(s) 
@@ -132,20 +143,30 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
 
     Notes
     -----
-    Data-data pairs (:math:`DD`) are counted using the 
-    `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.marked_npairs`,
-    and random pairs (:math:`DR` and :math:`RR`) are counted using the 
-    `~halotools.mock_observables.pair_counters.double_tree_pairs.npiars`.
+    Pairs are counted using 
+    `~halotools.mock_observables.pair_counters.marked_double_tree_pairs.marked_npairs`.  
     This pair counter is optimized to work on points distributed in a rectangular cuboid 
-    volume, e.g. a simulation box.  This optimization restricts this function to work on 
-    3-D point distributions.
+    volume, e.g. a simulation box.  This optimization restricts this function to work 
+    on 3-D point distributions.
     
     If the points are distributed in a continuous "periodic box", then ``randoms`` are not 
     necessary, as the geometry is very simple, and the monte carlo integration that 
     randoms are used for in complex geometries can be done analytically.
     
-    If the ``period`` argument is passed, all points' :math:`i^{\rm th}` coordinate must 
-    be between [0,``period[:math:`i`]``].
+    If the ``period`` argument is passed in, all points' ith coordinate 
+    must be between 0 and period[i].
+    
+    Examples
+    --------
+    >>> #randomly distributed points in a unit cube. 
+    >>> Npts = 1000
+    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> coords = np.vstack((x,y,z)).T
+    >>> period = np.array([1.0,1.0,1.0])
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> host_halo_IDs = np.random.random_integers(1,10,size=Npts)
+    >>> xi_1h, xi_2h = tpcf_one_two_halo_decomp(coords, host_halo_IDs, rbins, period=period)
+    
     """
     
     #check input arguments using clustering helper functions
@@ -336,7 +357,7 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     if _sample1_is_sample2:
         one_halo_xi_11 = _TP_estimator(one_halo_D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         two_halo_xi_11 = _TP_estimator(two_halo_D1D1,D1R,RR,N1,N1,NR,NR,estimator)
-        return one_halo_xi_11, two_halo__xi_11
+        return one_halo_xi_11, two_halo_xi_11
     else:
         if (do_auto==True) & (do_cross==True): 
             one_halo_xi_11 = _TP_estimator(one_halo_D1D1,D1R,RR,N1,N1,NR,NR,estimator)
