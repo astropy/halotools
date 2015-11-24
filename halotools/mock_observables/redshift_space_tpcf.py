@@ -291,8 +291,6 @@ def redshift_space_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
                                  PBCs, num_threads, do_RR, do_DR, _sample1_is_sample2,\
                                  approx_cell1_size, approx_cell2_size, approx_cellran_size)
     
-    print(np.shape(D1D1),np.shape(D1D2), np.shape(RR), len(rp_bins), len(pi_bins))
-    
     if _sample1_is_sample2:
         xi_11 = _TP_estimator(D1D1,D1R,RR,N1,N1,NR,NR,estimator)
         return xi_11
