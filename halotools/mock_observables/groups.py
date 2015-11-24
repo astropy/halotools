@@ -11,19 +11,19 @@ import sys
 import numpy as np
 from scipy.sparse import csgraph, csr_matrix, coo_matrix
 from math import pi, gamma
+from ..custom_exceptions import *
 
 from .pair_counters.fof_pairs import fof_pairs, xy_z_fof_pairs
 igraph_available=True
 try: import igraph
 except ImportError:
     igraph_available=False
-    print("igraph package not installed.  Some functions will not be available. \n"
-          "See http://igraph.org/ and note that there are two packages called 'igraph'.")
 if igraph_available==True: #there is another package called igraph--need to distinguish.
     if not hasattr(igraph,'Graph'):
         igraph_available==False
-        print("igraph package not installed.  Some functions will not be available. \n"
-              "See http://igraph.org/ and note that there are two packages called 'igraph'.")
+no_igraph_msg = ("igraph package not installed.  Some functions will not be available. \n"
+                 "See http://igraph.org/ and note that there are two packages called \n"
+                 "'igraph'.")
 ##########################################################################################
 
 __all__=['FoFGroups']
@@ -31,43 +31,51 @@ __author__ = ['Duncan Campbell']
 
 class FoFGroups(object):
     """
-    friends-of-friends groups object.
-    
-    redshift space groups assuming the distant observer approximation.
+    Friends-of-friends (FoF) groups class.
     """
     
     def __init__(self, positions, b_perp, b_para, period=None, Lbox=None, num_threads=1):
         """
-        create friends-of-friends groups object.
-    
-        The first two dimensions define the plane for perpendicular distances.  The third 
-        dimension is used for parallel distances.  i.e. x,y positions are on the plane of 
-        the sky, and z is the redshift coordinate.  This is the distant observer 
-        approximation.
+        Build FoF groups in redshift space groups assuming the distant observer approximation.
+        
+        The first two dimensions (x, y) define the plane for perpendicular distances. 
+        The third dimension (z) is used for parallel distances.  i.e. x,y positions are 
+        on the plane of the sky, and z is the radial distance coordinate.  This is the 
+        'distant observer' approximation.
     
         Parameters
         ----------
         positions : array_like
-            Npts x 3 numpy array containing 3-d positions of Npts. 
+            Npts x 3 numpy array containing 3-D positions of galaxies. 
         
         b_perp : float
-            normalized maximum linking length in the perpendicular direction.
+            Normalized maximum linking length in the perpendicular direction.
             Normalized to the mean separation between galaxies. 
         
         b_para : float
-            normalized maximum linking length in the parallel direction. 
+            Normalized maximum linking length in the parallel direction. 
             Normalized to the mean separation between galaxies. 
         
-        period: array_like, optional
+        period : array_like, optional
             length 3 array defining axis-aligned periodic boundary conditions.
         
-        Lbox: array_like, optional
+        Lbox : array_like, optional
             length 3 array defining cuboid boundaries of the simulation box.
         
-        num_threads: int, optional
-            number of threads to use in calculation. Default is 1. A string 'max' may be 
-            used to indicate that the pair counters should use all available cores on the 
-            machine.
+        num_threads : int, optional
+           number of threads to use in calculation. Default is 1. A string 'max' may be 
+           used to indicate that the pair counters should use all available cores on
+           the machine.
+        
+        Examples
+        --------
+        >>> #randomly distributed points in a unit cube. 
+        >>> Npts = 1000
+        >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+        >>> coords = np.vstack((x,y,z)).T
+        >>> period = np.array([1.0,1.0,1.0])
+        >>> groups = FoFGroups(coords, 0.2, 0.1, period=period)
+        
         """
         
         self.b_perp = float(b_perp) #perpendicular linking length
@@ -110,9 +118,15 @@ class FoFGroups(object):
     @property
     def group_ids(self):
         """
-        Return integer IDs for groups.
+        Determine integer IDs for groups.
         
-        Each member of a group is assigned a unique integer ID.
+        Each member of a group is assigned a unique integer ID that it shares with all 
+        connected group members.
+        
+        Returns
+        -------
+        group_ids : np.array
+            array of group IDs for each galaxy
         """
         if getattr(self,'_group_ids',None) is None:
             self._n_groups, self._group_ids = csgraph.connected_components(\
@@ -123,7 +137,12 @@ class FoFGroups(object):
     @property
     def n_groups(self):
         """
-        Return the total number of groups, including 1 member groups
+        Calculate the total number of groups, including 1 member groups
+        
+        Returns
+        -------
+        N_groups: int
+            number of distinct groups
         """
         if getattr(self,'_n_groups',None) is None:
             self._n_groups = csgraph.connected_components(self.m_perp, directed=False,\
@@ -133,44 +152,54 @@ class FoFGroups(object):
     ####the following methods are igraph package dependent###
     def create_graph(self):
         """
-        Create graph from FoF sparse matrix.  requires igraph package.
+        Create graph from FoF sparse matrix (requires igraph package).
         """
         if igraph_available==True:
             self.g = _scipy_to_igraph(self.m, self.positions, directed=False)
-        else: print("igraph package not installed.")
+        else: raise HalotoolsError(no_igraph_msg)
     
     def get_degree(self):
         """
-        return the degree of each galaxy vertex.  requires igraph package.
+        Calculate the 'degree' of each galaxy vertex (requires igraph package).
+        
+        Returns
+        -------
+        degree : np.array
+            the 'degree' of galaxies in groups
         """
         if igraph_available==True:
             self.degree = self.g.degree()
             return self.degree
-        else: print("igraph package not installed.")
+        else: raise HalotoolsError(no_igraph_msg)
     
     def get_betweenness(self):
         """
-        return the betweenness of each galaxy vertex.  requires igraph package.
+        Calculate the 'betweenness' of each galaxy vertex (requires igraph package).
+        
+        Returns
+        -------
+        betweeness : np.array
+            the 'betweenness' of galaxies in groups
         """
         if igraph_available==True:
             self.betweenness = self.g.betweenness()
             return self.betweenness
-        else: print("igraph package not installed.")
+        else: raise HalotoolsError(no_igraph_msg)
     
     def get_multiplicity(self):
         """
-        return the multiplicity of galaxies' group.  requires igraph package.
+        Return the multiplicity of galaxies' group (requires igraph package).
         """
         if igraph_available==True:
             clusters = self.g.clusters()
             mltp = np.array(clusters.sizes())
             self.multiplicity = mltp[self.group_ids]
             return self.multiplicity
-        else: print("igraph package not installed.")
+        else: raise HalotoolsError(no_igraph_msg)
     
     def get_edges(self):
         """
-        return all edges of the graph.  requires igraph package.
+        Return all edges of the graph (requires igraph package).
         
         Returns
         -------
@@ -181,25 +210,50 @@ class FoFGroups(object):
         if igraph_available==True:
             self.edges = np.asarray(self.g.get_edgelist())
             return self.edges
-        else: print("igraph package not installed.")
+        else: raise HalotoolsError(no_igraph_msg)
     
     def get_edge_lengths(self):
         """
-        return the length of all edges.  requires igraph package.
+        return the length of all edges (requires igraph package).
         
-        length = sqrt(r_perp**2 + r_para**2)
+        Returns
+        -------
+        lengths: np.array
+            The length of an 'edge' econnnecting galaxies, i.e. distance between galaxies.
+        
+        Notes
+        ------
+        The length is caclulated as
+        .. math::
+            L_{\edge} = \\sqrt(r_{\\perp}^2 + r_{\\parallel}^2},
+        
+        where :math:`r_{\\perp}` and :math:`r_{\\parallel}` are the perendicular an 
+        parallel distance between galaixes.
         """
         if igraph_available==True:
             edges = self.g.es()
             lens = edges.get_attribute_values('weight')
             self.edge_lengths = np.array(lens)
             return self.edge_lengths
-        else: print("igraph package not installed.")
+        else: raise HalotoolsError(no_igraph_msg)
 
 
 def _scipy_to_igraph(matrix, coords, directed=False):
     """
-    convert a scipy sparse matrix to an igraph graph object.  requires igraph package.
+    Convert a scipy sparse matrix to an igraph graph object (requires igraph package).
+    
+    Paramaters
+    ----------
+    matrix : object
+        scipy.sparse pairwise distance matrix
+    
+    coords : np.array
+        N by 3 array of coordinates of points
+        
+    Returns
+    -------
+    graph : object
+        igraph graph object
     """
     
     matrix = csr_matrix(matrix)
@@ -214,7 +268,7 @@ def _scipy_to_igraph(matrix, coords, directed=False):
                             edge_attrs={'weight': weights},\
                             vertex_attrs={'x':x, 'y':y, 'z':z })
         return g
-    else: print("igraph package not installed.")
+    else:  raise HalotoolsError(no_igraph_msg)
     
     
     
