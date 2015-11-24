@@ -164,4 +164,4 @@ if eval(setup_cfg.get('edit_on_github')):
     edit_on_github_source_root = ""
     edit_on_github_doc_root = "docs"
 
-extensions += ['autosummary_workaround']
+extensions += ['halotools.utils.autosummary_workaround']
