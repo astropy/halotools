@@ -58,6 +58,12 @@ Comprehensive Halotools Reference/API
 
 .. automodapi:: halotools.utils
 
+.. automodapi:: halotools.mock_observables
+.. automodapi:: halotools.mock_observables.pair_counters
+.. automodapi:: halotools.mock_observables.pair_counters.cpairs
+.. automodapi:: halotools.mock_observables.pair_counters.marked_cpairs
+
+
 
 .. automodapi:: halotools.mock_observables
 .. automodapi:: halotools.mock_observables.pair_counters
