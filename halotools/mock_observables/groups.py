@@ -13,7 +13,7 @@ from scipy.sparse import csgraph, csr_matrix, coo_matrix
 from math import pi, gamma
 from ..custom_exceptions import *
 
-from .pair_counters.fof_pairs import fof_pairs, xy_z_fof_pairs
+from .pair_counters.double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
 igraph_available=True
 try: import igraph
 except ImportError:
@@ -107,7 +107,7 @@ class FoFGroups(object):
         self.d_perp = self.b_perp/(self.n_gal**(1.0/3.0))
         self.d_para = self.b_para/(self.n_gal**(1.0/3.0))
     
-        self.m_perp, self.m_para = xy_z_fof_pairs(self.positions, self.positions,\
+        self.m_perp, self.m_para = xy_z_pair_matrix(self.positions, self.positions,\
                                                   self.d_perp, self.d_para,\
                                                   period=self.period, Lbox=self.Lbox,\
                                                   num_threads=num_threads)

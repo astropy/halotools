@@ -5,3 +5,4 @@ from __future__ import (absolute_import, division, print_function,
 from .double_tree_pairs import *
 from .marked_double_tree_pairs import *
 from .double_tree import *
+from .double_tree_pair_matrix import *
