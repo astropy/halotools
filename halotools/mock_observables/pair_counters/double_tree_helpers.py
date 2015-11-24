@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-rectangular Cuboid Pair Counter. 
-This module contains pair counting functions used to count the number of pairs with 
-separations less than or equal to r, optimized for simulation boxes.
-This module also contains a 'main' function which runs speed tests.
+This module contains helper functions used throughout the 
+`~halotools.mock_observables.pair_counters` module to perform 
+control flow on function arguments, bounds-checking and exception-handling. 
 """
 
 from __future__ import (absolute_import, division, print_function,
