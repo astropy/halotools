@@ -116,7 +116,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     Notes
     -----
     Pairs are counted using 
-    `~halotools.mock_observables.pair_counters.marked_double_pairs.marked_npairs`.
+    `~halotools.mock_observables.pair_counters.marked_npairs`.
     This pair counter is optimized to work on points distributed in a rectangular cuboid 
     volume, e.g. a simulation box.  This optimization restricts this function to work on 
     3-D  point distributions.
@@ -263,18 +263,36 @@ def marked_tpcf(sample1, rbins, sample2=None,
                 \\end{array}
                 \\right.
     
-    
     Examples
     --------
-    >>> #randomly distributed points in a unit cube. 
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
     >>> Npts = 1000
-    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
     >>> coords = np.vstack((x,y,z)).T
+    
+    Assign random floats in the range [0,1] to the points to use as the marks:
+    
     >>> marks = np.random.random(Npts)
-    >>> period = np.array([1.0,1.0,1.0])
+    
+    Use the multiplicative marking function:
+    
     >>> rbins = np.logspace(-2,-1,10)
     >>> MCF = marked_tpcf(coords, rbins, marks1=marks, period=period, normalize_by='number_counts', wfunc=1)
     
+    The result should be consistent with :math:`\\langle {\\rm mark}\\rangle^2` at all *r* 
+    within the statistical errors.
     """
 
 
@@ -456,20 +474,20 @@ def marked_tpcf(sample1, rbins, sample2=None,
     
     #return results
     if _sample1_is_sample2:
-        M_11 = W1W1/R1R1 - 1.0
+        M_11 = W1W1/R1R1
         return M_11
     else:
         if (do_auto==True) & (do_cross==True): 
-            M_11 = W1W1/R1R1 - 1.0
-            M_12 = W1W2/R1R2 - 1.0
-            M_22 = W2W2/R2R2 - 1.0
+            M_11 = W1W1/R1R1
+            M_12 = W1W2/R1R2
+            M_22 = W2W2/R2R2
             return M_11, M_12, M_22
         elif (do_cross==True):
-            M_12 = W1W2/R1R2 - 1.0
+            M_12 = W1W2/R1R2
             return M_12
         elif (do_auto==True):
-            M_11 = W1W1/R1R1 - 1.0
-            M_22 = W2W2/R2R2 - 1.0
+            M_11 = W1W1/R1R1
+            M_22 = W2W2/R2R2 
             return M_11, M_22
 
 
