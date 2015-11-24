@@ -10,7 +10,7 @@ All of these can be imported from `halotools.empirical_models`.
 Halo Mass Definitions
 ---------------------
 
-.. fixed_autosummary::
+.. autosummary::
 
    halo_mass_to_halo_radius
    halo_radius_to_halo_mass
@@ -20,7 +20,7 @@ Halo Mass Definitions
 NFW Profile Models
 ------------------
 
-.. fixed_autosummary::
+.. autosummary::
 
 	NFWProfile
 	NFWPhaseSpace
@@ -29,7 +29,7 @@ NFW Profile Models
 Central Galaxy Profile Models
 -----------------------------
 
-.. fixed_autosummary::
+.. autosummary::
 
 	TrivialProfile
 	TrivialPhaseSpace
@@ -37,7 +37,7 @@ Central Galaxy Profile Models
 Monte Carlo Realizations of Galaxy Profiles
 -------------------------------------------
 
-.. fixed_autosummary::
+.. autosummary::
 
 	NFWPhaseSpace.mc_generate_nfw_phase_space_points
 	NFWProfile.mc_generate_nfw_radial_positions

@@ -104,9 +104,9 @@ class FixedAutosummary(Autosummary):
 
 
 def setup(app):
+    # need to make sure autosummary is already setup so we can override it below
     app.setup_extension('sphinx.ext.autosummary')
-    if LooseVersion(sphinx.__version__) > LooseVersion('1.3.1'):
-        app.add_directive('fixed_autosummary', Autosummary)
-    else:
-        app.add_directive('fixed_autosummary', FixedAutosummary)
+
+    if LooseVersion(sphinx.__version__) <= LooseVersion('1.3.1'):
+        app.add_directive('autosummary', FixedAutosummary)
 
