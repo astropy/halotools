@@ -38,7 +38,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
     observer' approximation.
     
     Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`sp_pi_space_tpcf_usage_tutorial`. 
+    documentation of all features, see :ref:`rp_pi_tpcf_usage_tutorial`. 
     
     Parameters 
     ----------
