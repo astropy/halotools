@@ -3,10 +3,12 @@
 HOD Occupation Component Models
 ==================================
 
+All of these can be imported from `halotools.empirical_models`.
+
+.. currentmodule:: halotools.empirical_models
+
 Zheng et al. (2007)
 --------------------
-
-.. currentmodule:: halotools.empirical_models.occupation_models.zheng07_components
 
 .. autosummary::
 
@@ -18,8 +20,6 @@ Zheng et al. (2007)
 Leauthaud et al. (2011)
 -------------------------
 
-.. currentmodule:: halotools.empirical_models.occupation_models.leauthaud11_components
-
 .. autosummary::
 
 	Leauthaud11Cens
@@ -29,8 +29,6 @@ Leauthaud et al. (2011)
 
 Tinker et al. (2013)
 -------------------------
-
-.. currentmodule:: halotools.empirical_models.occupation_models.tinker13_components
 
 .. autosummary::
 
