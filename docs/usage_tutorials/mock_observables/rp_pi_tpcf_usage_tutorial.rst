@@ -2,7 +2,7 @@
 
 .. currentmodule:: halotools.mock_observables
 
-.. _redshift_space_tpcf_usage_tutorial:
+.. _rp_pi_tpcf_usage_tutorial:
 
 *****************************************************************
 Source code notes on `~redshift_space_tpcf.redshift_space_tpcf`
