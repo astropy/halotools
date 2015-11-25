@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 #load comparison simple pair counters
 from ..double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
 
-__all__['test_pair_matrix_periodic','test_pair_matrix_non_periodic',\
+__all__ = ['test_pair_matrix_periodic','test_pair_matrix_non_periodic',\
         'test_xy_z_pair_matrix_periodic','test_xy_z_pair_matrix_non_periodic']
 
 #create some toy data to test functions

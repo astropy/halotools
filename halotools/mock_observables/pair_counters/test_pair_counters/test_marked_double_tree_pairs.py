@@ -13,7 +13,7 @@ from ..double_tree_pairs import npairs
 
 from ....custom_exceptions import HalotoolsError
 
-__all__['test_marked_npairs_periodic','test_marked_npairs_nonperiodic',\
+__all__ = ['test_marked_npairs_periodic','test_marked_npairs_nonperiodic',\
         'test_marked_npairs_wfuncs_signatures', 'test_marked_npairs_wfuncs_behavior']
 
 def test_marked_npairs_periodic():
