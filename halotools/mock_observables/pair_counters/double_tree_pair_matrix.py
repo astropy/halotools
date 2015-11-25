@@ -13,31 +13,27 @@ import multiprocessing
 from functools import partial
 from scipy.sparse import coo_matrix
 
-from .rect_cuboid import *
+from .double_tree import *
 from .cpairs.pairwise_distances import *
 
-__all__=['fof_pairs', 'xy_z_fof_pairs']
+__all__=['pair_matrix', 'xy_z_pair_matrix']
 __author__=['Duncan Campbell']
 
 
-def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_threads=1):
+def pair_matrix(data1, data2, r_max, Lbox=None, period=None, verbose=False, num_threads=1):
     """
-    real-space FoF pair finder.
-    
-    return the pairs wich have separations <= r_max
+    Calculate the distance to all pairs with seperations less than ``r_max`` in real space.
     
     Parameters
     ----------
     data1: array_like
-        N1 by 3 numpy array of 3-dimensional positions. Should be between zero and 
-        period.
+        N1 by 3 numpy array of 3-D positions.
             
     data2: array_like
-        N2 by 3 numpy array of 3-dimensional positions. Should be between zero and 
-        period.
+        N2 by 3 numpy array of 3-D positions.
             
     r_max: float
-        maximum distance to connect pairs
+        Maximum distance to search for pairs
     
     Lbox: array_like, optional
         length of cube sides which encloses data1 and data2.
@@ -50,9 +46,9 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
     
     Returns
     -------
@@ -60,12 +56,12 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
         N1 x N2 sparse matrix in COO format containing distances between points.
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -130,12 +126,15 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
     too_big = (cell_size>Lbox)
     cell_size[too_big] = Lbox[too_big]
     
-    #build grids for data1 and data2
-    grid1 = rect_cuboid_cells(data1[:,0], data1[:,1], data1[:,2], Lbox, cell_size)
-    grid2 = rect_cuboid_cells(data2[:,0], data2[:,1], data2[:,2], Lbox, cell_size)
+    double_tree = FlatRectanguloidDoubleTree(data1[:,0], data1[:,1], data1[:,2],
+                                             data2[:,0], data2[:,1], data2[:,2],
+                                             cell_size[0],cell_size[1],cell_size[2], 
+                                             cell_size[0],cell_size[1],cell_size[2], 
+                                             r_max, r_max, r_max,
+                                             Lbox[0], Lbox[1], Lbox[2], PBCs=PBCs)
     
     #square radial bins to make distance calculation cheaper
-    r_max = r_max**2.0
+    r_max_squared = r_max**2.0
     
     #print come information
     if verbose==True:
@@ -144,16 +143,16 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
         print("number of cells = {0}".format(np.prod(grid1.num_divs)))
     
     #number of cells
-    Ncell1 = np.prod(grid1.num_divs)
+    Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
     
     #create a function to call with only one argument
-    engine = partial(_fof_pairs_engine, grid1, grid2, r_max, period, PBCs)
+    engine = partial(_pair_matrix_engine, double_tree, r_max_squared, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         result = pool.map(engine,range(Ncell1))
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         result = map(engine,range(Ncell1))
     
     #arrays to store result
@@ -168,13 +167,13 @@ def fof_pairs(data1, data2, r_max, Lbox=None, period=None, verbose=False, N_thre
         j_inds = np.append(j_inds,result[i][2])
     
     #resort the result (it was sorted to make in continuous over the cell structure)
-    i_inds = grid1.idx_sorted[i_inds]
-    j_inds = grid2.idx_sorted[j_inds]
+    i_inds = double_tree.tree1.idx_sorted[i_inds]
+    j_inds = double_tree.tree2.idx_sorted[j_inds]
 
     return coo_matrix((d, (i_inds, j_inds)))
 
 
-def _fof_pairs_engine(grid1, grid2, r_max, period, PBCs, icell1):
+def _pair_matrix_engine(double_tree, r_max_squared, period, PBCs, icell1):
     """
     pair counting engine for npairs function.  This code calls a cython function.
     """
@@ -184,37 +183,34 @@ def _fof_pairs_engine(grid1, grid2, r_max, period, PBCs, icell1):
     j_inds = np.zeros((0,), dtype='int')
     
     #extract the points in the cell
-    x_icell1, y_icell1, z_icell1 = (grid1.x[grid1.slice_array[icell1]],\
-                                    grid1.y[grid1.slice_array[icell1]],\
-                                    grid1.z[grid1.slice_array[icell1]])
+    s1 = double_tree.tree1.slice_array[icell1]
+    x_icell1, y_icell1, z_icell1 = (
+        double_tree.tree1.x[s1],
+        double_tree.tree1.y[s1],
+        double_tree.tree1.z[s1])
     
-    i_min = grid1.slice_array[icell1].start
+    i_min = s1.start
     
-    #get the list of neighboring cells
-    ix1, iy1, iz1 = np.unravel_index(icell1,(grid1.num_divs[0],\
-                                             grid1.num_divs[1],\
-                                             grid1.num_divs[2]))
-    adj_cell_arr = grid1.adjacent_cells(ix1, iy1, iz1)
+    xsearch_length = np.sqrt(r_max_squared)
+    ysearch_length = np.sqrt(r_max_squared)
+    zsearch_length = np.sqrt(r_max_squared)
+    adj_cell_generator = double_tree.adjacent_cell_generator(
+        icell1, xsearch_length, ysearch_length, zsearch_length)
             
-    #Loop over each of the (up to) 27 subvolumes neighboring, including the current cell.
-    for icell2 in adj_cell_arr:
+    adj_cell_counter = 0
+    for icell2, xshift, yshift, zshift in adj_cell_generator:
                 
         #extract the points in the cell
-        x_icell2 = grid2.x[grid2.slice_array[icell2]]
-        y_icell2 = grid2.y[grid2.slice_array[icell2]]
-        z_icell2 = grid2.z[grid2.slice_array[icell2]]
+        s2 = double_tree.tree2.slice_array[icell2]
+        x_icell2 = double_tree.tree2.x[s2] + xshift
+        y_icell2 = double_tree.tree2.y[s2] + yshift 
+        z_icell2 = double_tree.tree2.z[s2] + zshift
         
-        j_min = grid2.slice_array[icell2].start
+        j_min = s2.start
         
-        #use cython functions to do pair counting
-        if PBCs==False:
-            dd, ii_inds, jj_inds = pairwise_distance_no_pbc(x_icell1, y_icell1, z_icell1,\
+        dd, ii_inds, jj_inds = pairwise_distance_no_pbc(x_icell1, y_icell1, z_icell1,\
                                                             x_icell2, y_icell2, z_icell2,\
-                                                            r_max)
-        else: #PBCs==True
-            dd, ii_inds, jj_inds = pairwise_distance_pbc(x_icell1, y_icell1, z_icell1,\
-                                                         x_icell2, y_icell2, z_icell2,\
-                                                         period, r_max)
+                                                            r_max_squared)
         
         ii_inds = ii_inds+i_min
         jj_inds = jj_inds+j_min
@@ -223,16 +219,15 @@ def _fof_pairs_engine(grid1, grid2, r_max, period, PBCs, icell1):
         d = np.concatenate((d,dd))
         i_inds = np.concatenate((i_inds,ii_inds))
         j_inds = np.concatenate((j_inds,jj_inds))
-        
+    
     return d, i_inds, j_inds
 
 
-def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose=False,\
-                   N_threads=1):
+def xy_z_pair_matrix(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose=False,\
+                   num_threads=1):
     """
-    redshift-space FoF pair finder.
-    
-    return the pairs wich have separations <= rp_max and <=pi_max
+    Calculate the distance to all pairs with seperations less than or equal to ``rp_max`` 
+    and ``pi_max`` in real redshift space.
     
     Parameters
     ----------
@@ -258,9 +253,9 @@ def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose
     verbose: Boolean, optional
         If True, print out information and progress.
     
-    N_threads: int, optional
+    num_threads: int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
-        available cores.  N_threads=0 is the default.
+        available cores.  num_threads=0 is the default.
     
     Returns
     -------
@@ -268,12 +263,12 @@ def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose
         N1 x N2 sparse matrix in COO format containing distances between points.
     """
     
-    if N_threads is not 1:
-        if N_threads=='max':
-            N_threads = multiprocessing.cpu_count()
-        if isinstance(N_threads,int):
-            pool = multiprocessing.Pool(N_threads)
-        else: return ValueError("N_threads argument must be an integer number or 'max'")
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if isinstance(num_threads,int):
+            pool = multiprocessing.Pool(num_threads)
+        else: return ValueError("num_threads argument must be an integer number or 'max'")
     
     #process input
     data1 = np.array(data1)
@@ -343,13 +338,16 @@ def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose
     too_big = (cell_size>Lbox)
     cell_size[too_big] = Lbox[too_big]
     
-    #build grids for data1 and data2
-    grid1 = rect_cuboid_cells(data1[:,0], data1[:,1], data1[:,2], Lbox, cell_size)
-    grid2 = rect_cuboid_cells(data2[:,0], data2[:,1], data2[:,2], Lbox, cell_size)
+    double_tree = FlatRectanguloidDoubleTree(data1[:,0], data1[:,1], data1[:,2],
+                                             data2[:,0], data2[:,1], data2[:,2],
+                                             cell_size[0],cell_size[1],cell_size[2], 
+                                             cell_size[0],cell_size[1],cell_size[2], 
+                                             rp_max, rp_max, pi_max,
+                                             Lbox[0], Lbox[1], Lbox[2], PBCs=PBCs)
     
     #square radial bins to make distance calculation cheaper
-    rp_max = rp_max**2.0
-    pi_max = pi_max**2.0
+    rp_max_squared = rp_max**2.0
+    pi_max_squared = pi_max**2.0
     
     #print come information
     if verbose==True:
@@ -358,16 +356,16 @@ def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose
         print("number of cells = {0}".format(np.prod(grid1.num_divs)))
     
     #number of cells
-    Ncell1 = np.prod(grid1.num_divs)
+    Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
     
     #create a function to call with only one argument
-    engine = partial(_xy_z_fof_pairs_engine, grid1, grid2, rp_max, pi_max, period, PBCs)
+    engine = partial(_xy_z_pair_matrix_engine, double_tree, rp_max_squared, pi_max_squared, period, PBCs)
     
     #do the pair counting
-    if N_threads>1:
+    if num_threads>1:
         result = pool.map(engine,range(Ncell1))
         pool.close()
-    if N_threads==1:
+    if num_threads==1:
         result = map(engine,range(Ncell1))
     
     #arrays to store result
@@ -384,15 +382,15 @@ def xy_z_fof_pairs(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose
         j_inds = np.append(j_inds,result[i][3])
     
     #resort the result (it was sorted to make in continuous over the cell structure)
-    i_inds = grid1.idx_sorted[i_inds]
-    j_inds = grid2.idx_sorted[j_inds]
+    i_inds = double_tree.tree1.idx_sorted[i_inds]
+    j_inds = double_tree.tree2.idx_sorted[j_inds]
     
     return coo_matrix((d_perp, (i_inds, j_inds))), coo_matrix((d_para, (i_inds, j_inds)))
 
 
-def _xy_z_fof_pairs_engine(grid1, grid2, rp_max, pi_max, period, PBCs, icell1):
+def _xy_z_pair_matrix_engine(double_tree, rp_max_squared, pi_max_squared, period, PBCs, icell1):
     """
-    pair counting engine for npairs function.  This code calls a cython function.
+    pair counting engine for xy_z_fof_npairs function.  This code calls a cython function.
     """
     
     d_perp = np.zeros((0,), dtype='float')
@@ -401,37 +399,36 @@ def _xy_z_fof_pairs_engine(grid1, grid2, rp_max, pi_max, period, PBCs, icell1):
     j_inds = np.zeros((0,), dtype='int')
     
     #extract the points in the cell
-    x_icell1, y_icell1, z_icell1 = (grid1.x[grid1.slice_array[icell1]],\
-                                    grid1.y[grid1.slice_array[icell1]],\
-                                    grid1.z[grid1.slice_array[icell1]])
+    s1 = double_tree.tree1.slice_array[icell1]
+    x_icell1, y_icell1, z_icell1 = (
+        double_tree.tree1.x[s1],
+        double_tree.tree1.y[s1],
+        double_tree.tree1.z[s1])
     
-    i_min = grid1.slice_array[icell1].start
+    i_min = s1.start
     
-    #get the list of neighboring cells
-    ix1, iy1, iz1 = np.unravel_index(icell1,(grid1.num_divs[0],\
-                                             grid1.num_divs[1],\
-                                             grid1.num_divs[2]))
-    adj_cell_arr = grid1.adjacent_cells(ix1, iy1, iz1)
-            
-    #Loop over each of the (up to) 27 subvolumes neighboring, including the current cell.
-    for icell2 in adj_cell_arr:
-                
+    xsearch_length = np.sqrt(rp_max_squared)
+    ysearch_length = np.sqrt(rp_max_squared)
+    zsearch_length = np.sqrt(pi_max_squared)
+    adj_cell_generator = double_tree.adjacent_cell_generator(
+        icell1, xsearch_length, ysearch_length, zsearch_length)
+    
+    adj_cell_counter = 0
+    for icell2, xshift, yshift, zshift in adj_cell_generator:
+        adj_cell_counter +=1
+        
         #extract the points in the cell
-        x_icell2 = grid2.x[grid2.slice_array[icell2]]
-        y_icell2 = grid2.y[grid2.slice_array[icell2]]
-        z_icell2 = grid2.z[grid2.slice_array[icell2]]
+        s2 = double_tree.tree2.slice_array[icell2]
+        x_icell2 = double_tree.tree2.x[s2] + xshift
+        y_icell2 = double_tree.tree2.y[s2] + yshift 
+        z_icell2 = double_tree.tree2.z[s2] + zshift
         
-        j_min = grid2.slice_array[icell2].start
+        j_min = s2.start
         
-        #use cython functions to do pair counting
-        if PBCs==False:
-            dd_perp, dd_para, ii_inds, jj_inds = pairwise_xy_z_distance_no_pbc(x_icell1, y_icell1, z_icell1,\
-                                                            x_icell2, y_icell2, z_icell2,\
-                                                            rp_max, pi_max)
-        else: #PBCs==True
-            dd_perp, dd_para, ii_inds, jj_inds = pairwise_xy_z_distance_pbc(x_icell1, y_icell1, z_icell1,\
-                                                         x_icell2, y_icell2, z_icell2,\
-                                                         period, rp_max, pi_max)
+        dd_perp, dd_para, ii_inds, jj_inds = pairwise_xy_z_distance_no_pbc(\
+                                                 x_icell1, y_icell1, z_icell1,\
+                                                 x_icell2, y_icell2, z_icell2,\
+                                                 rp_max_squared, pi_max_squared)
         
         ii_inds = ii_inds+i_min
         jj_inds = jj_inds+j_min
@@ -441,7 +438,7 @@ def _xy_z_fof_pairs_engine(grid1, grid2, rp_max, pi_max, period, PBCs, icell1):
         d_para = np.concatenate((d_para,dd_para))
         i_inds = np.concatenate((i_inds,ii_inds))
         j_inds = np.concatenate((j_inds,jj_inds))
-        
+    
     return d_perp, d_para, i_inds, j_inds
 
 

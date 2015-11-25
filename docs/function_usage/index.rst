@@ -21,5 +21,13 @@ Modeling the Galaxy-Halo Connection
    hod_occupation_functions
    empirical_model_factory_functions
 
+Making Mock Observations 
+===========================
+
+.. toctree::
+   :maxdepth: 1
+
+   mock_observables_functions
+
 
 

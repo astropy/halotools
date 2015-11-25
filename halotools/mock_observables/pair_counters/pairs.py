@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
 
-__all__=['npairs','wnpairs','pairs']
+__all__=['npairs','wnpairs','xy_z_npairs','pairs']
 __author__ = ['Duncan Campbell']
 
 
@@ -85,6 +85,87 @@ def npairs(data1, data2, rbins, period=None):
             print("Warning: counting pairs with seperations larger than period/2 is awkward.")
             print("r=", rbins[i], "  min(period)/2=",np.min(period)/2.0)
         n[i] = len(np.where(dd<=rbins[i])[0])
+    
+    return n
+
+
+def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None):
+    """
+    Calculate the number of pairs with parellal separations less than or equal to 
+    pi_bins[i], and perpendicular seperations less than or equal to rp_bins[i].
+    
+    Assumes the first N-1 dimensions are perpendicular to the line-of-sight (LOS), and
+    the final dimension is parallel to the LOS.
+    
+    Parameters
+    ----------
+    data1: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    data2: array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    rp_bins : array_like
+        numpy array of boundaries defining the perpendicular bins in which pairs are 
+        counted. 
+    
+    pi_bins : array_like
+        numpy array of boundaries defining the parallel bins in which pairs are counted. 
+        
+    period: array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
+            
+    Returns
+    -------
+    N_pairs : ndarray of shape (len(rp_bins),len(pi_bins))
+        number counts of pairs
+     
+    """
+    
+    #work with arrays!
+    data1 = np.asarray(data1)
+    if data1.ndim ==1: data1 = np.array([data1])
+    data2 = np.asarray(data2)
+    if data2.ndim ==1: data2 = np.array([data2])
+    rp_bins = np.asarray(rp_bins)
+    if rp_bins.size ==1: rp_bins = np.array([rp_bins])
+    pi_bins = np.asarray(pi_bins)
+    if pi_bins.size ==1: pi_bins = np.array([pi_bins])
+    
+    #Check to make sure both data sets have the same dimension. Otherwise, throw an error!
+    if np.shape(data1)[-1]!=np.shape(data2)[-1]:
+        raise ValueError("data1 and data2 inputs do not have the same dimension.")
+        return None
+        
+    #Process period entry and check for consistency.
+    if period is None:
+            period = np.array([np.inf]*np.shape(data1)[-1])
+    else:
+        period = np.asarray(period).astype("float64")
+        if np.shape(period) == ():
+            period = np.array([period]*np.shape(data1)[-1])
+        elif np.shape(period)[0] != np.shape(data1)[-1]:
+            raise ValueError("period should have len == dimension of points")
+            return None
+    
+    N1 = len(data1)
+    N2 = len(data2)
+    dd = np.zeros((N1*N2,2)) #store pair seperations 
+    for i in range(0,N1): #calculate distance between every point and every other point
+        x1 = data1[i,:]
+        x2 = data2
+        dd[i*N2:i*N2+N2,1] = parallel_distance(x1, x2, period)
+        dd[i*N2:i*N2+N2,0] = perpendicular_distance(x1, x2, period)
+    
+    #count number less than r
+    n = np.zeros((rp_bins.size,pi_bins.size), dtype=np.int)
+    for i in range(rp_bins.size):
+        for j in range(pi_bins.size):
+            n[i,j] = np.sum((dd[:,0]<=rp_bins[i]) & (dd[:,1]<=pi_bins[j]))
     
     return n
 
@@ -303,3 +384,91 @@ def distance(x1,x2,period=None):
     return distance
 
 
+def parallel_distance(x1,x2,period=None):
+    """ 
+    Find the parallel distance between x1 & x2, accounting for box periodicity.
+    
+    Assumes the last dimension is the line-of-sight. 
+    
+    Parameters
+    ----------
+    x1 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and period
+    
+    x2 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and period.
+    
+    period : array_like
+        Size of the simulation box along each dimension. Defines periodic boundary 
+        conditioning.  Must be axis aligned.
+    
+    Returns
+    -------
+    distance : array
+    
+    """
+    
+    #process inputs
+    x1 = np.asarray(x1)
+    if x1.ndim ==1: x1 = np.array([x1])
+    x2 = np.asarray(x2)
+    if x2.ndim ==1: x2 = np.array([x2])
+    if period is None:
+        period = np.array([np.inf]*np.shape(x1)[-1])
+    
+    #check for consistency
+    if np.shape(x1)[-1] != np.shape(x2)[-1]:
+        raise ValueError("x1 and x2 list of points must have same dimension k.")
+    else: k = np.shape(x1)[-1]
+    if np.shape(period)[0] != np.shape(x1)[-1]:
+        raise ValueError("period must have length equal to the dimension of x1 and x2.")
+    
+    m = np.minimum(np.fabs(x1[:,-1] - x2[:,-1]), period[-1] - np.fabs(x1[:,-1] - x2[:,-1]))
+    distance = np.sqrt(m*m)
+    
+    return distance
+
+
+def perpendicular_distance(x1,x2,period=None):
+    """ 
+    Find the perpendicular distance between x1 & x2, accounting for box periodicity.
+    
+    Assumes the first N-1 dimensions are perpendicular to the line-of-sight.
+    
+    Parameters
+    ----------
+    x1 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and period
+    
+    x2 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and period.
+    
+    period : array_like
+        Size of the simulation box along each dimension. Defines periodic boundary 
+        conditioning.  Must be axis aligned.
+    
+    Returns
+    -------
+    distance : array
+    
+    """
+    
+    #process inputs
+    x1 = np.asarray(x1)
+    if x1.ndim ==1: x1 = np.array([x1])
+    x2 = np.asarray(x2)
+    if x2.ndim ==1: x2 = np.array([x2])
+    if period is None:
+        period = np.array([np.inf]*np.shape(x1)[-1])
+    
+    #check for consistency
+    if np.shape(x1)[-1] != np.shape(x2)[-1]:
+        raise ValueError("x1 and x2 list of points must have same dimension k.")
+    else: k = np.shape(x1)[-1]
+    if np.shape(period)[0] != np.shape(x1)[-1]:
+        raise ValueError("period must have length equal to the dimension of x1 and x2.")
+    
+    m = np.minimum(np.fabs(x1[:,:-1] - x2[:,:-1]), period[:-1] - np.fabs(x1[:,:-1] - x2[:,:-1]))
+    distance = np.sqrt(np.sum(m*m,axis=len(np.shape(m))-1))
+    
+    return distance

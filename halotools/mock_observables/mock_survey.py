@@ -21,30 +21,68 @@ __author__ = ['Duncan Campbell']
 
 def distant_observer_redshift(x, v, period=None, cosmo=None):
     """
-    Calculate observed redshifts using the distant observer approximation.
+    Calculate observed redshifts, :math:`z_{\\rm obs}`, assuming the distant observer approximation.
     
-    The cosmological redshift is estimated as:
-    
-    z_cosmo = z*H0/c
-    
-    where z is the 'z' position, H0 is the Hubble constant at z=0, and c is the speed of
-    light.  Note that this is an approximation
+    The line-of-sight (LOS) is assumed to be the z-direction.
     
     Parameters
     ----------
     x: array_like
-        Npts x 3 numpy array containing 3-d positions in Mpc/h units
+        Npts x 3 array containing 3-d positions in Mpc/h units
     
     v: array_like
-        Npts x 3 numpy array containing 3-d velocities of shape (N,3) in km/s
+        Npts x 3 array containing 3-d velocity components of galaxies in km/s
     
-    period: array_like, optional
-        periodic boundary conditions of simulation box
+    period : array_like, optional
+        Length-3 array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
     
     Returns
     -------
-    redshift: np.array
-        'observed' redshift.
+    redshift : np.array
+        array of "observed" redshifts.
+    
+    Notes
+    -----
+    This function convolves the peculiar velocities of galaxies with the comological 
+    redshift.  The cosmological redshift is estimated as:
+    
+    .. math::
+        z_{\\rm cosmo} = z \\times H_0/c
+    
+    where :math:`z` is the z-position of the galaxy, :math:`H_0` is the Hubble constant 
+    at z=0, and :math:`c` is the speed of light.
+    
+    The observed redshift is:
+    
+    .. math::
+        z_{\\rm obs} = z_{\\rm cosmo}+(v_{\\rm LOS}/c) \\times (1.0+z_{\\rm cosmo})
+    
+    where :math:`v_{\\rm LOS}` is the LOS component of the peculiar velocoty of the 
+    galaxy.
+    
+    When ``period`` is not None, and a galaxy's observed redshift, :math:`z_{\\rm obs}`, 
+    exceeds the cosmological redshift of period[2], :math:`z_{\\rm cosmo, max}`:
+    
+    .. math::
+        z_{\\rm cosmo, max} = \\text{period[2]}\\times H_0/c
+    
+    or is less than 0.0, the observed redshift is shifted to lay within the periodic 
+    boundaries such that 
+    :math:`z^{\\prime}_{\\rm obs} = {z}_{\\rm obs} - z_{\\rm cosmo, max}`
+    or :math:`z^{\\prime}_{\\rm obs} = {z}_{\\rm obs} + z_{\\rm cosmo, max}`, 
+    respectively.
+    
+    Examples
+    --------
+    >>> #randomly distributed points in a unit cube with random velocities. 
+    >>> Npts = 1000
+    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> coords = np.vstack((x,y,z)).T
+    >>> vx,vy,vz = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> vels = np.vstack((vx,vy,vz)).T
+    >>> redshifts = distant_observer_redshift(coords, vels)
+    
     """
     
     c_km_s = c.to('km/s').value
@@ -71,27 +109,30 @@ def distant_observer_redshift(x, v, period=None, cosmo=None):
 
 def ra_dec_z(x, v, cosmo=None):
     """
-    Calculate ra, dec, and redshift for a mock assuming an observer placed at (0,0,0).
+    Calculate the ra, dec, and redshift assuming an observer placed at (0,0,0).
     
     Parameters
     ----------
     x: array_like
-        Npts x 3 numpy array containing 3-d positions in Mpc/h units
+        Npts x 3 numpy array containing 3-d positions in Mpc/h
     
     v: array_like
-        Npts x 3 numpy array containing 3-d velocities of shape (N,3) in km/s
+        Npts x 3 numpy array containing 3-d velocities in km/s
     
-    cosmo: astropy.cosmology object, optional
-        default is FlatLambdaCDM(H0=0.7, Om0=0.3)
+    cosmo : object, optional
+        Instance of an Astropy `~astropy.cosmology` object.  The default is 
+        FlatLambdaCDM(H0=0.7, Om0=0.3)
     
     Returns
     -------
-    ra: np.array
+    ra : np.array
         right accession in radians
-    dec: np.array
+    
+    dec : np.array
         declination in radians
-    z: np.array
-        redshift
+    
+    redshift : np.array
+        "observed" redshift
     """
     
     #calculate the observed redshift
