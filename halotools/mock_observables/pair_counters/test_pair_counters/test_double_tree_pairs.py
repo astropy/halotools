@@ -17,6 +17,10 @@ from ....custom_exceptions import HalotoolsError
 import pytest
 slow = pytest.mark.slow
 
+__all__=['test_npairs_periodic','test_npairs_nonperiodic','test_xy_z_npairs_periodic',\
+         'test_xy_z_npairs_nonperiodic','test_s_mu_npairs_periodic',\
+         'test_s_mu_npairs_nonperiodic','test_jnpairs_periodic','test_jnpairs_nonperiodic']
+
 #set up random points to test pair counters
 np.random.seed(1)
 Npts = 1000

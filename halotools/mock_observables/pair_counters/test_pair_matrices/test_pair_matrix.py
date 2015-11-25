@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 #load comparison simple pair counters
 from ..double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
 
+__all__['test_pair_matrix_periodic','test_pair_matrix_non_periodic',\
+        'test_xy_z_pair_matrix_periodic','test_xy_z_pair_matrix_non_periodic']
+
 #create some toy data to test functions
 Npts = 1e4
 Lbox = np.array([1.0,1.0,1.0])
@@ -31,7 +34,7 @@ z = z.flatten()
 data2 = np.vstack((x,y,z)).T
 
 @slow
-def test_fof_pairs_periodic():
+def test_pair_matrix_periodic():
     
     r_max = 0.1
     m = pair_matrix(data1, data1, r_max, period=period)
@@ -47,7 +50,7 @@ def test_fof_pairs_periodic():
     assert m.getnnz()==7000
 
 @slow
-def test_fof_pairs_non_periodic():
+def test_pair_matrix_non_periodic():
     
     r_max = 0.1
     m = pair_matrix(data1, data1, r_max, period=None, Lbox=Lbox)
@@ -64,7 +67,7 @@ def test_fof_pairs_non_periodic():
     
     #calculate all distances and compare to scipy.distance
     #r_max=2.0
-    #m = fof_pairs(data1, data1, r_max, period=None, Lbox=Lbox)
+    #m = pair_matrix(data1, data1, r_max, period=None, Lbox=Lbox)
     #m = m.todense()
     
     #mm = spatial.distance.cdist(data1,data1)
@@ -74,7 +77,7 @@ def test_fof_pairs_non_periodic():
     #assert np.all(m==mm)
 
 @slow
-def test_xy_z_fof_pairs_periodic():
+def test_xy_z_pair_matrix_periodic():
     
     rp_max=0.01
     pi_max=0.01
@@ -96,7 +99,7 @@ def test_xy_z_fof_pairs_periodic():
     assert m_perp.getnnz()==15000
 
 @slow
-def test_xy_z_fof_pairs_non_periodic():
+def test_xy_z_pair_matrix_non_periodic():
     
     rp_max=0.01
     pi_max=0.01
