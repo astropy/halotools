@@ -610,13 +610,14 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
     if randomize_marks is not None: 
         randomize_marks = convert_to_ndarray(randomize_marks)
     else:
-        randomize_marks = np.ones([True]*marks1.shape[1])
+        randomize_marks = np.array([True]*marks1.shape[1])
+    
     if randomize_marks.ndim == 1:
         if len(randomize_marks)!=marks1.shape[1]:
             msg = ("randomize_marks must have same length as the number of weights per point.")
             warn(msg)
     else:
-        msg = ("random_marks must be one dimensional")
+        msg = ("randomize_marks must be one dimensional")
         warn(msg)
     
     # down sample if sample size exceeds max_sample_size.
