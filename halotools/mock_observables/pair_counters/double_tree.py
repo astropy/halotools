@@ -97,17 +97,6 @@ class FlatRectanguloidTree(object):
         >>> ycoords_ith_subvol = tree.y[ith_subvol_slice]
         >>> zcoords_ith_subvol = tree.z[ith_subvol_slice]
 
-        Now let's verify that we got the correct results:
-
-        >>> assert np.all(xcoords_ith_subvol <= 100.)
-        >>> assert np.all(0 <= xcoords_ith_subvol)
-
-        >>> assert np.all(ycoords_ith_subvol <= 200.)
-        >>> assert np.all(100. <= ycoords_ith_subvol)
-
-        >>> assert np.all(zcoords_ith_subvol <= 400.)
-        >>> assert np.all(300. <= zcoords_ith_subvol)
-
         """
 
         self._check_sensible_constructor_inputs()
@@ -458,12 +447,18 @@ class FlatRectanguloidDoubleTree(object):
 
 
     def leftmost_cell_tuple_idx2(self, tuple_idx1, num_cell2_per_cell1):
-        """
+        """ Given a *cell_tupleID1* for tree 1 in a single dimension, 
+        and given the number of tree-2 cells per tree1 cells in that dimension, 
+        return the *cell_tupleID2* of the tree-2 cell that is flush against the 
+        leftmost edge of the tree-1 cell with *cell_tupleID1*. 
         """
         return tuple_idx1*num_cell2_per_cell1
 
     def rightmost_cell_tuple_idx2(self, tuple_idx1, num_cell2_per_cell1):
-        """
+        """ Given a *cell_tupleID1* for tree 1 in a single dimension, 
+        and given the number of tree-2 cells per tree1 cells in that dimension, 
+        return the *cell_tupleID2* of the tree-2 cell that is flush against the 
+        rightmost edge of the tree-1 cell with *cell_tupleID1*. 
         """
         return (tuple_idx1+1)*num_cell2_per_cell1 - 1
 
