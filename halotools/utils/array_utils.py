@@ -53,13 +53,13 @@ def convert_to_ndarray(x, dt = None):
         try:
             iterator = iter(x)
             if dt is None:
-                return x.astype(type(x[0]))
+                return x.astype(type(x.flatten()[0]))
             else:
                 return x.astype(dt)
         except TypeError:
             x = x.reshape(1)
             if dt is None:
-                return x.astype(type(x[0]))
+                return x.astype(type(x.flatten()[0]))
             else:
                 return x.astype(dt)
     elif type(x) is Table:
@@ -67,7 +67,7 @@ def convert_to_ndarray(x, dt = None):
     elif (type(x) is str) or (type(x) is unicode):
         x = np.array([x])
         if dt is None:
-            return x.astype(type(x[0]))
+            return x.astype(type(x.flatten()[0]))
         else:
             return x.astype(dt)
     else:
@@ -75,13 +75,13 @@ def convert_to_ndarray(x, dt = None):
             l = len(x)
             x = np.array(x)
             if dt is None:
-                return x.astype(type(x[0]))
+                return x.astype(type(x.flatten()[0]))
             else:
                 return x.astype(dt)
         except TypeError:
             x = np.array([x])
             if dt is None:
-                return x.astype(type(x[0]))
+                return x.astype(type(x.flatten()[0]))
             else:
                 return x.astype(dt)
 

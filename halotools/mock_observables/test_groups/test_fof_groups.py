@@ -20,16 +20,18 @@ __all__=['test_fof_groups_init','test_fof_group_IDs','test_igraph_functionality'
 
 #set random seed to get consistent behavior
 np.random.seed(1)
+N=1e3
+Lbox = np.array([1.0,1.0,1.0])
+period = Lbox
+sample = np.random.random((N,3))
+b_perp = 0.5
+b_para = 0.5
 
 @pytest.mark.slow
 def test_fof_groups_init():
-    
-    N=1.0e3
-    Lbox = np.array([1.0,1.0,1.0])
-    period = Lbox
-    sample = np.random.random((N,3))
-    b_perp = 0.5
-    b_para = 0.5
+    """
+    test fof_groups object initialization
+    """
     
     fof_group = FoFGroups(sample, b_perp, b_para, Lbox=Lbox, period=period)
     
@@ -38,13 +40,9 @@ def test_fof_groups_init():
 
 @pytest.mark.slow
 def test_fof_group_IDs():
-    
-    N=1e3
-    Lbox = np.array([1.0,1.0,1.0])
-    period = Lbox
-    sample = np.random.random((N,3))
-    b_perp = 0.5
-    b_para = 0.5
+    """
+    test group ID caclulation
+    """
     
     fof_group = FoFGroups(sample, b_perp, b_para, Lbox=Lbox, period=period)
     
@@ -59,13 +57,9 @@ def test_fof_group_IDs():
 
 @pytest.mark.slow
 def test_igraph_functionality():
-
-    N=1e3
-    Lbox = np.array([1.0,1.0,1.0])
-    period = Lbox
-    sample = np.random.random((N,3))
-    b_perp = 0.5
-    b_para = 0.5
+    """
+    test igraph functionality caclulation
+    """
     
     fof_group = FoFGroups(sample, b_perp, b_para, Lbox=Lbox, period=period)
     
