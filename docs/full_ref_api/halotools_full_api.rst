@@ -67,12 +67,6 @@ Comprehensive Halotools Reference/API
 
 .. automodapi:: halotools.mock_observables
 .. automodapi:: halotools.mock_observables.pair_counters
-.. automodapi:: halotools.mock_observables.test_clustering
-.. automodapi:: halotools.mock_observables.test_groups
-.. automodapi:: halotools.mock_observables.test_mock_survey
-
-.. automodapi:: halotools.mock_observables.pair_counters.test_pair_counters
-.. automodapi:: halotools.mock_observables.pair_counters.test_fof_pairs
 
 
 
