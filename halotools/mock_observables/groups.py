@@ -12,8 +12,8 @@ import numpy as np
 from scipy.sparse import csgraph, csr_matrix, coo_matrix
 from math import pi, gamma
 from ..custom_exceptions import *
-
 from .pair_counters.double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
+
 igraph_available=True
 try: import igraph
 except ImportError:
