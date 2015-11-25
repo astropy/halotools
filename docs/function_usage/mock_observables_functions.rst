@@ -5,6 +5,8 @@
 Two-Point Correlation Functions
 ==================================
 
+All of these can be imported from `halotools.mock_observables`.
+
 .. currentmodule:: halotools.mock_observables
 
 .. autosummary::
