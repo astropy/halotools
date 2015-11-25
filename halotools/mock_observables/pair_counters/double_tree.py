@@ -451,6 +451,19 @@ class FlatRectanguloidDoubleTree(object):
         and given the number of tree-2 cells per tree1 cells in that dimension, 
         return the *cell_tupleID2* of the tree-2 cell that is flush against the 
         leftmost edge of the tree-1 cell with *cell_tupleID1*. 
+
+        Parameters 
+        ------------
+        tuple_idx1 : int 
+            Index of the *cell_tupleID1* for tree 1 in a single dimension
+
+        num_cell2_per_cell1 : int 
+            Number of tree-2 cells per tree-1 cell in the given dimension 
+
+        Returns 
+        --------
+        result : int 
+
         """
         return tuple_idx1*num_cell2_per_cell1
 
@@ -459,11 +472,25 @@ class FlatRectanguloidDoubleTree(object):
         and given the number of tree-2 cells per tree1 cells in that dimension, 
         return the *cell_tupleID2* of the tree-2 cell that is flush against the 
         rightmost edge of the tree-1 cell with *cell_tupleID1*. 
+
+        Parameters 
+        ------------
+        tuple_idx1 : int 
+            Index of the *cell_tupleID1* for tree 1 in a single dimension
+
+        num_cell2_per_cell1 : int 
+            Number of tree-2 cells per tree-1 cell in the given dimension 
+
+        Returns 
+        --------
+        result : int 
         """
         return (tuple_idx1+1)*num_cell2_per_cell1 - 1
 
     def num_cells_to_cover_search_length(self, cell_size, search_length):
-        """
+        """ Number of tree-2 cells that need to be searched to the left and right 
+        of the current tree-1 cell in order to guarantee that all points 
+        inside the search length will be found.
         """
         return int(np.ceil(search_length/float(cell_size)))
 
