@@ -105,7 +105,7 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
 
     Returns 
     -------
-    correlation_function : np.ndarray
+    correlation_function(s) : np.ndarray
         *len(s_bins)-1* by *len(mu_bins)-1* ndarray containing the correlation function
         :math:`\\xi(s, \\mu)` computed in each of the bins defined by input ``s_bins``
         and ``mu_bins``.
