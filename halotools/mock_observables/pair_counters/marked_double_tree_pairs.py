@@ -44,37 +44,37 @@ def marked_npairs(data1, data2, rbins, period=None,
     
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. Should be between zero and 
         period. This cython implementation requires data1.ndim==2.
             
-    data2: array_like
+    data2 : array_like
         N2 by 3 numpy array of 3-dimensional positions. Should be between zero and 
         period. This cython implementation requires data2.ndim==2.
             
-    rbins: array_like
+    rbins : array_like
         numpy array of boundaries defining the bins in which pairs are counted. 
     
-    period: array_like, optional
+    period : array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.  If True, period is set to be Lbox
     
-    weights1: array_like, optional
+    weights1 : array_like, optional
         Either a 1-d array of length N1, or a 2-d array of length N1 x N_weights, 
         containing weights used for weighted pair counts
         
-    weights2: array_like, optional
+    weights2 : array_like, optional
         Either a 1-d array of length N2, or a 2-d array of length N2 x N_weights, 
         containing weights used for weighted pair counts
         
-    wfunc: int, optional
+    wfunc : int, optional
         weighting function ID.
     
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
         available cores.  num_threads=0 is the default.
     

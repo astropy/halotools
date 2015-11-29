@@ -45,30 +45,30 @@ def npairs(data1, data2, rbins, period = None,\
         
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    data2: array_like
+    data2 : array_like
         N2 by 3 numpy array of 3-dimensional positions.
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    rbins: array_like
+    rbins : array_like
         Boundaries defining the bins in which pairs are counted.
         
-    period: array_like, optional
+    period : array_like, optional
         Length-3 array defining the periodic boundary conditions. 
         If only one number is specified, the enclosing volume is assumed to 
         be a periodic cube (by far the most common case). 
         If period is set to None, the default option, 
         PBCs are set to infinity.  
 
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         Number of CPU cores to use in the pair counting. 
         If ``num_threads`` is set to the string 'max', use all available cores. 
         Default is 1 thread for a serial calculation that 
@@ -230,50 +230,50 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
         
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    data2: array_like
+    data2 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    rbins: array_like
+    rbins : array_like
         Boundaries defining the bins in which pairs are counted.
         
-    period: array_like, optional
+    period : array_like, optional
         Length-3 array defining the periodic boundary conditions. 
         If only one number is specified, the enclosing volume is assumed to 
         be a periodic cube (by far the most common case). 
         If period is set to None, the default option, 
         PBCs are set to infinity.  
     
-    weights1: array_like, optional
+    weights1 : array_like, optional
         length N1 array containing weights used for weighted pair counts. 
         
-    weights2: array_like, optional
+    weights2 : array_like, optional
         length N2 array containing weights used for weighted pair counts.
     
-    jtags1: array_like, optional
+    jtags1 : array_like, optional
         length N1 array containing integer tags used to define jackknife sample 
         membership. Tags are in the range [1, N_samples]. 
         The tag '0' is a reserved tag and should not be used.
         
-    jtags2: array_like, optional
+    jtags2 : array_like, optional
         length N2 array containing integer tags used to define jackknife sample 
         membership. Tags are in the range [1, N_samples]. 
         The tag '0' is a reserved tag and should not be used.
     
-    N_samples: int, optional
+    N_samples : int, optional
         Total number of jackknife samples. All values of ``jtags1`` and ``jtags2`` 
         should be in the range [1, N_samples]. 
     
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         Number of CPU cores to use in the pair counting. 
         If ``num_threads`` is set to the string 'max', use all available cores. 
         Default is 1 thread for a serial calculation that 
@@ -475,36 +475,36 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
         
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
 
-    data2: array_like
+    data2 : array_like
         N2 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
 
-    rp_bins: array_like
+    rp_bins : array_like
         numpy array of boundaries defining the projected separation 
         :math:`r_{\\rm p}` bins in which pairs are 
         counted.
     
-    pi_bins: array_like
+    pi_bins : array_like
         numpy array of boundaries defining the line-of-sight separation 
         :math:`\\pi` bins in which pairs are counted.
     
-    period: array_like, optional
+    period : array_like, optional
         Length-3 array defining the periodic boundary conditions. 
         If only one number is specified, the enclosing volume is assumed to 
         be a periodic cube (by far the most common case). 
         If period is set to None, the default option, 
         PBCs are set to infinity.  
     
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         Number of CPU cores to use in the pair counting. 
         If ``num_threads`` is set to the string 'max', use all available cores. 
         Default is 1 thread for a serial calculation that 
@@ -674,36 +674,36 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
     
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    data2: array_like
+    data2 : array_like
         N2 by 3 numpy array of 3-dimensional positions.
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    s_bins: array_like
+    s_bins : array_like
         numpy array of boundaries defining the radial bins in which pairs are counted.
     
-    mu_bins: array_like
+    mu_bins : array_like
         numpy array of boundaries defining bins in :math:`\\sin(\\theta_{\\rm los})` 
         in which the pairs are counted in.  
         Note that using the sine is not common convention for 
         calculating the two point correlation function (see notes).
     
-    period: array_like, optional
+    period : array_like, optional
         Length-3 array defining the periodic boundary conditions. 
         If only one number is specified, the enclosing volume is assumed to 
         be a periodic cube (by far the most common case). 
         If period is set to None, the default option, 
         PBCs are set to infinity.  
     
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         Number of CPU cores to use in the pair counting. 
         If ``num_threads`` is set to the string 'max', use all available cores. 
         Default is 1 thread for a serial calculation that 
