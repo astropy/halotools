@@ -19,7 +19,7 @@ from .pair_counters.double_tree_pairs import jnpairs
 ##########################################################################################
 
 
-__all__=['tpcf_jackknife', 'covariance_matrix']
+__all__=['tpcf_jackknife']
 __author__ = ['Duncan Campbell']
 
 
@@ -379,9 +379,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                               NR_subs, estimator)
     
     #calculate the covariance matrix
-    xi_11_cov = covariance_matrix(xi_11_sub)
-    xi_12_cov = covariance_matrix(xi_12_sub)
-    xi_22_cov = covariance_matrix(xi_22_sub)
+    xi_11_cov = _covariance_matrix(xi_11_sub)
+    xi_12_cov = _covariance_matrix(xi_12_sub)
+    xi_22_cov = _covariance_matrix(xi_22_sub)
     
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
@@ -394,7 +394,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
             return xi_12_full,xi_12_cov
 
 
-def covariance_matrix(corr_funcs):
+def _covariance_matrix(corr_funcs):
     """
     Calculate the covariance matrix.
     
