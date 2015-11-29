@@ -134,7 +134,7 @@ def npairs(data1, data2, rbins, period = None,\
     
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax)
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period)
         )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
@@ -282,14 +282,12 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by which 
         the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``data`` points into subvolumes of the simulation box. 
-
+        will apportion the ``data`` points into subvolumes of the simulation box.
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use 
-        :math:`[r^{\\rm max}, r^{\\rm max}, r^{\\rm max}]`, 
-        which will result in reasonable performance for most use-cases. 
+        Default choice is to use 1/10 of the box size in each dimension, 
+        which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with it when carrying out  
+        recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
         
     approx_cell2_size : array_like, optional 
@@ -368,7 +366,7 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax)
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period)
         )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
@@ -516,13 +514,11 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
         Length-3 array serving as a guess for the optimal manner by which 
         the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
         will apportion the ``data`` points into subvolumes of the simulation box. 
-
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use 
-        :math:`[r_{\\rm p}^{\\rm max}, r_{\\rm p}^{\\rm max}, \\pi^{\\rm max}]`, 
-        which will result in reasonable performance for most use-cases. 
+        Default choice is to use 1/10 of the box size in each dimension, 
+        which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with it when carrying out  
+        recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
         
     approx_cell2_size : array_like, optional 
@@ -579,7 +575,7 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     ### Compute the estimates for the cell sizes
 
     result = _set_approximate_xy_z_cell_sizes(
-        approx_cell1_size, approx_cell2_size, rp_max, pi_max)
+        approx_cell1_size, approx_cell2_size, rp_max, pi_max, period)
     approx_cell1_size = result[0]
     approx_cell2_size = result[1]
 
@@ -797,7 +793,7 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
     
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax)
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period)
         )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
