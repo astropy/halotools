@@ -12,3 +12,4 @@ from .s_mu_tpcf import *
 from .delta_sigma import *
 from .groups import *
 from .mock_survey import *
+from .angular_tpcf import *
