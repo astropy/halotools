@@ -247,7 +247,7 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, chord_bins,
                                  num_threads, do_auto, do_cross, _sample1_is_sample2)
     #count random pairs
-    D1R, D2R, RR = random_counts(sample1, sample2, randoms, theta_bins,
+    D1R, D2R, RR = random_counts(sample1, sample2, randoms, chord_bins,
                                  num_threads, do_RR, do_DR, _sample1_is_sample2)
     
     #check to see if any of the random counts contain 0 pairs.
