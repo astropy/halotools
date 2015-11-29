@@ -38,7 +38,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     N times, set by the ``Nsub`` argument.
     
     Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`tpcf_jackknife_usage_tutorial`. 
+    documentation of all features, see :ref:`tpcf_jackknife_usage_tutorial`.
     
     Parameters
     ----------
@@ -95,7 +95,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-
+    
     approx_cell2_size : array_like, optional 
         Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
         ``approx_cell1_size`` for details. 
@@ -103,7 +103,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     approx_cellran_size : array_like, optional 
         Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
         ``approx_cell1_size`` for details. 
-
+    
     Returns 
     -------
     correlation_function(s) : numpy.array
@@ -155,8 +155,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                    \\right.
     
     Examples
-    --------
-   Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 
     periodic unit cube. 
