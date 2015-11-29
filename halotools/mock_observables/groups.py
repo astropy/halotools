@@ -41,8 +41,8 @@ class FoFGroups(object):
         The first two dimensions (x, y) define the plane for perpendicular distances. 
         The third dimension (z) is used for parallel distances.  i.e. x,y positions are 
         on the plane of the sky, and z is the radial distance coordinate.  This is the 
-        'distant observer' approximation.
-    
+        "distant observer" approximation.
+        
         Parameters
         ----------
         positions : array_like
@@ -63,18 +63,31 @@ class FoFGroups(object):
             length 3 array defining cuboid boundaries of the simulation box.
         
         num_threads : int, optional
-           number of threads to use in calculation. Default is 1. A string 'max' may be 
-           used to indicate that the pair counters should use all available cores on
-           the machine.
+            number of threads to use in calculation. Default is 1. A string 'max' may be 
+            used to indicate that the pair counters should use all available cores on
+            the machine.
         
         Examples
         --------
-        >>> #randomly distributed points in a unit cube. 
+        For demonstration purposes we create a randomly distributed set of points within a 
+        periodic unit cube. 
+        
         >>> Npts = 1000
-        >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+        >>> Lbox = 1.0
+        >>> period = np.array([Lbox,Lbox,Lbox])
+        
+        >>> x = np.random.random(Npts)
+        >>> y = np.random.random(Npts)
+        >>> z = np.random.random(Npts)
+        
+        We transform our *x, y, z* points into the array shape used by the pair-counter by 
+        taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+        is used throughout the `~halotools.mock_observables` sub-package:
+        
         >>> coords = np.vstack((x,y,z)).T
-        >>> period = np.array([1.0,1.0,1.0])
-        >>> groups = FoFGroups(coords, 0.2, 0.1, period=period)
+        
+        >>> b_perp, p_para = (0.1,0.2)
+        >>> groups = FoFGroups(coords, b_perp, b_para, period=period)
         
         """
         
@@ -127,6 +140,7 @@ class FoFGroups(object):
         -------
         group_ids : np.array
             array of group IDs for each galaxy
+        
         """
         if getattr(self,'_group_ids',None) is None:
             self._n_groups, self._group_ids = csgraph.connected_components(\
@@ -143,6 +157,7 @@ class FoFGroups(object):
         -------
         N_groups: int
             number of distinct groups
+        
         """
         if getattr(self,'_n_groups',None) is None:
             self._n_groups = csgraph.connected_components(self.m_perp, directed=False,\
@@ -166,6 +181,7 @@ class FoFGroups(object):
         -------
         degree : np.array
             the 'degree' of galaxies in groups
+        
         """
         if igraph_available==True:
             self.degree = self.g.degree()
@@ -206,6 +222,7 @@ class FoFGroups(object):
         edges: np.ndarray
             N_edges x 2 array of vertices that are connected by an edge.  The vertices are
             indicated by their index.
+        
         """
         if igraph_available==True:
             self.edges = np.asarray(self.g.get_edgelist())
@@ -214,7 +231,7 @@ class FoFGroups(object):
     
     def get_edge_lengths(self):
         """
-        return the length of all edges (requires igraph package).
+        Return the length of all edges (requires igraph package).
         
         Returns
         -------
@@ -223,12 +240,14 @@ class FoFGroups(object):
         
         Notes
         ------
-        The length is caclulated as
-        .. math::
-            L_{\edge} = \\sqrt(r_{\\perp}^2 + r_{\\parallel}^2},
+        The length is caclulated as:
         
-        where :math:`r_{\\perp}` and :math:`r_{\\parallel}` are the perendicular an 
+        .. math::
+            L_{\\rm edge} = \\sqrt{r_{\\perp}^2 + r_{\\parallel}^2},
+        
+        where :math:`r_{\\perp}` and :math:`r_{\\parallel}` are the perendicular and 
         parallel distance between galaixes.
+        
         """
         if igraph_available==True:
             edges = self.g.es()
@@ -254,6 +273,7 @@ def _scipy_to_igraph(matrix, coords, directed=False):
     -------
     graph : object
         igraph graph object
+    
     """
     
     matrix = csr_matrix(matrix)
