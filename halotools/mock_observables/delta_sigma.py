@@ -66,7 +66,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
         
     Returns 
     -------
-    Delta_Sigma: np.array
+    Delta_Sigma : np.array
         :math:`\\Delta\\Sigma(r_p)` calculated at projected radial distances ``rp_bins``.
         The units are units(particles)/units(rp_bins)**2.
     
@@ -96,14 +96,31 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     
     Examples
     --------
-    >>> #randomly distributed points in a unit cube. 
-    >>> Ngals = 1000
-    >>> x,y,z = (np.random.random(Ngals),np.random.random(Ngals),np.random.random(Ngals))
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
     >>> gal_coords = np.vstack((x,y,z)).T
+    
+    Let's do the same thing for a set of particle data
+    
     >>> Nptcls = 10000
-    >>> x,y,z = (np.random.random(Nptcls),np.random.random(Nptcls),np.random.random(Nptcls))
+    >>> x = np.random.random(Nptcls)
+    >>> y = np.random.random(Nptcls)
+    >>> z = np.random.random(Nptcls)
     >>> ptcl_coords = np.vstack((x,y,z)).T
-    >>> period = np.array([1.0,1.0,1.0])
+    
     >>> rp_bins = np.logspace(-2,-1,10)
     >>> result = delta_sigma(gal_coords, ptcl_coords, rp_bins, pi_max=0.3, period=period)
     """
