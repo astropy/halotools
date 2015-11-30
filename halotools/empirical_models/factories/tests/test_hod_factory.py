@@ -3,7 +3,7 @@
 import numpy as np 
 from copy import copy 
 
-from ...factories import HodModelFactory
+from ...factories import HodModelFactory, PrebuiltHodModelFactory
 from ... import factories
 from ...occupation_models import *
 
@@ -15,15 +15,15 @@ def test_Zheng07_composite():
 	""" Method to test the basic behavior of 
 	`~halotools.empirical_models.Zheng07`, 
 	a specific pre-loaded model of 
-	`~halotools.empirical_models.factories.HodModelFactory`. 
+	`~halotools.empirical_models.PrebuiltHodModelFactory`. 
 
 	The suite includes the following tests:
 
 		* Changes to ``self.param_dict`` properly propagate through to occupation component models. 
 
-		* Default behavior is recovered after calling the `~halotools.empirical_models.factories.HodModelFactory.restore_init_param_dict` method. 
+		* Default behavior is recovered after calling the `~halotools.empirical_models.HodModelFactory.restore_init_param_dict` method. 
 	"""
-	model = HodModelFactory('zheng07', threshold = -18)
+	model = PrebuiltHodModelFactory('zheng07', threshold = -18)
 
 	# Verify that changes param_dict properly propagate
 	testmass1 = 5.e11
@@ -55,7 +55,7 @@ def test_Zheng07_composite():
 def test_alt_Zheng07_composites():
 
 	# First build two models that are identical except for the satellite occupations
-	default_model = HodModelFactory('zheng07')
+	default_model = PrebuiltHodModelFactory('zheng07')
 	default_model_dictionary = default_model._input_model_dictionary
 	default_satocc_component = default_model_dictionary['satellites_occupation']
 	assert not hasattr(default_satocc_component, 'ancillary_model_dependencies')
@@ -94,7 +94,7 @@ def test_alt_Zheng07_composites():
 def test_Leauthaud11_composite():
 	"""
 	"""
-	model = HodModelFactory('leauthaud11', threshold = 10.5)
+	model = PrebuiltHodModelFactory('leauthaud11', threshold = 10.5)
 
 	# Verify that changes param_dict properly propagate
 	testmass1 = 5.e11

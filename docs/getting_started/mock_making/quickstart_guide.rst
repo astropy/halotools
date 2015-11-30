@@ -15,7 +15,7 @@ is to just use one of the default models that come pre-loaded with Halotools.
 In this quickstart guide, we'll use a simple HOD-style model based on 
 `~halotools.empirical_models.leauthaud11_model_dictionary`. 
 
->>> hod_model = empirical_models.HodModelFactory('leauthaud11')
+>>> hod_model = empirical_models.PrebuiltHodModelFactory('leauthaud11')
 
 For a list of other out-of-the-box model options you can choose from, see 
 :ref:`preloaded_models_overview`. 

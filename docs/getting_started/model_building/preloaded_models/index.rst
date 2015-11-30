@@ -10,7 +10,7 @@ the module, each pre-built model can be loaded into
 memory with a single line of code. For example: 
 
 	>>> from halotools import empirical_models
-	>>> model_instance = empirical_models.HodModelFactory('zheng07')
+	>>> model_instance = empirical_models.PrebuiltHodModelFactory('zheng07')
 
 All pre-built models can be used to directly populate dark matter halos 
 with mock galaxies using a single line of code:

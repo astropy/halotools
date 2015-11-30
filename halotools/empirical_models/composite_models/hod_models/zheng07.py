@@ -54,24 +54,9 @@ def zheng07_model_dictionary(
     Examples 
     --------
 
-    >>> model_dictionary = zheng07_model_dictionary()
-    >>> model_instance = factories.HodModelFactory(**model_dictionary)
+    >>> model_instance = factories.PrebuiltHodModelFactory('zheng07', threshold = -21)
 
-    The default settings are set in the `~halotools.empirical_models.model_defaults` module. 
-    To load a model based on a different threshold, use the ``threshold`` keyword argument:
-
-    >>> model_dictionary = zheng07_model_dictionary(threshold = -21)
-    >>> model_instance = factories.HodModelFactory(**model_dictionary)
-
-    This call will create a model whose parameter values are set according to the best-fit 
-    values given in Table 1 of arXiv:0703457. 
-
-    For this model, you can also use the following syntax candy, 
-    which accomplishes the same task as the above:
-
-    >>> model_instance = factories.HodModelFactory('zheng07', threshold = -21)
-
-    As with all instances of the `~halotools.empirical_models.HodModelFactory`, 
+    As with all instances of the `~halotools.empirical_models.PrebuiltHodModelFactory`, 
     you can populate a mock with one line of code: 
 
     >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 0) # doctest: +SKIP

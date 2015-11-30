@@ -49,11 +49,6 @@ class HodModelFactory(ModelFactory):
         """
         Parameters
         ----------
-        model_nickname : string, optional 
-            If passed to the constructor, the appropriate prebuilt 
-            model_dictionary will be used to build the instance. 
-            See the ``Examples`` below. 
-
         *model_features : sequence of keyword arguments, optional 
             The standard way to call the `HodModelFactory` is 
             with a sequence of keyword arguments providing the set of 
@@ -103,8 +98,9 @@ class HodModelFactory(ModelFactory):
 
         Examples 
         ---------
-
-        >>> model_instance = HodModelFactory('leauthaud11', redshift = 2, threshold = 10.5)
+        >>> from halotools.empirical_models import leauthaud11_model_dictionary
+        >>> model_dictionary = leauthaud11_model_dictionary(redshift = 2, threshold = 10.5)
+        >>> model_instance = HodModelFactory(**model_dictionary)
 
         All model instance have a `populate_mock` method that allows you to generate Monte Carlo 
         realizations of galaxy populations based on the underlying analytical functions: 
@@ -208,9 +204,7 @@ class HodModelFactory(ModelFactory):
 
         model_nickname = model_nickname.lower()
 
-        if model_nickname == 'zheng07':
-            dictionary_retriever = hod_models.zheng07_model_dictionary
-        elif model_nickname == 'leauthaud11':
+        if model_nickname == 'leauthaud11':
             dictionary_retriever = hod_models.leauthaud11_model_dictionary
         elif model_nickname == 'hearin15':
             dictionary_retriever = hod_models.hearin15_model_dictionary
