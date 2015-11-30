@@ -10,3 +10,4 @@ from .hod_mock_factory import *
 from .model_factory_template import *
 from .hod_model_factory import *
 from .subhalo_model_factory import *
+from .prebuilt_model_factory import *
