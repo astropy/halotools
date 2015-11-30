@@ -76,7 +76,7 @@ def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass
     For this model, you can also use the following syntax candy, 
     which accomplishes the same task as the above:
 
-    >>> model_instance = factories.HodModelFactory('leauthaud11', threshold = 11, redshift = 1)
+    >>> model_instance = factories.PrebuiltHodModelFactory('leauthaud11', threshold = 11, redshift = 1)
 
     As with all instances of the `~halotools.empirical_models.HodModelFactory`, 
     you can populate a mock with one line of code: 

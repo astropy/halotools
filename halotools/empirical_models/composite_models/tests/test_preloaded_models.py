@@ -7,6 +7,7 @@ from astropy.table import Table
 
 from ...composite_models import *
 from ...factories import HodModelFactory, SubhaloModelFactory
+from ...factories import PrebuiltHodModelFactory, PrebuiltSubhaloModelFactory
 
 from ....utils.table_utils import compute_conditional_percentiles
 from ....sim_manager import HaloCatalog
@@ -53,14 +54,14 @@ class TestHearin15(TestCase):
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Hearin15(self):
 
-		model = HodModelFactory('hearin15', concentration_binning = (1, 35, 5))
+		model = PrebuiltHodModelFactory('hearin15', concentration_binning = (1, 35, 5))
 		model.populate_mock(halocat = self.halocat)
 
 	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11(self):
 
-		model = HodModelFactory('leauthaud11', concentration_binning = (1, 35, 5))
+		model = PrebuiltHodModelFactory('leauthaud11', concentration_binning = (1, 35, 5))
 		model.populate_mock(halocat = self.halocat)
 
 		# Test that an attempt to repopulate with a different halocat raises an exception
@@ -71,7 +72,7 @@ class TestHearin15(TestCase):
 		with pytest.raises(HalotoolsError) as exc:
 			model.populate_mock(halo_finder='bdm')
 
-		model_highz = HodModelFactory('leauthaud11', redshift = 2., 
+		model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2., 
 			concentration_binning = (1, 35, 5))
 		model_highz.populate_mock(halocat = self.halocat2)
 		with pytest.raises(HalotoolsError) as exc:
