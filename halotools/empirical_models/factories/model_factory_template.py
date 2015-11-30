@@ -3,7 +3,7 @@
 Module storing the various factories used to build galaxy-halo models. 
 """
 
-__all__ = ['ModelFactory', 'HodModelArchitect']
+__all__ = ['ModelFactory']
 __author__ = ['Andrew Hearin']
 
 import numpy as np
@@ -545,92 +545,6 @@ class ModelFactory(object):
                 rbin_centers, xi_coll[i, :] = self.mock.compute_galaxy_matter_cross_clustering(**kwargs)
             xi = summary_func(xi_coll, axis=0)
             return rbin_centers, xi
-
-
-
-
-
-
-
-class HodModelArchitect(object):
-    """ Class used to create customized HOD-style models.  
-    """
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def customize_model(*args, **kwargs):
-        """ Method takes a baseline composite model as input, 
-        together with an arbitrary number of new component models, 
-        and swaps in the new component models to create a and return new composite model. 
-
-        Parameters 
-        ----------
-        baseline_model : HOD model instance 
-            `~halotools.empirical_models.HodModelFactory` instance. 
-
-        component_models : Halotools objects 
-            Instance of any component model that you want to swap in to the baseline_model. 
-
-        Returns 
-        --------
-        new_model : HOD model instance  
-            `~halotools.empirical_models.HodModelFactory` instance. The ``new_model`` will 
-            be identical in every way to the ``baseline_model``, except the features in the 
-            input component_models will replace the features in the ``baseline_model``. 
-
-        """
-
-        try:
-            baseline_model = kwargs['baseline_model']
-        except KeyError:
-            msg = ("\nThe customize_model method of HodModelArchitect "
-                "requires a baseline_model keyword argument\n")
-            raise HalotoolsError(msg)
-        baseline_dictionary = baseline_model.model_dictionary
-        new_dictionary = copy(baseline_dictionary)
-
-        for new_component in args:
-            try:
-                gal_type = new_component.gal_type
-                galprop_name = new_component.galprop_name
-            except AttributeError:
-                msg = ("\nEvery argument of the customize_model method of HodModelArchitect "
-                    "must be a model instance that has a ``gal_type`` and a ``galprop_name`` attribute.\n")
-                raise HalotoolsError(msg)
-
-            # Enforce self-consistency in the thresholds of new and old components
-            if galprop_name == 'occupation':
-                old_component = baseline_dictionary[gal_type][galprop_name]
-                if new_component.threshold != old_component.threshold:
-                    msg = ("\n\nYou tried to swap in a %s occupation component \nthat has a different " 
-                        "threshold than the original %s occupation component.\n"
-                        "This is technically permissible, but in general, composite HOD-style models \n"
-                        "must have the same threshold for all occupation components.\n"
-                        "Thus if you do not request the HodModelArchitect to make the corresponding threshold change \n"
-                        "for all gal_types, the resulting composite model will raise an exception and not build.\n")
-                    warn(msg % (gal_type, gal_type)) 
-
-            new_dictionary[gal_type][galprop_name] = new_component
-
-        new_model = HodModelFactory(new_dictionary)
-        return new_model
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
