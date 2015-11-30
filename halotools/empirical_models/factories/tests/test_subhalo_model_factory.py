@@ -27,13 +27,6 @@ class TestSubhaloModelFactory(TestCase):
         """ Pre-load various arrays into memory for use by all tests. 
         """
 
-    def test_behroozi_composite(self):
-        """ Require that the `~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary` 
-        model dictionary builds without raising an exception. 
-        """
-        model = SubhaloModelFactory('behroozi10')
-        alt_model = SubhaloModelFactory(**model.model_dictionary)
-
     def test_exception_handling(self):
         """ Using `~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary` 
         as a specific example, require that the `~halotools.empirical_models.SubhaloModelFactory` raises a HalotoolsError 
@@ -61,14 +54,6 @@ class TestSubhaloModelFactory(TestCase):
         with pytest.raises(HalotoolsError):
             model3 = SubhaloModelFactory(stellar_mass = behroozi, 
                 model_feature_calling_sequence = ['stellar_mass', 'quiescent'])
-
-
-    def test_smhm_binary_sfr_composite(self):
-        """ Require that the `~halotools.empirical_models.composite_models.sfr_models.smhm_binary_sfr_model_dictionary` 
-        model dictionary builds without raising an exception. 
-        """
-        model = SubhaloModelFactory('smhm_binary_sfr')
-        alt_model = SubhaloModelFactory(**model.model_dictionary)
 
     def test_baseline_model_instance_feature(self):
         """ Use the ``baseline_model_instance`` feature to create permutations of composite models, 

@@ -23,7 +23,13 @@ from ...utils.array_utils import custom_len
 from ...custom_exceptions import *
 
 class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
-    """
+    """ Factory class providing instances of composite models that come prebuilt with Halotools. 
+    The list of available options are 
+
+    * 'behroozi10' (see `~halotools.empirical_models.behroozi10_model_dictionary`)
+    
+    * 'smhm_binary_sfr' (see `~halotools.empirical_models.smhm_binary_sfr_model_dictionary`)
+
     """
 
     def __init__(self, model_nickname, **kwargs):
@@ -51,6 +57,23 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
             length-N structured numpy array or Astropy table; 
             the function output must be a length-N boolean array that will be used as a mask. 
             Halos that are masked will be entirely neglected during mock population.
+
+        Examples 
+        ----------
+
+        >>> model_instance = PrebuiltSubhaloModelFactory('behroozi10', redshift = 2)
+
+        Passing in `behroozi10` as the ``model_nickname`` argument triggers the factory to 
+        call the `~halotools.empirical_models.behroozi10_model_dictionary` 
+        function. When doing so, the remaining arguments that 
+        were passed to the `PrebuiltSubhaloModelFactory` 
+        will in turn be passed on to 
+        `~halotools.empirical_models.behroozi10_model_dictionary`. 
+
+        Now that we have built an instance of a composite model, we can use it to 
+        populate any simulation in the Halotools cache: 
+
+        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
 
         """
         input_model_dictionary, supplementary_kwargs = (
