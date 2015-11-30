@@ -104,8 +104,6 @@ def smhm_binary_sfr_model_dictionary(
         prim_haloprop_key = prim_haloprop_key, redshift = redshift, 
         scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
 
-    sm_model._suppress_repeated_param_warning = True
-
     model_dictionary = {'stellar_mass': sm_model, 'quiescent': sfr_model}
 
 

@@ -76,6 +76,7 @@ class BinaryGalpropModel(object):
         setattr(self, 'mc_'+self.galprop_name, self._mc_galprop)
 
         self._methods_to_inherit = ['mc_'+self.galprop_name]
+        self._mock_generation_calling_sequence = copy(self._methods_to_inherit)
 
         self._galprop_dtypes_to_allocate = np.dtype([(self.galprop_name, bool)])
 
