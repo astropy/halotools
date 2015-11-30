@@ -58,13 +58,9 @@ matrix:
         - python: 3.4
           env: ASTROPY_VERSION=development
 
-        # Try older numpy versions
+        # Try numpy 1.10 - might want to switch this so that 1.10 is *default* and 1.9 is checked here down the road
         - python: 2.7
-          env: NUMPY_VERSION=1.8
-        - python: 2.7
-          env: NUMPY_VERSION=1.7
-        - python: 2.7
-          env: NUMPY_VERSION=1.6
+          env: NUMPY_VERSION=1.10
 
 before_install:
 
