@@ -33,7 +33,7 @@ env:
         # For this package-template, we include examples of Cython modules,
         # so Cython is required for testing. If your package does not include
         # Cython code, you can set CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES='Cython scipy beautifulsoup4 requests'
+        - CONDA_DEPENDENCIES='Cython scipy beautifulsoup4 requests matplotlib'
     matrix:
         # Make sure that egg_info works without dependencies
         - SETUP_CMD='egg_info'
@@ -70,8 +70,8 @@ before_install:
 
     # If there are matplotlib tests, comment these out to
     # Make sure that interactive matplotlib backends work
-    # - export DISPLAY=:99.0
-    # - sh -e /etc/init.d/xvfb start
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
 
 install:
 
