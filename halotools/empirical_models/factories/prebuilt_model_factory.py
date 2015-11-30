@@ -3,7 +3,7 @@
 Module storing the various factories used to build galaxy-halo models. 
 """
 
-__all__ = ['PrebuiltSubhaloModelFactory']
+__all__ = ['PrebuiltSubhaloModelFactory', 'PrebuiltHodModelFactory']
 __author__ = ['Andrew Hearin']
 
 import numpy as np
@@ -23,7 +23,8 @@ from ...utils.array_utils import custom_len
 from ...custom_exceptions import *
 
 class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
-    """ Factory class providing instances of composite models that come prebuilt with Halotools. 
+    """ Factory class providing instances of `SubhaloModelFactory` models 
+    that come prebuilt with Halotools. 
     The list of available options are 
 
     * 'behroozi10' (see `~halotools.empirical_models.behroozi10_model_dictionary`)
@@ -127,4 +128,102 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
              % dictionary_retriever.__name__)
 
         return input_model_dictionary, supplementary_kwargs
+
+
+class PrebuiltHodModelFactory(HodModelFactory):
+    """ Factory class providing instances of `HodModelFactory` models that come prebuilt with Halotools. 
+    The list of available options are 
+
+    * 'zheng07' (see `~halotools.empirical_models.zheng07_model_dictionary`)
+    
+    * 'leauthaud11' (see `~halotools.empirical_models.leauthaud11_model_dictionary`)
+
+    * 'tinker13' (see `~halotools.empirical_models.tinker13_model_dictionary`)
+
+    * 'hearin15' (see `~halotools.empirical_models.hearin15_model_dictionary`)
+
+    """
+
+    def __init__(self, model_nickname, **kwargs):
+        """
+
+        Parameters
+        ----------
+        model_nickname : string 
+            String used to select the appropriate prebuilt 
+            model_dictionary that will be used to build the instance. 
+            See the ``Examples`` below. 
+
+        halo_selection_func : function object, optional   
+            Function object used to place a cut on the input ``table``. 
+            If the ``halo_selection_func`` keyword argument is passed, 
+            the input to the function must be a single positional argument storing a 
+            length-N structured numpy array or Astropy table; 
+            the function output must be a length-N boolean array that will be used as a mask. 
+            Halos that are masked will be entirely neglected during mock population.
+
+        """
+        input_model_dictionary, supplementary_kwargs = (
+            self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
+            )
+
+        super_class_kwargs = {}
+        for key, value in input_model_dictionary.iteritems():
+            super_class_kwargs[key] = value
+        for key, value in supplementary_kwargs.iteritems():
+            super_class_kwargs[key] = value
+
+        HodModelFactory.__init__(self, **super_class_kwargs)
+
+
+    def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
+        """
+        """
+        forbidden_constructor_kwargs = ('gal_type_list', 'model_feature_calling_sequence')
+        for kwarg in forbidden_constructor_kwargs:
+            if kwarg in constructor_kwargs:
+                msg = ("\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
+                    "do not pass a ``%s`` keyword argument to the HodModelFactory constructor.\n"
+                    "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
+                raise HalotoolsError(msg % kwarg)
+
+
+        from ..composite_models import hod_models
+
+        model_nickname = model_nickname.lower()
+
+        if model_nickname == 'zheng07':
+            dictionary_retriever = hod_models.zheng07_model_dictionary
+        elif model_nickname == 'leauthaud11':
+            dictionary_retriever = hod_models.leauthaud11_model_dictionary
+        elif model_nickname == 'hearin15':
+            dictionary_retriever = hod_models.hearin15_model_dictionary
+        elif model_nickname == 'tinker13':
+            dictionary_retriever = hod_models.tinker13_model_dictionary
+        else:
+            msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
+            raise HalotoolsError(msg % model_nickname)
+
+        result = dictionary_retriever(**constructor_kwargs)
+        if type(result) is dict:
+            input_model_dictionary = result
+            supplementary_kwargs = {}
+            supplementary_kwargs['gal_type_list'] = None 
+            supplementary_kwargs['model_feature_calling_sequence'] = None 
+        elif type(result) is tuple:
+            input_model_dictionary = result[0]
+            supplementary_kwargs = result[1]
+        else:
+            raise HalotoolsError("Unexpected result returned from ``%s``\n"
+            "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
+             % dictionary_retriever.__name__)
+
+        return input_model_dictionary, supplementary_kwargs
+
+
+
+
+
+
+
 
