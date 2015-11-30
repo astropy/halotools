@@ -602,10 +602,10 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
     #check for consistency between marks and samples
     if len(marks1) != len(sample1):
         msg = ("marks1 must have same length as sample1")
-        warn(msg)
+        raise HalotoolsError(msg)
     if len(marks2) != len(marks2):
         msg = ("marks2 must have same length as sample2")
-        warn(msg)
+        raise HalotoolsError(msg)
     
     if randomize_marks is not None: 
         randomize_marks = convert_to_ndarray(randomize_marks)
@@ -615,10 +615,10 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
     if randomize_marks.ndim == 1:
         if len(randomize_marks)!=marks1.shape[1]:
             msg = ("randomize_marks must have same length as the number of weights per point.")
-            warn(msg)
+            raise HalotoolsError(msg)
     else:
         msg = ("randomize_marks must be one dimensional")
-        warn(msg)
+        raise HalotoolsError(msg)
     
     # down sample if sample size exceeds max_sample_size.
     if _sample1_is_sample2 is True:
