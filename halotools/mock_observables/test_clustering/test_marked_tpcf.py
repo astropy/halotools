@@ -18,6 +18,7 @@ sample1 = np.random.random((N_pts,3))
 sample2 = np.random.random((N_pts,3))
 period = np.array([1.0,1.0,1.0])
 rbins = np.linspace(0,0.3,5)
+rmax = rbins.max()
 
 def test_marked_tpcf_auto_periodic():
     """
