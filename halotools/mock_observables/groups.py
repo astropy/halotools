@@ -86,7 +86,7 @@ class FoFGroups(object):
         
         >>> coords = np.vstack((x,y,z)).T
         
-        >>> b_perp, p_para = (0.1,0.2)
+        >>> b_perp, b_para = (0.1,0.2)
         >>> groups = FoFGroups(coords, b_perp, b_para, period=period)
         
         """
