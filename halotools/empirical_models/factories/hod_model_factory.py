@@ -120,7 +120,9 @@ class HodModelFactory(ModelFactory):
             model_nickname, **kwargs)
 
         super(HodModelFactory, self).__init__(input_model_dictionary, **supplementary_kwargs)
+
         self.mock_factory = HodMockFactory
+        self.model_factory = HodModelFactory
 
         self._model_feature_calling_sequence = (
             self.build_model_feature_calling_sequence(supplementary_kwargs))
