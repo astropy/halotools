@@ -89,7 +89,7 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
     For this model, you can also use the following syntax candy, 
     which accomplishes the same task as the above:
 
-    >>> model_instance = factories.HodModelFactory('hearin15', threshold = 11, redshift = 1)
+    >>> model_instance = factories.PrebuiltHodModelFactory('hearin15', threshold = 11, redshift = 1)
 
     As with all instances of the `~halotools.empirical_models.HodModelFactory`, 
     you can populate a mock with one line of code: 

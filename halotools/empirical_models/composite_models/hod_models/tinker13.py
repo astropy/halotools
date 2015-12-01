@@ -49,6 +49,38 @@ def tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_th
         Values of the quiescent fraction when evaluated at the input abcissa. 
         Default is [0.25, 0.7, 0.95]
 
+    Examples 
+    ----------
+    The simplest way to instantiate the tinker13 model is 
+    using the `~halotools.empirical_models.PrebuiltHodModelFactory` class:
+
+    >>> from halotools.empirical_models import PrebuiltHodModelFactory
+    >>> model_instance = PrebuiltHodModelFactory('tinker13')
+
+    Alternatively, you can pass the returned values of `tinker13_model_dictionary` to 
+    `~halotools.empirical_models.HodModelFactory`. The calling signature is slightly 
+    more complicated relative to, for example, 
+    `~halotools.empirical_models.leauthaud11_model_dictionary` because 
+    `tinker13_model_dictionary` also returns a supplementary_dictionary specifying 
+    the `model_feature_calling_sequence` (see :ref:`model_feature_calling_sequence_mechanism`). 
+
+    >>> model_dictionary, supplementary_dictionary = tinker13_model_dictionary()
+    >>> constructor_kwargs = model_dictionary
+    >>> for key in supplementary_dictionary: constructor_kwargs[key] = supplementary_dictionary[key]
+    >>> from halotools.empirical_models import HodModelFactory
+    >>> model_instance = HodModelFactory(**constructor_kwargs)
+
+    To load a model based on a different threshold and redshift:
+
+    >>> model_instance = PrebuiltHodModelFactory('tinker13', threshold = 11, redshift = 2)
+
+    Or, equivalently, 
+
+    >>> model_dictionary, supplementary_dictionary = tinker13_model_dictionary(threshold = 11, redshift = 2)
+    >>> constructor_kwargs = model_dictionary
+    >>> for key in supplementary_dictionary: constructor_kwargs[key] = supplementary_dictionary[key]
+    >>> model_instance = HodModelFactory(**constructor_kwargs)
+
     """
 
     # Build the occupation model

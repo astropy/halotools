@@ -45,7 +45,7 @@ class HodModelFactory(ModelFactory):
     
     """
 
-    def __init__(self, model_nickname = None, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters
         ----------
@@ -117,7 +117,7 @@ class HodModelFactory(ModelFactory):
         """
 
         input_model_dictionary, supplementary_kwargs = self._parse_constructor_kwargs(
-            model_nickname, **kwargs)
+            **kwargs)
 
         super(HodModelFactory, self).__init__(input_model_dictionary, **supplementary_kwargs)
 
@@ -151,86 +151,38 @@ class HodModelFactory(ModelFactory):
 
         ############################################################
 
-    def _parse_constructor_kwargs(self, model_nickname, **kwargs):
+    def _parse_constructor_kwargs(self, **kwargs):
         """
         """
-        if model_nickname is None:
-            input_model_dictionary = copy(kwargs)
+        input_model_dictionary = copy(kwargs)
 
-            ### First parse the supplementary keyword arguments, 
-            # such as 'model_feature_calling_sequence', 
-            ### from the keywords that are bound to component model instances, 
-            # such as 'centrals_occupation'
+        ### First parse the supplementary keyword arguments, 
+        # such as 'model_feature_calling_sequence', 
+        ### from the keywords that are bound to component model instances, 
+        # such as 'centrals_occupation'
 
-            possible_supplementary_kwargs = (
-                'halo_selection_func', 
-                'model_feature_calling_sequence', 
-                'gal_type_list'
-                )
+        possible_supplementary_kwargs = (
+            'halo_selection_func', 
+            'model_feature_calling_sequence', 
+            'gal_type_list'
+            )
 
-            supplementary_kwargs = {}
-            for key in possible_supplementary_kwargs:
-                try:
-                    supplementary_kwargs[key] = copy(input_model_dictionary[key])
-                    del input_model_dictionary[key]
-                except KeyError:
-                    pass
+        supplementary_kwargs = {}
+        for key in possible_supplementary_kwargs:
+            try:
+                supplementary_kwargs[key] = copy(input_model_dictionary[key])
+                del input_model_dictionary[key]
+            except KeyError:
+                pass
 
-            if 'gal_type_list' not in supplementary_kwargs:
-                supplementary_kwargs['gal_type_list'] = None
+        if 'gal_type_list' not in supplementary_kwargs:
+            supplementary_kwargs['gal_type_list'] = None
 
-            if 'model_feature_calling_sequence' not in supplementary_kwargs:
-                supplementary_kwargs['model_feature_calling_sequence'] = None
-
-            return input_model_dictionary, supplementary_kwargs
-
-        else:
-            input_model_dictionary, supplementary_kwargs = (
-                self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
-                )
-            return input_model_dictionary, supplementary_kwargs 
-
-    def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
-        """
-        """
-        forbidden_constructor_kwargs = ('gal_type_list', 'model_feature_calling_sequence')
-        for kwarg in forbidden_constructor_kwargs:
-            if kwarg in constructor_kwargs:
-                msg = ("\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
-                    "do not pass a ``%s`` keyword argument to the HodModelFactory constructor.\n"
-                    "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
-                raise HalotoolsError(msg % kwarg)
-
-
-        from ..composite_models import hod_models
-
-        model_nickname = model_nickname.lower()
-
-        if model_nickname == 'leauthaud11':
-            dictionary_retriever = hod_models.leauthaud11_model_dictionary
-        elif model_nickname == 'hearin15':
-            dictionary_retriever = hod_models.hearin15_model_dictionary
-        elif model_nickname == 'tinker13':
-            dictionary_retriever = hod_models.tinker13_model_dictionary
-        else:
-            msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
-            raise HalotoolsError(msg % model_nickname)
-
-        result = dictionary_retriever(**constructor_kwargs)
-        if type(result) is dict:
-            input_model_dictionary = result
-            supplementary_kwargs = {}
-            supplementary_kwargs['gal_type_list'] = None 
-            supplementary_kwargs['model_feature_calling_sequence'] = None 
-        elif type(result) is tuple:
-            input_model_dictionary = result[0]
-            supplementary_kwargs = result[1]
-        else:
-            raise HalotoolsError("Unexpected result returned from ``%s``\n"
-            "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
-             % dictionary_retriever.__name__)
+        if 'model_feature_calling_sequence' not in supplementary_kwargs:
+            supplementary_kwargs['model_feature_calling_sequence'] = None
 
         return input_model_dictionary, supplementary_kwargs
+
 
     def build_model_feature_calling_sequence(self, supplementary_kwargs):
         """
