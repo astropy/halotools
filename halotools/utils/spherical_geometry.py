@@ -76,12 +76,12 @@ def sample_spherical_surface(N_points):
     
     Parameters 
     ----------
-    N_points: int
+    N_points : int
         number of points to sample.
     
     Returns 
     ----------
-    coords: list 
+    coords : list 
         (ra,dec) coordinate pairs in degrees.
     """
 

@@ -44,7 +44,9 @@ def _npairs_process_args(data1, data2, rbins, period,
     y2 = data2[:,1]
     z2 = data2[:,2]
     rbins = convert_to_ndarray(rbins)
-
+    
+    rmax = np.max(rbins)
+    
     try:
         assert rbins.ndim == 1
         assert len(rbins) > 1
@@ -58,7 +60,7 @@ def _npairs_process_args(data1, data2, rbins, period,
     if period is None:
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
-            _enclose_in_box(x1, y1, z1, x2, y2, z2))
+            _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=[rmax*3.0,rmax*3.0,rmax*3.0]))
     else:
         PBCs = True
         period = convert_to_ndarray(period).astype(float)
@@ -161,7 +163,9 @@ def _xy_z_npairs_process_args(data1, data2, rp_bins, pi_bins, period,
     except AssertionError:
         msg = "Input ``rp_bins`` must be a monotonically increasing 1D array with at least two entries"
         raise HalotoolsError(msg)
-
+    
+    rp_max = np.max(rp_bins)
+    
     pi_bins = convert_to_ndarray(pi_bins)
     try:
         assert pi_bins.ndim == 1
@@ -171,12 +175,14 @@ def _xy_z_npairs_process_args(data1, data2, rp_bins, pi_bins, period,
     except AssertionError:
         msg = "Input ``pi_bins`` must be a monotonically increasing 1D array with at least two entries"
         raise HalotoolsError(msg)
-
+    
+    pi_max = np.max(pi_bins)
+    
     # Set the boolean value for the PBCs variable
     if period is None:
         PBCs = False
         x1, y1, z1, x2, y2, z2, period = (
-            _enclose_in_box(x1, y1, z1, x2, y2, z2))
+            _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=[rp_max*3.0, rp_max*3.0, pi_max*3.0]))
     else:
         PBCs = True
         period = convert_to_ndarray(period).astype(float)
@@ -192,10 +198,28 @@ def _xy_z_npairs_process_args(data1, data2, rp_bins, pi_bins, period,
     return x1, y1, z1, x2, y2, z2, rp_bins, pi_bins, period, num_threads, PBCs
 
 
-def _enclose_in_box(x1, y1, z1, x2, y2, z2):
+def _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=None):
     """
-    build axis aligned box which encloses all points. 
-    shift points so cube's origin is at 0,0,0.
+    Build axis aligned box which encloses all points. Shift points so cube's origin is 
+    at (0,0,0).
+    
+    Parameters
+    ----------
+    x1,y1,z1 : array_like
+        cartesian posotions of points
+        
+    x2,y2,z2 : array_like
+        cartesian posotions of points
+        
+    min_size : array_like
+        minimum lengths of a side of the box.  If the minimum box construced around the 
+        points has a side i less than ``min_size[i]``, then the box is padded in order to
+        obtain the minimum specified size 
+    
+    Returns
+    -------
+    x1, y1, z1, x2, y2, z2, Lbox
+        shifted positions and box size.
     """
     
     xmin = np.min([np.min(x1),np.min(x2)])
@@ -215,18 +239,26 @@ def _enclose_in_box(x1, y1, z1, x2, y2, z2):
     y2 = y2 - xyzmin
     z2 = z2 - xyzmin
     
-    period = np.array([xyzmax, xyzmax, xyzmax])
+    Lbox = np.array([xyzmax, xyzmax, xyzmax])
     
-    return x1, y1, z1, x2, y2, z2, period
+    if min_size is not None:
+        min_size = convert_to_ndarray(min_size)
+        if np.any(Lbox<min_size):
+            Lbox[(Lbox<min_size)] = min_size[(Lbox<min_size)]
+            
+    return x1, y1, z1, x2, y2, z2, Lbox
 
-def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax):
+def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period):
     """
+    process the approximate cell size parameters.  If either is set to None, apply 
+    default settings.
     """
 
     #################################################
     ### Set the approximate cell sizes of the trees
     if approx_cell1_size is None:
-        approx_cell1_size = np.array([rmax, rmax, rmax])
+        #approx_cell1_size = np.array([rmax, rmax, rmax])
+        approx_cell1_size = period/10.0
     else:
         approx_cell1_size = convert_to_ndarray(approx_cell1_size)
         try:
@@ -252,14 +284,15 @@ def _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax):
     return approx_cell1_size, approx_cell2_size
 
 def _set_approximate_xy_z_cell_sizes(approx_cell1_size, approx_cell2_size,
-                                     rp_max, pi_max):
+                                     rp_max, pi_max, period):
     """
     """
 
     #################################################
     ### Set the approximate cell sizes of the trees
     if approx_cell1_size is None:
-        approx_cell1_size = np.array([rp_max, rp_max, pi_max]).astype(float)
+        #approx_cell1_size = np.array([rp_max, rp_max, pi_max]).astype(float)
+        approx_cell1_size = period/10.0
     else:
         approx_cell1_size = convert_to_ndarray(approx_cell1_size)
         try:

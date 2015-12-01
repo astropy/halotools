@@ -19,7 +19,7 @@ from .pair_counters.double_tree_pairs import jnpairs
 ##########################################################################################
 
 
-__all__=['tpcf_jackknife', 'covariance_matrix']
+__all__=['tpcf_jackknife']
 __author__ = ['Duncan Campbell']
 
 
@@ -38,7 +38,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     N times, set by the ``Nsub`` argument.
     
     Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`tpcf_jackknife_usage_tutorial`. 
+    documentation of all features, see :ref:`tpcf_jackknife_usage_tutorial`.
     
     Parameters
     ----------
@@ -95,7 +95,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-
+    
     approx_cell2_size : array_like, optional 
         Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
         ``approx_cell1_size`` for details. 
@@ -103,7 +103,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     approx_cellran_size : array_like, optional 
         Analogous to ``approx_cell1_size``, but for randoms.  See comments for 
         ``approx_cell1_size`` for details. 
-
+    
     Returns 
     -------
     correlation_function(s) : numpy.array
@@ -155,8 +155,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                    \\right.
     
     Examples
-    --------
-   Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 
     periodic unit cube. 
@@ -379,9 +377,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                               NR_subs, estimator)
     
     #calculate the covariance matrix
-    xi_11_cov = covariance_matrix(xi_11_sub)
-    xi_12_cov = covariance_matrix(xi_12_sub)
-    xi_22_cov = covariance_matrix(xi_22_sub)
+    xi_11_cov = _covariance_matrix(xi_11_sub)
+    xi_12_cov = _covariance_matrix(xi_12_sub)
+    xi_22_cov = _covariance_matrix(xi_22_sub)
     
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
@@ -394,7 +392,7 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
             return xi_12_full,xi_12_cov
 
 
-def covariance_matrix(corr_funcs):
+def _covariance_matrix(corr_funcs):
     """
     Calculate the covariance matrix.
     
