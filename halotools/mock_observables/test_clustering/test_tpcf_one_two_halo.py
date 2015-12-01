@@ -22,28 +22,32 @@ sample2 = np.random.random((Npts,3))
 randoms = np.random.random((Npts*3,3))
 period = np.array([1.0,1.0,1.0])
 rbins = np.linspace(0,0.3,5)
+rmax = rbins.max()
 
+@slow
 def test_tpcf_one_two_halo_auto_periodic():
     """
     test the tpcf_one_two_halo autocorrelation with periodic boundary conditions
     """
     
     result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2 = None, 
-                                      randoms=None, period = period, 
-                                      max_sample_size=int(1e4), estimator='Natural')
+      randoms=None, period = period, 
+      max_sample_size=int(1e4), estimator='Natural')
     
     assert len(result)==2, "wrong number of correlation functions returned."
 
-
+@slow
 def test_tpcf_one_two_halo_cross_periodic():
     """
     test the tpcf_one_two_halo cross-correlation with periodic boundary conditions
     """
     
     result = tpcf_one_two_halo_decomp(sample1, IDs1, rbins, sample2 = sample2,
-                                      sample2_host_halo_id=IDs2,randoms=None,
-                                      period = period, max_sample_size=int(1e4),
-                                      estimator='Natural')
+      sample2_host_halo_id=IDs2,randoms=None,
+      period = period, max_sample_size=int(1e4),
+      estimator='Natural', approx_cell1_size = [rmax, rmax, rmax], 
+      approx_cell2_size = [rmax, rmax, rmax], 
+      approx_cellran_size = [rmax, rmax, rmax])
     
     assert len(result)==6, "wrong number of correlation functions returned."
 
