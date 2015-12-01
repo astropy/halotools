@@ -254,8 +254,10 @@ def marked_tpcf(sample1, rbins, sample2=None,
                 \\mathrm{d}v_y & = w_1[4]-w_2[4] \\\\
                 \\mathrm{d}v_z & = w_1[5]-w_2[5] \\\\
             \\end{array}
+
         .. math::
             f(w_1,w_2) = (\\mathrm{d}r_x \\mathrm{d}v_x+\\mathrm{d}r_y \\mathrm{d}v_y+\\mathrm{d}r_z \\mathrm{d}v_z)/\sqrt{\\mathrm{d}r_x^2+\\mathrm{d}r_y^2+\\mathrm{d}r_z^2}
+
         This function assumes that w[0:3] is the posotion vecotr, and w[3:] is the 
         velocity vector, and handles periodic boundary conditions appropriately.
         
@@ -294,7 +296,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     data.  Suppose the marking function needs to know the galaxies' positions as well as 
     some other information, for example velocities, resulting in 6 marks per galaxy.
     
-    For deomonstration, we create some random velocities:
+    For demonstration, we create some random velocities:
     
     >>> vx = np.random.random(Npts)
     >>> vy = np.random.random(Npts)
