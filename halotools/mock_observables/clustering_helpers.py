@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function,
 __all__ = ['_tpcf_process_args', '_tpcf_jackknife_process_args',\
            '_rp_pi_tpcf_process_args', '_s_mu_tpcf_process_args',\
            '_marked_tpcf_process_args','_delta_sigma_process_args',\
-           '_tpcf_one_two_halo_decomp_process_args',\
+           '_tpcf_one_two_halo_decomp_process_args','_angular_tpcf_process_args',\
            '_list_estimators', '_TP_estimator', '_TP_estimator_requirements']
 
 import numpy as np
@@ -602,22 +602,23 @@ def _marked_tpcf_process_args(sample1, rbins, sample2, marks1, marks2,\
     #check for consistency between marks and samples
     if len(marks1) != len(sample1):
         msg = ("marks1 must have same length as sample1")
-        warn(msg)
+        raise HalotoolsError(msg)
     if len(marks2) != len(marks2):
         msg = ("marks2 must have same length as sample2")
-        warn(msg)
+        raise HalotoolsError(msg)
     
     if randomize_marks is not None: 
         randomize_marks = convert_to_ndarray(randomize_marks)
     else:
-        randomize_marks = np.ones([True]*marks1.shape[1])
+        randomize_marks = np.array([True]*marks1.shape[1])
+    
     if randomize_marks.ndim == 1:
         if len(randomize_marks)!=marks1.shape[1]:
             msg = ("randomize_marks must have same length as the number of weights per point.")
-            warn(msg)
+            raise HalotoolsError(msg)
     else:
-        msg = ("random_marks must be one dimensional")
-        warn(msg)
+        msg = ("randomize_marks must be one dimensional")
+        raise HalotoolsError(msg)
     
     # down sample if sample size exceeds max_sample_size.
     if _sample1_is_sample2 is True:
@@ -875,6 +876,93 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
 
     return sample1, sample1_host_halo_id, rbins, sample2, sample2_host_halo_id,\
         randoms, period, do_auto, do_cross, num_threads, _sample1_is_sample2, PBCs
+
+
+def _angular_tpcf_process_args(sample1, theta_bins, sample2, randoms, 
+    do_auto, do_cross, estimator, num_threads, max_sample_size):
+    """ 
+    Private method to do bounds-checking on the arguments passed to 
+    `~halotools.mock_observables.angular_tpcf`. 
+    """
+
+    sample1 = convert_to_ndarray(sample1)
+
+    if sample2 is not None: 
+        sample2 = convert_to_ndarray(sample2)
+
+        if np.all(sample1==sample2):
+            _sample1_is_sample2 = True
+            msg = ("Warning: sample1 and sample2 are exactly the same, \n"
+                   "auto-correlation will be returned.\n")
+            warn(msg)
+            do_cross==False
+        else: 
+            _sample1_is_sample2 = False
+    else: 
+        sample2 = sample1
+        _sample1_is_sample2 = True
+
+    if randoms is not None: 
+        randoms = convert_to_ndarray(randoms)
+    
+    # down sample if sample size exceeds max_sample_size.
+    if _sample1_is_sample2 is True:
+        if (len(sample1) > max_sample_size):
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            print('downsampling sample1...')
+    else:
+        if len(sample1) > max_sample_size:
+            inds = np.arange(0,len(sample1))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample1 = sample1[inds]
+            print('down sampling sample1...')
+        if len(sample2) > max_sample_size:
+            inds = np.arange(0,len(sample2))
+            np.random.shuffle(inds)
+            inds = inds[0:max_sample_size]
+            sample2 = sample2[inds]
+            print('down sampling sample2...')
+    
+    theta_bins = convert_to_ndarray(theta_bins)
+    theta_max = np.max(theta_bins)
+    try:
+        assert theta_bins.ndim == 1
+        assert len(theta_bins) > 1
+        if len(theta_bins) > 2:
+            assert array_is_monotonic(theta_bins, strict = True) == 1
+    except AssertionError:
+        msg = "Input ``theta_bins`` must be a monotonically increasing 1D array with at least two entries"
+        raise HalotoolsError(msg)
+
+    #check for input parameter consistency
+    if (theta_max >= 180.0):
+        msg = ("\n The maximum length over which you search for pairs of points \n"
+                "cannot be larger than 180.0 deg. \n")
+        raise HalotoolsError(msg)
+
+    if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
+        msg = ('\nSample1 and sample2 must have same dimension.\n')
+        raise HalotoolsError(msg)
+
+    if (type(do_auto) is not bool) | (type(do_cross) is not bool):
+        msg = ('do_auto and do_cross keywords must be of type boolean.')
+        raise HalotoolsError(msg)
+
+    if num_threads == 'max':
+        num_threads = cpu_count()
+
+    available_estimators = _list_estimators()
+    if estimator not in available_estimators:
+        msg = ("Input `estimator` must be one of the following:{0}".value(available_estimators))
+        raise HalotoolsError(msg)
+
+
+    return sample1, theta_bins, sample2, randoms, do_auto, do_cross, num_threads,\
+           _sample1_is_sample2
 
 
 def _list_estimators():

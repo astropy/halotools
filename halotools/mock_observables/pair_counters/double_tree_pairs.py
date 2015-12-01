@@ -45,30 +45,30 @@ def npairs(data1, data2, rbins, period = None,\
         
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    data2: array_like
+    data2 : array_like
         N2 by 3 numpy array of 3-dimensional positions.
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    rbins: array_like
+    rbins : array_like
         Boundaries defining the bins in which pairs are counted.
         
-    period: array_like, optional
+    period : array_like, optional
         Length-3 array defining the periodic boundary conditions. 
         If only one number is specified, the enclosing volume is assumed to 
         be a periodic cube (by far the most common case). 
         If period is set to None, the default option, 
         PBCs are set to infinity.  
 
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         Number of CPU cores to use in the pair counting. 
         If ``num_threads`` is set to the string 'max', use all available cores. 
         Default is 1 thread for a serial calculation that 
@@ -134,7 +134,7 @@ def npairs(data1, data2, rbins, period = None,\
     
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax)
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period)
         )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
@@ -230,50 +230,50 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
         
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    data2: array_like
+    data2 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    rbins: array_like
+    rbins : array_like
         Boundaries defining the bins in which pairs are counted.
         
-    period: array_like, optional
+    period : array_like, optional
         Length-3 array defining the periodic boundary conditions. 
         If only one number is specified, the enclosing volume is assumed to 
         be a periodic cube (by far the most common case). 
         If period is set to None, the default option, 
         PBCs are set to infinity.  
     
-    weights1: array_like, optional
+    weights1 : array_like, optional
         length N1 array containing weights used for weighted pair counts. 
         
-    weights2: array_like, optional
+    weights2 : array_like, optional
         length N2 array containing weights used for weighted pair counts.
     
-    jtags1: array_like, optional
+    jtags1 : array_like, optional
         length N1 array containing integer tags used to define jackknife sample 
         membership. Tags are in the range [1, N_samples]. 
         The tag '0' is a reserved tag and should not be used.
         
-    jtags2: array_like, optional
+    jtags2 : array_like, optional
         length N2 array containing integer tags used to define jackknife sample 
         membership. Tags are in the range [1, N_samples]. 
         The tag '0' is a reserved tag and should not be used.
     
-    N_samples: int, optional
+    N_samples : int, optional
         Total number of jackknife samples. All values of ``jtags1`` and ``jtags2`` 
         should be in the range [1, N_samples]. 
     
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         Number of CPU cores to use in the pair counting. 
         If ``num_threads`` is set to the string 'max', use all available cores. 
         Default is 1 thread for a serial calculation that 
@@ -282,14 +282,12 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
     approx_cell1_size : array_like, optional 
         Length-3 array serving as a guess for the optimal manner by which 
         the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
-        will apportion the ``data`` points into subvolumes of the simulation box. 
-
+        will apportion the ``data`` points into subvolumes of the simulation box.
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use 
-        :math:`[r^{\\rm max}, r^{\\rm max}, r^{\\rm max}]`, 
-        which will result in reasonable performance for most use-cases. 
+        Default choice is to use 1/10 of the box size in each dimension, 
+        which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with it when carrying out  
+        recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
         
     approx_cell2_size : array_like, optional 
@@ -368,7 +366,7 @@ def jnpairs(data1, data2, rbins, period=None, weights1=None, weights2=None,
 
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax)
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period)
         )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
@@ -477,36 +475,36 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
         
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
 
-    data2: array_like
+    data2 : array_like
         N2 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
 
-    rp_bins: array_like
+    rp_bins : array_like
         numpy array of boundaries defining the projected separation 
         :math:`r_{\\rm p}` bins in which pairs are 
         counted.
     
-    pi_bins: array_like
+    pi_bins : array_like
         numpy array of boundaries defining the line-of-sight separation 
         :math:`\\pi` bins in which pairs are counted.
     
-    period: array_like, optional
+    period : array_like, optional
         Length-3 array defining the periodic boundary conditions. 
         If only one number is specified, the enclosing volume is assumed to 
         be a periodic cube (by far the most common case). 
         If period is set to None, the default option, 
         PBCs are set to infinity.  
     
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         Number of CPU cores to use in the pair counting. 
         If ``num_threads`` is set to the string 'max', use all available cores. 
         Default is 1 thread for a serial calculation that 
@@ -516,13 +514,11 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
         Length-3 array serving as a guess for the optimal manner by which 
         the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
         will apportion the ``data`` points into subvolumes of the simulation box. 
-
         The optimum choice unavoidably depends on the specs of your machine. 
-        Default choice is to use 
-        :math:`[r_{\\rm p}^{\\rm max}, r_{\\rm p}^{\\rm max}, \\pi^{\\rm max}]`, 
-        which will result in reasonable performance for most use-cases. 
+        Default choice is to use 1/10 of the box size in each dimension, 
+        which will return reasonable result performance for most use-cases. 
         Performance can vary sensitively with this parameter, so it is highly 
-        recommended that you experiment with it when carrying out  
+        recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
         
     approx_cell2_size : array_like, optional 
@@ -579,7 +575,7 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None, verbose=False, num_
     ### Compute the estimates for the cell sizes
 
     result = _set_approximate_xy_z_cell_sizes(
-        approx_cell1_size, approx_cell2_size, rp_max, pi_max)
+        approx_cell1_size, approx_cell2_size, rp_max, pi_max, period)
     approx_cell1_size = result[0]
     approx_cell2_size = result[1]
 
@@ -678,36 +674,36 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
     
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. 
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    data2: array_like
+    data2 : array_like
         N2 by 3 numpy array of 3-dimensional positions.
         Values of each dimension should be between zero and the corresponding dimension 
         of the input period.
             
-    s_bins: array_like
+    s_bins : array_like
         numpy array of boundaries defining the radial bins in which pairs are counted.
     
-    mu_bins: array_like
+    mu_bins : array_like
         numpy array of boundaries defining bins in :math:`\\sin(\\theta_{\\rm los})` 
         in which the pairs are counted in.  
         Note that using the sine is not common convention for 
         calculating the two point correlation function (see notes).
     
-    period: array_like, optional
+    period : array_like, optional
         Length-3 array defining the periodic boundary conditions. 
         If only one number is specified, the enclosing volume is assumed to 
         be a periodic cube (by far the most common case). 
         If period is set to None, the default option, 
         PBCs are set to infinity.  
     
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         Number of CPU cores to use in the pair counting. 
         If ``num_threads`` is set to the string 'max', use all available cores. 
         Default is 1 thread for a serial calculation that 
@@ -797,7 +793,7 @@ def s_mu_npairs(data1, data2, s_bins, mu_bins, period = None,\
     
     ### Compute the estimates for the cell sizes
     approx_cell1_size, approx_cell2_size = (
-        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax)
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, rmax, period)
         )
     approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size

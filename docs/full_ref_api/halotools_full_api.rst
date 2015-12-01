@@ -64,10 +64,3 @@ Comprehensive Halotools Reference/API
 .. automodapi:: halotools.mock_observables.pair_counters.marked_cpairs
 
 
-
-.. automodapi:: halotools.mock_observables
-.. automodapi:: halotools.mock_observables.pair_counters
-
-
-
-
