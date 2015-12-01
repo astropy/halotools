@@ -27,7 +27,10 @@ def marked_tpcf(sample1, rbins, sample2=None,
     normalize_by='random_marks', iterations=1, randomize_marks=None):
     """ 
     Calculate the real space marked two-point correlation function, :math:`\\mathcal{M}(r)`.
-
+    
+    Example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`marked_tpcf_usage_tutorial`. 
+    
     Parameters 
     ----------
     sample1 : array_like
@@ -36,22 +39,24 @@ def marked_tpcf(sample1, rbins, sample2=None,
     rbins : array_like
         array of boundaries defining the real space radial bins in which pairs are 
         counted.
-
+    
     sample2 : array_like, optional
         Npts x 3 array containing 3-D positions of points.
     
-    marks1: array_like, optional
+    marks1 : array_like, optional
         len(sample1) x N_marks array of marks.  The suplied marks array must have the 
-        appropiate shape for the chosen ``wfunc`` (see notes).
+        appropiate shape for the chosen ``wfunc`` (see Notes for requirements).  If this
+        parameter is not specified, it is set to numpy.ones((len(sample1), N_marks)).
         
-    marks2: array_like, optional
+    marks2 : array_like, optional
         len(sample2) x N_marks array of marks.  The suplied marks array must have the 
-        appropiate shape for the chosen ``wfunc`` (see notes).
+        appropiate shape for the chosen ``wfunc`` (see Notes for requirements).  If this
+        parameter is not specified, it is set to numpy.ones((len(sample2), N_marks)).
     
     period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only
-        one number, Lbox, is specified, period is assumed to be [Lbox]*3.
-
+        one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
+    
     do_auto : boolean, optional
         do auto-correlation?
     
@@ -66,29 +71,30 @@ def marked_tpcf(sample1, rbins, sample2=None,
         Defines maximum size of the sample that will be passed to the pair counter. 
         If sample size exeeds max_sample_size, the sample will be randomly down-sampled
         such that the subsample is equal to max_sample_size.
-
-    wfunc: int, optional
+    
+    wfunc : int, optional
         Integer ID indicating which marking function should be used.  See notes for a 
         list of available marking functions.
     
-    normalize_by: string, optional
+    normalize_by : string, optional
         A string indicating how to normailze the weighted pair counts in the marked 
-        correlation function calculation.  Options are: 'random_marks' or `number_counts`.
+        correlation function calculation.  Options are: 'random_marks' or 'number_counts'.
         See Notes for more detail.
-
+    
     iterations : int, optional
         integer number indicating the number of times to calculate the random weigths, 
         taking the mean of the outcomes.  Only applicable if ``normalize_by`` is set 
         to 'random_marks'.  See notes for further explanation.
-
+    
     randomize_marks : array_like, optional
-        Boolean array of N_marks indicating which weights should be randomized for 
-        the random counts.  Default is [True]*N_marks.  Only applicable if 
-        ``normalize_by`` is 'random_marks'.
-
+        Boolean array of lenght N_marks indicating which elements should be randomized 
+        when calculating the random weighted pair counts.  Default is [True]*N_marks.  
+        This parameter is only applicable if ``normalize_by`` is set to 'random_marks'.
+        See Notes for more detail.
+    
     Returns 
     -------
-    marked_correlation_function : numpy.array
+    marked_correlation_function(s) : numpy.array
         *len(rbins)-1* length array containing the marked correlation function 
         :math:`\\mathcal{M}(r)` computed in each of the bins defined by ``rbins``.
         
@@ -101,7 +107,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
         :math:`XX \\equiv \\mathcal{RR}`, the weighted pair counts where the marks have 
         been randomized marks.  If ``normalize_by`` is 'number_counts' 
         :math:`XX \\equiv DD`, the unweighted pair counts.  
-        See notes for a further discussion.
+        See Notes for more detail.
         
         If ``sample2`` is passed as input, three arrays of length *len(rbins)-1* are 
         returned: 
@@ -203,8 +209,8 @@ def marked_tpcf(sample1, rbins, sample2=None,
             f(w_1,w_2) = 
                 \\left \\{
                 \\begin{array}{ll}
-                    w_2[1] & : w2[0]>(w1[0]+w1[1]) \\\\
-                    0.0 & : w2[0] \\leq (w1[0]+w1[1]) \\\\
+                    w_2[1] & : w_2[0]>(w_1[0]+w_1[1]) \\\\
+                    0.0 & : w_2[0] \\leq (w_1[0]+w_1[1]) \\\\
                 \\end{array}
                 \\right.
     
@@ -213,8 +219,8 @@ def marked_tpcf(sample1, rbins, sample2=None,
             f(w_1,w_2) = 
                 \\left \\{
                 \\begin{array}{ll}
-                    w_2[1] & : w2[0]<(w1[0]+w1[1]) \\\\
-                    0.0 & : w2[0] \\geq (w1[0]+w1[1]) \\\\
+                    w_2[1] & : w_2[0]<(w_1[0]+w_1[1]) \\\\
+                    0.0 & : w_2[0] \\geq (w_1[0]+w_1[1]) \\\\
                 \\end{array}
                 \\right.
     
@@ -223,8 +229,8 @@ def marked_tpcf(sample1, rbins, sample2=None,
             f(w_1,w_2) = 
                 \\left \\{
                 \\begin{array}{ll}
-                    w_2[1] & : |w1[0]-w2[0]|<w1[1] \\\\
-                    0.0 & : |w1[0]-w2[0]| \\geq w1[1] \\\\
+                    w_2[1] & : |w_1[0]-w_2[0]|<w_1[1] \\\\
+                    0.0 & : |w_1[0]-w_2[0]| \\geq w_1[1] \\\\
                 \\end{array}
                 \\right.
     
@@ -233,20 +239,20 @@ def marked_tpcf(sample1, rbins, sample2=None,
             f(w_1,w_2) = 
                 \\left \\{
                 \\begin{array}{ll}
-                    w_2[1] & : |w1[0]-w2[0]|>w1[1] \\\\
-                    0.0 & : |w1[0]-w2[0]| \\leq w1[1] \\\\
+                    w_2[1] & : |w_1[0]-w_2[0]|>w_1[1] \\\\
+                    0.0 & : |w_1[0]-w_2[0]| \\leq w_1[1] \\\\
                 \\end{array}
                 \\right.
     
     #. radial velocity weights (N_marks = 6)
         .. math::
             \\begin{array}{ll}
-                \\mathrm{d}r_x & = w1[0]-w2[0] \\\\
-                \\mathrm{d}r_y & = w1[1]-w2[1] \\\\
-                \\mathrm{d}r_z & = w1[2]-w2[2] \\\\
-                \\mathrm{d}v_x & = w1[3]-w2[3] \\\\
-                \\mathrm{d}v_y & = w1[4]-w2[4] \\\\
-                \\mathrm{d}v_z & = w1[5]-w2[5] \\\\
+                \\mathrm{d}r_x & = w_1[0]-w_2[0] \\\\
+                \\mathrm{d}r_y & = w_1[1]-w_2[1] \\\\
+                \\mathrm{d}r_z & = w_1[2]-w_2[2] \\\\
+                \\mathrm{d}v_x & = w_1[3]-w_2[3] \\\\
+                \\mathrm{d}v_y & = w_1[4]-w_2[4] \\\\
+                \\mathrm{d}v_z & = w_1[5]-w_2[5] \\\\
             \\end{array}
         .. math::
             f(w_1,w_2) = (\\mathrm{d}r_x \\mathrm{d}v_x+\\mathrm{d}r_y \\mathrm{d}v_y+\\mathrm{d}r_z \\mathrm{d}v_z)/\sqrt{\\mathrm{d}r_x^2+\\mathrm{d}r_y^2+\\mathrm{d}r_z^2}
@@ -266,7 +272,7 @@ def marked_tpcf(sample1, rbins, sample2=None,
     >>> y = np.random.random(Npts)
     >>> z = np.random.random(Npts)
     
-    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    We transform our *x, y, z* points into the array shape used by the function by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
     is used throughout the `~halotools.mock_observables` sub-package:
     
@@ -283,6 +289,25 @@ def marked_tpcf(sample1, rbins, sample2=None,
     
     The result should be consistent with :math:`\\langle {\\rm mark}\\rangle^2` at all *r* 
     within the statistical errors.
+    
+    Let's look at how one would use a more complicated marking scheme, using the same 
+    data.  Suppose the marking function needs to know the galaxies' positions as well as 
+    some other information, for example velocities, resulting in 6 marks per galaxy.
+    
+    For deomonstration, we create some random velocities:
+    
+    >>> vx = np.random.random(Npts)
+    >>> vy = np.random.random(Npts)
+    >>> vz = np.random.random(Npts)
+    >>> marks = np.vstack((x,y,z,vx,vy,vz)).T
+    
+    However, we are only interested in the affect of the velocoty on the MCF.  We can set
+    the position marks to be fixed, only randomizing the velocity marks.
+    
+    >>> randomize_marks = [False,False,False,True,True,True]
+    
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> MCF = marked_tpcf(coords, rbins, marks1=marks, period=period, normalize_by='random_marks', randomize_marks=randomize_marks, wfunc=11)
     """
 
 
