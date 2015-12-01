@@ -130,7 +130,9 @@ class SubhaloModelFactory(ModelFactory):
             )
 
         super(SubhaloModelFactory, self).__init__(input_model_dictionary, **supplementary_kwargs)
+
         self.mock_factory = SubhaloMockFactory
+        self.model_factory = SubhaloModelFactory
 
         self._model_feature_calling_sequence = (
             self.build_model_feature_calling_sequence(supplementary_kwargs))
