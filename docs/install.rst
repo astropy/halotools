@@ -26,7 +26,8 @@ The other option for installing Halotools is to clone the source code from githu
 Verifying your installation 
 -----------------------------
 
-After installing the code, you should navigate to the root directory of the package and run the full test suite to make sure your copy of Halotools is science-ready:
+After installing the code, you should navigate to the root directory of the package and run the full test suite to make sure your copy of Halotools is science-ready. This will generate a large number of 
+compiler messages that you can ignore, and takes about a minute to run. 
 
 	python setup.py test 
 
@@ -34,7 +35,7 @@ Depending on how you have configured your copy of the gcc compiler, Mac users ma
 
 	CC=clang python setup.py test 
 
-If you are working from the master branch of Haltools, there should not be any errors or test failures. If you encounter problems when running the test suite, please be sure you have installed the package dependencies first before raising a Github Issue and/or contacting the Halotools developers.  
+If you are working from the master branch of Halotools, the message that concludes test-suite execution should not indicate that there were any errors or failures. If you encounter problems when running the test suite, please be sure you have installed the package dependencies first before raising a Github Issue and/or contacting the Halotools developers.  
 
 Dependencies
 ============
