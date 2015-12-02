@@ -32,55 +32,76 @@ from ...custom_exceptions import *
 class HodModelFactory(ModelFactory):
     """ Class used to build HOD-style models of the galaxy-halo connection. 
 
-    Can be thought of as a factory that takes an HOD model dictionary as input, 
-    and generates an HOD Model object. The returned object can be used directly to 
-    populate a simulation with a Monte Carlo realization of the model. 
+    The arguments passed to the `HodModelFactory` constructor determine 
+    the features of the model that are returned by the factory. This works in one of two ways, 
+    both of which have explicit examples provided below. 
 
-    Most behavior is derived from external classes bound up in the input ``model_dictionary``. 
-    So the purpose of `HodModelFactory` is mostly to compose these external 
-    behaviors together into a composite model. 
-    The aim is to provide a standardized model object 
-    that interfaces consistently with the rest of the package, 
-    regardless of the features of the model. 
+    1. Building a new model from scratch. 
+
+    You can build a model from scratch by passing in a sequence of 
+    ``model_features``, each of which are instances of component models. 
+    The factory then composes these independently-defined 
+    components into a composite model. 
+
+    2. Building a new model from an existing model. 
+
+    It is also possible to add/swap new features to a previously built composite model instance, 
+    allowing you to create new models from existing ones. To do this, you pass in 
+    a ``baseline_model_instance`` and any set of ``model_features``. 
+    Any ``model_feature`` keyword that matches a feature name of the ``baseline_model_instance`` 
+    will replace that feature in the ``baseline_model_instance``; 
+    all other ``model_features`` that you pass in will augment 
+    the ``baseline_model_instance`` with new behavior. 
+
+    Regardless what set of features you use to build your model, 
+    the returned object can be used to directly populate subhalos 
+    with mock galaxies, as shown in the example below. 
     
     """
 
-    def __init__(self, model_nickname = None, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters
         ----------
-        model_nickname : string, optional 
-            If passed to the constructor, the appropriate prebuilt 
-            model_dictionary will be used to build the instance. 
-            See the ``Examples`` below. 
 
         *model_features : sequence of keyword arguments, optional 
-            The standard way to call the `HodModelFactory` is 
-            with a sequence of keyword arguments providing the set of 
-            features that you want to build your composite model with. 
-            Each keyword you use will be simultaneously interpreted as 
-            the name of the feature and the name of the galaxy population 
-            with that feature; the value bound to each keyword 
-            must be an instance of a component model governing 
-            the behavior of that feature. See the ``Examples`` below. 
+            Each keyword you use will be interpreted as the name 
+            of a feature in the composite model, 
+            e.g. 'stellar_mass' or 'star_formation_rate'; 
+            the value bound to each keyword must be an instance of a 
+            component model governing the behavior of that feature. 
+            See the examples section below. 
+
+        baseline_model_instance : `SubhaloModelFactory` instance, optional 
+            If passed to the constructor, the ``model_dictionary`` bound to the 
+            ``baseline_model_instance`` will be treated as the baseline dictionary. 
+            Any additional keyword arguments passed to the constructor that appear 
+            in the baseline dictionary will be treated as model features that replace 
+            the corresponding component model in the baseline dictionary. Any  
+            model features passed to the constructor that do not 
+            appear in the baseline dictionary will be treated as new features that 
+            augment the baseline model with new behavior. See the examples section below. 
 
         model_feature_calling_sequence : list, optional
             Determines the order in which your component features  
             will be called during mock population. 
 
             Some component models may have explicit dependence upon 
-            the value of some other galaxy model property. 
+            the value of some other galaxy property being modeled. 
             In such a case, you must pass a ``model_feature_calling_sequence`` list, 
             ordered in the desired calling sequence. 
-            A classic example is if the stellar mass of a central galaxy has explicit 
-            dependence on whether or not the central is active or quiescent. 
-            In such a case, an example ``model_feature_calling_sequence`` could be 
-            model_feature_calling_sequence = ['centrals_quiescent', 'centrals_occupation', ...]
+
+            A classic example is if the stellar-to-halo-mass relation 
+            has explicit dependence on the star formation rate of the galaxy 
+            (active or quiescent). For this example, the
+            ``model_feature_calling_sequence`` would be 
+            model_feature_calling_sequence = ['sfr_designation', 'stellar_mass', ...]. 
 
             Default behavior is to assume that no model feature  
             has explicit dependence upon any other, in which case the component 
             models appearing in the ``model_features`` keyword arguments 
-            will be called in random order. 
+            will be called in random order, giving primacy to the potential presence 
+            of `stellar_mass` and/or `luminosity` features. 
 
         gal_type_list : list, optional 
             List of strings providing the names of the galaxy types in the 
@@ -103,28 +124,83 @@ class HodModelFactory(ModelFactory):
 
         Examples 
         ---------
+        As described above, there are two different ways to build models using the 
+        `HodModelFactory`. Here we give demonstrations of each in turn. 
 
-        >>> model_instance = HodModelFactory('leauthaud11', redshift = 2, threshold = 10.5)
+        In the first example we'll show how to build a model from scratch using 
+        the ``model_features`` option. For illustration purposes, we'll pick a 
+        particularly simple HOD-style model based on Zheng et al. (2007). As 
+        described in `~halotools.empirical_models.zheng07_model_dictionary`, in this model 
+        there are two galaxy populations, 'centrals' and 'satellites'; 
+        centrals sit at the center of dark matter halos, and satellites follow an NFW profile. 
 
-        All model instance have a `populate_mock` method that allows you to generate Monte Carlo 
-        realizations of galaxy populations based on the underlying analytical functions: 
+        We'll start with the features for the population of centrals:
 
-        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
+        >>> from halotools.empirical_models import TrivialPhaseSpace, Zheng07Cens
+        >>> cens_occ_model =  Zheng07Cens()
+        >>> cens_prof_model = TrivialPhaseSpace()
+
+        Now for the satellites:
+
+        >>> from halotools.empirical_models import NFWPhaseSpace, Zheng07Sats
+        >>> sats_occ_model =  Zheng07Sats()
+        >>> sats_prof_model = NFWPhaseSpace()
+
+        At this point we have our component model instances. 
+        The following call to the factory uses the ``model_features`` option 
+        described above:
+
+        >>> model_instance = HodModelFactory(centrals_occupation = cens_occ_model, centrals_profile = cens_prof_model, satellites_occupation = sats_occ_model, satellites_profile = sats_prof_model)
+
+        The feature names we have chosen are 'centrals_occupation' and 'centrals_profile', 
+        'satellites_occupation' and 'satellites_profile'. The first substring of each feature name 
+        informs the factory of the name of the galaxy population, the second substring identifies 
+        the type of feature; to each feature we have attached a component model instance. 
+
+        Whatever features your composite model has, 
+        you can use the `~HodModelFactory.populate_mock` method 
+        to create Monte Carlo realization of the model by populating any dark matter halo catalog 
+        in your cache directory:
+
+        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
+
+        Your ``model_instance`` now has a ``mock`` attribute storing a synthetic galaxy 
+        population. See the `~HodModelFactory.populate_mock` docstring for details. 
 
         There also convenience functions for estimating the clustering signal predicted by the model. 
         For example, the following method repeatedly populates the Bolshoi simulation with 
         galaxies, computes the 3-d galaxy clustering signal of each mock, computes the median 
         clustering signal in each bin, and returns the result:
 
-        >>> r, xi = model_instance.compute_average_galaxy_clustering(num_iterations = 5, redshift = 2) # doctest: +SKIP
+        >>> r, xi = model_instance.compute_average_galaxy_clustering(num_iterations = 5, simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
 
+        To learn more about the 
+        `~halotools.empirical_models.ModelFactory.compute_average_galaxy_clustering` and other 
+        similar methods, see :ref:`composite_model_convenience_functions`. 
+
+        In this next example we'll show how to build a new model from an existing one 
+        using the ``baseline_model_instance`` option. We will start from  
+        the composite model built in Example 1 above. Here we'll build a 
+        new model which is identical the ``model_instance`` above, 
+        only we instead use 
+        the `AssembiasZheng07Cens` class to introduce assembly bias into the 
+        occupation statistics of central galaxies. 
+
+        >>> from halotools.empirical_models import AssembiasZheng07Cens
+        >>> new_cen_occ_model = AssembiasZheng07Cens()
+        >>> new_model_instance = HodModelFactory(baseline_model_instance = model_instance, centrals_occupation = new_cen_occ_model)
+
+        The ``new_model_instance`` and the original ``model_instance`` are identical in every respect 
+        except for the assembly bias of central galaxy occupation. 
         """
 
         input_model_dictionary, supplementary_kwargs = self._parse_constructor_kwargs(
-            model_nickname, **kwargs)
+            **kwargs)
 
         super(HodModelFactory, self).__init__(input_model_dictionary, **supplementary_kwargs)
+
         self.mock_factory = HodMockFactory
+        self.model_factory = HodModelFactory
 
         self._model_feature_calling_sequence = (
             self.build_model_feature_calling_sequence(supplementary_kwargs))
@@ -153,23 +229,78 @@ class HodModelFactory(ModelFactory):
 
         ############################################################
 
-    def _parse_constructor_kwargs(self, model_nickname, **kwargs):
+    def _parse_constructor_kwargs(self, **kwargs):
+        """ Method used to parse the arguments passed to 
+        the constructor into a model dictionary and supplementary arguments.
+
+        `parse_constructor_kwargs` examines the keyword arguments passed to `__init__`, 
+        and identifies the possible presence of ``galaxy_selection_func``, 
+        ``halo_selection_func``, ``model_feature_calling_sequence`` and ``gal_type_list``; 
+        all other keyword arguments will be treated as component models, 
+        and it is enforced that the values bound to all such arguments 
+        at the very least have a ``_methods_to_inherit`` attribute. 
+
+        Parameters 
+        -----------
+        **kwargs : optional keyword arguments 
+            keywords will be interpreted as the ``feature name``; 
+            values must be instances of Halotools component models 
+
+        Returns 
+        --------
+        input_model_dictionary : dict 
+            Model dictionary defining the composite model. 
+
+        supplementary_kwargs : dict 
+            Dictionary of any possible remaining keyword arguments passed to the `__init__` constructor 
+            that are not part of the composite model dictionary, e.g., ``model_feature_calling_sequence``. 
         """
-        """
-        if model_nickname is None:
+
+        if 'baseline_model_instance' in kwargs:
+            baseline_model_dictionary = kwargs['baseline_model_instance'].model_dictionary
+            input_model_dictionary = copy(kwargs)
+            del input_model_dictionary['baseline_model_instance']
+
+            ### First parse the supplementary keyword arguments, 
+            # such as 'model_feature_calling_sequence', 
+            ### from the keywords that are bound to component model instances, 
+            # such as 'centrals_occupation'
+            possible_supplementary_kwargs = (
+                'halo_selection_func', 
+                'model_feature_calling_sequence', 
+                'gal_type_list'
+                )
+            supplementary_kwargs = {}
+            for key in possible_supplementary_kwargs:
+                try:
+                    supplementary_kwargs[key] = copy(input_model_dictionary[key])
+                    del input_model_dictionary[key]
+                except KeyError:
+                    pass
+
+            if 'gal_type_list' not in supplementary_kwargs:
+                supplementary_kwargs['gal_type_list'] = None
+
+            if 'model_feature_calling_sequence' not in supplementary_kwargs:
+                supplementary_kwargs['model_feature_calling_sequence'] = None
+
+            new_model_dictionary = copy(baseline_model_dictionary)
+            for key, value in input_model_dictionary.iteritems():
+                new_model_dictionary[key] = value
+            return new_model_dictionary, supplementary_kwargs
+
+        else:
             input_model_dictionary = copy(kwargs)
 
             ### First parse the supplementary keyword arguments, 
             # such as 'model_feature_calling_sequence', 
             ### from the keywords that are bound to component model instances, 
             # such as 'centrals_occupation'
-
             possible_supplementary_kwargs = (
                 'halo_selection_func', 
                 'model_feature_calling_sequence', 
                 'gal_type_list'
                 )
-
             supplementary_kwargs = {}
             for key in possible_supplementary_kwargs:
                 try:
@@ -186,58 +317,28 @@ class HodModelFactory(ModelFactory):
 
             return input_model_dictionary, supplementary_kwargs
 
-        else:
-            input_model_dictionary, supplementary_kwargs = (
-                self._retrieve_prebuilt_model_dictionary(model_nickname, **kwargs)
-                )
-            return input_model_dictionary, supplementary_kwargs 
-
-    def _retrieve_prebuilt_model_dictionary(self, model_nickname, **constructor_kwargs):
-        """
-        """
-        forbidden_constructor_kwargs = ('gal_type_list', 'model_feature_calling_sequence')
-        for kwarg in forbidden_constructor_kwargs:
-            if kwarg in constructor_kwargs:
-                msg = ("\nWhen using the HodModelFactory to build an instance of a prebuilt model,\n"
-                    "do not pass a ``%s`` keyword argument to the HodModelFactory constructor.\n"
-                    "The appropriate source of this keyword is as part of a prebuilt model dictionary.\n")
-                raise HalotoolsError(msg % kwarg)
-
-
-        from ..composite_models import hod_models
-
-        model_nickname = model_nickname.lower()
-
-        if model_nickname == 'zheng07':
-            dictionary_retriever = hod_models.zheng07_model_dictionary
-        elif model_nickname == 'leauthaud11':
-            dictionary_retriever = hod_models.leauthaud11_model_dictionary
-        elif model_nickname == 'hearin15':
-            dictionary_retriever = hod_models.hearin15_model_dictionary
-        elif model_nickname == 'tinker13':
-            dictionary_retriever = hod_models.tinker13_model_dictionary
-        else:
-            msg = ("\nThe ``%s`` model_nickname is not recognized by Halotools\n")
-            raise HalotoolsError(msg % model_nickname)
-
-        result = dictionary_retriever(**constructor_kwargs)
-        if type(result) is dict:
-            input_model_dictionary = result
-            supplementary_kwargs = {}
-            supplementary_kwargs['gal_type_list'] = None 
-            supplementary_kwargs['model_feature_calling_sequence'] = None 
-        elif type(result) is tuple:
-            input_model_dictionary = result[0]
-            supplementary_kwargs = result[1]
-        else:
-            raise HalotoolsError("Unexpected result returned from ``%s``\n"
-            "Should be either a single dictionary or a 2-element tuple of dictionaries\n"
-             % dictionary_retriever.__name__)
-
-        return input_model_dictionary, supplementary_kwargs
 
     def build_model_feature_calling_sequence(self, supplementary_kwargs):
-        """
+        """ Method uses the ``model_feature_calling_sequence`` passed to __init__, if available. 
+        If no such argument was passed, the default sequence 
+        will be to first call ``occupation`` features, then call all other features in a random order, 
+        always calling features associated with a ``centrals`` population first (if presesent). 
+
+        Parameters 
+        -----------
+        supplementary_kwargs : dict 
+            Dictionary storing all keyword arguments passed to the `__init__` constructor that were 
+            not part of the input model dictionary. 
+
+        Returns 
+        -------
+        model_feature_calling_sequence : list 
+            List of strings specifying the order in which the component models will be called upon 
+            during mock population to execute their methods. 
+
+        See also 
+        ---------
+        :ref:`model_feature_calling_sequence_mechanism`
         """
 
         ########################
@@ -532,18 +633,28 @@ class HodModelFactory(ModelFactory):
                 component_model.build_lookup_tables()
 
     def build_init_param_dict(self):
-        """ Method used to build a dictionary of parameters for the composite model. 
+        """ Create the ``param_dict`` attribute of the instance. The ``param_dict`` is a dictionary storing 
+        the full collection of parameters controlling the behavior of the composite model. 
 
-        Accomplished by retrieving all the parameters of the component models. 
-        Method returns nothing, but binds ``param_dict`` to the class instance. 
+        The ``param_dict`` dictionary is determined by examining the 
+        ``param_dict`` attribute of every component model, and building up a composite 
+        dictionary from them. It is permissible for the same parameter name to appear more than once 
+        amongst a set of component models, but a warning will be issued in such cases. 
 
         Notes 
         -----
-        In MCMC applications, the items of ``param_dict`` define the possible 
+        In MCMC applications, the items of ``param_dict`` defines the possible 
         parameter set explored by the likelihood engine. 
         Changing the values of the parameters in ``param_dict`` 
         will propagate to the behavior of the component models 
         when the relevant methods are called. 
+
+        See also 
+        ---------
+        set_warning_suppressions
+
+        :ref:`param_dict_mechanism` 
+
         """
 
         self.param_dict = {}
@@ -617,7 +728,12 @@ class HodModelFactory(ModelFactory):
 
 
     def build_prim_sec_haloprop_list(self):
-        """
+        """ Method builds the ``_haloprop_list`` of strings. 
+
+        This list stores the names of all halo catalog columns 
+        that appear as either ``prim_haloprop_key`` or ``sec_haloprop_key`` of any component model. 
+        For all strings appearing in ``_haloprop_list``, the mock ``galaxy_table`` will have 
+        a corresponding column storing the halo property inherited by the mock galaxy. 
         """
         haloprop_list = []
         for component_model in self.model_dictionary.values():
@@ -652,7 +768,17 @@ class HodModelFactory(ModelFactory):
         self.publications = list(set(pub_list))
 
     def build_dtype_list(self):
-        """
+        """ Create the `_galprop_dtypes_to_allocate` attribute that determines 
+        the name and data type of every galaxy property that will appear in the mock ``galaxy_table``. 
+
+        This attribute is determined by examining the 
+        `_galprop_dtypes_to_allocate` attribute of every component model, and building a composite 
+        set of all these dtypes, enforcing self-consistency in cases where the same galaxy property 
+        appears more than once. 
+
+        See also 
+        ---------
+        :ref:`galprop_dtypes_to_allocate_mechanism` 
         """
         dtype_list = []
         for component_model in self.model_dictionary.values():
@@ -664,7 +790,13 @@ class HodModelFactory(ModelFactory):
         self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
 
     def build_new_haloprop_func_dict(self):
-        """
+        """ Method used to build a dictionary of functions, ``new_haloprop_func_dict``, 
+        that create new halo catalog columns 
+        during a pre-processing phase of mock population. 
+
+        See also 
+        ---------
+        :ref:`new_haloprop_func_dict_mechanism`
         """
         new_haloprop_func_dict = {}
 
@@ -691,7 +823,19 @@ class HodModelFactory(ModelFactory):
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
     def set_warning_suppressions(self):
-        """
+        """ Method used to determine whether a warning should be issued if the 
+        `build_init_param_dict` method detects the presence of multiple appearances 
+        of the same parameter name. 
+
+        If *any* of the component model instances have a 
+        ``_suppress_repeated_param_warning`` attribute that is set to the boolean True value, 
+        then no warning will be issued even if there are multiple appearances of the same 
+        parameter name. This allows the user to not be bothered with warning messages for cases 
+        where it is understood that there will be no conflicting behavior. 
+
+        See also 
+        ---------
+        build_init_param_dict
         """
         self._suppress_repeated_param_warning = False
 
@@ -701,24 +845,24 @@ class HodModelFactory(ModelFactory):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
     def set_inherited_methods(self):
-        """ Each component model *should* have a `_mock_generation_calling_sequence` attribute 
+        """ Each component model *should* have a ``_mock_generation_calling_sequence`` attribute 
         that provides the sequence of method names to call during mock population. Additionally, 
-        each component *should* have a `_methods_to_inherit` attribute that determines 
+        each component *should* have a ``_methods_to_inherit`` attribute that determines 
         which methods will be inherited by the composite model. 
-        The `_mock_generation_calling_sequence` list *should* be a subset of `_methods_to_inherit`. 
+        The ``_mock_generation_calling_sequence`` list *should* be a subset of ``_methods_to_inherit``. 
         If any of the above conditions fail, no exception will be raised during the construction 
         of the composite model. Instead, an empty list will be forcibly attached to each 
         component model for which these lists may have been missing. 
-        Also, for each component model, if there are any elements of `_mock_generation_calling_sequence` 
-        that were missing from `_methods_to_inherit`, all such elements will be forcibly added to 
-        that component model's `_methods_to_inherit`.
+        Also, for each component model, if there are any elements of ``_mock_generation_calling_sequence`` 
+        that were missing from ``_methods_to_inherit``, all such elements will be forcibly added to 
+        that component model's ``_methods_to_inherit``.
 
-        Finally, each component model *should* have an `_attrs_to_inherit` attribute that determines 
+        Finally, each component model *should* have an ``_attrs_to_inherit`` attribute that determines 
         which attributes will be inherited by the composite model. If any component models did not 
-        implement the `_attrs_to_inherit`, an empty list is forcibly added to the component model. 
+        implement the ``_attrs_to_inherit``, an empty list is forcibly added to the component model. 
 
         After calling the set_inherited_methods method, it will be therefore be entirely safe to 
-        run a for loop over each component model's `_methods_to_inherit` and `_attrs_to_inherit`, 
+        run a for loop over each component model's ``_methods_to_inherit`` and ``_attrs_to_inherit``, 
         even if these lists were forgotten or irrelevant to that particular component. 
         """
 
@@ -744,7 +888,14 @@ class HodModelFactory(ModelFactory):
 
 
     def set_calling_sequence(self):
-        """
+        """ Method used to determine the sequence of function calls that will be made during 
+        mock population. The methods of each component model will be called one after the other; 
+        the order in which the component models are called upon is determined by 
+        ``_model_feature_calling_sequence``. 
+        When each component model is called, the sequence of methods that are called for that 
+        component is determined by the ``_mock_generation_calling_sequence`` attribute 
+        bound to the component model instance. 
+        See :ref:`model_feature_calling_sequence_mechanism` for further details. 
         """
         # model_feature_calling_sequence
         self._mock_generation_calling_sequence = []
@@ -810,6 +961,43 @@ class HodModelFactory(ModelFactory):
         for method in self._mock_generation_calling_sequence:
             if not hasattr(self, method):
                 raise HalotoolsError(missing_method_msg2)
+
+    def populate_mock(self, **kwargs):
+        """ Method used to populate a simulation using the model. 
+
+        After calling this method, ``self`` will have a new ``mock`` attribute, 
+        which has a ``table`` bound to it containing the Monte Carlo 
+        realization of the model. 
+
+        Parameters 
+        ----------
+        halocat : object, optional 
+            Class instance of `~halotools.sim_manager.HaloCatalog`. 
+            This object contains the halo catalog and its metadata.  
+
+        simname : string, optional
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        redshift : float, optional
+            Redshift of the desired catalog. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        See also 
+        -----------
+        :ref:`basic_syntax_subhalo_mocks` 
+        
+        :ref:`populating_mocks_with_alternate_sims_tutorial`
+
+        """
+        ModelFactory.populate_mock(self, **kwargs)
+
 
 ##########################################
 
