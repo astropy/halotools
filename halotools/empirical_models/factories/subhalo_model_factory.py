@@ -172,10 +172,15 @@ class SubhaloModelFactory(ModelFactory):
 
         >>> r, xi = model_instance.compute_average_galaxy_clustering(num_iterations = 5, simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
 
+        To learn more about the 
+        `~halotools.empirical_models.ModelFactory.compute_average_galaxy_clustering` and other 
+        similar methods, see :ref:`composite_model_convenience_functions`. 
+
         In this next example we'll show how to build a new model from an existing one 
         using the ``baseline_model_instance`` option. We will start from  
         the composite model built in Example 1 above. Here we'll build a 
-        new model which is identical the ``model_instance`` above, only we instead use 
+        new model which is identical the ``model_instance`` above, 
+        only we instead use 
         the `Moster13SmHm` class to model stellar mass. 
 
         >>> from halotools.empirical_models import Moster13SmHm

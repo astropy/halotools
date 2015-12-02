@@ -178,6 +178,20 @@ class HodModelFactory(ModelFactory):
         `~halotools.empirical_models.ModelFactory.compute_average_galaxy_clustering` and other 
         similar methods, see :ref:`composite_model_convenience_functions`. 
 
+        In this next example we'll show how to build a new model from an existing one 
+        using the ``baseline_model_instance`` option. We will start from  
+        the composite model built in Example 1 above. Here we'll build a 
+        new model which is identical the ``model_instance`` above, 
+        only we instead use 
+        the `AssembiasZheng07Cens` class to introduce assembly bias into the 
+        occupation statistics of central galaxies. 
+
+        >>> from halotools.empirical_models import AssembiasZheng07Cens
+        >>> new_cen_occ_model = AssembiasZheng07Cens()
+        >>> new_model_instance = HodModelFactory(baseline_model_instance = model_instance, centrals_occupation = new_cen_occ_model)
+
+        The ``new_model_instance`` and the original ``model_instance`` are identical in every respect 
+        except for the assembly bias of central galaxy occupation. 
         """
 
         input_model_dictionary, supplementary_kwargs = self._parse_constructor_kwargs(
@@ -822,6 +836,43 @@ class HodModelFactory(ModelFactory):
         for method in self._mock_generation_calling_sequence:
             if not hasattr(self, method):
                 raise HalotoolsError(missing_method_msg2)
+
+    def populate_mock(self, **kwargs):
+        """ Method used to populate a simulation using the model. 
+
+        After calling this method, ``self`` will have a new ``mock`` attribute, 
+        which has a ``table`` bound to it containing the Monte Carlo 
+        realization of the model. 
+
+        Parameters 
+        ----------
+        halocat : object, optional 
+            Class instance of `~halotools.sim_manager.HaloCatalog`. 
+            This object contains the halo catalog and its metadata.  
+
+        simname : string, optional
+            Nickname of the simulation. Currently supported simulations are 
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        redshift : float, optional
+            Redshift of the desired catalog. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        See also 
+        -----------
+        :ref:`basic_syntax_subhalo_mocks` 
+        
+        :ref:`populating_mocks_with_alternate_sims_tutorial`
+
+        """
+        ModelFactory.populate_mock(self, **kwargs)
+
 
 ##########################################
 
