@@ -266,6 +266,9 @@ class SubhaloModelFactory(ModelFactory):
             input_model_dictionary = copy(kwargs)
             del input_model_dictionary['baseline_model_instance']
 
+            ### First parse the supplementary keyword arguments, 
+            # such as 'model_feature_calling_sequence', 
+            ### from the keywords that are bound to component model instances
             possible_supplementary_kwargs = ('galaxy_selection_func', 
                 'halo_selection_func', 'model_feature_calling_sequence')
             supplementary_kwargs = {}
@@ -429,24 +432,24 @@ class SubhaloModelFactory(ModelFactory):
     def set_inherited_methods(self):
         """ Function determines which component model methods are inherited by the composite model. 
 
-        Each component model *should* have a `_mock_generation_calling_sequence` attribute 
+        Each component model *should* have a ``_mock_generation_calling_sequence`` attribute 
         that provides the sequence of method names to call during mock population. Additionally, 
-        each component *should* have a `_methods_to_inherit` attribute that determines 
+        each component *should* have a ``_methods_to_inherit`` attribute that determines 
         which methods will be inherited by the composite model. 
-        The `_mock_generation_calling_sequence` list *should* be a subset of `_methods_to_inherit`. 
+        The ``_mock_generation_calling_sequence`` list *should* be a subset of ``_methods_to_inherit``. 
         If any of the above conditions fail, no exception will be raised during the construction 
         of the composite model. Instead, an empty list will be forcibly attached to each 
         component model for which these lists may have been missing. 
-        Also, for each component model, if there are any elements of `_mock_generation_calling_sequence` 
-        that were missing from `_methods_to_inherit`, all such elements will be forcibly added to 
-        that component model's `_methods_to_inherit`.
+        Also, for each component model, if there are any elements of ``_mock_generation_calling_sequence`` 
+        that were missing from ``_methods_to_inherit``, all such elements will be forcibly added to 
+        that component model's ``_methods_to_inherit``.
 
-        Finally, each component model *should* have an `_attrs_to_inherit` attribute that determines 
+        Finally, each component model *should* have an ``_attrs_to_inherit`` attribute that determines 
         which attributes will be inherited by the composite model. If any component models did not 
-        implement the `_attrs_to_inherit`, an empty list is forcibly added to the component model. 
+        implement the ``_attrs_to_inherit``, an empty list is forcibly added to the component model. 
 
         After calling the set_inherited_methods method, it will be therefore be entirely safe to 
-        run a for loop over each component model's `_methods_to_inherit` and `_attrs_to_inherit`, 
+        run a for loop over each component model's ``_methods_to_inherit`` and ``_attrs_to_inherit``, 
         even if these lists were forgotten or irrelevant to that particular component. 
         """
 
@@ -571,14 +574,13 @@ class SubhaloModelFactory(ModelFactory):
 
     def set_calling_sequence(self):
         """ Method used to determine the sequence of function calls that will be made during 
-        mock population. The methods of each component model will be called one after the other, 
-        and the order in which the component models are called upon to execute their methods is determined by 
-        the 
-
-        See also 
-        ----------
-        :ref:`model_feature_calling_sequence_mechanism`
-
+        mock population. The methods of each component model will be called one after the other; 
+        the order in which the component models are called upon is determined by 
+        ``_model_feature_calling_sequence``. 
+        When each component model is called, the sequence of methods that are called for that 
+        component is determined by the ``_mock_generation_calling_sequence`` attribute 
+        bound to the component model instance. 
+        See :ref:`model_feature_calling_sequence_mechanism` for further details. 
         """
         self._mock_generation_calling_sequence = []
 
@@ -726,7 +728,7 @@ class SubhaloModelFactory(ModelFactory):
         of the same parameter name. 
 
         If *any* of the component model instances have a 
-        `_suppress_repeated_param_warning` attribute that is set to the boolean True value, 
+        ``_suppress_repeated_param_warning`` attribute that is set to the boolean True value, 
         then no warning will be issued even if there are multiple appearances of the same 
         parameter name. This allows the user to not be bothered with warning messages for cases 
         where it is understood that there will be no conflicting behavior. 
@@ -743,11 +745,11 @@ class SubhaloModelFactory(ModelFactory):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
     def build_init_param_dict(self):
-        """ Create the `param_dict` attribute of the instance. The `param_dict` is a dictionary storing 
+        """ Create the ``param_dict`` attribute of the instance. The ``param_dict`` is a dictionary storing 
         the full collection of parameters controlling the behavior of the composite model. 
 
-        The `param_dict` dictionary is determined by examining the 
-        `param_dict` attribute of every component model, and building up a composite 
+        The ``param_dict`` dictionary is determined by examining the 
+        ``param_dict`` attribute of every component model, and building up a composite 
         dictionary from them. It is permissible for the same parameter name to appear more than once 
         amongst a set of component models, but a warning will be issued in such cases. 
 
