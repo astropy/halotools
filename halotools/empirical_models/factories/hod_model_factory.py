@@ -230,40 +230,115 @@ class HodModelFactory(ModelFactory):
         ############################################################
 
     def _parse_constructor_kwargs(self, **kwargs):
+        """ Method used to parse the arguments passed to 
+        the constructor into a model dictionary and supplementary arguments.
+
+        `parse_constructor_kwargs` examines the keyword arguments passed to `__init__`, 
+        and identifies the possible presence of ``galaxy_selection_func``, 
+        ``halo_selection_func``, ``model_feature_calling_sequence`` and ``gal_type_list``; 
+        all other keyword arguments will be treated as component models, 
+        and it is enforced that the values bound to all such arguments 
+        at the very least have a ``_methods_to_inherit`` attribute. 
+
+        Parameters 
+        -----------
+        **kwargs : optional keyword arguments 
+            keywords will be interpreted as the ``feature name``; 
+            values must be instances of Halotools component models 
+
+        Returns 
+        --------
+        input_model_dictionary : dict 
+            Model dictionary defining the composite model. 
+
+        supplementary_kwargs : dict 
+            Dictionary of any possible remaining keyword arguments passed to the `__init__` constructor 
+            that are not part of the composite model dictionary, e.g., ``model_feature_calling_sequence``. 
         """
-        """
-        input_model_dictionary = copy(kwargs)
 
-        ### First parse the supplementary keyword arguments, 
-        # such as 'model_feature_calling_sequence', 
-        ### from the keywords that are bound to component model instances, 
-        # such as 'centrals_occupation'
+        if 'baseline_model_instance' in kwargs:
+            baseline_model_dictionary = kwargs['baseline_model_instance'].model_dictionary
+            input_model_dictionary = copy(kwargs)
+            del input_model_dictionary['baseline_model_instance']
 
-        possible_supplementary_kwargs = (
-            'halo_selection_func', 
-            'model_feature_calling_sequence', 
-            'gal_type_list'
-            )
+            ### First parse the supplementary keyword arguments, 
+            # such as 'model_feature_calling_sequence', 
+            ### from the keywords that are bound to component model instances, 
+            # such as 'centrals_occupation'
+            possible_supplementary_kwargs = (
+                'halo_selection_func', 
+                'model_feature_calling_sequence', 
+                'gal_type_list'
+                )
+            supplementary_kwargs = {}
+            for key in possible_supplementary_kwargs:
+                try:
+                    supplementary_kwargs[key] = copy(input_model_dictionary[key])
+                    del input_model_dictionary[key]
+                except KeyError:
+                    pass
 
-        supplementary_kwargs = {}
-        for key in possible_supplementary_kwargs:
-            try:
-                supplementary_kwargs[key] = copy(input_model_dictionary[key])
-                del input_model_dictionary[key]
-            except KeyError:
-                pass
+            if 'gal_type_list' not in supplementary_kwargs:
+                supplementary_kwargs['gal_type_list'] = None
 
-        if 'gal_type_list' not in supplementary_kwargs:
-            supplementary_kwargs['gal_type_list'] = None
+            if 'model_feature_calling_sequence' not in supplementary_kwargs:
+                supplementary_kwargs['model_feature_calling_sequence'] = None
 
-        if 'model_feature_calling_sequence' not in supplementary_kwargs:
-            supplementary_kwargs['model_feature_calling_sequence'] = None
+            new_model_dictionary = copy(baseline_model_dictionary)
+            for key, value in input_model_dictionary.iteritems():
+                new_model_dictionary[key] = value
+            return new_model_dictionary, supplementary_kwargs
 
-        return input_model_dictionary, supplementary_kwargs
+        else:
+            input_model_dictionary = copy(kwargs)
+
+            ### First parse the supplementary keyword arguments, 
+            # such as 'model_feature_calling_sequence', 
+            ### from the keywords that are bound to component model instances, 
+            # such as 'centrals_occupation'
+            possible_supplementary_kwargs = (
+                'halo_selection_func', 
+                'model_feature_calling_sequence', 
+                'gal_type_list'
+                )
+            supplementary_kwargs = {}
+            for key in possible_supplementary_kwargs:
+                try:
+                    supplementary_kwargs[key] = copy(input_model_dictionary[key])
+                    del input_model_dictionary[key]
+                except KeyError:
+                    pass
+
+            if 'gal_type_list' not in supplementary_kwargs:
+                supplementary_kwargs['gal_type_list'] = None
+
+            if 'model_feature_calling_sequence' not in supplementary_kwargs:
+                supplementary_kwargs['model_feature_calling_sequence'] = None
+
+            return input_model_dictionary, supplementary_kwargs
 
 
     def build_model_feature_calling_sequence(self, supplementary_kwargs):
-        """
+        """ Method uses the ``model_feature_calling_sequence`` passed to __init__, if available. 
+        If no such argument was passed, the default sequence 
+        will be to first call ``occupation`` features, then call all other features in a random order, 
+        always calling features associated with a ``centrals`` population first (if presesent). 
+
+        Parameters 
+        -----------
+        supplementary_kwargs : dict 
+            Dictionary storing all keyword arguments passed to the `__init__` constructor that were 
+            not part of the input model dictionary. 
+
+        Returns 
+        -------
+        model_feature_calling_sequence : list 
+            List of strings specifying the order in which the component models will be called upon 
+            during mock population to execute their methods. 
+
+        See also 
+        ---------
+        :ref:`model_feature_calling_sequence_mechanism`
         """
 
         ########################
@@ -558,18 +633,28 @@ class HodModelFactory(ModelFactory):
                 component_model.build_lookup_tables()
 
     def build_init_param_dict(self):
-        """ Method used to build a dictionary of parameters for the composite model. 
+        """ Create the ``param_dict`` attribute of the instance. The ``param_dict`` is a dictionary storing 
+        the full collection of parameters controlling the behavior of the composite model. 
 
-        Accomplished by retrieving all the parameters of the component models. 
-        Method returns nothing, but binds ``param_dict`` to the class instance. 
+        The ``param_dict`` dictionary is determined by examining the 
+        ``param_dict`` attribute of every component model, and building up a composite 
+        dictionary from them. It is permissible for the same parameter name to appear more than once 
+        amongst a set of component models, but a warning will be issued in such cases. 
 
         Notes 
         -----
-        In MCMC applications, the items of ``param_dict`` define the possible 
+        In MCMC applications, the items of ``param_dict`` defines the possible 
         parameter set explored by the likelihood engine. 
         Changing the values of the parameters in ``param_dict`` 
         will propagate to the behavior of the component models 
         when the relevant methods are called. 
+
+        See also 
+        ---------
+        set_warning_suppressions
+
+        :ref:`param_dict_mechanism` 
+
         """
 
         self.param_dict = {}
@@ -643,7 +728,12 @@ class HodModelFactory(ModelFactory):
 
 
     def build_prim_sec_haloprop_list(self):
-        """
+        """ Method builds the ``_haloprop_list`` of strings. 
+
+        This list stores the names of all halo catalog columns 
+        that appear as either ``prim_haloprop_key`` or ``sec_haloprop_key`` of any component model. 
+        For all strings appearing in ``_haloprop_list``, the mock ``galaxy_table`` will have 
+        a corresponding column storing the halo property inherited by the mock galaxy. 
         """
         haloprop_list = []
         for component_model in self.model_dictionary.values():
@@ -678,7 +768,17 @@ class HodModelFactory(ModelFactory):
         self.publications = list(set(pub_list))
 
     def build_dtype_list(self):
-        """
+        """ Create the `_galprop_dtypes_to_allocate` attribute that determines 
+        the name and data type of every galaxy property that will appear in the mock ``galaxy_table``. 
+
+        This attribute is determined by examining the 
+        `_galprop_dtypes_to_allocate` attribute of every component model, and building a composite 
+        set of all these dtypes, enforcing self-consistency in cases where the same galaxy property 
+        appears more than once. 
+
+        See also 
+        ---------
+        :ref:`galprop_dtypes_to_allocate_mechanism` 
         """
         dtype_list = []
         for component_model in self.model_dictionary.values():
@@ -690,7 +790,13 @@ class HodModelFactory(ModelFactory):
         self._galprop_dtypes_to_allocate = model_helpers.create_composite_dtype(dtype_list)
 
     def build_new_haloprop_func_dict(self):
-        """
+        """ Method used to build a dictionary of functions, ``new_haloprop_func_dict``, 
+        that create new halo catalog columns 
+        during a pre-processing phase of mock population. 
+
+        See also 
+        ---------
+        :ref:`new_haloprop_func_dict_mechanism`
         """
         new_haloprop_func_dict = {}
 
@@ -717,7 +823,19 @@ class HodModelFactory(ModelFactory):
         self.new_haloprop_func_dict = new_haloprop_func_dict
 
     def set_warning_suppressions(self):
-        """
+        """ Method used to determine whether a warning should be issued if the 
+        `build_init_param_dict` method detects the presence of multiple appearances 
+        of the same parameter name. 
+
+        If *any* of the component model instances have a 
+        ``_suppress_repeated_param_warning`` attribute that is set to the boolean True value, 
+        then no warning will be issued even if there are multiple appearances of the same 
+        parameter name. This allows the user to not be bothered with warning messages for cases 
+        where it is understood that there will be no conflicting behavior. 
+
+        See also 
+        ---------
+        build_init_param_dict
         """
         self._suppress_repeated_param_warning = False
 
@@ -727,24 +845,24 @@ class HodModelFactory(ModelFactory):
                 self._suppress_repeated_param_warning += component_model._suppress_repeated_param_warning
 
     def set_inherited_methods(self):
-        """ Each component model *should* have a `_mock_generation_calling_sequence` attribute 
+        """ Each component model *should* have a ``_mock_generation_calling_sequence`` attribute 
         that provides the sequence of method names to call during mock population. Additionally, 
-        each component *should* have a `_methods_to_inherit` attribute that determines 
+        each component *should* have a ``_methods_to_inherit`` attribute that determines 
         which methods will be inherited by the composite model. 
-        The `_mock_generation_calling_sequence` list *should* be a subset of `_methods_to_inherit`. 
+        The ``_mock_generation_calling_sequence`` list *should* be a subset of ``_methods_to_inherit``. 
         If any of the above conditions fail, no exception will be raised during the construction 
         of the composite model. Instead, an empty list will be forcibly attached to each 
         component model for which these lists may have been missing. 
-        Also, for each component model, if there are any elements of `_mock_generation_calling_sequence` 
-        that were missing from `_methods_to_inherit`, all such elements will be forcibly added to 
-        that component model's `_methods_to_inherit`.
+        Also, for each component model, if there are any elements of ``_mock_generation_calling_sequence`` 
+        that were missing from ``_methods_to_inherit``, all such elements will be forcibly added to 
+        that component model's ``_methods_to_inherit``.
 
-        Finally, each component model *should* have an `_attrs_to_inherit` attribute that determines 
+        Finally, each component model *should* have an ``_attrs_to_inherit`` attribute that determines 
         which attributes will be inherited by the composite model. If any component models did not 
-        implement the `_attrs_to_inherit`, an empty list is forcibly added to the component model. 
+        implement the ``_attrs_to_inherit``, an empty list is forcibly added to the component model. 
 
         After calling the set_inherited_methods method, it will be therefore be entirely safe to 
-        run a for loop over each component model's `_methods_to_inherit` and `_attrs_to_inherit`, 
+        run a for loop over each component model's ``_methods_to_inherit`` and ``_attrs_to_inherit``, 
         even if these lists were forgotten or irrelevant to that particular component. 
         """
 
@@ -770,7 +888,14 @@ class HodModelFactory(ModelFactory):
 
 
     def set_calling_sequence(self):
-        """
+        """ Method used to determine the sequence of function calls that will be made during 
+        mock population. The methods of each component model will be called one after the other; 
+        the order in which the component models are called upon is determined by 
+        ``_model_feature_calling_sequence``. 
+        When each component model is called, the sequence of methods that are called for that 
+        component is determined by the ``_mock_generation_calling_sequence`` attribute 
+        bound to the component model instance. 
+        See :ref:`model_feature_calling_sequence_mechanism` for further details. 
         """
         # model_feature_calling_sequence
         self._mock_generation_calling_sequence = []
