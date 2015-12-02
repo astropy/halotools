@@ -32,9 +32,12 @@ from ...custom_exceptions import *
 class HodModelFactory(ModelFactory):
     """ Class used to build HOD-style models of the galaxy-halo connection. 
 
-    Can be thought of as a factory that takes an HOD model dictionary as input, 
-    and generates an HOD Model object. The returned object can be used directly to 
-    populate a simulation with a Monte Carlo realization of the model. 
+    The arguments passed to the `HodModelFactory` constructor determine 
+    the features of the model that are returned by the factory. This works as follows. 
+    A sequence of ``model_features`` can be passed, each of which 
+    are instances of component models. The factory composes these independently-defined 
+    components into a composite model. The returned instance can be used directly to 
+    populate a simulation with a Monte Carlo realization of the model, as shown in the examples. 
 
     Most behavior is derived from external classes bound up in the input ``model_dictionary``. 
     So the purpose of `HodModelFactory` is mostly to compose these external 
@@ -57,7 +60,7 @@ class HodModelFactory(ModelFactory):
             the name of the feature and the name of the galaxy population 
             with that feature; the value bound to each keyword 
             must be an instance of a component model governing 
-            the behavior of that feature. See the ``Examples`` below. 
+            the behavior of that feature. See the examples section below. 
 
         model_feature_calling_sequence : list, optional
             Determines the order in which your component features  
