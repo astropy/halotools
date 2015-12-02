@@ -12,18 +12,20 @@ from time import time
 from astropy.tests.helper import remote_data
 from astropy.table import Table
 
+from ..custom_exceptions import HalotoolsError
+
 try:
     from bs4 import BeautifulSoup
 except ImportError:
-    raise("Must have bs4 package installed to use the catalog_manager module")
+    raise HalotoolsError("Must have bs4 package installed to use the catalog_manager module")
 
 try:
     import requests
 except ImportError:
-    raise("Must have requests package installed to use the catalog_manager module")
+    raise HalotoolsError("Must have requests package installed to use the catalog_manager module")
 import posixpath
 import urlparse
-import datetime 
+import datetime
 
 import os, fnmatch, re
 from functools import partial
@@ -47,48 +49,48 @@ from ..utils.io_utils import download_file_from_url
 unsupported_simname_msg = "Input simname ``%s`` is not recognized by Halotools"
 
 class CatalogManager(object):
-    """ Class used to scrape the web for simulation data  
-    and manage the set of cached catalogs. 
+    """ Class used to scrape the web for simulation data
+    and manage the set of cached catalogs.
     """
 
     def __init__(self):
         pass
 
     def _scrape_cache(self, catalog_type, **kwargs):
-        """ Private method that is the workhorse behind 
-        `processed_halo_tables_in_cache`, `raw_halo_tables_in_cache`, and `ptcl_tables_in_cache`. 
+        """ Private method that is the workhorse behind
+        `processed_halo_tables_in_cache`, `raw_halo_tables_in_cache`, and `ptcl_tables_in_cache`.
 
-        Parameters 
+        Parameters
         ----------
-        catalog_type : string 
-            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files. 
+        catalog_type : string
+            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files.
             Must be either 'halos', 'particles', or 'raw_halos'
 
         simname : string, optional
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``simname``. 
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``simname``.
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar``. 
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``halo_finder``. 
+            Nickname of the halo-finder, e.g. ``rockstar``.
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``halo_finder``.
 
-        version_name : string, optional 
-            String specifying the version of the processed halo catalog. 
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``version_name``. 
+        version_name : string, optional
+            String specifying the version of the processed halo catalog.
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``version_name``.
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -98,10 +100,10 @@ class CatalogManager(object):
 
         Returns
         -------
-        fname_list : list 
-            List of strings of the filenames (including absolute path) of 
-            processed halo stored in the cache directory, filtered according 
-            to the input arguments. 
+        fname_list : list
+            List of strings of the filenames (including absolute path) of
+            processed halo stored in the cache directory, filtered according
+            to the input arguments.
         """
         if 'simname' in kwargs.keys():
             if cache_config.simname_is_supported(kwargs['simname']) is False:
@@ -117,7 +119,7 @@ class CatalogManager(object):
             fname_pattern = '.list*'
         else:
             fname_pattern = '.hdf5'
-            
+
         if 'version_name' in kwargs.keys():
             fname_pattern = kwargs['version_name'] + fname_pattern
         if 'halo_finder' in kwargs.keys():
@@ -132,38 +134,38 @@ class CatalogManager(object):
                 full_fname_list.append(os.path.join(path,name))
 
         fname_list = fnmatch.filter(full_fname_list, fname_pattern)
-                
+
         return fname_list
 
     def processed_halo_tables_in_cache(self, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
         simname : string, optional
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``simname``. 
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``simname``.
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar``. 
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``halo_finder``. 
+            Nickname of the halo-finder, e.g. ``rockstar``.
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``halo_finder``.
 
-        version_name : string, optional 
-            String specifying the version of the processed halo catalog. 
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``version_name``. 
+        version_name : string, optional
+            String specifying the version of the processed halo catalog.
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``version_name``.
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -173,10 +175,10 @@ class CatalogManager(object):
 
         Returns
         -------
-        fname_list : list 
-            List of strings of the filenames (including absolute path) of 
-            processed halo catalogs in the cache directory. 
-            Filenames are filtered according to the input arguments. 
+        fname_list : list
+            List of strings of the filenames (including absolute path) of
+            processed halo catalogs in the cache directory.
+            Filenames are filtered according to the input arguments.
         """
 
         f = partial(self._scrape_cache, catalog_type='halos')
@@ -184,27 +186,27 @@ class CatalogManager(object):
 
     def raw_halo_tables_in_cache(self, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
         simname : string, optional
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``simname``. 
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``simname``.
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar``. 
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``halo_finder``. 
+            Nickname of the halo-finder, e.g. ``rockstar``.
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``halo_finder``.
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -214,31 +216,31 @@ class CatalogManager(object):
 
         Returns
         -------
-        fname_list : list 
-            List of strings of the filenames (including absolute path) of 
-            all unprocessed halo catalog ASCII data tables in the cache directory. 
-            Filenames are filtered according to the input arguments. 
+        fname_list : list
+            List of strings of the filenames (including absolute path) of
+            all unprocessed halo catalog ASCII data tables in the cache directory.
+            Filenames are filtered according to the input arguments.
         """
         f = partial(self._scrape_cache, catalog_type='raw_halos')
         return f(**kwargs)
 
     def ptcl_tables_in_cache(self, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
         simname : string, optional
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``simname``. 
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``simname``.
+
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -248,43 +250,43 @@ class CatalogManager(object):
 
         Returns
         -------
-        fname_list : list 
-            List of strings of the filenames (including absolute path) of 
-            all files in the cache directory storing a random downsampling of 
-            dark matter particles. 
-            Filenames are filtered according to the input arguments. 
+        fname_list : list
+            List of strings of the filenames (including absolute path) of
+            all files in the cache directory storing a random downsampling of
+            dark matter particles.
+            Filenames are filtered according to the input arguments.
         """
         f = partial(self._scrape_cache, catalog_type='particles')
         return f(**kwargs)
 
     def processed_halo_tables_available_for_download(self, **kwargs):
-        """ Method searches the appropriate web location and 
-        returns a list of the filenames of all reduced  
-        halo catalog binaries processed by Halotools 
-        that are available for download. 
+        """ Method searches the appropriate web location and
+        returns a list of the filenames of all reduced
+        halo catalog binaries processed by Halotools
+        that are available for download.
 
-        Parameters 
+        Parameters
         ----------
         simname : string, optional
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``simname``. 
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``simname``.
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar``. 
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``halo_finder``. 
+            Nickname of the halo-finder, e.g. ``rockstar``.
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``halo_finder``.
 
-        Returns 
+        Returns
         -------
-        output : list 
-            List of web locations of all pre-processed halo catalogs 
-            matching the input arguments. 
+        output : list
+            List of web locations of all pre-processed halo catalogs
+            matching the input arguments.
 
         """
         if 'simname' in kwargs.keys():
@@ -339,26 +341,26 @@ class CatalogManager(object):
 
     def _orig_halo_table_web_location(self, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
         simname : string
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
         halo_finder : string
             Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``.
 
-        Returns 
+        Returns
         -------
-        webloc : string 
-            Web location from which the original halo catalogs were downloaded.  
+        webloc : string
+            Web location from which the original halo catalogs were downloaded.
         """
         try:
             simname = kwargs['simname']
             halo_finder = kwargs['halo_finder']
         except KeyError:
-            raise("CatalogManager._orig_halo_table_web_location method "
+            raise HalotoolsError("CatalogManager._orig_halo_table_web_location method "
                 "must be called with ``simname`` and ``halo_finder`` arguments")
 
         if simname == 'multidark':
@@ -367,9 +369,9 @@ class CatalogManager(object):
             if halo_finder == 'rockstar':
                 return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
             elif halo_finder == 'bdm':
-                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/' 
+                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/'
         elif simname == 'bolplanck':
-            return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/' 
+            return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/'
         elif simname == 'consuelo':
             return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
         else:
@@ -377,32 +379,32 @@ class CatalogManager(object):
                 "have Halotools-recognized web locations" % (simname, halo_finder))
 
     def raw_halo_tables_available_for_download(self, **kwargs):
-        """ Method searches the appropriate web location and 
-        returns a list of the filenames of all relevant 
-        raw halo catalogs that are available for download. 
+        """ Method searches the appropriate web location and
+        returns a list of the filenames of all relevant
+        raw halo catalogs that are available for download.
 
-        Parameters 
+        Parameters
         ----------
         simname : string
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``simname``. 
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``simname``.
 
         halo_finder : string
-            Nickname of the halo-finder, e.g. ``rockstar``. 
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``halo_finder``. 
+            Nickname of the halo-finder, e.g. ``rockstar``.
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``halo_finder``.
 
-        Returns 
+        Returns
         -------
-        output : list 
-            List of web locations of all pre-processed halo catalogs 
-            matching the input arguments. 
+        output : list
+            List of web locations of all pre-processed halo catalogs
+            matching the input arguments.
 
         """
         if 'simname' in kwargs.keys():
@@ -425,27 +427,27 @@ class CatalogManager(object):
         return output
 
     def ptcl_tables_available_for_download(self, **kwargs):
-        """ Method searches the appropriate web location and 
-        returns a list of the filenames of all reduced  
-        halo catalog binaries processed by Halotools 
-        that are available for download. 
+        """ Method searches the appropriate web location and
+        returns a list of the filenames of all reduced
+        halo catalog binaries processed by Halotools
+        that are available for download.
 
-        Parameters 
+        Parameters
         ----------
         simname : string, optional
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-            Argument is used to filter the output list of filenames. 
-            Default is None, in which case `processed_halo_tables_in_cache` 
-            will not filter the returned list of filenames by ``simname``. 
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
-        Returns 
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``simname``.
+
+        Returns
         -------
-        output : list 
+        output : list
             List of web locations of all catalogs of downsampled particles
-            matching the input arguments. 
+            matching the input arguments.
 
         """
         if 'simname' in kwargs.keys():
@@ -479,25 +481,25 @@ class CatalogManager(object):
         return output
 
     def _get_scale_factor_substring(self, fname):
-        """ Method extracts the portion of the Rockstar hlist fname 
-        that contains the scale factor of the snapshot. 
+        """ Method extracts the portion of the Rockstar hlist fname
+        that contains the scale factor of the snapshot.
 
-        Parameters 
+        Parameters
         ----------
-        fname : string 
-            Filename of the hlist. 
+        fname : string
+            Filename of the hlist.
 
-        Returns 
+        Returns
         -------
-        scale_factor_substring : string 
-            The substring specifying the scale factor of the snapshot. 
+        scale_factor_substring : string
+            The substring specifying the scale factor of the snapshot.
 
-        Notes 
+        Notes
         -----
-        Assumes that the first character of the relevant substring 
-        is the one immediately following the first incidence of an underscore, 
-        and final character is the one immediately preceding the second decimal. 
-        These assumptions are valid for all catalogs currently on the hipacc website. 
+        Assumes that the first character of the relevant substring
+        is the one immediately following the first incidence of an underscore,
+        and final character is the one immediately preceding the second decimal.
+        These assumptions are valid for all catalogs currently on the hipacc website.
 
         """
         first_index = fname.index('_')+1
@@ -516,7 +518,7 @@ class CatalogManager(object):
         if desired_redshift <= -1:
             raise ValueError("desired_redshift of <= -1 is unphysical")
         else:
-            input_scale_factor = 1./(1.+desired_redshift) 
+            input_scale_factor = 1./(1.+desired_redshift)
 
         # First create a list of floats storing the scale factors of each hlist file
         scale_factor_list = []
@@ -527,7 +529,7 @@ class CatalogManager(object):
             scale_factor_list.append(scale_factor)
         scale_factor_list = np.array(scale_factor_list)
 
-        # Now use the array utils module to determine 
+        # Now use the array utils module to determine
         # which scale factor is the closest
         input_scale_factor = 1./(1. + desired_redshift)
         idx_closest_catalog = find_idx_nearest_val(
@@ -541,33 +543,33 @@ class CatalogManager(object):
 
     def closest_catalog_in_cache(self, catalog_type, desired_redshift, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
-        desired_redshift : float 
-            Redshift of the desired catalog. 
+        desired_redshift : float
+            Redshift of the desired catalog.
 
-        catalog_type : string 
-            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files. 
+        catalog_type : string
+            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files.
             Must be either ``halos``, ``particles``, or ``raw_halos``
 
         simname : string
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar``. 
-            Required when input ``catalog_type`` is ``halos`` or ``raw_halos``. 
+            Nickname of the halo-finder, e.g. ``rockstar``.
+            Required when input ``catalog_type`` is ``halos`` or ``raw_halos``.
 
-        version_name : string, optional 
-            String specifying the version of the processed halo catalog. 
-            Argument is used to filter the output list of filenames. 
-            Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``. 
+        version_name : string, optional
+            String specifying the version of the processed halo catalog.
+            Argument is used to filter the output list of filenames.
+            Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``.
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -577,10 +579,10 @@ class CatalogManager(object):
 
         Returns
         -------
-        output_fname : list 
-            String of the filename with the closest matching redshift. 
+        output_fname : list
+            String of the filename with the closest matching redshift.
 
-        redshift : float 
+        redshift : float
             Value of the redshift of the snapshot
         """
         if 'simname' in kwargs.keys():
@@ -592,12 +594,12 @@ class CatalogManager(object):
             try:
                 halo_finder = kwargs['halo_finder']
             except KeyError:
-                raise("If input catalog_type is not particles, must pass halo_finder argument")
+                raise HalotoolsError("If input catalog_type is not particles, must pass halo_finder argument")
         else:
             if 'halo_finder' in kwargs.keys():
                 warn("There is no need to specify a halo-finder when requesting particle data")
                 del kwargs['halo_finder']
-        
+
         if (catalog_type == 'halos') & ('version_name' not in kwargs.keys()):
             kwargs['version_name'] = sim_defaults.default_version_name
         filename_list = self._scrape_cache(catalog_type = catalog_type, **kwargs)
@@ -612,42 +614,42 @@ class CatalogManager(object):
 
     def closest_catalog_on_web(self, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
-        desired_redshift : float 
-            Redshift of the desired catalog. 
+        desired_redshift : float
+            Redshift of the desired catalog.
 
-        catalog_type : string 
-            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files. 
+        catalog_type : string
+            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files.
             Must be either ``halos``, ``particles``, or ``raw_halos``
 
         simname : string
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar``. 
-            Required when input ``catalog_type`` is ``halos`` or ``raw_halos``. 
+            Nickname of the halo-finder, e.g. ``rockstar``.
+            Required when input ``catalog_type`` is ``halos`` or ``raw_halos``.
 
-        version_name : string, optional 
-            String specifying the version of the processed halo catalog. 
-            Argument is used to filter the output list of filenames. 
-            Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``. 
+        version_name : string, optional
+            String specifying the version of the processed halo catalog.
+            Argument is used to filter the output list of filenames.
+            Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``.
 
         Returns
         -------
-        output_fname : list 
-            String of the filename with the closest matching redshift. 
+        output_fname : list
+            String of the filename with the closest matching redshift.
 
-        redshift : float 
+        redshift : float
             Value of the redshift of the snapshot
 
-        Examples 
+        Examples
         --------
         >>> catman = CatalogManager()
 
-        Suppose you would like to download a pre-processed halo catalog for the Bolshoi-Planck simulation for z=0.5. 
+        Suppose you would like to download a pre-processed halo catalog for the Bolshoi-Planck simulation for z=0.5.
         To identify the filename of the available catalog that most closely matches your needs:
 
         >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='halos', simname='bolplanck', halo_finder='rockstar', desired_redshift=0.5)  # doctest: +REMOTE_DATA
@@ -668,14 +670,14 @@ class CatalogManager(object):
         try:
             simname = kwargs['simname']
         except KeyError:
-            raise("Must supply input simname keyword argument")
+            raise HalotoolsError("Must supply input simname keyword argument")
 
         catalog_type = kwargs['catalog_type']
         if catalog_type is not 'particles':
             try:
                 halo_finder = kwargs['halo_finder']
             except KeyError:
-                raise("If input catalog_type is not particles, must pass halo_finder argument")
+                raise HalotoolsError("If input catalog_type is not particles, must pass halo_finder argument")
         else:
             if 'halo_finder' in kwargs.keys():
                 warn("There is no need to specify a halo-finder when requesting particle data")
@@ -694,38 +696,38 @@ class CatalogManager(object):
         return output_fname, redshift
 
     def download_raw_halo_table(self, dz_tol = 0.1, overwrite=False, **kwargs):
-        """ Method to download one of the pre-processed binary files 
-        storing a reduced halo catalog.  
+        """ Method to download one of the pre-processed binary files
+        storing a reduced halo catalog.
 
-        Parameters 
+        Parameters
         ----------
-        simname : string 
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-        halo_finder : string 
-            Nickname of the halo-finder, e.g. `rockstar`. 
+        simname : string
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
-        desired_redshift : float 
-            Redshift of the requested snapshot. Must match one of the 
-            available snapshots, or a prompt will be issued providing the nearest 
-            available snapshots to choose from. 
+        halo_finder : string
+            Nickname of the halo-finder, e.g. `rockstar`.
+
+        desired_redshift : float
+            Redshift of the requested snapshot. Must match one of the
+            available snapshots, or a prompt will be issued providing the nearest
+            available snapshots to choose from.
 
         dz_tol : float, optional
-            Tolerance value determining how close the requested redshift must be to 
-            some available snapshot before issuing a warning. Default value is 0.1. 
+            Tolerance value determining how close the requested redshift must be to
+            some available snapshot before issuing a warning. Default value is 0.1.
 
         overwrite : boolean, optional
-            If a file with the same filename already exists 
-            in the requested download location, the `overwrite` boolean determines 
-            whether or not to overwrite the file. Default is False, in which case 
-            no download will occur if a pre-existing file is detected. 
+            If a file with the same filename already exists
+            in the requested download location, the `overwrite` boolean determines
+            whether or not to overwrite the file. Default is False, in which case
+            no download will occur if a pre-existing file is detected.
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -733,11 +735,11 @@ class CatalogManager(object):
 
             * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
-        Returns 
+        Returns
         -------
-        output_fname : string  
-            Filename (including absolute path) of the location of the downloaded 
-            halo catalog.  
+        output_fname : string
+            Filename (including absolute path) of the location of the downloaded
+            halo catalog.
         """
         if 'simname' in kwargs.keys():
             if cache_config.simname_is_supported(kwargs['simname']) is False:
@@ -751,11 +753,11 @@ class CatalogManager(object):
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
-                "No raw %s halo catalog has \na redshift within %.2f " + 
+                "No raw %s halo catalog has \na redshift within %.2f " +
                 "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
-            return 
+            return
 
         cache_dirname = cache_config.get_catalogs_dir(catalog_type='raw_halos', **kwargs)
         output_fname = os.path.join(cache_dirname, os.path.basename(url))
@@ -789,38 +791,38 @@ class CatalogManager(object):
 
 
     def download_processed_halo_table(self, dz_tol = 0.1, overwrite=False, **kwargs):
-        """ Method to download one of the pre-processed binary files 
-        storing a reduced halo catalog.  
+        """ Method to download one of the pre-processed binary files
+        storing a reduced halo catalog.
 
-        Parameters 
+        Parameters
         ----------
-        simname : string 
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-        halo_finder : string 
-            Nickname of the halo-finder, e.g. `rockstar`. 
+        simname : string
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
-        desired_redshift : float 
-            Redshift of the requested snapshot. Must match one of the 
-            available snapshots, or a prompt will be issued providing the nearest 
-            available snapshots to choose from. 
+        halo_finder : string
+            Nickname of the halo-finder, e.g. `rockstar`.
+
+        desired_redshift : float
+            Redshift of the requested snapshot. Must match one of the
+            available snapshots, or a prompt will be issued providing the nearest
+            available snapshots to choose from.
 
         dz_tol : float, optional
-            Tolerance value determining how close the requested redshift must be to 
-            some available snapshot before issuing a warning. Default value is 0.1. 
+            Tolerance value determining how close the requested redshift must be to
+            some available snapshot before issuing a warning. Default value is 0.1.
 
         overwrite : boolean, optional
-            If a file with the same filename already exists 
-            in the requested download location, the `overwrite` boolean determines 
-            whether or not to overwrite the file. Default is False, in which case 
-            no download will occur if a pre-existing file is detected. 
+            If a file with the same filename already exists
+            in the requested download location, the `overwrite` boolean determines
+            whether or not to overwrite the file. Default is False, in which case
+            no download will occur if a pre-existing file is detected.
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -828,11 +830,11 @@ class CatalogManager(object):
 
             * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
-        Returns 
+        Returns
         -------
-        output_fname : string  
-            Filename (including absolute path) of the location of the downloaded 
-            halo catalog.  
+        output_fname : string
+            Filename (including absolute path) of the location of the downloaded
+            halo catalog.
         """
         if 'simname' in kwargs.keys():
             if cache_config.simname_is_supported(kwargs['simname']) is False:
@@ -850,7 +852,7 @@ class CatalogManager(object):
             if 'halo_finder' in kwargs:
                 msg = msg + "halo-finder = " + kwargs['halo_finder'] + "\n"
             else:
-                msg = msg + "halo-finder = any halo-finder\n" 
+                msg = msg + "halo-finder = any halo-finder\n"
             msg = msg + "There are no halo catalogs meeting your specifications"
             raise UnsupportedSimError(msg)
 
@@ -859,11 +861,11 @@ class CatalogManager(object):
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
-                "No pre-processed %s halo catalog has \na redshift within %.2f " + 
+                "No pre-processed %s halo catalog has \na redshift within %.2f " +
                 "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
-            return 
+            return
 
         cache_dirname = cache_config.get_catalogs_dir(catalog_type='halos', **kwargs)
         output_fname = os.path.join(cache_dirname, os.path.basename(url))
@@ -899,38 +901,38 @@ class CatalogManager(object):
 
 
     def download_ptcl_table(self, dz_tol = 0.1, overwrite=False, **kwargs):
-        """ Method to download one of the pre-processed binary files 
-        storing a reduced halo catalog.  
+        """ Method to download one of the pre-processed binary files
+        storing a reduced halo catalog.
 
-        Parameters 
+        Parameters
         ----------
-        simname : string 
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-        halo_finder : string 
-            Nickname of the halo-finder, e.g. `rockstar`. 
+        simname : string
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
-        desired_redshift : float 
-            Redshift of the requested snapshot. Must match one of the 
-            available snapshots, or a prompt will be issued providing the nearest 
-            available snapshots to choose from. 
+        halo_finder : string
+            Nickname of the halo-finder, e.g. `rockstar`.
+
+        desired_redshift : float
+            Redshift of the requested snapshot. Must match one of the
+            available snapshots, or a prompt will be issued providing the nearest
+            available snapshots to choose from.
 
         dz_tol : float, optional
-            Tolerance value determining how close the requested redshift must be to 
-            some available snapshot before issuing a warning. Default value is 0.1. 
+            Tolerance value determining how close the requested redshift must be to
+            some available snapshot before issuing a warning. Default value is 0.1.
 
         overwrite : boolean, optional
-            If a file with the same filename already exists 
-            in the requested download location, the `overwrite` boolean determines 
-            whether or not to overwrite the file. Default is False, in which case 
-            no download will occur if a pre-existing file is detected. 
+            If a file with the same filename already exists
+            in the requested download location, the `overwrite` boolean determines
+            whether or not to overwrite the file. Default is False, in which case
+            no download will occur if a pre-existing file is detected.
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -938,11 +940,11 @@ class CatalogManager(object):
 
             * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
-        Returns 
+        Returns
         -------
-        output_fname : string  
-            Filename (including absolute path) of the location of the downloaded 
-            halo catalog.  
+        output_fname : string
+            Filename (including absolute path) of the location of the downloaded
+            halo catalog.
         """
         if 'simname' in kwargs.keys():
             if cache_config.simname_is_supported(kwargs['simname']) is False:
@@ -967,11 +969,11 @@ class CatalogManager(object):
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
-                "No %s particle catalog has \na redshift within %.2f " + 
+                "No %s particle catalog has \na redshift within %.2f " +
                 "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
-            return 
+            return
 
         cache_dirname = cache_config.get_catalogs_dir(catalog_type='particles', **kwargs)
         output_fname = os.path.join(cache_dirname, os.path.basename(url))
@@ -1007,20 +1009,20 @@ class CatalogManager(object):
 
     def retrieve_ptcl_table_from_cache(self, simname, desired_redshift, **kwargs):
         """
-        Parameters 
+        Parameters
         ----------
-        desired_redshift : float 
-            Redshift of the desired catalog. 
+        desired_redshift : float
+            Redshift of the desired catalog.
 
         simname : string
-            Nickname of the simulation. Currently supported simulations are 
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
-            
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -1030,15 +1032,15 @@ class CatalogManager(object):
 
         Returns
         -------
-        particles : Astropy Table 
-            `~astropy.table.Table` object storing position and velocity of particles. 
-        """        
+        particles : Astropy Table
+            `~astropy.table.Table` object storing position and velocity of particles.
+        """
         try:
             import h5py
         except ImportError:
             raise HalotoolsError("Must have h5py package installed to use this feature")
 
-        fname, z = self.closest_catalog_in_cache(simname = simname, 
+        fname, z = self.closest_catalog_in_cache(simname = simname,
             catalog_type='particles', desired_redshift=desired_redshift, **kwargs)
 
         if abs(z-desired_redshift) > 0.01:
@@ -1054,22 +1056,22 @@ class CatalogManager(object):
 
     def store_newly_processed_halo_table(self, halo_table, reader, version_name, **kwargs):
         """
-        Parameters 
+        Parameters
         -----------
-        halo_table : table 
-            `~astropy.table.Table` object storing the halo catalog 
+        halo_table : table
+            `~astropy.table.Table` object storing the halo catalog
 
         reader : object
-            `~halotools.sim_manager.BehrooziASCIIReader` object used to read the ascii data 
-            and produce the input ``halo_table`` 
+            `~halotools.sim_manager.BehrooziASCIIReader` object used to read the ascii data
+            and produce the input ``halo_table``
 
-        version_name : string 
-            String will be appended to the original hlist name when storing the hdf5 file. 
+        version_name : string
+            String will be appended to the original hlist name when storing the hdf5 file.
 
-        external_cache_loc : string, optional 
-            Absolute path to an alternative source of halo catalogs. 
-            Method assumes that ``external_cache_loc`` is organized in the 
-            same way that the normal Halotools cache is. Specifically: 
+        external_cache_loc : string, optional
+            Absolute path to an alternative source of halo catalogs.
+            Method assumes that ``external_cache_loc`` is organized in the
+            same way that the normal Halotools cache is. Specifically:
 
             * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
 
@@ -1077,21 +1079,21 @@ class CatalogManager(object):
 
             * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
 
-        overwrite : boolean, optional 
+        overwrite : boolean, optional
             Determines whether we will overwrite an existing file of the same name, if present
 
-        notes : dict, optional 
-            Additional notes that will be appended to the stored hdf5 file as metadata. 
-            Each dict key of `notes` will be a metadata attribute of the hdf5 file, accessible 
-            via hdf5_fileobj.attrs[key]. The value attached to each key can be any string. 
+        notes : dict, optional
+            Additional notes that will be appended to the stored hdf5 file as metadata.
+            Each dict key of `notes` will be a metadata attribute of the hdf5 file, accessible
+            via hdf5_fileobj.attrs[key]. The value attached to each key can be any string.
 
-        Returns 
+        Returns
         -------
-        output_fname : string 
-            Filename (including absolute path) where the input ``halo_table`` will be stored. 
+        output_fname : string
+            Filename (including absolute path) where the input ``halo_table`` will be stored.
         """
-        output_dir = cache_config.get_catalogs_dir(catalog_type = 'halos', 
-            simname = reader.halocat.simname, 
+        output_dir = cache_config.get_catalogs_dir(catalog_type = 'halos',
+            simname = reader.halocat.simname,
             halo_finder = reader.halocat.halo_finder, **kwargs)
 
         basename = os.path.basename(reader.fname) + '.' + version_name + '.hdf5'
@@ -1126,7 +1128,7 @@ class CatalogManager(object):
         f.attrs['time_of_original_reduction'] = time_right_now
 
         f.attrs['original_data_source'] = self._orig_halo_table_web_location(
-            simname=reader.halocat.simname, 
+            simname=reader.halocat.simname,
             halo_finder=reader.halocat.halo_finder)
 
         f.attrs['simname'] = reader.halocat.simname
@@ -1159,7 +1161,7 @@ class CatalogManager(object):
 
 
 
-        
+
 
 
 
