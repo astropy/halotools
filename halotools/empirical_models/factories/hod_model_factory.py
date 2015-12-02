@@ -33,18 +33,29 @@ class HodModelFactory(ModelFactory):
     """ Class used to build HOD-style models of the galaxy-halo connection. 
 
     The arguments passed to the `HodModelFactory` constructor determine 
-    the features of the model that are returned by the factory. This works as follows. 
-    A sequence of ``model_features`` can be passed, each of which 
-    are instances of component models. The factory composes these independently-defined 
-    components into a composite model. The returned instance can be used directly to 
-    populate a simulation with a Monte Carlo realization of the model, as shown in the examples. 
+    the features of the model that are returned by the factory. This works in one of two ways, 
+    both of which have explicit examples provided below. 
 
-    Most behavior is derived from external classes bound up in the input ``model_dictionary``. 
-    So the purpose of `HodModelFactory` is mostly to compose these external 
-    behaviors together into a composite model. 
-    The aim is to provide a standardized model object 
-    that interfaces consistently with the rest of the package, 
-    regardless of the features of the model. 
+    1. Building a new model from scratch. 
+
+    You can build a model from scratch by passing in a sequence of 
+    ``model_features``, each of which are instances of component models. 
+    The factory then composes these independently-defined 
+    components into a composite model. 
+
+    2. Building a new model from an existing model. 
+
+    It is also possible to add/swap new features to a previously built composite model instance, 
+    allowing you to create new models from existing ones. To do this, you pass in 
+    a ``baseline_model_instance`` and any set of ``model_features``. 
+    Any ``model_feature`` keyword that matches a feature name of the ``baseline_model_instance`` 
+    will replace that feature in the ``baseline_model_instance``; 
+    all other ``model_features`` that you pass in will augment 
+    the ``baseline_model_instance`` with new behavior. 
+
+    Regardless what set of features you use to build your model, 
+    the returned object can be used to directly populate subhalos 
+    with mock galaxies, as shown in the example below. 
     
     """
 
@@ -52,33 +63,45 @@ class HodModelFactory(ModelFactory):
         """
         Parameters
         ----------
+
         *model_features : sequence of keyword arguments, optional 
-            The standard way to call the `HodModelFactory` is 
-            with a sequence of keyword arguments providing the set of 
-            features that you want to build your composite model with. 
-            Each keyword you use will be simultaneously interpreted as 
-            the name of the feature and the name of the galaxy population 
-            with that feature; the value bound to each keyword 
-            must be an instance of a component model governing 
-            the behavior of that feature. See the examples section below. 
+            Each keyword you use will be interpreted as the name 
+            of a feature in the composite model, 
+            e.g. 'stellar_mass' or 'star_formation_rate'; 
+            the value bound to each keyword must be an instance of a 
+            component model governing the behavior of that feature. 
+            See the examples section below. 
+
+        baseline_model_instance : `SubhaloModelFactory` instance, optional 
+            If passed to the constructor, the ``model_dictionary`` bound to the 
+            ``baseline_model_instance`` will be treated as the baseline dictionary. 
+            Any additional keyword arguments passed to the constructor that appear 
+            in the baseline dictionary will be treated as model features that replace 
+            the corresponding component model in the baseline dictionary. Any  
+            model features passed to the constructor that do not 
+            appear in the baseline dictionary will be treated as new features that 
+            augment the baseline model with new behavior. See the examples section below. 
 
         model_feature_calling_sequence : list, optional
             Determines the order in which your component features  
             will be called during mock population. 
 
             Some component models may have explicit dependence upon 
-            the value of some other galaxy model property. 
+            the value of some other galaxy property being modeled. 
             In such a case, you must pass a ``model_feature_calling_sequence`` list, 
             ordered in the desired calling sequence. 
-            A classic example is if the stellar mass of a central galaxy has explicit 
-            dependence on whether or not the central is active or quiescent. 
-            In such a case, an example ``model_feature_calling_sequence`` could be 
-            model_feature_calling_sequence = ['centrals_quiescent', 'centrals_occupation', ...]
+
+            A classic example is if the stellar-to-halo-mass relation 
+            has explicit dependence on the star formation rate of the galaxy 
+            (active or quiescent). For this example, the
+            ``model_feature_calling_sequence`` would be 
+            model_feature_calling_sequence = ['sfr_designation', 'stellar_mass', ...]. 
 
             Default behavior is to assume that no model feature  
             has explicit dependence upon any other, in which case the component 
             models appearing in the ``model_features`` keyword arguments 
-            will be called in random order. 
+            will be called in random order, giving primacy to the potential presence 
+            of `stellar_mass` and/or `luminosity` features. 
 
         gal_type_list : list, optional 
             List of strings providing the names of the galaxy types in the 
@@ -101,21 +124,59 @@ class HodModelFactory(ModelFactory):
 
         Examples 
         ---------
-        >>> from halotools.empirical_models import leauthaud11_model_dictionary
-        >>> model_dictionary = leauthaud11_model_dictionary(redshift = 2, threshold = 10.5)
-        >>> model_instance = HodModelFactory(**model_dictionary)
+        As described above, there are two different ways to build models using the 
+        `HodModelFactory`. Here we give demonstrations of each in turn. 
 
-        All model instance have a `populate_mock` method that allows you to generate Monte Carlo 
-        realizations of galaxy populations based on the underlying analytical functions: 
+        In the first example we'll show how to build a model from scratch using 
+        the ``model_features`` option. For illustration purposes, we'll pick a 
+        particularly simple HOD-style model based on Zheng et al. (2007). As 
+        described in `~halotools.empirical_models.zheng07_model_dictionary`, in this model 
+        there are two galaxy populations, 'centrals' and 'satellites'; 
+        centrals sit at the center of dark matter halos, and satellites follow an NFW profile. 
 
-        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 2) # doctest: +SKIP
+        We'll start with the features for the population of centrals:
+
+        >>> from halotools.empirical_models import TrivialPhaseSpace, Zheng07Cens
+        >>> cens_occ_model =  Zheng07Cens()
+        >>> cens_prof_model = TrivialPhaseSpace()
+
+        Now for the satellites:
+
+        >>> from halotools.empirical_models import NFWPhaseSpace, Zheng07Sats
+        >>> sats_occ_model =  Zheng07Sats()
+        >>> sats_prof_model = NFWPhaseSpace()
+
+        At this point we have our component model instances. 
+        The following call to the factory uses the ``model_features`` option 
+        described above:
+
+        >>> model_instance = HodModelFactory(centrals_occupation = cens_occ_model, centrals_profile = cens_prof_model, satellites_occupation = sats_occ_model, satellites_profile = sats_prof_model)
+
+        The feature names we have chosen are 'centrals_occupation' and 'centrals_profile', 
+        'satellites_occupation' and 'satellites_profile'. The first substring of each feature name 
+        informs the factory of the name of the galaxy population, the second substring identifies 
+        the type of feature; to each feature we have attached a component model instance. 
+
+        Whatever features your composite model has, 
+        you can use the `~HodModelFactory.populate_mock` method 
+        to create Monte Carlo realization of the model by populating any dark matter halo catalog 
+        in your cache directory:
+
+        >>> model_instance.populate_mock(simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
+
+        Your ``model_instance`` now has a ``mock`` attribute storing a synthetic galaxy 
+        population. See the `~HodModelFactory.populate_mock` docstring for details. 
 
         There also convenience functions for estimating the clustering signal predicted by the model. 
         For example, the following method repeatedly populates the Bolshoi simulation with 
         galaxies, computes the 3-d galaxy clustering signal of each mock, computes the median 
         clustering signal in each bin, and returns the result:
 
-        >>> r, xi = model_instance.compute_average_galaxy_clustering(num_iterations = 5, redshift = 2) # doctest: +SKIP
+        >>> r, xi = model_instance.compute_average_galaxy_clustering(num_iterations = 5, simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
+
+        To learn more about the 
+        `~halotools.empirical_models.ModelFactory.compute_average_galaxy_clustering` and other 
+        similar methods, see :ref:`composite_model_convenience_functions`. 
 
         """
 

@@ -120,7 +120,8 @@ class SubhaloModelFactory(ModelFactory):
         As described above, there are two different ways to build models using the 
         `SubhaloModelFactory`. Here we give demonstrations of each in turn. 
 
-        In the first example we'll show how to build a model from scratch. 
+        In the first example we'll show how to build a model from scratch using 
+        the ``model_features`` option. 
         We'll build a composite model from two component models: one modeling stellar mass, 
         one modeling star formation rate designation. We will use the 
         `~halotools.empirical_models.Behroozi10SmHm` class to model stellar mass, 
@@ -141,7 +142,7 @@ class SubhaloModelFactory(ModelFactory):
         >>> model_instance = SubhaloModelFactory(stellar_mass = stellar_mass_model, sfr = sfr_model)
 
         The feature names we have chosen are 'stellar_mass' and 'sfr', and to each feature 
-        we have attached composite model instances. 
+        we have attached a component model instance. 
         
         In this particular example the assignment of stellar mass and SFR-designation 
         are entirely independent, and so no other arguments are necessary. However, if you are 
@@ -163,6 +164,13 @@ class SubhaloModelFactory(ModelFactory):
 
         Your ``model_instance`` now has a ``mock`` attribute storing a synthetic galaxy 
         population. See the `~SubhaloModelFactory.populate_mock` docstring for details. 
+
+        There also convenience functions for estimating the clustering signal predicted by the model. 
+        For example, the following method repeatedly populates the Bolshoi simulation with 
+        galaxies, computes the 3-d galaxy clustering signal of each mock, computes the median 
+        clustering signal in each bin, and returns the result:
+
+        >>> r, xi = model_instance.compute_average_galaxy_clustering(num_iterations = 5, simname = 'bolshoi', redshift = 0.5) # doctest: +SKIP
 
         In this next example we'll show how to build a new model from an existing one 
         using the ``baseline_model_instance`` option. We will start from  
