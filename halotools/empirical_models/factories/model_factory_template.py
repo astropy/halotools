@@ -318,9 +318,9 @@ class ModelFactory(object):
         Notes 
         -----
         The `compute_average_galaxy_clustering` method bound to mock instances is just a convenience wrapper 
-        around the `~halotools.mock_observables.clustering.tpcf` function. If you wish for greater 
+        around the `~halotools.mock_observables.tpcf` function. If you wish for greater 
         control over how your galaxy clustering signal is estimated, 
-        see the `~halotools.mock_observables.clustering.tpcf` documentation. 
+        see the `~halotools.mock_observables.tpcf` documentation. 
         """
         if summary_statistic == 'mean':
             summary_func = np.mean 
@@ -493,9 +493,9 @@ class ModelFactory(object):
         -----
         The `compute_average_galaxy_matter_cross_clustering` method bound to 
         mock instances is just a convenience wrapper 
-        around the `~halotools.mock_observables.clustering.tpcf` function. If you wish for greater 
+        around the `~halotools.mock_observables.tpcf` function. If you wish for greater 
         control over how your galaxy clustering signal is estimated, 
-        see the `~halotools.mock_observables.clustering.tpcf` documentation. 
+        see the `~halotools.mock_observables.tpcf` documentation. 
         """
         if summary_statistic == 'mean':
             summary_func = np.mean 

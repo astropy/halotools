@@ -233,9 +233,9 @@ class MockFactory(object):
         Notes 
         -----
         The `compute_galaxy_clustering` method bound to mock instances is just a convenience wrapper 
-        around the `~halotools.mock_observables.clustering.tpcf` function. If you wish for greater 
+        around the `~halotools.mock_observables.tpcf` function. If you wish for greater 
         control over how your galaxy clustering signal is estimated, 
-        see the `~halotools.mock_observables.clustering.tpcf` documentation. 
+        see the `~halotools.mock_observables.tpcf` documentation. 
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_clustering method is only available "
@@ -261,7 +261,7 @@ class MockFactory(object):
         if include_crosscorr is False:
             pos = three_dim_pos_bundle(table = self.galaxy_table, 
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
-            clustering = mock_observables.clustering.tpcf(
+            clustering = mock_observables.tpcf(
                 pos, rbins, period=self.halocat.Lbox, N_threads=Nthreads)
             return rbin_centers, clustering
         else:
@@ -273,7 +273,7 @@ class MockFactory(object):
                 raise HalotoolsError(msg % (key, kwargs[key], key))
             pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table, 
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
-            xi11, xi12, xi22 = mock_observables.clustering.tpcf(
+            xi11, xi12, xi22 = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=pos2, 
                 period=self.halocat.Lbox, N_threads=Nthreads)
             return rbin_centers, xi11, xi12, xi22 
@@ -354,9 +354,9 @@ class MockFactory(object):
         Notes 
         -----
         The `compute_galaxy_matter_cross_clustering` method bound to mock instances is just a convenience wrapper 
-        around the `~halotools.mock_observables.clustering.tpcf` function. If you wish for greater 
+        around the `~halotools.mock_observables.tpcf` function. If you wish for greater 
         control over how your galaxy clustering signal is estimated, 
-        see the `~halotools.mock_observables.clustering.tpcf` documentation. 
+        see the `~halotools.mock_observables.tpcf` documentation. 
         """
         if HAS_MOCKOBS is False:
             msg = ("\nThe compute_galaxy_matter_cross_clustering method is only available "
@@ -387,7 +387,7 @@ class MockFactory(object):
         if include_complement is False:
             pos = three_dim_pos_bundle(table = self.galaxy_table, 
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
-            clustering = mock_observables.clustering.tpcf(
+            clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos, 
                 period=self.halocat.Lbox, N_threads=Nthreads, do_auto=False)
             return rbin_centers, clustering
@@ -400,10 +400,10 @@ class MockFactory(object):
                 raise HalotoolsError(msg % (key, kwargs[key], key))
             pos, pos2 = three_dim_pos_bundle(table = self.galaxy_table, 
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
-            clustering = mock_observables.clustering.tpcf(
+            clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos, 
                 period=self.halocat.Lbox, N_threads=Nthreads, do_auto=False)
-            clustering2 = mock_observables.clustering.tpcf(
+            clustering2 = mock_observables.tpcf(
                 sample1=pos2, rbins=rbins, sample2=ptcl_pos, 
                 period=self.halocat.Lbox, N_threads=Nthreads, do_auto=False)
             return rbin_centers, clustering, clustering2 
