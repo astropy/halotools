@@ -37,10 +37,35 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     Returns
     -------
     labels : numpy.array
-        numpy array with integer labels >0 indicating the subvolume each point occupies.
+        numpy array with integer labels in the range [1,numpy.prod(Nsub)] indicating 
+        the subvolume each point in ``sample`` occupies.
     
     N_sub_vol : int
        number of subvolumes.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
+    >>> coords = np.vstack((x,y,z)).T
+    
+    Divide the volume into cubes with legnth 0.25 on a side.
+    
+    >>> Nsub = [4,4,4]
+    >>> labels = cuboid_subvolume_labels(coords, Nsub, Lbox)
     """
     
     #process inputs and check for consistency
@@ -48,7 +73,7 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     if sample.ndim !=2:
         msg = "sample must be a legnth-N by 3 array."
         raise HalotoolsError(msg)
-    elif np.shape(sample)[1] 1=3:
+    elif np.shape(sample)[1] !=3:
         msg = "sample must be a legnth-N by 3 array."
         raise HalotoolsError(msg)
     if type(Nsub) is int:
@@ -81,7 +106,7 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
 
 def empirical_covariance_matrix(observations):
     """
-    Calculate the covariance matrix.
+    Calculate the covariance matrix given a sample of "observations".
     
     Parameters
     ----------
@@ -91,7 +116,8 @@ def empirical_covariance_matrix(observations):
     Returns
     -------
     cov : numpy.matrix
-        covaraince matrix
+        covaraince matrix shape (N_observations, N_observations) with the covariance 
+        between observations i,j (in the order they appear in ``observations``).
     """
     
     observations =  convert_to_ndarray(observations)
@@ -106,12 +132,12 @@ def empirical_covariance_matrix(observations):
     
     # raise a warning if N_samples < Nr
     if N_samples < Nr:
-        msg = ("Number of samples is smaller than the number of observations. \n"
-               "It is recommended to increase the number of samples, \n"
-               "or decrease the number of observations.")
+        msg = ("the nubumber of samples is smaller than the number of \n"
+               "observations. it is recommended to increase the number \n"
+               "of samples or decrease the number of observations.")
         warn(msg)
     
-    cov = np.zeros((Nr,Nr)) # 2D array that keeps the covariance matrix 
+    cov = np.zeros((Nr,Nr)) # 2D array that stores the covariance matrix 
     for i in range(Nr):
         for j in range(Nr):
             tmp = 0.0
