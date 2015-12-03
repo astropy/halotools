@@ -68,7 +68,7 @@ def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     
     Then, we can claclulate the quadrapole of the correlatio function:
     
-    >>> xi_2 = multipole(xi, mu_bins, order=2)
+    >>> xi_2 = tpcf_multipole(xi, mu_bins, order=2)
     """
     
     #process inputs
