@@ -251,6 +251,7 @@ class MockFactory(object):
         else:
             rbins = model_defaults.default_rbins
         rbin_centers = (rbins[1:] + rbins[0:-1])/2.
+        rmax = max(rbins)
 
         mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
@@ -262,7 +263,8 @@ class MockFactory(object):
             pos = three_dim_pos_bundle(table = self.galaxy_table, 
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
-                pos, rbins, period=self.halocat.Lbox, N_threads=Nthreads)
+                pos, rbins, period=self.halocat.Lbox, num_threads=Nthreads, 
+                approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
             # Verify that the complementary mask is non-trivial
@@ -275,7 +277,8 @@ class MockFactory(object):
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             xi11, xi12, xi22 = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=pos2, 
-                period=self.halocat.Lbox, N_threads=Nthreads)
+                period=self.halocat.Lbox, num_threads=Nthreads, 
+                approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, xi11, xi12, xi22 
 
 
@@ -377,6 +380,7 @@ class MockFactory(object):
         else:
             rbins = model_defaults.default_rbins
         rbin_centers = (rbins[1:] + rbins[0:-1])/2.
+        rmax = max(rbins)
 
         mask = infer_mask_from_kwargs(self.galaxy_table, **kwargs)
         # Verify that the mask is non-trivial
@@ -389,7 +393,8 @@ class MockFactory(object):
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                period=self.halocat.Lbox, N_threads=Nthreads, do_auto=False)
+                period=self.halocat.Lbox, num_threads=Nthreads, do_auto=False, 
+                approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
             # Verify that the complementary mask is non-trivial
@@ -402,10 +407,12 @@ class MockFactory(object):
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                period=self.halocat.Lbox, N_threads=Nthreads, do_auto=False)
+                period=self.halocat.Lbox, num_threads=Nthreads, do_auto=False, 
+                approx_cell1_size = [rmax, rmax, rmax])
             clustering2 = mock_observables.tpcf(
                 sample1=pos2, rbins=rbins, sample2=ptcl_pos, 
-                period=self.halocat.Lbox, N_threads=Nthreads, do_auto=False)
+                period=self.halocat.Lbox, num_threads=Nthreads, do_auto=False, 
+                approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering, clustering2 
 
 
@@ -466,7 +473,7 @@ class MockFactory(object):
 
         group_finder = mock_observables.FoFGroups(positions=pos, 
             b_perp = b_perp, b_para = b_para, 
-            Lbox = self.halocat.Lbox, N_threads = Nthreads)
+            Lbox = self.halocat.Lbox, num_threads = Nthreads)
 
         return group_finder.group_ids
 
