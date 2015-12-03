@@ -13,3 +13,5 @@ from .delta_sigma import *
 from .groups import *
 from .mock_survey import *
 from .angular_tpcf import *
+from .tpcf_multipole import *
+from .error_estimation_tools import *
