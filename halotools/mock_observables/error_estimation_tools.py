@@ -104,9 +104,9 @@ def cuboid_subvolume_labels(sample, Nsub, Lbox):
     return index, int(N_sub_vol)
 
 
-def empirical_covariance_matrix(observations):
+def jackknife_covariance_matrix(observations):
     """
-    Calculate the covariance matrix given a sample of "observations".
+    Calculate the covariance matrix given a sample of jackknifed "observations".
     
     Parameters
     ----------

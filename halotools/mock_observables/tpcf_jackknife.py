@@ -346,9 +346,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                               NR_subs, estimator)
     
     #calculate the covariance matrix
-    xi_11_cov = empirical_covariance_matrix(xi_11_sub)
-    xi_12_cov = empirical_covariance_matrix(xi_12_sub)
-    xi_22_cov = empirical_covariance_matrix(xi_22_sub)
+    xi_11_cov = jackknife_covariance_matrix(xi_11_sub)
+    xi_12_cov = jackknife_covariance_matrix(xi_12_sub)
+    xi_22_cov = jackknife_covariance_matrix(xi_22_sub)
     
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
