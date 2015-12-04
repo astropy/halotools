@@ -6,7 +6,7 @@ functions to assit in error estimation of mock observations.
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-__all__=['empirical_covariance_matrix','cuboid_subvolume_labels']
+__all__=['jackknife_covariance_matrix','cuboid_subvolume_labels']
 import numpy as np
 from ..utils.array_utils import convert_to_ndarray
 from ..custom_exceptions import *
