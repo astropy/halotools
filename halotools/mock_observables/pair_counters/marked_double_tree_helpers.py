@@ -153,9 +153,9 @@ def _func_signature_int_from_wfunc(wfunc):
     elif wfunc == 11:
         return 6
     elif wfunc == 12:
-        return 3
+        return 6
     elif wfunc == 13:
-        return 3
+        return 7
     else:
         msg = ("The value ``wfunc`` = %i is not recognized")
         raise HalotoolsError(msg % wfunc)
