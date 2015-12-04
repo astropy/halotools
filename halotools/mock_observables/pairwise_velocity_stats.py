@@ -9,8 +9,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 import numpy as np
 from math import pi, gamma
-from .clustering_helpers import *
 from .pair_counters.marked_double_tree_pairs import velocity_marked_npairs
+from .pairwise_velocity_helpers import *
 ##########################################################################################
 
 
@@ -86,13 +86,45 @@ def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
     v_12 : numpy.array
         *len(rbins)-1* length array containing the mean pairwise velocity, 
         :math:`v_{12}(r)`, computed in each of the bins defined by ``rbins``.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
+    >>> coords = np.vstack((x,y,z)).T
+    
+    We will do the same to get a random set of peculiar velocities.
+    
+    >>> vx = np.random.random(Npts)
+    >>> vy = np.random.random(Npts)
+    >>> vz = np.random.random(Npts)
+    >>> velocities = np.vstack((x,y,z)).T
+    
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> v_12 = mean_pairwise_velocity(coords, velocities, rbins, period=period)
+    
+    The result should be consistent with zero correlation at all *r* within 
+    statistical errors
     """
     
     function_args = [sample1, velocities1, rbins, sample2, velocities2, period,\
-                     do_auto, do_cross, num_threads, max_sample_size]
+                     do_auto, do_cross, num_threads, max_sample_size, approx_cell1_size, approx_cell2_size]
     
     sample1, velocities1, rbins, sample2, velocities2, period, do_auto, do_cross,\
-        num_threads, _sample1_is_sample2, PBCs = _pairwise_velocity_process_args(*function_args)
+        num_threads, _sample1_is_sample2, PBCs = _pairwise_velocity_stats_process_args(*function_args)
     
     marks1 = np.vstack((sample1.T, velocities1.T)).T
     marks2 = np.vstack((sample2.T, velocities2.T)).T
@@ -159,9 +191,6 @@ def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
                                                         marks1, marks2, wfunc,\
                                                         _sample1_is_sample2,\
                                                         approx_cell1_size, approx_cell2_size)
-    
-    print(V1V1)
-    print(N1N1)
     
     #return results
     if _sample1_is_sample2:
