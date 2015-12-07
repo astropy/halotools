@@ -14,6 +14,7 @@ from warnings import warn
 from ..custom_exceptions import *
 from ..utils.array_utils import convert_to_ndarray
 from .clustering_helpers import *
+from .tpcf_estimators import *
 from .pair_counters.double_tree_pairs import jnpairs
 from .error_estimation_tools import *
 ##########################################################################################

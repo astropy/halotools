@@ -243,23 +243,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
                     0.0 & : |w_1[0]-w_2[0]| \\leq w_1[1] \\\\
                 \\end{array}
                 \\right.
-    
-    #. radial velocity weights (N_marks = 6)
-        .. math::
-            \\begin{array}{ll}
-                \\mathrm{d}r_x & = w_1[0]-w_2[0] \\\\
-                \\mathrm{d}r_y & = w_1[1]-w_2[1] \\\\
-                \\mathrm{d}r_z & = w_1[2]-w_2[2] \\\\
-                \\mathrm{d}v_x & = w_1[3]-w_2[3] \\\\
-                \\mathrm{d}v_y & = w_1[4]-w_2[4] \\\\
-                \\mathrm{d}v_z & = w_1[5]-w_2[5] \\\\
-            \\end{array}
-
-        .. math::
-            f(w_1,w_2) = (\\mathrm{d}r_x \\mathrm{d}v_x+\\mathrm{d}r_y \\mathrm{d}v_y+\\mathrm{d}r_z \\mathrm{d}v_z)/\sqrt{\\mathrm{d}r_x^2+\\mathrm{d}r_y^2+\\mathrm{d}r_z^2}
-
-        This function assumes that w[0:3] is the posotion vecotr, and w[3:] is the 
-        velocity vector, and handles periodic boundary conditions appropriately.
         
     Examples
     --------
@@ -291,25 +274,6 @@ def marked_tpcf(sample1, rbins, sample2=None,
     
     The result should be consistent with :math:`\\langle {\\rm mark}\\rangle^2` at all *r* 
     within the statistical errors.
-    
-    Let's look at how one would use a more complicated marking scheme, using the same 
-    data.  Suppose the marking function needs to know the galaxies' positions as well as 
-    some other information, for example velocities, resulting in 6 marks per galaxy.
-    
-    For demonstration, we create some random velocities:
-    
-    >>> vx = np.random.random(Npts)
-    >>> vy = np.random.random(Npts)
-    >>> vz = np.random.random(Npts)
-    >>> marks = np.vstack((x,y,z,vx,vy,vz)).T
-    
-    However, we are only interested in the affect of the velocoty on the MCF.  We can set
-    the position marks to be fixed, only randomizing the velocity marks.
-    
-    >>> randomize_marks = [False,False,False,True,True,True]
-    
-    >>> rbins = np.logspace(-2,-1,10)
-    >>> MCF = marked_tpcf(coords, rbins, marks1=marks, period=period, normalize_by='random_marks', randomize_marks=randomize_marks, wfunc=11)
     """
 
 

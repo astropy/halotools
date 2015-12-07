@@ -11,6 +11,7 @@ import sys
 import numpy as np
 from math import pi, gamma
 from .clustering_helpers import *
+from .tpcf_estimators import *
 from .pair_counters.double_tree_pairs import xy_z_npairs
 ##########################################################################################
 
