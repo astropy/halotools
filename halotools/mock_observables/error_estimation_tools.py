@@ -118,6 +118,16 @@ def jackknife_covariance_matrix(observations):
     cov : numpy.matrix
         covaraince matrix shape (N_observations, N_observations) with the covariance 
         between observations i,j (in the order they appear in ``observations``).
+    
+    Examples
+    --------
+    For demonstration purposes we create some random data.  Let's say we have jackknife
+    samples and to estimate the errors on 15 measurements.  e.g. the two point
+    correlation function in 15 radial bins.
+    
+    >>> observations = np.random.random((100,15))
+    >>> cov = jackknife_covariance_matrix(observations)
+    
     """
     
     observations =  convert_to_ndarray(observations)
@@ -132,8 +142,8 @@ def jackknife_covariance_matrix(observations):
     
     # raise a warning if N_samples < Nr
     if N_samples < Nr:
-        msg = ("the nubumber of samples is smaller than the number of \n"
-               "observations. it is recommended to increase the number \n"
+        msg = ("\n the nubumber of samples is smaller than the number of \n"
+               "observations. It is recommended to increase the number \n"
                "of samples or decrease the number of observations.")
         warn(msg)
     
