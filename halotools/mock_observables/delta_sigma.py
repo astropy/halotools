@@ -22,7 +22,8 @@ __author__ = ['Duncan Campbell']
 
 
 def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
-                log_bins=True, n_bins=25, estimator='Natural', num_threads=1):
+                log_bins=True, n_bins=25, estimator='Natural', num_threads=1,
+                approx_cell1_size = None, approx_cell2_size = None):
     """ 
     Calculate the galaxy-galaxy lensing signal :math:`\\Delta\\Sigma(r_p)`.
     
@@ -60,10 +61,29 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     n_bins : int, optional
         integration parameter (see notes for more details).
     
+    estimator : string, optional
+        The estimator used to caclulate the galaxy-matter cross correlation.
+        options: 'Natural', 'Davis-Peebles', 'Hewett' , 'Hamilton', 'Landy-Szalay'
+    
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
         to indicate that the pair counters should use all available cores on the machine.
         
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
+        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+        will apportion the ``galaxies`` points into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use *max(rbins)* in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
+    
+    approx_cell2_size : array_like, optional 
+        Analogous to ``approx_cell1_size``, but for ``particles``.  See comments for 
+        ``approx_cell1_size`` for details. 
+    
     Returns 
     -------
     Delta_Sigma : np.array
@@ -96,7 +116,7 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a 
+    For demonstration purposes we create ae randomly distributed set of points within a 
     periodic unit cube. 
     
     >>> Npts = 1000
@@ -126,7 +146,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     """
     
     #process the input parameters
-    function_args = [galaxies, particles, rp_bins, pi_max, period, estimator, num_threads]
+    function_args = [galaxies, particles, rp_bins, pi_max, period, estimator,\
+                     num_threads, approx_cell1_size, approx_cell2_size]
     galaxies, particles, rp_bins, period, num_threads, PBCs =\
         _delta_sigma_process_args(*function_args)
     
@@ -158,7 +179,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     
     #calculate the cross-correlation between galaxies and particles
     xi = tpcf(galaxies, rbins, sample2=particles, randoms=None, period=period,\
-              do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads)
+              do_auto=False, do_cross=True, estimator=estimator, num_threads=num_threads,\
+              approx_cell1_size = approx_cell1_size, approx_cell2_size = approx_cell2_size)
     
     #Check to see if xi ever is equal to -1
     #if so, there are radial bins with 0 matter particles.
