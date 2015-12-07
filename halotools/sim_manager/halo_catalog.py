@@ -91,7 +91,25 @@ class HaloCatalog(object):
         pass
 
 
+class UserProvidedHaloCatalog(object):
+    """ Class used to transform a user-provided halo catalog into the standard form recognized by Halotools. 
+    """
+    def __init__(self, metadata, **halo_catalog_columns):
+        """
+        Parameters 
+        ------------
+        metadata : dict 
+            Python dictionary providing the metadata of the simulation
 
+        **halo_catalog_columns : sequence of arrays 
+            Sequence of length-*Nhalos* arrays passed in as keyword arguments. 
+            Each key will be the column name attached to the input array. 
+            
+            All keys must begin with the substring ``halo_`` to help differentiate 
+            halo property from mock galaxy properties. 
+
+        """
+        pass
 
 
 
