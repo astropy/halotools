@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
 import pytest 
@@ -16,7 +15,7 @@ from ..double_tree_pairs import npairs
 from ....custom_exceptions import HalotoolsError
 
 __all__ = ['test_marked_npairs_periodic','test_marked_npairs_nonperiodic',\
-        'test_marked_npairs_wfuncs_signatures', 'test_marked_npairs_wfuncs_behavior']
+           'test_marked_npairs_wfuncs_signatures','test_marked_npairs_wfuncs_behavior']
 
 def test_marked_npairs_periodic():
     
@@ -66,7 +65,8 @@ def test_marked_npairs_nonperiodic():
 
 @slow
 def test_marked_npairs_wfuncs_signatures():
-    """ Loop over all wfuncs and ensure that the wfunc signature is handled correctly. 
+    """ 
+    Loop over all wfuncs and ensure that the wfunc signature is handled correctly. 
     """
     
     Npts = 1e3
@@ -228,10 +228,5 @@ def test_marked_npairs_wfuncs_behavior():
     result = marked_npairs(data1, data1, rbins, period=period, 
     weights1=weights, weights2=weights, wfunc=10, approx_cell1_size = [rmax, rmax, rmax])
     assert np.all(result == -3*test_result), error_msg
-
-
-
-
-
 
 

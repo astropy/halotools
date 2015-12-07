@@ -64,14 +64,14 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, rbins, sample2,
             inds = inds[0:max_sample_size]
             sample1 = sample1[inds]
             velocities1 = velocities1[inds]
-            print('\n down sampling `sample1`...')
+            print('\n downsampling `sample1`...')
         if len(sample2) > max_sample_size:
             inds = np.arange(0,len(sample2))
             np.random.shuffle(inds)
             inds = inds[0:max_sample_size]
             sample2 = sample2[inds]
             velocities2 = velocities2[inds]
-            print('\n down sampling `sample2`...')
+            print('\n downsampling `sample2`...')
     
     #check the radial bins parameter
     rbins = convert_to_ndarray(rbins)
@@ -83,7 +83,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, rbins, sample2,
             assert array_is_monotonic(rbins, strict = True) == 1
     except AssertionError:
         msg = ("\n Input `rbins` must be a monotonically increasing \n"
-               "1-D array with at least two entries")
+               "1-D array with at least two entries.")
         raise HalotoolsError(msg)
         
     #Process period entry and check for consistency.
@@ -98,7 +98,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, rbins, sample2,
             assert np.all(period < np.inf)
             assert np.all(period > 0)
         except AssertionError:
-            msg = "Input ``period`` must be a bounded positive number in all dimensions"
+            msg = "Input `period` must be a bounded positive number in all dimensions."
             raise HalotoolsError(msg)
 
     #check for input parameter consistency
@@ -111,11 +111,11 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, rbins, sample2,
             raise HalotoolsError(msg)
     
     if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
-        msg = ('\n Sample1 and sample2 must have same dimension.\n')
+        msg = ('\n `sample1` and `sample2` must have same dimension.\n')
         raise HalotoolsError(msg)
     
     if (type(do_auto) is not bool) | (type(do_cross) is not bool):
-        msg = ('\n  do_auto and do_cross keywords must be of type boolean.')
+        msg = ('\n `do_auto` and `do_cross` keywords must be of type boolean.')
         raise HalotoolsError(msg)
     
     if num_threads == 'max':

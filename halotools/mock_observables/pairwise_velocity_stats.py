@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Calculate the pairwise velocity statistics.
+Calculate pairwise velocity statistics.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -17,19 +17,22 @@ from .pairwise_velocity_helpers import *
 __all__=['mean_pairwise_velocity', 'pairwise_velocity_dispersion']
 __author__ = ['Duncan Campbell']
 
-np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
+np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero
 
 
-def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
-                           velocities2=None, period=None,
-                           do_auto=True, do_cross=True,
+def mean_pairwise_velocity(sample1, velocities1, rbins,
+                           sample2=None, velocities2=None,
+                           period=None, do_auto=True, do_cross=True,
                            num_threads=1, max_sample_size=int(1e6),
                            approx_cell1_size = None,
                            approx_cell2_size = None):
     """ 
-    Calculate the mean pairwise velocity, :math:`\\bar{v}_{12}(r)`
+    Calculate the mean pairwise velocity, :math:`\\bar{v}_{12}(r)`.
     
-    Parameters 
+    Example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
+    
+    Parameters
     ----------
     sample1 : array_like
         Npts x 3 numpy array containing 3-D positions of points.
@@ -45,17 +48,17 @@ def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
         Npts x 3 array containing 3-D positions of points.
         
     velocities2 : array_like, optional
-        len(sample12) array of velocities.
+        len(sample2) array of velocities.
     
     period : array_like, optional
-        length 3 array defining axis-aligned periodic boundary conditions. If only
+        Length-3 array defining axis-aligned periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
     
     do_auto : boolean, optional
-        do auto-correlation?
+        caclulate the auto-pairwise velocities?
     
     do_cross : boolean, optional
-        do cross-correlation?
+        caclulate the cross-pairwise velocities?
     
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
@@ -76,16 +79,31 @@ def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
         Performance can vary sensitively with this parameter, so it is highly 
         recommended that you experiment with this parameter when carrying out  
         performance-critical calculations. 
-
+    
     approx_cell2_size : array_like, optional 
-        Analogous to ``approx_cell1_size``, but for sample2.  See comments for 
+        Analogous to ``approx_cell1_size``, but for `sample2`.  See comments for 
         ``approx_cell1_size`` for details. 
     
     Returns 
     -------
     v_12 : numpy.array
         *len(rbins)-1* length array containing the mean pairwise velocity, 
-        :math:`v_{12}(r)`, computed in each of the bins defined by ``rbins``.
+        :math:`\\bar{v}_{12}(r)`, computed in each of the bins defined by ``rbins``.
+    
+    Notes
+    -----
+    The pairwise velocity, :math:`v_{12}(r)`, is defined as:
+    
+    .. math::
+        v_{12}(r) = \\vec{v}_{\\rm 1, pec} \\cdot \\vec{r}_{12}-\\vec{v}_{\\rm 2, pec} \\cdot \\vec{r}_{12}
+    
+    where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and
+    :math:`\\vec{r}_{12}` is the radial vector connecting object 1 and 2.
+    
+    :math:`\\bar{v}_{12}(r)` is the mean of that quantity calculated in radial bins.
+    
+    Pairs and radial velocities are calculated using 
+    `~halotools.mock_observables.pair_counters.velocity_marked_npairs`.
     
     Examples
     --------
@@ -111,13 +129,11 @@ def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
     >>> vx = np.random.random(Npts)
     >>> vy = np.random.random(Npts)
     >>> vz = np.random.random(Npts)
-    >>> velocities = np.vstack((x,y,z)).T
+    >>> velocities = np.vstack((vx,vy,vz)).T
     
     >>> rbins = np.logspace(-2,-1,10)
     >>> v_12 = mean_pairwise_velocity(coords, velocities, rbins, period=period)
     
-    The result should be consistent with zero correlation at all *r* within 
-    statistical errors
     """
     
     function_args = [sample1, velocities1, rbins, sample2, velocities2, period,\
@@ -126,6 +142,7 @@ def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
     sample1, velocities1, rbins, sample2, velocities2, period, do_auto, do_cross,\
         num_threads, _sample1_is_sample2, PBCs = _pairwise_velocity_stats_process_args(*function_args)
     
+    #create marks for the marked pair counter.
     marks1 = np.vstack((sample1.T, velocities1.T)).T
     marks2 = np.vstack((sample2.T, velocities2.T)).T
     
@@ -134,7 +151,7 @@ def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
                            wfunc, _sample1_is_sample2, approx_cell1_size,
                            approx_cell2_size):
         """
-        Count weighted data pairs.
+        Count velocity weighted data pairs.
         """
         
         if do_auto==True:
@@ -185,14 +202,17 @@ def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
     
         return D1D1, D1D2, D2D2, N1N1, N1N2, N2N2
     
-    wfunc = 11
-    V1V1,V1V2,V2V2, N1N1,N1N2,N2N2 = marked_pair_counts(sample1, sample2, rbins, period,\
-                                                        num_threads, do_auto, do_cross,\
-                                                        marks1, marks2, wfunc,\
-                                                        _sample1_is_sample2,\
-                                                        approx_cell1_size, approx_cell2_size)
     
-    #return results
+    #count the sum of radial velocities and number of pairs
+    wfunc = 11
+    V1V1,V1V2,V2V2, N1N1,N1N2,N2N2 =\
+        marked_pair_counts(sample1, sample2, rbins, period,\
+                           num_threads, do_auto, do_cross,\
+                           marks1, marks2, wfunc,\
+                           _sample1_is_sample2,\
+                           approx_cell1_size, approx_cell2_size)
+    
+    #return results: the sum of radial velocities divided by the number of pairs
     if _sample1_is_sample2:
         M_11 = V1V1/N1N1
         return M_11
@@ -209,8 +229,7 @@ def mean_pairwise_velocity(sample1, velocities1, rbins, sample2=None,
             M_11 = V1V1/N1N1
             M_22 = V2V2/N2N2 
             return M_11, M_22
-    
-    
+
 
 def pairwise_velocity_dispersion(sample1, velocities1, rbins, sample2=None,
                                  velocities2=None, period=None,
@@ -219,9 +238,12 @@ def pairwise_velocity_dispersion(sample1, velocities1, rbins, sample2=None,
                                  approx_cell1_size = None,
                                  approx_cell2_size = None):
     """
-    Calculate the pairwise velocity dispersion, :math:`\\sigma_{12}(r)`
+    Calculate the pairwise velocity dispersion, :math:`\\sigma_{12}(r)`.
     
-    Parameters 
+    Example calls to this function appear in the documentation below. For thorough 
+    documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
+    
+    Parameters
     ----------
     sample1 : array_like
         Npts x 3 numpy array containing 3-D positions of points.
@@ -244,10 +266,10 @@ def pairwise_velocity_dispersion(sample1, velocities1, rbins, sample2=None,
         one number, Lbox, is specified, period is assumed to be [Lbox, Lbox, Lbox].
     
     do_auto : boolean, optional
-        do auto-correlation?
+        caclulate the auto-pairwise velocities?
     
     do_cross : boolean, optional
-        do cross-correlation?
+        caclulate the cross-pairwise velocities?
     
     num_threads : int, optional
         number of threads to use in calculation. Default is 1. A string 'max' may be used
@@ -261,20 +283,67 @@ def pairwise_velocity_dispersion(sample1, velocities1, rbins, sample2=None,
     Returns 
     -------
     sigma_12 : numpy.array
-        *len(rbins)-1* length array containing the mean pairwise velocity, 
+        *len(rbins)-1* length array containing the dispersion of the pairwise velocity, 
         :math:`\\sigma_{12}(r)`, computed in each of the bins defined by ``rbins``.
+    
+    Notes
+    -----
+    The pairwise velocity, :math:`v_{12}(r)`, is defined as:
+    
+    .. math::
+        v_{12}(r) = \\vec{v}_{\\rm 1, pec} \\cdot \\vec{r}_{12}-\\vec{v}_{\\rm 2, pec} \\cdot \\vec{r}_{12}
+    
+    where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and
+    :math:`\\vec{r}_{12}` is the radial vector connecting object 1 and 2.
+    
+    :math:`\\sigma_{12}(r)` is the standard deviation of this quantity in radial bins.
+    
+    Pairs and radial velocities are calculated using 
+    `~halotools.mock_observables.pair_counters.velocity_marked_npairs`.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
+    >>> coords = np.vstack((x,y,z)).T
+    
+    We will do the same to get a random set of peculiar velocities.
+    
+    >>> vx = np.random.random(Npts)
+    >>> vy = np.random.random(Npts)
+    >>> vz = np.random.random(Npts)
+    >>> velocities = np.vstack((vx,vy,vz)).T
+    
+    >>> rbins = np.logspace(-2,-1,10)
+    >>> sigma_12 = pairwise_velocity_dispersion(coords, velocities, rbins, period=period)
+    
     """
     
-    
+    #process input arguments
     function_args = [sample1, velocities1, rbins, sample2, velocities2, period,\
-                     do_auto, do_cross, num_threads, max_sample_size]
-    
-    sample1, velocities1, rbins, sample2, velocities2, period, do_auto, do_cross,\
-        num_threads, _sample1_is_sample2, PBCs = _pairwise_velocity_process_args(*function_args)
+                     do_auto, do_cross, num_threads, max_sample_size,\
+                     approx_cell1_size, approx_cell2_size]
+    sample1, velocities1, rbins, sample2, velocities2,\
+        period, do_auto, do_cross,\
+        num_threads, _sample1_is_sample2, PBCs =\
+        _pairwise_velocity_stats_process_args(*function_args)
     
     #calculate velocity difference scale
-    std_v1 = np.std(velocities1[0,:])
-    std_v2 = np.std(velocities2[0,:])
+    std_v1 = np.sqrt(np.std(velocities1[0,:]))
+    std_v2 = np.sqrt(np.std(velocities2[0,:]))
     
     #build the marks.
     shift1 = np.repeat(std_v1,len(sample1))
@@ -288,7 +357,7 @@ def pairwise_velocity_dispersion(sample1, velocities1, rbins, sample2=None,
                            wfunc, _sample1_is_sample2, approx_cell1_size,
                            approx_cell2_size):
         """
-        Count weighted data pairs.
+        Count velocity weighted data pairs.
         """
         
         if do_auto==True:

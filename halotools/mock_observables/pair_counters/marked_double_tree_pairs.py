@@ -98,7 +98,7 @@ def marked_npairs(data1, data2, rbins, period=None,
 
     # Process the input weights and with the helper function
     weights1, weights2 = (
-        _wnpairs_process_weights(data1, data2, 
+        _marked_npairs_process_weights(data1, data2, 
             weights1, weights2, wfunc))
 
     ### Compute the estimates for the cell sizes
@@ -270,7 +270,7 @@ def velocity_marked_npairs(data1, data2, rbins, period=None,
 
     # Process the input weights and with the helper function
     weights1, weights2 = (
-        _wnpairs_process_weights(data1, data2, 
+        _velocity_marked_npairs_process_weights(data1, data2, 
             weights1, weights2, wfunc))
 
     ### Compute the estimates for the cell sizes
