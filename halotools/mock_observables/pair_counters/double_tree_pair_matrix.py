@@ -12,43 +12,58 @@ import sys
 import multiprocessing
 from functools import partial
 from scipy.sparse import coo_matrix
-
+from .double_tree_helpers import (_set_approximate_cell_sizes, 
+    _set_approximate_xy_z_cell_sizes, _enclose_in_box)
 from .double_tree import *
 from .cpairs.pairwise_distances import *
+from ...custom_exceptions import *
+from ...utils.array_utils import convert_to_ndarray, array_is_monotonic
 
 __all__=['pair_matrix', 'xy_z_pair_matrix']
 __author__=['Duncan Campbell']
 
 
-def pair_matrix(data1, data2, r_max, Lbox=None, period=None, verbose=False, num_threads=1):
+def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
+                approx_cell1_size = None, approx_cell2_size = None):
     """
     Calculate the distance to all pairs with seperations less than ``r_max`` in real space.
     
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-D positions.
             
-    data2: array_like
+    data2 : array_like
         N2 by 3 numpy array of 3-D positions.
             
-    r_max: float
+    r_max : float
         Maximum distance to search for pairs
     
-    Lbox: array_like, optional
-        length of cube sides which encloses data1 and data2.
-    
-    period: array_like, optional
+    period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
         If none, PBCs are set to infinity.  If True, period is set to be Lbox
     
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
         available cores.  num_threads=0 is the default.
+    
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
+        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+        will apportion the ``data`` points into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use 1/10 of the box size in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
+    
+    approx_cell2_size : array_like, optional 
+        See comments for ``approx_cell1_size``. 
     
     Returns
     -------
@@ -56,82 +71,22 @@ def pair_matrix(data1, data2, r_max, Lbox=None, period=None, verbose=False, num_
         N1 x N2 sparse matrix in COO format containing distances between points.
     """
     
-    if num_threads is not 1:
-        if num_threads=='max':
-            num_threads = multiprocessing.cpu_count()
-        if isinstance(num_threads,int):
-            pool = multiprocessing.Pool(num_threads)
-        else: return ValueError("num_threads argument must be an integer number or 'max'")
+    search_dim_max = np.array([r_max, r_max, r_max])
+    function_args = [data1, data2, period, num_threads, search_dim_max]
+    x1, y1, z1, x2, y2, z2, period, num_threads, PBCs = _process_args(*function_args)
+    xperiod, yperiod, zperiod = period 
+    r_max = float(r_max)
     
-    #process input
-    data1 = np.array(data1)
-    data2 = np.array(data2)
-    if np.all(period==np.inf): period=None
+    approx_cell1_size, approx_cell2_size = (
+        _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, r_max, period)
+        )
+    approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
+    approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
     
-    #enforce shape requirements on input
-    if (np.shape(data1)[1]!=3) | (data1.ndim>2):
-        raise ValueError("data1 must be of shape (Npts,3)")
-    if (np.shape(data2)[1]!=3) | (data2.ndim>2):
-        raise ValueError("data2 must be of shape (Npts,3)")
-    
-    #process Lbox parameter
-    if (Lbox is None) & (period is None): 
-        data1, data2, Lbox = _enclose_in_box(data1, data2)
-    elif (Lbox is None) & (period is not None):
-        Lbox = period
-    elif np.shape(Lbox)==():
-        Lbox = np.array([Lbox]*3)
-    elif np.shape(Lbox)==(1,):
-        Lbox = np.array([Lbox[0]]*3)
-    else: Lbox = np.array(Lbox)
-    if np.shape(Lbox) != (3,):
-        raise ValueError("Lbox must be an array of length 3, or number indicating the \
-                          length of one side of a cube")
-    
-    #are we working with periodic boundary conditions (PBCs)?
-    if period is None: 
-        PBCs = False
-    elif np.shape(period) == (3,):
-        PBCs = True
-        if np.any(period!=Lbox):
-            raise ValueError("period must == Lbox") 
-    elif np.shape(period) == (1,):
-        period = np.array([period[0]]*3)
-        PBCs = True
-        if np.any(period!=Lbox):
-            raise ValueError("period must == Lbox") 
-    elif isinstance(period, (int, long, float, complex)):
-        period = np.array([period]*3)
-        PBCs = True
-        if np.any(period!=Lbox):
-            raise ValueError("period must == Lbox") 
-    elif (period == True) & (Lbox is not None):
-        PBCs = True
-        period = Lbox
-    elif (period == True) & (Lbox is None):
-        raise ValueError("If period is set to True, Lbox must be defined.")
-    else: PBCs=True
-    
-    #check to see we dont count pairs more than once
-    if (PBCs==True) & np.any(np.max(r_max)>Lbox/2.0):
-        raise ValueError('cannot count pairs with seperations \
-                          larger than Lbox/2 with PBCs')
-    
-    #choose grid size along each dimension.
-    #too small of a grid size is inefficient.
-    use_max = (Lbox/r_max) > 10
-    cell_size = np.array([np.max(r_max)]*3)
-    cell_size[use_max] = Lbox[use_max]/10.0
-    #cell shouldn't be bigger than the box
-    too_big = (cell_size>Lbox)
-    cell_size[too_big] = Lbox[too_big]
-    
-    double_tree = FlatRectanguloidDoubleTree(data1[:,0], data1[:,1], data1[:,2],
-                                             data2[:,0], data2[:,1], data2[:,2],
-                                             cell_size[0],cell_size[1],cell_size[2], 
-                                             cell_size[0],cell_size[1],cell_size[2], 
-                                             r_max, r_max, r_max,
-                                             Lbox[0], Lbox[1], Lbox[2], PBCs=PBCs)
+    double_tree = FlatRectanguloidDoubleTree(x1, y1, z1, x2, y2, z2,
+                                             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
+                                             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
+                                             r_max, r_max, r_max, xperiod, yperiod, zperiod, PBCs=PBCs)
     
     #square radial bins to make distance calculation cheaper
     r_max_squared = r_max**2.0
@@ -169,7 +124,7 @@ def pair_matrix(data1, data2, r_max, Lbox=None, period=None, verbose=False, num_
     #resort the result (it was sorted to make in continuous over the cell structure)
     i_inds = double_tree.tree1.idx_sorted[i_inds]
     j_inds = double_tree.tree2.idx_sorted[j_inds]
-
+    
     return coo_matrix((d, (i_inds, j_inds)))
 
 
@@ -223,127 +178,80 @@ def _pair_matrix_engine(double_tree, r_max_squared, period, PBCs, icell1):
     return d, i_inds, j_inds
 
 
-def xy_z_pair_matrix(data1, data2, rp_max, pi_max, Lbox=None, period=None, verbose=False,\
-                   num_threads=1):
+def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
+                     num_threads=1, approx_cell1_size = None, approx_cell2_size = None):
     """
     Calculate the distance to all pairs with seperations less than or equal to ``rp_max`` 
-    and ``pi_max`` in real redshift space.
+    and ``pi_max`` in redshift space.
     
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N1 by 3 numpy array of 3-dimensional positions. Should be between zero and 
         period.
             
-    data2: array_like
+    data2 : array_like
         N2 by 3 numpy array of 3-dimensional positions. Should be between zero and 
         period.
             
-    r_max: float
+    rp_max : float
         maximum distance to connect pairs
     
-    Lbox: array_like, optional
-        length of cube sides which encloses data1 and data2.
+    pi_max : float
+        maximum distance to connect pairs
     
-    period: array_like, optional
+    period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
         If none, PBCs are set to infinity.  If True, period is set to be Lbox
     
-    verbose: Boolean, optional
+    verbose : Boolean, optional
         If True, print out information and progress.
     
-    num_threads: int, optional
+    num_threads : int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
         available cores.  num_threads=0 is the default.
     
+    approx_cell1_size : array_like, optional 
+        Length-3 array serving as a guess for the optimal manner by which 
+        the `~halotools.mock_observables.pair_counters.FlatRectanguloidDoubleTree` 
+        will apportion the ``data`` points into subvolumes of the simulation box. 
+        The optimum choice unavoidably depends on the specs of your machine. 
+        Default choice is to use 1/10 of the box size in each dimension, 
+        which will return reasonable result performance for most use-cases. 
+        Performance can vary sensitively with this parameter, so it is highly 
+        recommended that you experiment with this parameter when carrying out  
+        performance-critical calculations. 
+    
+    approx_cell2_size : array_like, optional 
+        See comments for ``approx_cell1_size``. 
+    
     Returns
     -------
-    dists : scipy.sparse.coo_matrix
-        N1 x N2 sparse matrix in COO format containing distances between points.
+    perp_dists : scipy.sparse.coo_matrix
+        N1 x N2 sparse matrix in COO format containing perpendicular distances between points.
+    
+    para_dists : scipy.sparse.coo_matrix
+        N1 x N2 sparse matrix in COO format containing parallel distances between points.
     """
     
-    if num_threads is not 1:
-        if num_threads=='max':
-            num_threads = multiprocessing.cpu_count()
-        if isinstance(num_threads,int):
-            pool = multiprocessing.Pool(num_threads)
-        else: return ValueError("num_threads argument must be an integer number or 'max'")
+    search_dim_max = np.array([rp_max, rp_max, pi_max])
+    function_args = [data1, data2, period, num_threads, search_dim_max]
+    x1, y1, z1, x2, y2, z2, period, num_threads, PBCs = _process_args(*function_args)
+    xperiod, yperiod, zperiod = period 
+    rp_max = float(rp_max)
+    pi_max = float(rp_max)
     
-    #process input
-    data1 = np.array(data1)
-    data2 = np.array(data2)
-    if np.all(period==np.inf): period=None
+    approx_cell1_size, approx_cell2_size = (
+        _set_approximate_xy_z_cell_sizes(approx_cell1_size, approx_cell2_size, rp_max, pi_max, period)
+        )
+    approx_x1cell_size, approx_y1cell_size, approx_z1cell_size = approx_cell1_size
+    approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
     
-    #enforce shape requirements on input
-    if (np.shape(data1)[1]!=3) | (data1.ndim>2):
-        raise ValueError("data1 must be of shape (Npts,3)")
-    if (np.shape(data2)[1]!=3) | (data2.ndim>2):
-        raise ValueError("data2 must be of shape (Npts,3)")
-    
-    #process Lbox parameter
-    if (Lbox is None) & (period is None): 
-        data1, data2, Lbox = _enclose_in_box(data1, data2)
-    elif (Lbox is None) & (period is not None):
-        Lbox = period
-    elif np.shape(Lbox)==():
-        Lbox = np.array([Lbox]*3)
-    elif np.shape(Lbox)==(1,):
-        Lbox = np.array([Lbox[0]]*3)
-    else: Lbox = np.array(Lbox)
-    if np.shape(Lbox) != (3,):
-        raise ValueError("Lbox must be an array of length 3, or number indicating the \
-                          length of one side of a cube")
-    
-    #are we working with periodic boundary conditions (PBCs)?
-    if period is None: 
-        PBCs = False
-    elif np.shape(period) == (3,):
-        PBCs = True
-        if np.any(period!=Lbox):
-            raise ValueError("period must == Lbox") 
-    elif np.shape(period) == (1,):
-        period = np.array([period[0]]*3)
-        PBCs = True
-        if np.any(period!=Lbox):
-            raise ValueError("period must == Lbox") 
-    elif isinstance(period, (int, long, float, complex)):
-        period = np.array([period]*3)
-        PBCs = True
-        if np.any(period!=Lbox):
-            raise ValueError("period must == Lbox") 
-    elif (period == True) & (Lbox is not None):
-        PBCs = True
-        period = Lbox
-    elif (period == True) & (Lbox is None):
-        raise ValueError("If period is set to True, Lbox must be defined.")
-    else: PBCs=True
-    
-    #check to see we dont count pairs more than once    
-    if (PBCs==True) & np.any(rp_max>Lbox[0:2]/2.0):
-        raise ValueError('grid_pairs pair counter cannot count pairs with seperations\
-                          larger than Lbox/2 with PBCs')
-    if (PBCs==True) & np.any(pi_max>Lbox[2]/2.0):
-        raise ValueError('grid_pairs pair counter cannot count pairs with seperations\
-                          larger than Lbox/2 with PBCs')
-    
-    #choose grid size along each dimension.
-    #too small of a grid size is inefficient.
-    cell_size = np.zeros((3,))
-    cell_size[0:2] = np.array([rp_max]*2)
-    cell_size[2] = pi_max
-    use_max = (Lbox/cell_size) > 10
-    cell_size[use_max] = Lbox[use_max]/10.0
-    #cells shouldn't be bigger than the box
-    too_big = (cell_size>Lbox)
-    cell_size[too_big] = Lbox[too_big]
-    
-    double_tree = FlatRectanguloidDoubleTree(data1[:,0], data1[:,1], data1[:,2],
-                                             data2[:,0], data2[:,1], data2[:,2],
-                                             cell_size[0],cell_size[1],cell_size[2], 
-                                             cell_size[0],cell_size[1],cell_size[2], 
-                                             rp_max, rp_max, pi_max,
-                                             Lbox[0], Lbox[1], Lbox[2], PBCs=PBCs)
+    double_tree = FlatRectanguloidDoubleTree(x1, y1, z1, x2, y2, z2,
+                                             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
+                                             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
+                                             rp_max, rp_max, pi_max, xperiod, yperiod,zperiod, PBCs=PBCs)
     
     #square radial bins to make distance calculation cheaper
     rp_max_squared = rp_max**2.0
@@ -441,4 +349,44 @@ def _xy_z_pair_matrix_engine(double_tree, rp_max_squared, pi_max_squared, period
     
     return d_perp, d_para, i_inds, j_inds
 
+
+def _process_args(data1, data2, period, num_threads, search_dim_max):
+    """
+    private internal function to process the arguments of the pair matrix functions.
+    """
+    
+    if num_threads is not 1:
+        if num_threads=='max':
+            num_threads = multiprocessing.cpu_count()
+        if not isinstance(num_threads,int):
+            msg = ("\n Input ``num_threads`` argument must \n"
+                   "be an integer or the string 'max'")
+            raise HalotoolsError(msg)
+    
+    # Passively enforce that we are working with ndarrays
+    x1 = data1[:,0]
+    y1 = data1[:,1]
+    z1 = data1[:,2]
+    x2 = data2[:,0]
+    y2 = data2[:,1]
+    z2 = data2[:,2]
+
+    # Set the boolean value for the PBCs variable
+    if period is None:
+        PBCs = False
+        x1, y1, z1, x2, y2, z2, period = (
+            _enclose_in_box(x1, y1, z1, x2, y2, z2, min_size=search_dim_max*3.0))
+    else:
+        PBCs = True
+        period = convert_to_ndarray(period).astype(float)
+        if len(period) == 1:
+            period = np.array([period[0]]*3)
+        try:
+            assert np.all(period < np.inf)
+            assert np.all(period > 0)
+        except AssertionError:
+            msg = "Input ``period`` must be a bounded positive number in all dimensions"
+            raise HalotoolsError(msg)
+
+    return x1, y1, z1, x2, y2, z2, period, num_threads, PBCs
 
