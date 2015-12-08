@@ -37,8 +37,8 @@ def write_cache_memory_log(fname, table):
         f.write(header)
         for entry in table:
             newline = get_formatted_cache_memory_line(
-                table['simname'], table['redshift'], 
-                table['halo_finder'], table['version_name'], table['fname'])
+                entry['simname'], entry['redshift'], 
+                entry['halo_finder'], entry['version_name'], entry['fname'])
             f.write(newline)
 
 def read_cache_memory_log(fname):

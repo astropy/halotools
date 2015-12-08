@@ -32,7 +32,7 @@ class TestCacheManipulation(TestCase):
     """ 
     """
 
-    def setup_class(self):
+    def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
 
@@ -45,10 +45,11 @@ class TestCacheManipulation(TestCase):
             os.system('rm -rf ' + self.temp_dirname)
             os.mkdir(self.temp_dirname)
 
+        self.dummy_fname = os.path.join(self.temp_dirname, 'dummy_cache_log.txt')
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_read_write(self):
-        dummy_fname = os.path.join(self.temp_dirname, 'dummy_cache_log.txt')
+        
 
         simname = ['bolshoi', 'bolshoi']
         redshift = [0, 1]
@@ -59,6 +60,12 @@ class TestCacheManipulation(TestCase):
         table = Table({'simname': simname, 'redshift': redshift, 
             'halo_finder': halo_finder, 'version_name': version_name, 
             'fname': fname})
+
+        manipulate_cache_log.write_cache_memory_log(self.dummy_fname, table)
+
+    def tearDown(self):
+        os.system('rm -rf ' + self.temp_dirname)
+
 
 
 
