@@ -65,6 +65,7 @@ class TestCacheManipulation(TestCase):
 
     def tearDown(self):
         os.system('rm -rf ' + self.temp_dirname)
+        raise HalotoolsError("Pay attention to me!")
 
 
 
