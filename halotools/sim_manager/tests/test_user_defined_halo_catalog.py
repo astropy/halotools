@@ -124,7 +124,6 @@ class TestUserDefinedHaloCatalog(TestCase):
             bad_halocat_args['s'] = np.ones(self.Nhalos)
             halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
                 **bad_halocat_args)
-            assert len(w) == 2
             assert 'interpreted as metadata' in str(w[-1].message)
 
     def test_ptcl_table(self):
@@ -134,6 +133,9 @@ class TestUserDefinedHaloCatalog(TestCase):
 
         * Enforce that instances *do* have ``ptcl_table`` attributes if a legitimate one is passed. 
 
+        * Enforce that ptcl_table have ``x``, ``y`` and ``z`` columns. 
+
+        * Enforce that ptcl_table input is an Astropy `~astropy.table.Table` object, not a Numpy recarray
         """
 
         # Must not have a ptcl_table attribute when none is passed
