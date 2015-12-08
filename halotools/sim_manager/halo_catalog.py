@@ -36,7 +36,7 @@ class HaloCatalog(object):
             raise HalotoolsError("Must have h5py package installed to use this feature")
         self._catman = catalog_manager.CatalogManager()
 
-        self._process_constructor_inputs(**kwargs):
+        self._process_constructor_inputs(**kwargs)
 
         self.fname_halo_table = self._catman.get_halo_table_fname(
             simname = simname, halo_finder = halo_finder, 
@@ -119,6 +119,11 @@ class UserDefinedHaloCatalog(object):
             randomly selected from the snapshot. At a minimum, the table must have 
             columns 'x', 'y' and 'z'. 
 
+        Notes 
+        -------
+        This class is tested by 
+        `~halotools.sim_manager.tests.test_user_defined_halo_catalog.TestUserDefinedHaloCatalog`. 
+
         """
         halocat_dict, metadata_dict = self._parse_constructor_kwargs(**kwargs)
         self.halo_table = Table(halocat_dict)
@@ -157,11 +162,14 @@ class UserDefinedHaloCatalog(object):
 
         halocat_dict = (
             {key: kwargs[key] for key in kwargs 
-            if (type(kwargs[key]) is np.ndarray) & (custom_len(kwargs[key]) == Nhalos)}
+            if (type(kwargs[key]) is np.ndarray) and (custom_len(kwargs[key]) == Nhalos)}
             )
         self._test_halocat_dict(halocat_dict)
 
-        metadata_dict = {key: kwargs[key] if (key not in halocat_dict) & (key != 'ptcl_table')}
+        metadata_dict = (
+            {key: kwargs[key] for key in kwargs
+            if (key not in halocat_dict) and (key != 'ptcl_table')}
+            )
 
         return halocat_dict, metadata_dict 
 
@@ -210,7 +218,7 @@ class UserDefinedHaloCatalog(object):
                 "this argument must contain an Astropy Table object with at least 1e4 rows\n"
                 "and ``x``, ``y`` and ``z`` columns. \n")
             raise HalotoolsError(msg)
-            
+
         except KeyError:
             pass
 
