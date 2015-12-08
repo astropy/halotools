@@ -34,7 +34,6 @@ class TestUserDefinedHaloCatalog(TestCase):
             'halo_z': self.halo_z, 'halo_id': self.halo_id, 'halo_mass': self.halo_mass}
             )
         self.toy_list = [elt for elt in self.halo_x]
-        self.ptcl_table = Table({'x': self.halo_x, 'y': self.halo_y, 'z': self.halo_z})
 
     def test_metadata(self):
         """ Method performs various existence and consistency tests on the input metadata. 
@@ -128,9 +127,58 @@ class TestUserDefinedHaloCatalog(TestCase):
             assert len(w) == 2
             assert 'interpreted as metadata' in str(w[-1].message)
 
+    def test_ptcl_table(self):
+        """ Method performs various existence and consistency tests on the input ptcl_table.
 
+        * Enforce that instances do *not* have ``ptcl_table`` attributes if none is passed. 
 
+        * Enforce that instances *do* have ``ptcl_table`` attributes if a legitimate one is passed. 
 
+        """
+
+        # Must not have a ptcl_table attribute when none is passed
+        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            **self.good_halocat_args)
+        assert not hasattr(halocat, 'ptcl_table')
+
+        num_ptcl = 1e4
+        ptcl_table = Table(
+            {'x': np.zeros(num_ptcl), 
+            'y': np.zeros(num_ptcl), 
+            'z': np.zeros(num_ptcl)}
+            )
+   
+        # Must have ptcl_table attribute when argument is legitimate
+        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            ptcl_table = ptcl_table, **self.good_halocat_args)
+        assert hasattr(halocat, 'ptcl_table')
+
+        # Must have at least 1e4 particles
+        num_ptcl2 = 1e3
+        ptcl_table2 = Table(
+            {'x': np.zeros(num_ptcl2), 
+            'y': np.zeros(num_ptcl2), 
+            'z': np.zeros(num_ptcl2)}
+            )
+        with pytest.raises(HalotoolsError):
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+                ptcl_table = ptcl_table2, **self.good_halocat_args)
+
+        # Must have a 'z' column 
+        num_ptcl2 = 1e4
+        ptcl_table2 = Table(
+            {'x': np.zeros(num_ptcl2), 
+            'y': np.zeros(num_ptcl2)}
+            )
+        with pytest.raises(HalotoolsError):
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+                ptcl_table = ptcl_table2, **self.good_halocat_args)
+
+        # Data structure must be an astropy table, not an ndarray
+        ptcl_table2 = ptcl_table.as_array()
+        with pytest.raises(HalotoolsError):
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+                ptcl_table = ptcl_table2, **self.good_halocat_args)
 
 
 

@@ -242,10 +242,10 @@ class UserDefinedHaloCatalog(object):
             ptcl_table = kwargs['ptcl_table']
 
             assert type(ptcl_table) is Table
-            assert len(ptcl_table) > 1e4
-            assert 'x' in ptcl_table
-            assert 'y' in ptcl_table
-            assert 'z' in ptcl_table
+            assert len(ptcl_table) >= 1e4
+            assert 'x' in ptcl_table.keys()
+            assert 'y' in ptcl_table.keys()
+            assert 'z' in ptcl_table.keys()
 
             self.ptcl_table = ptcl_table
 
