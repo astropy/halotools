@@ -3,9 +3,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 import pytest 
+import warnings 
 
 import numpy as np 
-from copy import copy 
+from copy import copy, deepcopy 
 
 from astropy.table import Table
 
@@ -40,18 +41,93 @@ class TestUserDefinedHaloCatalog(TestCase):
 
         * Enforces that ``Lbox`` and ``ptcl_mass`` are passed. 
 
-        * Enforces that all ``x``, ``y`` and ``z`` coordinates are between 0 and ``Lbox``. 
+        * Enforces that all ``halo_x``, ``halo_y`` and ``halo_z`` coordinates are between 0 and ``Lbox``. 
 
+        * Enforces that all metadata get bound to the instance. 
         """
+        with pytest.raises(HalotoolsError):
+            halocat = UserDefinedHaloCatalog(Lbox = 200, **self.good_halocat_args)
+
+        with pytest.raises(HalotoolsError):
+            halocat = UserDefinedHaloCatalog(ptcl_mass = 200, **self.good_halocat_args)
+
+        with pytest.raises(HalotoolsError):
+            halocat = UserDefinedHaloCatalog(Lbox = 20, ptcl_mass = 100, 
+                **self.good_halocat_args)
 
         halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
             **self.good_halocat_args)
+        assert hasattr(halocat, 'Lbox')
+        assert halocat.Lbox == 200
+        assert hasattr(halocat, 'ptcl_mass')
+        assert halocat.ptcl_mass == 100
+        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            arnold_schwarzenegger = 'Stick around!', 
+            **self.good_halocat_args)
+        assert hasattr(halocat, 'arnold_schwarzenegger')
+        assert halocat.arnold_schwarzenegger == 'Stick around!'
 
+    def test_halo_table_data(self):
+        """ Method performs various existence and consistency tests on the input halo catalog. 
+
+        * Enforces that ``halo_id`` is passed to the constructor. 
+
+        * Enforces that some mass-like variable is passed to the constructor. 
+
+        * Enforces that ``halo_x``, ``halo_y`` and ``halo_z`` are all passed to the constructor. 
+
+        * Enforces that all ``halo_x``, ``halo_y`` and ``halo_z`` coordinates are between 0 and ``Lbox``. 
+
+        * Enforces that all length-*Nhalos* ndarray inputs have keywords that begin with ``halo_``. 
+        """
+
+        # All halo catalog columns must have length-Nhalos
+        bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
-            halocat = UserDefinedHaloCatalog(Lbox = 200, **self.good_halocat_args)
-            halocat = UserDefinedHaloCatalog(ptcl_mass = 200, **self.good_halocat_args)
-            halocat = UserDefinedHaloCatalog(Lbox = 20, ptcl_mass = 100, 
-                **self.good_halocat_args)
+            bad_halocat_args['halo_x'][0] = -1
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+                **bad_halocat_args)
+
+        # positions must be < Lbox
+        bad_halocat_args = deepcopy(self.good_halocat_args)
+        with pytest.raises(HalotoolsError):
+            bad_halocat_args['halo_x'][0] = 10000
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+                **bad_halocat_args)
+
+        # must have halo_x column 
+        bad_halocat_args = deepcopy(self.good_halocat_args)
+        with pytest.raises(HalotoolsError):
+            del bad_halocat_args['halo_x']
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+                **bad_halocat_args)
+
+        # Must have halo_id column 
+        bad_halocat_args = deepcopy(self.good_halocat_args)
+        with pytest.raises(HalotoolsError):
+            del bad_halocat_args['halo_id']
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+                **bad_halocat_args)
+
+        # Must have some column storing a mass-like variable
+        bad_halocat_args = deepcopy(self.good_halocat_args)
+        with pytest.raises(HalotoolsError):
+            del bad_halocat_args['halo_mass']
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+                **bad_halocat_args)
+
+        # Must raise warning if a length-Nhalos array is passed with 
+        # a keyword argument that does not begin with 'halo_'
+        bad_halocat_args = deepcopy(self.good_halocat_args)
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            bad_halocat_args['s'] = np.ones(self.Nhalos)
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+                **bad_halocat_args)
+            assert len(w) == 2
+            assert 'interpreted as metadata' in str(w[-1].message)
+
 
 
 

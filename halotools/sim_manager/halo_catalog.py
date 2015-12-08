@@ -164,7 +164,9 @@ class UserDefinedHaloCatalog(object):
 
         halo_table_dict = (
             {key: kwargs[key] for key in kwargs 
-            if (type(kwargs[key]) is np.ndarray) and (custom_len(kwargs[key]) == Nhalos)}
+            if (type(kwargs[key]) is np.ndarray) 
+            and (custom_len(kwargs[key]) == Nhalos) 
+            and (key[:5] == 'halo_')}
             )
         self._test_halo_table_dict(halo_table_dict)
 
@@ -190,15 +192,6 @@ class UserDefinedHaloCatalog(object):
                 "Each of these keyword arguments must storing an ndarray of the same length\n"
                 "as the ndarray bound to the ``halo_id`` keyword argument.\n")
             raise HalotoolsError(msg)
-
-        for key in halo_table_dict:
-            if key[:5] != 'halo_':
-                msg = ("\nThe ``%s`` key passed to UserDefinedHaloCatalog stores \n"
-                    "an ndarray of the same length as the ``halo_id`` keyword argument, \n"
-                    "and so the ``%s`` key is interpreted as a halo catalog column.\n"
-                    "All halo catalog column names must begin with ``halo_``\n"
-                    "to help Halotools disambiguate between halo properties and mock galaxy properties.\n")
-                raise HalotoolsError(msg % (key, key))
 
     def _test_metadata_dict(self, **metadata_dict):
         """
@@ -230,6 +223,16 @@ class UserDefinedHaloCatalog(object):
             msg = ("The ``halo_x``, ``halo_y`` and ``halo_z`` columns must only store arrays\n"
                 "that are bound by 0 and the input ``Lbox``. \n")
             raise HalotoolsError(msg)
+
+        for key, value in metadata_dict.iteritems():
+            if (type(value) == np.ndarray):
+                if custom_len(value) == len(self.halo_table['halo_id']):
+                    msg = ("\nThe input ``" + key + "`` argument stores a length-Nhalos ndarray.\n"
+                        "However, this key is being interpreted as metadata because \n"
+                        "it does not begin with ``halo_``. If this is your intention, ignore this message.\n"
+                        "Otherwise, rename this key to begin with ``halo_``. \n")
+                    warn(msg, UserWarning)
+
 
     def _passively_bind_ptcl_table(self, **kwargs):
         """
