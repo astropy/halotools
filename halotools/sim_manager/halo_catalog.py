@@ -125,8 +125,10 @@ class UserDefinedHaloCatalog(object):
         `~halotools.sim_manager.tests.test_user_defined_halo_catalog.TestUserDefinedHaloCatalog`. 
 
         """
-        halocat_dict, metadata_dict = self._parse_constructor_kwargs(**kwargs)
-        self.halo_table = Table(halocat_dict)
+        halo_table_dict, metadata_dict = self._parse_constructor_kwargs(**kwargs)
+        self.halo_table = Table(halo_table_dict)
+
+        self._test_metadata_dict(**metadata_dict)
         for key, value in metadata_dict.iteritems():
             setattr(self, key, value)
 
@@ -142,7 +144,7 @@ class UserDefinedHaloCatalog(object):
 
         Returns 
         ----------
-        halocat_dict : dictionary 
+        halo_table_dict : dictionary 
             Keys are the names of the halo catalog columns, values are length-*Nhalos* ndarrays. 
 
         metadata_dict : dictionary 
@@ -160,28 +162,28 @@ class UserDefinedHaloCatalog(object):
                 "storing an ndarray of length Nhalos > 1.\n")
             raise HalotoolsError(msg)
 
-        halocat_dict = (
+        halo_table_dict = (
             {key: kwargs[key] for key in kwargs 
             if (type(kwargs[key]) is np.ndarray) and (custom_len(kwargs[key]) == Nhalos)}
             )
-        self._test_halocat_dict(halocat_dict)
+        self._test_halo_table_dict(halo_table_dict)
 
         metadata_dict = (
             {key: kwargs[key] for key in kwargs
-            if (key not in halocat_dict) and (key != 'ptcl_table')}
+            if (key not in halo_table_dict) and (key != 'ptcl_table')}
             )
 
-        return halocat_dict, metadata_dict 
+        return halo_table_dict, metadata_dict 
 
 
-    def _test_halocat_dict(self, halocat_dict):
+    def _test_halo_table_dict(self, halo_table_dict):
         """
         """ 
         try:
-            assert 'halo_x' in halocat_dict 
-            assert 'halo_y' in halocat_dict 
-            assert 'halo_z' in halocat_dict 
-            assert len(halocat_dict) >= 5
+            assert 'halo_x' in halo_table_dict 
+            assert 'halo_y' in halo_table_dict 
+            assert 'halo_z' in halo_table_dict 
+            assert len(halo_table_dict) >= 5
         except AssertionError:
             msg = ("\nThe UserDefinedHaloCatalog requires keyword arguments ``halo_x``, "
                 "``halo_y`` and ``halo_z``,\nplus one additional column storing a mass-like variable.\n"
@@ -189,14 +191,45 @@ class UserDefinedHaloCatalog(object):
                 "as the ndarray bound to the ``halo_id`` keyword argument.\n")
             raise HalotoolsError(msg)
 
-        for key in halocat_dict:
+        for key in halo_table_dict:
             if key[:5] != 'halo_':
                 msg = ("\nThe ``%s`` key passed to UserDefinedHaloCatalog stores \n"
                     "an ndarray of the same length as the ``halo_id`` keyword argument, \n"
                     "and so the ``%s`` key is interpreted as a halo catalog column.\n"
                     "All halo catalog column names must begin with ``halo_``\n"
                     "to help Halotools disambiguate between halo properties and mock galaxy properties.\n")
-                raise HalotoolsError(msg)
+                raise HalotoolsError(msg % (key, key))
+
+    def _test_metadata_dict(self, **metadata_dict):
+        """
+        """
+        try:
+            assert 'Lbox' in metadata_dict
+            assert custom_len(metadata_dict['Lbox']) == 1
+            assert 'ptcl_mass' in metadata_dict
+            assert custom_len(metadata_dict['ptcl_mass']) == 1
+        except AssertionError:
+            msg = ("\nThe UserDefinedHaloCatalog requires keyword arguments ``Lbox`` and ``ptcl_mass``\n"
+                "storing scalars that will be interpreted as metadata about the halo catalog.\n")
+            raise HalotoolsError(msg)
+
+        Lbox = metadata_dict['Lbox']
+        try:
+            x, y, z = (
+                self.halo_table['halo_x'], 
+                self.halo_table['halo_y'], 
+                self.halo_table['halo_z']
+                )
+            assert np.all(x >= 0)
+            assert np.all(x <= Lbox)
+            assert np.all(y >= 0)
+            assert np.all(y <= Lbox)
+            assert np.all(z >= 0)
+            assert np.all(z <= Lbox)
+        except AssertionError:
+            msg = ("The ``halo_x``, ``halo_y`` and ``halo_z`` columns must only store arrays\n"
+                "that are bound by 0 and the input ``Lbox``. \n")
+            raise HalotoolsError(msg)
 
     def _passively_bind_ptcl_table(self, **kwargs):
         """
