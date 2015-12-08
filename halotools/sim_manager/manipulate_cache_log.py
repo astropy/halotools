@@ -2,10 +2,10 @@
 update the ascii data file that keeps track of N-body simulation data. 
 """
 
-__all__ = ('get_formatted_cache_memory_line', 
+__all__ = ('get_formatted_cache_memory_line', 'get_cache_memory_header', 
     'write_cache_memory_log', 'read_cache_memory_log')
 
-import os
+import os, tempfile
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 from astropy.config.paths import _find_home
 from astropy.table import Table
@@ -16,6 +16,9 @@ import datetime
 from . import sim_defaults
 
 from ..custom_exceptions import UnsupportedSimError, CatalogTypeError
+
+def get_cache_memory_header():
+    return '# simname  redshift  halo_finder  version_name  fname  most_recent_use\n'
 
 def get_formatted_cache_memory_line(simname, redshift, 
     halo_finder, version_name, fname):
