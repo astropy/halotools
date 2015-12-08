@@ -4,8 +4,7 @@
 Cuboid FoF pair search
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 import numpy as np
 from time import time
 import sys
@@ -105,6 +104,7 @@ def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
     
     #do the pair counting
     if num_threads>1:
+        pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine,range(Ncell1))
         pool.close()
     if num_threads==1:
@@ -271,6 +271,7 @@ def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
     
     #do the pair counting
     if num_threads>1:
+        pool = multiprocessing.Pool(num_threads)
         result = pool.map(engine,range(Ncell1))
         pool.close()
     if num_threads==1:
