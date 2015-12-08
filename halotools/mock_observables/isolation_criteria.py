@@ -37,7 +37,7 @@ def spherical_isolation(sample1, r_max, period=None, num_threads=1,
         length 3 array defining axis-aligned periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
     
-    num_threads: int, optional
+    num_threads : int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
         available cores.  num_threads=0 is the default.
     
@@ -124,7 +124,8 @@ def cylindrical_isolation(sample1, rp_max, pi_max, period=None, num_threads=1,
     period : array_like, optional
         length 3 array defining axis-aligned periodic boundary conditions. If only
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*3).
-    num_threads: int, optional
+    
+    num_threads : int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
         available cores.  num_threads=0 is the default.
     

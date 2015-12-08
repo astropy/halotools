@@ -125,7 +125,7 @@ def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
     i_inds = double_tree.tree1.idx_sorted[i_inds]
     j_inds = double_tree.tree2.idx_sorted[j_inds]
     
-    return coo_matrix((d, (i_inds, j_inds)))
+    return coo_matrix((d, (i_inds, j_inds)), shape=(len(data1),len(data2)))
 
 
 def _pair_matrix_engine(double_tree, r_max_squared, period, PBCs, icell1):
@@ -293,7 +293,8 @@ def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
     i_inds = double_tree.tree1.idx_sorted[i_inds]
     j_inds = double_tree.tree2.idx_sorted[j_inds]
     
-    return coo_matrix((d_perp, (i_inds, j_inds))), coo_matrix((d_para, (i_inds, j_inds)))
+    return coo_matrix((d_perp, (i_inds, j_inds)), shape=(len(data1),len(data2))),\
+           coo_matrix((d_para, (i_inds, j_inds)), shape=(len(data1),len(data2)))
 
 
 def _xy_z_pair_matrix_engine(double_tree, rp_max_squared, pi_max_squared, period, PBCs, icell1):
