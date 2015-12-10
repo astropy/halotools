@@ -69,35 +69,15 @@ def update_halo_table_cache_log(simname, redshift,
         cache_fname = get_halo_table_cache_log_fname()
     pass
 
-def verify_halo_table_cache_log_columns(log):
-    correct_header = get_halo_table_cache_log_header()
-    expected_key_set = set(correct_header.strip().split()[1:])
-    log_key_set = set(log.keys())
+
+
+
+def identify_halo_catalog_fname(**kwargs):
     try:
-        assert log_key_set == expected_key_set
-    except AssertionError:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
-        if os.path.isfile(cache_fname):
-            with open(cache_fname, 'r') as f:
-                actual_header = f.readline()
-            if actual_header != correct_header:
-                header_problem_msg = ("\nThe Halotools cache log appears to be corrupted.\n"
-                    "The file " + cache_fname + "\nkeeps track of which halo catalogs"
-                    "you use with Halotools.\nThe correct header for this file is "
-                    + correct_header + "\nThe actual header in this file is \n" 
-                    + actual_header + "\n"
-                    "Your halo table cache log appears to have become corrupted.\n"
-                    "Please visually inspect this file to ensure it has not been \n"
-                    "accidentally overwritten. ")
-            else:
-                raise HalotoolsError("\nUnaddressed control flow branch. This is a bug in Halotools.\n")
 
-        else:
-            raise HalotoolsError("\nUnaddressed control flow branch. This is a bug in Halotools.\n")
-
-
-
-def identify_halo_catalog(cache_fname, **kwargs):
     log = read_cache_memory_log(cache_fname)
 
     try:
@@ -106,7 +86,70 @@ def identify_halo_catalog(cache_fname, **kwargs):
     except:
         pass
 
+def verify_halo_table_cache_existence(cache_fname):
+    """
+    """
 
+    if not os.path.isfile(cache_fname):
+        msg = ("\nThe file " + cache_fname + "\ndoes not exist. "
+            "This file serves as a log for all the halo catalogs you use with Halotools.\n"
+            "If you have not yet downloaded the initial halo catalog,\n"
+            "you should do so now following the ``Getting Started`` instructions on "
+            "http://halotools.readthedocs.org\nIf you have already taken this step,\n"
+            "then your halo table cache log has been deleted,\nin which case you should"
+            "execute the following script:\n"
+            "halotools/scripts/auto_detect_halo_tables_in_cache.py\n")
+        raise HalotoolsError(msg)
+
+def verify_halo_table_cache_header(cache_fname):
+    """
+    """
+    verify_halo_table_cache_existence(cache_fname)
+
+    correct_header = get_halo_table_cache_log_header()
+    with open(cache_fname, 'r') as f:
+        actual_header = f.readline()
+
+    if correct_header != actual_header:
+        msg = ("\nThe file " + cache_fname + 
+            "serves as a log for all the halo catalogs you use with Halotools.\n"
+            "The correct header that should be in this file is \n"
+            + correct_header + "\nThe actual header currently stored in this file is \n"
+            + actual_header + "\nTo resolve your error, try opening the log file "
+            "with a text editor and replacing the current line with the correct one.\n")
+        raise HalotoolsError(msg)
+
+def verify_halo_table_cache_log_columns(log, **kwargs):
+    """
+    """
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
+
+    verify_halo_table_cache_header(cache_fname)
+
+    correct_header = get_halo_table_cache_log_header()
+    expected_key_set = set(correct_header.strip().split()[1:])
+    log_key_set = set(log.keys())
+    try:
+        assert log_key_set == expected_key_set
+    except AssertionError:
+        cache_fname = get_halo_table_cache_log_fname()
+        msg = ("The file " + cache_fname + 
+            "\nkeeps track of the halo catalogs"
+            "you use with Halotools.\n"
+            "This file appears to be corrupted.\n"
+            "Please visually inspect this file to ensure it has not been "
+            "accidentally overwritten. \n"
+            "Then store a backup of this file and execute the following script:\n"
+            "halotools/scripts/auto_detect_halo_tables_in_cache.py\n"
+            "If this does not resolve the error you are encountering,\n"
+            "and if you have been using halo catalogs stored on some external disk \n"
+            "or other non-standard location, you may try manually adding \n"
+            "the appropriate lines to the cache log.\n"
+            "Please contact the Halotools developers if the issue persists.\n")
+        raise HalotoolsError(msg)
 
 
 
