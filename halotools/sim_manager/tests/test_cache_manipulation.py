@@ -77,6 +77,9 @@ class TestCacheManipulation(TestCase):
     def test_identify_halo_catalog_fname(self):
         raise HalotoolsError("The identify_halo_catalog_fname function is not implemented yet.")
 
+    def test_auto_detect_halo_table(self):
+        raise HalotoolsError("The auto_detect_halo_table function is not implemented yet.")
+
     def tearDown(self):
         os.system('rm -rf ' + self.temp_dirname)
 

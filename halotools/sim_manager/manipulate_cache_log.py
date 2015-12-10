@@ -14,6 +14,13 @@ from astropy.table import Table
 import warnings
 import datetime
 
+try:
+    import h5py
+except ImportError:
+    warn("\nMost of the functionality of the sim_manager sub-package"
+    " requires h5py to be installed,\n"
+        "which can be accomplished either with pip or conda")
+
 from . import sim_defaults
 
 from ..custom_exceptions import HalotoolsError
@@ -79,13 +86,34 @@ def identify_halo_catalog_fname(**kwargs):
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
 
-    log = read_cache_memory_log(cache_fname)
+    if 'fname' in kwargs:
+        if not os.path.isfile(kwargs['fname']):
+            msg = ("\nThe requested filename ``" + kwargs['fname'] + "`` does not exist.\n")
+            raise HalotoolsError(msg)
+        else:
+            update_halo_table_cache_log(kwargs['fname'])
+            return kwargs['fname']
+    else:
+        log = read_cache_memory_log(cache_fname)
+        mask = np.ones(len(log), dtype=bool)
 
-    try:
-        fname = kwargs['fname']
-        mask = log['fname'] == fname
-    except:
-        pass
+        catalog_attrs = ('simname', 'redshift', 'halo_finder', 'version_name')
+        for key in catalog_attrs:
+            try:
+                attr_mask = log[key] == kwargs[key]
+                mask *= attr_mask
+            except KeyError:
+                pass
+        matching_catalogs = log[mask]
+
+        if len(matching_catalogs) == 0:
+            auto_detect_halo_table(**kwargs)
+        elif len(matching_catalogs) == 1:
+            return 
+
+
+def auto_detect_halo_table(**kwargs):
+    raise HalotoolsError("The auto_detect_halo_table function is not implemented yet.")
 
 def verify_halo_table_cache_existence(cache_fname):
     """
@@ -99,7 +127,7 @@ def verify_halo_table_cache_existence(cache_fname):
             "http://halotools.readthedocs.org\nIf you have already taken this step,\n"
             "then your halo table cache log has been deleted,\nin which case you should"
             "execute the following script:\n"
-            "halotools/scripts/auto_detect_halo_tables_in_cache.py\n")
+            "halotools/scripts/rebuild_halo_table_cache_log.py\n")
         raise HalotoolsError(msg)
 
 def verify_halo_table_cache_header(cache_fname):
@@ -120,15 +148,20 @@ def verify_halo_table_cache_header(cache_fname):
             "with a text editor and replacing the current line with the correct one.\n")
         raise HalotoolsError(msg)
 
-def verify_halo_table_cache_log_columns(log, **kwargs):
+def verify_halo_table_cache_log_columns(**kwargs):
     """
     """
     try:
         cache_fname = kwargs['cache_fname']
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
+    verify_halo_table_cache_existence(cache_fname = cache_fname)
+    verify_halo_table_cache_header(cache_fname = cache_fname)
 
-    verify_halo_table_cache_header(cache_fname)
+    try:
+        log = kwargs['log']
+    except KeyError:
+        log = read_halo_table_cache_log(cache_fname = cache_fname)
 
     correct_header = get_halo_table_cache_log_header()
     expected_key_set = set(correct_header.strip().split()[1:])
@@ -144,7 +177,7 @@ def verify_halo_table_cache_log_columns(log, **kwargs):
             "Please visually inspect this file to ensure it has not been "
             "accidentally overwritten. \n"
             "Then store a backup of this file and execute the following script:\n"
-            "halotools/scripts/auto_detect_halo_tables_in_cache.py\n"
+            "halotools/scripts/rebuild_halo_table_cache_log.py\n"
             "If this does not resolve the error you are encountering,\n"
             "and if you have been using halo catalogs stored on some external disk \n"
             "or other non-standard location, you may try manually adding \n"
@@ -152,13 +185,54 @@ def verify_halo_table_cache_log_columns(log, **kwargs):
             "Please contact the Halotools developers if the issue persists.\n")
         raise HalotoolsError(msg)
 
+def verify_cache_log(**kwargs):
+
+    verify_halo_table_cache_existence(**kwargs)
+    verify_halo_table_cache_header(**kwargs)
+    verify_halo_table_cache_log_columns(**kwargs)
 
 
 
+def check_metadata_consistency(cache_log_entry, **kwargs):
+    """
+    """
+    try:
+        import h5py
+    except ImportError:
+        raise HalotoolsError("\nYou must have h5py installed in order to use "
+            "the Halotools halo catalog cache system.\n")
 
+    halo_table_fname = cache_log_entry['fname']
+    f = h5py.File(halo_table_fname)
 
+    for key, requested_attr in kwargs.iteritems():
+        try:
+            attr_of_cached_catalog = f.attrs[key]
+            assert attr_of_cached_catalog == requested_attr
+        except KeyError:
+            msg = ("\nThe halo table stored in \n``"+halo_table_fname+"\n"
+                "does not have metadata stored for the ``"+key+"`` attribute\n"
+                "and so some self-consistency checks cannot be performed.\n"
+                "If you are seeing this message while attempting to load a \n"
+                "halo catalog provided by Halotools, please submit a bug report on GitHub.\n"
+                "If you are using your own halo catalog that you have stored \n"
+                "in the Halotools cache yourself, you should consider adding this metadata\n"
+                "to the hdf5 file as one of the keys of the .attrs file attribute.\n")
+            warnings.warn(msg)
+        except AssertionError:
+            msg = ("\nThe halo table stored in \n``"+halo_table_fname+"\n"
+                "has the value ``"+attr_of_cached_catalog+"`` stored as metadata for the \n"
+                "``"+key+"`` attribute.\nThis is inconsistent with the "
+                "``"+requested_attr+"`` value that you requested.\n"
+                "If you are seeing this message while attempting to load a \n"
+                "halo catalog provided by Halotools, please submit a bug report on GitHub.\n"
+                "If you are using your own halo catalog that you have stored \n"
+                "in the Halotools cache yourself, then you have "
+                "attempted to access a halo catalog \nby requesting a value for "
+                "the ``"+key+"`` attribute that is inconsistent with the stored value.\n")
+            raise HalotoolsError(msg)
 
-
+    f.close()
 
 
 
