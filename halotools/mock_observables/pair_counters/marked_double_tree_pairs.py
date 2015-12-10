@@ -201,9 +201,9 @@ def _marked_npairs_engine(double_tree, weights1, weights2,
 
 
 def xy_z_marked_npairs(data1, data2, rp_bins, pi_bins, period=None, 
-    weights1 = None, weights2 = None, 
-    wfunc = 0, verbose = False, num_threads = 1,
-    approx_cell1_size = None, approx_cell2_size = None):
+                       weights1 = None, weights2 = None, 
+                       wfunc = 0, verbose = False, num_threads = 1,
+                       approx_cell1_size = None, approx_cell2_size = None):
     """
     Calculate the number of weighted pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`W(>r_{\\perp},>r_{\\parallel})`.
     
@@ -741,9 +741,9 @@ def _xy_z_velocity_marked_npairs_engine(double_tree, weights1, weights2,
     This is an engine that calls a cython module to count pairs
     """
     
-    counts1 = np.zeros(len(rp_bins_squared))
-    counts2 = np.zeros(len(rp_bins_squared))
-    counts3 = np.zeros(len(pi_bins_squared))
+    counts1 = np.zeros((len(rp_bins), len(pi_bins)))
+    counts2 = np.zeros((len(rp_bins), len(pi_bins)))
+    counts3 = np.zeros((len(rp_bins), len(pi_bins)))
     
     #extract the points in the cell
     s1 = double_tree.tree1.slice_array[icell1]

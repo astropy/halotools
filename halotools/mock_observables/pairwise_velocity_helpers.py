@@ -13,13 +13,13 @@ from multiprocessing import cpu_count
 from ..custom_exceptions import *
 from ..utils.array_utils import convert_to_ndarray, array_is_monotonic
 
-__all__ = ['_pairwise_velocity_stats_process_args']
+__all__ = ['_pairwise_velocity_stats_process_args','_process_radial_bins','_process_rp_bins']
 __author__ = ['Duncan Campbell']
 
-def _pairwise_velocity_stats_process_args(sample1, velocities1, rbins, sample2,
-                                 velocities2, period, do_auto, do_cross,
-                                 num_threads, max_sample_size,
-                                 approx_cell1_size, approx_cell2_size):
+def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2,
+                                          velocities2, period, do_auto, do_cross,
+                                          num_threads, max_sample_size,
+                                          approx_cell1_size, approx_cell2_size):
     """ 
     Private method to do bounds-checking on the arguments passed to 
     `~halotools.mock_observables.pairwise_velocity_stats`. 
@@ -73,19 +73,6 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, rbins, sample2,
             velocities2 = velocities2[inds]
             print('\n downsampling `sample2`...')
     
-    #check the radial bins parameter
-    rbins = convert_to_ndarray(rbins)
-    rmax = np.max(rbins)
-    try:
-        assert rbins.ndim == 1
-        assert len(rbins) > 1
-        if len(rbins) > 2:
-            assert array_is_monotonic(rbins, strict = True) == 1
-    except AssertionError:
-        msg = ("\n Input `rbins` must be a monotonically increasing \n"
-               "1-D array with at least two entries.")
-        raise HalotoolsError(msg)
-        
     #Process period entry and check for consistency.
     if period is None:
         PBCs = False
@@ -100,15 +87,6 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, rbins, sample2,
         except AssertionError:
             msg = "Input `period` must be a bounded positive number in all dimensions."
             raise HalotoolsError(msg)
-
-    #check for input parameter consistency
-    if (period is not None):
-        if (rmax >= np.min(period)/3.0):
-            msg = ("\n The maximum length over which you search for pairs \n"
-                   "of points cannot be larger than Lbox/3 in any dimension. \n"
-                   "If you need to count pairs on these length scales, \n"
-                   "you should use a larger simulation. \n")
-            raise HalotoolsError(msg)
     
     if (sample2 is not None) & (sample1.shape[-1] != sample2.shape[-1]):
         msg = ('\n `sample1` and `sample2` must have same dimension.\n')
@@ -121,5 +99,73 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, rbins, sample2,
     if num_threads == 'max':
         num_threads = cpu_count()
     
-    return sample1, velocities1, rbins, sample2, velocities2, period, do_auto,\
+    return sample1, velocities1, sample2, velocities2, period, do_auto,\
            do_cross, num_threads, _sample1_is_sample2, PBCs
+
+
+def _process_radial_bins(rbins ,period, PBCs):
+    """
+    process radial bin parameter
+    """
+    
+    #check the radial bins parameter
+    rbins = convert_to_ndarray(rbins)
+    rmax = np.max(rbins)
+    try:
+        assert rbins.ndim == 1
+        assert len(rbins) > 1
+        if len(rbins) > 2:
+            assert array_is_monotonic(rbins, strict = True) == 1
+    except AssertionError:
+        msg = ("\n Input `rbins` must be a monotonically increasing \n"
+               "1-D array with at least two entries.")
+        raise HalotoolsError(msg)
+    
+    #check for input parameter consistency
+    if PBCs:
+        if (rmax >= np.min(period)/3.0):
+            msg = ("\n The maximum length over which you search for pairs \n"
+                   "of points cannot be larger than Lbox/3 in any dimension. \n"
+                   "If you need to count pairs on these length scales, \n"
+                   "you should use a larger simulation. \n")
+            raise HalotoolsError(msg)
+    
+    return rbins
+
+def _process_rp_bins(rp_bins,pi_max,period,PBCs):
+    """
+    process projected radial bin and pi_max parameters
+    """
+    
+    #process projected radial bins
+    rp_bins = convert_to_ndarray(rp_bins)
+    rp_max = np.max(rp_bins)
+    try:
+        assert rp_bins.ndim == 1
+        assert len(rp_bins) > 1
+        if len(rp_bins) > 2:
+            assert array_is_monotonic(rp_bins, strict = True) == 1
+    except AssertionError:
+        msg = ("\n Input `rp_bins` must be a monotonically increasing \n"
+               "1-D array with at least two entries.")
+        raise HalotoolsError(msg)
+    
+    pi_max = float(pi_max)
+    
+    if PBCs:
+        if (rp_max >= np.min(period[0:2])/3.0):
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                   "cannot be larger than Lbox/3 in any dimension. \n"
+                   "If you need to count pairs on these length scales, \n"
+                   "you should use a larger simulation.\n")
+            raise HalotoolsError(msg)
+        if (pi_max >= np.min(period[2])/3.0):
+            msg = ("\n The maximum length over which you search for pairs of points \n"
+                   "cannot be larger than Lbox/3 in any dimension. \n"
+                   "If you need to count pairs on these length scales, \n"
+                   "you should use a larger simulation.\n")
+            raise HalotoolsError(msg)
+    
+    return rp_bins, pi_max
+
+
