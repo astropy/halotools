@@ -47,39 +47,49 @@ class TestCacheManipulation(TestCase):
 
         self.dummy_fname = os.path.join(self.temp_dirname, 'dummy_cache_log.txt')
 
-    @pytest.mark.skipif('not APH_MACHINE')
-    def test_read_write(self):
-        
-
         simname = ['bolshoi', 'bolshoi']
         redshift = [0, 1]
         halo_finder = ['rockstar', 'rockstar']
         version_name = ['beta_v0', 'beta_v0']
         fname = ['whatever_fname1', 'whatever_fname2']
 
-        table1 = Table({'simname': simname, 'redshift': redshift, 
+        self.halo_table_cache_log_table1 = Table({'simname': simname, 'redshift': redshift, 
             'halo_finder': halo_finder, 'version_name': version_name, 
             'fname': fname})
 
-        manipulate_cache_log.overwrite_halo_table_cache_log(table1, cache_fname=self.dummy_fname)
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_write(self):
+        
+        manipulate_cache_log.overwrite_halo_table_cache_log(
+            self.halo_table_cache_log_table1, cache_fname=self.dummy_fname)
 
         table2 = manipulate_cache_log.read_halo_table_cache_log(cache_fname=self.dummy_fname)
 
-        assert set(table1.keys()).issubset(set(table2.keys()))
-        assert not set(table2.keys()).issubset(set(table1.keys()))
+        assert set(self.halo_table_cache_log_table1.keys()).issubset(set(table2.keys()))
+        assert not set(table2.keys()).issubset(set(self.halo_table_cache_log_table1.keys()))
 
-        for key in table1.keys():
-            assert np.all(table1[key] == table2[key])
+        for key in self.halo_table_cache_log_table1.keys():
+            assert np.all(self.halo_table_cache_log_table1[key] == table2[key])
 
+    @pytest.mark.xfail
     def test_update_halo_table_cache_log(self):
         raise HalotoolsError("The update_halo_table_cache_log function is not implemented yet.")
 
+
+
+
+    @pytest.mark.xfail
     def test_identify_halo_catalog_fname(self):
         raise HalotoolsError("The identify_halo_catalog_fname function is not implemented yet.")
 
+
+
+
+    @pytest.mark.xfail
     def test_auto_detect_halo_table(self):
         raise HalotoolsError("The auto_detect_halo_table function is not implemented yet.")
 
+    @pytest.mark.xfail
     def test_erase_halo_table_cache_log_entry(self):
         raise HalotoolsError("The erase_halo_table_cache_log_entry function is not implemented yet.")
 
