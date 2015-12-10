@@ -7,6 +7,8 @@ __all__ = ('get_formatted_halo_table_cache_log_line',
     'overwrite_halo_table_cache_log', 'read_halo_table_cache_log')
 
 import os, tempfile
+from copy import copy, deepcopy 
+
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 from astropy.config.paths import _find_home
 from astropy.table import Table
@@ -81,6 +83,8 @@ def update_halo_table_cache_log(simname, redshift,
 
 
 def identify_halo_catalog_fname(**kwargs):
+    """
+    """
     try:
         cache_fname = kwargs['cache_fname']
     except KeyError:
@@ -109,7 +113,19 @@ def identify_halo_catalog_fname(**kwargs):
         if len(matching_catalogs) == 0:
             auto_detect_halo_table(**kwargs)
         elif len(matching_catalogs) == 1:
-            return 
+            metadata = deepcopy(kwargs)
+            try:
+                del metadata['cache_fname']
+            except KeyError:
+                pass
+            check_metadata_consistency(matching_catalogs, **metadata)
+            return matching_catalogs['fname']
+        else:
+            msg = ("\nHalotools detected multiple halo catalogs matching "
+                "the input arguments.\nThe returned list provides the filenames"
+                "of all matching catalogs\n")
+            warnings.warn(msg)
+            return list(matching_catalogs['fname'])
 
 
 def auto_detect_halo_table(**kwargs):
@@ -147,6 +163,9 @@ def verify_halo_table_cache_header(cache_fname):
             + actual_header + "\nTo resolve your error, try opening the log file "
             "with a text editor and replacing the current line with the correct one.\n")
         raise HalotoolsError(msg)
+
+def erase_halo_table_cache_log_entry(**kwargs):
+    raise HalotoolsError("The erase_halo_table_cache_log_entry function is not implemented yet.")
 
 def verify_halo_table_cache_log_columns(**kwargs):
     """
@@ -190,8 +209,6 @@ def verify_cache_log(**kwargs):
     verify_halo_table_cache_existence(**kwargs)
     verify_halo_table_cache_header(**kwargs)
     verify_halo_table_cache_log_columns(**kwargs)
-
-
 
 def check_metadata_consistency(cache_log_entry, **kwargs):
     """

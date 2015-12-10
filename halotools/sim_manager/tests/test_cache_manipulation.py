@@ -80,6 +80,9 @@ class TestCacheManipulation(TestCase):
     def test_auto_detect_halo_table(self):
         raise HalotoolsError("The auto_detect_halo_table function is not implemented yet.")
 
+    def test_erase_halo_table_cache_log_entry(self):
+        raise HalotoolsError("The erase_halo_table_cache_log_entry function is not implemented yet.")
+
     def tearDown(self):
         os.system('rm -rf ' + self.temp_dirname)
 
