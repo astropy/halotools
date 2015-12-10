@@ -34,24 +34,39 @@ def get_formatted_halo_table_cache_log_line(simname, redshift,
         )
     return formatted_line
 
-def overwrite_halo_table_cache_log(fname, table):
+def overwrite_halo_table_cache_log(new_log, **kwargs):
     """
     """
-    with open(fname, 'w') as f:
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
+
+    with open(cache_fname, 'w') as f:
         header = get_halo_table_cache_log_header() 
         f.write(header)
-        for entry in table:
+        for entry in new_log:
             newline = get_formatted_halo_table_cache_log_line(
                 entry['simname'], entry['redshift'], 
                 entry['halo_finder'], entry['version_name'], entry['fname'])
             f.write(newline)
 
-def read_halo_table_cache_log(fname):
+def read_halo_table_cache_log(**kwargs):
     """
     """
-    return Table.read(fname, format = 'ascii')
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
 
-def update_halo_table_cache_log(simname, redshift, halo_finder, version_name, fname):
+    return Table.read(cache_fname, format = 'ascii')
+
+def update_halo_table_cache_log(simname, redshift, 
+    halo_finder, version_name, fname, **kwargs):
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
     pass
 
 def verify_halo_table_cache_log_columns(log):
