@@ -1,2 +1,5 @@
-halos  haloes
-color  colour
+misspellings = (
+	('halos','haloes'), 
+	('color', 'colour'), 
+	('realization', 'realisation')
+	)
