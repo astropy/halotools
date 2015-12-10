@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """
-This module contains helper functions used throughout the 
+This module contains private helper functions used throughout the 
 `~halotools.mock_observables.pair_counters` module to perform 
 control flow on function arguments, bounds-checking and exception-handling. 
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import numpy as np
 from time import time
@@ -304,7 +303,7 @@ def _set_approximate_xy_z_cell_sizes(approx_cell1_size, approx_cell2_size,
             raise HalotoolsError(msg)
 
     if approx_cell2_size is None:
-        approx_cell2_size = np.array([rp_max, rp_max, pi_max]).astype(float)
+        approx_cell2_size = copy(approx_cell1_size)
     else:
         approx_cell2_size = convert_to_ndarray(approx_cell2_size)
         try:

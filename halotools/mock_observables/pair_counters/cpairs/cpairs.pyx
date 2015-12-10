@@ -1,28 +1,38 @@
 # cython: profile=False
 
 """
-optimized cython pair counters.  These are called by "rect_cuboid_pairs" module as the 
-engine to actually calculate the pair-wise distances and do the binning.  These functions 
-should be used with care as there are no 'checks' preformed to ensure the arguments are 
-of the correct format.
+brute force pair counters
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 import sys
 cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin, sqrt
-
 from .distances cimport *
 
-__all__ = ['npairs_no_pbc', 'npairs_pbc', 'wnpairs_no_pbc', 'wnpairs_pbc',\
-           'jnpairs_no_pbc', 'jnpairs_pbc',\
-           'xy_z_npairs_no_pbc', 'xy_z_npairs_pbc', 'xy_z_wnpairs_no_pbc', 'xy_z_wnpairs_pbc',\
-           'xy_z_jnpairs_no_pbc', 'xy_z_jnpairs_pbc',\
-           's_mu_npairs_no_pbc', 's_mu_npairs_pbc']
+__all__ = ['npairs_no_pbc',\
+           'npairs_pbc',\
+           'wnpairs_no_pbc',\
+           'wnpairs_pbc',\
+           'jnpairs_no_pbc',\
+           'jnpairs_pbc',\
+           'xy_z_npairs_no_pbc',\
+           'xy_z_npairs_pbc',\
+           'xy_z_wnpairs_no_pbc',\
+           'xy_z_wnpairs_pbc',\
+           'xy_z_jnpairs_no_pbc',\
+           'xy_z_jnpairs_pbc',\
+           's_mu_npairs_no_pbc',\
+           's_mu_npairs_pbc']
+
 __author__=['Duncan Campbell']
+
+
+###########################
+####   pair counters   ####
+###########################
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -35,8 +45,54 @@ def npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                   np.ndarray[np.float64_t, ndim=1] z_icell2,
                   np.ndarray[np.float64_t, ndim=1] rbins):
     """
-    real-space pair counter without periodic boundary conditions (no PBCs).
-    Calculate the number of pairs with separations less than or equal to rbins[i].
+    Calculate the number of pairs with seperations greater than or equal to r, :math:`N(>r)`.
+    
+    This can be used for pair coutning with PBCs if the pointes are pre-shifted to 
+    account for the PBC.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    rbins : numpy.array
+         array defining radial bins in which to sum the pair counts
+    
+    Returns
+    -------
+    result :  numpy.array
+        array of pair counts in radial bins defined by ``rbins``.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    unit cube. 
+    
+    >>> Npts = 1000
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    Count the number of pairs that can be formed amongst these random points:
+    
+    >>> rbins = np.linspace(0,0.5,10)
+    >>> counts = npairs_no_pbc(x,y,z,x,y,z,rbins)
     """
     
     #c definitions
@@ -47,6 +103,9 @@ def npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rbins = rbins**2
     
     #loop over points in grid1's cells
     for i in range(0,Ni):
@@ -76,8 +135,56 @@ def npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                np.ndarray[np.float64_t, ndim=1] rbins,
                np.ndarray[np.float64_t, ndim=1] period):
     """
-    real-space pair counter with periodic boundary conditions (PBCs).
-    Calculate the number of pairs with separations less than or equal to rbins[i].
+    Calculate the number of pairs with seperations greater than or equal to r, :math:`N(>r)`, with periodic boundary conditions (PBC).
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    rbins : numpy.array
+         array defining radial bins in which to sum the pair counts
+    
+    period : numpy.array
+        array defining axis-aligned periodic boundary conditions.
+    
+    Returns
+    -------
+    result :  numpy.array
+        array of pair counts in radial bins defined by ``rbins``.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    Count the number of weighted pairs that can be formed amongst these random points:
+    
+    >>> rbins = np.linspace(0,0.5,10)
+    >>> counts = npairs_pbc(x,y,z,x,y,z,rbins,period)
     """
     
     #c definitions
@@ -88,6 +195,9 @@ def npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rbins = rbins**2
     
     #loop over points in grid1's cells
     for i in range(0,Ni):
@@ -119,9 +229,69 @@ def wnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                    np.ndarray[np.float64_t, ndim=1] w_icell2,
                    np.ndarray[np.float64_t, ndim=1] rbins):
     """
-    weighted real-space pair counter without periodic boundary conditions (no PBCs)..
-    Calculate the weighted number of pairs with separations less than or equal to 
-    rbins[i].
+    Calculate the weighted number of pairs with seperations greater than or equal to r, :math:`W(>r)`.
+    
+    :math:`W(>r)` is incremented by :math:`w_1 \\times w_2` if two pints have seperations 
+    greater than or equal to r, where :math:`w_1` and :math:`w_2` the associated wieghts.
+    
+    This can be used for pair coutning with PBCs if the pointes are pre-shifted to 
+    account for the PBC.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N1
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N2
+    
+    rbins : numpy.array
+         array defining radial bins in which to sum the pair counts
+    
+    Returns
+    -------
+    result :  numpy.array
+        array of weighted pair counts in radial bins defined by ``rbins``.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    Assign random weights:
+    
+    >>> weights = np.random.random(Npts)
+    
+    Count the number of weighted pairs that can be formed amongst these random points:
+    
+    >>> rbins = np.linspace(0,0.5,10)
+    >>> counts = wnpairs_no_pbc(x,y,z,x,y,z,weights,weights,rbins)
     """
     
     #c definitions
@@ -132,6 +302,9 @@ def wnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rbins = rbins**2
     
     #loop over points in grid1's cell
     for i in range(0,len(x_icell1)):
@@ -165,9 +338,66 @@ def wnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                 np.ndarray[np.float64_t, ndim=1] rbins,
                 np.ndarray[np.float64_t, ndim=1] period):
     """
-    weighted real-space pair counter with periodic boundary conditions (PBCs).
-    Calculate the weighted number of pairs with separations less than or equal to 
-    rbins[i].
+    Calculate the weighted number of pairs with seperations greater than or equal to r, :math:`W(>r)`, with periodic boundary conditions (PBC).
+    
+    :math:`W(>r)` is incremented by :math:`w_1 \\times w_2` if two pints have seperations 
+    greater than or equal to r, where :math:`w_1` and :math:`w_2` the associated wieghts.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N1
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N2
+    
+    rbins : numpy.array
+         array defining radial bins in which to sum the pair counts
+    
+    Returns
+    -------
+    result :  numpy.array
+        array of weighted pair counts in radial bins defined by ``rbins``.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    Assign random weights:
+    
+    >>> weights = np.random.random(Npts)
+    
+    Count the number of weighted pairs that can be formed amongst these random points:
+    
+    >>> rbins = np.linspace(0,0.5,10)
+    >>> counts = wnpairs_no_pbc(x,y,z,x,y,z,weights,weights,rbins)
     """
     
     #c definitions
@@ -178,6 +408,9 @@ def wnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rbins = rbins**2
     
     #loop over points in grid1's cell
     for i in range(0,len(x_icell1)):
@@ -213,9 +446,53 @@ def jnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                    np.int_t N_samples,
                    np.ndarray[np.float64_t, ndim=1] rbins):
     """
-    jackknife weighted real-space pair counter.
-    Calculate the weighted number of pairs with separations less than or equal to rbins[i]
-    for a jackknife sample.
+    Calculate the jackknife weighted number of pairs with seperations greater than or equal to r, :math:`N(>r)`.
+    
+    This can be used for pair coutning with PBCs if the pointes are pre-shifted to 
+    account for the PBC.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N1
+    
+    w_icell2 : numpy.array
+        array of weight floats of length N2
+    
+    j_icell1 : numpy.array
+        array of integer subsample labels of length N1
+        
+    j_icell2 : numpy.array
+        array of integer subsample labels of length N2
+        
+    N_samples : int
+        total number of subsamples
+    
+    rbins : numpy.array
+         array defining radial bins in which to sum the pair counts
+    
+    Returns
+    -------
+    result :  numpy.ndarray
+        2-D array of pair counts of length ``N_samples`` in radial bins defined by ``rbins``.
     """
     
     #c definitions
@@ -226,6 +503,9 @@ def jnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rbins = rbins**2
     
     #loop over points in grid1's cell
     for i in range(0,Ni):
@@ -261,9 +541,53 @@ def jnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                 np.ndarray[np.float64_t, ndim=1] rbins,
                 np.ndarray[np.float64_t, ndim=1] period):
     """
-    jackknife weighted real-space pair counter.
-    Calculate the weighted number of pairs with separations less than or equal to rbins[i]
-    for a jackknife sample.
+    Calculate the jackknife weighted number of pairs with seperations greater than or equal to r, :math:`N(>r)`, with periodic boundary conditions (PBC).
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N1
+    
+    w_icell2 : numpy.array
+        array of weight floats of length N2
+    
+    j_icell1 : numpy.array
+        array of integer subsample labels of length N1
+        
+    j_icell2 : numpy.array
+        array of integer subsample labels of length N2
+        
+    N_samples : int
+        total number of subsamples
+    
+    rbins : numpy.array
+         array defining radial bins in which to sum the pair counts
+    
+    period : numpy.array
+        array defining axis-aligned periodic boundary conditions.
+    
+    Returns
+    -------
+    result :  numpy.ndarray
+        2-D array of pair counts of length ``N_samples`` in radial bins defined by ``rbins``.
     """
     
     #c definitions
@@ -275,6 +599,9 @@ def jnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rbins = rbins**2
     
     #loop over points in grid1's cell
     for i in range(0,Ni):
@@ -307,9 +634,43 @@ def xy_z_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                        np.ndarray[np.float64_t, ndim=1] rp_bins,
                        np.ndarray[np.float64_t, ndim=1] pi_bins):
     """
-    2+1D pair counter without periodic boundary conditions (no PBCs).
-    Calculate the number of pairs with separations in the x-y plane less than or equal 
-    to rp_bins[i], and separations in the z coordinate less than or equal to pi_bins[i].
+    Calculate the number of pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`N(>r_{\\perp},>r_{\\parallel})`.
+    
+    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
+    
+    This can be used for pair coutning with PBCs if the pointes are pre-shifted to 
+    account for the PBC.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    rp_bins : numpy.array
+        array defining projected seperation in which to sum the pair counts
+    
+    pi_bins : numpy.array
+        array defining parallel seperation in which to sum the pair counts
+    
+    Returns
+    -------
+    result : numpy.ndarray
+        2-D array of pair counts of bins defined by ``rp_bins`` and ``pi_bins``.
     """
     
     #c definitions
@@ -323,6 +684,10 @@ def xy_z_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rp_bins = rp_bins**2
+    pi_bins = pi_bins**2
     
     #loop over points in grid1's cell
     for i in range(0,Ni):
@@ -357,9 +722,43 @@ def xy_z_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                     np.ndarray[np.float64_t, ndim=1] pi_bins,
                     np.ndarray[np.float64_t, ndim=1] period):
     """
-    2+1D pair counter without periodic boundary conditions (no PBCs).
-    Calculate the number of pairs with separations in the x-y plane less than or equal 
-    to rp_bins[i], and separations in the z coordinate less than or equal to pi_bins[i].
+    Calculate the number of pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`N(>r_{\\perp},>r_{\\parallel})`, with periodic boundary conditions (PBC).
+    
+    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    rp_bins : numpy.array
+        array defining projected seperation in which to sum the pair counts
+    
+    pi_bins : numpy.array
+        array defining parallel seperation in which to sum the pair counts
+    
+    period : numpy.array
+        array defining axis-aligned periodic boundary conditions.
+    
+    Returns
+    -------
+    result : numpy.ndarray
+        2-D array of pair counts of bins defined by ``rp_bins`` and ``pi_bins``.
     """
     
     #c definitions
@@ -373,6 +772,10 @@ def xy_z_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rp_bins = rp_bins**2
+    pi_bins = pi_bins**2
     
     #loop over points in grid1's cell
     for i in range(0,Ni):
@@ -411,9 +814,49 @@ def xy_z_wnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                         np.ndarray[np.float64_t, ndim=1] rp_bins,
                         np.ndarray[np.float64_t, ndim=1] pi_bins):
     """
-    2+1D pair counter without periodic boundary conditions (no PBCs).
-    Calculate the number of pairs with separations in the x-y plane less than or equal 
-    to rp_bins[i], and separations in the z coordinate less than or equal to pi_bins[i].
+    Calculate the weighted number of pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`N(>r_{\\perp},>r_{\\parallel})`.
+    
+    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
+    
+    This can be used for pair coutning with PBCs if the pointes are pre-shifted to 
+    account for the PBC.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N1
+    
+    w_icell2 : numpy.array
+        array of weight floats of length N2
+    
+    rp_bins : numpy.array
+        array defining projected seperation in which to sum the pair counts
+    
+    pi_bins : numpy.array
+        array defining parallel seperation in which to sum the pair counts
+    
+    Returns
+    -------
+    result : numpy.ndarray
+        2-D array of weighted pair counts of bins defined by ``rp_bins`` and ``pi_bins``.
     """
     
     #c definitions
@@ -427,6 +870,10 @@ def xy_z_wnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rp_bins = rp_bins**2
+    pi_bins = pi_bins**2
     
     #loop over points in grid1's cell
     for i in range(0,Ni):
@@ -464,9 +911,49 @@ def xy_z_wnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                      np.ndarray[np.float64_t, ndim=1] pi_bins,
                      np.ndarray[np.float64_t, ndim=1] period):
     """
-    2+1D pair counter without periodic boundary conditions (no PBCs).
-    Calculate the number of pairs with separations in the x-y plane less than or equal 
-    to rp_bins[i], and separations in the z coordinate less than or equal to pi_bins[i].
+    Calculate the weighted number of pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`N(>r_{\\perp},>r_{\\parallel})`, with periodic boundary conditions (PBC).
+    
+    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N1
+    
+    w_icell2 : numpy.array
+        array of weight floats of length N2
+    
+    rp_bins : numpy.array
+        array defining projected seperation in which to sum the pair counts
+    
+    pi_bins : numpy.array
+        array defining parallel seperation in which to sum the pair counts
+    
+    period : numpy.array
+        array defining axis-aligned periodic boundary conditions.
+    
+    Returns
+    -------
+    result : numpy.ndarray
+        2-D array of weighted pair counts of bins defined by ``rp_bins`` and ``pi_bins``.
     """
     
     #c definitions
@@ -480,6 +967,10 @@ def xy_z_wnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rp_bins = rp_bins**2
+    pi_bins = pi_bins**2
     
     #loop over points in grid1's cell
     for i in range(0,Ni):
@@ -522,9 +1013,58 @@ def xy_z_jnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                         np.ndarray[np.float64_t, ndim=1] rp_bins,
                         np.ndarray[np.float64_t, ndim=1] pi_bins):
     """
-    2+1D pair counter without periodic boundary conditions (no PBCs).
-    Calculate the number of pairs with separations in the x-y plane less than or equal 
-    to rp_bins[i], and separations in the z coordinate less than or equal to pi_bins[i].
+    Calculate the jackknife weighted number of pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`N(>r_{\\perp},>r_{\\parallel})`.
+    
+    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
+    
+    This can be used for pair coutning with PBCs if the pointes are pre-shifted to 
+    account for the PBC.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N1
+    
+    w_icell2 : numpy.array
+        array of weight floats of length N2
+    
+    j_icell1 : numpy.array
+        array of integer subsample labels of length N1
+        
+    j_icell2 : numpy.array
+        array of integer subsample labels of length N2
+        
+    N_samples : int
+        total number of subsamples
+    
+    rp_bins : numpy.array
+        array defining projected seperation in which to sum the pair counts
+    
+    pi_bins : numpy.array
+        array defining parallel seperation in which to sum the pair counts
+    
+    Returns
+    -------
+    result : numpy.ndarray
+        3-D array of weighted jackknife pair counts in bins defined by ``rp_bins`` and ``pi_bins``.
     """
     
     #c definitions
@@ -538,6 +1078,10 @@ def xy_z_jnpairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rp_bins = rp_bins**2
+    pi_bins = pi_bins**2
     
     #loop over points in grid1's cell
     for i in range(0,Ni):
@@ -579,9 +1123,58 @@ def xy_z_jnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                      np.ndarray[np.float64_t, ndim=1] pi_bins,
                      np.ndarray[np.float64_t, ndim=1] period):
     """
-    2+1D pair counter without periodic boundary conditions (no PBCs).
-    Calculate the number of pairs with separations in the x-y plane less than or equal 
-    to rp_bins[i], and separations in the z coordinate less than or equal to pi_bins[i].
+    Calculate the jackknife weighted number of pairs with seperations greater than or equal to :math:`r_{\\perp}` and :math:`r_{\\parallel}`, :math:`N(>r_{\\perp},>r_{\\parallel})`, with periodic boundary conditions (PBC).
+    
+    :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    w_icell1 : numpy.array
+        array of weight floats of length N1
+    
+    w_icell2 : numpy.array
+        array of weight floats of length N2
+    
+    j_icell1 : numpy.array
+        array of integer subsample labels of length N1
+        
+    j_icell2 : numpy.array
+        array of integer subsample labels of length N2
+        
+    N_samples : int
+        total number of subsamples
+    
+    rp_bins : numpy.array
+        array defining projected seperation in which to sum the pair counts
+    
+    pi_bins : numpy.array
+        array defining parallel seperation in which to sum the pair counts
+    
+    period : numpy.array
+        array defining axis-aligned periodic boundary conditions.
+    
+    Returns
+    -------
+    result : numpy.ndarray
+        3-D array of weighted jackknife pair counts in bins defined by ``rp_bins`` and ``pi_bins``.
     """
     
     #c definitions
@@ -595,6 +1188,10 @@ def xy_z_jnpairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    rp_bins = rp_bins**2
+    pi_bins = pi_bins**2
     
     #loop over points in grid1's cell
     for i in range(0,Ni):
@@ -633,12 +1230,43 @@ def s_mu_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                        np.ndarray[np.float64_t, ndim=1] s_bins,
                        np.ndarray[np.float64_t, ndim=1] mu_bins):
     """
-    2+1D pair counter without periodic boundary conditions (no PBCs).
-    Calculate the number of pairs with separations s, and angle from the line of sight mu.
+    Calculate the number of pairs with seperations greater than or equal to :math:`s` and :math:`\\mu`, :math:`N(>s,>\\mu)`.
     
-    A pre-step for calculating correlation function multipoles, omega etc
-    The s bins can run from 0 <= s < ds*Nsbins
-    The mu bins can run from 0 <= mu <= 1
+    :math:`s` is the radial seperation, and :math:`\\mu` is sine of the angle wrt the z-direction.
+    
+    This can be used for pair coutning with PBCs if the pointes are pre-shifted to 
+    account for the PBC.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    s_bins : numpy.array
+         array defining :math:`s` bins in which to sum the pair counts
+    
+    mu_bins : numpy.array
+         array defining :math:`mu` bins in which to sum the pair counts
+    
+    Returns
+    -------
+    result : numpy.ndarray
+        2-D array of pair counts in bins defined by ``s_bins`` and ``mu_bins``.
     """
     
     #c definitions
@@ -691,12 +1319,43 @@ def s_mu_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                     np.ndarray[np.float64_t, ndim=1] mu_bins,
                     np.ndarray[np.float64_t, ndim=1] period):
     """
-    2+1D pair counter with periodic boundary conditions (PBCs).
-    Calculate the number of pairs with separations s, and angle from the line of sight mu.
+    Calculate the number of pairs with seperations greater than or equal to :math:`s` and :math:`\\mu`, :math:`N(>s,>\\mu)`, with periodic boundary conditions (PBC).
     
-    A pre-step for calculating correlation function multipoles, omega etc
-    The s bins can run from 0 <= s < ds*Nsbins
-    The mu bins can run from 0 <= mu <= 1
+    :math:`s` is the radial seperation, and :math:`\\mu` is sine of the angle wrt the z-direction.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+         array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+         array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+         array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+         array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+         array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+         array of z positions of lenght N2 (data2)
+    
+    s_bins : numpy.array
+         array defining :math:`s` bins in which to sum the pair counts
+    
+    mu_bins : numpy.array
+         array defining :math:`mu` bins in which to sum the pair counts
+    
+    period : numpy.array
+        array defining axis-aligned periodic boundary conditions.
+    
+    Returns
+    -------
+    result : numpy.ndarray
+        2-D array of pair counts in bins defined by ``s_bins`` and ``mu_bins``.
     """
     
     #c definitions
@@ -739,6 +1398,10 @@ def s_mu_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
         
     return counts
 
+
+###########################
+#### binning functions ####
+###########################
 
 cdef inline radial_binning(np.int_t* counts, np.float64_t* bins,\
                            np.float64_t d, np.int_t k):
@@ -856,22 +1519,43 @@ cdef inline xy_z_jbinning(np.float64_t* counts, np.float64_t* rp_bins,\
                 if k<0: break
 
 
+###########################
+###########################
+###########################
+
 cdef inline double jweight(np.int_t j, np.int_t j1, np.int_t j2,\
                            np.float64_t w1, np.float64_t w2):
     """
-    return jackknife weighted counts
+    Return the jackknife weighted count.
     
     parameters
     ----------
-    j: jackknife subsample
-    j1: jackknife sample 1 tag
-    j2: jackknife sample 2 tag
-    w1: weight1
-    w2: weight2
+    j : int
+        subsample being removed
     
-    notes
+    j1 : int
+        integer label indicating which subsample point 1 occupies
+    
+    j2 : int
+        integer label indicating which subsample point 2 occupies
+    
+    w1 : float
+        weight associated with point 1
+    
+    w2 : float
+        weight associated with point 2
+    
+    Returns
+    -------
+    w : double
+        0.0, w1*w2*0.5, or w1*w2
+    
+    Notes
     -----
-    if sample j==0, do no jackknife weighting.  i.e. reserve this for the full sample.
+    We use the tag '0' to indicated we want to use the entire sample, i.e. no subsample
+    should be labeled with a '0'.
+    
+    jackknife wiehgt is caclulated as follows:
     if both points are inside the sample, return w1*w2
     if both points are outside the sample, return 0.0
     if one point is within and one point is outside the sample, return 0.5*w1*w2

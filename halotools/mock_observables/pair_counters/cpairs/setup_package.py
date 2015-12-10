@@ -5,7 +5,8 @@ import os
 import sys
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
-SOURCES = ["cpairs.pyx", "distances.pyx", "pairwise_distances.pyx"]
+SOURCES = ["cpairs.pyx", "distances.pyx", "pairwise_distances.pyx",\
+           "per_object_cpairs.pyx"]
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():

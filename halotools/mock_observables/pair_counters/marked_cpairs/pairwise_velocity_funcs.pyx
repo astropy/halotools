@@ -5,29 +5,53 @@ weighting fuctions that return pairwise velocity calculations.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
-import sys
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, sqrt
+from cmath import sqrt
 
+__all__= ["relative_radial_velocity_weights", "radial_velocity_weights",\
+          "radial_velocity_variance_counter_weights",\
+          "relative_los_velocity_weights", "los_velocity_weights",\
+          "los_velocity_variance_counter_weights"]
 __author__ = ["Duncan Campbell"]
 
 
 cdef void relative_radial_velocity_weights(np.float64_t* w1,
-                                  np.float64_t* w2,
-                                  np.float64_t* shift,
-                                  double* result1,
-                                  double* result2,
-                                  double* result3):
+                                           np.float64_t* w2,
+                                           np.float64_t* shift,
+                                           double* result1,
+                                           double* result2,
+                                           double* result3):
     """
     Calculate the relative radial velocity between two points.
     
-    Return the relative radial velocity
+    Parameters
+    ----------
+    w1 : pointer to an array
+        weights array associated with data1.
+        w1[0:2] x,y,z positions
+        w1[3:6] vx, vy, vz velocities
     
-    weighting vector (w1 w2) is:
-    w[0:2] is the position vector x,y,z
-    w[3:] is the velocity vector vx, vy, vz
+    w2 : pointer to an array
+        weights array associated with data2
+        w2[0:2] x,y,z positions
+        w2[3:6] vx, vy, vz velocities
+    
+    shift : pointer to an array
+        Legnth-3 array storing the amount the points were shifted in each spatial 
+        dimension.  This is used when doing pair counts on periodic boxes and the 
+        points have been preshifted.
+    
+    result1 : pointer to a double
+        relative radial velocity
+        
+    result2 : pointer to a double
+        0.0 (dummy)
+        
+    result3 : pointer to a double
+        1.0 (pairs involved, but also kind-of a dummy)
+    
     """
     
     #calculate radial vector between points
@@ -70,11 +94,32 @@ cdef void radial_velocity_weights(np.float64_t* w1,
     """
     Calculate the radial velocity between two points.
     
-    Return the radial multiplied radial velocities
+    Parameters
+    ----------
+    w1 : pointer to an array
+        weights array associated with data1.
+        w1[0:2] x,y,z positions
+        w1[3:6] vx, vy, vz velocities
     
-    weighting vector (w1 w2) is:
-    w[0:2] is the position vector x,y,z
-    w[3:] is the velocity vector vx, vy, vz
+    w2 : pointer to an array
+        weights array associated with data2
+        w2[0:2] x,y,z positions
+        w2[3:6] vx, vy, vz velocities
+    
+    shift : pointer to an array
+        Legnth-3 array storing the amount the points were shifted in each spatial 
+        dimension.  This is used when doing pair counts on periodic boxes and the 
+        points have been preshifted.
+    
+    result1 : pointer to a double
+        radial velocity, v_r1 * v_r2
+        
+    result2 : pointer to a double
+        0.0 (dummy)
+        
+    result3 : pointer to a double
+        1.0 (pairs involved, but also kind-of a dummy)
+    
     """
     
     #calculate radial vector between points
@@ -104,21 +149,45 @@ cdef void radial_velocity_weights(np.float64_t* w1,
        result3[0] = 1.0 #number of pairs
 
 
-cdef void velocity_variance_counter_weights(np.float64_t* w1,
-                                            np.float64_t* w2,
-                                            np.float64_t* shift,
-                                            double* result1,
-                                            double* result2,
-                                            double* result3):
+cdef void radial_velocity_variance_counter_weights(np.float64_t* w1,
+                                                   np.float64_t* w2,
+                                                   np.float64_t* shift,
+                                                   double* result1,
+                                                   double* result2,
+                                                   double* result3):
     """
-    Calculate the relative radial velocity between two points, minus a value (a shift)
+    Calculate the relative radial velocity between two points minus an offset, and the 
+    squared quantity.  This function is used to calculate the variance using the 
+    "shifted data" technique where a constant value is subtracted from the value.
     
-    Return the shifted relative radial velocity and the shited radial velocity squared
+    Parameters
+    ----------
+    w1 : pointer to an array
+        weights array associated with data1.
+        w1[0:2] x,y,z positions
+        w1[3:6] vx, vy, vz velocities
+        w1[7] offset
     
-    weighting vector (w1 w2) is:
-    w[0:2] is the position vector x,y,z
-    w[3:] is the velocity vector vx, vy, vz
-    w[6] is the shit value
+    w2 : pointer to an array
+        weights array associated with data2
+        w2[0:2] x,y,z positions
+        w2[3:6] vx, vy, vz velocities
+        w2[7] offset
+    
+    shift : pointer to an array
+        Legnth-3 array storing the amount the points were shifted in each spatial 
+        dimension.  This is used when doing pair counts on periodic boxes and the 
+        points have been preshifted.
+    
+    result1 : pointer to a double
+        relative radial velocity minus an offset
+        
+    result2 : pointer to a double
+        relative radial velocity minus an offset squared
+        
+    result3 : pointer to a double
+        1.0 (pairs involved, but also kind-of a dummy)
+    
     """
     
     #calculate radial vector between points
@@ -151,4 +220,131 @@ cdef void velocity_variance_counter_weights(np.float64_t* w1,
         result2[0] = result*result #radial velocity squared
         result3[0] = 1.0 #number of pairs
 
+
+cdef void relative_los_velocity_weights(np.float64_t* w1,
+                                        np.float64_t* w2,
+                                        np.float64_t* shift,
+                                        double* result1,
+                                        double* result2,
+                                        double* result3):
+    """
+    Calculate the relative line-of-sight (LOS) velocity between two points.
+    
+    Parameters
+    ----------
+    w1 : pointer to an array
+        weights array associated with data1.
+        w1[0] vz velocities
+    
+    w2 : pointer to an array
+        weights array associated with data2
+        w2[0] vz velocities
+    
+    shift : pointer to an array
+        Legnth-3 array storing the amount the points were shifted in each spatial 
+        dimension.  This is used when doing pair counts on periodic boxes and the 
+        points have been preshifted.
+    
+    result1 : pointer to a double
+        relative LOS velocity
+        
+    result2 : pointer to a double
+        0.0 (dummy)
+        
+    result3 : pointer to a double
+        1.0 (pairs involved, but also kind-of a dummy)
+    
+    """
+    
+    cdef float dvz = (w1[0] - w2[0])
+    
+    result1[0] = dvz #LOS velocity
+    result2[0] = 0.0 #unused value
+    result3[0] = 1.0 #number of pairs
+
+
+cdef void los_velocity_weights(np.float64_t* w1,
+                               np.float64_t* w2,
+                               np.float64_t* shift,
+                               double* result1,
+                               double* result2,
+                               double* result3):
+    """
+    Calculate the line-of-sight (LOS) velocity between two points.
+    
+    Parameters
+    ----------
+    w1 : pointer to an array
+        weights array associated with data1.
+        w1[0] vz velocities
+    
+    w2 : pointer to an array
+        weights array associated with data2
+        w2[0] vz velocities
+    
+    shift : pointer to an array
+        Legnth-3 array storing the amount the points were shifted in each spatial 
+        dimension.  This is used when doing pair counts on periodic boxes and the 
+        points have been preshifted.
+    
+    result1 : pointer to a double
+        LOS velocity v_z1 * v_z2
+        
+    result2 : pointer to a double
+        0.0 (dummy)
+        
+    result3 : pointer to a double
+        1.0 (pairs involved, but also kind-of a dummy)
+    
+    """
+    
+    cdef float dvz = (w1[0] - w2[0])
+    
+    result1[0] = dvz #LOS velocity
+    result2[0] = 0.0 #unused value
+    result3[0] = 1.0 #number of pairs
+
+
+cdef void los_velocity_variance_counter_weights(np.float64_t* w1,
+                                                np.float64_t* w2,
+                                                np.float64_t* shift,
+                                                double* result1,
+                                                double* result2,
+                                                double* result3):
+    """
+    Calculate the relative LOS velocity between two points minus an offset, and the 
+    squared quantity.  This function is used to calculate the variance using the 
+    "shifted data" technique where a constant value is subtracted from the value.
+    
+    Parameters
+    ----------
+    w1 : pointer to an array
+        weights array associated with data1.
+        w1[0] vz velocities
+    
+    w2 : pointer to an array
+        weights array associated with data2
+        w2[0] vz velocities
+    
+    shift : pointer to an array
+        Legnth-3 array storing the amount the points were shifted in each spatial 
+        dimension.  This is used when doing pair counts on periodic boxes and the 
+        points have been preshifted.
+    
+    result1 : pointer to a double
+        relative LOS velocity minus an offset
+        
+    result2 : pointer to a double
+        relative LOS velocity minus an offset squared
+        
+    result3 : pointer to a double
+        1.0 (pairs involved, but also kind-of a dummy)
+    
+    """
+    
+    cdef float dvz = (w1[0] - w2[0]) - w1[1]*w2[1]
+    
+    result1[0] = dvz #LOS velocity
+    result2[0] = dvz*dvz #LOS velocity squared
+    result3[0] = 1.0 #number of pairs
 

@@ -4,7 +4,7 @@ import sys
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ["marked_cpairs.pyx", "weighting_functions.pyx", "custom_weighting_func.pyx",
-           "pairwise_velocity_funcs.pyx"]
+           "pairwise_velocity_funcs.pyx","distances.pyx"]
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """
-Cuboid FoF pair search
+caclulate the pairwise distances in cuboid volumes using 
+`~halotools.mock_observables.double_tree`.
 """
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import numpy as np
-from time import time
-import sys
+import time
 import multiprocessing
 from functools import partial
 from scipy.sparse import coo_matrix
@@ -25,7 +25,7 @@ __author__=['Duncan Campbell']
 def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
                 approx_cell1_size = None, approx_cell2_size = None):
     """
-    Calculate the distance to all pairs with seperations less than ``r_max`` in real space.
+    Calculate the distance to all pairs with seperations less than ``r_max``.
     
     Parameters
     ----------
@@ -66,15 +66,55 @@ def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
     
     Returns
     -------
-    dists : scipy.sparse.coo_matrix
+    dists : `~scipy.sparse.coo_matrix`
         N1 x N2 sparse matrix in COO format containing distances between points.
+    
+    Notes
+    -----
+    The distances between all points with seperations less than ``r_max`` are stored 
+    and returned.  If there are many points and/or ``r_max`` is large, this can become
+    very memmory intensive.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+        
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+        
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
+    >>> coords = np.vstack((x,y,z)).T
+    
+    Now, we can find the distance between all points:
+    
+    >>> r_max = 0.1
+    >>> dists = pair_matrix(coords, coords, r_max, period=period)
+    
+    The diagonal of this matrix will be zeros, the distance between each point and itself.
+    The off diagonal elements are the pairwise distances between points i,j in the order 
+    they appear in `coords`.  In this case, the matrix will be symmetric.
     """
     
     search_dim_max = np.array([r_max, r_max, r_max])
     function_args = [data1, data2, period, num_threads, search_dim_max]
     x1, y1, z1, x2, y2, z2, period, num_threads, PBCs = _process_args(*function_args)
-    xperiod, yperiod, zperiod = period 
+    #note that process_args sets period equal to Lbox is there are no PBCs
+    xperiod, yperiod, zperiod = period
     r_max = float(r_max)
+    
+    if verbose==True:
+        print("running on {0} x {1}\n"
+              "points with PBCs={2}".format(len(data1), len(data2), PBCs))
+        start = time.time()
     
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_cell_sizes(approx_cell1_size, approx_cell2_size, r_max, period)
@@ -83,24 +123,24 @@ def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
     
     double_tree = FlatRectanguloidDoubleTree(x1, y1, z1, x2, y2, z2,
-                                             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
-                                             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
-                                             r_max, r_max, r_max, xperiod, yperiod, zperiod, PBCs=PBCs)
-    
-    #square radial bins to make distance calculation cheaper
-    r_max_squared = r_max**2.0
-    
-    #print come information
-    if verbose==True:
-        print("running for pairs with {0} by {1} points".format(len(data1),len(data2)))
-        print("cell size= {0}".format(grid1.dL))
-        print("number of cells = {0}".format(np.prod(grid1.num_divs)))
+                      approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
+                      approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
+                      r_max, r_max, r_max, xperiod, yperiod, zperiod, PBCs=PBCs)
     
     #number of cells
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
+    Ncell2 = double_tree.num_x2divs*double_tree.num_y2divs*double_tree.num_z2divs
+    
+    if verbose==True:
+        print("volume 1 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x1divs,\
+              double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
+        print("volume 2 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x2divs,\
+              double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
     
     #create a function to call with only one argument
-    engine = partial(_pair_matrix_engine, double_tree, r_max_squared, period, PBCs)
+    engine = partial(_pair_matrix_engine, double_tree, r_max, period, PBCs)
     
     #do the pair counting
     if num_threads>1:
@@ -125,10 +165,13 @@ def pair_matrix(data1, data2, r_max, period=None, verbose=False, num_threads=1,
     i_inds = double_tree.tree1.idx_sorted[i_inds]
     j_inds = double_tree.tree2.idx_sorted[j_inds]
     
+    if verbose==True:
+        print("total run time: {0} seconds".format(time.time()-start))
+    
     return coo_matrix((d, (i_inds, j_inds)), shape=(len(data1),len(data2)))
 
 
-def _pair_matrix_engine(double_tree, r_max_squared, period, PBCs, icell1):
+def _pair_matrix_engine(double_tree, r_max, period, PBCs, icell1):
     """
     pair counting engine for npairs function.  This code calls a cython function.
     """
@@ -146,9 +189,9 @@ def _pair_matrix_engine(double_tree, r_max_squared, period, PBCs, icell1):
     
     i_min = s1.start
     
-    xsearch_length = np.sqrt(r_max_squared)
-    ysearch_length = np.sqrt(r_max_squared)
-    zsearch_length = np.sqrt(r_max_squared)
+    xsearch_length = r_max
+    ysearch_length = r_max
+    zsearch_length = r_max
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)
             
@@ -164,8 +207,8 @@ def _pair_matrix_engine(double_tree, r_max_squared, period, PBCs, icell1):
         j_min = s2.start
         
         dd, ii_inds, jj_inds = pairwise_distance_no_pbc(x_icell1, y_icell1, z_icell1,\
-                                                            x_icell2, y_icell2, z_icell2,\
-                                                            r_max_squared)
+                                                        x_icell2, y_icell2, z_icell2,\
+                                                        r_max)
         
         ii_inds = ii_inds+i_min
         jj_inds = jj_inds+j_min
@@ -181,8 +224,8 @@ def _pair_matrix_engine(double_tree, r_max_squared, period, PBCs, icell1):
 def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
                      num_threads=1, approx_cell1_size = None, approx_cell2_size = None):
     """
-    Calculate the distance to all pairs with seperations less than or equal to ``rp_max`` 
-    and ``pi_max`` in redshift space.
+    Calculate the distance to all pairs with perpendicular seperations less than or 
+    equal to ``rp_max`` and parallel seperations ``pi_max`` in redshift space.
     
     Parameters
     ----------
@@ -228,19 +271,60 @@ def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
     
     Returns
     -------
-    perp_dists : scipy.sparse.coo_matrix
+    perp_dists : `~scipy.sparse.coo_matrix`
         N1 x N2 sparse matrix in COO format containing perpendicular distances between points.
     
-    para_dists : scipy.sparse.coo_matrix
+    para_dists : `~scipy.sparse.coo_matrix`
         N1 x N2 sparse matrix in COO format containing parallel distances between points.
+    
+    Notes
+    -----
+    The distances between all points with seperations that meet the secified conditions 
+    are stored and returned.  If there are many points and/or ``rp_max`` and ``pi_max`` 
+    are large, this can become very memmory intensive.
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
+    >>> coords = np.vstack((x,y,z)).T
+    
+    Now, we can find the distance between all points:
+    
+    >>> rp_max = 0.1
+    >>> pi_max = 0.2
+    >>> d_perp, d_para = xy_z_pair_matrix(coords, coords, rp_max, pi_max, period=period)
+    
+    The diagonal of this matrix will be zeros, the distance between each point and itself.
+    The off diagonal elements are the pairwise distances between points i,j in the order 
+    they appear in `coords`.  In this case, the matrix will be symmetric.
     """
     
     search_dim_max = np.array([rp_max, rp_max, pi_max])
     function_args = [data1, data2, period, num_threads, search_dim_max]
     x1, y1, z1, x2, y2, z2, period, num_threads, PBCs = _process_args(*function_args)
+    #note that process_args sets period equal to Lbox is there are no PBCs
     xperiod, yperiod, zperiod = period 
     rp_max = float(rp_max)
     pi_max = float(rp_max)
+    
+    if verbose==True:
+        print("running on {0} x {1}\n"
+              "points with PBCs={2}".format(len(data1), len(data2), PBCs))
+        start = time.time()
     
     approx_cell1_size, approx_cell2_size = (
         _set_approximate_xy_z_cell_sizes(approx_cell1_size, approx_cell2_size, rp_max, pi_max, period)
@@ -249,25 +333,24 @@ def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
     approx_x2cell_size, approx_y2cell_size, approx_z2cell_size = approx_cell2_size
     
     double_tree = FlatRectanguloidDoubleTree(x1, y1, z1, x2, y2, z2,
-                                             approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
-                                             approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
-                                             rp_max, rp_max, pi_max, xperiod, yperiod,zperiod, PBCs=PBCs)
-    
-    #square radial bins to make distance calculation cheaper
-    rp_max_squared = rp_max**2.0
-    pi_max_squared = pi_max**2.0
-    
-    #print come information
-    if verbose==True:
-        print("running for pairs with {0} by {1} points".format(len(data1),len(data2)))
-        print("cell size= {0}".format(grid1.dL))
-        print("number of cells = {0}".format(np.prod(grid1.num_divs)))
+                      approx_x1cell_size, approx_y1cell_size, approx_z1cell_size, 
+                      approx_x2cell_size, approx_y2cell_size, approx_z2cell_size, 
+                      rp_max, rp_max, pi_max, xperiod, yperiod,zperiod, PBCs=PBCs)
     
     #number of cells
     Ncell1 = double_tree.num_x1divs*double_tree.num_y1divs*double_tree.num_z1divs
+    Ncell2 = double_tree.num_x2divs*double_tree.num_y2divs*double_tree.num_z2divs
+    
+    if verbose==True:
+        print("volume 1 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x1divs,\
+              double_tree.num_y1divs,double_tree.num_z1divs,Ncell1))
+        print("volume 2 split {0},{1},{2} times along each dimension,\n"
+              "resulting in {3} cells.".format(double_tree.num_x2divs,\
+              double_tree.num_y2divs,double_tree.num_z2divs,Ncell2))
     
     #create a function to call with only one argument
-    engine = partial(_xy_z_pair_matrix_engine, double_tree, rp_max_squared, pi_max_squared, period, PBCs)
+    engine = partial(_xy_z_pair_matrix_engine, double_tree, rp_max, pi_max, period, PBCs)
     
     #do the pair counting
     if num_threads>1:
@@ -294,11 +377,14 @@ def xy_z_pair_matrix(data1, data2, rp_max, pi_max, period=None, verbose=False,\
     i_inds = double_tree.tree1.idx_sorted[i_inds]
     j_inds = double_tree.tree2.idx_sorted[j_inds]
     
+    if verbose==True:
+        print("total run time: {0} seconds".format(time.time()-start))
+    
     return coo_matrix((d_perp, (i_inds, j_inds)), shape=(len(data1),len(data2))),\
            coo_matrix((d_para, (i_inds, j_inds)), shape=(len(data1),len(data2)))
 
 
-def _xy_z_pair_matrix_engine(double_tree, rp_max_squared, pi_max_squared, period, PBCs, icell1):
+def _xy_z_pair_matrix_engine(double_tree, rp_max, pi_max, period, PBCs, icell1):
     """
     pair counting engine for xy_z_fof_npairs function.  This code calls a cython function.
     """
@@ -317,9 +403,9 @@ def _xy_z_pair_matrix_engine(double_tree, rp_max_squared, pi_max_squared, period
     
     i_min = s1.start
     
-    xsearch_length = np.sqrt(rp_max_squared)
-    ysearch_length = np.sqrt(rp_max_squared)
-    zsearch_length = np.sqrt(pi_max_squared)
+    xsearch_length = rp_max
+    ysearch_length = rp_max
+    zsearch_length = pi_max
     adj_cell_generator = double_tree.adjacent_cell_generator(
         icell1, xsearch_length, ysearch_length, zsearch_length)
     
@@ -338,7 +424,7 @@ def _xy_z_pair_matrix_engine(double_tree, rp_max_squared, pi_max_squared, period
         dd_perp, dd_para, ii_inds, jj_inds = pairwise_xy_z_distance_no_pbc(\
                                                  x_icell1, y_icell1, z_icell1,\
                                                  x_icell2, y_icell2, z_icell2,\
-                                                 rp_max_squared, pi_max_squared)
+                                                 rp_max, pi_max)
         
         ii_inds = ii_inds+i_min
         jj_inds = jj_inds+j_min
