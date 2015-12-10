@@ -2,8 +2,9 @@
 update the ascii data file that keeps track of N-body simulation data. 
 """
 
-__all__ = ('get_formatted_cache_memory_line', 'get_cache_memory_header', 
-    'write_cache_memory_log', 'read_cache_memory_log')
+__all__ = ('get_formatted_halo_table_cache_log_line', 
+    'get_halo_table_cache_log_header', 
+    'overwrite_halo_table_cache_log', 'read_halo_table_cache_log')
 
 import os, tempfile
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
@@ -15,12 +16,16 @@ import datetime
 
 from . import sim_defaults
 
-from ..custom_exceptions import UnsupportedSimError, CatalogTypeError
+from ..custom_exceptions import HalotoolsError
 
-def get_cache_memory_header():
+def get_halo_table_cache_log_fname():
+    dirname = os.path.join(get_astropy_cache_dir(), 'halotools')
+    return os.path.join(dirname, 'halo_table_cache_log.txt')
+
+def get_halo_table_cache_log_header():
     return '# simname  redshift  halo_finder  version_name  fname  most_recent_use\n'
 
-def get_formatted_cache_memory_line(simname, redshift, 
+def get_formatted_halo_table_cache_log_line(simname, redshift, 
     halo_finder, version_name, fname):
     timenow = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     formatted_line = (
@@ -29,22 +34,69 @@ def get_formatted_cache_memory_line(simname, redshift,
         )
     return formatted_line
 
-def write_cache_memory_log(fname, table):
+def overwrite_halo_table_cache_log(fname, table):
     """
     """
     with open(fname, 'w') as f:
-        header = get_cache_memory_header() 
+        header = get_halo_table_cache_log_header() 
         f.write(header)
         for entry in table:
-            newline = get_formatted_cache_memory_line(
+            newline = get_formatted_halo_table_cache_log_line(
                 entry['simname'], entry['redshift'], 
                 entry['halo_finder'], entry['version_name'], entry['fname'])
             f.write(newline)
 
-def read_cache_memory_log(fname):
+def read_halo_table_cache_log(fname):
     """
     """
     return Table.read(fname, format = 'ascii')
+
+def update_halo_table_cache_log(simname, redshift, halo_finder, version_name, fname):
+    pass
+
+def verify_halo_table_cache_log_columns(log):
+    correct_header = get_halo_table_cache_log_header()
+    expected_key_set = set(correct_header.strip().split()[1:])
+    log_key_set = set(log.keys())
+    try:
+        assert log_key_set == expected_key_set
+    except AssertionError:
+        cache_fname = get_halo_table_cache_log_fname()
+        if os.path.isfile(cache_fname):
+            with open(cache_fname, 'r') as f:
+                actual_header = f.readline()
+            if actual_header != correct_header:
+                header_problem_msg = ("\nThe Halotools cache log appears to be corrupted.\n"
+                    "The file " + cache_fname + "\nkeeps track of which halo catalogs"
+                    "you use with Halotools.\nThe correct header for this file is "
+                    + correct_header + "\nThe actual header in this file is \n" 
+                    + actual_header + "\n"
+                    "Your halo table cache log appears to have become corrupted.\n"
+                    "Please visually inspect this file to ensure it has not been \n"
+                    "accidentally overwritten. ")
+            else:
+                raise HalotoolsError("\nUnaddressed control flow branch. This is a bug in Halotools.\n")
+
+        else:
+            raise HalotoolsError("\nUnaddressed control flow branch. This is a bug in Halotools.\n")
+
+
+
+def identify_halo_catalog(cache_fname, **kwargs):
+    log = read_cache_memory_log(cache_fname)
+
+    try:
+        fname = kwargs['fname']
+        mask = log['fname'] == fname
+    except:
+        pass
+
+
+
+
+
+
+
 
 
 

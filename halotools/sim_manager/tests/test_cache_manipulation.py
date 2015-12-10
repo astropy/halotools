@@ -61,9 +61,9 @@ class TestCacheManipulation(TestCase):
             'halo_finder': halo_finder, 'version_name': version_name, 
             'fname': fname})
 
-        manipulate_cache_log.write_cache_memory_log(self.dummy_fname, table1)
+        manipulate_cache_log.overwrite_halo_table_cache_log(self.dummy_fname, table1)
 
-        table2 = manipulate_cache_log.read_cache_memory_log(self.dummy_fname)
+        table2 = manipulate_cache_log.read_halo_table_cache_log(self.dummy_fname)
 
         assert set(table1.keys()).issubset(set(table2.keys()))
         assert not set(table2.keys()).issubset(set(table1.keys()))
