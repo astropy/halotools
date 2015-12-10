@@ -22,7 +22,7 @@ def get_cache_memory_header():
 
 def get_formatted_cache_memory_line(simname, redshift, 
     halo_finder, version_name, fname):
-    timenow = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    timenow = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     formatted_line = (
         simname + '  ' + str(redshift) + '  ' + 
         halo_finder + '  ' + version_name + '  ' + fname + '  ' + timenow + '\n'

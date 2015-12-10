@@ -57,16 +57,22 @@ class TestCacheManipulation(TestCase):
         version_name = ['beta_v0', 'beta_v0']
         fname = ['whatever_fname1', 'whatever_fname2']
 
-        table = Table({'simname': simname, 'redshift': redshift, 
+        table1 = Table({'simname': simname, 'redshift': redshift, 
             'halo_finder': halo_finder, 'version_name': version_name, 
             'fname': fname})
 
-        manipulate_cache_log.write_cache_memory_log(self.dummy_fname, table)
+        manipulate_cache_log.write_cache_memory_log(self.dummy_fname, table1)
+
+        table2 = manipulate_cache_log.read_cache_memory_log(self.dummy_fname)
+
+        assert set(table1.keys()).issubset(set(table2.keys()))
+        assert not set(table2.keys()).issubset(set(table1.keys()))
+
+        for key in table1.keys():
+            assert np.all(table1[key] == table2[key])
 
     def tearDown(self):
         os.system('rm -rf ' + self.temp_dirname)
-        raise HalotoolsError("Pay attention to me!")
-
 
 
 

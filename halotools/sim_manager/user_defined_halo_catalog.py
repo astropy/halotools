@@ -1,3 +1,6 @@
+""" Module containing the UserDefinedHaloCatalog class. 
+"""
+
 import numpy as np
 import os, sys, urllib2, fnmatch
 from warnings import warn 
