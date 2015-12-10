@@ -61,6 +61,7 @@ def read_halo_table_cache_log(**kwargs):
 
     return Table.read(cache_fname, format = 'ascii')
 
+
 def update_halo_table_cache_log(simname, redshift, 
     halo_finder, version_name, fname, **kwargs):
     try:

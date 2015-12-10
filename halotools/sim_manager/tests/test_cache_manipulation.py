@@ -71,6 +71,12 @@ class TestCacheManipulation(TestCase):
         for key in table1.keys():
             assert np.all(table1[key] == table2[key])
 
+    def test_update_halo_table_cache_log(self):
+        raise HalotoolsError("The update_halo_table_cache_log function is not implemented yet.")
+
+    def test_identify_halo_catalog_fname(self):
+        raise HalotoolsError("The identify_halo_catalog_fname function is not implemented yet.")
+
     def tearDown(self):
         os.system('rm -rf ' + self.temp_dirname)
 
