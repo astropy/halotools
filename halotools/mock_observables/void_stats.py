@@ -169,7 +169,7 @@ def underdensity_prob_func(sample1, rbins, n_ran, period, u=0.2, num_threads=1,
     
     Returns
     -------
-    vpf : numpy.array
+    upf : numpy.array
         *len(rbins)* length array containing the underdensity probability function 
         :math:`P_U(r)` computed for each :math:`r` defined by input ``rbins``.
     
@@ -200,7 +200,7 @@ def underdensity_prob_func(sample1, rbins, n_ran, period, u=0.2, num_threads=1,
     
     >>> rbins = np.logspace(-2,-1,20)
     >>> n_ran = 1000
-    >>> vpf = underdensity_prob_func(coords, rbins, n_ran, period, u=0.2)
+    >>> upf = underdensity_prob_func(coords, rbins, n_ran, period, u=0.2)
     """
     
     #process input
