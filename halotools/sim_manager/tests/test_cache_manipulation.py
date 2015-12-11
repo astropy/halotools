@@ -36,8 +36,20 @@ class TestCacheManipulation(TestCase):
         """ Pre-load various arrays into memory for use by all tests. 
         """
 
+        simname_list = ['bolshoi', 'bolshoi']
+        redshift_list = [0, 1]
+        halo_finder_list = ['rockstar', 'rockstar']
+        version_name_list = ['beta_v0', 'beta_v0']
+        fname_list = ['whatever_fname1', 'whatever_fname2']
+        self.create_dummy_cache_log('temp_dummy_cache_dirname', 
+            simname_list, redshift_list,
+            halo_finder_list, version_name_list, fname_list)
+
+    def create_dummy_cache_log(self, tmp_name, simname_list, redshift_list, 
+        halo_finder_list, version_name_list, fname_list):
+
         self.temp_dirname = os.path.join(detected_home, 
-            'Desktop', 'temp_dummy_cache_dirname')
+            'Desktop', tmp_name)
 
         if os.path.isdir(self.temp_dirname) is False:
             os.mkdir(self.temp_dirname)
@@ -45,25 +57,28 @@ class TestCacheManipulation(TestCase):
             os.system('rm -rf ' + self.temp_dirname)
             os.mkdir(self.temp_dirname)
 
-        self.dummy_fname = os.path.join(self.temp_dirname, 'dummy_cache_log.txt')
+        self.dummy_cache_log_fname = os.path.join(self.temp_dirname, 'dummy_cache_log.txt')
 
-        simname = ['bolshoi', 'bolshoi']
-        redshift = [0, 1]
-        halo_finder = ['rockstar', 'rockstar']
-        version_name = ['beta_v0', 'beta_v0']
-        fname = ['whatever_fname1', 'whatever_fname2']
+        self.halo_table_cache_log_table1 = Table(
+            {'simname': simname_list, 
+            'redshift': redshift_list, 
+            'halo_finder': halo_finder_list, 
+            'version_name': version_name_list, 
+            'fname': fname_list}
+            )
 
-        self.halo_table_cache_log_table1 = Table({'simname': simname, 'redshift': redshift, 
-            'halo_finder': halo_finder, 'version_name': version_name, 
-            'fname': fname})
+    def create_dummy_cache_directories(self):
+        pass
+
+
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_read_write(self):
         
         manipulate_cache_log.overwrite_halo_table_cache_log(
-            self.halo_table_cache_log_table1, cache_fname=self.dummy_fname)
+            self.halo_table_cache_log_table1, cache_fname=self.dummy_cache_log_fname)
 
-        table2 = manipulate_cache_log.read_halo_table_cache_log(cache_fname=self.dummy_fname)
+        table2 = manipulate_cache_log.read_halo_table_cache_log(cache_fname=self.dummy_cache_log_fname)
 
         assert set(self.halo_table_cache_log_table1.keys()).issubset(set(table2.keys()))
         assert not set(table2.keys()).issubset(set(self.halo_table_cache_log_table1.keys()))
