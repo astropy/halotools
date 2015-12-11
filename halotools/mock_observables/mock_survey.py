@@ -75,12 +75,28 @@ def distant_observer_redshift(x, v, period=None, cosmo=None):
     
     Examples
     --------
-    >>> #randomly distributed points in a unit cube with random velocities. 
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
     >>> Npts = 1000
-    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
     >>> coords = np.vstack((x,y,z)).T
+    
+    We do the same thing to assign random peculiar velocities:
+    
     >>> vx,vy,vz = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
     >>> vels = np.vstack((vx,vy,vz)).T
+    
     >>> redshifts = distant_observer_redshift(coords, vels)
     
     """
@@ -133,6 +149,33 @@ def ra_dec_z(x, v, cosmo=None):
     
     redshift : np.array
         "observed" redshift
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
+    >>> coords = np.vstack((x,y,z)).T
+    
+    We do the same thing to assign random peculiar velocities:
+    
+    >>> vx,vy,vz = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> vels = np.vstack((vx,vy,vz)).T
+    
+    >>> from astropy.cosmology import WMAP9 as cosmo
+    >>> ra, dec, redshift = ra_dec_z(coords, vels, cosmo = cosmo)
     """
     
     #calculate the observed redshift

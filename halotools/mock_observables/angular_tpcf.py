@@ -102,12 +102,12 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     
     Examples
     --------
-    For demonstration purposes we create a randomly distributed set of points within a 
-    periodic unit cube. 
+    For demonstration purposes we create a randomly distributed set of points on the
+    sky:
     
+    >>> from halotools.utils import sample_spherical_surface
     >>> Npts = 1000
-   
-    >>> angular_coords = sample_spherical_surface(Npts)
+    >>> angular_coords = sample_spherical_surface(Npts) #in degrees
     
     >>> theta_bins = np.logspace(-2,1,10)
     >>> w = angular_tpcf(angular_coords, theta_bins)

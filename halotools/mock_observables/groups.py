@@ -87,7 +87,7 @@ class FoFGroups(object):
         
         >>> b_perp, b_para = (0.1,0.2)
         >>> groups = FoFGroups(coords, b_perp, b_para, period=period)
-        >>> IDs = groups.group_IDs
+        >>> IDs = groups.group_ids
         """
         
         self.b_perp = float(b_perp) #perpendicular linking length

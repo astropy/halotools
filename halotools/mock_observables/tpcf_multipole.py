@@ -34,7 +34,7 @@ def tpcf_multipole(s_mu_tcpf_result, mu_bins, order=0):
     order : int, optional
         order of the multpole returned.
     
-    Returns:
+    Returns
     -------
     xi_l : np.array
         multipole of ``s_mu_tcpf_result`` of the indicated order.

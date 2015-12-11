@@ -109,17 +109,17 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     -------
     correlation_function(s) : numpy.array
         *len(rp_bins)-1* length array containing the correlation function :math:`w_p(r_p)` 
-        computed in each of the bins defined by input `rp_bins`.
+        computed in each of the bins defined by input ``rp_bins``.
         
         
-        If `sample2` is not None (and not exactly the same as ``sample1``), 
+        If ``sample2`` is not None (and not exactly the same as ``sample1``), 
         three arrays of length len(`rbins`)-1 are returned: 
         
         .. math::
             w_{p11}(r_p), \\ w_{p12}(r_p), \\ w_{p22}(r_p),
 
-        the autocorrelation of `sample1`, the cross-correlation between `sample1` 
-        and `sample2`, and the autocorrelation of `sample2`.  If `do_auto` or `do_cross` 
+        the autocorrelation of ``sample1``, the cross-correlation between ``sample1`` 
+        and ``sample2``, and the autocorrelation of ``sample2``.  If ``do_auto`` or ``do_cross`` 
         is set to False, the appropriate result(s) is not returned.
     
     Notes
@@ -139,11 +139,23 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     
     Examples
     --------
-    >>> #randomly distributed points in a unit cube. 
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
     >>> Npts = 1000
-    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
     >>> coords = np.vstack((x,y,z)).T
-    >>> period = np.array([1.0,1.0,1.0])
+    
     >>> rp_bins = np.logspace(-2,-1,10)
     >>> pi_bins = np.logspace(-2,-1,10)
     >>> xi = wp(coords, rp_bins, pi_bins, period=period)

@@ -44,9 +44,9 @@ def nearest_neighbor(sample1, sample2, r_max, period=None, nth_nearest=1,
     
     nth_nearest : int
         intger indicating the nth nearest nieghbor for which to search.
-        If you are looking for the nearest neighbor when `sample1` and 
-        `sample2` are the same, but want to exclude the trivial self match, set 
-        nth_nearest = 2.  Results are not unique when there are multiple nth nearest 
+        If you are looking for the nearest neighbor when ``sample1`` and 
+        ``sample2`` are the same, but want to exclude the trivial self match, set 
+        *nth_nearest = 2*.  Results are not unique when there are multiple nth nearest 
         neighbors with the same seperation.
     
     num_threads : int, optional
@@ -72,17 +72,17 @@ def nearest_neighbor(sample1, sample2, r_max, period=None, nth_nearest=1,
     -------
     nearest_nieghbor : numpy.array
         *len(sample1)* array of integers indicating the index of the nearest neighbor in 
-        `sample2`.  If no nieghbor was found, set to -1.
+        ``sample2``.  If no nieghbor was found, set to -1.
     
     Notes
     -----
     pairwise distances are calculated using 
     `~halotools.mock_observables.pair_counters.pair_matrix`.  The distance to all pairs
-    with seperations less than or equal to `r_max` are found and stored in memory.  
-    Therefore, if `r_max` and/or the number of points in `sample1` and `sample2` is (are) 
+    with seperations less than or equal to ``r_max`` are found and stored in memory.  
+    Therefore, if ``r_max`` and/or the number of points in ``sample1`` and ``sample2`` is (are) 
     large, this process can become slow and use copious amounts of memory.
     
-    If you need to search many pairs out to large `r_max`, consider running this code 
+    If you need to search many pairs out to large ``r_max``, consider running this code 
     iteratively, finding the nearest neighbor for pairs with smaller seperations first.
     
     Examples

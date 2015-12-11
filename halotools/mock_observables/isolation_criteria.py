@@ -20,15 +20,18 @@ __author__ = ['Duncan Campbell']
 np.seterr(divide='ignore', invalid='ignore') #ignore divide by zero in e.g. DD/RR
 
 
-def spherical_isolation(sample1, r_max, period=None, num_threads=1,
-                        approx_cell1_size=None, approx_cell2_size=None):
+def spherical_isolation(sample1, sample2, r_max, period=None,
+                        num_threads=1, approx_cell1_size=None, approx_cell2_size=None):
     """
-    detemrine whether a set of points has any neighbor within a spherical volume
+    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within a spherical volume.
     
     Parameters
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
+        N1pts x 3 numpy array containing 3-D positions of points.
+    
+    sample2 : array_like
+        N2pts x 3 numpy array containing 3-D positions of points.
     
     r_max : float
         size of sphere to search for neighbors
@@ -61,6 +64,10 @@ def spherical_isolation(sample1, r_max, period=None, num_threads=1,
     has_neighbor : numpy.array
         array of booleans indicating if the point as a neighbor.
     
+    Notes
+    -----
+    Points with zero seperation are considered a self-match, and do no count as neighbors.
+    
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 
@@ -81,19 +88,15 @@ def spherical_isolation(sample1, r_max, period=None, num_threads=1,
     >>> coords = np.vstack((x,y,z)).T
     
     >>> r_max = 0.05
-    >>> is_isolated = spherical_isolation(coords, r_max, period=period)
+    >>> is_isolated = spherical_isolation(coords, coords, r_max, period=period)
     """
     
     
-    distance_matrix = pair_matrix(sample1, sample1, r_max, period=period,
+    distance_matrix = pair_matrix(sample1, sample2, r_max, period=period,
                                   approx_cell1_size = approx_cell1_size,
                                   approx_cell2_size = approx_cell1_size)
     
     i ,j = distance_matrix.nonzero()
-    
-    #self matches should have a distance of zero, but just in case...
-    is_not_self_match = (i!=j)
-    i = i[is_not_self_match]
     
     #compare list of indices vs. possible indices
     N = len(sample1)
@@ -105,15 +108,18 @@ def spherical_isolation(sample1, r_max, period=None, num_threads=1,
     return is_isolated
 
 
-def cylindrical_isolation(sample1, rp_max, pi_max, period=None, num_threads=1,
+def cylindrical_isolation(sample1, sample2, rp_max, pi_max, period=None, num_threads=1,
                           approx_cell1_size=None, approx_cell2_size=None):
     """
-    detemrine whether a set of points has any neighbor within a cylinderical volume
+    Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within a cylinderical volume
     
     Parameters
     ----------
     sample1 : array_like
-        Npts x 3 numpy array containing 3-D positions of points.
+        N1pts x 3 numpy array containing 3-D positions of points.
+    
+    sample2 : array_like
+        N2pts x 3 numpy array containing 3-D positions of points.
     
     rp_max : float
         radius of the cylinder to seach for neighbors
@@ -149,6 +155,10 @@ def cylindrical_isolation(sample1, rp_max, pi_max, period=None, num_threads=1,
     has_neighbor : numpy.array
         array of booleans indicating if the point as a neighbor.
     
+    Notes
+    -----
+    Points with zero seperation are considered a self-match, and do no count as neighbors.
+    
     Examples
     --------
     For demonstration purposes we create a randomly distributed set of points within a 
@@ -170,7 +180,7 @@ def cylindrical_isolation(sample1, rp_max, pi_max, period=None, num_threads=1,
     
     >>> rp_max = 0.05
     >>> pi_max = 0.1
-    >>> is_isolated = cylindrical_isolation(coords, rp_max, pi_max, period=period)
+    >>> is_isolated = cylindrical_isolation(coords, coords, rp_max, pi_max, period=period)
     """
     
     perp_distance_matrix, para_distance_matrix = \
