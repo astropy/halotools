@@ -6,14 +6,14 @@ __all__ = ('get_formatted_halo_table_cache_log_line',
     'get_halo_table_cache_log_header', 
     'overwrite_halo_table_cache_log', 'read_halo_table_cache_log')
 
-import os, tempfile
+import os, tempfile, fnmatch
 from copy import copy, deepcopy 
 
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 from astropy.config.paths import _find_home
 from astropy.table import Table
 
-import warnings
+from warnings import warn 
 import datetime
 
 try:
@@ -82,7 +82,7 @@ def update_halo_table_cache_log(simname, redshift,
 
 
 
-def identify_halo_catalog_fname(**kwargs):
+def identify_fname_halo_table(**kwargs):
     """
     """
     try:
@@ -124,12 +124,79 @@ def identify_halo_catalog_fname(**kwargs):
             msg = ("\nHalotools detected multiple halo catalogs matching "
                 "the input arguments.\nThe returned list provides the filenames"
                 "of all matching catalogs\n")
-            warnings.warn(msg)
+            warn(msg)
             return list(matching_catalogs['fname'])
 
 
 def auto_detect_halo_table(**kwargs):
-    raise HalotoolsError("The auto_detect_halo_table function is not implemented yet.")
+    """
+    """
+    matching_halo_table_list = []
+
+    try:
+        cache_dirname = kwargs['cache_dirname']
+    except KeyError:
+        astropy_cache_dir = get_astropy_cache_dir()
+        cache_dirname = os.path.join(astropy_cache_dir, 
+            'halotools', 'halo_tables')
+
+    fname_pattern = '*.hdf5'
+    for path, dirlist, filelist in os.walk(cache_dirname):
+        for name in fnmatch.filter(filelist, fname_pattern):
+            if file_has_matching_metadata(name, **kwargs) is True:
+                matching_halo_table_list.append(name)
+
+    # Need to finish implementing
+
+
+
+
+
+def file_has_matching_metadata(fname_halo_table, dz_tol = 0.05, **kwargs):
+    if not os.path.isfile(fname_halo_table):
+        raise HalotoolsError("\nThe filename ``"+fname_halo_table+"`` does not exist.\n")
+    try:
+        import h5py
+    except ImportError:
+        raise HalotoolsError("Must have h5py package installed "
+            "to use the sim_manager sub-package")
+
+    f = h5py.File(fname_halo_table)
+
+    result = True
+    metadata_to_check = ('simname', 'halo_finder', 'version_name')
+    unavailable_metadata = []
+    for metadata_key in metadata_to_check:
+        try:
+            metadata_in_hdf5_file = f.attrs[metadata_key]
+            requested_metadata = kwargs[metadata_key]
+            result *= metadata_in_hdf5_file == requested_metadata
+        except KeyError:
+            unavailable_metadata.append(metadata_key)
+
+    try:
+        redshift_of_hdf5_file = f.attrs['redshift']
+        requested_redshift = kwargs['redshift']
+        result *= abs(redshift_of_hdf5_file - requested_redshift) > dz_tol
+    except KeyError:
+        unavailable_metadata.append('redshift')
+
+    if len(unavailable_metadata) > 0:
+        msg = ("\nThe filename ``"+fname_halo_table+
+            "`` has the following missing metadata:\n")
+        for metadata_key in unavailable_metadata:
+            msg += (metadata_key + "\n")
+        msg += ("Thus for this file it is not possible "
+            "to verify whether it is a proper match.\n"
+            "If this file was provided by Halotools, "
+            "please raise an Issue on GitHub.\n"
+            "If you provided and/or processed this file yourself, \n"
+            "you should use the ``update_metadata`` function on this file.\n")
+        warn(msg)
+
+    f.close()
+    return result
+    
 
 def verify_halo_table_cache_existence(cache_fname):
     """
@@ -235,7 +302,7 @@ def check_metadata_consistency(cache_log_entry, **kwargs):
                 "If you are using your own halo catalog that you have stored \n"
                 "in the Halotools cache yourself, you should consider adding this metadata\n"
                 "to the hdf5 file as one of the keys of the .attrs file attribute.\n")
-            warnings.warn(msg)
+            warn(msg)
         except AssertionError:
             msg = ("\nThe halo table stored in \n``"+halo_table_fname+"\n"
                 "has the value ``"+attr_of_cached_catalog+"`` stored as metadata for the \n"

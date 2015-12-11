@@ -38,7 +38,7 @@ class OverhauledHaloCatalog(object):
 
         self._process_constructor_inputs(**kwargs)
 
-        self.fname_halo_table = self._catman.get_halo_table_fname(
+        self.fname_halo_table = self._catman.get_fname_halo_table(
             simname = simname, halo_finder = halo_finder, 
             redshift = redshift, version_name = version_name, 
             dz_tol = dz_tol)
@@ -74,7 +74,7 @@ class OverhauledHaloCatalog(object):
         """
         pass
 
-    def store_halocat_in_cache(self, halo_table_fname, overwrite = False, 
+    def store_halocat_in_cache(self, fname_halo_table, overwrite = False, 
         neglect_supplementary_metadata = False, store_ptcl_table = True, **kwargs):
         """ 
         Parameters 
