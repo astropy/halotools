@@ -4,7 +4,7 @@ import sys
 
 PATH_TO_PKG = os.path.relpath(os.path.dirname(__file__))
 SOURCES = ["marked_cpairs.pyx", "weighting_functions.pyx", "custom_weighting_func.pyx",
-           "pairwise_velocity_funcs.pyx","distances.pyx"]
+           "pairwise_velocity_funcs.pyx","distances.pyx", "conditional_pairwise_distances.pyx"]
 THIS_PKG_NAME = '.'.join(__name__.split('.')[:-1])
 
 def get_extensions():
@@ -13,6 +13,7 @@ def get_extensions():
     sources = [os.path.join(PATH_TO_PKG, srcfn) for srcfn in SOURCES]
     include_dirs = ['numpy']
     libraries = []
+    language ='c++'
     extra_compile_args = []
 
     extensions = []
@@ -21,6 +22,7 @@ def get_extensions():
                           sources=[source],
                           include_dirs=include_dirs,
                           libraries=libraries,
+                          language = language,
                           extra_compile_args=extra_compile_args))
 
     return extensions

@@ -35,7 +35,7 @@ def marked_npairs(data1, data2, rbins,
     Calculate the number of weighted pairs with seperations greater than or equal to r, :math:`W(>r)`.
     
     The weight given to each pair is determined by the weights for a pair, 
-    :math:`w_1`,:math:`w_2`, and a user-specified "weighting function", indicated 
+    :math:`w_1`, :math:`w_2`, and a user-specified "weighting function", indicated 
     by the ``wfunc`` parameter, :math:`f(w_1,w_2)`.
     
     Parameters
@@ -210,7 +210,7 @@ def xy_z_marked_npairs(data1, data2, rp_bins, pi_bins, period=None,
     :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
     
     The weight given to each pair is determined by the weights for a pair, 
-    :math:`w_1`,:math:`w_2`, and a user-specified "weighting function", indicated 
+    :math:`w_1`, :math:`w_2`, and a user-specified "weighting function", indicated 
     by the ``wfunc`` parameter, :math:`f(w_1,w_2)`.
     
     Parameters
@@ -389,7 +389,7 @@ def velocity_marked_npairs(data1, data2, rbins, period=None,
     Calculate the number of velocity weighted pairs with seperations greater than or equal to r, :math:`W(>r)`.
     
     The weight given to each pair is determined by the weights for a pair, 
-    :math:`w_1`,:math:`w_2`, and a user-specified "velocity weighting function", indicated 
+    :math:`w_1`, :math:`w_2`, and a user-specified "velocity weighting function", indicated 
     by the ``wfunc`` parameter, :math:`f(w_1,w_2)`.
     
     Parameters
@@ -592,7 +592,7 @@ def xy_z_velocity_marked_npairs(data1, data2, rp_bins, pi_bins, period=None,
     :math:`r_{\\perp}` and :math:`r_{\\parallel}` are defined wrt the z-direction.
     
     The weight given to each pair is determined by the weights for a pair, 
-    :math:`w_1`,:math:`w_2`, and a user-specified "velocity weighting function", indicated 
+    :math:`w_1`, :math:`w_2`, and a user-specified "velocity weighting function", indicated 
     by the ``wfunc`` parameter, :math:`f(w_1,w_2)`.
     
     Parameters

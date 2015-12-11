@@ -11,8 +11,8 @@ import numpy as np
 cimport numpy as np
 from libc.math cimport fabs, fmin
 from libcpp.vector cimport vector
-
 from .distances cimport *
+ctypedef bint (*f_type)(np.float64_t* w1, np.float64_t* w2)
 
 __all__ = ['conditional_pairwise_distance_no_pbc',\
            'conditional_pairwise_xy_z_distance_no_pbc',]
@@ -29,9 +29,9 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
                              np.ndarray[np.float64_t, ndim=1] y_icell2,
                              np.ndarray[np.float64_t, ndim=1] z_icell2,
                              np.float64_t max_r,
-                             np.ndarray[np.float64_t, ndim=1] w_icell1,
-                             np.ndarray[np.float64_t, ndim=1] w_icell2,
-                             np.int_t weight_func_id):
+                             np.ndarray[np.float64_t, ndim=2] w_icell1,
+                             np.ndarray[np.float64_t, ndim=2] w_icell2,
+                             np.int_t cond_func_id):
     
     """
     Calculate the conditional limited pairwise distance matrix, :math:`d_{ij}`.
@@ -68,6 +68,9 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
     w_icell2 : numpy.array
         array of floats
     
+    cond_func_id : int
+        integer ID of conditional function
+        
     Returns
     -------
     d : numpy.array
@@ -89,11 +92,13 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
     >>> x = np.random.random(Npts)
     >>> y = np.random.random(Npts)
     >>> z = np.random.random(Npts)
+    >>> weights = np.random.random(Npts)
     
-    Calculate the distance between all pairs with seperations less than 0.5:
+    Calculate the distance between all pairs with seperations less than 0.5 if 
+    the weight associated with the first point is larger than the second point:
     
     >>> r_max = 0.5
-    >>> d,i,j = conditional_pairwise_distance_no_pbc(x,y,z,x,y,z,r_max)
+    >>> d,i,j = conditional_pairwise_distance_no_pbc(x,y,z,x,y,z,r_max,weights,weights,1)
     """
     
     #c definitions
@@ -108,22 +113,26 @@ def conditional_pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icel
     #square the distance to avoid taking a square root in a tight loop
     max_r = max_r**2
     
+    cond_func = return_conditional_function(cond_func_id)
+    
     #loop over points in grid1's cells
     n=0
     for i in range(0,Ni):
         #loop over points in grid2's cells
         for j in range(0,Nj):
-                        
-            #calculate the square distance
-            d = square_distance(x_icell1[i],y_icell1[i],z_icell1[i],\
+            
+            if cond_func(&w_icell1[i,0],&w_icell2[j,0]):
+            
+                #calculate the square distance
+                d = square_distance(x_icell1[i],y_icell1[i],z_icell1[i],\
                                 x_icell2[j],y_icell2[j],z_icell2[j])
-                        
-            #add distance to result
-            if d<=max_r:
-                distances.push_back(d)
-                i_ind.push_back(i)
-                j_ind.push_back(j)
-                n = n+1
+                
+                #add distance to result
+                if d<=max_r:
+                    distances.push_back(d)
+                    i_ind.push_back(i)
+                    j_ind.push_back(j)
+                    n = n+1
     
     return np.sqrt(distances).astype(float), np.array(i_ind).astype(int),\
            np.array(j_ind).astype(int)
@@ -139,9 +148,9 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
                                   np.ndarray[np.float64_t, ndim=1] y_icell2,
                                   np.ndarray[np.float64_t, ndim=1] z_icell2,
                                   np.float64_t max_rp, np.float64_t max_pi,
-                                  np.ndarray[np.float64_t, ndim=1] w_icell1,
-                                  np.ndarray[np.float64_t, ndim=1] w_icell2,
-                                  np.int_t weight_func_id):
+                                  np.ndarray[np.float64_t, ndim=2] w_icell1,
+                                  np.ndarray[np.float64_t, ndim=2] w_icell2,
+                                  np.int_t cond_func_id):
     """
     Calculate the conditional limited pairwise distance matrices, :math:`d_{{\\perp}ij}` and :math:`d_{{\\parallel}ij}`.
     
@@ -181,6 +190,9 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
     w_icell2 : numpy.array
         array of floats
     
+    cond_func_id : int
+        integer ID of conditional function
+    
     Returns
     -------
     d_perp : numpy.array
@@ -205,13 +217,14 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
     >>> x = np.random.random(Npts)
     >>> y = np.random.random(Npts)
     >>> z = np.random.random(Npts)
+    >>> weights = np.random.random(Npts)
     
     Calculate the distance between all pairs with perpednicular seperations less than 0.25
     and parallel sperations of 0.5:
     
     >>> max_rp = 0.25
     >>> max_pi = 0.5
-    >>> d_perp,d_para,i,j = conditional_pairwise_xy_z_distance_no_pbc(x,y,z,x,y,z,max_rp,max_para)
+    >>> d_perp,d_para,i,j = conditional_pairwise_xy_z_distance_no_pbc(x,y,z,x,y,z,max_rp,max_para,weights,weights,1)
     """
     
     
@@ -229,24 +242,28 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
     max_rp = max_rp**2
     max_pi = max_pi**2
     
+    cond_func = return_conditional_function(cond_func_id)
+    
     #loop over points in grid1's cells
     n=0
     for i in range(0,Ni):
         #loop over points in grid2's cells
         for j in range(0,Nj):
-                        
-            #calculate the square distance
-            d_perp = perp_square_distance(x_icell1[i], y_icell1[i],\
+            
+            if cond_func(&w_icell1[i,0],&w_icell2[j,0]):
+            
+                #calculate the square distance
+                d_perp = perp_square_distance(x_icell1[i], y_icell1[i],\
                                           x_icell2[j], y_icell2[j])
-            d_para = para_square_distance(z_icell1[i], z_icell2[j])
-                        
-            #add distance to result
-            if (d_perp<=max_rp) & (d_para<=max_pi):
-                perp_distances.push_back(d_perp)
-                para_distances.push_back(d_para)
-                i_ind.push_back(i)
-                j_ind.push_back(j)
-                n = n+1
+                d_para = para_square_distance(z_icell1[i], z_icell2[j])
+                
+                #add distance to result
+                if (d_perp<=max_rp) & (d_para<=max_pi):
+                    perp_distances.push_back(d_perp)
+                    para_distances.push_back(d_para)
+                    i_ind.push_back(i)
+                    j_ind.push_back(j)
+                    n = n+1
     
     return np.sqrt(perp_distances).astype(float), np.sqrt(para_distances).astype(float),\
            np.array(i_ind).astype(int), np.array(j_ind).astype(int)
@@ -255,7 +272,7 @@ def conditional_pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x
 ### conditional functions ###
 cdef bint gt_cond(np.float64_t* w1, np.float64_t* w2):
     """
-    
+    1
     """
     cdef bint result
     result = (w1[0]>w2[0])
@@ -263,7 +280,7 @@ cdef bint gt_cond(np.float64_t* w1, np.float64_t* w2):
 
 cdef bint lt_cond(np.float64_t* w1, np.float64_t* w2):
     """
-    
+    2
     """
     cdef bint result
     result = (w1[0]<w2[0])
@@ -271,15 +288,23 @@ cdef bint lt_cond(np.float64_t* w1, np.float64_t* w2):
 
 cdef bint eq_cond(np.float64_t* w1, np.float64_t* w2):
     """
-    
+    3
     """
     cdef bint result
     result = (w1[0]==w2[0])
     return result
 
+cdef bint neq_cond(np.float64_t* w1, np.float64_t* w2):
+    """
+    4
+    """
+    cdef bint result
+    result = (w1[0]!=w2[0])
+    return result
+
 cdef bint tg_cond(np.float64_t* w1, np.float64_t* w2):
     """
-    
+    5
     """
     cdef bint result
     result = (w2[0]>(w1[0]+w1[1]))
@@ -287,10 +312,28 @@ cdef bint tg_cond(np.float64_t* w1, np.float64_t* w2):
 
 cdef bint lg_cond(np.float64_t* w1, np.float64_t* w2):
     """
-    
+    6
     """
     cdef bint result
     result = (w2[0]<(w1[0]+w1[1]))
     return result
 
-
+cdef f_type return_conditional_function(cond_func_id):
+    """
+    returns a pointer to the user-specified conditional function.
+    """
+    
+    if cond_func_id==1:
+        return gt_cond
+    if cond_func_id==2:
+        return lt_cond
+    if cond_func_id==3:
+        return eq_cond
+    if cond_func_id==4:
+        return neq_cond
+    if cond_func_id==5:
+        return tg_cond
+    if cond_func_id==6:
+        return lg_cond
+    else:
+        raise ValueError('conditonal function does not exist!')
