@@ -111,7 +111,8 @@ def identify_fname_halo_table(**kwargs):
         matching_catalogs = log[mask]
 
         if len(matching_catalogs) == 0:
-            auto_detect_halo_table(**kwargs)
+            matching_halo_table_list = auto_detect_halo_table(**kwargs)
+            return matching_halo_table_list
         elif len(matching_catalogs) == 1:
             metadata = deepcopy(kwargs)
             try:
@@ -146,9 +147,33 @@ def auto_detect_halo_table(**kwargs):
             if file_has_matching_metadata(name, **kwargs) is True:
                 matching_halo_table_list.append(name)
 
-    # Need to finish implementing
+    # Now search all directories that appear in the cache log
+    # This is not necessarily redundant with the above because 
+    # users may have stored halo catalogs on external disks, 
+    # which the cache log may be aware of
+    verify_cache_log(**kwargs)
+    log = read_halo_table_cache_log(**kwargs)
+    for entry in log:
+        fname_log_entry = entry['fname']
+        cache_dirname = os.path.dirname(fname_log_entry)
+        for path, dirlist, filelist in os.walk(cache_dirname):
+            for name in fnmatch.filter(filelist, fname_pattern):
+                if file_has_matching_metadata(name, **kwargs) is True:
+                    matching_halo_table_list.append(name)
 
-
+    matching_halo_table_list = list(set(matching_halo_table_list))
+    if len(matching_halo_table_list) == 0:
+        msg = ("\nThere are no catalogs in your cache that meet your requested specs.\n"
+            "Try supplying an explicit filename instead.\n")
+        raise HalotoolsError(msg)
+    elif len(matching_halo_table_list) == 1:
+        return matching_halo_table_list[0]
+    else:
+        msg = ("\nHalotools detected multiple halo catalogs matching "
+            "the input arguments.\nThe returned list provides the filenames"
+            "of all matching catalogs\n")
+        warn(msg)
+        return matching_halo_table_list
 
 
 
