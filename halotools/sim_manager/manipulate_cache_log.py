@@ -395,6 +395,28 @@ def cleanup_halo_table_cache(delete_nonexistent_files=False, **kwargs):
 
 
 
+def remove_repeated_cache_lines(**kwargs):
+    """ Method searches the cache for possible repetition of lines and removes them, if present. 
+    """
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
+    verify_cache_log(cache_fname = cache_fname)
+
+    with open(cache_fname, 'r') as f:
+        data_lines = (line for i, line in enumerate(f) if line[0] != '#')
+
+    unique_lines = []
+    for line in data_lines:
+        if line not in unique_lines:
+            unique_lines.append(line)
+
+    header = get_halo_table_cache_log_header()
+    with open(cache_fname, 'w') as f:
+        f.write(header)
+        for line in unique_lines:
+            f.write(line)
 
 
 
