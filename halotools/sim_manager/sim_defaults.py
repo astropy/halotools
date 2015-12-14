@@ -26,6 +26,7 @@ from ..custom_exceptions import UnsupportedSimError, HalotoolsCacheError
 default_simname = 'bolshoi'
 default_halo_finder = 'rockstar'
 default_redshift = 0.0
+default_version_name = 'halotools.alpha.version0'
 
 # The following two variables are used to define completeness cuts applied to halo catalogs
 # The Halotools default completeness cut is to throw out all halos with mpeak < mp*300, 
@@ -43,7 +44,6 @@ default_cosmology = cosmology.WMAP5
 # URLs of websites hosting catalogs used by the package
 processed_halo_tables_webloc = 'http://www.astro.yale.edu/aphearin/Data_files/halo_catalogs'
 ptcl_tables_webloc = 'http://www.astro.yale.edu/aphearin/Data_files/particle_catalogs'
-default_version_name = 'halotools.alpha.version0'
 
 default_cache_location = 'pkg_default'
 

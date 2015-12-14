@@ -132,7 +132,11 @@ class TestCacheManipulation(TestCase):
     def test_update_metadata(self):
         """ This function is referenced by file_has_matching_metadata.
         """ 
-        raise HalotoolsError("The test_update_metadata function is not implemented yet.")
+        raise HalotoolsError("The update_metadata function is not implemented yet.")
+
+    @pytest.mark.xfail
+    def test_regenerate_halo_table_cache_log(self):
+        raise HalotoolsError("The regenerate_halo_table_cache_log function is not implemented yet.")
 
 
     @pytest.mark.xfail
