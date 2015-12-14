@@ -26,7 +26,7 @@ def _pairwise_velocity_stats_process_args(sample1, velocities1, sample2,
     """
     
     sample1 = convert_to_ndarray(sample1)
-    velocities1 = convert_to_ndarray(sample1)
+    velocities1 = convert_to_ndarray(velocities1)
     
     if sample2 is not None: 
         sample2 = convert_to_ndarray(sample2)

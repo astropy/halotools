@@ -225,7 +225,7 @@ def underdensity_prob_func(sample1, rbins, n_ran, period, u=0.2, num_threads=1,
     # specified under-density
     mean_rho = len(sample1)/period.prod()
     vol = (4.0/3.0)* np.pi * rbins**3
-    N_max = mean_rho*vol
+    N_max = mean_rho*vol*u
     mask = (result > N_max)
     
     result = np.sum(mask, axis=0)

@@ -44,10 +44,9 @@ def nearest_neighbor(sample1, sample2, r_max, period=None, nth_nearest=1,
     
     nth_nearest : int
         intger indicating the nth nearest nieghbor for which to search.
-        If you are looking for the nearest neighbor when ``sample1`` and 
-        ``sample2`` are the same, but want to exclude the trivial self match, set 
-        *nth_nearest = 2*.  Results are not unique when there are multiple nth nearest 
-        neighbors with the same seperation.
+        If the distance between points is 0.0, it is not counted as a match.
+        Results are not unique when there are multiple nth nearest neighbors with the 
+        same seperation.
     
     num_threads : int, optional
         number of 'threads' to use in the pair counting.  if set to 'max', use all 
@@ -177,7 +176,7 @@ def _nth_matrix_minimum(m, n, axis=None):
         return sorted_i[0], sorted_j[0]
     elif axis==0:
         #create array to store result
-        result = np.zeros(N0)-1
+        result = np.zeros(N0, dtype=int)-1
         #sort by distance and row index
         sort_inds = np.lexsort((d,i))
         sorted_i = i[sort_inds]
@@ -196,7 +195,7 @@ def _nth_matrix_minimum(m, n, axis=None):
         #if so, return the index of the corresponding column j
         result[unique_is[nth_i_matches_first]] = sorted_j[nth_i[nth_i_matches_first]]
     elif axis==1:
-        result = np.zeros(N1)-1
+        result = np.zeros(N1, dtype=int)-1
         sort_inds = np.lexsort((d,j))
         sorted_i = i[sort_inds]
         sorted_j = j[sort_inds]

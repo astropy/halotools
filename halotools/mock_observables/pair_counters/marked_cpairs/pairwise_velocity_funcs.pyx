@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 cimport cython
 import numpy as np
 cimport numpy as np
-from cmath import sqrt
+from libc.math cimport fabs, sqrt
 
 __all__= ["relative_radial_velocity_weights", "radial_velocity_weights",\
           "radial_velocity_variance_counter_weights",\
@@ -256,8 +256,7 @@ cdef void relative_los_velocity_weights(np.float64_t* w1,
     
     """
     
-    cdef float dvz = (w1[0] - w2[0])
-    
+    cdef float dvz = fabs(w1[0] - w2[0])
     result1[0] = dvz #LOS velocity
     result2[0] = 0.0 #unused value
     result3[0] = 1.0 #number of pairs
@@ -298,9 +297,7 @@ cdef void los_velocity_weights(np.float64_t* w1,
     
     """
     
-    cdef float dvz = (w1[0] - w2[0])
-    
-    result1[0] = dvz #LOS velocity
+    result1[0] = w1[0]*w2[0] #LOS velocity
     result2[0] = 0.0 #unused value
     result3[0] = 1.0 #number of pairs
 
@@ -342,7 +339,7 @@ cdef void los_velocity_variance_counter_weights(np.float64_t* w1,
     
     """
     
-    cdef float dvz = (w1[0] - w2[0]) - w1[1]*w2[1]
+    cdef float dvz = fabs(w1[0] - w2[0]) - w1[1]*w2[1]
     
     result1[0] = dvz #LOS velocity
     result2[0] = dvz*dvz #LOS velocity squared

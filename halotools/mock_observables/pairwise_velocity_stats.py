@@ -127,9 +127,9 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     
     We will do the same to get a random set of peculiar velocities.
     
-    >>> vx = np.random.random(Npts)
-    >>> vy = np.random.random(Npts)
-    >>> vz = np.random.random(Npts)
+    >>> vx = np.random.random(Npts)-0.5
+    >>> vy = np.random.random(Npts)-0.5
+    >>> vz = np.random.random(Npts)-0.5
     >>> velocities = np.vstack((vx,vy,vz)).T
     
     >>> rbins = np.logspace(-2,-1,10)
@@ -241,7 +241,7 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
                     approx_cell1_size = None,
                     approx_cell2_size = None):
     """
-    Calculate the pairwise velocity dispersion, :math:`\\sigma_{12}(r)`.
+    Calculate the pairwise velocity dispersion (PVD), :math:`\\sigma_{12}(r)`.
     
     Example calls to this function appear in the documentation below. For thorough 
     documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
@@ -325,9 +325,9 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     
     We will do the same to get a random set of peculiar velocities.
     
-    >>> vx = np.random.random(Npts)
-    >>> vy = np.random.random(Npts)
-    >>> vz = np.random.random(Npts)
+    >>> vx = np.random.random(Npts)-0.5
+    >>> vy = np.random.random(Npts)-0.5
+    >>> vz = np.random.random(Npts)-0.5
     >>> velocities = np.vstack((vx,vy,vz)).T
     
     >>> rbins = np.logspace(-2,-1,10)
@@ -461,7 +461,7 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                             approx_cell1_size = None,
                             approx_cell2_size = None):
     """ 
-    Calculate the mean line-of-sight (LOS) pairwise velocity as a function of projected seperation, :math:`\\bar{v}_{z,12}(r_p)`.
+    Calculate the mean pairwise line-of-sight (LOS) velocity as a function of projected seperation, :math:`\\bar{v}_{z,12}(r_p)`.
     
     Example calls to this function appear in the documentation below. For thorough 
     documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
@@ -529,6 +529,16 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     
     Notes
     -----
+    The pairwise LOS velocity, :math:`v_{z12}(r)`, is defined as:
+    
+    .. math::
+        v_{z12} = |\\vec{v}_{\\rm 1, pec}\\cdot \\hat{z}-\\vec{v}_{\\rm 2, pec}\\cdot\\hat{z}|
+    
+    where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and 
+    :math:` \\hat{z}` is the unit-z vector.
+    
+    :math:`\\bar{v}_{z12}(r_p)` is the mean of this quantity in projected radial bins.
+    
     Pairs and radial velocities are calculated using 
     `~halotools.mock_observables.pair_counters.xy_z_velocity_marked_npairs`.
     
@@ -553,9 +563,9 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     
     We will do the same to get a random set of peculiar velocities.
     
-    >>> vx = np.random.random(Npts)
-    >>> vy = np.random.random(Npts)
-    >>> vz = np.random.random(Npts)
+    >>> vx = np.random.random(Npts)-0.5
+    >>> vy = np.random.random(Npts)-0.5
+    >>> vz = np.random.random(Npts)-0.5
     >>> velocities = np.vstack((vx,vy,vz)).T
     
     >>> rp_bins = np.logspace(-2,-1,10)
@@ -592,7 +602,9 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                                  period=period, num_threads=num_threads,
                                  approx_cell1_size = approx_cell1_size,
                                  approx_cell2_size = approx_cell1_size)
+            D1D1 = np.diff(D1D1,axis=1)[:,0]
             D1D1 = np.diff(D1D1)
+            N1N1 = np.diff(N1N1,axis=1)[:,0]
             N1N1 = np.diff(N1N1)
         else:
             D1D1=None
@@ -613,7 +625,9 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                                      period=period, num_threads=num_threads,
                                      approx_cell1_size = approx_cell1_size,
                                      approx_cell2_size = approx_cell2_size)
+                D1D2 = np.diff(D1D2,axis=1)[:,0]
                 D1D2 = np.diff(D1D2)
+                N1N2 = np.diff(N1N2,axis=1)[:,0]
                 N1N2 = np.diff(N1N2)
             else: 
                 D1D2=None
@@ -625,7 +639,9 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
                                      period=period, num_threads=num_threads,
                                      approx_cell1_size = approx_cell2_size,
                                      approx_cell2_size = approx_cell2_size)
+                D2D2 = np.diff(D2D2,axis=1)[:,0]
                 D2D2 = np.diff(D2D2)
+                N2N2 = np.diff(N2N2,axis=1)[:,0]
                 N2N2 = np.diff(N2N2)
             else: 
                 D2D2=None
@@ -669,7 +685,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                     approx_cell1_size = None,
                     approx_cell2_size = None):
     """
-    Calculate the pairwise velocity dispersion, :math:`\\sigma_{12}(r)`.
+    Calculate the pairwise line-of-sight (LOS) velocity dispersion (PVD), :math:`\\sigma_{z12}(r_p)`.
     
     Example calls to this function appear in the documentation below. For thorough 
     documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
@@ -722,18 +738,19 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     
     Notes
     -----
-    The pairwise velocity, :math:`v_{12}(r)`, is defined as:
+    The pairwise LOS velocity, :math:`v_{z12}(r)`, is defined as:
     
     .. math::
-        v_{12}(r) = \\vec{v}_{\\rm 1, pec} \\cdot \\vec{r}_{12}-\\vec{v}_{\\rm 2, pec} \\cdot \\vec{r}_{12}
+        v_{z12} = |\\vec{v}_{\\rm 1, pec}\\cdot \\hat{z}-\\vec{v}_{\\rm 2, pec}\\cdot\\hat{z}|
     
-    where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and
-    :math:`\\vec{r}_{12}` is the radial vector connecting object 1 and 2.
+    where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and 
+    :math:` \\hat{z}` is the unit-z vector.
     
-    :math:`\\sigma_{12}(r)` is the standard deviation of this quantity in radial bins.
+    :math:`\\sigma_{z12}(r_p)` is the standard deviation of this quantity in 
+    projected radial bins.
     
     Pairs and radial velocities are calculated using 
-    `~halotools.mock_observables.pair_counters.velocity_marked_npairs`.
+    `~halotools.mock_observables.pair_counters.xy_z_velocity_marked_npairs`.
     
     Examples
     --------
@@ -744,9 +761,9 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     >>> Lbox = 1.0
     >>> period = np.array([Lbox,Lbox,Lbox])
     
-    >>> x = np.random.random(Npts)
-    >>> y = np.random.random(Npts)
-    >>> z = np.random.random(Npts)
+    >>> x = np.random.random(Npts)-0.5
+    >>> y = np.random.random(Npts)-0.5
+    >>> z = np.random.random(Npts)-0.5
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
@@ -805,8 +822,11 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                                  period=period, num_threads=num_threads,
                                  approx_cell1_size = approx_cell1_size,
                                  approx_cell2_size = approx_cell1_size)
+            D1D1 = np.diff(D1D1,axis=1)[:,0]
             D1D1 = np.diff(D1D1)
+            S1S1 = np.diff(S1S1,axis=1)[:,0]
             S1S1 = np.diff(S1S1)
+            N1N1 = np.diff(N1N1,axis=1)[:,0]
             N1N1 = np.diff(N1N1)
         else:
             D1D1=None
@@ -831,8 +851,11 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                                      period=period, num_threads=num_threads,
                                      approx_cell1_size = approx_cell1_size,
                                      approx_cell2_size = approx_cell2_size)
+                D1D2 = np.diff(D1D2,axis=1)[:,0]
                 D1D2 = np.diff(D1D2)
+                S1S2 = np.diff(S1S2,axis=1)[:,0]
                 S1S2 = np.diff(S1S2)
+                N1N2 = np.diff(N1N2,axis=1)[:,0]
                 N1N2 = np.diff(N1N2)
             else: 
                 D1D2=None
@@ -844,8 +867,11 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                                      period=period, num_threads=num_threads,
                                      approx_cell1_size = approx_cell2_size,
                                      approx_cell2_size = approx_cell2_size)
+                D2D2 = np.diff(D2D2,axis=1)[:,0]
                 D2D2 = np.diff(D2D2)
+                S2S2 = np.diff(S2S2,axis=1)[:,0]
                 S2S2 = np.diff(S2S2)
+                N2N2 = np.diff(N2N2,axis=1)[:,0]
                 N2N2 = np.diff(N2N2)
             else: 
                 D2D2=None
@@ -859,7 +885,6 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                                                         marks1, marks2, wfunc,\
                                                         _sample1_is_sample2,\
                                                         approx_cell1_size, approx_cell2_size)
-    
     
     def _shifted_std(N, sum_x, sum_x_sqr):
         """

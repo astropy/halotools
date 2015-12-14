@@ -581,7 +581,6 @@ def xy_z_velocity_marked_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1
                                    nrp_bins_minus_one, npi_bins_minus_one,\
                                    &w_icell1[i,0],&w_icell2[j,0],\
                                    <ff_type>wfunc, <np.float64_t*>shift.data)
-    
     return counts1, counts2, counts3
 
 

@@ -728,7 +728,6 @@ def xy_z_velocity_marked_npairs(data1, data2, rp_bins, pi_bins, period=None,
         counts1 = np.sum(counts1,axis=0)
         counts2 = np.sum(counts2,axis=0)
         counts3 = np.sum(counts3,axis=0)
-    
     return counts1, counts2, counts3
 
 
@@ -785,6 +784,5 @@ def _xy_z_velocity_marked_npairs_engine(double_tree, weights1, weights2,
         counts1 += holder1 
         counts2 += holder2
         counts3 += holder3
-            
     return counts1, counts2, counts3 
 

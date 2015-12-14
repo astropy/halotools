@@ -307,7 +307,7 @@ cdef bint tg_cond(np.float64_t* w1, np.float64_t* w2):
     5
     """
     cdef bint result
-    result = (w2[0]>(w1[0]+w1[1]))
+    result = (w1[0]>(w2[0]+w1[1]))
     return result
 
 cdef bint lg_cond(np.float64_t* w1, np.float64_t* w2):
@@ -315,7 +315,7 @@ cdef bint lg_cond(np.float64_t* w1, np.float64_t* w2):
     6
     """
     cdef bint result
-    result = (w2[0]<(w1[0]+w1[1]))
+    result = (w1[0]<(w2[0]+w1[1]))
     return result
 
 cdef f_type return_conditional_function(cond_func_id):
