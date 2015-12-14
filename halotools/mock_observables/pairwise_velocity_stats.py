@@ -532,10 +532,10 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     The pairwise LOS velocity, :math:`v_{z12}(r)`, is defined as:
     
     .. math::
-        v_{z12} = |\\vec{v}_{\\rm 1, pec}\\cdot \\hat{z}-\\vec{v}_{\\rm 2, pec}\\cdot\\hat{z}|
+        v_{z12} = |\\vec{v}_{\\rm 1, pec} \\cdot \\hat{z}-\\vec{v}_{\\rm 2, pec}\\cdot\\hat{z}|
     
     where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and 
-    :math:` \\hat{z}` is the unit-z vector.
+    :math:`\\hat{z}` is the unit-z vector.
     
     :math:`\\bar{v}_{z12}(r_p)` is the mean of this quantity in projected radial bins.
     
@@ -744,7 +744,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
         v_{z12} = |\\vec{v}_{\\rm 1, pec}\\cdot \\hat{z}-\\vec{v}_{\\rm 2, pec}\\cdot\\hat{z}|
     
     where :math:`\\vec{v}_{\\rm 1, pec}` is the peculiar velocity of object 1, and 
-    :math:` \\hat{z}` is the unit-z vector.
+    :math:`\\hat{z}` is the unit-z vector.
     
     :math:`\\sigma_{z12}(r_p)` is the standard deviation of this quantity in 
     projected radial bins.
