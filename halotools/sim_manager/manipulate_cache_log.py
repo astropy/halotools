@@ -207,7 +207,7 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
         # First try to resolve the problem by 
         # removing any possibly repeated entries from the cache log
         remove_repeated_cache_lines(**kwargs)
-        log = read_halo_table_cache_log(cache_fname)
+        log = read_halo_table_cache_log(cache_fname=cache_fname)
         mask = log['fname'] == fname
         matching_catalogs = log[mask]
         if len(matching_catalogs) == 1:
@@ -686,7 +686,6 @@ def remove_repeated_cache_lines(**kwargs):
     # Overwrite the cache with the unique entries
     header = get_halo_table_cache_log_header()
     with open(cache_fname, 'w') as f:
-        f.write(header)
         for line in unique_lines:
             f.write(line)
     verify_cache_log(cache_fname = cache_fname)
