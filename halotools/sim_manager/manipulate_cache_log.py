@@ -71,7 +71,6 @@ def read_halo_table_cache_log(**kwargs):
         cache_fname = kwargs['cache_fname']
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
-    verify_cache_log(**kwargs)
 
     if os.path.isfile(cache_fname):
         return Table.read(cache_fname, format = 'ascii')
@@ -477,7 +476,7 @@ def verify_halo_table_cache_header(**kwargs):
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
 
-    verify_halo_table_cache_existence(cache_fname)
+    verify_halo_table_cache_existence(cache_fname=cache_fname)
 
     correct_header = get_halo_table_cache_log_header()
     with open(cache_fname, 'r') as f:

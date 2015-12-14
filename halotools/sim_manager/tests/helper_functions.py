@@ -17,6 +17,14 @@ from .. import manipulate_cache_log
 
 from ...custom_exceptions import HalotoolsError
 
+try:
+    import h5py
+except ImportError:
+    warn("\nMost of the functionality of the sim_manager sub-package"
+    " requires h5py to be installed,\n"
+        "which can be accomplished either with pip or conda")
+
+
 import random, string
 def randomword(*args):
     if len(args) == 1:
@@ -37,7 +45,7 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('TestLoadCachedHaloTableFromFname', 'create_dummy_halo_table_cache_log' )
+__all__ = ('add_new_row_to_cache_log', 'create_dummy_halo_table_cache_log' )
 
 dummy_cache_baseloc = os.path.join(detected_home, 'Desktop', 'tmp_dummy_cache')
 cache_basename = 'halo_table_cache_log.txt'
@@ -56,7 +64,7 @@ def create_dummy_halo_table_cache_log(dummy_subdirname, dummy_cache_log_table):
     manipulate_cache_log.overwrite_halo_table_cache_log(
         dummy_cache_log_table, cache_fname = dummy_cache_fname)
 
-def add_new_cache_log_row(scenario, 
+def add_new_row_to_cache_log(scenario, 
     simname, halo_finder, redshift, version_name, **kwargs):
     if type(scenario) == int:
         scenario = str(scenario)
@@ -64,9 +72,10 @@ def add_new_cache_log_row(scenario,
     try:
         new_halo_table_fname = kwargs['fname']
     except KeyError:
-        random_fname = randomword()
+        new_halo_table_basename = (simname + '.' + halo_finder + '.' + 
+            'z' + str(np.round(redshift, 3)) + '.' + version_name + '.hdf5')
         new_halo_table_fname = os.path.join(dummy_cache_baseloc, scenario, 
-            'halo_tables', simname, halo_finder, random_fname)
+            'halo_tables', simname, halo_finder, new_halo_table_basename)
 
     new_table = Table(
         {'simname': [simname], 'halo_finder': [halo_finder], 
@@ -79,4 +88,95 @@ def add_new_cache_log_row(scenario,
         return table_vstack([existing_table, new_table])
     except KeyError:
         return new_table
+
+def create_halo_table_hdf5(cache_log_entry, **kwargs):
+    try:
+        num_halos = kwargs['num_halos']
+    except KeyError:
+        num_halos = 10
+
+    try:
+        Lbox = kwargs['Lbox']
+    except KeyError:
+        Lbox = 100.
+
+    try:
+        ptcl_mass = kwargs['ptcl_mass']
+    except KeyError:
+        ptcl_mass = 1.e8
+
+    try:
+        halo_id = kwargs['halo_id']
+    except KeyError:
+        halo_id = np.arange(num_halos)
+
+    try:
+        halo_x = kwargs['halo_x']
+    except KeyError:
+        halo_x = np.linspace(0, 0.999*Lbox, num_halos)   
+    try:
+        halo_y = kwargs['halo_y']
+    except KeyError:
+        halo_y = np.linspace(0, 0.999*Lbox, num_halos)
+    try:
+        halo_z = kwargs['halo_z']
+    except KeyError:
+        halo_z = np.linspace(0, 0.999*Lbox, num_halos)
+
+    table = Table({
+        'halo_id': halo_id, 
+        'halo_x': halo_x, 
+        'halo_y': halo_y, 
+        'halo_z': halo_z}
+        )
+
+    try:
+        simname = kwargs['simname']
+    except KeyError:
+        simname = cache_log_entry['simname']
+    try:
+        halo_finder = kwargs['halo_finder']
+    except KeyError:
+        halo_finder = cache_log_entry['halo_finder']
+    try:
+        redshift = kwargs['redshift']
+    except KeyError:
+        redshift = cache_log_entry['redshift']
+    try:
+        version_name = kwargs['version_name']
+    except KeyError:
+        version_name = cache_log_entry['version_name']
+    try:
+        fname = str(kwargs['fname'])
+    except KeyError:
+        fname = str(cache_log_entry['fname'])
+    basename = os.path.dirname(fname)
+    try:
+        os.makedirs(basename)
+    except OSError:
+        pass
+
+    table.write(fname, path='data')
+    f = h5py.File(fname)
+    f.attrs.create('Lbox', Lbox)
+    f.attrs.create('ptcl_mass', ptcl_mass)
+    f.attrs.create('simname', simname)
+    f.attrs.create('halo_finder', halo_finder)
+    f.attrs.create('redshift', redshift)
+    f.attrs.create('version_name', version_name)
+    f.attrs.create('fname', fname)
+
+    f.close()
+
+
+
+
+
+
+
+
+
+
+
+
 

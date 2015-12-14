@@ -40,15 +40,37 @@ class TestLoadCachedHaloTableFromFname(TestCase):
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
-        pass
+        self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
+
+        try:
+            os.system('rm -rf ' + self.dummy_cache_baseloc)
+        except OSError:
+            pass
 
     def test_scenario1(self):
         """
         """
         scenario = 1
 
-        updated_log = helper_functions.add_new_cache_log_row(scenario, 
-            'bolshoi', 'rockstar', 0.0, 'alpha.version0')
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 0.00004, 'alpha.version0')
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 1.23456, 'alpha.version0')
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'bdm', 0.010101, 'alpha.version0')
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+
+    def tearDown(self):
+        try:
+            os.system('rm -rf ' + self.dummy_cache_baseloc)
+        except OSError:
+            pass
+
 
 
 
