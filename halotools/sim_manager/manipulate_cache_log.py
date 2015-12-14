@@ -6,6 +6,7 @@ __all__ = ('get_formatted_halo_table_cache_log_line',
     'get_halo_table_cache_log_header', 
     'overwrite_halo_table_cache_log', 'read_halo_table_cache_log')
 
+import numpy as np
 import os, tempfile, fnmatch
 from copy import copy, deepcopy 
 
@@ -13,6 +14,8 @@ from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 from astropy.config.paths import _find_home
 from astropy.table import Table
 from astropy.table import vstack as table_vstack
+
+from astropy.io import ascii as astropy_ascii
 
 from warnings import warn 
 import datetime
@@ -32,15 +35,19 @@ def get_halo_table_cache_log_fname():
     dirname = os.path.join(get_astropy_cache_dir(), 'halotools')
     return os.path.join(dirname, 'halo_table_cache_log.txt')
 
+def get_redshift_string(redshift):
+    return str(np.round(redshift, 3))
+
 def get_halo_table_cache_log_header():
-    return '# simname  redshift  halo_finder  version_name  fname  most_recent_use\n'
+    return 'simname halo_finder redshift version_name fname'
+    # return '# simname  redshift  halo_finder  version_name  fname \n'
 
 def get_formatted_halo_table_cache_log_line(simname, redshift, 
     halo_finder, version_name, fname):
-    timenow = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+    redshift_string = get_redshift_string(redshift)
     formatted_line = (
-        simname + '  ' + str(redshift) + '  ' + 
-        halo_finder + '  ' + version_name + '  ' + fname + '  ' + timenow + '\n'
+        simname + '  ' + redshift_string + '  ' + 
+        halo_finder + '  ' + version_name + '  ' + fname 
         )
     return formatted_line
 
@@ -52,14 +59,27 @@ def overwrite_halo_table_cache_log(new_log, **kwargs):
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
 
-    with open(cache_fname, 'w') as f:
-        header = get_halo_table_cache_log_header() 
-        f.write(header)
-        for entry in new_log:
-            newline = get_formatted_halo_table_cache_log_line(
-                entry['simname'], entry['redshift'], 
-                entry['halo_finder'], entry['version_name'], entry['fname'])
-            f.write(newline)
+    for entry in new_log:
+        print(entry)
+    new_log.write(cache_fname, names = ('simname', 'halo_finder', 'redshift', 
+        'version_name', 'fname'), format='ascii')
+
+    # new_log.write(cache_fname, format='ascii')
+    # print(cache_fname)
+    # raise KeyError
+
+    # data = {key: new_log[key] for key in new_log.keys()}
+    # astropy_ascii.write(data, cache_fname, 
+    #     names=['simname', 'redshift', 'halo_finder', 'version_name', 'fname'])
+
+    # with open(cache_fname, 'w') as f:
+    #     header = get_halo_table_cache_log_header() 
+    #     f.write(header)
+    #     for entry in new_log:
+    #         newline = get_formatted_halo_table_cache_log_line(
+    #             entry['simname'], entry['redshift'], 
+    #             entry['halo_finder'], entry['version_name'], entry['fname'])
+    #         f.write(newline)
 
 def rebuild_halo_table_cache_log(**kwargs):
     pass
@@ -186,8 +206,9 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
         msg = ("\nThe requested filename ``" + fname + "`` does not exist.\n")
         raise HalotoolsError(msg)
 
-    log = read_halo_table_cache_log(cache_fname)
-    mask = log['fname'] == fname
+    verify_cache_log(**kwargs)
+    log = read_halo_table_cache_log(cache_fname=cache_fname)
+    mask = str(log['fname']) == str(fname)
     matching_catalogs = log[mask]
 
     if len(matching_catalogs) == 0:
@@ -198,7 +219,7 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
         raise HalotoolsError(msg)
 
     elif len(matching_catalogs) == 1:
-        check_metadata_consistency(matching_catalogs)
+        check_metadata_consistency(matching_catalogs[0])
         fname = matching_catalogs['fname'][0]
         return Table.read(fname, path='data')
 
@@ -211,7 +232,7 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
         mask = log['fname'] == fname
         matching_catalogs = log[mask]
         if len(matching_catalogs) == 1:
-            check_metadata_consistency(matching_catalogs)
+            check_metadata_consistency(matching_catalogs[0])
             fname = matching_catalogs['fname'][0]
             return Table.read(fname, path='data')
         elif len(matching_catalogs) > 1:
@@ -484,7 +505,7 @@ def verify_halo_table_cache_header(**kwargs):
 
     if correct_header != actual_header:
         msg = ("\nThe file " + cache_fname + 
-            "serves as a log for all the halo catalogs you use with Halotools.\n"
+            "\nserves as a log for all the halo catalogs you use with Halotools.\n"
             "The correct header that should be in this file is \n"
             + correct_header + "\nThe actual header currently stored in this file is \n"
             + actual_header + "\nTo resolve your error, try opening the log file "
@@ -502,7 +523,7 @@ def verify_halo_table_cache_log_columns(**kwargs):
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
     verify_halo_table_cache_existence(cache_fname = cache_fname)
-    verify_halo_table_cache_header(cache_fname = cache_fname)
+    # verify_halo_table_cache_header(cache_fname = cache_fname)
 
     try:
         log = kwargs['log']
@@ -510,7 +531,7 @@ def verify_halo_table_cache_log_columns(**kwargs):
         log = read_halo_table_cache_log(cache_fname = cache_fname)
 
     correct_header = get_halo_table_cache_log_header()
-    expected_key_set = set(correct_header.strip().split()[1:])
+    expected_key_set = set(['simname', 'redshift', 'halo_finder', 'fname', 'version_name'])
     log_key_set = set(log.keys())
     try:
         assert log_key_set == expected_key_set
@@ -534,7 +555,7 @@ def verify_halo_table_cache_log_columns(**kwargs):
 def verify_cache_log(**kwargs):
 
     verify_halo_table_cache_existence(**kwargs)
-    verify_halo_table_cache_header(**kwargs)
+    # verify_halo_table_cache_header(**kwargs)
     verify_halo_table_cache_log_columns(**kwargs)
 
 def check_metadata_consistency(cache_log_entry):
@@ -675,7 +696,7 @@ def remove_repeated_cache_lines(**kwargs):
 
     # First we eliminate lines which are exactly repeated
     with open(cache_fname, 'r') as f:
-        data_lines = (line for i, line in enumerate(f) if line[0] != '#')
+        data_lines = [line for i, line in enumerate(f) if line[0] != '#']
     unique_lines = []
     for line in data_lines:
         if line not in unique_lines:

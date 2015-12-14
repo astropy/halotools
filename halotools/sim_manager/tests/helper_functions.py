@@ -48,21 +48,12 @@ else:
 __all__ = ('add_new_row_to_cache_log', 'create_dummy_halo_table_cache_log' )
 
 dummy_cache_baseloc = os.path.join(detected_home, 'Desktop', 'tmp_dummy_cache')
-cache_basename = 'halo_table_cache_log.txt'
+cache_basename = 'halo_table_cache_log.dat'
 
-def create_dummy_halo_table_cache_log(dummy_subdirname, dummy_cache_log_table):
-    """
-    """
-    if not os.path.isdir(dummy_cache_baseloc):
-        os.mkdir(dummy_cache_baseloc)
-    new_dummy_cache_loc = os.path.join(dummy_cache_baseloc, dummy_subdirname)
-    if not os.path.isdir(new_dummy_cache_loc):
-        os.mkdir(new_dummy_cache_loc)
-
-    dummy_cache_fname = os.path.join(new_dummy_cache_loc, cache_basename)
-
-    manipulate_cache_log.overwrite_halo_table_cache_log(
-        dummy_cache_log_table, cache_fname = dummy_cache_fname)
+def get_scenario_cache_fname(scenario):
+    if type(scenario) is not str:
+        scenario = str(scenario)
+    return os.path.join(dummy_cache_baseloc, scenario)
 
 def add_new_row_to_cache_log(scenario, 
     simname, halo_finder, redshift, version_name, **kwargs):
@@ -74,7 +65,8 @@ def add_new_row_to_cache_log(scenario,
     except KeyError:
         new_halo_table_basename = (simname + '.' + halo_finder + '.' + 
             'z' + str(np.round(redshift, 3)) + '.' + version_name + '.hdf5')
-        new_halo_table_fname = os.path.join(dummy_cache_baseloc, scenario, 
+        scenario_dirname = get_scenario_cache_fname(scenario)
+        new_halo_table_fname = os.path.join(scenario_dirname, 
             'halo_tables', simname, halo_finder, new_halo_table_basename)
 
     new_table = Table(
@@ -129,6 +121,8 @@ def create_halo_table_hdf5(cache_log_entry, **kwargs):
         'halo_y': halo_y, 
         'halo_z': halo_z}
         )
+    if 'omit_column' in kwargs:
+        del table[kwargs['omit_column']]
 
     try:
         simname = kwargs['simname']
@@ -151,6 +145,7 @@ def create_halo_table_hdf5(cache_log_entry, **kwargs):
     except KeyError:
         fname = str(cache_log_entry['fname'])
     basename = os.path.dirname(fname)
+    
     try:
         os.makedirs(basename)
     except OSError:
