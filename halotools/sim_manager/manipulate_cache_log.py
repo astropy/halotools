@@ -12,6 +12,7 @@ from copy import copy, deepcopy
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 from astropy.config.paths import _find_home
 from astropy.table import Table
+from astropy.table import vstack as table_vstack
 
 from warnings import warn 
 import datetime
@@ -88,7 +89,12 @@ def read_halo_table_cache_log(**kwargs):
 
 
 def update_halo_table_cache_log(simname, redshift, 
-    halo_finder, version_name, fname, **kwargs):
+    halo_finder, version_name, fname, ignore_nearby_redshifts = False, 
+    dz_tol = 0.05, **kwargs):
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
 
     if not os.path.isfile(fname):
         msg = ("\nCannot update the cache log with a file named \n" + fname + "\n"
@@ -97,23 +103,71 @@ def update_halo_table_cache_log(simname, redshift,
             "and verify that the file is located where you think it is.\n")
         raise HalotoolsError(msg)
 
-    table_entry = Table(
-        {'simname': simname, 'redshift': redshift, 
-        'halo_finder': halo_finder, 'version_name': version_name, 
-        'fname': fname})
-    check_metadata_consistency(table_entry)
+    new_table_entry = Table(
+        {'simname': [simname], 'redshift': [redshift], 
+        'halo_finder': [halo_finder], 'version_name': [version_name], 
+        'fname': [fname]})
+    check_metadata_consistency(new_table_entry)
 
 
     remove_repeated_cache_lines(**kwargs)
     log = read_halo_table_cache_log(**kwargs)
 
-    mask = np.ones(len(log), dtype = bool)
-    mask *= simname == log['simname']
-    mask *= halo_finder == log['halo_finder']
-    mask *= version_name == log['version_name']
+    exact_match_mask = np.ones(len(log), dtype = bool)
+    exact_match_mask *= simname == log['simname']
+    exact_match_mask *= halo_finder == log['halo_finder']
+    exact_match_mask *= version_name == log['version_name']
+
+    close_match_mask = copy(exact_match_mask)
+    exact_match_mask *= redshift == log['redshift']
+    close_match_mask *= abs(redshift - log['redshift']) < dz_tol
+
+    exact_matches = log[exact_match_mask]
+    close_matches = log[close_match_mask]
+
+    if len(exact_matches) == 0:
+        new_log = table_vstack([log, new_table_entry])
+    elif len(exact_matches) == 1:
+        if fname == exact_matches['fname']:
+            new_log = copy(log)
+        else:
+            msg = ("\nIn the halo table cache log\n"+cache_fname+"\n"
+                "There already exists an entry with metadata that matches "
+                "the input arguments to ``update_halo_table_cache_log``\n"
+                "However, you requested that the log be updated with the following filename:\n"
+                +fname+"\nThis is inconsistent with the filename of the existing log entry:\n"
+                +close_matches['fname']+"\nEither delete this line from the log or correct"
+                "your input arguments.\n")
+            raise HalotoolsError(msg)
+    else:
+        msg = ("\nIn the halo table cache log\n"+cache_fname+"\n"
+            "there are multiple entries with the same metadata but different filenames:\n")
+        for entry in exact_matches:
+            msg += entry['fname'] + "\n"
+        msg += ("This ambiguity can be resolved in one of two ways. \n\n"
+            "1. If the duplicate lines are obsolete, simply delete them from the log.\n\n"
+            "2. If these lines correctly point to different versions of the same catalog, \n"
+            "then you will need to resolve this ambiguity by using different version names \n"
+            "To do this, you should first metadata of the hdf5 file as follows:\n\n"
+            ">>> f = h5py.File(fname)\n"
+            ">>> f.attrs.create('version_name', 'my_new_version_name')\n"
+            ">>> f.close()\n\n"
+            "After changing the metadata, update the version_name columns in the log.\n")
+        raise HalotoolsError(msg)
+
+    if len(exact_matches) == len(close_matches):
+        overwrite_halo_table_cache_log(new_log, **kwargs)
+    else:
+        nearby_redshift_filename = list(set(close_matches['fname']) - set(exact_matches['fname']))[0]
+        msg = ("\nThere is already a log entry with a closely matching redshift:\n"
+            +nearby_redshift_filename+"\n"
+            "You must either use this catalog or set the ``ignore_nearby_redshifts`` to True.\n"
+            )
+        raise HalotoolsError(msg)
 
 
-    mask *= redshift == log['redshift']
+
+
 
 
 def load_cached_halo_table_from_fname(fname, **kwargs):
