@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import numpy as np
 
-__all__=['npairs','wnpairs','xy_z_npairs','pairs']
+__all__=['npairs','wnpairs','xy_z_npairs','xy_z_wnpairs','pairs']
 __author__ = ['Duncan Campbell']
 
 
@@ -20,11 +20,11 @@ def npairs(data1, data2, rbins, period=None):
     
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N by k numpy array of k-dimensional positions. Should be between zero and 
         period
             
-    data2: array_like
+    data2 : array_like
         N by k numpy array of k-dimensional positions. Should be between zero and 
         period
             
@@ -32,7 +32,7 @@ def npairs(data1, data2, rbins, period=None):
         numpy array of boundaries defining the bins in which pairs are counted. 
         len(rbins) = Nrbins + 1.
             
-    period: array_like, optional
+    period : array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
@@ -99,11 +99,11 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None):
     
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N by k numpy array of k-dimensional positions. Should be between zero and 
         period
             
-    data2: array_like
+    data2 : array_like
         N by k numpy array of k-dimensional positions. Should be between zero and 
         period
             
@@ -114,7 +114,7 @@ def xy_z_npairs(data1, data2, rp_bins, pi_bins, period=None):
     pi_bins : array_like
         numpy array of boundaries defining the parallel bins in which pairs are counted. 
         
-    period: array_like, optional
+    period : array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
@@ -176,11 +176,11 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
     
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N by k numpy array of k-dimensional positions. Should be between zero and 
         period
             
-    data2: array_like
+    data2 : array_like
         N by k numpy array of k-dimensional positions. Should be between zero and 
         period
             
@@ -188,15 +188,15 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
         numpy array of boundaries defining the bins in which pairs are counted. 
         len(rbins) = Nrbins + 1.
             
-    period: array_like, optional
+    period : array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.
         
-    weights1: array_like, optional
+    weights1 : array_like, optional
         length N1 array containing weights used for weighted pair counts, w1*w2.
         
-    weights2: array_like, optional
+    weights2 : array_like, optional
         length N2 array containing weights used for weighted pair counts, w1*w2.
             
     Returns
@@ -267,24 +267,131 @@ def wnpairs(data1, data2, r, period=None, weights1=None, weights2=None):
     return n
 
 
+def xy_z_wnpairs(data1, data2, rp_bins, pi_bins, period=None, weights1=None, weights2=None):
+    """
+    Calculate the number of weighted pairs with parellal separations less than or equal to 
+    pi_bins[i], and perpendicular seperations less than or equal to rp_bins[i].
+    
+    Assumes the first N-1 dimensions are perpendicular to the line-of-sight (LOS), and
+    the final dimension is parallel to the LOS.
+    
+    Parameters
+    ----------
+    data1 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    data2 : array_like
+        N by k numpy array of k-dimensional positions. Should be between zero and 
+        period
+            
+    rp_bins : array_like
+        numpy array of boundaries defining the perpendicular bins in which pairs are 
+        counted. 
+    
+    pi_bins : array_like
+        numpy array of boundaries defining the parallel bins in which pairs are counted. 
+        
+    period : array_like, optional
+        length k array defining axis-aligned periodic boundary conditions. If only 
+        one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
+        If none, PBCs are set to infinity.
+    
+    weights1 : array_like, optional
+        length N1 array containing weights used for weighted pair counts, w1*w2.
+        
+    weights2 : array_like, optional
+        length N2 array containing weights used for weighted pair counts, w1*w2.
+            
+    
+    Returns
+    -------
+    wN_pairs : ndarray of shape (len(rp_bins),len(pi_bins))
+        weighted number counts of pairs
+     
+    """
+    
+    #work with arrays!
+    data1 = np.asarray(data1)
+    if data1.ndim ==1: data1 = np.array([data1])
+    data2 = np.asarray(data2)
+    if data2.ndim ==1: data2 = np.array([data2])
+    rp_bins = np.asarray(rp_bins)
+    if rp_bins.size ==1: rp_bins = np.array([rp_bins])
+    pi_bins = np.asarray(pi_bins)
+    if pi_bins.size ==1: pi_bins = np.array([pi_bins])
+    
+    #Check to make sure both data sets have the same dimension. Otherwise, throw an error!
+    if np.shape(data1)[-1]!=np.shape(data2)[-1]:
+        raise ValueError("data1 and data2 inputs do not have the same dimension.")
+        return None
+        
+    #Process period entry and check for consistency.
+    if period is None:
+            period = np.array([np.inf]*np.shape(data1)[-1])
+    else:
+        period = np.asarray(period).astype("float64")
+        if np.shape(period) == ():
+            period = np.array([period]*np.shape(data1)[-1])
+        elif np.shape(period)[0] != np.shape(data1)[-1]:
+            raise ValueError("period should have len == dimension of points")
+            return None
+    
+    #Process weights1 entry and check for consistency.
+    if weights1 is None:
+            weights1 = np.array([1.0]*np.shape(data1)[0], dtype=np.float64)
+    else:
+        weights1 = np.asarray(weights1).astype("float64")
+        if np.shape(weights1)[0] != np.shape(data1)[0]:
+            raise ValueError("weights1 should have same len as data1")
+            return None
+    #Process weights2 entry and check for consistency.
+    if weights2 is None:
+            weights2 = np.array([1.0]*np.shape(data2)[0], dtype=np.float64)
+    else:
+        weights2 = np.asarray(weights2).astype("float64")
+        if np.shape(weights2)[0] != np.shape(data2)[0]:
+            raise ValueError("weights2 should have same len as data2")
+            return None
+    
+    N1 = len(data1)
+    N2 = len(data2)
+    dd = np.zeros((N1*N2,2)) #store pair seperations 
+    ww = np.zeros((N1*N2,1)) #store pair seperations
+    for i in range(0,N1): #calculate distance between every point and every other point
+        x1 = data1[i,:]
+        x2 = data2
+        dd[i*N2:i*N2+N2,1] = parallel_distance(x1, x2, period)
+        dd[i*N2:i*N2+N2,0] = perpendicular_distance(x1, x2, period)
+        ww[i*N2:i*N2+N2] = weights1[i]*weights2
+    
+    #count number less than r
+    n = np.zeros((rp_bins.size,pi_bins.size), dtype=np.float64)
+    for i in range(rp_bins.size):
+        for j in range(pi_bins.size):
+                n[i,j] += np.sum(np.extract((dd[:,0]<=rp_bins[i]) & (dd[:,1]<=pi_bins[j]),ww))
+    
+    return n
+
+
 def pairs(data1, r, data2=None, period=None):
     """
     Calculate the pairs with separations less than or equal to rbins[i].
     
     Parameters
     ----------
-    data1: array_like
+    data1 : array_like
         N by k numpy array of k-dimensional positions. Should be between zero and 
         period
             
     r : float
         radius for which pairs are counted. 
         
-    data2: array_like, optional
+    data2 : array_like, optional
         N by k numpy array of k-dimensional positions. Should be between zero and 
         period
             
-    period: array_like, optional
+    period : array_like, optional
         length k array defining axis-aligned periodic boundary conditions. If only 
         one number, Lbox, is specified, period is assumed to be np.array([Lbox]*k).
         If none, PBCs are set to infinity.

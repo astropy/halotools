@@ -18,7 +18,3 @@ cdef double tlweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
 cdef double tweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
 cdef double exweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
 
-cdef double radial_velocity_weights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
-cdef double velocity_dot_weights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
-cdef double velocity_angle_weights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift)
-

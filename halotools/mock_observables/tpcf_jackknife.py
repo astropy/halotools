@@ -14,8 +14,9 @@ from warnings import warn
 from ..custom_exceptions import *
 from ..utils.array_utils import convert_to_ndarray
 from .clustering_helpers import *
-#from .pair_counters.double_tree_pairs import jnpairs
+from .tpcf_estimators import *
 from .pair_counters.double_tree_pairs import jnpairs
+from .error_estimation_tools import *
 ##########################################################################################
 
 
@@ -201,52 +202,20 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     else: 
         Lbox = period
     
-    
-    def get_subvolume_labels(sample1, sample2, randoms, Nsub, Lbox):
-        """
-        Split volume into subvolumes, and tag points in subvolumes with integer labels for 
-        use in the jackknife calculation.
-        
-        note: '0' tag should be reserved. It is used in the jackknife calculation to mean
-        'full sample'
-        """
-        
-        dL = Lbox/Nsub # length of subvolumes along each dimension
-        N_sub_vol = np.prod(Nsub) # total the number of subvolumes
-        inds = np.arange(1,N_sub_vol+1).reshape(Nsub[0],Nsub[1],Nsub[2])
-    
-        #tag each particle with an integer indicating which jackknife subvolume it is in
-        #subvolume indices for the sample1 particle's positions
-        index_1 = np.floor(sample1/dL).astype(int)
-        for i in range(3): #take care of the case where a point falls on the boundary
-            index_1[:, i] = np.where(index_1[:, i] == Nsub[i], Nsub[i] - 1, index_1[:, i])
-        j_index_1 = inds[index_1[:,0],index_1[:,1],index_1[:,2]].astype(int)
-    
-        #subvolume indices for the random particle's positions
-        index_random = np.floor(randoms/dL).astype(int)
-        for i in range(3): #take care of the case where a point falls on the boundary
-            index_random[:, i] = np.where(index_random[:, i] == Nsub[i], Nsub[i] - 1, index_random[:, i])
-        j_index_random = inds[index_random[:,0],\
-                              index_random[:,1],\
-                              index_random[:,2]].astype(int)
-        
-        #subvolume indices for the sample2 particle's positions
-        index_2 = np.floor(sample2/dL).astype(int)
-        for i in range(3): #take care of the case where a point falls on the boundary
-            index_2[:, i] = np.where(index_2[:, i] == Nsub[i], Nsub[i] - 1, index_2[:, i])
-        j_index_2 = inds[index_2[:,0],index_2[:,1],index_2[:,2]].astype(int)
-        
-        return j_index_1, j_index_2, j_index_random, int(N_sub_vol)
-    
     def get_subvolume_numbers(j_index, N_sub_vol):
         """
-        get the list of subvolume labels
+        calculate how many points are in each subvolume.
         """
         
-        #need every label to be in there at least once
+        #there could be subvolumes with no points, and we
+        #need every label to be in there at least once. append a vector
+        #of the possible labels, and we can subtract 1 later.
         temp = np.hstack((j_index,np.arange(1,N_sub_vol+1,1)))
+        
         labels, N = np.unique(temp,return_counts=True)
+        
         N = N-1 #remove the place holder I added two lines above.
+        
         return N
     
     def jnpair_counts(sample1, sample2, j_index_1, j_index_2, N_sub_vol, rbins,\
@@ -308,8 +277,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     N2 = len(sample2)
     NR = len(randoms)
     
-    j_index_1, j_index_2, j_index_random, N_sub_vol = \
-                               get_subvolume_labels(sample1, sample2, randoms, Nsub, Lbox)
+    j_index_1, N_sub_vol = cuboid_subvolume_labels(sample1, Nsub, Lbox)
+    j_index_2, N_sub_vol = cuboid_subvolume_labels(sample2, Nsub, Lbox)
+    j_index_random, N_sub_vol = cuboid_subvolume_labels(randoms, Nsub, Lbox)
     
     #number of points in each subvolume
     NR_subs = get_subvolume_numbers(j_index_random,N_sub_vol)
@@ -377,9 +347,9 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
                               NR_subs, estimator)
     
     #calculate the covariance matrix
-    xi_11_cov = _covariance_matrix(xi_11_sub)
-    xi_12_cov = _covariance_matrix(xi_12_sub)
-    xi_22_cov = _covariance_matrix(xi_22_sub)
+    xi_11_cov = jackknife_covariance_matrix(xi_11_sub)
+    xi_12_cov = jackknife_covariance_matrix(xi_12_sub)
+    xi_22_cov = jackknife_covariance_matrix(xi_22_sub)
     
     if _sample1_is_sample2:
         return xi_11_full, xi_11_cov
@@ -390,48 +360,6 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
             return xi_11_full,xi_22_full,xi_11_cov,xi_22_cov
         elif do_cross==True:
             return xi_12_full,xi_12_cov
-
-
-def _covariance_matrix(corr_funcs):
-    """
-    Calculate the covariance matrix.
-    
-    Parameters
-    ----------
-    corr_funcs : np.array
-        shape (N_sample, N_bins) numpy array of jackknife sample correlation functions.
-    
-    Returns
-    -------
-    cov: numpy.ndarray
-        covaraince matrix
-    """
-    
-    corr_funcs =  convert_to_ndarray(corr_funcs)
-    
-    if corr_funcs.ndim !=2:
-        msg = ("corr_funcs array must be 2-dimensional")
-        HalotoolsError(msg)
-    
-    N_samples = corr_funcs.shape[0]
-    Nr = corr_funcs.shape[1]
-    after_subtraction = corr_funcs - np.mean(corr_funcs, axis=0) # subtract the mean
-    
-    #raise a warning if N_samples < Nr
-    if N_samples<Nr:
-        msg = ("Number of samples is smaller than the number of bins. \n"
-               "It is recommended to increase the number of samples, \n"
-               "or decrease the number of bins.")
-        warn(msg)
-    
-    cov = np.zeros((Nr,Nr)) # 2D array that keeps the covariance matrix 
-    for i in range(Nr):
-        for j in range(Nr):
-            tmp = 0.0
-            for k in range(N_samples):
-                tmp = tmp + after_subtraction[k,i]*after_subtraction[k,j]
-                cov[i,j] = (((N_samples-1)/N_samples)*tmp)
-    return cov
 
 
 def _enclose_in_box(data1, data2, data3):

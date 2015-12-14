@@ -12,6 +12,7 @@ import numpy as np
 from math import pi, gamma
 
 from .clustering_helpers import *
+from .tpcf_estimators import *
 from .pair_counters.double_tree_pairs import s_mu_npairs
 ##########################################################################################
 
@@ -161,11 +162,23 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
     
     Examples
     --------
-    >>> #randomly distributed points in a unit cube. 
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
     >>> Npts = 1000
-    >>> x,y,z = (np.random.random(Npts),np.random.random(Npts),np.random.random(Npts))
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    We transform our *x, y, z* points into the array shape used by the pair-counter by 
+    taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
+    is used throughout the `~halotools.mock_observables` sub-package:
+    
     >>> coords = np.vstack((x,y,z)).T
-    >>> period = np.array([1.0,1.0,1.0])
+    
     >>> s_bins = np.logspace(-2,-1,10)
     >>> mu_bins = np.linspace(0,1,50)
     >>> xi = s_mu_tpcf(coords, s_bins, mu_bins, period=period)

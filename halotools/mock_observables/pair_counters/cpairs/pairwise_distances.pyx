@@ -4,8 +4,7 @@
 calculate and return the pairwise distances between two sets of points.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 import sys
 cimport cython
 import numpy as np
@@ -32,7 +31,60 @@ def pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                              np.float64_t max_r):
     
     """
-    real-space pairwise distance calculator.
+    Calculate the limited pairwise distance matrix, :math:`d_{ij}`.
+    
+    calculate the distance between all pairs with sperations less than or equal 
+    to ``max_r``.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+        array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+        array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+        array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+        array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+        array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+        array of z positions of lenght N2 (data2)
+    
+    max_r : float
+        maximum seperation to record
+    
+    Returns
+    -------
+    d : numpy.array
+        array of pairwise seperation distances
+    
+    i : numpy.array
+        array of 0-indexed indices
+    
+    j : numpy.array
+        array of 0-indexed indices
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    unit cube. 
+    
+    >>> Npts = 1000
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    Calculate the distance between all pairs with seperations less than 0.5:
+    
+    >>> r_max = 0.5
+    >>> d,i,j = pairwise_distance_no_pbc(x,y,z,x,y,z,r_max)
     """
     
     #c definitions
@@ -43,6 +95,9 @@ def pairwise_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef np.int_t i, j, n
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance to avoid taking a square root in a tight loop
+    max_r = max_r**2
     
     #loop over points in grid1's cells
     n=0
@@ -78,7 +133,65 @@ def pairwise_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                              np.float64_t max_r):
     
     """
-    real-space pairwise distance calculator.
+    Calculate the limited pairwise distance matrix, :math:`d_{ij}`, with periodic boundary conditions (PBC).
+    
+    calculate the distance between all pairs with sperations less than or equal 
+    to ``max_r``.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+        array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+        array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+        array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+        array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+        array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+        array of z positions of lenght N2 (data2)
+    
+    period : numpy.array
+        array defining axis-aligned periodic boundary conditions.
+    
+    max_r : float
+        maximum seperation to record
+    
+    Returns
+    -------
+    d : numpy.array
+        array of pairwise seperation distances
+    
+    i : numpy.array
+        array of 0-indexed indices
+    
+    j : numpy.array
+        array of 0-indexed indices
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    Calculate the distance between all pairs with seperations less than 0.5:
+    
+    >>> r_max = 0.5
+    >>> d,i,j = pairwise_distance_pbc(x,y,z,x,y,z,period,r_max)
     """
     
     #c definitions
@@ -89,6 +202,9 @@ def pairwise_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j, n
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance to avoid taking a square root in a tight loop
+    max_r = max_r**2
     
     #loop over points in grid1's cells
     n=0
@@ -122,10 +238,71 @@ def pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                                   np.ndarray[np.float64_t, ndim=1] y_icell2,
                                   np.ndarray[np.float64_t, ndim=1] z_icell2,
                                   np.float64_t max_rp, np.float64_t max_pi):
+    """
+    Calculate the limited pairwise distance matrices, :math:`d_{{\\perp}ij}` and :math:`d_{{\\parallel}ij}`.
     
+    Calculate the perpendicular and parallel distance between all pairs with seperations 
+    less than or equal to ``max_rp`` and ``max_pi`` wrt to the z-direction, repsectively.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+        array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+        array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+        array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+        array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+        array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+        array of z positions of lenght N2 (data2)
+    
+    max_rp : float
+        maximum perpendicular seperation to record
+    
+    max_pi : float
+        maximum parallel seperation to record
+    
+    Returns
+    -------
+    d_perp : numpy.array
+        array of perpendicular pairwise seperation distances
+    
+    d_para : numpy.array
+        array of parallel pairwise seperation distances
+    
+    i : numpy.array
+        array of 0-indexed indices
+    
+    j : numpy.array
+        array of 0-indexed indices
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    unit cube. 
+    
+    >>> Npts = 1000
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    Calculate the distance between all pairs with perpednicular seperations less than 0.25
+    and parallel sperations of 0.5:
+    
+    >>> max_rp = 0.25
+    >>> max_pi = 0.5
+    >>> d_perp,d_para,i,j = pairwise_xy_z_distance_no_pbc(x,y,z,x,y,z,max_rp,max_para)
     """
-    2+1D pairwise distance calculator.
-    """
+    
     
     #c definitions
     cdef vector[np.int_t] i_ind
@@ -136,6 +313,10 @@ def pairwise_xy_z_distance_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j, n
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    max_rp = max_rp**2
+    max_pi = max_pi**2
     
     #loop over points in grid1's cells
     n=0
@@ -173,7 +354,73 @@ def pairwise_xy_z_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                                np.float64_t max_rp, np.float64_t max_pi):
     
     """
-    2+1D pairwise distance calculator.
+    Calculate the limited pairwise distance matrices, :math:`d_{{\\perp}ij}` and :math:`d_{{\\parallel}ij}`, with periodic boundary conditions (PBC).
+    
+    Calculate the perpendicular and parallel distance between all pairs with seperations 
+    less than or equal to ``max_rp`` and ``max_pi`` wrt to the z-direction, repsectively.
+    
+    Parameters
+    ----------
+    x_icell1 : numpy.array
+        array of x positions of lenght N1 (data1)
+    
+    y_icell1 : numpy.array
+        array of y positions of lenght N1 (data1)
+    
+    z_icell1 : numpy.array
+        array of z positions of lenght N1 (data1)
+    
+    x_icell2 : numpy.array
+        array of x positions of lenght N2 (data2)
+    
+    y_icell2 : numpy.array
+        array of y positions of lenght N2 (data2)
+    
+    z_icell2 : numpy.array
+        array of z positions of lenght N2 (data2)
+    
+    period : numpy.array
+        array defining axis-aligned periodic boundary conditions.
+    
+    max_rp : float
+        maximum perpendicular seperation to record
+    
+    max_pi : float
+        maximum parallel seperation to record
+    
+    Returns
+    -------
+    d_perp : numpy.array
+        array of perpendicular pairwise seperation distances
+    
+    d_para : numpy.array
+        array of parallel pairwise seperation distances
+    
+    i : numpy.array
+        array of 0-indexed indices
+    
+    j : numpy.array
+        array of 0-indexed indices
+    
+    Examples
+    --------
+    For demonstration purposes we create a randomly distributed set of points within a 
+    periodic unit cube. 
+    
+    >>> Npts = 1000
+    >>> Lbox = 1.0
+    >>> period = np.array([Lbox,Lbox,Lbox])
+    
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
+    
+    Calculate the distance between all pairs with perpednicular seperations less than 0.25
+    and parallel sperations of 0.5:
+    
+    >>> max_rp = 0.25
+    >>> max_pi = 0.5
+    >>> d_perp, d_para,i,j = pairwise_xy_z_distance_no_pbc(x,y,z,x,y,z,period,max_rp,max_para)
     """
     
     #c definitions
@@ -185,6 +432,10 @@ def pairwise_xy_z_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     cdef int i, j, n
     cdef int Ni = len(x_icell1)
     cdef int Nj = len(x_icell2)
+    
+    #square the distance bins to avoid taking a square root in a tight loop
+    max_rp = max_rp**2
+    max_pi = max_pi**2
     
     #loop over points in grid1's cells
     n=0
@@ -210,3 +461,6 @@ def pairwise_xy_z_distance_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
     
     return np.sqrt(perp_distances).astype(float), np.sqrt(para_distances).astype(float),\
            np.array(i_ind).astype(int), np.array(j_ind).astype(int)
+    
+    
+    

@@ -36,11 +36,10 @@ class FoFGroups(object):
     
     def __init__(self, positions, b_perp, b_para, period=None, Lbox=None, num_threads=1):
         """
-        Build FoF groups in redshift space groups assuming the distant observer approximation.
+        Build FoF groups in redshift space assuming the distant observer approximation.
         
         The first two dimensions (x, y) define the plane for perpendicular distances. 
-        The third dimension (z) is used for parallel distances.  i.e. x,y positions are 
-        on the plane of the sky, and z is the radial distance coordinate.  This is the 
+        The third dimension (z) is used for line-of-sight distances.  This is the 
         "distant observer" approximation.
         
         Parameters
@@ -88,7 +87,7 @@ class FoFGroups(object):
         
         >>> b_perp, b_para = (0.1,0.2)
         >>> groups = FoFGroups(coords, b_perp, b_para, period=period)
-        
+        >>> IDs = groups.group_ids
         """
         
         self.b_perp = float(b_perp) #perpendicular linking length
@@ -110,20 +109,20 @@ class FoFGroups(object):
                               length of one side of a cube")
         if (period is not None) and (not np.all(Lbox==period)):
             raise ValueError("If both Lbox and Period are defined, they must be equal.")
-    
+        
         self.period = period #simulation box periodic boundary conditions
         self.Lbox = np.asarray(Lbox,dtype='float64') #simulation box periodic boundary conditions
-    
+        
         #calculate the physical linking lengths
         self.volume = np.prod(self.Lbox)
         self.n_gal = len(positions)/self.volume
         self.d_perp = self.b_perp/(self.n_gal**(1.0/3.0))
         self.d_para = self.b_para/(self.n_gal**(1.0/3.0))
-    
+        
         self.m_perp, self.m_para = xy_z_pair_matrix(self.positions, self.positions,\
-                                                  self.d_perp, self.d_para,\
-                                                  period=self.period, Lbox=self.Lbox,\
-                                                  num_threads=num_threads)
+                                                    self.d_perp, self.d_para,\
+                                                    period=self.period,\
+                                                    num_threads=num_threads)
         
         self.m = self.m_perp.multiply(self.m_perp)+self.m_para.multiply(self.m_para)
         self.m = self.m.sqrt()
@@ -164,7 +163,6 @@ class FoFGroups(object):
                                                           return_labels=False)
         return self._n_groups
     
-    ####the following methods are igraph package dependent###
     def create_graph(self):
         """
         Create graph from FoF sparse matrix (requires igraph package).

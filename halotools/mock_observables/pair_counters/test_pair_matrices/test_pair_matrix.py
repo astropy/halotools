@@ -42,7 +42,7 @@ def test_pair_matrix_periodic():
     
     #test on a uniform grid
     r_max=0.10001
-    m = pair_matrix(data2, data2, r_max, period=period, Lbox=Lbox)
+    m = pair_matrix(data2, data2, r_max, period=period)
 
     #each point has 7 connections including 1 self connection
     #includes self connections
@@ -53,12 +53,12 @@ def test_pair_matrix_periodic():
 def test_pair_matrix_non_periodic():
     
     r_max = 0.1
-    m = pair_matrix(data1, data1, r_max, period=None, Lbox=Lbox)
+    m = pair_matrix(data1, data1, r_max, period=None)
     assert isinstance(m,scipy.sparse.coo.coo_matrix)
     
     #test on a uniform grid
     r_max=0.10001
-    m = pair_matrix(data2, data2, r_max, period=None, Lbox=Lbox)
+    m = pair_matrix(data2, data2, r_max, period=None)
 
     # connections: inside + faces + edges + corners
     # includes self connections
@@ -81,8 +81,12 @@ def test_xy_z_pair_matrix_periodic():
     
     rp_max=0.01
     pi_max=0.01
+    approx_cell1_size = [0.1,0.1,0.1]
+    approx_cell2_size = approx_cell1_size
     
-    m_perp, m_para = xy_z_pair_matrix(data1, data1, rp_max, pi_max, period=period)
+    m_perp, m_para = xy_z_pair_matrix(data1, data1, rp_max, pi_max, period=period,
+                                      approx_cell1_size = approx_cell1_size,
+                                      approx_cell2_size = approx_cell2_size)
     assert isinstance(m_perp,scipy.sparse.coo.coo_matrix)
     assert isinstance(m_para,scipy.sparse.coo.coo_matrix)
     
@@ -90,7 +94,7 @@ def test_xy_z_pair_matrix_periodic():
     rp_max=0.11
     pi_max=0.11
     
-    m_perp, m_para = xy_z_pair_matrix(data2, data2, rp_max, pi_max, period=period, Lbox=Lbox)
+    m_perp, m_para = xy_z_pair_matrix(data2, data2, rp_max, pi_max, period=period)
 
     #each point has 7 connections including 1 self connection
     #includes self connections
@@ -103,8 +107,12 @@ def test_xy_z_pair_matrix_non_periodic():
     
     rp_max=0.01
     pi_max=0.01
+    approx_cell1_size = [0.1,0.1,0.1]
+    approx_cell2_size = approx_cell1_size
     
-    m_perp, m_para = xy_z_pair_matrix(data1, data1, rp_max, pi_max, period=None, Lbox=Lbox)
+    m_perp, m_para = xy_z_pair_matrix(data1, data1, rp_max, pi_max, period=None,
+                                      approx_cell1_size = approx_cell1_size,
+                                      approx_cell2_size = approx_cell2_size)
     
     assert isinstance(m_perp,scipy.sparse.coo.coo_matrix)
     assert isinstance(m_para,scipy.sparse.coo.coo_matrix)
@@ -113,7 +121,7 @@ def test_xy_z_pair_matrix_non_periodic():
     rp_max=0.1001
     pi_max=0.1001
     
-    m_perp, m_para = xy_z_pair_matrix(data2, data2, rp_max, pi_max, period=None, Lbox=Lbox)
+    m_perp, m_para = xy_z_pair_matrix(data2, data2, rp_max, pi_max, period=None)
 
     # connections: inside + faces + edges + corners
     # includes self connections
