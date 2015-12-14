@@ -225,28 +225,28 @@ class TestLoadCachedHaloTableFromFname(TestCase):
                 cache_fname = cache_fname)
         assert 'does not exist' in err.value.message
 
-    # def test_scenario5(self):
-    #     """ There are harmless duplicate entries in the log
-    #     """
-    #     scenario = 5
-    #     cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
-    #     cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+    def test_scenario5(self):
+        """ There are harmless duplicate entries in the log
+        """
+        scenario = 5
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
-    #     updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-    #         'bolshoi', 'bdm', 0.004, 'alpha.version0')
-    #     helper_functions.create_halo_table_hdf5(updated_log[-1])
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'bdm', 0.004, 'alpha.version0')
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
 
-    #     updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-    #         'bolshoi', 'bdm', 0.004, 'alpha.version0', 
-    #         existing_table = updated_log)
-        # helper_functions.create_halo_table_hdf5(updated_log[-1])
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'bdm', 0.004, 'alpha.version0', 
+            existing_table = updated_log)
+        # Do not create another table as it already exists 
+        
+        manipulate_cache_log.overwrite_halo_table_cache_log(
+            updated_log, cache_fname = cache_fname)
 
-        # manipulate_cache_log.overwrite_halo_table_cache_log(
-        #     updated_log, cache_fname = cache_fname)
-
-        # fname = updated_log['fname'][1]
-        # _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
-        #     cache_fname = cache_fname)
+        fname = updated_log['fname'][1]
+        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            cache_fname = cache_fname)
 
 
     def tearDown(self):
