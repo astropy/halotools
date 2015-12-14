@@ -9,7 +9,11 @@ import numpy as np
 from copy import copy, deepcopy 
 
 from astropy.table import Table
+from astropy.table import vstack as table_vstack
+
 from astropy.config.paths import _find_home 
+
+from . import helper_functions 
 
 from .. import manipulate_cache_log
 
@@ -26,7 +30,8 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('TestLoadCachedHaloTableFromFname', )
+__all__ = ('TestLoadCachedHaloTableFromFname' )
+
 
 class TestLoadCachedHaloTableFromFname(TestCase):
     """ 
@@ -36,4 +41,38 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         """ Pre-load various arrays into memory for use by all tests. 
         """
         pass
+
+    def test_scenario1(self):
+        """
+        """
+        scenario = 1
+
+        updated_log = helper_functions.add_new_cache_log_row(scenario, 
+            'bolshoi', 'rockstar', 0.0, 'alpha.version0')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
