@@ -139,17 +139,122 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         fname = updated_log['fname'][1]
         _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
             cache_fname = cache_fname)
-        with pytest.raises(HalotoolsError):
+        with pytest.raises(HalotoolsError) as err:
             fname = updated_log['fname'][-1]
             _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
                 cache_fname = cache_fname)
+        assert 'If you are using your own halo catalog' in err.value.message
+
+
+    def test_scenario3(self):
+        """ There are two identical entries that differ only by a version name
+        """
+        scenario = 3
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 0.004, 'alpha.version0')
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 0.004, 'alpha.version1', 
+            existing_table = updated_log)
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+        manipulate_cache_log.overwrite_halo_table_cache_log(
+            updated_log, cache_fname = cache_fname)
+
+        fname = updated_log['fname'][0]
+        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            cache_fname = cache_fname)
+
+        fname = updated_log['fname'][1]
+        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            cache_fname = cache_fname)
+
+    def test_scenario4(self):
+        """ There are two identical entries that differ only by a halo-finder
+        """
+        scenario = 4
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'bdm', 0.004, 'alpha.version0')
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 0.004, 'alpha.version0', 
+            existing_table = updated_log)
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+        manipulate_cache_log.overwrite_halo_table_cache_log(
+            updated_log, cache_fname = cache_fname)
+
+        fname = updated_log['fname'][0]
+        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            cache_fname = cache_fname)
+
+        fname = updated_log['fname'][1]
+        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            cache_fname = cache_fname)
+
+    def test_scenario4(self):
+        """ A non-existent file is requested
+        """
+        scenario = 4
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'bdm', 0.004, 'alpha.version0')
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 0.004, 'alpha.version0', 
+            existing_table = updated_log)
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+        manipulate_cache_log.overwrite_halo_table_cache_log(
+            updated_log, cache_fname = cache_fname)
+
+        with pytest.raises(HalotoolsError) as err:
+            fname = 'marf'
+            _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+                cache_fname = cache_fname)
+        assert 'does not exist' in err.value.message
+
+    # def test_scenario5(self):
+    #     """ There are harmless duplicate entries in the log
+    #     """
+    #     scenario = 5
+    #     cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+    #     cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+
+    #     updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+    #         'bolshoi', 'bdm', 0.004, 'alpha.version0')
+    #     helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+    #     updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+    #         'bolshoi', 'bdm', 0.004, 'alpha.version0', 
+    #         existing_table = updated_log)
+        # helper_functions.create_halo_table_hdf5(updated_log[-1])
+
+        # manipulate_cache_log.overwrite_halo_table_cache_log(
+        #     updated_log, cache_fname = cache_fname)
+
+        # fname = updated_log['fname'][1]
+        # _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+        #     cache_fname = cache_fname)
+
 
     def tearDown(self):
-        try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
-            pass
-
+        # try:
+        #     os.system('rm -rf ' + self.dummy_cache_baseloc)
+        # except OSError:
+        #     pass
+        pass
 
 
 
