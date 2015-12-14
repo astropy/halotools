@@ -24,16 +24,6 @@ except ImportError:
     " requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda")
 
-
-import random, string
-def randomword(*args):
-    if len(args) == 1:
-        length = args[0]
-    else:
-        length = np.random.random_integers(5, 15)
-        return ''.join(random.choice(string.lowercase) for i in range(length))
-
-
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
 # returned values depend on the configuration 
@@ -69,6 +59,7 @@ def add_new_row_to_cache_log(scenario,
         new_halo_table_fname = os.path.join(scenario_dirname, 
             'halo_tables', simname, halo_finder, new_halo_table_basename)
 
+    redshift = np.round(redshift, 3)
     new_table = Table(
         {'simname': [simname], 'halo_finder': [halo_finder], 
         'redshift': [redshift], 'version_name': [version_name], 

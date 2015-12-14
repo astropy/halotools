@@ -63,82 +63,92 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
         fname = updated_log['fname'][0]
-
         with pytest.raises(HalotoolsError):
             _ = manipulate_cache_log.load_cached_halo_table_from_fname(
                 fname = fname, cache_fname = cache_fname)
 
+        assert not os.path.isfile(cache_fname)
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
+        assert os.path.isfile(cache_fname)
 
         _ = manipulate_cache_log.load_cached_halo_table_from_fname(
             fname = fname, cache_fname = cache_fname)
 
-    def test_scenario0(self):
+    def test_scenario1(self):
         """ There is a one-to-one match between log entries and halo tables. 
         Only one version exists. 
         All entries have exactly matching metadata. 
         """
-        # scenario = 0
-        # cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
-        # cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+        scenario = 1
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
-        # updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-        #     'bolshoi', 'rockstar', 0.00004, 'alpha.version0')
-        # helper_functions.create_halo_table_hdf5(updated_log[-1])
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 0.00004, 'alpha.version0')
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
 
-        # updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-        #     'bolshoi', 'rockstar', 1.23456, 'alpha.version0', 
-        #     existing_table = updated_log)
-        # helper_functions.create_halo_table_hdf5(updated_log[-1])
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 1.23456, 'alpha.version0', 
+            existing_table = updated_log)
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
 
-        # updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-        #     'bolshoi', 'bdm', 0.010101, 'alpha.version0', 
-        #     existing_table = updated_log)
-        # helper_functions.create_halo_table_hdf5(updated_log[-1])
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'bdm', 0.010101, 'alpha.version0', 
+            existing_table = updated_log)
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
 
-        # manipulate_cache_log.overwrite_halo_table_cache_log(
-        #     updated_log, cache_fname = cache_fname)
+        manipulate_cache_log.overwrite_halo_table_cache_log(
+            updated_log, cache_fname = cache_fname)
 
-        pass
-        # for entry in updated_log:
-        #     fname = entry['fname']
-        #     _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
-        #         cache_fname = cache_fname)
+        for entry in updated_log:
+            fname = entry['fname']
+            _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+                cache_fname = cache_fname)
 
-    def test_scenario1(self):
+
+    def test_scenario2(self):
         """ There is a one-to-one match between log entries and halo tables. 
         Only one version exists. 
         One entry has mis-matched simname metadata. 
         """
-        # scenario = 1
-        # cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
-        # cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+        scenario = 2
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
-        # updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-        #     'bolshoi', 'rockstar', 0.00004, 'alpha.version0')
-        # helper_functions.create_halo_table_hdf5(updated_log[-1])
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 0.00004, 'alpha.version0')
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
 
-        # updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-        #     'bolshoi', 'rockstar', 1.23456, 'alpha.version0')
-        # helper_functions.create_halo_table_hdf5(updated_log[-1], simname = 'marf', 
-        #     existing_table = updated_log)
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 1.23456, 'alpha.version0', 
+            existing_table = updated_log)
+        helper_functions.create_halo_table_hdf5(updated_log[-1])
 
-        # manipulate_cache_log.overwrite_halo_table_cache_log(
-        #     updated_log, cache_fname = cache_fname)
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'bdm', 0.010101, 'alpha.version0', 
+            existing_table = updated_log)
+        helper_functions.create_halo_table_hdf5(updated_log[-1], simname='marf')
 
-        # fname = updated_log['fname'][-1]
-        # _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
-        #     cache_fname = cache_fname)
-        pass
+        manipulate_cache_log.overwrite_halo_table_cache_log(
+            updated_log, cache_fname = cache_fname)
 
+        fname = updated_log['fname'][0]
+        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            cache_fname = cache_fname)
+        fname = updated_log['fname'][1]
+        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            cache_fname = cache_fname)
+        with pytest.raises(HalotoolsError):
+            fname = updated_log['fname'][-1]
+            _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+                cache_fname = cache_fname)
 
     def tearDown(self):
-        # try:
-        #     os.system('rm -rf ' + self.dummy_cache_baseloc)
-        # except OSError:
-        #     pass
-        pass
+        try:
+            os.system('rm -rf ' + self.dummy_cache_baseloc)
+        except OSError:
+            pass
 
 
 

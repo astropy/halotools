@@ -40,7 +40,6 @@ def get_redshift_string(redshift):
 
 def get_halo_table_cache_log_header():
     return 'simname halo_finder redshift version_name fname'
-    # return '# simname  redshift  halo_finder  version_name  fname \n'
 
 def get_formatted_halo_table_cache_log_line(simname, redshift, 
     halo_finder, version_name, fname):
@@ -59,27 +58,7 @@ def overwrite_halo_table_cache_log(new_log, **kwargs):
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
 
-    for entry in new_log:
-        print(entry)
-    new_log.write(cache_fname, names = ('simname', 'halo_finder', 'redshift', 
-        'version_name', 'fname'), format='ascii')
-
-    # new_log.write(cache_fname, format='ascii')
-    # print(cache_fname)
-    # raise KeyError
-
-    # data = {key: new_log[key] for key in new_log.keys()}
-    # astropy_ascii.write(data, cache_fname, 
-    #     names=['simname', 'redshift', 'halo_finder', 'version_name', 'fname'])
-
-    # with open(cache_fname, 'w') as f:
-    #     header = get_halo_table_cache_log_header() 
-    #     f.write(header)
-    #     for entry in new_log:
-    #         newline = get_formatted_halo_table_cache_log_line(
-    #             entry['simname'], entry['redshift'], 
-    #             entry['halo_finder'], entry['version_name'], entry['fname'])
-    #         f.write(newline)
+    new_log.write(cache_fname, format='ascii')
 
 def rebuild_halo_table_cache_log(**kwargs):
     pass
@@ -93,7 +72,7 @@ def read_halo_table_cache_log(**kwargs):
         cache_fname = get_halo_table_cache_log_fname()
 
     if os.path.isfile(cache_fname):
-        return Table.read(cache_fname, format = 'ascii')
+        return Table.read(cache_fname, format='ascii')
     else:
         msg = ("\nThe Halotools cache log with filename\n``"+cache_fname+"``\n"
             "does not exist. If you have not yet downloaded any of the halo catalogs\n"
@@ -208,7 +187,7 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
 
     verify_cache_log(**kwargs)
     log = read_halo_table_cache_log(cache_fname=cache_fname)
-    mask = str(log['fname']) == str(fname)
+    mask = log['fname'] == str(fname)
     matching_catalogs = log[mask]
 
     if len(matching_catalogs) == 0:
@@ -500,10 +479,13 @@ def verify_halo_table_cache_header(**kwargs):
     verify_halo_table_cache_existence(cache_fname=cache_fname)
 
     correct_header = get_halo_table_cache_log_header()
+    correct_list = correct_header.strip().split()
+
     with open(cache_fname, 'r') as f:
         actual_header = f.readline()
+    header_list = actual_header.strip().split()
 
-    if correct_header != actual_header:
+    if set(correct_list) != set(header_list):
         msg = ("\nThe file " + cache_fname + 
             "\nserves as a log for all the halo catalogs you use with Halotools.\n"
             "The correct header that should be in this file is \n"
@@ -523,7 +505,7 @@ def verify_halo_table_cache_log_columns(**kwargs):
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
     verify_halo_table_cache_existence(cache_fname = cache_fname)
-    # verify_halo_table_cache_header(cache_fname = cache_fname)
+    verify_halo_table_cache_header(cache_fname = cache_fname)
 
     try:
         log = kwargs['log']
@@ -555,7 +537,7 @@ def verify_halo_table_cache_log_columns(**kwargs):
 def verify_cache_log(**kwargs):
 
     verify_halo_table_cache_existence(**kwargs)
-    # verify_halo_table_cache_header(**kwargs)
+    verify_halo_table_cache_header(**kwargs)
     verify_halo_table_cache_log_columns(**kwargs)
 
 def check_metadata_consistency(cache_log_entry):
