@@ -80,22 +80,71 @@ def update_halo_table_cache_log(simname, redshift,
     pass
 
 
-
-
-def identify_fname_halo_table(**kwargs):
+def load_cached_halo_table_from_fname(fname, **kwargs):
     """
     """
+    # If a cache location is explicitly specified, 
+    # use it instead of the standard location. 
+    # This facilitate unit-testing
     try:
         cache_fname = kwargs['cache_fname']
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
 
+    try:
+        assert os.path.isfile(fname)
+    except AssertionError:
+        msg = ("\nThe requested filename ``" + fname + "`` does not exist.\n")
+        raise HalotoolsError(msg)
+
+    log = read_cache_memory_log(cache_fname)
+    mask = log['fname'] == fname
+    matching_catalogs = log[mask]
+
+    if len(matching_catalogs) == 0:
+        msg = ("The filename you requested ,``"+fname+"`` \nexists but it does not appear"
+            "in the halo table cache log,\n"
+            +cache_fname+"\nYou can add this catalog to your cache log by calling the\n"
+            "``update_halo_table_cache_log`` function.\n")
+        warn(msg)
+    elif len(matching_catalogs) == 1:
+        return Table.read(matching_catalogs['fname'][0], path='data')
+    else:
+        # There are two or more cache log entries with the same exact filename
+        # First try to resolve the problem by 
+        # removing any possibly repeated entries from the cache log
+        remove_repeated_cache_lines(**kwargs)
+        log = read_cache_memory_log(cache_fname)
+        mask = log['fname'] == fname
+        matching_catalogs = log[mask]
+        if len(matching_catalogs) > 1:
+            msg = ("The filename you requested ``"+fname+"``\n"
+                "appears multiple times in the halo table cache log,\n"
+                +cache_fname+"\n, and the metadata between these repeated entries is inconsistent.\n"
+                "Use a text editor to open up the log and delete the incorrect lines.\n")
+            raise HalotoolsError(msg)
+
+
+
+def identify_fname_halo_table(**kwargs):
+    """
+    """
+    # If a cache location is explicitly specified, 
+    # use it instead of the standard location. 
+    # This facilitate unit-testing
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
+
+    # If an input `fname` was passed, check that it exists and return it
     if 'fname' in kwargs:
         if not os.path.isfile(kwargs['fname']):
             msg = ("\nThe requested filename ``" + kwargs['fname'] + "`` does not exist.\n")
             raise HalotoolsError(msg)
         else:
             return kwargs['fname']
+    # We need to infer the fname from the metadata and cache log
     else:
         log = read_cache_memory_log(cache_fname)
         mask = np.ones(len(log), dtype=bool)
@@ -343,7 +392,7 @@ def check_metadata_consistency(cache_log_entry, **kwargs):
     f.close()
 
 
-def cleanup_halo_table_cache(delete_nonexistent_files=False, **kwargs):
+def check_halo_table_cache_for_nonexistent_files(delete_nonexistent_files=False, **kwargs):
     """ Function searches the halo table cache log for references to files that do not exist and (optionally) deletes them from the log. 
     """
 
@@ -404,19 +453,24 @@ def remove_repeated_cache_lines(**kwargs):
         cache_fname = get_halo_table_cache_log_fname()
     verify_cache_log(cache_fname = cache_fname)
 
+
+    # First we eliminate lines which are exactly repeated
     with open(cache_fname, 'r') as f:
         data_lines = (line for i, line in enumerate(f) if line[0] != '#')
-
     unique_lines = []
     for line in data_lines:
         if line not in unique_lines:
             unique_lines.append(line)
-
+    # Overwrite the cache with the unique entries
     header = get_halo_table_cache_log_header()
     with open(cache_fname, 'w') as f:
         f.write(header)
         for line in unique_lines:
             f.write(line)
+    verify_cache_log(cache_fname = cache_fname)
+
+
+
 
 
 
