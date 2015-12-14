@@ -135,8 +135,8 @@ class TestCacheManipulation(TestCase):
         raise HalotoolsError("The update_metadata function is not implemented yet.")
 
     @pytest.mark.xfail
-    def test_regenerate_halo_table_cache_log(self):
-        raise HalotoolsError("The regenerate_halo_table_cache_log function is not implemented yet.")
+    def test_rebuild_halo_table_cache_log(self):
+        raise HalotoolsError("The rebuild_halo_table_cache_log function is not implemented yet.")
 
 
     @pytest.mark.xfail

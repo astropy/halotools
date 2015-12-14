@@ -60,7 +60,7 @@ def overwrite_halo_table_cache_log(new_log, **kwargs):
                 entry['halo_finder'], entry['version_name'], entry['fname'])
             f.write(newline)
 
-def regenerate_halo_table_cache_log(**kwargs):
+def rebuild_halo_table_cache_log(**kwargs):
     pass
 
 def read_halo_table_cache_log(**kwargs):
@@ -70,6 +70,7 @@ def read_halo_table_cache_log(**kwargs):
         cache_fname = kwargs['cache_fname']
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
+    verify_cache_log(**kwargs)
 
     if os.path.isfile(cache_fname):
         return Table.read(cache_fname, format = 'ascii')
@@ -78,21 +79,41 @@ def read_halo_table_cache_log(**kwargs):
             "does not exist. If you have not yet downloaded any of the halo catalogs\n"
             "provided by Halotools, do that now using the ``download_initial_halocat.py`` script,\n"
             "located in ``halotools/scripts``.\n"
-            "Otherwise, your cache log may have gotten accidentally deleted.\n"
+            "Otherwise, your cache log may have been accidentally deleted.\n"
             "First verify that your cache directory itself still exists:\n"
             +os.path.dirname(cache_fname) + "\n"
             "Also verify that the ``halo_tables`` sub-directory still contains your halo catalogs.\n"
-            "If that checks out, try running the ``regenerate_halo_table_cache_log`` function.\n")
+            "If that checks out, try running the ``rebuild_halo_table_cache_log`` function.\n")
         raise HalotoolsError(msg)
 
 
 def update_halo_table_cache_log(simname, redshift, 
     halo_finder, version_name, fname, **kwargs):
-    try:
-        cache_fname = kwargs['cache_fname']
-    except KeyError:
-        cache_fname = get_halo_table_cache_log_fname()
-    pass
+
+    if not os.path.isfile(fname):
+        msg = ("\nCannot update the cache log with a file named \n" + fname + "\n"
+            "because this file does not exist.\n"
+            "Be sure you are specifying an absolute path for the fname \n"
+            "and verify that the file is located where you think it is.\n")
+        raise HalotoolsError(msg)
+
+    table_entry = Table(
+        {'simname': simname, 'redshift': redshift, 
+        'halo_finder': halo_finder, 'version_name': version_name, 
+        'fname': fname})
+    check_metadata_consistency(table_entry)
+
+
+    remove_repeated_cache_lines(**kwargs)
+    log = read_halo_table_cache_log(**kwargs)
+
+    mask = np.ones(len(log), dtype = bool)
+    mask *= simname == log['simname']
+    mask *= halo_finder == log['halo_finder']
+    mask *= version_name == log['version_name']
+
+
+    mask *= redshift == log['redshift']
 
 
 def load_cached_halo_table_from_fname(fname, **kwargs):
@@ -121,12 +142,13 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
             "in the halo table cache log,\n"
             +cache_fname+"\nYou can add this catalog to your cache log by calling the\n"
             "``update_halo_table_cache_log`` function.\n")
-        warn(msg)
+        raise HalotoolsError(msg)
+
     elif len(matching_catalogs) == 1:
-            check_metadata_consistency(matching_catalogs)
-            fname = matching_catalogs['fname']
-            return Table.read(fname, path='data')
-        return Table.read(matching_catalogs['fname'][0], path='data')
+        check_metadata_consistency(matching_catalogs)
+        fname = matching_catalogs['fname'][0]
+        return Table.read(fname, path='data')
+
     else:
         # There are two or more cache log entries with the same exact filename
         # First try to resolve the problem by 
@@ -371,9 +393,13 @@ def halo_table_hdf5_has_matching_metadata(fname_halo_table, dz_tol = 0.05, **kwa
     return exact_match, close_redshift_match
     
 
-def verify_halo_table_cache_existence(cache_fname):
+def verify_halo_table_cache_existence(**kwargs):
     """
     """
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
 
     if not os.path.isfile(cache_fname):
         msg = ("\nThe file " + cache_fname + "\ndoes not exist. "
@@ -381,14 +407,22 @@ def verify_halo_table_cache_existence(cache_fname):
             "If you have not yet downloaded the initial halo catalog,\n"
             "you should do so now following the ``Getting Started`` instructions on "
             "http://halotools.readthedocs.org\nIf you have already taken this step,\n"
-            "then your halo table cache log has been deleted,\nin which case you should"
-            "execute the following script:\n"
-            "halotools/scripts/rebuild_halo_table_cache_log.py\n")
+            "first verify that your cache directory itself still exists:\n"
+            +os.path.dirname(cache_fname) + "\n"
+            "Also verify that the ``halo_tables`` sub-directory of the cache \n"
+            "still contains your halo catalogs.\n"
+            "If that checks out, try running the following script:\n"
+            "halotools/scripts/rebuild_halo_table_cache_log.py``\n")
         raise HalotoolsError(msg)
 
-def verify_halo_table_cache_header(cache_fname):
+def verify_halo_table_cache_header(**kwargs):
     """
     """
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
+
     verify_halo_table_cache_existence(cache_fname)
 
     correct_header = get_halo_table_cache_log_header()
@@ -466,6 +500,8 @@ def check_metadata_consistency(cache_log_entry):
         msg = ("There is no halo catalog with filename \n"+halo_table_fname+"\n")
         raise HalotoolsError(msg)
 
+    # Verify that the columns of the cache log agree with 
+    # the metadata stored in the hdf5 file (if present)
     cache_column_names_to_check = ('simname', 'halo_finder', 'version_name', 'redshift')
     for key in cache_column_names_to_check:
         requested_attr = cache_log_entry[key]
@@ -497,6 +533,27 @@ def check_metadata_consistency(cache_log_entry):
                 "attempted to access a halo catalog \nby requesting a value for "
                 "the ``"+key+"`` attribute that is inconsistent with the stored value.\n")
             raise HalotoolsError(msg)
+
+    try:
+        assert 'Lbox' in f.attrs.keys()
+        assert 'ptcl_mass' in f.attrs.keys()
+    except AssertionError:
+        msg = ("\nAll halo tables must contain metadata storing the "
+            "box size and particle mass of the simulation.\n"
+            "The halo table stored in the following location is missing this metadata:\n"
+            +halo_table_fname+"\n")
+        raise HalotoolsError(msg)
+
+    try:
+        d = f['data']
+        assert 'halo_id' in d.dtype.names
+        assert 'halo_x' in d.dtype.names
+        assert 'halo_y' in d.dtype.names
+        assert 'halo_z' in d.dtype.names
+    except AssertionError:
+        msg = ("\nAll halo tables must have the following columns:\n"
+            "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``\n")
+        raise HalotoolsError(msg)
 
     f.close()
 
