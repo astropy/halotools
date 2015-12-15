@@ -40,12 +40,14 @@ def verified_fname_generator():
     """
     for fname in potential_fnames:
         try:
-            verified_fname = manipulate_cache_log(fname)
+            verified_fname = manipulate_cache_log.return_halo_table_fname_after_verification(fname)
             yield verified_fname
         except:
+            print("Exception for " + fname)
             pass
 
 verified_fnames = list(verified_fname_generator())
+print("Number of verified names = " + str(len(verified_fnames)))
 
 if os.path.exists(fname_cache_log):
     os.system('rm ' + fname_cache_log)
