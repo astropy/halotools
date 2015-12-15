@@ -176,26 +176,34 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         Only one version exists. 
         One entry has mis-matched simname metadata. 
         """
+        #################### SETUP ####################
         scenario = 2
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'rockstar', 0.00004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'rockstar', 1.23456, 'halotools.alpha.version0', 
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'bdm', 0.010101, 'halotools.alpha.version0', 
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1], simname='marf')
 
+        # Now write the log file to disk using a dummy location so that the real cache is left alone
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
+
+        #################################################################
+        ##### First we perform tests passing in absolute fnames #####
 
         fname = updated_log['fname'][0]
         _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
@@ -209,6 +217,29 @@ class TestLoadCachedHaloTableFromFname(TestCase):
                 cache_fname = cache_fname)
         assert 'If you are using your own halo catalog' in err.value.message
 
+        #################################################################
+        ##### Now we perform various tests using the simname shorthands #####
+
+        # Pass in a complete set of metadata that disagrees with the 
+        # metadata stored in the hdf5 file
+        with pytest.raises(HalotoolsError) as err:
+            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+                cache_fname = cache_fname, 
+                simname = 'bolshoi', halo_finder = 'bdm', redshift = 0.01, 
+                version_name = 'halotools.alpha.version0')
+        assert 'You can make the correction as follows:' in err.value.message
+
+        ## Now verify that the proposed solution works
+        import h5py
+        fname = updated_log['fname'][-1]
+        f = h5py.File(fname)
+        f.attrs.create('simname', 'bolshoi')
+        f.close()
+
+        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            cache_fname = cache_fname, 
+            simname = 'bolshoi', halo_finder = 'bdm', redshift = 0.01, 
+            version_name = 'halotools.alpha.version0')
 
     def test_scenario3(self):
         """ There are two identical entries that differ only by a version name

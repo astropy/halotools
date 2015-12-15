@@ -152,7 +152,7 @@ def update_halo_table_cache_log(simname, redshift,
             "1. If the duplicate lines are obsolete, simply delete them from the log.\n\n"
             "2. If these lines correctly point to different versions of the same catalog, \n"
             "then you will need to resolve this ambiguity by using different version names \n"
-            "To do this, you should first metadata of the hdf5 file as follows:\n\n"
+            "To do this, you should first alter the metadata of the hdf5 file as follows:\n\n"
             ">>> f = h5py.File(fname)\n"
             ">>> f.attrs.create('version_name', 'my_new_version_name')\n"
             ">>> f.close()\n\n"
@@ -204,7 +204,9 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
         raise HalotoolsError(msg)
 
     elif len(matching_catalogs) == 1:
-        check_metadata_consistency(matching_catalogs[0])
+        idx = np.where(mask == True)[0]
+        linenum = idx[0] + 2
+        check_metadata_consistency(matching_catalogs[0], linenum = linenum)
         fname = matching_catalogs['fname'][0]
         return Table.read(fname, path='data')
 
@@ -339,7 +341,9 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
             raise HalotoolsError(msg)
 
     elif len(close_matches) == 1:
-        check_metadata_consistency(close_matches[0])
+        idx = np.where(close_match_mask == True)[0]
+        linenum = idx[0] + 2
+        check_metadata_consistency(close_matches[0], linenum = linenum)
         fname = close_matches['fname'][0]
         return Table.read(fname, path='data')
 
@@ -352,55 +356,55 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
         raise HalotoolsError(msg)
 
 
-def identify_fname_halo_table(**kwargs):
-    """
-    """
-    # If a cache location is explicitly specified, 
-    # use it instead of the standard location. 
-    # This facilitate unit-testing
-    try:
-        cache_fname = kwargs['cache_fname']
-    except KeyError:
-        cache_fname = get_halo_table_cache_log_fname()
+# def identify_fname_halo_table(**kwargs):
+#     """
+#     """
+#     # If a cache location is explicitly specified, 
+#     # use it instead of the standard location. 
+#     # This facilitate unit-testing
+#     try:
+#         cache_fname = kwargs['cache_fname']
+#     except KeyError:
+#         cache_fname = get_halo_table_cache_log_fname()
 
-    # If an input `fname` was passed, check that it exists and return it
-    if 'fname' in kwargs:
-        if not os.path.isfile(kwargs['fname']):
-            msg = ("\nThe requested filename ``" + kwargs['fname'] + "`` does not exist.\n")
-            raise HalotoolsError(msg)
-        else:
-            return kwargs['fname']
-    # We need to infer the fname from the metadata and cache log
-    else:
-        log = read_halo_table_cache_log(cache_fname)
-        mask = np.ones(len(log), dtype=bool)
+#     # If an input `fname` was passed, check that it exists and return it
+#     if 'fname' in kwargs:
+#         if not os.path.isfile(kwargs['fname']):
+#             msg = ("\nThe requested filename ``" + kwargs['fname'] + "`` does not exist.\n")
+#             raise HalotoolsError(msg)
+#         else:
+#             return kwargs['fname']
+#     # We need to infer the fname from the metadata and cache log
+#     else:
+#         log = read_halo_table_cache_log(cache_fname)
+#         mask = np.ones(len(log), dtype=bool)
 
-        catalog_attrs = ('simname', 'redshift', 'halo_finder', 'version_name')
-        for key in catalog_attrs:
-            try:
-                attr_mask = log[key] == kwargs[key]
-                mask *= attr_mask
-            except KeyError:
-                pass
-        matching_catalogs = log[mask]
+#         catalog_attrs = ('simname', 'redshift', 'halo_finder', 'version_name')
+#         for key in catalog_attrs:
+#             try:
+#                 attr_mask = log[key] == kwargs[key]
+#                 mask *= attr_mask
+#             except KeyError:
+#                 pass
+#         matching_catalogs = log[mask]
 
-        if len(matching_catalogs) == 0:
-            matching_halo_table_list = auto_detect_halo_table(**kwargs)
-            return matching_halo_table_list
-        elif len(matching_catalogs) == 1:
-            metadata = deepcopy(kwargs)
-            try:
-                del metadata['cache_fname']
-            except KeyError:
-                pass
-            check_metadata_consistency(matching_catalogs, **metadata)
-            return matching_catalogs['fname']
-        else:
-            msg = ("\nHalotools detected multiple halo catalogs matching "
-                "the input arguments.\nThe returned list provides the filenames"
-                "of all matching catalogs\n")
-            warn(msg)
-            return list(matching_catalogs['fname'])
+#         if len(matching_catalogs) == 0:
+#             matching_halo_table_list = auto_detect_halo_table(**kwargs)
+#             return matching_halo_table_list
+#         elif len(matching_catalogs) == 1:
+#             metadata = deepcopy(kwargs)
+#             try:
+#                 del metadata['cache_fname']
+#             except KeyError:
+#                 pass
+#             check_metadata_consistency(matching_catalogs, **metadata)
+#             return matching_catalogs['fname']
+#         else:
+#             msg = ("\nHalotools detected multiple halo catalogs matching "
+#                 "the input arguments.\nThe returned list provides the filenames"
+#                 "of all matching catalogs\n")
+#             warn(msg)
+#             return list(matching_catalogs['fname'])
 
 
 def auto_detect_matching_halo_tables(**kwargs):
@@ -606,7 +610,7 @@ def verify_cache_log(**kwargs):
     verify_halo_table_cache_header(**kwargs)
     verify_halo_table_cache_log_columns(**kwargs)
 
-def check_metadata_consistency(cache_log_entry):
+def check_metadata_consistency(cache_log_entry, linenum = None):
     """
     """
     try:
@@ -645,15 +649,35 @@ def check_metadata_consistency(cache_log_entry):
             warn(msg)
         except AssertionError:
             msg = ("\nThe halo table stored in \n``"+halo_table_fname+"\n"
-                "has the value ``"+attr_of_cached_catalog+"`` stored as metadata for the \n"
+                "has the value ``"+attr_of_cached_catalog+"`` stored as metadata for the "
                 "``"+key+"`` attribute.\nThis is inconsistent with the "
-                "``"+requested_attr+"`` value that you requested.\n"
+                "``"+requested_attr+"`` value that you requested,\n"
+                "which is also the value that appears in the log.\n"
                 "If you are seeing this message while attempting to load a \n"
                 "halo catalog provided by Halotools, please submit a bug report on GitHub.\n"
                 "If you are using your own halo catalog that you have stored \n"
                 "in the Halotools cache yourself, then you have "
                 "attempted to access a halo catalog \nby requesting a value for "
-                "the ``"+key+"`` attribute that is inconsistent with the stored value.\n")
+                "the ``"+key+"`` attribute that is inconsistent with the stored value.\n"
+                "You can rectify this problem in one of two ways.\n"
+                "1. If the correct value for the ``"+key+
+                "`` attribute is ``"+attr_of_cached_catalog+"``,\n"
+                "then you should open up the log and change "
+                "the ``"+key+"`` column to ``"+attr_of_cached_catalog+"``.\n")
+            if linenum is not None:
+                msg += "The relevant line to change is #" + str(linenum) + "\n"
+            else:
+                msg += ("The relevant line is the one with the ``fname`` column set to \n"
+                    +halo_table_fname+"\n")
+            msg += ("2. If the correct value for the ``"+key+
+                "`` attribute is ``"+requested_attr+"``,\n"
+                "then your hdf5 file has incorrect metadata that needs to be changed.\n"
+                "You can make the correction as follows:\n\n"
+                ">>> fname = '"+halo_table_fname+"'\n"
+                ">>> f = h5py.File(fname)\n"
+                ">>> f.attrs.create('"+key+"', '"+requested_attr+"')\n"
+                ">>> f.close()\n\n"
+                )
             raise HalotoolsError(msg)
 
     try:
