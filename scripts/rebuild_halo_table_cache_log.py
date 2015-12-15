@@ -3,7 +3,10 @@
 """Command-line script to rebuild the halo table cache log"""
 
 import argparse, os
+from astropy.table import Table
+
 from halotools.sim_manager import manipulate_cache_log
+
 
 fname_cache_log = manipulate_cache_log.get_halo_table_cache_log_fname()
 
@@ -42,7 +45,16 @@ def verified_fname_generator():
 
 verified_fnames = list(verified_fname_generator())
 
+try:
+    os.system('rm ' + fname_cache_log)
+except OSError:
+    pass
 
+new_log = Table()
+new_log['fname'] = verified_fnames
+for entry in new_log:
+    fname = entry['fname']
+    print(fname)
 
 
 
