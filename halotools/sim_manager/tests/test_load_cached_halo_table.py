@@ -357,6 +357,9 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             fname = updated_log['fname'][0], 
             cache_fname = cache_fname)
 
+        #################################################################
+        ##### Now we perform various tests using the simname shorthands #####
+
         # Load the first halo table with the correct simname arguments
         _ = manipulate_cache_log.load_cached_halo_table_from_simname(
             cache_fname = cache_fname, 
