@@ -271,6 +271,7 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
         cache_fname = kwargs['cache_fname']
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
+    remove_repeated_cache_lines(cache_fname=cache_fname)
     log = read_halo_table_cache_log(cache_fname=cache_fname)
 
     # Search for matching entries in the log
