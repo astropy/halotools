@@ -857,11 +857,185 @@ def remove_repeated_cache_lines(**kwargs):
     verify_cache_log(cache_fname = cache_fname)
 
 
+def store_new_halo_table_in_cache(halo_table, metadata_dict, **kwargs):
+    """
+    """
+    try:
+        assert type(halo_table) is Table
+    except AssertionError:
+        msg = ("\nThe input ``halo_table`` must be an Astropy Table object.\n")
+        raise HalotoolsError(msg)
+
+    # Verify that the metadata_dict has all the necessary keys
+    try:
+        simname = metadata_dict['simname']
+        halo_finder = metadata_dict['halo_finder']
+        redshift = metadata_dict['redshift']
+        version_name = metadata_dict['version_name']
+        fname = metadata_dict['fname']
+        Lbox = metadata_dict['Lbox']
+        ptcl_mass = metadata_dict['ptcl_mass']
+    except KeyError:
+        msg = ("\nThe input ``metadata_dict`` must have the following keys:\n"
+            "``simname``, ``halo_finder``, ``redshift``, ``version_name``, ``fname``, \n"
+            "``Lbox``, ``ptcl_mass``")
+        raise HalotoolsError(msg)
+
+    # The filename cannot already exist
+    if os.path.isfile(fname):
+        raise HalotoolsError("\nThe file named \n"
+            +fname+"\nalready exists. If you want to overwrite an existing halo catalog,\n"
+            "you must instead call the `overwrite_existing_halo_table_in_cache` function.\n")
+
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
+    verify_cache_log(cache_fname = cache_fname)
+    remove_repeated_cache_lines(cache_fname = cache_fname)
+    log = read_halo_table_cache_log(cache_fname = cache_fname)
+
+    # Make sure that the filename does not already appear in the log
+    mask = log['fname'] == fname
+    matching_entries = log[mask]
+    if len(matching_entries) == 0:
+        pass
+    elif len(matching_entries) == 1:
+        remove_unique_fname_from_halo_table_cache_log(fname, 
+            cache_fname=cache_fname)
+        log = read_halo_table_cache_log(cache_fname = cache_fname)
+    else:
+        msg = ("\nThe filename you are trying to store, \n"
+            +fname+"\nappears multiple times in the Halotools cache log,\n"
+            "with the different entries having mutually incompatible metadata.\n"
+            "Only one set of this metadata can be correct for a given filename.\n"
+            "You must first remedy this problem before you can proceed.\n"
+            "To do so, use a text editor to open the cache log, "
+            "which is stored at the following location:\n"
+            +cache_fname+"\nThen simply delete the line(s) storing incorrect metadata"
+            "The offending lines are #")
+        for entry in idx:
+            msg += str(entry) + ', '
+        msg += "\nwhere the first line of the log file is line #1.\n"
+        msg += "\nAlways save a backup version of the log before making manual changes.\n"
+        raise HalotoolsError(msg)
+
+    # At this point, we have ensured that the filename does not already exist 
+    # and will be a new log entry. Now we must verify the metadata that was passed in 
+    # is consistent with the halo table contents. 
+
+    try:
+        halo_id = halo_table['halo_id']
+        halo_x = halo_table['halo_x']
+        halo_y = halo_table['halo_y']
+        halo_z = halo_table['halo_z']
+    except KeyError:
+        msg = ("\nAll halo tables must at least have the following columns:\n"
+            "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``\n")
+        raise HalotoolsError(msg)
+
+    # Check that Lbox properly bounds the halo positions
+    try:
+        assert np.all(halo_x >= 0)
+        assert np.all(halo_y >= 0)
+        assert np.all(halo_z >= 0)
+        assert np.all(halo_x <= Lbox)
+        assert np.all(halo_y <= Lbox)
+        assert np.all(halo_z <= Lbox)
+    except AssertionError:
+        msg = ("\nThere are points in the input halo table that "
+            "lie outside [0, Lbox] in some dimension.\n")
+        raise HalotoolsError(msg)
+
+    # Check that halo_id column contains a set of unique entries
+    try:
+        num_halos = len(halo_table)
+        unique_halo_ids = list(set(halo_id))
+        num_unique_ids = len(unique_halo_ids)
+        assert num_halos == num_unique_ids
+    except AssertionError:
+        msg = ("\nThe ``halo_id`` column of your halo table must contain a unique integer "
+            "for every halo\n")
+        raise HalotoolsError(msg)
+
+    # The table appears to be kosher, so we write it to an hdf5 file, 
+    # add metadata, and update the log
+    halo_table.write(fname, path='data')
+
+    try:
+        import h5py
+    except ImportError:
+        raise HalotoolsError("\nYou must have h5py installed "
+            "in order to store a new halo catalog.\n")
+    f = h5py.File(fname)
+    for key, value in metadata_dict.iteritems():
+        f.attrs.create(key, value)
+    f.close()
+
+    new_table_entry = Table({'simname': [simname], 
+        'halo_finder': [halo_finder], 
+        'redshift': [redshift], 
+        'version_name': [version_name], 
+        'fname': [fname]}
+        )
+
+    new_log = table_vstack([log, new_table_entry])
+    overwrite_halo_table_cache_log(new_log, cache_fname = cache_fname)
 
 
 
+def remove_unique_fname_from_halo_table_cache_log(fname, 
+    raise_warning = False, **kwargs):
+    """
+    """
+
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_halo_table_cache_log_fname()
+    verify_cache_log(cache_fname = cache_fname)
+    remove_repeated_cache_lines(cache_fname = cache_fname)
+    log = read_halo_table_cache_log(cache_fname = cache_fname)
+
+    mask = log['fname'] == fname
+    matching_entries = log[mask]
+    if len(matching_entries) == 0:
+        if raise_warning == True:
+            msg = ("\nYou requested that the following fname be deleted \n"
+                "from the halo table cache log:\n"+fname+"\n"
+                "However, this filename does not appear in the log.\n"
+                "This is likely harmless, and if you do not wish to see this warning message,\n"
+                "just set the `raise_warning` keyword argument to False.\n")
+            warn(msg)
+        else:
+            pass
+    elif len(matching_entries) == 1:
+        new_log = log[~mask]
+        overwrite_halo_table_cache_log(new_log, cache_fname = cache_fname)
+    else:
+        idx = np.where(mask == True)[0] + 1
+        msg = ("\nYou requested that the following fname be deleted \n"
+            "from the halo table cache log:\n"+fname+"\n"
+            "However, this filename appears more than once in the log,\n"
+            "with the different entries having mutually incompatible metadata.\n"
+            "Only one set of this metadata can be correct for a given filename.\n"
+            "You must first remedy this problem before you can proceed.\n"
+            "To do so, use a text editor to open the cache log, "
+            "which is stored at the following location:\n"
+            +cache_fname+"\nThen simply delete the line(s) storing incorrect metadata"
+            "The offending lines are #")
+        for entry in idx:
+            msg += str(entry) + ', '
+        msg += "\nwhere the first line of the log file is line #1.\n"
+        msg += "\nAlways save a backup version of the log before making manual changes.\n"
+        raise HalotoolsError(msg)
 
 
+
+def overwrite_existing_halo_table_in_cache(halo_table, 
+    simname, halo_finder, redshift, version_name, fname, 
+    **kwargs):
+    pass
 
 
 
