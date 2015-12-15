@@ -224,10 +224,19 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
             fname = matching_catalogs['fname'][0]
             return Table.read(fname, path='data')
         elif len(matching_catalogs) > 1:
+            idx = np.where(mask == True)[0] + 1
             msg = ("\nThe filename you requested \n``"+fname+"``\n"
                 "appears multiple times in the halo table cache log,\n"
-                +cache_fname+"\nand the metadata stored by these repeated entries is inconsistent.\n"
-                "Use a text editor to open up the log and delete the incorrect lines.\n")
+                +"and the metadata stored by these repeated entries is mutually inconsistent.\n"
+                "Use a text editor to open up the log and delete the incorrect line(s).\n"
+                "The log is stored in the following location:\n"
+                +cache_fname+"\n"
+                "The offending lines  are #")
+            for entry in idx:
+                msg += str(entry) + ', '
+            msg += "\nwhere the first line of the log file is line #1.\n"
+            msg += "\nAlways save a backup version of the log before making manual changes.\n"
+
             raise HalotoolsError(msg)
 
 def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
