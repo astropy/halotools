@@ -58,6 +58,12 @@ def overwrite_halo_table_cache_log(new_log, **kwargs):
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
 
+    basename = os.path.dirname(cache_fname)
+    try:
+        os.makedirs(basename)
+    except OSError:
+        pass
+
     new_log.write(cache_fname, format='ascii')
 
 def rebuild_halo_table_cache_log(**kwargs):
@@ -215,9 +221,9 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
             fname = matching_catalogs['fname'][0]
             return Table.read(fname, path='data')
         elif len(matching_catalogs) > 1:
-            msg = ("The filename you requested ``"+fname+"``\n"
+            msg = ("\nThe filename you requested \n``"+fname+"``\n"
                 "appears multiple times in the halo table cache log,\n"
-                +cache_fname+"\n, and the metadata between these repeated entries is inconsistent.\n"
+                +cache_fname+"\nand the metadata stored by these repeated entries is inconsistent.\n"
                 "Use a text editor to open up the log and delete the incorrect lines.\n")
             raise HalotoolsError(msg)
 
