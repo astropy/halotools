@@ -389,7 +389,31 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
         linenum = idx[0] + 2
         check_metadata_consistency(close_matches[0], linenum = linenum)
         fname = close_matches['fname'][0]
-        return Table.read(fname, path='data')
+
+        # Check to make sure that for this filename, 
+        # the log does not contain duplicate entries 
+        # with mutually inconsistent metadata
+        all_fnames_in_log = log['fname']
+        fname_mask = fname == all_fnames_in_log
+        log_entries_with_matching_fnames = log[fname_mask]
+        if len(log_entries_with_matching_fnames) > 1:
+            idx = np.where(fname_mask == True)[0] + 1
+            msg = ("\nThe filename you requested \n``"+fname+"``\n"
+                "appears multiple times in the halo table cache log,\n"
+                +"and the metadata stored by these repeated entries is mutually inconsistent.\n"
+                "Use a text editor to open up the log and delete the incorrect line(s).\n"
+                "The log is stored in the following location:\n"
+                +cache_fname+"\n"
+                "The offending lines  are #")
+            for entry in idx:
+                msg += str(entry) + ', '
+            msg += "\nwhere the first line of the log file is line #1.\n"
+            msg += "\nAlways save a backup version of the log before making manual changes.\n"
+
+            raise HalotoolsError(msg)
+            # The log and file are clean, so load the catalog
+        else:
+            return Table.read(fname, path='data')
 
     else:
         msg = ("\nHalotools detected multiple halo catalogs matching "
@@ -751,7 +775,6 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
         raise HalotoolsError(msg)
 
     f.close()
-
 
 def check_halo_table_cache_for_nonexistent_files(delete_nonexistent_files=False, **kwargs):
     """ Function searches the halo table cache log for references to files that do not exist and (optionally) deletes them from the log. 
