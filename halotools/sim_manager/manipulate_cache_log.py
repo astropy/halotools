@@ -283,6 +283,13 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
     close_match_mask *= abs(log['redshift'] - redshift) < dz_tol
     close_matches = log[close_match_mask]
 
+    # Multiple version check mask
+    multiple_version_mask = np.ones(len(log), dtype=bool)
+    multiple_version_mask *= log['simname'] == simname
+    multiple_version_mask *= log['halo_finder'] == halo_finder
+    multiple_version_mask *= abs(log['redshift'] - redshift) < dz_tol
+    multi_version_matches = log[multiple_version_mask]
+
     def add_substring_to_msg(msg):
         if no_simname_argument is True:
             msg += ("simname = ``" + simname + 
@@ -321,7 +328,20 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
                 "but that you just need to add a line to the cache log so that \n"
                 "Halotools can remember this simulation in the future.\n"
                 "If that is the case, just open up the log, "
-                "add a line to it and call this function again.\n")
+                "add a line to it and call this function again.\n"
+                "Always save a backup version of the log before making manual changes.\n")
+            if len(multi_version_matches) > 0:
+                entry = multi_version_matches[0]
+                msg += ("\nAlternatively, you do have an alternate version of this catalog\n"
+                    "with a closely matching redshift:\n\n")
+                msg += "simname = ``" + entry['simname'] + "``\n"
+                msg += "halo_finder = ``" + entry['halo_finder'] + "``\n"
+                msg += "redshift = ``" + str(entry['redshift']) + "``\n"
+                msg += "version_name = ``" + entry['version_name'] + "``\n"
+                msg += "fname = ``" + entry['fname'] + "``\n\n"
+                msg += ("If this alternate version is the one you want, \n"
+                    "just change your function arguments accordingly.")
+
             raise HalotoolsError(msg)
         else:
             candidate_redshifts = matches_no_redshift_mask['redshift']
@@ -338,6 +358,19 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
                 "the closest available redshift is " + str(closest_redshift) + "\n"
                 "\nYou should either change your redshift argument \n"
                 "or download/process the catalog you need.\n")
+
+            if len(multi_version_matches) > 0:
+                entry = multi_version_matches[0]
+                msg += ("\nAlternatively, you do have an alternate version of this catalog\n"
+                    "with a closely matching redshift:\n\n")
+                msg += "simname = ``" + entry['simname'] + "``\n"
+                msg += "halo_finder = ``" + entry['halo_finder'] + "``\n"
+                msg += "redshift = ``" + str(entry['redshift']) + "``\n"
+                msg += "version_name = ``" + entry['version_name'] + "``\n"
+                msg += "fname = ``" + entry['fname'] + "``\n\n"
+                msg += ("If this alternate version is the one you want, \n"
+                    "just change your function arguments accordingly.")
+
             raise HalotoolsError(msg)
 
     elif len(close_matches) == 1:

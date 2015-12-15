@@ -59,11 +59,4 @@ class TestLoadCachedHaloTableFromSimname(TestCase):
 
 
 
-
-
-
-
-
-
-
         

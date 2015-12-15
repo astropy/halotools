@@ -242,31 +242,88 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             version_name = 'halotools.alpha.version0')
 
     def test_scenario3(self):
-        """ There are two identical entries that differ only by a version name
+        """ There are two entries that differ by both a redshift and a version name
         """
+        #################### SETUP ####################
         scenario = 3
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'rockstar', 0.004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'rockstar', 0.004, 'alpha.version1', 
+            'bolshoi', 'rockstar', 0.4, 'alpha.version1', 
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
+        # Now write the log file to disk using a dummy location so that the real cache is left alone
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
 
+        #################################################################
+        ##### First we perform tests passing in absolute fnames #####
+
+        # Load the first halo table with the correct arguments
         fname = updated_log['fname'][0]
         _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
             cache_fname = cache_fname)
 
+        # Load the second halo table with the correct arguments
         fname = updated_log['fname'][1]
         _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
             cache_fname = cache_fname)
+
+        #################################################################
+        ##### Now we perform various tests using the simname shorthands #####
+
+        # Load the first halo table with the correct arguments
+        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            cache_fname = cache_fname, 
+            simname = 'bolshoi', halo_finder = 'rockstar', redshift = 0.004, 
+            version_name = 'halotools.alpha.version0')
+
+        # Load the second halo table with the correct arguments
+        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            cache_fname = cache_fname, 
+            simname = 'bolshoi', halo_finder = 'rockstar', redshift = 0.4, 
+            version_name = 'alpha.version1')
+
+        # Load the first halo table with incorrect redshift that gives a suggested alternative
+        with pytest.raises(HalotoolsError) as err:
+            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+                cache_fname = cache_fname, 
+                simname = 'bolshoi', halo_finder = 'rockstar', redshift = 0.4, 
+                version_name = 'halotools.alpha.version0')
+        assert ('Alternatively, you do have an alternate version of this catalog' in 
+            err.value.message)
+        assert 'the closest available redshift is ' in err.value.message
+
+        # Load the first halo table with incorrect redshift but a correct version name
+        # this triggers the 'len(matches_no_redshift_mask) > 0' branch
+        with pytest.raises(HalotoolsError) as err:
+            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+                cache_fname = cache_fname, 
+                simname = 'bolshoi', halo_finder = 'rockstar', redshift = 4, 
+                version_name = 'halotools.alpha.version0')
+        assert ('Alternatively, you do have an alternate version of this catalog' not in 
+            err.value.message)
+        assert 'the closest available redshift is ' in err.value.message
+
+        # Load the first halo table with the correct redshift but a mis-spelled version name
+        # this triggers the 'if len(matches_no_redshift_mask) == 0' branch
+        with pytest.raises(HalotoolsError) as err:
+            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+                cache_fname = cache_fname, 
+                simname = 'bolshoi', halo_finder = 'rockstar', redshift = 0.4, 
+                version_name = 'halotools.alpersion0')
+        assert ('Alternatively, you do have an alternate version of this catalog' in 
+            err.value.message)
+        assert 'the closest available redshift is ' not in err.value.message
+
 
     def test_scenario4(self):
         """ There are two identical entries that differ only by a halo-finder
