@@ -60,7 +60,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             pass
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'rockstar', 0.00004, 'alpha.version0')
+            'bolshoi', 'rockstar', 0.00004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
         fname = updated_log['fname'][0]
@@ -83,7 +83,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         All entries have exactly matching metadata. 
         """
 
-        # first the setup
+        #################### SETUP ####################
         scenario = 1
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
@@ -105,9 +105,12 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
-        # Now write the log file to disk 
+        # Now write the log file to disk using a dummy location so that the real cache is left alone
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
+
+        #################################################################
+        ##### First we perform tests passing in absolute fnames #####
 
         # For each entry in the log, load the halo table into memory 
         # with an input fname taken directly from the log entry
@@ -178,16 +181,16 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'rockstar', 0.00004, 'alpha.version0')
+            'bolshoi', 'rockstar', 0.00004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'rockstar', 1.23456, 'alpha.version0', 
+            'bolshoi', 'rockstar', 1.23456, 'halotools.alpha.version0', 
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.010101, 'alpha.version0', 
+            'bolshoi', 'bdm', 0.010101, 'halotools.alpha.version0', 
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1], simname='marf')
 
@@ -215,7 +218,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'rockstar', 0.004, 'alpha.version0')
+            'bolshoi', 'rockstar', 0.004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
@@ -242,11 +245,11 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.004, 'alpha.version0')
+            'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'rockstar', 0.004, 'alpha.version0', 
+            'bolshoi', 'rockstar', 0.004, 'halotools.alpha.version0', 
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
@@ -269,11 +272,11 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.004, 'alpha.version0')
+            'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'rockstar', 0.004, 'alpha.version0', 
+            'bolshoi', 'rockstar', 0.004, 'halotools.alpha.version0', 
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
@@ -294,11 +297,11 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.004, 'alpha.version0')
+            'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.004, 'alpha.version0', 
+            'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0', 
             existing_table = updated_log)
         # Do not create another table as it already exists 
         
@@ -317,11 +320,11 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.004, 'alpha.version0')
+            'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[0])
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.004, 'alpha.version0', 
+            'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0', 
             existing_table = updated_log)
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
@@ -354,7 +357,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             pass
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.004, 'alpha.version0', 
+            'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0', 
             fname = os.path.join(alt_halo_table_loc, 'dummy_halo_table.hdf5'))
         helper_functions.create_halo_table_hdf5(updated_log[0])
 
@@ -379,7 +382,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             pass
 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.004, 'alpha.version0', 
+            'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0', 
             fname = os.path.join(alt_halo_table_loc, 'dummy_halo_table.hdf5'))
         helper_functions.create_halo_table_hdf5(updated_log[0])
 
@@ -398,7 +401,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
 
         # Now correct the log and ensure the error goes away
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
-            'bolshoi', 'bdm', 0.004, 'alpha.version0', 
+            'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0', 
             fname = os.path.join(alt_halo_table_loc, 'dummy_halo_table.hdf5'))
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
