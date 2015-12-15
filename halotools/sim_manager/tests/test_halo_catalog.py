@@ -15,7 +15,7 @@ from astropy.config.paths import _find_home
 
 from . import helper_functions 
 
-from .. import manipulate_cache_log
+from .. import manipulate_cache_log, halo_catalog
 
 from ...custom_exceptions import HalotoolsError
 
@@ -30,11 +30,13 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('TestLoadCachedHaloTableFromSimname', )
+__all__ = ('TestOverhauledHaloCatalog' )
 
-class TestLoadCachedHaloTableFromSimname(TestCase):
+
+class TestOverhauledHaloCatalog(TestCase):
     """ 
     """
+
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
@@ -45,10 +47,13 @@ class TestLoadCachedHaloTableFromSimname(TestCase):
         except OSError:
             pass
 
+    @pytest.mark.xfail
+    def test_default_load(self):
+        """ Verify that the default halo catalog loads. 
+        """
+        halocat = halo_catalog.OverhauledHaloCatalog()
 
 
 
 
 
-
-    
