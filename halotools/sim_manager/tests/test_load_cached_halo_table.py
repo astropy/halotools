@@ -521,32 +521,64 @@ class TestLoadCachedHaloTableFromFname(TestCase):
     def test_scenario7(self):
         """ There are entries in the log that point to nonexistent files. 
         """
+        #################### SETUP ####################
         scenario = 7
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[0])
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0', 
             existing_table = updated_log)
+        # Do not create a table as we need it to be non-existent 
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolplanck', 'bdm', 0.104, 'beta.version0', 
             existing_table = updated_log)
+        # Do not create a table as we need it to be non-existent 
 
+        # Now write the log file to disk using a dummy location so that the real cache is left alone
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
 
+        # The first file does exist and can be loaded from an explicit fname
         _ = manipulate_cache_log.load_cached_halo_table_from_fname(
             fname = updated_log['fname'][0], cache_fname = cache_fname)
 
+        # The first file does exist and can be loaded from metadata 
+        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            cache_fname = cache_fname, 
+            simname = updated_log['simname'][0], 
+            halo_finder = updated_log['halo_finder'][0], 
+            redshift = updated_log['redshift'][0], 
+            version_name = updated_log['version_name'][0], 
+            )
+
+        # The third file in the log does not exist 
+        # and an exception is raised when passing an explicit fname
         with pytest.raises(HalotoolsError) as err:
             _ = manipulate_cache_log.load_cached_halo_table_from_fname(
                 fname = updated_log['fname'][2], cache_fname = cache_fname)
-        assert 'does not exist' in err.value.message
+        assert 'located on an external disk that is' in err.value.message
+        assert 'You tried to load a halo catalog by' in err.value.message 
+
+        # The third file in the log does not exist 
+        # and an exception is raised when passing in metadata
+        with pytest.raises(HalotoolsError) as err:
+            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+                cache_fname = cache_fname, 
+                simname = updated_log['simname'][2], 
+                halo_finder = updated_log['halo_finder'][2], 
+                redshift = updated_log['redshift'][2], 
+                version_name = updated_log['version_name'][2], 
+                )
+        assert 'You requested to load a halo catalog' in err.value.message
 
     def test_scenario8(self):
         """ There is a halo table stored in a custom location.  

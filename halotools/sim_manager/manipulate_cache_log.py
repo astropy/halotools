@@ -170,10 +170,6 @@ def update_halo_table_cache_log(simname, redshift,
         raise HalotoolsError(msg)
 
 
-
-
-
-
 def load_cached_halo_table_from_fname(fname, **kwargs):
     """
     """
@@ -188,7 +184,11 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
     try:
         assert os.path.isfile(fname)
     except AssertionError:
-        msg = ("\nThe requested filename ``" + fname + "`` does not exist.\n")
+        msg = ("\nYou tried to load a halo catalog by "
+            "passing in the following explicit filename: \n\n" + fname + "\n\nThis file does not exist.\n"
+            "First check your spelling, remembering that the full absolute path is required.\n"
+            "If your input filename is as intended, the file has either been deleted or \n"
+            "is located on an external disk that is not currently plugged in.\n")
         raise HalotoolsError(msg)
 
     verify_cache_log(**kwargs)
