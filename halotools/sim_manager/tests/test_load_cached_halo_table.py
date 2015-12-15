@@ -579,14 +579,15 @@ class TestLoadCachedHaloTableFromFname(TestCase):
                 version_name = updated_log['version_name'][2], 
                 )
         assert 'You requested to load a halo catalog' in err.value.message
-
     def test_scenario8(self):
         """ There is a halo table stored in a custom location.  
         """
+        #################### SETUP ####################
         scenario = 8
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
+        # Create a custom location that differs from where the log is stored
         alt_halo_table_loc = os.path.join(
             helper_functions.dummy_cache_baseloc, 'alt_halo_table_loc')
         try:
@@ -594,16 +595,30 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         except OSError:
             pass
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0', 
             fname = os.path.join(alt_halo_table_loc, 'dummy_halo_table.hdf5'))
         helper_functions.create_halo_table_hdf5(updated_log[0])
 
+        # Now write the log file to disk using a dummy location so that the real cache is left alone
+        # The fact that alt_halo_table_loc is not a sub-directory of 
+        # os.path.dirname(cache_fname) is what makes this scenario different
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
 
+        # Verify that we can load the file when passing in an explicit fname
         _ = manipulate_cache_log.load_cached_halo_table_from_fname(
             fname = updated_log['fname'][0], cache_fname = cache_fname)
+
+        # Verify that we can load the file when passing in metadata
+        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            cache_fname = cache_fname, 
+            simname = updated_log['simname'][0], 
+            halo_finder = updated_log['halo_finder'][0],
+            redshift = updated_log['redshift'][0], 
+            version_name = updated_log['version_name'][0]        
+            )
 
     def test_scenario9(self):
         """ There are duplicate entries in the log that have mutually inconsistent data. 
