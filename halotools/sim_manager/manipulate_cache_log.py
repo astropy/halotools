@@ -648,7 +648,11 @@ def verify_halo_table_cache_log_columns(**kwargs):
     try:
         log = kwargs['log']
     except KeyError:
-        log = read_halo_table_cache_log(cache_fname = cache_fname)
+        try:
+            log = read_halo_table_cache_log(cache_fname = cache_fname)
+        except:
+            raise HalotoolsError("\nThe log file has become corrupted "
+                "and is not readable with astropy.table.Table.read()\n")
 
     correct_header = get_halo_table_cache_log_header()
     expected_key_set = set(['simname', 'redshift', 'halo_finder', 'fname', 'version_name'])
