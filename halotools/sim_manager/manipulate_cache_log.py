@@ -281,39 +281,43 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
     close_match_mask *= abs(log['redshift'] - redshift) < dz_tol
     close_matches = log[close_match_mask]
 
+    def add_substring_to_msg(msg):
+        if no_simname_argument is True:
+            msg += ("simname = ``" + simname + 
+                "`` (set by sim_defaults.default_simname)\n")
+        else:
+            msg += "simname = ``" + simname + "``\n"
+
+        if no_halo_finder_argument is True:
+            msg += ("halo_finder = ``" + halo_finder + 
+                "`` (set by sim_defaults.default_halo_finder)\n")
+        else:
+            msg += "halo_finder = ``" + halo_finder + "``\n"
+
+        if no_redshift_argument is True:
+            msg += ("redshift = ``" + str(redshift) + 
+                "`` (set by sim_defaults.default_redshift)\n")
+        else:
+            msg += "redshift = ``" + str(redshift) + "``\n"
+
+        if no_version_name_argument is True:
+            msg += ("version_name = ``" + str(version_name) + 
+                "`` (set by sim_defaults.default_version_name)\n")
+        else:
+            msg += "version_name = ``" + str(version_name) + "``\n"
+        return msg
+
     if len(close_matches) == 0:
         if len(matches_no_redshift_mask) == 0:
             msg = ("\nThe Halotools cache log ``"+cache_fname+"``\n"
                 "does not contain any entries matching your requested inputs.\n"
-                "First, double-check the spellings of your arguments:\n\n")
+                "First, the double-check that your arguments are as intended, including spelling:\n\n")
 
-            if no_simname_argument is True:
-                msg += ("simname = ``" + simname + 
-                    "`` (set by sim_defaults.default_simname)\n")
-            else:
-                msg += "simname = ``" + simname + "``\n"
-
-            if no_halo_finder_argument is True:
-                msg += ("halo_finder = ``" + halo_finder + 
-                    "`` (set by sim_defaults.default_halo_finder)\n")
-            else:
-                msg += "halo_finder = ``" + halo_finder + "``\n"
-
-            if no_redshift_argument is True:
-                msg += ("redshift = ``" + str(redshift) + 
-                    "`` (set by sim_defaults.default_redshift)\n")
-            else:
-                msg += "redshift = ``" + str(redshift) + "``\n"
-
-            if no_version_name_argument is True:
-                msg += ("version_name = ``" + str(version_name) + 
-                    "`` (set by sim_defaults.default_version_name)\n")
-            else:
-                msg += "version_name = ``" + str(version_name) + "``\n"
+            msg = add_substring_to_msg(msg)
 
             msg += ("\nIt is possible that you have spelled everything correctly, \n"
-                "but that you just need to add a line to the cache log \n"
-                "so that Halotools can remember this simulation in the future.\n"
+                "but that you just need to add a line to the cache log so that \n"
+                "Halotools can remember this simulation in the future.\n"
                 "If that is the case, just open up the log, "
                 "add a line to it and call this function again.\n")
             raise HalotoolsError(msg)
@@ -323,8 +327,15 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
                 abs(redshift - candidate_redshifts))]
             msg = ("\nThe Halotools cache log ``"+cache_fname+"``\n"
                 "does not contain any entries matching your requested inputs.\n"
-                "For the cached catalogs matching your other specifications, \n"
-                "the closest available redshift is " + str(closest_redshift) + "\n")
+                "First, the double-check that your arguments are as intended, including spelling:\n\n")
+
+            msg = add_substring_to_msg(msg)
+
+            msg += ("\nFor the cached catalogs matching your \n"
+                "``simname``, ``halo_finder`` and ``version_name`` specifications, \n"
+                "the closest available redshift is " + str(closest_redshift) + "\n"
+                "\nYou should either change your redshift argument \n"
+                "or download/process the catalog you need.\n")
             raise HalotoolsError(msg)
 
     elif len(close_matches) == 1:
