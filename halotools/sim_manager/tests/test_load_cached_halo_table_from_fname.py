@@ -107,7 +107,6 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
                 cache_fname = cache_fname)
 
-
     def test_scenario2(self):
         """ There is a one-to-one match between log entries and halo tables. 
         Only one version exists. 

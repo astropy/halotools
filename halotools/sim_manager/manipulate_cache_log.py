@@ -227,16 +227,40 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
                 "Use a text editor to open up the log and delete the incorrect lines.\n")
             raise HalotoolsError(msg)
 
-def load_cached_halo_table_from_simname(simname = sim_defaults.default_simname, 
-    redshift = sim_defaults.default_redshift, 
-    halo_finder = sim_defaults.default_halo_finder, 
-    version_name = sim_defaults.default_version_name, 
-    dz_tol = 0.05, **kwargs):
+def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
     """
     """
     if 'fname' in kwargs:
         raise HalotoolsError("\nIf you know the filename of the halo catalog,\n"
             "you should call the ``load_cached_halo_table_from_fname`` function instead.\n")
+
+    try:
+        simname = kwargs['simname']
+        no_simname_argument = False
+    except KeyError:
+        simname = sim_defaults.default_simname
+        no_simname_argument = True
+
+    try:
+        halo_finder = kwargs['halo_finder']
+        no_halo_finder_argument = False
+    except KeyError:
+        halo_finder = sim_defaults.default_halo_finder
+        no_halo_finder_argument = True
+
+    try:
+        redshift = kwargs['redshift']
+        no_redshift_argument = False
+    except KeyError:
+        redshift = sim_defaults.default_redshift
+        no_redshift_argument = True
+
+    try:
+        version_name = kwargs['version_name']
+        no_version_name_argument = False
+    except KeyError:
+        version_name = sim_defaults.default_version_name
+        no_version_name_argument = True
 
     # If a cache location is explicitly specified, 
     # use it instead of the standard location. 
@@ -245,7 +269,7 @@ def load_cached_halo_table_from_simname(simname = sim_defaults.default_simname,
         cache_fname = kwargs['cache_fname']
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
-    log = read_halo_table_cache_log(cache_fname)
+    log = read_halo_table_cache_log(cache_fname=cache_fname)
 
     # Search for matching entries in the log
     close_match_mask = np.ones(len(log), dtype=bool)
@@ -261,8 +285,33 @@ def load_cached_halo_table_from_simname(simname = sim_defaults.default_simname,
         if len(matches_no_redshift_mask) == 0:
             msg = ("\nThe Halotools cache log ``"+cache_fname+"``\n"
                 "does not contain any entries matching your requested inputs.\n"
-                "First, double-check your spellings.\n"
-                "It is possible that you have spelled everything correctly, \n"
+                "First, double-check the spellings of your arguments:\n\n")
+
+            if no_simname_argument is True:
+                msg += ("simname = ``" + simname + 
+                    "`` (set by sim_defaults.default_simname)\n")
+            else:
+                msg += "simname = ``" + simname + "``\n"
+
+            if no_halo_finder_argument is True:
+                msg += ("halo_finder = ``" + halo_finder + 
+                    "`` (set by sim_defaults.default_halo_finder)\n")
+            else:
+                msg += "halo_finder = ``" + halo_finder + "``\n"
+
+            if no_redshift_argument is True:
+                msg += ("redshift = ``" + str(redshift) + 
+                    "`` (set by sim_defaults.default_redshift)\n")
+            else:
+                msg += "redshift = ``" + str(redshift) + "``\n"
+
+            if no_version_name_argument is True:
+                msg += ("version_name = ``" + str(version_name) + 
+                    "`` (set by sim_defaults.default_version_name)\n")
+            else:
+                msg += "version_name = ``" + str(version_name) + "``\n"
+
+            msg += ("\nIt is possible that you have spelled everything correctly, \n"
                 "but that you just need to add a line to the cache log \n"
                 "so that Halotools can remember this simulation in the future.\n"
                 "If that is the case, just open up the log, "
@@ -279,7 +328,7 @@ def load_cached_halo_table_from_simname(simname = sim_defaults.default_simname,
             raise HalotoolsError(msg)
 
     elif len(close_matches) == 1:
-        check_metadata_consistency(close_matches)
+        check_metadata_consistency(close_matches[0])
         fname = close_matches['fname'][0]
         return Table.read(fname, path='data')
 
