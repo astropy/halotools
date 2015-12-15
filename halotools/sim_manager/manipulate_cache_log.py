@@ -192,6 +192,7 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
         raise HalotoolsError(msg)
 
     verify_cache_log(**kwargs)
+    remove_repeated_cache_lines(cache_fname=cache_fname)
     log = read_halo_table_cache_log(cache_fname=cache_fname)
     mask = log['fname'] == str(fname)
     matching_catalogs = log[mask]
