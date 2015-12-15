@@ -196,7 +196,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'bdm', 0.010101, 'halotools.alpha.version0', 
             existing_table = updated_log)
-        helper_functions.create_halo_table_hdf5(updated_log[-1], simname='marf')
+        helper_functions.create_halo_table_hdf5(updated_log[-1], simname='Jose Canseco')
 
         # Now write the log file to disk using a dummy location so that the real cache is left alone
         manipulate_cache_log.overwrite_halo_table_cache_log(
@@ -328,59 +328,136 @@ class TestLoadCachedHaloTableFromFname(TestCase):
     def test_scenario4(self):
         """ There are two identical entries that differ only by a halo-finder
         """
+        #################### SETUP ####################
         scenario = 4
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'rockstar', 0.004, 'halotools.alpha.version0', 
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
+        # Now write the log file to disk using a dummy location so that the real cache is left alone
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
 
+
+        #################################################################
+        ##### First we perform tests passing in absolute fnames #####
+
+        # Load the first halo table with the correct fname arguments
+        _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+            fname = updated_log['fname'][0], 
+            cache_fname = cache_fname)
+
+        # Load the first halo table with the correct simname arguments
+        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            cache_fname = cache_fname, 
+            simname = updated_log['simname'][0], 
+            halo_finder = updated_log['halo_finder'][0], 
+            redshift = updated_log['redshift'][0], 
+            version_name = updated_log['version_name'][0])
+
+        # Change the hdf5 metadata of entry 0 by swapping the version name from version 1
+        import h5py
+        f = h5py.File(updated_log['fname'][0])
+        f.attrs.create('halo_finder', updated_log['halo_finder'][1])
+        f.close()
+
+        # Verify that an error is raised when loading from input fname
+        with pytest.raises(HalotoolsError) as err:
+            _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+                fname = updated_log['fname'][0], 
+                cache_fname = cache_fname)
+        assert 'inconsistent with the ``bdm`` value that you requested' in err.value.message
+
+        # Verify that an error is raised when loading from input simname
+        with pytest.raises(HalotoolsError) as err:
+            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+                cache_fname = cache_fname, 
+                simname = updated_log['simname'][0], 
+                halo_finder = updated_log['halo_finder'][0], 
+                redshift = updated_log['redshift'][0], 
+                version_name = updated_log['version_name'][0])
+        assert 'inconsistent with the ``bdm`` value that you requested' in err.value.message
+
+
+        ## Now verify that the proposed solution works
+        import h5py
         fname = updated_log['fname'][0]
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
-            cache_fname = cache_fname)
+        f = h5py.File(fname)
+        f.attrs.create('halo_finder', 'bdm')
+        f.close()
 
-        fname = updated_log['fname'][1]
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
-            cache_fname = cache_fname)
+        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            cache_fname = cache_fname, 
+            simname = updated_log['simname'][0], 
+            halo_finder = updated_log['halo_finder'][0], 
+            redshift = updated_log['redshift'][0], 
+            version_name = updated_log['version_name'][0])
 
-    def test_scenario4(self):
+    def test_scenario5(self):
         """ A non-existent file is requested
         """
-        scenario = 4
+        #################### SETUP ####################
+        scenario = 5
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'bdm', 0.004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
+        # Create a new log entry and accompanying halo table 
         updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
             'bolshoi', 'rockstar', 0.004, 'halotools.alpha.version0', 
             existing_table = updated_log)
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
+        # Now write the log file to disk using a dummy location so that the real cache is left alone
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
 
+        # Verify that the appropriate exception is raised when passing in a nonsense fname
         with pytest.raises(HalotoolsError) as err:
-            fname = 'marf'
+            fname = 'Jose Canseco'
             _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
                 cache_fname = cache_fname)
         assert 'does not exist' in err.value.message
 
-    def test_scenario5(self):
+        # Verify that the file can be loaded from the correct simname 
+        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            cache_fname = cache_fname, 
+            simname = updated_log['simname'][0], 
+            halo_finder = updated_log['halo_finder'][0], 
+            redshift = updated_log['redshift'][0], 
+            version_name = updated_log['version_name'][0])
+
+        # Manually delete the file
+        os.system('rm ' + updated_log['fname'][0])
+
+        # Verify that the appropriate exception is raised now that the file is gone 
+        with pytest.raises(HalotoolsError) as err:
+            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+                cache_fname = cache_fname, 
+                simname = updated_log['simname'][0], 
+                halo_finder = updated_log['halo_finder'][0], 
+                redshift = updated_log['redshift'][0], 
+                version_name = updated_log['version_name'][0])
+        assert 'This file does not exist' in err.value.message
+
+    def test_scenario6(self):
         """ There are harmless duplicate entries in the log
         """
-        scenario = 5
+        scenario = 6
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
@@ -400,10 +477,10 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
             cache_fname = cache_fname)
 
-    def test_scenario6(self):
+    def test_scenario7(self):
         """ There are entries in the log that point to nonexistent files. 
         """
-        scenario = 6
+        scenario = 7
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
@@ -430,10 +507,10 @@ class TestLoadCachedHaloTableFromFname(TestCase):
                 fname = updated_log['fname'][2], cache_fname = cache_fname)
         assert 'does not exist' in err.value.message
 
-    def test_scenario7(self):
+    def test_scenario8(self):
         """ There is a halo table stored in a custom location.  
         """
-        scenario = 7
+        scenario = 8
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 
@@ -455,10 +532,10 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         _ = manipulate_cache_log.load_cached_halo_table_from_fname(
             fname = updated_log['fname'][0], cache_fname = cache_fname)
 
-    def test_scenario8(self):
+    def test_scenario9(self):
         """ There are duplicate entries in the log that have mutually inconsistent data. 
         """
-        scenario = 8
+        scenario = 9
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
 

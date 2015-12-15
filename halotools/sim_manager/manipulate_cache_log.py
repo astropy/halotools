@@ -656,7 +656,11 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
     if os.path.isfile(halo_table_fname):
         f = h5py.File(halo_table_fname)
     else:
-        msg = ("There is no halo catalog with filename \n"+halo_table_fname+"\n")
+        msg = ("\nYou requested to load a halo catalog "
+            "with the following filename: \n"+halo_table_fname+"\n"
+            "This file does not exist. \n"
+            "Either this file has been deleted, or it could just be stored \n"
+            "on an external disk that is currently not plugged in.\n")
         raise HalotoolsError(msg)
 
     # Verify that the columns of the cache log agree with 
@@ -691,18 +695,19 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
                 "If you are using your own halo catalog that you have stored \n"
                 "in the Halotools cache yourself, then you have "
                 "attempted to access a halo catalog \nby requesting a value for "
-                "the ``"+key+"`` attribute that is inconsistent with the stored value.\n"
-                "You can rectify this problem in one of two ways.\n"
+                "the ``"+key+"`` attribute that is inconsistent with the stored value.\n\n"
+                "You can rectify this problem in one of two ways:\n\n"
                 "1. If the correct value for the ``"+key+
                 "`` attribute is ``"+attr_of_cached_catalog+"``,\n"
                 "then you should open up the log and change "
                 "the ``"+key+"`` column to ``"+attr_of_cached_catalog+"``.\n")
             if linenum is not None:
-                msg += "The relevant line to change is #" + str(linenum) + "\n"
+                msg += "The relevant line to change is line #" + str(linenum) + ",\n"
+                msg += "where the first line of the log is line #1.\n"
             else:
                 msg += ("The relevant line is the one with the ``fname`` column set to \n"
                     +halo_table_fname+"\n")
-            msg += ("2. If the correct value for the ``"+key+
+            msg += ("\n2. If the correct value for the ``"+key+
                 "`` attribute is ``"+requested_attr+"``,\n"
                 "then your hdf5 file has incorrect metadata that needs to be changed.\n"
                 "You can make the correction as follows:\n\n"
