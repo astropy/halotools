@@ -5,7 +5,7 @@
 import argparse, os
 from astropy.table import Table
 
-from halotools.sim_manager import manipulate_cache_log
+from .halotools.sim_manager import manipulate_cache_log
 
 
 fname_cache_log = manipulate_cache_log.get_halo_table_cache_log_fname()
