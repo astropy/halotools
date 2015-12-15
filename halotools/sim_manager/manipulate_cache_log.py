@@ -170,7 +170,7 @@ def update_halo_table_cache_log(simname, redshift,
         raise HalotoolsError(msg)
 
 
-def load_cached_halo_table_from_fname(fname, **kwargs):
+def return_halo_table_fname_after_verification(fname, **kwargs):
     """
     """
     # If a cache location is explicitly specified, 
@@ -209,7 +209,7 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
         linenum = idx[0] + 2
         check_metadata_consistency(matching_catalogs[0], linenum = linenum)
         fname = matching_catalogs['fname'][0]
-        return Table.read(fname, path='data')
+        return fname
 
     else:
         # There are two or more cache log entries with the same exact filename
@@ -222,7 +222,7 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
         if len(matching_catalogs) == 1:
             check_metadata_consistency(matching_catalogs[0])
             fname = matching_catalogs['fname'][0]
-            return Table.read(fname, path='data')
+            return fname
         elif len(matching_catalogs) > 1:
             idx = np.where(mask == True)[0] + 1
             msg = ("\nThe filename you requested \n``"+fname+"``\n"
@@ -239,12 +239,12 @@ def load_cached_halo_table_from_fname(fname, **kwargs):
 
             raise HalotoolsError(msg)
 
-def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
+def return_halo_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
     """
     """
     if 'fname' in kwargs:
         raise HalotoolsError("\nIf you know the filename of the halo catalog,\n"
-            "you should call the ``load_cached_halo_table_from_fname`` function instead.\n")
+            "you should call the ``return_halo_table_fname_after_verification`` function instead.\n")
 
     try:
         simname = kwargs['simname']
@@ -413,7 +413,7 @@ def load_cached_halo_table_from_simname(dz_tol = 0.05, **kwargs):
             raise HalotoolsError(msg)
             # The log and file are clean, so load the catalog
         else:
-            return Table.read(fname, path='data')
+            return fname
 
     else:
         msg = ("\nHalotools detected multiple halo catalogs matching "

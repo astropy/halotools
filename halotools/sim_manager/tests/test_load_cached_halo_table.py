@@ -65,7 +65,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
 
         fname = updated_log['fname'][0]
         with pytest.raises(HalotoolsError):
-            _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+            _ = manipulate_cache_log.return_halo_table_fname_after_verification(
                 fname = fname, cache_fname = cache_fname)
 
         assert not os.path.isfile(cache_fname)
@@ -73,7 +73,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             updated_log, cache_fname = cache_fname)
         assert os.path.isfile(cache_fname)
 
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(
             fname = fname, cache_fname = cache_fname)
 
     @pytest.mark.skipif('not APH_MACHINE')
@@ -112,37 +112,37 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         #################################################################
         ##### First we perform tests passing in absolute fnames #####
 
-        # For each entry in the log, load the halo table into memory 
-        # with an input fname taken directly from the log entry
+        # Verify each entry in the log for an input  
+        # fname taken directly from the log entry
         for ii, entry in enumerate(updated_log):
             fname = entry['fname']
-            _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            _ = manipulate_cache_log.return_halo_table_fname_after_verification(fname = fname, 
                 cache_fname = cache_fname)
 
         #################################################################
         ##### Now we perform various tests using the simname shorthands #####
 
         # Pass in a complete, correct set of metadata
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = 'bolshoi', halo_finder = 'bdm', redshift = 0.01, 
             version_name = 'halotools.alpha.version0')
 
         # Pass in an incomplete-but-sufficient-and-correct set of metadata
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             halo_finder = 'bdm', redshift = 0.01, 
             version_name = 'halotools.alpha.version0')
 
         # Pass in a complete set of metadata with a slightly incorrect redshift
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = 'bolshoi', halo_finder = 'bdm', redshift = 0.02, 
             version_name = 'halotools.alpha.version0')
 
         # Pass in a complete set of metadata with a badly incorrect redshift
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = 'bolshoi', halo_finder = 'rockstar', redshift = 2., 
                 version_name = 'halotools.alpha.version0')
@@ -152,20 +152,20 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         assert '1.235' in err.value.message
 
         # Pass in a complete set of metadata with a slightly incorrect, negative redshift
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = 'bolshoi', halo_finder = 'bdm', redshift = -0.001, 
             version_name = 'halotools.alpha.version0')
 
         # Pass in a complete set of metadata with a matching default halo_finder
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = 'bolshoi', redshift = 1.25, 
             version_name = 'halotools.alpha.version0')
 
         # Pass in the wrong version name 
         with pytest.raises(HalotoolsError):
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = 'bolshoi', redshift = 1.25, 
                 version_name = 'halotools.beta.version0')
@@ -206,14 +206,14 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         ##### First we perform tests passing in absolute fnames #####
 
         fname = updated_log['fname'][0]
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(fname = fname, 
             cache_fname = cache_fname)
         fname = updated_log['fname'][1]
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(fname = fname, 
             cache_fname = cache_fname)
         with pytest.raises(HalotoolsError) as err:
             fname = updated_log['fname'][-1]
-            _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            _ = manipulate_cache_log.return_halo_table_fname_after_verification(fname = fname, 
                 cache_fname = cache_fname)
         assert 'If you are using your own halo catalog' in err.value.message
 
@@ -223,7 +223,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         # Pass in a complete set of metadata that disagrees with the 
         # metadata stored in the hdf5 file
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = 'bolshoi', halo_finder = 'bdm', redshift = 0.01, 
                 version_name = 'halotools.alpha.version0')
@@ -236,7 +236,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         f.attrs.create('simname', 'bolshoi')
         f.close()
 
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = 'bolshoi', halo_finder = 'bdm', redshift = 0.01, 
             version_name = 'halotools.alpha.version0')
@@ -267,34 +267,34 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         #################################################################
         ##### First we perform tests passing in absolute fnames #####
 
-        # Load the first halo table with the correct arguments
+        # Check the first halo table with the correct arguments
         fname = updated_log['fname'][0]
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(fname = fname, 
             cache_fname = cache_fname)
 
-        # Load the second halo table with the correct arguments
+        # Check the second halo table with the correct arguments
         fname = updated_log['fname'][1]
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(fname = fname, 
             cache_fname = cache_fname)
 
         #################################################################
         ##### Now we perform various tests using the simname shorthands #####
 
-        # Load the first halo table with the correct arguments
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        # Check the first halo table with the correct arguments
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = 'bolshoi', halo_finder = 'rockstar', redshift = 0.004, 
             version_name = 'halotools.alpha.version0')
 
-        # Load the second halo table with the correct arguments
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        # Check the second halo table with the correct arguments
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = 'bolshoi', halo_finder = 'rockstar', redshift = 0.4, 
             version_name = 'alpha.version1')
 
-        # Load the first halo table with incorrect redshift that gives a suggested alternative
+        # Check the first halo table with incorrect redshift that gives a suggested alternative
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = 'bolshoi', halo_finder = 'rockstar', redshift = 0.4, 
                 version_name = 'halotools.alpha.version0')
@@ -302,10 +302,10 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             err.value.message)
         assert 'the closest available redshift is ' in err.value.message
 
-        # Load the first halo table with incorrect redshift but a correct version name
+        # Check the first halo table with incorrect redshift but a correct version name
         # this triggers the 'len(matches_no_redshift_mask) > 0' branch
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = 'bolshoi', halo_finder = 'rockstar', redshift = 4, 
                 version_name = 'halotools.alpha.version0')
@@ -313,10 +313,10 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             err.value.message)
         assert 'the closest available redshift is ' in err.value.message
 
-        # Load the first halo table with the correct redshift but a mis-spelled version name
+        # Check the first halo table with the correct redshift but a mis-spelled version name
         # this triggers the 'if len(matches_no_redshift_mask) == 0' branch
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = 'bolshoi', halo_finder = 'rockstar', redshift = 0.4, 
                 version_name = 'halotools.alpersion0')
@@ -352,16 +352,16 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         #################################################################
         ##### First we perform tests passing in absolute fnames #####
 
-        # Load the first halo table with the correct fname arguments
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+        # Check the first halo table with the correct fname arguments
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(
             fname = updated_log['fname'][0], 
             cache_fname = cache_fname)
 
         #################################################################
         ##### Now we perform various tests using the simname shorthands #####
 
-        # Load the first halo table with the correct simname arguments
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        # Check the first halo table with the correct simname arguments
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = updated_log['simname'][0], 
             halo_finder = updated_log['halo_finder'][0], 
@@ -376,14 +376,14 @@ class TestLoadCachedHaloTableFromFname(TestCase):
 
         # Verify that an error is raised when loading from input fname
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+            _ = manipulate_cache_log.return_halo_table_fname_after_verification(
                 fname = updated_log['fname'][0], 
                 cache_fname = cache_fname)
         assert 'inconsistent with the ``bdm`` value that you requested' in err.value.message
 
         # Verify that an error is raised when loading from input simname
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = updated_log['simname'][0], 
                 halo_finder = updated_log['halo_finder'][0], 
@@ -399,7 +399,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         f.attrs.create('halo_finder', 'bdm')
         f.close()
 
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = updated_log['simname'][0], 
             halo_finder = updated_log['halo_finder'][0], 
@@ -432,12 +432,12 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         # Verify that the appropriate exception is raised when passing in a nonsense fname
         with pytest.raises(HalotoolsError) as err:
             fname = 'Jose Canseco'
-            _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+            _ = manipulate_cache_log.return_halo_table_fname_after_verification(fname = fname, 
                 cache_fname = cache_fname)
         assert 'does not exist' in err.value.message
 
         # Verify that the file can be loaded from the correct simname 
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = updated_log['simname'][0], 
             halo_finder = updated_log['halo_finder'][0], 
@@ -449,7 +449,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
 
         # Verify that the appropriate exception is raised now that the file is gone 
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = updated_log['simname'][0], 
                 halo_finder = updated_log['halo_finder'][0], 
@@ -486,7 +486,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         log = manipulate_cache_log.read_halo_table_cache_log(cache_fname = cache_fname)
         assert len(log) == 2
         fname = updated_log['fname'][1]
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(fname = fname, 
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(fname = fname, 
             cache_fname = cache_fname)
         log = manipulate_cache_log.read_halo_table_cache_log(cache_fname = cache_fname)
         assert len(log) == 1
@@ -506,8 +506,8 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         log2 = manipulate_cache_log.read_halo_table_cache_log(cache_fname = cache_fname)
         assert len(log2) == 2
 
-        # Load the first halo table with the correct simname arguments
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        # Check the first halo table with the correct simname arguments
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = log2['simname'][0], 
             halo_finder = log2['halo_finder'][0], 
@@ -548,11 +548,11 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             updated_log, cache_fname = cache_fname)
 
         # The first file does exist and can be loaded from an explicit fname
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(
             fname = updated_log['fname'][0], cache_fname = cache_fname)
 
         # The first file does exist and can be loaded from metadata 
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = updated_log['simname'][0], 
             halo_finder = updated_log['halo_finder'][0], 
@@ -563,7 +563,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         # The third file in the log does not exist 
         # and an exception is raised when passing an explicit fname
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+            _ = manipulate_cache_log.return_halo_table_fname_after_verification(
                 fname = updated_log['fname'][2], cache_fname = cache_fname)
         assert 'located on an external disk that is' in err.value.message
         assert 'You tried to load a halo catalog by' in err.value.message 
@@ -571,7 +571,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         # The third file in the log does not exist 
         # and an exception is raised when passing in metadata
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = updated_log['simname'][2], 
                 halo_finder = updated_log['halo_finder'][2], 
@@ -608,11 +608,11 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             updated_log, cache_fname = cache_fname)
 
         # Verify that we can load the file when passing in an explicit fname
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(
             fname = updated_log['fname'][0], cache_fname = cache_fname)
 
         # Verify that we can load the file when passing in metadata
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = updated_log['simname'][0], 
             halo_finder = updated_log['halo_finder'][0],
@@ -656,12 +656,12 @@ class TestLoadCachedHaloTableFromFname(TestCase):
 
         # Verify that we catch the error when passing in an fname
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+            _ = manipulate_cache_log.return_halo_table_fname_after_verification(
                 fname = updated_log['fname'][0], cache_fname = cache_fname)
         assert 'appears multiple times in the halo table cache log,' in err.value.message
 
         with pytest.raises(HalotoolsError) as err:
-            _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+            _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
                 cache_fname = cache_fname, 
                 simname = updated_log['simname'][0], 
                 halo_finder = updated_log['halo_finder'][0], 
@@ -678,11 +678,11 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             updated_log, cache_fname = cache_fname)
 
         # Passing in an fname should work now
-        _ = manipulate_cache_log.load_cached_halo_table_from_fname(
+        _ = manipulate_cache_log.return_halo_table_fname_after_verification(
             fname = updated_log['fname'][0], cache_fname = cache_fname)
 
         # Passing in metadata should also work now
-        _ = manipulate_cache_log.load_cached_halo_table_from_simname(
+        _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
             simname = updated_log['simname'][0], 
             halo_finder = updated_log['halo_finder'][0], 
