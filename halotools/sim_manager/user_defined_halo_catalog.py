@@ -29,12 +29,12 @@ class UserDefinedHaloCatalog(object):
         """
         Parameters 
         ------------
-        *metadata : dict 
+        **metadata : float or string 
             Keyword arguments storing catalog metadata. Both `Lbox` and `ptcl_mass` 
             are required and must be in Mpc/h and Msun/h units, respectively. 
             See Examples section for further notes. 
 
-        *halo_catalog_columns : sequence of arrays 
+        **halo_catalog_columns : sequence of arrays 
             Sequence of length-*Nhalos* arrays passed in as keyword arguments. 
 
             Each key will be the column name attached to the input array. 
@@ -44,6 +44,7 @@ class UserDefinedHaloCatalog(object):
             as well as columns 'halo_x', 'halo_y' and 'halo_z'. 
             There must also be some additional mass-like variable, 
             for which you can use any name that begins with 'halo_'
+            See Examples section for further notes. 
 
         ptcl_table : table, optional 
             Astropy `~astropy.table.Table` object storing dark matter particles 
@@ -54,6 +55,37 @@ class UserDefinedHaloCatalog(object):
         -------
         This class is tested by 
         `~halotools.sim_manager.tests.test_user_defined_halo_catalog.TestUserDefinedHaloCatalog`. 
+
+        Examples 
+        ----------
+        Here is an example using dummy data to show how to create a new `UserDefinedHaloCatalog` 
+        instance from from your own halo catalog. First the setup:
+
+        >>> Lbox = 250.
+        >>> ptcl_mass = 1e9
+        >>> num_halos = 100
+        >>> x = np.random.uniform(0, Lbox, num_halos)
+        >>> y = np.random.uniform(0, Lbox, num_halos)
+        >>> z = np.random.uniform(0, Lbox, num_halos)
+        >>> mass = np.random.uniform(1e12, 1e15, num_halos)
+        >>> ids = np.arange(0, num_halos)
+
+        Now we simply pass in both the metadata and the halo catalog columns as keyword arguments:
+
+        >>> halo_catalog = UserDefinedHaloCatalog(Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+
+        If you wish to pass in additional metadata, just include additional keywords:
+
+        >>> simname = 'my_personal_sim'
+
+        >>> halo_catalog = UserDefinedHaloCatalog(simname = simname, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+
+        Similarly, if you wish to include additional columns for your halo catalog, 
+        Halotools is able to tell the difference between metadata and columns of halo data:
+
+        >>> spin = np.random.uniform(0, 0.2, num_halos)
+        >>> halo_catalog = UserDefinedHaloCatalog(halo_spin = spin, simname = simname, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+
 
         """
         halo_table_dict, metadata_dict = self._parse_constructor_kwargs(**kwargs)
