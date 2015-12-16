@@ -35,12 +35,18 @@ potential_fnames = fnames_in_existing_log()
 potential_fnames.extend(list(halo_table_fnames_in_standard_cache()))
 potential_fnames = list(set(potential_fnames))
 
+
+
+#fname='/Users/aphearin/.astropy/cache/halotools/halo_catalogs/consuelo/rockstar/hlist_1.00000.list.halotools.alpha.version0.hdf5'
+#manipulate_cache_log.verify_file_storing_unrecognized_halo_table(fname)
+
+
 def verified_fname_generator():
     """
     """
     for fname in potential_fnames:
         try:
-            verified_fname = manipulate_cache_log.return_halo_table_fname_after_verification(fname)
+            verified_fname = manipulate_cache_log.verify_file_storing_unrecognized_halo_table(fname)
             yield verified_fname
         except:
             print("Exception for " + fname)
