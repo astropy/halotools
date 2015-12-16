@@ -16,6 +16,7 @@ from astropy.config.paths import _find_home
 from . import helper_functions 
 
 from .. import manipulate_cache_log, halo_catalog
+from ..user_defined_halo_catalog import UserDefinedHaloCatalog
 
 from ...custom_exceptions import HalotoolsError
 
@@ -47,6 +48,21 @@ class TestStoreNewHaloTable(TestCase):
         except OSError:
             pass
 
+        self.Nhalos = 1e2
+        self.Lbox = 100
+        self.halo_x = np.linspace(0, self.Lbox, self.Nhalos)
+        self.halo_y = np.linspace(0, self.Lbox, self.Nhalos)
+        self.halo_z = np.linspace(0, self.Lbox, self.Nhalos)
+        self.halo_mass = np.logspace(10, 15, self.Nhalos)
+        self.halo_id = np.arange(0, self.Nhalos)
+        self.good_halocat_args = (
+            {'halo_x': self.halo_x, 'halo_y': self.halo_y, 
+            'halo_z': self.halo_z, 'halo_id': self.halo_id, 'halo_mass': self.halo_mass}
+            )
+
     def test_basic_behavior(self):
+        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            **self.good_halocat_args)
+
         raise HalotoolsError("Pick up here next time")
         
