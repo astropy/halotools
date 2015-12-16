@@ -710,6 +710,7 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
         try:
             attr_of_cached_catalog = f.attrs[key]
             if key == 'redshift':
+                assert type(attr_of_cached_catalog) == type(requested_attr)
                 assert abs(requested_attr - attr_of_cached_catalog) < 0.01
             else:
                 assert attr_of_cached_catalog == requested_attr
@@ -725,9 +726,9 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
             warn(msg)
         except AssertionError:
             msg = ("\nThe halo table stored in \n``"+halo_table_fname+"\n"
-                "has the value ``"+attr_of_cached_catalog+"`` stored as metadata for the "
+                "has the value ``"+str(attr_of_cached_catalog)+"`` stored as metadata for the "
                 "``"+key+"`` attribute.\nThis is inconsistent with the "
-                "``"+requested_attr+"`` value that you requested,\n"
+                "``"+str(requested_attr)+"`` value that you requested,\n"
                 "which is also the value that appears in the log.\n"
                 "If you are seeing this message while attempting to load a \n"
                 "halo catalog provided by Halotools, please submit a bug report on GitHub.\n"
@@ -737,9 +738,9 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
                 "the ``"+key+"`` attribute that is inconsistent with the stored value.\n\n"
                 "You can rectify this problem in one of two ways:\n\n"
                 "1. If the correct value for the ``"+key+
-                "`` attribute is ``"+attr_of_cached_catalog+"``,\n"
+                "`` attribute is ``"+str(attr_of_cached_catalog)+"``,\n"
                 "then you should open up the log and change "
-                "the ``"+key+"`` column to ``"+attr_of_cached_catalog+"``.\n")
+                "the ``"+key+"`` column to ``"+str(attr_of_cached_catalog)+"``.\n")
             if linenum is not None:
                 msg += "The relevant line to change is line #" + str(linenum) + ",\n"
                 msg += "where the first line of the log is line #1.\n"
@@ -747,12 +748,12 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
                 msg += ("The relevant line is the one with the ``fname`` column set to \n"
                     +halo_table_fname+"\n")
             msg += ("\n2. If the correct value for the ``"+key+
-                "`` attribute is ``"+requested_attr+"``,\n"
+                "`` attribute is ``"+str(requested_attr)+"``,\n"
                 "then your hdf5 file has incorrect metadata that needs to be changed.\n"
                 "You can make the correction as follows:\n\n"
                 ">>> fname = '"+halo_table_fname+"'\n"
                 ">>> f = h5py.File(fname)\n"
-                ">>> f.attrs.create('"+key+"', '"+requested_attr+"')\n"
+                ">>> f.attrs.create('"+key+"', '"+str(requested_attr)+"')\n"
                 ">>> f.close()\n\n"
                 )
             raise HalotoolsError(msg)
