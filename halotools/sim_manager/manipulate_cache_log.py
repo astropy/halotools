@@ -747,13 +747,18 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
             else:
                 msg += ("The relevant line is the one with the ``fname`` column set to \n"
                     +halo_table_fname+"\n")
+
+            if (type(requested_attr) == str) or (type(requested_attr) == unicode):
+                attr_msg = "'"+str(requested_attr)+"'"
+            else:
+                attr_msg = str(requested_attr)
             msg += ("\n2. If the correct value for the ``"+key+
                 "`` attribute is ``"+str(requested_attr)+"``,\n"
                 "then your hdf5 file has incorrect metadata that needs to be changed.\n"
                 "You can make the correction as follows:\n\n"
                 ">>> fname = '"+halo_table_fname+"'\n"
                 ">>> f = h5py.File(fname)\n"
-                ">>> f.attrs.create('"+key+"', '"+str(requested_attr)+"')\n"
+                ">>> f.attrs.create('"+key+"', "+attr_msg+")\n"
                 ">>> f.close()\n\n"
                 )
             raise HalotoolsError(msg)
@@ -1070,10 +1075,17 @@ def verify_file_storing_unrecognized_halo_table(fname):
         msg = ("\nThe hdf5 file storing the halos must have the following metadata:\n"
             "``simname``, ``halo_finder``, ``redshift``, ``version_name``, ``fname``, "
             "``Lbox``, ``ptcl_mass``\n"
-            "Metadata for hdf5 files can be added using the following syntax:\n\n"
+            "Here is an example of how to add metadata "
+            "for hdf5 files can be added using the following syntax:\n\n"
             ">>> f = h5py.File(fname)\n"
             ">>> f.attrs.create('simname', simname)\n"
-            ">>> f.close()\n")
+            ">>> f.close()\n\n"
+            "Be sure to use string-valued variables for the following inputs:\n"
+            "``simname``, ``halo_finder``, ``version_name`` and ``fname``,\n"
+            "and floats for the following inputs:\n"
+            "``redshift``, ``Lbox`` (in Mpc/h)  ``ptcl_mass`` (in Msun/h)\n"
+            )
+
         raise HalotoolsError(msg)
 
     try:
