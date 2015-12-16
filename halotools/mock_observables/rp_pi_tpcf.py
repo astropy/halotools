@@ -270,9 +270,7 @@ def rp_pi_tpcf(sample1, rp_bins, pi_bins, sample2=None, randoms=None,
                                   num_threads=num_threads,\
                                   approx_cell1_size=approx_cell1_size,\
                                   approx_cell2_size=approx_cell2_size)
-                print(np.shape(D1D2))
                 D1D2 = np.diff(np.diff(D1D2,axis=0),axis=1)
-                print(np.shape(D1D2))
             else: D1D2=None
             if do_auto==True:
                 D2D2 = xy_z_npairs(sample2, sample2, rp_bins, pi_bins, period=period,\
