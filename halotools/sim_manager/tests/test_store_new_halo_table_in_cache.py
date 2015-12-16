@@ -87,13 +87,20 @@ class TestStoreNewHaloTable(TestCase):
             fname = temp_fname
             )
 
-        # Load the newly created table
+        # Load the newly created table using a simname
         loaded_halocat = OverhauledHaloCatalog(
             simname = 'fakesim', halo_finder = 'fake_halo_finder',
             redshift = 0.0, version_name = 'phony_version', 
             cache_fname = cache_fname)
         assert loaded_halocat.redshift == 0.0
         assert hasattr(loaded_halocat, 'halo_table')
+
+        # Load the newly created table using an explicit fname
+        loaded_halocat2 = OverhauledHaloCatalog(
+            fname = temp_fname, cache_fname = cache_fname)
+        assert loaded_halocat2.redshift == 0.0
+        assert hasattr(loaded_halocat2, 'halo_table')
+
 
 
     def tearDown(self):
