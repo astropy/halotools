@@ -424,55 +424,6 @@ def return_halo_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
         raise HalotoolsError(msg)
 
 
-# def identify_fname_halo_table(**kwargs):
-#     """
-#     """
-#     # If a cache location is explicitly specified, 
-#     # use it instead of the standard location. 
-#     # This facilitate unit-testing
-#     try:
-#         cache_fname = kwargs['cache_fname']
-#     except KeyError:
-#         cache_fname = get_halo_table_cache_log_fname()
-
-#     # If an input `fname` was passed, check that it exists and return it
-#     if 'fname' in kwargs:
-#         if not os.path.isfile(kwargs['fname']):
-#             msg = ("\nThe requested filename ``" + kwargs['fname'] + "`` does not exist.\n")
-#             raise HalotoolsError(msg)
-#         else:
-#             return kwargs['fname']
-#     # We need to infer the fname from the metadata and cache log
-#     else:
-#         log = read_halo_table_cache_log(cache_fname)
-#         mask = np.ones(len(log), dtype=bool)
-
-#         catalog_attrs = ('simname', 'redshift', 'halo_finder', 'version_name')
-#         for key in catalog_attrs:
-#             try:
-#                 attr_mask = log[key] == kwargs[key]
-#                 mask *= attr_mask
-#             except KeyError:
-#                 pass
-#         matching_catalogs = log[mask]
-
-#         if len(matching_catalogs) == 0:
-#             matching_halo_table_list = auto_detect_halo_table(**kwargs)
-#             return matching_halo_table_list
-#         elif len(matching_catalogs) == 1:
-#             metadata = deepcopy(kwargs)
-#             try:
-#                 del metadata['cache_fname']
-#             except KeyError:
-#                 pass
-#             check_metadata_consistency(matching_catalogs, **metadata)
-#             return matching_catalogs['fname']
-#         else:
-#             msg = ("\nHalotools detected multiple halo catalogs matching "
-#                 "the input arguments.\nThe returned list provides the filenames"
-#                 "of all matching catalogs\n")
-#             warn(msg)
-#             return list(matching_catalogs['fname'])
 
 
 def auto_detect_matching_halo_tables(**kwargs):
@@ -865,7 +816,8 @@ def remove_repeated_cache_lines(**kwargs):
     verify_cache_log(cache_fname = cache_fname)
 
 
-def store_new_halo_table_in_cache(halo_table, **metadata):
+def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False, 
+    **metadata):
     """
     """
     try:
@@ -926,13 +878,17 @@ def store_new_halo_table_in_cache(halo_table, **metadata):
     remove_repeated_cache_lines(cache_fname = cache_fname)
     log = read_halo_table_cache_log(cache_fname = cache_fname)
 
+    # There is no need for any of the following checks if this is the first catalog stored
     if first_halo_table_in_cache is False:
+
         # Make sure that the filename does not already appear in the log
-        mask = log['fname'] == fname
-        matching_entries = log[mask]
-        if len(matching_entries) == 0:
+        exact_match_mask, close_match_mask = (
+            search_log_for_possibly_existing_entry(log, fname = fname)
+            )
+        exactly_matching_entries = log[exact_match_mask]
+        if len(exactly_matching_entries) == 0:
             pass
-        elif len(matching_entries) == 1:
+        elif len(exactly_matching_entries) == 1:
             remove_unique_fname_from_halo_table_cache_log(fname, 
                 cache_fname=cache_fname)
             log = read_halo_table_cache_log(cache_fname = cache_fname)
@@ -952,8 +908,49 @@ def store_new_halo_table_in_cache(halo_table, **metadata):
             msg += "\nAlways save a backup version of the log before making manual changes.\n"
             raise HalotoolsError(msg)
 
+        # Now make sure that there is no log entry with the same metadata 
+        exact_match_mask, close_match_mask = (
+            search_log_for_possibly_existing_entry(log, 
+                simname = simname, halo_finder = halo_finder, 
+                redshift = redshift, version_name = version_name)
+            )
+        exactly_matching_entries = log[exact_match_mask]
+        closely_matching_entries = log[close_match_mask]
+        if len(closely_matching_entries) == 0:
+            pass
+        else:
+            if len(exactly_matching_entries) == 0:
+                if ignore_nearby_redshifts == True:
+                    pass
+                else:
+                    msg = ("\nThere already exists a halo catalog in cache \n"
+                        "with the same metadata as the catalog you are trying to store, \n"
+                        "and a very similar redshift. The closely matching"
+                        "halo catalog has the following filename:\n"
+                        +closely_matching_entries['fname'][0]+"\n"
+                        "If you want to proceed anyway, you must set the \n"
+                        "``ignore_nearby_redshifts`` keyword argument to ``True``.\n"
+                        )
+                    raise HalotoolsError(msg)
+            else:
+                msg = ("\nThere is already a halo catalog in your cache log with metdata \n"
+                    "that exactly matches the metadata of the catalog you are trying to store.\n"
+                    "The filename of this matching halo catalog is:\n\n"
+                    +exactly_matching_entries['fname'][0]+"\n\n"
+                    "If this log entry is spurious, you should open the log \n"
+                    "with a text editor and delete the offending line.\n"
+                    "The log is stored at the following filename:\n\n"
+                    +cache_fname+"\n\n"
+                    "If this matching halo catalog is one you want to continue keeping track of, \n"
+                    "then you should change the ``version_name`` \nof the halo catalog "
+                    "you are trying to store.\n"
+                    )
+                raise HalotoolsError(msg)
+
+
     # At this point, we have ensured that the filename does not already exist 
-    # and will be a new log entry. Now we must verify the metadata that was passed in 
+    # and it is safe to consider it as a new log entry. 
+    # Now we must verify the metadata that was passed in 
     # is consistent with the halo table contents. 
 
     try:
@@ -1162,7 +1159,22 @@ def verify_file_storing_unrecognized_halo_table(fname):
 
     return fname
 
+def search_log_for_possibly_existing_entry(log, dz_tol = 0.05, **entries_to_check):
+    """
+    """
+    exact_match_mask = np.ones(len(log), dtype = bool)
+    close_match_mask = np.ones(len(log), dtype = bool)
 
+    for key, value in entries_to_check.iteritems():
+        exact_match_mask *= log[key] == value
+
+    for key, value in entries_to_check.iteritems():
+        if key == 'redshift':
+            close_match_mask *= abs(log[key] - value) < dz_tol
+        else:
+            close_match_mask *= log[key] == value
+
+    return exact_match_mask, close_match_mask
 
 
 

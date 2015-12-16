@@ -151,10 +151,8 @@ class TestStoreNewHaloTable(TestCase):
 
     def test_scenario2(self):
         """ There is an existing halo table stored in cache. 
-        We will attempt to store a identical halo table with a different fname.
+        We will attempt to store a identical halo table with the same metadata but a different fname.
         """
-
-
         #################### SETUP ####################
         scenario = 2
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
@@ -184,19 +182,17 @@ class TestStoreNewHaloTable(TestCase):
                 Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
                 fname = temp_fname2
                 )
+        substr = 'If this matching halo catalog is one you want to continue keeping track of'
+        assert substr in err.value.message
 
-        # # Load the two halo tables 
-        # halocat1 = OverhauledHaloCatalog(
-        #     simname = 'fakesim', halo_finder = 'fake_halo_finder',
-        #     redshift = 0.0, version_name = 'phony_version', 
-        #     cache_fname = cache_fname)
-        # halocat2 = OverhauledHaloCatalog(
-        #     simname = 'fakesim', halo_finder = 'fake_halo_finder',
-        #     redshift = 1.0, version_name = 'phony_version', 
-        #     cache_fname = cache_fname)
-
-        # assert halocat2.redshift == 1.0
-        # assert halocat1.redshift == 0.0
+        # Now verify that the solution proposed by the error message does indeed resolve the problem
+        manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
+            cache_fname = cache_fname, 
+            simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+            redshift = 0.0, version_name = 'phony_version2', 
+            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            fname = temp_fname2
+            )
 
 
     def tearDown(self):
