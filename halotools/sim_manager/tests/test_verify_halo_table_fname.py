@@ -149,7 +149,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         assert 'closest available redshift is' in err.value.message
         assert '0.0' not in err.value.message
         assert '2.0' in err.value.message
-        assert '1.235' in err.value.message
+        assert '1.234' in err.value.message
 
         # Pass in a complete set of metadata with a slightly incorrect, negative redshift
         _ = manipulate_cache_log.return_halo_table_fname_from_simname_inputs(
