@@ -710,7 +710,6 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
         try:
             attr_of_cached_catalog = f.attrs[key]
             if key == 'redshift':
-                assert type(attr_of_cached_catalog) == type(requested_attr)
                 assert abs(requested_attr - attr_of_cached_catalog) < 0.01
             else:
                 assert attr_of_cached_catalog == requested_attr
@@ -760,6 +759,9 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
                 ">>> f = h5py.File(fname)\n"
                 ">>> f.attrs.create('"+key+"', "+attr_msg+")\n"
                 ">>> f.close()\n\n"
+                "Be sure to use string-valued variables for the following inputs:\n"
+                "``simname``, ``halo_finder``, ``version_name`` and ``fname``,\n"
+                "and a float for the ``redshift`` input.\n"
                 )
             raise HalotoolsError(msg)
 
