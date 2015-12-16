@@ -368,11 +368,10 @@ class TestStoreNewHaloTable(TestCase):
 
 
     def tearDown(self):
-        pass
-        # try:
-        #     os.system('rm -rf ' + self.dummy_cache_baseloc)
-        # except OSError:
-        #     pass
+        try:
+            os.system('rm -rf ' + self.dummy_cache_baseloc)
+        except OSError:
+            pass
 
 
 
