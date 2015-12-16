@@ -74,6 +74,17 @@ class UserDefinedHaloCatalog(object):
 
         >>> halo_catalog = UserDefinedHaloCatalog(Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
+        Your ``halo_catalog`` object can be used throughout the Halotools package. 
+        The halo catalog itself is stored in the ``halo_table`` attribute, with columns accessed as follows:
+
+        >>> array_of_masses = halo_catalog.halo_table['halo_mvir']
+        >>> array_of_x_positions = halo_catalog.halo_table['halo_x']
+
+        Each piece of metadata you passed in can be accessed as an ordinary attribute:
+
+        >>> halo_catalog_box_size = halo_catalog.Lbox
+        >>> particle_mass = halo_catalog.ptcl_mass
+
         If you wish to pass in additional metadata, just include additional keywords:
 
         >>> simname = 'my_personal_sim'
