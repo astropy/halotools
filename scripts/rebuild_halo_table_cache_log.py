@@ -138,7 +138,7 @@ for ii, entry in enumerate(new_log):
     new_log['simname'][ii] = str(f.attrs['simname'])
     new_log['halo_finder'][ii] = str(f.attrs['halo_finder'])
     new_log['version_name'][ii] = str(f.attrs['version_name'])
-    new_log['redshift'][ii] = np.round(float(f.attrs['redshift']), 3)
+    new_log['redshift'][ii] = np.round(float(f.attrs['redshift']), 4)
     f.close()
 
 

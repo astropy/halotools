@@ -59,7 +59,7 @@ def add_new_row_to_cache_log(scenario,
         new_halo_table_fname = os.path.join(scenario_dirname, 
             'halo_tables', simname, halo_finder, new_halo_table_basename)
 
-    redshift = np.round(redshift, 3)
+    redshift = np.round(redshift, 4)
     new_table = Table(
         {'simname': [simname], 'halo_finder': [halo_finder], 
         'redshift': [redshift], 'version_name': [version_name], 
@@ -148,7 +148,7 @@ def create_halo_table_hdf5(cache_log_entry, **kwargs):
     f.attrs.create('ptcl_mass', ptcl_mass)
     f.attrs.create('simname', simname)
     f.attrs.create('halo_finder', halo_finder)
-    f.attrs.create('redshift', np.round(float(redshift), 3))
+    f.attrs.create('redshift', np.round(float(redshift), 4))
     f.attrs.create('version_name', version_name)
     f.attrs.create('fname', fname)
 
