@@ -21,44 +21,42 @@ if os.path.isfile(fname_cache_log):
 else:
     has_existing_log = False
 
+#fname simname halo_finder version_name redshift
+
 cache_log_dirname = os.path.dirname(fname_cache_log)
 corrupted_cache_log_fname = 'corrupted_halo_table_cache_log.txt'
 corrupted_cache_log_fname = os.path.join(cache_log_dirname, corrupted_cache_log_fname)
-if os.path.isfile(corrupted_cache_log_fname):
-    if not os.path.isfile(fname_cache_log):
-        os.system('mv '+ corrupted_cache_log_fname + ' ' + fname_cache_log)
-    else:
-        msg = ("\n\n\nThere appears to be an existing backup "
-            "of the following file in your cache directory:\n\n"
-            +corrupted_cache_log_fname+"\n\n"
-            "This can only mean that you have run this script before in an attempt to restore your cache.\n"
-            "The reason this corrupted cache is backed up is so that you do not lose a record \n"
-            "of halo catalogs that were previously rejected by this script, \n"
-            "but that you may have repaired in the interim.\n\n"
-            "It is not permissible to run this script with this corrupted log in place, "
-            "so here is how to proceed.\n"
-            "Use a text editor to manually compare the "
-            "corrupted and working copies of the cache log:\n\n"
-            + fname_cache_log + "\n"
-            + corrupted_cache_log_fname + "\n\n"
-            "For any row of the corrupted log corresponding to a halo catalog \n"
-            "that you would like to be recognized in your cache,\n"
-            "copy this row into a new row of " + os.path.basename(fname_cache_log) + "\n"
-            "When you have finished, delete the " + os.path.basename(corrupted_cache_log_fname) + "file \n"
-            "after backing it up in an external location.\n"
-            "Once the corrupted log has been removed from " + os.path.dirname(corrupted_cache_log_fname) + ",\n"
-            "you can run the rebuild_halo_table_cache_log.py again.\n"
-            "This script will then repeate the verification process on all entries of " 
-            + os.path.basename(fname_cache_log) + "\n\n\n"
-            )
-        raise HalotoolsError(msg)
 
-if os.path.exists(fname_cache_log):
-    dirname = os.path.dirname(fname_cache_log)
-    corrupted_cache_log_fname = os.path.join(dirname, corrupted_cache_log_fname)
-    if os.path.isfile(corrupted_cache_log_fname):
-        os.system('rm ' + corrupted_cache_log_fname)
-    os.system('mv ' + fname_cache_log + ' ' + corrupted_cache_log_fname)
+rejected_filename_log_fname = 'rejected_halo_table_filenames.txt'
+rejected_filename_log_fname = os.path.join(cache_log_dirname, rejected_filename_log_fname)
+
+if os.path.isfile(corrupted_cache_log_fname):
+    msg = ("\n\n\nThere appears to be an existing backup "
+        "of the following file in your cache directory:\n\n"
+        +corrupted_cache_log_fname+"\n\n"
+        "This can only mean that you have run this script before in an attempt to restore your cache.\n"
+        "The reason this corrupted cache is backed up is so that you do not lose a record \n"
+        "of halo catalogs that were previously rejected by this script, \n"
+        "but that you may have repaired in the interim.\n\n"
+        "It is not permissible to run this script with this corrupted log in place, "
+        "so here is how to proceed.\n"
+        "Use a text editor to manually compare the "
+        "corrupted and working copies of the cache log:\n\n"
+        + fname_cache_log + "\n"
+        + corrupted_cache_log_fname + "\n\n"
+        "For any row of the corrupted log corresponding to a halo catalog \n"
+        "that you would like to be recognized in your cache,\n"
+        "copy this row into a new row of " + os.path.basename(fname_cache_log) + "\n"
+        "Depending on the state of the corrupted log, "
+        "you may need to enter in the metadata columns manually.\n"
+        "When you have finished, delete the " + os.path.basename(corrupted_cache_log_fname) + "file \n"
+        "after backing it up in an external location.\n"
+        "Once the corrupted log has been removed from " + os.path.dirname(corrupted_cache_log_fname) + ",\n"
+        "you can run the rebuild_halo_table_cache_log.py again.\n"
+        "This script will then repeate the verification process on all entries of " 
+        + os.path.basename(fname_cache_log) + "\n\n\n"
+        )
+    raise HalotoolsError(msg)
 
 
 def fnames_in_existing_log():
@@ -67,8 +65,10 @@ def fnames_in_existing_log():
     try:
         manipulate_cache_log.verify_cache_log()
         existing_log = manipulate_cache_log.read_halo_table_cache_log()
+        existing_log_is_corrupted = False
         return list(existing_log['fname'])
     except:
+        existing_log_is_corrupted = True
         return []
 
 def halo_table_fnames_in_standard_cache():
@@ -83,8 +83,16 @@ def halo_table_fnames_in_standard_cache():
 print("\nNumber of files detected in standard cache location = " 
     + str(len(list(halo_table_fnames_in_standard_cache()))) + "\n")
 
+def fnames_in_rejected_filename_log():
+    if os.path.isfile(rejected_filename_log_fname):
+        with open(rejected_filename_log_fname, 'r') as f:
+            for ii, line in enumerate(f):
+                yield str(line)
+
 potential_fnames = fnames_in_existing_log()
 potential_fnames.extend(list(halo_table_fnames_in_standard_cache()))
+potential_fnames.extend(list(fnames_in_rejected_filename_log()))
+# remove any possibly duplicated entries
 potential_fnames = list(set(potential_fnames))
 
 def verified_fname_generator():
@@ -113,7 +121,9 @@ print("\nNumber of files passing verification tests = "
 rejected_fnames = list(rejected_fname_generator())
 print("\nNumber of files that fail verification tests = " 
     + str(len(rejected_fnames)) + "\n")
-
+# We are now done with the existing rejected_fnames file. 
+if os.path.isfile(rejected_filename_log_fname):
+    os.system('rm ' + rejected_filename_log_fname)
 
 new_log = Table()
 new_log['fname'] = verified_fnames
@@ -131,6 +141,10 @@ for ii, entry in enumerate(new_log):
     new_log['redshift'][ii] = np.round(float(f.attrs['redshift']), 3)
     f.close()
 
+
+if has_existing_log is True:
+    os.system('mv ' + fname_cache_log + ' ' + corrupted_cache_log_fname)
+
 if len(new_log) > 0:
     manipulate_cache_log.overwrite_halo_table_cache_log(new_log, cache_fname=fname_cache_log)
 
@@ -141,29 +155,30 @@ if len(new_log) > 0:
         print(entry['fname'])
     print("\n")
     print("The new cache log is stored in the following location:\n" + fname_cache_log)
-    print("\n")
 
 if len(rejected_fnames) > 0:
-    print("\n")
     print("The following filenames have been detected but rejected and will NOT be added to your new cache log:\n")
     for entry in rejected_fnames:
         print(entry)
     print("\n")
+    with open(rejected_filename_log_fname, 'w') as f:
+        for name in rejected_fnames:
+            f.write(name + "\n")
+    print("These rejected filenames are now stored in the following location:\n"
+        + rejected_filename_log_fname + "\n")
     if has_existing_log is True:
         print("Before running this script, you already had an existing cache log.\n"
-            "This log has been saved and is now stored in the following location:\n" + corrupted_cache_log_fname)
+            "This log was not readable by Halotools.\n"
+            "This file has been saved and is now stored in the following location:\n" + corrupted_cache_log_fname)
     print("\n")
-    print("To find out why a file was rejected:\n\n"
+    print("For any file in " + os.path.basename(rejected_filename_log_fname) + ",\n"
+    "you can find out why the file was rejected by reading the traceback triggered by the following syntax:\n\n"
         ">>> from halotools.sim_manager import manipulate_cache_log \n"
         ">>> manipulate_cache_log.verify_file_storing_unrecognized_halo_table(fname) \n")
     print("In many cases, the reason for rejection is simple and can be easily rectified.\n"
         "For example, you may only need to add a little metadata to the .hdf5 file\n"
         "When you are done repairing any inconsistencies in the file, you can simply run this script again\n")
     print("\n")
-
-
-
-
 
 
 
