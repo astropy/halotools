@@ -842,9 +842,13 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
         Lbox = metadata['Lbox']
         ptcl_mass = metadata['ptcl_mass']
     except KeyError:
-        msg = ("\nThe input ``metadata`` must have the following keys:\n"
+        msg = ("\nYou tried to create a new halo catalog without passing in\n"
+            "a sufficient amount of metadata as keyword arguments.\n"
+            "All calls to the `store_new_halo_table_in_cache` function\n"
+            "must have the following keyword arguments "
+            "that will be interpreted as halo catalog metadata:\n\n"
             "``simname``, ``halo_finder``, ``redshift``, ``version_name``, ``fname``, \n"
-            "``Lbox``, ``ptcl_mass``")
+            "``Lbox``, ``ptcl_mass``\n")
         raise HalotoolsError(msg)
 
 
@@ -892,20 +896,16 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
         exactly_matching_entries = log[exact_match_mask]
         if len(exactly_matching_entries) == 0:
             pass
-        elif len(exactly_matching_entries) == 1:
-            remove_unique_fname_from_halo_table_cache_log(fname, 
-                cache_fname=cache_fname)
-            log = read_halo_table_cache_log(cache_fname = cache_fname)
         else:
             msg = ("\nThe filename you are trying to store, \n"
-                +fname+"\nappears multiple times in the Halotools cache log,\n"
-                "with the different entries having mutually incompatible metadata.\n"
-                "Only one set of this metadata can be correct for a given filename.\n"
+                +fname+"\nappears one or more times in the Halotools cache log,\n"
+                "and yet this file does not yet exist.\n"
                 "You must first remedy this problem before you can proceed.\n"
-                "To do so, use a text editor to open the cache log, "
-                "which is stored at the following location:\n"
-                +cache_fname+"\nThen simply delete the line(s) storing incorrect metadata"
+                "Use a text editor to open the cache log, "
+                "which is stored at the following location:\n\n"
+                +cache_fname+"\n\nThen simply delete the line(s) storing incorrect metadata.\n"
                 "The offending lines are #")
+            idx = np.where(exact_match_mask == True)[0] + 1
             for entry in idx:
                 msg += str(entry) + ', '
             msg += "\nwhere the first line of the log file is line #1.\n"
@@ -956,6 +956,7 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
     # and it is safe to consider it as a new log entry. 
     # Now we must verify the metadata that was passed in 
     # is consistent with the halo table contents. 
+
 
     try:
         halo_id = halo_table['halo_id']
@@ -1014,6 +1015,7 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
             'version_name': [version_name], 
             'fname': [fname]}
             )
+
         new_log = table_vstack([log, new_table_entry])
         overwrite_halo_table_cache_log(new_log, cache_fname = cache_fname)
         remove_repeated_cache_lines(cache_fname = cache_fname)

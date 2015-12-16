@@ -64,7 +64,8 @@ class TestStoreNewHaloTable(TestCase):
             **self.good_halocat_args)
 
     def test_scenario0(self):
-        """ The cache has never been used before, and the first time it is used is to store a 
+        """ The cache has never been used before, 
+        and the first time it is used is to store a perfectly kosher 
         user-defined halo catalog. 
         """
 
@@ -102,13 +103,62 @@ class TestStoreNewHaloTable(TestCase):
         assert hasattr(loaded_halocat2, 'halo_table')
 
     def test_scenario1(self):
+        """ The cache has never been used before, 
+        and the first time it is used is to store a user-defined halo catalog 
+        that is flawed in some way or another. 
+        """
+
+        #################### SETUP ####################
+        scenario = 1
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+        try:
+            os.makedirs(cache_dirname)
+        except OSError:
+            pass
+
+        temp_fname = os.path.join(self.dummy_cache_baseloc, 'temp_halocat.hdf5')
+
+        # Some points in the x-positions are not bounded by [0, Lbox]
+        with pytest.raises(HalotoolsError) as err:
+            bad_table = deepcopy(self.halocat_obj.halo_table)
+            bad_table['halo_x'] = -1
+            # Store the halo table 
+            manipulate_cache_log.store_new_halo_table_in_cache(bad_table, 
+                cache_fname = cache_fname, 
+                simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+                redshift = 0.0, version_name = 'phony_version', 
+                Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+                fname = temp_fname
+                )
+            del bad_table
+        substr = 'There are points in the input halo table that lie outside'
+        assert substr in err.value.message
+
+
+        # User forgot to pass in one of the required pieces of metadata
+        with pytest.raises(HalotoolsError) as err:
+            # Store the halo table 
+            manipulate_cache_log.store_new_halo_table_in_cache(
+                self.halocat_obj.halo_table, 
+                cache_fname = cache_fname, 
+                simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+                redshift = 0.0, version_name = 'phony_version', 
+                ptcl_mass = self.halocat_obj.ptcl_mass, 
+                fname = temp_fname
+                )
+        substr = 'All calls to the `store_new_halo_table_in_cache` function'
+        assert substr in err.value.message
+
+
+    def test_scenario2(self):
         """ There is an existing halo table stored in cache. 
         We will store an identical one differing only by a redshift. 
         """
 
 
         #################### SETUP ####################
-        scenario = 1
+        scenario = 2
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
         try:
@@ -149,12 +199,12 @@ class TestStoreNewHaloTable(TestCase):
         assert halocat2.redshift == 1.0
         assert halocat1.redshift == 0.0
 
-    def test_scenario2(self):
+    def test_scenario3(self):
         """ There is an existing halo table stored in cache. 
         We will attempt to store a identical halo table with the same metadata but a different fname.
         """
         #################### SETUP ####################
-        scenario = 2
+        scenario = 3
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
         try:
@@ -194,15 +244,13 @@ class TestStoreNewHaloTable(TestCase):
             fname = temp_fname2
             )
 
-
-
-    def test_scenario3(self):
+    def test_scenario4(self):
         """ There is an existing halo table stored in cache. 
         We will attempt to store a identical halo table 
         with the different metadata but the same fname.
         """
         #################### SETUP ####################
-        scenario = 3
+        scenario = 4
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
         try:
@@ -232,7 +280,6 @@ class TestStoreNewHaloTable(TestCase):
                 )
         substr = 'A file at this location already exists.'
         assert substr in err.value.message
-
 
         # Now verify that the solution proposed by the error message does indeed resolve the problem
         temp_fname2 = os.path.join(self.dummy_cache_baseloc, 'temp_halocat2.hdf5')
