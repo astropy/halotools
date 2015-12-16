@@ -147,6 +147,11 @@ class TestCacheManipulation(TestCase):
     def test_erase_halo_table_cache_log_entry(self):
         raise HalotoolsError("The erase_halo_table_cache_log_entry function is not implemented yet.")
 
+    @pytest.mark.xfail
+    def test_overwrite_existing_halo_table_in_cache(self):
+        raise HalotoolsError("The overwrite_existing_halo_table_in_cache function is not implemented yet.")
+        
+
     def tearDown(self):
         for name in self.temp_cache_dirnames:
             os.system('rm -rf ' + name)

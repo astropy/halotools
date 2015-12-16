@@ -856,9 +856,13 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
 
     # The filename cannot already exist
     if os.path.isfile(fname):
-        raise HalotoolsError("\nThe file named \n"
-            +fname+"\nalready exists. If you want to overwrite an existing halo catalog,\n"
-            "you must instead call the `overwrite_existing_halo_table_in_cache` function.\n")
+        raise HalotoolsError("\nYou tried to store a new halo catalog "
+            "with the following filename: \n\n"
+            +fname+"\n\n"
+            "A file at this location already exists. \n"
+            "If you want to overwrite an existing halo catalog,\n"
+            "you must instead call the `overwrite_existing_halo_table_in_cache` function.\n"
+            "Otherwise, you should choose a different filename.\n")
 
     try:
         verify_halo_table_cache_existence(cache_fname = cache_fname)
