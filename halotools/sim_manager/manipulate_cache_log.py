@@ -908,34 +908,49 @@ def store_new_halo_table_in_cache(halo_table, **metadata):
             +fname+"\nalready exists. If you want to overwrite an existing halo catalog,\n"
             "you must instead call the `overwrite_existing_halo_table_in_cache` function.\n")
 
+    try:
+        verify_halo_table_cache_existence(cache_fname = cache_fname)
+        first_halo_table_in_cache = False
+    except HalotoolsError:
+        # This is the first halo catalog being stored in cache
+        first_halo_table_in_cache = True
+        new_log = Table()
+        new_log['simname'] = [simname]
+        new_log['halo_finder'] = [halo_finder]
+        new_log['redshift'] = [redshift]
+        new_log['version_name'] = [version_name]
+        new_log['fname'] = [fname]
+        overwrite_halo_table_cache_log(new_log, cache_fname = cache_fname)
+
     verify_cache_log(cache_fname = cache_fname)
     remove_repeated_cache_lines(cache_fname = cache_fname)
     log = read_halo_table_cache_log(cache_fname = cache_fname)
 
-    # Make sure that the filename does not already appear in the log
-    mask = log['fname'] == fname
-    matching_entries = log[mask]
-    if len(matching_entries) == 0:
-        pass
-    elif len(matching_entries) == 1:
-        remove_unique_fname_from_halo_table_cache_log(fname, 
-            cache_fname=cache_fname)
-        log = read_halo_table_cache_log(cache_fname = cache_fname)
-    else:
-        msg = ("\nThe filename you are trying to store, \n"
-            +fname+"\nappears multiple times in the Halotools cache log,\n"
-            "with the different entries having mutually incompatible metadata.\n"
-            "Only one set of this metadata can be correct for a given filename.\n"
-            "You must first remedy this problem before you can proceed.\n"
-            "To do so, use a text editor to open the cache log, "
-            "which is stored at the following location:\n"
-            +cache_fname+"\nThen simply delete the line(s) storing incorrect metadata"
-            "The offending lines are #")
-        for entry in idx:
-            msg += str(entry) + ', '
-        msg += "\nwhere the first line of the log file is line #1.\n"
-        msg += "\nAlways save a backup version of the log before making manual changes.\n"
-        raise HalotoolsError(msg)
+    if first_halo_table_in_cache is False:
+        # Make sure that the filename does not already appear in the log
+        mask = log['fname'] == fname
+        matching_entries = log[mask]
+        if len(matching_entries) == 0:
+            pass
+        elif len(matching_entries) == 1:
+            remove_unique_fname_from_halo_table_cache_log(fname, 
+                cache_fname=cache_fname)
+            log = read_halo_table_cache_log(cache_fname = cache_fname)
+        else:
+            msg = ("\nThe filename you are trying to store, \n"
+                +fname+"\nappears multiple times in the Halotools cache log,\n"
+                "with the different entries having mutually incompatible metadata.\n"
+                "Only one set of this metadata can be correct for a given filename.\n"
+                "You must first remedy this problem before you can proceed.\n"
+                "To do so, use a text editor to open the cache log, "
+                "which is stored at the following location:\n"
+                +cache_fname+"\nThen simply delete the line(s) storing incorrect metadata"
+                "The offending lines are #")
+            for entry in idx:
+                msg += str(entry) + ', '
+            msg += "\nwhere the first line of the log file is line #1.\n"
+            msg += "\nAlways save a backup version of the log before making manual changes.\n"
+            raise HalotoolsError(msg)
 
     # At this point, we have ensured that the filename does not already exist 
     # and will be a new log entry. Now we must verify the metadata that was passed in 
@@ -986,18 +1001,21 @@ def store_new_halo_table_in_cache(halo_table, **metadata):
             "in order to store a new halo catalog.\n")
     f = h5py.File(fname)
     for key, value in metadata.iteritems():
+        if type(value) == unicode:
+            value = str(value)
         f.attrs.create(key, value)
     f.close()
 
-    new_table_entry = Table({'simname': [simname], 
-        'halo_finder': [halo_finder], 
-        'redshift': [redshift], 
-        'version_name': [version_name], 
-        'fname': [fname]}
-        )
-
-    new_log = table_vstack([log, new_table_entry])
-    overwrite_halo_table_cache_log(new_log, cache_fname = cache_fname)
+    if first_halo_table_in_cache is False:
+        new_table_entry = Table({'simname': [simname], 
+            'halo_finder': [halo_finder], 
+            'redshift': [redshift], 
+            'version_name': [version_name], 
+            'fname': [fname]}
+            )
+        new_log = table_vstack([log, new_table_entry])
+        overwrite_halo_table_cache_log(new_log, cache_fname = cache_fname)
+        remove_repeated_cache_lines(cache_fname = cache_fname)
 
 
 

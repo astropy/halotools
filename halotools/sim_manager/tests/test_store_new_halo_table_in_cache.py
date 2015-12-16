@@ -15,7 +15,8 @@ from astropy.config.paths import _find_home
 
 from . import helper_functions 
 
-from .. import manipulate_cache_log, halo_catalog
+from .. import manipulate_cache_log
+from ..halo_catalog import OverhauledHaloCatalog
 from ..user_defined_halo_catalog import UserDefinedHaloCatalog
 
 from ...custom_exceptions import HalotoolsError
@@ -62,10 +63,12 @@ class TestStoreNewHaloTable(TestCase):
         self.halocat_obj = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
             **self.good_halocat_args)
 
-    def test_manipulate_cache_log_storage_function(self):
-        """
+    def test_scenario0(self):
+        """ The cache has never been used before, and the first time it is used is to store a 
+        user-defined halo catalog. 
         """
 
+        #################### SETUP ####################
         scenario = 0
         cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
         cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
@@ -74,6 +77,7 @@ class TestStoreNewHaloTable(TestCase):
         except OSError:
             pass
 
+        # Store the halo table 
         temp_fname = os.path.join(self.dummy_cache_baseloc, 'temp_halocat.hdf5')
         manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
             cache_fname = cache_fname, 
@@ -83,12 +87,21 @@ class TestStoreNewHaloTable(TestCase):
             fname = temp_fname
             )
 
+        # Load the newly created table
+        loaded_halocat = OverhauledHaloCatalog(
+            simname = 'fakesim', halo_finder = 'fake_halo_finder',
+            redshift = 0.0, version_name = 'phony_version', 
+            cache_fname = cache_fname)
+        assert loaded_halocat.redshift == 0.0
+        assert hasattr(loaded_halocat, 'halo_table')
+
 
     def tearDown(self):
-        try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
-            pass
+        pass
+        # try:
+        #     os.system('rm -rf ' + self.dummy_cache_baseloc)
+        # except OSError:
+        #     pass
 
 
 
