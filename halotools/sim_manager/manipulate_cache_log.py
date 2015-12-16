@@ -560,7 +560,7 @@ def halo_table_hdf5_has_matching_metadata(fname_halo_table, dz_tol = 0.05, **kwa
             unavailable_metadata.append(metadata_key)
 
     try:
-        redshift_of_hdf5_file = f.attrs['redshift']
+        redshift_of_hdf5_file = np.round(float(f.attrs['redshift']), 3)
         requested_redshift = kwargs['redshift']
         exact_match *= redshift_of_hdf5_file == requested_redshift
         close_redshift_match *= abs(redshift_of_hdf5_file - requested_redshift) > dz_tol
@@ -1060,7 +1060,7 @@ def verify_file_storing_unrecognized_halo_table(fname):
     try:
         simname = f.attrs['simname']
         halo_finder = f.attrs['halo_finder']
-        redshift = f.attrs['redshift']
+        redshift = np.round(float(f.attrs['redshift']), 3)
         version_name = f.attrs['version_name']
         Lbox = f.attrs['Lbox']
         ptcl_mass = f.attrs['ptcl_mass']

@@ -148,7 +148,7 @@ def create_halo_table_hdf5(cache_log_entry, **kwargs):
     f.attrs.create('ptcl_mass', ptcl_mass)
     f.attrs.create('simname', simname)
     f.attrs.create('halo_finder', halo_finder)
-    f.attrs.create('redshift', redshift)
+    f.attrs.create('redshift', np.round(float(redshift), 3))
     f.attrs.create('version_name', version_name)
     f.attrs.create('fname', fname)
 
