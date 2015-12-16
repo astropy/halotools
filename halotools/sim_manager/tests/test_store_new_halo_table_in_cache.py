@@ -153,7 +153,8 @@ class TestStoreNewHaloTable(TestCase):
 
     def test_scenario2(self):
         """ There is an existing halo table stored in cache. 
-        We will store an identical one differing only by a redshift. 
+        We will store an identical one differing by a substantially distinct redshift. 
+        Both catalogs successfully store and reload. 
         """
 
 
@@ -201,7 +202,8 @@ class TestStoreNewHaloTable(TestCase):
 
     def test_scenario3(self):
         """ There is an existing halo table stored in cache. 
-        We will attempt to store a identical halo table with the same metadata but a different fname.
+        We will attempt to store a identical halo table 
+        with the same metadata but a different fname, raising an error. 
         """
         #################### SETUP ####################
         scenario = 3
@@ -247,7 +249,7 @@ class TestStoreNewHaloTable(TestCase):
     def test_scenario4(self):
         """ There is an existing halo table stored in cache. 
         We will attempt to store a identical halo table 
-        with the different metadata but the same fname.
+        with the different metadata but the same fname, raising an error. 
         """
         #################### SETUP ####################
         scenario = 4
@@ -291,6 +293,78 @@ class TestStoreNewHaloTable(TestCase):
             fname = temp_fname2
             )
 
+
+    def test_scenario5(self):
+        """ There is an existing halo table stored in cache. 
+        We will store an identical one differing by an extremely similar redshift. 
+        Both catalogs successfully store and reload, provided that the 
+        ``ignore_nearby_redshifts`` flag is thrown. 
+        """
+
+
+        #################### SETUP ####################
+        scenario = 5
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+        try:
+            os.makedirs(cache_dirname)
+        except OSError:
+            pass
+
+        # Store the first halo table 
+        temp_fname = os.path.join(self.dummy_cache_baseloc, 'temp_halocat.hdf5')
+        manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
+            cache_fname = cache_fname, 
+            simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+            redshift = 0.0, version_name = 'phony_version', 
+            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            fname = temp_fname
+            )
+
+        # Try to store the second halo table without the necessary flag
+        temp_fname2 = os.path.join(self.dummy_cache_baseloc, 'temp_halocat2.hdf5')
+
+        with pytest.raises(HalotoolsError) as err:
+            manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
+                cache_fname = cache_fname, 
+                simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+                redshift = 0.001, version_name = 'phony_version', 
+                Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+                fname = temp_fname2
+                )
+        substr = 'and a very similar redshift.'
+        assert substr in err.value.message
+
+        # Now verify that the solution proposed by the error message does indeed resolve the problem
+        manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
+            cache_fname = cache_fname, 
+            simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+            redshift = 0.001, version_name = 'phony_version', 
+            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            fname = temp_fname2, ignore_nearby_redshifts = True
+            )
+
+        # Load the two halo tables 
+        with pytest.raises(HalotoolsError) as err:
+            halocat1 = OverhauledHaloCatalog(
+                simname = 'fakesim', halo_finder = 'fake_halo_finder',
+                redshift = 0.0, version_name = 'phony_version', 
+                cache_fname = cache_fname)
+        substr = 'Try decreasing the value of the ``dz_tol`` parameter.'
+        assert substr in err.value.message
+
+        halocat1 = OverhauledHaloCatalog(
+            simname = 'fakesim', halo_finder = 'fake_halo_finder',
+            redshift = 0.0, version_name = 'phony_version', 
+            cache_fname = cache_fname, dz_tol = 0.0001)
+
+        halocat2 = OverhauledHaloCatalog(
+            simname = 'fakesim', halo_finder = 'fake_halo_finder',
+            redshift = 0.001, version_name = 'phony_version', 
+            cache_fname = cache_fname, dz_tol = 0.0001)
+
+        assert halocat1.redshift == 0.0
+        assert halocat2.redshift == 0.001
 
 
     def tearDown(self):

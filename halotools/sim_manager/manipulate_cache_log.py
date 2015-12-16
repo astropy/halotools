@@ -929,9 +929,9 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
                 else:
                     msg = ("\nThere already exists a halo catalog in cache \n"
                         "with the same metadata as the catalog you are trying to store, \n"
-                        "and a very similar redshift. The closely matching"
-                        "halo catalog has the following filename:\n"
-                        +closely_matching_entries['fname'][0]+"\n"
+                        "and a very similar redshift. \nThe closely matching "
+                        "halo catalog has the following filename:\n\n"
+                        +closely_matching_entries['fname'][0]+"\n\n"
                         "If you want to proceed anyway, you must set the \n"
                         "``ignore_nearby_redshifts`` keyword argument to ``True``.\n"
                         )
