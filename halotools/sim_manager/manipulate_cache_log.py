@@ -827,6 +827,12 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
         raise HalotoolsError(msg)
 
     try:
+        import h5py
+    except ImportError:
+        raise HalotoolsError("\nYou must have h5py installed "
+            "in order to store a new halo catalog.\n")
+
+    try:
         cache_fname = deepcopy(metadata['cache_fname'])
         del metadata['cache_fname']
     except KeyError:
@@ -957,7 +963,6 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
     # Now we must verify the metadata that was passed in 
     # is consistent with the halo table contents. 
 
-
     try:
         halo_id = halo_table['halo_id']
         halo_x = halo_table['halo_x']
@@ -966,6 +971,10 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
     except KeyError:
         msg = ("\nAll halo tables must at least have the following columns:\n"
             "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``\n")
+        if first_halo_table_in_cache is True:
+            # The cache log we created pointed to a 
+            # bogus halo_table and so needs to be deleted
+            os.system('rm ' + cache_fname)
         raise HalotoolsError(msg)
 
     # Check that Lbox properly bounds the halo positions
@@ -979,6 +988,10 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
     except AssertionError:
         msg = ("\nThere are points in the input halo table that "
             "lie outside [0, Lbox] in some dimension.\n")
+        if first_halo_table_in_cache is True:
+            # The cache log we created pointed to a 
+            # bogus halo_table and so needs to be deleted
+            os.system('rm ' + cache_fname)
         raise HalotoolsError(msg)
 
     # Check that halo_id column contains a set of unique entries
@@ -990,17 +1003,16 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
     except AssertionError:
         msg = ("\nThe ``halo_id`` column of your halo table must contain a unique integer "
             "for every halo\n")
+        if first_halo_table_in_cache is True:
+            # The cache log we created pointed to a 
+            # bogus halo_table and so needs to be deleted
+            os.system('rm ' + cache_fname)
         raise HalotoolsError(msg)
 
     # The table appears to be kosher, so we write it to an hdf5 file, 
     # add metadata, and update the log
     halo_table.write(fname, path='data')
 
-    try:
-        import h5py
-    except ImportError:
-        raise HalotoolsError("\nYou must have h5py installed "
-            "in order to store a new halo catalog.\n")
     f = h5py.File(fname)
     for key, value in metadata.iteritems():
         if type(value) == unicode:
@@ -1019,8 +1031,6 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
         new_log = table_vstack([log, new_table_entry])
         overwrite_halo_table_cache_log(new_log, cache_fname = cache_fname)
         remove_repeated_cache_lines(cache_fname = cache_fname)
-
-
 
 def remove_unique_fname_from_halo_table_cache_log(fname, 
     raise_warning = False, **kwargs):
