@@ -101,6 +101,102 @@ class TestStoreNewHaloTable(TestCase):
         assert loaded_halocat2.redshift == 0.0
         assert hasattr(loaded_halocat2, 'halo_table')
 
+    def test_scenario1(self):
+        """ There is an existing halo table stored in cache. 
+        We will store an identical one differing only by a redshift. 
+        """
+
+
+        #################### SETUP ####################
+        scenario = 1
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+        try:
+            os.makedirs(cache_dirname)
+        except OSError:
+            pass
+
+        # Store the first halo table 
+        temp_fname = os.path.join(self.dummy_cache_baseloc, 'temp_halocat.hdf5')
+        manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
+            cache_fname = cache_fname, 
+            simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+            redshift = 0.0, version_name = 'phony_version', 
+            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            fname = temp_fname
+            )
+
+        # Store the second halo table 
+        temp_fname2 = os.path.join(self.dummy_cache_baseloc, 'temp_halocat2.hdf5')
+        manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
+            cache_fname = cache_fname, 
+            simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+            redshift = 1.0, version_name = 'phony_version', 
+            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            fname = temp_fname2
+            )
+
+        # Load the two halo tables 
+        halocat1 = OverhauledHaloCatalog(
+            simname = 'fakesim', halo_finder = 'fake_halo_finder',
+            redshift = 0.0, version_name = 'phony_version', 
+            cache_fname = cache_fname)
+        halocat2 = OverhauledHaloCatalog(
+            simname = 'fakesim', halo_finder = 'fake_halo_finder',
+            redshift = 1.0, version_name = 'phony_version', 
+            cache_fname = cache_fname)
+
+        assert halocat2.redshift == 1.0
+        assert halocat1.redshift == 0.0
+
+    def test_scenario2(self):
+        """ There is an existing halo table stored in cache. 
+        We will attempt to store a identical halo table with a different fname.
+        """
+
+
+        #################### SETUP ####################
+        scenario = 2
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+        try:
+            os.makedirs(cache_dirname)
+        except OSError:
+            pass
+
+        # Store the first halo table 
+        temp_fname = os.path.join(self.dummy_cache_baseloc, 'temp_halocat.hdf5')
+        manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
+            cache_fname = cache_fname, 
+            simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+            redshift = 0.0, version_name = 'phony_version', 
+            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            fname = temp_fname
+            )
+
+        # Store the second halo table 
+        with pytest.raises(HalotoolsError) as err:
+            temp_fname2 = os.path.join(self.dummy_cache_baseloc, 'temp_halocat2.hdf5')
+            manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
+                cache_fname = cache_fname, 
+                simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+                redshift = 0.0, version_name = 'phony_version', 
+                Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+                fname = temp_fname2
+                )
+
+        # # Load the two halo tables 
+        # halocat1 = OverhauledHaloCatalog(
+        #     simname = 'fakesim', halo_finder = 'fake_halo_finder',
+        #     redshift = 0.0, version_name = 'phony_version', 
+        #     cache_fname = cache_fname)
+        # halocat2 = OverhauledHaloCatalog(
+        #     simname = 'fakesim', halo_finder = 'fake_halo_finder',
+        #     redshift = 1.0, version_name = 'phony_version', 
+        #     cache_fname = cache_fname)
+
+        # assert halocat2.redshift == 1.0
+        # assert halocat1.redshift == 0.0
 
 
     def tearDown(self):
