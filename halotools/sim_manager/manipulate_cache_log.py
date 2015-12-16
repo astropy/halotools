@@ -865,7 +865,7 @@ def remove_repeated_cache_lines(**kwargs):
     verify_cache_log(cache_fname = cache_fname)
 
 
-def store_new_halo_table_in_cache(halo_table, metadata_dict, **kwargs):
+def store_new_halo_table_in_cache(halo_table, **metadata):
     """
     """
     try:
@@ -874,19 +874,32 @@ def store_new_halo_table_in_cache(halo_table, metadata_dict, **kwargs):
         msg = ("\nThe input ``halo_table`` must be an Astropy Table object.\n")
         raise HalotoolsError(msg)
 
-    # Verify that the metadata_dict has all the necessary keys
     try:
-        simname = metadata_dict['simname']
-        halo_finder = metadata_dict['halo_finder']
-        redshift = metadata_dict['redshift']
-        version_name = metadata_dict['version_name']
-        fname = metadata_dict['fname']
-        Lbox = metadata_dict['Lbox']
-        ptcl_mass = metadata_dict['ptcl_mass']
+        cache_fname = deepcopy(metadata['cache_fname'])
+        del metadata['cache_fname']
     except KeyError:
-        msg = ("\nThe input ``metadata_dict`` must have the following keys:\n"
+        cache_fname = get_halo_table_cache_log_fname()
+
+    # Verify that the metadata has all the necessary keys
+    try:
+        simname = metadata['simname']
+        halo_finder = metadata['halo_finder']
+        redshift = metadata['redshift']
+        version_name = metadata['version_name']
+        fname = metadata['fname']
+        Lbox = metadata['Lbox']
+        ptcl_mass = metadata['ptcl_mass']
+    except KeyError:
+        msg = ("\nThe input ``metadata`` must have the following keys:\n"
             "``simname``, ``halo_finder``, ``redshift``, ``version_name``, ``fname``, \n"
             "``Lbox``, ``ptcl_mass``")
+        raise HalotoolsError(msg)
+
+
+    try:
+        assert str(fname[-5:]) == '.hdf5'
+    except AssertionError:
+        msg = ("\nThe input ``fname`` must end with the extension ``.hdf5``\n")
         raise HalotoolsError(msg)
 
     # The filename cannot already exist
@@ -895,10 +908,6 @@ def store_new_halo_table_in_cache(halo_table, metadata_dict, **kwargs):
             +fname+"\nalready exists. If you want to overwrite an existing halo catalog,\n"
             "you must instead call the `overwrite_existing_halo_table_in_cache` function.\n")
 
-    try:
-        cache_fname = kwargs['cache_fname']
-    except KeyError:
-        cache_fname = get_halo_table_cache_log_fname()
     verify_cache_log(cache_fname = cache_fname)
     remove_repeated_cache_lines(cache_fname = cache_fname)
     log = read_halo_table_cache_log(cache_fname = cache_fname)
@@ -976,7 +985,7 @@ def store_new_halo_table_in_cache(halo_table, metadata_dict, **kwargs):
         raise HalotoolsError("\nYou must have h5py installed "
             "in order to store a new halo catalog.\n")
     f = h5py.File(fname)
-    for key, value in metadata_dict.iteritems():
+    for key, value in metadata.iteritems():
         f.attrs.create(key, value)
     f.close()
 

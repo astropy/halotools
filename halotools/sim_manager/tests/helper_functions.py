@@ -38,7 +38,7 @@ else:
 __all__ = ('add_new_row_to_cache_log', 'create_dummy_halo_table_cache_log' )
 
 dummy_cache_baseloc = os.path.join(detected_home, 'Desktop', 'tmp_dummy_cache')
-cache_basename = 'halo_table_cache_log.dat'
+cache_basename = 'halo_table_cache_log.txt'
 
 def get_scenario_cache_fname(scenario):
     if type(scenario) is not str:

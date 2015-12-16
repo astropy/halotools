@@ -42,12 +42,12 @@ class TestStoreNewHaloTable(TestCase):
         """ Pre-load various arrays into memory for use by all tests. 
         """
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
-
         try:
             os.system('rm -rf ' + self.dummy_cache_baseloc)
         except OSError:
             pass
 
+        # Create a fake halo catalog 
         self.Nhalos = 1e2
         self.Lbox = 100
         self.halo_x = np.linspace(0, self.Lbox, self.Nhalos)
@@ -59,10 +59,47 @@ class TestStoreNewHaloTable(TestCase):
             {'halo_x': self.halo_x, 'halo_y': self.halo_y, 
             'halo_z': self.halo_z, 'halo_id': self.halo_id, 'halo_mass': self.halo_mass}
             )
-
-    def test_basic_behavior(self):
-        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+        self.halocat_obj = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
             **self.good_halocat_args)
 
-        raise HalotoolsError("Pick up here next time")
+    def test_manipulate_cache_log_storage_function(self):
+        """
+        """
+
+        scenario = 0
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+        try:
+            os.makedirs(cache_dirname)
+        except OSError:
+            pass
+
+        temp_fname = os.path.join(self.dummy_cache_baseloc, 'temp_halocat.hdf5')
+        manipulate_cache_log.store_new_halo_table_in_cache(self.halocat_obj.halo_table, 
+            cache_fname = cache_fname, 
+            simname = 'fakesim', halo_finder = 'fake_halo_finder', 
+            redshift = 0.0, version_name = 'phony_version', 
+            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            fname = temp_fname
+            )
+
+
+    def tearDown(self):
+        try:
+            os.system('rm -rf ' + self.dummy_cache_baseloc)
+        except OSError:
+            pass
+
+
+
+
+
+
+
+
+
+
+
+
+
         
