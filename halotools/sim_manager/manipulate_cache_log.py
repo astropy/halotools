@@ -832,11 +832,16 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
         raise HalotoolsError("\nYou must have h5py installed "
             "in order to store a new halo catalog.\n")
 
+    # The following two keyword arguments are intentionally absent 
+    # from the docstring and are for developer convenience only. 
+    # No end-user should ever have recourse for either 
+    # cache_fname or overwrite_existing_halo_table
     try:
         cache_fname = deepcopy(metadata['cache_fname'])
         del metadata['cache_fname']
     except KeyError:
         cache_fname = get_halo_table_cache_log_fname()
+
 
     # Verify that the metadata has all the necessary keys
     try:
@@ -1078,12 +1083,28 @@ def remove_unique_fname_from_halo_table_cache_log(fname,
         msg += "\nAlways save a backup version of the log before making manual changes.\n"
         raise HalotoolsError(msg)
 
+def overwrite_existing_halo_table_in_cache(halo_table, **kwargs):
+    """
+    """
+    try:
+        fname = kwargs['fname']
+    except KeyError:
+        msg = ("\nYou must specify the absolute pathname of the file \n"
+            "where you want to store the halo catalog.\n")
+        raise HalotoolsError(msg)
 
+    if not os.path.isfile(fname):
+        msg = ("\nYou called the overwrite_existing_halo_table_in_cache function \n"
+            "by passing in the following filename:\n\n"
+            +fname+"\n\n"
+            "This file does not exist.\n"
+            "If you have typed in the filename correctly, then you should instead call the \n"
+            "``store_new_halo_table_in_cache`` function with the same arguments.\n")
+        raise HalotoolsError(msg)
 
-def overwrite_existing_halo_table_in_cache(halo_table, 
-    simname, halo_finder, redshift, version_name, fname, 
-    **kwargs):
-    pass
+    remove_unique_fname_from_halo_table_cache_log(**kwargs)
+    os.system('rm '+fname)
+    store_new_halo_table_in_cache(halo_table, **kwargs)
 
 
 def verify_file_storing_unrecognized_halo_table(fname):

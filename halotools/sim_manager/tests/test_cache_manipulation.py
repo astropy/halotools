@@ -149,7 +149,8 @@ class TestCacheManipulation(TestCase):
 
     @pytest.mark.xfail
     def test_overwrite_existing_halo_table_in_cache(self):
-        raise HalotoolsError("The overwrite_existing_halo_table_in_cache function is not implemented yet.")
+        raise HalotoolsError("The overwrite_existing_halo_table_in_cache function "
+            "has been implemented but remains untested.")
         
 
     def tearDown(self):

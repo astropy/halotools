@@ -1,6 +1,6 @@
 misspellings = (
 	('halos','haloes'), 
 	('color', 'colour'), 
-	('realization', 'realisation')
+	('realization', 'realisation'), 
 	('catalog', 'catalogue')
 	)
