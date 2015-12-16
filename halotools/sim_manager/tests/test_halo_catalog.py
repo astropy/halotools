@@ -53,6 +53,14 @@ class TestOverhauledHaloCatalog(TestCase):
         """
         halocat = halo_catalog.OverhauledHaloCatalog()
 
+    @pytest.mark.xfail
+    def test_load_ptcl_table(self):
+        """ Verify that the default halo catalog loads. 
+        """
+        halocat = halo_catalog.OverhauledHaloCatalog()
+        ptcls = halocat.ptcl_table
+
+
 
 
 
