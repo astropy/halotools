@@ -128,24 +128,8 @@ class RockstarHlistReader(object):
             raise HalotoolsError(msg)
         self.column_indices_to_keep = column_indices_to_keep
 
-        try:
-            row_cuts = kwargs['row_cuts']
-            assert type(row_cuts) == list
-            assert len(row_cuts) <= len(self.dt)
-            for entry in row_cuts:
-                assert type(entry) == tuple
-                assert len(entry) == 3
-                assert entry[0] in column_indices_to_keep
-        except KeyError:
-            row_cuts = []
-        except AssertionError:
-            msg = ("\nInput ``row_cuts`` must be a list of 3-element tuples. \n"
-                "The first entry is an integer that will be interpreted as the \n"
-                "column-index upon which a cut is made.\n"
-                "All column indices must appear in the input ``column_indices_to_keep``.\n"
-                )
-            raise HalotoolsError(msg)
-        self._set_row_cuts(row_cuts)
+        input_row_cuts = self._interpret_input_row_cuts(**kwargs)
+        self._set_row_cuts(input_row_cuts)
 
         try:
             assert (type(header_char) == str) or (type(header_char) == unicode)
@@ -158,13 +142,37 @@ class RockstarHlistReader(object):
     def _determine_compression_safe_file_opener(self):
         """
         """
+        f = gzip.open(self.fname, 'r')
         try:
-            f = gzip.open(self.fname, 'r')
-            f.readline()
+            f.read(1)
             self._compression_safe_file_opener = gzip.open
-            f.close()
         except IOError:
             self._compression_safe_file_opener = open
+        finally:
+            f.close()
+
+    def _interpret_input_row_cuts(self, **kwargs):
+        """
+        """
+        try:
+            input_row_cuts = kwargs['row_cuts']
+            assert type(input_row_cuts) == list
+            assert len(input_row_cuts) <= len(self.dt)
+            for entry in input_row_cuts:
+                assert type(entry) == tuple
+                assert len(entry) == 3
+                assert entry[0] in self.column_indices_to_keep
+        except KeyError:
+            input_row_cuts = []
+        except AssertionError:
+            msg = ("\nInput ``row_cuts`` must be a list of 3-element tuples. \n"
+                "The first entry is an integer that will be interpreted as the \n"
+                "column-index upon which a cut is made.\n"
+                "All column indices must appear in the input ``column_indices_to_keep``.\n"
+                )
+            raise HalotoolsError(msg)
+
+        return input_row_cuts
 
     def _set_row_cuts(self, input_row_cuts):
         """
@@ -286,8 +294,8 @@ class RockstarHlistReader(object):
         start = time()
 
         try:
-            Nchunks = kwargs['Nchunks']
-        except KeyError:
+            Nchunks = int(kwargs['Nchunks'])
+        except:
             Nchunks = 100
 
         header_length = self.header_len()
@@ -301,12 +309,8 @@ class RockstarHlistReader(object):
             Nchunks = 1
 
         print("\n...Processing ASCII data of file: \n%s\n " % self.fname)
-        print(" Total number of rows in file = %i" % num_data_rows)
+        print(" Total number of rows containing halo catalog data = %i" % num_data_rows)
         print(" Number of rows in detected header = %i \n" % header_length)
-        if Nchunks==1:
-            print("Reading catalog in a single chunk of size %i\n" % chunksize)
-        else:
-            print("...Reading catalog in %i chunks, each with %i rows\n" % (Nchunks, chunksize))            
 
         with self._compression_safe_file_opener(self.fname, 'r') as f:
 
@@ -347,6 +351,7 @@ class RockstarHlistReader(object):
         else:
             msg = "Total runtime to read in ASCII = %.1f seconds\n"
         print(msg % runtime)
+        print("\a")
 
         return Table(full_array)
 
