@@ -15,6 +15,9 @@ from astropy.table import Table
 
 from . import catalog_manager, supported_sims, sim_defaults, cache_config
 from .read_rockstar_hlists import RockstarHlistReader
+
+from .catalog_column_info import * 
+
 from ..utils import convert_to_ndarray
 
 from ..custom_exceptions import *
@@ -93,7 +96,7 @@ class HalotoolsRockstarCatalogReader(RockstarHlistReader):
     def _interpret_input_row_cuts(self, **kwargs):
         """
         """
-        
+
         try:
             input_row_cuts = kwargs['row_cuts']
             assert type(input_row_cuts) == list
