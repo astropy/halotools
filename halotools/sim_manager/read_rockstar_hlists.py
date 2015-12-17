@@ -7,6 +7,7 @@ Methods and classes to read ASCII files storing simulation data.
 __all__ = ('RockstarHlistReader', )
 
 import os
+import gzip
 from time import time
 import numpy as np
 from difflib import get_close_matches
@@ -57,12 +58,6 @@ class RockstarHlistReader(object):
             appear in ``column_indices_to_keep``: for purposes of good bookeeping, 
             you are not permitted to place a cut on a column that you do not keep. 
 
-        recompress : bool, optional 
-            If ``input_fname`` is a compressed file, `RockstarHlistReader` 
-            will automatically uncompress it before reading. If recompress 
-            is True, the file will be recompressed after reading; if False, 
-            it will remain uncompressed. Default is True. 
-
         header_char : str, optional
             String to be interpreted as a header line of the ascii hlist file. 
             Default is '#'. 
@@ -86,15 +81,12 @@ class RockstarHlistReader(object):
 
         self._process_constructor_inputs(input_fname, dt, **kwargs)
 
-        self._uncompress_ascii()
-
 
     def _process_constructor_inputs(self, input_fname, dt, 
-        recompress = True, header_char='#', **kwargs):
+        header_char='#', **kwargs):
         """
         """
         self.header_char = header_char
-        self._recompress = recompress
 
         # Check whether input_fname exists. 
         if not os.path.isfile(input_fname):
@@ -107,6 +99,8 @@ class RockstarHlistReader(object):
                     "However, ``%s`` exists, so change your input_fname accordingly.")
                 raise HalotoolsError(msg % (input_fname, input_fname[:-3]))
         self.fname = input_fname
+
+        self._determine_compression_safe_file_opener()
 
         self.num_cols_total = self.infer_number_of_columns()
 
@@ -161,6 +155,17 @@ class RockstarHlistReader(object):
             raise HalotoolsError(msg)
 
 
+    def _determine_compression_safe_file_opener(self):
+        """
+        """
+        try:
+            f = gzip.open(self.fname, 'r')
+            f.readline()
+            self._compression_safe_file_opener = gzip.open
+            f.close()
+        except IOError:
+            self._compression_safe_file_opener = open
+
     def _set_row_cuts(self, input_row_cuts):
         """
         """
@@ -202,7 +207,7 @@ class RockstarHlistReader(object):
 
         """
         Nheader = 0
-        with open(self.fname) as f:
+        with self._compression_safe_file_opener(self.fname, 'r') as f:
             for i, l in enumerate(f):
                 if ( (l[0:len(self.header_char)]==self.header_char) or (l=="\n") ):
                     Nheader += 1
@@ -213,7 +218,7 @@ class RockstarHlistReader(object):
 
     def data_len(self):
         Nrows_data = 0
-        with open(self.fname) as f:
+        with self._compression_safe_file_opener(self.fname, 'r') as f:
             for i, l in enumerate(f):
                 if ( (l[0:len(self.header_char)]!=self.header_char) and (l!="\n") ):
                     Nrows_data += 1
@@ -222,40 +227,11 @@ class RockstarHlistReader(object):
     def infer_number_of_columns(self):
         """ Find the first line of data and infer the total number of columns
         """
-        with open(self.fname) as f:
+        with self._compression_safe_file_opener(self.fname, 'r') as f:
             for i, l in enumerate(f):
                 if ( (l[0:len(self.header_char)]!=self.header_char) and (l!="\n") ):
                     line = l.strip().split()
                     return len(line)
-
-
-    def _uncompress_ascii(self):
-        """ If the input fname has file extension `.gz`, 
-        then the method uses `gunzip` to decompress it, 
-        and returns the input fname truncated to exclude 
-        the `.gz` extension. If the input fname does not 
-        end in `.gz`, method does nothing besides return 
-        the input fname. 
-        """
-        if self.fname[-3:]=='.gz':
-            print("...uncompressing ASCII data")
-            os.system("gunzip "+self.fname)
-            self.fname = self.fname[:-3]
-        else:
-            # input_fname was already decompressed. 
-            # Turn off auto-recompress
-            self._recompress = False
-
-    def _compress_ascii(self):
-        """ Recompresses the halo catalog ascii data, 
-        and returns the input filename appended with `.gz`.  
-        """
-
-        recompress = (self._recompress) & (self.fname[-3:]!='.gz')
-        if recompress is True:
-            print("...re-compressing ASCII data")
-            os.system("gzip "+self.fname)
-            self.fname = self.fname + '.gz'
 
     def data_chunk_generator(self, chunk_size, f):
         """
@@ -332,7 +308,7 @@ class RockstarHlistReader(object):
         else:
             print("...Reading catalog in %i chunks, each with %i rows\n" % (Nchunks, chunksize))            
 
-        with open(self.fname) as f:
+        with self._compression_safe_file_opener(self.fname, 'r') as f:
 
             for skip_header_row in xrange(header_length):
                 _ = f.readline()
@@ -371,8 +347,6 @@ class RockstarHlistReader(object):
         else:
             msg = "Total runtime to read in ASCII = %.1f seconds\n"
         print(msg % runtime)
-
-        self._compress_ascii()
 
         return Table(full_array)
 
