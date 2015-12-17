@@ -4,7 +4,7 @@ Methods and classes to read ASCII files storing simulation data.
 
 """
 
-__all__ = ['BehrooziASCIIReader']
+__all__ = ['BehrooziAsciiReader']
 
 import os
 from time import time
@@ -14,9 +14,9 @@ from astropy.table import Table
 
 from . import catalog_manager, supported_sims, sim_defaults, cache_config
 
-from ..custom_exceptions import UnsupportedSimError, CatalogTypeError, HalotoolsCacheError, HalotoolsIOError
+from ..custom_exceptions import *
 
-class BehrooziASCIIReader(object):
+class BehrooziAsciiReader(object):
     """ Class containing methods used to read raw ASCII data generated with Rockstar 
     and made publicly available by Peter Behroozi. 
     """
@@ -25,28 +25,7 @@ class BehrooziASCIIReader(object):
         Parameters 
         -----------
         input_fname : string 
-            Name of the file (including absolute path) to be processed. 
-
-        simname : string, optional 
-            Nickname of the simulation, e.g. ``bolshoi``. If None is passed, 
-            Halotools will attempt to automatically infer this from ``input_fname``. 
-
-        halo_finder : string, optional 
-            Nickname of the halo-finder, e.g. ``rockstar``. If None is passed, 
-            Halotools will attempt to automatically infer this from ``input_fname``. 
-
-        cuts_funcobj : function object, optional
-            Any function used to apply row-wise cuts when reading ASCII data. 
-            ``cuts_funcobj`` should accept a structured array or Astropy Table as input, 
-            and return a boolean array of the same length. 
-            If None, default cut is set by ``default_halocat_cut``. 
-            If set to the string ``nocut``, all rows will be kept. 
-            The ``cuts_funcobj`` must be a callable function defined 
-            within the namespace of the `RockstarReader` instance, and 
-            it must be a stand-alone function, not a bound method of 
-            some other class.  
-            If passing ``cuts_funcobj`` keyword argument, 
-            you may not pass a ``column_bounds`` keyword argument. 
+            Absolute path of the file to be processed. 
 
         column_bounds : list, optional 
             List of tuples used to apply row-wise cuts when reading ASCII data. 
@@ -71,137 +50,16 @@ class BehrooziASCIIReader(object):
             # Check to see whether the uncompressed version is in cache
             if not os.path.isfile(input_fname[:-3]):
                 msg = "Input filename %s is not a file" 
-                raise HalotoolsCacheError(msg % input_fname)
+                raise HalotoolsError(msg % input_fname)
             else:
                 msg = ("Input filename ``%s`` is not a file. \n"
-                    "However, ``%s`` is, so change your input_fname accordingly.")
-                raise HalotoolsCacheError(msg % (input_fname, input_fname[:-3]))
+                    "However, ``%s`` exists, so change your input_fname accordingly.")
+                raise HalotoolsError(msg % (input_fname, input_fname[:-3]))
         else:
             self.fname = input_fname
                 
         self._recompress = recompress
         self._uncompress_ascii()
-
-        self.catman = catalog_manager.CatalogManager()
-
-        simname, halo_finder, redshift = self._infer_snapshot(self.fname, **kwargs)
-        self.halocat = supported_sims.HaloCatalog(
-            simname=simname, halo_finder=halo_finder, redshift=redshift)
-
-        self._process_cuts_funcobj(**kwargs)
-
-    def _infer_snapshot(self, fname, **kwargs):
-        """
-        """
-
-        subdir = os.path.abspath(os.path.join(fname, os.pardir))
-        pardir = os.path.abspath(os.path.join(subdir, os.pardir))
-
-        if 'halo_finder' in kwargs.keys():
-            halo_finder = kwargs['halo_finder']
-        else:
-            halo_finder = os.path.basename(subdir)
-
-        if 'simname' in kwargs.keys():
-            simname = kwargs['simname']
-        else:
-            simname = os.path.basename(pardir)
-
-        if simname not in cache_config.supported_sim_list:
-            msg = "Halotools tried to infer your simname from the input fname = %s \n"
-            "The inferred simname is %s, which is not recognized.\n "
-            "Try calling the function again but using ``simname`` as a keyword argument, \n"
-            "or otherwise add your simname to the list of supported sims. "
-            raise HalotoolsCacheError(msg % (fname, simname))
-
-        supported_halo_finders = cache_config.get_supported_halo_finders(simname)
-        if halo_finder not in supported_halo_finders:
-            msg = "Halotools tried to infer your halo_finder from the input fname = %s \n"
-            "The inferred halo_finder is %s, which is not recognized.\n "
-            "Try calling the function again but using ``halo_finder`` as a keyword argument, \n"
-            "or otherwise add your halo_finder to the list of supported halo_finders. "
-            raise HalotoolsCacheError(msg % (fname, halo_finder))
-
-        scale_factor = float(self.catman._get_scale_factor_substring(os.path.basename(fname)))
-        redshift = (1./scale_factor) - 1
-
-        return simname, halo_finder, redshift
-
-
-    def _process_cuts_funcobj(self, **kwargs):
-        """
-        """
-        if ('cuts_funcobj' in kwargs.keys()) & ('column_bounds' in kwargs.keys()):
-            raise KeyError("You may not pass both a ``cuts_funcobj`` and a ``column_bounds`` argument")
-        elif 'cuts_funcobj' in kwargs.keys():
-            if kwargs['cuts_funcobj'] == 'nocut':
-                g = lambda x : np.ones(len(x), dtype=bool)
-                self.cuts_funcobj = g
-                self._cuts_description = 'nocut'
-            else:
-                if callable(kwargs['cuts_funcobj']):
-                    self.cuts_funcobj = kwargs['cuts_funcobj']
-                    self._cuts_description = ('User-supplied cuts_funcobj '
-                        'given as cuts_funcobj keyword argument to BehrooziASCIIReader constructor')
-                else:
-                    raise TypeError("The input cuts_funcobj must be a callable function")
-        elif 'column_bounds' in kwargs.keys():
-            column_bounds = kwargs['column_bounds']
-            for cut in column_bounds:
-                if cut[0] not in self.halocat.dtype_ascii.names:
-                    msg = ("columns_bound keyword argument included a cut on ``%s``, "
-                        "which is not a column of this halo catalog\n")
-                    possible_matches = get_close_matches(cut[0], self.halocat.dtype_ascii.names)
-                    if possible_matches != []:
-                        s = ''
-                        for elt in possible_matches: 
-                            s = elt + ', ' + s
-                        s = s[:-2]
-
-                        additional_msg = "Did you mean any of the following keys?\n" + s
-                        msg = msg + additional_msg
-                    raise HalotoolsIOError(msg % cut[0])
-
-            def return_cutfunc(column_bounds):
-                cutfuncs = []
-                for cut in column_bounds:
-                    g = lambda x : (x[cut[0]] > cut[1]) & (x[cut[0]] < cut[2])
-                    cutfuncs.append(g)
-                def composite_cut(t):
-                    result = np.ones(len(t), dtype=bool)
-                    for cut in cutfuncs:
-                        result *= cut(t)
-                    return result
-                return composite_cut
-            self.cuts_funcobj = return_cutfunc(column_bounds)
-            self._cuts_description = ('User-supplied cuts_funcobj '
-                'given as cuts_funcobj keyword argument to BehrooziASCIIReader constructor')
-        else:
-            self.cuts_funcobj = self.default_halocat_cut
-            self._cuts_description = 'Default cut set by BehrooziASCIIReader.default_halocat_cut method'
-
-
-    def default_halocat_cut(self, x):
-        """ Function used to provide a simple cut on a raw halo catalog, 
-        such that only rows with :math:`M_{\\rm peak} > 300m_{\\rm p}` 
-        pass the cut. 
-
-        Parameters 
-        ----------
-        x : array 
-            Length-Nhalos structured numpy array, presumed to have a field called `mpeak`. 
-
-        Returns 
-        -------
-        result : array
-            Length-Nhalos boolean array serving as a mask. 
-        """
-
-        key = sim_defaults.mass_like_variable_to_apply_cut
-        mp = self.halocat.particle_mass
-        nptcl = sim_defaults.Num_ptcl_requirement
-        mass_cut = nptcl * mp
-        return x[key] > mass_cut
 
     def file_len(self):
         """ Compute the number of all rows in the raw halo catalog. 
