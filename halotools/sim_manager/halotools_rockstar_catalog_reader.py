@@ -16,7 +16,7 @@ from astropy.table import Table
 from . import catalog_manager, supported_sims, sim_defaults, cache_config
 from .read_rockstar_hlists import RockstarHlistReader
 
-from .catalog_column_info import * 
+from .catalog_version_info import * 
 
 from ..utils import convert_to_ndarray
 
