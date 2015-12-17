@@ -21,7 +21,7 @@ from ..custom_exceptions import *
 class RockstarHlistReader(object):
     """ Class containing methods used to read raw ASCII data generated with Rockstar. 
     """
-    def __init__(self, input_fname, dt, **kwargs):
+    def __init__(self, input_fname, **kwargs):
         """
         Parameters 
         -----------
@@ -29,7 +29,7 @@ class RockstarHlistReader(object):
             Absolute path of the file to be processed. 
 
         dt : Numpy dtype object 
-            The ``dt`` argument instructs the reader how to interpret the 
+            The ``dt`` keyword argument instructs the reader how to interpret the 
             columns stored in the ASCII data. 
 
         column_indices_to_keep : list, optional 
@@ -79,10 +79,10 @@ class RockstarHlistReader(object):
 
         """
 
-        self._process_constructor_inputs(input_fname, dt, **kwargs)
+        self._process_constructor_inputs(input_fname, **kwargs)
 
 
-    def _process_constructor_inputs(self, input_fname, dt, 
+    def _process_constructor_inputs(self, input_fname, 
         header_char='#', **kwargs):
         """
         """
@@ -102,16 +102,24 @@ class RockstarHlistReader(object):
 
         self._determine_compression_safe_file_opener()
 
+        self._interpret_input_dt(**kwargs)
+
         self.num_cols_total = self.infer_number_of_columns()
 
-        try:
-            assert type(dt) == np.dtype
-            assert len(dt) <= self.num_cols_total
-        except:
-            msg = ("\nInput ``dt`` must be a Numpy dtype object.\n")
-            raise HalotoolsError(msg)
-        self.dt = dt
+        self._interpret_column_indices_to_keep(**kwargs)
 
+        input_row_cuts = self._interpret_input_row_cuts(**kwargs)
+        self._set_row_cuts(input_row_cuts)
+
+        try:
+            assert (type(header_char) == str) or (type(header_char) == unicode)
+            assert len(header_char) == 1
+        except AssertionError:
+            msg = ("\nThe input ``header_char`` must be a single string character.\n")
+            raise HalotoolsError(msg)
+
+
+    def _interpret_column_indices_to_keep(self, **kwargs):
         try:
             column_indices_to_keep = kwargs['column_indices_to_keep']
             assert type(column_indices_to_keep) == list
@@ -128,16 +136,19 @@ class RockstarHlistReader(object):
             raise HalotoolsError(msg)
         self.column_indices_to_keep = column_indices_to_keep
 
-        input_row_cuts = self._interpret_input_row_cuts(**kwargs)
-        self._set_row_cuts(input_row_cuts)
 
+    def _interpret_input_dt(self, **kwargs):
+        """
+        """
         try:
-            assert (type(header_char) == str) or (type(header_char) == unicode)
-            assert len(header_char) == 1
-        except AssertionError:
-            msg = ("\nThe input ``header_char`` must be a single string character.\n")
+            dt = kwargs['dt']
+            assert type(dt) == np.dtype
+            assert len(dt) <= self.num_cols_total
+        except:
+            msg = ("\nRequired input keyword argument ``dt`` "
+                "must be a Numpy dtype object.\n")
             raise HalotoolsError(msg)
-
+        self.dt = dt
 
     def _determine_compression_safe_file_opener(self):
         """
