@@ -1,0 +1,8 @@
+
+from . import halotools_alpha_version0
+
+dtype_consuelo_rockstar = halotools_alpha_version0.dtype_slac_consuelo_rockstar_july19_2015
+dtype_bolshoi_rockstar = halotools_alpha_version0.dtype_slac_bolshoi_rockstar_july19_2015
+dtype_bolplanck_rockstar = halotools_alpha_version0.dtype_slac_bolplanck_rockstar_july19_2015
+dtype_multidark_rockstar = halotools_alpha_version0.dtype_slac_multidark_rockstar_july19_2015
+dtype_bolshoi_bdm = halotools_alpha_version0.dtype_slac_bolshoi_bdm_july19_2015
