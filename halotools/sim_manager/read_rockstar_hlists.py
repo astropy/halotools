@@ -4,7 +4,7 @@ Methods and classes to read ASCII files storing simulation data.
 
 """
 
-__all__ = ['RockstarHlistReader']
+__all__ = ('RockstarHlistReader', )
 
 import os
 from time import time
@@ -13,14 +13,14 @@ from difflib import get_close_matches
 from astropy.table import Table
 
 from . import catalog_manager, supported_sims, sim_defaults, cache_config
+from ..utils import convert_to_ndarray
 
 from ..custom_exceptions import *
 
 class RockstarHlistReader(object):
     """ Class containing methods used to read raw ASCII data generated with Rockstar. 
     """
-    def __init__(self, input_fname, dt, 
-        recompress = True, header_char='#', **kwargs):
+    def __init__(self, input_fname, dt, **kwargs):
         """
         Parameters 
         -----------
@@ -84,8 +84,7 @@ class RockstarHlistReader(object):
 
         """
 
-        self._process_constructor_inputs(input_fname, dt, 
-            recompress = True, header_char='#', **kwargs)
+        self._process_constructor_inputs(input_fname, dt, **kwargs)
 
         self._uncompress_ascii()
 
@@ -94,6 +93,9 @@ class RockstarHlistReader(object):
         recompress = True, header_char='#', **kwargs):
         """
         """
+        self.header_char = header_char
+        self._recompress = recompress
+
         # Check whether input_fname exists. 
         if not os.path.isfile(input_fname):
             # Check to see whether the uncompressed version is available instead
@@ -106,11 +108,11 @@ class RockstarHlistReader(object):
                 raise HalotoolsError(msg % (input_fname, input_fname[:-3]))
         self.fname = input_fname
 
-        num_cols_total = self.infer_number_of_columns()
+        self.num_cols_total = self.infer_number_of_columns()
 
         try:
             assert type(dt) == np.dtype
-            assert len(dt) <= num_cols_total
+            assert len(dt) <= self.num_cols_total
         except:
             msg = ("\nInput ``dt`` must be a Numpy dtype object.\n")
             raise HalotoolsError(msg)
@@ -119,11 +121,11 @@ class RockstarHlistReader(object):
         try:
             column_indices_to_keep = kwargs['column_indices_to_keep']
             assert type(column_indices_to_keep) == list
-            assert len(column_indices_to_keep) <= num_cols_total
+            assert len(column_indices_to_keep) <= self.num_cols_total
             assert len(column_indices_to_keep) == len(self.dt)
-            assert set(column_indices_to_keep).issubset(set(xrange(num_cols_total)))
+            assert set(column_indices_to_keep).issubset(set(xrange(self.num_cols_total)))
         except KeyError:
-            column_indices_to_keep = list(xrange(num_cols_total))
+            column_indices_to_keep = list(xrange(self.num_cols_total))
         except AssertionError:
             msg = ("\nInput ``column_indices_to_keep`` must be a list of integers\n"
                 "between zero and and the total number of ascii data columns,\n"
@@ -135,14 +137,13 @@ class RockstarHlistReader(object):
         try:
             row_cuts = kwargs['row_cuts']
             assert type(row_cuts) == list
-            assert len(row_cuts) <= num_cols_total
-            assert len(row_cuts) == len(self.dt)
+            assert len(row_cuts) <= len(self.dt)
             for entry in row_cuts:
                 assert type(entry) == tuple
                 assert len(entry) == 3
                 assert entry[0] in column_indices_to_keep
         except KeyError:
-            row_cuts = None
+            row_cuts = []
         except AssertionError:
             msg = ("\nInput ``row_cuts`` must be a list of 3-element tuples. \n"
                 "The first entry is an integer that will be interpreted as the \n"
@@ -150,7 +151,7 @@ class RockstarHlistReader(object):
                 "All column indices must appear in the input ``column_indices_to_keep``.\n"
                 )
             raise HalotoolsError(msg)
-        self.row_cuts = row_cuts
+        self._set_row_cuts(row_cuts)
 
         try:
             assert (type(header_char) == str) or (type(header_char) == unicode)
@@ -158,9 +159,30 @@ class RockstarHlistReader(object):
         except AssertionError:
             msg = ("\nThe input ``header_char`` must be a single string character.\n")
             raise HalotoolsError(msg)
-        self.header_char = header_char
-                
-        self._recompress = recompress
+
+
+    def _set_row_cuts(self, input_row_cuts):
+        """
+        """
+        # Initialize a multi-dimensional array 
+        # where we have num_cols_total entries of (-inf, inf)
+        x = np.zeros(self.num_cols_total*2) + float("inf")
+        x[0::2] = float("-inf")
+        x = x.reshape(self.num_cols_total, 2)
+
+        # For any column in x for which there is a cut on the corresponding halo property, 
+        # overwrite the column with the two-element tuple defining the cut (lower_bound, upper_bound)
+        for entry in input_row_cuts:
+            x[entry[0]] = entry[1:]
+
+        self.row_cuts = []
+        for column_index in self.column_indices_to_keep:
+            self.row_cuts.append((column_index, x[column_index][0], x[column_index][1]))
+
+        # self.row_cuts is now a list of tuples
+        # This list has the same number of entries as the number of columns to keep 
+        # Each element of this list is a 3-element tuple of the form: 
+        # (ascii_column_index, lower_bound, upper_bound)
 
     def header_len(self):
         """ Compute the number of header rows in the raw halo catalog. 
@@ -249,14 +271,14 @@ class RockstarHlistReader(object):
         --------
         chunk : tuple 
             Tuple of data from the ascii. 
-            Only data from ``columns_to_keep`` are yielded. 
+            Only data from ``column_indices_to_keep`` are yielded. 
 
         """
         cur = 0
         while cur < chunk_size:
             line = f.readline()    
             parsed_line = line.strip().split()
-            yield tuple(parsed_line[i] for i in self.columns_to_keep)
+            yield tuple(parsed_line[i] for i in self.column_indices_to_keep)
             cur += 1 
 
     def apply_row_cut(self, array_chunk):
@@ -310,7 +332,7 @@ class RockstarHlistReader(object):
         else:
             print("...Reading catalog in %i chunks, each with %i rows\n" % (Nchunks, chunksize))            
 
-        with open(fname) as f:
+        with open(self.fname) as f:
 
             for skip_header_row in xrange(header_length):
                 _ = f.readline()
@@ -318,7 +340,7 @@ class RockstarHlistReader(object):
             for ichunk in xrange(num_full_chunks):
 
                 chunk_array = np.array(list(
-                    data_chunk_generator(chunksize, f)), dtype=self.dt)
+                    self.data_chunk_generator(chunksize, f)), dtype=self.dt)
                 cut_chunk = self.apply_row_cut(chunk_array)
 
                 try:
@@ -330,7 +352,7 @@ class RockstarHlistReader(object):
 
             # Now for the final chunk
             chunk_array = np.array(list(
-                data_chunk_generator(chunksize_remainder, f)), dtype=self.dt)
+                self.data_chunk_generator(chunksize_remainder, f)), dtype=self.dt)
             cut_chunk = self.apply_row_cut(chunk_array)
 
             try:
@@ -355,4 +377,4 @@ class RockstarHlistReader(object):
         return Table(full_array)
 
 
-        
+
