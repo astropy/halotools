@@ -44,19 +44,22 @@ def host_status(halos):
 	host_halo_mask = halos['halo_hostid'] == halos['halo_id']
 	host_halos = halos[host_halo_mask]
 
-	if ('halo_scale_factor_firstacc' in halos.keys()) & ('halo_scale_factor' in halos.keys()):
-		# implement workaround of the fact that 'halo_scale_factor_firstacc' was 
-		# artificially truncated at 3 decimals in the original ascii, but not 'halo_scale_factor'
-		scale_factor_diff = host_halos['halo_scale_factor'] - host_halos['halo_scale_factor_firstacc'] 
-		ejected_mask = scale_factor_diff > 0.01
-		output[host_halo_mask] = np.where(ejected_mask, 'ejected_host_halo', 'true_host_halo')
-	else:
-		warn("Unable to determine whether host halo was ejected because "
+	try:
+		halo_scale_factor_firstacc = host_halos['halo_scale_factor_firstacc']
+		halo_scale_factor = host_halos['halo_scale_factor']
+		ejected_mask = halo_scale_factor > halo_scale_factor_firstacc + 0.001
+		output[host_halo_mask] = np.where(
+			ejected_mask, 'ejected_host_halo', 'true_host_halo')
+	except KeyError:
+		msg = ("\nUnable to determine whether host halo was ejected because \n"
 			"either ``halo_scale_factor_firstacc`` or ``halo_scale_factor`` "
-			"key is missing from input halo catalog")
+			"key is missing from input halo catalog.\n"
+			"All present-day hosts will be labeled as ``true_host_halo``.\n")
+		warn(msg)
 		output[host_halo_mask] = 'true_host_halo'
 
-	sub_halo_mask = np.invert(host_halo_mask)
+	# Determine whether the hosts of present-day subs appears in the catalog 
+	sub_halo_mask = ~host_halo_mask
 	sub_halos = halos[sub_halo_mask]
 	output[sub_halo_mask] = 'subhalo_nohost'
 	output_subhalo_subarray = output[sub_halo_mask]
