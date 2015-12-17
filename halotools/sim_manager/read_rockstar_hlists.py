@@ -4,7 +4,7 @@ Methods and classes to read ASCII files storing simulation data.
 
 """
 
-__all__ = ['BehrooziAsciiReader']
+__all__ = ['RockstarHlistReader']
 
 import os
 from time import time
@@ -16,38 +16,87 @@ from . import catalog_manager, supported_sims, sim_defaults, cache_config
 
 from ..custom_exceptions import *
 
-class BehrooziAsciiReader(object):
-    """ Class containing methods used to read raw ASCII data generated with Rockstar 
-    and made publicly available by Peter Behroozi. 
+class RockstarHlistReader(object):
+    """ Class containing methods used to read raw ASCII data generated with Rockstar. 
     """
-    def __init__(self, input_fname, recompress = True, **kwargs):
+    def __init__(self, input_fname, dt, 
+        recompress = True, header_char='#', **kwargs):
         """
         Parameters 
         -----------
         input_fname : string 
             Absolute path of the file to be processed. 
 
-        column_bounds : list, optional 
-            List of tuples used to apply row-wise cuts when reading ASCII data. 
-            Each list element is a three-element tuple. The first tuple element 
-            must be a column key of the halo catalog. The second and third 
-            tuple elements will be interpreted as lower and upper bounds. 
-            If column_bounds is an N-element list, only ASCII rows passing *all* 
-            cuts will be kept in the resulting catalog. 
-            If passing ``column_bounds`` keyword argument, 
-            you may not pass a ``cuts_funcobj`` keyword argument. 
+        dt : Numpy dtype object 
+            The ``dt`` argument instructs the reader how to interpret the 
+            columns stored in the ASCII data. 
+
+        column_indices_to_keep : list, optional 
+            List of indices of columns that will be stored in the processed catalog. 
+            Default behavior is to keep all columns. 
+
+        row_cuts : list, optional 
+            List of tuples used to define which rows of the ASCII data will be kept.
+            Default behavior is to make no cuts. 
+
+            The row-cut is determined from a list of tuples as follows. 
+            Each element of the ``row_cuts`` list is a three-element tuple. 
+            The first tuple element will be interpreted as the index of the column 
+            upon which your cut is made. 
+            The column-indexing convention is C-like, 
+            so that the first column has column-index = 0. 
+            The second and third tuple elements will be interpreted 
+            as lower and upper bounds on this column, respectively. 
+
+            For example, if you only want to keep halos 
+            with :math:`M_{\\rm peak} > 1e10`, 
+            and :math:`M_{\\rm peak}` is the tenth column of the ASCII file, 
+            then you would set row_cuts = [(9, 1e10, float("inf"))]. 
+
+            For any column-index appearing in ``row_cuts``, this index must also 
+            appear in ``column_indices_to_keep``: for purposes of good bookeeping, 
+            you are not permitted to place a cut on a column that you do not keep. 
 
         recompress : bool, optional 
-            If ``input_fname`` is a compressed file, `BehrooziASCIIReader` 
+            If ``input_fname`` is a compressed file, `RockstarHlistReader` 
             will automatically uncompress it before reading. If recompress 
             is True, the file will be recompressed after reading; if False, 
             it will remain uncompressed. Default is True. 
+
+        header_char : str, optional
+            String to be interpreted as a header line of the ascii hlist file. 
+            Default is '#'. 
+
+        Notes 
+        -----
+        Making even very conservative cuts on 
+        either present-day or peak halo mass 
+        can result in dramatic reductions in file size; 
+        most halos in a typical raw catalog are right on the hairy edge 
+        of the numerical resolution limit. 
+
+        Also note that the processed halo catalogs 
+        provided by Halotools *do* make cuts on rows. So if you run the 
+        `RockstarHlistReader` with default settings on one of the raw 
+        catalogs provided by Halotools, you will *not* get a  
+        result that matches the corresponding processed catalog 
+        provided by Halotools. 
+
         """
 
+        self._process_constructor_inputs(input_fname, dt, 
+            recompress = True, header_char='#', **kwargs)
+
+        self._uncompress_ascii()
+
+
+    def _process_constructor_inputs(self, input_fname, dt, 
+        recompress = True, header_char='#', **kwargs):
+        """
+        """
         # Check whether input_fname exists. 
-        # If not, raise an exception. If so, bind to self. 
         if not os.path.isfile(input_fname):
-            # Check to see whether the uncompressed version is in cache
+            # Check to see whether the uncompressed version is available instead
             if not os.path.isfile(input_fname[:-3]):
                 msg = "Input filename %s is not a file" 
                 raise HalotoolsError(msg % input_fname)
@@ -55,39 +104,70 @@ class BehrooziAsciiReader(object):
                 msg = ("Input filename ``%s`` is not a file. \n"
                     "However, ``%s`` exists, so change your input_fname accordingly.")
                 raise HalotoolsError(msg % (input_fname, input_fname[:-3]))
-        else:
-            self.fname = input_fname
+        self.fname = input_fname
+
+        num_cols_total = self.infer_number_of_columns()
+
+        try:
+            assert type(dt) == np.dtype
+            assert len(dt) <= num_cols_total
+        except:
+            msg = ("\nInput ``dt`` must be a Numpy dtype object.\n")
+            raise HalotoolsError(msg)
+        self.dt = dt
+
+        try:
+            column_indices_to_keep = kwargs['column_indices_to_keep']
+            assert type(column_indices_to_keep) == list
+            assert len(column_indices_to_keep) <= num_cols_total
+            assert len(column_indices_to_keep) == len(self.dt)
+            assert set(column_indices_to_keep).issubset(set(xrange(num_cols_total)))
+        except KeyError:
+            column_indices_to_keep = list(xrange(num_cols_total))
+        except AssertionError:
+            msg = ("\nInput ``column_indices_to_keep`` must be a list of integers\n"
+                "between zero and and the total number of ascii data columns,\n"
+                "and the length of ``column_indices_to_keep`` must equal "
+                "the length of the input ``dt``.\n")
+            raise HalotoolsError(msg)
+        self.column_indices_to_keep = column_indices_to_keep
+
+        try:
+            row_cuts = kwargs['row_cuts']
+            assert type(row_cuts) == list
+            assert len(row_cuts) <= num_cols_total
+            assert len(row_cuts) == len(self.dt)
+            for entry in row_cuts:
+                assert type(entry) == tuple
+                assert len(entry) == 3
+                assert entry[0] in column_indices_to_keep
+        except KeyError:
+            row_cuts = None
+        except AssertionError:
+            msg = ("\nInput ``row_cuts`` must be a list of 3-element tuples. \n"
+                "The first entry is an integer that will be interpreted as the \n"
+                "column-index upon which a cut is made.\n"
+                "All column indices must appear in the input ``column_indices_to_keep``.\n"
+                )
+            raise HalotoolsError(msg)
+        self.row_cuts = row_cuts
+
+        try:
+            assert (type(header_char) == str) or (type(header_char) == unicode)
+            assert len(header_char) == 1
+        except AssertionError:
+            msg = ("\nThe input ``header_char`` must be a single string character.\n")
+            raise HalotoolsError(msg)
+        self.header_char = header_char
                 
         self._recompress = recompress
-        self._uncompress_ascii()
 
-    def file_len(self):
-        """ Compute the number of all rows in the raw halo catalog. 
-
-        Parameters 
-        ----------
-        fname : string 
-
-        Returns 
-        -------
-        Nrows : int
-     
-        """
-        with open(self.fname) as f:
-            for i, l in enumerate(f):
-                pass
-        Nrows = i + 1
-        return Nrows
-
-    def header_len(self,header_char='#'):
+    def header_len(self):
         """ Compute the number of header rows in the raw halo catalog. 
 
         Parameters 
         ----------
         fname : string 
-
-        header_char : str, optional
-            string to be interpreted as a header line
 
         Returns 
         -------
@@ -102,12 +182,29 @@ class BehrooziAsciiReader(object):
         Nheader = 0
         with open(self.fname) as f:
             for i, l in enumerate(f):
-                if ( (l[0:len(header_char)]==header_char) or (l=="\n") ):
+                if ( (l[0:len(self.header_char)]==self.header_char) or (l=="\n") ):
                     Nheader += 1
                 else:
                     break
 
         return Nheader
+
+    def data_len(self):
+        Nrows_data = 0
+        with open(self.fname) as f:
+            for i, l in enumerate(f):
+                if ( (l[0:len(self.header_char)]!=self.header_char) and (l!="\n") ):
+                    Nrows_data += 1
+        return Nrows_data
+
+    def infer_number_of_columns(self):
+        """ Find the first line of data and infer the total number of columns
+        """
+        with open(self.fname) as f:
+            for i, l in enumerate(f):
+                if ( (l[0:len(self.header_char)]!=self.header_char) and (l!="\n") ):
+                    line = l.strip().split()
+                    return len(line)
 
 
     def _uncompress_ascii(self):
@@ -138,6 +235,41 @@ class BehrooziAsciiReader(object):
             os.system("gzip "+self.fname)
             self.fname = self.fname + '.gz'
 
+    def data_chunk_generator(self, chunk_size, f):
+        """
+        Parameters 
+        -----------
+        chunk_size : int 
+            Number of rows of data in the chunk being generated 
+
+        f : File
+            Open file object being read
+
+        Returns 
+        --------
+        chunk : tuple 
+            Tuple of data from the ascii. 
+            Only data from ``columns_to_keep`` are yielded. 
+
+        """
+        cur = 0
+        while cur < chunk_size:
+            line = f.readline()    
+            parsed_line = line.strip().split()
+            yield tuple(parsed_line[i] for i in self.columns_to_keep)
+            cur += 1 
+
+    def apply_row_cut(self, array_chunk):
+        """
+        """
+        mask = np.ones(len(array_chunk), dtype = bool)
+        for idx, entry in enumerate(self.row_cuts):
+            mask *= ( 
+                (array_chunk[array_chunk.dtype.names[idx]] >= entry[1]) & 
+                (array_chunk[array_chunk.dtype.names[idx]] <= entry[2])
+                )
+        return array_chunk[mask]
+
 
     def read_halocat(self, **kwargs):
         """ Reads the raw halo catalog in chunks and returns a structured array
@@ -145,90 +277,68 @@ class BehrooziAsciiReader(object):
 
         Parameters 
         ----------
-        nchunks : int, optional 
+        Nchunks : int, optional 
             `read_halocat` reads and processes ascii 
             in chunks at a time, both to improve performance and 
             so that the entire raw halo catalog need not fit in memory 
             in order to process it. The total number of chunks to use 
-            can be specified with the `nchunks` argument. Default is 1000. 
+            can be specified with the `Nchunks` argument. Default is 1000. 
 
         """
         start = time()
 
-        # First read the first line as a self-consistency check against self.halocat.header_ascii
-        with open(self.fname) as f:
-            self._header_ascii_from_input_fname = f.readline()
+        try:
+            Nchunks = kwargs['Nchunks']
+        except KeyError:
+            Nchunks = 100
 
-        if 'nchunks' in kwargs.keys():
-            Nchunks = kwargs['nchunks']
-        else:
-            Nchunks = 1000
-
-        dt = self.halocat.dtype_ascii
-
-        file_length = self.file_len()
         header_length = self.header_len()
-        chunksize = file_length / Nchunks
+        num_data_rows = self.data_len()
+
+        chunksize = int(num_data_rows / float(Nchunks))
+        num_full_chunks = num_data_rows/chunksize
+        chunksize_remainder = num_data_rows % chunksize
         if chunksize == 0:
-            chunksize = file_length # data will now never be chunked
+            chunksize = num_data_rows # data will not be chunked
             Nchunks = 1
 
         print("\n...Processing ASCII data of file: \n%s\n " % self.fname)
-        print(" Total number of rows in file = %i" % file_length)
+        print(" Total number of rows in file = %i" % num_data_rows)
         print(" Number of rows in detected header = %i \n" % header_length)
         if Nchunks==1:
             print("Reading catalog in a single chunk of size %i\n" % chunksize)
         else:
-            print("...Reading catalog in %i chunks, each with %i rows\n" % (Nchunks, chunksize))
+            print("...Reading catalog in %i chunks, each with %i rows\n" % (Nchunks, chunksize))            
 
-        print("Applying the following row-wise cuts: \n%s\n" % self._cuts_description)
+        with open(fname) as f:
 
-        chunk_counter = 0
-        chunk = []
-        container = []
-        iout = np.round(Nchunks / 10.).astype(int)
-        for linenum, line in enumerate(open(self.fname)):
+            for skip_header_row in xrange(header_length):
+                _ = f.readline()
 
-            if line[0] == '#':
-                pass
-            else:
-                parsed_line = line.strip().split()
-                chunk.append(tuple(parsed_line))  
-        
-            if (linenum % chunksize == 0) & (linenum > 0):
+            for ichunk in xrange(num_full_chunks):
 
-                chunk_counter += 1
-                if (chunk_counter % iout)==0:
-                    print("... working on chunk # %i of %i\n" % (chunk_counter, Nchunks))
+                chunk_array = np.array(list(
+                    data_chunk_generator(chunksize, f)), dtype=self.dt)
+                cut_chunk = self.apply_row_cut(chunk_array)
 
                 try:
-                    a = np.array(chunk, dtype = dt)
-                except ValueError:
-                    Nfields = len(dt.fields)
-                    print("Number of fields in np.dtype = %i" % Nfields)
-                    Ncolumns = []
-                    for elt in chunk:
-                        if len(elt) not in Ncolumns:
-                            Ncolumns.append(len(elt))
-                    print("Number of columns in chunk = ")
-                    for ncols in Ncolumns:
-                        print(ncols)
-                    print chunk[-1]
-                    raise HalotoolsIOError("Number of columns does not match length of dtype")
+                    # append the new chunk onto the existing array
+                    full_array = np.append(full_array, cut_chunk)
+                except NameError:
+                    # we have just gotten the first chunk
+                    full_array = cut_chunk
 
-                container.append(a[self.cuts_funcobj(a)])
-                chunk = []
+            # Now for the final chunk
+            chunk_array = np.array(list(
+                data_chunk_generator(chunksize_remainder, f)), dtype=self.dt)
+            cut_chunk = self.apply_row_cut(chunk_array)
 
-        a = np.array(chunk, dtype = dt)
-        container.append(a[self.cuts_funcobj(a)])
-
-        print("Done reading ASCII. Now bundling into a single array")
-    # Bundle up all array chunks into a single array
-        for chunk in container:
             try:
-                output = np.append(output, chunk)
+                # append the new chunk onto the existing array
+                full_array = np.append(full_array, cut_chunk)
             except NameError:
-                output = np.array(chunk) 
+                # There were zero full chunks and so we only have the remainder
+                full_array = cut_chunk
                 
 
         end = time()
@@ -242,4 +352,7 @@ class BehrooziAsciiReader(object):
 
         self._compress_ascii()
 
-        return Table(output)
+        return Table(full_array)
+
+
+        
