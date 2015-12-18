@@ -869,6 +869,94 @@ def search_log_for_possibly_existing_entry(log, dz_tol = 0.05, **entries_to_chec
 
 
 
+def verify_file_storing_unrecognized_halo_table(fname):
+    """
+    """
+    if not os.path.isfile(fname):
+        msg = ("\nThe input filename \n" + fname + "\ndoes not exist.")
+        raise HalotoolsError(msg)
+
+    try:
+        import h5py
+    except ImportError:
+        raise HalotoolsError("\nYou must have h5py installed "
+            "in order to use the verify_unrecognized_halo_table function.\n")
+
+    try:
+        f = h5py.File(fname)
+    except:
+        msg = ("\nThe input filename \n" + fname + "\nmust be an hdf5 file.\n")
+        raise HalotoolsError(msg)
+
+    try:
+        simname = f.attrs['simname']
+        halo_finder = f.attrs['halo_finder']
+        redshift = np.round(float(f.attrs['redshift']), 4)
+        version_name = f.attrs['version_name']
+        Lbox = f.attrs['Lbox']
+        ptcl_mass = f.attrs['ptcl_mass']
+        inferred_fname = f.attrs['fname']
+    except:
+        msg = ("\nThe hdf5 file storing the halos must have the following metadata:\n"
+            "``simname``, ``halo_finder``, ``redshift``, ``version_name``, ``fname``, "
+            "``Lbox``, ``ptcl_mass``\n"
+            "Here is an example of how to add metadata "
+            "for hdf5 files can be added using the following syntax:\n\n"
+            ">>> f = h5py.File(fname)\n"
+            ">>> f.attrs.create('simname', simname)\n"
+            ">>> f.close()\n\n"
+            "Be sure to use string-valued variables for the following inputs:\n"
+            "``simname``, ``halo_finder``, ``version_name`` and ``fname``,\n"
+            "and floats for the following inputs:\n"
+            "``redshift``, ``Lbox`` (in Mpc/h)  ``ptcl_mass`` (in Msun/h)\n"
+            )
+
+        raise HalotoolsError(msg)
+
+    try:
+        halo_table = f['data']
+    except:
+        msg = ("\nThe hdf5 file must have a dset key called `data`\n"
+            "so that the halo table is accessible with the following syntax:\n"
+            ">>> f = h5py.File(fname)\n"
+            ">>> halo_table = f['data']\n")
+        raise HalotoolsError(msg)
+
+    try:
+        halo_id = halo_table['halo_id']
+        halo_x = halo_table['halo_x']
+        halo_y = halo_table['halo_y']
+        halo_z = halo_table['halo_z']
+    except KeyError:
+        msg = ("\nAll halo tables must at least have the following columns:\n"
+            "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``\n")
+        raise HalotoolsError(msg)
+
+    # Check that Lbox properly bounds the halo positions
+    try:
+        assert np.all(halo_x >= 0)
+        assert np.all(halo_y >= 0)
+        assert np.all(halo_z >= 0)
+        assert np.all(halo_x <= Lbox)
+        assert np.all(halo_y <= Lbox)
+        assert np.all(halo_z <= Lbox)
+    except AssertionError:
+        msg = ("\nThere are points in the input halo table that "
+            "lie outside [0, Lbox] in some dimension.\n")
+        raise HalotoolsError(msg)
+
+    # Check that halo_id column contains a set of unique entries
+    try:
+        num_halos = len(halo_table)
+        unique_halo_ids = list(set(halo_id))
+        num_unique_ids = len(unique_halo_ids)
+        assert num_halos == num_unique_ids
+    except AssertionError:
+        msg = ("\nThe ``halo_id`` column of your halo table must contain a unique integer "
+            "for every halo\n")
+        raise HalotoolsError(msg)
+
+    return fname
 
 
 
