@@ -34,9 +34,6 @@ def get_halo_table_cache_log_fname():
     dirname = os.path.join(get_astropy_cache_dir(), 'halotools')
     return os.path.join(dirname, 'halo_table_cache_log.txt')
 
-def get_redshift_string(redshift):
-    return str(np.round(redshift, 4))
-
 def get_halo_table_cache_log_header():
     return 'simname halo_finder redshift version_name fname'
 
