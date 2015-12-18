@@ -334,58 +334,6 @@ def return_halo_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
             msg += entry['fname'] + "\n"
         raise HalotoolsError(msg)
 
-
-def halo_table_hdf5_has_matching_metadata(fname_halo_table, dz_tol = 0.05, **kwargs):
-    """
-    """
-    if not os.path.isfile(fname_halo_table):
-        raise HalotoolsError("\nThe filename ``"+fname_halo_table+"`` does not exist.\n")
-    try:
-        import h5py
-    except ImportError:
-        raise HalotoolsError("Must have h5py package installed "
-            "to use the sim_manager sub-package")
-
-    f = h5py.File(fname_halo_table)
-
-    exact_match = True
-    close_redshift_match = True
-    metadata_to_check = ('simname', 'halo_finder', 'version_name')
-    unavailable_metadata = []
-    for metadata_key in metadata_to_check:
-        try:
-            metadata_in_hdf5_file = f.attrs[metadata_key]
-            requested_metadata = kwargs[metadata_key]
-            exact_match *= metadata_in_hdf5_file == requested_metadata
-            close_redshift_match *= metadata_in_hdf5_file == requested_metadata
-        except KeyError:
-            unavailable_metadata.append(metadata_key)
-
-    try:
-        redshift_of_hdf5_file = np.round(float(f.attrs['redshift']), 4)
-        requested_redshift = kwargs['redshift']
-        exact_match *= redshift_of_hdf5_file == requested_redshift
-        close_redshift_match *= abs(redshift_of_hdf5_file - requested_redshift) > dz_tol
-    except KeyError:
-        unavailable_metadata.append('redshift')
-
-    if len(unavailable_metadata) > 0:
-        msg = ("\nThe filename ``"+fname_halo_table+
-            "`` has the following missing metadata:\n")
-        for metadata_key in unavailable_metadata:
-            msg += (metadata_key + "\n")
-        msg += ("Thus for this file it is not possible "
-            "to verify whether it is a proper match.\n"
-            "If this file was provided by Halotools, "
-            "please raise an Issue on GitHub.\n"
-            "If you provided and/or processed this file yourself, \n"
-            "you should use the ``update_metadata`` function on this file.\n")
-        warn(msg)
-
-    f.close()
-    return exact_match, close_redshift_match
-    
-
 def verify_halo_table_cache_existence(**kwargs):
     """
     """
