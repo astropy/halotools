@@ -150,7 +150,7 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
             "If that is the case, just open up the log, "
             "add a line to it and call this function again.\n"
             "Be sure that the redshift you enter agrees exactly \nwith the "
-            "corresponding entry of `halo_table_cache_log.txt`\n"
+            "corresponding entry of `ptcl_table_cache_log.txt`\n"
             "Always save a backup version of the log before making manual changes.\n")
         raise HalotoolsError(msg)
 
@@ -408,6 +408,85 @@ def verify_ptcl_table_cache_log_columns(**kwargs):
             "the appropriate lines to the cache log.\n"
             "Please contact the Halotools developers if the issue persists.\n")
         raise HalotoolsError(msg)
+
+
+
+def verify_file_storing_unrecognized_ptcl_table(fname):
+    """
+    """
+    if not os.path.isfile(fname):
+        msg = ("\nThe input filename \n" + fname + "\ndoes not exist.")
+        raise HalotoolsError(msg)
+
+    try:
+        import h5py
+    except ImportError:
+        raise HalotoolsError("\nYou must have h5py installed "
+            "in order to use the verify_unrecognized_ptcl_table function.\n")
+
+    try:
+        f = h5py.File(fname)
+    except:
+        msg = ("\nThe input filename \n" + fname + "\nmust be an hdf5 file.\n")
+        raise HalotoolsError(msg)
+
+    try:
+        simname = f.attrs['simname']
+        redshift = np.round(float(f.attrs['redshift']), 4)
+        version_name = f.attrs['version_name']
+        Lbox = f.attrs['Lbox']
+        inferred_fname = f.attrs['fname']
+    except:
+        msg = ("\nThe hdf5 file storing the particles must have the following metadata:\n"
+            "``simname``, ``redshift``, ``version_name``, ``fname``, ``Lbox``. \n"
+            "Here is an example of how to add metadata "
+            "for hdf5 files can be added using the following syntax:\n\n"
+            ">>> f = h5py.File(fname)\n"
+            ">>> f.attrs.create('simname', simname)\n"
+            ">>> f.close()\n\n"
+            "Be sure to use string-valued variables for the following inputs:\n"
+            "``simname``, ``version_name`` and ``fname``,\n"
+            "and floats for the following inputs:\n"
+            "``redshift``, ``Lbox`` (in Mpc/h) \n"
+            )
+
+        raise HalotoolsError(msg)
+
+    try:
+        ptcl_table = f['data']
+    except:
+        msg = ("\nThe hdf5 file must have a dset key called `data`\n"
+            "so that the halo table is accessible with the following syntax:\n"
+            ">>> f = h5py.File(fname)\n"
+            ">>> ptcl_table = f['data']\n")
+        raise HalotoolsError(msg)
+
+    try:
+        ptcl_x = ptcl_table['x']
+        ptcl_y = ptcl_table['y']
+        ptcl_z = ptcl_table['z']
+    except KeyError:
+        msg = ("\nAll particle tables must at least have the following columns:\n"
+            "``x``, ``y``, ``z``\n")
+        raise HalotoolsError(msg)
+
+    # Check that Lbox properly bounds the halo positions
+    try:
+        assert np.all(ptcl_x >= 0)
+        assert np.all(ptcl_y >= 0)
+        assert np.all(ptcl_z >= 0)
+        assert np.all(ptcl_x <= Lbox)
+        assert np.all(ptcl_y <= Lbox)
+        assert np.all(ptcl_z <= Lbox)
+    except AssertionError:
+        msg = ("\nThere are points in the input particle table that "
+            "lie outside [0, Lbox] in some dimension.\n")
+        raise HalotoolsError(msg)
+
+    return fname
+
+
+
 
 
 
