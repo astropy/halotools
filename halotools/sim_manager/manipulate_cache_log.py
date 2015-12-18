@@ -382,9 +382,6 @@ def verify_halo_table_cache_header(**kwargs):
             "with a text editor and replacing the current line with the correct one.\n")
         raise HalotoolsError(msg)
 
-def erase_halo_table_cache_log_entry(**kwargs):
-    raise HalotoolsError("The erase_halo_table_cache_log_entry function is not implemented yet.")
-
 def verify_halo_table_cache_log_columns(**kwargs):
     """
     """
