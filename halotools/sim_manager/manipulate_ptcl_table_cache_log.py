@@ -155,7 +155,11 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
         raise HalotoolsError(msg)
 
     elif len(exact_matches) == 1:
-            return fname
+        idx = np.where(exact_match_mask == True)[0]
+        linenum = idx[0] + 2
+        check_ptcl_table_metadata_consistency(exact_matches[0], linenum = linenum)
+        fname = exact_matches['fname'][0]
+        return fname
     else:
         msg = ("\nHalotools detected multiple particle catalogs matching "
             "the input arguments.\n"
@@ -164,6 +168,110 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
             msg += entry['fname'] + "\n"
         msg += ("Please delete the erroneous lines from the log before proceeding.\n")
         raise HalotoolsError(msg)
+
+def check_ptcl_table_metadata_consistency(cache_log_entry, linenum = None):
+    """
+    """
+    try:
+        import h5py
+    except ImportError:
+        raise HalotoolsError("\nYou must have h5py installed in order to use "
+            "the Halotools halo catalog cache system.\n")
+
+    ptcl_table_fname = cache_log_entry['fname']
+    if os.path.isfile(ptcl_table_fname):
+        f = h5py.File(ptcl_table_fname)
+    else:
+        msg = ("\nYou requested to load a halo catalog "
+            "with the following filename: \n"+ptcl_table_fname+"\n"
+            "This file does not exist. \n"
+            "Either this file has been deleted, or it could just be stored \n"
+            "on an external disk that is currently not plugged in.\n")
+        raise HalotoolsError(msg)
+
+    # Verify that the columns of the cache log agree with 
+    # the metadata stored in the hdf5 file (if present)
+    cache_column_names_to_check = ('simname', 'version_name', 'redshift')
+    for key in cache_column_names_to_check:
+        requested_attr = cache_log_entry[key]
+        try:
+            attr_of_cached_catalog = f.attrs[key]
+            if key == 'redshift':
+                assert abs(requested_attr - attr_of_cached_catalog) < 0.01
+            else:
+                assert attr_of_cached_catalog == requested_attr
+        except KeyError:
+            msg = ("\nThe particle table stored in \n``"+ptcl_table_fname+"\n"
+                "does not have metadata stored for the ``"+key+"`` attribute\n"
+                "and so some self-consistency checks cannot be performed.\n"
+                "If you are seeing this message while attempting to load a \n"
+                "particle catalog provided by Halotools, please submit a bug report on GitHub.\n"
+                "If you are using your own particle catalog that you have stored \n"
+                "in the Halotools cache yourself, you should consider adding this metadata\n"
+                "to the hdf5 file as one of the keys of the .attrs file attribute.\n")
+            warn(msg)
+        except AssertionError:
+            msg = ("\nThe particle table stored in \n``"+ptcl_table_fname+"\n"
+                "has the value ``"+str(attr_of_cached_catalog)+"`` stored as metadata for the "
+                "``"+key+"`` attribute.\nThis is inconsistent with the "
+                "``"+str(requested_attr)+"`` value that you requested,\n"
+                "which is also the value that appears in the log.\n"
+                "If you are seeing this message while attempting to load a \n"
+                "particle catalog provided by Halotools, please submit a bug report on GitHub.\n"
+                "If you are using your own particle catalog that you have stored \n"
+                "in the Halotools cache yourself, then you have "
+                "attempted to access a particle catalog \nby requesting a value for "
+                "the ``"+key+"`` attribute that is inconsistent with the stored value.\n\n"
+                "You can rectify this problem in one of two ways:\n\n"
+                "1. If the correct value for the ``"+key+
+                "`` attribute is ``"+str(attr_of_cached_catalog)+"``,\n"
+                "then you should open up the log and change "
+                "the ``"+key+"`` column to ``"+str(attr_of_cached_catalog)+"``.\n")
+            if linenum is not None:
+                msg += "The relevant line to change is line #" + str(linenum) + ",\n"
+                msg += "where the first line of the log is line #1.\n"
+            else:
+                msg += ("The relevant line is the one with the ``fname`` column set to \n"
+                    +ptcl_table_fname+"\n")
+
+            if (type(requested_attr) == str) or (type(requested_attr) == unicode):
+                attr_msg = "'"+str(requested_attr)+"'"
+            else:
+                attr_msg = str(requested_attr)
+            msg += ("\n2. If the correct value for the ``"+key+
+                "`` attribute is ``"+str(requested_attr)+"``,\n"
+                "then your hdf5 file has incorrect metadata that needs to be changed.\n"
+                "You can make the correction as follows:\n\n"
+                ">>> fname = '"+ptcl_table_fname+"'\n"
+                ">>> f = h5py.File(fname)\n"
+                ">>> f.attrs.create('"+key+"', "+attr_msg+")\n"
+                ">>> f.close()\n\n"
+                "Be sure to use string-valued variables for the following inputs:\n"
+                "``simname``, ``version_name`` and ``fname``,\n"
+                "and a float for the ``redshift`` input.\n"
+                )
+            raise HalotoolsError(msg)
+
+    try:
+        assert 'Lbox' in f.attrs.keys()
+    except AssertionError:
+        msg = ("\nAll particle tables must contain metadata storing the "
+            "box size of the simulation.\n"
+            "The particle table stored in the following location is missing this metadata:\n"
+            +ptcl_table_fname+"\n")
+        raise HalotoolsError(msg)
+
+    try:
+        d = f['data']
+        assert 'x' in d.dtype.names
+        assert 'y' in d.dtype.names
+        assert 'z' in d.dtype.names
+    except AssertionError:
+        msg = ("\nAll particle tables must at least have the following columns:\n"
+            "``x``, ``y``, ``z``\n")
+        raise HalotoolsError(msg)
+
+    f.close()
 
 
 def remove_repeated_ptcl_table_cache_lines(**kwargs):
