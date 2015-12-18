@@ -12,6 +12,7 @@ from time import time
 import numpy as np
 from difflib import get_close_matches
 from astropy.table import Table
+from copy import deepcopy
 
 from . import catalog_manager, supported_sims, sim_defaults, cache_config
 from ..utils import convert_to_ndarray
@@ -76,20 +77,18 @@ class RockstarHlistReader(object):
 
             The row-cut is determined from a list of tuples as follows. 
             Each element of the ``row_cuts`` list is a three-element tuple. 
-            The first tuple element will be interpreted as the index of the column 
+            The first tuple element must be a string that will 
+            be interpreted as the halo property  
             upon which your cut is made. 
-            The column-indexing convention is C-like, 
-            so that the first column has column-index = 0. 
             The second and third tuple elements will be interpreted 
-            as lower and upper bounds on this column, respectively. 
+            as lower and upper bounds on this halo property, respectively. 
 
             For example, if you only want to keep halos 
             with :math:`M_{\\rm peak} > 1e10`, 
-            and :math:`M_{\\rm peak}` is the tenth column of the ASCII file, 
-            then you would set row_cuts = [(9, 1e10, float("inf"))]. 
+            then you would set row_cuts = [('halo_mpeak', 1e10, float("inf"))]. 
 
-            For any column-index appearing in ``row_cuts``, this index must also 
-            appear in ``column_indices_to_keep``: for purposes of good bookeeping, 
+            Every entry appearing in ``row_cuts`` must also 
+            appear in ``columns_to_keep``: for purposes of good bookeeping, 
             you are not permitted to place a cut on a column that you do not keep. 
 
         header_char : str, optional
@@ -126,7 +125,7 @@ class RockstarHlistReader(object):
         self._interpret_input_dt()
 
         input_row_cuts = self._interpret_input_row_cuts(**kwargs)
-        self._set_row_cuts(input_row_cuts)
+        self.row_cuts = self._get_row_cuts(input_row_cuts)
 
 
     def _get_fname(self, input_fname):
@@ -253,22 +252,47 @@ class RockstarHlistReader(object):
             for entry in input_row_cuts:
                 assert type(entry) == tuple
                 assert len(entry) == 3
-                assert entry[0] in self.column_indices_to_keep
+                assert entry[0] in self.dt.names
         except KeyError:
             input_row_cuts = []
         except AssertionError:
             msg = ("\nInput ``row_cuts`` must be a list of 3-element tuples. \n"
-                "The first entry is an integer that will be interpreted as the \n"
-                "column-index upon which a cut is made.\n"
-                "All column indices must appear in the input ``column_indices_to_keep``.\n"
+                "The first entry must be a string that will be interpreted as the \n"
+                "name of the column upon which an on-the-fly cut is made.\n"
+                "All such columns must appear in the input ``columns_to_keep``.\n"
                 )
             raise HalotoolsError(msg)
 
         return input_row_cuts
 
-    def _set_row_cuts(self, input_row_cuts):
+    def _get_row_cuts(self, input_row_cuts):
         """
         """
+
+        # The first entry in each row_cut tuple 
+        # contains the string name of the column 
+        # Use the columns_to_keep list to replace this entry with the column index
+        reformatted_row_cuts = list(
+            [deepcopy(a[0]), deepcopy(a[1]), deepcopy(a[2])] 
+            for a in input_row_cuts)
+
+        for ii, row_cut in enumerate(input_row_cuts):
+            name = row_cut[0]
+            # Look for the corresponding entry
+            index = np.nan
+            for column in self.columns_to_keep:
+                if column[1] == name:
+                    index = column[0]
+            if index == np.nan:
+                msg = ("\nYou have made a cut on the ``"+name+"`` halo property\n"
+                    "without including this property with the ``columns_to_keep``. "
+                    "For bookeeping reasons, this is not permissible.\n"
+                    "Either change your cut or include the column.\n")
+                raise HalotoolsError(msg)
+            else:
+                reformatted_row_cuts[ii][0] = index
+
+
         # Initialize a multi-dimensional array 
         # where we have num_cols_total entries of (-inf, inf)
         x = np.zeros(self.num_cols_total*2) + float("inf")
@@ -277,14 +301,16 @@ class RockstarHlistReader(object):
 
         # For any column in x for which there is a cut on the corresponding halo property, 
         # overwrite the column with the two-element tuple defining the cut (lower_bound, upper_bound)
-        for entry in input_row_cuts:
+        for entry in reformatted_row_cuts:
+            print(entry)
             x[entry[0]] = entry[1:]
 
-        self.row_cuts = []
+        output_row_cuts = []
         for column_index in self.column_indices_to_keep:
-            self.row_cuts.append((column_index, x[column_index][0], x[column_index][1]))
+            output_row_cuts.append((column_index, x[column_index][0], x[column_index][1]))
 
-        # self.row_cuts is now a list of tuples
+        return output_row_cuts
+        # output_row_cuts is now a list of tuples
         # This list has the same number of entries as the number of columns to keep 
         # Each element of this list is a 3-element tuple of the form: 
         # (ascii_column_index, lower_bound, upper_bound)
