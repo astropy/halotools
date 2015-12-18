@@ -2,8 +2,7 @@
 update the ascii data file that keeps track of N-body simulation data. 
 """
 
-__all__ = ('get_formatted_halo_table_cache_log_line', 
-    'get_halo_table_cache_log_header', 
+__all__ = ('get_halo_table_cache_log_header', 
     'overwrite_halo_table_cache_log', 'read_halo_table_cache_log')
 
 import numpy as np
@@ -40,15 +39,6 @@ def get_redshift_string(redshift):
 
 def get_halo_table_cache_log_header():
     return 'simname halo_finder redshift version_name fname'
-
-def get_formatted_halo_table_cache_log_line(simname, redshift, 
-    halo_finder, version_name, fname):
-    redshift_string = get_redshift_string(redshift)
-    formatted_line = (
-        simname + '  ' + redshift_string + '  ' + 
-        halo_finder + '  ' + version_name + '  ' + fname 
-        )
-    return formatted_line
 
 def overwrite_halo_table_cache_log(new_log, **kwargs):
     """
