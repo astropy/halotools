@@ -109,6 +109,11 @@ class TestCacheManipulation(TestCase):
             "has been implemented but remains untested.")
         
 
+    def test_redshift_message(self):
+        msg = ("\nNeed to implement a message that suggests a nearby redshift to try when \n"
+            "a ptcl_table is not found\n")
+        raise HalotoolsError(msg)
+
     def tearDown(self):
         for name in self.temp_cache_dirnames:
             os.system('rm -rf ' + name)
