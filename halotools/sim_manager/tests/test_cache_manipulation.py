@@ -99,23 +99,9 @@ class TestCacheManipulation(TestCase):
 
 
     @pytest.mark.xfail
-    def test_identify_fname_halo_table(self):
-        raise HalotoolsError("The identify_fname_halo_table function is not implemented yet.")
-
-    @pytest.mark.xfail
-    def test_update_metadata(self):
-        """ This function is referenced by file_has_matching_metadata.
-        """ 
-        raise HalotoolsError("The update_metadata function is not implemented yet.")
-
-    @pytest.mark.xfail
     def test_rebuild_halo_table_cache_log(self):
         raise HalotoolsError("The rebuild_halo_table_cache_log function is not implemented yet.")
 
-
-    @pytest.mark.xfail
-    def test_auto_detect_halo_table(self):
-        raise HalotoolsError("The auto_detect_halo_table function is not implemented yet.")
 
     @pytest.mark.xfail
     def test_overwrite_existing_halo_table_in_cache(self):
