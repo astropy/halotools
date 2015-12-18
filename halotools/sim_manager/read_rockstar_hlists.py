@@ -21,20 +21,54 @@ from ..custom_exceptions import *
 class RockstarHlistReader(object):
     """ Class containing methods used to read raw ASCII data generated with Rockstar. 
     """
-    def __init__(self, input_fname, **kwargs):
+    def __init__(self, input_fname, header_char='#', **kwargs):
         """
         Parameters 
         -----------
         input_fname : string 
             Absolute path of the file to be processed. 
 
-        dt : Numpy dtype object 
-            The ``dt`` keyword argument instructs the reader how to interpret the 
-            columns stored in the ASCII data. 
+        columns_to_keep : list, optional 
+            List of tuples used to define which columns 
+            of the halo catalog ASCII data will be kept.
+            If ``columns_to_keep`` is not specified, the 
+            ``columns_to_keep_ascii_fname`` keyword must be provided. 
 
-        column_indices_to_keep : list, optional 
-            List of indices of columns that will be stored in the processed catalog. 
-            Default behavior is to keep all columns. 
+            For every desired column of data, ``columns_to_keep`` 
+            should have a corresponding list element. 
+            Each list element is a tuple with 3 entries. 
+            The first tuple entry is an integer providing 
+            the *index* of the column to be kept, starting from 0. 
+            The second tuple entry is a string providing the name 
+            that will be given to the data in that column, 
+            e.g., 'halo_id' or 'halo_spin'. 
+            The third tuple entry is a string defining the Numpy dtype 
+            of the data in that column, 
+            e.g., 'f4' for a float, 'f8' for a double, 
+            or 'i8' for a long. 
+
+            Thus an example input for ``columns_to_keep`` could be 
+            [(0, 'halo_scale_factor', 'f4'), (1, 'halo_id', 'i8'), (16, 'halo_vmax', 'f4')]. 
+
+        columns_to_keep_ascii_fname : string, optional 
+            The ``columns_to_keep_ascii_fname`` string is 
+            the filename storing ascii data that 
+            determines the ``columns_to_keep`` variable. 
+            So ``columns_to_keep_ascii_fname`` is just a convenient way to 
+            determine ``columns_to_keep`` that also helps 
+            keep a permanent record of the choices you made to process your catalog. 
+
+            The number of rows of data in the ``columns_to_keep_ascii_fname`` file 
+            determines the number of columns of halo catalog ASCII data that will be kept. 
+            Each row in the file should have 3 columns, 
+            one column for each of the three 
+            tuple elements in ``columns_to_keep``. 
+            The file may begin with any number of header lines beginning with '#'. 
+            These will be ignored by Halotools but can be used 
+            to provide notes for your own bookkeeping. 
+
+            See halotools/data/RockstarHlistReader_input_example.dat 
+            for an explicit example. 
 
         row_cuts : list, optional 
             List of tuples used to define which rows of the ASCII data will be kept.
@@ -79,15 +113,25 @@ class RockstarHlistReader(object):
 
         """
 
-        self._process_constructor_inputs(input_fname, **kwargs)
+        self.fname = self._get_fname(input_fname)
+
+        self.header_char = self._get_header_char(header_char)
+
+        self._determine_compression_safe_file_opener()
+
+        self.num_cols_total = self.infer_number_of_columns()
+
+        self.columns_to_keep = self._determine_columns_to_keep(**kwargs)
+        self._interpret_column_indices_to_keep()
+        self._interpret_input_dt()
+
+        input_row_cuts = self._interpret_input_row_cuts(**kwargs)
+        self._set_row_cuts(input_row_cuts)
 
 
-    def _process_constructor_inputs(self, input_fname, 
-        header_char='#', **kwargs):
+    def _get_fname(self, input_fname):
         """
         """
-        self.header_char = header_char
-
         # Check whether input_fname exists. 
         if not os.path.isfile(input_fname):
             # Check to see whether the uncompressed version is available instead
@@ -98,57 +142,94 @@ class RockstarHlistReader(object):
                 msg = ("Input filename ``%s`` is not a file. \n"
                     "However, ``%s`` exists, so change your input_fname accordingly.")
                 raise HalotoolsError(msg % (input_fname, input_fname[:-3]))
-        self.fname = input_fname
 
-        self._determine_compression_safe_file_opener()
+        return input_fname
 
-        self._interpret_input_dt(**kwargs)
-
-        self.num_cols_total = self.infer_number_of_columns()
-
-        self._interpret_column_indices_to_keep(**kwargs)
-
-        input_row_cuts = self._interpret_input_row_cuts(**kwargs)
-        self._set_row_cuts(input_row_cuts)
-
+    def _get_header_char(self, header_char):
+        """
+        """
         try:
             assert (type(header_char) == str) or (type(header_char) == unicode)
             assert len(header_char) == 1
         except AssertionError:
             msg = ("\nThe input ``header_char`` must be a single string character.\n")
             raise HalotoolsError(msg)
+        return header_char
 
-
-    def _interpret_column_indices_to_keep(self, **kwargs):
+    def _determine_columns_to_keep(self, **kwargs):
+        """
+        """
         try:
-            column_indices_to_keep = kwargs['column_indices_to_keep']
-            assert type(column_indices_to_keep) == list
-            assert len(column_indices_to_keep) <= self.num_cols_total
-            assert len(column_indices_to_keep) == len(self.dt)
-            assert set(column_indices_to_keep).issubset(set(xrange(self.num_cols_total)))
+            columns_to_keep = kwargs['columns_to_keep']
         except KeyError:
-            column_indices_to_keep = list(xrange(self.num_cols_total))
-        except AssertionError:
-            msg = ("\nInput ``column_indices_to_keep`` must be a list of integers\n"
-                "between zero and and the total number of ascii data columns,\n"
-                "and the length of ``column_indices_to_keep`` must equal "
-                "the length of the input ``dt``.\n")
-            raise HalotoolsError(msg)
-        self.column_indices_to_keep = column_indices_to_keep
+            columns_to_keep = self._infer_columns_to_keep_from_ascii(**kwargs)
+        finally:
+            self._test_columns_to_keep(columns_to_keep)
+        
+        return columns_to_keep
+
+    def _test_columns_to_keep(self, columns_to_keep):
+        """
+        """
+        for entry in columns_to_keep:
+            try:
+                assert len(entry) == 3
+                assert type(entry[0]) == int
+                assert (type(entry[1]) == str) or (type(entry[1]) == unicode)
+                assert (type(entry[2]) == str) or (type(entry[2]) == unicode)
+                dt = np.dtype([(entry[1], entry[2])])
+            except:
+                msg = ("\nYour input ``columns_to_keep`` is not properly formatted.\n"
+                    "See the docstring of `RockstarHlistReader` for a description.\n")
+                raise HalotoolsError(msg)
+            try:
+                assert entry[0] < self.num_cols_total
+            except:
+                msg = ("\nYour ``"+entry[1]+"`` entry of ``columns_to_keep``\n"
+                    "has its first tuple element = " + str(entry[0]) + "\n"
+                    "But the total number of columns in the hlist file is " + 
+                    str(self.num_cols_total) + "\nRemember that the first column has index 0.\n"
+                    )
+                raise HalotoolsError(msg)
 
 
-    def _interpret_input_dt(self, **kwargs):
+    def _infer_columns_to_keep_from_ascii(self, **kwargs):
         """
         """
         try:
-            dt = kwargs['dt']
-            assert type(dt) == np.dtype
-            assert len(dt) <= self.num_cols_total
-        except:
-            msg = ("\nRequired input keyword argument ``dt`` "
-                "must be a Numpy dtype object.\n")
+            columns_fname = kwargs['columns_to_keep_ascii_fname']
+            assert os.path.isfile(columns_fname)
+            t = Table.read(columns_fname, format='ascii', 
+                names = ['column_index', 'halo_property', 'dtype'])
+            columns_to_keep = [(t['column_index'][i], t['halo_property'][i], 
+                t['dtype'][i]) for i in xrange(len(t))]
+            return columns_to_keep
+        except AssertionError:
+            msg = ("\nThe input ``columns_to_keep_ascii_fname`` does not exist.\n"
+                "You must specify an absolute path to an existing file.\n")
             raise HalotoolsError(msg)
-        self.dt = dt
+        except KeyError:
+            msg = ("\nIf you do not pass an input ``columns_to_keep`` argument, \n"
+                "you must pass an input ``columns_to_keep_ascii_fname`` argument.\n")
+            raise HalotoolsError(msg)
+        except InconsistentTableError:
+            msg = ("\nThe file stored at \n" + columns_fname + "\n"
+                "is not properly formatted. See the following file for an example:\n\n"
+                "halotools/data/RockstarHlistReader_input_example.dat\n\n")
+            raise HalotoolsError(msg)
+
+
+    def _interpret_column_indices_to_keep(self):
+        """
+        """
+        self.column_indices_to_keep = [entry[0] for entry in self.columns_to_keep]
+
+
+    def _interpret_input_dt(self):
+        """
+        """
+        dt_list = [(entry[1], entry[2]) for entry in self.columns_to_keep]
+        self.dt = np.dtype(dt_list)
 
     def _determine_compression_safe_file_opener(self):
         """
