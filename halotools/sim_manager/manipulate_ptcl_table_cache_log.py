@@ -75,7 +75,7 @@ def read_ptcl_table_cache_log(**kwargs):
             "If that checks out, try running the ``rebuild_ptcl_table_cache_log`` function.\n")
         raise HalotoolsError(msg)
 
-def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
+def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.01, **kwargs):
     """
     """
     try:
@@ -113,7 +113,7 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
     exact_match_mask = np.ones(len(log), dtype=bool)
     exact_match_mask *= log['simname'] == simname
     exact_match_mask *= log['version_name'] == version_name
-    exact_match_mask *= log['redshift'] == redshift
+    exact_match_mask *= abs(log['redshift'] - redshift) < dz_tol
     exact_matches = log[exact_match_mask]
 
     def add_substring_to_msg(msg):
