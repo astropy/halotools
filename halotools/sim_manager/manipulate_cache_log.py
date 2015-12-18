@@ -535,57 +535,6 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
 
     f.close()
 
-def check_halo_table_cache_for_nonexistent_files(delete_nonexistent_files=False, **kwargs):
-    """ Function searches the halo table cache log for references to files that do not exist and (optionally) deletes them from the log. 
-    """
-
-    try:
-        cache_fname = kwargs['cache_fname']
-    except KeyError:
-        cache_fname = get_halo_table_cache_log_fname()
-    print("Inspecting the halo table cache log located "
-        "in the following directory:\ncache_fname")
-    verify_cache_log(cache_fname = cache_fname)
-
-
-    log = read_halo_table_cache_log(cache_fname = cache_fname)
-    rows_to_keep = np.ones(len(log), dtype=bool)
-
-    for row, entry in enumerate(log):
-        fname = entry['fname']
-        if not os.path.isfile(fname):
-            missing_file_msg = ("\nLine #"+str(row+1)+" of your halo table cache log \n"
-                "stores the following information:\n"
-                "simname = " + entry['simname'] + "\n"
-                "redshift = " + entry['redshift'] + "\n"
-                "halo_finder = " + entry['halo_finder'] + "\n"
-                "version_name = " + entry['version_name'] + "\n"
-                "fname = " + entry['fname'] + "\n"
-                "There is no file stored at that location.\n"
-                )
-
-            if delete_nonexistent_files is True:
-                missing_file_msg += ("Because you called the ``cleanup_halo_table_cache`` function \n"
-                    "with the ``delete_nonexistent_files`` argument set to ``True``, \n"
-                    "this entry will now be deleted from your cache.\n")
-                print(missing_file_msg)
-                rows_to_keep[row] = False
-            else:
-                missing_file_msg += ("This could simply be because "
-                    "the location is an external disk that is not connected.\n"
-                    "However, if this file has become obsolete,\n"
-                    "then you should delete this entry from your cache.\n"
-                    "You can do this in one of two ways:\n"
-                    "1. Opening the cache log file stored in \n"+cache_fname+"\n"
-                    "and manually deleting line #"+str(row+1)+"\n"
-                    "2. Calling the ``cleanup_halo_table_cache`` function again \n"
-                    "with the ``delete_nonexistent_files`` argument set to ``True``.\n"
-                    )
-                print(missing_file_msg)
-    log = log[rows_to_keep]
-    overwrite_halo_table_cache_log(log, cache_fname = cache_fname)
-
-
 
 def remove_repeated_cache_lines(**kwargs):
     """ Method searches the cache for possible repetition of lines and removes them, if present. 
