@@ -98,32 +98,6 @@ class TestCacheManipulation(TestCase):
                 pass
 
 
-
-
-    # @pytest.mark.skipif('not APH_MACHINE')
-    # def test_read_write(self):
-        
-    #     for cache_fname, table in zip(
-    #         self.dummy_cache_log_fnames, self.cache_log_tables_to_test):
-
-    #         manipulate_cache_log.overwrite_halo_table_cache_log(
-    #             table, cache_fname=cache_fname)
-
-    #         table2 = manipulate_cache_log.read_halo_table_cache_log(cache_fname=cache_fname)
-
-    #         assert set(table.keys()).issubset(set(table2.keys()))
-    #         assert not set(table2.keys()).issubset(set(table.keys()))
-
-    #         for key in table.keys():
-    #             assert np.all(table[key] == table2[key])
-
-    @pytest.mark.xfail
-    def test_update_halo_table_cache_log(self):
-        raise HalotoolsError("The update_halo_table_cache_log function is not implemented yet.")
-
-
-
-
     @pytest.mark.xfail
     def test_identify_fname_halo_table(self):
         raise HalotoolsError("The identify_fname_halo_table function is not implemented yet.")
