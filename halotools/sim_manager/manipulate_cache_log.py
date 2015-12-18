@@ -81,9 +81,6 @@ def read_halo_table_cache_log(**kwargs):
             "If that checks out, try running the ``rebuild_halo_table_cache_log`` function.\n")
         raise HalotoolsError(msg)
 
-
-
-
 def return_halo_table_fname_after_verification(fname, **kwargs):
     """
     """
@@ -336,66 +333,6 @@ def return_halo_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
         for entry in close_matches:
             msg += entry['fname'] + "\n"
         raise HalotoolsError(msg)
-
-
-
-
-def auto_detect_matching_halo_tables(**kwargs):
-    """
-    """
-    matching_halo_table_list = []
-    close_redshift_halo_table_list = []
-
-    # If a cache location is explicitly specified, 
-    # use it instead of the standard location. 
-    # This facilitate unit-testing
-    try:
-        cache_fname = kwargs['cache_fname']
-    except KeyError:
-        cache_fname = get_halo_table_cache_log_fname()
-    cache_dirname = os.path.dirname(cache_fname)
-    halo_table_cache_dirname = os.path.join(cache_dirname, 'halo_tables')
-
-    fname_pattern = '*.hdf5'
-    for path, dirlist, filelist in os.walk(halo_table_cache_dirname):
-        for name in fnmatch.filter(filelist, fname_pattern):
-            exact_match, close_match = halo_table_hdf5_has_matching_metadata(name, **kwargs)
-            if exact_match:
-                matching_halo_table_list.append(name)
-            if close_match:
-                close_redshift_halo_table_list.append(name)
-
-    # Now search all directories that appear in the cache log
-    # This is not necessarily redundant with the above because 
-    # users may have stored halo catalogs on external disks, 
-    # which the cache log may be aware of
-    verify_cache_log(**kwargs)
-    log = read_halo_table_cache_log(**kwargs)
-    for entry in log:
-        fname_log_entry = entry['fname']
-        halo_table_cache_dirname = os.path.dirname(fname_log_entry)
-        for path, dirlist, filelist in os.walk(halo_table_cache_dirname):
-            for name in fnmatch.filter(filelist, fname_pattern):
-                exact_match, close_match = halo_table_hdf5_has_matching_metadata(name, **kwargs)
-                if exact_match:
-                    matching_halo_table_list.append(name)
-                if close_match:
-                    close_redshift_halo_table_list.append(name)
-
-    matching_halo_table_list = list(set(matching_halo_table_list))
-    if len(matching_halo_table_list) == 0:
-        msg = ("\nThere are no catalogs in your cache that meet your requested specs.\n"
-            "Either supply more metadata or an explicit filename instead.\n")
-        raise HalotoolsError(msg)
-    elif len(matching_halo_table_list) == 1:
-        return matching_halo_table_list[0]
-    else:
-        msg = ("\nHalotools detected multiple halo catalogs matching "
-            "the input arguments.\nThe returned list provides the filenames"
-            "of all matching catalogs\n")
-        warn(msg)
-        return matching_halo_table_list
-
 
 
 def halo_table_hdf5_has_matching_metadata(fname_halo_table, dz_tol = 0.05, **kwargs):
