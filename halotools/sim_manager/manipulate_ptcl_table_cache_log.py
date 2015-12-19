@@ -75,6 +75,77 @@ def read_ptcl_table_cache_log(**kwargs):
             "If that checks out, try running the ``rebuild_ptcl_table_cache_log`` function.\n")
         raise HalotoolsError(msg)
 
+def return_ptcl_table_fname_after_verification(fname, **kwargs):
+    """
+    """
+    # If a cache location is explicitly specified, 
+    # use it instead of the standard location. 
+    # This facilitate unit-testing
+    try:
+        cache_fname = kwargs['cache_fname']
+    except KeyError:
+        cache_fname = get_ptcl_table_cache_log_fname()
+
+    try:
+        assert os.path.isfile(fname)
+    except AssertionError:
+        msg = ("\nYou tried to load a particle catalog by "
+            "passing in the following explicit filename: \n\n" + fname + "\n\nThis file does not exist.\n"
+            "First check your spelling, remembering that the full absolute path is required.\n"
+            "If your input filename is as intended, the file has either been deleted or \n"
+            "is located on an external disk that is not currently plugged in.\n")
+        raise HalotoolsError(msg)
+
+    verify_ptcl_table_cache_log(**kwargs)
+    remove_repeated_ptcl_table_cache_lines(cache_fname=cache_fname)
+    log = read_ptcl_table_cache_log(cache_fname=cache_fname)
+    mask = log['fname'] == str(fname)
+    matching_catalogs = log[mask]
+
+    if len(matching_catalogs) == 0:
+        msg = ("The filename you requested ,``"+fname+"`` \nexists but it does not appear"
+            "in the particle table cache log,\n"
+            +cache_fname+"\nYou can add this catalog to your cache log by "
+            "opening the log file with a text editor\n"
+            "and adding the appropriate line that matches the existing pattern.\n")
+        raise HalotoolsError(msg)
+
+    elif len(matching_catalogs) == 1:
+        idx = np.where(mask == True)[0]
+        linenum = idx[0] + 2
+        check_metadata_consistency(matching_catalogs[0], linenum = linenum)
+        fname = matching_catalogs['fname'][0]
+        return fname
+
+    else:
+        # There are two or more cache log entries with the same exact filename
+        # First try to resolve the problem by 
+        # removing any possibly repeated entries from the cache log
+        remove_repeated_ptcl_table_cache_lines(**kwargs)
+        log = read_ptcl_table_cache_log(cache_fname=cache_fname)
+        mask = log['fname'] == fname
+        matching_catalogs = log[mask]
+        if len(matching_catalogs) == 1:
+            check_metadata_consistency(matching_catalogs[0])
+            fname = matching_catalogs['fname'][0]
+            return fname
+        elif len(matching_catalogs) > 1:
+            idx = np.where(mask == True)[0] + 1
+            msg = ("\nThe filename you requested \n``"+fname+"``\n"
+                "appears multiple times in the particle table cache log,\n"
+                +"and the metadata stored by these repeated entries is mutually inconsistent.\n"
+                "Use a text editor to open up the log and delete the incorrect line(s).\n"
+                "The log is stored in the following location:\n"
+                +cache_fname+"\n"
+                "The offending lines  are #")
+            for entry in idx:
+                msg += str(entry) + ', '
+            msg += "\nwhere the first line of the log file is line #1.\n"
+            msg += "\nAlways save a backup version of the log before making manual changes.\n"
+
+            raise HalotoolsError(msg)
+
+
 def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
     """
     """
@@ -152,7 +223,7 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
             "If that is the case, just open up the log, "
             "add a line to it and call this function again.\n"
             "Be sure that the redshift you enter agrees exactly \nwith the "
-            "corresponding entry of `ptcl_table_cache_log.txt`\n"
+            "corresponding entry of `halo_table_cache_log.txt`\n"
             "Always save a backup version of the log before making manual changes.\n")
         raise HalotoolsError(msg)
 
@@ -180,13 +251,13 @@ def check_ptcl_table_metadata_consistency(cache_log_entry, linenum = None):
         import h5py
     except ImportError:
         raise HalotoolsError("\nYou must have h5py installed in order to use "
-            "the Halotools halo catalog cache system.\n")
+            "the Halotools particle catalog cache system.\n")
 
     ptcl_table_fname = cache_log_entry['fname']
     if os.path.isfile(ptcl_table_fname):
         f = h5py.File(ptcl_table_fname)
     else:
-        msg = ("\nYou requested to load a halo catalog "
+        msg = ("\nYou requested to load a particle catalog "
             "with the following filename: \n"+ptcl_table_fname+"\n"
             "This file does not exist. \n"
             "Either this file has been deleted, or it could just be stored \n"
@@ -322,9 +393,9 @@ def verify_ptcl_table_cache_existence(**kwargs):
         msg = ("\nThe file " + cache_fname + "\ndoes not exist. "
             "This file serves as a log for all the catalogs of randomly selected\n"
             "dark matter particles you use with Halotools.\n"
-            "If you have not yet downloaded the initial halo catalog,\n"
+            "If you have not yet downloaded the initial particle catalog,\n"
             "you should do so now following the ``Getting Started`` instructions on "
-            "http://halotools.readthedocs.org\nIf you have already taken this step,\n"
+            "http://halotools.readthedocs.org\n\nIf you have already taken this step,\n"
             "first verify that your cache directory itself still exists:\n"
             +os.path.dirname(cache_fname) + "\n"
             "Also verify that the ``particle_catalogs`` sub-directory of the cache \n"
@@ -377,7 +448,7 @@ def verify_ptcl_table_cache_log_columns(**kwargs):
             log = read_ptcl_table_cache_log(cache_fname = cache_fname)
         except:
             msg = ("The file " + cache_fname + 
-                "\nkeeps track of the halo catalogs"
+                "\nkeeps track of the particle catalogs"
                 "you use with Halotools.\n"
                 "This file appears to be corrupted.\n"
                 "Please visually inspect this file to ensure it has not been "
@@ -385,7 +456,7 @@ def verify_ptcl_table_cache_log_columns(**kwargs):
                 "Then store a backup of this file and execute the following script:\n"
                 "halotools/scripts/rebuild_ptcl_table_cache_log.py\n"
                 "If this does not resolve the error you are encountering,\n"
-                "and if you have been using halo catalogs stored on some external disk \n"
+                "and if you have been using particle catalogs stored on some external disk \n"
                 "or other non-standard location, you may try manually adding \n"
                 "the appropriate lines to the cache log.\n"
                 "Please contact the Halotools developers if the issue persists.\n")
@@ -399,7 +470,7 @@ def verify_ptcl_table_cache_log_columns(**kwargs):
     except AssertionError:
         cache_fname = get_ptcl_table_cache_log_fname()
         msg = ("The file " + cache_fname + 
-            "\nkeeps track of the halo catalogs"
+            "\nkeeps track of the particle catalogs"
             "you use with Halotools.\n"
             "This file appears to be corrupted.\n"
             "Please visually inspect this file to ensure it has not been "
@@ -407,7 +478,7 @@ def verify_ptcl_table_cache_log_columns(**kwargs):
             "Then store a backup of this file and execute the following script:\n"
             "halotools/scripts/rebuild_ptcl_table_cache_log.py\n"
             "If this does not resolve the error you are encountering,\n"
-            "and if you have been using halo catalogs stored on some external disk \n"
+            "and if you have been using particle catalogs stored on some external disk \n"
             "or other non-standard location, you may try manually adding \n"
             "the appropriate lines to the cache log.\n"
             "Please contact the Halotools developers if the issue persists.\n")
@@ -460,7 +531,7 @@ def verify_file_storing_unrecognized_ptcl_table(fname):
         ptcl_table = f['data']
     except:
         msg = ("\nThe hdf5 file must have a dset key called `data`\n"
-            "so that the halo table is accessible with the following syntax:\n"
+            "so that the particle table is accessible with the following syntax:\n"
             ">>> f = h5py.File(fname)\n"
             ">>> ptcl_table = f['data']\n")
         raise HalotoolsError(msg)
@@ -474,7 +545,7 @@ def verify_file_storing_unrecognized_ptcl_table(fname):
             "``x``, ``y``, ``z``\n")
         raise HalotoolsError(msg)
 
-    # Check that Lbox properly bounds the halo positions
+    # Check that Lbox properly bounds the particle positions
     try:
         assert np.all(ptcl_x >= 0)
         assert np.all(ptcl_y >= 0)
@@ -490,6 +561,222 @@ def verify_file_storing_unrecognized_ptcl_table(fname):
     return fname
 
 
+def store_new_ptcl_table_in_cache(ptcl_table, ignore_nearby_redshifts = False, 
+    **metadata):
+    """
+    """
+    try:
+        assert type(ptcl_table) is Table
+    except AssertionError:
+        msg = ("\nThe input ``ptcl_table`` must be an Astropy Table object.\n")
+        raise HalotoolsError(msg)
+
+    try:
+        import h5py
+    except ImportError:
+        raise HalotoolsError("\nYou must have h5py installed "
+            "in order to store a new particle catalog.\n")
+
+    # The following two keyword arguments are intentionally absent 
+    # from the docstring and are for developer convenience only. 
+    # No end-user should ever have recourse for either 
+    # cache_fname or overwrite_existing_ptcl_table
+    try:
+        cache_fname = deepcopy(metadata['cache_fname'])
+        del metadata['cache_fname']
+    except KeyError:
+        cache_fname = get_ptcl_table_cache_log_fname()
+
+
+    # Verify that the metadata has all the necessary keys
+    try:
+        simname = metadata['simname']
+        redshift = metadata['redshift']
+        version_name = metadata['version_name']
+        fname = metadata['fname']
+        Lbox = metadata['Lbox']
+    except KeyError:
+        msg = ("\nYou tried to create a new particle catalog without passing in\n"
+            "a sufficient amount of metadata as keyword arguments.\n"
+            "All calls to the `store_new_ptcl_table_in_cache` function\n"
+            "must have the following keyword arguments "
+            "that will be interpreted as particle catalog metadata:\n\n"
+            "``simname``, ``redshift``, ``version_name``, ``fname``, \n"
+            "``Lbox``\n")
+        raise HalotoolsError(msg)
+
+
+    try:
+        assert str(fname[-5:]) == '.hdf5'
+    except AssertionError:
+        msg = ("\nThe input ``fname`` must end with the extension ``.hdf5``\n")
+        raise HalotoolsError(msg)
+
+    # The filename cannot already exist
+    if os.path.isfile(fname):
+        raise HalotoolsError("\nYou tried to store a new particle catalog "
+            "with the following filename: \n\n"
+            +fname+"\n\n"
+            "A file at this location already exists. \n"
+            "Either delete it or choose a different filename.\n")
+
+    try:
+        verify_ptcl_table_cache_existence(cache_fname = cache_fname)
+        first_ptcl_table_in_cache = False
+    except HalotoolsError:
+        # This is the first particle catalog being stored in cache
+        first_ptcl_table_in_cache = True
+        new_log = Table()
+        new_log['simname'] = [simname]
+        new_log['redshift'] = [redshift]
+        new_log['version_name'] = [version_name]
+        new_log['fname'] = [fname]
+        overwrite_ptcl_table_cache_log(new_log, cache_fname = cache_fname)
+
+    verify_cache_log(cache_fname = cache_fname)
+    remove_repeated_ptcl_table_cache_lines(cache_fname = cache_fname)
+    log = read_ptcl_table_cache_log(cache_fname = cache_fname)
+
+    # There is no need for any of the following checks if this is the first catalog stored
+    if first_ptcl_table_in_cache is False:
+
+        # Make sure that the filename does not already appear in the log
+        exact_match_mask, close_match_mask = (
+            search_log_for_possibly_existing_entry(log, fname = fname)
+            )
+        exactly_matching_entries = log[exact_match_mask]
+        if len(exactly_matching_entries) == 0:
+            pass
+        else:
+            msg = ("\nThe filename you are trying to store, \n"
+                +fname+"\nappears one or more times in the Halotools cache log,\n"
+                "and yet this file does not yet exist.\n"
+                "You must first remedy this problem before you can proceed.\n"
+                "Use a text editor to open the cache log, "
+                "which is stored at the following location:\n\n"
+                +cache_fname+"\n\nThen simply delete the line(s) storing incorrect metadata.\n"
+                "The offending lines are #")
+            idx = np.where(exact_match_mask == True)[0] + 1
+            for entry in idx:
+                msg += str(entry) + ', '
+            msg += "\nwhere the first line of the log file is line #1.\n"
+            msg += "\nAlways save a backup version of the log before making manual changes.\n"
+            raise HalotoolsError(msg)
+
+        # Now make sure that there is no log entry with the same metadata 
+        exact_match_mask, close_match_mask = (
+            search_log_for_possibly_existing_entry(log, 
+                simname = simname, 
+                redshift = redshift, version_name = version_name)
+            )
+        exactly_matching_entries = log[exact_match_mask]
+        closely_matching_entries = log[close_match_mask]
+        if len(closely_matching_entries) == 0:
+            pass
+        else:
+            if len(exactly_matching_entries) == 0:
+                if ignore_nearby_redshifts == True:
+                    pass
+                else:
+                    msg = ("\nThere already exists a particle catalog in cache \n"
+                        "with the same metadata as the catalog you are trying to store, \n"
+                        "and a very similar redshift. \nThe closely matching "
+                        "particle catalog has the following filename:\n\n"
+                        +closely_matching_entries['fname'][0]+"\n\n"
+                        "If you want to proceed anyway, you must set the \n"
+                        "``ignore_nearby_redshifts`` keyword argument to ``True``.\n"
+                        )
+                    raise HalotoolsError(msg)
+            else:
+                msg = ("\nThere is already a particle catalog in your cache log with metdata \n"
+                    "that exactly matches the metadata of the catalog you are trying to store.\n"
+                    "The filename of this matching particle catalog is:\n\n"
+                    +exactly_matching_entries['fname'][0]+"\n\n"
+                    "If this log entry is spurious, you should open the log \n"
+                    "with a text editor and delete the offending line.\n"
+                    "The log is stored at the following filename:\n\n"
+                    +cache_fname+"\n\n"
+                    "If this matching particle catalog is one you want to continue keeping track of, \n"
+                    "then you should change the ``version_name`` \nof the particle catalog "
+                    "you are trying to store.\n"
+                    )
+                raise HalotoolsError(msg)
+
+
+    # At this point, we have ensured that the filename does not already exist 
+    # and it is safe to consider it as a new log entry. 
+    # Now we must verify the metadata that was passed in 
+    # is consistent with the particle table contents. 
+
+    try:
+        x = ptcl_table['x']
+        y = ptcl_table['y']
+        z = ptcl_table['z']
+    except KeyError:
+        msg = ("\nAll particle tables must at least have the following columns:\n"
+            "``x``, ``y``, ``z``\n")
+        if first_ptcl_table_in_cache is True:
+            # The cache log we created pointed to a 
+            # bogus ptcl_table and so needs to be deleted
+            os.system('rm ' + cache_fname)
+        raise HalotoolsError(msg)
+
+    # Check that Lbox properly bounds the particle positions
+    try:
+        assert np.all(x >= 0)
+        assert np.all(y >= 0)
+        assert np.all(z >= 0)
+        assert np.all(x <= Lbox)
+        assert np.all(y <= Lbox)
+        assert np.all(z <= Lbox)
+    except AssertionError:
+        msg = ("\nThere are points in the input particle table that "
+            "lie outside [0, Lbox] in some dimension.\n")
+        if first_ptcl_table_in_cache is True:
+            # The cache log we created pointed to a 
+            # bogus ptcl_table and so needs to be deleted
+            os.system('rm ' + cache_fname)
+        raise HalotoolsError(msg)
+
+    # The table appears to be kosher, so we write it to an hdf5 file, 
+    # add metadata, and update the log
+    ptcl_table.write(fname, path='data')
+
+    f = h5py.File(fname)
+    for key, value in metadata.iteritems():
+        if type(value) == unicode:
+            value = str(value)
+        f.attrs.create(key, value)
+    f.close()
+
+    if first_ptcl_table_in_cache is False:
+        new_table_entry = Table({'simname': [simname], 
+            'redshift': [redshift], 
+            'version_name': [version_name], 
+            'fname': [fname]}
+            )
+
+        new_log = table_vstack([log, new_table_entry])
+        overwrite_ptcl_table_cache_log(new_log, cache_fname = cache_fname)
+        remove_repeated_ptcl_table_cache_lines(cache_fname = cache_fname)
+
+
+def search_log_for_possibly_existing_entry(log, dz_tol = 0.05, **catalog_attrs):
+    """
+    """
+    exact_match_mask = np.ones(len(log), dtype = bool)
+    close_match_mask = np.ones(len(log), dtype = bool)
+
+    for key, value in catalog_attrs.iteritems():
+        exact_match_mask *= log[key] == value
+
+    for key, value in catalog_attrs.iteritems():
+        if key == 'redshift':
+            close_match_mask *= abs(log[key] - value) < dz_tol
+        else:
+            close_match_mask *= log[key] == value
+
+    return exact_match_mask, close_match_mask
 
 
 

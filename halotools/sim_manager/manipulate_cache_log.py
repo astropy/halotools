@@ -108,8 +108,9 @@ def return_halo_table_fname_after_verification(fname, **kwargs):
     if len(matching_catalogs) == 0:
         msg = ("The filename you requested ,``"+fname+"`` \nexists but it does not appear"
             "in the halo table cache log,\n"
-            +cache_fname+"\nYou can add this catalog to your cache log by calling the\n"
-            "``update_halo_table_cache_log`` function.\n")
+            +cache_fname+"\nYou can add this catalog to your cache log by "
+            "opening the log file with a text editor\n"
+            "and adding the appropriate line that matches the existing pattern.\n")
         raise HalotoolsError(msg)
 
     elif len(matching_catalogs) == 1:
@@ -850,16 +851,16 @@ def overwrite_existing_halo_table_in_cache(halo_table, **kwargs):
 
 
 
-def search_log_for_possibly_existing_entry(log, dz_tol = 0.05, **entries_to_check):
+def search_log_for_possibly_existing_entry(log, dz_tol = 0.05, **catalog_attrs):
     """
     """
     exact_match_mask = np.ones(len(log), dtype = bool)
     close_match_mask = np.ones(len(log), dtype = bool)
 
-    for key, value in entries_to_check.iteritems():
+    for key, value in catalog_attrs.iteritems():
         exact_match_mask *= log[key] == value
 
-    for key, value in entries_to_check.iteritems():
+    for key, value in catalog_attrs.iteritems():
         if key == 'redshift':
             close_match_mask *= abs(log[key] - value) < dz_tol
         else:
