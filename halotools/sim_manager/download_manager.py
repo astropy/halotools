@@ -209,10 +209,11 @@ class DownloadManager(object):
         """
         try:
             simname = kwargs['simname']
+            halo_finder = kwargs['halo_finder']
             if simname not in supported_sim_list:
                 raise HalotoolsError(unsupported_simname_msg % simname)
         except KeyError:
-            pass
+            raise HalotoolsError("\nMust pass input ``simname`` and ``halo_finder``\n")
 
         simname = kwargs['simname']
         halo_finder = kwargs['halo_finder']
@@ -346,80 +347,6 @@ class DownloadManager(object):
         closest_available_redshift = (1./closest_scale_factor) - 1
 
         return output_fname, closest_available_redshift
-
-    def closest_catalog_in_cache(self, catalog_type, desired_redshift, **kwargs):
-        """
-        Parameters
-        ----------
-        desired_redshift : float
-            Redshift of the desired catalog.
-
-        catalog_type : string
-            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files.
-            Must be either ``halos``, ``particles``, or ``raw_halos``
-
-        simname : string
-            Nickname of the simulation. Currently supported simulations are
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
-
-        halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar``.
-            Required when input ``catalog_type`` is ``halos`` or ``raw_halos``.
-
-        version_name : string, optional
-            String specifying the version of the processed halo catalog.
-            Argument is used to filter the output list of filenames.
-            Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``.
-
-        external_cache_loc : string, optional
-            Absolute path to an alternative source of halo catalogs.
-            Method assumes that ``external_cache_loc`` is organized in the
-            same way that the normal Halotools cache is. Specifically:
-
-            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
-
-            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
-
-            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
-
-        Returns
-        -------
-        output_fname : list
-            String of the filename with the closest matching redshift.
-
-        redshift : float
-            Value of the redshift of the snapshot
-        """
-        try:
-            simname = kwargs['simname']
-            if simname not in supported_sim_list:
-                raise HalotoolsError(unsupported_simname_msg % simname)
-        except KeyError:
-            pass
-
-        # Verify arguments are as needed
-        if catalog_type is not 'particles':
-            try:
-                halo_finder = kwargs['halo_finder']
-            except KeyError:
-                raise HalotoolsError("If input catalog_type is not particles, must pass halo_finder argument")
-        else:
-            if 'halo_finder' in kwargs.keys():
-                warn("There is no need to specify a halo-finder when requesting particle data")
-                del kwargs['halo_finder']
-
-        if (catalog_type == 'halos') & ('version_name' not in kwargs.keys()):
-            kwargs['version_name'] = sim_defaults.default_version_name
-        filename_list = self._scrape_cache(catalog_type = catalog_type, **kwargs)
-
-        if custom_len(filename_list) == 0:
-            msg = "\nNo matching catalogs found by closest_catalog_in_cache method of DownloadManager\n"
-            raise HalotoolsCacheError(msg)
-
-        output_fname, redshift = self._closest_fname(filename_list, desired_redshift)
-
-        return output_fname, redshift
 
     def closest_catalog_on_web(self, **kwargs):
         """
