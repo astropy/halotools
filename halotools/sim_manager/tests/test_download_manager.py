@@ -159,7 +159,24 @@ class TestDownloadManager(TestCase):
                 halo_finder = halo_finder, desired_redshift = redshift, 
                 overwrite = False)
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_raw_halo_tables_available_for_download(self):
+        l = self.downman.raw_halo_tables_available_for_download(
+            simname='bolshoi', halo_finder = 'bdm')
+        assert len(l) > 0
 
+        l = self.downman.raw_halo_tables_available_for_download(
+            simname='bolshoi', halo_finder = 'rockstar')
+        assert len(l) > 0
+
+        l = self.downman.raw_halo_tables_available_for_download(
+            simname='bolplanck', halo_finder = 'rockstar')
+        assert len(l) > 0
+
+        l = self.downman.raw_halo_tables_available_for_download(
+            simname='multidark', halo_finder = 'rockstar')
+        assert len(l) > 0
 
     def teardown_class(self):
         os.system('rm -rf ' + self.dummyloc)
