@@ -152,6 +152,12 @@ class TestLoadCachedPtclTable(TestCase):
         assert '0.0' not in err.value.message
         assert '2.0' in err.value.message
 
+        assert 'closest available redshift is' in err.value.message
+        # The line above is the error message raised by the corresponding halo_table test
+        # For some reason, I instead to raise the line above it to get the right message
+        # I don't understand what the cause of the different logical branching is, 
+        # and this would be good to test since the ptcl_table versions of the code were made rather hastily
+
         # Pass in a complete set of metadata with a slightly incorrect, negative redshift
         _ = manipulate_ptcl_table_cache_log.return_ptcl_table_fname_from_simname_inputs(
             cache_fname = cache_fname, 
