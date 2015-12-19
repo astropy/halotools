@@ -26,7 +26,7 @@ from ..custom_exceptions import UnsupportedSimError, HalotoolsCacheError
 default_simname = 'bolshoi'
 default_halo_finder = 'rockstar'
 default_redshift = 0.0
-default_version_name = 'halotools_alpha_version1'
+default_version_name = 'halotools.alpha.version0'
 
 # The following two variables are used to define completeness cuts applied to halo catalogs
 # The Halotools default completeness cut is to throw out all halos with mpeak < mp*300, 
