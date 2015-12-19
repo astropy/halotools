@@ -147,6 +147,57 @@ class TestDownloadManager(TestCase):
             simname='bolshoi', halo_finder='rockstar')
         assert file_list != []
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_ptcl_tables_available_for_download(self):
+        """ Test that there is exactly one ptcl_table available for Bolshoi. 
+        """
+        x = self.downman.ptcl_tables_available_for_download(simname = 'bolshoi')
+        assert len(x) == 1
+
+        x = self.downman.ptcl_tables_available_for_download(simname = 'bolplanck')
+        assert len(x) == 4
+
+        x = self.downman.ptcl_tables_available_for_download(simname = 'consuelo')
+        assert len(x) == 4
+
+        x = self.downman.ptcl_tables_available_for_download(simname = 'multidark')
+        assert len(x) == 1
+
+
+    def test_get_scale_factor_substring(self):
+        """ 
+        """
+        f = self.downman._get_scale_factor_substring('hlist_0.50648.particles.hdf5')
+        assert f == '0.50648'
+
+
+    def test_closest_fname(self):
+        """ 
+        """
+        f, z = self.downman._closest_fname(
+            ['hlist_0.50648.particles.hdf5', 'hlist_0.67540.particles.hdf5', 
+            'hlist_0.33324.particles.hdf5'], 100.
+            )
+        assert (f, np.round(z, 2)) == ('hlist_0.33324.particles.hdf5', 2.)
+
+        f, z = self.downman._closest_fname(
+            ['hlist_0.50648.particles.hdf5', 'hlist_0.67540.particles.hdf5', 
+            'hlist_0.33324.particles.hdf5'], 1.
+            )
+        assert (f, np.round(z, 1)) == ('hlist_0.50648.particles.hdf5', 1.)
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @pytest.mark.xfail
+    @remote_data
+    def test_ptcl_tables_available_for_download(self):
+        """ Test that we find the version-1 ptcl_tables on the web. 
+        At the time this test was written, the catalogs had not been 
+        uploaded yet, so we mark it with xfail. 
+        """
+        x = self.downman.ptcl_tables_available_for_download(
+            simname = 'bolplanck', version_name = 'halotools_alpha_version1')
+        assert len(x) == 0
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
