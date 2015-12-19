@@ -410,6 +410,12 @@ class DownloadManager(object):
         except KeyError:
             pass
 
+        if 'redshift' in kwargs.keys():
+            msg = ("\nThe correct argument to use to specify the redshift \n"
+                "you are searching for is with the ``desired_redshift`` keyword, \n"
+                "not the ``redshift`` keyword.\n")
+            raise HalotoolsError(msg)
+
         if 'version_name' not in kwargs.keys():
             kwargs['version_name'] = sim_defaults.default_version_name
 

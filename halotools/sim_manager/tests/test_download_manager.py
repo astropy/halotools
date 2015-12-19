@@ -265,6 +265,27 @@ class TestDownloadManager(TestCase):
             )
 
 
+    @remote_data
+    def test_closest_catalog_on_web(self):
+        """ 
+        """
+        fname, redshift = self.downman.closest_catalog_on_web(simname = 'bolshoi', 
+            halo_finder = 'rockstar', desired_redshift = 0., catalog_type = 'halos')
+        assert 'hlist_1.00035.list.halotools.alpha.version0.hdf5' in fname 
+
+        fname, redshift = self.downman.closest_catalog_on_web(simname = 'bolshoi', 
+            halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'halos')
+        assert 'bolshoi/bdm/hlist_1.00030.list.halotools.alpha.version0.hdf5' in fname 
+
+    @remote_data
+    @pytest.mark.xfail
+    def test_closest_catalog_on_web(self):
+        """ This test currently fails because the halo catalogs have not been updated yet.
+        """
+        fname, redshift = self.downman.closest_catalog_on_web(simname = 'bolshoi', 
+            halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'halos', 
+            version_name = sim_defaults.default_version_name)
+        assert 'bolshoi/bdm/hlist_1.00030.list.halotools_alpha_version1.hdf5' in fname 
 
     def teardown_class(self):
         os.system('rm -rf ' + self.dummyloc)
