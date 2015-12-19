@@ -79,6 +79,9 @@ class DownloadManager(object):
             Default is None, in which case `processed_halo_tables_in_cache`
             will not filter the returned list of filenames by ``halo_finder``.
 
+        version_name : string, optional 
+            Version of the table. Default is set by `~halotools.sim_manager.sim_defaults` module. 
+
         Returns
         -------
         output : list
@@ -92,6 +95,11 @@ class DownloadManager(object):
                 raise HalotoolsError(unsupported_simname_msg % simname)
         except KeyError:
             pass
+
+        try:
+            version_name = kwargs['version_name']
+        except KeyError:
+            version_name = sim_defaults.default_version_name
 
         baseurl = sim_defaults.processed_halo_tables_webloc
         soup = BeautifulSoup(requests.get(baseurl).text)
@@ -115,7 +123,7 @@ class DownloadManager(object):
             for a in soup.find_all('a'):
                 catlist.append(os.path.join(halocatdir, a['href']))
 
-        file_pattern = sim_defaults.default_version_name + '.hdf5'
+        file_pattern = version_name + '.hdf5'
         all_halocats = fnmatch.filter(catlist, '*'+file_pattern)
 
         # all_halocats a list of all pre-processed catalogs on the web
@@ -371,7 +379,7 @@ class DownloadManager(object):
         version_name : string, optional
             String specifying the version of the processed halo catalog.
             Argument is used to filter the output list of filenames.
-            Default is set by ``~halotools.sim_manager.sim_defaults.default_version_name``.
+            Default is set by `~halotools.sim_manager.sim_defaults` module.
 
         Returns
         -------
