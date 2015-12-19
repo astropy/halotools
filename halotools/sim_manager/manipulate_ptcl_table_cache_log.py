@@ -113,7 +113,7 @@ def return_ptcl_table_fname_after_verification(fname, **kwargs):
     elif len(matching_catalogs) == 1:
         idx = np.where(mask == True)[0]
         linenum = idx[0] + 2
-        check_metadata_consistency(matching_catalogs[0], linenum = linenum)
+        check_ptcl_table_metadata_consistency(matching_catalogs[0], linenum = linenum)
         fname = matching_catalogs['fname'][0]
         return fname
 
@@ -126,7 +126,7 @@ def return_ptcl_table_fname_after_verification(fname, **kwargs):
         mask = log['fname'] == fname
         matching_catalogs = log[mask]
         if len(matching_catalogs) == 1:
-            check_metadata_consistency(matching_catalogs[0])
+            check_ptcl_table_metadata_consistency(matching_catalogs[0])
             fname = matching_catalogs['fname'][0]
             return fname
         elif len(matching_catalogs) > 1:
