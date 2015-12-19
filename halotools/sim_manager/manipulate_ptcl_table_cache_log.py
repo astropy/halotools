@@ -75,7 +75,7 @@ def read_ptcl_table_cache_log(**kwargs):
             "If that checks out, try running the ``rebuild_ptcl_table_cache_log`` function.\n")
         raise HalotoolsError(msg)
 
-def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.01, **kwargs):
+def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
     """
     """
     try:
@@ -110,11 +110,13 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.01, **kwargs):
     log = read_ptcl_table_cache_log(cache_fname=cache_fname)
 
     # Search for matching entries in the log
-    exact_match_mask = np.ones(len(log), dtype=bool)
-    exact_match_mask *= log['simname'] == simname
-    exact_match_mask *= log['version_name'] == version_name
-    exact_match_mask *= abs(log['redshift'] - redshift) < dz_tol
-    exact_matches = log[exact_match_mask]
+    close_redshift_match_mask = np.ones(len(log), dtype=bool)
+    close_redshift_match_mask *= log['simname'] == simname
+    close_redshift_match_mask *= log['version_name'] == version_name
+    close_redshift_match_mask *= abs(log['redshift'] - redshift) < dz_tol
+    close_matches = log[close_redshift_match_mask]
+
+    simname_only_mask = log['simname'] == simname
 
     def add_substring_to_msg(msg):
         if no_simname_argument is True:
@@ -136,7 +138,7 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.01, **kwargs):
             msg += "version_name = ``" + str(version_name) + "``\n"
         return msg
 
-    if len(exact_matches) == 0:
+    if len(close_matches) == 0:
 
         msg = ("\nThe Halotools cache log ``"+cache_fname+"``\n"
             "does not contain any entries matching your requested inputs.\n"
@@ -154,11 +156,11 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.01, **kwargs):
             "Always save a backup version of the log before making manual changes.\n")
         raise HalotoolsError(msg)
 
-    elif len(exact_matches) == 1:
-        idx = np.where(exact_match_mask == True)[0]
+    elif len(close_matches) == 1:
+        idx = np.where(close_redshift_match_mask == True)[0]
         linenum = idx[0] + 2
-        check_ptcl_table_metadata_consistency(exact_matches[0], linenum = linenum)
-        fname = exact_matches['fname'][0]
+        check_ptcl_table_metadata_consistency(close_matches[0], linenum = linenum)
+        fname = close_matches['fname'][0]
         return fname
     else:
         msg = ("\nHalotools detected multiple particle catalogs matching "
@@ -166,7 +168,9 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.01, **kwargs):
             "Now printing the list of all catalogs matching your requested specifications:\n")
         for entry in close_matches:
             msg += entry['fname'] + "\n"
-        msg += ("Please delete the erroneous lines from the log before proceeding.\n")
+        msg += ("Either delete the erroneous lines from the log \n"
+            "or decrease the ``dz_tol`` parameter of the "
+            "return_ptcl_table_fname_from_simname_inputs function.\n")
         raise HalotoolsError(msg)
 
 def check_ptcl_table_metadata_consistency(cache_log_entry, linenum = None):
