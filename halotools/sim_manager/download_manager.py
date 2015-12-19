@@ -30,6 +30,8 @@ import datetime
 import os, fnmatch, re
 from functools import partial
 
+from . import manipulate_cache_log
+
 from ..custom_exceptions import *
 
 try:
@@ -395,8 +397,9 @@ class DownloadManager(object):
         return output_fname, redshift
 
 
-
-    def download_processed_halo_table(self, dz_tol = 0.1, overwrite=False, **kwargs):
+    def download_processed_halo_table(self, simname, halo_finder, desired_redshift, 
+        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_version_name, 
+        download_dirname = 'std_cache_loc'):
         """ Method to download one of the pre-processed binary files
         storing a reduced halo catalog.
 
@@ -408,12 +411,17 @@ class DownloadManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
         halo_finder : string
-            Nickname of the halo-finder, e.g. `rockstar`.
+            Nickname of the halo-finder, e.g. `rockstar` or `bdm`. 
 
         desired_redshift : float
             Redshift of the requested snapshot. Must match one of the
             available snapshots, or a prompt will be issued providing the nearest
             available snapshots to choose from.
+
+        download_dirname : str, optional 
+            Absolute path to the directory where you want to download the catalog. 
+            Default is `std_cache_loc`, which will store the catalog in the following directory:
+            ``$HOME/.astropy/cache/halotools/halo_tables/simname/halo_finder/``
 
         dz_tol : float, optional
             Tolerance value determining how close the requested redshift must be to
@@ -425,60 +433,68 @@ class DownloadManager(object):
             whether or not to overwrite the file. Default is False, in which case
             no download will occur if a pre-existing file is detected.
 
-        external_cache_loc : string, optional
-            Absolute path to an alternative source of halo catalogs.
-            Method assumes that ``external_cache_loc`` is organized in the
-            same way that the normal Halotools cache is. Specifically:
-
-            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
-
-            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
-
-            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
-
         Returns
         -------
         output_fname : string
             Filename (including absolute path) of the location of the downloaded
             halo catalog.
         """
-        try:
-            simname = kwargs['simname']
-            if simname not in supported_sim_list:
-                raise HalotoolsError(unsupported_simname_msg % simname)
-        except KeyError:
-            pass
 
-        desired_redshift = kwargs['desired_redshift']
+        ###################################
+        # Search for a file that matches the input specifications
+        available_fnames_to_download = (
+            self.processed_halo_tables_available_for_download(simname = simname, 
+                halo_finder = halo_finder, version_name = version_name)
+            )
 
-        available_fnames_to_download = self.processed_halo_tables_available_for_download(**kwargs)
         if available_fnames_to_download == []:
             msg = "You made the following request for a pre-processed halo catalog:\n"
-            if 'simname' in kwargs:
-                msg = msg + "simname = " + kwargs['simname'] + "\n"
-            else:
-                msg = msg + "simname = any simulation\n"
-            if 'halo_finder' in kwargs:
-                msg = msg + "halo-finder = " + kwargs['halo_finder'] + "\n"
-            else:
-                msg = msg + "halo-finder = any halo-finder\n"
+
+            msg += "simname = " + simname + "\n"
+            msg += "halo_finder = " + halo_finder + "\n"
+            msg += "version_name = " + version_name + "\n"
             msg = msg + "There are no halo catalogs meeting your specifications"
-            raise UnsupportedSimError(msg)
+            raise HalotoolsError(msg)
 
         url, closest_redshift = (
             self._closest_fname(available_fnames_to_download, desired_redshift))
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
-                "No pre-processed %s halo catalog has \na redshift within %.2f " +
+                "\nNo pre-processed %s halo catalog has \na redshift within %.2f " +
                 "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
                 )
-            print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
-            return
+            raise HalotoolsError(msg % (simname, dz_tol, desired_redshift, closest_redshift))
 
-        cache_dirname = cache_config.get_catalogs_dir(catalog_type='halos', **kwargs)
-        output_fname = os.path.join(cache_dirname, os.path.basename(url))
+        # At this point we have a candidate file to download that 
+        # matches the input specifications. 
+        ###################################
 
+        ###################################
+        # Determine the download directory
+        if download_dirname == 'std_cache_loc':
+            cache_log_fname = manipulate_cache_log.get_halo_table_cache_log_fname()
+            cache_basedir = os.path.dirname(cache_log_fname)
+            download_dirname = os.path.join(cache_basedir, 'halo_catalogs', simname, halo_finder)
+            try:
+                os.makedirs(std_cache_loc)
+            except OSError:
+                pass
+        else:
+            try:
+                assert os.path.exists(download_dirname)
+            except AssertionError:
+                msg = ("\nThe input ``download_dirname`` is a non-existent path.\n")
+                raise HalotoolsError(msg)
+        output_fname = os.path.join(download_dirname, os.path.basename(url))
+        ###################################
+
+
+        ###################################
+        # Now we check the cache log to see if there are any matching entries 
+
+
+        ###################################
         if overwrite == False:
             file_pattern = os.path.basename(url)
             # The file may already be decompressed, in which case we don't want to download it again
