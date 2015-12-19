@@ -7,7 +7,7 @@ from astropy.config.paths import _find_home
 from astropy.tests.helper import remote_data, pytest
 from unittest import TestCase
 
-from ..catalog_manager import CatalogManager
+from ..download_manager import DownloadManager
 
 from ...custom_exceptions import UnsupportedSimError
 
@@ -23,14 +23,14 @@ else:
     APH_MACHINE = False
 
 
-class TestCatalogManager(TestCase):
+class TestDownloadManager(TestCase):
 
 
     def setup_class(self):
 
         homedir = _find_home()
 
-        self.catman = CatalogManager()
+        self.downman = DownloadManager()
 
         def defensively_create_empty_dir(dirname):
 
@@ -106,58 +106,15 @@ class TestCatalogManager(TestCase):
         full_fname = os.path.join(p, f)
         assert os.path.isfile(full_fname)
 
-    @pytest.mark.skipif('not APH_MACHINE')
-    def test_processed_halo_tables_in_cache(self):
-
-        for simname in self.simnames:
-            attrname = simname + '_fnames'
-            basenames_from_self = getattr(self, attrname)
-
-            for version in self.dummy_version_names:
-                basenames_from_setup = [f + '.' + version + self.extension for f in basenames_from_self]
-
-                result = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
-                    simname = simname, halo_finder = 'rockstar', version_name = version)
-                basenames_from_catman = [os.path.basename(f) for f in result]
-
-                assert set(basenames_from_catman) == set(basenames_from_setup)
-
-        simname = 'bolshoi'
-        version = 'halotools.alpha'
-        result_allargs = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
-            simname = simname, halo_finder = 'rockstar', version_name = version)
-        result_nosim = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
-            halo_finder = 'rockstar', version_name = version)
-        result_noversion = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
-            simname = simname, halo_finder = 'rockstar')
-        result_nohf = self.catman.processed_halo_tables_in_cache(external_cache_loc=self.dummyloc, 
-            simname = simname, version_name = version)
-
-        assert result_allargs != []
-        assert result_nosim != []
-        assert result_noversion != []
-        assert result_nohf != []
-
-        assert set(result_allargs).issubset(set(result_nosim))
-        assert set(result_allargs).issubset(set(result_noversion))
-        assert set(result_allargs).issubset(set(result_nohf))
-
-        assert set(result_allargs) != set(result_nohf)
-        assert set(result_allargs) != set(result_nosim)
-        assert set(result_allargs) == set(result_noversion)
-
-        assert set(result_nohf) != (set(result_nosim))
-        assert set(result_nohf) != (set(result_noversion))
-        assert set(result_nosim) != (set(result_noversion))
 
     @remote_data
     def test_ptcl_tables_available_for_download(self):
 
-        file_list = self.catman.ptcl_tables_available_for_download(simname='bolshoi')
+        file_list = self.downman.ptcl_tables_available_for_download(simname='bolshoi')
         assert len(file_list) == 1
         assert 'hlist_1.00035.particles.hdf5' == os.path.basename(file_list[0])
 
-        file_list = self.catman.ptcl_tables_available_for_download(simname='multidark')
+        file_list = self.downman.ptcl_tables_available_for_download(simname='multidark')
         assert len(file_list) == 1
         assert 'hlist_1.00109.particles.hdf5' == os.path.basename(file_list[0])
 
@@ -167,7 +124,7 @@ class TestCatalogManager(TestCase):
             'hlist_0.67540.particles.hdf5', 
             'hlist_1.00000.particles.hdf5']
             )
-        file_list = self.catman.ptcl_tables_available_for_download(simname='consuelo')
+        file_list = self.downman.ptcl_tables_available_for_download(simname='consuelo')
         assert len(file_list) == 4
         file_set = set([os.path.basename(f) for f in file_list])
         assert file_set == consuelo_set
@@ -178,7 +135,7 @@ class TestCatalogManager(TestCase):
             'hlist_0.66818.particles.hdf5', 
             'hlist_1.00231.particles.hdf5']
             )
-        file_list = self.catman.ptcl_tables_available_for_download(simname='bolplanck')
+        file_list = self.downman.ptcl_tables_available_for_download(simname='bolplanck')
         assert len(file_list) == 4
         file_set = set([os.path.basename(f) for f in file_list])
         assert file_set == bolplanck_set
@@ -186,81 +143,9 @@ class TestCatalogManager(TestCase):
     @remote_data
     def test_processed_halo_tables_available_for_download(self):
 
-        file_list = self.catman.processed_halo_tables_available_for_download(
+        file_list = self.downman.processed_halo_tables_available_for_download(
             simname='bolshoi', halo_finder='rockstar')
         assert file_list != []
-
-    @pytest.mark.skipif('not APH_MACHINE')
-    def test_closest_processed_halo_table_in_cache(self):
-
-        catalog_type = 'halos'
-        halo_finder = 'rockstar'
-        simname = 'bolshoi'
-
-        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
-            catalog_type=catalog_type, 
-            desired_redshift = 0.0, halo_finder = halo_finder, 
-            simname = simname
-            )
-        correct_basename = 'hlist_1.00035.list.halotools.alpha.version0.hdf5'
-        assert os.path.basename(closest_fname) == correct_basename
-
-    @pytest.mark.skipif('not APH_MACHINE')
-    def test_closest_ptcl_table_in_cache(self):
-
-        catalog_type = 'particles'
-        simname = 'bolshoi'
-
-        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
-            catalog_type=catalog_type, 
-            desired_redshift = 0.0, 
-            simname = simname
-            )
-        correct_basename = 'hlist_1.00035.particles.hdf5'
-        assert os.path.basename(closest_fname) == correct_basename
-       
-        simname = 'consuelo'
-        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
-            catalog_type=catalog_type, 
-            desired_redshift = 0.0, 
-            simname = simname
-            )
-        correct_basename = 'hlist_1.00000.particles.hdf5'
-        assert os.path.basename(closest_fname) == correct_basename
-        
-        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
-            catalog_type=catalog_type, 
-            desired_redshift = 2.0, 
-            simname = simname
-            )
-        correct_basename = 'hlist_0.33324.particles.hdf5'
-        assert os.path.basename(closest_fname) == correct_basename
-
-        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
-            catalog_type=catalog_type, 
-            desired_redshift = 12.0, 
-            simname = simname
-            )
-        correct_basename = 'hlist_0.33324.particles.hdf5'
-        assert os.path.basename(closest_fname) == correct_basename
-
-        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
-            catalog_type=catalog_type, 
-            desired_redshift = 1.2,  
-            simname = simname
-            )
-        correct_basename = 'hlist_0.50648.particles.hdf5'
-        assert os.path.basename(closest_fname) == correct_basename
-
-
-        simname = 'bolplanck'
-        closest_fname, closest_redshift = self.catman.closest_catalog_in_cache(
-            catalog_type=catalog_type, 
-            desired_redshift = 0.0, 
-            simname = simname
-            )
-        correct_basename = 'hlist_1.00231.particles.hdf5'
-        assert os.path.basename(closest_fname) == correct_basename
 
 
     @pytest.mark.skipif('not APH_MACHINE')
@@ -270,7 +155,7 @@ class TestCatalogManager(TestCase):
         redshift = 2
         halo_finder = 'bdm'
         with pytest.raises(UnsupportedSimError) as exc:
-            self.catman.download_processed_halo_table(simname = simname, 
+            self.downman.download_processed_halo_table(simname = simname, 
                 halo_finder = halo_finder, desired_redshift = redshift, 
                 overwrite = False)
 
