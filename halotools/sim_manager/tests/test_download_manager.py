@@ -178,6 +178,43 @@ class TestDownloadManager(TestCase):
             simname='multidark', halo_finder = 'rockstar')
         assert len(l) > 0
 
+
+    def test_orig_halo_table_web_location(self):
+        """ Test will fail unless the web locations are held fixed 
+        to their current, hard-coded values. 
+        """
+        assert (
+            'www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM' in 
+            self.downman._orig_halo_table_web_location(
+                simname = 'bolshoi', halo_finder = 'bdm')
+            )
+
+        assert (
+            'www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/' in 
+            self.downman._orig_halo_table_web_location(
+                simname = 'bolshoi', halo_finder = 'rockstar')
+            )
+
+        assert (
+            'tp://www.slac.stanford.edu/~behroozi/BPlanck_Hlists' in 
+            self.downman._orig_halo_table_web_location(
+                simname = 'bolplanck', halo_finder = 'rockstar')
+            )
+
+        assert (
+            'c.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar' in 
+            self.downman._orig_halo_table_web_location(
+                simname = 'multidark', halo_finder = 'rockstar')
+            )
+
+        assert (
+            '/www.slac.stanford.edu/~behroozi/Consuelo_Catalo' in 
+            self.downman._orig_halo_table_web_location(
+                simname = 'consuelo', halo_finder = 'rockstar')
+            )
+
+
+
     def teardown_class(self):
         os.system('rm -rf ' + self.dummyloc)
 
