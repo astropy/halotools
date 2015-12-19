@@ -52,4 +52,36 @@ class TestLoadCachedPtclTable(TestCase):
         """ Verify that the appropriate HalotoolsError is raised 
         if trying to load a non-existent cache log.
         """
-        raise HalotoolsError("The cache management of the ptcl_table is entirely untested. ")
+        scenario = 0
+        cache_dirname = helper_functions.get_scenario_cache_fname(scenario)
+        cache_fname = os.path.join(cache_dirname, helper_functions.cache_basename)
+        try:
+            os.makedirs(cache_dirname)
+        except OSError:
+            pass
+
+        updated_log = helper_functions.add_new_row_to_cache_log(scenario, 
+            'bolshoi', 'rockstar', 0.00004, 'halotools.alpha.version0')
+        helper_functions.create_ptcl_table_hdf5(updated_log[-1])
+
+        fname = updated_log['fname'][0]
+        with pytest.raises(HalotoolsError):
+            _ = manipulate_ptcl_table_cache_log.return_ptcl_table_fname_after_verification(
+                fname = fname, cache_fname = cache_fname)
+
+        assert not os.path.isfile(cache_fname)
+        manipulate_ptcl_table_cache_log.overwrite_ptcl_table_cache_log(
+            updated_log, cache_fname = cache_fname)
+        assert os.path.isfile(cache_fname)
+
+        _ = manipulate_ptcl_table_cache_log.return_ptcl_table_fname_after_verification(
+            fname = fname, cache_fname = cache_fname)
+
+
+
+
+
+
+
+
+
