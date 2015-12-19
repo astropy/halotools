@@ -493,6 +493,7 @@ class DownloadManager(object):
         ###################################
         # Now we check the cache log to see if there are any matching entries 
 
+        ### LEFT OFF HERE 
 
         ###################################
         if overwrite == False:
