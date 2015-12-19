@@ -9,7 +9,7 @@ from unittest import TestCase
 
 from ..download_manager import DownloadManager
 
-from ...custom_exceptions import UnsupportedSimError
+from ...custom_exceptions import UnsupportedSimError, HalotoolsError
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
@@ -286,6 +286,14 @@ class TestDownloadManager(TestCase):
             halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'halos', 
             version_name = sim_defaults.default_version_name)
         assert 'bolshoi/bdm/hlist_1.00030.list.halotools_alpha_version1.hdf5' in fname 
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_processed_halo_table(self):
+        """
+        """
+        raise HalotoolsError("This test will be a bit subtle to write")
+        # self.downman.download_processed_halo_table(simname = 'bolshoi')
 
     def teardown_class(self):
         os.system('rm -rf ' + self.dummyloc)

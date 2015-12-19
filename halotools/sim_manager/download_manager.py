@@ -494,9 +494,12 @@ class DownloadManager(object):
             Filename (including absolute path) of the location of the downloaded
             halo catalog.
         """
-        if 'simname' in kwargs.keys():
-            if cache_config.simname_is_supported(kwargs['simname']) is False:
-                raise UnsupportedSimError(kwargs['simname'])
+        try:
+            simname = kwargs['simname']
+            if simname not in supported_sim_list:
+                raise HalotoolsError(unsupported_simname_msg % simname)
+        except KeyError:
+            pass
 
         desired_redshift = kwargs['desired_redshift']
 
@@ -589,9 +592,12 @@ class DownloadManager(object):
             Filename (including absolute path) of the location of the downloaded
             halo catalog.
         """
-        if 'simname' in kwargs.keys():
-            if cache_config.simname_is_supported(kwargs['simname']) is False:
-                raise UnsupportedSimError(kwargs['simname'])
+        try:
+            simname = kwargs['simname']
+            if simname not in supported_sim_list:
+                raise HalotoolsError(unsupported_simname_msg % simname)
+        except KeyError:
+            pass
 
         desired_redshift = kwargs['desired_redshift']
 
@@ -699,11 +705,19 @@ class DownloadManager(object):
             Filename (including absolute path) of the location of the downloaded
             halo catalog.
         """
-        if 'simname' in kwargs.keys():
-            if cache_config.simname_is_supported(kwargs['simname']) is False:
-                raise UnsupportedSimError(kwargs['simname'])
+        try:
+            simname = kwargs['simname']
+            if simname not in supported_sim_list:
+                raise HalotoolsError(unsupported_simname_msg % simname)
+        except KeyError:
+            pass
 
-        desired_redshift = kwargs['desired_redshift']
+        try:
+            desired_redshift = kwargs['desired_redshift']
+        except KeyError:
+            msg = ("\n``desired_redshift`` is a required keyword argument.\n")
+            raise HalotoolsError(msg)
+
         if 'halo_finder' in kwargs.keys():
             warn("It is not necessary to specify a halo catalog when downloading particles")
 
@@ -718,7 +732,7 @@ class DownloadManager(object):
             else:
                 msg = msg + "simname = any simulation\n"
             msg = msg + "There are no simulations with this name with particles available for download"
-            raise UnsupportedSimError(msg)
+            raise HalotoolsError(msg)
 
         if abs(closest_redshift - desired_redshift) > dz_tol:
             msg = (
