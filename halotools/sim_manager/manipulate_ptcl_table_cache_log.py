@@ -213,7 +213,7 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
 
         msg = ("\nThe Halotools cache log ``"+cache_fname+"``\n"
             "does not contain any entries matching your requested inputs.\n"
-            "First, the double-check that your arguments are as intended, including spelling:\n\n")
+            "First, double-check that your arguments are as intended, including spelling:\n\n")
 
         msg = add_substring_to_msg(msg)
 
@@ -223,7 +223,8 @@ def return_ptcl_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
             "If that is the case, just open up the log, "
             "add a line to it and call this function again.\n"
             "Be sure that the redshift you enter agrees exactly \nwith the "
-            "corresponding entry of `halo_table_cache_log.txt`\n"
+            "corresponding entry of `halo_table_cache_log.txt`,\n"
+            "as it is important that your particles are sampling the same snapshot as your halos.\n"
             "Always save a backup version of the log before making manual changes.\n")
         raise HalotoolsError(msg)
 
