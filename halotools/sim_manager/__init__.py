@@ -13,3 +13,4 @@ from .halo_catalog import *
 from .user_defined_halo_catalog import *
 
 from .manipulate_cache_log import *
+from .read_rockstar_hlists import *
