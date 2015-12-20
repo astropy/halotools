@@ -205,7 +205,7 @@ class TestDownloadManager(TestCase):
         simname = 'consuelo'
         redshift = 2
         halo_finder = 'bdm'
-        with pytest.raises(UnsupportedSimError) as exc:
+        with pytest.raises(HalotoolsError) as exc:
             self.downman.download_processed_halo_table(simname = simname, 
                 halo_finder = halo_finder, desired_redshift = redshift, 
                 overwrite = False)
@@ -270,10 +270,12 @@ class TestDownloadManager(TestCase):
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
+    @pytest.mark.xfail
     def test_download_processed_halo_table(self):
         """
         """
-        raise HalotoolsError("This test will be a bit subtle to write")
+        self.downman.download_processed_halo_table('bolshoi', 'rockstar', 0.0)
+        # raise HalotoolsError("This test will be a bit subtle to write")
         # self.downman.download_processed_halo_table(simname = 'bolshoi')
 
     def teardown_class(self):

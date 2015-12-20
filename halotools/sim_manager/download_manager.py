@@ -11,6 +11,8 @@ from warnings import warn
 from time import time
 from astropy.tests.helper import remote_data
 from astropy.table import Table
+from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
+from astropy.config.paths import _find_home
 
 from ..custom_exceptions import HalotoolsError
 
@@ -473,11 +475,12 @@ class DownloadManager(object):
         ###################################
         # Determine the download directory
         if download_dirname == 'std_cache_loc':
-            cache_log_fname = manipulate_cache_log.get_halo_table_cache_log_fname()
-            cache_basedir = os.path.dirname(cache_log_fname)
+            # cache_log_fname = manipulate_cache_log.get_halo_table_cache_log_fname()
+            # cache_basedir = os.path.dirname(cache_log_fname)
+            cache_basedir = os.path.join(_find_home(), '.astropy', 'cache', 'halotools')
             download_dirname = os.path.join(cache_basedir, 'halo_catalogs', simname, halo_finder)
             try:
-                os.makedirs(std_cache_loc)
+                os.makedirs(download_dirname)
             except OSError:
                 pass
         else:
@@ -489,11 +492,11 @@ class DownloadManager(object):
         output_fname = os.path.join(download_dirname, os.path.basename(url))
         ###################################
 
-
+        raise HalotoolsError("Not implemented yet: LEFT OFF HERE")
         ###################################
         # Now we check the cache log to see if there are any matching entries 
 
-        ### LEFT OFF HERE 
+        ###  
 
         ###################################
         if overwrite == False:
