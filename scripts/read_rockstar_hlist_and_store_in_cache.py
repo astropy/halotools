@@ -9,16 +9,78 @@ from astropy.table import Table
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("input_fname")
-parser.add_argument("columns_to_keep_fname")
-parser.add_argument("simname")
-parser.add_argument("redshift", type=float)
-parser.add_argument("version_name")
-parser.add_argument("output_fname")
+input_fname_help_msg = ("Absolute path to the ASCII hlist file storing the halo catalog. "
+	"Can be either compressed or uncompressed.")
+columns_to_keep_fname_help_msg = ("Absolute path to the "
+	"``columns_to_keep_fname`` ASCII file defining "
+	"the cuts made on the rows and columns of the hlist file. "
+	"As described in the docstring of the RockstarHlistReader class, "
+	"the contents of this file are used to select the relevant columns of the hlist file. "
+	"The ``columns_to_keep_fname`` file can begin with any number of header lines "
+	"beginning with the '#' character, all of which will be ignored. "
+	"Besides the header, there should be one row of the ``columns_to_keep_fname`` file "
+	"for every column of the hlist file you wish to keep. "
+	"Each row of the ``columns_to_keep_fname`` file must have 3 columns. "
+	"Column 1: integer providing the index of the column in the hlist file, "
+	"where the first column has column-index 0. "
+	"Column 2: string providing the name of the column data, e.g., 'halo_id'. "
+	"The Halotools convention is for all such strings to begin with 'halo_'. "
+	"If you wish store your catalog in the Halotools cache and use it to populate mocks, "
+	"you will need to follow this convention; otherwise you may ignore it. "
+	"Column 3: string defining the data type stored in the column, e.g., 'f4' for floats,"
+	"'f8' for double, 'i4' for int, i8' for long. "
+	"The contents of the ``columns_to_keep_fname`` will be stored as metadata of the "
+	"resulting hdf5 file, so that you have an exact record of how the hlist file "
+	"was reduced into an hdf5 file. See halotools/data/RockstarHlistReader_input_example.dat "
+	"for an example ``columns_to_keep_fname``. ")
+
+version_name_msg = ("Nickname used to distinguish between different versions of the same "
+	"snapshot. You should use a different version_name for every different version of Rockstar "
+	"run on the snapshot, and also for every different time you process the same the halo catalog "
+	"with different cuts. ")
+parser.add_argument("input_fname", help=input_fname_help_msg)
+parser.add_argument("columns_to_keep_fname", help=columns_to_keep_fname_help_msg)
+parser.add_argument("simname", help = "Nickname of the simulation. ")
+parser.add_argument("redshift", help = "Redshift of the snapshot. ", type=float)
+parser.add_argument("version_name", help = version_name_msg)
+parser.add_argument("output_fname", help = "Absolute path of the hdf5 file storing the "
+	"processed halo catalog.")
 
 parser.add_argument("--overwrite", 
 	help="If an hdf5 file with a matching ``output_fname`` exists, overwrite it.", 
 	action="store_true")
+
+parser.add_argument("--ignore_nearby_redshifts", action = "store_true", 
+	help = "If there are catalogs in your existing cache that match all your "
+	"input metadata and have a very similar redshift, you must throw the --ignore_nearby_redshifts "
+	"flag in order to use the script to generate a new halo catalog. "
+	)
+
+
+
+# parser.add_argument("--min_row_value", nargs=2, help = "Use this optional argument to "
+# 	"make a cut on some column of the halo catalog on-the-fly as the hlist file is being read. "
+# 	"There must be two arguments that follow each appearance of the --min_row_value flag. "
+# 	"The first argument is a string giving the column name upon which a cut will be placed. "
+# 	"This string must appear in the first column of the ``columns_to_keep_fname`` ascii file: "
+# 	"for the sake of good bookkeeping, it is not permissible to "
+# 	"place a cut on a column that you do not keep. "
+# 	"The second argument defines the lower bound on the data in the column; "
+# 	"all halos with a value of the requested column below this cut will be ignored. "
+# 	"The --min_row_value flag can appear as many times in the call to the script as you like. "
+# 	"Only rows passing all cuts will be accepted.")
+
+# parser.add_argument("--max_row_value", nargs=2, help = "Use this optional argument to "
+# 	"make a cut on some column of the halo catalog on-the-fly as the hlist file is being read. "
+# 	"There must be two arguments that follow each appearance of the --max_row_value flag. "
+# 	"The first argument is a string giving the column name upon which a cut will be placed. "
+# 	"This string must appear in the first column of the ``columns_to_keep_fname`` ascii file: "
+# 	"for the sake of good bookkeeping, it is not permissible to "
+# 	"place a cut on a column that you do not keep. "
+# 	"The second argument defines the upper bound on the data in the column; "
+# 	"all halos with a value of the requested column above this cut will be ignored. "
+# 	"The --max_row_value flag can appear as many times in the call to the script as you like. "
+# 	"Only rows passing all cuts will be accepted.")
 
 args = parser.parse_args()
 
@@ -29,6 +91,7 @@ halo_finder = 'rockstar'
 redshift = args.redshift
 version_name = args.version_name
 output_fname = args.output_fname
+
 
 ####################################################################
 # The input input_fname must point to an existing file
@@ -57,7 +120,7 @@ except AssertionError:
 if (os.path.isfile(output_fname)) & (not args.overwrite):
 	msg = ("\n\nYou ran this script with the following argument for the ``output_fname``:\n\n"
 		+ output_fname + "\n\n"
-		"This file already exists."
+		"This file already exists. "
 		"If you want to overwrite this file, \nrun this script again and throw the ``--overwrite`` flag.\n\n"
 		)
 	raise HalotoolsError(msg)
@@ -86,9 +149,31 @@ if has_existing_cache_log:
 		fname = output_fname)
 		)
 	exactly_matching_fnames_in_log = log[exact_fname_match_mask]
-	if len(exactly_matching_fnames_in_log) == 0:
-		pass
-	elif len(exactly_matching_fnames_in_log) ==  1:
+	num_exact_matches = len(exactly_matching_fnames_in_log)
+
+	_, close_redshift_match_mask = (
+		manipulate_cache_log.search_log_for_possibly_existing_entry(log, 
+		simname = simname, halo_finder = 'rockstar', redshift = redshift, 
+		version_name = version_name)
+		)
+	closely_matching_fnames_in_log = log[close_redshift_match_mask]
+	num_close_matches = len(closely_matching_fnames_in_log)
+
+	if num_exact_matches== 0:
+		if num_close_matches == 0:
+			pass
+		else:
+			if not args.ignore_nearby_redshifts:
+				msg = ("\n\nHalotools detected the following cached halo catalogs that match \n"
+					"all your input metadata, and have have a very similar redshift:\n\n")
+				for fname in closely_matching_fnames_in_log['fname']:
+					msg += fname + "\n"
+				msg += ("\nIf you wish to ignore these closely matching catalogs, \n"
+					"you must throw the ``--ignore_nearby_redshifts`` flag.\n"
+					)
+				raise HalotoolsError(msg)
+
+	elif num_exact_matches ==  1:
 		matching_fname = exactly_matching_fnames_in_log['fname'][0]
 		if args.overwrite:
 			manipulate_cache_log.remove_unique_fname_from_halo_table_cache_log(matching_fname)
@@ -139,20 +224,7 @@ if has_existing_cache_log:
 			)
 		raise HalotoolsError(msg)
 
-####################################################################
-# There are zero entries in the log with an ``fname`` that matches 
-# the ``output_fname`` passed to the script. 
-# Now address the case where there may be log entries with matching metadata
 
-if has_existing_cache_log:
-	manipulate_cache_log.verify_cache_log()
-	log = manipulate_cache_log.read_halo_table_cache_log()
-
-	exact_attr_match_mask, close_redshift_match_mask = (
-		manipulate_cache_log.search_log_for_possibly_existing_entry(log, 
-		simname = simname, halo_finder = halo_finder, 
-		redshift = redshift, version_name = version_name)
-		)
 
 
 
