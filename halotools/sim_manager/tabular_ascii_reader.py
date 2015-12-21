@@ -141,6 +141,43 @@ class TabularAsciiReader(object):
         ``row_cut_eq_dict`` and ``row_cut_neq_dict`` keyword arguments are used 
         simultaneously, only rows passing all cuts will be kept. 
 
+        Examples 
+        ---------
+        Suppose the only columns of data we intend to analyze 
+        are ``mass`` (column 5), ``upid`` (column 2) 
+        and ``phantom`` (column 28). Below we'll give example of 
+        how to make different choices for (optional) cuts 
+        on these columns, always retrieving only the data that we need.           
+
+        >>> input_fname = 'ascii_file.dat'
+
+        >>> columns_to_keep_dict = {'mass': (5, 'f4'), 'upid': (2, 'i8') 'phantom': (28, 'i8')}
+
+        In this first example, no cuts at all will be placed on any rows, 
+        and the returned array will only only have 'mass', 'upid' and 'phantom' columns:
+
+        >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict) # doctest: +SKIP
+        >>> result = reader.read_ascii() # doctest: +SKIP
+
+        If in the following call to the reader, we will only 
+        consider rows with mass < 1e10 will be ignored:
+
+        >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict, row_cut_min_dict = {'mass': 1e10}) # doctest: +SKIP
+        >>> result = reader.read_ascii() # doctest: +SKIP
+
+        If in the following call to the reader, we will only 
+        consider rows with 1e12 < mass < 1e13 will be ignored:
+
+        >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict, row_cut_min_dict = {'mass': 1e12}, row_cut_max_dict = {'mass': 1e13}) # doctest: +SKIP
+        >>> result = reader.read_ascii() # doctest: +SKIP
+
+        Now we will consider a more complex case. We only wish to 
+        consider rows that have upid = -1, 1e12 < mass < 1e13, and such that phantom != 1:
+
+        >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict, row_cut_min_dict = {'mass': 1e12}, row_cut_max_dict = {'mass': 1e13}, row_cut_eq_dict = {'upid': -1}, row_cut_neq_dict = {'phantom': 1}) # doctest: +SKIP
+        >>> result = reader.read_ascii() # doctest: +SKIP
+
+
         """
         self.fname = self._get_fname(input_fname)
 
