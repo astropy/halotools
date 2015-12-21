@@ -809,7 +809,7 @@ def remove_unique_fname_from_halo_table_cache_log(fname,
         new_log = log[~mask]
         overwrite_halo_table_cache_log(new_log, cache_fname = cache_fname)
     else:
-        idx = np.where(mask == True)[0] + 1
+        idx = np.where(mask == True)[0] + 2
         msg = ("\nYou requested that the following fname be deleted \n"
             "from the halo table cache log:\n"+fname+"\n"
             "However, this filename appears more than once in the log,\n"
