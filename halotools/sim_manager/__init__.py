@@ -10,7 +10,8 @@ from .catalog_manager import *
 from .sim_defaults import *
 
 from .halo_catalog import *
-from .user_defined_halo_catalog import *
+from .user_defined_halo_catalog import UserDefinedHaloCatalog
 
 from .manipulate_cache_log import *
-from .read_rockstar_hlists import *
+from .read_rockstar_hlists import RockstarHlistReader
+from .tabular_ascii_reader import TabularAsciiReader
