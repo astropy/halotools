@@ -151,7 +151,9 @@ class TabularAsciiReader(object):
         self._verify_eq_neq_consistency()
 
     def _verify_input_row_cuts_keys(self, **kwargs):
-        """
+        """ Require all columns upon which a row-cut is placed to also appear in 
+        the input ``columns_to_keep_dict``. For purposes of good bookeeping, 
+        you are not permitted to place a cut on a column that you do not keep.        
         """
         potential_row_cuts = ('row_cut_min_dict', 'row_cut_max_dict', 
             'row_cut_eq_dict', 'row_cut_neq_dict')
@@ -171,6 +173,10 @@ class TabularAsciiReader(object):
                     raise HalotoolsError(msg)
 
     def _verify_min_max_consistency(self, **kwargs):
+        """ Verify that no min_cut column has a value greater to the corresponding max_cut. 
+
+        Such a choice would laboriously result in a final catalog with zero entries. 
+        """
 
         for row_cut_min_key, row_cut_min in self.row_cut_min_dict.iteritems():
             try:
@@ -200,6 +206,10 @@ class TabularAsciiReader(object):
 
 
     def _verify_eq_neq_consistency(self, **kwargs):
+        """ Verify that no neq_cut column has a value equal to the corresponding eq_cut. 
+
+        Such a choice would laboriously result in a final catalog with zero entries. 
+        """ 
 
         for row_cut_eq_key, row_cut_eq in self.row_cut_eq_dict.iteritems():
             try:
@@ -227,9 +237,11 @@ class TabularAsciiReader(object):
             except KeyError:
                 pass
 
-
-
     def _process_columns_to_keep(self, columns_to_keep_dict):
+        """ Private method performs sanity checks in the input ``columns_to_keep_dict`` 
+        and uses this input to define two attributes used for future bookkeeping, 
+        ``self.column_indices_to_keep`` and ``self.dt``. 
+        """
 
         for key, value in columns_to_keep_dict.iteritems():
             try:
