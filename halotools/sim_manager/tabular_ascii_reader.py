@@ -10,107 +10,109 @@ import os
 import gzip
 from time import time
 import numpy as np
-from difflib import get_close_matches
 from astropy.table import Table
 from copy import deepcopy
 
-from astropy.io.ascii import InconsistentTableError
-
-from . import catalog_manager, supported_sims, sim_defaults, cache_config
 from ..utils import convert_to_ndarray
-
-from ..custom_exceptions import *
+from ..custom_exceptions import HalotoolsError
 
 class TabularAsciiReader(object):
     """ Class containing methods used to read raw ASCII data generated with Rockstar. 
     """
-    def __init__(self, input_fname, header_char='#', **kwargs):
+    def __init__(self, input_fname, columns_to_keep_dict, 
+        header_char='#', **kwargs):
         """
         Parameters 
         -----------
         input_fname : string 
             Absolute path of the file to be processed. 
 
-        columns_to_keep : list, optional 
-            List of tuples used to define which columns 
-            of the halo catalog ASCII data will be kept.
-            If ``columns_to_keep`` is not specified, the 
-            ``columns_to_keep_ascii_fname`` keyword must be provided. 
+        columns_to_keep_dict : dict 
+            Dictionary used to define which columns 
+            of the tabular ASCII data will be kept.
 
-            For every desired column of data, ``columns_to_keep`` 
-            should have a corresponding list element. 
-            Each list element is a tuple with 3 entries. 
+            Each key of the dictionary will be the name of the 
+            column in the returned data table. The value bound to 
+            each key is a two-element tuple. 
             The first tuple entry is an integer providing 
             the *index* of the column to be kept, starting from 0. 
-            The second tuple entry is a string providing the name 
-            that will be given to the data in that column, 
-            e.g., 'halo_id' or 'halo_spin'. 
-            The third tuple entry is a string defining the Numpy dtype 
+            The second tuple entry is a string defining the Numpy dtype 
             of the data in that column, 
             e.g., 'f4' for a float, 'f8' for a double, 
             or 'i8' for a long. 
 
-            Thus an example input for ``columns_to_keep`` could be 
-            [(0, 'halo_scale_factor', 'f4'), (1, 'halo_id', 'i8'), (16, 'halo_vmax', 'f4')]. 
+            Thus an example ``columns_to_keep_dict`` could be 
+            {'mass': (1, 'f4'), 'obj_id': (0, 'i8'), 'spin': (45, 'f4')}
 
-        columns_to_keep_ascii_fname : string, optional 
-            The ``columns_to_keep_ascii_fname`` string is 
-            the filename storing ascii data that 
-            determines the ``columns_to_keep`` variable. 
-            So ``columns_to_keep_ascii_fname`` is just a convenient way to 
-            determine ``columns_to_keep`` that also helps 
-            keep a permanent record of the choices you made to process your catalog. 
+        row_cut_min_dict : dict, optional 
+            Dictionary used to place a lower-bound cut on the rows 
+            of the tabular ASCII data. 
 
-            The number of rows of data in the ``columns_to_keep_ascii_fname`` file 
-            determines the number of columns of halo catalog ASCII data that will be kept. 
-            Each row in the file should have 3 columns, 
-            one column for each of the three 
-            tuple elements in ``columns_to_keep``. 
-            The file may begin with any number of header lines beginning with '#'. 
-            These will be ignored by Halotools but can be used 
-            to provide notes for your own bookkeeping. 
+            Each key of the dictionary must also 
+            be a key of the input ``columns_to_keep_dict``; 
+            for purposes of good bookeeping, you are not permitted 
+            to place a cut on a column that you do not keep. The value 
+            bound to each key serves as the lower bound on the data stored 
+            in that row. A row with a smaller value than this lower bound for the 
+            corresponding column will not appear in the returned data table. 
 
-            See halotools/data/RockstarHlistReader_input_example.dat 
-            for an explicit example. 
+            For example, if row_cut_min_dict = {'mass': 1e10}, then all rows of the 
+            returned data table will have a mass greater than 1e10. 
 
-        row_cuts : list, optional 
-            List of tuples used to define which rows of the ASCII data will be kept.
-            Default behavior is to make no cuts. 
+        row_cut_max_dict : dict, optional 
+            Dictionary used to place an upper-bound cut on the rows 
+            of the tabular ASCII data. 
 
-            The row-cut is determined from a list of tuples as follows. 
-            Each element of the ``row_cuts`` list is a three-element tuple. 
-            The first tuple element must be a string that will 
-            be interpreted as the halo property  
-            upon which your cut is made. 
-            The second and third tuple elements will be interpreted 
-            as lower and upper bounds on this halo property, respectively. 
+            Each key of the dictionary must also 
+            be a key of the input ``columns_to_keep_dict``; 
+            for purposes of good bookeeping, you are not permitted 
+            to place a cut on a column that you do not keep. The value 
+            bound to each key serves as the upper bound on the data stored 
+            in that row. A row with a larger value than this upper bound for the 
+            corresponding column will not appear in the returned data table. 
 
-            For example, if you only want to keep halos 
-            with :math:`M_{\\rm peak} > 1e10`, 
-            then you would set row_cuts = [('halo_mpeak', 1e10, float("inf"))]. 
+            For example, if row_cut_min_dict = {'mass': 1e15}, then all rows of the 
+            returned data table will have a mass less than 1e15. 
 
-            Every entry appearing in ``row_cuts`` must also 
-            appear in ``columns_to_keep``: for purposes of good bookeeping, 
-            you are not permitted to place a cut on a column that you do not keep. 
+        row_cut_eq_dict : dict, optional 
+            Dictionary used to place an equality cut on the rows 
+            of the tabular ASCII data. 
+
+            Each key of the dictionary must also 
+            be a key of the input ``columns_to_keep_dict``; 
+            for purposes of good bookeeping, you are not permitted 
+            to place a cut on a column that you do not keep. The value 
+            bound to each key serves as the required value for the data stored 
+            in that row. Only rows with a value equal to this required value for the 
+            corresponding column will appear in the returned data table. 
+
+            For example, if row_cut_eq_dict = {'upid': -1}, then all rows of the 
+            returned data table will have a upid of -1. 
+
+        row_cut_neq_dict : dict, optional 
+            Dictionary used to place an inequality cut on the rows 
+            of the tabular ASCII data. 
+
+            Each key of the dictionary must also 
+            be a key of the input ``columns_to_keep_dict``; 
+            for purposes of good bookeeping, you are not permitted 
+            to place a cut on a column that you do not keep. The value 
+            bound to each key serves as a forbidden value for the data stored 
+            in that row. Rows with a value equal to this forbidden value for the 
+            corresponding column will not appear in the returned data table. 
+
+            For example, if row_cut_neq_dict = {'upid': -1}, then no rows of the 
+            returned data table will have a upid of -1. 
 
         header_char : str, optional
             String to be interpreted as a header line of the ascii hlist file. 
             Default is '#'. 
 
         Notes 
-        -----
-        Making even very conservative cuts on 
-        either present-day or peak halo mass 
-        can result in dramatic reductions in file size; 
-        most halos in a typical raw catalog are right on the hairy edge 
-        of the numerical resolution limit. 
-
-        Also note that the processed halo catalogs 
-        provided by Halotools *do* make cuts on rows. So if you run the 
-        `RockstarHlistReader` with default settings on one of the raw 
-        catalogs provided by Halotools, you will *not* get a  
-        result that matches the corresponding processed catalog 
-        provided by Halotools. 
+        ------
+        When the ``row_cut_min_dict``, ``row_cut_max_dict``, 
+        ``row_cut_eq_dict`` and ``row_cut_neq_dict`` keyword arguments are used 
+        simultaneously, only rows passing all cuts will be kept. 
 
         """
 
@@ -122,13 +124,102 @@ class TabularAsciiReader(object):
 
         self.num_cols_total = self.infer_number_of_columns()
 
-        self.columns_to_keep = self._determine_columns_to_keep(**kwargs)
-        self._interpret_column_indices_to_keep()
-        self._interpret_input_dt()
+        self._process_columns_to_keep(columns_to_keep_dict)
 
-        input_row_cuts = self._interpret_input_row_cuts(**kwargs)
-        self.row_cuts = self._get_row_cuts(input_row_cuts)
+        # input_row_cuts = self._interpret_input_row_cuts(**kwargs)
+        # self.row_cuts = self._get_row_cuts(input_row_cuts)
 
+    def _verify_input_row_cuts(self, **kwargs):
+        """
+        """
+        potential_row_cuts = ('row_cut_min_dict', 'row_cut_max_dict', 
+            'row_cut_eq_dict', 'row_cut_neq_dict')
+        for row_cut_key in potential_row_cuts:
+
+            try:
+                row_cut_type = kwargs[row_cut_key]
+
+                for key in row_cut_dict:
+                    try:
+                        assert key in self.input_columns_to_keep_dict.keys()
+                    except AssertionError:
+                        msg = ("\nThe ``"+key+"`` key does not appear in the input \n"
+                            "``columns_to_keep_dict``, but it does appear in the "
+                            "input ``"+row_cut_type+"``. \n"
+                            "It is not permissible to place a cut "
+                            "on a column that you do not keep.\n")
+                        raise HalotoolsError(msg)
+            except KeyError:
+                pass
+
+        try:
+            row_cut_min_dict = kwargs['row_cut_min_dict']
+
+            try:
+                row_cut_max_dict = kwargs['row_cut_max_dict']
+                for row_cut_min_key, row_cut_min in row_cut_min_dict.iteritems():
+                    try:
+                        row_cut_max = row_cut_max_dict[row_cut_min_key]
+                        if row_cut_max <= row_cut_min:
+                            msg = ("\nFor the ``"+row_cut_min_key+"`` column, \n"
+                                "you set the value of the input ``row_cut_min_dict`` to "
+                                +str(row_cut_min)+"\nand the value of the input "
+                                "``row_cut_max_dict`` to "+str(row_cut_max)+"\n"
+                                "This will result in zero selected rows and is not permissible.\n")
+                            raise HalotoolsError(msg)
+                    except KeyError:
+                        pass
+
+            except KeyError:
+                pass
+
+        except KeyError:
+            pass
+
+
+    def _process_columns_to_keep(self, columns_to_keep_dict):
+
+        for key, value in columns_to_keep_dict.iteritems():
+            try:
+                assert type(value) == tuple
+                assert len(value) == 2
+            except AssertionError:
+                msg = ("\nThe value bound to every key of the input ``columns_to_keep_dict``\n"
+                    "must be a two-element tuple.\n"
+                    "The ``"+key+"`` is not the required type.\n"
+                    )
+                raise HalotoolsError(msg)
+
+            column_index, dtype = value
+            try:
+                assert type(column_index) == int
+            except AssertionError:
+                msg = ("\nThe first element of the two-element tuple bound to every key of \n"
+                    "the input ``columns_to_keep_dict`` must an integer.\n"
+                    "The first element of the ``"+key+"`` is not the required type.\n"
+                    )
+                raise HalotoolsError(msg)
+            try:
+                dt = np.dtype(dtype)
+            except:
+                msg = ("\nThe second element of the two-element tuple bound to every key of \n"
+                    "the input ``columns_to_keep_dict`` must be a string recognized by Numpy\n"
+                    "as a data type, e.g., 'f4' or 'i8'.\n"
+                    "The second element of the ``"+key+"`` is not the required type.\n"
+                    )
+                raise HalotoolsError(msg)
+
+            attr_name = key + '_column_index'
+            setattr(self, attr_name, value[0])
+            attr_name = key + '_dtype'
+            setattr(self, attr_name, np.dtype(value[1]))
+
+        self.dt = np.dtype(
+            [(key, columns_to_keep_dict[key][1]) 
+            for key in columns_to_keep_dict]
+            )
+
+        self.input_columns_to_keep_dict = columns_to_keep_dict
 
     def _get_fname(self, input_fname):
         """
