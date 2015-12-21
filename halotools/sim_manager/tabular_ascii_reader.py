@@ -490,7 +490,7 @@ class TabularAsciiReader(object):
 
         return array_chunk[mask]
 
-    def read_ascii(self, chunk_memory_size = 500):
+    def read_ascii(self, chunk_memory_size = 500.):
         """ Method reads the input ascii and returns 
         a structured Numpy array of the data 
         that passes the row- and column-cuts. 

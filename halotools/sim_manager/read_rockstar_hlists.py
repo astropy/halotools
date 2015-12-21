@@ -164,10 +164,118 @@ class RockstarHlistReader(TabularAsciiReader):
             header_char, row_cut_min_dict, row_cut_max_dict, 
             row_cut_eq_dict, row_cut_neq_dict)
 
+    def data_chunk_generator(self, chunk_size, f):
+        """
+        Python generator uses f.readline() to march 
+        through an input open file object to yield 
+        a chunk of data with length equal to the input ``chunk_size``. 
+        The generator only yields columns that were included 
+        in the ``columns_to_keep_dict`` passed to the constructor. 
 
+        Parameters 
+        -----------
+        chunk_size : int 
+            Number of rows of data in the chunk being generated 
 
+        f : File
+            Open file object being read
 
+        Returns 
+        --------
+        chunk : tuple 
+            Tuple of data from the ascii. 
+            Only data from ``column_indices_to_keep`` are yielded. 
 
+        """
+        TabularAsciiReader.data_chunk_generator(self, chunk_size, f)
+
+    def data_len(self):
+        """ 
+        Number of rows of data in the input ASCII file. 
+
+        Returns 
+        --------
+        Nrows_data : int 
+            Total number of rows of data. 
+
+        Notes 
+        -------
+        The returned value is computed as the number of lines 
+        between the returned value of `header_len` and 
+        the next appearance of "\n" as the sole character on a line. 
+
+        The `data_len` method is the particular section of code 
+        where where the following assumptions are made:
+
+        1. The data begins with the first appearance of a non-empty line that does not begin with the character defined by ``self.header_char``. 
+
+        2. The data ends with the next appearance of an empty line. 
+        """
+        return TabularAsciiReader.data_len(self)
+
+    def header_len(self):
+        """ Number of rows in the header of the ASCII file. 
+
+        Parameters 
+        ----------
+        fname : string 
+
+        Returns 
+        -------
+        Nheader : int
+
+        Notes 
+        -----
+        The header is assumed to be those characters at the beginning of the file 
+        that begin with ``self.header_char``. 
+
+        All empty lines that appear in header will be included in the count. 
+
+        """
+        return TabularAsciiReader.header_len(self)
+
+    def apply_row_cut(self, array_chunk):
+        """ Method applies a boolean mask to the input array 
+        based on the row-cuts determined by the 
+        dictionaries passed to the constructor. 
+
+        Parameters 
+        -----------
+        array_chunk : Numpy array  
+
+        Returns 
+        --------
+        cut_array : Numpy array             
+        """ 
+        return TabularAsciiReader.apply_row_cut(self, array_chunk)
+
+    def read_ascii(self, chunk_memory_size = 500.):
+        """ Method reads the input ascii and returns 
+        a structured Numpy array of the data 
+        that passes the row- and column-cuts. 
+
+        Parameters 
+        ----------
+        chunk_memory_size : int, optional 
+            Determine the approximate amount of Megabytes of memory 
+            that will be processed in chunks. This variable 
+            must be smaller than the amount of RAM on your machine; 
+            choosing larger values typically improves performance. 
+            Default is 500 Mb. 
+
+        Returns 
+        --------
+        full_array : array_like 
+            Structured Numpy array storing the rows and columns 
+            that pass the input cuts. The columns of this array 
+            are those selected by the ``column_indices_to_keep`` 
+            argument passed to the constructor. 
+
+        See also 
+        ----------
+        data_chunk_generator
+        """
+        return TabularAsciiReader.read_ascii(self, chunk_memory_size = 500.)
 
 
 
