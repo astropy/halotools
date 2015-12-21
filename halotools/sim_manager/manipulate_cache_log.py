@@ -30,6 +30,9 @@ from . import sim_defaults
 
 from ..custom_exceptions import HalotoolsError
 
+def get_redshift_string(redshift):
+    return '{0:.4f}'.format(redshift)
+
 def get_halo_table_cache_log_fname():
     dirname = os.path.join(get_astropy_cache_dir(), 'halotools')
     return os.path.join(dirname, 'halo_table_cache_log.txt')
