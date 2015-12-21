@@ -79,7 +79,10 @@ class OverhauledHaloCatalog(object):
         """
         f = h5py.File(self.fname_halo_table)
         for attr_key in f.attrs.keys():
-            setattr(self, attr_key, f.attrs[attr_key])
+            if attr_key == 'redshift':
+                setattr(self, attr_key, float(f.attrs[attr_key]))
+            else:
+                setattr(self, attr_key, f.attrs[attr_key])
         f.close()
 
     def store_halocat_in_cache(self, fname_halo_table, overwrite = False, 

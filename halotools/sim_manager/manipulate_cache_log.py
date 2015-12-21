@@ -31,7 +31,7 @@ from . import sim_defaults
 from ..custom_exceptions import HalotoolsError
 
 def get_redshift_string(redshift):
-    return '{0:.4f}'.format(redshift)
+    return '{0:.4f}'.format(float(redshift))
 
 def get_halo_table_cache_log_fname():
     dirname = os.path.join(get_astropy_cache_dir(), 'halotools')
@@ -174,7 +174,7 @@ def return_halo_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
         no_halo_finder_argument = True
 
     try:
-        redshift = kwargs['redshift']
+        redshift = float(kwargs['redshift'])
         no_redshift_argument = False
     except KeyError:
         redshift = sim_defaults.default_redshift
@@ -204,7 +204,7 @@ def return_halo_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
     close_match_mask *= log['version_name'] == version_name
 
     matches_no_redshift_mask = log[close_match_mask]
-    close_match_mask *= abs(log['redshift'] - redshift) < dz_tol
+    close_match_mask *= abs(log['redshift'] - float(redshift)) < dz_tol
     close_matches = log[close_match_mask]
 
     # Multiple version check mask
@@ -270,7 +270,7 @@ def return_halo_table_fname_from_simname_inputs(dz_tol = 0.05, **kwargs):
         else:
             candidate_redshifts = matches_no_redshift_mask['redshift']
             closest_redshift = candidate_redshifts[np.argmin(
-                abs(redshift - candidate_redshifts))]
+                abs(float(redshift) - candidate_redshifts))]
             msg = ("\nThe Halotools cache log ``"+cache_fname+"``\n"
                 "does not contain any entries matching your requested inputs.\n"
                 "First, the double-check that your arguments are as intended, including spelling:\n\n")
@@ -479,7 +479,7 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
         try:
             attr_of_cached_catalog = f.attrs[key]
             if key == 'redshift':
-                assert abs(requested_attr - attr_of_cached_catalog) < 0.01
+                assert abs(float(requested_attr) - float(attr_of_cached_catalog)) < 0.01
             else:
                 assert attr_of_cached_catalog == requested_attr
         except KeyError:
@@ -528,9 +528,9 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
                 ">>> f = h5py.File(fname)\n"
                 ">>> f.attrs.create('"+key+"', "+attr_msg+")\n"
                 ">>> f.close()\n\n"
-                "Be sure to use string-valued variables for the following inputs:\n"
-                "``simname``, ``halo_finder``, ``version_name`` and ``fname``,\n"
-                "and a float for the ``redshift`` input.\n"
+                "Be sure to use string-valued variables for all inputs, including redshift.\n"
+                "To properly format the redshift, the Halotools convention is:\n"
+                "redshift_string = '{0:.4f}'.format(float(redshift))' \n"
                 )
             raise HalotoolsError(msg)
 
@@ -614,7 +614,7 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
     try:
         simname = metadata['simname']
         halo_finder = metadata['halo_finder']
-        redshift = metadata['redshift']
+        redshift = float(metadata['redshift'])
         version_name = metadata['version_name']
         fname = metadata['fname']
         Lbox = metadata['Lbox']
@@ -655,7 +655,7 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
         new_log = Table()
         new_log['simname'] = [simname]
         new_log['halo_finder'] = [halo_finder]
-        new_log['redshift'] = [redshift]
+        new_log['redshift'] = [float(redshift)]
         new_log['version_name'] = [version_name]
         new_log['fname'] = [fname]
         overwrite_halo_table_cache_log(new_log, cache_fname = cache_fname)
@@ -694,7 +694,7 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
         exact_match_mask, close_match_mask = (
             search_log_for_possibly_existing_entry(log, 
                 simname = simname, halo_finder = halo_finder, 
-                redshift = redshift, version_name = version_name)
+                redshift = float(redshift), version_name = version_name)
             )
         exactly_matching_entries = log[exact_match_mask]
         closely_matching_entries = log[close_match_mask]
@@ -795,7 +795,7 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
     if first_halo_table_in_cache is False:
         new_table_entry = Table({'simname': [simname], 
             'halo_finder': [halo_finder], 
-            'redshift': [redshift], 
+            'redshift': [float(redshift)], 
             'version_name': [version_name], 
             'fname': [fname]}
             )
@@ -886,7 +886,7 @@ def search_log_for_possibly_existing_entry(log, dz_tol = 0.05, **catalog_attrs):
 
     for key, value in catalog_attrs.iteritems():
         if key == 'redshift':
-            close_match_mask *= abs(log[key] - value) < dz_tol
+            close_match_mask *= abs(log[key] - float(value)) < dz_tol
         else:
             close_match_mask *= log[key] == value
 
@@ -916,7 +916,7 @@ def verify_file_storing_unrecognized_halo_table(fname):
     try:
         simname = f.attrs['simname']
         halo_finder = f.attrs['halo_finder']
-        redshift = np.round(float(f.attrs['redshift']), 4)
+        redshift = float(f.attrs['redshift'])
         version_name = f.attrs['version_name']
         Lbox = f.attrs['Lbox']
         ptcl_mass = f.attrs['ptcl_mass']
@@ -930,10 +930,12 @@ def verify_file_storing_unrecognized_halo_table(fname):
             ">>> f = h5py.File(fname)\n"
             ">>> f.attrs.create('simname', simname)\n"
             ">>> f.close()\n\n"
-            "Be sure to use string-valued variables for the following inputs:\n"
-            "``simname``, ``halo_finder``, ``version_name`` and ``fname``,\n"
-            "and floats for the following inputs:\n"
-            "``redshift``, ``Lbox`` (in Mpc/h)  ``ptcl_mass`` (in Msun/h)\n"
+            "Use floats for the following inputs:\n"
+            "``Lbox`` (in Mpc/h)  ``ptcl_mass`` (in Msun/h)\n"
+            "Use string-valued variables for the following inputs:\n"
+            "``simname``, ``halo_finder``, ``version_name``, ``fname``, and also ``redshift``.\n"
+            "To properly format the redshift metadata, the Halotools convention is:\n"
+            "redshift_string = '{0:.4f}'.format(float(redshift))' \n"
             )
 
         raise HalotoolsError(msg)

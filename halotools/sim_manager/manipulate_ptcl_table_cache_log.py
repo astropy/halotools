@@ -322,9 +322,9 @@ def check_ptcl_table_metadata_consistency(cache_log_entry, linenum = None):
                 ">>> f = h5py.File(fname)\n"
                 ">>> f.attrs.create('"+key+"', "+attr_msg+")\n"
                 ">>> f.close()\n\n"
-                "Be sure to use string-valued variables for the following inputs:\n"
-                "``simname``, ``version_name`` and ``fname``,\n"
-                "and a float for the ``redshift`` input.\n"
+                "Use string-valued variables for all inputs, including ``redshift``.\n"
+                "To properly format the redshift metadata, the Halotools convention is:\n"
+                "redshift_string = '{0:.4f}'.format(float(redshift))' \n"
                 )
             raise HalotoolsError(msg)
 
@@ -508,7 +508,7 @@ def verify_file_storing_unrecognized_ptcl_table(fname):
 
     try:
         simname = f.attrs['simname']
-        redshift = np.round(float(f.attrs['redshift']), 4)
+        redshift = float(f.attrs['redshift'])
         version_name = f.attrs['version_name']
         Lbox = f.attrs['Lbox']
         inferred_fname = f.attrs['fname']
@@ -520,10 +520,11 @@ def verify_file_storing_unrecognized_ptcl_table(fname):
             ">>> f = h5py.File(fname)\n"
             ">>> f.attrs.create('simname', simname)\n"
             ">>> f.close()\n\n"
-            "Be sure to use string-valued variables for the following inputs:\n"
-            "``simname``, ``version_name`` and ``fname``,\n"
-            "and floats for the following inputs:\n"
-            "``redshift``, ``Lbox`` (in Mpc/h) \n"
+            "Use a float for the ``Lbox`` (in Mpc/h) input.\n"
+            "Use string-valued variables for the following inputs:\n"
+            "``simname``, ``version_name`` ``fname``, and also ``redshift``.\n"
+            "To properly format the redshift metadata, the Halotools convention is:\n"
+            "redshift_string = '{0:.4f}'.format(float(redshift))' \n"
             )
 
         raise HalotoolsError(msg)
@@ -592,7 +593,7 @@ def store_new_ptcl_table_in_cache(ptcl_table, ignore_nearby_redshifts = False,
     # Verify that the metadata has all the necessary keys
     try:
         simname = metadata['simname']
-        redshift = metadata['redshift']
+        redshift = float(metadata['redshift'])
         version_name = metadata['version_name']
         fname = metadata['fname']
         Lbox = metadata['Lbox']
