@@ -15,6 +15,7 @@ import numpy as np
 from warnings import warn 
 from astropy.table import Table
 from astropy.table import vstack as table_vstack 
+from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 
 import datetime
 
@@ -86,6 +87,8 @@ class RockstarHlistReader(TabularAsciiReader):
             The file extension must be '.hdf5'. 
             If the file already exists, you must set 
             the keyword argument ``overwrite`` to True. 
+            If output_fname is set to `std_cache_loc`, Halotools will place the 
+            catalog in the default cache location. 
 
         simname : string 
             Nickname of the simulation used as a shorthand way to keep track 
@@ -236,8 +239,11 @@ class RockstarHlistReader(TabularAsciiReader):
             raise HalotoolsError(msg)
 
         self._verify_cache_log(**kwargs)
-        self._check_output_fname(output_fname, overwrite, **kwargs)
-        self.output_fname = output_fname
+
+        self.output_fname = (
+            self._retrieve_output_fname(output_fname, overwrite, **kwargs)
+            )
+
         self._check_cache_log_for_matching_catalog(**kwargs)
 
     def _enforce_halo_catalog_formatting_requirements(self):
@@ -390,15 +396,36 @@ class RockstarHlistReader(TabularAsciiReader):
         if self._cache_log_exists == True:
             manipulate_cache_log.remove_repeated_cache_lines(**kwargs)
 
-    def _check_output_fname(self, output_fname, overwrite, **kwargs):
+    def _get_default_output_fname(self):
+        """
+        """
+        basedir = get_astropy_cache_dir()
+        dirname = os.path.join(basedir, 'halotools', 'halo_catalogs', 
+            self.simname, self.halo_finder)
+        try:
+            os.makedirs(dirname)
+        except OSError:
+            pass
+
+        basename = (
+            os.path.basename(self.input_fname) + 
+            '.' + self.version_name + '.hdf5'
+            )
+        default_fname = os.path.join(dirname, basename)
+        return default_fname
+
+    def _retrieve_output_fname(self, output_fname, overwrite, **kwargs):
         """ Private method checks to see whether the chosen 
         ``output_fname`` already exists on disk, and also whether it 
         already appears in the cache log. If ovewrite is True, 
         the log will be cleaned of any entries with a matching output_fname. 
         If overwrite is False and a match is detected, an exception is raised. 
-        The `_check_output_fname` can safely be called even if the cache log 
+        The `_retrieve_output_fname` can safely be called even if the cache log 
         does not exist. 
         """
+        if output_fname == 'std_cache_loc':
+            output_fname = self._get_default_output_fname()
+
         try:
             assert output_fname[-5:] == '.hdf5'
         except:
