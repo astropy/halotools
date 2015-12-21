@@ -12,6 +12,7 @@ import os
 import gzip
 from time import time
 import numpy as np
+from warnings import warn 
 
 from .tabular_ascii_reader import TabularAsciiReader
 
@@ -36,7 +37,8 @@ class RockstarHlistReader(TabularAsciiReader):
     def __init__(self, input_fname, columns_to_keep_dict, 
         output_fname, simname, halo_finder, redshift, version_name, 
         header_char='#', row_cut_min_dict = {}, row_cut_max_dict = {}, 
-        row_cut_eq_dict = {}, row_cut_neq_dict = {}, **kwargs):
+        row_cut_eq_dict = {}, row_cut_neq_dict = {}, 
+        overwrite = False, **kwargs):
         """
         Parameters 
         -----------
@@ -152,6 +154,10 @@ class RockstarHlistReader(TabularAsciiReader):
             String to be interpreted as a header line of the ascii hlist file. 
             Default is '#'. 
 
+        overwrite : bool, optional 
+            If the chosen ``output_fname`` already exists, then you must set ``overwrite`` 
+            to True in order to write the file to disk. Default is False. 
+
         Notes 
         ------
         When the ``row_cut_min_dict``, ``row_cut_max_dict``, 
@@ -163,6 +169,16 @@ class RockstarHlistReader(TabularAsciiReader):
             input_fname, columns_to_keep_dict, 
             header_char, row_cut_min_dict, row_cut_max_dict, 
             row_cut_eq_dict, row_cut_neq_dict)
+
+        try:
+            import h5py 
+        except ImportError:
+            msg = ("\nYou must have h5py installed if you want to \n"
+                "use the RockstarHlistReader to store your catalog in the Halotools cache. \n"
+                "For a stand-alone reader class, you should instead use TabularAsciiReader.\n")
+            warn(msg)
+
+        self._check_output_fname(output_fname, overwrite)
 
     def data_chunk_generator(self, chunk_size, f):
         """
@@ -276,6 +292,31 @@ class RockstarHlistReader(TabularAsciiReader):
         data_chunk_generator
         """
         return TabularAsciiReader.read_ascii(self, chunk_memory_size = 500.)
+
+    def _check_output_fname(self, output_fname, overwrite):
+        """ Private method checks to see whether the chosen 
+        ``output_fname`` already exists. 
+        """
+        if os.path.isfile(output_fname):
+            if overwrite == True:
+                msg = ("\nThe chosen ``output_fname``, \n"+output_fname+"\n"
+                    "already exists and will be overwritten when the \n"
+                    "`store_halo_catalog_in_cache` method is called.\n")
+                warn(msg)
+            else:
+                msg = ("\nThe chosen ``output_fname``, \n"+output_fname+"\n"
+                    "already exists. You must set overwrite to True if you want to "
+                    "use the `store_halo_catalog_in_cache` method.\n")
+                raise IOError(msg)
+
+    def _check_cache_log_for_matching_catalog(self):
+        """ Private method searches the Halotools cache log to see if there are 
+        any entries with metadata that matches the RockstarHlistReader constructor inputs.  
+        """
+        pass
+
+
+
 
 
 
