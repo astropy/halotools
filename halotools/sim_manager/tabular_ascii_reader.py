@@ -173,7 +173,7 @@ class TabularAsciiReader(object):
         >>> data_array = reader.read_ascii() # doctest: +SKIP
 
         """
-        self.fname = self._get_fname(input_fname)
+        self.input_fname = self._get_fname(input_fname)
 
         self.header_char = self._get_header_char(header_char)
 
@@ -203,7 +203,7 @@ class TabularAsciiReader(object):
 
             for key in row_cut_dict:
                 try:
-                    assert key in self.input_columns_to_keep_dict.keys()
+                    assert key in self.columns_to_keep_dict.keys()
                 except AssertionError:
                     msg = ("\nThe ``"+key+"`` key does not appear in the input \n"
                         "``columns_to_keep_dict``, but it does appear in the "
@@ -312,7 +312,7 @@ class TabularAsciiReader(object):
                     "The second element of the ``"+key+"`` is not the required type.\n"
                     )
                 raise TypeError(msg)
-        self.input_columns_to_keep_dict = columns_to_keep_dict
+        self.columns_to_keep_dict = columns_to_keep_dict
 
         # Create a hard copy of the dict keys to ensure that 
         # self.column_indices_to_keep and self.dt are defined 
@@ -364,7 +364,7 @@ class TabularAsciiReader(object):
         """ Determine whether to use *open* or *gzip.open* to read 
         the input file, depending on whether or not the file is compressed. 
         """
-        f = gzip.open(self.fname, 'r')
+        f = gzip.open(self.input_fname, 'r')
         try:
             f.read(1)
             self._compression_safe_file_opener = gzip.open
@@ -393,7 +393,7 @@ class TabularAsciiReader(object):
 
         """
         Nheader = 0
-        with self._compression_safe_file_opener(self.fname, 'r') as f:
+        with self._compression_safe_file_opener(self.input_fname, 'r') as f:
             for i, l in enumerate(f):
                 if ( (l[0:len(self.header_char)]==self.header_char) or (l=="\n") ):
                     Nheader += 1
@@ -425,7 +425,7 @@ class TabularAsciiReader(object):
         2. The data ends with the next appearance of an empty line. 
         """
         Nrows_data = 0
-        with self._compression_safe_file_opener(self.fname, 'r') as f:
+        with self._compression_safe_file_opener(self.input_fname, 'r') as f:
             for i, l in enumerate(f):
                 if ( (l[0:len(self.header_char)]!=self.header_char) and (l!="\n") ):
                     Nrows_data += 1
@@ -516,10 +516,10 @@ class TabularAsciiReader(object):
         ----------
         data_chunk_generator
         """
-        print("\n...Processing ASCII data of file: \n%s\n " % self.fname)
+        print("\n...Processing ASCII data of file: \n%s\n " % self.input_fname)
         start = time()
 
-        file_size = os.path.getsize(self.fname) 
+        file_size = os.path.getsize(self.input_fname) 
         chunk_memory_size *= 1e6 # convert to bytes to match units of file_size
         num_data_rows = self.data_len()
         print("Total number of rows in detected data = %i" % num_data_rows)
@@ -540,7 +540,7 @@ class TabularAsciiReader(object):
         print("Number of rows in detected header = %i \n" % header_length)
 
         chunklist = []
-        with self._compression_safe_file_opener(self.fname, 'r') as f:
+        with self._compression_safe_file_opener(self.input_fname, 'r') as f:
 
             for skip_header_row in xrange(header_length):
                 _ = f.readline()
