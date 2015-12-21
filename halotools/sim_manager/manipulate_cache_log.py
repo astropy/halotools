@@ -99,7 +99,8 @@ def return_halo_table_fname_after_verification(fname, **kwargs):
             "is located on an external disk that is not currently plugged in.\n")
         raise HalotoolsError(msg)
 
-    verify_cache_log(**kwargs)
+    cache_log_exists, cache_log_is_kosher = verify_cache_log(**kwargs)
+
     remove_repeated_cache_lines(cache_fname=cache_fname)
     log = read_halo_table_cache_log(cache_fname=cache_fname)
     mask = log['fname'] == str(fname)
@@ -421,11 +422,31 @@ def verify_halo_table_cache_log_columns(**kwargs):
             "Please contact the Halotools developers if the issue persists.\n")
         raise HalotoolsError(msg)
 
-def verify_cache_log(**kwargs):
+def verify_cache_log(raise_non_existent_cache_exception = True, **kwargs):
+    
+    cache_log_exists, cache_log_is_kosher = False, False
 
-    verify_halo_table_cache_existence(**kwargs)
-    verify_halo_table_cache_header(**kwargs)
-    verify_halo_table_cache_log_columns(**kwargs)
+    if raise_non_existent_cache_exception is True:
+        verify_halo_table_cache_existence(**kwargs)
+        cache_log_exists = True
+        verify_halo_table_cache_header(**kwargs)
+        verify_halo_table_cache_log_columns(**kwargs)
+        cache_log_is_kosher = True
+        return cache_log_exists, cache_log_is_kosher
+
+    else:
+        try:
+            verify_halo_table_cache_existence(**kwargs)
+            cache_log_exists = True
+        except HalotoolsError:
+            return cache_log_exists, cache_log_is_kosher 
+
+        if cache_log_exists is True:
+            verify_halo_table_cache_header(**kwargs)
+            verify_halo_table_cache_log_columns(**kwargs)
+            cache_log_is_kosher = True
+            return cache_log_exists, cache_log_is_kosher 
+
 
 def check_metadata_consistency(cache_log_entry, linenum = None):
     """

@@ -63,12 +63,13 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             'bolshoi', 'rockstar', 0.00004, 'halotools.alpha.version0')
         helper_functions.create_halo_table_hdf5(updated_log[-1])
 
+        # At this stage the cache log does not exist
+        assert not os.path.isfile(cache_fname)
         fname = updated_log['fname'][0]
         with pytest.raises(HalotoolsError):
             _ = manipulate_cache_log.return_halo_table_fname_after_verification(
                 fname = fname, cache_fname = cache_fname)
 
-        assert not os.path.isfile(cache_fname)
         manipulate_cache_log.overwrite_halo_table_cache_log(
             updated_log, cache_fname = cache_fname)
         assert os.path.isfile(cache_fname)
