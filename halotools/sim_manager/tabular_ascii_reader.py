@@ -2,7 +2,7 @@
 """
 Module storing the TabularAsciiReader, a class providing a memory-efficient 
 algorithm for reading a very large ascii file that stores tabular data 
-with a data type that is known in advance. 
+of a data type that is known in advance. 
 
 """
 
@@ -18,24 +18,29 @@ from ..custom_exceptions import HalotoolsError
 class TabularAsciiReader(object):
     """ Class providing a memory-efficient algorithm for 
     reading a very large ascii file that stores tabular data 
-    with a data type that is known in advance. 
+    of a data type that is known in advance. 
 
     When reading ASCII data with 
     `~halotools.sim_manager.TabularAsciiReader.read_ascii`, user-defined 
-    cuts on columns are applied on-the-fly as the file is read 
-    using a python generator to yield only those columns whose 
-    indices appear in the input ``columns_to_keep_dict``. 
-    The data is read in as chunks, and a user-defined mask is applied 
-    to each chunk. The only aggregated data are those rows and columns 
-    passing both cuts, so that the `~halotools.sim_manager.TabularAsciiReader` 
-    only requires you to have enough RAM to store the cut catalog, 
+    cuts on columns are applied on-the-fly using a python generator 
+    to yield only those columns whose indices appear in the 
+    input ``columns_to_keep_dict``. 
+
+    The data is generated in chunks, 
+    and a user-defined mask is applied to each chunk. 
+    The only aggregated data from each chunk are those rows  
+    passing all requested cuts, so that the 
+    `~halotools.sim_manager.TabularAsciiReader` 
+    only requires you to have enough RAM to store the *cut* catalog, 
     not the entire ASCII file. 
-    The `~halotools.sim_manager.TabularAsciiReader.read_ascii` method 
-    returns a structured Numpy array, 
+
+    The primary method is the class is  
+    `~halotools.sim_manager.TabularAsciiReader.read_ascii`. 
+    The output of this method is a structured Numpy array, 
     which can then be stored in your preferred binary format 
     using the built-in Numpy methods, h5py, etc. 
 
-    The algorithm assumes that data of unchanging type is 
+    The algorithm assumes that data of known, unchanging type is 
     arranged in a consecutive sequence of lines within the ascii file, 
     and that the appearance of an empty line demarcates the end 
     of the data stream. 
@@ -331,7 +336,7 @@ class TabularAsciiReader(object):
             f.close()
 
     def header_len(self):
-        """ Compute the number of header rows in the raw halo catalog. 
+        """ Number of rows in the ascii data header. 
 
         Parameters 
         ----------
@@ -343,6 +348,9 @@ class TabularAsciiReader(object):
 
         Notes 
         -----
+        The header is assumed to be those characters at the beginning of the file 
+        that begin with ``self.header_char``. 
+
         All empty lines that appear in header will be included in the count. 
 
         """
@@ -358,12 +366,25 @@ class TabularAsciiReader(object):
 
     def data_len(self):
         """ 
-        Number of rows between the result of `header_len` and 
-        the next appearance of "\n" as the only character on a line. 
-        Thus this algorithm assumes that data of unchanging type is 
-        arranged in a consecutive sequence of lines within the file, 
-        and that the appearance of an empty line demarcates the end 
-        of the data stream.   
+        Number of rows data in the input ASCII file. 
+
+        Returns 
+        --------
+        Nrows_data : int 
+            Total number of rows of data. 
+
+        Notes 
+        -------
+        The returned value is computed as the number of lines 
+        between the returned value of `header_len` and 
+        the next appearance of "\n" as the sole character on a line. 
+
+        The `data_len` method is the particular section of code 
+        where where the following assumptions are made:
+
+        1. The data begins with the first appearance of a line that does not begin with ``self.header_char``. 
+
+        2. The data ends with the first subsequent appearance of an empty line. 
         """
         Nrows_data = 0
         with self._compression_safe_file_opener(self.fname, 'r') as f:
@@ -405,7 +426,8 @@ class TabularAsciiReader(object):
 
     def apply_row_cut(self, array_chunk):
         """ Method applies a boolean mask to the input array 
-        based on the row-cuts determined by the dictionaries passed to the constructor. 
+        based on the row-cuts determined by the 
+        dictionaries passed to the constructor. 
 
         Parameters 
         -----------
@@ -431,43 +453,53 @@ class TabularAsciiReader(object):
 
         return array_chunk[mask]
 
-
-    def read_ascii(self, **kwargs):
-        """ Method reads the input ascii using the `data_chunk_generator` 
-        and returns a structured Numpy array storing the data 
-        passing the row- and column-cuts. 
+    def read_ascii(self, chunk_memory_size = 500):
+        """ Method reads the input ascii and returns 
+        a structured Numpy array of the data 
+        that passes the row- and column-cuts. 
 
         Parameters 
         ----------
-        Nchunks : int, optional 
-            `read_ascii` reads and processes ascii 
-            in chunks at a time, both to improve performance and 
-            so that the entire raw halo catalog need not fit in memory 
-            in order to process it. The total number of chunks to use 
-            can be specified with the `Nchunks` argument. Default is 1000. 
+        chunk_memory_size : int, optional 
+            Determine the approximate amount of Megabytes of memory 
+            that will be processed in chunks. This variable 
+            must be smaller than the amount of RAM on your machine; 
+            choosing larger values typically improves performance. 
+            Default is 500 Mb. 
 
+        Returns 
+        --------
+        full_array : array_like 
+            Structured Numpy array storing the rows and columns 
+            that pass the input cuts. The columns of this array 
+            are those selected by the ``column_indices_to_keep`` 
+            argument passed to the constructor. 
+
+        See also 
+        ----------
+        data_chunk_generator
         """
         start = time()
 
-        try:
-            Nchunks = int(kwargs['Nchunks'])
-        except:
-            Nchunks = 100
-
-        header_length = self.header_len()
+        file_size = os.path.getsize(fname) 
         num_data_rows = self.data_len()
+        # Set the number of chunks to be filesize/chunk_memory, 
+        # but enforcing that 0 < Nchunks <= num_data_rows
+        try:
+            Nchunks = max(1, min(file_size / chunk_memory_size, num_data_rows))
+        except ZeroDivisionError:
+            msg = ("\nMust choose non-zero size for input ``chunk_memory_size``")
+            raise HalotoolsError(msg)
 
-        chunksize = int(num_data_rows / float(Nchunks))
-        num_full_chunks = num_data_rows/chunksize
-        chunksize_remainder = num_data_rows % chunksize
-        if chunksize == 0:
-            chunksize = num_data_rows # data will not be chunked
-            Nchunks = 1
+        num_rows_in_chunk = int(num_data_rows / float(Nchunks))
+        num_full_chunks = num_data_rows / num_rows_in_chunk
+        num_rows_in_chunk_remainder = num_data_rows - num_rows_in_chunk*Nchunks
 
         print("\n...Processing ASCII data of file: \n%s\n " % self.fname)
-        print(" Total number of rows containing data = %i" % num_data_rows)
+        print(" Total number of rows in detected data = %i" % num_data_rows)
         print(" Number of rows in detected header = %i \n" % header_length)
 
+        header_length = self.header_len()
         chunklist = []
         with self._compression_safe_file_opener(self.fname, 'r') as f:
 
@@ -477,13 +509,13 @@ class TabularAsciiReader(object):
             for ichunk in xrange(num_full_chunks):
 
                 chunk_array = np.array(list(
-                    self.data_chunk_generator(chunksize, f)), dtype=self.dt)
+                    self.data_chunk_generator(num_rows_in_chunk, f)), dtype=self.dt)
                 cut_chunk = self.apply_row_cut(chunk_array)
                 chunklist.append(cut_chunk)
 
-            # Now for the final chunk
+            # Now for the remainder chunk
             chunk_array = np.array(list(
-                self.data_chunk_generator(chunksize_remainder, f)), dtype=self.dt)
+                self.data_chunk_generator(num_rows_in_chunk_remainder, f)), dtype=self.dt)
             cut_chunk = self.apply_row_cut(chunk_array)
             chunklist.append(cut_chunk)
 
