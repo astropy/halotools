@@ -11,16 +11,16 @@ parser = argparse.ArgumentParser()
 
 input_fname_help_msg = ("Absolute path to the ASCII hlist file storing the halo catalog. "
 	"Can be either compressed or uncompressed.")
-columns_to_keep_fname_help_msg = ("Absolute path to the "
-	"``columns_to_keep_fname`` ASCII file defining "
+columns_to_keep_ascii_fname_help_msg = ("Absolute path to the "
+	"``columns_to_keep_ascii_fname`` ASCII file defining "
 	"the cuts made on the rows and columns of the hlist file. "
 	"As described in the docstring of the RockstarHlistReader class, "
 	"the contents of this file are used to select the relevant columns of the hlist file. "
-	"The ``columns_to_keep_fname`` file can begin with any number of header lines "
+	"The ``columns_to_keep_ascii_fname`` file can begin with any number of header lines "
 	"beginning with the '#' character, all of which will be ignored. "
-	"Besides the header, there should be one row of the ``columns_to_keep_fname`` file "
+	"Besides the header, there should be one row of the ``columns_to_keep_ascii_fname`` file "
 	"for every column of the hlist file you wish to keep. "
-	"Each row of the ``columns_to_keep_fname`` file must have 3 columns. "
+	"Each row of the ``columns_to_keep_ascii_fname`` file must have 3 columns. "
 	"Column 1: integer providing the index of the column in the hlist file, "
 	"where the first column has column-index 0. "
 	"Column 2: string providing the name of the column data, e.g., 'halo_id'. "
@@ -29,17 +29,17 @@ columns_to_keep_fname_help_msg = ("Absolute path to the "
 	"you will need to follow this convention; otherwise you may ignore it. "
 	"Column 3: string defining the data type stored in the column, e.g., 'f4' for floats,"
 	"'f8' for double, 'i4' for int, i8' for long. "
-	"The contents of the ``columns_to_keep_fname`` will be stored as metadata of the "
+	"The contents of the ``columns_to_keep_ascii_fname`` will be stored as metadata of the "
 	"resulting hdf5 file, so that you have an exact record of how the hlist file "
 	"was reduced into an hdf5 file. See halotools/data/RockstarHlistReader_input_example.dat "
-	"for an example ``columns_to_keep_fname``. ")
+	"for an example ``columns_to_keep_ascii_fname``. ")
 
 version_name_msg = ("Nickname used to distinguish between different versions of the same "
 	"snapshot. You should use a different version_name for every different version of Rockstar "
 	"run on the snapshot, and also for every different time you process the same the halo catalog "
 	"with different cuts. ")
 parser.add_argument("input_fname", help=input_fname_help_msg)
-parser.add_argument("columns_to_keep_fname", help=columns_to_keep_fname_help_msg)
+parser.add_argument("columns_to_keep_ascii_fname", help=columns_to_keep_ascii_fname_help_msg)
 parser.add_argument("simname", help = "Nickname of the simulation. ")
 parser.add_argument("redshift", help = "Redshift of the snapshot. ", type=float)
 parser.add_argument("version_name", help = version_name_msg)
@@ -62,7 +62,7 @@ parser.add_argument("--ignore_nearby_redshifts", action = "store_true",
 # 	"make a cut on some column of the halo catalog on-the-fly as the hlist file is being read. "
 # 	"There must be two arguments that follow each appearance of the --min_row_value flag. "
 # 	"The first argument is a string giving the column name upon which a cut will be placed. "
-# 	"This string must appear in the first column of the ``columns_to_keep_fname`` ascii file: "
+# 	"This string must appear in the first column of the ``columns_to_keep_ascii_fname`` ascii file: "
 # 	"for the sake of good bookkeeping, it is not permissible to "
 # 	"place a cut on a column that you do not keep. "
 # 	"The second argument defines the lower bound on the data in the column; "
@@ -74,7 +74,7 @@ parser.add_argument("--ignore_nearby_redshifts", action = "store_true",
 # 	"make a cut on some column of the halo catalog on-the-fly as the hlist file is being read. "
 # 	"There must be two arguments that follow each appearance of the --max_row_value flag. "
 # 	"The first argument is a string giving the column name upon which a cut will be placed. "
-# 	"This string must appear in the first column of the ``columns_to_keep_fname`` ascii file: "
+# 	"This string must appear in the first column of the ``columns_to_keep_ascii_fname`` ascii file: "
 # 	"for the sake of good bookkeeping, it is not permissible to "
 # 	"place a cut on a column that you do not keep. "
 # 	"The second argument defines the upper bound on the data in the column; "
@@ -85,7 +85,7 @@ parser.add_argument("--ignore_nearby_redshifts", action = "store_true",
 args = parser.parse_args()
 
 input_fname = args.input_fname
-columns_to_keep_fname = args.columns_to_keep_fname
+columns_to_keep_ascii_fname = args.columns_to_keep_ascii_fname
 simname = args.simname
 halo_finder = 'rockstar'
 redshift = args.redshift
@@ -104,15 +104,15 @@ except AssertionError:
 	raise HalotoolsError(msg)
 
 ####################################################################
-# The input columns_to_keep_fname must point to an existing file
+# The input columns_to_keep_ascii_fname must point to an existing file
 try:
-	assert os.path.isfile(columns_to_keep_fname)
+	assert os.path.isfile(columns_to_keep_ascii_fname)
 except AssertionError:
-	msg = ("\nThe ``columns_to_keep_fname`` argument should be the name of the file \n"
+	msg = ("\nThe ``columns_to_keep_ascii_fname`` argument should be the name of the file \n"
 		"used to determine how the hlist file is processed.\n"
 		"If you are unsure of the purpose of this file, run this script again and throw the --help flag.\n"
-		"You called the script with the following ``columns_to_keep_fname`` filename:\n"
-	+columns_to_keep_fname+"\nThis file does not exist.\n")
+		"You called the script with the following ``columns_to_keep_ascii_fname`` filename:\n"
+	+columns_to_keep_ascii_fname+"\nThis file does not exist.\n")
 	raise HalotoolsError(msg)
 
 ####################################################################
@@ -224,11 +224,13 @@ if has_existing_cache_log:
 			)
 		raise HalotoolsError(msg)
 
+####################################################################
+### At this point, there will be no conflicts with storing the 
+# processed halo catalog in the Halotools cache
 
-
-
-
-
+print("columns_to_keep_ascii_fname = ", columns_to_keep_ascii_fname)
+reader = RockstarHlistReader(input_fname, 
+	columns_to_keep_ascii_fname = columns_to_keep_ascii_fname)
 
 
 

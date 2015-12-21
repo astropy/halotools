@@ -14,6 +14,8 @@ from difflib import get_close_matches
 from astropy.table import Table
 from copy import deepcopy
 
+from astropy.io.ascii import InconsistentTableError
+
 from . import catalog_manager, supported_sims, sim_defaults, cache_config
 from ..utils import convert_to_ndarray
 
@@ -162,8 +164,7 @@ class RockstarHlistReader(object):
             columns_to_keep = kwargs['columns_to_keep']
         except KeyError:
             columns_to_keep = self._infer_columns_to_keep_from_ascii(**kwargs)
-        finally:
-            self._test_columns_to_keep(columns_to_keep)
+        self._test_columns_to_keep(columns_to_keep)
         
         return columns_to_keep
 
@@ -194,12 +195,14 @@ class RockstarHlistReader(object):
 
     def _infer_columns_to_keep_from_ascii(self, **kwargs):
         """
+
         """
         try:
             columns_fname = kwargs['columns_to_keep_ascii_fname']
             assert os.path.isfile(columns_fname)
             t = Table.read(columns_fname, format='ascii', 
                 names = ['column_index', 'halo_property', 'dtype'])
+            print("Branch AAA triggered")
             columns_to_keep = [(t['column_index'][i], t['halo_property'][i], 
                 t['dtype'][i]) for i in xrange(len(t))]
             return columns_to_keep
