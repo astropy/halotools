@@ -519,7 +519,9 @@ class TabularAsciiReader(object):
         start = time()
 
         file_size = os.path.getsize(fname) 
+        chunk_memory_size *= 1e6 # convert to bytes to match units of file_size
         num_data_rows = self.data_len()
+
         # Set the number of chunks to be filesize/chunk_memory, 
         # but enforcing that 0 < Nchunks <= num_data_rows
         try:
