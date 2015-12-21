@@ -39,7 +39,8 @@ class RockstarHlistReader(TabularAsciiReader):
         output_fname, simname, halo_finder, redshift, version_name, 
         header_char='#', row_cut_min_dict = {}, row_cut_max_dict = {}, 
         row_cut_eq_dict = {}, row_cut_neq_dict = {}, 
-        overwrite = False, **kwargs):
+        overwrite = False, ignore_nearby_redshifts = False, dz_tol = 0.05, 
+        **kwargs):
         """
         Parameters 
         -----------
@@ -159,6 +160,18 @@ class RockstarHlistReader(TabularAsciiReader):
             If the chosen ``output_fname`` already exists, then you must set ``overwrite`` 
             to True in order to write the file to disk. Default is False. 
 
+        ignore_nearby_redshifts : bool, optional 
+            Flag used to determine whether nearby redshifts in cache will be ignored. 
+            If there are existing halo catalogs in the Halotools cache with matching 
+            ``simname``, ``halo_finder`` and ``version_name``, and a redshift 
+            within ``dz_tol``, then the ignore_nearby_redshifts flag must be set to True 
+            for the new halo catalog to be stored in cache. 
+            Default is False. 
+
+        dz_tol : float, optional 
+            Tolerance determining when another halo catalog in cache is deemed nearby.
+            Default is 0.05. 
+
         Notes 
         ------
         When the ``row_cut_min_dict``, ``row_cut_max_dict``, 
@@ -171,6 +184,13 @@ class RockstarHlistReader(TabularAsciiReader):
             header_char, row_cut_min_dict, row_cut_max_dict, 
             row_cut_eq_dict, row_cut_neq_dict)
 
+        self.simname = simname 
+        self.halo_finder = halo_finder
+        self.redshift = redshift 
+        self.version_name = version_name
+        self.ignore_nearby_redshifts = ignore_nearby_redshifts
+        self.dz_tol = dz_tol
+
         try:
             import h5py 
         except ImportError:
@@ -180,7 +200,9 @@ class RockstarHlistReader(TabularAsciiReader):
             warn(msg)
 
         self._verify_cache_log(**kwargs)
-        self._check_output_fname(output_fname, overwrite)
+        self._check_output_fname(output_fname, overwrite, **kwargs)
+        self.output_fname = output_fname
+        self._check_cache_log_for_matching_catalog(**kwargs)
 
     def data_chunk_generator(self, chunk_size, f):
         """
@@ -362,11 +384,58 @@ class RockstarHlistReader(TabularAsciiReader):
                 manipulate_cache_log.remove_unique_fname_from_halo_table_cache_log(
                     output_fname, raise_warning = False, **kwargs)
 
-    def _check_cache_log_for_matching_catalog(self, simname, halo_finder, 
-        redshift, version_name, output_fname, **kwargs):
+    def _check_cache_log_for_matching_catalog(self, **kwargs):
         """ Private method searches the Halotools cache log to see if there are 
         any entries with metadata that matches the RockstarHlistReader constructor inputs.  
         """
+
+        if self._cache_log_exists == True:
+
+            log = manipulate_cache_log.read_halo_table_cache_log(**kwargs)
+            exact_match_mask, close_match_mask = (
+                manipulate_cache_log.search_log_for_possibly_existing_entry(log, 
+                    simname = self.simname, 
+                    halo_finder = self.halo_finder, 
+                    redshift = self.redshift, 
+                    version_name = self.version_name, 
+                    dz_tol = self.dz_tol)
+                )
+            catalogs_with_exactly_matching_metadata = log[exact_match_mask]
+
+            if len(catalogs_with_exactly_matching_metadata) > 0:
+                cache_fname = manipulate_cache_log.get_halo_table_cache_log_fname(**kwargs)
+                matching_fname = catalogs_with_exactly_matching_metadata['fname'][0]
+                idx = np.where(exact_match_mask == True)[0]
+                linenum = idx[0] + 2
+                msg = ("\nHalotools detected one or more entries in your cache log \n"
+                    "with metadata that exactly match your input \n"
+                    "``simname``, ``halo_finder``, ``redshift`` and ``version_name``.\n"
+                    "The first appearance of a matching entry in the log has the following filename:\n\n"
+                    +matching_fname+"\n\n"
+                    "If this log entry is invalid, use a text editor to open the log and delete the entry. \n"
+                    "The cache log is stored in the following location:\n\n"
+                    +cache_fname+"\n\n"
+                    "The relevant line to change is line #" + str(linenum) + ",\n"
+                    "where line #1 is the first line of the file.\n\n"
+                    )
+                raise HalotoolsError(msg)
+
+            catalogs_with_close_redshifts = log[close_match_mask]
+            if len(catalogs_with_close_redshifts) > 0:
+
+                if self.ignore_nearby_redshifts == False:
+
+                    msg = ("\nThere already exists a halo catalog in cache \n"
+                        "with the same metadata as the catalog you are trying to store, \n"
+                        "and a very similar redshift. \nThe closely matching "
+                        "halo catalog has the following filename:\n\n"
+                        +catalogs_with_close_redshifts['fname'][0]+"\n\n"
+                        "If you want to proceed anyway, you must set the \n"
+                        "``ignore_nearby_redshifts`` keyword argument to ``True``.\n"
+                        )
+                    raise HalotoolsError(msg)
+
+
 
 
 
