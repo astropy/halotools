@@ -77,7 +77,7 @@ class TestLoadCachedPtclTable(TestCase):
         _ = manipulate_ptcl_table_cache_log.return_ptcl_table_fname_after_verification(
             fname = fname, cache_fname = cache_fname)
 
-
+    @pytest.mark.xfail
     @pytest.mark.skipif('not APH_MACHINE')
     def test_scenario1(self):
         """ There is a one-to-one match between log entries and halo tables. 

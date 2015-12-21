@@ -109,6 +109,7 @@ class TestCacheManipulation(TestCase):
             "has been implemented but remains untested.")
         
 
+    @pytest.mark.xfail
     def test_redshift_message(self):
         msg = ("\nNeed to implement a message that suggests a nearby redshift to try when \n"
             "a ptcl_table is not found\n")
