@@ -13,6 +13,8 @@ import gzip
 from time import time
 import numpy as np
 from warnings import warn 
+from astropy.table import Table
+import datetime
 
 from .tabular_ascii_reader import TabularAsciiReader
 from . import manipulate_cache_log 
@@ -37,10 +39,11 @@ class RockstarHlistReader(TabularAsciiReader):
 
     def __init__(self, input_fname, columns_to_keep_dict, 
         output_fname, simname, halo_finder, redshift, version_name, 
-        header_char='#', row_cut_min_dict = {}, row_cut_max_dict = {}, 
+        Lbox, particle_mass, header_char='#', 
+        row_cut_min_dict = {}, row_cut_max_dict = {}, 
         row_cut_eq_dict = {}, row_cut_neq_dict = {}, 
         overwrite = False, ignore_nearby_redshifts = False, dz_tol = 0.05, 
-        **kwargs):
+        processing_notes = None, **kwargs):
         """
         Parameters 
         -----------
@@ -91,6 +94,16 @@ class RockstarHlistReader(TabularAsciiReader):
             the version name(s) used for the default catalogs provided by Halotools. 
             If you process your own halo catalog with the RockstarHlistReader, 
             you should choose your own version name. 
+
+        Lbox : float 
+            Box size of the simulation in Mpc/h.
+            ``Lbox`` will automatically be added to the ``supplementary_metadata_dict`` 
+            so that your hdf5 file will have the box size bound as metadata. 
+
+        particle_mass : float 
+            Mass of the dark matter particles of the simulation in Msun/h.
+            ``particle_mass`` will automatically be added to the ``supplementary_metadata_dict`` 
+            so that your hdf5 file will have the particle mass bound as metadata. 
 
         row_cut_min_dict : dict, optional 
             Dictionary used to place a lower-bound cut on the rows 
@@ -172,6 +185,10 @@ class RockstarHlistReader(TabularAsciiReader):
             Tolerance determining when another halo catalog in cache is deemed nearby.
             Default is 0.05. 
 
+        processing_notes : string, optional 
+            String used to provide supplementary notes that will be attached to 
+            the hdf5 file storing your halo catalog. 
+
         Notes 
         ------
         When the ``row_cut_min_dict``, ``row_cut_max_dict``, 
@@ -190,6 +207,9 @@ class RockstarHlistReader(TabularAsciiReader):
         self.version_name = version_name
         self.ignore_nearby_redshifts = ignore_nearby_redshifts
         self.dz_tol = dz_tol
+        self.Lbox = Lbox
+        self.particle_mass = particle_mass
+        self.processing_notes = processing_notes
 
         try:
             import h5py 
@@ -197,7 +217,7 @@ class RockstarHlistReader(TabularAsciiReader):
             msg = ("\nYou must have h5py installed if you want to \n"
                 "use the RockstarHlistReader to store your catalog in the Halotools cache. \n"
                 "For a stand-alone reader class, you should instead use TabularAsciiReader.\n")
-            warn(msg)
+            raise HalotoolsError(msg)
 
         self._verify_cache_log(**kwargs)
         self._check_output_fname(output_fname, overwrite, **kwargs)
@@ -338,6 +358,13 @@ class RockstarHlistReader(TabularAsciiReader):
         The `_check_output_fname` can safely be called even if the cache log 
         does not exist. 
         """
+        try:
+            assert output_fname[-5:] == '.hdf5'
+        except:
+            msg = ("\nThe output_fname must be a string or unicode that concludes "
+                " with file extension '.hdf5'\n")
+            raise HalotoolsError(msg)
+
         if os.path.isfile(output_fname):
             if overwrite == True:
                 msg = ("\nThe chosen ``output_fname``, \n"+output_fname+"\n"
@@ -434,6 +461,57 @@ class RockstarHlistReader(TabularAsciiReader):
                         "``ignore_nearby_redshifts`` keyword argument to ``True``.\n"
                         )
                     raise HalotoolsError(msg)
+
+    def read_and_store_halocat_in_cache(self, **kwargs):
+        """ Method reads the ASCII data, stores the result as an hdf5 file 
+        in the Halotools cache, and updates the log. 
+        """
+        self.halo_table = Table(self.read_ascii())
+        self.halo_table.write(self.output_fname, path='data')
+
+        self._write_metadata()
+
+    def _write_metadata(self):
+        """ Private method to add metadata to the hdf5 file. 
+        """
+        # Now add the metadata 
+        f = h5py.File(self.output_fname)
+        f.attrs.create('simname', self.simname)
+        f.attrs.create('halo_finder', self.halo_finder)
+        redshift_string = manipulate_cache_log.get_redshift_string(self.redshift)
+        f.attrs.create('redshift', self.redshift_string)
+        f.attrs.create('version_name', self.version_name)
+        f.attrs.create('fname', self.output_fname)
+
+        f.attrs.create('orig_ascii_fname', self.input_fname)
+
+        time_right_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        f.attrs.create('time_of_catalog_production', time_right_now)
+
+        if self.processing_notes != None:
+            f.attrs.create('processing_notes', self.processing_notes)
+
+        # Store all the choices for row cuts as metadata
+        for haloprop_key, cut_value in self.row_cut_min_dict.iteritems():
+            attrname = haloprop_key + '_row_cut_min'
+            f.attrs.create(attrname, cut_value)
+
+        for haloprop_key, cut_value in self.row_cut_max_dict.iteritems():
+            attrname = haloprop_key + '_row_cut_max'
+            f.attrs.create(attrname, cut_value)
+
+        for haloprop_key, cut_value in self.row_cut_eq_dict.iteritems():
+            attrname = haloprop_key + '_row_cut_eq'
+            f.attrs.create(attrname, cut_value)
+
+        for haloprop_key, cut_value in self.row_cut_neq_dict.iteritems():
+            attrname = haloprop_key + '_row_cut_neq'
+            f.attrs.create(attrname, cut_value)
+
+        f.close()
+
+
+
 
 
 
