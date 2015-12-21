@@ -516,11 +516,13 @@ class TabularAsciiReader(object):
         ----------
         data_chunk_generator
         """
+        print("\n...Processing ASCII data of file: \n%s\n " % self.fname)
         start = time()
 
-        file_size = os.path.getsize(fname) 
+        file_size = os.path.getsize(self.fname) 
         chunk_memory_size *= 1e6 # convert to bytes to match units of file_size
         num_data_rows = self.data_len()
+        print("Total number of rows in detected data = %i" % num_data_rows)
 
         # Set the number of chunks to be filesize/chunk_memory, 
         # but enforcing that 0 < Nchunks <= num_data_rows
@@ -534,11 +536,9 @@ class TabularAsciiReader(object):
         num_full_chunks = num_data_rows / num_rows_in_chunk
         num_rows_in_chunk_remainder = num_data_rows - num_rows_in_chunk*Nchunks
 
-        print("\n...Processing ASCII data of file: \n%s\n " % self.fname)
-        print(" Total number of rows in detected data = %i" % num_data_rows)
-        print(" Number of rows in detected header = %i \n" % header_length)
-
         header_length = self.header_len()
+        print("Number of rows in detected header = %i \n" % header_length)
+
         chunklist = []
         with self._compression_safe_file_opener(self.fname, 'r') as f:
 
