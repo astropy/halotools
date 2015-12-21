@@ -115,6 +115,14 @@ class TestCacheManipulation(TestCase):
             "a ptcl_table is not found\n")
         raise HalotoolsError(msg)
 
+
+    def test_redshift_formatting(self):
+        msg = ("The recently-written RockstarHlistReader changed the convention\n"
+            "for the formatting of the ``redshift`` attribute bound to hdf5 files.\n"
+            "The new convention is to store this data as a string, the old was a float.\n"
+            "This needs to be propagated throughout the rest of the bookkeeping.\n")
+        raise HalotoolsError(msg)
+
     def tearDown(self):
         for name in self.temp_cache_dirnames:
             os.system('rm -rf ' + name)

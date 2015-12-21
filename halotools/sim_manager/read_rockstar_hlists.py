@@ -255,11 +255,15 @@ class RockstarHlistReader(TabularAsciiReader):
             raise HalotoolsError(msg)
 
         for name in self.dt.names:
-            assert name[0:5] == 'halo_'
-        except AssertionError:
-            msg = ("\nAll columns of halo tables stored in the Halotools cache\n"
-                "must begin with the substring ``halo_``. \n")
-            raise HalotoolsError(msg)
+            try:
+                assert name[0:5] == 'halo_'
+            except AssertionError:
+                msg = ("\nAll columns of halo tables stored in the Halotools cache\n"
+                    "must begin with the substring ``halo_``.\n")
+                msg += ("The column name ``"+name+"`` "
+                    "appeared in your input ``columns_to_keep_dict``.\n"
+                    )
+                raise HalotoolsError(msg)
 
     def data_chunk_generator(self, chunk_size, f):
         """
@@ -516,11 +520,11 @@ class RockstarHlistReader(TabularAsciiReader):
 
         new_log_entry = Table(
             {'simname', [self.simname], 
-            {'halo_finder', [self.halo_finder], 
-            {'redshift', [self.redshift], 
-            {'version_name', [self.version_name], 
-            {'fname', [self.output_fname], 
-            })
+            'halo_finder', [self.halo_finder], 
+            'redshift', [self.redshift], 
+            'version_name', [self.version_name], 
+            'fname', [self.output_fname]}
+            )
 
         if self._cache_log_exists is True:
             existing_log = manipulate_cache_log.read_halo_table_cache_log(**kwargs)
@@ -606,7 +610,8 @@ class RockstarHlistReader(TabularAsciiReader):
             num_unique_ids = len(unique_halo_ids)
             assert num_halos == num_unique_ids
         except AssertionError:
-            msg = ("\nThe ``halo_id`` column of your halo table must contain a unique integer "
+            msg = ("\nThe ``halo_id`` column of your halo table "
+                "must contain a unique integer for every row.\n")
             raise HalotoolsError(msg)
 
 
