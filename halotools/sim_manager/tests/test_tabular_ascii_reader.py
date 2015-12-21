@@ -8,7 +8,6 @@ import pytest
 from astropy.config.paths import _find_home 
 
 from ..tabular_ascii_reader import TabularAsciiReader
-from ...custom_exceptions import HalotoolsError
 
 
 ### Determine whether the machine is mine
@@ -40,7 +39,7 @@ class TestTabularAsciiReader(TestCase):
         reader = TabularAsciiReader(
             self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')})
 
-        with pytest.raises(HalotoolsError) as err:
+        with pytest.raises(IOError) as err:
             reader = TabularAsciiReader(
                 os.path.basename(self.dummy_fname), 
                 columns_to_keep_dict = {'mass': (3, 'f4')})
@@ -52,7 +51,7 @@ class TestTabularAsciiReader(TestCase):
             self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
             header_char = '*')
 
-        with pytest.raises(HalotoolsError) as err:
+        with pytest.raises(TypeError) as err:
             reader = TabularAsciiReader(self.dummy_fname, 
                 columns_to_keep_dict = {'mass': (3, 'f4')}, 
                 header_char = '###')
@@ -61,21 +60,21 @@ class TestTabularAsciiReader(TestCase):
 
     def test_process_columns_to_keep(self):
 
-        with pytest.raises(HalotoolsError) as err:
+        with pytest.raises(TypeError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4', 'c')}, 
                 header_char = '*')
         substr = 'must be a two-element tuple.'
         assert substr in err.value.message
 
-        with pytest.raises(HalotoolsError) as err:
+        with pytest.raises(TypeError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'mass': (3.5, 'f4')}, 
                 header_char = '*')
         substr = 'The first element of the two-element tuple'
         assert substr in err.value.message
 
-        with pytest.raises(HalotoolsError) as err:
+        with pytest.raises(TypeError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'Jose Canseco')}, 
                 header_char = '*')
@@ -106,21 +105,21 @@ class TestTabularAsciiReader(TestCase):
             self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
             row_cut_min_dict = {'mass': 8}, row_cut_max_dict = {'mass': 9})
       
-        with pytest.raises(HalotoolsError) as err:
+        with pytest.raises(ValueError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
                 row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'mass': 8})
         substr = 'This will result in zero selected rows '
         assert substr in err.value.message
 
-        with pytest.raises(HalotoolsError) as err:
+        with pytest.raises(KeyError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
                 row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'vmax': 8})
         substr = 'The ``vmax`` key does not appear in the input'
         assert substr in err.value.message
 
-        with pytest.raises(HalotoolsError) as err:
+        with pytest.raises(KeyError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'vmax': (3, 'f4')}, 
                 row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'vmax': 8})
@@ -129,7 +128,7 @@ class TestTabularAsciiReader(TestCase):
 
     def test_verify_eq_neq_consistency(self):
 
-        with pytest.raises(HalotoolsError) as err:
+        with pytest.raises(ValueError) as err:
             reader = TabularAsciiReader(
                 self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
                 row_cut_eq_dict = {'mass': 8}, row_cut_neq_dict = {'mass': 8})

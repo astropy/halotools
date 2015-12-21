@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Module storing the TabularAsciiReader, a class providing a memory-efficient 
 algorithm for reading a very large ascii file that stores tabular data 
@@ -12,8 +11,6 @@ import os
 import gzip
 from time import time
 import numpy as np
-
-from ..custom_exceptions import HalotoolsError
 
 class TabularAsciiReader(object):
     """ Class providing a memory-efficient algorithm for 
@@ -213,7 +210,7 @@ class TabularAsciiReader(object):
                         "input ``"+row_cut_key+"``. \n"
                         "It is not permissible to place a cut "
                         "on a column that you do not keep.\n")
-                    raise HalotoolsError(msg)
+                    raise KeyError(msg)
 
     def _verify_min_max_consistency(self, **kwargs):
         """ Verify that no min_cut column has a value greater to the corresponding max_cut. 
@@ -230,7 +227,7 @@ class TabularAsciiReader(object):
                         +str(row_cut_min)+"\nand the value of the input "
                         "``row_cut_max_dict`` to "+str(row_cut_max)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
-                    raise HalotoolsError(msg)
+                    raise ValueError(msg)
             except KeyError:
                 pass
 
@@ -243,7 +240,7 @@ class TabularAsciiReader(object):
                         +str(row_cut_max)+"\nand the value of the input "
                         "``row_cut_min_dict`` to "+str(row_cut_min)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
-                    raise HalotoolsError(msg)
+                    raise ValueError(msg)
             except KeyError:
                 pass
 
@@ -263,7 +260,7 @@ class TabularAsciiReader(object):
                         +str(row_cut_eq)+"\nand the value of the input "
                         "``row_cut_neq_dict`` to "+str(row_cut_neq)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
-                    raise HalotoolsError(msg)
+                    raise ValueError(msg)
             except KeyError:
                 pass
 
@@ -276,7 +273,7 @@ class TabularAsciiReader(object):
                         +str(row_cut_neq)+"\nand the value of the input "
                         "``row_cut_eq_dict`` to "+str(row_cut_eq)+"\n"
                         "This will result in zero selected rows and is not permissible.\n")
-                    raise HalotoolsError(msg)
+                    raise ValueError(msg)
             except KeyError:
                 pass
 
@@ -295,7 +292,7 @@ class TabularAsciiReader(object):
                     "must be a two-element tuple.\n"
                     "The ``"+key+"`` is not the required type.\n"
                     )
-                raise HalotoolsError(msg)
+                raise TypeError(msg)
 
             column_index, dtype = value
             try:
@@ -305,7 +302,7 @@ class TabularAsciiReader(object):
                     "the input ``columns_to_keep_dict`` must an integer.\n"
                     "The first element of the ``"+key+"`` is not the required type.\n"
                     )
-                raise HalotoolsError(msg)
+                raise TypeError(msg)
             try:
                 dt = np.dtype(dtype)
             except:
@@ -314,7 +311,7 @@ class TabularAsciiReader(object):
                     "as a data type, e.g., 'f4' or 'i8'.\n"
                     "The second element of the ``"+key+"`` is not the required type.\n"
                     )
-                raise HalotoolsError(msg)
+                raise TypeError(msg)
         self.input_columns_to_keep_dict = columns_to_keep_dict
 
         # Create a hard copy of the dict keys to ensure that 
@@ -342,11 +339,11 @@ class TabularAsciiReader(object):
             # Check to see whether the uncompressed version is available instead
             if not os.path.isfile(input_fname[:-3]):
                 msg = "Input filename %s is not a file" 
-                raise HalotoolsError(msg % input_fname)
+                raise IOError(msg % input_fname)
             else:
                 msg = ("Input filename ``%s`` is not a file. \n"
                     "However, ``%s`` exists, so change your input_fname accordingly.")
-                raise HalotoolsError(msg % (input_fname, input_fname[:-3]))
+                raise IOError(msg % (input_fname, input_fname[:-3]))
 
         return input_fname
 
@@ -360,7 +357,7 @@ class TabularAsciiReader(object):
             assert len(header_char) == 1
         except AssertionError:
             msg = ("\nThe input ``header_char`` must be a single string character.\n")
-            raise HalotoolsError(msg)
+            raise TypeError(msg)
         return header_char
 
     def _determine_compression_safe_file_opener(self):
@@ -531,7 +528,7 @@ class TabularAsciiReader(object):
             Nchunks = max(1, min(file_size / chunk_memory_size, num_data_rows))
         except ZeroDivisionError:
             msg = ("\nMust choose non-zero size for input ``chunk_memory_size``")
-            raise HalotoolsError(msg)
+            raise ValueError(msg)
 
         num_rows_in_chunk = int(num_data_rows / float(Nchunks))
         num_full_chunks = num_data_rows / num_rows_in_chunk
