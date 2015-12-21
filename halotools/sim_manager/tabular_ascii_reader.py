@@ -26,8 +26,8 @@ class TabularAsciiReader(object):
     to yield only those columns whose indices appear in the 
     input ``columns_to_keep_dict``. 
 
-    The data is generated in chunks, 
-    and a user-defined mask is applied to each chunk. 
+    As the file is read, the data is generated in chunks, 
+    and a customizable mask is applied to each newly generated chunk. 
     The only aggregated data from each chunk are those rows  
     passing all requested cuts, so that the 
     `~halotools.sim_manager.TabularAsciiReader` 
@@ -145,38 +145,35 @@ class TabularAsciiReader(object):
         ---------
         Suppose the only columns of data we intend to analyze 
         are ``mass`` (column 5), ``upid`` (column 2) 
-        and ``phantom`` (column 28). Below we'll give example of 
+        and ``phantom`` (column 28). Below we'll give examples of 
         how to make different choices for (optional) cuts 
-        on these columns, always retrieving only the data that we need.           
+        on these columns, always retrieving only the columns of data that we need.           
 
-        >>> input_fname = 'ascii_file.dat'
-
-        >>> columns_to_keep_dict = {'mass': (5, 'f4'), 'upid': (2, 'i8') 'phantom': (28, 'i8')}
+        >>> columns_to_keep_dict = {'mass': (5, 'f4'), 'upid': (2, 'i8'),  'phantom': (28, 'i8')}
 
         In this first example, no cuts at all will be placed on any rows, 
         and the returned array will only only have 'mass', 'upid' and 'phantom' columns:
 
         >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict) # doctest: +SKIP
-        >>> result = reader.read_ascii() # doctest: +SKIP
+        >>> data_array = reader.read_ascii() # doctest: +SKIP
 
         If in the following call to the reader, we will only 
-        consider rows with mass < 1e10 will be ignored:
+        consider rows with mass > 1e10:
 
         >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict, row_cut_min_dict = {'mass': 1e10}) # doctest: +SKIP
-        >>> result = reader.read_ascii() # doctest: +SKIP
+        >>> data_array = reader.read_ascii() # doctest: +SKIP
 
-        If in the following call to the reader, we will only 
-        consider rows with 1e12 < mass < 1e13 will be ignored:
+        Next we will only consider rows with 1e12 < mass < 1e13:
 
         >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict, row_cut_min_dict = {'mass': 1e12}, row_cut_max_dict = {'mass': 1e13}) # doctest: +SKIP
-        >>> result = reader.read_ascii() # doctest: +SKIP
+        >>> data_array = reader.read_ascii() # doctest: +SKIP
 
         Now we will consider a more complex case. We only wish to 
-        consider rows that have upid = -1, 1e12 < mass < 1e13, and such that phantom != 1:
+        consider rows that have upid = -1, 1e12 < mass < 1e13, and we will also exclude 
+        any row with phantom != 1:
 
         >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict, row_cut_min_dict = {'mass': 1e12}, row_cut_max_dict = {'mass': 1e13}, row_cut_eq_dict = {'upid': -1}, row_cut_neq_dict = {'phantom': 1}) # doctest: +SKIP
-        >>> result = reader.read_ascii() # doctest: +SKIP
-
+        >>> data_array = reader.read_ascii() # doctest: +SKIP
 
         """
         self.fname = self._get_fname(input_fname)
@@ -318,17 +315,24 @@ class TabularAsciiReader(object):
                     "The second element of the ``"+key+"`` is not the required type.\n"
                     )
                 raise HalotoolsError(msg)
+        self.input_columns_to_keep_dict = columns_to_keep_dict
 
+        # Create a hard copy of the dict keys to ensure that 
+        # self.column_indices_to_keep and self.dt are defined 
+        # according to the same sequence
+        column_key_list = list(columns_to_keep_dict.keys())
 
+        # Only data columns with indices in self.column_indices_to_keep 
+        # will be yielded by the data_chunk_generator
         self.column_indices_to_keep = list(
-            [columns_to_keep_dict[key][0] for key in columns_to_keep_dict])
-
-        self.dt = np.dtype(
-            [(key, columns_to_keep_dict[key][1]) 
-            for key in columns_to_keep_dict]
+            [columns_to_keep_dict[key][0] for key in column_key_list]
             )
 
-        self.input_columns_to_keep_dict = columns_to_keep_dict
+        # The rows of data yielded by the data_chunk_generator 
+        # will be assumed to be the following Numpy dtype
+        self.dt = np.dtype(
+            [(key, columns_to_keep_dict[key][1]) for key in column_key_list]
+            )
 
     def _get_fname(self, input_fname):
         """ Verify that the input fname does not already exist. 
@@ -361,7 +365,7 @@ class TabularAsciiReader(object):
 
     def _determine_compression_safe_file_opener(self):
         """ Determine whether to use *open* or *gzip.open* to read 
-        the input file, depending on whether or not it is compressed. 
+        the input file, depending on whether or not the file is compressed. 
         """
         f = gzip.open(self.fname, 'r')
         try:
@@ -373,7 +377,7 @@ class TabularAsciiReader(object):
             f.close()
 
     def header_len(self):
-        """ Number of rows in the ascii data header. 
+        """ Number of rows in the header of the ASCII file. 
 
         Parameters 
         ----------
@@ -403,7 +407,7 @@ class TabularAsciiReader(object):
 
     def data_len(self):
         """ 
-        Number of rows data in the input ASCII file. 
+        Number of rows of data in the input ASCII file. 
 
         Returns 
         --------
@@ -419,9 +423,9 @@ class TabularAsciiReader(object):
         The `data_len` method is the particular section of code 
         where where the following assumptions are made:
 
-        1. The data begins with the first appearance of a line that does not begin with ``self.header_char``. 
+        1. The data begins with the first appearance of a non-empty line that does not begin with the character defined by ``self.header_char``. 
 
-        2. The data ends with the first subsequent appearance of an empty line. 
+        2. The data ends with the next appearance of an empty line. 
         """
         Nrows_data = 0
         with self._compression_safe_file_opener(self.fname, 'r') as f:
@@ -432,12 +436,11 @@ class TabularAsciiReader(object):
 
     def data_chunk_generator(self, chunk_size, f):
         """
-        Python generator uses *f.readline()* to march 
+        Python generator uses f.readline() to march 
         through an input open file object to yield 
-        a chunk of data of the input size. 
-        The generator only yields columns 
-        that were included in the ``columns_to_keep_dict`` 
-        that was passed to the constructor. 
+        a chunk of data with length equal to the input ``chunk_size``. 
+        The generator only yields columns that were included 
+        in the ``columns_to_keep_dict`` passed to the constructor. 
 
         Parameters 
         -----------
