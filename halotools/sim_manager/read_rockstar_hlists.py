@@ -14,6 +14,8 @@ from time import time
 import numpy as np
 from warnings import warn 
 from astropy.table import Table
+from astropy.table import vstack as table_vstack 
+
 import datetime
 
 from .tabular_ascii_reader import TabularAsciiReader
@@ -65,7 +67,19 @@ class RockstarHlistReader(TabularAsciiReader):
             or 'i8' for a long. 
 
             Thus an example ``columns_to_keep_dict`` could be 
-            {'mass': (1, 'f4'), 'obj_id': (0, 'i8'), 'spin': (45, 'f4')}
+            {'halo_mvir': (1, 'f4'), 'halo_id': (0, 'i8'), 'halo_spin': (45, 'f4')}
+
+            The columns of all halo tables stored in the Halotools cache must 
+            must begin with the substring 'halo_'. 
+            At a minimum, any halo table stored in cache 
+            must have the following columns:  
+            ``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``, 
+            plus at least one additional column (typically storing a mass-like variable). 
+            These requirements must be met if you want to use the Halotools cache system, 
+            or if you want Halotools to populate your halo catalog with mock galaxies. 
+            If you do not want to conform to these conventions, just use the 
+            `~halotools.sim_manager.TabularAsciiReader` and handle 
+            the file storage using your own preferred method. 
 
         output_fname : string 
             Absolute path to the location where the hdf5 file will be stored. 
@@ -201,6 +215,8 @@ class RockstarHlistReader(TabularAsciiReader):
             header_char, row_cut_min_dict, row_cut_max_dict, 
             row_cut_eq_dict, row_cut_neq_dict)
 
+        self._enforce_halo_catalog_formatting_requirements()
+
         self.simname = simname 
         self.halo_finder = halo_finder
         self.redshift = redshift 
@@ -223,6 +239,27 @@ class RockstarHlistReader(TabularAsciiReader):
         self._check_output_fname(output_fname, overwrite, **kwargs)
         self.output_fname = output_fname
         self._check_cache_log_for_matching_catalog(**kwargs)
+
+    def _enforce_halo_catalog_formatting_requirements(self):
+        """ Private method enforces the halo_table formatting conventions of the package. 
+        """
+        try:
+            assert 'halo_id' in self.dt.names
+            assert 'halo_x' in self.dt.names
+            assert 'halo_y' in self.dt.names
+            assert 'halo_z' in self.dt.names
+        except AssertionError:
+            msg = ("\nAll halo tables stored in cache \n"
+            "must at least have the following columns:\n"
+                "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``\n")
+            raise HalotoolsError(msg)
+
+        for name in self.dt.names:
+            assert name[0:5] == 'halo_'
+        except AssertionError:
+            msg = ("\nAll columns of halo tables stored in the Halotools cache\n"
+                "must begin with the substring ``halo_``. \n")
+            raise HalotoolsError(msg)
 
     def data_chunk_generator(self, chunk_size, f):
         """
@@ -467,9 +504,32 @@ class RockstarHlistReader(TabularAsciiReader):
         in the Halotools cache, and updates the log. 
         """
         self.halo_table = Table(self.read_ascii())
+        self._verify_halo_table(self.halo_table)
+
         self.halo_table.write(self.output_fname, path='data')
 
         self._write_metadata()
+
+        self._update_cache_log(**kwargs)
+
+    def _update_cache_log(**kwargs):
+
+        new_log_entry = Table(
+            {'simname', [self.simname], 
+            {'halo_finder', [self.halo_finder], 
+            {'redshift', [self.redshift], 
+            {'version_name', [self.version_name], 
+            {'fname', [self.output_fname], 
+            })
+
+        if self._cache_log_exists is True:
+            existing_log = manipulate_cache_log.read_halo_table_cache_log(**kwargs)
+            new_log = table_vstack([existing_log, new_log_entry])
+        else:
+            new_log = new_log_entry
+
+        manipulate_cache_log.overwrite_halo_table_cache_log(new_log, **kwargs)
+
 
     def _write_metadata(self):
         """ Private method to add metadata to the hdf5 file. 
@@ -511,6 +571,43 @@ class RockstarHlistReader(TabularAsciiReader):
         f.close()
 
 
+    def _verify_halo_table(self, halo_table):
+        """
+        """
+
+        try:
+            halo_id = halo_table['halo_id']
+            halo_x = halo_table['halo_x']
+            halo_y = halo_table['halo_y']
+            halo_z = halo_table['halo_z']
+        except KeyError:
+            msg = ("\nAll halo tables stored in Haltools cache "
+                "must at least have the following columns:\n"
+                "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``\n")
+            raise HalotoolsError(msg)
+
+        # Check that Lbox properly bounds the halo positions
+        try:
+            assert np.all(halo_x >= 0)
+            assert np.all(halo_y >= 0)
+            assert np.all(halo_z >= 0)
+            assert np.all(halo_x <= Lbox)
+            assert np.all(halo_y <= Lbox)
+            assert np.all(halo_z <= Lbox)
+        except AssertionError:
+            msg = ("\nThere are points in the input halo table that "
+                "lie outside [0, Lbox] in some dimension.\n")
+            raise HalotoolsError(msg)
+
+        # Check that halo_id column contains a set of unique entries
+        try:
+            num_halos = len(halo_table)
+            unique_halo_ids = list(set(halo_id))
+            num_unique_ids = len(unique_halo_ids)
+            assert num_halos == num_unique_ids
+        except AssertionError:
+            msg = ("\nThe ``halo_id`` column of your halo table must contain a unique integer "
+            raise HalotoolsError(msg)
 
 
 
