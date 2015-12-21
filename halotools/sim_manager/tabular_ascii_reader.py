@@ -35,6 +35,10 @@ class TabularAsciiReader(object):
     which can then be stored in your preferred binary format 
     using the built-in Numpy methods, h5py, etc. 
 
+    The algorithm assumes that data of unchanging type is 
+    arranged in a consecutive sequence of lines within the ascii file, 
+    and that the appearance of an empty line demarcates the end 
+    of the data stream. 
     """
     def __init__(self, input_fname, columns_to_keep_dict, 
         header_char='#', row_cut_min_dict = {}, row_cut_max_dict = {}, 
@@ -285,7 +289,7 @@ class TabularAsciiReader(object):
         self.input_columns_to_keep_dict = columns_to_keep_dict
 
     def _get_fname(self, input_fname):
-        """
+        """ Verify that the input fname does not already exist. 
         """
         # Check whether input_fname exists. 
         if not os.path.isfile(input_fname):
@@ -301,7 +305,9 @@ class TabularAsciiReader(object):
         return input_fname
 
     def _get_header_char(self, header_char):
-        """
+        """ Verify that the input header_char is 
+        a one-character string or unicode variable. 
+
         """
         try:
             assert (type(header_char) == str) or (type(header_char) == unicode)
@@ -312,7 +318,8 @@ class TabularAsciiReader(object):
         return header_char
 
     def _determine_compression_safe_file_opener(self):
-        """
+        """ Determine whether to use *open* or *gzip.open* to read 
+        the input file, depending on whether or not it is compressed. 
         """
         f = gzip.open(self.fname, 'r')
         try:
@@ -336,8 +343,7 @@ class TabularAsciiReader(object):
 
         Notes 
         -----
-        All empty lines that appear in header 
-        will be included in the count. 
+        All empty lines that appear in header will be included in the count. 
 
         """
         Nheader = 0
@@ -351,6 +357,14 @@ class TabularAsciiReader(object):
         return Nheader
 
     def data_len(self):
+        """ 
+        Number of rows between the result of `header_len` and 
+        the next appearance of "\n" as the only character on a line. 
+        Thus this algorithm assumes that data of unchanging type is 
+        arranged in a consecutive sequence of lines within the file, 
+        and that the appearance of an empty line demarcates the end 
+        of the data stream.   
+        """
         Nrows_data = 0
         with self._compression_safe_file_opener(self.fname, 'r') as f:
             for i, l in enumerate(f):
@@ -360,6 +374,13 @@ class TabularAsciiReader(object):
 
     def data_chunk_generator(self, chunk_size, f):
         """
+        Python generator uses *f.readline()* to march 
+        through an input open file object to yield 
+        a chunk of data of the input size. 
+        The generator only yields columns 
+        that were included in the ``columns_to_keep_dict`` 
+        that was passed to the constructor. 
+
         Parameters 
         -----------
         chunk_size : int 
@@ -383,7 +404,16 @@ class TabularAsciiReader(object):
             cur += 1 
 
     def apply_row_cut(self, array_chunk):
-        """
+        """ Method applies a boolean mask to the input array 
+        based on the row-cuts determined by the dictionaries passed to the constructor. 
+
+        Parameters 
+        -----------
+        array_chunk : Numpy array  
+
+        Returns 
+        --------
+        cut_array : Numpy array             
         """ 
         mask = np.ones(len(array_chunk), dtype = bool)
 
@@ -403,8 +433,9 @@ class TabularAsciiReader(object):
 
 
     def read_ascii(self, **kwargs):
-        """ Reads the raw halo catalog in chunks and returns a structured array
-        after applying cuts.
+        """ Method reads the input ascii using the `data_chunk_generator` 
+        and returns a structured Numpy array storing the data 
+        passing the row- and column-cuts. 
 
         Parameters 
         ----------
