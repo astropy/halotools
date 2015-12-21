@@ -15,6 +15,7 @@ import numpy as np
 from warnings import warn 
 
 from .tabular_ascii_reader import TabularAsciiReader
+from . import manipulate_cache_log 
 
 from ..custom_exceptions import HalotoolsError
 
@@ -178,7 +179,22 @@ class RockstarHlistReader(TabularAsciiReader):
                 "For a stand-alone reader class, you should instead use TabularAsciiReader.\n")
             warn(msg)
 
+
+        self._verify_cache_log(**kwargs)
         self._check_output_fname(output_fname, overwrite)
+
+    def _verify_cache_log(self, **kwargs):
+        """
+        """
+        try:
+            manipulate_cache_log.verify_halo_table_cache_existence(**kwargs)
+            self._has_existing_cache_log = True
+        except HalotoolsError:
+            self._has_existing_cache_log = False
+
+        if self._has_existing_cache_log == True:
+            manipulate_cache_log.verify_cache_log(**kwargs)
+            manipulate_cache_log.remove_repeated_cache_lines(**kwargs)
 
     def data_chunk_generator(self, chunk_size, f):
         """
@@ -295,7 +311,8 @@ class RockstarHlistReader(TabularAsciiReader):
 
     def _check_output_fname(self, output_fname, overwrite):
         """ Private method checks to see whether the chosen 
-        ``output_fname`` already exists. 
+        ``output_fname`` already exists on disk, and also whether it 
+        already appears in the cache log. 
         """
         if os.path.isfile(output_fname):
             if overwrite == True:
@@ -309,11 +326,23 @@ class RockstarHlistReader(TabularAsciiReader):
                     "use the `store_halo_catalog_in_cache` method.\n")
                 raise IOError(msg)
 
-    def _check_cache_log_for_matching_catalog(self):
+        log = manipulate_cache_log.read_halo_table_cache_log(**kwargs)
+        exact_match_mask, _ = (
+            manipulate_cache_log.search_log_for_possibly_existing_entry(log, 
+                fname = output_fname)
+            )
+        num_matches = len(log[exact_match_mask])
+
+        if overwrite == False:
+            manipulate_cache_log.remove_unique_fname_from_halo_table_cache_log(
+                output_fname, raise_warning = False, **kwargs)
+
+
+    def _check_cache_log_for_matching_catalog(self, simname, halo_finder, 
+        redshift, version_name, output_fname, **kwargs):
         """ Private method searches the Halotools cache log to see if there are 
         any entries with metadata that matches the RockstarHlistReader constructor inputs.  
         """
-        pass
 
 
 
