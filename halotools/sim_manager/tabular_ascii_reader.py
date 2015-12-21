@@ -20,7 +20,8 @@ class TabularAsciiReader(object):
     """ Class containing methods used to read raw ASCII data generated with Rockstar. 
     """
     def __init__(self, input_fname, columns_to_keep_dict, 
-        header_char='#', **kwargs):
+        header_char='#', row_cut_min_dict = {}, row_cut_max_dict = {}, 
+        row_cut_eq_dict = {}, row_cut_neq_dict = {}):
         """
         Parameters 
         -----------
@@ -126,55 +127,92 @@ class TabularAsciiReader(object):
 
         self._process_columns_to_keep(columns_to_keep_dict)
 
-        # input_row_cuts = self._interpret_input_row_cuts(**kwargs)
-        # self.row_cuts = self._get_row_cuts(input_row_cuts)
+        self.row_cut_min_dict = row_cut_min_dict
+        self.row_cut_max_dict = row_cut_max_dict
+        self.row_cut_eq_dict = row_cut_eq_dict
+        self.row_cut_neq_dict = row_cut_neq_dict
 
-    def _verify_input_row_cuts(self, **kwargs):
+        self._verify_input_row_cuts_keys()
+        self._verify_min_max_consistency()
+        self._verify_eq_neq_consistency()
+
+    def _verify_input_row_cuts_keys(self, **kwargs):
         """
         """
         potential_row_cuts = ('row_cut_min_dict', 'row_cut_max_dict', 
             'row_cut_eq_dict', 'row_cut_neq_dict')
         for row_cut_key in potential_row_cuts:
 
-            try:
-                row_cut_type = kwargs[row_cut_key]
+            row_cut_dict = getattr(self, row_cut_key)
 
-                for key in row_cut_dict:
-                    try:
-                        assert key in self.input_columns_to_keep_dict.keys()
-                    except AssertionError:
-                        msg = ("\nThe ``"+key+"`` key does not appear in the input \n"
-                            "``columns_to_keep_dict``, but it does appear in the "
-                            "input ``"+row_cut_type+"``. \n"
-                            "It is not permissible to place a cut "
-                            "on a column that you do not keep.\n")
-                        raise HalotoolsError(msg)
+            for key in row_cut_dict:
+                try:
+                    assert key in self.input_columns_to_keep_dict.keys()
+                except AssertionError:
+                    msg = ("\nThe ``"+key+"`` key does not appear in the input \n"
+                        "``columns_to_keep_dict``, but it does appear in the "
+                        "input ``"+row_cut_key+"``. \n"
+                        "It is not permissible to place a cut "
+                        "on a column that you do not keep.\n")
+                    raise HalotoolsError(msg)
+
+    def _verify_min_max_consistency(self, **kwargs):
+
+        for row_cut_min_key, row_cut_min in self.row_cut_min_dict.iteritems():
+            try:
+                row_cut_max = self.row_cut_max_dict[row_cut_min_key]
+                if row_cut_max <= row_cut_min:
+                    msg = ("\nFor the ``"+row_cut_min_key+"`` column, \n"
+                        "you set the value of the input ``row_cut_min_dict`` to "
+                        +str(row_cut_min)+"\nand the value of the input "
+                        "``row_cut_max_dict`` to "+str(row_cut_max)+"\n"
+                        "This will result in zero selected rows and is not permissible.\n")
+                    raise HalotoolsError(msg)
             except KeyError:
                 pass
 
-        try:
-            row_cut_min_dict = kwargs['row_cut_min_dict']
-
+        for row_cut_max_key, row_cut_max in self.row_cut_max_dict.iteritems():
             try:
-                row_cut_max_dict = kwargs['row_cut_max_dict']
-                for row_cut_min_key, row_cut_min in row_cut_min_dict.iteritems():
-                    try:
-                        row_cut_max = row_cut_max_dict[row_cut_min_key]
-                        if row_cut_max <= row_cut_min:
-                            msg = ("\nFor the ``"+row_cut_min_key+"`` column, \n"
-                                "you set the value of the input ``row_cut_min_dict`` to "
-                                +str(row_cut_min)+"\nand the value of the input "
-                                "``row_cut_max_dict`` to "+str(row_cut_max)+"\n"
-                                "This will result in zero selected rows and is not permissible.\n")
-                            raise HalotoolsError(msg)
-                    except KeyError:
-                        pass
-
+                row_cut_min = self.row_cut_min_dict[row_cut_max_key]
+                if row_cut_min >= row_cut_max:
+                    msg = ("\nFor the ``"+row_cut_max_key+"`` column, \n"
+                        "you set the value of the input ``row_cut_max_dict`` to "
+                        +str(row_cut_max)+"\nand the value of the input "
+                        "``row_cut_min_dict`` to "+str(row_cut_min)+"\n"
+                        "This will result in zero selected rows and is not permissible.\n")
+                    raise HalotoolsError(msg)
             except KeyError:
                 pass
 
-        except KeyError:
-            pass
+
+    def _verify_eq_neq_consistency(self, **kwargs):
+
+        for row_cut_eq_key, row_cut_eq in self.row_cut_eq_dict.iteritems():
+            try:
+                row_cut_neq = self.row_cut_neq_dict[row_cut_eq_key]
+                if row_cut_neq == row_cut_eq:
+                    msg = ("\nFor the ``"+row_cut_eq_key+"`` column, \n"
+                        "you set the value of the input ``row_cut_eq_dict`` to "
+                        +str(row_cut_eq)+"\nand the value of the input "
+                        "``row_cut_neq_dict`` to "+str(row_cut_neq)+"\n"
+                        "This will result in zero selected rows and is not permissible.\n")
+                    raise HalotoolsError(msg)
+            except KeyError:
+                pass
+
+        for row_cut_neq_key, row_cut_neq in self.row_cut_neq_dict.iteritems():
+            try:
+                row_cut_eq = self.row_cut_eq_dict[row_cut_neq_key]
+                if row_cut_eq == row_cut_neq:
+                    msg = ("\nFor the ``"+row_cut_neq_key+"`` column, \n"
+                        "you set the value of the input ``row_cut_neq_dict`` to "
+                        +str(row_cut_neq)+"\nand the value of the input "
+                        "``row_cut_eq_dict`` to "+str(row_cut_eq)+"\n"
+                        "This will result in zero selected rows and is not permissible.\n")
+                    raise HalotoolsError(msg)
+            except KeyError:
+                pass
+
 
 
     def _process_columns_to_keep(self, columns_to_keep_dict):

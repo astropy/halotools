@@ -24,7 +24,7 @@ else:
 
 class TestTabularAsciiReader(TestCase):
 
-    def setup_class(self):
+    def setUp(self):
 
         self.tmpdir = os.path.join(_find_home(), 'Desktop', 'tmp_testingdir')
         try:
@@ -47,9 +47,98 @@ class TestTabularAsciiReader(TestCase):
         substr = 'is not a file'
         assert substr in err.value.message
 
+    def test_get_header_char(self):
+        reader = TabularAsciiReader(
+            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            header_char = '*')
+
+        with pytest.raises(HalotoolsError) as err:
+            reader = TabularAsciiReader(self.dummy_fname, 
+                columns_to_keep_dict = {'mass': (3, 'f4')}, 
+                header_char = '###')
+        substr = 'must be a single string character'
+        assert substr in err.value.message
+
+    def test_process_columns_to_keep(self):
+
+        with pytest.raises(HalotoolsError) as err:
+            reader = TabularAsciiReader(
+                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4', 'c')}, 
+                header_char = '*')
+        substr = 'must be a two-element tuple.'
+        assert substr in err.value.message
+
+        with pytest.raises(HalotoolsError) as err:
+            reader = TabularAsciiReader(
+                self.dummy_fname, columns_to_keep_dict = {'mass': (3.5, 'f4')}, 
+                header_char = '*')
+        substr = 'The first element of the two-element tuple'
+        assert substr in err.value.message
+
+        with pytest.raises(HalotoolsError) as err:
+            reader = TabularAsciiReader(
+                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'Jose Canseco')}, 
+                header_char = '*')
+        substr = 'The second element of the two-element tuple'
+        assert substr in err.value.message
+
+    def test_verify_input_row_cuts(self):
+
+        reader = TabularAsciiReader(
+            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            row_cut_min_dict = {'mass': 8})
+
+        reader = TabularAsciiReader(
+            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            row_cut_max_dict = {'mass': 8})
+
+        reader = TabularAsciiReader(
+            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            row_cut_eq_dict = {'mass': 8})
+
+        reader = TabularAsciiReader(
+            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            row_cut_neq_dict = {'mass': 8})
+
+    def test_verify_min_max_consistency(self):
+
+        reader = TabularAsciiReader(
+            self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+            row_cut_min_dict = {'mass': 8}, row_cut_max_dict = {'mass': 9})
+      
+        with pytest.raises(HalotoolsError) as err:
+            reader = TabularAsciiReader(
+                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+                row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'mass': 8})
+        substr = 'This will result in zero selected rows '
+        assert substr in err.value.message
+
+        with pytest.raises(HalotoolsError) as err:
+            reader = TabularAsciiReader(
+                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+                row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'vmax': 8})
+        substr = 'The ``vmax`` key does not appear in the input'
+        assert substr in err.value.message
+
+        with pytest.raises(HalotoolsError) as err:
+            reader = TabularAsciiReader(
+                self.dummy_fname, columns_to_keep_dict = {'vmax': (3, 'f4')}, 
+                row_cut_min_dict = {'mass': 9}, row_cut_max_dict = {'vmax': 8})
+        substr = 'The ``mass`` key does not appear in the input'
+        assert substr in err.value.message
+
+    def test_verify_eq_neq_consistency(self):
+
+        with pytest.raises(HalotoolsError) as err:
+            reader = TabularAsciiReader(
+                self.dummy_fname, columns_to_keep_dict = {'mass': (3, 'f4')}, 
+                row_cut_eq_dict = {'mass': 8}, row_cut_neq_dict = {'mass': 8})
+        substr = 'This will result in zero selected rows '
+        assert substr in err.value.message
 
 
-
+    def tearDown(self):
+        os.system("rm -rf " + self.tmpdir)
 
 
 
