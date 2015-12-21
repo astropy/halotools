@@ -24,6 +24,7 @@ class TestUserDefinedHaloCatalog(TestCase):
         """
         self.Nhalos = 1e2
         self.Lbox = 100
+        self.redshift = 0.0
         self.halo_x = np.linspace(0, self.Lbox, self.Nhalos)
         self.halo_y = np.linspace(0, self.Lbox, self.Nhalos)
         self.halo_z = np.linspace(0, self.Lbox, self.Nhalos)
@@ -54,13 +55,13 @@ class TestUserDefinedHaloCatalog(TestCase):
             halocat = UserDefinedHaloCatalog(Lbox = 20, ptcl_mass = 100, 
                 **self.good_halocat_args)
 
-        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift, 
             **self.good_halocat_args)
         assert hasattr(halocat, 'Lbox')
         assert halocat.Lbox == 200
         assert hasattr(halocat, 'ptcl_mass')
         assert halocat.ptcl_mass == 100
-        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
             arnold_schwarzenegger = 'Stick around!', 
             **self.good_halocat_args)
         assert hasattr(halocat, 'arnold_schwarzenegger')
@@ -84,35 +85,35 @@ class TestUserDefinedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             bad_halocat_args['halo_x'][0] = -1
-            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # positions must be < Lbox
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             bad_halocat_args['halo_x'][0] = 10000
-            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # must have halo_x column 
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_x']
-            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # Must have halo_id column 
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_id']
-            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # Must have some column storing a mass-like variable
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_mass']
-            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # Must raise warning if a length-Nhalos array is passed with 
@@ -122,7 +123,7 @@ class TestUserDefinedHaloCatalog(TestCase):
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             bad_halocat_args['s'] = np.ones(self.Nhalos)
-            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
             assert 'interpreted as metadata' in str(w[-1].message)
 
@@ -139,7 +140,7 @@ class TestUserDefinedHaloCatalog(TestCase):
         """
 
         # Must not have a ptcl_table attribute when none is passed
-        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
             **self.good_halocat_args)
         assert not hasattr(halocat, 'ptcl_table')
 
@@ -151,7 +152,7 @@ class TestUserDefinedHaloCatalog(TestCase):
             )
    
         # Must have ptcl_table attribute when argument is legitimate
-        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+        halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
             ptcl_table = ptcl_table, **self.good_halocat_args)
         assert hasattr(halocat, 'ptcl_table')
 
@@ -163,7 +164,7 @@ class TestUserDefinedHaloCatalog(TestCase):
             'z': np.zeros(num_ptcl2)}
             )
         with pytest.raises(HalotoolsError):
-            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
         # Must have a 'z' column 
@@ -173,13 +174,13 @@ class TestUserDefinedHaloCatalog(TestCase):
             'y': np.zeros(num_ptcl2)}
             )
         with pytest.raises(HalotoolsError):
-            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
         # Data structure must be an astropy table, not an ndarray
         ptcl_table2 = ptcl_table.as_array()
         with pytest.raises(HalotoolsError):
-            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+            halocat = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
 

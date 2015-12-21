@@ -30,8 +30,10 @@ class UserDefinedHaloCatalog(object):
         Parameters 
         ------------
         **metadata : float or string 
-            Keyword arguments storing catalog metadata. Both `Lbox` and `ptcl_mass` 
+            Keyword arguments storing catalog metadata. 
+            The quantities `Lbox` and `ptcl_mass` 
             are required and must be in Mpc/h and Msun/h units, respectively. 
+            `redshift` is also required metadata. 
             See Examples section for further notes. 
 
         **halo_catalog_columns : sequence of arrays 
@@ -61,6 +63,7 @@ class UserDefinedHaloCatalog(object):
         Here is an example using dummy data to show how to create a new `UserDefinedHaloCatalog` 
         instance from from your own halo catalog. First the setup:
 
+        >>> redshift = 0.0
         >>> Lbox = 250.
         >>> ptcl_mass = 1e9
         >>> num_halos = 100
@@ -72,7 +75,7 @@ class UserDefinedHaloCatalog(object):
 
         Now we simply pass in both the metadata and the halo catalog columns as keyword arguments:
 
-        >>> halo_catalog = UserDefinedHaloCatalog(Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+        >>> halo_catalog = UserDefinedHaloCatalog(redshift = redshift, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
         Your ``halo_catalog`` object can be used throughout the Halotools package. 
         The halo catalog itself is stored in the ``halo_table`` attribute, with columns accessed as follows:
@@ -89,13 +92,13 @@ class UserDefinedHaloCatalog(object):
 
         >>> simname = 'my_personal_sim'
 
-        >>> halo_catalog = UserDefinedHaloCatalog(simname = simname, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+        >>> halo_catalog = UserDefinedHaloCatalog(redshift = redshift, simname = simname, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
         Similarly, if you wish to include additional columns for your halo catalog, 
         Halotools is able to tell the difference between metadata and columns of halo data:
 
         >>> spin = np.random.uniform(0, 0.2, num_halos)
-        >>> halo_catalog = UserDefinedHaloCatalog(halo_spin = spin, simname = simname, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+        >>> halo_catalog = UserDefinedHaloCatalog(redshift = redshift, halo_spin = spin, simname = simname, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
 
         """
@@ -175,8 +178,10 @@ class UserDefinedHaloCatalog(object):
             assert custom_len(metadata_dict['Lbox']) == 1
             assert 'ptcl_mass' in metadata_dict
             assert custom_len(metadata_dict['ptcl_mass']) == 1
+            assert 'redshift' in metadata_dict
         except AssertionError:
-            msg = ("\nThe UserDefinedHaloCatalog requires keyword arguments ``Lbox`` and ``ptcl_mass``\n"
+            msg = ("\nThe UserDefinedHaloCatalog requires "
+                "keyword arguments ``Lbox``, ``ptcl_mass`` and ``redshift``\n"
                 "storing scalars that will be interpreted as metadata about the halo catalog.\n")
             raise HalotoolsError(msg)
 
@@ -196,6 +201,13 @@ class UserDefinedHaloCatalog(object):
         except AssertionError:
             msg = ("The ``halo_x``, ``halo_y`` and ``halo_z`` columns must only store arrays\n"
                 "that are bound by 0 and the input ``Lbox``. \n")
+            raise HalotoolsError(msg)
+
+        redshift = metadata_dict['redshift']
+        try:
+            assert type(redshift) == float
+        except AssertionError:
+            msg = ("\nThe ``redshift`` metadata must be a float.\n")
             raise HalotoolsError(msg)
 
         for key, value in metadata_dict.iteritems():

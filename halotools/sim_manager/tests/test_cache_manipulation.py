@@ -115,12 +115,15 @@ class TestCacheManipulation(TestCase):
             "a ptcl_table is not found\n")
         raise HalotoolsError(msg)
 
-
+    @pytest.mark.xfail
     def test_redshift_formatting(self):
         msg = ("The recently-written RockstarHlistReader changed the convention\n"
             "for the formatting of the ``redshift`` attribute bound to hdf5 files.\n"
             "The new convention is to store this data as a string, the old was a float.\n"
-            "This needs to be propagated throughout the rest of the bookkeeping.\n")
+            "This needs to be propagated throughout the rest of the bookkeeping.\n"
+            "Probably the best thing to do from here is add a APH_MACHINE-specific test\n"
+            "that verifies one-by-one that all catalogs in my own personal cache have \n"
+            "redshift stored as a string.\n")
         raise HalotoolsError(msg)
 
     def tearDown(self):
