@@ -84,9 +84,9 @@ def create_halo_table_hdf5(cache_log_entry, **kwargs):
         Lbox = 100.
 
     try:
-        ptcl_mass = kwargs['ptcl_mass']
+        particle_mass = kwargs['particle_mass']
     except KeyError:
-        ptcl_mass = 1.e8
+        particle_mass = 1.e8
 
     try:
         halo_id = kwargs['halo_id']
@@ -145,10 +145,10 @@ def create_halo_table_hdf5(cache_log_entry, **kwargs):
     table.write(fname, path='data')
     f = h5py.File(fname)
     f.attrs.create('Lbox', Lbox)
-    f.attrs.create('ptcl_mass', ptcl_mass)
+    f.attrs.create('particle_mass', particle_mass)
     f.attrs.create('simname', simname)
     f.attrs.create('halo_finder', halo_finder)
-    f.attrs.create('redshift', np.round(float(redshift), 4))
+    f.attrs.create('redshift', '{0:.4f}'.format(float(redshift)))
     f.attrs.create('version_name', version_name)
     f.attrs.create('fname', fname)
 

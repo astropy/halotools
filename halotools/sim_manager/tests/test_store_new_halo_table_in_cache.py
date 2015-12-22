@@ -60,7 +60,7 @@ class TestStoreNewHaloTable(TestCase):
             {'halo_x': self.halo_x, 'halo_y': self.halo_y, 
             'halo_z': self.halo_z, 'halo_id': self.halo_id, 'halo_mass': self.halo_mass}
             )
-        self.halocat_obj = UserDefinedHaloCatalog(Lbox = 200, ptcl_mass = 100, 
+        self.halocat_obj = UserDefinedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = 0., 
             **self.good_halocat_args)
 
     def test_scenario0(self):
@@ -84,7 +84,7 @@ class TestStoreNewHaloTable(TestCase):
             cache_fname = cache_fname, 
             simname = 'fakesim', halo_finder = 'fake_halo_finder', 
             redshift = 0.0, version_name = 'phony_version', 
-            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
             fname = temp_fname
             )
 
@@ -128,7 +128,7 @@ class TestStoreNewHaloTable(TestCase):
                 cache_fname = cache_fname, 
                 simname = 'fakesim', halo_finder = 'fake_halo_finder', 
                 redshift = 0.0, version_name = 'phony_version', 
-                Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+                Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
                 fname = temp_fname
                 )
             del bad_table
@@ -144,7 +144,7 @@ class TestStoreNewHaloTable(TestCase):
                 cache_fname = cache_fname, 
                 simname = 'fakesim', halo_finder = 'fake_halo_finder', 
                 redshift = 0.0, version_name = 'phony_version', 
-                ptcl_mass = self.halocat_obj.ptcl_mass, 
+                particle_mass = self.halocat_obj.particle_mass, 
                 fname = temp_fname
                 )
         substr = 'All calls to the `store_new_halo_table_in_cache` function'
@@ -173,7 +173,7 @@ class TestStoreNewHaloTable(TestCase):
             cache_fname = cache_fname, 
             simname = 'fakesim', halo_finder = 'fake_halo_finder', 
             redshift = 0.0, version_name = 'phony_version', 
-            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
             fname = temp_fname
             )
 
@@ -183,7 +183,7 @@ class TestStoreNewHaloTable(TestCase):
             cache_fname = cache_fname, 
             simname = 'fakesim', halo_finder = 'fake_halo_finder', 
             redshift = 1.0, version_name = 'phony_version', 
-            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
             fname = temp_fname2
             )
 
@@ -220,7 +220,7 @@ class TestStoreNewHaloTable(TestCase):
             cache_fname = cache_fname, 
             simname = 'fakesim', halo_finder = 'fake_halo_finder', 
             redshift = 0.0, version_name = 'phony_version', 
-            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
             fname = temp_fname
             )
 
@@ -231,7 +231,7 @@ class TestStoreNewHaloTable(TestCase):
                 cache_fname = cache_fname, 
                 simname = 'fakesim', halo_finder = 'fake_halo_finder', 
                 redshift = 0.0, version_name = 'phony_version', 
-                Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+                Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
                 fname = temp_fname2
                 )
         substr = 'If this matching halo catalog is one you want to continue keeping track of'
@@ -242,7 +242,7 @@ class TestStoreNewHaloTable(TestCase):
             cache_fname = cache_fname, 
             simname = 'fakesim', halo_finder = 'fake_halo_finder', 
             redshift = 0.0, version_name = 'phony_version2', 
-            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
             fname = temp_fname2
             )
 
@@ -266,7 +266,7 @@ class TestStoreNewHaloTable(TestCase):
             cache_fname = cache_fname, 
             simname = 'fakesim', halo_finder = 'fake_halo_finder', 
             redshift = 0.0, version_name = 'phony_version', 
-            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
             fname = temp_fname
             )
 
@@ -277,7 +277,7 @@ class TestStoreNewHaloTable(TestCase):
                 cache_fname = cache_fname, 
                 simname = 'fakesim', halo_finder = 'fake_halo_finder', 
                 redshift = 0.0, version_name = 'phony_version', 
-                Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+                Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
                 fname = temp_fname2
                 )
         substr = 'A file at this location already exists.'
@@ -289,7 +289,7 @@ class TestStoreNewHaloTable(TestCase):
             cache_fname = cache_fname, 
             simname = 'fakesim', halo_finder = 'fake_halo_finder', 
             redshift = 0.0, version_name = 'phony_version2', 
-            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
             fname = temp_fname2
             )
 
@@ -317,7 +317,7 @@ class TestStoreNewHaloTable(TestCase):
             cache_fname = cache_fname, 
             simname = 'fakesim', halo_finder = 'fake_halo_finder', 
             redshift = 0.0, version_name = 'phony_version', 
-            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
             fname = temp_fname
             )
 
@@ -329,7 +329,7 @@ class TestStoreNewHaloTable(TestCase):
                 cache_fname = cache_fname, 
                 simname = 'fakesim', halo_finder = 'fake_halo_finder', 
                 redshift = 0.001, version_name = 'phony_version', 
-                Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+                Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
                 fname = temp_fname2
                 )
         substr = 'and a very similar redshift.'
@@ -340,7 +340,7 @@ class TestStoreNewHaloTable(TestCase):
             cache_fname = cache_fname, 
             simname = 'fakesim', halo_finder = 'fake_halo_finder', 
             redshift = 0.001, version_name = 'phony_version', 
-            Lbox = self.halocat_obj.Lbox, ptcl_mass = self.halocat_obj.ptcl_mass, 
+            Lbox = self.halocat_obj.Lbox, particle_mass = self.halocat_obj.particle_mass, 
             fname = temp_fname2, ignore_nearby_redshifts = True
             )
 

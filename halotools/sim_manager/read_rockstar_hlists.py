@@ -222,12 +222,13 @@ class RockstarHlistReader(TabularAsciiReader):
 
         self.simname = simname 
         self.halo_finder = halo_finder
-        self.redshift = redshift 
+        self.redshift = float(manipulate_cache_log.get_redshift_string(redshift)) 
         self.version_name = version_name
-        self.ignore_nearby_redshifts = ignore_nearby_redshifts
         self.dz_tol = dz_tol
         self.Lbox = Lbox
         self.particle_mass = particle_mass
+        self.overwrite = overwrite
+        self.ignore_nearby_redshifts = ignore_nearby_redshifts
         self.processing_notes = processing_notes
 
         try:
@@ -241,7 +242,7 @@ class RockstarHlistReader(TabularAsciiReader):
         self._verify_cache_log(**kwargs)
 
         self.output_fname = (
-            self._retrieve_output_fname(output_fname, overwrite, **kwargs)
+            self._retrieve_output_fname(output_fname, self.overwrite, **kwargs)
             )
 
         self._check_cache_log_for_matching_catalog(**kwargs)
@@ -270,119 +271,6 @@ class RockstarHlistReader(TabularAsciiReader):
                     "appeared in your input ``columns_to_keep_dict``.\n"
                     )
                 raise HalotoolsError(msg)
-
-    def data_chunk_generator(self, chunk_size, f):
-        """
-        Python generator uses f.readline() to march 
-        through an input open file object to yield 
-        a chunk of data with length equal to the input ``chunk_size``. 
-        The generator only yields columns that were included 
-        in the ``columns_to_keep_dict`` passed to the constructor. 
-
-        Parameters 
-        -----------
-        chunk_size : int 
-            Number of rows of data in the chunk being generated 
-
-        f : File
-            Open file object being read
-
-        Returns 
-        --------
-        chunk : tuple 
-            Tuple of data from the ascii. 
-            Only data from ``column_indices_to_keep`` are yielded. 
-
-        """
-        TabularAsciiReader.data_chunk_generator(self, chunk_size, f)
-
-    def data_len(self):
-        """ 
-        Number of rows of data in the input ASCII file. 
-
-        Returns 
-        --------
-        Nrows_data : int 
-            Total number of rows of data. 
-
-        Notes 
-        -------
-        The returned value is computed as the number of lines 
-        between the returned value of `header_len` and 
-        the next appearance of "\n" as the sole character on a line. 
-
-        The `data_len` method is the particular section of code 
-        where where the following assumptions are made:
-
-        1. The data begins with the first appearance of a non-empty line that does not begin with the character defined by ``self.header_char``. 
-
-        2. The data ends with the next appearance of an empty line. 
-        """
-        return TabularAsciiReader.data_len(self)
-
-    def header_len(self):
-        """ Number of rows in the header of the ASCII file. 
-
-        Parameters 
-        ----------
-        fname : string 
-
-        Returns 
-        -------
-        Nheader : int
-
-        Notes 
-        -----
-        The header is assumed to be those characters at the beginning of the file 
-        that begin with ``self.header_char``. 
-
-        All empty lines that appear in header will be included in the count. 
-
-        """
-        return TabularAsciiReader.header_len(self)
-
-    def apply_row_cut(self, array_chunk):
-        """ Method applies a boolean mask to the input array 
-        based on the row-cuts determined by the 
-        dictionaries passed to the constructor. 
-
-        Parameters 
-        -----------
-        array_chunk : Numpy array  
-
-        Returns 
-        --------
-        cut_array : Numpy array             
-        """ 
-        return TabularAsciiReader.apply_row_cut(self, array_chunk)
-
-    def read_ascii(self, chunk_memory_size = 500.):
-        """ Method reads the input ascii and returns 
-        a structured Numpy array of the data 
-        that passes the row- and column-cuts. 
-
-        Parameters 
-        ----------
-        chunk_memory_size : int, optional 
-            Determine the approximate amount of Megabytes of memory 
-            that will be processed in chunks. This variable 
-            must be smaller than the amount of RAM on your machine; 
-            choosing larger values typically improves performance. 
-            Default is 500 Mb. 
-
-        Returns 
-        --------
-        full_array : array_like 
-            Structured Numpy array storing the rows and columns 
-            that pass the input cuts. The columns of this array 
-            are those selected by the ``column_indices_to_keep`` 
-            argument passed to the constructor. 
-
-        See also 
-        ----------
-        data_chunk_generator
-        """
-        return TabularAsciiReader.read_ascii(self, chunk_memory_size = 500.)
 
     def _verify_cache_log(self, **kwargs):
         """ Private method checks to see whether the cache log exists. 
@@ -461,7 +349,7 @@ class RockstarHlistReader(TabularAsciiReader):
             if overwrite is False:
                 if num_matches > 0:
                     cache_fname = manipulate_cache_log.get_halo_table_cache_log_fname(**kwargs)
-                    idx = np.where(exact_match_mask == True)[0] + 2
+                    idx = np.where(exact_match_mask == True)[0]
                     linenum = idx[0] + 2
                     msg = ("\nHalotools detected an existing catalog in your cache \n"
                         "with a filename that matches your chosen ``output_fname``. \n"
@@ -478,6 +366,8 @@ class RockstarHlistReader(TabularAsciiReader):
             else:
                 manipulate_cache_log.remove_unique_fname_from_halo_table_cache_log(
                     output_fname, raise_warning = False, **kwargs)
+
+        return output_fname
 
     def _check_cache_log_for_matching_catalog(self, **kwargs):
         """ Private method searches the Halotools cache log to see if there are 
@@ -534,23 +424,28 @@ class RockstarHlistReader(TabularAsciiReader):
         """ Method reads the ASCII data, stores the result as an hdf5 file 
         in the Halotools cache, and updates the log. 
         """
-        self.halo_table = Table(self.read_ascii())
+        result = self.read_ascii()
+        self.halo_table = Table(result)
         self._verify_halo_table(self.halo_table)
 
-        self.halo_table.write(self.output_fname, path='data')
+        try:
+            overwrite = kwargs['overwrite']
+        except KeyError:
+            overwrite = self.overwrite
+        self.halo_table.write(self.output_fname, path='data', overwrite = overwrite)
 
         self._write_metadata()
 
         self._update_cache_log(**kwargs)
 
-    def _update_cache_log(**kwargs):
+    def _update_cache_log(self, **kwargs):
 
         new_log_entry = Table(
-            {'simname', [self.simname], 
-            'halo_finder', [self.halo_finder], 
-            'redshift', [self.redshift], 
-            'version_name', [self.version_name], 
-            'fname', [self.output_fname]}
+            {'simname': [self.simname], 
+            'halo_finder': [self.halo_finder], 
+            'redshift': [self.redshift], 
+            'version_name': [self.version_name], 
+            'fname': [self.output_fname]}
             )
 
         if self._cache_log_exists is True:
@@ -561,26 +456,34 @@ class RockstarHlistReader(TabularAsciiReader):
 
         manipulate_cache_log.overwrite_halo_table_cache_log(new_log, **kwargs)
 
+        # If there was already an entry matching all columns of new_log_entry, 
+        # then we just wrote a duplicate entry to the log, 
+        # so now we clean the newly-written log of any possibly-repeated entries:
+        manipulate_cache_log.remove_repeated_cache_lines(**kwargs)
+
 
     def _write_metadata(self):
         """ Private method to add metadata to the hdf5 file. 
         """
+        import h5py
         # Now add the metadata 
         f = h5py.File(self.output_fname)
-        f.attrs.create('simname', self.simname)
-        f.attrs.create('halo_finder', self.halo_finder)
-        redshift_string = manipulate_cache_log.get_redshift_string(self.redshift)
-        f.attrs.create('redshift', self.redshift_string)
-        f.attrs.create('version_name', self.version_name)
-        f.attrs.create('fname', self.output_fname)
+        f.attrs.create('simname', str(self.simname))
+        f.attrs.create('halo_finder', str(self.halo_finder))
+        redshift_string = str(manipulate_cache_log.get_redshift_string(self.redshift))
+        f.attrs.create('redshift', redshift_string)
+        f.attrs.create('version_name', str(self.version_name))
+        f.attrs.create('fname', str(self.output_fname))
 
-        f.attrs.create('orig_ascii_fname', self.input_fname)
+        f.attrs.create('Lbox', self.Lbox)
+        f.attrs.create('particle_mass', self.particle_mass)
+        f.attrs.create('orig_ascii_fname', str(self.input_fname))
 
-        time_right_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        time_right_now = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         f.attrs.create('time_of_catalog_production', time_right_now)
 
         if self.processing_notes != None:
-            f.attrs.create('processing_notes', self.processing_notes)
+            f.attrs.create('processing_notes', str(self.processing_notes))
 
         # Store all the choices for row cuts as metadata
         for haloprop_key, cut_value in self.row_cut_min_dict.iteritems():
@@ -622,9 +525,9 @@ class RockstarHlistReader(TabularAsciiReader):
             assert np.all(halo_x >= 0)
             assert np.all(halo_y >= 0)
             assert np.all(halo_z >= 0)
-            assert np.all(halo_x <= Lbox)
-            assert np.all(halo_y <= Lbox)
-            assert np.all(halo_z <= Lbox)
+            assert np.all(halo_x <= self.Lbox)
+            assert np.all(halo_y <= self.Lbox)
+            assert np.all(halo_z <= self.Lbox)
         except AssertionError:
             msg = ("\nThere are points in the input halo table that "
                 "lie outside [0, Lbox] in some dimension.\n")

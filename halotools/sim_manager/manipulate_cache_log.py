@@ -31,7 +31,7 @@ from . import sim_defaults
 from ..custom_exceptions import HalotoolsError
 
 def get_redshift_string(redshift):
-    return '{0:.4f}'.format(float(redshift))
+    return str('{0:.4f}'.format(float(redshift)))
 
 def get_halo_table_cache_log_fname():
     dirname = os.path.join(get_astropy_cache_dir(), 'halotools')
@@ -536,10 +536,21 @@ def check_metadata_consistency(cache_log_entry, linenum = None):
 
     try:
         assert 'Lbox' in f.attrs.keys()
-        assert 'ptcl_mass' in f.attrs.keys()
     except AssertionError:
-        msg = ("\nAll halo tables must contain metadata storing the "
-            "box size and particle mass of the simulation.\n"
+        msg = ("\nAll halo tables must contain a "
+            "metadata attribute ``Lbox`` storing the "
+            "box size of the simulation in units of Mpc/h.\n"
+            "The halo table stored in the following location is missing this metadata:\n"
+            +halo_table_fname+"\n")
+        raise HalotoolsError(msg)
+
+    try:
+        assert 'particle_mass' in f.attrs.keys()
+    except AssertionError:
+        msg = ("\nAll halo tables must contain a "
+            "metadata attribute ``particle_mass`` storing the "
+            "mass of the dark matter particles "
+            "in the simulation in units of Msun/h.\n"
             "The halo table stored in the following location is missing this metadata:\n"
             +halo_table_fname+"\n")
         raise HalotoolsError(msg)
@@ -618,7 +629,7 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
         version_name = metadata['version_name']
         fname = metadata['fname']
         Lbox = metadata['Lbox']
-        ptcl_mass = metadata['ptcl_mass']
+        particle_mass = metadata['particle_mass']
     except KeyError:
         msg = ("\nYou tried to create a new halo catalog without passing in\n"
             "a sufficient amount of metadata as keyword arguments.\n"
@@ -626,7 +637,7 @@ def store_new_halo_table_in_cache(halo_table, ignore_nearby_redshifts = False,
             "must have the following keyword arguments "
             "that will be interpreted as halo catalog metadata:\n\n"
             "``simname``, ``halo_finder``, ``redshift``, ``version_name``, ``fname``, \n"
-            "``Lbox``, ``ptcl_mass``\n")
+            "``Lbox``, ``particle_mass``\n")
         raise HalotoolsError(msg)
 
 
@@ -919,19 +930,19 @@ def verify_file_storing_unrecognized_halo_table(fname):
         redshift = float(f.attrs['redshift'])
         version_name = f.attrs['version_name']
         Lbox = f.attrs['Lbox']
-        ptcl_mass = f.attrs['ptcl_mass']
+        particle_mass = f.attrs['particle_mass']
         inferred_fname = f.attrs['fname']
     except:
         msg = ("\nThe hdf5 file storing the halos must have the following metadata:\n"
             "``simname``, ``halo_finder``, ``redshift``, ``version_name``, ``fname``, "
-            "``Lbox``, ``ptcl_mass``\n"
+            "``Lbox``, ``particle_mass``\n"
             "Here is an example of how to add metadata "
             "for hdf5 files can be added using the following syntax:\n\n"
             ">>> f = h5py.File(fname)\n"
             ">>> f.attrs.create('simname', simname)\n"
             ">>> f.close()\n\n"
             "Use floats for the following inputs:\n"
-            "``Lbox`` (in Mpc/h)  ``ptcl_mass`` (in Msun/h)\n"
+            "``Lbox`` (in Mpc/h)  ``particle_mass`` (in Msun/h)\n"
             "Use string-valued variables for the following inputs:\n"
             "``simname``, ``halo_finder``, ``version_name``, ``fname``, and also ``redshift``.\n"
             "To properly format the redshift metadata, the Halotools convention is:\n"

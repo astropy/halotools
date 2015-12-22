@@ -31,7 +31,7 @@ class UserDefinedHaloCatalog(object):
         ------------
         **metadata : float or string 
             Keyword arguments storing catalog metadata. 
-            The quantities `Lbox` and `ptcl_mass` 
+            The quantities `Lbox` and `particle_mass` 
             are required and must be in Mpc/h and Msun/h units, respectively. 
             `redshift` is also required metadata. 
             See Examples section for further notes. 
@@ -65,7 +65,7 @@ class UserDefinedHaloCatalog(object):
 
         >>> redshift = 0.0
         >>> Lbox = 250.
-        >>> ptcl_mass = 1e9
+        >>> particle_mass = 1e9
         >>> num_halos = 100
         >>> x = np.random.uniform(0, Lbox, num_halos)
         >>> y = np.random.uniform(0, Lbox, num_halos)
@@ -75,7 +75,7 @@ class UserDefinedHaloCatalog(object):
 
         Now we simply pass in both the metadata and the halo catalog columns as keyword arguments:
 
-        >>> halo_catalog = UserDefinedHaloCatalog(redshift = redshift, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+        >>> halo_catalog = UserDefinedHaloCatalog(redshift = redshift, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
         Your ``halo_catalog`` object can be used throughout the Halotools package. 
         The halo catalog itself is stored in the ``halo_table`` attribute, with columns accessed as follows:
@@ -86,19 +86,19 @@ class UserDefinedHaloCatalog(object):
         Each piece of metadata you passed in can be accessed as an ordinary attribute:
 
         >>> halo_catalog_box_size = halo_catalog.Lbox
-        >>> particle_mass = halo_catalog.ptcl_mass
+        >>> particle_mass = halo_catalog.particle_mass
 
         If you wish to pass in additional metadata, just include additional keywords:
 
         >>> simname = 'my_personal_sim'
 
-        >>> halo_catalog = UserDefinedHaloCatalog(redshift = redshift, simname = simname, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+        >>> halo_catalog = UserDefinedHaloCatalog(redshift = redshift, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
         Similarly, if you wish to include additional columns for your halo catalog, 
         Halotools is able to tell the difference between metadata and columns of halo data:
 
         >>> spin = np.random.uniform(0, 0.2, num_halos)
-        >>> halo_catalog = UserDefinedHaloCatalog(redshift = redshift, halo_spin = spin, simname = simname, Lbox = Lbox, ptcl_mass = ptcl_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+        >>> halo_catalog = UserDefinedHaloCatalog(redshift = redshift, halo_spin = spin, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
 
         """
@@ -176,12 +176,12 @@ class UserDefinedHaloCatalog(object):
         try:
             assert 'Lbox' in metadata_dict
             assert custom_len(metadata_dict['Lbox']) == 1
-            assert 'ptcl_mass' in metadata_dict
-            assert custom_len(metadata_dict['ptcl_mass']) == 1
+            assert 'particle_mass' in metadata_dict
+            assert custom_len(metadata_dict['particle_mass']) == 1
             assert 'redshift' in metadata_dict
         except AssertionError:
             msg = ("\nThe UserDefinedHaloCatalog requires "
-                "keyword arguments ``Lbox``, ``ptcl_mass`` and ``redshift``\n"
+                "keyword arguments ``Lbox``, ``particle_mass`` and ``redshift``\n"
                 "storing scalars that will be interpreted as metadata about the halo catalog.\n")
             raise HalotoolsError(msg)
 

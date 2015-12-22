@@ -543,9 +543,9 @@ class TabularAsciiReader(object):
         with self._compression_safe_file_opener(self.input_fname, 'r') as f:
 
             for skip_header_row in xrange(header_length):
-                _ = f.readline()
+                _s = f.readline()
 
-            for ichunk in xrange(num_full_chunks):
+            for _i in xrange(num_full_chunks):
 
                 chunk_array = np.array(list(
                     self.data_chunk_generator(num_rows_in_chunk, f)), dtype=self.dt)
