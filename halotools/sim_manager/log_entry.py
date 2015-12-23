@@ -127,8 +127,7 @@ class HaloTableCacheLogEntry(object):
                 '_verify_all_keys_begin_with_halo', 
                 '_verify_has_required_data_columns', 
                 '_verify_all_positions_inside_box', 
-                '_verify_halo_ids_are_unique', 
-                '_verify_exists_some_mass_like_variable')
+                '_verify_halo_ids_are_unique')
 
             for verification_function in verification_sequence:
                 func = getattr(self, verification_function)
@@ -282,9 +281,6 @@ class HaloTableCacheLogEntry(object):
         except:
             pass
 
-        return msg, num_failures 
-
-    def _verify_exists_some_mass_like_variable(self, msg, num_failures):
         return msg, num_failures 
 
     def _verify_file_exists(self, msg, num_failures):

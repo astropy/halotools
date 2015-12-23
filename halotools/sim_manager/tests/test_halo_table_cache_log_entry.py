@@ -49,13 +49,15 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         os.makedirs(self.dummy_cache_baseloc)
 
-        self.simnames = ('bolshoi', 'consuelo', 'bolshoi', 'bolshoi')
-        self.halo_finders = ('rockstar', 'bdm', 'bdm', 'rockstar')
-        self.version_names = ('v0', 'v1', 'v2', 'v3')
-        self.redshifts = (1.2, -0.1, 1.339, 1.3)
+        self.simnames = ('bolshoi', 'consuelo', 
+            'bolshoi', 'bolshoi', 'multidark')
+        self.halo_finders = ('rockstar', 'bdm', 
+            'bdm', 'rockstar', 'bdm')
+        self.version_names = ('v0', 'v1', 'v2', 'v3', 'v4')
+        self.redshifts = (1.2, -0.1, 1.339, 1.3, 100.)
 
         self.basenames = ('non_existent.hdf5', 'existent.file', 
-            'existent.hdf5', 'existent.hdf5')
+            'existent.hdf5', 'existent.hdf5', 'good.hdf5')
         self.fnames = tuple(os.path.join(self.dummy_cache_baseloc, name) 
             for name in self.basenames)
 
@@ -72,6 +74,14 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         self.table4 = Table(
             {'halo_id': [1, 2, 2], 
+            'halo_x': [1, 2, 3], 
+            'halo_y': [1, 2, 3], 
+            'halo_z': [1, 2, 3], 
+            'halo_mass': [1, 2, 3], 
+            })
+
+        self.good_table = Table(
+            {'halo_id': [1, 2, 3], 
             'halo_x': [1, 2, 3], 
             'halo_y': [1, 2, 3], 
             'halo_z': [1, 2, 3], 
@@ -281,6 +291,27 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "must be bounded by [0, Lbox]" not in log_entry._cache_safety_message
         assert "must contain a unique set of integers" in log_entry._cache_safety_message
+
+    def test_passing_scenario(self):
+        num_scenario = 4
+
+        try:
+            os.system('rm '+self.fnames[num_scenario])
+        except:
+            pass
+
+        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+
+        self.good_table.write(self.fnames[num_scenario], path='data')
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            f.attrs[attr] = getattr(log_entry, attr)
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
+
+        assert log_entry.safe_for_cache == True
+        assert "The HaloTableCacheLogEntry is safe to add to the log" == log_entry._cache_safety_message
 
     def tearDown(self):
         try:
