@@ -272,9 +272,19 @@ class RockstarHlistReader(TabularAsciiReader):
                     "method will overwrite the existing file and log entry.\n")
                 warn(msg)
             else:
+                linenum = self.halo_table_cache.log.index(self.log_entry) + 1
                 msg += ("In order to proceed, "
                     "you must either set ``overwrite`` to True \n"
-                    "or manually delete the existing file and log entry.\n")
+                    "or manually delete the existing file and also "
+                    "remove the entry from the log.\n"
+                    "To delete an entry from the log, \n"
+                    "you can either use the `remove_entry_from_cache_log` method \n"
+                    "of the HaloTableCache class, or equivalently, you can \n"
+                    "manually delete line #"+str(linenum)+"from the log file. \n"
+                    "The log file is stored in the following location:\n"
+                    +self.halo_table_cache.cache_log_fname+"\n"
+                    )
+                raise HalotoolsError(msg)
         else:
             if self.ignore_nearby_redshifts == False:
                 pass
@@ -296,8 +306,6 @@ class RockstarHlistReader(TabularAsciiReader):
                         "the ``ignore_nearby_redshifts`` to True, \n"
                         "or choose a different ``version_name`` for your catalog.\n")
                     raise HalotoolsError(msg)
-
-
 
 
     def _enforce_halo_catalog_formatting_requirements(self):
