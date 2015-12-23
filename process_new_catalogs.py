@@ -80,21 +80,10 @@ reader = RockstarHlistReader(input_fname = input_fname,
     particle_mass=particle_mass, 
     row_cut_min_dict = row_cut_min_dict, 
     processing_notes = processing_notes, 
-    overwrite=False)
+    overwrite=True)
 
-print("\n\n\n\nRUNNING THE READER METHOD\n\n\n")
-reader.read_and_store_halocat_in_cache()
-
-# basic_reader = TabularAsciiReader(input_fname = input_fname, 
-#     columns_to_keep_dict = {'halo_id': (1, 'i8'), 'halo_mpeak': (58, 'f4')}
-#     )
-
-
-# single_log_entry = Table({'simname': ['bolshoi'], 'halo_finder': ['rockstar'], 
-#     'version_name': ['halotools_alpha_version1'], 'redshift': [11.7632], 
-#     'fname': [reader.output_fname]})
-
-# log = manipulate_cache_log.read_halo_table_cache_log()
+# print("\n\n\n\nRUNNING THE READER METHOD\n\n\n")
+# reader.read_and_store_halocat_in_cache()
 
 
 

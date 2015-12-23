@@ -310,7 +310,7 @@ class RockstarHlistReader(TabularAsciiReader):
                         fname = self.output_fname, dz_tol = self.dz_tol)
                         )
                 if len(closely_matching_catalogs) > 0:
-                    msg = ("\The following filenames appear in the cache log \n"
+                    msg = ("\nThe following filenames appear in the cache log \n"
                         "and exactly matching metadata and closely matching redshifts: \n\n")
                     for entry in closely_matching_catalogs:
                         msg += str(entry.fname) + "\n"
@@ -384,18 +384,6 @@ class RockstarHlistReader(TabularAsciiReader):
             msg = ("\nThe output_fname must be a string or unicode that concludes "
                 " with file extension '.hdf5'\n")
             raise HalotoolsError(msg)
-
-        if os.path.isfile(output_fname):
-            if overwrite == True:
-                msg = ("\nThe chosen ``output_fname``, \n"+output_fname+"\n"
-                    "already exists and will be overwritten when the \n"
-                    "`store_halo_catalog_in_cache` method is called.\n")
-                warn(msg)
-            else:
-                msg = ("\nThe chosen ``output_fname``, \n"+output_fname+"\n"
-                    "already exists. You must set overwrite to True if you want to "
-                    "use the `store_halo_catalog_in_cache` method.\n")
-                raise IOError(msg)
 
         return output_fname
 
