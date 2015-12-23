@@ -144,7 +144,10 @@ class TestHaloTableCacheLogEntry(TestCase):
     def test_scenario2c(self):
         num_scenario = 2
 
-        os.system('rm '+self.fnames[num_scenario])
+        try:
+            os.system('rm '+self.fnames[num_scenario])
+        except:
+            pass
         self.table1.write(self.fnames[num_scenario], path='data')
 
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
@@ -158,7 +161,6 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.attrs['Lbox'] = 100.
         f.attrs['particle_mass'] = 1.e8
         f.close()
-        
 
         assert log_entry.safe_for_cache == False
         assert "does not match" in log_entry._cache_safety_message
