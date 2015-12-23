@@ -3,3 +3,4 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from .test_cache_config import *
+from .test_halo_table_cache_log_entry import TestHaloTableCacheLogEntry

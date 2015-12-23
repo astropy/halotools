@@ -11,6 +11,8 @@ def get_redshift_string(redshift):
     return str('{0:.4f}'.format(float(redshift)))
 
 class HaloTableCacheLogEntry(object):
+    """ Object serving as an entry in the `~halotools.sim_manager.HaloTableCache`. 
+    """
 
     import h5py
     log_attributes = ['simname', 'halo_finder', 'version_name', 'redshift', 'fname']
@@ -19,6 +21,36 @@ class HaloTableCacheLogEntry(object):
 
     def __init__(self, simname, halo_finder, version_name, redshift, fname):
         """
+        Parameters 
+        -----------
+        simname : string 
+            Nickname of the simulation used as a shorthand way to keep track 
+            of the halo catalogs in your cache. The simnames processed by Halotools are 
+            'bolshoi', 'bolplanck', 'consuelo' and 'multidark'. 
+
+        halo_finder : string 
+            Nickname of the halo-finder, e.g., 'rockstar' or 'bdm'. 
+
+        version_name : string 
+            Nickname of the version of the halo catalog used to differentiate 
+            between the same halo catalog processed in different ways. 
+
+        redshift : string or float  
+            Redshift of the halo catalog, rounded to 4 decimal places. 
+
+        fname : string 
+            Name of the hdf5 file storing the table of halos. 
+
+        Notes 
+        ------
+        This class overrides the python built-in comparison functions __eq__, __lt__, etc. 
+        Equality holds only if all of the five constructor inputs are equal. 
+        Two class instances are compared by using a dictionary order 
+        defined by the same sequence as the constructor input positional arguments. 
+
+        See also 
+        ----------
+        `~halotools.sim_manager.tests.TestHaloTableCacheLogEntry`. 
         """
         self.simname = simname
         self.halo_finder = halo_finder
@@ -85,25 +117,34 @@ class HaloTableCacheLogEntry(object):
 
     @property 
     def safe_for_cache(self):
-        """ This will do all the following checks:
+        """ Boolean determining whether the 
+        `~halotools.sim_manager.HaloTableCacheLogEntry` instance stores a valid 
+        halo catalog that can safely be added to the cache for future use. 
+        `safe_for_cache` is implemented as a property method, so that each request 
+        performs all the checks from scratch. A log entry is considered valid 
+        if it passes the following tests:
 
-        1. File exists (check)
+        1. The file exists. 
 
-        2. File has .hdf5 extension (check)
+        2. The filename has .hdf5 extension. 
 
-        2. Metadata of hdf5 file is complete  (check)
+        3. The hdf5 file has ``simname``, ``halo_finder``, ``version_name``, ``redshift``, ``fname``, ``Lbox`` and ``particle_mass`` metadata attributes. 
 
-        3. Metadata of hdf5 file is consistent with HaloTableCacheLogEntry attributes (check)
+        4. Each value in the above metadata is consistent with the corresponding value bound to the `~halotools.sim_manager.HaloTableCacheLogEntry` instance. 
 
-        4. Halo table can be read in with astropy.Table.read
+        5. The halo table data can be read in using the `~astropy.table.Table.read` method of the `~astropy.table.Table` class. 
 
-        4. Keys all begin with 'halo_'
+        6. The halo table has the following columns ``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``, plus at least one additional column storing a mass-like variable.
 
-        5. Positions are all in the range [0, Lbox]
+        7. The name of each column of the halo table begins with the substring ``halo_``. 
 
-        6. halo_id is a set of unique integers 
+        8. Values for each of the ``halo_x``, ``halo_y``, ``halo_z`` columns are all in the range [0, Lbox]. 
 
-        7. There exists some mass-like variable
+        9. The ``halo_id`` column stores a set of unique integers. 
+
+        Note in particular that `safe_for_cache` performs no checks whatsoever concerning 
+        the other entries that may or may not be stored in the cache. Such checks are 
+        the responsibility of the `~halotools.sim_manager.HaloTableCache` class. 
 
         """
         self._cache_safety_message = "The HaloTableCacheLogEntry is safe to add to the log"
@@ -124,8 +165,8 @@ class HaloTableCacheLogEntry(object):
                 '_verify_hdf5_has_complete_metadata', 
                 '_verify_metadata_consistency', 
                 '_verify_table_read', 
-                '_verify_all_keys_begin_with_halo', 
                 '_verify_has_required_data_columns', 
+                '_verify_all_keys_begin_with_halo', 
                 '_verify_all_positions_inside_box', 
                 '_verify_halo_ids_are_unique')
 
@@ -200,6 +241,8 @@ class HaloTableCacheLogEntry(object):
 
 
     def _verify_all_keys_begin_with_halo(self, msg, num_failures):
+        """
+        """
         try:
             data = Table.read(self.fname, path='data')
             for key in data.keys():
@@ -216,6 +259,8 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures 
 
     def _verify_has_required_data_columns(self, msg, num_failures):
+        """
+        """
         try:
             data = Table.read(self.fname, path='data')
             keys = data.keys()
@@ -238,6 +283,8 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures 
 
     def _verify_all_positions_inside_box(self, msg, num_failures):
+        """
+        """
         try:
             data = Table.read(self.fname, path='data')
             f = self.h5py.File(self.fname)
@@ -267,6 +314,8 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures 
 
     def _verify_halo_ids_are_unique(self, msg, num_failures):
+        """
+        """
         try:
             data = Table.read(self.fname, path='data')
             try:
@@ -284,6 +333,8 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures 
 
     def _verify_file_exists(self, msg, num_failures):
+        """
+        """
 
         if os.path.isfile(self.fname):
             pass
@@ -293,6 +344,8 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures
 
     def _verify_h5py_extension(self, msg, num_failures):
+        """
+        """
 
         if self.fname[-5:]=='.hdf5':
             pass
@@ -302,6 +355,8 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures
 
     def _verify_hdf5_has_complete_metadata(self, msg, num_failures):
+        """
+        """
 
         try:
             f = self.h5py.File(self.fname)
@@ -335,6 +390,19 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures
 
     def determine_log_entry_from_fname(self, fname):
+        """ Method tries to construct a `~halotools.sim_manager.HaloTableCacheLogEntry` 
+        using the metadata that may be stored in the input file. An exception will be raised 
+        if the determination is not possible. 
+
+        Parameters 
+        -----------
+        fname : string 
+            Name of the file 
+
+        Returns 
+        ---------
+        log_entry : `~halotools.sim_manager.HaloTableCacheLogEntry` instance 
+        """
 
         if not os.path.isfile(fname):
             msg = ("File does not exist")

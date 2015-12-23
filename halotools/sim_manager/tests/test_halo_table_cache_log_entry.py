@@ -32,7 +32,7 @@ __all__ = ('TestHaloTableCacheLogEntry' )
 
 
 class TestHaloTableCacheLogEntry(TestCase):
-    """ 
+    """ Class providing unit testing for `~halotools.sim_manager.HaloTableCacheLogEntry`. 
     """
     import h5py
     hard_coded_log_attrs = ['simname', 'halo_finder', 'version_name', 'redshift', 'fname']
