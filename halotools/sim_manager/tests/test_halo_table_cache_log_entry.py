@@ -139,7 +139,31 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.close()
         _ =  log_entry.safe_for_cache
         assert "``particle_mass``" not in log_entry._cache_safety_message
+
+
+    def test_scenario2c(self):
+        num_scenario = 2
+
+        os.system('rm '+self.fnames[num_scenario])
+        self.table1.write(self.fnames[num_scenario], path='data')
+
+        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            if attr != 'redshift':
+                f.attrs[attr] = getattr(log_entry, attr)
+            else:
+                f.attrs[attr] = 0.4
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
         
+
+        assert log_entry.safe_for_cache == False
+        assert "does not match" in log_entry._cache_safety_message
+
+
 
     def tearDown(self):
         try:

@@ -136,21 +136,28 @@ class HaloTableCacheLogEntry(object):
     def _verify_metadata_consistency(self, msg, num_failures):
         """
         """
+
         try:
             f = self.h5py.File(self.fname)
+            
             for key in HaloTableCacheLogEntry.log_attributes:
                 try:
-                    metadata = f.attr[key]
+
+                    metadata = f.attrs[key]
                     assert metadata == getattr(self, key)
+
                 except AssertionError:
+
                     num_failures += 1
                     msg += (
                         str(num_failures)+". The ``"+key+"`` metadata of the hdf5 file = "+str(metadata)+
                         "does not match the "+str(getattr(self, key))+" value in the log entry.\n\n"
                         )
                 except KeyError:
+
                     pass
-        except:
+        except IOError:
+            
             pass
 
         finally:
@@ -200,7 +207,6 @@ class HaloTableCacheLogEntry(object):
             required_set = set(HaloTableCacheLogEntry.required_metadata)
             actual_set = set(f.attrs.keys())
 
-
             if required_set.issubset(actual_set):
                 pass
             else:
@@ -212,7 +218,7 @@ class HaloTableCacheLogEntry(object):
                     msg += "``"+elt + "``\n"
                 msg += "\n"
 
-        except:
+        except IOError:
             num_failures += 1
             msg += (str(num_failures) + 
                 ". Attempting to access the hdf5 metadata raised an exception.\n\n")
