@@ -399,7 +399,9 @@ class RockstarHlistReader(TabularAsciiReader):
 
         return output_fname
 
-    def read_halocat(self, write_to_disk = False, update_cache_log = False):
+    def read_halocat(self, 
+        write_to_disk = False, update_cache_log = False, 
+        add_supplementary_halocat_columns = True):
         """ Method reads the ascii data and  
         binds the resulting catalog to ``self.halo_table``.
 
@@ -414,9 +416,17 @@ class RockstarHlistReader(TabularAsciiReader):
             If True, the `update_cache_log` method will be called automatically. 
             Default is False, in which case you must call the `update_cache_log` 
             method yourself to add the the processed catalog to the cache. 
+
+        add_supplementary_halocat_columns : bool, optional 
+            Boolean determining whether the halo_table will have additional 
+            columns added to it computed by the add_supplementary_halocat_columns method. 
+            Default is True. 
         """
         result = self.read_ascii()
         self.halo_table = Table(result)
+
+        if add_supplementary_halocat_columns == True: 
+            self.add_supplementary_halocat_columns()
 
         if write_to_disk is True: 
             self.write_to_disk()
@@ -500,6 +510,24 @@ class RockstarHlistReader(TabularAsciiReader):
         """
         self.halo_table_cache.add_entry_to_cache_log(
             self.log_entry, update_ascii = True)
+
+    def add_supplementary_halocat_columns(self):
+        """ Add the halo_nfw_conc and halo_hostid columns. 
+        This implementation will eventually change in favor of something 
+        more flexible. 
+        """
+        ### Add the halo_nfw_conc column
+        if ('halo_rvir' in self.halo_table.keys()) & ('halo_rs' in self.halo_table.keys()):
+            self.halo_table['halo_nfw_conc'] = (
+                self.halo_table['halo_rvir'] / self.halo_table['halo_rs']
+                )
+
+        ### Add the halo_nfw_conc column
+        self.halo_table['halo_hostid'] = self.halo_table['halo_id']
+        subhalo_mask = self.halo_table['halo_upid'] != -1
+        self.halo_table['halo_hostid'][subhalo_mask] = (
+            self.halo_table['halo_upid'][subhalo_mask]
+            )
 
 
 
