@@ -60,9 +60,12 @@ class TestHaloTableCacheLogEntry(TestCase):
     def test_scenario1(self):
         """ We can instantiate the log entry with a complete set of metadata
         """
+        hard_coded_attrs = ['simname', 'halo_finder', 'version_name', 'redshift', 'fname']
         for i in range(len(self.simnames)):
             constructor_kwargs = self.get_scenario_kwargs(i)
             log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
+            assert set(log_entry.log_attributes) == set(hard_coded_attrs)
+
 
 
     def tearDown(self):
