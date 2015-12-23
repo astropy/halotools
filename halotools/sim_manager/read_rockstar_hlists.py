@@ -21,6 +21,8 @@ import datetime
 
 from .tabular_ascii_reader import TabularAsciiReader
 from . import manipulate_cache_log 
+from .halo_table_cache import HaloTableCache
+from .log_entry import HaloTableCacheLogEntry
 
 from ..custom_exceptions import HalotoolsError
 
@@ -46,7 +48,7 @@ class RockstarHlistReader(TabularAsciiReader):
         row_cut_min_dict = {}, row_cut_max_dict = {}, 
         row_cut_eq_dict = {}, row_cut_neq_dict = {}, 
         overwrite = False, ignore_nearby_redshifts = False, dz_tol = 0.05, 
-        processing_notes = None, **kwargs):
+        processing_notes = ' ', **kwargs):
         """
         Parameters 
         -----------
@@ -87,8 +89,11 @@ class RockstarHlistReader(TabularAsciiReader):
             The file extension must be '.hdf5'. 
             If the file already exists, you must set 
             the keyword argument ``overwrite`` to True. 
+
             If output_fname is set to `std_cache_loc`, Halotools will place the 
-            catalog in the default cache location. 
+            catalog in the following location: 
+
+            $HOME/.astropy/cache/halotools/halo_catalogs/simname/halo_finder/input_fname.version_name.hdf5
 
         simname : string 
             Nickname of the simulation used as a shorthand way to keep track 
@@ -101,7 +106,7 @@ class RockstarHlistReader(TabularAsciiReader):
             publicly available hlists processed with the 'bdm' halo-finder. 
 
         redshift : float 
-            Redshift of the halo catalog 
+            Redshift of the halo catalog. 
 
         version_name : string 
             Nickname of the version of the halo catalog you produce using RockstarHlistReader. 
@@ -193,8 +198,9 @@ class RockstarHlistReader(TabularAsciiReader):
         ignore_nearby_redshifts : bool, optional 
             Flag used to determine whether nearby redshifts in cache will be ignored. 
             If there are existing halo catalogs in the Halotools cache with matching 
-            ``simname``, ``halo_finder`` and ``version_name``, and a redshift 
-            within ``dz_tol``, then the ignore_nearby_redshifts flag must be set to True 
+            ``simname``, ``halo_finder`` and ``version_name``, and if one or more of those 
+            catalogs has a redshift within ``dz_tol``, 
+            then the ignore_nearby_redshifts flag must be set to True 
             for the new halo catalog to be stored in cache. 
             Default is False. 
 
@@ -212,14 +218,24 @@ class RockstarHlistReader(TabularAsciiReader):
         ``row_cut_eq_dict`` and ``row_cut_neq_dict`` keyword arguments are used 
         simultaneously, only rows passing all cuts will be kept. 
         """
+        try:
+            import h5py 
+        except ImportError:
+            msg = ("\nYou must have h5py installed if you want to \n"
+                "use the RockstarHlistReader to store your catalog in the Halotools cache. \n"
+                "For a stand-alone reader class, you should instead use TabularAsciiReader.\n")
+            raise HalotoolsError(msg)
 
         TabularAsciiReader.__init__(self, 
             input_fname, columns_to_keep_dict, 
             header_char, row_cut_min_dict, row_cut_max_dict, 
             row_cut_eq_dict, row_cut_neq_dict)
 
+        # Require that the minimum required columns have been selected, 
+        # and that they all begin with `halo_`
         self._enforce_halo_catalog_formatting_requirements()
 
+        # Bind the constructor arguments to the instance
         self.simname = simname 
         self.halo_finder = halo_finder
         self.redshift = float(manipulate_cache_log.get_redshift_string(redshift)) 
@@ -231,19 +247,31 @@ class RockstarHlistReader(TabularAsciiReader):
         self.ignore_nearby_redshifts = ignore_nearby_redshifts
         self.processing_notes = processing_notes
 
-        try:
-            import h5py 
-        except ImportError:
-            msg = ("\nYou must have h5py installed if you want to \n"
-                "use the RockstarHlistReader to store your catalog in the Halotools cache. \n"
-                "For a stand-alone reader class, you should instead use TabularAsciiReader.\n")
-            raise HalotoolsError(msg)
-
         self.output_fname = (
             self._retrieve_output_fname(output_fname, self.overwrite, **kwargs)
             )
 
-        self._check_cache_log_for_matching_catalog(**kwargs)
+        self._check_cache_log_for_matching_catalog()
+
+    def _check_cache_log_for_matching_catalog(self):
+        """
+        """
+        self.halo_table_cache = HaloTableCache()
+        self.log_entry = HaloTableCacheLogEntry(simname = self.simname, 
+            halo_finder = self.halo_finder, version_name = self.version_name, 
+            redshift = self.redshift, fname = self.output_fname)
+
+        if (self.log_entry in self.halo_table_cache.log):
+            msg = ("\nThere is already an existing entry in the Halotools cache log\n"
+                "that exactly matches the filename and metadata of the file you intend to write.\n")
+            if self.overwrite == True:
+                msg += ("Because you have set ``overwrite`` to True, \ncalling the read_and_store_halocat_in_cache "
+                    "method will overwrite the existing file and log entry.\n")
+                warn(msg)
+            else:
+                msg += ("In order to proceed, you must either set ``overwrite`` to True \n"
+                    "or manually delete the existing file and log entry.\n")
+
 
     def _enforce_halo_catalog_formatting_requirements(self):
         """ Private method enforces the halo_table formatting conventions of the package. 
