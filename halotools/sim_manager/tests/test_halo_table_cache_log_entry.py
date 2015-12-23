@@ -63,7 +63,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         self.table2 = Table({'halo_x': [1, 2, 3]})
         
         self.table3 = Table(
-            {'halo_id': [1, 2, 2], 
+            {'halo_id': [1, 2, 3], 
             'halo_x': [-1, 2, 3], 
             'halo_y': [1, 2, 3], 
             'halo_z': [1, 2, 3], 
@@ -71,7 +71,7 @@ class TestHaloTableCacheLogEntry(TestCase):
             })
 
         self.table4 = Table(
-            {'halo_id': [1, 2, 3], 
+            {'halo_id': [1, 2, 2], 
             'halo_x': [1, 2, 3], 
             'halo_y': [1, 2, 3], 
             'halo_z': [1, 2, 3], 
@@ -245,7 +245,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "must begin with the following five characters:" not in log_entry._cache_safety_message
         assert "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``" in log_entry._cache_safety_message
-        
+
     def test_scenario3c(self):
         num_scenario = 3
 
@@ -267,9 +267,20 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "must begin with the following five characters:" not in log_entry._cache_safety_message
         assert "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``" not in log_entry._cache_safety_message
-        print(log_entry._cache_safety_message)
         assert "must be bounded by [0, Lbox]" in log_entry._cache_safety_message
+        assert "must contain a unique set of integers" not in log_entry._cache_safety_message
 
+        self.table4.write(self.fnames[num_scenario], path='data', overwrite=True)
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            f.attrs[attr] = getattr(log_entry, attr)
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
+
+        assert log_entry.safe_for_cache == False
+        assert "must be bounded by [0, Lbox]" not in log_entry._cache_safety_message
+        assert "must contain a unique set of integers" in log_entry._cache_safety_message
 
     def tearDown(self):
         try:

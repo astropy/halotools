@@ -268,6 +268,20 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures 
 
     def _verify_halo_ids_are_unique(self, msg, num_failures):
+        try:
+            data = Table.read(self.fname, path='data')
+            try:
+                halo_id = data['halo_id']
+                assert halo_id.dtype == np.int
+                assert len(halo_id) == len(set(halo_id))
+            except AssertionError:
+                num_failures += 1
+                msg += (str(num_failures)+". The ``halo_id`` column"
+                    "must contain a unique set of integers.\n\n"
+                    )
+        except:
+            pass
+
         return msg, num_failures 
 
     def _verify_exists_some_mass_like_variable(self, msg, num_failures):
