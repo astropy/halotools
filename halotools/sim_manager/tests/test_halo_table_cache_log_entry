@@ -13,6 +13,8 @@ from astropy.table import vstack as table_vstack
 
 from astropy.config.paths import _find_home 
 
+from .. import HaloTableCacheLogEntry
+
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
 # returned values depend on the configuration 
@@ -31,6 +33,7 @@ __all__ = ('TestHaloTableCacheLogEntry' )
 class TestHaloTableCacheLogEntry(TestCase):
     """ 
     """
+    import h5py
 
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
@@ -41,4 +44,41 @@ class TestHaloTableCacheLogEntry(TestCase):
             os.system('rm -rf ' + self.dummy_cache_baseloc)
         except OSError:
             pass
+
+        self.simnames = ('bolshoi', 'consuelo')
+        self.halo_finders = ('rockstar', 'bdm')
+        self.version_names = ('testing_version1', 'testing_version2')
+        self.redshifts = (1.2, -0.1)
+        self.fnames = ('abc.hdf5', 'def.hdf5')
+
+    def get_scenario_kwargs(self, num_scenario):
+        return ({'simname': self.simnames[num_scenario], 'halo_finders': self.halo_finders[num_scenario], 
+            'version_name': self.version_names[num_scenario], 'redshift': self.redshifts[num_scenario], 
+            'fname': self.fnames[num_scenario]})
+
+    def test_scenario1(self):
+        """ We can instantiate the log entry with a complete set of metadata
+        """
+        for i in range(len(self.simnames)):
+            constructor_kwargs = self.get_scenario_kwargs[i]
+            log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
+
+
+    def tearDown(self):
+        try:
+            os.system('rm -rf ' + self.dummy_cache_baseloc)
+        except OSError:
+            pass
+
+
+
+
+
+
+
+
+
+
+
+
 

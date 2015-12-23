@@ -1,6 +1,5 @@
 from collections import OrderedDict
 import os
-import h5py
 
 from ..custom_exceptions import InvalidCacheLogEntry
 
@@ -11,6 +10,7 @@ def get_redshift_string(redshift):
 
 class HaloTableCacheLogEntry(object):
 
+    import h5py
     log_attributes = ['simname', 'halo_finder', 'version_name', 'redshift', 'fname']
     required_metadata = ['Lbox', 'particle_mass']
     required_metadata.extend(log_attributes)
