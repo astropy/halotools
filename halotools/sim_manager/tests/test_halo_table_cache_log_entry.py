@@ -35,6 +35,7 @@ class TestHaloTableCacheLogEntry(TestCase):
     """ 
     """
     import h5py
+    hard_coded_log_attrs = ['simname', 'halo_finder', 'version_name', 'redshift', 'fname']
 
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
@@ -68,11 +69,11 @@ class TestHaloTableCacheLogEntry(TestCase):
     def test_instantiation(self):
         """ We can instantiate the log entry with a complete set of metadata
         """
-        hard_coded_attrs = ['simname', 'halo_finder', 'version_name', 'redshift', 'fname']
+        
         for i in range(len(self.simnames)):
             constructor_kwargs = self.get_scenario_kwargs(i)
             log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
-            assert set(log_entry.log_attributes) == set(hard_coded_attrs)
+            assert set(log_entry.log_attributes) == set(self.hard_coded_log_attrs)
 
     def test_scenario0(self):
         num_scenario = 0
@@ -115,6 +116,30 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "access the hdf5 metadata raised an exception." not in log_entry._cache_safety_message
         assert "missing the following metadata" in log_entry._cache_safety_message
+
+    def test_scenario2b(self):
+        num_scenario = 2
+
+        os.system('rm '+self.fnames[num_scenario])
+        self.table1.write(self.fnames[num_scenario], path='data')
+
+        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            f.attrs[attr] = getattr(log_entry, attr)
+        f.close()
+
+        assert log_entry.safe_for_cache == False
+        assert "``particle_mass``" in log_entry._cache_safety_message
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
+        _ =  log_entry.safe_for_cache
+        assert "``particle_mass``" not in log_entry._cache_safety_message
+        
 
     def tearDown(self):
         try:

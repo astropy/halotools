@@ -197,7 +197,6 @@ class HaloTableCacheLogEntry(object):
 
         try:
             f = self.h5py.File(self.fname)
-            print("made it this far")
             required_set = set(HaloTableCacheLogEntry.required_metadata)
             actual_set = set(f.attrs.keys())
 
