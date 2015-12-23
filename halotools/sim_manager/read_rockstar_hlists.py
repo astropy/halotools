@@ -239,8 +239,6 @@ class RockstarHlistReader(TabularAsciiReader):
                 "For a stand-alone reader class, you should instead use TabularAsciiReader.\n")
             raise HalotoolsError(msg)
 
-        self._verify_cache_log(**kwargs)
-
         self.output_fname = (
             self._retrieve_output_fname(output_fname, self.overwrite, **kwargs)
             )
@@ -258,7 +256,11 @@ class RockstarHlistReader(TabularAsciiReader):
         except AssertionError:
             msg = ("\nAll halo tables stored in cache \n"
             "must at least have the following columns:\n"
-                "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``\n")
+                "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``.\n"
+                "If you do not intend to use store the catalog in cache, \n"
+                "you should instead process the file with the "
+                "`~halotools.sim_manager.TabularAsciiReader`.\n"
+                )
             raise HalotoolsError(msg)
 
         for name in self.dt.names:
@@ -269,20 +271,11 @@ class RockstarHlistReader(TabularAsciiReader):
                     "must begin with the substring ``halo_``.\n")
                 msg += ("The column name ``"+name+"`` "
                     "appeared in your input ``columns_to_keep_dict``.\n"
+                    "If you do not intend to use store the catalog in cache, \n"
+                    "you should instead process the file with the "
+                    "`~halotools.sim_manager.TabularAsciiReader`.\n"
                     )
                 raise HalotoolsError(msg)
-
-    def _verify_cache_log(self, **kwargs):
-        """ Private method checks to see whether the cache log exists. 
-        If so, verifies that the existing log is kosher. 
-        """
-        self._cache_log_exists, _ = (
-            manipulate_cache_log.verify_cache_log(
-                raise_non_existent_cache_exception = False, **kwargs)
-            )
-
-        if self._cache_log_exists == True:
-            manipulate_cache_log.remove_repeated_cache_lines(**kwargs)
 
     def _get_default_output_fname(self):
         """
@@ -304,12 +297,8 @@ class RockstarHlistReader(TabularAsciiReader):
 
     def _retrieve_output_fname(self, output_fname, overwrite, **kwargs):
         """ Private method checks to see whether the chosen 
-        ``output_fname`` already exists on disk, and also whether it 
-        already appears in the cache log. If ovewrite is True, 
-        the log will be cleaned of any entries with a matching output_fname. 
-        If overwrite is False and a match is detected, an exception is raised. 
-        The `_retrieve_output_fname` can safely be called even if the cache log 
-        does not exist. 
+        ``output_fname`` already exists on disk, and enforces 
+        compatibility with ``overwrite``. 
         """
         if output_fname == 'std_cache_loc':
             output_fname = self._get_default_output_fname()
@@ -333,92 +322,7 @@ class RockstarHlistReader(TabularAsciiReader):
                     "use the `store_halo_catalog_in_cache` method.\n")
                 raise IOError(msg)
 
-        self._cache_log_exists, _ = (
-            manipulate_cache_log.verify_cache_log(
-                raise_non_existent_cache_exception = False, **kwargs)
-            )
-        if self._cache_log_exists == True:
-
-            log = manipulate_cache_log.read_halo_table_cache_log(**kwargs)
-            exact_match_mask, _ = (
-                manipulate_cache_log.search_log_for_possibly_existing_entry(log, 
-                    fname = output_fname)
-                )
-            num_matches = len(log[exact_match_mask])
-
-            if overwrite is False:
-                if num_matches > 0:
-                    cache_fname = manipulate_cache_log.get_halo_table_cache_log_fname(**kwargs)
-                    idx = np.where(exact_match_mask == True)[0]
-                    linenum = idx[0] + 2
-                    msg = ("\nHalotools detected an existing catalog in your cache \n"
-                        "with a filename that matches your chosen ``output_fname``. \n"
-                        "If you want to overwrite this existing log entry, \n"
-                        "you must set the ``overwrite`` keyword argument to True. \n"
-                        "Otherwise, choose a different ``output_fname``.\n\n"
-                        "Alternatively, you can delete the existing entry from the log.\n"
-                        "The log file is stored in the following location:\n\n"
-                        +cache_fname+"\n\n"
-                        )
-                    msg += "The relevant line to change is line #" + str(linenum) + "\n\n"
-                    raise HalotoolsError(msg)
-
-            else:
-                manipulate_cache_log.remove_unique_fname_from_halo_table_cache_log(
-                    output_fname, raise_warning = False, **kwargs)
-
         return output_fname
-
-    def _check_cache_log_for_matching_catalog(self, **kwargs):
-        """ Private method searches the Halotools cache log to see if there are 
-        any entries with metadata that matches the RockstarHlistReader constructor inputs.  
-        """
-
-        if self._cache_log_exists == True:
-
-            log = manipulate_cache_log.read_halo_table_cache_log(**kwargs)
-            exact_match_mask, close_match_mask = (
-                manipulate_cache_log.search_log_for_possibly_existing_entry(log, 
-                    simname = self.simname, 
-                    halo_finder = self.halo_finder, 
-                    redshift = self.redshift, 
-                    version_name = self.version_name, 
-                    dz_tol = self.dz_tol)
-                )
-            catalogs_with_exactly_matching_metadata = log[exact_match_mask]
-
-            if len(catalogs_with_exactly_matching_metadata) > 0:
-                cache_fname = manipulate_cache_log.get_halo_table_cache_log_fname(**kwargs)
-                matching_fname = catalogs_with_exactly_matching_metadata['fname'][0]
-                idx = np.where(exact_match_mask == True)[0]
-                linenum = idx[0] + 2
-                msg = ("\nHalotools detected one or more entries in your cache log \n"
-                    "with metadata that exactly match your input \n"
-                    "``simname``, ``halo_finder``, ``redshift`` and ``version_name``.\n"
-                    "The first appearance of a matching entry in the log has the following filename:\n\n"
-                    +matching_fname+"\n\n"
-                    "If this log entry is invalid, use a text editor to open the log and delete the entry. \n"
-                    "The cache log is stored in the following location:\n\n"
-                    +cache_fname+"\n\n"
-                    "The relevant line to change is line #" + str(linenum) + ",\n"
-                    "where line #1 is the first line of the file.\n\n"
-                    )
-                raise HalotoolsError(msg)
-
-            catalogs_with_close_redshifts = log[close_match_mask]
-            if len(catalogs_with_close_redshifts) > 0:
-
-                if self.ignore_nearby_redshifts == False:
-
-                    msg = ("\nThere already exists a halo catalog in cache \n"
-                        "with the same metadata as the catalog you are trying to store, \n"
-                        "and a very similar redshift. \nThe closely matching "
-                        "halo catalog has the following filename:\n\n"
-                        +catalogs_with_close_redshifts['fname'][0]+"\n\n"
-                        "If you want to proceed anyway, you must set the \n"
-                        "``ignore_nearby_redshifts`` keyword argument to ``True``.\n"
-                        )
-                    raise HalotoolsError(msg)
 
     def read_and_store_halocat_in_cache(self, **kwargs):
         """ Method reads the ASCII data, stores the result as an hdf5 file 
@@ -426,7 +330,6 @@ class RockstarHlistReader(TabularAsciiReader):
         """
         result = self.read_ascii()
         self.halo_table = Table(result)
-        self._verify_halo_table(self.halo_table)
 
         try:
             overwrite = kwargs['overwrite']
@@ -435,31 +338,6 @@ class RockstarHlistReader(TabularAsciiReader):
         self.halo_table.write(self.output_fname, path='data', overwrite = overwrite)
 
         self._write_metadata()
-
-        self._update_cache_log(**kwargs)
-
-    def _update_cache_log(self, **kwargs):
-
-        new_log_entry = Table(
-            {'simname': [self.simname], 
-            'halo_finder': [self.halo_finder], 
-            'redshift': [self.redshift], 
-            'version_name': [self.version_name], 
-            'fname': [self.output_fname]}
-            )
-
-        if self._cache_log_exists is True:
-            existing_log = manipulate_cache_log.read_halo_table_cache_log(**kwargs)
-            new_log = table_vstack([existing_log, new_log_entry])
-        else:
-            new_log = new_log_entry
-
-        manipulate_cache_log.overwrite_halo_table_cache_log(new_log, **kwargs)
-
-        # If there was already an entry matching all columns of new_log_entry, 
-        # then we just wrote a duplicate entry to the log, 
-        # so now we clean the newly-written log of any possibly-repeated entries:
-        manipulate_cache_log.remove_repeated_cache_lines(**kwargs)
 
 
     def _write_metadata(self):
@@ -503,48 +381,6 @@ class RockstarHlistReader(TabularAsciiReader):
             f.attrs.create(attrname, cut_value)
 
         f.close()
-
-
-    def _verify_halo_table(self, halo_table):
-        """
-        """
-
-        try:
-            halo_id = halo_table['halo_id']
-            halo_x = halo_table['halo_x']
-            halo_y = halo_table['halo_y']
-            halo_z = halo_table['halo_z']
-        except KeyError:
-            msg = ("\nAll halo tables stored in Haltools cache "
-                "must at least have the following columns:\n"
-                "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``\n")
-            raise HalotoolsError(msg)
-
-        # Check that Lbox properly bounds the halo positions
-        try:
-            assert np.all(halo_x >= 0)
-            assert np.all(halo_y >= 0)
-            assert np.all(halo_z >= 0)
-            assert np.all(halo_x <= self.Lbox)
-            assert np.all(halo_y <= self.Lbox)
-            assert np.all(halo_z <= self.Lbox)
-        except AssertionError:
-            msg = ("\nThere are points in the input halo table that "
-                "lie outside [0, Lbox] in some dimension.\n")
-            raise HalotoolsError(msg)
-
-        # Check that halo_id column contains a set of unique entries
-        try:
-            num_halos = len(halo_table)
-            unique_halo_ids = list(set(halo_id))
-            num_unique_ids = len(unique_halo_ids)
-            assert num_halos == num_unique_ids
-        except AssertionError:
-            msg = ("\nThe ``halo_id`` column of your halo table "
-                "must contain a unique integer for every row.\n")
-            raise HalotoolsError(msg)
-
-
 
 
 
