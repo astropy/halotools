@@ -262,15 +262,42 @@ class RockstarHlistReader(TabularAsciiReader):
             redshift = self.redshift, fname = self.output_fname)
 
         if (self.log_entry in self.halo_table_cache.log):
-            msg = ("\nThere is already an existing entry in the Halotools cache log\n"
-                "that exactly matches the filename and metadata of the file you intend to write.\n")
+            msg = ("\nThere is already an existing entry "
+                "in the Halotools cache log\n"
+                "that exactly matches the filename and "
+                "metadata of the file you intend to write.\n")
             if self.overwrite == True:
-                msg += ("Because you have set ``overwrite`` to True, \ncalling the read_and_store_halocat_in_cache "
+                msg += ("Because you have set ``overwrite`` to True, "
+                    "\ncalling the read_and_store_halocat_in_cache "
                     "method will overwrite the existing file and log entry.\n")
                 warn(msg)
             else:
-                msg += ("In order to proceed, you must either set ``overwrite`` to True \n"
+                msg += ("In order to proceed, "
+                    "you must either set ``overwrite`` to True \n"
                     "or manually delete the existing file and log entry.\n")
+        else:
+            if self.ignore_nearby_redshifts == False:
+                pass
+            else:
+                closely_matching_catalogs = list(
+                    self.halo_table_cache.matching_log_entry_generator(
+                        simname = self.simname, 
+                        halo_finder = self.halo_finder, 
+                        version_name = self.version_name, 
+                        redshift = self.redshift, 
+                        fname = self.output_fname, dz_tol = self.dz_tol)
+                        )
+                if len(closely_matching_catalogs) > 0:
+                    msg = ("\The following filenames appear in the cache log \n"
+                        "and exactly matching metadata and closely matching redshifts: \n\n")
+                    for entry in closely_matching_catalogs:
+                        msg += str(entry.fname) + "\n"
+                    msg += ("In order to proceed, you must either set "
+                        "the ``ignore_nearby_redshifts`` to True, \n"
+                        "or choose a different ``version_name`` for your catalog.\n")
+                    raise HalotoolsError(msg)
+
+
 
 
     def _enforce_halo_catalog_formatting_requirements(self):

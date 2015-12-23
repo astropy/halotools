@@ -128,6 +128,8 @@ class HaloTableCache(object):
                 yield entry
 
     def add_entry_to_cache_log(self, log_entry, update_ascii = True):
+        """
+        """
 
         try:
             assert isinstance(log_entry, HaloTableCacheLogEntry)
