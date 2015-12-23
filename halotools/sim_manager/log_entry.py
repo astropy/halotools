@@ -232,7 +232,6 @@ class HaloTableCacheLogEntry(object):
                         ">>> f = h5py.File(fname) \n"
                         ">>> f.attrs[metadata_key] = metadata_value \n"
                         ">>> f.close() \n")
-                        )
                     raise InvalidCacheLogEntry(msg)
             redshift = f.attrs['redshift']
             if type(redshift) not in (str, unicode):
