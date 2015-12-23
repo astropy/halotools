@@ -345,7 +345,7 @@ class TabularAsciiReader(object):
                     "However, ``%s`` exists, so change your input_fname accordingly.")
                 raise IOError(msg % (input_fname, input_fname[:-3]))
 
-        return input_fname
+        return os.path.abspath(input_fname)
 
     def _get_header_char(self, header_char):
         """ Verify that the input header_char is 
