@@ -254,14 +254,25 @@ class RockstarHlistReader(TabularAsciiReader):
         self._check_cache_log_for_matching_catalog()
 
     def _check_cache_log_for_matching_catalog(self):
-        """
+        """ If this method raises no exceptions, 
+        then either there are no conflicting log entries 
+        or self.overwrite is set to True. In either case, 
+        no if there are no exceptions then it is safe to 
+        reduce the catalog, write it to disk, and request that 
+        the cache be updated. 
+
+        Note, though, that this does not guarantee that the 
+        resulting processed catalog will be safe to store in cache, 
+        as the processed catalog will be subject to further testing before 
+        it can be cached (for example, the halo_id column of the processed catalog 
+        must contain a set of unique integers). 
         """
         self.halo_table_cache = HaloTableCache()
         self.log_entry = HaloTableCacheLogEntry(simname = self.simname, 
             halo_finder = self.halo_finder, version_name = self.version_name, 
             redshift = self.redshift, fname = self.output_fname)
 
-        if (self.log_entry in self.halo_table_cache.log):
+        if self.log_entry in self.halo_table_cache.log:
             msg = ("\nThere is already an existing entry "
                 "in the Halotools cache log\n"
                 "that exactly matches the filename and "
@@ -285,6 +296,7 @@ class RockstarHlistReader(TabularAsciiReader):
                     +self.halo_table_cache.cache_log_fname+"\n"
                     )
                 raise HalotoolsError(msg)
+        # there are no exact matches, but there may accidentally be nearby redshifts
         else:
             if self.ignore_nearby_redshifts == False:
                 pass
