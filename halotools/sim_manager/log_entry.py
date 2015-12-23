@@ -133,6 +133,35 @@ class HaloTableCacheLogEntry(object):
             return num_failures == 0
 
     def _verify_metadata_consistency(self, msg, num_failures):
+        """
+        """
+        try:
+            f = h5py.File(self.fname)
+            for key in HaloTableCacheLogEntry.log_attributes:
+                try:
+                    metadata = f.attr[key]
+                    assert metadata == getattr(self, key)
+                except AssertionError:
+                    num_failures += 1
+                    msg += (
+                        str(num_failures)+". The ``"+key+"`` metadata of the hdf5 file = "+str(metadata)+
+                        "does not match the "+str(getattr(self, key))+" value in the log entry.\n\n"
+                        )
+                except KeyError:
+                    pass
+        except:
+            pass
+
+        finally:
+            # The file may or not still be open
+            try:
+                f.close()
+            except:
+                pass
+
+        return msg, num_failures
+
+
         raise NotImplementedError("needs to be written")
     def _verify_all_keys_begin_with_halo(self, msg, num_failures):
         raise NotImplementedError("needs to be written")
