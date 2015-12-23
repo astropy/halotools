@@ -134,7 +134,11 @@ class HaloTableCacheLogEntry(object):
             return num_failures == 0
 
     def _verify_metadata_consistency(self, msg, num_failures):
-        """
+        """ Enforce that the hdf5 metadata agrees with the 
+        values in the log entry. 
+
+        Note that we actually accept floats for the redshift hdf5 metadata, 
+        even though this should technically be a string. 
         """
 
         try:
