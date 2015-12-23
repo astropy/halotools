@@ -49,22 +49,42 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         os.makedirs(self.dummy_cache_baseloc)
 
-        self.simnames = ('bolshoi', 'consuelo', 'bolshoi')
-        self.halo_finders = ('rockstar', 'bdm', 'bdm')
-        self.version_names = ('v1', 'v2', 'v3')
-        self.redshifts = (1.2, -0.1, 0.)
+        self.simnames = ('bolshoi', 'consuelo', 'bolshoi', 'bolshoi')
+        self.halo_finders = ('rockstar', 'bdm', 'bdm', 'rockstar')
+        self.version_names = ('v0', 'v1', 'v2', 'v3')
+        self.redshifts = (1.2, -0.1, 1.339, 1.3)
 
-        self.basenames = ('non_existent.hdf5', 'existent.file', 'existent.hdf5')
+        self.basenames = ('non_existent.hdf5', 'existent.file', 
+            'existent.hdf5', 'existent.hdf5')
         self.fnames = tuple(os.path.join(self.dummy_cache_baseloc, name) 
             for name in self.basenames)
 
         self.table1 = Table({'x': [1, 2, 3]})
+        self.table2 = Table({'halo_x': [1, 2, 3]})
+        
+        self.table3 = Table(
+            {'halo_id': [1, 2, 2], 
+            'halo_x': [-1, 2, 3], 
+            'halo_y': [1, 2, 3], 
+            'halo_z': [1, 2, 3], 
+            'halo_mass': [1, 2, 3], 
+            })
+
+        self.table4 = Table(
+            {'halo_id': [1, 2, 3], 
+            'halo_x': [1, 2, 3], 
+            'halo_y': [1, 2, 3], 
+            'halo_z': [1, 2, 3], 
+            'halo_mass': [1, 2, 3], 
+            })
+
             
 
     def get_scenario_kwargs(self, num_scenario):
         return ({'simname': self.simnames[num_scenario], 'halo_finder': self.halo_finders[num_scenario], 
             'version_name': self.version_names[num_scenario], 'redshift': self.redshifts[num_scenario], 
             'fname': self.fnames[num_scenario]})
+
 
 
     def tearDown(self):

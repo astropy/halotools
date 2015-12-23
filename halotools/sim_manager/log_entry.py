@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import os
 from astropy.table import Table 
+import numpy as np 
 
 from ..custom_exceptions import InvalidCacheLogEntry
 
@@ -230,7 +231,7 @@ class HaloTableCacheLogEntry(object):
                 msg += (str(num_failures)+". The halo table "
                     "must at a minimum have the following columns:\n"
                     "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``,\n"
-                    "plus at least one additional column storing a mass-like variable.\n"
+                    "plus at least one additional column storing a mass-like variable.\n\n"
                     )
         except:
             pass
@@ -238,6 +239,32 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures 
 
     def _verify_all_positions_inside_box(self, msg, num_failures):
+        try:
+            data = Table.read(self.fname, path='data')
+            f = self.h5py.File(self.fname)
+            Lbox = f.attrs['Lbox']
+            f.close()
+            try:
+                halo_x = data['halo_x']
+                halo_y = data['halo_y']
+                halo_z = data['halo_z']
+
+                assert np.all(halo_x >= 0)
+                assert np.all(halo_x <= Lbox)
+                assert np.all(halo_y >= 0)
+                assert np.all(halo_y <= Lbox)
+                assert np.all(halo_z >= 0)
+                assert np.all(halo_z <= Lbox)
+
+            except AssertionError:
+                num_failures += 1
+                msg += (str(num_failures)+". All values of the "
+                    "``halo_x``, ``halo_y``, ``halo_z`` columns\n"
+                    "must be bounded by [0, Lbox].\n\n"
+                    )
+        except:
+            pass
+
         return msg, num_failures 
 
     def _verify_halo_ids_are_unique(self, msg, num_failures):
