@@ -13,7 +13,8 @@ from astropy.table import vstack as table_vstack
 
 from astropy.config.paths import _find_home 
 
-from .. import HaloTableCacheLogEntry
+from . import helper_functions
+from ..log_entry import HaloTableCacheLogEntry
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
@@ -52,7 +53,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         self.fnames = ('abc.hdf5', 'def.hdf5')
 
     def get_scenario_kwargs(self, num_scenario):
-        return ({'simname': self.simnames[num_scenario], 'halo_finders': self.halo_finders[num_scenario], 
+        return ({'simname': self.simnames[num_scenario], 'halo_finder': self.halo_finders[num_scenario], 
             'version_name': self.version_names[num_scenario], 'redshift': self.redshifts[num_scenario], 
             'fname': self.fnames[num_scenario]})
 
@@ -60,7 +61,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         """ We can instantiate the log entry with a complete set of metadata
         """
         for i in range(len(self.simnames)):
-            constructor_kwargs = self.get_scenario_kwargs[i]
+            constructor_kwargs = self.get_scenario_kwargs(i)
             log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
 
 
