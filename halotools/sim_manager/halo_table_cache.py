@@ -2,10 +2,10 @@ import os
 from copy import copy
 from astropy.config.paths import _find_home
 from astropy.table import Table
-from log_entry import HaloTableCacheLogEntry
 from warnings import warn
 
-from custom_exceptions import InvalidCacheLogEntry
+from .log_entry import HaloTableCacheLogEntry
+from ..custom_exceptions import InvalidCacheLogEntry
 
 __all__ = ('HaloTableCache', )
 

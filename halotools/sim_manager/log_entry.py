@@ -2,7 +2,7 @@ from collections import OrderedDict
 import os
 import h5py
 
-from custom_excptions import InvalidCacheLogEntry
+from ..custom_exceptions import InvalidCacheLogEntry
 
 __all__ = ('HaloTableCacheLogEntry', )
 

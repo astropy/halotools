@@ -15,6 +15,11 @@ class HalotoolsError(Exception):
 	def __init__(self, message):
 		super(HalotoolsError, self).__init__(message)
 
+class InvalidCacheLogEntry(Exception):
+	""" Base class of all Halotools-specific exceptions. 
+	"""
+	def __init__(self, message):
+		super(HalotoolsError, self).__init__(message)
 
 
 ########################################
