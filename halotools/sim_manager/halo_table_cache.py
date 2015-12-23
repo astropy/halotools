@@ -5,11 +5,13 @@ from astropy.table import Table
 from warnings import warn
 
 from .log_entry import HaloTableCacheLogEntry
-from ..custom_exceptions import InvalidCacheLogEntry
+from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 
 __all__ = ('HaloTableCache', )
 
 class HaloTableCache(object):
+    """ Object providing a collection of halo catalogs for use with Halotools. 
+    """ 
 
     def __init__(self, **kwargs):
         self._standard_log_dirname = os.path.join(_find_home(), 
@@ -149,6 +151,64 @@ class HaloTableCache(object):
                 msg = ("The log has been updated in memory "
                     "but not on disk because \nthe update_ascii argument is set to False")
                 print(msg)
+
+    def remove_entry_from_cache_log(self, simname, halo_finder, version_name, redshift, fname, 
+        raise_non_existence_exception = True):
+        """
+        If the log stores an entry matching the input metadata, the entry will be deleted and 
+        the ascii file storing the log will be updated. If there is no match, 
+        an exception will be raised according to the value of the input 
+        ``raise_non_existence_exception``.  
+
+        Parameters 
+        -----------
+        simname : string 
+            Nickname of the simulation used as a shorthand way to keep track 
+            of the halo catalogs in your cache. The simnames processed by Halotools are 
+            'bolshoi', 'bolplanck', 'consuelo' and 'multidark'. 
+
+        halo_finder : string 
+            Nickname of the halo-finder, e.g., 'rockstar' or 'bdm'. 
+
+        version_name : string 
+            Nickname of the version of the halo catalog used to differentiate 
+            between the same halo catalog processed in different ways. 
+
+        redshift : string or float  
+            Redshift of the halo catalog, rounded to 4 decimal places. 
+
+        fname : string 
+            Name of the hdf5 file storing the table of halos. 
+
+        raise_non_existence_exception : bool, optional 
+            If True, an exception will be raised if this function is called 
+            and there is no matching entry in the log. Default is True. 
+        """
+        log_entry = HaloTableCacheLogEntry(simname = simname, 
+            halo_finder = halo_finder, version_name = version_name, 
+            redshift = redshift, fname = fname)
+
+        try:
+            self.log.remove(log_entry)
+            self._overwrite_log_ascii(self.log)
+            msg = ("The log has been updated on disk and in memory")
+            print(msg)
+        except ValueError:
+            if raise_non_existence_exception == False:
+                pass
+            else:
+                msg = ("\nYou requested that the following entry "
+                    "be removed from the cache log:\n\n")
+                msg += "simname = ``" + str(simname) + "``\n"
+                msg += "halo_finder = ``" + str(halo_finder) + "``\n"
+                msg += "version_name = ``" + str(version_name) + "``\n"
+                msg += "redshift = ``" + str(redshift) + "``\n"
+                msg += "fname = ``" + str(fname) + "``\n\n"
+                msg += ("This entry does not appear in the log.\n"
+                    "If you want to *passively* remove a log entry, \n"
+                    "you must call this method again setting "
+                    "`raise_non_existence_exception` to False.\n")
+                raise HalotoolsError(msg)
 
 
 
