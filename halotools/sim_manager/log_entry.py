@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import os
+from astropy.table import Table 
 
 from ..custom_exceptions import InvalidCacheLogEntry
 
@@ -85,13 +86,15 @@ class HaloTableCacheLogEntry(object):
     def safe_for_cache(self):
         """ This will do all the following checks:
 
-        1. File exists 
+        1. File exists (check)
 
-        2. File has .hdf5 extension
+        2. File has .hdf5 extension (check)
 
-        2. Metadata of hdf5 file is complete 
+        2. Metadata of hdf5 file is complete  (check)
 
-        3. Metadata of hdf5 file is consistent with HaloTableCacheLogEntry attributes
+        3. Metadata of hdf5 file is consistent with HaloTableCacheLogEntry attributes (check)
+
+        4. Halo table can be read in with astropy.Table.read
 
         4. Keys all begin with 'halo_'
 
@@ -119,6 +122,7 @@ class HaloTableCacheLogEntry(object):
             verification_sequence = ('_verify_h5py_extension', 
                 '_verify_hdf5_has_complete_metadata', 
                 '_verify_metadata_consistency', 
+                '_verify_table_read', 
                 '_verify_all_keys_begin_with_halo', 
                 '_verify_all_positions_inside_box', 
                 '_verify_halo_ids_are_unique', 
@@ -132,6 +136,20 @@ class HaloTableCacheLogEntry(object):
                 
             self._num_failures = num_failures
             return num_failures == 0
+
+    def _verify_table_read(self, msg, num_failures):
+        """ Enforce that the data can be read using the usual Astropy syntax
+        """
+        try:
+            data = Table.read(self.fname, path='data')
+        except:
+            num_failures += 1
+            msg += (str(num_failures)+". The hdf5 file must be readable with "
+                "Astropy \nusing the following syntax:\n\n"
+                ">>> halo_data = Table.read(fname, path='data')\n\n")
+            pass
+        return msg, num_failures
+
 
     def _verify_metadata_consistency(self, msg, num_failures):
         """ Enforce that the hdf5 metadata agrees with the 
