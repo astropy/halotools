@@ -399,21 +399,57 @@ class RockstarHlistReader(TabularAsciiReader):
 
         return output_fname
 
-    def read_and_store_halocat_in_cache(self, **kwargs):
-        """ Method reads the ASCII data, stores the result as an hdf5 file 
-        in the Halotools cache, and updates the log. 
+    def read_halocat(self, write_to_disk = False, update_cache_log = False):
+        """ Method reads the ascii data and  
+        binds the resulting catalog to ``self.halo_table``.
+
+        Parameters 
+        -----------
+        write_to_disk : bool, optional 
+            If True, the `write_to_disk` method will be called automatically. 
+            Default is False, in which case you must call the `write_to_disk` 
+            method yourself to store the processed catalog. 
+
+        update_cache_log : bool, optional 
+            If True, the `update_cache_log` method will be called automatically. 
+            Default is False, in which case you must call the `update_cache_log` 
+            method yourself to add the the processed catalog to the cache. 
         """
         result = self.read_ascii()
         self.halo_table = Table(result)
 
-        try:
-            overwrite = kwargs['overwrite']
-        except KeyError:
-            overwrite = self.overwrite
-        self.halo_table.write(self.output_fname, path='data', overwrite = overwrite)
+        if write_to_disk is True: 
+            self.write_to_disk()
+            self._file_has_been_written_to_disk = True
+        else:
+            self._file_has_been_written_to_disk = False
 
+        if update_cache_log == True:
+            if self._file_has_been_written_to_disk == True: 
+                self.update_cache_log()
+            else:
+                msg = ("\nYou set update_cache_log to True but the \n"
+                    "newly processed halo_table has not yet been written to disk.\n")
+                if write_to_disk == False:
+                    msg += ("This is because you set write_to_disk to False, \n"
+                        "in which case the read_halocat method "
+                        "will not automatically update the cache.\n")
+                    warn(msg)
+                else:
+                    msg += ("This indicates that there was a problem "
+                        "writing the halo_table to disk.\n"
+                        "After you resolve the problem, you can manually call \n"
+                        "the write_to_disk and update_cache_log methods.\n")
+                    raise HalotoolsError(msg)
+
+    def write_to_disk(self):
+        """ Method writes ``self.halo_table`` to ``self.output_fname`` 
+        and also calls the ``self._write_metadata`` method to place the 
+        hdf5 file into standard form. 
+        """
+        self.halo_table.write(
+            self.output_fname, path='data', overwrite = self.overwrite)
         self._write_metadata()
-
 
     def _write_metadata(self):
         """ Private method to add metadata to the hdf5 file. 
@@ -458,7 +494,12 @@ class RockstarHlistReader(TabularAsciiReader):
         f.close()
 
 
-
+    def update_cache_log(self):
+        """ Method updates the cache log with the new catalog, 
+        provided that it is safe to add to the cache. 
+        """
+        self.halo_table_cache.add_entry_to_cache_log(
+            self.log_entry, update_ascii = True)
 
 
 
