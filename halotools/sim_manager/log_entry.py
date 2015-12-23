@@ -144,7 +144,11 @@ class HaloTableCacheLogEntry(object):
                 try:
 
                     metadata = f.attrs[key]
-                    assert metadata == getattr(self, key)
+                    if key != 'redshift':
+                        assert metadata == getattr(self, key)
+                    else:
+                        metadata = float(get_redshift_string(metadata))
+                        assert metadata == float(getattr(self, key))
 
                 except AssertionError:
 

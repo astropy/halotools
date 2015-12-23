@@ -52,7 +52,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         self.simnames = ('bolshoi', 'consuelo', 'bolshoi')
         self.halo_finders = ('rockstar', 'bdm', 'bdm')
         self.version_names = ('v1', 'v2', 'v3')
-        self.redshifts = (1.2, -0.1, 0.)
+        self.redshifts = (1.2, -0.1, 1.339)
 
         self.basenames = ('non_existent.hdf5', 'existent.file', 'existent.hdf5')
         self.fnames = tuple(os.path.join(self.dummy_cache_baseloc, name) 
@@ -165,7 +165,10 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "does not match" in log_entry._cache_safety_message
 
-
+        f = self.h5py.File(self.fnames[num_scenario])
+        f.attrs['redshift'] = 1.3390001
+        f.close()
+        assert log_entry.safe_for_cache == True, log_entry._cache_safety_message
 
     def tearDown(self):
         try:
