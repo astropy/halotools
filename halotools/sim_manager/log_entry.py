@@ -124,6 +124,7 @@ class HaloTableCacheLogEntry(object):
                 '_verify_metadata_consistency', 
                 '_verify_table_read', 
                 '_verify_all_keys_begin_with_halo', 
+                '_verify_has_required_data_columns', 
                 '_verify_all_positions_inside_box', 
                 '_verify_halo_ids_are_unique', 
                 '_verify_exists_some_mass_like_variable')
@@ -209,6 +210,28 @@ class HaloTableCacheLogEntry(object):
                     msg += (str(num_failures)+". The column names "
                         "of all data in the halo catalog\n"
                         "must begin with the following five characters: `halo_`.\n\n")
+        except:
+            pass
+
+        return msg, num_failures 
+
+    def _verify_has_required_data_columns(self, msg, num_failures):
+        try:
+            data = Table.read(self.fname, path='data')
+            keys = data.keys()
+            try:
+                assert 'halo_x' in keys
+                assert 'halo_y' in keys
+                assert 'halo_z' in keys
+                assert 'halo_id' in keys
+                assert len(keys) >= 5
+            except AssertionError:
+                num_failures += 1
+                msg += (str(num_failures)+". The halo table "
+                    "must at a minimum have the following columns:\n"
+                    "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``,\n"
+                    "plus at least one additional column storing a mass-like variable.\n"
+                    )
         except:
             pass
 
