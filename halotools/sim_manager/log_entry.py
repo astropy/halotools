@@ -199,6 +199,19 @@ class HaloTableCacheLogEntry(object):
 
 
     def _verify_all_keys_begin_with_halo(self, msg, num_failures):
+        try:
+            data = Table.read(self.fname, path='data')
+            for key in data.keys():
+                try:
+                    assert key[0:5] == 'halo_'
+                except AssertionError:
+                    num_failures += 1
+                    msg += (str(num_failures)+". The column names "
+                        "of all data in the halo catalog\n"
+                        "must begin with the following five characters: `halo_`.\n\n")
+        except:
+            pass
+
         return msg, num_failures 
 
     def _verify_all_positions_inside_box(self, msg, num_failures):
