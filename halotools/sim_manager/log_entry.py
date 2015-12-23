@@ -137,7 +137,7 @@ class HaloTableCacheLogEntry(object):
         """
         """
         try:
-            f = h5py.File(self.fname)
+            f = self.h5py.File(self.fname)
             for key in HaloTableCacheLogEntry.log_attributes:
                 try:
                     metadata = f.attr[key]
@@ -196,25 +196,27 @@ class HaloTableCacheLogEntry(object):
     def _verify_hdf5_has_complete_metadata(self, msg, num_failures):
 
         try:
-            f = h5py.File(self.fname)
+            f = self.h5py.File(self.fname)
+            print("made it this far")
             required_set = set(HaloTableCacheLogEntry.required_metadata)
             actual_set = set(f.attrs.keys())
+
 
             if required_set.issubset(actual_set):
                 pass
             else:
                 missing_metadata = required_set - actual_set
                 num_failures += 1
-                msg += (str(num_failures) + ". The hdf5 file is missing "
-                    "the following metadata:\n")
+                msg += (str(num_failures) + 
+                    ". The hdf5 file is missing the following metadata:\n")
                 for elt in missing_metadata:
                     msg += "``"+elt + "``\n"
                 msg += "\n"
 
         except:
             num_failures += 1
-            msg += (str(num_failures) + ". Attempting to access the hdf5 metadata "
-                "raised an exception.\n\n")
+            msg += (str(num_failures) + 
+                ". Attempting to access the hdf5 metadata raised an exception.\n\n")
             pass
 
         finally:
@@ -237,7 +239,7 @@ class HaloTableCacheLogEntry(object):
             raise IOError(msg)
 
         try:
-            f = h5py.File(fname)
+            f = self.h5py.File(fname)
             required_set = set(HaloTableCacheLogEntry.required_metadata)
             actual_set = set(f.attrs.keys())
             assert required_set.issubset(actual_set)
@@ -252,7 +254,7 @@ class HaloTableCacheLogEntry(object):
             f.close()
 
         try:
-            f = h5py.File(fname)
+            f = self.h5py.File(fname)
             required_set = set(HaloTableCacheLogEntry.required_metadata)
             for metadata_key in required_metadata - {'redshift'}:
                 metadata = f.attrs[metadata_key]
@@ -281,7 +283,7 @@ class HaloTableCacheLogEntry(object):
         finally:
             f.close()
 
-        f = h5py.File(fname)
+        f = self.h5py.File(fname)
         constructor_kwargs = ({key: f.attrs[key] 
             for key in HaloTableCacheLogEntry.required_metadata})
         log_entry = HaloTableCacheLogEntry(**constructor_kwargs)

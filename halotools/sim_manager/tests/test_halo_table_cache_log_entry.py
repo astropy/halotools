@@ -48,14 +48,16 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         os.makedirs(self.dummy_cache_baseloc)
 
-        self.simnames = ('bolshoi', 'consuelo')
-        self.halo_finders = ('rockstar', 'bdm')
-        self.version_names = ('testing_version1', 'testing_version2')
-        self.redshifts = (1.2, -0.1)
+        self.simnames = ('bolshoi', 'consuelo', 'bolshoi')
+        self.halo_finders = ('rockstar', 'bdm', 'bdm')
+        self.version_names = ('v1', 'v2', 'v3')
+        self.redshifts = (1.2, -0.1, 0.)
 
-        self.basenames = ('non_existent.hdf5', 'existent.file')
+        self.basenames = ('non_existent.hdf5', 'existent.file', 'existent.hdf5')
         self.fnames = tuple(os.path.join(self.dummy_cache_baseloc, name) 
             for name in self.basenames)
+
+        self.table1 = Table({'x': [1, 2, 3]})
             
 
     def get_scenario_kwargs(self, num_scenario):
@@ -73,20 +75,46 @@ class TestHaloTableCacheLogEntry(TestCase):
             assert set(log_entry.log_attributes) == set(hard_coded_attrs)
 
     def test_scenario0(self):
-        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(0))
+        num_scenario = 0
+        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
         assert log_entry.safe_for_cache == False
         assert "The input filename does not exist." in log_entry._cache_safety_message
 
     def test_scenario1(self):
+        num_scenario = 1
 
-        with open(self.fnames[1], 'w') as f:
+        with open(self.fnames[num_scenario], 'w') as f:
             f.write('abc')
-        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(1))
+        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
         assert log_entry.safe_for_cache == False
         assert "The input filename does not exist." not in log_entry._cache_safety_message
         assert "The input file must have '.hdf5' extension" in log_entry._cache_safety_message
 
+    def test_scenario2(self):
+        num_scenario = 2
 
+        with open(self.fnames[num_scenario], 'w') as f:
+            f.write('abc')
+        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+        assert log_entry.safe_for_cache == False
+        assert "The input filename does not exist." not in log_entry._cache_safety_message
+        assert "The input file must have '.hdf5' extension" not in log_entry._cache_safety_message
+        assert "access the hdf5 metadata raised an exception." in log_entry._cache_safety_message
+
+    def test_scenario2a(self):
+        num_scenario = 2
+
+        os.system('rm '+self.fnames[num_scenario])
+        self.table1.write(self.fnames[num_scenario], path='data')
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        k = f.attrs.keys()
+        f.close()
+
+        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+        assert log_entry.safe_for_cache == False
+        assert "access the hdf5 metadata raised an exception." not in log_entry._cache_safety_message
+        assert "missing the following metadata" in log_entry._cache_safety_message
 
     def tearDown(self):
         try:
