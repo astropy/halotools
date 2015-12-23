@@ -125,7 +125,8 @@ class HaloTableCacheLogEntry(object):
                 '_verify_exists_some_mass_like_variable')
 
             for verification_function in verification_sequence:
-                msg, num_failures = getattr(self, verification_function)(msg, num_failures)
+                func = getattr(self, verification_function)
+                msg, num_failures = func(msg, num_failures)
             
             if num_failures > 0: self._cache_safety_message = message_preamble + msg
                 
@@ -162,15 +163,17 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures
 
 
-        raise NotImplementedError("needs to be written")
     def _verify_all_keys_begin_with_halo(self, msg, num_failures):
-        raise NotImplementedError("needs to be written")
+        return msg, num_failures 
+
     def _verify_all_positions_inside_box(self, msg, num_failures):
-        raise NotImplementedError("needs to be written")
+        return msg, num_failures 
+
     def _verify_halo_ids_are_unique(self, msg, num_failures):
-        raise NotImplementedError("needs to be written")
+        return msg, num_failures 
+
     def _verify_exists_some_mass_like_variable(self, msg, num_failures):
-        raise NotImplementedError("needs to be written")
+        return msg, num_failures 
 
     def _verify_file_exists(self, msg, num_failures):
 
@@ -187,7 +190,7 @@ class HaloTableCacheLogEntry(object):
             pass
         else:
             num_failures += 1
-            msg += str(num_failures) + ". The input file have '.hdf5' extension.\n\n"
+            msg += str(num_failures) + ". The input file must have '.hdf5' extension.\n\n"
         return msg, num_failures
 
     def _verify_hdf5_has_complete_metadata(self, msg, num_failures):
