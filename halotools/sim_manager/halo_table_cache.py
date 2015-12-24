@@ -216,6 +216,59 @@ class HaloTableCache(object):
                 raise HalotoolsError(msg)
 
 
+    def determine_log_entry_from_fname(self, fname):
+        """ Method tries to construct a `~halotools.sim_manager.HaloTableCacheLogEntry` 
+        using the metadata that may be stored in the input file. An exception will be raised 
+        if the determination is not possible. 
+
+        Parameters 
+        -----------
+        fname : string 
+            Name of the file 
+
+        Returns 
+        ---------
+        log_entry : `~halotools.sim_manager.HaloTableCacheLogEntry` instance 
+        """
+        try:
+            import h5py
+        except ImportError:
+            raise HalotoolsError("Must have h5py package installed "
+                "to use the determine_log_entry_from_fname method. ")
+
+        if not os.path.isfile(fname):
+            msg = ("File does not exist")
+            raise IOError(msg)
+
+        if fname[-5:] != '.hdf5':
+            msg = ("Can only self-determine the log entry of files with .hdf5 extension")
+            raise IOError(msg)
+
+        try:
+            f = h5py.File(fname)
+            required_set = set(HaloTableCacheLogEntry.required_metadata)
+            actual_set = set(f.attrs.keys())
+            assert required_set.issubset(actual_set)
+        except AssertionError:
+            missing_metadata = required_set - actual_set
+            msg = ("The hdf5 file is missing the following metadata:\n")
+            for elt in missing_metadata:
+                msg += "``"+elt + "``\n"
+            msg += "\n"
+            raise InvalidCacheLogEntry(msg)
+        finally:
+            try:
+                f.close()
+            except:
+                pass
+
+        f = h5py.File(fname)
+        constructor_kwargs = ({key: f.attrs[key] 
+            for key in HaloTableCacheLogEntry.log_attributes})
+        log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
+        f.close()
+        return log_entry
+
 
 
 
