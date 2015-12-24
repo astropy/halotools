@@ -5,15 +5,11 @@ from halotools.sim_manager import RockstarHlistReader, OverhauledHaloCatalog
 from halotools.sim_manager import TabularAsciiReader
 from halotools.sim_manager import manipulate_cache_log
 from astropy.table import Table 
-
+import os
 from halotools.sim_manager.read_rockstar_hlists import _infer_redshift_from_input_fname
 
-# input_fname = '/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolshoi/rockstar/hlist_0.07835.list'
-input_fname = '/Volumes/NbodyDisk1/July19_new_catalogs/raw_halo_catalogs/bolshoi/rockstar/hlist_0.33035.list'
-
-
-output_fname = 'std_cache_loc'
-version_name = 'halotools_alpha_version1'
+num_ptcl_cut = 300.
+processing_notes = 'Catalog only contains (sub)halos with present-day virial mass greater than 300 particles'
 
 bolshoi_columns_to_keep_dict = ({
     'halo_scale_factor': (0, 'f4'), 
@@ -65,35 +61,40 @@ bolshoi_columns_to_keep_dict = ({
     'halo_vmax_mpeak': (72, 'f4')
     })
 
-simname = 'bolshoi'
-halo_finder = 'rockstar'
-redshift = _infer_redshift_from_input_fname(input_fname)
-Lbox = 250.
-num_ptcl_cut = 300.
-particle_mass = 1.35e8
-row_cut_min_dict = {'halo_mvir': num_ptcl_cut*particle_mass}
-processing_notes = 'Catalog only contains (sub)halos with present-day virial mass greater than 300 particles'
+def process_catalog(simname, halo_finder, fname, particle_mass, Lbox, columns_to_keep_dict):
 
-reader = RockstarHlistReader(input_fname = input_fname, 
-    columns_to_keep_dict=bolshoi_columns_to_keep_dict, 
-    output_fname=output_fname, 
-    simname=simname, 
-    halo_finder=halo_finder, 
-    redshift=redshift, 
-    version_name=version_name, 
-    Lbox=Lbox, 
-    particle_mass=particle_mass, 
-    row_cut_min_dict = row_cut_min_dict, 
-    processing_notes = processing_notes, 
-    overwrite=True)
+    redshift = _infer_redshift_from_input_fname(fname)
+    row_cut_min_dict = {'halo_mvir': num_ptcl_cut*particle_mass}
 
-# print("\n\n\n\nRUNNING THE READER METHOD\n\n\n")
-# reader.read_and_store_halocat_in_cache()
+    print("\n...working on redshift = " + str(redshift) + "...\n")
+    reader = RockstarHlistReader(input_fname = fname, 
+        columns_to_keep_dict=columns_to_keep_dict, 
+        output_fname='std_cache_loc', 
+        simname=simname, 
+        halo_finder=halo_finder, 
+        redshift=redshift, 
+        version_name='halotools_alpha_version1', 
+        Lbox=Lbox, 
+        particle_mass=particle_mass, 
+        row_cut_min_dict = row_cut_min_dict, 
+        processing_notes = processing_notes, 
+        overwrite=True)
+
+    reader.read_halocat(write_to_disk = True, update_cache_log = True)
+    del reader
 
 
 
+#### BOLSHOI #####
+bolshoi_Lbox = 250.
+bolshoi_particle_mass = 1.35e8
+dirname = '/Volumes/NbodyDisk1/July19_new_catalogs/raw_halo_catalogs/bolshoi/rockstar'
+basename_list = ('hlist_0.54435.list', 'hlist_0.67035.list', 'hlist_1.00035.list')
+fname_generator = (os.path.join(dirname, basename) for basename in basename_list)
 
-
+for fname in fname_generator:
+    process_catalog('bolshoi', 'rockstar', fname, 
+        bolshoi_particle_mass, bolshoi_Lbox, bolshoi_columns_to_keep_dict)
 
 
 
