@@ -15,3 +15,4 @@ from .user_defined_halo_catalog import UserDefinedHaloCatalog
 from .manipulate_cache_log import *
 from .read_rockstar_hlists import RockstarHlistReader
 from .tabular_ascii_reader import TabularAsciiReader
+from .halo_table_cache import HaloTableCache

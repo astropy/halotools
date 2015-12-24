@@ -17,7 +17,7 @@ except ImportError:
 from . import sim_defaults, catalog_manager, manipulate_cache_log
 
 from .halo_table_cache import HaloTableCache
-from .log_entry import HaloTableCacheLogEntry
+from .log_entry import HaloTableCacheLogEntry, get_redshift_string
 
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
@@ -50,7 +50,7 @@ class OverhauledHaloCatalog(object):
 
         self._bind_metadata()
 
-    def _retrieve_matching_halo_catalogs(self, **kwargs):
+    def _retrieve_matching_log_entries(self, **kwargs):
         """
         """
         log_attributes_set = set(HaloTableCacheLogEntry.log_attributes)
@@ -99,7 +99,7 @@ class OverhauledHaloCatalog(object):
         f = h5py.File(self.fname_halo_table)
         for attr_key in f.attrs.keys():
             if attr_key == 'redshift':
-                setattr(self, attr_key, float(f.attrs[attr_key]))
+                setattr(self, attr_key, float(get_redshift_string(f.attrs[attr_key])))
             else:
                 setattr(self, attr_key, f.attrs[attr_key])
         f.close()

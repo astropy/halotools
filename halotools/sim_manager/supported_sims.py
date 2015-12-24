@@ -395,7 +395,10 @@ class HaloCatalog(object):
         if f.attrs['halo_finder'] != self.halo_finder:
             raise HalotoolsIOError(msg % ('halo_finder', 'halo_finder'))
 
-        self.cuts_description = f.attrs['cuts_description']
+        try:
+            self.cuts_description = f.attrs['cuts_description']
+        except:
+            self.cuts_description = ' '
 
         f.close()
 
