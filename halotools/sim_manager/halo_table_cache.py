@@ -105,6 +105,8 @@ class HaloTableCache(object):
                 'fname': np.zeros(num_entries, dtype=object)})
 
     def matching_log_entry_generator(self, dz_tol = 0.0, **kwargs):
+        """
+        """
 
         try:
             assert set(kwargs.keys()).issubset(set(HaloTableCacheLogEntry.log_attributes))

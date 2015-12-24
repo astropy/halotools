@@ -10,10 +10,14 @@ from astropy.table import Table
 try:
     import h5py
 except ImportError:
-    warn("Most of the functionality of the sim_manager sub-package requires h5py to be installed,\n"
-        "which can be accomplished either with pip or conda")
+    warn("Most of the functionality of the "
+        "sim_manager sub-package requires h5py to be installed,\n"
+        "which can be accomplished either with pip or conda. ")
 
 from . import sim_defaults, catalog_manager, manipulate_cache_log
+
+from .halo_table_cache import HaloTableCache
+from .log_entry import HaloTableCacheLogEntry
 
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
@@ -37,12 +41,27 @@ class OverhauledHaloCatalog(object):
             raise HalotoolsError("Must have h5py package installed "
                 "to use OverhauledHaloCatalog objects")
 
+        self.halo_table_cache = HaloTableCache()
+
         self.fname_halo_table = self._retrieve_fname_halo_table(**kwargs)
 
         if preload_halo_table is True:
             self._load_halo_table()
 
         self._bind_metadata()
+
+    def _retrieve_matching_halo_catalogs(self, **kwargs):
+        """
+        """
+        log_attributes_set = set(HaloTableCacheLogEntry.log_attributes)
+        input_key_set = set(kwargs)
+        relevant_keys = log_attributes_set & input_key_set
+
+        relevant_kwargs = {key: kwargs[key] for key in relevant_keys}
+
+        return list(
+            self.halo_table_cache.matching_log_entry_generator(**relevant_kwargs))
+
 
     def _retrieve_fname_halo_table(self, **kwargs):
         """
