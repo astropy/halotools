@@ -6,7 +6,12 @@ from halotools.sim_manager import TabularAsciiReader
 from halotools.sim_manager import manipulate_cache_log
 from astropy.table import Table 
 
-input_fname = '/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolshoi/rockstar/hlist_0.07835.list'
+from halotools.sim_manager.read_rockstar_hlists import _infer_redshift_from_input_fname
+
+# input_fname = '/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolshoi/rockstar/hlist_0.07835.list'
+input_fname = '/Volumes/NbodyDisk1/July19_new_catalogs/raw_halo_catalogs/bolshoi/rockstar/hlist_0.33035.list'
+
+
 output_fname = 'std_cache_loc'
 version_name = 'halotools_alpha_version1'
 
@@ -62,7 +67,7 @@ bolshoi_columns_to_keep_dict = ({
 
 simname = 'bolshoi'
 halo_finder = 'rockstar'
-redshift = (1./0.07835) - 1.
+redshift = _infer_redshift_from_input_fname(input_fname)
 Lbox = 250.
 num_ptcl_cut = 300.
 particle_mass = 1.35e8
