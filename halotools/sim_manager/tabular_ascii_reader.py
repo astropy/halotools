@@ -546,6 +546,7 @@ class TabularAsciiReader(object):
                 _s = f.readline()
 
             for _i in xrange(num_full_chunks):
+                print("... working on chunk "+str(_i)+" of "+str(num_full_chunks))
 
                 chunk_array = np.array(list(
                     self.data_chunk_generator(num_rows_in_chunk, f)), dtype=self.dt)
