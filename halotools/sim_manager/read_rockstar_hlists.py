@@ -22,9 +22,42 @@ import datetime
 from .tabular_ascii_reader import TabularAsciiReader
 from . import manipulate_cache_log 
 from .halo_table_cache import HaloTableCache
-from .log_entry import HaloTableCacheLogEntry
+from .log_entry import HaloTableCacheLogEntry, get_redshift_string
 
 from ..custom_exceptions import HalotoolsError
+
+def _infer_redshift_from_input_fname(fname):
+    """ Method extracts the portion of the Rockstar hlist fname
+    that contains the scale factor of the snapshot, and returns a 
+    float for the redshift inferred from this substring. 
+
+    Parameters 
+    ----------
+    fname : string 
+        Name of the Rockstar hlist file 
+
+    Returns
+    -------
+    rounded_redshift : float
+        Redshift of the catalog, rounded to four decimals. 
+
+    Notes
+    -----
+    Assumes that the first character of the relevant substring
+    is the one immediately following the first incidence of an underscore,
+    and final character is the one immediately preceding the second decimal.
+    These assumptions are valid for all catalogs currently on the hipacc website.
+
+    """
+    fname = os.path.basename(fname)
+    first_index = fname.index('_')+1
+    last_index = fname.index('.', fname.index('.')+1)
+    scale_factor_substring = fname[first_index:last_index]
+    scale_factor = float(scale_factor_substring)
+    redshift = (1./scale_factor) - 1
+    rounded_redshift = float(get_redshift_string(redshift))
+    return rounded_redshift
+
 
 class RockstarHlistReader(TabularAsciiReader):
     """ The `RockstarHlistReader` reads Rockstar hlist ASCII files, 
@@ -252,6 +285,15 @@ class RockstarHlistReader(TabularAsciiReader):
             )
 
         self._check_cache_log_for_matching_catalog()
+
+        msg = ("\n\nThe information about your ascii file "
+            "and the metadata about the catalog \n"
+            "have been processed and no exceptions were raised. \n"
+            "Use the ``read_halocat`` method to read the ascii data, \n"
+            "setting the write_to_disk and update_cache_log arguments as you like. \n"
+            "See the docstring of the ``read_halocat`` method\n"
+            "for details about these options. \n")
+        print(msg)
 
     def _check_cache_log_for_matching_catalog(self):
         """ If this method raises no exceptions, 
@@ -516,6 +558,7 @@ class RockstarHlistReader(TabularAsciiReader):
         self.halo_table['halo_hostid'][subhalo_mask] = (
             self.halo_table['halo_upid'][subhalo_mask]
             )
+
 
 
 
