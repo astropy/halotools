@@ -44,8 +44,7 @@ class UnsupportedSimError(HalotoolsCacheError):
 	"""
 	def __init__(self, simname):
 
-		message = ("\nThe input simname " + simname + " is not recognized by Halotools.\n"
-			"See the supported_sim_list defined at the top of halotools.sim_manager.cache_config\n")
+		message = ("\nThe input simname " + simname + " is not recognized by Halotools.\n")
 
 		super(UnsupportedSimError, self).__init__(message)
 
