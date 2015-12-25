@@ -42,7 +42,7 @@ except ImportError:
     warn("Most of the functionality of the catalog_manager module requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda")
 
-from . import cache_config, sim_defaults
+from . import sim_defaults
 
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import custom_len, convert_to_ndarray
@@ -612,7 +612,7 @@ class DownloadManager(object):
             print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
             return
 
-        cache_dirname = cache_config.get_catalogs_dir(catalog_type='particles', **kwargs)
+        cache_dirname = os.path.join(_find_home, 'cache', 'halotools', 'particle_catalogs')
         output_fname = os.path.join(cache_dirname, os.path.basename(url))
 
         if overwrite == False:
