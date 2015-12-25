@@ -85,6 +85,14 @@ class OverhauledHaloCatalog(object):
         """
         """
         halo_table_cache = HaloTableCache()
+        if len(halo_table_cache.log) == 0:
+            msg = ("\nThe Halotools cache log is empty.\n"
+                "If you have never used Haltools before, "
+                "you should read the Getting Started guide on halotools.readthedocs.org.\n"
+                "If you have previously used the package before, \n"
+                "try running the halotools/scripts/rebuild_halo_table_cache_log.py script.\n")
+            raise HalotoolsError(msg)
+
 
         gen0 = halo_table_cache.matching_log_entry_generator(
             simname = self.simname, halo_finder = self.halo_finder, 

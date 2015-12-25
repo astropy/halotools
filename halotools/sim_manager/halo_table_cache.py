@@ -49,6 +49,10 @@ class HaloTableCache(object):
         return cleaned_log
         
     def retrieve_log_from_ascii(self):
+        """ Read '$HOME/.astropy/cache/halotools/halo_table_cache_log.txt', 
+        clean the log of any repeated entries, sort the log, and return the resulting 
+        list of `~halotools.sim_manager.HaloTableCacheLogEntry` instances. 
+        """
         
         log_table = self._read_log_table_from_ascii()
         log_inferred_from_ascii = self._log_from_log_table(log_table)
