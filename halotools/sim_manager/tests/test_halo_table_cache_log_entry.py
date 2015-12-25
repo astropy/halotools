@@ -311,7 +311,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.close()
 
         assert log_entry.safe_for_cache == True
-        assert "The HaloTableCacheLogEntry is safe to add to the log" == log_entry._cache_safety_message
+        assert "The halo catalog is safe to add to the cache log." == log_entry._cache_safety_message
 
     def tearDown(self):
         try:

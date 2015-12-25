@@ -147,10 +147,9 @@ class HaloTableCacheLogEntry(object):
         the responsibility of the `~halotools.sim_manager.HaloTableCache` class. 
 
         """
-        self._cache_safety_message = "The HaloTableCacheLogEntry is safe to add to the log"
+        self._cache_safety_message = "The halo catalog is safe to add to the cache log."
 
-        message_preamble = ("The HaloTableCacheLogEntry is not safe "
-            "to add to the log\nfor the following reasons:\n\n")
+        message_preamble = ("The halo catalog and/or its associated metadata fail the following tests:\n\n")
 
         msg, num_failures = '', 0
         msg, num_failures = self._verify_file_exists(msg, num_failures)

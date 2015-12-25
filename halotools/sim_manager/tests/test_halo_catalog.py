@@ -2,22 +2,15 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-import pytest 
-import warnings, os
-
-import numpy as np 
-from copy import copy, deepcopy 
-
-from astropy.table import Table
-from astropy.table import vstack as table_vstack
-
+import warnings, os, pytest
 from astropy.config.paths import _find_home 
 
-from . import helper_functions 
 
-from .. import manipulate_cache_log, halo_catalog
+import numpy as np 
 
-from ...custom_exceptions import HalotoolsError
+from ..halo_catalog import OverhauledHaloCatalog
+from ..halo_table_cache import HaloTableCache
+from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
@@ -37,27 +30,107 @@ class TestOverhauledHaloCatalog(TestCase):
     """ 
     """
 
-    def setUp(self):
-        """ Pre-load various arrays into memory for use by all tests. 
-        """
-        self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
-
-        try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
-            pass
-
-    @pytest.mark.xfail
-    def test_default_load(self):
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_load_all_catalogs(self):
         """ Verify that the default halo catalog loads. 
         """
-        halocat = halo_catalog.OverhauledHaloCatalog()
+        cache = HaloTableCache()
+        for entry in cache.log:
+            constructor_kwargs = (
+                {attr: getattr(entry, attr) 
+                for attr in entry.log_attributes})
+            halocat = OverhauledHaloCatalog(**constructor_kwargs)
+            assert hasattr(halocat, 'redshift')
+            assert hasattr(halocat, 'Lbox')
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_default_catalog(self):
+        """ Verify that the default halo catalog loads. 
+        """
+        halocat = OverhauledHaloCatalog()
+        assert hasattr(halocat, 'redshift')
+        assert hasattr(halocat, 'Lbox')
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_load_bad_catalog1(self):
+        """ Verify that the appropriate errors are raised when 
+        attempting to load catalogs without matches in cache.  
+        """
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = OverhauledHaloCatalog(simname = 'bolshoi', 
+                halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
+                redshift = 5, dz_tol = 1)
+        assert 'The following entries in the cache log' in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_load_bad_catalog2(self):
+        """ Verify that the appropriate errors are raised when 
+        attempting to load catalogs without matches in cache.  
+        """
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = OverhauledHaloCatalog(simname = 'bolshoi', 
+                halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
+                redshift = 5, dz_tol = 1)
+        assert 'The following entries in the cache log' in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_load_bad_catalog3(self):
+        """ Verify that the appropriate errors are raised when 
+        attempting to load catalogs without matches in cache.  
+        """
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = OverhauledHaloCatalog(simname = 'bolshoi', 
+                halo_finder = 'bdm', version_name = 'Jose Canseco')
+        assert 'The following entries in the cache log' in err.value.message
+        assert '(set by sim_defaults.default_redshift)' in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_load_bad_catalog4(self):
+        """ Verify that the appropriate errors are raised when 
+        attempting to load catalogs without matches in cache.  
+        """
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = OverhauledHaloCatalog(simname = 'bolshoi', 
+                halo_finder = 'Jose Canseco')
+        assert 'The following entries in the cache log' in err.value.message
+        assert '(set by sim_defaults.default_version_name)' in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_load_bad_catalog5(self):
+        """ Verify that the appropriate errors are raised when 
+        attempting to load catalogs without matches in cache.  
+        """
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = OverhauledHaloCatalog(simname = 'Jose Canseco')
+        assert 'There are no simulations matching your input simname' in err.value.message
+        assert '(set by sim_defaults.default_halo_finder)' in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_load_bad_catalog6(self):
+        """ Verify that the appropriate errors are raised when 
+        attempting to load catalogs without matches in cache.  
+        """
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = OverhauledHaloCatalog(simname = 'Jose Canseco', 
+                halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
+                redshift = 5, dz_tol = 1)
+        assert 'There are no simulations matching your input simname' in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_load_bad_catalog7(self):
+        """ Verify that the appropriate errors are raised when 
+        attempting to load catalogs without matches in cache.  
+        """
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = OverhauledHaloCatalog(dz_tol = 100)
+        assert 'There are multiple entries in the cache log' in err.value.message
+        assert '(set by sim_defaults.default_simname)' in err.value.message
 
     @pytest.mark.xfail
     def test_load_ptcl_table(self):
         """ Verify that the default halo catalog loads. 
         """
-        halocat = halo_catalog.OverhauledHaloCatalog()
+        halocat = OverhauledHaloCatalog()
         ptcls = halocat.ptcl_table
 
 
