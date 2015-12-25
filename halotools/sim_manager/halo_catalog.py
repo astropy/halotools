@@ -1,11 +1,7 @@
 import numpy as np
-import os, sys, urllib2, fnmatch
+import os
 from warnings import warn 
-import bisect 
 
-from copy import deepcopy 
-from astropy import cosmology
-from astropy import units as u
 from astropy.table import Table
 
 try:
@@ -15,12 +11,11 @@ except ImportError:
         "sim_manager sub-package requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda. ")
 
-from . import sim_defaults, catalog_manager, manipulate_cache_log
+from . import sim_defaults
 
 from .halo_table_cache import HaloTableCache
 from .log_entry import HaloTableCacheLogEntry, get_redshift_string
 
-from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
 
