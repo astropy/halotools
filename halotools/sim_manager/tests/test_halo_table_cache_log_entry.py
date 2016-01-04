@@ -34,19 +34,20 @@ __all__ = ('TestHaloTableCacheLogEntry' )
 class TestHaloTableCacheLogEntry(TestCase):
     """ Class providing unit testing for `~halotools.sim_manager.HaloTableCacheLogEntry`. 
     """
-    import h5py
+
     hard_coded_log_attrs = ['simname', 'halo_finder', 'version_name', 'redshift', 'fname']
 
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
-        self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
+        import h5py
+        self.h5py = h5py
 
+        self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
         try:
             os.system('rm -rf ' + self.dummy_cache_baseloc)
         except OSError:
             pass
-
         os.makedirs(self.dummy_cache_baseloc)
 
         self.simnames = ('bolshoi', 'consuelo', 
