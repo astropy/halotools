@@ -14,7 +14,9 @@ except ImportError:
 from . import sim_defaults
 
 from .halo_table_cache import HaloTableCache
+from .ptcl_table_cache import PtclTableCache
 from .log_entry import HaloTableCacheLogEntry, get_redshift_string
+from .ptcl_table_log_entry import PtclTableCacheLogEntry
 
 from ..custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
@@ -37,7 +39,7 @@ class OverhauledHaloCatalog(object):
             raise HalotoolsError("Must have h5py package installed "
                 "to use OverhauledHaloCatalog objects")
 
-        self._process_kwargs(**kwargs)
+        self._process_kwargs(dz_tol, **kwargs)
 
         self.log_entry = self._retrieve_matching_cache_log_entry(dz_tol)
 
@@ -47,7 +49,10 @@ class OverhauledHaloCatalog(object):
         self._bind_metadata()
 
 
-    def _process_kwargs(self, **kwargs):
+    def _process_kwargs(self, dz_tol, **kwargs):
+        """
+        """
+        self.dz_tol = dz_tol 
 
         try:
             self.simname = kwargs['simname']
@@ -267,6 +272,30 @@ class OverhauledHaloCatalog(object):
             else:
                 setattr(self, attr_key, f.attrs[attr_key])
         f.close()
+
+    @property 
+    def ptcl_table(self):
+        """
+        """
+        try:
+            return self._ptcl_table
+        except AttributeError:
+            try:
+                ptcl_log_entry = self.ptcl_log_entry 
+            except AttributeError:
+                self.ptcl_log_entry = (
+                    self._retrieve_matching_ptcl_cache_log_entry(self.dz_tol)
+                    )
+                ptcl_log_entry = self.ptcl_log_entry
+
+            if ptcl_log_entry.safe_for_cache == True:
+                self._ptcl_table = Table.read(self.fname, path='data')
+                return self._ptcl_table
+            else:
+                raise InvalidCacheLogEntry(ptcl_log_entry._cache_safety_message)
+
+
+
 
 
 

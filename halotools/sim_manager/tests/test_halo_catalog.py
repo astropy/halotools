@@ -126,9 +126,10 @@ class TestOverhauledHaloCatalog(TestCase):
         assert 'There are multiple entries in the cache log' in err.value.message
         assert '(set by sim_defaults.default_simname)' in err.value.message
 
-    @pytest.mark.xfail
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
     def test_load_ptcl_table(self):
-        """ Verify that the default halo catalog loads. 
+        """ Verify that the default particle catalog loads. 
         """
         halocat = OverhauledHaloCatalog()
         ptcls = halocat.ptcl_table
