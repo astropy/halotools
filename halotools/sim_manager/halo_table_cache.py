@@ -257,12 +257,12 @@ class HaloTableCache(object):
                 "to use the determine_log_entry_from_fname method. ")
 
         if not os.path.isfile(fname):
-            msg = ("File does not exist")
-            raise IOError(msg)
+            msg = "File does not exist"
+            return str(msg)
 
         if fname[-5:] != '.hdf5':
-            msg = ("Can only self-determine the log entry of files with .hdf5 extension")
-            raise IOError(msg)
+            msg = "Can only self-determine the log entry of files with .hdf5 extension"
+            return str(msg)
 
         try:
             f = h5py.File(fname)
@@ -275,7 +275,7 @@ class HaloTableCache(object):
             for elt in missing_metadata:
                 msg += "``"+elt + "``\n"
             msg += "\n"
-            raise InvalidCacheLogEntry(msg)
+            return str(msg)
         finally:
             try:
                 f.close()
