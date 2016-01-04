@@ -2,11 +2,11 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .generate_random_sim import *
 from .cache_config import *
 from .supported_sims import *
 from .catalog_manager import *
 from .sim_defaults import *
+from .generate_random_sim import *
 
 from .halo_catalog import *
 from .user_defined_halo_catalog import UserDefinedHaloCatalog

@@ -8,9 +8,11 @@ used to test the `~halotools.empirical_models` modules.
 from astropy.table import Table
 import numpy as np
 
-__all__ = ['FakeSim', 'FakeMock']
+from .user_defined_halo_catalog import UserDefinedHaloCatalog
 
-class FakeSim(object):
+__all__ = ('FakeSim', 'FakeMock')
+
+class FakeSim(UserDefinedHaloCatalog):
 	""" Fake simulation data used in the test suite of `~halotools.empirical_models`. 
 
 	The `FakeSim` object has all the attributes required by 
@@ -27,7 +29,7 @@ class FakeSim(object):
 	"""
 
 	def __init__(self, num_massbins = 6, num_halos_per_massbin = int(1e3), 
-		num_ptcl = int(1e3), seed = 43):
+		num_ptcl = int(1e4), seed = 43, redshift = 0.):
 		"""
 		Parameters 
 		----------
@@ -45,24 +47,18 @@ class FakeSim(object):
 			Random number seed used to generate the fake halos and particles. 
 			Default is 43.
 		"""
-		self.Lbox = 250.0
-		self.particle_mass = 1.e8
-		self.simname = 'fake'
+		Lbox = 250.0
+		particle_mass = 1.e8
+		simname = 'fake'
 
 		self.seed = seed
+		np.random.seed(self.seed)
 
 		self.num_massbins = num_massbins
 		self.num_halos_per_massbin = num_halos_per_massbin
 		self.num_halos = self.num_massbins*self.num_halos_per_massbin
 		self.num_ptcl = num_ptcl
 
-	@property 
-	def halo_table(self):
-		""" Astropy Table of randomly generated 
-		dark matter halos. 
-		"""
-
-		np.random.seed(self.seed)
 
 		halo_id = np.arange(1e9, 1e9+self.num_halos)
 
@@ -83,57 +79,42 @@ class FakeSim(object):
 		rs = rvir/conc
 		zhalf = np.random.uniform(0, 10, self.num_halos)
 
-		x = np.random.uniform(0, self.Lbox, self.num_halos)
-		y = np.random.uniform(0, self.Lbox, self.num_halos)
-		z = np.random.uniform(0, self.Lbox, self.num_halos)
+		x = np.random.uniform(0, Lbox, self.num_halos)
+		y = np.random.uniform(0, Lbox, self.num_halos)
+		z = np.random.uniform(0, Lbox, self.num_halos)
 		vx = np.random.uniform(-500, 500, self.num_halos)
 		vy = np.random.uniform(-500, 500, self.num_halos)
 		vz = np.random.uniform(-500, 500, self.num_halos)
 
-		d = {
-			'halo_id': halo_id, 
-			'halo_hostid': halo_id, 
-			'halo_upid': upid, 
-			'halo_mvir': mvir, 
-			'halo_mpeak': mpeak, 
-			'halo_rvir': rvir, 
-			'halo_rs': rs, 
-			'halo_zhalf': zhalf, 
-			'halo_nfw_conc': conc, 
-			'halo_vmax': vmax, 
-			'halo_vpeak': vpeak, 
-			'halo_x': x, 
-			'halo_y': y, 
-			'halo_z': z, 
-			'halo_vx': vx, 
-			'halo_vy': vy, 
-			'halo_vz': vz
-			}
+		px = np.random.uniform(0, Lbox, self.num_ptcl)
+		py = np.random.uniform(0, Lbox, self.num_ptcl)
+		pz = np.random.uniform(0, Lbox, self.num_ptcl)
+		pvx = np.random.uniform(-1000, 1000, self.num_ptcl)
+		pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
+		pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
+		d = {'x': px, 'y': py, 'z': pz, 'vx': pvx, 'vy': pvy, 'vz': pvz}
+		ptcl_table = Table(d)
 
-		return Table(d)
 
-	@property 
-	def host_halos(self):
-		mask = self.halo_table['halo_hostid'] == self.halo_table['halo_id']
-		return self.halo_table[mask]
+		UserDefinedHaloCatalog.__init__(self, 
+			Lbox = Lbox, particle_mass = particle_mass, 
+			redshift = 0.0, 
+			halo_id = halo_id, 
+			halo_x = x, halo_y = y, halo_z = z, 
+			halo_vx = vx, halo_vy = vy, halo_vz = vz, 
+			halo_upid = upid, 
+			halo_hostid = halo_id, 
+			halo_mvir = mvir, 
+			halo_mpeak = mpeak, 
+			halo_rvir = rvir, 
+			halo_rs = rs, 
+			halo_zhalf = zhalf, 
+			halo_nfw_conc = conc, 
+			halo_vmax = vmax, 
+			halo_vpeak = vpeak, 
+			ptcl_table = ptcl_table
+			)
 
-	@property 
-	def ptcl_table(self):
-		""" Astropy Table of randomly generated 
-		dark matter particles. 
-		"""
-
-		np.random.seed(self.seed)
-		x = np.random.uniform(0, self.Lbox, self.num_ptcl)
-		y = np.random.uniform(0, self.Lbox, self.num_ptcl)
-		z = np.random.uniform(0, self.Lbox, self.num_ptcl)
-		vx = np.random.uniform(-1000, 1000, self.num_ptcl)
-		vy = np.random.uniform(-1000, 1000, self.num_ptcl)
-		vz = np.random.uniform(-1000, 1000, self.num_ptcl)
-
-		d = {'x': x, 'y': y, 'z':z, 'vx':vx, 'vy':vy, 'vz':vz}
-
-		return Table(d)
 
 	
 class FakeMock(object):
