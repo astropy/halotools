@@ -165,7 +165,7 @@ class HaloTableCache(object):
                 print(msg)
 
     def remove_entry_from_cache_log(self, simname, halo_finder, version_name, redshift, fname, 
-        raise_non_existence_exception = True):
+        raise_non_existence_exception = True, update_ascii = True):
         """
         If the log stores an entry matching the input metadata, the entry will be deleted and 
         the ascii file storing the log will be updated. If there is no match, 
@@ -202,8 +202,13 @@ class HaloTableCache(object):
 
         try:
             self.log.remove(log_entry)
-            self._overwrite_log_ascii(self.log)
-            msg = ("The log has been updated on disk and in memory")
+            if update_ascii == True:
+                self._overwrite_log_ascii(self.log)
+                msg = ("The log has been updated on disk and in memory")
+            else:
+                msg = ("The log has been updated in memory "
+                    "but not on disk because \n"
+                    "the update_ascii argument is set to False")
             print(msg)
         except ValueError:
             if raise_non_existence_exception == False:
