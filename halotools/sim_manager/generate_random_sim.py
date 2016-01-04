@@ -59,12 +59,16 @@ class FakeSim(UserDefinedHaloCatalog):
 		self.num_halos = self.num_massbins*self.num_halos_per_massbin
 		self.num_ptcl = num_ptcl
 
-
 		halo_id = np.arange(1e9, 1e9+self.num_halos)
 
 		randomizer = np.random.random(self.num_halos)
 		subhalo_fraction = 0.1
 		upid = np.where(randomizer > subhalo_fraction, -1, 1)
+
+		host_mask = upid == -1
+		halo_hostid = np.zeros(len(halo_id))
+		halo_hostid[host_mask] = halo_id[host_mask]
+		halo_hostid[~host_mask] = upid[~host_mask]
 
 		massbins = np.logspace(10, 15, self.num_massbins)
 		mvir = np.repeat(massbins, self.num_halos_per_massbin, axis=0)
@@ -103,7 +107,7 @@ class FakeSim(UserDefinedHaloCatalog):
 			halo_x = x, halo_y = y, halo_z = z, 
 			halo_vx = vx, halo_vy = vy, halo_vz = vz, 
 			halo_upid = upid, 
-			halo_hostid = halo_id, 
+			halo_hostid = halo_hostid, 
 			halo_mvir = mvir, 
 			halo_mpeak = mpeak, 
 			halo_rvir = rvir, 
