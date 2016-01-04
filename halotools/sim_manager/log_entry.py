@@ -59,7 +59,7 @@ class HaloTableCacheLogEntry(object):
         self.fname = fname
     
     def __eq__(self, other):
-        if isinstance(other, self.__class__):
+        if type(other) is type(self):
             comparison_generator = (getattr(self, attr) == getattr(other, attr) 
                 for attr in HaloTableCacheLogEntry.log_attributes)
             return False not in tuple(comparison_generator)
