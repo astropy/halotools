@@ -104,8 +104,38 @@ class TestHaloTableCache(TestCase):
         self.bad_log_entry = HaloTableCacheLogEntry('1', '2', '3', '4', '5')
 
 
-    def test_clean_log_of_repeated_entries(self):
-        pass
+    def test_determine_log_entry_from_fname(self):
+        cache = HaloTableCache(read_log_from_standard_loc = False)
+
+        entry = self.good_log_entry
+        fname = entry.fname
+        result = cache.determine_log_entry_from_fname(fname)
+        assert result == self.good_log_entry
+
+        entry = self.bad_log_entry
+        fname = entry.fname
+        result = cache.determine_log_entry_from_fname(fname)
+        assert result == "File does not exist"
+
+        entry.fname = self.bad_log_entry.fname
+        os.system('touch ' + entry.fname)
+        result = cache.determine_log_entry_from_fname(fname)
+        assert result == "Can only self-determine the log entry of files with .hdf5 extension"
+
+        entry = self.good_log_entry
+        fname = entry.fname
+        f = self.h5py.File(fname)
+        tmp = deepcopy(f.attrs['version_name'])
+        del f.attrs['version_name']
+        f.close()
+        result = cache.determine_log_entry_from_fname(fname)
+        assert "The hdf5 file is missing the following metadata:" in result
+
+        f = self.h5py.File(fname)
+        f.attrs.create('version_name', tmp)
+        f.close()
+
+
 
     def test_add_entry_to_cache_log(self):
         cache = HaloTableCache(read_log_from_standard_loc = False)
@@ -156,9 +186,9 @@ class TestHaloTableCache(TestCase):
 
 
 
-    def tearDown(self):
-        try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
-            pass
+    # def tearDown(self):
+    #     try:
+    #         os.system('rm -rf ' + self.dummy_cache_baseloc)
+    #     except OSError:
+    #         pass
 
