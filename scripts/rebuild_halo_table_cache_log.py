@@ -6,24 +6,23 @@ import argparse, os, fnmatch
 from astropy.table import Table
 import numpy as np
 
-from halotools.sim_manager import manipulate_cache_log
-from halotools.custom_exceptions import HalotoolsError
-
 try:
     import h5py
 except ImportError:
     msg = ("\nMust have h5py installed to use the rebuild_halo_table_cache_log script.\n")
     raise HalotoolsError(msg)
 
-fname_cache_log = manipulate_cache_log.get_halo_table_cache_log_fname()
-if os.path.isfile(fname_cache_log):
+from halotools.sim_manager import manipulate_cache_log
+from halotools.custom_exceptions import HalotoolsError
+from halotools.sim_manager.halo_table_cache import HaloTableCache
+
+halo_table_cache = HaloTableCache()
+if os.path.isfile(halo_table_cache.cache_log_fname):
     has_existing_log = True
 else:
     has_existing_log = False
 
-#fname simname halo_finder version_name redshift
-
-cache_log_dirname = os.path.dirname(fname_cache_log)
+cache_log_dirname = os.path.dirname(halo_table_cache.cache_log_fname)
 corrupted_cache_log_fname = 'corrupted_halo_table_cache_log.txt'
 corrupted_cache_log_fname = os.path.join(cache_log_dirname, corrupted_cache_log_fname)
 
@@ -42,39 +41,40 @@ if os.path.isfile(corrupted_cache_log_fname):
         "so here is how to proceed.\n"
         "Use a text editor to manually compare the "
         "corrupted and working copies of the cache log:\n\n"
-        + fname_cache_log + "\n"
+        + halo_table_cache.cache_log_fname + "\n"
         + corrupted_cache_log_fname + "\n\n"
         "For any row of the corrupted log corresponding to a halo catalog \n"
         "that you would like to be recognized in your cache,\n"
-        "copy this row into a new row of " + os.path.basename(fname_cache_log) + "\n"
+        "copy this row into a new row of " + os.path.basename(halo_table_cache.cache_log_fname) + "\n"
         "Depending on the state of the corrupted log, "
         "you may need to enter in the metadata columns manually.\n"
         "When you have finished, delete the " + os.path.basename(corrupted_cache_log_fname) + "file \n"
         "after backing it up in an external location.\n"
-        "Once the corrupted log has been removed from " + os.path.dirname(corrupted_cache_log_fname) + ",\n"
+        "Once the corrupted log has been removed from \n" + os.path.dirname(corrupted_cache_log_fname) + ",\n"
         "you can run the rebuild_halo_table_cache_log.py again.\n"
         "This script will then repeate the verification process on all entries of " 
-        + os.path.basename(fname_cache_log) + "\n\n\n"
+        + os.path.basename(halo_table_cache.cache_log_fname) + "\n\n\n"
         )
     raise HalotoolsError(msg)
 
 
 def fnames_in_existing_log():
-    """
+    """ If there is an existing log, try and extract a list of filenames from it. 
     """
     try:
-        manipulate_cache_log.verify_cache_log()
-        existing_log = manipulate_cache_log.read_halo_table_cache_log()
+        names = [entry.fname for entry in halo_table_cache.log]
         existing_log_is_corrupted = False
-        return list(existing_log['fname'])
+        return names
     except:
         existing_log_is_corrupted = True
         return []
 
 def halo_table_fnames_in_standard_cache():
+    """ Walk the directory tree of all subdirectories in 
+    $HOME/.astropy/cache/halotools/halo_catalogs and yield the absolute path 
+    to any file with a .hdf5 extension. 
     """
-    """
-    standard_loc = os.path.join(os.path.dirname(fname_cache_log), 'halo_catalogs')
+    standard_loc = os.path.join(os.path.dirname(halo_table_cache.cache_log_fname), 'halo_catalogs')
     if os.path.exists(standard_loc):
         for path, dirlist, filelist in os.walk(standard_loc):
             for name in fnmatch.filter(filelist, '*.hdf5'):
@@ -143,10 +143,10 @@ for ii, entry in enumerate(new_log):
 
 
 if has_existing_log is True:
-    os.system('mv ' + fname_cache_log + ' ' + corrupted_cache_log_fname)
+    os.system('mv ' + halo_table_cache.cache_log_fname + ' ' + corrupted_cache_log_fname)
 
 if len(new_log) > 0:
-    manipulate_cache_log.overwrite_halo_table_cache_log(new_log, cache_fname=fname_cache_log)
+    manipulate_cache_log.overwrite_halo_table_cache_log(new_log, cache_fname=halo_table_cache.cache_log_fname)
 
     print("\n")
     print("\n")
@@ -154,7 +154,7 @@ if len(new_log) > 0:
     for entry in new_log:
         print(entry['fname'])
     print("\n")
-    print("The new cache log is stored in the following location:\n" + fname_cache_log)
+    print("The new cache log is stored in the following location:\n" + halo_table_cache.cache_log_fname)
 
 if len(rejected_fnames) > 0:
     print("The following filenames have been detected but rejected and will NOT be added to your new cache log:\n")
