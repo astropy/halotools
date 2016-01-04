@@ -137,22 +137,6 @@ class HaloTableCache(object):
             if yield_entry == True:
                 yield entry
 
-    def closest_matching_log_entries(self, simname, halo_finder, 
-        version_name, redshift, dz_tol):
-        """
-        """
-        gen = self.matching_log_entry_generator(
-            simname = simname, halo_finder = halo_finder, 
-            version_name = version_name, redshift = redshift, dz_tol = dz_tol)
-        matching_fnames = [entry.fname for entry in gen]        
-
-        gen2 = self.halo_table_cache.matching_log_entry_generator(simname = simname, 
-            halo_finder = halo_finder, version_name = version_name)
-        gen3 = self.halo_table_cache.matching_log_entry_generator(
-            simname = simname, halo_finder = halo_finder)
-        gen4 = self.halo_table_cache.matching_log_entry_generator(simname = simname)
-
-
     def add_entry_to_cache_log(self, log_entry, update_ascii = True):
         """
         """
