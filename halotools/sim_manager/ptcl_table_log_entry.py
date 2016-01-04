@@ -4,11 +4,9 @@ from astropy.table import Table
 import numpy as np 
 
 from ..custom_exceptions import InvalidCacheLogEntry
+from .log_entry import get_redshift_string
 
 __all__ = ('PtclTableCacheLogEntry', )
-
-def get_redshift_string(redshift):
-    return str('{0:.4f}'.format(float(redshift)))
 
 class PtclTableCacheLogEntry(object):
     """ Object serving as an entry in the `~halotools.sim_manager.PtclTableCache`. 
