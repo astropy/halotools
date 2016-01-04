@@ -27,7 +27,7 @@ except ImportError:
 
 from ...sim_manager import sim_defaults
 from ...utils.array_utils import randomly_downsample_data
-from ...sim_manager import FakeSim, FakeMock
+from ...sim_manager import FakeSim
 from ...custom_exceptions import *
 
 

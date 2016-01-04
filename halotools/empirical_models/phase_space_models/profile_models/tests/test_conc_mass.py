@@ -14,7 +14,7 @@ from ..conc_mass_models import ConcMass
 
 from .... import model_defaults
 
-from .....sim_manager import FakeSim, FakeMock
+from .....sim_manager import FakeSim
 
 class TestConcMass(TestCase):
     """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.ConcMass` class.  

@@ -19,7 +19,7 @@ from ...smhm_models import Moster13SmHm, Behroozi10SmHm
 from ...sfr_models import BinaryGalpropInterpolModel
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
-from ....sim_manager import FakeMock, FakeSim, sim_defaults
+from ....sim_manager import FakeSim, sim_defaults
 
 
 __all__ = ['smhm_binary_sfr_model_dictionary']
