@@ -15,8 +15,6 @@ except ImportError:
     warn("Most of the functionality of the sim_manager sub-package requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda")
 
-from . import sim_defaults, catalog_manager
-
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
