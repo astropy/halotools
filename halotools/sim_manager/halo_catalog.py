@@ -76,13 +76,89 @@ class OverhauledHaloCatalog(object):
             self.redshift = sim_defaults.default_redshift
             self._default_redshift_choice = True
 
+    def _retrieve_matching_ptcl_cache_log_entry(self, dz_tol):
+        """
+        """
+        ptcl_table_cache = PtclTableCache()
+        if len(ptcl_table_cache.log) == 0:
+            msg = ("\nThe Halotools cache log has record of particle catalogs.\n"
+                "If you have never used Halotools before, "
+                "you should read the Getting Started guide on halotools.readthedocs.org.\n"
+                "If you have previously used the package before, \n"
+                "try running the halotools/scripts/rebuild_ptcl_table_cache_log.py script.\n")
+            raise HalotoolsError(msg)
+
+        gen0 = ptcl_table_cache.matching_log_entry_generator(
+            simname = self.simname, version_name = self.version_name, 
+            redshift = self.redshift, dz_tol = dz_tol)
+        gen1 = ptcl_table_cache.matching_log_entry_generator(
+            simname = self.simname, version_name = self.version_name)
+        gen2 = ptcl_table_cache.matching_log_entry_generator(simname = self.simname)
+
+        matching_entries = list(gen0)     
+
+        msg = ("\nYou tried to load a cached halo catalog "
+            "with the following characteristics:\n\n")
+
+        if self._default_simname_choice is True:
+            msg += ("simname = ``" + str(self.simname) 
+                + "``  (set by sim_defaults.default_simname)\n")
+        else:
+            msg += "simname = ``" + str(self.simname) + "``\n"
+
+        if self._default_version_name_choice is True:
+            msg += ("version_name = ``" + str(self.version_name) 
+                + "``  (set by sim_defaults.default_version_name)\n")
+        else:
+            msg += "version_name = ``" + str(self.version_name) + "``\n"
+
+        if self._default_redshift_choice is True:
+            msg += ("redshift = ``" + str(self.redshift) 
+                + "``  (set by sim_defaults.default_redshift)\n")
+        else:
+            msg += "redshift = ``" + str(self.redshift) + "``\n"
+
+        msg += ("\nThere is no matching catalog in cache "
+            "within dz_tol = "+str(dz_tol)+" of these inputs.\n"
+            )
+
+
+        if len(matching_entries) == 0:
+            suggestion_preamble = ("\nThe following entries in the cache log "
+                "most closely match your inputs:\n\n")
+            alt_list1 = list(gen1) # discard the redshift requirement
+            if len(alt_list1) > 0:
+                msg += suggestion_preamble
+                for entry in alt_list1: msg += str(entry) + "\n\n"
+            else:
+                alt_list2 = list(gen2) # discard the version_name requirement
+                if len(alt_list2) > 0:
+                    msg += suggestion_preamble
+                    for entry in alt_list2: msg += str(entry) + "\n\n"
+                else:
+                    msg += "There are no simulations matching your input simname.\n"
+            raise InvalidCacheLogEntry(msg)
+
+        elif len(matching_entries) == 1:
+            return matching_entries[0]
+
+        else:
+            msg += ("There are multiple entries in the cache log \n"
+                "within dz_tol = "+str(dz_tol)+" of your inputs. \n"
+                "Try using the exact redshift and/or decreasing dz_tol.\n"
+                "Now printing the matching entries:\n\n")
+            for entry in matching_entries:
+                msg += str(entry) + "\n"
+            raise InvalidCacheLogEntry(msg)
+
+
     def _retrieve_matching_cache_log_entry(self, dz_tol):
         """
         """
         halo_table_cache = HaloTableCache()
         if len(halo_table_cache.log) == 0:
             msg = ("\nThe Halotools cache log is empty.\n"
-                "If you have never used Haltools before, "
+                "If you have never used Halotools before, "
                 "you should read the Getting Started guide on halotools.readthedocs.org.\n"
                 "If you have previously used the package before, \n"
                 "try running the halotools/scripts/rebuild_halo_table_cache_log.py script.\n")
