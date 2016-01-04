@@ -212,6 +212,30 @@ class TestPtclTableCacheLogEntry(TestCase):
         substr = "must at a minimum have the following columns"
         assert substr in log_entry._cache_safety_message
 
+
+    def test_scenario4(self):
+        num_scenario = 4
+
+        try:
+            os.system('rm '+self.fnames[num_scenario])
+        except:
+            pass
+        self.good_table.write(self.fnames[num_scenario], path='data')
+
+        log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            f.attrs[attr] = getattr(log_entry, attr)
+        f.attrs['Lbox'] = 2.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
+
+        assert log_entry.safe_for_cache == False
+        substr = "must be bounded by [0, Lbox]."
+        assert substr in log_entry._cache_safety_message
+
+
     def test_passing_scenario(self):
         num_scenario = 4
 
