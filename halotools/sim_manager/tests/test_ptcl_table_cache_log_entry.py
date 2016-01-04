@@ -14,7 +14,7 @@ from astropy.table import vstack as table_vstack
 from astropy.config.paths import _find_home 
 
 from . import helper_functions
-from ..log_entry import PtclTableCacheLogEntry
+from ..ptcl_table_log_entry import PtclTableCacheLogEntry
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
@@ -86,7 +86,127 @@ class TestPtclTableCacheLogEntry(TestCase):
             log_entry = PtclTableCacheLogEntry(**constructor_kwargs)
             assert set(log_entry.log_attributes) == set(self.hard_coded_log_attrs)
 
+    def test_scenario0(self):
+        num_scenario = 0
+        log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+        assert log_entry.safe_for_cache == False
+        assert "The input filename does not exist." in log_entry._cache_safety_message
 
+    def test_scenario1(self):
+        num_scenario = 1
+
+        with open(self.fnames[num_scenario], 'w') as f:
+            f.write('abc')
+        log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+        assert log_entry.safe_for_cache == False
+        assert "The input filename does not exist." not in log_entry._cache_safety_message
+        assert "The input file must have '.hdf5' extension" in log_entry._cache_safety_message
+
+    def test_scenario2(self):
+        num_scenario = 2
+
+        with open(self.fnames[num_scenario], 'w') as f:
+            f.write('abc')
+        log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+        assert log_entry.safe_for_cache == False
+        assert "The input filename does not exist." not in log_entry._cache_safety_message
+        assert "The input file must have '.hdf5' extension" not in log_entry._cache_safety_message
+        assert "access the hdf5 metadata raised an exception." in log_entry._cache_safety_message
+
+    def test_scenario2a(self):
+        num_scenario = 2
+
+        os.system('rm '+self.fnames[num_scenario])
+        self.table1.write(self.fnames[num_scenario], path='data')
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        k = f.attrs.keys()
+        f.close()
+
+        log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+        assert log_entry.safe_for_cache == False
+        assert "access the hdf5 metadata raised an exception." not in log_entry._cache_safety_message
+        assert "missing the following metadata" in log_entry._cache_safety_message
+
+    def test_scenario2b(self):
+        num_scenario = 2
+
+        os.system('rm '+self.fnames[num_scenario])
+        self.table1.write(self.fnames[num_scenario], path='data')
+
+        log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            f.attrs[attr] = getattr(log_entry, attr)
+        f.close()
+
+        assert log_entry.safe_for_cache == False
+        assert "``particle_mass``" in log_entry._cache_safety_message
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
+        _ =  log_entry.safe_for_cache
+        assert "``particle_mass``" not in log_entry._cache_safety_message
+
+    def test_scenario2c(self):
+        num_scenario = 2
+
+        try:
+            os.system('rm '+self.fnames[num_scenario])
+        except:
+            pass
+        self.table1.write(self.fnames[num_scenario], path='data')
+
+        log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            if attr != 'redshift':
+                f.attrs[attr] = getattr(log_entry, attr)
+            else:
+                f.attrs[attr] = 0.4
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
+
+        assert log_entry.safe_for_cache == False
+        assert "does not match" in log_entry._cache_safety_message
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        f.attrs['redshift'] = 1.3390001
+        f.close()
+        assert log_entry.safe_for_cache == False
+        assert "does not match" not in log_entry._cache_safety_message
+
+        f = self.h5py.File(self.fnames[num_scenario])
+        f.attrs['redshift'] = '1.3390001'
+        f.close()
+        assert log_entry.safe_for_cache == False
+        assert "does not match" not in log_entry._cache_safety_message
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def tearDown(self):
+        try:
+            os.system('rm -rf ' + self.dummy_cache_baseloc)
+        except OSError:
+            pass
 
 
 
