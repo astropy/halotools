@@ -27,8 +27,7 @@ class PtclTableCacheLogEntry(object):
             'bolshoi', 'bolplanck', 'consuelo' and 'multidark'. 
 
         version_name : string 
-            Nickname of the version of the particle catalog used to differentiate 
-            between the same particle catalog processed in different ways. 
+            Nickname of the version of the particle catalog. 
 
         redshift : string or float  
             Redshift of the particle catalog, rounded to 4 decimal places. 

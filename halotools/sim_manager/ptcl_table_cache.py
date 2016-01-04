@@ -11,7 +11,7 @@ from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 __all__ = ('PtclTableCache', )
 
 class PtclTableCache(object):
-    """ Object providing a collection of halo catalogs for use with Halotools. 
+    """ Object providing a collection of particle catalogs for use with Halotools. 
     """ 
 
     def __init__(self, **kwargs):
@@ -172,18 +172,17 @@ class PtclTableCache(object):
         -----------
         simname : string 
             Nickname of the simulation used as a shorthand way to keep track 
-            of the halo catalogs in your cache. The simnames processed by Halotools are 
+            of the particle catalogs in your cache. The simnames processed by Halotools are 
             'bolshoi', 'bolplanck', 'consuelo' and 'multidark'. 
 
         version_name : string 
-            Nickname of the version of the halo catalog used to differentiate 
-            between the same halo catalog processed in different ways. 
+            Nickname of the version of the particle catalog. 
 
         redshift : string or float  
-            Redshift of the halo catalog, rounded to 4 decimal places. 
+            Redshift of the particle catalog, rounded to 4 decimal places. 
 
         fname : string 
-            Name of the hdf5 file storing the table of halos. 
+            Name of the hdf5 file storing the table of particles. 
 
         raise_non_existence_exception : bool, optional 
             If True, an exception will be raised if this function is called 
