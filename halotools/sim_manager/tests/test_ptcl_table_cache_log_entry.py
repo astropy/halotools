@@ -187,17 +187,52 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "does not match" not in log_entry._cache_safety_message
 
+    def test_scenario3(self):
+        num_scenario = 3
 
+        try:
+            os.system('rm '+self.fnames[num_scenario])
+        except:
+            pass
+        self.table1.write(self.fnames[num_scenario], path='data')
 
+        log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            if attr != 'redshift':
+                f.attrs[attr] = getattr(log_entry, attr)
+            else:
+                f.attrs[attr] = 0.4
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
 
+        assert log_entry.safe_for_cache == False
+        substr = "must at a minimum have the following columns"
+        assert substr in log_entry._cache_safety_message
 
+    def test_passing_scenario(self):
+        num_scenario = 4
 
+        try:
+            os.system('rm '+self.fnames[num_scenario])
+        except:
+            pass
+        self.good_table.write(self.fnames[num_scenario], path='data')
 
+        log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            f.attrs[attr] = getattr(log_entry, attr)
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
 
-
-
+        assert log_entry.safe_for_cache == True, log_entry._cache_safety_message
+        substr =  "The particle catalog is safe to add to the cache log." 
+        assert substr in log_entry._cache_safety_message
 
 
 
