@@ -405,8 +405,13 @@ class RockstarHlistReader(TabularAsciiReader):
         except OSError:
             pass
 
+        if self.input_fname[-3:] == '.gz':
+            rootname = self.input_fname[:-3]
+        else:
+            rootname = self.input_fname
+
         basename = (
-            os.path.basename(self.input_fname) + 
+            os.path.basename(rootname) + 
             '.' + self.version_name + '.hdf5'
             )
         default_fname = os.path.join(dirname, basename)
