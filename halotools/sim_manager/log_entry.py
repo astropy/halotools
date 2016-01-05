@@ -151,8 +151,7 @@ class HaloTableCacheLogEntry(object):
 
         message_preamble = ("The halo catalog and/or its associated metadata fail the following tests:\n\n")
 
-        msg, num_failures = '', 0
-        msg, num_failures = self._verify_file_exists(msg, num_failures)
+        msg, num_failures = self._verify_file_exists()
 
         if num_failures > 0:
             self._cache_safety_message = message_preamble + msg
@@ -171,34 +170,38 @@ class HaloTableCacheLogEntry(object):
 
             for verification_function in verification_sequence:
                 func = getattr(self, verification_function)
-                msg, num_failures = func(msg, num_failures)
+                tmp_msg, num_failures = func(num_failures)
+                msg += tmp_msg
             
             if num_failures > 0: self._cache_safety_message = message_preamble + msg
                 
             self._num_failures = num_failures
             return num_failures == 0
 
-    def _verify_table_read(self, msg, num_failures):
+    def _verify_table_read(self, num_failures):
         """ Enforce that the data can be read using the usual Astropy syntax
         """
+        msg = ''
+
         try:
             data = Table.read(self.fname, path='data')
         except:
             num_failures += 1
-            msg += (str(num_failures)+". The hdf5 file must be readable with "
+            msg = (str(num_failures)+". The hdf5 file must be readable with "
                 "Astropy \nusing the following syntax:\n\n"
                 ">>> halo_data = Table.read(fname, path='data')\n\n")
             pass
         return msg, num_failures
 
 
-    def _verify_metadata_consistency(self, msg, num_failures):
+    def _verify_metadata_consistency(self, num_failures):
         """ Enforce that the hdf5 metadata agrees with the 
         values in the log entry. 
 
         Note that we actually accept floats for the redshift hdf5 metadata, 
         even though this should technically be a string. 
         """
+        msg = ''
 
         try:
             f = self.h5py.File(self.fname)
@@ -216,7 +219,7 @@ class HaloTableCacheLogEntry(object):
                 except AssertionError:
 
                     num_failures += 1
-                    msg += (
+                    msg = (
                         str(num_failures)+". The hdf5 file has metadata "
                         "``"+key+"`` = "+str(metadata)+
                         ".\nThis does not match the "
@@ -239,9 +242,11 @@ class HaloTableCacheLogEntry(object):
         return msg, num_failures
 
 
-    def _verify_all_keys_begin_with_halo(self, msg, num_failures):
+    def _verify_all_keys_begin_with_halo(self, num_failures):
         """
         """
+        msg = ''
+
         try:
             data = Table.read(self.fname, path='data')
             for key in data.keys():
@@ -249,7 +254,7 @@ class HaloTableCacheLogEntry(object):
                     assert key[0:5] == 'halo_'
                 except AssertionError:
                     num_failures += 1
-                    msg += (str(num_failures)+". The column names "
+                    msg = (str(num_failures)+". The column names "
                         "of all data in the halo catalog\n"
                         "must begin with the following five characters: `halo_`.\n\n")
         except:
@@ -257,9 +262,11 @@ class HaloTableCacheLogEntry(object):
 
         return msg, num_failures 
 
-    def _verify_has_required_data_columns(self, msg, num_failures):
+    def _verify_has_required_data_columns(self, num_failures):
         """
         """
+        msg = ''
+
         try:
             data = Table.read(self.fname, path='data')
             keys = data.keys()
@@ -271,7 +278,7 @@ class HaloTableCacheLogEntry(object):
                 assert len(keys) >= 5
             except AssertionError:
                 num_failures += 1
-                msg += (str(num_failures)+". The halo table "
+                msg = (str(num_failures)+". The halo table "
                     "must at a minimum have the following columns:\n"
                     "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``,\n"
                     "plus at least one additional column storing a mass-like variable.\n\n"
@@ -281,9 +288,11 @@ class HaloTableCacheLogEntry(object):
 
         return msg, num_failures 
 
-    def _verify_all_positions_inside_box(self, msg, num_failures):
+    def _verify_all_positions_inside_box(self, num_failures):
         """
         """
+        msg = ''
+
         try:
             data = Table.read(self.fname, path='data')
             f = self.h5py.File(self.fname)
@@ -303,7 +312,7 @@ class HaloTableCacheLogEntry(object):
 
             except AssertionError:
                 num_failures += 1
-                msg += (str(num_failures)+". All values of the "
+                msg = (str(num_failures)+". All values of the "
                     "``halo_x``, ``halo_y``, ``halo_z`` columns\n"
                     "must be bounded by [0, Lbox].\n\n"
                     )
@@ -312,9 +321,11 @@ class HaloTableCacheLogEntry(object):
 
         return msg, num_failures 
 
-    def _verify_halo_ids_are_unique(self, msg, num_failures):
+    def _verify_halo_ids_are_unique(self, num_failures):
         """
         """
+        msg = ''
+
         try:
             data = Table.read(self.fname, path='data')
             try:
@@ -323,7 +334,7 @@ class HaloTableCacheLogEntry(object):
                 assert len(halo_id) == len(set(halo_id))
             except AssertionError:
                 num_failures += 1
-                msg += (str(num_failures)+". The ``halo_id`` column"
+                msg = (str(num_failures)+". The ``halo_id`` column"
                     "must contain a unique set of integers.\n\n"
                     )
         except:
@@ -331,31 +342,35 @@ class HaloTableCacheLogEntry(object):
 
         return msg, num_failures 
 
-    def _verify_file_exists(self, msg, num_failures):
+    def _verify_file_exists(self):
         """
         """
+        msg = ''
+        num_failures = 0
 
         if os.path.isfile(self.fname):
             pass
         else:
             num_failures += 1
-            msg += str(num_failures)+". The input filename does not exist.\n\n"
+            msg = str(num_failures)+". The input filename does not exist.\n\n"
         return msg, num_failures
 
-    def _verify_h5py_extension(self, msg, num_failures):
+    def _verify_h5py_extension(self, num_failures):
         """
         """
+        msg = ''
 
         if self.fname[-5:]=='.hdf5':
             pass
         else:
             num_failures += 1
-            msg += str(num_failures) + ". The input file must have '.hdf5' extension.\n\n"
+            msg = str(num_failures) + ". The input file must have '.hdf5' extension.\n\n"
         return msg, num_failures
 
-    def _verify_hdf5_has_complete_metadata(self, msg, num_failures):
+    def _verify_hdf5_has_complete_metadata(self, num_failures):
         """
         """
+        msg = ''
 
         try:
             f = self.h5py.File(self.fname)
