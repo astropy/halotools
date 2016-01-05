@@ -9,28 +9,23 @@ __all__ = ['DownloadManager']
 import numpy as np
 from warnings import warn
 from time import time
-from astropy.tests.helper import remote_data
-from astropy.table import Table
 from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 from astropy.config.paths import _find_home
-
-from ..custom_exceptions import HalotoolsError
 
 try:
     from bs4 import BeautifulSoup
 except ImportError:
-    raise HalotoolsError("Must have bs4 package installed to use the catalog_manager module")
+    raise HalotoolsError("Must have bs4 package installed to use the DownloadManager")
 
 try:
     import requests
 except ImportError:
-    raise HalotoolsError("Must have requests package installed to use the catalog_manager module")
+    raise HalotoolsError("Must have requests package installed to use the DownloadManager")
+
 import posixpath
 import urlparse
-import datetime
 
 import os, fnmatch, re
-from functools import partial
 
 from . import manipulate_cache_log
 
@@ -39,13 +34,13 @@ from ..custom_exceptions import *
 try:
     import h5py
 except ImportError:
-    warn("Most of the functionality of the catalog_manager module requires h5py to be installed,\n"
+    warn("Some of the functionality of the DownloadManager requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda")
 
 from . import sim_defaults
 
 from ..utils.array_utils import find_idx_nearest_val
-from ..utils.array_utils import custom_len, convert_to_ndarray
+from ..utils.array_utils import custom_len
 from ..utils.io_utils import download_file_from_url
 
 supported_sim_list = ('bolshoi', 'bolplanck', 'consuelo', 'multidark')
@@ -56,9 +51,6 @@ class DownloadManager(object):
     """ Class used to scrape the web for simulation data
     and manage the set of cached catalogs.
     """
-
-    def __init__(self):
-        pass
 
     def processed_halo_tables_available_for_download(self, **kwargs):
         """ Method searches the appropriate web location and
