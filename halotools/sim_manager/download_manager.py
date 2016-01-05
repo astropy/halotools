@@ -66,17 +66,19 @@ class DownloadManager(object):
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
             Argument is used to filter the output list of filenames.
-            Default is None, in which case `processed_halo_tables_in_cache`
+            Default is None, in which case `processed_halo_tables_available_for_download`
             will not filter the returned list of filenames by ``simname``.
 
         halo_finder : string, optional
             Nickname of the halo-finder, e.g. ``rockstar``.
             Argument is used to filter the output list of filenames.
-            Default is None, in which case `processed_halo_tables_in_cache`
+            Default is None, in which case `processed_halo_tables_available_for_download`
             will not filter the returned list of filenames by ``halo_finder``.
 
         version_name : string, optional 
-            Version of the table. Default is set by `~halotools.sim_manager.sim_defaults` module. 
+            Nickname for the version of the catalog. 
+            Argument is used to filter the output list of filenames.
+            Default is set by `~halotools.sim_manager.sim_defaults` module. 
 
         Returns
         -------
