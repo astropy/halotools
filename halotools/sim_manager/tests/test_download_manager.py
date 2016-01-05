@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-import os, fnmatch
+import os, fnmatch, shutil
 import numpy as np
 from astropy.config.paths import _find_home 
 from astropy.tests.helper import remote_data, pytest
@@ -37,14 +37,14 @@ class TestDownloadManager(TestCase):
             if os.path.isdir(dirname) is False:
                 os.mkdir(dirname)
             else:
-                os.system('rm -rf ' + dirname)
+                shutil.rmtree(dirname)
                 os.mkdir(dirname)
 
         # First create an empty directory where we will 
         # temporarily store a collection of empty files
-        dummydir = os.path.join(homedir, 'temp_directory_for_halotools_testing')
-        defensively_create_empty_dir(dummydir)
-        self.dummyloc = os.path.join(dummydir, 'halotools')
+        self.base_dummydir = os.path.join(homedir, 'temp_directory_for_halotools_testing')
+        defensively_create_empty_dir(self.base_dummydir)
+        self.dummyloc = os.path.join(self.base_dummydir, 'halotools')
         defensively_create_empty_dir(self.dummyloc)
 
         self.halocat_dir = os.path.join(self.dummyloc, 'halo_catalogs')
@@ -278,8 +278,11 @@ class TestDownloadManager(TestCase):
         # raise HalotoolsError("This test will be a bit subtle to write")
         # self.downman.download_processed_halo_table(simname = 'bolshoi')
 
-    def teardown_class(self):
-        os.system('rm -rf ' + self.dummyloc)
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.base_dummydir)
+        except:
+            pass
 
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os
+import os, shutil
 import numpy as np
 from unittest import TestCase
 import pytest 
@@ -137,8 +137,10 @@ class TestTabularAsciiReader(TestCase):
 
 
     def tearDown(self):
-        os.system("rm -rf " + self.tmpdir)
-
+        try:
+            shutil.rmtree(self.tmpdir)
+        except:
+            pass
 
 
 

@@ -131,10 +131,10 @@ print("\nNumber of files that fail verification tests = "
 
 # We are now done with the existing rejected_fnames file. 
 if os.path.isfile(rejected_filename_log_fname):
-    os.system('rm ' + rejected_filename_log_fname)
+    os.remove(rejected_filename_log_fname)
 
 if old_cache_log_exists:
-    os.system('mv ' + old_cache.cache_log_fname + ' ' + corrupted_cache_log_fname)
+    os.rename(old_cache.cache_log_fname, corrupted_cache_log_fname)
 
 if len(new_cache.log) > 0:
     new_cache._overwrite_log_ascii(new_cache.log)
@@ -162,7 +162,7 @@ if len(rejected_fnames) > 0:
 
     # If there was already an existing rejected filename log, delete it
     if os.path.isfile(rejected_filename_log_fname):
-        os.system('rm ' + rejected_filename_log_fname) 
+        os.remove(rejected_filename_log_fname) 
 
     with open(rejected_filename_log_fname, 'w') as f:
         names = [str(os.path.abspath(name)) for name in rejected_fnames.keys()]

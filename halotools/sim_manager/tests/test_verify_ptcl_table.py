@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 import pytest 
-import warnings, os
+import warnings, os, shutil
 
 import numpy as np 
 from copy import copy, deepcopy 
@@ -43,8 +43,8 @@ class TestLoadCachedPtclTable(TestCase):
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
 
         try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
             pass
 
 
@@ -252,8 +252,8 @@ class TestLoadCachedPtclTable(TestCase):
 
     def tearDown(self):
         try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
             pass
 
 

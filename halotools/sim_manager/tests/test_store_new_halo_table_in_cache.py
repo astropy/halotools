@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 import pytest 
-import warnings, os
+import warnings, os, shutil
 
 import numpy as np 
 from copy import copy, deepcopy 
@@ -44,8 +44,8 @@ class TestStoreNewHaloTable(TestCase):
         """
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
         try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
             pass
 
         # Create a fake halo catalog 
@@ -370,10 +370,11 @@ class TestStoreNewHaloTable(TestCase):
         assert halocat2.redshift == 0.001
 
 
+
     def tearDown(self):
         try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
             pass
 
 

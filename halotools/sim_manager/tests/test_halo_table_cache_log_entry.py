@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 import pytest 
-import warnings, os
+import warnings, os, shutil
 
 import numpy as np 
 from copy import copy, deepcopy 
@@ -45,8 +45,8 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
         try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
             pass
         os.makedirs(self.dummy_cache_baseloc)
 
@@ -133,7 +133,10 @@ class TestHaloTableCacheLogEntry(TestCase):
     def test_scenario2a(self):
         num_scenario = 2
 
-        os.system('rm '+self.fnames[num_scenario])
+        try:
+            os.remove(self.fnames[num_scenario])
+        except OSError:
+            pass
         self.table1.write(self.fnames[num_scenario], path='data')
 
         f = self.h5py.File(self.fnames[num_scenario])
@@ -148,7 +151,10 @@ class TestHaloTableCacheLogEntry(TestCase):
     def test_scenario2b(self):
         num_scenario = 2
 
-        os.system('rm '+self.fnames[num_scenario])
+        try:
+            os.remove(self.fnames[num_scenario])
+        except OSError:
+            pass
         self.table1.write(self.fnames[num_scenario], path='data')
 
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
@@ -173,7 +179,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         num_scenario = 2
 
         try:
-            os.system('rm '+self.fnames[num_scenario])
+            os.remove(self.fnames[num_scenario])
         except:
             pass
         self.table1.write(self.fnames[num_scenario], path='data')
@@ -209,7 +215,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         num_scenario = 3
 
         try:
-            os.system('rm '+self.fnames[num_scenario])
+            os.remove(self.fnames[num_scenario])
         except:
             pass
         self.table1.write(self.fnames[num_scenario], path='data')
@@ -234,7 +240,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         num_scenario = 3
 
         try:
-            os.system('rm '+self.fnames[num_scenario])
+            os.remove(self.fnames[num_scenario])
         except:
             pass
         self.table1.write(self.fnames[num_scenario], path='data')
@@ -261,7 +267,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         num_scenario = 3
 
         try:
-            os.system('rm '+self.fnames[num_scenario])
+            os.remove(self.fnames[num_scenario])
         except:
             pass
 
@@ -297,7 +303,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         num_scenario = 4
 
         try:
-            os.system('rm '+self.fnames[num_scenario])
+            os.remove(self.fnames[num_scenario])
         except:
             pass
 
@@ -316,8 +322,8 @@ class TestHaloTableCacheLogEntry(TestCase):
 
     def tearDown(self):
         try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
             pass
 
 

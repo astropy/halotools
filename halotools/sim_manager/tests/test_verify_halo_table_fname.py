@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 import pytest 
-import warnings, os
+import warnings, os, shutil
 
 import numpy as np 
 from copy import copy, deepcopy 
@@ -43,8 +43,8 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
 
         try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
             pass
 
     def test_cache_existence_check(self):
@@ -446,7 +446,7 @@ class TestLoadCachedHaloTableFromFname(TestCase):
             version_name = updated_log['version_name'][0])
 
         # Manually delete the file
-        os.system('rm ' + updated_log['fname'][0])
+        os.remove(updated_log['fname'][0])
 
         # Verify that the appropriate exception is raised now that the file is gone 
         with pytest.raises(HalotoolsError) as err:
@@ -693,8 +693,8 @@ class TestLoadCachedHaloTableFromFname(TestCase):
         
     def tearDown(self):
         try:
-            os.system('rm -rf ' + self.dummy_cache_baseloc)
-        except OSError:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
             pass
 
 

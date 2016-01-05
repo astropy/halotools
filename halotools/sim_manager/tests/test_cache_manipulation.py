@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 import pytest 
-import warnings, os
+import warnings, os, shutil
 
 import numpy as np 
 from copy import copy, deepcopy 
@@ -65,7 +65,7 @@ class TestCacheManipulation(TestCase):
         if os.path.isdir(getattr(self, tmp_name)) is False:
             os.mkdir(new_cache_name)
         else:
-            os.system('rm -rf ' + new_cache_name)
+            shutil.rmtree(new_cache_name)
             os.mkdir(new_cache_name)
 
         new_cache_log_fname = os.path.join(new_cache_name, 'dummy_cache_log.txt')
@@ -128,7 +128,10 @@ class TestCacheManipulation(TestCase):
 
     def tearDown(self):
         for name in self.temp_cache_dirnames:
-            os.system('rm -rf ' + name)
+            try:
+                shutil.rmtree(name)
+            except:
+                pass
 
 
 
