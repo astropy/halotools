@@ -28,6 +28,8 @@ import urlparse
 import os, fnmatch, re
 
 from . import manipulate_cache_log
+from .halo_table_cache import HaloTableCache
+from .ptcl_table_cache import PtclTableCache
 
 from ..custom_exceptions import *
 
@@ -51,6 +53,10 @@ class DownloadManager(object):
     """ Class used to scrape the web for simulation data
     and manage the set of cached catalogs.
     """
+
+    def __init__(self):
+        self.halo_table_cache = HaloTableCache()
+        self.ptcl_table_cache = PtclTableCache()
 
     def processed_halo_tables_available_for_download(self, **kwargs):
         """ Method searches the appropriate web location and
