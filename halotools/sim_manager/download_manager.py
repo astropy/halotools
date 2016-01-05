@@ -268,7 +268,7 @@ class DownloadManager(object):
         scale_factor_substring = fname[first_index:last_index]
         return scale_factor_substring
 
-    def _closest_fname(self, filename_list, desired_redshift):
+    def _closest_fname(self, filename_list, redshift):
         """
         """
 
@@ -276,10 +276,10 @@ class DownloadManager(object):
             msg = "The _closest_fname method was passed an empty filename_list"
             raise HalotoolsError(msg)
 
-        if desired_redshift <= -1:
-            raise ValueError("desired_redshift of <= -1 is unphysical")
+        if redshift <= -1:
+            raise ValueError("redshift of <= -1 is unphysical")
         else:
-            input_scale_factor = 1./(1.+desired_redshift)
+            input_scale_factor = 1./(1.+redshift)
 
         # First create a list of floats storing the scale factors of each hlist file
         scale_factor_list = []
@@ -292,7 +292,7 @@ class DownloadManager(object):
 
         # Now use the array utils module to determine
         # which scale factor is the closest
-        input_scale_factor = 1./(1. + desired_redshift)
+        input_scale_factor = 1./(1. + redshift)
         idx_closest_catalog = find_idx_nearest_val(
             scale_factor_list, input_scale_factor)
         closest_scale_factor = scale_factor_list[idx_closest_catalog]
@@ -302,13 +302,11 @@ class DownloadManager(object):
 
         return output_fname, closest_available_redshift
 
-    def closest_catalog_on_web(self, **kwargs):
+    def closest_catalog_on_web(self, catalog_type, 
+        simname, desired_redshift, **kwargs):
         """
         Parameters
         ----------
-        desired_redshift : float
-            Redshift of the desired catalog.
-
         catalog_type : string
             Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files.
             Must be either ``halos`` or ``particles``
@@ -318,43 +316,62 @@ class DownloadManager(object):
             Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
+        desired_redshift : float
+            Redshift of the desired catalog.
+
         halo_finder : string, optional
             Nickname of the halo-finder, e.g. ``rockstar``.
             Required when input ``catalog_type`` is ``halos``.
 
-        version_name : string, optional
-            String specifying the version of the processed halo catalog.
+        version_name : string, optional 
+            Nickname for the version of the catalog. 
             Argument is used to filter the output list of filenames.
-            Default is set by `~halotools.sim_manager.sim_defaults` module.
+            Default is set by `~halotools.sim_manager.sim_defaults` module. 
 
         Returns
         -------
         output_fname : list
             String of the filename with the closest matching redshift.
 
-        redshift : float
-            Value of the redshift of the snapshot
+        actual_redshift : float
+            Value of the redshift of the closest matching snapshot
 
         Examples
         --------
         >>> catman = DownloadManager()
 
-        Suppose you would like to download a pre-processed halo catalog for the Bolshoi-Planck simulation for z=0.5.
-        To identify the filename of the available catalog that most closely matches your needs:
+        Suppose you would like to download a pre-processed halo catalog 
+        for the Bolshoi-Planck simulation for z=0.5.
+        To identify the filename of the available catalog 
+        that most closely matches your needs:
 
         >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='halos', simname='bolplanck', halo_finder='rockstar', desired_redshift=0.5)  # doctest: +REMOTE_DATA
 
-        You may also wish to have a collection of downsampled dark matter particles to accompany this snapshot:
+        You may also wish to have a collection of downsampled 
+        dark matter particles to accompany this snapshot:
 
         >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
 
         """
         try:
-            simname = kwargs['simname']
-            if simname not in supported_sim_list:
-                raise HalotoolsError(unsupported_simname_msg % simname)
-        except KeyError:
-            pass
+            assert catalog_type in ('particles', 'halos')
+        except AssertionError:
+            msg = ("Input ``catalog_type`` must be either ``particles`` or ``halos``")
+            raise HalotoolsError(msg)
+
+        if catalog_type is 'halos':
+            try:
+                halo_finder = kwargs['halo_finder']
+            except KeyError:
+                raise HalotoolsError("\nIf input catalog_type is ``halos``, "
+                    "must pass ``halo_finder`` argument")
+        else:
+            if 'halo_finder' in kwargs.keys():
+                warn("There is no need to specify a halo-finder "
+                    "when requesting particle data")
+
+        if simname not in supported_sim_list:
+            raise HalotoolsError(unsupported_simname_msg % simname)
 
         if 'redshift' in kwargs.keys():
             msg = ("\nThe correct argument to use to specify the redshift \n"
@@ -362,35 +379,27 @@ class DownloadManager(object):
                 "not the ``redshift`` keyword.\n")
             raise HalotoolsError(msg)
 
-        if 'version_name' not in kwargs.keys():
-            kwargs['version_name'] = sim_defaults.default_version_name
-
-        # Verify arguments are as needed
         try:
-            simname = kwargs['simname']
+            version_name = kwargs['version_name']
         except KeyError:
-            raise HalotoolsError("\nMust supply input simname keyword argument")
-
-        catalog_type = kwargs['catalog_type']
-        if catalog_type is not 'particles':
-            try:
-                halo_finder = kwargs['halo_finder']
-            except KeyError:
-                raise HalotoolsError("\nIf input catalog_type is not particles, must pass halo_finder argument")
-        else:
-            if 'halo_finder' in kwargs.keys():
-                warn("There is no need to specify a halo-finder when requesting particle data")
-                del kwargs['halo_finder']
+            version_name = sim_defaults.default_version_name
 
         if catalog_type is 'particles':
-            filename_list = self.ptcl_tables_available_for_download(**kwargs)
+            filename_list = (
+                self.ptcl_tables_available_for_download(simname = simname, 
+                    version_name = version_name)
+                )
         elif catalog_type is 'halos':
-            filename_list = self.processed_halo_tables_available_for_download(**kwargs)
+            filename_list = (
+                self.processed_halo_tables_available_for_download(simname = simname, 
+                    halo_finder = halo_finder, version_name = version_name)
+                )
 
-        desired_redshift = kwargs['desired_redshift']
-        output_fname, redshift = self._closest_fname(filename_list, desired_redshift)
+        output_fname, actual_redshift = (
+            self._closest_fname(filename_list, desired_redshift)
+            )
 
-        return output_fname, redshift
+        return output_fname, actual_redshift
 
 
     def download_processed_halo_table(self, simname, halo_finder, desired_redshift, 
