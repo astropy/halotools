@@ -146,8 +146,8 @@ if len(new_cache.log) > 0:
     for entry in new_cache.log:
         print(entry)
     print("\n")
-    print("The new cache log is stored "
-        "in the following location:\n" + new_cache.cache_log_fname)
+    print("The updated cache log is stored "
+        "in the following (standard) location:\n" + new_cache.cache_log_fname)
 
 if len(rejected_fnames) > 0:
     print("\n\nThere were some filenames that were "
@@ -161,10 +161,9 @@ if len(rejected_fnames) > 0:
 
     print("\n")
 
-    try:
+    # If there was already an existing rejected filename log, delete it
+    if os.path.isfile(rejected_filename_log_fname):
         os.system('rm ' + rejected_filename_log_fname) 
-    except:
-        pass
 
     with open(rejected_filename_log_fname, 'w') as f:
         names = [str(os.path.abspath(name)) for name in rejected_fnames.keys()]
@@ -182,7 +181,7 @@ if len(rejected_fnames) > 0:
             + corrupted_cache_log_fname)
     print("\n")
 
-
+print("\a\a")
 
 
 
