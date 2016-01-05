@@ -231,9 +231,9 @@ class RockstarHlistReader(TabularAsciiReader):
         ignore_nearby_redshifts : bool, optional 
             Flag used to determine whether nearby redshifts in cache will be ignored. 
             If there are existing halo catalogs in the Halotools cache with matching 
-            ``simname``, ``halo_finder`` and ``version_name``, and if one or more of those 
-            catalogs has a redshift within ``dz_tol``, 
-            then the ignore_nearby_redshifts flag must be set to True 
+            ``simname``, ``halo_finder`` and ``version_name``, 
+            and if one or more of those catalogs has a redshift within ``dz_tol``, 
+            then the ignore_nearby_redshifts flag must be set to True in order 
             for the new halo catalog to be stored in cache. 
             Default is False. 
 
