@@ -158,8 +158,10 @@ class HaloTableCache(object):
             if update_ascii == True:
                 self._overwrite_log_ascii(self.log)
 
-    def remove_entry_from_cache_log(self, simname, halo_finder, version_name, redshift, fname, 
-        raise_non_existence_exception = True, update_ascii = True):
+    def remove_entry_from_cache_log(self, simname, halo_finder, 
+        version_name, redshift, fname, 
+        raise_non_existence_exception = True, 
+        update_ascii = True, delete_corresponding_halo_catalog = False):
         """
         If the log stores an entry matching the input metadata, the entry will be deleted and 
         the ascii file storing the log will be updated. If there is no match, 
@@ -189,21 +191,48 @@ class HaloTableCache(object):
         raise_non_existence_exception : bool, optional 
             If True, an exception will be raised if this function is called 
             and there is no matching entry in the log. Default is True. 
+
+        delete_corresponding_halo_catalog : bool, optional 
+            If set to True, when the log entry is deleted, 
+            the corresponding hdf5 file will be deleted from your disk. 
+            Default is False. 
         """
+        if (update_ascii == False) & (delete_corresponding_halo_catalog == True):
+            msg = ("\nIf ``delete_corresponding_halo_catalog`` is True, \n"
+                "``update_ascii`` must also be set to True.\n")
+            raise HalotoolsError(msg)
+
         log_entry = HaloTableCacheLogEntry(simname = simname, 
             halo_finder = halo_finder, version_name = version_name, 
             redshift = redshift, fname = fname)
 
         try:
             self.log.remove(log_entry)
+
             if update_ascii == True:
                 self._overwrite_log_ascii(self.log)
-                msg = ("The log has been updated on disk and in memory")
+                msg = ("\nThe log has been updated on disk and in memory.\n")
             else:
-                msg = ("The log has been updated in memory "
+                msg = ("\nThe log has been updated in memory "
                     "but not on disk because \n"
-                    "the update_ascii argument is set to False")
+                    "the update_ascii argument is set to False.\n")
+
+            if delete_corresponding_halo_catalog == True:
+                try:
+                    os.remove(log_entry.fname)
+                    msg += (
+                        "The corresponding hdf5 file storing the halo catalog "
+                        "has also been deleted from disk.\n"
+                        )
+                except OSError:
+                    pass
+            else:
+                if os.path.isfile(log_entry.fname):
+                    msg += ("The corresponding hdf5 file storing the halo catalog \n"
+                        "has not been deleted from your disk because you set "
+                        "``delete_corresponding_halo_catalog`` to False.\n")
             print(msg)
+
         except ValueError:
             if raise_non_existence_exception == False:
                 pass
