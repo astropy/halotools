@@ -90,13 +90,20 @@ def fnames_in_rejected_filename_log():
     if os.path.isfile(rejected_filename_log_fname):
         with open(rejected_filename_log_fname, 'r') as f:
             for ii, line in enumerate(f):
-                yield os.path.abspath(str(line))
+                line = line.strip()
+                if '.hdf5' == line[-5]:
+                    yield os.path.abspath(str(line))
 
-potential_fnames = fnames_in_existing_log()
-potential_fnames.extend(list(halo_table_fnames_in_standard_cache()))
-potential_fnames.extend(list(fnames_in_rejected_filename_log()))
+
+collated_names = []
+names1 = fnames_in_existing_log()
+collated_names.extend(names1)
+names2 = list(halo_table_fnames_in_standard_cache())
+collated_names.extend(names2)
+names3 = list(fnames_in_rejected_filename_log())
+collated_names.extend(names3)
 # remove any possibly duplicated entries
-potential_fnames = [str(name).strip() for name in potential_fnames]
+potential_fnames = [str(name).strip() for name in collated_names]
 potential_fnames = list(set(potential_fnames))
 
 rejected_fnames = {}
@@ -175,11 +182,6 @@ if len(rejected_fnames) > 0:
             + corrupted_cache_log_fname)
     print("\n")
 
-import shelve
-d = shelve.open('/Users/aphearin/Desktop/tmpdict')
-for key in rejected_fnames.keys():
-    d[key] = rejected_fnames[key]
-d.close()
 
 
 
