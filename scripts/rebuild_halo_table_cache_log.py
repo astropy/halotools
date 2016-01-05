@@ -13,7 +13,6 @@ except ImportError:
     msg = ("\nMust have h5py installed to use the rebuild_halo_table_cache_log script.\n")
     raise HalotoolsError(msg)
 
-from halotools.sim_manager import manipulate_cache_log
 from halotools.custom_exceptions import HalotoolsError
 from halotools.sim_manager.halo_table_cache import HaloTableCache
 from halotools.sim_manager.log_entry import HaloTableCacheLogEntry
