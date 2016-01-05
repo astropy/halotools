@@ -1,5 +1,5 @@
 import os
-from copy import copy
+from copy import copy, deepcopy
 from astropy.config.paths import _find_home
 from astropy.table import Table
 from warnings import warn
@@ -251,7 +251,7 @@ class HaloTableCache(object):
                 raise HalotoolsError(msg)
 
 
-    def determine_log_entry_from_fname(self, fname):
+    def determine_log_entry_from_fname(self, fname, overwrite_fname_metadata = False):
         """ Method tries to construct a `~halotools.sim_manager.HaloTableCacheLogEntry` 
         using the metadata that may be stored in the input file. An exception will be raised 
         if the determination is not possible. 
@@ -300,11 +300,37 @@ class HaloTableCache(object):
         f = h5py.File(fname)
         constructor_kwargs = ({key: f.attrs[key] 
             for key in HaloTableCacheLogEntry.log_attributes})
+        if overwrite_fname_metadata == True:
+            constructor_kwargs['fname'] = fname
+            f.attrs['fname'] = fname
         log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
         f.close()
         return log_entry
 
+    def update_cached_file_location(self, new_fname, old_fname):
+        """
+        Parameters 
+        -----------
+        new_fname : string 
+            Name of the new location of the file 
 
+        old_fname : string 
+            Name of the old location of the file 
+        """
+        new_log_entry = self.determine_log_entry_from_fname(
+            new_fname, overwrite_fname_metadata = True)
+
+        self.add_entry_to_cache_log(new_log_entry, update_ascii = True)
+        self.remove_entry_from_cache_log(
+            simname = new_log_entry.simname, 
+            halo_finder = new_log_entry.halo_finder, 
+            version_name = new_log_entry.version_name, 
+            redshift = new_log_entry.redshift, 
+            fname = old_fname, 
+            raise_non_existence_exception = False, 
+            update_ascii = True, 
+            delete_corresponding_halo_catalog = False
+            )
 
 
 
