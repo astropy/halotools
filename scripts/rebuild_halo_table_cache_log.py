@@ -105,11 +105,12 @@ potential_log_entries = list(set(potential_log_entries))
 
 new_cache = HaloTableCache(read_log_from_standard_loc = False)
 for log_entry in potential_log_entries:
-    if log_entry.safe_for_cache == True:
-        new_cache.add_entry_to_cache_log(log_entry, update_ascii = False)
-    else:
-        rejected_fnames.append((log_entry.fname, log_entry._cache_safety_message))
-
+    try:
+        new_cache.add_entry_to_cache_log(
+            log_entry, update_ascii = False)
+    except:
+        rejected_fnames.append(
+            (log_entry.fname, log_entry._cache_safety_message))
 
 print("\nNumber of files passing verification tests = " 
     + str(len(new_cache.log)) + "\n")
