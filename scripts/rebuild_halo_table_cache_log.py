@@ -5,6 +5,7 @@
 import argparse, os, fnmatch
 from astropy.table import Table
 import numpy as np
+from time import time
 
 try:
     import h5py
@@ -46,7 +47,7 @@ if os.path.isfile(corrupted_cache_log_fname):
         "copy this row into a new row of " + os.path.basename(old_cache.cache_log_fname) + "\n"
         "Depending on the state of the corrupted log, "
         "you may need to enter in the metadata columns manually.\n"
-        "When you have finished, delete the " + os.path.basename(corrupted_cache_log_fname) + "file \n"
+        "When you have finished, delete " + os.path.basename(corrupted_cache_log_fname) + "\n"
         "after backing it up in an external location.\n"
         "Once the corrupted log has been removed from \n" + os.path.dirname(corrupted_cache_log_fname) + ",\n"
         "you can run the rebuild_halo_table_cache_log.py again.\n"
@@ -60,7 +61,7 @@ def fnames_in_existing_log():
     """ If there is an existing log, try and extract a list of filenames from it. 
     """
     try:
-        names = [entry.fname for entry in old_cache.log]
+        names = [os.path.abspath(entry.fname) for entry in old_cache.log]
         existing_log_is_corrupted = False
         return names
     except:
@@ -76,31 +77,36 @@ def halo_table_fnames_in_standard_cache():
     if os.path.exists(standard_loc):
         for path, dirlist, filelist in os.walk(standard_loc):
             for name in fnmatch.filter(filelist, '*.hdf5'):
-                yield os.path.join(path, name)
+                yield os.path.abspath(os.path.join(path, name))
 
+num_files = len(list(halo_table_fnames_in_standard_cache()))
 print("\nNumber of files detected in standard cache location = " 
-    + str(len(list(halo_table_fnames_in_standard_cache()))) + "\n")
+    + str(num_files) + "\n")
+print("\nEach of these files must be opened, and the metadata will be checked, \n"
+    "and consistency between the metadata and halo table will be checked.\n"
+    "Estimated runtime = " + str(num_files*3) + " seconds.\n")
 
 def fnames_in_rejected_filename_log():
     if os.path.isfile(rejected_filename_log_fname):
         with open(rejected_filename_log_fname, 'r') as f:
             for ii, line in enumerate(f):
-                yield str(line)
+                yield os.path.abspath(str(line))
 
 potential_fnames = fnames_in_existing_log()
 potential_fnames.extend(list(halo_table_fnames_in_standard_cache()))
 potential_fnames.extend(list(fnames_in_rejected_filename_log()))
 # remove any possibly duplicated entries
+potential_fnames = [str(name).strip() for name in potential_fnames]
 potential_fnames = list(set(potential_fnames))
 
-rejected_fnames = []
+rejected_fnames = {}
 potential_log_entries = []
 for fname in potential_fnames:
     result = old_cache.determine_log_entry_from_fname(fname)
     if type(result) is HaloTableCacheLogEntry:
         potential_log_entries.append(result)
     else:
-        rejected_fnames.append((fname, result))
+        rejected_fnames[fname] = result
 potential_log_entries = list(set(potential_log_entries))
 
 new_cache = HaloTableCache(read_log_from_standard_loc = False)
@@ -109,8 +115,7 @@ for log_entry in potential_log_entries:
         new_cache.add_entry_to_cache_log(
             log_entry, update_ascii = False)
     except:
-        rejected_fnames.append(
-            (log_entry.fname, log_entry._cache_safety_message))
+        rejected_fnames[log_entry.fname] = log_entry._cache_safety_message
 
 print("\nNumber of files passing verification tests = " 
     + str(len(new_cache.log)) + "\n")
@@ -125,7 +130,7 @@ if os.path.isfile(rejected_filename_log_fname):
 if old_cache_log_exists:
     os.system('mv ' + old_cache.cache_log_fname + ' ' + corrupted_cache_log_fname)
 
-if len(new_log) > 0:
+if len(new_cache.log) > 0:
     new_cache._overwrite_log_ascii(new_cache.log)
 
     print("\n\n")
@@ -138,19 +143,27 @@ if len(new_log) > 0:
         "in the following location:\n" + new_cache.cache_log_fname)
 
 if len(rejected_fnames) > 0:
-    print("There were some filenames that were "
+    print("\n\nThere were some filenames that were "
         "rejected and will NOT be added to your new cache log.\n"
         "The reason for the rejection appears below each filename.")
-    for ii, entry in enumerate(rejected_fnames):
-        print("Rejected file #" + str(ii) + "\n")
-        print(entry[0])
-        print("\n")
-        print(entry[1])
+    for ii, fname in enumerate(rejected_fnames.keys()):
+        print("-----------------------------------")
+        print("Rejected file #" + str(ii+1) + "\n")
+        print(fname)
+        print(rejected_fnames[fname])
 
     print("\n")
 
+    try:
+        os.system('rm ' + rejected_filename_log_fname) 
+    except:
+        pass
+
     with open(rejected_filename_log_fname, 'w') as f:
-        for name in rejected_fnames:
+        names = [str(os.path.abspath(name)) for name in rejected_fnames.keys()]
+        names = list(set(names))
+        names.sort()
+        for name in names:
             f.write(name + "\n")
     print("These rejected filenames are now stored in the following location:\n"
         + rejected_filename_log_fname + "\n")
@@ -162,7 +175,11 @@ if len(rejected_fnames) > 0:
             + corrupted_cache_log_fname)
     print("\n")
 
-
+import shelve
+d = shelve.open('/Users/aphearin/Desktop/tmpdict')
+for key in rejected_fnames.keys():
+    d[key] = rejected_fnames[key]
+d.close()
 
 
 
