@@ -196,7 +196,8 @@ class TestHaloTableCache(TestCase):
         os.rename(old_fname, new_fname)
 
         assert self.good_log_entry in cache.log
-        cache.update_cached_file_location(new_fname, old_fname)
+        cache.update_cached_file_location(new_fname, old_fname, 
+            update_ascii = False)
         assert self.good_log_entry not in cache.log
 
         new_entry = cache.determine_log_entry_from_fname(new_fname)
