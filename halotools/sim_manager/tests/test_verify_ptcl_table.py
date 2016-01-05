@@ -250,6 +250,11 @@ class TestLoadCachedPtclTable(TestCase):
             version_name = 'halotools_alpha_version1')
 
 
+    def tearDown(self):
+        try:
+            os.system('rm -rf ' + self.dummy_cache_baseloc)
+        except OSError:
+            pass
 
 
 

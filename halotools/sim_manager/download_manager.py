@@ -513,7 +513,8 @@ class DownloadManager(object):
                         if 'initial_download_script_msg' in kwargs.keys():
                             msg = kwargs['initial_download_script_msg']
                         else:
-                            msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
+                            msg = ("The following filename already exists "
+                                "in your cache directory: \n\n%s\n\n"
                                 "If you really want to overwrite the file, \n"
                                 "you must call the same function again \n"
                                 "with the keyword argument `overwrite` set to `True`")

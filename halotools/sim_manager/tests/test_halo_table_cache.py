@@ -186,9 +186,9 @@ class TestHaloTableCache(TestCase):
 
 
 
-    # def tearDown(self):
-    #     try:
-    #         os.system('rm -rf ' + self.dummy_cache_baseloc)
-    #     except OSError:
-    #         pass
+    def tearDown(self):
+        try:
+            os.system('rm -rf ' + self.dummy_cache_baseloc)
+        except OSError:
+            pass
 
