@@ -8,6 +8,7 @@ from astropy.tests.helper import remote_data, pytest
 from unittest import TestCase
 
 from ..download_manager import DownloadManager
+from ..halo_table_cache import HaloTableCache 
 
 from ...custom_exceptions import UnsupportedSimError, HalotoolsError
 
@@ -26,7 +27,7 @@ else:
 class TestDownloadManager(TestCase):
 
 
-    def setup_class(self):
+    def setUp(self):
 
         homedir = _find_home()
 
@@ -106,6 +107,7 @@ class TestDownloadManager(TestCase):
         full_fname = os.path.join(p, f)
         assert os.path.isfile(full_fname)
 
+        self.clear_APH_MACHINE_of_highz_file()
 
     @remote_data
     def test_ptcl_tables_available_for_download(self):
@@ -196,7 +198,8 @@ class TestDownloadManager(TestCase):
         uploaded yet, so we mark it with xfail. 
         """
         x = self.downman.ptcl_tables_available_for_download(
-            simname = 'bolplanck', version_name = 'halotools_alpha_version1')
+            simname = 'bolplanck', version_name = 'halotools_alpha_version1', 
+            download_dirname=self.halocat_dir)
         assert len(x) == 0
 
     @pytest.mark.skipif('not APH_MACHINE')
@@ -207,8 +210,8 @@ class TestDownloadManager(TestCase):
         halo_finder = 'bdm'
         with pytest.raises(HalotoolsError) as exc:
             self.downman.download_processed_halo_table(simname = simname, 
-                halo_finder = halo_finder, desired_redshift = redshift, 
-                overwrite = False)
+                halo_finder = halo_finder, redshift = redshift, 
+                overwrite = False, download_dirname=self.halocat_dir)
 
 
     def test_orig_halo_table_web_location(self):
@@ -270,13 +273,80 @@ class TestDownloadManager(TestCase):
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
-    @pytest.mark.xfail
-    def test_download_processed_halo_table(self):
+    def test_download_processed_halo_table1(self):
         """
         """
-        self.downman.download_processed_halo_table('bolshoi', 'rockstar', 0.0)
-        # raise HalotoolsError("This test will be a bit subtle to write")
-        # self.downman.download_processed_halo_table(simname = 'bolshoi')
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_processed_halo_table(
+                simname = 'Jose Canseco', 
+                halo_finder = 'rockstar', 
+                version_name = 'halotools_alpha_version1', 
+                redshift = 11.7, 
+                download_dirname=self.halocat_dir)
+        substr = "no web locations" 
+        assert substr in err.value.message
+
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_processed_halo_table2(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_processed_halo_table(
+                simname = 'bolshoi', 
+                halo_finder = 'rockstar', 
+                version_name = 'Jose Canseco', 
+                redshift = 11.7, 
+                download_dirname=self.halocat_dir)
+        substr = "no halo catalogs meeting" 
+        assert substr in err.value.message
+
+
+    def clear_APH_MACHINE_of_highz_file(self, 
+        delete_corresponding_halo_catalog = True):
+
+        cache = HaloTableCache()
+        matching_log_entries = cache.matching_log_entry_generator(
+            simname = 'bolshoi', 
+            halo_finder = 'rockstar', 
+            version_name = 'halotools_alpha_version1', 
+            redshift = 11.7, dz_tol = 0.2 
+            )
+        for matching_log_entry in matching_log_entries:
+            cache.remove_entry_from_cache_log(
+                simname = matching_log_entry.simname, 
+                halo_finder = matching_log_entry.halo_finder, 
+                version_name = matching_log_entry.version_name, 
+                redshift = matching_log_entry.redshift, 
+                fname = matching_log_entry.fname, 
+                update_ascii = True, 
+                delete_corresponding_halo_catalog = delete_corresponding_halo_catalog
+                )
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_processed_halo_table3(self):
+        """
+        """
+
+        self.clear_APH_MACHINE_of_highz_file()
+
+        cache1 = HaloTableCache()
+        self.downman.download_processed_halo_table(
+            simname = 'bolshoi', 
+            halo_finder = 'rockstar', 
+            version_name = 'halotools_alpha_version1', 
+            redshift = 11.7, 
+            download_dirname=self.halocat_dir)
+        cache2 = HaloTableCache()
+        assert len(cache1.log) == len(cache2.log) - 1
+        new_entry = list(set(cache2.log) - set(cache1.log))[0]
+
+        assert os.path.isfile(new_entry.fname)
+        assert new_entry.safe_for_cache is True
+
+
 
     def tearDown(self):
         try:
