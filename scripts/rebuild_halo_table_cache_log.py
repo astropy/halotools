@@ -175,7 +175,7 @@ if len(rejected_fnames) > 0:
         + rejected_filename_log_fname + "\n")
 
     if old_cache_log_exists:
-        print("Before running this script, you already had an existing cache log.\n"
+        print("Before running this script, you already had an existing (possibly corrupted) cache log.\n"
             "This file has been saved "
             "and is now stored in the following location:\n" 
             + corrupted_cache_log_fname)
