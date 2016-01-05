@@ -184,6 +184,27 @@ class TestHaloTableCache(TestCase):
             raise_non_existence_exception = False)
         assert len(cache.log) == 1
 
+    def test_update_cached_file_location(self):
+        """
+        """
+        cache = HaloTableCache(read_log_from_standard_loc = False)
+        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
+        old_fname = self.good_log_entry.fname
+        old_basename = os.path.basename(old_fname)
+        new_basename = "dummy" + old_basename
+        new_fname = os.path.join(os.path.dirname(old_fname), new_basename)
+        os.rename(old_fname, new_fname)
+
+        assert self.good_log_entry in cache.log
+        cache.update_cached_file_location(new_fname, old_fname)
+        assert self.good_log_entry not in cache.log
+
+        new_entry = cache.determine_log_entry_from_fname(new_fname)
+        assert new_entry in cache.log
+
+
+
+
 
     def tearDown(self):
         try:
