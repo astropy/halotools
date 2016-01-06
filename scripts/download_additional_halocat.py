@@ -12,11 +12,11 @@ parser.add_argument("-overwrite",
     help="Overwrite the existing halo catalog (if present)", 
     action="store_true")
 
-parser.add_argument("-ptcls-only", 
+parser.add_argument("-ptcls_only", 
     help="Only download the particle data of the snapshot", 
     action="store_true")
 
-parser.add_argument("-halos-only", 
+parser.add_argument("-halos_only", 
     help="Only download the halo catalog data of the snapshot", 
     action="store_true")
 
@@ -46,6 +46,11 @@ halo_finder = args.halo_finder
 version_name = args.version_name
 redshift = args.redshift
 if version == 'most_recent': version = sim_defaults.default_version_name
+
+
+if args.ptcls_only is True: download_halos = False
+if args.halos_only is True: download_ptcls = False
+
 
 downman = DownloadManager()
 
