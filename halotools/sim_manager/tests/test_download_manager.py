@@ -9,7 +9,7 @@ from unittest import TestCase
 
 from ..download_manager import DownloadManager
 from ..halo_table_cache import HaloTableCache 
-
+from .. import sim_defaults 
 from ...custom_exceptions import UnsupportedSimError, HalotoolsError
 
 ### Determine whether the machine is mine
@@ -190,19 +190,6 @@ class TestDownloadManager(TestCase):
         assert (f, np.round(z, 1)) == ('hlist_0.50648.particles.hdf5', 1.)
 
     @pytest.mark.skipif('not APH_MACHINE')
-    @pytest.mark.xfail
-    @remote_data
-    def test_ptcl_tables_available_for_download(self):
-        """ Test that we find the version-1 ptcl_tables on the web. 
-        At the time this test was written, the catalogs had not been 
-        uploaded yet, so we mark it with xfail. 
-        """
-        x = self.downman.ptcl_tables_available_for_download(
-            simname = 'bolplanck', version_name = 'halotools_alpha_version1', 
-            download_dirname=self.halocat_dir)
-        assert len(x) == 0
-
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_unsupported_sim_download_attempt(self): 
         simname = 'consuelo'
@@ -262,7 +249,6 @@ class TestDownloadManager(TestCase):
         assert 'bolshoi/bdm/hlist_1.00030.list.halotools.alpha.version0.hdf5' in fname 
 
     @remote_data
-    @pytest.mark.xfail
     def test_closest_catalog_on_web(self):
         """ This test currently fails because the halo catalogs have not been updated yet.
         """
@@ -345,6 +331,32 @@ class TestDownloadManager(TestCase):
 
         self.clear_APH_MACHINE_of_highz_file()
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_ptcl_table1(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_ptcl_table(
+                simname = 'Jose Canseco', 
+                version_name = 'halotools_alpha_version1', 
+                redshift = 11.7, 
+                download_dirname=self.halocat_dir)
+        substr = "no web locations" 
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_ptcl_table2(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_ptcl_table(
+                simname = 'bolshoi', 
+                version_name = 'Jose Canseco', 
+                redshift = 11.7, 
+                download_dirname=self.halocat_dir)
+        substr = "There are no particle catalogs meeting your specifications"
+        assert substr in err.value.message
 
     def tearDown(self):
         try:
