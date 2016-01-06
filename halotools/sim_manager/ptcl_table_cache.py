@@ -156,12 +156,7 @@ class PtclTableCache(object):
             self.log.sort()
             if update_ascii == True:
                 self._overwrite_log_ascii(self.log)
-                msg = ("The log has been updated on disk and in memory")
-                print(msg)
-            else:
-                msg = ("The log has been updated in memory "
-                    "but not on disk because \nthe update_ascii argument is set to False")
-                print(msg)
+
 
     def remove_entry_from_cache_log(self, simname, version_name, redshift, fname, 
         raise_non_existence_exception = True):
