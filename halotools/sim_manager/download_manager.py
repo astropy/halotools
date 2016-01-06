@@ -749,7 +749,7 @@ class DownloadManager(object):
             file_pattern = '*' + file_pattern + '*'
 
             for path, dirlist, filelist in os.walk(cache_dirname):
-                 for fname in filelist:
+                for fname in filelist:
                     if fnmatch.filter([fname], file_pattern) != []:
                         existing_fname = os.path.join(path, fname)
                         if 'initial_download_script_msg' in kwargs.keys():
