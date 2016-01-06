@@ -652,8 +652,12 @@ class DownloadManager(object):
                 "as well as the``fname`` column of the corresponding entry in the log. \n"
                 "You can accomplish this with the ``update_cached_file_location``"
                 "method \nof the HaloTableCache class.\n\n")
-        
-        print(success_msg)
+
+        if 'initial_download_script_msg' in kwargs.keys():
+            return new_log_entry
+        else:
+            print(success_msg)
+
 
 
     def download_ptcl_table(self, simname, redshift, 
@@ -867,7 +871,10 @@ class DownloadManager(object):
                 "You can accomplish this with the ``update_cached_file_location``"
                 "method \nof the PtclTableCache class.\n\n")
         
-        print(success_msg)
+        if 'initial_download_script_msg' in kwargs.keys():
+            return new_log_entry
+        else:
+            print(success_msg)
 
 
 
