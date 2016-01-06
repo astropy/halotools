@@ -51,7 +51,7 @@ if args.overwrite == False:
         raise HalotoolsError(existing_fname_error_msg % matching_fname)        
 
 ##################################################################
-
+### Call the download method
 
 new_halo_log_entry = downman.download_processed_halo_table(simname = simname, 
     halo_finder = halo_finder, redshift = redshift, 
@@ -60,11 +60,12 @@ new_halo_log_entry = downman.download_processed_halo_table(simname = simname,
 new_ptcl_log_entry = downman.download_ptcl_table(simname = simname, 
     redshift = redshift, dz_tol = 0.05, overwrite=args.overwrite, 
     initial_download_script_msg = existing_fname_error_msg)
+
 ##################################################################
 
 
 ##################################################################
-### DOWNLOAD COMPLETE. Now construct the success message
+### Issue the success message
 cache_dirname = str(os.path.dirname(downman.halo_table_cache.cache_log_fname)).strip()
 halo_table_cache_basename = str(os.path.basename(downman.halo_table_cache.cache_log_fname))
 ptcl_table_cache_basename = str(os.path.basename(downman.ptcl_table_cache.cache_log_fname))
