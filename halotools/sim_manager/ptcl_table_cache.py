@@ -158,8 +158,10 @@ class PtclTableCache(object):
                 self._overwrite_log_ascii(self.log)
 
 
-    def remove_entry_from_cache_log(self, simname, version_name, redshift, fname, 
-        raise_non_existence_exception = True):
+    def remove_entry_from_cache_log(self, simname, version_name, 
+        redshift, fname, 
+        raise_non_existence_exception = True, 
+        update_ascii = True, delete_corresponding_ptcl_catalog = False):
         """
         If the log stores an entry matching the input metadata, the entry will be deleted and 
         the ascii file storing the log will be updated. If there is no match, 
@@ -185,16 +187,46 @@ class PtclTableCache(object):
         raise_non_existence_exception : bool, optional 
             If True, an exception will be raised if this function is called 
             and there is no matching entry in the log. Default is True. 
+
+        delete_corresponding_ptcl_catalog : bool, optional 
+            If set to True, when the log entry is deleted, 
+            the corresponding hdf5 file will be deleted from your disk. 
+            Default is False. 
         """
+        ######################################################
+        # update_ascii kwarg is for unit-testing only 
+        # this feature is intentionally hidden from the docstring
+        if (update_ascii == False) & (delete_corresponding_ptcl_catalog == True):
+            msg = ("\nIf ``delete_corresponding_ptcl_catalog`` is True, \n"
+                "``update_ascii`` must also be set to True.\n")
+            raise HalotoolsError(msg)
+        ######################################################
+
         log_entry = PtclTableCacheLogEntry(simname = simname, 
             version_name = version_name, 
             redshift = redshift, fname = fname)
 
         try:
             self.log.remove(log_entry)
-            self._overwrite_log_ascii(self.log)
-            msg = ("The log has been updated on disk and in memory")
-            print(msg)
+
+            if update_ascii == True:
+                self._overwrite_log_ascii(self.log)
+                msg = ("\nThe log has been updated on disk and in memory.\n")
+            else:
+                msg = ("\nThe log has been updated in memory "
+                    "but not on disk because \n"
+                    "the update_ascii argument is set to False.\n")
+
+            if delete_corresponding_ptcl_catalog == True:
+                try:
+                    os.remove(log_entry.fname)
+                    msg += (
+                        "The corresponding hdf5 file storing the particle catalog "
+                        "has also been deleted from disk.\n"
+                        )
+                except OSError:
+                    pass
+
         except ValueError:
             if raise_non_existence_exception == False:
                 pass
