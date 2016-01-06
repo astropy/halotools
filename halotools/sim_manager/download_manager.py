@@ -535,11 +535,15 @@ class DownloadManager(object):
             msg = ("\nThere already exists a halo catalog in your cache log with \n"
                 "specifications that exactly match your inputs.\n")
             if overwrite == False:
-                msg += ("If you want to overwrite this catalog with your download, \n"
-                    "you must set the ``overwrite`` keyword argument to True. \n"
-                    "Alternatively, you can delete the log entry using the \n"
-                    "remove_entry_from_cache_log method of the HaloTableCache class.\n")
-                raise HalotoolsError(msg)
+                if 'initial_download_script_msg' in kwargs.keys():
+                    msg = kwargs['initial_download_script_msg']
+                    raise HalotoolsError(msg % output_fname)
+                else:
+                    msg += ("If you want to overwrite this catalog with your download, \n"
+                        "you must set the ``overwrite`` keyword argument to True. \n"
+                        "Alternatively, you can delete the log entry using the \n"
+                        "remove_entry_from_cache_log method of the HaloTableCache class.\n")
+                    raise HalotoolsError(msg)
             else:
                 msg += ("Since you have set ``overwrite`` to True, \n"
                     "the download will proceed and the existing file will be overwritten.\n")
@@ -773,11 +777,15 @@ class DownloadManager(object):
             msg = ("\nThere already exists a particle catalog in your cache log with \n"
                 "specifications that exactly match your inputs.\n")
             if overwrite == False:
-                msg += ("If you want to overwrite this catalog with your download, \n"
-                    "you must set the ``overwrite`` keyword argument to True. \n"
-                    "Alternatively, you can delete the log entry using the \n"
-                    "remove_entry_from_cache_log method of the PtclTableCache class.\n")
-                raise HalotoolsError(msg)
+                if 'initial_download_script_msg' in kwargs.keys():
+                    msg = kwargs['initial_download_script_msg']
+                    raise HalotoolsError(msg % output_fname)
+                else:
+                    msg += ("If you want to overwrite this catalog with your download, \n"
+                        "you must set the ``overwrite`` keyword argument to True. \n"
+                        "Alternatively, you can delete the log entry using the \n"
+                        "remove_entry_from_cache_log method of the PtclTableCache class.\n")
+                    raise HalotoolsError(msg)
             else:
                 msg += ("Since you have set ``overwrite`` to True, \n"
                     "the download will proceed and the existing file will be overwritten.\n")
