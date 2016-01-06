@@ -191,7 +191,8 @@ class DownloadManager(object):
             raise HalotoolsError("Input simname %s and halo_finder %s do not "
                 "have Halotools-recognized web locations" % (simname, halo_finder))
 
-    def ptcl_tables_available_for_download(self, **kwargs):
+    def ptcl_tables_available_for_download(self, 
+        version_name = sim_defaults.default_version_name, **kwargs):
         """ Method searches the appropriate web location and
         returns a list of the filenames of all reduced
         halo catalog binaries processed by Halotools
@@ -207,6 +208,11 @@ class DownloadManager(object):
             Argument is used to filter the output list of filenames.
             Default is None, in which case `processed_halo_tables_in_cache`
             will not filter the returned list of filenames by ``simname``.
+
+        version_name : string, optional 
+            Nickname for the version of the catalog. 
+            Argument is used to filter the output list of filenames.
+            Default is set by `~halotools.sim_manager.sim_defaults` module. 
 
         Returns
         -------
@@ -236,12 +242,12 @@ class DownloadManager(object):
             for a in soup.find_all('a'):
                 catlist.append(os.path.join(simloc, a['href']))
 
-        file_pattern = 'hdf5'
-        all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern + '*')
+        file_pattern = version_name
+        all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern + '*.hdf5')
 
         if 'simname' in kwargs.keys():
             simname = kwargs['simname']
-            file_pattern = '*'+simname+'/*' + file_pattern
+            file_pattern = '*'+simname+'*'
             output = fnmatch.filter(all_ptcl_tables, file_pattern)
         else:
             output = all_ptcl_tables
@@ -722,7 +728,7 @@ class DownloadManager(object):
 
         if abs(closest_redshift - redshift) > dz_tol:
             msg = (
-                "\nNo pre-processed %s halo catalog has \na redshift within %.2f " +
+                "\nNo particle catalog for the ``%s`` simulation has \na redshift within %.2f " +
                 "of the redshift = %.2f.\n The closest redshift for these catalogs is %s \n"
                 )
             raise HalotoolsError(msg % (simname, dz_tol, redshift, closest_redshift_string))
