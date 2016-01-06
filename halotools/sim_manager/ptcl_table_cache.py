@@ -244,7 +244,7 @@ class PtclTableCache(object):
                 raise HalotoolsError(msg)
 
 
-    def determine_log_entry_from_fname(self, fname):
+    def determine_log_entry_from_fname(self, fname, overwrite_fname_metadata = False):
         """ Method tries to construct a `~halotools.sim_manager.PtclTableCacheLogEntry` 
         using the metadata that may be stored in the input file. An exception will be raised 
         if the determination is not possible. 
@@ -265,12 +265,12 @@ class PtclTableCache(object):
                 "to use the determine_log_entry_from_fname method. ")
 
         if not os.path.isfile(fname):
-            msg = ("File does not exist")
-            raise IOError(msg)
+            msg = "File does not exist"
+            return str(msg)
 
         if fname[-5:] != '.hdf5':
-            msg = ("Can only self-determine the log entry of files with .hdf5 extension")
-            raise IOError(msg)
+            msg = "Can only self-determine the log entry of files with .hdf5 extension"
+            return str(msg)
 
         try:
             f = h5py.File(fname)
@@ -283,7 +283,7 @@ class PtclTableCache(object):
             for elt in missing_metadata:
                 msg += "``"+elt + "``\n"
             msg += "\n"
-            raise InvalidCacheLogEntry(msg)
+            return str(msg)
         finally:
             try:
                 f.close()
@@ -293,6 +293,9 @@ class PtclTableCache(object):
         f = h5py.File(fname)
         constructor_kwargs = ({key: f.attrs[key] 
             for key in PtclTableCacheLogEntry.log_attributes})
+        if overwrite_fname_metadata == True:
+            constructor_kwargs['fname'] = fname
+            f.attrs['fname'] = fname
         log_entry = PtclTableCacheLogEntry(**constructor_kwargs)
         f.close()
         return log_entry
