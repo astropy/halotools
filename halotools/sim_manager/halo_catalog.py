@@ -289,7 +289,7 @@ class OverhauledHaloCatalog(object):
                 ptcl_log_entry = self.ptcl_log_entry
 
             if ptcl_log_entry.safe_for_cache == True:
-                self._ptcl_table = Table.read(self.fname, path='data')
+                self._ptcl_table = Table.read(ptcl_log_entry.fname, path='data')
                 return self._ptcl_table
             else:
                 raise InvalidCacheLogEntry(ptcl_log_entry._cache_safety_message)
