@@ -4,6 +4,7 @@
 
 import os
 from halotools.sim_manager import DownloadManager, sim_defaults
+from halotools.custom_exceptions import HalotoolsError
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -12,15 +13,45 @@ parser.add_argument("--overwrite",
     action="store_true")
 args = parser.parse_args()
 
-existing_fname_error_msg = ("\n\nThe following filename already exists in your cache directory: \n\n%s\n\n"
+existing_fname_error_msg = ("\n\nThe following filename already exists "
+    "in your cache log: \n\n%s\n\n"
     "If you really want to overwrite the file, \n"
-    "simply execute this script again but throwing ``--overwrite`` as a command-line flag.\n\n")
+    "execute this script again but throw the ``--overwrite`` flag.\n\n")
 
 simname = sim_defaults.default_simname
 halo_finder = sim_defaults.default_halo_finder
 redshift = sim_defaults.default_redshift
+version_name = sim_defaults.default_version_name
 
 downman = DownloadManager()
+
+##################################################################
+# First check to see if the log has any matching entries before 
+# requesting the download 
+# This is technically redundant with the functionality in the downloading methods, 
+# but this makes it easier to issue the right error message
+if args.overwrite == False:
+
+    gen = downman.halo_table_cache.matching_log_entry_generator
+    matching_halocats = list(
+        gen(simname = simname, halo_finder = halo_finder, 
+            version_name = version_name, redshift = redshift, dz_tol = 0.1))
+
+    gen2 = downman.ptcl_table_cache.matching_log_entry_generator
+    matching_ptcl_cats = list(
+        gen2(simname = simname, version_name = version_name, 
+            redshift = redshift, dz_tol = 0.1))
+
+    if len(matching_halocats) > 0:
+        matching_fname = matching_halocats[0].fname
+        raise HalotoolsError(existing_fname_error_msg % matching_fname)
+
+    if len(matching_ptcl_cats) > 0:
+        matching_fname = matching_ptcl_cats[0].fname
+        raise HalotoolsError(existing_fname_error_msg % matching_fname)        
+
+##################################################################
+
 
 new_halo_log_entry = downman.download_processed_halo_table(simname = simname, 
     halo_finder = halo_finder, redshift = redshift, 
@@ -29,8 +60,11 @@ new_halo_log_entry = downman.download_processed_halo_table(simname = simname,
 new_ptcl_log_entry = downman.download_ptcl_table(simname = simname, 
     redshift = redshift, dz_tol = 0.05, overwrite=args.overwrite, 
     initial_download_script_msg = existing_fname_error_msg)
+##################################################################
 
 
+##################################################################
+### DOWNLOAD COMPLETE. Now construct the success message
 cache_dirname = str(os.path.dirname(downman.halo_table_cache.cache_log_fname)).strip()
 halo_table_cache_basename = str(os.path.basename(downman.halo_table_cache.cache_log_fname))
 ptcl_table_cache_basename = str(os.path.basename(downman.ptcl_table_cache.cache_log_fname))
