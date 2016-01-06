@@ -197,11 +197,15 @@ class HaloTableCache(object):
             the corresponding hdf5 file will be deleted from your disk. 
             Default is False. 
         """
+        ######################################################
+        # update_ascii kwarg is for unit-testing only 
+        # this feature is intentionally hidden from the docstring
         if (update_ascii == False) & (delete_corresponding_halo_catalog == True):
             msg = ("\nIf ``delete_corresponding_halo_catalog`` is True, \n"
                 "``update_ascii`` must also be set to True.\n")
             raise HalotoolsError(msg)
-
+        ######################################################
+        
         log_entry = HaloTableCacheLogEntry(simname = simname, 
             halo_finder = halo_finder, version_name = version_name, 
             redshift = redshift, fname = fname)
