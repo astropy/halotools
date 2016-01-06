@@ -302,7 +302,7 @@ class TestDownloadManager(TestCase):
         substr = "no halo catalogs meeting" 
         assert substr in err.value.message
 
-
+    @classmethod
     def clear_APH_MACHINE_of_highz_file(self, 
         delete_corresponding_halo_catalog = True):
 
@@ -337,15 +337,13 @@ class TestDownloadManager(TestCase):
             simname = 'bolshoi', 
             halo_finder = 'rockstar', 
             version_name = 'halotools_alpha_version1', 
-            redshift = 11.7, 
-            download_dirname=self.halocat_dir)
+            redshift = 11.7, overwrite = True)
         cache2 = HaloTableCache()
         assert len(cache1.log) == len(cache2.log) - 1
         new_entry = list(set(cache2.log) - set(cache1.log))[0]
-
         assert os.path.isfile(new_entry.fname)
-        assert new_entry.safe_for_cache is True
 
+        self.clear_APH_MACHINE_of_highz_file()
 
 
     def tearDown(self):
