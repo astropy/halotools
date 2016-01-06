@@ -236,8 +236,8 @@ class DownloadManager(object):
             for a in soup.find_all('a'):
                 catlist.append(os.path.join(simloc, a['href']))
 
-        file_pattern = 'particles.hdf5'
-        all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern)
+        file_pattern = 'hdf5'
+        all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern + '*')
 
         if 'simname' in kwargs.keys():
             simname = kwargs['simname']
@@ -461,11 +461,6 @@ class DownloadManager(object):
             for the new halo catalog to be stored in cache. 
             Default is False. 
 
-        Returns
-        -------
-        output_fname : string
-            Filename (including absolute path) of the location of the downloaded
-            halo catalog.
         """
 
         ############################################################
@@ -655,9 +650,12 @@ class DownloadManager(object):
         print(success_msg)
 
 
-    def download_ptcl_table(self, dz_tol = 0.1, overwrite=False, **kwargs):
-        """ Method to download one of the pre-processed binary files
-        storing a reduced halo catalog.
+    def download_ptcl_table(self, simname, redshift, 
+        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_version_name, 
+        download_dirname = 'std_cache_loc', ignore_nearby_redshifts = False, 
+        **kwargs):
+        """ Method to download one of the binary files storing a 
+        random downsampling of dark matter particles.
 
         Parameters
         ----------
@@ -666,13 +664,21 @@ class DownloadManager(object):
             Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
 
-        halo_finder : string
-            Nickname of the halo-finder, e.g. `rockstar`.
-
-        desired_redshift : float
-            Redshift of the requested snapshot. Must match one of the
-            available snapshots, or a prompt will be issued providing the nearest
+        redshift : float
+            Redshift of the requested snapshot. 
+            Must match one of theavailable snapshots within dz_tol, 
+            or a prompt will be issued providing the nearest
             available snapshots to choose from.
+
+        version_name : string, optional 
+            Nickname of the version of the halo catalog used to differentiate 
+            between the same halo catalog processed in different ways. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        download_dirname : str, optional 
+            Absolute path to the directory where you want to download the catalog. 
+            Default is `std_cache_loc`, which will store the catalog in the following directory:
+            ``$HOME/.astropy/cache/halotools/halo_tables/simname/halo_finder/``
 
         dz_tol : float, optional
             Tolerance value determining how close the requested redshift must be to
@@ -684,93 +690,178 @@ class DownloadManager(object):
             whether or not to overwrite the file. Default is False, in which case
             no download will occur if a pre-existing file is detected.
 
-        external_cache_loc : string, optional
-            Absolute path to an alternative source of halo catalogs.
-            Method assumes that ``external_cache_loc`` is organized in the
-            same way that the normal Halotools cache is. Specifically:
+        ignore_nearby_redshifts : bool, optional 
+            Flag used to determine whether nearby redshifts in cache will be ignored. 
+            If there are existing halo catalogs in the Halotools cache with matching 
+            ``simname``, ``halo_finder`` and ``version_name``, 
+            and if one or more of those catalogs has a redshift within ``dz_tol``, 
+            then the ignore_nearby_redshifts flag must be set to True in order 
+            for the new halo catalog to be stored in cache. 
+            Default is False. 
 
-            * Particle tables should located in ``external_cache_loc/particle_catalogs/simname``
-
-            * Processed halo tables should located in ``external_cache_loc/halo_catalogs/simname/halo_finder``
-
-            * Raw halo tables (unprocessed ASCII) should located in ``external_cache_loc/raw_halo_catalogs/simname/halo_finder``
-
-        Returns
-        -------
-        output_fname : string
-            Filename (including absolute path) of the location of the downloaded
-            halo catalog.
         """
-        try:
-            simname = kwargs['simname']
-            if simname not in supported_sim_list:
-                raise HalotoolsError(unsupported_simname_msg % simname)
-        except KeyError:
-            pass
+        ############################################################
+        # Identify candidate file to download
 
-        try:
-            desired_redshift = kwargs['desired_redshift']
-        except KeyError:
-            msg = ("\n``desired_redshift`` is a required keyword argument.\n")
+        available_fnames_to_download = self.ptcl_tables_available_for_download(
+            simname = simname, version_name = version_name)
+
+        if len(available_fnames_to_download) == 0:
+            msg = "You made the following request for a pre-processed halo catalog:\n"
+
+            msg += "simname = " + simname + "\n"
+            msg += "version_name = " + version_name + "\n"
+            msg = msg + "There are no particle catalogs meeting your specifications"
             raise HalotoolsError(msg)
-
-        if 'halo_finder' in kwargs.keys():
-            warn("It is not necessary to specify a halo catalog when downloading particles")
-
-        available_fnames_to_download = self.ptcl_tables_available_for_download(**kwargs)
 
         url, closest_redshift = (
-            self._closest_fname(available_fnames_to_download, desired_redshift))
-        if available_fnames_to_download == []:
-            msg = "You made the following request for a pre-processed halo catalog:\n"
-            if 'simname' in kwargs:
-                msg = msg + "simname = " + kwargs['simname'] + "\n"
+            self._closest_fname(available_fnames_to_download, redshift))
+
+        closest_redshift_string = get_redshift_string(closest_redshift)
+        closest_redshift = float(closest_redshift_string)
+
+        if abs(closest_redshift - redshift) > dz_tol:
+            msg = (
+                "\nNo pre-processed %s halo catalog has \na redshift within %.2f " +
+                "of the redshift = %.2f.\n The closest redshift for these catalogs is %s \n"
+                )
+            raise HalotoolsError(msg % (simname, dz_tol, redshift, closest_redshift_string))
+
+        # At this point we have a candidate file to download that 
+        # matches the input specifications. 
+        ############################################################
+
+        ############################################################
+        # Determine the download directory, 
+        # passively creating the necessary directory tree 
+        if download_dirname == 'std_cache_loc':
+            # cache_log_fname = manipulate_cache_log.get_halo_table_cache_log_fname()
+            # cache_basedir = os.path.dirname(cache_log_fname)
+            cache_basedir = os.path.dirname(self.ptcl_table_cache.cache_log_fname)
+            download_dirname = os.path.join(cache_basedir, 'particle_catalogs', simname)
+            try:
+                os.makedirs(download_dirname)
+            except OSError:
+                pass
+        else:
+            try:
+                assert os.path.exists(download_dirname)
+            except AssertionError:
+                msg = ("\Your input ``download_dirname`` is a non-existent path.\n")
+                raise HalotoolsError(msg)
+        output_fname = os.path.join(download_dirname, os.path.basename(url))
+        ############################################################
+
+        ############################################################
+        # Now we check the cache log to see if there are any matching entries 
+        exact_match_generator = self.ptcl_table_cache.matching_log_entry_generator(
+            simname = simname, version_name = version_name, 
+            redshift = closest_redshift, dz_tol = 0.)
+        exact_matches = list(exact_match_generator)
+
+        if len(exact_matches) > 0:
+            msg = ("\nThere already exists a particle catalog in your cache log with \n"
+                "specifications that exactly match your inputs.\n")
+            if overwrite == False:
+                msg += ("If you want to overwrite this catalog with your download, \n"
+                    "you must set the ``overwrite`` keyword argument to True. \n"
+                    "Alternatively, you can delete the log entry using the \n"
+                    "remove_entry_from_cache_log method of the PtclTableCache class.\n")
+                raise HalotoolsError(msg)
             else:
-                msg = msg + "simname = any simulation\n"
-            msg = msg + "There are no simulations with this name with particles available for download"
+                msg += ("Since you have set ``overwrite`` to True, \n"
+                    "the download will proceed and the existing file will be overwritten.\n")
+                warn(msg)
+
+        close_match_generator = self.ptcl_table_cache.matching_log_entry_generator(
+            simname = simname, version_name = version_name, 
+            redshift = closest_redshift, dz_tol = dz_tol)
+        close_matches = list(close_match_generator)
+
+        if ((len(close_matches) > 0) 
+            & (len(exact_matches) == 0) 
+            & (ignore_nearby_redshifts == False)):
+
+            entry = close_matches[0]
+            msg = "\nThe following filename appears in the cache log. \n\n"
+            msg += str(entry.fname) + "\n\n"
+            msg += ("This log entry has exactly matching metadata "
+                "and a redshift within the input ``dz_tol`` = " + str(dz_tol) 
+                +"\n of the redshift of the most closely matching catalog on the web.\n"
+                "In order to proceed, you must either set "
+                "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``. \n"
+                )
             raise HalotoolsError(msg)
 
-        if abs(closest_redshift - desired_redshift) > dz_tol:
-            msg = (
-                "No %s particle catalog has \na redshift within %.2f " +
-                "of the desired_redshift = %.2f.\n The closest redshift for these catalogs is %.2f\n"
-                )
-            print(msg % (kwargs['simname'], dz_tol, kwargs['desired_redshift'], closest_redshift))
-            return
+        # At this point there are no conflicts with the existing log
+        ############################################################
 
-        cache_dirname = os.path.join(_find_home, 'cache', 'halotools', 'particle_catalogs')
-        output_fname = os.path.join(cache_dirname, os.path.basename(url))
+        ############################################################
+        # If the output_fname already exists, overwrite must be set to True
+        # A special message is printed if this exception is raised by the 
+        # initial download script (hidden feature for developers only)
+        if (overwrite == False) & (os.path.isfile(output_fname)):
 
-        if overwrite == False:
-            file_pattern = os.path.basename(url)
-            # The file may already be decompressed, in which case we don't want to download it again
-            file_pattern = re.sub('.tar.gz', '', file_pattern)
-            file_pattern = re.sub('.gz', '', file_pattern)
-            file_pattern = '*' + file_pattern + '*'
+            if 'initial_download_script_msg' in kwargs.keys():
+                msg = kwargs['initial_download_script_msg']
+            else:
+                msg = ("The following filename already exists "
+                    "in your cache directory: \n\n%s\n\n"
+                    "If you really want to overwrite the file, \n"
+                    "you must call the same function again \n"
+                    "with the keyword argument `overwrite` set to `True`")
+            raise HalotoolsCacheError(msg % output_fname)
 
-            for path, dirlist, filelist in os.walk(cache_dirname):
-                for fname in filelist:
-                    if fnmatch.filter([fname], file_pattern) != []:
-                        existing_fname = os.path.join(path, fname)
-                        if 'initial_download_script_msg' in kwargs.keys():
-                            msg = kwargs['initial_download_script_msg']
-                        else:
-                            msg = ("The following filename already exists in your cache directory: \n\n%s\n\n"
-                                "If you really want to overwrite the file, \n"
-                                "you must call the same function again \n"
-                                "with the keyword argument `overwrite` set to `True`")
-                        raise HalotoolsCacheError(msg % existing_fname)
-
-        start = time()
         download_file_from_url(url, output_fname)
-        end = time()
-        runtime = (end - start)
-        print("\nTotal runtime to download particle data = %.1f seconds\n" % runtime)
-        if 'success_msg' in kwargs.keys():
-            print(kwargs['success_msg'])
-        return output_fname
 
+        # overwrite the fname metadata so that 
+        # it is consistent with the downloaded location
+        import h5py
+        f = h5py.File(output_fname)
+        f.attrs['fname'] = str(output_fname)
+        f.close()
 
+        new_log_entry = (
+            self.ptcl_table_cache.determine_log_entry_from_fname(
+                output_fname)
+            )
+
+        if new_log_entry.safe_for_cache == False:
+            msg = ("\nThere is a problem with the file you downloaded.\n"
+                "Please take note of the following filename "
+                "and contact the Halotools developers.\n"+ output_fname)
+            raise HalotoolsError(msg)
+
+        self.ptcl_table_cache.add_entry_to_cache_log(new_log_entry)
+
+        # Print a special message if this download was triggered 
+        # by the downloading script (hidden feature for developers only)
+        try:
+            success_msg = kwargs['success_msg']
+        except KeyError:
+            args_msg = "simname = '" + str(new_log_entry.simname) + "'"
+            args_msg += ", version_name = '" + str(new_log_entry.version_name) + "'"
+            args_msg += ", redshift = " + str(new_log_entry.redshift) 
+
+            success_msg = ("\nThe particle catalog has been successfully downloaded "
+                "to the following location:\n" + str(output_fname) + "\n\n"
+                "This filename and its associated metadata have also been "
+                "added to the Halotools cache log, \n"
+                "as reflected by a newly added line to the following ASCII file:\n\n"
+                + str(self.ptcl_table_cache.cache_log_fname) + "\n\n"
+                "You can access the particle data with the following syntax:\n\n"
+                ">>> from halotools.sim_manager import OverhauledHaloCatalog \n"
+                ">>> halocat = OverhauledHaloCatalog("+args_msg+")\n"
+                ">>> particles = halocat.ptcl_table \n\n"
+                "Mock observable functions such as the galaxy-galaxy lensing signal \n"
+                "can now be computed for mock galaxies populated into this simulation.\n\n"
+                "Note that if you move this particle catalog into a new location on disk, \n"
+                "you must update both the ``fname`` metadata of the hdf5 file \n"
+                "as well as the``fname`` column of the corresponding entry in the log. \n"
+                "You can accomplish this with the ``update_cached_file_location``"
+                "method \nof the PtclTableCache class.\n\n")
+        
+        print(success_msg)
 
 
 
