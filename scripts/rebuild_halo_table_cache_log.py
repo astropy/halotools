@@ -139,7 +139,7 @@ if old_cache_log_exists:
 if len(new_cache.log) > 0:
     new_cache._overwrite_log_ascii(new_cache.log)
 
-    print("\n\n")
+    print("\n")
     print("The following log entries have been verified "
         "and added to your new cache log:\n")
     for entry in new_cache.log:
