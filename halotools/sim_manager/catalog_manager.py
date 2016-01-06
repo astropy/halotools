@@ -656,7 +656,7 @@ class CatalogManager(object):
 
         You may also wish to have a collection of downsampled dark matter particles to accompany this snapshot:
 
-        >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
+        >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +SKIP
 
         """
         if 'simname' in kwargs.keys():
