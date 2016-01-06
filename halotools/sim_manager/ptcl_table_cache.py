@@ -14,7 +14,7 @@ class PtclTableCache(object):
     """ Object providing a collection of particle catalogs for use with Halotools. 
     """ 
 
-    def __init__(self, **kwargs):
+    def __init__(self, read_log_from_standard_loc = True, **kwargs):
         self._standard_log_dirname = os.path.join(_find_home(), 
             '.astropy', 'cache', 'halotools')
         try:
@@ -29,8 +29,11 @@ class PtclTableCache(object):
             self.cache_log_fname = copy(self._standard_log_fname)
         self._cache_log_fname_exists = os.path.isfile(self.cache_log_fname)
         
-        self.log = self.retrieve_log_from_ascii()
-        
+        if read_log_from_standard_loc == True:
+            self.log = self.retrieve_log_from_ascii()
+        else:
+            self.log = []
+
     def _overwrite_log_ascii(self, new_log):
         new_log.sort()
         log_table = self._log_table_from_log(new_log)
