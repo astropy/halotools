@@ -14,7 +14,7 @@ from astropy.table import vstack as table_vstack
 from astropy.config.paths import _find_home 
 
 from . import helper_functions
-from ..ptcl_table_log_entry import PtclTableCacheLogEntry
+from ..ptcl_table_cache_log_entry import PtclTableCacheLogEntry
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 

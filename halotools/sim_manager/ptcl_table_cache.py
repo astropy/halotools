@@ -5,7 +5,7 @@ from astropy.table import Table
 from warnings import warn
 import numpy as np 
 
-from .ptcl_table_log_entry import PtclTableCacheLogEntry
+from .ptcl_table_cache_log_entry import PtclTableCacheLogEntry
 from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 
 __all__ = ('PtclTableCache', )

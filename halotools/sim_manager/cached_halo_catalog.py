@@ -16,7 +16,7 @@ from . import sim_defaults, supported_sims
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
 from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
-from .ptcl_table_log_entry import PtclTableCacheLogEntry
+from .ptcl_table_cache_log_entry import PtclTableCacheLogEntry
 
 from ..custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
