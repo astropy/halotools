@@ -5,7 +5,7 @@ from halotools.sim_manager import RockstarHlistReader
 from halotools.sim_manager import TabularAsciiReader
 from astropy.table import Table 
 import os
-from halotools.sim_manager.read_rockstar_hlists import _infer_redshift_from_input_fname
+from halotools.sim_manager.rockstar_hlist_reader import _infer_redshift_from_input_fname
 
 num_ptcl_cut = 300.
 processing_notes = 'Catalog only contains (sub)halos with present-day virial mass greater than 300 particles'

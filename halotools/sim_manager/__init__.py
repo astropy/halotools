@@ -12,7 +12,7 @@ from .download_manager import DownloadManager
 from .cached_halo_catalog import CachedHaloCatalog
 from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
 
-from .read_rockstar_hlists import RockstarHlistReader
+from .rockstar_hlist_reader import RockstarHlistReader
 from .tabular_ascii_reader import TabularAsciiReader
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
