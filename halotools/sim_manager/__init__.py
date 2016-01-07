@@ -2,8 +2,9 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+from . import sim_defaults
+
 from .supported_sims import *
-from .sim_defaults import *
 from .generate_random_sim import FakeSim
 
 from .download_manager import DownloadManager

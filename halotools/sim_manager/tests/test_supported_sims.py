@@ -14,7 +14,7 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-from ..supported_sims import CachedHaloCatalog 
+from ..halo_catalog import CachedHaloCatalog 
 
 @pytest.mark.slow
 @pytest.mark.skipif('not APH_MACHINE')

@@ -9,8 +9,6 @@ descriptions of the purpose of each variable defined in this module.
 
 """
 
-__all__ = ('return_dtype_and_header')
-
 import os, sys
 import numpy as np
 from astropy import cosmology
