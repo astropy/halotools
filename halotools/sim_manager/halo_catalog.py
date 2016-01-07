@@ -11,7 +11,7 @@ except ImportError:
         "sim_manager sub-package requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda. ")
 
-from . import sim_defaults
+from . import sim_defaults, supported_sims
 
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
@@ -43,11 +43,11 @@ class CachedHaloCatalog(object):
 
         self.log_entry = self._retrieve_matching_cache_log_entry(dz_tol)
 
-        if preload_halo_table is True:
-            self._load_halo_table()
-
         self._bind_metadata()
 
+        if preload_halo_table is True:
+            _ = self.halo_table
+            del _
 
     def _process_kwargs(self, dz_tol, **kwargs):
         """
@@ -272,6 +272,45 @@ class CachedHaloCatalog(object):
             else:
                 setattr(self, attr_key, f.attrs[attr_key])
         f.close()
+
+        matching_sim = self._retrieve_supported_sim()
+        if matching_sim is not None:
+            for attr in matching_sim._attrlist:
+                if hasattr(self, attr):
+                    try:
+                        assert getattr(self, attr) == getattr(matching_sim, attr)
+                    except AssertionError:
+                        msg = ("The ``" + attr + "`` metadata of the hdf5 file \n"
+                            "is inconsistent with the corresponding attribute of the \n" 
+                            + matching_sim.__class__.__name__ + "class in the "
+                            "sim_manager.supported_sims module.\n"
+                            "Double-check the value of this attribute in the \n"
+                            "NbodySimulation sub-class you added to the supported_sims module. \n"
+                            )
+                        raise HalotoolsError(msg)
+                else:
+                    setattr(self, attr, getattr(matching_sim, attr))
+        else:
+            msg = ("You have stored your own simulation in the Halotools cache \n"
+                "but you have not added a corresponding NbodySimulation sub-class. \n"
+                "This is permissible, but not recommended. \n"
+                "See, for example, the Bolshoi sub-class for how to add your own simulation. \n")
+            warn(msg)
+
+    def _retrieve_supported_sim(self):
+        """
+        """
+        matching_sim = None
+        for clname in supported_sims.__all__:
+            try:
+                cl = getattr(supported_sims, clname)
+                obj = cl()
+                if isinstance(obj, supported_sims.NbodySimulation):
+                    if self.simname == obj.simname:
+                        matching_sim = obj
+            except TypeError:
+                pass
+        return matching_sim
 
     @property 
     def ptcl_table(self):
