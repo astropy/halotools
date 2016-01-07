@@ -54,7 +54,7 @@ class UserSuppliedHaloCatalog(object):
         Notes 
         -------
         This class is tested by 
-        `~halotools.sim_manager.tests.test_user_defined_halo_catalog.TestUserSuppliedHaloCatalog`. 
+        `~halotools.sim_manager.tests.test_user_supplied_halo_catalog.TestUserSuppliedHaloCatalog`. 
 
         Examples 
         ----------

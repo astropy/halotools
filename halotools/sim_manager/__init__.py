@@ -10,7 +10,7 @@ from .fake_sim import FakeSim
 from .download_manager import DownloadManager
 
 from .cached_halo_catalog import CachedHaloCatalog
-from .user_defined_halo_catalog import UserSuppliedHaloCatalog
+from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
 
 from .read_rockstar_hlists import RockstarHlistReader
 from .tabular_ascii_reader import TabularAsciiReader

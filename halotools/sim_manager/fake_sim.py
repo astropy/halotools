@@ -8,7 +8,7 @@ used to test the `~halotools.empirical_models` modules.
 from astropy.table import Table
 import numpy as np
 
-from .user_defined_halo_catalog import UserSuppliedHaloCatalog
+from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
 
 __all__ = ('FakeSim', )
 
