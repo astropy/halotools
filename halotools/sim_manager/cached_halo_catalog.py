@@ -251,7 +251,16 @@ class CachedHaloCatalog(object):
     @property 
     def halo_table(self):
         """
-        `~astropy.table.Table` object storing a catalog of dark matter halos. 
+        Astropy `~astropy.table.Table` object storing a catalog of dark matter halos. 
+
+        You can access the array storing, say, halo virial mass using the following syntax: 
+
+        >>> halocat = CachedHaloCatalog() # doctest: +SKIP
+        >>> mass_array = halocat.halo_table['halo_mvir'] # doctest: +SKIP
+
+        To see what halo properties are available in the catalog:
+
+        >>> print(halocat.halo_table.keys()) # doctest: +SKIP
         """
         try:
             return self._halo_table
@@ -315,6 +324,7 @@ class CachedHaloCatalog(object):
     @property 
     def ptcl_table(self):
         """
+        Astropy `~astropy.table.Table` object storing a collection of ~1e6 randomly selected dark matter particles. 
         """
         try:
             return self._ptcl_table

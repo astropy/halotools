@@ -54,6 +54,8 @@ class DownloadManager(object):
     """
 
     def __init__(self):
+        """
+        """
         self.halo_table_cache = HaloTableCache()
         self.ptcl_table_cache = PtclTableCache()
 
