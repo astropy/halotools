@@ -8,7 +8,7 @@ from astropy.config.paths import _find_home
 
 import numpy as np 
 
-from ..halo_catalog import CachedHaloCatalog
+from ..cached_halo_catalog import CachedHaloCatalog
 from ..halo_table_cache import HaloTableCache
 from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
