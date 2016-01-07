@@ -8,7 +8,7 @@ from astropy.config.paths import _find_home
 
 import numpy as np 
 
-from ..halo_catalog import MarfMarfMarf
+from ..halo_catalog import CachedHaloCatalog
 from ..halo_table_cache import HaloTableCache
 from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
@@ -23,10 +23,10 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('TestMarfMarfMarf' )
+__all__ = ('TestCachedHaloCatalog' )
 
 
-class TestMarfMarfMarf(TestCase):
+class TestCachedHaloCatalog(TestCase):
     """ 
     """
 
@@ -39,7 +39,7 @@ class TestMarfMarfMarf(TestCase):
             constructor_kwargs = (
                 {attr: getattr(entry, attr) 
                 for attr in entry.log_attributes})
-            halocat = MarfMarfMarf(**constructor_kwargs)
+            halocat = CachedHaloCatalog(**constructor_kwargs)
             assert hasattr(halocat, 'redshift')
             assert hasattr(halocat, 'Lbox')
 
@@ -47,7 +47,7 @@ class TestMarfMarfMarf(TestCase):
     def test_default_catalog(self):
         """ Verify that the default halo catalog loads. 
         """
-        halocat = MarfMarfMarf()
+        halocat = CachedHaloCatalog()
         assert hasattr(halocat, 'redshift')
         assert hasattr(halocat, 'Lbox')
 
@@ -57,7 +57,7 @@ class TestMarfMarfMarf(TestCase):
         attempting to load catalogs without matches in cache.  
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
-            halocat = MarfMarfMarf(simname = 'bolshoi', 
+            halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
                 redshift = 5, dz_tol = 1)
         assert 'The following entries in the cache log' in err.value.message
@@ -68,7 +68,7 @@ class TestMarfMarfMarf(TestCase):
         attempting to load catalogs without matches in cache.  
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
-            halocat = MarfMarfMarf(simname = 'bolshoi', 
+            halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
                 redshift = 5, dz_tol = 1)
         assert 'The following entries in the cache log' in err.value.message
@@ -79,7 +79,7 @@ class TestMarfMarfMarf(TestCase):
         attempting to load catalogs without matches in cache.  
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
-            halocat = MarfMarfMarf(simname = 'bolshoi', 
+            halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'bdm', version_name = 'Jose Canseco')
         assert 'The following entries in the cache log' in err.value.message
         assert '(set by sim_defaults.default_redshift)' in err.value.message
@@ -90,7 +90,7 @@ class TestMarfMarfMarf(TestCase):
         attempting to load catalogs without matches in cache.  
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
-            halocat = MarfMarfMarf(simname = 'bolshoi', 
+            halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'Jose Canseco')
         assert 'The following entries in the cache log' in err.value.message
         assert '(set by sim_defaults.default_version_name)' in err.value.message
@@ -101,7 +101,7 @@ class TestMarfMarfMarf(TestCase):
         attempting to load catalogs without matches in cache.  
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
-            halocat = MarfMarfMarf(simname = 'Jose Canseco')
+            halocat = CachedHaloCatalog(simname = 'Jose Canseco')
         assert 'There are no simulations matching your input simname' in err.value.message
         assert '(set by sim_defaults.default_halo_finder)' in err.value.message
 
@@ -111,7 +111,7 @@ class TestMarfMarfMarf(TestCase):
         attempting to load catalogs without matches in cache.  
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
-            halocat = MarfMarfMarf(simname = 'Jose Canseco', 
+            halocat = CachedHaloCatalog(simname = 'Jose Canseco', 
                 halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
                 redshift = 5, dz_tol = 1)
         assert 'There are no simulations matching your input simname' in err.value.message
@@ -122,7 +122,7 @@ class TestMarfMarfMarf(TestCase):
         attempting to load catalogs without matches in cache.  
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
-            halocat = MarfMarfMarf(dz_tol = 100)
+            halocat = CachedHaloCatalog(dz_tol = 100)
         assert 'There are multiple entries in the cache log' in err.value.message
         assert '(set by sim_defaults.default_simname)' in err.value.message
 
@@ -131,7 +131,7 @@ class TestMarfMarfMarf(TestCase):
     def test_load_ptcl_table(self):
         """ Verify that the default particle catalog loads. 
         """
-        halocat = MarfMarfMarf()
+        halocat = CachedHaloCatalog()
         ptcls = halocat.ptcl_table
 
 

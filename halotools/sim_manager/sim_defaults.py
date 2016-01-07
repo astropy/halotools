@@ -17,10 +17,10 @@ from astropy import cosmology
 
 from ..custom_exceptions import UnsupportedSimError, HalotoolsCacheError
 
-# Set the default argument for the MarfMarfMarf class. 
+# Set the default argument for the CachedHaloCatalog class. 
 # Any combination of simname, halo-finder and redshift may be chosen, 
 # provided that the selected combination corresponds to a catalog in your cache directory
-# These choices dictate any behavior that loads an unspecified MarfMarfMarf into memory, 
+# These choices dictate any behavior that loads an unspecified CachedHaloCatalog into memory, 
 # such as calling the `populate_mock()` method of composite models
 default_simname = 'bolshoi'
 default_halo_finder = 'rockstar'

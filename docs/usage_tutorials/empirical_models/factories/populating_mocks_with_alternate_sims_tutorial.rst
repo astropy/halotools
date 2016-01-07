@@ -14,7 +14,7 @@ you can use
 
 	1. a pre-processed halo catalog downloaded by Halotools, 
 	2. a "raw" halo catalog processed with the Halotools `~halotools.sim_manager` sub-package, or 
-	3. your own catalog converted into a format recognized by Halotools using the `~halotools.sim_manager.MarfMarfMarf` class.
+	3. your own catalog converted into a format recognized by Halotools using the `~halotools.sim_manager.CachedHaloCatalog` class.
 
 This section of the documentation covers how to make mocks using each of these three options. 
 

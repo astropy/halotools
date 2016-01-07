@@ -8,11 +8,11 @@ used to test the `~halotools.empirical_models` modules.
 from astropy.table import Table
 import numpy as np
 
-from .user_defined_halo_catalog import ScramScramScram
+from .user_defined_halo_catalog import UserSuppliedHaloCatalog
 
 __all__ = ('FakeSim', )
 
-class FakeSim(ScramScramScram):
+class FakeSim(UserSuppliedHaloCatalog):
 	""" Fake simulation data used in the test suite of `~halotools.empirical_models`. 
 
 	The `FakeSim` object has all the attributes required by 
@@ -100,7 +100,7 @@ class FakeSim(ScramScramScram):
 		ptcl_table = Table(d)
 
 
-		ScramScramScram.__init__(self, 
+		UserSuppliedHaloCatalog.__init__(self, 
 			Lbox = Lbox, particle_mass = particle_mass, 
 			redshift = 0.0, 
 			halo_id = halo_id, 

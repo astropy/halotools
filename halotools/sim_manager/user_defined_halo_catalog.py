@@ -1,4 +1,4 @@
-""" Module containing the ScramScramScram class. 
+""" Module containing the UserSuppliedHaloCatalog class. 
 """
 
 import numpy as np
@@ -18,9 +18,9 @@ except ImportError:
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
-__all__ = ('ScramScramScram', )
+__all__ = ('UserSuppliedHaloCatalog', )
 
-class ScramScramScram(object):
+class UserSuppliedHaloCatalog(object):
     """ Class used to transform a user-provided halo catalog into the standard form recognized by Halotools. 
     """
     def __init__(self, **kwargs):
@@ -54,11 +54,11 @@ class ScramScramScram(object):
         Notes 
         -------
         This class is tested by 
-        `~halotools.sim_manager.tests.test_user_defined_halo_catalog.TestScramScramScram`. 
+        `~halotools.sim_manager.tests.test_user_defined_halo_catalog.TestUserSuppliedHaloCatalog`. 
 
         Examples 
         ----------
-        Here is an example using dummy data to show how to create a new `ScramScramScram` 
+        Here is an example using dummy data to show how to create a new `UserSuppliedHaloCatalog` 
         instance from from your own halo catalog. First the setup:
 
         >>> redshift = 0.0
@@ -73,7 +73,7 @@ class ScramScramScram(object):
 
         Now we simply pass in both the metadata and the halo catalog columns as keyword arguments:
 
-        >>> halo_catalog = ScramScramScram(redshift = redshift, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+        >>> halo_catalog = UserSuppliedHaloCatalog(redshift = redshift, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
         Your ``halo_catalog`` object can be used throughout the Halotools package. 
         The halo catalog itself is stored in the ``halo_table`` attribute, with columns accessed as follows:
@@ -90,13 +90,13 @@ class ScramScramScram(object):
 
         >>> simname = 'my_personal_sim'
 
-        >>> halo_catalog = ScramScramScram(redshift = redshift, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+        >>> halo_catalog = UserSuppliedHaloCatalog(redshift = redshift, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
         Similarly, if you wish to include additional columns for your halo catalog, 
         Halotools is able to tell the difference between metadata and columns of halo data:
 
         >>> spin = np.random.uniform(0, 0.2, num_halos)
-        >>> halo_catalog = ScramScramScram(redshift = redshift, halo_spin = spin, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+        >>> halo_catalog = UserSuppliedHaloCatalog(redshift = redshift, halo_spin = spin, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
 
 
         """
@@ -124,7 +124,7 @@ class ScramScramScram(object):
 
         metadata_dict : dictionary 
             Dictionary storing the catalog metadata. Keys will be attribute names bound 
-            to the `ScramScramScram` instance. 
+            to the `UserSuppliedHaloCatalog` instance. 
         """
 
         try:
@@ -133,7 +133,7 @@ class ScramScramScram(object):
             Nhalos = custom_len(halo_id)
             assert Nhalos > 1
         except KeyError, AssertionError:
-            msg = ("\nThe ScramScramScram requires a ``halo_id`` keyword argument "
+            msg = ("\nThe UserSuppliedHaloCatalog requires a ``halo_id`` keyword argument "
                 "storing an ndarray of length Nhalos > 1.\n")
             raise HalotoolsError(msg)
 
@@ -162,7 +162,7 @@ class ScramScramScram(object):
             assert 'halo_z' in halo_table_dict 
             assert len(halo_table_dict) >= 5
         except AssertionError:
-            msg = ("\nThe ScramScramScram requires keyword arguments ``halo_x``, "
+            msg = ("\nThe UserSuppliedHaloCatalog requires keyword arguments ``halo_x``, "
                 "``halo_y`` and ``halo_z``,\nplus one additional column storing a mass-like variable.\n"
                 "Each of these keyword arguments must storing an ndarray of the same length\n"
                 "as the ndarray bound to the ``halo_id`` keyword argument.\n")
@@ -178,7 +178,7 @@ class ScramScramScram(object):
             assert custom_len(metadata_dict['particle_mass']) == 1
             assert 'redshift' in metadata_dict
         except AssertionError:
-            msg = ("\nThe ScramScramScram requires "
+            msg = ("\nThe UserSuppliedHaloCatalog requires "
                 "keyword arguments ``Lbox``, ``particle_mass`` and ``redshift``\n"
                 "storing scalars that will be interpreted as metadata about the halo catalog.\n")
             raise HalotoolsError(msg)
@@ -234,7 +234,7 @@ class ScramScramScram(object):
             self.ptcl_table = ptcl_table
 
         except AssertionError:
-            msg = ("\nIf passing a ``ptcl_table`` to ScramScramScram, \n"
+            msg = ("\nIf passing a ``ptcl_table`` to UserSuppliedHaloCatalog, \n"
                 "this argument must contain an Astropy Table object with at least 1e4 rows\n"
                 "and ``x``, ``y`` and ``z`` columns. \n")
             raise HalotoolsError(msg)

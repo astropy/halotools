@@ -21,10 +21,10 @@ from .ptcl_table_log_entry import PtclTableCacheLogEntry
 from ..custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
 
-__all__ = ('MarfMarfMarf', )
+__all__ = ('CachedHaloCatalog', )
 
 
-class MarfMarfMarf(object):
+class CachedHaloCatalog(object):
     """
     Container class for halo catalogs and particle data.  
     """
@@ -37,7 +37,7 @@ class MarfMarfMarf(object):
             import h5py
         except ImportError:
             raise HalotoolsError("Must have h5py package installed "
-                "to use MarfMarfMarf objects")
+                "to use CachedHaloCatalog objects")
 
         self._process_kwargs(dz_tol, **kwargs)
 
@@ -263,7 +263,7 @@ class MarfMarfMarf(object):
                 raise InvalidCacheLogEntry(self.log_entry._cache_safety_message)
 
     def _bind_metadata(self):
-        """ Create convenience bindings of all metadata to the `MarfMarfMarf` instance. 
+        """ Create convenience bindings of all metadata to the `CachedHaloCatalog` instance. 
         """
         f = h5py.File(self.log_entry.fname)
         for attr_key in f.attrs.keys():

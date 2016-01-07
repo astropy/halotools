@@ -72,7 +72,7 @@ The ``galprop dtypes to allocate`` mechanism
 Whenever a component model is used during mock population, the mock factory passes a ``table`` keyword 
 argument to the methods of the component. Depending on what stage of the mock-making algorithm 
 this happens, the Astropy `~astropy.table.Table` bound to this keyword argument could either be a 
-``halo_table`` from a `~halotools.sim_manager.MarfMarfMarf`, or a ``galaxy_table`` bound to a mock. 
+``halo_table`` from a `~halotools.sim_manager.CachedHaloCatalog`, or a ``galaxy_table`` bound to a mock. 
 In either case, it is important that the table passed to the function has the necessary columns assumed 
 by the function. :ref:`new_haloprop_func_dict_mechanism` addresses the case where the ``table`` keyword 
 is a ``halo_table``; as described below, the ``_galprop_dtypes_to_allocate`` mechanism addresses the ``galaxy_table`` case. 

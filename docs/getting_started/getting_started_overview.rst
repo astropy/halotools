@@ -61,11 +61,11 @@ you are on a fast university connection the download time should be less than a 
 If you want to start playing with this catalog right away:
 
 >>> from halotools import sim_manager
->>> default_snapshot = sim_manager.MarfMarfMarf() # doctest: +SKIP
+>>> default_snapshot = sim_manager.CachedHaloCatalog() # doctest: +SKIP
 >>> print(default_snapshot.halo_table[0:9]) # doctest: +SKIP
 
 To see simple examples of how to manipulate the data stored in halo catalogs, 
-see the Examples section of the `~halotools.sim_manager.MarfMarfMarf` API documentation. 
+see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` API documentation. 
 
 If you wish to download alternate snapshots, you should can either use the 
 `~halotools.sim_manager.CatalogManager`, or use the download_alternate_halocats.py convenience script, 

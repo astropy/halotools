@@ -10,13 +10,13 @@ from copy import copy, deepcopy
 
 from astropy.table import Table
 
-from .. import ScramScramScram
+from .. import UserSuppliedHaloCatalog
 from ...custom_exceptions import HalotoolsError
 
-__all__ = ['TestScramScramScram']
+__all__ = ['TestUserSuppliedHaloCatalog']
 
-class TestScramScramScram(TestCase):
-    """ Class providing tests of the `~halotools.sim_manager.ScramScramScram`. 
+class TestUserSuppliedHaloCatalog(TestCase):
+    """ Class providing tests of the `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
     """
 
     def setup_class(self):
@@ -46,22 +46,22 @@ class TestScramScramScram(TestCase):
         * Enforces that all metadata get bound to the instance. 
         """
         with pytest.raises(HalotoolsError):
-            halocat = ScramScramScram(Lbox = 200, **self.good_halocat_args)
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, **self.good_halocat_args)
 
         with pytest.raises(HalotoolsError):
-            halocat = ScramScramScram(particle_mass = 200, **self.good_halocat_args)
+            halocat = UserSuppliedHaloCatalog(particle_mass = 200, **self.good_halocat_args)
 
         with pytest.raises(HalotoolsError):
-            halocat = ScramScramScram(Lbox = 20, particle_mass = 100, 
+            halocat = UserSuppliedHaloCatalog(Lbox = 20, particle_mass = 100, 
                 **self.good_halocat_args)
 
-        halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift, 
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift, 
             **self.good_halocat_args)
         assert hasattr(halocat, 'Lbox')
         assert halocat.Lbox == 200
         assert hasattr(halocat, 'particle_mass')
         assert halocat.particle_mass == 100
-        halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
             arnold_schwarzenegger = 'Stick around!', 
             **self.good_halocat_args)
         assert hasattr(halocat, 'arnold_schwarzenegger')
@@ -85,35 +85,35 @@ class TestScramScramScram(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             bad_halocat_args['halo_x'][0] = -1
-            halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # positions must be < Lbox
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             bad_halocat_args['halo_x'][0] = 10000
-            halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # must have halo_x column 
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_x']
-            halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # Must have halo_id column 
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_id']
-            halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # Must have some column storing a mass-like variable
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_mass']
-            halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
         # Must raise warning if a length-Nhalos array is passed with 
@@ -123,7 +123,7 @@ class TestScramScramScram(TestCase):
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             bad_halocat_args['s'] = np.ones(self.Nhalos)
-            halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
             assert 'interpreted as metadata' in str(w[-1].message)
 
@@ -140,7 +140,7 @@ class TestScramScramScram(TestCase):
         """
 
         # Must not have a ptcl_table attribute when none is passed
-        halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
             **self.good_halocat_args)
         assert not hasattr(halocat, 'ptcl_table')
 
@@ -152,7 +152,7 @@ class TestScramScramScram(TestCase):
             )
    
         # Must have ptcl_table attribute when argument is legitimate
-        halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
             ptcl_table = ptcl_table, **self.good_halocat_args)
         assert hasattr(halocat, 'ptcl_table')
 
@@ -164,7 +164,7 @@ class TestScramScramScram(TestCase):
             'z': np.zeros(num_ptcl2)}
             )
         with pytest.raises(HalotoolsError):
-            halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
         # Must have a 'z' column 
@@ -174,13 +174,13 @@ class TestScramScramScram(TestCase):
             'y': np.zeros(num_ptcl2)}
             )
         with pytest.raises(HalotoolsError):
-            halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
         # Data structure must be an astropy table, not an ndarray
         ptcl_table2 = ptcl_table.as_array()
         with pytest.raises(HalotoolsError):
-            halocat = ScramScramScram(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
 

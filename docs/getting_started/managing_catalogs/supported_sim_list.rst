@@ -13,7 +13,7 @@ for download for redshifts z = 0, 0.5, 1, and 2.
 Halo catalogs based on the Rockstar halo-finder are available for all 
 of the simulations below; for Bolshoi, BDM-based catalogs are also available. 
 To see simple examples of how to manipulate the data stored in halo catalogs, 
-see the Examples section of the `~halotools.sim_manager.MarfMarfMarf` API documentation. 
+see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` API documentation. 
 
 Below we give a 
 brief description of each of the simulations supported by the package.

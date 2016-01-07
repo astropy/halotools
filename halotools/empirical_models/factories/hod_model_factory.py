@@ -21,7 +21,7 @@ from .subhalo_mock_factory import SubhaloMockFactory
 from .. import model_helpers
 from .. import model_defaults 
 
-from ...sim_manager import MarfMarfMarf
+from ...sim_manager import CachedHaloCatalog
 from ...sim_manager import sim_defaults
 from ...sim_manager.generate_random_sim import FakeSim
 from ...utils.array_utils import custom_len
@@ -972,7 +972,7 @@ class HodModelFactory(ModelFactory):
         Parameters 
         ----------
         halocat : object, optional 
-            Class instance of `~halotools.sim_manager.MarfMarfMarf`. 
+            Class instance of `~halotools.sim_manager.CachedHaloCatalog`. 
             This object contains the halo catalog and its metadata.  
 
         simname : string, optional

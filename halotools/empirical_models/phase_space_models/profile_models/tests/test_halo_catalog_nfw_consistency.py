@@ -15,7 +15,7 @@ from ..nfw_profile import NFWProfile
 
 from .... import model_defaults 
 
-from .....sim_manager import MarfMarfMarf
+from .....sim_manager import CachedHaloCatalog
 from .....utils import table_utils
 from .....utils.array_utils import convert_to_ndarray
 from .....custom_exceptions import HalotoolsError
@@ -45,7 +45,7 @@ class TestHaloCatNFWConsistency(TestCase):
     def setup_class(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
-        halocat = MarfMarfMarf(simname = 'bolshoi', redshift = 0.)
+        halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0.)
         hosts = table_utils.SampleSelector.host_halo_selection(table = halocat.halo_table)
 
         mask_mvir_1e11 = (hosts['halo_mvir'] > 1e11) & (hosts['halo_mvir'] < 2e11)

@@ -314,7 +314,7 @@ The `~AnalyticDensityProf` constructor has three required arguments: ``cosmology
 
 .. currentmodule:: halotools.empirical_models
 
-3. The string ``mdef`` is parsed with the `model_defaults.get_halo_boundary_key` function and the returned value is bound to the ``halo_boundary_key`` instance attribute. This guarantees that during mock-making, the appropriate column of the `~halotools.sim_manager.MarfMarfMarf` halo_table will be automatically chosen for all methods of the `~AnalyticDensityProf` sub-class instance requiring this knowledge. 
+3. The string ``mdef`` is parsed with the `model_defaults.get_halo_boundary_key` function and the returned value is bound to the ``halo_boundary_key`` instance attribute. This guarantees that during mock-making, the appropriate column of the `~halotools.sim_manager.CachedHaloCatalog` halo_table will be automatically chosen for all methods of the `~AnalyticDensityProf` sub-class instance requiring this knowledge. 
 
 4. Likewise, ``mdef`` is parsed with the `model_defaults.get_halo_mass_key` function and the returned value is bound to the ``prim_haloprop_key`` instance attribute. This guarantees that the `~AnalyticDensityProf` sub-class instance will use the halo_table column that is consistent with the input mass definition. 
 
