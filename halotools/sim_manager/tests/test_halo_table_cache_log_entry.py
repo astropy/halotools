@@ -14,7 +14,7 @@ from astropy.table import vstack as table_vstack
 from astropy.config.paths import _find_home 
 
 from . import helper_functions
-from ..log_entry import HaloTableCacheLogEntry
+from ..halo_table_cache_log_entry import HaloTableCacheLogEntry
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 

@@ -14,7 +14,7 @@ from astropy.table import vstack as table_vstack
 
 from . import helper_functions
 
-from ..log_entry import HaloTableCacheLogEntry, get_redshift_string
+from ..halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
 from ..halo_table_cache import HaloTableCache
 
 from ...custom_exceptions import InvalidCacheLogEntry, HalotoolsError

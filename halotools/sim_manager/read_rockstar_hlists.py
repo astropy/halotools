@@ -21,7 +21,7 @@ import datetime
 
 from .tabular_ascii_reader import TabularAsciiReader
 from .halo_table_cache import HaloTableCache
-from .log_entry import HaloTableCacheLogEntry, get_redshift_string
+from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
 
 from ..custom_exceptions import HalotoolsError
 

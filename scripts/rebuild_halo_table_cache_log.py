@@ -14,8 +14,8 @@ except ImportError:
     raise HalotoolsError(msg)
 
 from halotools.custom_exceptions import HalotoolsError
-from halotools.sim_manager.halo_table_cache import HaloTableCache
-from halotools.sim_manager.log_entry import HaloTableCacheLogEntry
+from halotools.sim_manager import HaloTableCache
+from halotools.sim_manager.halo_table_cache_log_entry import HaloTableCacheLogEntry
 
 old_cache = HaloTableCache()
 old_cache_log_exists = os.path.isfile(old_cache.cache_log_fname)

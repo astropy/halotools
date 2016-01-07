@@ -14,7 +14,7 @@ except ImportError:
     raise HalotoolsError(msg)
 
 from halotools.custom_exceptions import HalotoolsError
-from halotools.sim_manager.ptcl_table_cache import PtclTableCache
+from halotools.sim_manager import PtclTableCache
 from halotools.sim_manager.ptcl_table_log_entry import PtclTableCacheLogEntry
 
 old_cache = PtclTableCache()

@@ -5,7 +5,7 @@ from astropy.table import Table
 from warnings import warn
 import numpy as np 
 
-from .log_entry import HaloTableCacheLogEntry
+from .halo_table_cache_log_entry import HaloTableCacheLogEntry
 from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 
 __all__ = ('HaloTableCache', )
