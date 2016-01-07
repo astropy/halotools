@@ -16,9 +16,8 @@ from ..factories import ModelFactory, SubhaloMockFactory
 from .. import model_helpers
 from .. import model_defaults 
 
-from ...sim_manager import CachedHaloCatalog
+from ...sim_manager import CachedHaloCatalog, FakeSim
 from ...sim_manager import sim_defaults
-from ...sim_manager.generate_random_sim import FakeSim
 from ...utils.array_utils import custom_len
 from ...custom_exceptions import *
 

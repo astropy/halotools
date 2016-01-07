@@ -5,7 +5,7 @@ import numpy as np
 from ...composite_models import *
 from ...factories import *
 
-from ....sim_manager.generate_random_sim import FakeSim
+from ....sim_manager import FakeSim
 
 __all__ = ['test_preloaded_hod_mocks']
 
