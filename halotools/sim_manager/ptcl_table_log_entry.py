@@ -4,7 +4,7 @@ from astropy.table import Table
 import numpy as np 
 
 from ..custom_exceptions import InvalidCacheLogEntry
-from .log_entry import get_redshift_string
+from .halo_table_cache_log_entry import get_redshift_string
 
 __all__ = ('PtclTableCacheLogEntry', )
 
