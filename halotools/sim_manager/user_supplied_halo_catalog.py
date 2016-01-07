@@ -40,16 +40,16 @@ class UserSuppliedHaloCatalog(object):
             Each key will be the column name attached to the input array. 
             All keys must begin with the substring ``halo_`` to help differentiate 
             halo property from mock galaxy properties. At a minimum, there must be a 
-            'halo_id' keyword argument storing a unique integer for each halo, 
-            as well as columns 'halo_x', 'halo_y' and 'halo_z'. 
+            ``halo_id`` keyword argument storing a unique integer for each halo, 
+            as well as columns ``halo_x``, ``halo_y`` and ``halo_z``. 
             There must also be some additional mass-like variable, 
-            for which you can use any name that begins with 'halo_'
+            for which you can use any name that begins with ``halo_``
             See Examples section for further notes. 
 
         ptcl_table : table, optional 
             Astropy `~astropy.table.Table` object storing dark matter particles 
             randomly selected from the snapshot. At a minimum, the table must have 
-            columns 'x', 'y' and 'z'. 
+            columns ``x``, ``y`` and ``z``. 
 
         Notes 
         -------
@@ -97,7 +97,6 @@ class UserSuppliedHaloCatalog(object):
 
         >>> spin = np.random.uniform(0, 0.2, num_halos)
         >>> halo_catalog = UserSuppliedHaloCatalog(redshift = redshift, halo_spin = spin, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
-
 
         """
         halo_table_dict, metadata_dict = self._parse_constructor_kwargs(**kwargs)

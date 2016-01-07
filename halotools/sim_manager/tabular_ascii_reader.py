@@ -13,7 +13,8 @@ from time import time
 import numpy as np
 
 class TabularAsciiReader(object):
-    """ Class providing a memory-efficient algorithm for 
+    """
+    Class providing a memory-efficient algorithm for 
     reading a very large ascii file that stores tabular data 
     of a data type that is known in advance. 
 
@@ -46,132 +47,6 @@ class TabularAsciiReader(object):
         header_char='#', row_cut_min_dict = {}, row_cut_max_dict = {}, 
         row_cut_eq_dict = {}, row_cut_neq_dict = {}):
         """
-        Parameters 
-        -----------
-        input_fname : string 
-            Absolute path of the file to be processed. 
-
-        columns_to_keep_dict : dict 
-            Dictionary used to define which columns 
-            of the tabular ASCII data will be kept.
-
-            Each key of the dictionary will be the name of the 
-            column in the returned data table. The value bound to 
-            each key is a two-element tuple. 
-            The first tuple entry is an integer providing 
-            the *index* of the column to be kept, starting from 0. 
-            The second tuple entry is a string defining the Numpy dtype 
-            of the data in that column, 
-            e.g., 'f4' for a float, 'f8' for a double, 
-            or 'i8' for a long. 
-
-            Thus an example ``columns_to_keep_dict`` could be 
-            {'mass': (1, 'f4'), 'obj_id': (0, 'i8'), 'spin': (45, 'f4')}
-
-        row_cut_min_dict : dict, optional 
-            Dictionary used to place a lower-bound cut on the rows 
-            of the tabular ASCII data. 
-
-            Each key of the dictionary must also 
-            be a key of the input ``columns_to_keep_dict``; 
-            for purposes of good bookeeping, you are not permitted 
-            to place a cut on a column that you do not keep. The value 
-            bound to each key serves as the lower bound on the data stored 
-            in that row. A row with a smaller value than this lower bound for the 
-            corresponding column will not appear in the returned data table. 
-
-            For example, if row_cut_min_dict = {'mass': 1e10}, then all rows of the 
-            returned data table will have a mass greater than 1e10. 
-
-        row_cut_max_dict : dict, optional 
-            Dictionary used to place an upper-bound cut on the rows 
-            of the tabular ASCII data. 
-
-            Each key of the dictionary must also 
-            be a key of the input ``columns_to_keep_dict``; 
-            for purposes of good bookeeping, you are not permitted 
-            to place a cut on a column that you do not keep. The value 
-            bound to each key serves as the upper bound on the data stored 
-            in that row. A row with a larger value than this upper bound for the 
-            corresponding column will not appear in the returned data table. 
-
-            For example, if row_cut_min_dict = {'mass': 1e15}, then all rows of the 
-            returned data table will have a mass less than 1e15. 
-
-        row_cut_eq_dict : dict, optional 
-            Dictionary used to place an equality cut on the rows 
-            of the tabular ASCII data. 
-
-            Each key of the dictionary must also 
-            be a key of the input ``columns_to_keep_dict``; 
-            for purposes of good bookeeping, you are not permitted 
-            to place a cut on a column that you do not keep. The value 
-            bound to each key serves as the required value for the data stored 
-            in that row. Only rows with a value equal to this required value for the 
-            corresponding column will appear in the returned data table. 
-
-            For example, if row_cut_eq_dict = {'upid': -1}, then *all* rows of the 
-            returned data table will have a upid of -1. 
-
-        row_cut_neq_dict : dict, optional 
-            Dictionary used to place an inequality cut on the rows 
-            of the tabular ASCII data. 
-
-            Each key of the dictionary must also 
-            be a key of the input ``columns_to_keep_dict``; 
-            for purposes of good bookeeping, you are not permitted 
-            to place a cut on a column that you do not keep. The value 
-            bound to each key serves as a forbidden value for the data stored 
-            in that row. Rows with a value equal to this forbidden value for the 
-            corresponding column will not appear in the returned data table. 
-
-            For example, if row_cut_neq_dict = {'upid': -1}, then *no* rows of the 
-            returned data table will have a upid of -1. 
-
-        header_char : str, optional
-            String to be interpreted as a header line of the ascii hlist file. 
-            Default is '#'. 
-
-        Notes 
-        ------
-        When the ``row_cut_min_dict``, ``row_cut_max_dict``, 
-        ``row_cut_eq_dict`` and ``row_cut_neq_dict`` keyword arguments are used 
-        simultaneously, only rows passing all cuts will be kept. 
-
-        Examples 
-        ---------
-        Suppose the only columns of data we intend to analyze 
-        are ``mass`` (column 5), ``upid`` (column 2) 
-        and ``phantom`` (column 28). Below we'll give examples of 
-        how to make different choices for (optional) cuts 
-        on these columns, always retrieving only the columns of data that we need.           
-
-        >>> columns_to_keep_dict = {'mass': (5, 'f4'), 'upid': (2, 'i8'),  'phantom': (28, 'i8')}
-
-        In this first example, no cuts at all will be placed on any rows, 
-        and the returned array will only only have 'mass', 'upid' and 'phantom' columns:
-
-        >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict) # doctest: +SKIP
-        >>> data_array = reader.read_ascii() # doctest: +SKIP
-
-        If in the following call to the reader, we will only 
-        consider rows with mass > 1e10:
-
-        >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict, row_cut_min_dict = {'mass': 1e10}) # doctest: +SKIP
-        >>> data_array = reader.read_ascii() # doctest: +SKIP
-
-        Next we will only consider rows with 1e12 < mass < 1e13:
-
-        >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict, row_cut_min_dict = {'mass': 1e12}, row_cut_max_dict = {'mass': 1e13}) # doctest: +SKIP
-        >>> data_array = reader.read_ascii() # doctest: +SKIP
-
-        Now we will consider a more complex case. We only wish to 
-        consider rows that have upid = -1, 1e12 < mass < 1e13, and we will also exclude 
-        any row with phantom != 1:
-
-        >>> reader = TabularAsciiReader(input_fname, columns_to_keep_dict, row_cut_min_dict = {'mass': 1e12}, row_cut_max_dict = {'mass': 1e13}, row_cut_eq_dict = {'upid': -1}, row_cut_neq_dict = {'phantom': 1}) # doctest: +SKIP
-        >>> data_array = reader.read_ascii() # doctest: +SKIP
-
         """
         self.input_fname = self._get_fname(input_fname)
 
@@ -415,14 +290,15 @@ class TabularAsciiReader(object):
         -------
         The returned value is computed as the number of lines 
         between the returned value of `header_len` and 
-        the next appearance of "\n" as the sole character on a line. 
+        the next appearance of an empty line. 
 
         The `data_len` method is the particular section of code 
         where where the following assumptions are made:
 
-        1. The data begins with the first appearance of a non-empty line that does not begin with the character defined by ``self.header_char``. 
+            1. The data begins with the first appearance of a non-empty line that does not begin with the character defined by ``self.header_char``. 
 
-        2. The data ends with the next appearance of an empty line. 
+            2. The data ends with the next appearance of an empty line. 
+
         """
         Nrows_data = 0
         with self._compression_safe_file_opener(self.input_fname, 'r') as f:

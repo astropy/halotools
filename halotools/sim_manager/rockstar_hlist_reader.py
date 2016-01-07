@@ -59,7 +59,8 @@ def _infer_redshift_from_input_fname(fname):
 
 
 class RockstarHlistReader(TabularAsciiReader):
-    """ The `RockstarHlistReader` reads Rockstar hlist ASCII files, 
+    """
+    The `RockstarHlistReader` reads Rockstar hlist ASCII files, 
     stores them as hdf5 files in the Halotools cache, and updates the cache log. 
 
 
@@ -71,7 +72,6 @@ class RockstarHlistReader(TabularAsciiReader):
     keep track of your halo catalogs, this is the class to use. For a stand-alone 
     reader of Rockstar hlists, you should instead use the 
     `~halotools.sim_manager.TabularAsciiReader` class. 
-
     """
 
     def __init__(self, input_fname, columns_to_keep_dict, 
@@ -105,7 +105,7 @@ class RockstarHlistReader(TabularAsciiReader):
             {'halo_mvir': (1, 'f4'), 'halo_id': (0, 'i8'), 'halo_spin': (45, 'f4')}
 
             The columns of all halo tables stored in the Halotools cache must 
-            must begin with the substring 'halo_'. 
+            must begin with the substring ``halo_``. 
             At a minimum, any halo table stored in cache 
             must have the following columns:  
             ``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``, 
@@ -249,6 +249,7 @@ class RockstarHlistReader(TabularAsciiReader):
         When the ``row_cut_min_dict``, ``row_cut_max_dict``, 
         ``row_cut_eq_dict`` and ``row_cut_neq_dict`` keyword arguments are used 
         simultaneously, only rows passing all cuts will be kept. 
+
         """
         try:
             import h5py 
