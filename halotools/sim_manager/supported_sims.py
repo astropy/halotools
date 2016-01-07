@@ -42,6 +42,7 @@ from ..custom_exceptions import *
 __all__ = ('NbodySimulation', 
     'Bolshoi', 'BolPlanck', 'MultiDark', 'Consuelo')
 
+supported_sim_list = ('bolshoi', 'bolplanck', 'consuelo', 'multidark')
 
 ######################################################
 ########## Simulation classes defined below ########## 

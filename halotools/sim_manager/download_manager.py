@@ -27,6 +27,8 @@ import urlparse
 
 import os, fnmatch, re
 
+from . import sim_defaults, supported_sims 
+
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
 from .log_entry import get_redshift_string
@@ -39,13 +41,10 @@ except ImportError:
     warn("Some of the functionality of the DownloadManager requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda")
 
-from . import sim_defaults
 
 from ..utils.array_utils import find_idx_nearest_val
 from ..utils.array_utils import custom_len
 from ..utils.io_utils import download_file_from_url
-
-supported_sim_list = ('bolshoi', 'bolplanck', 'consuelo', 'multidark')
 
 unsupported_simname_msg = "There are no web locations recognized by Halotools \n for simname ``%s``"
 
@@ -95,7 +94,7 @@ class DownloadManager(object):
         """
         try:
             simname = kwargs['simname']
-            if simname not in supported_sim_list:
+            if simname not in supported_sims.supported_sim_list:
                 raise HalotoolsError(unsupported_simname_msg % simname)
         except KeyError:
             pass
@@ -222,7 +221,7 @@ class DownloadManager(object):
         """
         try:
             simname = kwargs['simname']
-            if simname not in supported_sim_list:
+            if simname not in supported_sims.supported_sim_list:
                 raise HalotoolsError(unsupported_simname_msg % simname)
         except KeyError:
             pass
@@ -382,7 +381,7 @@ class DownloadManager(object):
                 warn("There is no need to specify a halo-finder "
                     "when requesting particle data")
 
-        if simname not in supported_sim_list:
+        if simname not in supported_sims.supported_sim_list:
             raise HalotoolsError(unsupported_simname_msg % simname)
 
         if 'redshift' in kwargs.keys():
