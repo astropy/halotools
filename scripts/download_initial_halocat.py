@@ -23,6 +23,8 @@ halo_finder = sim_defaults.default_halo_finder
 redshift = sim_defaults.default_redshift
 version_name = sim_defaults.default_version_name
 
+# Done parsing inputs
+
 downman = DownloadManager()
 
 ##################################################################
@@ -51,12 +53,13 @@ if args.overwrite == False:
         raise HalotoolsError(existing_fname_error_msg % matching_fname)        
 
 ##################################################################
-### Call the download method
+### Call the download methods
 
 new_halo_log_entry = downman.download_processed_halo_table(simname = simname, 
     halo_finder = halo_finder, redshift = redshift, 
     initial_download_script_msg = existing_fname_error_msg, 
     overwrite = args.overwrite)
+
 new_ptcl_log_entry = downman.download_ptcl_table(simname = simname, 
     redshift = redshift, dz_tol = 0.05, overwrite=args.overwrite, 
     initial_download_script_msg = existing_fname_error_msg)
