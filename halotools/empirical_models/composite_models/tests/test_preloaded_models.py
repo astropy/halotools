@@ -10,7 +10,7 @@ from ...factories import HodModelFactory, SubhaloModelFactory
 from ...factories import PrebuiltHodModelFactory, PrebuiltSubhaloModelFactory
 
 from ....utils.table_utils import compute_conditional_percentiles
-from ....sim_manager import HaloCatalog
+from ....sim_manager import MarfMarfMarf
 from ....custom_exceptions import *
 
 ### Determine whether the machine is mine
@@ -46,9 +46,9 @@ class TestHearin15(TestCase):
 		self.highz_toy_halos = self.toy_halo_table[highz_mask]
 		self.lowz_toy_halos = self.toy_halo_table[np.invert(highz_mask)]
 
-		self.halocat = HaloCatalog(preload_halo_table = True)
+		self.halocat = MarfMarfMarf(preload_halo_table = True)
 
-		self.halocat2 = HaloCatalog(preload_halo_table = True, redshift = 2.)
+		self.halocat2 = MarfMarfMarf(preload_halo_table = True, redshift = 2.)
 
 	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')

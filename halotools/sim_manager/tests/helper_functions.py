@@ -13,8 +13,6 @@ from astropy.table import vstack as table_vstack
 
 from astropy.config.paths import _find_home 
 
-from .. import manipulate_cache_log
-
 from ...custom_exceptions import HalotoolsError
 
 try:

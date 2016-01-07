@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np 
-from halotools.sim_manager import RockstarHlistReader, OverhauledHaloCatalog
+from halotools.sim_manager import RockstarHlistReader
 from halotools.sim_manager import TabularAsciiReader
-from halotools.sim_manager import manipulate_cache_log
 from astropy.table import Table 
 import os
 from halotools.sim_manager.read_rockstar_hlists import _infer_redshift_from_input_fname

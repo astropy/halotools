@@ -56,7 +56,7 @@ class HodMockFactory(MockFactory):
         ----------
         halocat : object, keyword argument
             Object containing the halo catalog and other associated data.  
-            Produced by `~halotools.sim_manager.supported_sims.HaloCatalog`
+            Produced by `~halotools.sim_manager.MarfMarfMarf`
 
         model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.HodModelFactory`. 

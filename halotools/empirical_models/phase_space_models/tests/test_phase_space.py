@@ -9,7 +9,6 @@ from ..nfw_phase_space import NFWPhaseSpace
 from ..profile_models.tests import analytic_nfw_density_outer_shell_normalization
 from ..profile_models.tests import monte_carlo_density_outer_shell_normalization
 
-from ....sim_manager import HaloCatalog
 from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestNFWPhaseSpace']

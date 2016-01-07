@@ -521,7 +521,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
         This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_vmax` function, 
-        and also the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_halo_catalog_nfw_consistency.TestHaloCatalogNFWConsistency.test_vmax_consistency` function. 
+        and also the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_halo_catalog_nfw_consistency.TestHaloCatNFWConsistency.test_vmax_consistency` function. 
 
         """
         return NFWProfile.vmax(self, total_mass, conc)

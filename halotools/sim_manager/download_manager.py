@@ -27,7 +27,6 @@ import urlparse
 
 import os, fnmatch, re
 
-from . import manipulate_cache_log
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
 from .log_entry import get_redshift_string
@@ -507,8 +506,6 @@ class DownloadManager(object):
         # Determine the download directory, 
         # passively creating the necessary directory tree 
         if download_dirname == 'std_cache_loc':
-            # cache_log_fname = manipulate_cache_log.get_halo_table_cache_log_fname()
-            # cache_basedir = os.path.dirname(cache_log_fname)
             cache_basedir = os.path.dirname(self.halo_table_cache.cache_log_fname)
             download_dirname = os.path.join(cache_basedir, 'halo_catalogs', simname, halo_finder)
             try:
@@ -634,10 +631,10 @@ class DownloadManager(object):
                 + str(self.halo_table_cache.cache_log_fname) + "\n\n"
                 "Since the catalog will now be recognized in cache, \n"
                 "you can load it into memory using the following syntax:\n\n"
-                ">>> from halotools.sim_manager import OverhauledHaloCatalog \n"
-                ">>> halocat = OverhauledHaloCatalog("+args_msg+") \n\n"
+                ">>> from halotools.sim_manager import MarfMarfMarf \n"
+                ">>> halocat = MarfMarfMarf("+args_msg+") \n\n"
                 "For convenience, you can set this catalog to be your default catalog \n"
-                "and omit the OverhauledHaloCatalog constructor arguments.\n"
+                "and omit the MarfMarfMarf constructor arguments.\n"
                 "To do that, change the following variables in the \n"
                 "halotools.sim_manager.sim_defaults module:\n"
                 "``default_simname``, ``default_halo_finder``, "
@@ -749,8 +746,6 @@ class DownloadManager(object):
         # Determine the download directory, 
         # passively creating the necessary directory tree 
         if download_dirname == 'std_cache_loc':
-            # cache_log_fname = manipulate_cache_log.get_halo_table_cache_log_fname()
-            # cache_basedir = os.path.dirname(cache_log_fname)
             cache_basedir = os.path.dirname(self.ptcl_table_cache.cache_log_fname)
             download_dirname = os.path.join(cache_basedir, 'particle_catalogs', simname)
             try:
@@ -868,8 +863,8 @@ class DownloadManager(object):
                 "as reflected by a newly added line to the following ASCII file:\n\n"
                 + str(self.ptcl_table_cache.cache_log_fname) + "\n\n"
                 "You can access the particle data with the following syntax:\n\n"
-                ">>> from halotools.sim_manager import OverhauledHaloCatalog \n"
-                ">>> halocat = OverhauledHaloCatalog("+args_msg+")\n"
+                ">>> from halotools.sim_manager import MarfMarfMarf \n"
+                ">>> halocat = MarfMarfMarf("+args_msg+")\n"
                 ">>> particles = halocat.ptcl_table \n\n"
                 "Mock observable functions such as the galaxy-galaxy lensing signal \n"
                 "can now be computed for mock galaxies populated into this simulation.\n\n"

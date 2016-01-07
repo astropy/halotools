@@ -14,8 +14,7 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-from .. import cache_config
-from ..supported_sims import HaloCatalog 
+from ..supported_sims import MarfMarfMarf 
 
 @pytest.mark.slow
 @pytest.mark.skipif('not APH_MACHINE')
@@ -23,14 +22,13 @@ def test_load_halo_catalogs():
     """
     """
 
-    simnames = cache_config.supported_sim_list
     adict = {'bolshoi': [0.33035, 0.54435, 0.67035, 1], 'bolplanck': [0.33406, 0.50112, 0.67, 1], 
         'consuelo': [0.333, 0.506, 0.6754, 1], 'multidark': [0.318, 0.5, 0.68, 1]}
-    for simname in simnames:
+    for simname in adict.keys():
         alist = adict[simname]
         for a in alist:
             z = 1/a - 1
-            halocat = HaloCatalog(simname = simname, redshift = z)
+            halocat = MarfMarfMarf(simname = simname, redshift = z)
             assert np.allclose(halocat.redshift, z, atol = 0.01)
 
             if simname not in ['bolshoi', 'multidark']:

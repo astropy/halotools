@@ -197,8 +197,8 @@ You can also populate alternative halo catalogs:
 
 .. code-block:: python
 
-    from halotools.sim_manager import HaloCatalog
-    my_halocat = HaloCatalog(simname = my_simname, redshift = my_redshift)
+    from halotools.sim_manager import MarfMarfMarf
+    my_halocat = MarfMarfMarf(simname = my_simname, redshift = my_redshift)
     model.populate_mock(halocat = my_halocat)
 
 To read more about the options you have for populating mocks, see 

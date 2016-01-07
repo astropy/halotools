@@ -92,8 +92,8 @@ msg = (
     "Both hdf5 files store an Astropy Table data structure. \n"
     "\nThe Halotools cache system allows you to \n"
     "load these catalogs into memory with the following syntax:\n\n"
-    ">>> from halotools.sim_manager import OverhauledHaloCatalog\n"
-    ">>> bolshoi_z0 = OverhauledHaloCatalog()\n"
+    ">>> from halotools.sim_manager import MarfMarfMarf\n"
+    ">>> bolshoi_z0 = MarfMarfMarf()\n"
     ">>> halos = bolshoi_z0.halo_table\n"
     ">>> particles = bolshoi_z0.ptcl_table\n\n")
 

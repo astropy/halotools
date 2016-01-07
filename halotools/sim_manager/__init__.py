@@ -2,18 +2,15 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .cache_config import *
 from .supported_sims import *
-from .catalog_manager import *
 from .sim_defaults import *
-from .generate_random_sim import *
+from .generate_random_sim import FakeSim
 
 from .download_manager import DownloadManager
 
-from .halo_catalog import *
-from .user_defined_halo_catalog import UserDefinedHaloCatalog
+from .halo_catalog import MarfMarfMarf
+from .user_defined_halo_catalog import ScramScramScram
 
-from .manipulate_cache_log import *
 from .read_rockstar_hlists import RockstarHlistReader
 from .tabular_ascii_reader import TabularAsciiReader
 from .halo_table_cache import HaloTableCache

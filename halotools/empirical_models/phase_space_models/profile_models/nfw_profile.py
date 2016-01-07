@@ -468,7 +468,7 @@ class NFWProfile(AnalyticDensityProf, ConcMass):
         See :ref:`halo_profile_definitions` for derivations and implementation details. 
 
         This method is tested by `~halotools.empirical_models.phase_space_models.profile_models.tests.test_nfw_profile.TestNFWProfile.test_vmax` function, 
-        and also the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_halo_catalog_nfw_consistency.TestHaloCatalogNFWConsistency.test_vmax_consistency` function. 
+        and also the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_halo_catalog_nfw_consistency.TestHaloCatNFWConsistency.test_vmax_consistency` function. 
 
         """
         Rmax = self.rmax(total_mass, conc)

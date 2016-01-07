@@ -33,7 +33,7 @@ The features supported by the ``sim_manager`` include:
 ============================================
 
 To see simple examples of how to manipulate the data stored in halo catalogs, 
-see the Examples section of the `~halotools.sim_manager.HaloCatalog` API documentation. 
+see the Examples section of the `~halotools.sim_manager.MarfMarfMarf` API documentation. 
 
 For beginner's instructions in using the ``sim_manager`` sub-package to download new catalogs 
 and manage your cache, see :ref:`sim_manager_step_by_step`. 

@@ -20,7 +20,6 @@ from astropy.config.paths import get_cache_dir as get_astropy_cache_dir
 import datetime
 
 from .tabular_ascii_reader import TabularAsciiReader
-from . import manipulate_cache_log 
 from .halo_table_cache import HaloTableCache
 from .log_entry import HaloTableCacheLogEntry, get_redshift_string
 
@@ -271,7 +270,7 @@ class RockstarHlistReader(TabularAsciiReader):
         # Bind the constructor arguments to the instance
         self.simname = simname 
         self.halo_finder = halo_finder
-        self.redshift = float(manipulate_cache_log.get_redshift_string(redshift)) 
+        self.redshift = float(get_redshift_string(redshift))
         self.version_name = version_name
         self.dz_tol = dz_tol
         self.Lbox = Lbox
@@ -504,7 +503,7 @@ class RockstarHlistReader(TabularAsciiReader):
         f = h5py.File(self.output_fname)
         f.attrs.create('simname', str(self.simname))
         f.attrs.create('halo_finder', str(self.halo_finder))
-        redshift_string = str(manipulate_cache_log.get_redshift_string(self.redshift))
+        redshift_string = str(get_redshift_string(self.redshift))
         f.attrs.create('redshift', redshift_string)
         f.attrs.create('version_name', str(self.version_name))
         f.attrs.create('fname', str(self.output_fname))

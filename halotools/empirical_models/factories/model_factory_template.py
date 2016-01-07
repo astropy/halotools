@@ -19,7 +19,7 @@ from .subhalo_mock_factory import SubhaloMockFactory
 from .. import model_helpers
 from .. import model_defaults 
 
-from ...sim_manager.supported_sims import HaloCatalog
+from ...sim_manager import MarfMarfMarf
 from ...sim_manager import sim_defaults
 from ...sim_manager.generate_random_sim import FakeSim
 from ...utils.array_utils import custom_len
@@ -81,7 +81,7 @@ class ModelFactory(object):
         Parameters 
         ----------
         halocat : object, optional 
-            Class instance of `~halotools.sim_manager.HaloCatalog`. 
+            Class instance of `~halotools.sim_manager.MarfMarfMarf`. 
             This object contains the halo catalog and its metadata.  
 
         simname : string, optional
@@ -147,7 +147,7 @@ class ModelFactory(object):
                 halocat = kwargs['halocat']
                 del kwargs['halocat'] # otherwise the call to the mock factory below has multiple halocat kwargs
             else:
-                halocat = HaloCatalog(**kwargs)
+                halocat = MarfMarfMarf(**kwargs)
 
             if hasattr(self, 'redshift'):
                 if abs(self.redshift - halocat.redshift) > 0.05:
@@ -286,7 +286,7 @@ class ModelFactory(object):
         >>> r, clustering = model.compute_average_galaxy_clustering() # doctest: +SKIP 
 
         To control how which simulation is used, you use the same syntax you use to load 
-        a `~halotools.sim_manager.HaloCatalog` into memory from your cache directory: 
+        a `~halotools.sim_manager.MarfMarfMarf` into memory from your cache directory: 
 
         >>> r, clustering = model.compute_average_galaxy_clustering(simname = 'multidark', desired_redshift=1) # doctest: +SKIP 
 
@@ -335,7 +335,7 @@ class ModelFactory(object):
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
-        halocat = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
+        halocat = MarfMarfMarf(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
@@ -442,7 +442,7 @@ class ModelFactory(object):
         >>> r, clustering = model.compute_average_galaxy_matter_cross_clustering() # doctest: +SKIP 
 
         To control how which simulation is used, you use the same syntax you use to load 
-        a `~halotools.sim_manager.HaloCatalog` into memory from your cache directory: 
+        a `~halotools.sim_manager.MarfMarfMarf` into memory from your cache directory: 
 
         >>> r, clustering = model.compute_average_galaxy_matter_cross_clustering(simname = 'multidark', desired_redshift=1) # doctest: +SKIP 
 
@@ -510,7 +510,7 @@ class ModelFactory(object):
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
-        halocat = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
+        halocat = MarfMarfMarf(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
