@@ -55,27 +55,25 @@ download script::
 
 Running this script will set up the Halotools cache directory system on your local machine, 
 and then download the default halo catalog to the cache (Bolshoi z=0 rockstar halos), 
-storing the catalog as a pre-processed hdf5 file. The default catalog is ~400Mb, and if 
-you are on a fast university connection the download time should be less than a minute. 
+storing the catalog as a pre-processed hdf5 file. The default catalog is ~400Mb. 
+Because this script automatically updates the Halotools cache log with the catalog, 
+you can now load these halos into memory using the `~halotools.sim_manager.CachedHaloCatalog` class: 
 
-If you want to start playing with this catalog right away:
-
->>> from halotools import sim_manager
->>> default_snapshot = sim_manager.CachedHaloCatalog() # doctest: +SKIP
->>> print(default_snapshot.halo_table[0:9]) # doctest: +SKIP
+>>> from halotools import sim_manager 
+>>> default_halocat = sim_manager.CachedHaloCatalog() # doctest: +SKIP
+>>> print(default_halocat.halo_table[0:9]) # doctest: +SKIP
 
 To see simple examples of how to manipulate the data stored in halo catalogs, 
-see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` API documentation. 
+see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` documentation. 
 
 If you wish to download alternate snapshots, you should can either use the 
-`~halotools.sim_manager.CatalogManager`, or use the download_alternate_halocats.py convenience script, 
-which should be called with three arguments: simname, redshift, and halo-finder. For example: 
+`~halotools.sim_manager.DownloadManager`, or use the download_additional_halocat.py convenience script, which should be called with four arguments: simname, halo_finder, version_name and redshift. For example: 
 
-	python scripts/download_alternate_halocats.py multidark 0.5 rockstar
+	python scripts/download_additional_halocat.py multidark rockstar most_recent 0.5
 
-You can read about your download options by running:
+Choosing ``most_recent`` as the version_name automatically selects the most up-to-date version of the Halotools-provided catalogs. You can read about your download options by executing the script and throwing the help flag:
 
-	python scripts/download_alternate_halocats.py -help
+	python scripts/download_alternate_halocats.py --help
 
 
 Getting started with subpackages
