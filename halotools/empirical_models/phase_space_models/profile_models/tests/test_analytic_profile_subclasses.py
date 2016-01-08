@@ -21,7 +21,7 @@ __all__ = ['TestAnalyticDensityProf']
 
 class TestAnalyticDensityProf(TestCase):
     """ Test the existence and reasonableness of all instances of 
-    sub-classes of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`. 
+    sub-classes of `~halotools.empirical_models.AnalyticDensityProf`. 
     """
 
     def setup_class(self):
@@ -33,7 +33,7 @@ class TestAnalyticDensityProf(TestCase):
 
     def test_attr_inheritance(self):
         """ Test that all sub-classes of 
-        `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` 
+        `~halotools.empirical_models.AnalyticDensityProf` 
         correctly inherit the necessary attributes and methods.
         """
 

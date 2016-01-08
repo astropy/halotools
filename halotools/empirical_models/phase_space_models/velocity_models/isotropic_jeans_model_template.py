@@ -34,7 +34,7 @@ class IsotropicJeansVelocity(object):
     Currently, this general-purpose functionality is not implemented and 
     `IsotropicJeansVelocity` has no functionality of its own. The only 
     analytical velocity model in Halotools is 
-    `~halotools.empirical_models.phase_space_models.velocity_models.NFWJeansVelocity`, 
+    `~halotools.empirical_models.NFWJeansVelocity`, 
     which over-rides the fundamental `dimensionless_radial_velocity_dispersion` method with 
     an analytical solution to the Jeans equation for unbiased tracers orbiting in 
     an equilibrated NFW potential. 

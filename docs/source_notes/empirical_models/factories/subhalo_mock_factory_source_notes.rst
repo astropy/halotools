@@ -37,7 +37,7 @@ see :ref:`populating_mocks_with_alternate_sims_tutorial`.
 
 As a simple example, here is how to create an instance of the `SubhaloMockFactory` 
 with a composite model based on the prebuilt 
-`~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary`:
+`~halotools.empirical_models.behroozi10_model_dictionary`:
 
 .. code-block:: python
 

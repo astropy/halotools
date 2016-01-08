@@ -17,7 +17,7 @@ from .... import model_defaults
 from .....sim_manager import FakeSim
 
 class TestConcMass(TestCase):
-    """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.ConcMass` class.  
+    """ Tests of `~halotools.empirical_models.ConcMass` class.  
 
     """
     def setup_class(self):
@@ -30,7 +30,7 @@ class TestConcMass(TestCase):
             concentration_key = 'conc')
 
     def test_dutton_maccio14(self):
-        """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.ConcMass.compute_concentration` method for the analytical *dutton_maccio14* option.
+        """ Tests of `~halotools.empirical_models.ConcMass.compute_concentration` method for the analytical *dutton_maccio14* option.
         Summary of tests is as follows: 
         
             * Returned concentrations satisfy :math:`0 < c < 100` for the full range of reasonable masses
@@ -49,7 +49,7 @@ class TestConcMass(TestCase):
         assert np.all(np.diff(conc) < 0)
 
     def test_direct_from_halo_catalog(self):
-        """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.ConcMass.compute_concentration` method for the *direct_from_halo_catalog* option.
+        """ Tests of `~halotools.empirical_models.ConcMass.compute_concentration` method for the *direct_from_halo_catalog* option.
 
         Require that the following are true: 
 

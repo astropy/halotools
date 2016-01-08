@@ -10,7 +10,7 @@ The functions contained in this module borrow heavily from the Colossus
 package developed by Benedikt Diemer, http://bdiemer.bitbucket.org. 
 
 Testing for this module is done in the 
-`~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers` module. 
+`~halotools.empirical_models.test_profile_helpers` module. 
 
 """
 from __future__ import (
@@ -58,8 +58,8 @@ def density_threshold(cosmology, redshift, mdef):
 
 	Notes 
 	------
-	This function is tested by the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestProfileHelpers.test_density_threshold` function  
-	and the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestProfileHelpers.test_density_threshold_error_handling` function. 
+	This function is tested by the `~halotools.empirical_models.test_profile_helpers.TestProfileHelpers.test_density_threshold` function  
+	and the `~halotools.empirical_models.test_profile_helpers.TestProfileHelpers.test_density_threshold_error_handling` function. 
 	"""
 
 	try:
@@ -142,7 +142,7 @@ def delta_vir(cosmology, redshift):
 
 	Notes 
 	------
-	This function is tested by the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestProfileHelpers.test_delta_vir` function. 	
+	This function is tested by the `~halotools.empirical_models.test_profile_helpers.TestProfileHelpers.test_delta_vir` function. 	
 	"""
 	try:
 		assert isinstance(cosmology, astropy_cosmology_obj.core.FLRW)
@@ -189,7 +189,7 @@ def halo_mass_to_halo_radius(mass, cosmology, redshift, mdef):
 
 	Notes 
 	------
-	This function is tested by the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestProfileHelpers.test_halo_radius_to_halo_mass` function. 	
+	This function is tested by the `~halotools.empirical_models.test_profile_helpers.TestProfileHelpers.test_halo_radius_to_halo_mass` function. 	
 	"""
 	try:
 		assert isinstance(cosmology, astropy_cosmology_obj.core.FLRW)
@@ -232,7 +232,7 @@ def halo_radius_to_halo_mass(radius, cosmology, redshift, mdef):
 
 	Notes 
 	------
-	This function is tested by the `~halotools.empirical_models.phase_space_models.profile_models.tests.test_profile_helpers.TestProfileHelpers.test_halo_radius_to_halo_mass` function. 	
+	This function is tested by the `~halotools.empirical_models.test_profile_helpers.TestProfileHelpers.test_halo_radius_to_halo_mass` function. 	
 
 	"""
 	try:

@@ -7,7 +7,7 @@ from . import sim_defaults
 from .supported_sims import *
 from .fake_sim import FakeSim
 
-from .download_manager import DownloadManager
+from .download_manager import *
 
 from .cached_halo_catalog import CachedHaloCatalog
 from .user_supplied_halo_catalog import UserSuppliedHaloCatalog

@@ -20,7 +20,7 @@ from ....custom_exceptions import HalotoolsError
 __all__ = ['TestSubhaloModelFactory']
 
 class TestSubhaloModelFactory(TestCase):
-    """ Class providing tests of the `~halotools.empirical_models.factories.SubhaloModelFactory`. 
+    """ Class providing tests of the `~halotools.empirical_models.SubhaloModelFactory`. 
     """
 
     def setup_class(self):
@@ -28,7 +28,7 @@ class TestSubhaloModelFactory(TestCase):
         """
 
     def test_exception_handling(self):
-        """ Using `~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary` 
+        """ Using `~halotools.empirical_models.behroozi10_model_dictionary` 
         as a specific example, require that the `~halotools.empirical_models.SubhaloModelFactory` raises a HalotoolsError 
         if any of its component models do not have `_galprop_dtypes_to_allocate` and `_methods_to_inherit` attributes. 
         """

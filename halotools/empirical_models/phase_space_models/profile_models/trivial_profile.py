@@ -55,7 +55,7 @@ class TrivialProfile(AnalyticDensityProf):
 
         Notes 
         -----
-        Testing for this class is done by `~halotools.empirical_models.phase_space_models.profile_models.tests.TestTrivialProfile`
+        Testing for this class is done by `~halotools.empirical_models.TestTrivialProfile`
 
         """
 
@@ -84,7 +84,7 @@ class TrivialProfile(AnalyticDensityProf):
         dimensionless_density: array_like 
             Dimensionless density of a dark matter halo 
             at the input ``scaled_radius``, normalized by the 
-            `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` 
+            `~halotools.empirical_models.profile_helpers.density_threshold` 
             :math:`\\rho_{\\rm thresh}` for the 
             halo mass definition, cosmology, and redshift. 
             Result is an array of the dimension as the input ``scaled_radius``. 

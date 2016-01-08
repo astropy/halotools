@@ -1,6 +1,6 @@
 :orphan:
 
-.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models
+.. currentmodule:: halotools.empirical_models
 
 .. _profile_template_tutorial:
 
@@ -11,15 +11,15 @@ Source code notes on `AnalyticDensityProf`
 This section of the documentation provides background material and detailed implementation notes 
 on the functions and methods of the primary base class used to model the spatial distribution 
 of matter and galaxies within halos,  
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`. 
+`~halotools.empirical_models.AnalyticDensityProf`. 
 This as an abstract base class and so it cannot itself be instantiated; only concrete 
 sub-classes can be used to directly model the spatial profile of halos. 
 
-The purpose of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` 
+The purpose of the `~halotools.empirical_models.AnalyticDensityProf` 
 class is to provide a template for any Halotools model of the spatial distribution 
 of points within a halo. So in Halotools, any analytical model for how either matter or galaxies 
 are spatially distributed within their halos will subclass from the 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class. 
+`~halotools.empirical_models.AnalyticDensityProf` class. 
 
 This tutorial is organized as follows. The :ref:`halo_mass_definitions` section 
 reviews how halo boundaries and masses are defined with respect to a cosmologically 
@@ -39,7 +39,7 @@ Halo Mass and Radius Definitions
 Basic equations
 -----------------------------------
 
-The `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class models 
+The `~halotools.empirical_models.AnalyticDensityProf` class models 
 a dark matter halo to be a spherically symmetric overdensity relative to some reference 
 density, :math:`\rho_{\rm ref}(z)`. The reference density is typically either the critical 
 energy density of the universe, :math:`\rho_{\rm crit}(z)`, or the mean matter density 
@@ -89,16 +89,16 @@ Computing the relevant quantities
 
 In Halotools, the reference densities are computed using the `~astropy.cosmology` sub-package of Astropy, 
 and the remaining quantities are computed in the 
-`~halotools.empirical_models.phase_space_models.profile_models` sub-package, 
-specifically the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers` module. 
+`~halotools.empirical_models.profile_models` sub-package, 
+specifically the `~halotools.empirical_models.profile_helpers` module. 
 
 ============================================  ========================================================================================================= 
 Quantity                                      Source Code                 
 ============================================  ========================================================================================================= 
-:math:`\rho_{\rm thresh}(z)`                  `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold`
-:math:`\Delta_{\rm vir}(z)`                   `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.delta_vir`
-:math:`M_{\Delta}(z)`                         `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_radius_to_halo_mass`
-:math:`R_{\Delta}(z)`                         `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_mass_to_halo_radius`
+:math:`\rho_{\rm thresh}(z)`                  `~halotools.empirical_models.profile_helpers.density_threshold`
+:math:`\Delta_{\rm vir}(z)`                   `~halotools.empirical_models.profile_helpers.delta_vir`
+:math:`M_{\Delta}(z)`                         `~halotools.empirical_models.profile_helpers.halo_radius_to_halo_mass`
+:math:`R_{\Delta}(z)`                         `~halotools.empirical_models.profile_helpers.halo_mass_to_halo_radius`
 :math:`\rho_{\rm crit}(z)`                    `~astropy.cosmology.FLRW.critical_density`
 :math:`\Omega_{\rm m}(z)`                     `~astropy.cosmology.FLRW.Om`
 ============================================  =========================================================================================================
@@ -119,38 +119,38 @@ is related to the spatial profile of the matter in its interior via:
 	M_{\Delta}(z) \equiv 4\pi\int_{0}^{R_{\Delta}}dr' r'^{2}\rho_{\rm prof}(r')
 
 This equation defines the normalization of the halo profile :math:`\rho_{\rm prof}(r)`, which for any 
-sub-class of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` is 
+sub-class of `~halotools.empirical_models.AnalyticDensityProf` is 
 computed with the 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.mass_density` method. 
+`~halotools.empirical_models.AnalyticDensityProf.mass_density` method. 
 
-For numerical stability, it is always preferable to work with order-unity quantities rather than astronomical numbers. So throughout the `~halotools.empirical_models.phase_space_models.profile_models` sub-package, most methods 
+For numerical stability, it is always preferable to work with order-unity quantities rather than astronomical numbers. So throughout the `~halotools.empirical_models.profile_models` sub-package, most methods 
 work with the *scaled radius*, :math:`\tilde{r}`, defined as:
 
 .. math::
 
 	\tilde{r} \equiv r/R_{\Delta}, 
 
-and the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_mass_density`, 
+and the `~halotools.empirical_models.AnalyticDensityProf.dimensionless_mass_density`, 
 :math:`\tilde{\rho}_{\rm prof}`, defined as:
 
 .. math::
 
 	\tilde{\rho}_{\rm prof}(\tilde{r}) \equiv \rho_{\rm prof}(\tilde{r})/\rho_{\rm thresh}
 
-In the implementation of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf`, 
+In the implementation of `~halotools.empirical_models.AnalyticDensityProf`, 
 for reasons of numerical stability a profile is actually defined by :math:`\tilde{\rho}_{\rm prof}(\tilde{r})`, 
 and :math:`\rho_{\rm prof}(r)` is a derived quantity. 
 
 In fact, in order to define a new 
 profile model, one only need define a sub-class 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` and provide an 
-implementation of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_mass_density` method, as *all* other profile quantities can be computed from this function. 
+`~halotools.empirical_models.AnalyticDensityProf` and provide an 
+implementation of the `~halotools.empirical_models.AnalyticDensityProf.dimensionless_mass_density` method, as *all* other profile quantities can be computed from this function. 
 
 Convenience functions 
 -----------------------
 
-In addition to the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_mass_density` method that defines the profile, instances of the 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class 
+In addition to the `~halotools.empirical_models.AnalyticDensityProf.dimensionless_mass_density` method that defines the profile, instances of the 
+`~halotools.empirical_models.AnalyticDensityProf` class 
 have a number of other useful bound methods:
 
 .. _computing_enclosed_mass:
@@ -165,8 +165,8 @@ The mass enclosed within a given radius is defined as:
 	M_{\Delta}(<r) \equiv 4\pi\int_{0}^{r}dr' r'^{2}\rho_{\rm prof}(r'), 
 
 which can be computed via the 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.enclosed_mass` method 
-of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
+`~halotools.empirical_models.AnalyticDensityProf.enclosed_mass` method 
+of the `~halotools.empirical_models.AnalyticDensityProf` class, 
 or any of its sub-classes. 
 
 .. _computing_cumulative_mass_PDF:
@@ -183,14 +183,14 @@ particle at a scaled-radius position less than :math:`\tilde{r}`:
 	P_{\rm prof}(<\tilde{r}) \equiv M_{\Delta}(<\tilde{r}) / M_{\Delta}.  
 
 This function is computed by 
-the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.cumulative_mass_PDF` method 
-of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class. 
+the `~halotools.empirical_models.AnalyticDensityProf.cumulative_mass_PDF` method 
+of the `~halotools.empirical_models.AnalyticDensityProf` class. 
 The :math:`P_{\rm prof}(<\tilde{r})` is used by 
-`~halotools.empirical_models.phase_space_models.MonteCarloGalProf` 
+`~halotools.empirical_models.MonteCarloGalProf` 
 to help generate Monte Carlo realizations of halo density profiles. 
 
 For reasons of numerical stability, in the Halotools implementation 
-of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.enclosed_mass` method
+of the `~halotools.empirical_models.AnalyticDensityProf.enclosed_mass` method
 the quantity :math:`M_{\Delta}(<r)` is computed as 
 :math:`M_{\Delta}(<r) = P_{\rm prof}(<\tilde{r})M_{\Delta}`. 
 
@@ -208,8 +208,8 @@ A halo's *virial velocity* :math:`V_{\rm vir}` is defined as:
 Intuitively, the virial velocity is the speed of a tracer particle on a 
 circular orbit at a distance :math:`R_{\Delta}` from the center of a halo in virial equilibrium. 
 You can compute :math:`V_{\rm vir}` via 
-the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.virial_velocity` method 
-of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
+the `~halotools.empirical_models.AnalyticDensityProf.virial_velocity` method 
+of the `~halotools.empirical_models.AnalyticDensityProf` class, 
 or any of its subclasses. 
 
 .. _computing_circular_velocity:
@@ -226,8 +226,8 @@ The circular velocity profile, :math:`V_{\rm circ}(r)`, is defined as:
 where *G* is Newton's constant. Intuitively, :math:`V_{\rm circ}(r)` is the speed of  
 a tracer particle on a bound circular orbit at a distance *r* from the 
 center of a virialized halo. You can compute :math:`V_{\rm circ}(r)` with  
-the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.circular_velocity` method 
-of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
+the `~halotools.empirical_models.AnalyticDensityProf.circular_velocity` method 
+of the `~halotools.empirical_models.AnalyticDensityProf` class, 
 or any of its sub-classes. 
 
 For reasons of numerical stability, when computing :math:`V_{\rm circ}(r)` 
@@ -265,7 +265,7 @@ and the denominator is :math:`\tilde{r}`, we arrive at
 	\tilde{V}^{2}_{\rm circ}(\tilde{r}) = \frac{P_{\rm prof}(<\tilde{r})}{\tilde{r}}
 
 This is why in the source code for the 
-`~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_circular_velocity` method, the returned quantity is :math:`\sqrt{P_{\rm prof}(<\tilde{r})/\tilde{r}}`. Then the source code for the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.circular_velocity` method simply multiplies the returned value of `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_circular_velocity` by :math:`V_{\rm vir}`. 
+`~halotools.empirical_models.AnalyticDensityProf.dimensionless_circular_velocity` method, the returned quantity is :math:`\sqrt{P_{\rm prof}(<\tilde{r})/\tilde{r}}`. Then the source code for the `~halotools.empirical_models.AnalyticDensityProf.circular_velocity` method simply multiplies the returned value of `~halotools.empirical_models.AnalyticDensityProf.dimensionless_circular_velocity` by :math:`V_{\rm vir}`. 
 
 .. _computing_vmax:
 
@@ -275,7 +275,7 @@ Maximum circular velocity
 The maximum circular velocity :math:`V_{\rm max}` is defined as the maximum value attained by 
 :math:`V_{\rm circ}(r)` over the entire profile of the halo. Halotools computes :math:`V_{\rm max}` 
 by using Scipy's zero-finder `~scipy.optimize.minimize`. You can compute :math:`V_{\rm max}` 
-using the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.vmax` method of the `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf` class, 
+using the `~halotools.empirical_models.AnalyticDensityProf.vmax` method of the `~halotools.empirical_models.AnalyticDensityProf` class, 
 or any of its sub-classes. 
 
 
@@ -286,16 +286,16 @@ Computing the relevant quantities
 ============================================  ====================================================================================================================================================== 
 Quantity                                      Source Code                 
 ============================================  ====================================================================================================================================================== 
-:math:`\rho_{\rm prof}(r)`                    `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.mass_density`
-:math:`\tilde{\rho}_{\rm prof}(\tilde{r})`                    `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_mass_density`
-:math:`M_{\Delta}(<r)`                    	  `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.enclosed_mass`
-:math:`P_{\rm prof}(<\tilde{r})`              `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.cumulative_mass_PDF`
-:math:`V_{\rm vir}`                           `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.virial_velocity`
-:math:`V_{\rm circ}(r)`                       `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.circular_velocity`
-:math:`\tilde{V}_{\rm circ}(r)`               `~halotools.empirical_models.phase_space_models.profile_models.AnalyticDensityProf.dimensionless_circular_velocity`
+:math:`\rho_{\rm prof}(r)`                    `~halotools.empirical_models.AnalyticDensityProf.mass_density`
+:math:`\tilde{\rho}_{\rm prof}(\tilde{r})`                    `~halotools.empirical_models.AnalyticDensityProf.dimensionless_mass_density`
+:math:`M_{\Delta}(<r)`                    	  `~halotools.empirical_models.AnalyticDensityProf.enclosed_mass`
+:math:`P_{\rm prof}(<\tilde{r})`              `~halotools.empirical_models.AnalyticDensityProf.cumulative_mass_PDF`
+:math:`V_{\rm vir}`                           `~halotools.empirical_models.AnalyticDensityProf.virial_velocity`
+:math:`V_{\rm circ}(r)`                       `~halotools.empirical_models.AnalyticDensityProf.circular_velocity`
+:math:`\tilde{V}_{\rm circ}(r)`               `~halotools.empirical_models.AnalyticDensityProf.dimensionless_circular_velocity`
 ============================================  ======================================================================================================================================================
 
-.. currentmodule:: halotools.empirical_models.phase_space_models
+.. currentmodule:: halotools.empirical_models
 
 .. _analytic_density_prof_constructor:
 
@@ -308,11 +308,9 @@ The `~AnalyticDensityProf` constructor has three required arguments: ``cosmology
 
 1. When an instance of an `~AnalyticDensityProf` sub-class is incorporated into a composite model, these attributes will be compared against the corresponding attributes of other component models so that composite model consistency is ensured. 
 
-.. currentmodule:: halotools.empirical_models.phase_space_models.profile_models
+.. currentmodule:: halotools.empirical_models
 
 2. A fixed value for the ``density_threshold`` attribute can be bound to the instance that is consistent with the returned value of the `profile_helpers.density_threshold` function.
-
-.. currentmodule:: halotools.empirical_models
 
 3. The string ``mdef`` is parsed with the `model_defaults.get_halo_boundary_key` function and the returned value is bound to the ``halo_boundary_key`` instance attribute. This guarantees that during mock-making, the appropriate column of the `~halotools.sim_manager.CachedHaloCatalog` halo_table will be automatically chosen for all methods of the `~AnalyticDensityProf` sub-class instance requiring this knowledge. 
 

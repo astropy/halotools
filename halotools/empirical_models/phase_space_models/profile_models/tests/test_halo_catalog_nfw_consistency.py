@@ -37,7 +37,7 @@ else:
 __all__ = ['TestHaloCatNFWConsistency']
 
 class TestHaloCatNFWConsistency(TestCase):
-    """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` in which comparisons are made to a Bolshoi halo catalog. 
+    """ Tests of `~halotools.empirical_models.NFWProfile` in which comparisons are made to a Bolshoi halo catalog. 
 
     """
     @pytest.mark.slow

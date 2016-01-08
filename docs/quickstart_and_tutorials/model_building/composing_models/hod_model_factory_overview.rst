@@ -23,9 +23,9 @@ The value bound to each of the above keys are instances of Halotools classes, di
 A concrete example of a composite HOD model dictionary
 ---------------------------------------------------------------------------------------------------------------------
 
-With the above picture in mind, let's now look at a specific example of how a composite model dictionary is built. For our example, we’ll use the particularly simple `~halotools.empirical_models.Zheng07` composite model, one of the fully-functional composite models that comes pre-built with Halotools in the `~halotools.empirical_models.composite_models` sub-package (see :ref:`composite_models_api`). 
+With the above picture in mind, let's now look at a specific example of how a composite model dictionary is built. For our example, we’ll use the particularly simple `~halotools.empirical_models.Zheng07` composite model, one of the fully-functional composite models that comes pre-built with Halotools in the `~halotools.empirical_models` sub-package. 
 
-All the functions in the `~halotools.empirical_models.composite_models` sub-package do the same thing: they build a composite model dictionary, pass the dictionary to the relevant factory, and return an instance of a composite model, as diagrammed in :ref:`model_factory_flowchart`. To help understand this example, have a look at the source code for the `~halotools.empirical_models.Zheng07` composite model while you read this section of the documentation. 
+All the pre-built dictionary functions in the `~halotools.empirical_models` sub-package do the same thing: they build a composite model dictionary, pass the dictionary to the relevant factory, and return an instance of a composite model, as diagrammed in :ref:`model_factory_flowchart`. To help understand this example, have a look at the source code for the `~halotools.empirical_models.Zheng07` composite model while you read this section of the documentation. 
 
 
 For definiteness, let’s look at how the Zheng07 composite model is built. The first chunk of code builds a dictionary called `subpopulation_dictionary_centrals`:
