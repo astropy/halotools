@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Methods and classes for halo catalog I/O and organization.
-
+Module storing the DownloadManager class responsible for 
+retrieving the Halotools-provided simulation data from the web 
+and storing it in the Halotools cache. 
 """
 
 __all__ = ['DownloadManager']
@@ -49,8 +50,7 @@ from ..utils.io_utils import download_file_from_url
 unsupported_simname_msg = "There are no web locations recognized by Halotools \n for simname ``%s``"
 
 class DownloadManager(object):
-    """ Class used to scrape the web for simulation data
-    and manage the set of cached catalogs.
+    """ Class used to scrape the web for simulation data and cache the downloaded catalogs.
     """
 
     def __init__(self):
@@ -110,6 +110,42 @@ class DownloadManager(object):
             then the ignore_nearby_redshifts flag must be set to True in order 
             for the new halo catalog to be stored in cache. 
             Default is False. 
+
+        Examples 
+        -----------
+        >>> dman = DownloadManager()
+        >>> simname = 'bolplanck'
+        >>> z = 2
+        >>> version_name = sim_defaults.default_version_name
+        >>> halo_finder = sim_defaults.default_version_name
+        >>> dman.download_processed_halo_table(simname = 'bolplanck', halo_finder = halo_finder, version_name = version_name, redshift = z) # doctest: +SKIP
+
+        Now that you have downloaded the catalog, it is stored in the default cache location:
+
+        $HOME/.astropy/cache/halotools/halo_catalogs/
+        Use the download_dirname keyword argument to store the catalog in an alternate location.
+        Wherever you store it, after calling the `download_processed_halo_table` method 
+        you can load the catalog into memory as follows:
+
+        >>> from halotools.sim_manager import CachedHaloCatalog
+        >>> halocat = CachedHaloCatalog(simname = 'bolplanck', redshift = z) # doctest: +SKIP
+
+        Since you chose default values for the ``version_name`` and ``halo_finder``, 
+        it is not necessary to specify these keyword arguments. The ``halocat`` has 
+        metadata attached to it describing the simulation, snapshot, catalog processing notes, etc. 
+        The actual halos are stored in the form of an Astropy `~astropy.table.Table` data structure 
+        and can be accessed as follows:
+
+        >>> halos = halocat.halo_table # doctest: +SKIP
+        >>> array_of_masses = halos['halo_mvir'] # doctest: +SKIP
+        >>> array_of_x_position = halos['halo_x'] # doctest: +SKIP
+
+        Notes 
+        -------
+        If after downloading the catalog you decide that you want to move it 
+        to a new location on disk, you will need to be sure your cache directory 
+        is informed of the relocation. 
+        In this case, see :ref:`relocating_simulation_data` for instructions. 
 
         """
 
@@ -354,6 +390,41 @@ class DownloadManager(object):
             then the ignore_nearby_redshifts flag must be set to True in order 
             for the new halo catalog to be stored in cache. 
             Default is False. 
+
+        Examples 
+        -----------
+        >>> dman = DownloadManager()
+        >>> simname = 'bolplanck'
+        >>> z = 2
+        >>> version_name = sim_defaults.default_version_name
+        >>> dman.download_ptcl_table(simname = 'bolplanck', version_name = version_name, redshift = z) # doctest: +SKIP
+
+        Now that you have downloaded the particles, the data is stored in the default cache location:
+
+        $HOME/.astropy/cache/halotools/particle_catalogs/
+        Use the download_dirname keyword argument to store the catalog in an alternate location.
+        Wherever you store it, after calling the `download_ptcl_table` method 
+        you can access particle data by loading the associated halo catalog into memory:
+
+        >>> from halotools.sim_manager import CachedHaloCatalog
+        >>> halocat = CachedHaloCatalog(simname = 'bolplanck', redshift = z, halo_finder = 'rockstar') # doctest: +SKIP
+
+        Since you chose default values for the ``version_name``, 
+        it is not necessary to specify that keyword arguments. The ``halocat`` has 
+        metadata attached to it describing the simulation, snapshot, catalog processing notes, etc. 
+        The actual particles are stored in the form of an Astropy `~astropy.table.Table` data structure 
+        and can be accessed as follows:
+
+        >>> particles = halocat.ptcl_table # doctest: +SKIP
+        >>> array_of_x_position = particles['x'] # doctest: +SKIP
+
+        Notes 
+        -------
+        If after downloading the catalog you decide that you want to move it 
+        to a new location on disk, you will need to be sure your cache directory 
+        is informed of the relocation. 
+        In this case, see :ref:`relocating_simulation_data` for instructions. 
+
 
         """
         ############################################################

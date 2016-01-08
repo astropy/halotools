@@ -4,6 +4,13 @@
 Downloading and Caching Halotools-Provided Catalogs
 ********************************************************
 
+This section of the documentation describes how to get up and running 
+with the halo and particle catalogs provided by Halotools. To see 
+if Halotools provides the catalogs you need, see the 
+:ref:`supported_sim_list` page.   
+If you want to use your own catalog and/or use Halotools to process 
+an alternative catalog, see :ref:`working_with_alternative_catalogs`
+
 Halotools provides a handful of homogeneously processed 
 halo catalogs and associated particle data. These catalogs 
 have been prepared into a standard form, and so 
@@ -72,7 +79,10 @@ of the downloaded halo catalog, you must update the cache log.**
 For more information about managing the disk locations of your halo catalogs, 
 see :ref:`relocating_simulation_data`. 
 
-
+The `~halotools.sim_manager.DownloadManager.download_ptcl_table` method 
+has the same API, where the only difference is that you do not specify 
+a halo-finder when you want a particle table, as the particles were 
+selected randomly without regard to halo membership. 
 
 
 
