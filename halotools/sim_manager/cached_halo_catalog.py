@@ -15,7 +15,7 @@ from . import sim_defaults, supported_sims
 
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
-from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
+from .halo_table_cache_log_entry import get_redshift_string
 from .ptcl_table_cache_log_entry import PtclTableCacheLogEntry
 
 from ..custom_exceptions import HalotoolsError, InvalidCacheLogEntry
@@ -38,6 +38,8 @@ class CachedHaloCatalog(object):
         except ImportError:
             raise HalotoolsError("Must have h5py package installed "
                 "to use CachedHaloCatalog objects")
+
+        self.halo_table_cache = HaloTableCache() 
 
         self._process_kwargs(dz_tol, **kwargs)
 
@@ -160,8 +162,8 @@ class CachedHaloCatalog(object):
     def _retrieve_matching_cache_log_entry(self, dz_tol):
         """
         """
-        halo_table_cache = HaloTableCache()
-        if len(halo_table_cache.log) == 0:
+        
+        if len(self.halo_table_cache.log) == 0:
             msg = ("\nThe Halotools cache log is empty.\n"
                 "If you have never used Halotools before, "
                 "you should read the Getting Started guide on halotools.readthedocs.org.\n"
@@ -170,16 +172,16 @@ class CachedHaloCatalog(object):
             raise HalotoolsError(msg)
 
 
-        gen0 = halo_table_cache.matching_log_entry_generator(
+        gen0 = self.halo_table_cache.matching_log_entry_generator(
             simname = self.simname, halo_finder = self.halo_finder, 
             version_name = self.version_name, redshift = self.redshift, 
             dz_tol = dz_tol)
-        gen1 = halo_table_cache.matching_log_entry_generator(
+        gen1 = self.halo_table_cache.matching_log_entry_generator(
             simname = self.simname, 
             halo_finder = self.halo_finder, version_name = self.version_name)
-        gen2 = halo_table_cache.matching_log_entry_generator(
+        gen2 = self.halo_table_cache.matching_log_entry_generator(
             simname = self.simname, halo_finder = self.halo_finder)
-        gen3 = halo_table_cache.matching_log_entry_generator(
+        gen3 = self.halo_table_cache.matching_log_entry_generator(
             simname = self.simname)
 
         matching_entries = list(gen0)     
