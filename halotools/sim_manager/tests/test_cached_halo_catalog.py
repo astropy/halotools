@@ -154,5 +154,33 @@ class TestCachedHaloCatalog(TestCase):
                 else:
                     assert str(getattr(entry, attr)) == str(getattr(halocat, attr))
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_acceptable_arguments(self):
+        fname = 'dummy'
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = CachedHaloCatalog(fname = fname, simname = 'bolshoi')
+        substr = "If you specify an input ``fname``"
+        assert substr in err.value.message
+        substr = "do not also specify ``simname``"
+        assert substr in err.value.message
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = CachedHaloCatalog(fname = fname, version_name = 'dummy')
+        substr = "If you specify an input ``fname``"
+        assert substr in err.value.message
+        substr = "do not also specify ``version_name``"
+        assert substr in err.value.message
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = CachedHaloCatalog(fname = fname, redshift = 0)
+        substr = "If you specify an input ``fname``"
+        assert substr in err.value.message
+        substr = "do not also specify ``redshift``"
+        assert substr in err.value.message
+
+
+
+
 
 
