@@ -5,9 +5,12 @@
 Quickstart Guides and Tutorials
 ***************************************
 
-This section of the documentation provides an overview of the 
-core functionality of Halotools, and usage-tutorials to help you 
-quickly get started with the package. 
+This section of the documentation contains both quickstart guides 
+for getting started with Halotools and also detailed usage-tutorials. 
+If you are instead looking for a quick reference to the API of some 
+class or function, try looking in :ref:`function_usage_examples`, 
+or otherwise in :ref:`complete_reference_api`. 
+
 
 Quickstart Guides
 =================================================
