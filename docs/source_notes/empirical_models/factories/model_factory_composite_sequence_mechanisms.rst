@@ -1,6 +1,6 @@
 :orphan:
 
-.. currentmodule:: halotools.empirical_models.factories
+.. currentmodule:: halotools.empirical_models
 
 .. _composite_model_constructor_bookkeeping_mechanisms:
 
@@ -24,7 +24,7 @@ While creating a composite model from a set of component models, the factory cla
 
 In most cases this propagation process is unambiguous and straightforwardly accomplished with :ref:`update_param_dict_decorator_mechanism`. However, if two or more component models have a parameter with the exact same name, then care is required. 
 
-As an example, consider the composite model dictionary built by the `~halotools.empirical_models.leauthaud11_model_dictionary` function. In this composite model, there are two populations of galaxies, *centrals* and *satellites*, whose occupation statistics are governed by `~halotools.empirical_models.Leauthaud11Cens` and `~halotools.empirical_models.Leauthaud11Sats`, respectively. Both of these classes derive much of their behavior from the underlying stellar-to-halo-mass relation of Behroozi et al. (2010), and so all the parameters in the ``param_dict`` of `~halotools.empirical_models.smhm_models.Behroozi10SmHm` appear in both the ``param_dict`` of `~halotools.empirical_models.Leauthaud11Cens` and the ``param_dict`` of `~halotools.empirical_models.Leauthaud11Sats`. 
+As an example, consider the composite model dictionary built by the `~halotools.empirical_models.leauthaud11_model_dictionary` function. In this composite model, there are two populations of galaxies, *centrals* and *satellites*, whose occupation statistics are governed by `~halotools.empirical_models.Leauthaud11Cens` and `~halotools.empirical_models.Leauthaud11Sats`, respectively. Both of these classes derive much of their behavior from the underlying stellar-to-halo-mass relation of Behroozi et al. (2010), and so all the parameters in the ``param_dict`` of `~halotools.empirical_models.Behroozi10SmHm` appear in both the ``param_dict`` of `~halotools.empirical_models.Leauthaud11Cens` and the ``param_dict`` of `~halotools.empirical_models.Leauthaud11Sats`. 
 
 In this example, the repeated appearance of the stellar-to-halo-mass parameters is harmless because these these really are the same parameters that just so happen to appear twice. But since Halotools users are free to define their own model components and compose any arbitrary collection of components together, it is possible that the same name could have been inadvertently given to parameters in different components controlling entirely distinct behavior. In such a case, when that parameter is modified in the composite model ``param_dict`` it is ambiguous how to propagate the change down in to the appropriate component model. 
 
@@ -81,7 +81,7 @@ Every component model assigns some property or set of properties to the mock pop
 
 If you are writing your own model component of any kind, the model factories require that instances of your model have a ``_galprop_dtypes_to_allocate`` attribute. You can meet this specification by assigning any `numpy.dtype` object to the ``_galprop_dtypes_to_allocate`` attribute during the `__init__` constructor of your componenent model, even if the dtype is empty. 
 
-For example implementations, see the constructors of `~halotools.empirical_models.smhm_models.PrimGalpropModel` and `~halotools.empirical_models.OccupationComponent`. 
+For example implementations, see the constructors of `~halotools.empirical_models.PrimGalpropModel` and `~halotools.empirical_models.OccupationComponent`. 
 
 .. _model_feature_calling_sequence_mechanism:
 

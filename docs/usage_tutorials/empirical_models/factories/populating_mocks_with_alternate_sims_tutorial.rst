@@ -1,6 +1,6 @@
 :orphan:
 
-.. currentmodule:: halotools.empirical_models.factories
+.. currentmodule:: halotools.empirical_models
 
 .. _populating_mocks_with_alternate_sims_tutorial:
 

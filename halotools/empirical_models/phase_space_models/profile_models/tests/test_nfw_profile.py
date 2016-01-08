@@ -216,7 +216,7 @@ class TestNFWProfile(TestCase):
         obtains this mapping by first computing :math:`P_{\\rm NFW}(<\\tilde{r})` at a set of abcissa, 
         and then using `~scipy.interpolate.InterpolatedUnivariateSpline` to tabulate the inverse mapping. 
         In the Halotools implementation, the code calling the inverse mapping is 
-        `~halotools.empirical_models.model_helpers.custom_spline`, which is just a convenience wrapper 
+        `~halotools.empirical_models.custom_spline`, which is just a convenience wrapper 
         around `~scipy.interpolate.InterpolatedUnivariateSpline` that handles edge cases a bit more intuitively. 
 
         For volume elements evenly spaced in :math:`\\tilde{r}`, any NFW profile must respect the following relation:

@@ -195,7 +195,7 @@ class SubhaloModelFactory(ModelFactory):
         ------------------------------------
         See :ref:`subhalo_model_factory_tutorial` for documentation on the internals of the factory. 
 
-        This factory is tested by the `~halotools.empirical_models.factories.tests.TestSubhaloModelFactory` class. 
+        This factory is tested by the `~halotools.empirical_models.TestSubhaloModelFactory` class. 
 
         """
 

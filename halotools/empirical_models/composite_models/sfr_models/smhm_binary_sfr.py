@@ -86,7 +86,7 @@ def smhm_binary_sfr_model_dictionary(
     Returns 
     -------
     model : object 
-        Instance of `~halotools.empirical_models.factories.SubhaloModelFactory`
+        Instance of `~halotools.empirical_models.SubhaloModelFactory`
 
     Examples 
     --------

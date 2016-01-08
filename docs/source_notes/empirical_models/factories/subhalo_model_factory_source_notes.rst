@@ -1,6 +1,6 @@
 :orphan:
 
-.. currentmodule:: halotools.empirical_models.factories
+.. currentmodule:: halotools.empirical_models
 
 .. _subhalo_model_factory_tutorial:
 
