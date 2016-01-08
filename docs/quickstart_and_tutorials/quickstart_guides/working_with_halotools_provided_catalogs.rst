@@ -26,6 +26,33 @@ using the `~halotools.sim_manager.CachedHaloCatalog` class:
 >>> from halotools.sim_manager import CachedHaloCatalog
 >>> halocat = CachedHaloCatalog(simname = 'multidark', halo_finder = 'rockstar', redshift = 1) # doctest: +SKIP
 
+The rest of this section of the documentation decribes how to use 
+the `~halotools.sim_manager.DownloadManager` class. If you prefer 
+to use the convenience script, run it from the command line and throw the 
+help flag to see its calling sequence:
+
+	python scripts/download_additional_halocat.py --help
+
+
+.. _download_manager_usage_tutorial:
+
+Usage tutorial for the `~halotools.sim_manager.DownloadManager` class
+=========================================================================
+
+The primary functionality of the `~halotools.sim_manager.DownloadManager` 
+class lies in just two methods: 
+`~halotools.sim_manager.DownloadManager.download_processed_halo_table` and 
+`~halotools.sim_manager.DownloadManager.download_ptcl_table`.  
+
+>>> from halotools.sim_manager import DownloadManager
+>>> dman = DownloadManager()
+
+
+
+
+
+
+
 
 
 
