@@ -16,7 +16,7 @@ import collections
 from warnings import warn 
 from astropy.table import Table
 
-from ..sim_manager import FakeSim
+from ..sim_manager.fake_sim import FakeSim
 from ..custom_exceptions import HalotoolsError
 
 def compute_conditional_percentiles(**kwargs):
