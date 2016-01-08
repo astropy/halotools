@@ -317,7 +317,7 @@ class DownloadManager(object):
 
         return output_fname, closest_available_redshift
 
-    def closest_catalog_on_web(self, catalog_type, 
+    def _closest_catalog_on_web(self, catalog_type, 
         simname, desired_redshift, **kwargs):
         """
         Parameters
@@ -360,14 +360,20 @@ class DownloadManager(object):
         To identify the filename of the available catalog 
         that most closely matches your needs:
 
-        >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='halos', simname='bolplanck', halo_finder='rockstar', desired_redshift=0.5)  # doctest: +REMOTE_DATA
+        >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='halos', simname='bolplanck', halo_finder='rockstar', desired_redshift=0.5)  # doctest: +REMOTE_DATA
 
         You may also wish to have a collection of downsampled 
         dark matter particles to accompany this snapshot:
 
-        >>> webloc_closest_match = catman.closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
+        >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
 
         """
+        if 'redshift' in kwargs.keys():
+            msg = ("\nThe correct argument to use to specify the redshift \n"
+                "you are searching for is with the ``desired_redshift`` keyword, \n"
+                "not the ``redshift`` keyword.\n")
+            raise HalotoolsError(msg)
+
         try:
             assert catalog_type in ('particles', 'halos')
         except AssertionError:
@@ -387,12 +393,6 @@ class DownloadManager(object):
 
         if simname not in supported_sims.supported_sim_list:
             raise HalotoolsError(unsupported_simname_msg % simname)
-
-        if 'redshift' in kwargs.keys():
-            msg = ("\nThe correct argument to use to specify the redshift \n"
-                "you are searching for is with the ``desired_redshift`` keyword, \n"
-                "not the ``redshift`` keyword.\n")
-            raise HalotoolsError(msg)
 
         try:
             version_name = kwargs['version_name']

@@ -235,27 +235,25 @@ class TestDownloadManager(TestCase):
                 simname = 'consuelo', halo_finder = 'rockstar')
             )
 
-
     @remote_data
-    def test_closest_catalog_on_web(self):
+    def test_closest_halo_catalog_on_web(self):
         """ 
         """
-        fname, redshift = self.downman.closest_catalog_on_web(simname = 'bolshoi', 
+        fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi', 
             halo_finder = 'rockstar', desired_redshift = 0., catalog_type = 'halos')
-        assert 'hlist_1.00035.list.halotools.alpha.version0.hdf5' in fname 
+        assert 'hlist_1.00035.list.halotools_alpha_version1.hdf5' in fname 
 
-        fname, redshift = self.downman.closest_catalog_on_web(simname = 'bolshoi', 
+        fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi', 
             halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'halos')
-        assert 'bolshoi/bdm/hlist_1.00030.list.halotools.alpha.version0.hdf5' in fname 
+        assert 'bolshoi/bdm/hlist_1.00030.list.halotools_alpha_version1.hdf5' in fname 
 
     @remote_data
-    def test_closest_catalog_on_web(self):
+    def test_closest_ptcl_catalog_on_web(self):
         """ This test currently fails because the halo catalogs have not been updated yet.
         """
-        fname, redshift = self.downman.closest_catalog_on_web(simname = 'bolshoi', 
-            halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'halos', 
-            version_name = sim_defaults.default_version_name)
-        assert 'bolshoi/bdm/hlist_1.00030.list.halotools_alpha_version1.hdf5' in fname 
+        fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolplanck', 
+            desired_redshift = 2, catalog_type = 'particles')
+        assert 'bolplanck/hlist_0.33406.particles.halotools_alpha_version1.hdf5' in fname 
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
