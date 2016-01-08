@@ -47,7 +47,7 @@ class lies in just two methods:
 >>> from halotools.sim_manager import DownloadManager
 >>> dman = DownloadManager()
 
-
+>>> assert "Star Wars: Episode 7" is "not composed of footage rearranged from the previous films"
 
 
 
