@@ -154,44 +154,6 @@ class DownloadManager(object):
 
         return output
 
-    def _orig_halo_table_web_location(self, **kwargs):
-        """
-        Parameters
-        ----------
-        simname : string
-            Nickname of the simulation. Currently supported simulations are
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
-
-        halo_finder : string
-            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``.
-
-        Returns
-        -------
-        webloc : string
-            Web location from which the original halo catalogs were downloaded.
-        """
-        try:
-            simname = kwargs['simname']
-            halo_finder = kwargs['halo_finder']
-        except KeyError:
-            raise HalotoolsError("\nDownloadManager._orig_halo_table_web_location method "
-                "must be called with ``simname`` and ``halo_finder`` arguments")
-
-        if simname == 'multidark':
-            return 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
-        elif simname == 'bolshoi':
-            if halo_finder == 'rockstar':
-                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
-            elif halo_finder == 'bdm':
-                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/'
-        elif simname == 'bolplanck':
-            return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/'
-        elif simname == 'consuelo':
-            return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
-        else:
-            raise HalotoolsError("Input simname %s and halo_finder %s do not "
-                "have Halotools-recognized web locations" % (simname, halo_finder))
 
     def ptcl_tables_available_for_download(self, 
         version_name = sim_defaults.default_version_name, **kwargs):
@@ -255,166 +217,6 @@ class DownloadManager(object):
             output = all_ptcl_tables
 
         return output
-
-    def _get_scale_factor_substring(self, fname):
-        """ Method extracts the portion of the Rockstar hlist fname
-        that contains the scale factor of the snapshot.
-
-        Parameters
-        ----------
-        fname : string
-            Filename of the hlist.
-
-        Returns
-        -------
-        scale_factor_substring : string
-            The substring specifying the scale factor of the snapshot.
-
-        Notes
-        -----
-        Assumes that the first character of the relevant substring
-        is the one immediately following the first incidence of an underscore,
-        and final character is the one immediately preceding the second decimal.
-        These assumptions are valid for all catalogs currently on the hipacc website.
-
-        """
-        first_index = fname.index('_')+1
-        last_index = fname.index('.', fname.index('.')+1)
-        scale_factor_substring = fname[first_index:last_index]
-        return scale_factor_substring
-
-    def _closest_fname(self, filename_list, redshift):
-        """
-        """
-
-        if custom_len(filename_list) == 0:
-            msg = "The _closest_fname method was passed an empty filename_list"
-            raise HalotoolsError(msg)
-
-        if redshift <= -1:
-            raise ValueError("redshift of <= -1 is unphysical")
-        else:
-            input_scale_factor = 1./(1.+redshift)
-
-        # First create a list of floats storing the scale factors of each hlist file
-        scale_factor_list = []
-        for full_fname in filename_list:
-            fname = os.path.basename(full_fname)
-            scale_factor_substring = self._get_scale_factor_substring(fname)
-            scale_factor = float(scale_factor_substring)
-            scale_factor_list.append(scale_factor)
-        scale_factor_list = np.array(scale_factor_list)
-
-        # Now use the array utils module to determine
-        # which scale factor is the closest
-        input_scale_factor = 1./(1. + redshift)
-        idx_closest_catalog = find_idx_nearest_val(
-            scale_factor_list, input_scale_factor)
-        closest_scale_factor = scale_factor_list[idx_closest_catalog]
-        output_fname = filename_list[idx_closest_catalog]
-
-        closest_available_redshift = (1./closest_scale_factor) - 1
-
-        return output_fname, closest_available_redshift
-
-    def _closest_catalog_on_web(self, catalog_type, 
-        simname, desired_redshift, **kwargs):
-        """
-        Parameters
-        ----------
-        catalog_type : string
-            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files.
-            Must be either ``halos`` or ``particles``
-
-        simname : string
-            Nickname of the simulation. Currently supported simulations are
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
-
-        desired_redshift : float
-            Redshift of the desired catalog.
-
-        halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar``.
-            Required when input ``catalog_type`` is ``halos``.
-
-        version_name : string, optional 
-            Nickname for the version of the catalog. 
-            Argument is used to filter the output list of filenames.
-            Default is set by `~halotools.sim_manager.sim_defaults` module. 
-
-        Returns
-        -------
-        output_fname : list
-            String of the filename with the closest matching redshift.
-
-        actual_redshift : float
-            Value of the redshift of the closest matching snapshot
-
-        Examples
-        --------
-        >>> catman = DownloadManager()
-
-        Suppose you would like to download a pre-processed halo catalog 
-        for the Bolshoi-Planck simulation for z=0.5.
-        To identify the filename of the available catalog 
-        that most closely matches your needs:
-
-        >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='halos', simname='bolplanck', halo_finder='rockstar', desired_redshift=0.5)  # doctest: +REMOTE_DATA
-
-        You may also wish to have a collection of downsampled 
-        dark matter particles to accompany this snapshot:
-
-        >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
-
-        """
-        if 'redshift' in kwargs.keys():
-            msg = ("\nThe correct argument to use to specify the redshift \n"
-                "you are searching for is with the ``desired_redshift`` keyword, \n"
-                "not the ``redshift`` keyword.\n")
-            raise HalotoolsError(msg)
-
-        try:
-            assert catalog_type in ('particles', 'halos')
-        except AssertionError:
-            msg = ("Input ``catalog_type`` must be either ``particles`` or ``halos``")
-            raise HalotoolsError(msg)
-
-        if catalog_type is 'halos':
-            try:
-                halo_finder = kwargs['halo_finder']
-            except KeyError:
-                raise HalotoolsError("\nIf input catalog_type is ``halos``, "
-                    "must pass ``halo_finder`` argument")
-        else:
-            if 'halo_finder' in kwargs.keys():
-                warn("There is no need to specify a halo-finder "
-                    "when requesting particle data")
-
-        if simname not in supported_sims.supported_sim_list:
-            raise HalotoolsError(unsupported_simname_msg % simname)
-
-        try:
-            version_name = kwargs['version_name']
-        except KeyError:
-            version_name = sim_defaults.default_version_name
-
-        if catalog_type is 'particles':
-            filename_list = (
-                self.ptcl_tables_available_for_download(simname = simname, 
-                    version_name = version_name)
-                )
-        elif catalog_type is 'halos':
-            filename_list = (
-                self.processed_halo_tables_available_for_download(simname = simname, 
-                    halo_finder = halo_finder, version_name = version_name)
-                )
-
-        output_fname, actual_redshift = (
-            self._closest_fname(filename_list, desired_redshift)
-            )
-
-        return output_fname, actual_redshift
 
 
     def download_processed_halo_table(self, simname, halo_finder, redshift, 
@@ -882,6 +684,204 @@ class DownloadManager(object):
         else:
             print(success_msg)
 
+    def _orig_halo_table_web_location(self, **kwargs):
+        """
+        Parameters
+        ----------
+        simname : string
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
+        halo_finder : string
+            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``.
+
+        Returns
+        -------
+        webloc : string
+            Web location from which the original halo catalogs were downloaded.
+        """
+        try:
+            simname = kwargs['simname']
+            halo_finder = kwargs['halo_finder']
+        except KeyError:
+            raise HalotoolsError("\nDownloadManager._orig_halo_table_web_location method "
+                "must be called with ``simname`` and ``halo_finder`` arguments")
+
+        if simname == 'multidark':
+            return 'http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/'
+        elif simname == 'bolshoi':
+            if halo_finder == 'rockstar':
+                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/'
+            elif halo_finder == 'bdm':
+                return 'http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/'
+        elif simname == 'bolplanck':
+            return 'http://www.slac.stanford.edu/~behroozi/BPlanck_Hlists/'
+        elif simname == 'consuelo':
+            return 'http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/'
+        else:
+            raise HalotoolsError("Input simname %s and halo_finder %s do not "
+                "have Halotools-recognized web locations" % (simname, halo_finder))
+
+    def _get_scale_factor_substring(self, fname):
+        """ Method extracts the portion of the Rockstar hlist fname
+        that contains the scale factor of the snapshot.
+
+        Parameters
+        ----------
+        fname : string
+            Filename of the hlist.
+
+        Returns
+        -------
+        scale_factor_substring : string
+            The substring specifying the scale factor of the snapshot.
+
+        Notes
+        -----
+        Assumes that the first character of the relevant substring
+        is the one immediately following the first incidence of an underscore,
+        and final character is the one immediately preceding the second decimal.
+        These assumptions are valid for all catalogs currently on the hipacc website.
+
+        """
+        first_index = fname.index('_')+1
+        last_index = fname.index('.', fname.index('.')+1)
+        scale_factor_substring = fname[first_index:last_index]
+        return scale_factor_substring
+
+    def _closest_fname(self, filename_list, redshift):
+        """
+        """
+
+        if custom_len(filename_list) == 0:
+            msg = "The _closest_fname method was passed an empty filename_list"
+            raise HalotoolsError(msg)
+
+        if redshift <= -1:
+            raise ValueError("redshift of <= -1 is unphysical")
+        else:
+            input_scale_factor = 1./(1.+redshift)
+
+        # First create a list of floats storing the scale factors of each hlist file
+        scale_factor_list = []
+        for full_fname in filename_list:
+            fname = os.path.basename(full_fname)
+            scale_factor_substring = self._get_scale_factor_substring(fname)
+            scale_factor = float(scale_factor_substring)
+            scale_factor_list.append(scale_factor)
+        scale_factor_list = np.array(scale_factor_list)
+
+        # Now use the array utils module to determine
+        # which scale factor is the closest
+        input_scale_factor = 1./(1. + redshift)
+        idx_closest_catalog = find_idx_nearest_val(
+            scale_factor_list, input_scale_factor)
+        closest_scale_factor = scale_factor_list[idx_closest_catalog]
+        output_fname = filename_list[idx_closest_catalog]
+
+        closest_available_redshift = (1./closest_scale_factor) - 1
+
+        return output_fname, closest_available_redshift
+
+    def _closest_catalog_on_web(self, catalog_type, 
+        simname, desired_redshift, **kwargs):
+        """
+        Parameters
+        ----------
+        catalog_type : string
+            Specifies which subdirectory of the Halotools cache to scrape for .hdf5 files.
+            Must be either ``halos`` or ``particles``
+
+        simname : string
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
+        desired_redshift : float
+            Redshift of the desired catalog.
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar``.
+            Required when input ``catalog_type`` is ``halos``.
+
+        version_name : string, optional 
+            Nickname for the version of the catalog. 
+            Argument is used to filter the output list of filenames.
+            Default is set by `~halotools.sim_manager.sim_defaults` module. 
+
+        Returns
+        -------
+        output_fname : list
+            String of the filename with the closest matching redshift.
+
+        actual_redshift : float
+            Value of the redshift of the closest matching snapshot
+
+        Examples
+        --------
+        >>> catman = DownloadManager()
+
+        Suppose you would like to download a pre-processed halo catalog 
+        for the Bolshoi-Planck simulation for z=0.5.
+        To identify the filename of the available catalog 
+        that most closely matches your needs:
+
+        >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='halos', simname='bolplanck', halo_finder='rockstar', desired_redshift=0.5)  # doctest: +REMOTE_DATA
+
+        You may also wish to have a collection of downsampled 
+        dark matter particles to accompany this snapshot:
+
+        >>> webloc_closest_match = catman._closest_catalog_on_web(catalog_type='particles', simname='bolplanck', desired_redshift=0.5)  # doctest: +REMOTE_DATA
+
+        """
+        if 'redshift' in kwargs.keys():
+            msg = ("\nThe correct argument to use to specify the redshift \n"
+                "you are searching for is with the ``desired_redshift`` keyword, \n"
+                "not the ``redshift`` keyword.\n")
+            raise HalotoolsError(msg)
+
+        try:
+            assert catalog_type in ('particles', 'halos')
+        except AssertionError:
+            msg = ("Input ``catalog_type`` must be either ``particles`` or ``halos``")
+            raise HalotoolsError(msg)
+
+        if catalog_type is 'halos':
+            try:
+                halo_finder = kwargs['halo_finder']
+            except KeyError:
+                raise HalotoolsError("\nIf input catalog_type is ``halos``, "
+                    "must pass ``halo_finder`` argument")
+        else:
+            if 'halo_finder' in kwargs.keys():
+                warn("There is no need to specify a halo-finder "
+                    "when requesting particle data")
+
+        if simname not in supported_sims.supported_sim_list:
+            raise HalotoolsError(unsupported_simname_msg % simname)
+
+        try:
+            version_name = kwargs['version_name']
+        except KeyError:
+            version_name = sim_defaults.default_version_name
+
+        if catalog_type is 'particles':
+            filename_list = (
+                self.ptcl_tables_available_for_download(simname = simname, 
+                    version_name = version_name)
+                )
+        elif catalog_type is 'halos':
+            filename_list = (
+                self.processed_halo_tables_available_for_download(simname = simname, 
+                    halo_finder = halo_finder, version_name = version_name)
+                )
+
+        output_fname, actual_redshift = (
+            self._closest_fname(filename_list, desired_redshift)
+            )
+
+        return output_fname, actual_redshift
 
 
 
