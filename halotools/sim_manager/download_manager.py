@@ -59,166 +59,6 @@ class DownloadManager(object):
         self.halo_table_cache = HaloTableCache()
         self.ptcl_table_cache = PtclTableCache()
 
-    def processed_halo_tables_available_for_download(self, **kwargs):
-        """ Method searches the appropriate web location and
-        returns a list of the filenames of all reduced
-        halo catalog binaries processed by Halotools
-        that are available for download.
-
-        Parameters
-        ----------
-        simname : string, optional
-            Nickname of the simulation. Currently supported simulations are
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
-
-            Argument is used to filter the output list of filenames.
-            Default is None, in which case `processed_halo_tables_available_for_download`
-            will not filter the returned list of filenames by ``simname``.
-
-        halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar``.
-
-            Argument is used to filter the output list of filenames.
-            Default is None, in which case `processed_halo_tables_available_for_download`
-            will not filter the returned list of filenames by ``halo_finder``.
-
-        version_name : string, optional 
-            Nickname for the version of the catalog. 
-            
-            Argument is used to filter the output list of filenames.
-            Default is set by `~halotools.sim_manager.sim_defaults` module. 
-
-        Returns
-        -------
-        output : list
-            List of web locations of all pre-processed halo catalogs
-            matching the input arguments.
-
-        """
-        try:
-            simname = kwargs['simname']
-            if simname not in supported_sims.supported_sim_list:
-                raise HalotoolsError(unsupported_simname_msg % simname)
-        except KeyError:
-            pass
-
-        try:
-            version_name = kwargs['version_name']
-        except KeyError:
-            version_name = sim_defaults.default_version_name
-
-        baseurl = sim_defaults.processed_halo_tables_webloc
-        soup = BeautifulSoup(requests.get(baseurl).text)
-        simloclist = []
-        for a in soup.find_all('a', href=True):
-            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
-            if dirpath and dirpath[0] != '/':
-                simloclist.append(os.path.join(baseurl, dirpath))
-
-        halocatloclist = []
-        for simloc in simloclist:
-            soup = BeautifulSoup(requests.get(simloc).text)
-            for a in soup.find_all('a', href=True):
-                dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
-                if dirpath and dirpath[0] != '/':
-                    halocatloclist.append(os.path.join(simloc, dirpath))
-
-        catlist = []
-        for halocatdir in halocatloclist:
-            soup = BeautifulSoup(requests.get(halocatdir).text)
-            for a in soup.find_all('a'):
-                catlist.append(os.path.join(halocatdir, a['href']))
-
-        file_pattern = version_name + '.hdf5'
-        all_halocats = fnmatch.filter(catlist, '*'+file_pattern)
-
-        # all_halocats a list of all pre-processed catalogs on the web
-        # Now we apply our filter, if applicable
-
-        if ('simname' in kwargs.keys()) & ('halo_finder' in kwargs.keys()):
-            simname = kwargs['simname']
-            halo_finder = kwargs['halo_finder']
-            file_pattern = '*'+simname+'/'+halo_finder+'/*' + file_pattern
-            output = fnmatch.filter(all_halocats, file_pattern)
-        elif 'simname' in kwargs.keys():
-            simname = kwargs['simname']
-            file_pattern = '*'+simname+'/*' + file_pattern
-            output = fnmatch.filter(all_halocats, file_pattern)
-        elif 'halo_finder' in kwargs.keys():
-            halo_finder = kwargs['halo_finder']
-            file_pattern = '*/' + halo_finder + '/*' + file_pattern
-            output = fnmatch.filter(all_halocats, file_pattern)
-        else:
-            output = all_halocats
-
-        return output
-
-
-    def ptcl_tables_available_for_download(self, 
-        version_name = sim_defaults.default_version_name, **kwargs):
-        """ Method searches the appropriate web location and
-        returns a list of the filenames of all reduced
-        halo catalog binaries processed by Halotools
-        that are available for download.
-
-        Parameters
-        ----------
-        simname : string, optional
-            Nickname of the simulation. Currently supported simulations are
-            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
-            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
-
-            Argument is used to filter the output list of filenames.
-            Default is None, in which case `processed_halo_tables_in_cache`
-            will not filter the returned list of filenames by ``simname``.
-
-        version_name : string, optional 
-            Nickname for the version of the catalog. 
-            Argument is used to filter the output list of filenames.
-            Default is set by `~halotools.sim_manager.sim_defaults` module. 
-
-        Returns
-        -------
-        output : list
-            List of web locations of all catalogs of downsampled particles
-            matching the input arguments.
-
-        """
-        try:
-            simname = kwargs['simname']
-            if simname not in supported_sims.supported_sim_list:
-                raise HalotoolsError(unsupported_simname_msg % simname)
-        except KeyError:
-            pass
-
-        baseurl = sim_defaults.ptcl_tables_webloc
-        soup = BeautifulSoup(requests.get(baseurl).text)
-        simloclist = []
-        for a in soup.find_all('a', href=True):
-            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
-            if dirpath and dirpath[0] != '/':
-                simloclist.append(os.path.join(baseurl, dirpath))
-
-        catlist = []
-        for simloc in simloclist:
-            soup = BeautifulSoup(requests.get(simloc).text)
-            for a in soup.find_all('a'):
-                catlist.append(os.path.join(simloc, a['href']))
-
-        file_pattern = version_name
-        all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern + '*.hdf5')
-
-        if 'simname' in kwargs.keys():
-            simname = kwargs['simname']
-            file_pattern = '*'+simname+'*'
-            output = fnmatch.filter(all_ptcl_tables, file_pattern)
-        else:
-            output = all_ptcl_tables
-
-        return output
-
-
     def download_processed_halo_table(self, simname, halo_finder, redshift, 
         dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_version_name, 
         download_dirname = 'std_cache_loc', ignore_nearby_redshifts = False, 
@@ -277,7 +117,7 @@ class DownloadManager(object):
         # Identify candidate file to download
 
         available_fnames_to_download = (
-            self.processed_halo_tables_available_for_download(simname = simname, 
+            self._processed_halo_tables_available_for_download(simname = simname, 
                 halo_finder = halo_finder, version_name = version_name)
             )
 
@@ -519,7 +359,7 @@ class DownloadManager(object):
         ############################################################
         # Identify candidate file to download
 
-        available_fnames_to_download = self.ptcl_tables_available_for_download(
+        available_fnames_to_download = self._ptcl_tables_available_for_download(
             simname = simname, version_name = version_name)
 
         if len(available_fnames_to_download) == 0:
@@ -868,12 +708,12 @@ class DownloadManager(object):
 
         if catalog_type is 'particles':
             filename_list = (
-                self.ptcl_tables_available_for_download(simname = simname, 
+                self._ptcl_tables_available_for_download(simname = simname, 
                     version_name = version_name)
                 )
         elif catalog_type is 'halos':
             filename_list = (
-                self.processed_halo_tables_available_for_download(simname = simname, 
+                self._processed_halo_tables_available_for_download(simname = simname, 
                     halo_finder = halo_finder, version_name = version_name)
                 )
 
@@ -883,10 +723,165 @@ class DownloadManager(object):
 
         return output_fname, actual_redshift
 
+    def _ptcl_tables_available_for_download(self, 
+        version_name = sim_defaults.default_version_name, **kwargs):
+        """ Method searches the appropriate web location and
+        returns a list of the filenames of all reduced
+        halo catalog binaries processed by Halotools
+        that are available for download.
+
+        Parameters
+        ----------
+        simname : string, optional
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `processed_halo_tables_in_cache`
+            will not filter the returned list of filenames by ``simname``.
+
+        version_name : string, optional 
+            Nickname for the version of the catalog. 
+            Argument is used to filter the output list of filenames.
+            Default is set by `~halotools.sim_manager.sim_defaults` module. 
+
+        Returns
+        -------
+        output : list
+            List of web locations of all catalogs of downsampled particles
+            matching the input arguments.
+
+        """
+        try:
+            simname = kwargs['simname']
+            if simname not in supported_sims.supported_sim_list:
+                raise HalotoolsError(unsupported_simname_msg % simname)
+        except KeyError:
+            pass
+
+        baseurl = sim_defaults.ptcl_tables_webloc
+        soup = BeautifulSoup(requests.get(baseurl).text)
+        simloclist = []
+        for a in soup.find_all('a', href=True):
+            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+            if dirpath and dirpath[0] != '/':
+                simloclist.append(os.path.join(baseurl, dirpath))
+
+        catlist = []
+        for simloc in simloclist:
+            soup = BeautifulSoup(requests.get(simloc).text)
+            for a in soup.find_all('a'):
+                catlist.append(os.path.join(simloc, a['href']))
+
+        file_pattern = version_name
+        all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern + '*.hdf5')
+
+        if 'simname' in kwargs.keys():
+            simname = kwargs['simname']
+            file_pattern = '*'+simname+'*'
+            output = fnmatch.filter(all_ptcl_tables, file_pattern)
+        else:
+            output = all_ptcl_tables
+
+        return output
 
 
 
+    def _processed_halo_tables_available_for_download(self, **kwargs):
+        """ Method searches the appropriate web location and
+        returns a list of the filenames of all reduced
+        halo catalog binaries processed by Halotools
+        that are available for download.
 
+        Parameters
+        ----------
+        simname : string, optional
+            Nickname of the simulation. Currently supported simulations are
+            Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``),
+            MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``).
+
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `_processed_halo_tables_available_for_download`
+            will not filter the returned list of filenames by ``simname``.
+
+        halo_finder : string, optional
+            Nickname of the halo-finder, e.g. ``rockstar``.
+
+            Argument is used to filter the output list of filenames.
+            Default is None, in which case `_processed_halo_tables_available_for_download`
+            will not filter the returned list of filenames by ``halo_finder``.
+
+        version_name : string, optional 
+            Nickname for the version of the catalog. 
+            
+            Argument is used to filter the output list of filenames.
+            Default is set by `~halotools.sim_manager.sim_defaults` module. 
+
+        Returns
+        -------
+        output : list
+            List of web locations of all pre-processed halo catalogs
+            matching the input arguments.
+
+        """
+        try:
+            simname = kwargs['simname']
+            if simname not in supported_sims.supported_sim_list:
+                raise HalotoolsError(unsupported_simname_msg % simname)
+        except KeyError:
+            pass
+
+        try:
+            version_name = kwargs['version_name']
+        except KeyError:
+            version_name = sim_defaults.default_version_name
+
+        baseurl = sim_defaults.processed_halo_tables_webloc
+        soup = BeautifulSoup(requests.get(baseurl).text)
+        simloclist = []
+        for a in soup.find_all('a', href=True):
+            dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+            if dirpath and dirpath[0] != '/':
+                simloclist.append(os.path.join(baseurl, dirpath))
+
+        halocatloclist = []
+        for simloc in simloclist:
+            soup = BeautifulSoup(requests.get(simloc).text)
+            for a in soup.find_all('a', href=True):
+                dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
+                if dirpath and dirpath[0] != '/':
+                    halocatloclist.append(os.path.join(simloc, dirpath))
+
+        catlist = []
+        for halocatdir in halocatloclist:
+            soup = BeautifulSoup(requests.get(halocatdir).text)
+            for a in soup.find_all('a'):
+                catlist.append(os.path.join(halocatdir, a['href']))
+
+        file_pattern = version_name + '.hdf5'
+        all_halocats = fnmatch.filter(catlist, '*'+file_pattern)
+
+        # all_halocats a list of all pre-processed catalogs on the web
+        # Now we apply our filter, if applicable
+
+        if ('simname' in kwargs.keys()) & ('halo_finder' in kwargs.keys()):
+            simname = kwargs['simname']
+            halo_finder = kwargs['halo_finder']
+            file_pattern = '*'+simname+'/'+halo_finder+'/*' + file_pattern
+            output = fnmatch.filter(all_halocats, file_pattern)
+        elif 'simname' in kwargs.keys():
+            simname = kwargs['simname']
+            file_pattern = '*'+simname+'/*' + file_pattern
+            output = fnmatch.filter(all_halocats, file_pattern)
+        elif 'halo_finder' in kwargs.keys():
+            halo_finder = kwargs['halo_finder']
+            file_pattern = '*/' + halo_finder + '/*' + file_pattern
+            output = fnmatch.filter(all_halocats, file_pattern)
+        else:
+            output = all_halocats
+
+        return output
 
 
 

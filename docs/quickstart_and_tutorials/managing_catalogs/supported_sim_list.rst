@@ -20,32 +20,32 @@ brief description of each of the simulations supported by the package.
 If you would like to use your own catalog, rather than one of the simulations listed below, 
 see the :ref:`using_your_own_catalog`. 
 
-Bolshoi
-========
+Bolshoi (simname = `bolshoi`)
+==================================
 Cosmological N-body simulation of WMAP5 cosmology 
 with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h. 
 
 For a detailed description of the simulation specs, see 
 http://www.cosmosim.org/cms/simulations/multidark-project/bolshoi. 
 
-Bolshoi-Planck 
-===============
+Bolshoi-Planck (simname = `bolplanck`)
+====================================================================
 Cosmological N-body simulation of Planck 2013 cosmology 
 with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h. 
 
 For a detailed description of the simulation specs, see 
 http://www.cosmosim.org/cms/simulations/bolshoip-project/bolshoip/. 
 
-Multidark 
-==========
+Multidark (simname = `multidark`)
+====================================================================
 Cosmological N-body simulation of WMAP5 cosmology 
 with Lbox = 1Gpc/h and particle mass of ~1e10 Msun/h. 
 
 For a detailed description of the simulation specs, see 
 http://www.cosmosim.org/cms/simulations/multidark-project/mdr1. 
 
-Consuelo
-=========
+Consuelo (simname = `consuelo`)
+====================================================================
 Cosmological N-body simulation of WMAP5-like cosmology 
 with Lbox = 400 Mpc/h and particle mass of ~1e9 Msun/h. 
 

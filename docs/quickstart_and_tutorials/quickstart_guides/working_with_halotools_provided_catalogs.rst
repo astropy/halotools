@@ -12,6 +12,10 @@ and can immediately be used for your science application.
 
 The class responsible for downloading and caching these 
 catalogs is `~halotools.sim_manager.DownloadManager`. 
+
+>>> from halotools.sim_manager import DownloadManager
+>>> dman = DownloadManager()
+
 There is also a convenience script providing 
 command-line wrapper behavior around this class: 
 scripts/download_additional_halocat.py. Whether you use 
@@ -40,14 +44,39 @@ Usage tutorial for the `~halotools.sim_manager.DownloadManager` class
 =========================================================================
 
 The primary functionality of the `~halotools.sim_manager.DownloadManager` 
-class lies in just two methods: 
+class lies in just two very similar methods: 
 `~halotools.sim_manager.DownloadManager.download_processed_halo_table` and 
 `~halotools.sim_manager.DownloadManager.download_ptcl_table`.  
+The `~halotools.sim_manager.DownloadManager.download_processed_halo_table` method 
+accepts three positional arguments: simname, halo_finder and redshift. 
 
 >>> from halotools.sim_manager import DownloadManager
 >>> dman = DownloadManager()
+>>> dman.download_processed_halo_table('bolplanck', 'rockstar', 0.5) # doctest: +SKIP
 
->>> assert "Star Wars: Episode 7" is "not composed of footage rearranged from the previous films"
+The optional argument ``version_name`` can be used to specify which version of 
+the catalogs you download, with default value set 
+in the `~halotools.sim_manager.sim_defaults` module. The purpose of the ``version_name`` 
+is to differentiate between the same simulation data processed in different ways. 
+Processing differences could either occur at the level of halo-finding, or simply in 
+the cuts placed on the original halo catalog. 
+
+You can the download location with the ``download_dirname`` argument. By default, 
+your halo catalogs will be downloaded to the Halotools cache directory:
+
+$HOME/.astropy/cache/halotools/
+
+You are free to store the halo catalogs in any location on disk that you like. 
+However, please take note: **if you manually change the location 
+of the downloaded halo catalog, you must update the cache log.** 
+For more information about managing the disk locations of your halo catalogs, 
+see :ref:`relocating_simulation_data`. 
+
+
+
+
+
+
 
 
 

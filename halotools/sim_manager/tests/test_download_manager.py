@@ -112,11 +112,11 @@ class TestDownloadManager(TestCase):
     @remote_data
     def test_ptcl_tables_available_for_download(self):
 
-        file_list = self.downman.ptcl_tables_available_for_download(simname='bolshoi')
+        file_list = self.downman._ptcl_tables_available_for_download(simname='bolshoi')
         assert len(file_list) == 1
         assert 'hlist_1.00035.particles.hdf5' == os.path.basename(file_list[0])
 
-        file_list = self.downman.ptcl_tables_available_for_download(simname='multidark')
+        file_list = self.downman._ptcl_tables_available_for_download(simname='multidark')
         assert len(file_list) == 1
         assert 'hlist_1.00109.particles.hdf5' == os.path.basename(file_list[0])
 
@@ -126,7 +126,7 @@ class TestDownloadManager(TestCase):
             'hlist_0.67540.particles.hdf5', 
             'hlist_1.00000.particles.hdf5']
             )
-        file_list = self.downman.ptcl_tables_available_for_download(simname='consuelo')
+        file_list = self.downman._ptcl_tables_available_for_download(simname='consuelo')
         assert len(file_list) == 4
         file_set = set([os.path.basename(f) for f in file_list])
         assert file_set == consuelo_set
@@ -137,7 +137,7 @@ class TestDownloadManager(TestCase):
             'hlist_0.66818.particles.hdf5', 
             'hlist_1.00231.particles.hdf5']
             )
-        file_list = self.downman.ptcl_tables_available_for_download(simname='bolplanck')
+        file_list = self.downman._ptcl_tables_available_for_download(simname='bolplanck')
         assert len(file_list) == 4
         file_set = set([os.path.basename(f) for f in file_list])
         assert file_set == bolplanck_set
@@ -145,7 +145,7 @@ class TestDownloadManager(TestCase):
     @remote_data
     def test_processed_halo_tables_available_for_download(self):
 
-        file_list = self.downman.processed_halo_tables_available_for_download(
+        file_list = self.downman._processed_halo_tables_available_for_download(
             simname='bolshoi', halo_finder='rockstar')
         assert file_list != []
 
@@ -154,16 +154,16 @@ class TestDownloadManager(TestCase):
     def test_ptcl_tables_available_for_download(self):
         """ Test that there is exactly one ptcl_table available for Bolshoi. 
         """
-        x = self.downman.ptcl_tables_available_for_download(simname = 'bolshoi')
+        x = self.downman._ptcl_tables_available_for_download(simname = 'bolshoi')
         assert len(x) == 1
 
-        x = self.downman.ptcl_tables_available_for_download(simname = 'bolplanck')
+        x = self.downman._ptcl_tables_available_for_download(simname = 'bolplanck')
         assert len(x) == 4
 
-        x = self.downman.ptcl_tables_available_for_download(simname = 'consuelo')
+        x = self.downman._ptcl_tables_available_for_download(simname = 'consuelo')
         assert len(x) == 4
 
-        x = self.downman.ptcl_tables_available_for_download(simname = 'multidark')
+        x = self.downman._ptcl_tables_available_for_download(simname = 'multidark')
         assert len(x) == 1
 
 

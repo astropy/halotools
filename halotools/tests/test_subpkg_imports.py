@@ -12,6 +12,3 @@ def test_import_mock_observables():
 
 def test_import_utils():
 	from .. import utils
-
-def test_incorrect_assertion():
-	assert "Star Wars: Episode 7" is "not composed of footage rearranged from the previous films"
