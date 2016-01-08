@@ -6,8 +6,8 @@ Quickstart Guides and Tutorials
 ***************************************
 
 This section of the documentation contains both quickstart guides 
-for getting started with Halotools and also detailed usage-tutorials. 
-If you are instead looking for a quick reference to the API of some 
+and detailed usage-tutorials. If you are instead looking for 
+a quick reference to the API of some 
 class or function, try looking in :ref:`function_usage_examples`, 
 or otherwise in :ref:`complete_reference_api`. 
 
@@ -19,9 +19,10 @@ Quickstart Guides
    :maxdepth: 1
 
    getting_started_overview
-   mock_making/quickstart_guide
-   model_building/quickstart_guide
-   mock_observations/quickstart_guide
+   quickstart_guides/populating_mocks
+   quickstart_guides/modeling_quickstart
+   quickstart_guides/mock_observables_quickstart
+   quickstart_guides/working_with_halotools_provided_catalogs
 
 Tutorials 
 =====================
