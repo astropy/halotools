@@ -11,4 +11,4 @@ be directly added to your cache and loaded into memory
 as soon as they are downloaded. 
 
 The class responsible for downloading and caching these 
-catalogs is `~halotools.sim_manager.Downloadmanager`. 
+catalogs is `~halotools.sim_manager.DownloadManager`. 
