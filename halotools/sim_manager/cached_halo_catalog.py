@@ -56,32 +56,75 @@ class CachedHaloCatalog(object):
         """
         self.dz_tol = dz_tol 
 
-        try:
-            self.simname = kwargs['simname']
-            self._default_simname_choice = False
-        except KeyError:
-            self.simname = sim_defaults.default_simname
-            self._default_simname_choice = True
-        try:
-            self.halo_finder = kwargs['halo_finder']
-            self._default_halo_finder_choice = False
-        except KeyError:
-            self.halo_finder = sim_defaults.default_halo_finder
-            self._default_halo_finder_choice = True
+        if 'fname' in kwargs:
+            try:
+                assert 'simname' not in kwargs 
+            except AssertionError:
+                msg = ("\nIf you specify an input ``fname``, "
+                    "do not also specify ``simname``.\n")
+                raise HalotoolsError(msg)
 
-        try:
-            self.version_name = kwargs['version_name']
+            try:
+                assert 'halo_finder' not in kwargs 
+            except AssertionError:
+                msg = ("\nIf you specify an input ``fname``, "
+                    "do not also specify ``halo_finder``.\n")
+                raise HalotoolsError(msg)
+
+            try:
+                assert 'redshift' not in kwargs 
+            except AssertionError:
+                msg = ("\nIf you specify an input ``fname``, "
+                    "do not also specify ``redshift``.\n")
+                raise HalotoolsError(msg)
+
+            try:
+                assert 'version_name' not in kwargs 
+            except AssertionError:
+                msg = ("\nIf you specify an input ``fname``, "
+                    "do not also specify ``version_name``.\n")
+                raise HalotoolsError(msg)
+
+            self._default_simname_choice = False
+            self._default_halo_finder_choice = False
             self._default_version_name_choice = False
-        except KeyError:
-            self.version_name = sim_defaults.default_version_name
-            self._default_version_name_choice = True
-        
-        try:
-            self.redshift = kwargs['redshift']
             self._default_redshift_choice = False
-        except KeyError:
-            self.redshift = sim_defaults.default_redshift
-            self._default_redshift_choice = True
+
+            self.fname = kwargs['fname']
+            result = self.halo_table_cache.determine_log_entry_from_fname(self.fname)
+            self.simname = result.simname
+            self.halo_finder = result.halo_finder
+            self.version_name = result.version_name
+            self.redshift = result.redshift
+
+        else:
+
+            try:
+                self.simname = kwargs['simname']
+                self._default_simname_choice = False
+            except KeyError:
+                self.simname = sim_defaults.default_simname
+                self._default_simname_choice = True
+            try:
+                self.halo_finder = kwargs['halo_finder']
+                self._default_halo_finder_choice = False
+            except KeyError:
+                self.halo_finder = sim_defaults.default_halo_finder
+                self._default_halo_finder_choice = True
+
+            try:
+                self.version_name = kwargs['version_name']
+                self._default_version_name_choice = False
+            except KeyError:
+                self.version_name = sim_defaults.default_version_name
+                self._default_version_name_choice = True
+            
+            try:
+                self.redshift = kwargs['redshift']
+                self._default_redshift_choice = False
+            except KeyError:
+                self.redshift = sim_defaults.default_redshift
+                self._default_redshift_choice = True
 
     def _retrieve_matching_ptcl_cache_log_entry(self, dz_tol):
         """

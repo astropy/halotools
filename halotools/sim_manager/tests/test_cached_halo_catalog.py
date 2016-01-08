@@ -39,6 +39,7 @@ class TestCachedHaloCatalog(TestCase):
             constructor_kwargs = (
                 {attr: getattr(entry, attr) 
                 for attr in entry.log_attributes})
+            del constructor_kwargs['fname']
             halocat = CachedHaloCatalog(**constructor_kwargs)
             assert hasattr(halocat, 'redshift')
             assert hasattr(halocat, 'Lbox')
@@ -134,14 +135,24 @@ class TestCachedHaloCatalog(TestCase):
         halocat = CachedHaloCatalog()
         ptcls = halocat.ptcl_table
 
-
-    @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
     def test_fname_optional_load(self):
         fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolplanck/rockstar/hlist_0.33406.list.halotools_alpha_version1.hdf5'
         halocat = CachedHaloCatalog(fname = fname)
         assert halocat.simname == 'bolplanck'
 
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_all_fname_loads(self):
+        cache = HaloTableCache()
+        for entry in cache.log:
+            fname = entry.fname
+            halocat = CachedHaloCatalog(fname = fname)
+            for attr in entry.log_attributes:
+                if attr == 'redshift':
+                    assert float(getattr(entry, attr)) == float(getattr(halocat, attr))
+                else:
+                    assert str(getattr(entry, attr)) == str(getattr(halocat, attr))
 
 
 
