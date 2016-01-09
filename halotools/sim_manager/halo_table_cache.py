@@ -51,6 +51,9 @@ class HaloTableCache(object):
         
         return cleaned_log
         
+    def update_log_from_current_ascii(self):
+        self.log = self.retrieve_log_from_ascii()
+
     def retrieve_log_from_ascii(self):
         """ Read '$HOME/.astropy/cache/halotools/halo_table_cache_log.txt', 
         clean the log of any repeated entries, sort the log, and return the resulting 
@@ -150,13 +153,13 @@ class HaloTableCache(object):
         if log_entry.safe_for_cache == False:
             raise InvalidCacheLogEntry(log_entry._cache_safety_message)
 
-        if log_entry in self.log:
+        self.log.append(log_entry)
+        if len(set(self.log)) < len(self.log):
             warn("The cache log already contains the entry")
-        else:
-            self.log.append(log_entry)
-            self.log.sort()
-            if update_ascii == True:
-                self._overwrite_log_ascii(self.log)
+        self.log = list(set(self.log))
+        self.log.sort()
+        if update_ascii == True:
+            self._overwrite_log_ascii(self.log)
 
     def remove_entry_from_cache_log(self, simname, halo_finder, 
         version_name, redshift, fname, 
@@ -210,38 +213,26 @@ class HaloTableCache(object):
             halo_finder = halo_finder, version_name = version_name, 
             redshift = redshift, fname = fname)
 
+        msg = ''
         try:
             self.log.remove(log_entry)
+            _existing_log_entry_detected = True
 
             if update_ascii == True:
                 self._overwrite_log_ascii(self.log)
-                msg = ("\nThe log has been updated on disk and in memory.\n")
+                msg += ("\nThe log has been updated on disk and in memory.\n")
             else:
-                msg = ("\nThe log has been updated in memory "
+                msg += ("\nThe log has been updated in memory "
                     "but not on disk because \n"
                     "the update_ascii argument is set to False.\n")
 
-            if delete_corresponding_halo_catalog == True:
-                try:
-                    os.remove(log_entry.fname)
-                    msg += (
-                        "The corresponding hdf5 file storing the halo catalog "
-                        "has also been deleted from disk.\n"
-                        )
-                except OSError:
-                    pass
-            else:
-                if os.path.isfile(log_entry.fname):
-                    msg += ("The corresponding hdf5 file storing the halo catalog \n"
-                        "has not been deleted from your disk because you set "
-                        "``delete_corresponding_halo_catalog`` to False.\n")
-            print(msg)
-
         except ValueError:
+            _existing_log_entry_detected = False 
+
             if raise_non_existence_exception == False:
                 pass
             else:
-                msg = ("\nYou requested that the following entry "
+                msg += ("\nYou requested that the following entry "
                     "be removed from the cache log:\n\n")
                 msg += "simname = ``" + str(simname) + "``\n"
                 msg += "halo_finder = ``" + str(halo_finder) + "``\n"
@@ -253,6 +244,26 @@ class HaloTableCache(object):
                     "you must call this method again setting "
                     "`raise_non_existence_exception` to False.\n")
                 raise HalotoolsError(msg)
+
+
+        if delete_corresponding_halo_catalog == True:
+            try:
+                os.remove(fname)
+                msg += (
+                    "The corresponding hdf5 file storing the halo catalog "
+                    "has also been deleted from disk.\n"
+                    )
+            except OSError:
+                msg += (
+                    "The input ``fname`` does not exist on disk, "
+                    "so setting ``delete_corresponding_halo_catalog`` to True did nothing.\n"
+                    )
+        else:
+            if os.path.isfile(fname):
+                msg += ("The corresponding hdf5 file storing the halo catalog \n"
+                    "has not been deleted from your disk because you set "
+                    "``delete_corresponding_halo_catalog`` to False.\n")
+        print(msg)
 
 
     def determine_log_entry_from_fname(self, fname, overwrite_fname_metadata = False):
@@ -306,9 +317,11 @@ class HaloTableCache(object):
             for key in HaloTableCacheLogEntry.log_attributes})
         if overwrite_fname_metadata == True:
             constructor_kwargs['fname'] = fname
-            f.attrs['fname'] = fname
-        log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
+            f.attrs['fname'] = fname 
         f.close()
+
+        log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
+            
         return log_entry
 
     def update_cached_file_location(self, new_fname, old_fname, **kwargs):

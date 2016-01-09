@@ -148,6 +148,7 @@ class DownloadManager(object):
         In this case, see :ref:`relocating_simulation_data` for instructions. 
 
         """
+        self.halo_table_cache.update_log_from_current_ascii()
 
         ############################################################
         # Identify candidate file to download
@@ -427,6 +428,7 @@ class DownloadManager(object):
 
 
         """
+        self.halo_table_cache.update_log_from_current_ascii()
         ############################################################
         # Identify candidate file to download
 
