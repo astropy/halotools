@@ -73,9 +73,9 @@ your halo catalogs will be downloaded to the Halotools cache directory:
 
 $HOME/.astropy/cache/halotools/
 
-You are free to store the halo catalogs in any location on disk that you like. 
-However, please take note: **if you manually change the location 
-of the downloaded halo catalog, you must update the cache log.** 
+You are free to store the halo catalogs in any location on disk that you like, 
+though it will generally help ensure reproducibility if you 
+do not move your halo catalogs around.  
 For more information about managing the disk locations of your halo catalogs, 
 see :ref:`relocating_simulation_data`. 
 
