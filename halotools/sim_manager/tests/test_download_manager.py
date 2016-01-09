@@ -24,6 +24,9 @@ else:
     APH_MACHINE = False
 
 
+__all__ = ('TestDownloadManager', )
+
+
 class TestDownloadManager(TestCase):
 
 

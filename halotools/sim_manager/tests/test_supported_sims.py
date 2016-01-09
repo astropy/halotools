@@ -16,6 +16,8 @@ else:
 
 from ..cached_halo_catalog import CachedHaloCatalog 
 
+__all__ = ('test_load_halo_catalogs', )
+
 @pytest.mark.slow
 @pytest.mark.skipif('not APH_MACHINE')
 def test_load_halo_catalogs():

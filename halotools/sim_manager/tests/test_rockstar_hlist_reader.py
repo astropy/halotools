@@ -23,6 +23,9 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
+__all__ = ('TestRockstarHlistReader', )
+
+
 class TestRockstarHlistReader(TestCase):
 
     def setUp(self):

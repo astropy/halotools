@@ -21,6 +21,8 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
+__all__ = ('TestTabularAsciiReader', )
+
 class TestTabularAsciiReader(TestCase):
 
     def setUp(self):
