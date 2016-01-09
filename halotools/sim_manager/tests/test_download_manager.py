@@ -143,11 +143,26 @@ class TestDownloadManager(TestCase):
         assert file_set == bolplanck_set
 
     @remote_data
-    def test_processed_halo_tables_available_for_download(self):
+    def test_processed_halo_tables_available_for_download1(self):
 
         file_list = self.downman._processed_halo_tables_available_for_download(
             simname='bolshoi', halo_finder='rockstar')
         assert file_list != []
+
+    @remote_data
+    def test_processed_halo_tables_available_for_download2(self):
+
+        file_list = self.downman._processed_halo_tables_available_for_download(
+            simname='bolshoi')
+        assert file_list != []
+
+    @remote_data
+    def test_processed_halo_tables_available_for_download3(self):
+
+        file_list = self.downman._processed_halo_tables_available_for_download(
+            halo_finder='bdm')
+        assert file_list != []
+
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
@@ -236,16 +251,30 @@ class TestDownloadManager(TestCase):
             )
 
     @remote_data
-    def test_closest_halo_catalog_on_web(self):
+    def test_closest_halo_catalog_on_web1(self):
         """ 
         """
         fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi', 
             halo_finder = 'rockstar', desired_redshift = 0., catalog_type = 'halos')
         assert 'hlist_1.00035.list.halotools_alpha_version1.hdf5' in fname 
 
+    @remote_data
+    def test_closest_halo_catalog_on_web2(self):
+        """ 
+        """
         fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi', 
             halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'halos')
         assert 'bolshoi/bdm/hlist_1.00030.list.halotools_alpha_version1.hdf5' in fname 
+
+    @remote_data
+    def test_closest_halo_catalog_on_web3(self):
+        """ 
+        """
+        with pytest.raises(HalotoolsError) as err:
+            fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi', 
+                halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'Jose Canseco')
+        substr = "Input ``catalog_type`` must be either ``particles`` or ``halos``" 
+        assert substr in err.value.message
 
     @remote_data
     def test_closest_ptcl_catalog_on_web(self):
@@ -254,6 +283,28 @@ class TestDownloadManager(TestCase):
         fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolplanck', 
             desired_redshift = 2, catalog_type = 'particles')
         assert 'bolplanck/hlist_0.33406.particles.halotools_alpha_version1.hdf5' in fname 
+
+    @classmethod
+    def clear_APH_MACHINE_of_highz_file(self, 
+        delete_corresponding_halo_catalog = True):
+
+        cache = HaloTableCache()
+        matching_log_entries = cache.matching_log_entry_generator(
+            simname = 'bolshoi', 
+            halo_finder = 'rockstar', 
+            version_name = 'halotools_alpha_version1', 
+            redshift = 11.7, dz_tol = 0.2 
+            )
+        for matching_log_entry in matching_log_entries:
+            cache.remove_entry_from_cache_log(
+                simname = matching_log_entry.simname, 
+                halo_finder = matching_log_entry.halo_finder, 
+                version_name = matching_log_entry.version_name, 
+                redshift = matching_log_entry.redshift, 
+                fname = matching_log_entry.fname, 
+                update_ascii = True, 
+                delete_corresponding_halo_catalog = delete_corresponding_halo_catalog
+                )
 
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
@@ -286,31 +337,68 @@ class TestDownloadManager(TestCase):
         substr = "no halo catalogs meeting" 
         assert substr in err.value.message
 
-    @classmethod
-    def clear_APH_MACHINE_of_highz_file(self, 
-        delete_corresponding_halo_catalog = True):
-
-        cache = HaloTableCache()
-        matching_log_entries = cache.matching_log_entry_generator(
-            simname = 'bolshoi', 
-            halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', 
-            redshift = 11.7, dz_tol = 0.2 
-            )
-        for matching_log_entry in matching_log_entries:
-            cache.remove_entry_from_cache_log(
-                simname = matching_log_entry.simname, 
-                halo_finder = matching_log_entry.halo_finder, 
-                version_name = matching_log_entry.version_name, 
-                redshift = matching_log_entry.redshift, 
-                fname = matching_log_entry.fname, 
-                update_ascii = True, 
-                delete_corresponding_halo_catalog = delete_corresponding_halo_catalog
-                )
-
     @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_download_processed_halo_table3(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_processed_halo_table(
+                simname = 'bolshoi', 
+                halo_finder = 'rockstar', 
+                version_name = sim_defaults.default_version_name, 
+                redshift = 0, overwrite=False)
+        substr = "you must set the ``overwrite`` keyword argument to True" 
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_processed_halo_table4(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_processed_halo_table(
+                simname = 'bolshoi', 
+                halo_finder = 'rockstar', 
+                version_name = sim_defaults.default_version_name, 
+                redshift = 0, overwrite=False, download_dirname = 'abc')
+        substr = "Your input ``download_dirname`` is a non-existent path." 
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_processed_halo_table5(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_processed_halo_table(
+                simname = 'bolshoi', 
+                halo_finder = 'rockstar', 
+                version_name = sim_defaults.default_version_name, 
+                redshift = 11.7, dz_tol = 200, 
+                overwrite=True, download_dirname = 'std_cache_loc')
+        substr = "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``" 
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_processed_halo_table6(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_processed_halo_table(
+                simname = 'bolshoi', 
+                halo_finder = 'rockstar', 
+                version_name = sim_defaults.default_version_name, 
+                redshift = 0.3, dz_tol = 0.001, 
+                overwrite=False, download_dirname = self.halocat_dir)
+        substr = "The closest redshift for these catalogs is" 
+        assert substr in err.value.message
+
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_processed_halo_table7(self):
         """
         """
 
@@ -354,6 +442,48 @@ class TestDownloadManager(TestCase):
                 redshift = 11.7, 
                 download_dirname=self.halocat_dir)
         substr = "There are no particle catalogs meeting your specifications"
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_ptcl_table3(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_ptcl_table(
+                simname = 'bolshoi', 
+                version_name = sim_defaults.default_version_name,  
+                redshift = 0, 
+                download_dirname=self.halocat_dir)
+        substr = "you must set the ``overwrite`` keyword argument to True."
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_ptcl_table4(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_ptcl_table(
+                simname = 'bolshoi', 
+                version_name = sim_defaults.default_version_name,  
+                redshift = 0, 
+                download_dirname='abc')
+        substr = "Your input ``download_dirname`` is a non-existent path."
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_download_ptcl_table5(self):
+        """
+        """
+        with pytest.raises(HalotoolsError) as err:
+            self.downman.download_ptcl_table(
+                simname = 'bolshoi', 
+                version_name = sim_defaults.default_version_name,  
+                redshift = 0.2, dz_tol = 0.001,  
+                download_dirname=self.halocat_dir)
+        substr = "The closest redshift for these catalogs is"
         assert substr in err.value.message
 
     def tearDown(self):

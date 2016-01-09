@@ -197,7 +197,7 @@ class DownloadManager(object):
             try:
                 assert os.path.exists(download_dirname)
             except AssertionError:
-                msg = ("\Your input ``download_dirname`` is a non-existent path.\n")
+                msg = ("\nYour input ``download_dirname`` is a non-existent path.\n")
                 raise HalotoolsError(msg)
         output_fname = os.path.join(download_dirname, os.path.basename(url))
         ############################################################
@@ -472,7 +472,7 @@ class DownloadManager(object):
             try:
                 assert os.path.exists(download_dirname)
             except AssertionError:
-                msg = ("\Your input ``download_dirname`` is a non-existent path.\n")
+                msg = ("\nYour input ``download_dirname`` is a non-existent path.\n")
                 raise HalotoolsError(msg)
         output_fname = os.path.join(download_dirname, os.path.basename(url))
         ############################################################
