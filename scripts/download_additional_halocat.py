@@ -96,17 +96,16 @@ if args.overwrite == False:
 
 ##################################################################
 ### Call the download methods
+if download_ptcls == True:
+    new_ptcl_log_entry = downman.download_ptcl_table(simname = simname, 
+        redshift = redshift, dz_tol = 0.05, overwrite=args.overwrite, 
+        initial_download_script_msg = existing_fname_error_msg)
 
 if download_halos == True:
     new_halo_log_entry = downman.download_processed_halo_table(simname = simname, 
         halo_finder = halo_finder, redshift = redshift, 
         initial_download_script_msg = existing_fname_error_msg, 
         overwrite = args.overwrite)
-
-if download_ptcls == True:
-    new_ptcl_log_entry = downman.download_ptcl_table(simname = simname, 
-        redshift = redshift, dz_tol = 0.05, overwrite=args.overwrite, 
-        initial_download_script_msg = existing_fname_error_msg)
 
 ##################################################################
 
