@@ -2,12 +2,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-import warnings, os, pytest
+import warnings, os, pytest, shutil
 from astropy.config.paths import _find_home 
 
 
 import numpy as np 
 
+from . import helper_functions
 from ..cached_halo_catalog import CachedHaloCatalog
 from ..halo_table_cache import HaloTableCache
 from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
@@ -29,6 +30,19 @@ __all__ = ('TestCachedHaloCatalog' )
 class TestCachedHaloCatalog(TestCase):
     """ 
     """
+
+    def setUp(self):
+        """ Pre-load various arrays into memory for use by all tests. 
+        """
+        import h5py
+        self.h5py = h5py
+
+        self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
+        try:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
+            pass
+        os.makedirs(self.dummy_cache_baseloc)
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_all_catalogs(self):
@@ -155,8 +169,9 @@ class TestCachedHaloCatalog(TestCase):
                     assert str(getattr(entry, attr)) == str(getattr(halocat, attr))
 
     @pytest.mark.skipif('not APH_MACHINE')
-    def test_acceptable_arguments(self):
-        fname = 'dummy'
+    def test_acceptable_arguments1(self):
+        fname = os.path.join(self.dummy_cache_baseloc, 'abc.hdf5')
+        os.system('touch '+ fname)
 
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, simname = 'bolshoi')
@@ -165,12 +180,34 @@ class TestCachedHaloCatalog(TestCase):
         substr = "do not also specify ``simname``"
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_acceptable_arguments2(self):
+        fname = os.path.join(self.dummy_cache_baseloc, 'abc.hdf5')
+        os.system('touch '+ fname)
+
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, version_name = 'dummy')
         substr = "If you specify an input ``fname``"
         assert substr in err.value.message
         substr = "do not also specify ``version_name``"
         assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_acceptable_arguments3(self):
+        fname = os.path.join(self.dummy_cache_baseloc, 'abc.hdf5')
+        os.system('touch '+ fname)
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = CachedHaloCatalog(fname = fname, halo_finder = 'dummy')
+        substr = "If you specify an input ``fname``"
+        assert substr in err.value.message
+        substr = "do not also specify ``halo_finder``"
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_acceptable_arguments4(self):
+        fname = os.path.join(self.dummy_cache_baseloc, 'abc.hdf5')
+        os.system('touch '+ fname)
 
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, redshift = 0)
@@ -179,6 +216,48 @@ class TestCachedHaloCatalog(TestCase):
         substr = "do not also specify ``redshift``"
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_acceptable_arguments5(self):
+        fname = 'abc'
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = CachedHaloCatalog(fname = fname, redshift = 0)
+        substr = "non-existent path"
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_acceptable_arguments6(self):
+        cache = HaloTableCache()
+        fname = cache.log[0].fname
+        halocat = CachedHaloCatalog(fname = fname)
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_acceptable_arguments7(self):
+        cache = HaloTableCache()
+        correct_fname = cache.log[10].fname
+        # print("printing correct fname")
+        # print(correct_fname)
+        temporary_bad_fname = 'abc.hdf5'
+
+        f = self.h5py.File(correct_fname)
+        f.attrs['fname'] = temporary_bad_fname
+        f.close()
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = CachedHaloCatalog(fname = correct_fname)
+        print(err.value.message)
+
+        f = self.h5py.File(correct_fname)
+        f.attrs['fname'] = correct_fname
+        f.close()
+       
+
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
+            pass
 
 
 

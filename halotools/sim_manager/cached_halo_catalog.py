@@ -30,7 +30,7 @@ class CachedHaloCatalog(object):
     """
 
     def __init__(self, preload_halo_table = False, dz_tol = 0.05, 
-        **kwargs):
+        update_cached_fname = False, **kwargs):
         """
         """
         try:
@@ -39,24 +39,36 @@ class CachedHaloCatalog(object):
             raise HalotoolsError("Must have h5py package installed "
                 "to use CachedHaloCatalog objects")
 
+        self._dz_tol = dz_tol
+        self._update_cached_fname = update_cached_fname
+
         self.halo_table_cache = HaloTableCache() 
 
-        self._process_kwargs(dz_tol, **kwargs)
+        self.log_entry = self._determine_cache_log_entry(**kwargs)
+        self.simname = self.log_entry.simname 
+        self.halo_finder = self.log_entry.halo_finder 
+        self.version_name = self.log_entry.version_name 
+        self.redshift = self.log_entry.redshift 
+        self.fname = self.log_entry.fname 
 
-        self.log_entry = self._retrieve_matching_cache_log_entry(dz_tol)
-
-        self._bind_metadata()
+        self._bind_additional_metadata()
 
         if preload_halo_table is True:
             _ = self.halo_table
             del _
 
-    def _process_kwargs(self, dz_tol, **kwargs):
+    def _determine_cache_log_entry(self, **kwargs):
         """
-        """
-        self.dz_tol = dz_tol 
+        """ 
 
         if 'fname' in kwargs:
+            fname = kwargs['fname']
+
+            if not os.path.isfile(fname):
+                msg = ("\nThe ``fname`` you passed to the CachedHaloCatalog "
+                    "constructor is a non-existent path.\n")
+                raise HalotoolsError(msg)
+
             try:
                 assert 'simname' not in kwargs 
             except AssertionError:
@@ -85,53 +97,79 @@ class CachedHaloCatalog(object):
                     "do not also specify ``version_name``.\n")
                 raise HalotoolsError(msg)
 
-            self._default_simname_choice = False
-            self._default_halo_finder_choice = False
-            self._default_version_name_choice = False
-            self._default_redshift_choice = False
-
-            self.fname = kwargs['fname']
-            result = self.halo_table_cache.determine_log_entry_from_fname(self.fname)
-            self.simname = result.simname
-            self.halo_finder = result.halo_finder
-            self.version_name = result.version_name
-            self.redshift = result.redshift
+            return self._retrieve_matching_log_entry_from_fname(fname)
 
         else:
 
             try:
-                self.simname = kwargs['simname']
+                simname = kwargs['simname']
                 self._default_simname_choice = False
             except KeyError:
-                self.simname = sim_defaults.default_simname
+                simname = sim_defaults.default_simname
                 self._default_simname_choice = True
+
             try:
-                self.halo_finder = kwargs['halo_finder']
+                halo_finder = kwargs['halo_finder']
                 self._default_halo_finder_choice = False
             except KeyError:
-                self.halo_finder = sim_defaults.default_halo_finder
+                halo_finder = sim_defaults.default_halo_finder
                 self._default_halo_finder_choice = True
 
             try:
-                self.version_name = kwargs['version_name']
+                version_name = kwargs['version_name']
                 self._default_version_name_choice = False
             except KeyError:
-                self.version_name = sim_defaults.default_version_name
+                version_name = sim_defaults.default_version_name
                 self._default_version_name_choice = True
             
             try:
-                self.redshift = kwargs['redshift']
+                redshift = kwargs['redshift']
                 self._default_redshift_choice = False
             except KeyError:
-                self.redshift = sim_defaults.default_redshift
+                redshift = sim_defaults.default_redshift
                 self._default_redshift_choice = True
 
-    def _retrieve_matching_ptcl_cache_log_entry(self, dz_tol):
+            return self._retrieve_matching_log_entry_from_metadata(
+                simname, halo_finder, version_name, redshift)
+
+    def _retrieve_matching_log_entry_from_fname(self, fname):
         """
         """
+        log_entry = self.halo_table_cache.determine_log_entry_from_fname(fname, 
+            overwrite_fname_metadata = False)
+
+        if log_entry.fname != fname:
+            if self._update_cached_fname == True:
+                log_entry = (
+                    self.halo_table_cache.determine_log_entry_from_fname(fname, 
+                        overwrite_fname_metadata = self._update_cached_fname)
+                    )
+            else:
+                msg = ("\nThe ``fname`` you passed as an input to the "
+                    "CachedHaloCatalog class \ndoes not match the ``fname`` "
+                    "stored as metadata in the hdf5 file.\n"
+                    "This means that at some point you manually relocated the catalog on disk \n"
+                    "after storing its location in cache, "
+                    "but you did not yet update the Halotools cache log. \n"
+                    "When possible, try to keep your halo catalogs "
+                    "at a fixed disk location \n"
+                    "as this helps ensure reproducibility. \n"
+                    "If the ``fname`` you passed to CachedHaloCatalog is the "
+                    "new location you want to store the catalog, \n"
+                    "then you can update the cache by calling the CachedHaloCatalog \n"
+                    "constructor again and setting the ``update_cached_fname`` variable to True.\n")
+                raise HalotoolsError(msg)
+
+        return log_entry
+
+
+    def _retrieve_matching_ptcl_cache_log_entry(self):
+        """
+        """
+
         ptcl_table_cache = PtclTableCache()
         if len(ptcl_table_cache.log) == 0:
-            msg = ("\nThe Halotools cache log has record of particle catalogs.\n"
+            msg = ("\nThe Halotools cache log has no record of any particle catalogs.\n"
                 "If you have never used Halotools before, "
                 "you should read the Getting Started guide on halotools.readthedocs.org.\n"
                 "If you have previously used the package before, \n"
@@ -140,7 +178,7 @@ class CachedHaloCatalog(object):
 
         gen0 = ptcl_table_cache.matching_log_entry_generator(
             simname = self.simname, version_name = self.version_name, 
-            redshift = self.redshift, dz_tol = dz_tol)
+            redshift = self.redshift, dz_tol = self._dz_tol)
         gen1 = ptcl_table_cache.matching_log_entry_generator(
             simname = self.simname, version_name = self.version_name)
         gen2 = ptcl_table_cache.matching_log_entry_generator(simname = self.simname)
@@ -169,7 +207,7 @@ class CachedHaloCatalog(object):
             msg += "redshift = ``" + str(self.redshift) + "``\n"
 
         msg += ("\nThere is no matching catalog in cache "
-            "within dz_tol = "+str(dz_tol)+" of these inputs.\n"
+            "within dz_tol = "+str(self._dz_tol)+" of these inputs.\n"
             )
 
 
@@ -190,11 +228,12 @@ class CachedHaloCatalog(object):
             raise InvalidCacheLogEntry(msg)
 
         elif len(matching_entries) == 1:
-            return matching_entries[0]
+            log_entry = matching_entries[0]
+            return log_entry
 
         else:
             msg += ("There are multiple entries in the cache log \n"
-                "within dz_tol = "+str(dz_tol)+" of your inputs. \n"
+                "within dz_tol = "+str(self._dz_tol)+" of your inputs. \n"
                 "Try using the exact redshift and/or decreasing dz_tol.\n"
                 "Now printing the matching entries:\n\n")
             for entry in matching_entries:
@@ -202,7 +241,8 @@ class CachedHaloCatalog(object):
             raise InvalidCacheLogEntry(msg)
 
 
-    def _retrieve_matching_cache_log_entry(self, dz_tol):
+    def _retrieve_matching_log_entry_from_metadata(self, 
+        simname, halo_finder, version_name, redshift):
         """
         """
         
@@ -216,16 +256,16 @@ class CachedHaloCatalog(object):
 
 
         gen0 = self.halo_table_cache.matching_log_entry_generator(
-            simname = self.simname, halo_finder = self.halo_finder, 
-            version_name = self.version_name, redshift = self.redshift, 
-            dz_tol = dz_tol)
+            simname = simname, halo_finder = halo_finder, 
+            version_name = version_name, redshift = redshift, 
+            dz_tol = self._dz_tol)
         gen1 = self.halo_table_cache.matching_log_entry_generator(
-            simname = self.simname, 
-            halo_finder = self.halo_finder, version_name = self.version_name)
+            simname = simname, 
+            halo_finder = halo_finder, version_name = version_name)
         gen2 = self.halo_table_cache.matching_log_entry_generator(
-            simname = self.simname, halo_finder = self.halo_finder)
+            simname = simname, halo_finder = halo_finder)
         gen3 = self.halo_table_cache.matching_log_entry_generator(
-            simname = self.simname)
+            simname = simname)
 
         matching_entries = list(gen0)     
 
@@ -233,31 +273,31 @@ class CachedHaloCatalog(object):
             "with the following characteristics:\n\n")
 
         if self._default_simname_choice is True:
-            msg += ("simname = ``" + str(self.simname) 
+            msg += ("simname = ``" + str(simname) 
                 + "``  (set by sim_defaults.default_simname)\n")
         else:
-            msg += "simname = ``" + str(self.simname) + "``\n"
+            msg += "simname = ``" + str(simname) + "``\n"
 
         if self._default_halo_finder_choice is True:
-            msg += ("halo_finder = ``" + str(self.halo_finder) 
+            msg += ("halo_finder = ``" + str(halo_finder) 
                 + "``  (set by sim_defaults.default_halo_finder)\n")
         else:
-            msg += "halo_finder = ``" + str(self.halo_finder) + "``\n"
+            msg += "halo_finder = ``" + str(halo_finder) + "``\n"
 
         if self._default_version_name_choice is True:
-            msg += ("version_name = ``" + str(self.version_name) 
+            msg += ("version_name = ``" + str(version_name) 
                 + "``  (set by sim_defaults.default_version_name)\n")
         else:
-            msg += "version_name = ``" + str(self.version_name) + "``\n"
+            msg += "version_name = ``" + str(version_name) + "``\n"
 
         if self._default_redshift_choice is True:
-            msg += ("redshift = ``" + str(self.redshift) 
+            msg += ("redshift = ``" + str(redshift) 
                 + "``  (set by sim_defaults.default_redshift)\n")
         else:
-            msg += "redshift = ``" + str(self.redshift) + "``\n"
+            msg += "redshift = ``" + str(redshift) + "``\n"
 
         msg += ("\nThere is no matching catalog in cache "
-            "within dz_tol = "+str(dz_tol)+" of these inputs.\n"
+            "within dz_tol = "+str(self._dz_tol)+" of these inputs.\n"
             )
 
         if len(matching_entries) == 0:
@@ -282,11 +322,12 @@ class CachedHaloCatalog(object):
             raise InvalidCacheLogEntry(msg)
 
         elif len(matching_entries) == 1:
-            return matching_entries[0]
+            log_entry = matching_entries[0]
+            return log_entry
 
         else:
             msg += ("There are multiple entries in the cache log \n"
-                "within dz_tol = "+str(dz_tol)+" of your inputs. \n"
+                "within dz_tol = "+str(self._dz_tol)+" of your inputs. \n"
                 "Try using the exact redshift and/or decreasing dz_tol.\n"
                 "Now printing the matching entries:\n\n")
             for entry in matching_entries:
@@ -316,7 +357,7 @@ class CachedHaloCatalog(object):
             else:
                 raise InvalidCacheLogEntry(self.log_entry._cache_safety_message)
 
-    def _bind_metadata(self):
+    def _bind_additional_metadata(self):
         """ Create convenience bindings of all metadata to the `CachedHaloCatalog` instance. 
         """
         f = h5py.File(self.log_entry.fname)
@@ -378,7 +419,7 @@ class CachedHaloCatalog(object):
                 ptcl_log_entry = self.ptcl_log_entry 
             except AttributeError:
                 self.ptcl_log_entry = (
-                    self._retrieve_matching_ptcl_cache_log_entry(self.dz_tol)
+                    self._retrieve_matching_ptcl_cache_log_entry()
                     )
                 ptcl_log_entry = self.ptcl_log_entry
 
