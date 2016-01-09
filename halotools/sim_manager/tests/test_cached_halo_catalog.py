@@ -2,15 +2,20 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-import warnings, os, pytest, shutil
+import warnings, os, shutil
+
 from astropy.config.paths import _find_home 
+from astropy.tests.helper import remote_data, pytest
 
 
 import numpy as np 
 
 from . import helper_functions
+
 from ..cached_halo_catalog import CachedHaloCatalog
 from ..halo_table_cache import HaloTableCache
+from ..download_manager import DownloadManager 
+
 from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
 
 ### Determine whether the machine is mine
@@ -235,8 +240,6 @@ class TestCachedHaloCatalog(TestCase):
     def test_acceptable_arguments7(self):
         cache = HaloTableCache()
         correct_fname = cache.log[10].fname
-        # print("printing correct fname")
-        # print(correct_fname)
         temporary_bad_fname = 'abc.hdf5'
 
         f = self.h5py.File(correct_fname)
@@ -251,6 +254,126 @@ class TestCachedHaloCatalog(TestCase):
         f.attrs['fname'] = correct_fname
         f.close()
        
+    @pytest.mark.skipif('not APH_MACHINE')
+    @remote_data
+    def test_relocate_simulation_data(self):
+
+        dman = DownloadManager()
+        cache = HaloTableCache()
+
+        ######################################################
+        ### Make sure the file does not already exist on disk or in cache
+        tmp_fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.07835.list.halotools_alpha_version1.hdf5'
+
+        if os.path.isfile(tmp_fname):
+            matching_log_entry = cache.determine_log_entry_from_fname(tmp_fname)
+            
+            cache.remove_entry_from_cache_log(
+                simname = matching_log_entry.simname, 
+                halo_finder = matching_log_entry.halo_finder, 
+                version_name = matching_log_entry.version_name, 
+                redshift = matching_log_entry.redshift, 
+                fname = matching_log_entry.fname, 
+                update_ascii = True, 
+                delete_corresponding_halo_catalog = True, 
+                raise_non_existence_exception = False)
+
+            assert matching_log_entry not in cache.log
+
+        ######################################################
+        ## Enforce it does not exist on disk or in the log
+        assert not os.path.isfile(tmp_fname)
+
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = CachedHaloCatalog(simname = 'bolshoi', 
+                halo_finder = 'rockstar', 
+                version_name = 'halotools_alpha_version1', 
+                redshift = 11.7632)
+
+        #####################################################
+        ## Now download the file and store it in cache
+
+        dman.download_processed_halo_table(simname = 'bolshoi', 
+            halo_finder = 'rockstar', 
+            version_name = 'halotools_alpha_version1', 
+            redshift = 11.7632, overwrite = True)
+
+        ######################################################
+        ## Enforce that the file is on disk, in cache, and loads
+        assert os.path.isfile(tmp_fname)
+
+        entry = cache.determine_log_entry_from_fname(tmp_fname)
+        assert entry not in cache.log
+        cache.update_log_from_current_ascii()
+        assert entry in cache.log
+
+        halocat = CachedHaloCatalog(simname = 'bolshoi', 
+            halo_finder = 'rockstar', 
+            version_name = 'halotools_alpha_version1', redshift = 11.7632)
+
+        #####################################################
+        ## Now move the file to a new location 
+        new_fname = os.path.join(self.dummy_cache_baseloc, os.path.basename(tmp_fname))
+        assert not os.path.isfile(new_fname)
+        os.system('cp ' + tmp_fname + ' ' + new_fname)
+        os.system('rm ' + tmp_fname)
+        assert not os.path.isfile(tmp_fname)
+        assert os.path.isfile(new_fname)
+
+        ######################################################
+        ## Verify that we can no longer load the catalog from metadata 
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = CachedHaloCatalog(simname = 'bolshoi', 
+                halo_finder = 'rockstar', 
+                version_name = 'halotools_alpha_version1', redshift = 11.7632)
+        substr = "The following input fname does not exist: "
+        assert substr in err.value.message
+        assert tmp_fname in err.value.message 
+        
+        ######################################################
+        ## Update the cache location using the CachedHaloCatalog
+
+        del halocat 
+        halocat = CachedHaloCatalog(fname = new_fname, update_cached_fname = True)
+        assert halocat.fname == new_fname
+        del halocat 
+        ######################################################
+
+        ######################################################
+        ## Verify that we can load the catalog from metadata again
+        halocat = CachedHaloCatalog(simname = 'bolshoi', 
+            halo_finder = 'rockstar', 
+            version_name = 'halotools_alpha_version1', redshift = 11.7632)
+
+        # ######################################################
+        # # Now clean up and remove the file again
+        cache.update_log_from_current_ascii()
+
+        matching_log_entries = cache.matching_log_entry_generator(
+            simname = 'bolshoi', 
+            halo_finder = 'rockstar', 
+            version_name = 'halotools_alpha_version1', 
+            redshift = 11.7632, dz_tol = 0.05)
+
+        for matching_log_entry in matching_log_entries:
+            cache.remove_entry_from_cache_log(
+                simname = matching_log_entry.simname, 
+                halo_finder = matching_log_entry.halo_finder, 
+                version_name = matching_log_entry.version_name, 
+                redshift = matching_log_entry.redshift, 
+                fname = matching_log_entry.fname, 
+                update_ascii = True, 
+                delete_corresponding_halo_catalog = True
+                )
+        # ######################################################
+
+        # ######################################################
+        # # Enforce that the file is really gone 
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            halocat = CachedHaloCatalog(simname = 'bolshoi', 
+                halo_finder = 'rockstar', 
+                version_name = 'halotools_alpha_version1', redshift = 11.7632)
+        # ######################################################
 
 
     def tearDown(self):
