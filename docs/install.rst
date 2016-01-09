@@ -7,17 +7,17 @@ Package Installation
 Installing Halotools
 ====================
 
-There are two simple options for how to install Halotools on your machine. In both cases, once you install the package you will be able to import the Halotools package from a python interpreter running from any location on your machine.
+There are two options for how to install Halotools on your machine. In both cases, once you install the package you will be able to import the Halotools package from a python interpreter running from any location on your machine.
 
 Using pip
 -------------
 
-The pip install option will become available upon the package beta-release - coming soon!
+The pip install option will become available upon beta-release - coming soon!
 
 Building from source 
 --------------------------
 
-The other option for installing Halotools is to clone the source code from github and call the setup file::
+The other option for installing Halotools is to clone the source code from github and call the setup file. Note that installation compiles the code's Cython-based back-end, which will generate a large number of compiler warnings that you can ignore. 
 
 	git clone https://github.com/astropy/halotools.git
 	cd halotools
@@ -26,8 +26,7 @@ The other option for installing Halotools is to clone the source code from githu
 Verifying your installation 
 -----------------------------
 
-After installing the code, you should navigate to the root directory of the package and run the full test suite to make sure your copy of Halotools is science-ready. This will generate a large number of 
-compiler messages that you can ignore, and takes about a minute to run. 
+After installing the code, you should navigate to the root directory of the package and run the full test suite to make sure your copy of Halotools is science-ready. This will also generate a large number of compiler messages that you can ignore, and takes about a minute to run. 
 
 	python setup.py test 
 
