@@ -1,6 +1,7 @@
 import numpy as np
 import os
 from warnings import warn 
+from copy import deepcopy 
 
 from astropy.table import Table
 
@@ -140,10 +141,13 @@ class CachedHaloCatalog(object):
 
         if log_entry.fname != fname:
             if self._update_cached_fname == True:
+                old_fname = deepcopy(log_entry.fname)
                 log_entry = (
                     self.halo_table_cache.determine_log_entry_from_fname(fname, 
                         overwrite_fname_metadata = self._update_cached_fname)
                     )
+                self.halo_table_cache.update_cached_file_location(
+                    fname, old_fname)
             else:
                 msg = ("\nThe ``fname`` you passed as an input to the "
                     "CachedHaloCatalog class \ndoes not match the ``fname`` "
