@@ -364,6 +364,11 @@ class CachedHaloCatalog(object):
     def _bind_additional_metadata(self):
         """ Create convenience bindings of all metadata to the `CachedHaloCatalog` instance. 
         """
+        if not os.path.isfile(self.log_entry.fname):
+            msg = ("The following input fname does not exist: \n\n" + 
+                self.log_entry.fname + "\n\n")
+            raise InvalidCacheLogEntry(msg)
+
         f = h5py.File(self.log_entry.fname)
         for attr_key in f.attrs.keys():
             if attr_key == 'redshift':
