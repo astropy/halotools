@@ -10,6 +10,7 @@ __all__ = ('RockstarHlistReader', )
 
 import os
 import gzip
+
 from time import time
 import numpy as np
 from warnings import warn 
@@ -370,10 +371,12 @@ class RockstarHlistReader(TabularAsciiReader):
             assert 'halo_x' in self.dt.names
             assert 'halo_y' in self.dt.names
             assert 'halo_z' in self.dt.names
+            assert len(self.dt.names) > 4
         except AssertionError:
             msg = ("\nAll halo tables stored in cache \n"
             "must at least have the following columns:\n"
-                "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``.\n"
+                "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``, \n"
+                "plus at least one additional column (typically storing a mass-like variable).\n"
                 "If you do not intend to use store the catalog in cache, \n"
                 "you should instead process the file with the "
                 "`~halotools.sim_manager.TabularAsciiReader`.\n"

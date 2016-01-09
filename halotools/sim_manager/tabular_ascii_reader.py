@@ -9,6 +9,7 @@ __all__ = ('TabularAsciiReader', )
 
 import os
 import gzip
+import collections
 from time import time
 import numpy as np
 
@@ -64,6 +65,7 @@ class TabularAsciiReader(object):
         self._verify_input_row_cuts_keys()
         self._verify_min_max_consistency()
         self._verify_eq_neq_consistency()
+        self._enforce_no_repeated_columns()
 
     def _verify_input_row_cuts_keys(self, **kwargs):
         """ Require all columns upon which a row-cut is placed to also appear in 
@@ -221,6 +223,16 @@ class TabularAsciiReader(object):
                 raise IOError(msg % (input_fname, input_fname[:-3]))
 
         return os.path.abspath(input_fname)
+
+    def _enforce_no_repeated_columns(self):
+        duplicates = list(
+            k for k, v in collections.Counter(self.column_indices_to_keep).items() if v>1
+            )
+        if len(duplicates) > 0:
+            example_repeated_column_index = str(duplicates[0])
+            msg = ("\nColumn number " + example_repeated_column_index + 
+                " appears more than once in your ``columns_to_keep_dict``.")
+            raise ValueError(msg)
 
     def _get_header_char(self, header_char):
         """ Verify that the input header_char is 
