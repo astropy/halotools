@@ -28,7 +28,7 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('TestCachedHaloCatalog' )
+__all__ = ('TestCachedHaloCatalog',  )
 
 
 class TestCachedHaloCatalog(TestCase):

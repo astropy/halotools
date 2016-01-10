@@ -27,7 +27,7 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('TestPtclTableCacheLogEntry' )
+__all__ = ('TestPtclTableCacheLogEntry',  )
 
 
 

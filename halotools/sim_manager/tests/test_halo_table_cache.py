@@ -30,7 +30,7 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
-__all__ = ('TestHaloTableCache' )
+__all__ = ('TestHaloTableCache',  )
 
 class TestHaloTableCache(TestCase):
     """
