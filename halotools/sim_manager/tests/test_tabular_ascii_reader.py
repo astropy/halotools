@@ -137,6 +137,89 @@ class TestTabularAsciiReader(TestCase):
         substr = 'This will result in zero selected rows '
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog1(self):
+        fname = 'abc'
+        columns_to_keep_dict = {'spin_bullock': (43, 'f4')}
+
+        with pytest.raises(IOError) as err:
+            reader = TabularAsciiReader(fname, columns_to_keep_dict)
+        substr = "is not a file"
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog2(self):
+        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        columns_to_keep_dict = {'spin_bullock': (43, 'f4'), 'x': (43, 'f4')}
+
+        with pytest.raises(ValueError) as err:
+            reader = TabularAsciiReader(fname, columns_to_keep_dict)
+        substr = "appears more than once in your ``columns_to_keep_dict``"
+        assert substr in err.value.message
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog3(self):
+        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        columns_to_keep_dict = {'spin_bullock': (43, 'f4')}
+
+        row_cut_min_dict = {'spin_bullock': 0.5}
+        row_cut_max_dict = {'spin_bullock': 0.4}
+
+        with pytest.raises(ValueError) as err:
+            reader = TabularAsciiReader(fname, columns_to_keep_dict, 
+                row_cut_min_dict = row_cut_min_dict, row_cut_max_dict=row_cut_max_dict)
+        substr = "This will result in zero selected rows and is not permissible."
+        assert substr in err.value.message
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog4(self):
+        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+        columns_to_keep_dict = {'spin_bullock': (43, 'f4')}
+
+        row_cut_eq_dict = {'spin_bullock': 0.5}
+        row_cut_neq_dict = {'spin_bullock': 0.5}
+
+        with pytest.raises(ValueError) as err:
+            reader = TabularAsciiReader(fname, columns_to_keep_dict, 
+                row_cut_eq_dict = row_cut_eq_dict, row_cut_neq_dict=row_cut_neq_dict)
+        substr = "This will result in zero selected rows and is not permissible."
+        assert substr in err.value.message
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog5(self):
+        """
+        """
+        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+
+        columns_to_keep_dict = {'spin_bullock': (43, 'f4'), 'id': (1, 'i8'), 'upid': (6, 'i8')}
+
+        reader = TabularAsciiReader(fname, columns_to_keep_dict, 
+            row_cut_min_dict = {'spin_bullock': 0.1}, 
+            row_cut_max_dict = {'spin_bullock': 0.9}, 
+            row_cut_eq_dict = {'upid': -1}, 
+            row_cut_neq_dict = {'id': -1}
+            )
+
+        arr = reader.read_ascii()
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog6(self):
+        """
+        """
+        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+
+        columns_to_keep_dict = {'spin_bullock': (43, 'f4'), 'id': (1, 'i8'), 'upid': (6, 'i8')}
+
+        reader = TabularAsciiReader(fname, columns_to_keep_dict)
+
+        with pytest.raises(ValueError) as err:
+            arr = reader.read_ascii(chunk_memory_size = 0)
+        substr = "Must choose non-zero size for input ``chunk_memory_size``"
+        assert substr in err.value.message
 
     def tearDown(self):
         try:
