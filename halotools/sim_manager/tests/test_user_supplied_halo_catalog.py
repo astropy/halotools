@@ -36,24 +36,30 @@ class TestUserSuppliedHaloCatalog(TestCase):
             )
         self.toy_list = [elt for elt in self.halo_x]
 
-    def test_metadata(self):
-        """ Method performs various existence and consistency tests on the input metadata. 
+        self.num_ptcl = 1e4
+        self.good_ptcl_table = Table(
+            {'x': np.zeros(self.num_ptcl), 
+            'y': np.zeros(self.num_ptcl), 
+            'z': np.zeros(self.num_ptcl)}
+            )
 
-        * Enforces that ``Lbox`` and ``particle_mass`` are passed. 
+    def test_particle_mass_requirement(self):
 
-        * Enforces that all ``halo_x``, ``halo_y`` and ``halo_z`` coordinates are between 0 and ``Lbox``. 
-
-        * Enforces that all metadata get bound to the instance. 
-        """
         with pytest.raises(HalotoolsError):
             halocat = UserSuppliedHaloCatalog(Lbox = 200, **self.good_halocat_args)
+
+    def test_lbox_requirement(self):
 
         with pytest.raises(HalotoolsError):
             halocat = UserSuppliedHaloCatalog(particle_mass = 200, **self.good_halocat_args)
 
+    def test_halos_contained_inside_lbox(self):
+
         with pytest.raises(HalotoolsError):
             halocat = UserSuppliedHaloCatalog(Lbox = 20, particle_mass = 100, 
                 **self.good_halocat_args)
+
+    def test_successful_load(self):
 
         halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift, 
             **self.good_halocat_args)
@@ -61,25 +67,16 @@ class TestUserSuppliedHaloCatalog(TestCase):
         assert halocat.Lbox == 200
         assert hasattr(halocat, 'particle_mass')
         assert halocat.particle_mass == 100
+
+    def test_additional_metadata(self):
+
         halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
             arnold_schwarzenegger = 'Stick around!', 
             **self.good_halocat_args)
         assert hasattr(halocat, 'arnold_schwarzenegger')
         assert halocat.arnold_schwarzenegger == 'Stick around!'
 
-    def test_halo_table_data(self):
-        """ Method performs various existence and consistency tests on the input halo catalog. 
-
-        * Enforces that ``halo_id`` is passed to the constructor. 
-
-        * Enforces that some mass-like variable is passed to the constructor. 
-
-        * Enforces that ``halo_x``, ``halo_y`` and ``halo_z`` are all passed to the constructor. 
-
-        * Enforces that all ``halo_x``, ``halo_y`` and ``halo_z`` coordinates are between 0 and ``Lbox``. 
-
-        * Enforces that all length-*Nhalos* ndarray inputs have keywords that begin with ``halo_``. 
-        """
+    def test_all_halo_columns_have_length_nhalos(self):
 
         # All halo catalog columns must have length-Nhalos
         bad_halocat_args = deepcopy(self.good_halocat_args)
@@ -88,6 +85,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
             halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
+    def test_positions_contained_inside_lbox_alt_test(self):
         # positions must be < Lbox
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
@@ -95,6 +93,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
             halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
+    def test_has_halo_x_column(self):
         # must have halo_x column 
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
@@ -102,6 +101,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
             halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
+    def test_has_halo_id_column(self):
         # Must have halo_id column 
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
@@ -109,6 +109,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
             halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
+    def test_has_halo_mass_column(self):
         # Must have some column storing a mass-like variable
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
@@ -116,6 +117,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
             halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
+    def test_halo_prefix_warning(self):
         # Must raise warning if a length-Nhalos array is passed with 
         # a keyword argument that does not begin with 'halo_'
         bad_halocat_args = deepcopy(self.good_halocat_args)
@@ -139,23 +141,21 @@ class TestUserSuppliedHaloCatalog(TestCase):
         * Enforce that ptcl_table input is an Astropy `~astropy.table.Table` object, not a Numpy recarray
         """
 
+    def test_ptcl_table_dne(self):
         # Must not have a ptcl_table attribute when none is passed
         halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
             **self.good_halocat_args)
         assert not hasattr(halocat, 'ptcl_table')
 
-        num_ptcl = 1e4
-        ptcl_table = Table(
-            {'x': np.zeros(num_ptcl), 
-            'y': np.zeros(num_ptcl), 
-            'z': np.zeros(num_ptcl)}
-            )
+    def test_ptcl_table_exists_when_given_goodargs(self):
    
         # Must have ptcl_table attribute when argument is legitimate
-        halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
-            ptcl_table = ptcl_table, **self.good_halocat_args)
+        halocat = UserSuppliedHaloCatalog(
+            Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            ptcl_table = self.good_ptcl_table, **self.good_halocat_args)
         assert hasattr(halocat, 'ptcl_table')
 
+    def test_min_numptcl_requirement(self):
         # Must have at least 1e4 particles
         num_ptcl2 = 1e3
         ptcl_table2 = Table(
@@ -164,9 +164,11 @@ class TestUserSuppliedHaloCatalog(TestCase):
             'z': np.zeros(num_ptcl2)}
             )
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(
+                Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
+    def test_ptcls_have_zposition(self):
         # Must have a 'z' column 
         num_ptcl2 = 1e4
         ptcl_table2 = Table(
@@ -174,13 +176,16 @@ class TestUserSuppliedHaloCatalog(TestCase):
             'y': np.zeros(num_ptcl2)}
             )
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(
+                Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
+    def test_ptcls_are_astropy_table(self):
         # Data structure must be an astropy table, not an ndarray
-        ptcl_table2 = ptcl_table.as_array()
+        ptcl_table2 = self.good_ptcl_table.as_array()
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(
+                Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
 
