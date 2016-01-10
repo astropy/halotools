@@ -18,7 +18,7 @@ see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` API d
 Below we give a 
 brief description of each of the simulations supported by the package.
 If you would like to use your own catalog, rather than one of the simulations listed below, 
-see the :ref:`using_your_own_catalog`. 
+see the :ref:`working_with_alternative_catalogs`. 
 
 Bolshoi (simname = `bolshoi`)
 ==================================

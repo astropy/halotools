@@ -40,7 +40,7 @@ and manage your cache, see :ref:`sim_manager_step_by_step`.
 
 **List of supported simulations**
 ============================================
-To see what catalogs Halotools is pre-configured to work with, see :ref:`supported_sim_list`. If you have your own catalog you would like to work with instead, see the :ref:`using_your_own_catalog`. 
+To see what catalogs Halotools is pre-configured to work with, see :ref:`supported_sim_list`. If you have your own catalog you would like to work with instead, see the :ref:`working_with_alternative_catalogs`. 
 
 
 Using ``sim_manager``
@@ -50,7 +50,6 @@ Using ``sim_manager``
    :maxdepth: 1
 
    sim_manager_step_by_step.rst
-   alternate_catalogs.rst
 
 
 
