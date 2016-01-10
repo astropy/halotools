@@ -46,7 +46,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         self.halo_y = np.linspace(0, self.Lbox, self.Nhalos)
         self.halo_z = np.linspace(0, self.Lbox, self.Nhalos)
         self.halo_mass = np.logspace(10, 15, self.Nhalos)
-        self.halo_id = np.arange(0, self.Nhalos)
+        self.halo_id = np.arange(0, self.Nhalos, dtype = np.int)
         self.good_halocat_args = (
             {'halo_x': self.halo_x, 'halo_y': self.halo_y, 
             'halo_z': self.halo_z, 'halo_id': self.halo_id, 'halo_mass': self.halo_mass}
@@ -335,6 +335,38 @@ class TestUserSuppliedHaloCatalog(TestCase):
                 overwrite = True, some_more_metadata = not_representable_as_string)
         substr = "keyword is not representable as a string."
         assert substr in err.value.message
+
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_add_halocat_to_cache6(self):
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_halocat_args)
+
+        basename = 'abc.hdf5'
+        fname = os.path.join(self.dummy_cache_baseloc, basename)
+
+        simname = 'dummy_simname'
+        halo_finder = 'dummy_halo_finder'
+        version_name = 'dummy_version_name'
+        processing_notes = 'dummy processing notes'
+
+        halocat.add_halocat_to_cache(
+            fname, simname, halo_finder, version_name, processing_notes, 
+            overwrite = True)
+
+        cache = HaloTableCache()
+        assert halocat.log_entry in cache.log
+
+        cache.remove_entry_from_cache_log(
+            halocat.log_entry.simname, 
+            halocat.log_entry.halo_finder,
+            halocat.log_entry.version_name,
+            halocat.log_entry.redshift,
+            halocat.log_entry.fname, 
+            raise_non_existence_exception = True, 
+            update_ascii = True,
+            delete_corresponding_halo_catalog = True)
 
 
     @pytest.mark.xfail

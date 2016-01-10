@@ -323,7 +323,7 @@ class UserSuppliedHaloCatalog(object):
         f.attrs.create('particle_mass', self.particle_mass)
 
         time_right_now = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        f.attrs.create('time_of_catalog_storage_in_cache', time_right_now)
+        f.attrs.create('time_catalog_was_originally_cached', time_right_now)
 
         f.attrs.create('processing_notes', str(processing_notes))
 
@@ -337,7 +337,7 @@ class UserSuppliedHaloCatalog(object):
 
         log_entry = HaloTableCacheLogEntry(simname = simname, 
             halo_finder = halo_finder, version_name = version_name, 
-            redshift = redshift, fname = fname)
+            redshift = self.redshift, fname = fname)
 
         cache.add_entry_to_cache_log(log_entry, update_ascii = True)
         self.log_entry = log_entry

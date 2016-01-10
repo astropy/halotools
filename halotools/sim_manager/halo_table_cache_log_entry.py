@@ -334,7 +334,7 @@ class HaloTableCacheLogEntry(object):
                 assert len(halo_id) == len(set(halo_id))
             except AssertionError:
                 num_failures += 1
-                msg = (str(num_failures)+". The ``halo_id`` column"
+                msg = (str(num_failures)+". The ``halo_id`` column "
                     "must contain a unique set of integers.\n\n"
                     )
         except:
