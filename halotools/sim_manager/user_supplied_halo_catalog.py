@@ -341,7 +341,10 @@ class UserSuppliedHaloCatalog(object):
         cache.add_entry_to_cache_log(log_entry, update_ascii = True)
         self.log_entry = log_entry
 
-
+    def add_ptcl_table_to_cache(self):
+        """ Not implemented yet. 
+        """
+        raise NotImplementedError
 
 
 

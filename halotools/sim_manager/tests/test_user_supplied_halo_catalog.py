@@ -36,7 +36,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
     """ Class providing tests of the `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
     """
 
-    def setup_class(self):
+    def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
         self.Nhalos = 1e2
@@ -60,15 +60,27 @@ class TestUserSuppliedHaloCatalog(TestCase):
             'z': np.zeros(self.num_ptcl)}
             )
 
+        import h5py
+        self.h5py = h5py
+
+        self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
+        try:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
+            pass
+        os.makedirs(self.dummy_cache_baseloc)
+
     def test_particle_mass_requirement(self):
 
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, **self.good_halocat_args)
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+                **self.good_halocat_args)
 
     def test_lbox_requirement(self):
 
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(particle_mass = 200, **self.good_halocat_args)
+            halocat = UserSuppliedHaloCatalog(particle_mass = 200, 
+                **self.good_halocat_args)
 
     def test_halos_contained_inside_lbox(self):
 
@@ -78,7 +90,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
     def test_successful_load(self):
 
-        halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift, 
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
             **self.good_halocat_args)
         assert hasattr(halocat, 'Lbox')
         assert halocat.Lbox == 200
@@ -87,7 +100,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
     def test_additional_metadata(self):
 
-        halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift,
             arnold_schwarzenegger = 'Stick around!', 
             **self.good_halocat_args)
         assert hasattr(halocat, 'arnold_schwarzenegger')
@@ -99,7 +113,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             bad_halocat_args['halo_x'][0] = -1
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+                particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
     def test_positions_contained_inside_lbox_alt_test(self):
@@ -107,7 +122,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             bad_halocat_args['halo_x'][0] = 10000
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+                particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
     def test_has_halo_x_column(self):
@@ -115,7 +131,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_x']
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+                particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
     def test_has_halo_id_column(self):
@@ -123,7 +140,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_id']
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+                particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
     def test_has_halo_mass_column(self):
@@ -131,7 +149,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
         bad_halocat_args = deepcopy(self.good_halocat_args)
         with pytest.raises(HalotoolsError):
             del bad_halocat_args['halo_mass']
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+                particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
 
     def test_halo_prefix_warning(self):
@@ -142,7 +161,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             bad_halocat_args['s'] = np.ones(self.Nhalos)
-            halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+            halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+                particle_mass = 100, redshift = self.redshift,
                 **bad_halocat_args)
             assert 'interpreted as metadata' in str(w[-1].message)
 
@@ -160,7 +180,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
     def test_ptcl_table_dne(self):
         # Must not have a ptcl_table attribute when none is passed
-        halocat = UserSuppliedHaloCatalog(Lbox = 200, particle_mass = 100, redshift = self.redshift,
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift,
             **self.good_halocat_args)
         assert not hasattr(halocat, 'ptcl_table')
 
@@ -205,6 +226,40 @@ class TestUserSuppliedHaloCatalog(TestCase):
                 Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_add_halocat_to_cache1(self):
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_halocat_args)
+
+        basename = 'abc'
+        fname = os.path.join(self.dummy_cache_baseloc, basename)
+        os.system('touch ' + fname)
+        assert os.path.isfile(fname)
+
+        dummy_string = '  '
+        with pytest.raises(HalotoolsError) as err:
+            halocat.add_halocat_to_cache(
+                fname, dummy_string, dummy_string, dummy_string, dummy_string)
+        substr = "Either choose a different fname or set ``overwrite`` to True"
+        assert substr in err.value.message
+
+
+
+
+    @pytest.mark.xfail
+    def test_add_ptcl_table_to_cache(self):
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_halocat_args)
+        halocat.add_ptcl_table_to_cache()
+
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.dummy_cache_baseloc)
+        except:
+            pass
 
 
 
