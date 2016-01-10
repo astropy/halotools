@@ -7,7 +7,6 @@ import warnings, os, shutil
 from astropy.config.paths import _find_home 
 from astropy.tests.helper import remote_data, pytest
 
-
 import numpy as np 
 
 from . import helper_functions

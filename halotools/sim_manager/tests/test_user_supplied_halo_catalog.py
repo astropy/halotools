@@ -2,18 +2,35 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-import pytest 
-import warnings 
+import warnings, os, shutil
+
+from astropy.config.paths import _find_home 
+from astropy.tests.helper import remote_data, pytest
 
 import numpy as np 
 from copy import copy, deepcopy 
 
+from . import helper_functions
+
 from astropy.table import Table
 
 from .. import UserSuppliedHaloCatalog
-from ...custom_exceptions import HalotoolsError
+from ..halo_table_cache import HaloTableCache
 
-__all__ = ['TestUserSuppliedHaloCatalog']
+from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
+
+### Determine whether the machine is mine
+# This will be used to select tests whose 
+# returned values depend on the configuration 
+# of my personal cache directory files
+aph_home = u'/Users/aphearin'
+detected_home = _find_home()
+if aph_home == detected_home:
+    APH_MACHINE = True
+else:
+    APH_MACHINE = False
+
+__all__ = ('TestUserSuppliedHaloCatalog', )
 
 class TestUserSuppliedHaloCatalog(TestCase):
     """ Class providing tests of the `~halotools.sim_manager.UserSuppliedHaloCatalog`. 

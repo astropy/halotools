@@ -147,7 +147,7 @@ class HaloTableCache(object):
         try:
             assert isinstance(log_entry, HaloTableCacheLogEntry)
         except AssertionError:
-            msg = ("You can only add instances of HaloTableCacheLogEntry to the cache log")
+            msg = ("\nYou can only add instances of HaloTableCacheLogEntry to the cache log")
             raise TypeError(msg)
 
         if log_entry.safe_for_cache == False:
