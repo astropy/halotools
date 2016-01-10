@@ -300,6 +300,41 @@ class PtclTableCache(object):
         f.close()
         return log_entry
 
+    def update_cached_file_location(self, new_fname, old_fname, **kwargs):
+        """
+        Parameters 
+        -----------
+        new_fname : string 
+            Name of the new location of the file 
+
+        old_fname : string 
+            Name of the old location of the file 
+        """
+
+        ######################################################
+        # update_ascii kwarg is for unit-testing only 
+        # this feature is intentionally hidden from the docstring
+        try:
+            update_ascii = kwargs['update_ascii']
+        except KeyError:
+            update_ascii = True
+        ######################################################
+
+        new_log_entry = self.determine_log_entry_from_fname(
+            new_fname, overwrite_fname_metadata = True)
+
+        self.add_entry_to_cache_log(new_log_entry, update_ascii = update_ascii)
+        self.remove_entry_from_cache_log(
+            simname = new_log_entry.simname, 
+            version_name = new_log_entry.version_name, 
+            redshift = new_log_entry.redshift, 
+            fname = old_fname, 
+            raise_non_existence_exception = False, 
+            update_ascii = update_ascii, 
+            delete_corresponding_ptcl_catalog = False
+            )
+
+
 
 
 
