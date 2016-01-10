@@ -88,6 +88,16 @@ class TestUserSuppliedHaloCatalog(TestCase):
             halocat = UserSuppliedHaloCatalog(Lbox = 20, particle_mass = 100, 
                 **self.good_halocat_args)
 
+    def test_redshift_is_float(self):
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = UserSuppliedHaloCatalog(
+                Lbox = 200, particle_mass = 100, redshift = '1.0', 
+                **self.good_halocat_args)
+        substr = "The ``redshift`` metadata must be a float."
+        assert substr in err.value.message
+
+
     def test_successful_load(self):
 
         halocat = UserSuppliedHaloCatalog(Lbox = 200, 
@@ -353,7 +363,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         halocat.add_halocat_to_cache(
             fname, simname, halo_finder, version_name, processing_notes, 
-            overwrite = True)
+            overwrite = True, some_additional_metadata = processing_notes)
 
         cache = HaloTableCache()
         assert halocat.log_entry in cache.log
