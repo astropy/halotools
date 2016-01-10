@@ -141,6 +141,46 @@ class TestPtclTableCache(TestCase):
         assert "The hdf5 file is missing the following metadata:" in result
 
 
+    def test_add_entry_to_cache_log1(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+        assert len(cache.log) == 0
+
+        with pytest.raises(TypeError) as err:
+            cache.add_entry_to_cache_log('abc', update_ascii = False)
+        substr = "You can only add instances of PtclTableCacheLogEntry to the cache log"
+        assert substr in err.value.message
+
+    def test_add_entry_to_cache_log2(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
+        assert len(cache.log) == 1
+
+    def test_add_entry_to_cache_log3(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
+            substr = "cache log already contains the entry"
+            assert substr in str(w[-1].message)
+        assert len(cache.log) == 1
+
+    def test_add_entry_to_cache_log4(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
+        cache.add_entry_to_cache_log(self.good_log_entry2, update_ascii = False)
+        assert len(cache.log) == 2
+
+    def test_add_entry_to_cache_log5(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+        with pytest.raises(InvalidCacheLogEntry) as err:
+            cache.add_entry_to_cache_log(self.bad_log_entry, update_ascii = False)
+        substr = "The input filename does not exist."
+        assert substr in err.value.message
+
+
+
     def tearDown(self):
         try:
             shutil.rmtree(self.dummy_cache_baseloc)
