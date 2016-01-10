@@ -64,6 +64,10 @@ class RockstarHlistReader(TabularAsciiReader):
     The `RockstarHlistReader` reads Rockstar hlist ASCII files, 
     stores them as hdf5 files in the Halotools cache, and updates the cache log. 
 
+    It is important that you carefully read the 
+    :ref:`reducing_and_caching_a_new_rockstar_catalog` 
+    before using this class. 
+
     `RockstarHlistReader` is a subclass of 
     `~halotools.sim_manager.TabularAsciiReader`, and supplements this behavior 
     with the ability to read, update, and search the Halotools cache log. 
@@ -249,6 +253,10 @@ class RockstarHlistReader(TabularAsciiReader):
         When the ``row_cut_min_dict``, ``row_cut_max_dict``, 
         ``row_cut_eq_dict`` and ``row_cut_neq_dict`` keyword arguments are used 
         simultaneously, only rows passing all cuts will be kept. 
+
+        See also 
+        ---------
+        :ref:`reducing_and_caching_a_new_rockstar_catalog`
 
         """
         try:
@@ -442,6 +450,13 @@ class RockstarHlistReader(TabularAsciiReader):
         """ Method reads the ascii data and  
         binds the resulting catalog to ``self.halo_table``.
 
+        By default, the optional ``write_to_disk`` and ``update_cache_log`` 
+        arguments are set to False because Halotools will not 
+        write large amounts of data to disk without your explicit instructions 
+        to do so. However, it the majority of use-cases, 
+        you should set both of these arguments to True, in which case 
+        your reduced catalog will be saved on disk and stored in cache. 
+
         Parameters 
         -----------
         write_to_disk : bool, optional 
@@ -458,6 +473,9 @@ class RockstarHlistReader(TabularAsciiReader):
             Boolean determining whether the halo_table will have additional 
             columns added to it computed by the add_supplementary_halocat_columns method. 
             Default is True. 
+
+            Note that this feature is rather bare-bones and is likely to significantly 
+            evolve and/or entirely vanish in future releases. 
         """
         result = self.read_ascii()
         self.halo_table = Table(result)

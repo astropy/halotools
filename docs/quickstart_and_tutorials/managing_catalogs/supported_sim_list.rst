@@ -27,12 +27,27 @@ WMAP5 cosmology with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h.
 For a detailed description of the simulation specs, see 
 http://www.cosmosim.org/cms/simulations/multidark-project/bolshoi. 
 
+To download the halos upon which the Halotools-provided catalogs are based, see 
+`Source of Bolshoi Rockstar halos <http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs/>`_ 
+and `Source of Bolshoi BDM halos <http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/>`_. 
+
+Note that the above web source of halo data is frequently updated and is not maintained 
+by Halotools, and so it is not possible to guarantee that a halo catalog you download 
+from this location will be the same as the one used to produce the Halotools-provided catalogs. 
+
 Bolshoi-Planck (simname = `bolplanck`)
 ====================================================================
 Planck 2013 cosmology with Lbox = 250 Mpc/h and particle mass of ~1e8 Msun/h. 
 
 For a detailed description of the simulation specs, see 
 http://www.cosmosim.org/cms/simulations/bolshoip-project/bolshoip/. 
+
+To download the halos upon which the Halotools-provided catalogs are based, see 
+`Source of Bolshoi Planck Rockstar halos <http://www.slac.stanford.edu/~behroozi/Bolshoi_Catalogs_BDM/>`_. 
+
+Note that the above web source of halo data is frequently updated and is not maintained 
+by Halotools, and so it is not possible to guarantee that a halo catalog you download 
+from this location will be the same as the one used to produce the Halotools-provided catalogs. 
 
 Multidark (simname = `multidark`)
 ====================================================================
@@ -41,6 +56,13 @@ WMAP5 cosmology with Lbox = 1Gpc/h and particle mass of ~1e10 Msun/h.
 For a detailed description of the simulation specs, see 
 http://www.cosmosim.org/cms/simulations/multidark-project/mdr1. 
 
+To download the halos upon which the Halotools-provided catalogs are based, see 
+`Source of Multidark Rockstar halos <http://slac.stanford.edu/~behroozi/MultiDark_Hlists_Rockstar/>`_. 
+
+Note that the above web source of halo data is frequently updated and is not maintained 
+by Halotools, and so it is not possible to guarantee that a halo catalog you download 
+from this location will be the same as the one used to produce the Halotools-provided catalogs. 
+
 Consuelo (simname = `consuelo`)
 ====================================================================
 WMAP5-like cosmology with Lbox = 420 Mpc/h and particle mass of ~1e9 Msun/h. 
@@ -48,6 +70,12 @@ WMAP5-like cosmology with Lbox = 420 Mpc/h and particle mass of ~1e9 Msun/h.
 For a detailed description of the simulation specs, see 
 http://lss.phy.vanderbilt.edu/lasdamas/simulations.html. 
 
+To download the halos upon which the Halotools-provided catalogs are based, see 
+`Source of Consuelo Rockstar halos <http://www.slac.stanford.edu/~behroozi/Consuelo_Catalogs/>`_. 
+
+Note that the above web source of halo data is frequently updated and is not maintained 
+by Halotools, and so it is not possible to guarantee that a halo catalog you download 
+from this location will be the same as the one used to produce the Halotools-provided catalogs. 
 
 
 
