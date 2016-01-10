@@ -25,7 +25,8 @@ from ..custom_exceptions import HalotoolsError
 __all__ = ('UserSuppliedHaloCatalog', )
 
 class UserSuppliedHaloCatalog(object):
-    """ Class used to transform a user-provided halo catalog into the standard form recognized by Halotools. 
+    """ Class used to transform a user-provided halo catalog 
+    into the standard form recognized by Halotools. 
     """
     def __init__(self, **kwargs):
         """

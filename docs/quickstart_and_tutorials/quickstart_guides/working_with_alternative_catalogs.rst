@@ -28,9 +28,10 @@ but do not want to store the catalog in cache, you should instead use the stand-
 Using alternative catalogs 
 ===============================================================
 
-Any halo-finder or simulation works perfectly well with Halotools, 
-regardless of the halo-finder, or whether or not you want to store the 
-halo catalog in cache. For more information about how to 
+The full functionality of Halotools is available for use with 
+halos in any N-body simulation identified with any halo-finder, 
+and use of the Halotools caching system is optional in every respect. 
+For more information about how to 
 work with simulation data not provided by Halotools, 
 see :ref:`user_supplied_halo_catalogs`. 
 
