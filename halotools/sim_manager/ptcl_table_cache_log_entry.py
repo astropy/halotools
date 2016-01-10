@@ -90,14 +90,6 @@ class PtclTableCacheLogEntry(object):
         msg = msg[0:-2] + ")"
         return msg
 
-    @property 
-    def _order(self):
-        """ Private property used to define how log entries are ordered
-        """
-        return OrderedDict(
-            (attrname, getattr(self, attrname)) 
-            for attrname in PtclTableCacheLogEntry.log_attributes)
-
     @property
     def _key(self):
         """ Private property needed for the python built-in ``set`` 
