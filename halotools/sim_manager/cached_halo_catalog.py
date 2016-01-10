@@ -27,12 +27,115 @@ __all__ = ('CachedHaloCatalog', )
 
 class CachedHaloCatalog(object):
     """
-    Container class for halo catalogs and particle data.  
+    Container class for the halo catalogs and particle data 
+    that are stored in the Halotools cache log. 
+
+    The halos are stored in the ``halo_table`` attribute 
+    in the form of an Astropy `~astropy.table.Table`. 
+
+    If available, another `~astropy.table.Table` storing 
+    a random downsampling of dark matter particles 
+    is stored in the ``ptcl_table`` attribute. 
     """
 
     def __init__(self, preload_halo_table = False, dz_tol = 0.05, 
         update_cached_fname = False, **kwargs):
         """
+        Parameters 
+        ------------
+        simname : string, optional 
+            Nickname of the simulation used as a shorthand way to keep track 
+            of the halo catalogs in your cache. 
+            The simnames of the Halotools-provided catalogs are 
+            'bolshoi', 'bolplanck', 'consuelo' and 'multidark'. 
+
+            Default is set by the ``default_simname`` variable in the 
+            `~halotools.sim_manager.sim_defaults` module.  
+
+        halo_finder : string, optional 
+            Nickname of the halo-finder used to generate the hlist file from particle data. 
+
+            Default is set by the ``default_halo_finder`` variable in the 
+            `~halotools.sim_manager.sim_defaults` module.  
+
+        redshift : float, optional 
+            Redshift of the halo catalog. 
+
+            Default is set by the ``default_redshift`` variable in the 
+            `~halotools.sim_manager.sim_defaults` module.  
+
+        version_name : string, optional 
+            Nickname of the version of the halo catalog. 
+
+            Default is set by the ``default_version_name`` variable in the 
+            `~halotools.sim_manager.sim_defaults` module. 
+
+        fname : string, optional 
+            Absolute path to the location on disk storing the hdf5 file 
+            of halo data. If passing ``fname``, do not pass the metadata keys 
+            ``simname``, ``halo_finder``, ``version_name`` or ``redshift``. 
+
+        update_cached_fname : bool, optional 
+            If the hdf5 file storing the halos has been relocated to a new 
+            disk location after storing the data in cache, 
+            the ``update_cached_fname`` input can be used together with the 
+            ``fname`` input to update the cache log with the new disk location. 
+
+            See :ref:`relocating_simulation_data_instructions` for 
+            further instructions. 
+
+        dz_tol : float, optional 
+            Tolerance within to search for a catalog with a matching redshift. 
+            Halo catalogs in cache with a redshift that differs by greater 
+            than ``dz_tol`` will be ignored. Default is 0.05. 
+
+        Examples 
+        ---------
+        If you followed the instructions in the 
+        :ref:`download_default_halos` section of the :ref:`getting_started` guide, 
+        then you can load the default halo catalog into memory by calling the 
+        `~halotools.sim_manager.CachedHaloCatalog` with no arguments: 
+
+        >>> halocat = CachedHaloCatalog() # doctest: +SKIP
+
+        The halos are stored in the ``halo_table`` attribute 
+        in the form of an Astropy `~astropy.table.Table`. 
+
+        >>> halos = halocat.halo_table # doctest: +SKIP
+
+        As with any Astropy `~astropy.table.Table`, the properties of the 
+        halos can be accessed in the same manner as a Numpy structured array 
+        or python dictionary:
+
+        >>> array_of_masses = halos['halo_mvir'] # doctest: +SKIP
+        >>> x_positions = halos['halo_x'] # doctest: +SKIP
+
+        Note that all keys of a cached halo catalog begin with the substring 
+        ``halo_``. This is a bookkeeping device used to help 
+        the internals of Halotools differentiate 
+        between halo properties and the properties of mock galaxies 
+        populated into the halos with ambiguously similar names. 
+
+        The ``simname``, ``halo_finder``, ``version_name`` and ``redshift`` 
+        keyword arguments fully specify the halo catalog that will be loaded. 
+        Omitting any of them will select the corresponding default value 
+        set in the `~halotools.sim_manager.sim_defaults` module. 
+
+        >>> halocat = CachedHaloCatalog(redshift = 1, simname = 'multidark') # doctest: +SKIP
+
+        If you forget which catalogs you have stored in cache, 
+        you have two options for how to remind yourself. 
+        First, you can use the `~halotools.sim_manager.HaloTableCache` class:
+
+        >>> from halotools.sim_manager import HaloTableCache
+        >>> cache = HaloTableCache()
+        >>> for entry in cache.log: print(entry) # doctest: +SKIP
+
+        Alternatively, you can simply use a text editor to open the cache log, 
+        which is stored as ASCII data in the following location on your machine: 
+
+        $HOME/.astropy/cache/halotools/halo_table_cache_log.txt
+
         """
         try:
             import h5py

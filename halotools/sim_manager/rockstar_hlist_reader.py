@@ -133,7 +133,8 @@ class RockstarHlistReader(TabularAsciiReader):
 
         simname : string 
             Nickname of the simulation used as a shorthand way to keep track 
-            of the halo catalogs in your cache. The simnames processed by Halotools are 
+            of the halo catalogs in your cache. 
+            The simnames of the Halotools-provided catalogs are 
             'bolshoi', 'bolplanck', 'consuelo' and 'multidark'. 
 
         halo_finder : string 
@@ -148,10 +149,9 @@ class RockstarHlistReader(TabularAsciiReader):
             Nickname of the version of the halo catalog you produce using RockstarHlistReader. 
             The ``version_name`` is used as a bookkeeping tool in the cache log.
 
-            It is not permissible to use a value of ``version_name`` that matches 
-            the version name(s) used for the default catalogs provided by Halotools. 
             If you process your own halo catalog with the RockstarHlistReader, 
-            you should choose your own version name. 
+            you should choose your own version name that differs from the 
+            version names of the Halotools-provided catalogs. 
 
         Lbox : float 
             Box size of the simulation in Mpc/h.

@@ -17,8 +17,8 @@ explains what is going on under the hood.
 
 .. _relocating_simulation_data_instructions:
 
-Instructions
-================
+Instructions for relocating simulation data
+==============================================
 
 The normal way to load a `~halotools.sim_manager.CachedHaloCatalog` is to 
 pass a set of metadata to the constructor:
