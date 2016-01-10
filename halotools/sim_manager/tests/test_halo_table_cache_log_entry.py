@@ -50,10 +50,8 @@ class TestHaloTableCacheLogEntry(TestCase):
             pass
         os.makedirs(self.dummy_cache_baseloc)
 
-        self.simnames = ('bolshoi', 'consuelo', 
-            'bolshoi', 'bolshoi', 'multidark')
-        self.halo_finders = ('rockstar', 'bdm', 
-            'bdm', 'rockstar', 'bdm')
+        self.simnames = ('bolshoi', 'consuelo', 'bolshoi', 'bolshoi', 'multidark')
+        self.halo_finders = ('rockstar', 'bdm', 'bdm', 'rockstar', 'bdm')
         self.version_names = ('v0', 'v1', 'v2', 'v3', 'v4')
         self.redshifts = (1.2, -0.1, 1.339, 1.3, 100.)
 
@@ -89,6 +87,7 @@ class TestHaloTableCacheLogEntry(TestCase):
             'halo_mass': [1, 2, 3], 
             })
 
+
     def get_scenario_kwargs(self, num_scenario):
         return ({'simname': self.simnames[num_scenario], 'halo_finder': self.halo_finders[num_scenario], 
             'version_name': self.version_names[num_scenario], 'redshift': self.redshifts[num_scenario], 
@@ -102,6 +101,39 @@ class TestHaloTableCacheLogEntry(TestCase):
             constructor_kwargs = self.get_scenario_kwargs(i)
             log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
             assert set(log_entry.log_attributes) == set(self.hard_coded_log_attrs)
+
+    def test_comparison_override1(self):
+        constructor_kwargs = self.get_scenario_kwargs(1)
+        log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
+        constructor_kwargs = self.get_scenario_kwargs(2)
+        log_entry2 = HaloTableCacheLogEntry(**constructor_kwargs)
+
+        assert log_entry1 != log_entry2
+        assert log_entry1 != 7
+
+    def test_comparison_override2(self):
+        constructor_kwargs = self.get_scenario_kwargs(1)
+        log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
+        constructor_kwargs = self.get_scenario_kwargs(2)
+        log_entry2 = HaloTableCacheLogEntry(**constructor_kwargs)
+
+        assert log_entry1 > log_entry2
+        assert log_entry1 >= log_entry2
+        with pytest.raises(TypeError) as err:
+            _ = log_entry1 > 0
+        substr = "You cannot compare the order"
+        assert substr in err.value.message
+
+    def test_comparison_override3(self):
+        constructor_kwargs = self.get_scenario_kwargs(1)
+        log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
+        _ = hash(log_entry1)
+
+    def test_comparison_override4(self):
+        constructor_kwargs = self.get_scenario_kwargs(1)
+        log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
+        msg = str(log_entry1)
+        assert str(msg) == "('consuelo', 'bdm', 'v1', '-0.1000', '/Users/aphearin/Desktop/tmp_dummy_cache/existent.file')"
 
     def test_scenario0(self):
         num_scenario = 0
@@ -298,6 +330,30 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "must be bounded by [0, Lbox]" not in log_entry._cache_safety_message
         assert "must contain a unique set of integers" in log_entry._cache_safety_message
+
+    def test_scenario4a(self):
+        num_scenario = 4
+
+        try:
+            os.remove(self.fnames[num_scenario])
+        except:
+            pass
+
+        log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
+
+        bad_table = deepcopy(self.good_table)
+        del bad_table['halo_id']
+        bad_table['halo_id'] = np.arange(len(bad_table), dtype = float)
+        bad_table.write(self.fnames[num_scenario], path='data')
+        f = self.h5py.File(self.fnames[num_scenario])
+        for attr in self.hard_coded_log_attrs:
+            f.attrs[attr] = getattr(log_entry, attr)
+        f.attrs['Lbox'] = 100.
+        f.attrs['particle_mass'] = 1.e8
+        f.close()
+
+        assert log_entry.safe_for_cache == False
+        assert "Your ``halo_id`` has the incorrect data type." in log_entry._cache_safety_message
 
     def test_passing_scenario(self):
         num_scenario = 4
