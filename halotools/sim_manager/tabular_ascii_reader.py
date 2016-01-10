@@ -41,13 +41,110 @@ class TabularAsciiReader(object):
 
     The algorithm assumes that data of known, unchanging type is 
     arranged in a consecutive sequence of lines within the ascii file, 
-    and that the appearance of an empty line demarcates the end 
+    that the data stream begins with the first line that is not the ``header_char``, 
+    and that the first subsequent appearance of an empty line demarcates the end 
     of the data stream. 
     """
     def __init__(self, input_fname, columns_to_keep_dict, 
         header_char='#', row_cut_min_dict = {}, row_cut_max_dict = {}, 
         row_cut_eq_dict = {}, row_cut_neq_dict = {}):
         """
+        Parameters 
+        -----------
+        input_fname : string 
+            Absolute path to the file storing the ASCII data. 
+
+        columns_to_keep_dict : dict 
+            Dictionary used to define which columns 
+            of the tabular ASCII data will be kept.
+
+            Each key of the dictionary will be the name of the 
+            column in the returned data table. The value bound to 
+            each key is a two-element tuple. 
+            The first tuple entry is an integer providing 
+            the *index* of the column to be kept, starting from 0. 
+            The second tuple entry is a string defining the Numpy dtype 
+            of the data in that column, 
+            e.g., 'f4' for a float, 'f8' for a double, 
+            or 'i8' for a long. 
+
+            Thus an example ``columns_to_keep_dict`` could be 
+            {'x': (1, 'f4'), 'y': (0, 'i8'), 'z': (9, 'f4')}. 
+            In this case, the structured array returned by the `read_ascii`  method 
+            would have three keys: 
+            ``x`` storing a float for the data in 
+            the second column of the ASCII file, 
+            ``y`` storing a long integer for the data in 
+            the first column of the ASCII file, and 
+            ``z`` storing a float for the data in 
+            the tenth column of the ASCII file. 
+
+        header_char : str, optional
+            String to be interpreted as a header line 
+            at the beginning of the ascii file. 
+            Default is '#'. 
+
+        row_cut_min_dict : dict, optional 
+            Dictionary used to place a lower-bound cut on the rows 
+            of the tabular ASCII data. 
+
+            Each key of the dictionary must also 
+            be a key of the input ``columns_to_keep_dict``; 
+            for purposes of good bookeeping, you are not permitted 
+            to place a cut on a column that you do not keep. The value 
+            bound to each key serves as the lower bound on the data stored 
+            in that row. A row with a smaller value than this lower bound for the 
+            corresponding column will not appear in the returned data table. 
+
+            For example, if row_cut_min_dict = {'mass': 1e10}, then all rows of the 
+            returned data table will have a mass greater than 1e10. 
+
+        row_cut_max_dict : dict, optional 
+            Dictionary used to place an upper-bound cut on the rows 
+            of the tabular ASCII data. 
+
+            Each key of the dictionary must also 
+            be a key of the input ``columns_to_keep_dict``; 
+            for purposes of good bookeeping, you are not permitted 
+            to place a cut on a column that you do not keep. The value 
+            bound to each key serves as the upper bound on the data stored 
+            in that row. A row with a larger value than this upper bound for the 
+            corresponding column will not appear in the returned data table. 
+
+            For example, if row_cut_min_dict = {'mass': 1e15}, then all rows of the 
+            returned data table will have a mass less than 1e15. 
+
+        row_cut_eq_dict : dict, optional 
+            Dictionary used to place an equality cut on the rows 
+            of the tabular ASCII data. 
+
+            Each key of the dictionary must also 
+            be a key of the input ``columns_to_keep_dict``; 
+            for purposes of good bookeeping, you are not permitted 
+            to place a cut on a column that you do not keep. The value 
+            bound to each key serves as the required value for the data stored 
+            in that row. Only rows with a value equal to this required value for the 
+            corresponding column will appear in the returned data table. 
+
+            For example, if row_cut_eq_dict = {'upid': -1}, then *all* rows of the 
+            returned data table will have a upid of -1. 
+
+        row_cut_neq_dict : dict, optional 
+            Dictionary used to place an inequality cut on the rows 
+            of the tabular ASCII data. 
+
+            Each key of the dictionary must also 
+            be a key of the input ``columns_to_keep_dict``; 
+            for purposes of good bookeeping, you are not permitted 
+            to place a cut on a column that you do not keep. The value 
+            bound to each key serves as a forbidden value for the data stored 
+            in that row. Rows with a value equal to this forbidden value for the 
+            corresponding column will not appear in the returned data table. 
+
+            For example, if row_cut_neq_dict = {'upid': -1}, then *no* rows of the 
+            returned data table will have a upid of -1. 
+
+
         """
         self.input_fname = self._get_fname(input_fname)
 

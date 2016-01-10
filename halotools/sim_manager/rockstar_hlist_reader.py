@@ -64,14 +64,13 @@ class RockstarHlistReader(TabularAsciiReader):
     The `RockstarHlistReader` reads Rockstar hlist ASCII files, 
     stores them as hdf5 files in the Halotools cache, and updates the cache log. 
 
-
     `RockstarHlistReader` is a subclass of 
     `~halotools.sim_manager.TabularAsciiReader`, and supplements this behavior 
     with the ability to read, update, and search the Halotools cache log. 
 
     If you are planning to use the Halotools cache manager to store and 
     keep track of your halo catalogs, this is the class to use. For a stand-alone 
-    reader of Rockstar hlists, you should instead use the 
+    reader of Rockstar hlists or large ASCII files in general, you should instead use the 
     `~halotools.sim_manager.TabularAsciiReader` class. 
     """
 
