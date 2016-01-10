@@ -20,7 +20,6 @@ Quickstart Guides
 
    getting_started_overview
    quickstart_guides/populating_mocks
-   quickstart_guides/modeling_quickstart
    quickstart_guides/mock_observables_quickstart
    quickstart_guides/working_with_halotools_provided_catalogs
 
