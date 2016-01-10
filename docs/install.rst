@@ -34,7 +34,8 @@ Depending on how you have configured your copy of the gcc compiler, Mac users ma
 
 	CC=clang python setup.py test 
 
-If you are working from the master branch of Halotools, the message that concludes test-suite execution should not indicate that there were any errors or failures. If you encounter problems when running the test suite, please be sure you have installed the package dependencies first before raising a Github Issue and/or contacting the Halotools developers.  
+If you are working from the master branch of Halotools, the message that concludes test-suite execution should not indicate that there were any errors or failures. A typical acceptable test suite report will read something like "245 passed in 83.2 seconds", 
+or "275 passed, 4 xfailed in 74.3 seconds". The "xfail" marker is shorthand for "expected failure"; tests marked by xfail do not indicate a bug or installation problem; instead, this indicates that there is a new feature that has only been partially implemented. If you encounter problems when running the test suite, please be sure you have installed the package dependencies first before raising a Github Issue and/or contacting the Halotools developers.  
 
 Dependencies
 ============
