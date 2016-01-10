@@ -9,7 +9,7 @@ with the halo and particle catalogs provided by Halotools. To see
 if Halotools provides the catalogs you need, see the 
 :ref:`supported_sim_list` page.   
 If you want to use your own catalog and/or use Halotools to process 
-an alternative catalog, see :ref:`working_with_alternative_catalogs`
+an alternative catalog, see the :ref:`working_with_alternative_catalogs` page. 
 
 Halotools provides a handful of homogeneously processed 
 halo catalogs and associated particle data. These catalogs 

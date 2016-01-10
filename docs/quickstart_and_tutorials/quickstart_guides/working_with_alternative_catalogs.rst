@@ -30,3 +30,29 @@ Using alternative catalogs
 
 Any halo-finder or simulation works perfectly well with Halotools. 
 See :ref:`user_supplied_halo_catalogs`. 
+
+
+Using your own collection of dark matter particles 
+===============================================================
+
+Some features in Halotools requires use of a catalog of 
+a random sample of dark matter particles from the same snapshot as the 
+halo catalog. Most of the Halotools-provided halo catalogs are accompanied by 
+a corresponding particle catalog, but you may prefer to provide your own, 
+or you may wish to use these features with alternative simulation data. 
+See the :ref:`working_with_alternative_particle_data` section of the 
+documentation for how to put your collection of particles into a standard form 
+and optionally store the particle data in your cache. 
+
+
+
+
+
+
+
+
+
+
+
+
+
