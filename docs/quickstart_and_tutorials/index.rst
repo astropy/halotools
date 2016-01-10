@@ -32,7 +32,6 @@ Tutorials
 
    mock_making/overview
    model_building/models
-   managing_catalogs/index
    mock_observations/overview
 
 
