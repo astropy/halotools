@@ -19,9 +19,25 @@ Quickstart Guides
    :maxdepth: 1
 
    getting_started_overview
+
+Setting up the simulation data 
+---------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   quickstart_guides/working_with_halotools_provided_catalogs
+   quickstart_guides/working_with_alternative_catalogs
+
+Building and testing models of the galaxy-halo connection
+------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
    quickstart_guides/populating_mocks
    quickstart_guides/mock_observables_quickstart
-   quickstart_guides/working_with_halotools_provided_catalogs
+
 
 Tutorials 
 =====================

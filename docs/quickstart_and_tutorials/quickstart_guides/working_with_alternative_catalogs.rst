@@ -21,15 +21,18 @@ as a fast-loading hf5 file. If this is your use-case, see the
 :ref:`reducing_and_caching_a_new_rockstar_catalog` section of the documentation. 
 
 If you want to reduce your own Rockstar catalog with Halotools 
-but do not to store the catalog in cache, you should instead use the stand-alone 
+but do not want to store the catalog in cache, you should instead use the stand-alone 
 `~halotools.sim_manager.TabularAsciiReader` class. 
 
 
 Using alternative catalogs 
 ===============================================================
 
-Any halo-finder or simulation works perfectly well with Halotools. 
-See :ref:`user_supplied_halo_catalogs`. 
+Any halo-finder or simulation works perfectly well with Halotools, 
+regardless of the halo-finder, or whether or not you want to store the 
+halo catalog in cache. For more information about how to 
+work with simulation data not provided by Halotools, 
+see :ref:`user_supplied_halo_catalogs`. 
 
 
 Using your own collection of dark matter particles 
