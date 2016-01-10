@@ -179,7 +179,25 @@ class TestPtclTableCache(TestCase):
         substr = "The input filename does not exist."
         assert substr in err.value.message
 
+    def test_remove_entry_from_cache_log1(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+        cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
+        cache.add_entry_to_cache_log(self.good_log_entry2, update_ascii = False)
+        assert len(cache.log) == 2
 
+        entry = self.good_log_entry
+        args = [getattr(entry, attr) for attr in entry.log_attributes]
+        cache.remove_entry_from_cache_log(*args, update_ascii = False)
+        assert len(cache.log) == 1
+
+        with pytest.raises(HalotoolsError) as err:
+            cache.remove_entry_from_cache_log(*args, update_ascii = False)
+        substr = "This entry does not appear in the log."
+        assert substr in err.value.message
+
+        cache.remove_entry_from_cache_log(*args, update_ascii = False, 
+            raise_non_existence_exception = False)
+        assert len(cache.log) == 1
 
     def tearDown(self):
         try:
