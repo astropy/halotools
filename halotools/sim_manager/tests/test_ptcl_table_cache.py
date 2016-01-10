@@ -50,6 +50,95 @@ class TestPtclTableCache(TestCase):
             pass
         os.makedirs(self.dummy_cache_baseloc)
 
+        # Create a good halo catalog and log entry
+        self.good_table = Table(
+            {'ptcl_id': [1, 2, 3], 
+            'x': [1, 2, 3], 
+            'y': [1, 2, 3], 
+            'z': [1, 2, 3], 
+            'vx': [1, 2, 3], 
+            'vy': [1, 2, 3], 
+            'vz': [1, 2, 3], 
+            })
+        self.good_table_fname = os.path.join(self.dummy_cache_baseloc, 
+            'good_table.hdf5')
+        self.good_table.write(self.good_table_fname, path='data')
+
+        self.good_log_entry = PtclTableCacheLogEntry('good_simname1', 
+            'good_version_name', get_redshift_string(0.0), self.good_table_fname)
+
+        f = self.h5py.File(self.good_table_fname)
+        for attr in self.good_log_entry.log_attributes:
+            f.attrs.create(str(attr), str(getattr(self.good_log_entry, attr)))
+        f.attrs.create('Lbox', 100.)
+        f.attrs.create('particle_mass', 1e8)
+        f.close()
+
+
+        # Create a second good halo catalog and log entry
+
+        self.good_table2 = deepcopy(self.good_table)
+        self.good_table2_fname = os.path.join(self.dummy_cache_baseloc, 
+            'good_table2.hdf5')
+        self.good_table2.write(self.good_table2_fname, path='data')
+
+        self.good_log_entry2 = PtclTableCacheLogEntry('good_simname2', 
+            'good_version_name', get_redshift_string(1.0), self.good_table2_fname)
+
+        f = self.h5py.File(self.good_table2_fname)
+        for attr in self.good_log_entry2.log_attributes:
+            f.attrs.create(str(attr), str(getattr(self.good_log_entry2, attr)))
+        f.attrs.create('Lbox', 100.)
+        f.attrs.create('particle_mass', 1e8)
+        f.close()
+
+        # Create a bad halo catalog and log entry
+
+        self.bad_table = Table(
+            {
+            'y': [1, 2, 3], 
+            'z': [1, 2, 3], 
+            })
+
+        bad_table_fname = os.path.join(self.dummy_cache_baseloc, 
+            'bad_table.hdf5')
+        self.bad_table.write(bad_table_fname, path='data')
+
+        self.bad_log_entry = PtclTableCacheLogEntry('1', '2', '3', '4')
+
+    def test_determine_log_entry_from_fname1(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+        entry = self.good_log_entry
+        fname = entry.fname
+        result = cache.determine_log_entry_from_fname(fname)
+        assert result == self.good_log_entry
+
+    def test_determine_log_entry_from_fname2(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+        entry = self.bad_log_entry
+        fname = entry.fname
+        result = cache.determine_log_entry_from_fname(fname)
+        assert result == "File does not exist"
+
+    def test_determine_log_entry_from_fname3(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+        entry = self.bad_log_entry
+        entry.fname = self.bad_log_entry.fname
+        os.system('touch ' + entry.fname)
+        result = cache.determine_log_entry_from_fname(entry.fname)
+        assert result == "Can only self-determine the log entry of files with .hdf5 extension"
+
+    def test_determine_log_entry_from_fname4(self):
+        cache = PtclTableCache(read_log_from_standard_loc = False)
+
+        entry = self.good_log_entry
+        fname = entry.fname
+        f = self.h5py.File(fname)
+        tmp = deepcopy(f.attrs['version_name'])
+        del f.attrs['version_name']
+        f.close()
+        result = cache.determine_log_entry_from_fname(fname)
+        assert "The hdf5 file is missing the following metadata:" in result
 
 
     def tearDown(self):
