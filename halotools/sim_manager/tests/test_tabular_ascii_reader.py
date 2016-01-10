@@ -198,12 +198,25 @@ class TestTabularAsciiReader(TestCase):
 
         reader = TabularAsciiReader(fname, columns_to_keep_dict, 
             row_cut_min_dict = {'spin_bullock': 0.1}, 
-            row_cut_max_dict = {'spin_bullock': 0.9}, 
+            row_cut_max_dict = {'spin_bullock': 0.5}, 
             row_cut_eq_dict = {'upid': -1}, 
             row_cut_neq_dict = {'id': -1}
             )
 
         arr = reader.read_ascii()
+
+        # Verify that the cuts were applied correctly 
+        assert np.all(arr['spin_bullock'] >= 0.1)
+        assert np.all(arr['spin_bullock'] <= 0.5)
+        assert np.all(arr['upid'] == -1)
+
+        # verify that the cuts were non-trivial 
+        reader = TabularAsciiReader(fname, columns_to_keep_dict)
+        arr = reader.read_ascii()
+        assert np.any(arr['spin_bullock'] < 0.1)
+        assert np.any(arr['spin_bullock'] > 0.5)
+        assert np.any(arr['upid'] != -1)
+
 
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
