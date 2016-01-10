@@ -7,7 +7,8 @@ import warnings, pytest
 
 from astropy.config.paths import _find_home 
 
-from ..rockstar_hlist_reader import RockstarHlistReader
+from ..rockstar_hlist_reader import RockstarHlistReader, _infer_redshift_from_input_fname
+from ..halo_table_cache import HaloTableCache 
 
 from ...custom_exceptions import HalotoolsError
 
@@ -142,6 +143,108 @@ class TestRockstarHlistReader(TestCase):
                 )
         substr = "appears more than once in your ``columns_to_keep_dict``"
         assert substr in err.value.message
+
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog1(self):
+        """
+        """
+        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+
+        columns_to_keep_dict = ({
+            'halo_spin_bullock': (43, 'f4'), 'halo_id': (1, 'i8'), 'halo_upid': (6, 'i8'), 
+            'halo_x': (17, 'f4'), 'halo_y': (18, 'f4'), 'halo_z': (19, 'f4')
+            })
+
+        reader = RockstarHlistReader(
+            input_fname = fname, 
+            columns_to_keep_dict = columns_to_keep_dict, 
+            output_fname = self.good_output_fname, 
+            simname = 'bolplanck', halo_finder = 'rockstar', redshift = 11.8008, 
+            version_name = 'dummy', Lbox = 250., particle_mass = 1.35e8, 
+            row_cut_min_dict = {'halo_spin_bullock': 0.1}, 
+            row_cut_max_dict = {'halo_spin_bullock': 0.9}, 
+            row_cut_eq_dict = {'halo_upid': -1}, 
+            row_cut_neq_dict = {'halo_id': -1}
+            )
+
+        reader.read_halocat(write_to_disk = True)
+
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog2(self):
+        """
+        """
+        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+
+        columns_to_keep_dict = ({
+            'halo_spin_bullock': (43, 'f4'), 'halo_id': (1, 'i8'), 'halo_upid': (6, 'i8'), 
+            'halo_x': (17, 'f4'), 'halo_y': (18, 'f4'), 'halo_z': (19, 'f4')
+            })
+
+
+        cache = HaloTableCache()
+        entry = cache.log[0]
+
+        with pytest.raises(HalotoolsError) as err:
+            reader = RockstarHlistReader(
+                input_fname = fname, 
+                columns_to_keep_dict = columns_to_keep_dict, 
+                output_fname = entry.fname, 
+                simname = entry.simname, halo_finder = entry.halo_finder, redshift = entry.redshift, 
+                version_name = entry.version_name, Lbox = 250., particle_mass = 1.35e8)
+        substr = "There is already an existing entry in the Halotools cache log"
+        assert substr in err.value.message
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog3(self):
+        """
+        """
+        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+
+        columns_to_keep_dict = ({
+            'spin_bullock': (43, 'f4'), 'halo_id': (1, 'i8'), 'halo_upid': (6, 'i8'), 
+            'halo_x': (17, 'f4'), 'halo_y': (18, 'f4'), 'halo_z': (19, 'f4')
+            })
+
+        with pytest.raises(HalotoolsError) as err:
+            reader = RockstarHlistReader(
+                input_fname = fname, 
+                columns_to_keep_dict = columns_to_keep_dict, 
+                output_fname = self.good_output_fname, 
+                simname = 'bolplanck', halo_finder = 'rockstar', redshift = 11.8008, 
+                version_name = 'dummy', Lbox = 250., particle_mass = 1.35e8, 
+                )
+        substr = "must begin with the substring ``halo_``"
+        assert substr in err.value.message
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_read_dummy_halo_catalog4(self):
+        """
+        """
+        fname = "/Users/aphearin/.astropy/cache/halotools/raw_halo_catalogs/bolplanck/rockstar/hlist_0.07812.list"
+
+        columns_to_keep_dict = ({
+            'halo_spin_bullock': (43, 'f4'), 'halo_id': (1, 'i8'), 'halo_upid': (6, 'i8'), 
+            'halo_x': (17, 'f4'), 'halo_y': (18, 'f4'), 'halo_z': (19, 'f4')
+            })
+
+        reader = RockstarHlistReader(
+            input_fname = fname, 
+            columns_to_keep_dict = columns_to_keep_dict, 
+            output_fname = 'std_cache_loc', 
+            simname = 'bolplanck', halo_finder = 'rockstar', redshift = 11.8008, 
+            version_name = 'dummy', Lbox = 250., particle_mass = 1.35e8, 
+            )
+ 
+    def test_infer_redshift_from_fname(self):
+        fname = 'hlist_0.07812.list'
+        result = _infer_redshift_from_input_fname(fname)
+        assert result == 11.8008
 
     def tearDown(self):
         try:
