@@ -244,7 +244,97 @@ class TestUserSuppliedHaloCatalog(TestCase):
         substr = "Either choose a different fname or set ``overwrite`` to True"
         assert substr in err.value.message
 
+        with pytest.raises(HalotoolsError) as err:
+            halocat.add_halocat_to_cache(
+                fname, dummy_string, dummy_string, dummy_string, dummy_string, 
+                overwrite = True)
+        assert substr not in err.value.message
 
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_add_halocat_to_cache2(self):
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_halocat_args)
+
+        basename = 'abc'
+
+        dummy_string = '  '
+        with pytest.raises(HalotoolsError) as err:
+            halocat.add_halocat_to_cache(
+                basename, dummy_string, dummy_string, dummy_string, dummy_string)
+        substr = "The directory you are trying to store the file does not exist."
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_add_halocat_to_cache3(self):
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_halocat_args)
+
+        basename = 'abc'
+        fname = os.path.join(self.dummy_cache_baseloc, basename)
+        os.system('touch ' + fname)
+        assert os.path.isfile(fname)
+
+        dummy_string = '  '
+        with pytest.raises(HalotoolsError) as err:
+            halocat.add_halocat_to_cache(
+                fname, dummy_string, dummy_string, dummy_string, dummy_string, 
+                overwrite = True)
+        substr = "The fname must end with an ``.hdf5`` extension."
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_add_halocat_to_cache4(self):
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_halocat_args)
+
+        basename = 'abc.hdf5'
+        fname = os.path.join(self.dummy_cache_baseloc, basename)
+        os.system('touch ' + fname)
+        assert os.path.isfile(fname)
+
+        dummy_string = '  '
+        class Dummy(object):
+            pass
+            
+            def __str__(self):
+                raise TypeError
+        not_representable_as_string = Dummy()
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat.add_halocat_to_cache(
+                fname, not_representable_as_string, dummy_string, dummy_string, dummy_string, 
+                overwrite = True)
+        substr = "must all be strings."
+        assert substr in err.value.message
+
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_add_halocat_to_cache5(self):
+        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_halocat_args)
+
+        basename = 'abc.hdf5'
+        fname = os.path.join(self.dummy_cache_baseloc, basename)
+        os.system('touch ' + fname)
+        assert os.path.isfile(fname)
+
+        dummy_string = '  '
+        class Dummy(object):
+            pass
+            
+            def __str__(self):
+                raise TypeError
+        not_representable_as_string = Dummy()
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat.add_halocat_to_cache(
+                fname, dummy_string, dummy_string, dummy_string, dummy_string, 
+                overwrite = True, some_more_metadata = not_representable_as_string)
+        substr = "keyword is not representable as a string."
+        assert substr in err.value.message
 
 
     @pytest.mark.xfail

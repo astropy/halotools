@@ -272,6 +272,7 @@ class UserSuppliedHaloCatalog(object):
 
         try:
             dirname = os.path.dirname(fname)
+            assert os.path.exists(dirname)
         except:
             msg = ("\nThe directory you are trying to store the file does not exist. \n")
             raise HalotoolsError(msg)
