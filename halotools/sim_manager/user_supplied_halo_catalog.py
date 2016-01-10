@@ -252,8 +252,41 @@ class UserSuppliedHaloCatalog(object):
 
     def add_halocat_to_cache(self, 
         fname, simname, halo_finder, version_name, processing_notes, 
-        overwrite = False, ignore_nearby_redshifts = False, **additional_metadata):
+        overwrite = False, **additional_metadata):
         """
+        Parameters 
+        ------------
+        fname : string 
+            Absolute path of the file to be stored in cache. 
+            Must conclude with an `.hdf5` extension. 
+
+        simname : string 
+            Nickname of the simulation used as a shorthand way to keep track 
+            of the halo catalogs in your cache. 
+
+        halo_finder : string 
+            Nickname of the halo-finder used to generate the hlist file from particle data. 
+
+        version_name : string 
+            Nickname of the version of the halo catalog. 
+            The ``version_name`` is used as a bookkeeping tool in the cache log.
+
+        processing_notes : string, optional 
+            String used to provide supplementary notes that will be attached to 
+            the hdf5 file storing your halo catalog. 
+
+        overwrite : bool, optional 
+            If the chosen ``fname`` already exists, then you must set ``overwrite`` 
+            to True in order to write the file to disk. Default is False. 
+
+        **additional_metadata : sequence of strings, optional 
+            Each keyword of ``additional_metadata`` defines the name 
+            of a piece of metadata stored in the hdf5 file. The 
+            value bound to each key can be any string. When you load your 
+            cached halo catalog into memory, each piece of metadata 
+            will be stored as an attribute of the 
+            `~halotools.sim_manager.CachedHaloCatalog` instance. 
+
         """
         try:
             import h5py 
