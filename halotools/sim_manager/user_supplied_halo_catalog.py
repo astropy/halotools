@@ -27,6 +27,9 @@ __all__ = ('UserSuppliedHaloCatalog', )
 class UserSuppliedHaloCatalog(object):
     """ Class used to transform a user-provided halo catalog 
     into the standard form recognized by Halotools. 
+
+    See :ref:`user_supplied_halo_catalogs` for a tutorial on this class. 
+    
     """
     def __init__(self, **kwargs):
         """
