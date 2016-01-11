@@ -33,7 +33,7 @@ env:
         # For this package-template, we include examples of Cython modules,
         # so Cython is required for testing. If your package does not include
         # Cython code, you can set CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES='Cython scipy beautifulsoup4 requests matplotlib'
+        - CONDA_DEPENDENCIES='Cython scipy beautifulsoup4 requests matplotlib h5py'
     matrix:
         # Make sure that egg_info works without dependencies
         - SETUP_CMD='egg_info'
@@ -61,6 +61,10 @@ matrix:
         # Try numpy 1.10 - might want to switch this so that 1.10 is *default* and 1.9 is checked here down the road
         - python: 2.7
           env: NUMPY_VERSION=1.10
+
+         # try a version *without* h5py - we need this for RTD
+        - python: 2.7
+          env: CONDA_DEPENDENCIES="'Cython scipy beautifulsoup4 requests matplotlib'
 
     allow_failures:
         - python: 3.3
