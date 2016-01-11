@@ -12,7 +12,8 @@ except ImportError:
         "sim_manager sub-package requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda. ")
 
-from . import sim_defaults, supported_sims
+from ..sim_manager import sim_defaults, supported_sims
+
 
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache

@@ -28,7 +28,7 @@ import urlparse
 
 import os, fnmatch, re
 
-from . import sim_defaults, supported_sims 
+from ..sim_manager import sim_defaults, supported_sims 
 
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
