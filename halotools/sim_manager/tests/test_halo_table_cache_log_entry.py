@@ -129,6 +129,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
         _ = hash(log_entry1)
 
+    @pytest.mark.skipif('not APH_MACHINE')
     def test_comparison_override4(self):
         constructor_kwargs = self.get_scenario_kwargs(1)
         log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
