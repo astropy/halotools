@@ -60,9 +60,9 @@ matrix:
         - python: 2.7
           env: NUMPY_VERSION=1.10
 
-        # try a version *without* h5py - we need this for RTD
+        # try a version *without* h5py - we need this for readthedocs
         - python: 2.7
-          env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`"
+          env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
 
     allow_failures:
         - python: 3.3
