@@ -3,7 +3,7 @@ import os
 from astropy.table import Table 
 import numpy as np 
 
-from ..custom_exceptions import InvalidCacheLogEntry
+from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 
 __all__ = ('HaloTableCacheLogEntry', )
 
@@ -14,7 +14,6 @@ class HaloTableCacheLogEntry(object):
     """ Object serving as an entry in the `~halotools.sim_manager.HaloTableCache`. 
     """
 
-    import h5py
     log_attributes = ['simname', 'halo_finder', 'version_name', 'redshift', 'fname']
     required_metadata = ['Lbox', 'particle_mass']
     required_metadata.extend(log_attributes)
@@ -52,6 +51,14 @@ class HaloTableCacheLogEntry(object):
         ----------
         `~halotools.sim_manager.tests.TestHaloTableCacheLogEntry`. 
         """
+        try:
+            import h5py
+            self.h5py = h5py
+        except ImportError:
+            msg = ("Must have h5py installed \n"
+                "to to instantiate the HaloTableCacheLogEntry class.\n")
+            raise HalotoolsError(msg)
+
         self.simname = simname
         self.halo_finder = halo_finder
         self.version_name = version_name

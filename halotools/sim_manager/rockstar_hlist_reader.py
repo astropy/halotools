@@ -261,6 +261,7 @@ class RockstarHlistReader(TabularAsciiReader):
         """
         try:
             import h5py 
+            self.h5py = h5py
         except ImportError:
             msg = ("\nYou must have h5py installed if you want to \n"
                 "use the RockstarHlistReader to store your catalog in the Halotools cache. \n"
@@ -519,9 +520,8 @@ class RockstarHlistReader(TabularAsciiReader):
     def _write_metadata(self):
         """ Private method to add metadata to the hdf5 file. 
         """
-        import h5py
         # Now add the metadata 
-        f = h5py.File(self.output_fname)
+        f = self.h5py.File(self.output_fname)
         f.attrs.create('simname', str(self.simname))
         f.attrs.create('halo_finder', str(self.halo_finder))
         redshift_string = str(get_redshift_string(self.redshift))

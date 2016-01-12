@@ -140,6 +140,7 @@ class CachedHaloCatalog(object):
         """
         try:
             import h5py
+            self.h5py = h5py
         except ImportError:
             raise HalotoolsError("Must have h5py package installed "
                 "to use CachedHaloCatalog objects")
@@ -473,7 +474,7 @@ class CachedHaloCatalog(object):
                 self.log_entry.fname + "\n\n")
             raise InvalidCacheLogEntry(msg)
 
-        f = h5py.File(self.log_entry.fname)
+        f = self.h5py.File(self.log_entry.fname)
         for attr_key in f.attrs.keys():
             if attr_key == 'redshift':
                 setattr(self, attr_key, float(get_redshift_string(f.attrs[attr_key])))

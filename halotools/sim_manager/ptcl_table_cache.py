@@ -261,8 +261,9 @@ class PtclTableCache(object):
         try:
             import h5py
         except ImportError:
-            raise HalotoolsError("Must have h5py package installed "
-                "to use the determine_log_entry_from_fname method. ")
+            raise HalotoolsError("Must have h5py package installed \n"
+                "to use the determine_log_entry_from_fname method "
+                "of the PtclTableCache class.\n")
 
         if not os.path.isfile(fname):
             msg = "File does not exist"

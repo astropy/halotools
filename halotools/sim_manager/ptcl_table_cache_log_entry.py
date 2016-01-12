@@ -3,7 +3,7 @@ import os
 from astropy.table import Table 
 import numpy as np 
 
-from ..custom_exceptions import InvalidCacheLogEntry
+from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 from .halo_table_cache_log_entry import get_redshift_string
 
 __all__ = ('PtclTableCacheLogEntry', )
@@ -12,7 +12,6 @@ class PtclTableCacheLogEntry(object):
     """ Object serving as an entry in the `~halotools.sim_manager.PtclTableCache`. 
     """
 
-    import h5py
     log_attributes = ['simname', 'version_name', 'redshift', 'fname']
     required_metadata = ['Lbox', 'particle_mass']
     required_metadata.extend(log_attributes)
@@ -46,6 +45,14 @@ class PtclTableCacheLogEntry(object):
         ----------
         `~halotools.sim_manager.tests.TestPtclTableCacheLogEntry`. 
         """
+        try:
+            import h5py
+            self.h5py = h5py
+        except ImportError:
+            msg = ("\nMust have the h5py package installed \n"
+                "to instantiate the PtclTableCacheLogEntry class.\n")
+            raise HalotoolsError(msg)
+
         self.simname = simname
         self.version_name = version_name
         self.redshift = get_redshift_string(redshift)

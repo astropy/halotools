@@ -13,7 +13,8 @@ from astropy.table import Table
 try:
     import h5py
 except ImportError:
-    warn("Most of the functionality of the sim_manager sub-package requires h5py to be installed,\n"
+    warn("Most of the functionality of the sim_manager "
+        "sub-package requires h5py to be installed,\n"
         "which can be accomplished either with pip or conda")
 
 from .halo_table_cache import HaloTableCache 

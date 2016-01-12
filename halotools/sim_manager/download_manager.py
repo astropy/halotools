@@ -277,7 +277,14 @@ class DownloadManager(object):
 
         # overwrite the fname metadata so that 
         # it is consistent with the downloaded location
-        import h5py
+        try:
+            import h5py
+        except ImportError:
+            msg = ("\nYou must have h5py installed to use "
+                "the \ndownload_processed_halo_table method "
+                "of the DownloadManager class.\n")
+            raise HalotoolsError(msg)
+
         f = h5py.File(output_fname)
         f.attrs['fname'] = str(output_fname)
         f.close()
@@ -547,7 +554,13 @@ class DownloadManager(object):
 
         # overwrite the fname metadata so that 
         # it is consistent with the downloaded location
-        import h5py
+        try:
+            import h5py
+        except ImportError:
+            msg = ("\nYou must have h5py installed to use "
+                "the \ndownload_ptcl_table method "
+                "of the DownloadManager class.\n")
+            raise HalotoolsError(msg)
         f = h5py.File(output_fname)
         f.attrs['fname'] = str(output_fname)
         f.close()

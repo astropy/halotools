@@ -25,12 +25,6 @@ from astropy import cosmology
 from astropy import units as u
 from astropy.table import Table
 
-try:
-    import h5py
-except ImportError:
-    warn("Most of the functionality of the supported_sims module requires h5py to be installed,\n"
-        "which can be accomplished either with pip or conda")
-
 from ..sim_manager import sim_defaults
 
 from ..utils.array_utils import find_idx_nearest_val
