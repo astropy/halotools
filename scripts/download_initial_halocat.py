@@ -1,64 +1,105 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
 """Command-line script to download the default halo catalog"""
 
-import sys
-from halotools.sim_manager import CatalogManager, sim_defaults
-from halotools.custom_exceptions import HalotoolsError, UnsupportedSimError
+import os
+from halotools.sim_manager import DownloadManager, sim_defaults
+from halotools.custom_exceptions import HalotoolsError
 
-existing_fname_error_msg = ("\n\nThe following filename already exists in your cache directory: \n\n%s\n\n"
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("-overwrite", 
+    help="Overwrite the existing halo catalog (if present)", 
+    action="store_true")
+args = parser.parse_args()
+
+existing_fname_error_msg = ("\n\nThe following filename already exists "
+    "in your cache log: \n\n%s\n\n"
     "If you really want to overwrite the file, \n"
-    "simply execute this script again but using ``-overwrite`` as a command-line argument.\n\n")
+    "execute this script again but throw the ``-overwrite`` flag.\n\n")
 
-command_line_arg_error_msg = ("\n\nThe only command-line argument recognized by the "
-    "download_initial_halocat script is ``-overwrite``.\n"
-    "The -overwrite flag should be thrown in case your cache directory already contains the "
-    "default processed halo catalog, and you want to overwrite it with a new download.\n\n")
+simname = sim_defaults.default_simname
+halo_finder = sim_defaults.default_halo_finder
+redshift = sim_defaults.default_redshift
+version_name = sim_defaults.default_version_name
 
-def main(flags):
-    """ args is a python list. Element 0 is the name of the module. 
-    The remaining elements are the command-line arguments as strings. 
-    """
+# Done parsing inputs
 
-    simname = sim_defaults.default_simname
-    halo_finder = sim_defaults.default_halo_finder
-    redshift = sim_defaults.default_redshift
+downman = DownloadManager()
 
-    catman = CatalogManager()
+##################################################################
+# First check to see if the log has any matching entries before 
+# requesting the download 
+# This is technically redundant with the functionality in the downloading methods, 
+# but this makes it easier to issue the right error message
+if args.overwrite == False:
 
-    if len(flags) == 1:
-        catman.download_processed_halo_table(simname = simname, 
-            halo_finder = halo_finder, desired_redshift = redshift, 
-            initial_download_script_msg = existing_fname_error_msg)
-        catman.download_ptcl_table(simname = simname, 
-            desired_redshift = redshift, dz_tol = 0.05)
+    gen = downman.halo_table_cache.matching_log_entry_generator
+    matching_halocats = list(
+        gen(simname = simname, halo_finder = halo_finder, 
+            version_name = version_name, redshift = redshift, dz_tol = 0.1))
 
-    elif (len(flags) == 2) & (flags[1] == '-overwrite'):
-        catman.download_processed_halo_table(simname = simname, 
-            halo_finder = halo_finder, desired_redshift = redshift, 
-            initial_download_script_msg = existing_fname_error_msg, 
-            overwrite = True)
-        catman.download_ptcl_table(simname = simname, 
-            desired_redshift = redshift, dz_tol = 0.05, overwrite=True)
-    else:
-        raise HalotoolsError(command_line_arg_error_msg)
+    gen2 = downman.ptcl_table_cache.matching_log_entry_generator
+    matching_ptcl_cats = list(
+        gen2(simname = simname, version_name = version_name, 
+            redshift = redshift, dz_tol = 0.1))
 
-    msg = ("\n\nYour Halotools cache directory now has two hdf5 files, \n"
-        "one storing a z = %.2f %s halo catalog for the %s simulation, \n"
-        "another storing a random downsampling of ~1e6 dark matter particles from the same snapshot.\n"
-        "\nHalotools can load these catalogs into memory with the following syntax:\n\n"
-        ">>> from halotools.sim_manager import HaloCatalog\n"
-        ">>> bolshoi_z0 = HaloCatalog()\n"
-        ">>> halos = bolshoi_z0.halo_table\n"
-        ">>> particles = bolshoi_z0.ptcl_table\n\n")
+    if len(matching_halocats) > 0:
+        matching_fname = matching_halocats[0].fname
+        raise HalotoolsError(existing_fname_error_msg % matching_fname)
 
-    print(msg % (abs(redshift), halo_finder, simname))
+    if len(matching_ptcl_cats) > 0:
+        matching_fname = matching_ptcl_cats[0].fname
+        raise HalotoolsError(existing_fname_error_msg % matching_fname)        
+
+##################################################################
+### Call the download methods
+
+new_halo_log_entry = downman.download_processed_halo_table(simname = simname, 
+    halo_finder = halo_finder, redshift = redshift, 
+    initial_download_script_msg = existing_fname_error_msg, 
+    overwrite = args.overwrite)
+
+new_ptcl_log_entry = downman.download_ptcl_table(simname = simname, 
+    redshift = redshift, dz_tol = 0.05, overwrite=args.overwrite, 
+    initial_download_script_msg = existing_fname_error_msg)
+
+##################################################################
 
 
-###################################################################################################
-# Trigger
-###################################################################################################
+##################################################################
+### Issue the success message
+cache_dirname = str(os.path.dirname(downman.halo_table_cache.cache_log_fname)).strip()
+halo_table_cache_basename = str(os.path.basename(downman.halo_table_cache.cache_log_fname))
+ptcl_table_cache_basename = str(os.path.basename(downman.ptcl_table_cache.cache_log_fname))
 
-if __name__ == "__main__":
-        main(sys.argv)
+msg = (
+    "By running the initial download script, you have set up the Halotools cache \n"
+    "in the following location on disk:\n\n" + cache_dirname + "\n\n"
+    "The directory now contains the following two cache log files: \n\n" + 
+    str(downman.halo_table_cache.cache_log_fname) + "\n" + 
+    str(downman.ptcl_table_cache.cache_log_fname) + "\n\n"
+    "These two ASCII files maintain a record of the \nhalo and particle catalogs "
+    "you use with Halotools.\n"
+    "The "+halo_table_cache_basename+" cache log now has a single entry \n"
+    "reflecting the default halo catalog you just downloaded; "
+    "\nthe halo catalog is now stored in the following location:\n\n"
+    + new_halo_log_entry.fname + "\n\n"
+    "The "+ptcl_table_cache_basename+" cache log also has a single entry \n"
+    "corresponding to a random downsampling of ~1e6 dark matter particles from the same snapshot; "
+    "\nthe particle catalog is now stored in the following location:\n\n"
+    + new_ptcl_log_entry.fname + "\n\n"
+    "Both hdf5 files store an Astropy Table data structure. \n"
+    "\nThe Halotools cache system allows you to \n"
+    "load these catalogs into memory with the following syntax:\n\n"
+    ">>> from halotools.sim_manager import CachedHaloCatalog\n"
+    ">>> bolshoi_z0 = CachedHaloCatalog()\n"
+    ">>> halos = bolshoi_z0.halo_table\n"
+    ">>> particles = bolshoi_z0.ptcl_table\n\n")
+
+
+print(msg)
+print("\a\a")
+
+
 

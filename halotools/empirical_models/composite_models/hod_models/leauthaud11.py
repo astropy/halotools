@@ -38,7 +38,7 @@ def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model is built by the `~halotools.empirical_models.factories.HodModelFactory`, 
+    This composite model is built by the `~halotools.empirical_models.HodModelFactory`, 
     which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_dictionary`. 
 
     Parameters 
@@ -59,7 +59,7 @@ def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass
     Returns 
     -------
     model_dictionary : dict 
-        Dictionary passed to `~halotools.empirical_models.factories.HodModelFactory`
+        Dictionary passed to `~halotools.empirical_models.HodModelFactory`
 
     Examples 
     --------

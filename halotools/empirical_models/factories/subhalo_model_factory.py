@@ -16,9 +16,8 @@ from ..factories import ModelFactory, SubhaloMockFactory
 from .. import model_helpers
 from .. import model_defaults 
 
-from ...sim_manager.supported_sims import HaloCatalog
+from ...sim_manager import FakeSim, CachedHaloCatalog
 from ...sim_manager import sim_defaults
-from ...sim_manager.generate_random_sim import FakeSim
 from ...utils.array_utils import custom_len
 from ...custom_exceptions import *
 
@@ -196,7 +195,7 @@ class SubhaloModelFactory(ModelFactory):
         ------------------------------------
         See :ref:`subhalo_model_factory_tutorial` for documentation on the internals of the factory. 
 
-        This factory is tested by the `~halotools.empirical_models.factories.tests.TestSubhaloModelFactory` class. 
+        This factory is tested by the `~halotools.empirical_models.TestSubhaloModelFactory` class. 
 
         """
 
@@ -849,7 +848,7 @@ class SubhaloModelFactory(ModelFactory):
         Parameters 
         ----------
         halocat : object, optional 
-            Class instance of `~halotools.sim_manager.HaloCatalog`. 
+            Class instance of `~halotools.sim_manager.CachedHaloCatalog`. 
             This object contains the halo catalog and its metadata.  
 
         simname : string, optional

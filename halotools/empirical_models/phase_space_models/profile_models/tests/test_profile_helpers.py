@@ -16,7 +16,7 @@ from .....custom_exceptions import HalotoolsError
 __all__ = ['TestProfileHelpers']
 
 class TestProfileHelpers(TestCase):
-    """ Container class for tests of all the methods in the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers` module. 
+    """ Container class for tests of all the methods in the `~halotools.empirical_models.profile_helpers` module. 
     """
 
     def setup_class(self):
@@ -26,8 +26,8 @@ class TestProfileHelpers(TestCase):
 
 
     def test_halo_radius_to_halo_mass(self):
-        """ Check that the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_mass_to_halo_radius` 
-        and  `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_radius_to_halo_mass` functions are 
+        """ Check that the `~halotools.empirical_models.profile_helpers.halo_mass_to_halo_radius` 
+        and  `~halotools.empirical_models.profile_helpers.halo_radius_to_halo_mass` functions are 
         proper inverses of one another for a range of mdef, cosmology, and redshift
         """
         r0 = 0.25
@@ -40,7 +40,7 @@ class TestProfileHelpers(TestCase):
                     assert np.allclose(r1, r0, rtol = 1e-3)
 
     def test_delta_vir(self):
-        """ Compute the calculated value of `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.delta_vir` 
+        """ Compute the calculated value of `~halotools.empirical_models.profile_helpers.delta_vir` 
         at high-redshift where :math:`\\Omega_{\\rm m} = 1` should be a good approximation, and 
         compare it to the analytical top-hat collapse result in this regime.
         """
@@ -59,7 +59,7 @@ class TestProfileHelpers(TestCase):
 
 
     def test_density_threshold(self):
-        """ Verify that the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold`
+        """ Verify that the `~halotools.empirical_models.profile_helpers.density_threshold`
         method returns the correct multiple of the appropriate density contrast over a range 
         of redshifts and cosmologies. 
 
@@ -83,7 +83,7 @@ class TestProfileHelpers(TestCase):
 
     def test_density_threshold_error_handling(self):
         """ Verify that we raise a `~halotools.custom_exceptions.HalotoolsError` when nonsense 
-        inputs such as 'Jose Canseco' are passed to the `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` method.
+        inputs such as 'Jose Canseco' are passed to the `~halotools.empirical_models.profile_helpers.density_threshold` method.
         """
 
         with pytest.raises(HalotoolsError):

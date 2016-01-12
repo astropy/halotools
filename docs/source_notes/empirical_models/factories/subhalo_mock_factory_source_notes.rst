@@ -1,6 +1,6 @@
 :orphan:
 
-.. currentmodule:: halotools.empirical_models.factories
+.. currentmodule:: halotools.empirical_models
 
 .. _subhalo_mock_factory_tutorial:
 
@@ -30,19 +30,19 @@ Basic syntax for making subhalo-based mocks
 The `SubhaloMockFactory` is responsible for one task: using a Halotools composite model 
 to populate a simulation with mock galaxies. To fulfill this one task, there are just 
 two required keyword arguments: ``model`` and ``halocat``. The model must be an instance 
-of a `SubhaloModelFactory`, and the halocat must be an instance of a `~halotools.sim_manager.HaloCatalog`. 
+of a `SubhaloModelFactory`, and the halocat must be an instance of a `~halotools.sim_manager.CachedHaloCatalog`. 
 For simplicity, in this tutorial we will assume that you are using the `SubhaloMockFactory`  
 to populate the default halo catalog. For documentation on populating alternative catalogs, 
 see :ref:`populating_mocks_with_alternate_sims_tutorial`. 
 
 As a simple example, here is how to create an instance of the `SubhaloMockFactory` 
 with a composite model based on the prebuilt 
-`~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary`:
+`~halotools.empirical_models.behroozi10_model_dictionary`:
 
 .. code-block:: python
 
 	behroozi10_model = SubhaloModelFactory('behroozi10')
-	default_halocat = HaloCatalog()
+	default_halocat = CachedHaloCatalog()
 	mock = SubhaloMockFactory(model = behroozi10_model, halocat = default_halocat)
 
 Instantiating the `SubhaloMockFactory` triggers the pre-processing phase of mock population. 

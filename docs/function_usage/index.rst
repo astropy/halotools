@@ -29,5 +29,13 @@ Making Mock Observations
 
    mock_observables_functions
 
+Processing Simulation Data 
+=============================
+
+.. toctree::
+   :maxdepth: 1
+
+   processing_simulation_data
+
 
 

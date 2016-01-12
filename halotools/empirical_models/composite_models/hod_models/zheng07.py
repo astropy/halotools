@@ -37,7 +37,7 @@ def zheng07_model_dictionary(
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model is built by the `~halotools.empirical_models.factories.HodModelFactory`.
+    This composite model is built by the `~halotools.empirical_models.HodModelFactory`.
 
     Parameters 
     ----------
@@ -49,7 +49,7 @@ def zheng07_model_dictionary(
     -------
     model_dictionary : dict 
         Dictionary of keywords to be passed to 
-        `~halotools.empirical_models.factories.HodModelFactory`
+        `~halotools.empirical_models.HodModelFactory`
 
     Examples 
     --------

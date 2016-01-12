@@ -7,7 +7,7 @@ from astropy.table import Table
 
 from ..table_utils import SampleSelector, compute_conditional_percentiles
 
-from ...sim_manager.generate_random_sim import FakeSim
+from ...sim_manager import FakeSim
 
 
 class TestSampleSelector(TestCase):

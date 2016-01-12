@@ -1,6 +1,6 @@
 :orphan:
 
-.. currentmodule:: halotools.empirical_models.phase_space_models
+.. currentmodule:: halotools.empirical_models
 
 .. _monte_carlo_galprof_mixin_tutorial:
 

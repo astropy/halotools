@@ -27,7 +27,7 @@ except ImportError:
 
 from ...sim_manager import sim_defaults
 from ...utils.array_utils import randomly_downsample_data
-from ...sim_manager import FakeSim, FakeMock
+from ...sim_manager import FakeSim
 from ...custom_exceptions import *
 
 
@@ -50,7 +50,7 @@ class MockFactory(object):
         ----------
         halocat : object 
             Object containing the halo catalog and other associated data.  
-            Produced by `~halotools.sim_manager.supported_sims.HaloCatalog`
+            Produced by `~halotools.sim_manager.CachedHaloCatalog`
 
         model : object 
             A model built by a sub-class of `~halotools.empirical_models.ModelFactory`. 

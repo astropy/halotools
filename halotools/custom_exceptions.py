@@ -3,10 +3,9 @@
 Classes for all Halotools-specific exceptions. 
 """
 
-__all__ = (['HalotoolsError', 'HalotoolsCacheError', 
+__all__ = ('HalotoolsError', 'HalotoolsCacheError', 
 	'HalotoolsIOError', 'UnsupportedSimError', 'CatalogTypeError', 
-	'HalotoolsModelInputError', 'HalotoolsArgumentError']
-	)
+	'HalotoolsModelInputError', 'HalotoolsArgumentError')
 
 
 class HalotoolsError(Exception):
@@ -15,6 +14,11 @@ class HalotoolsError(Exception):
 	def __init__(self, message):
 		super(HalotoolsError, self).__init__(message)
 
+class InvalidCacheLogEntry(Exception):
+	""" Base class of all Halotools-specific exceptions. 
+	"""
+	def __init__(self, message):
+		super(InvalidCacheLogEntry, self).__init__(message)
 
 
 ########################################
@@ -39,8 +43,7 @@ class UnsupportedSimError(HalotoolsCacheError):
 	"""
 	def __init__(self, simname):
 
-		message = ("\nThe input simname " + simname + " is not recognized by Halotools.\n"
-			"See the supported_sim_list defined at the top of halotools.sim_manager.cache_config\n")
+		message = ("\nThe input simname " + simname + " is not recognized by Halotools.\n")
 
 		super(UnsupportedSimError, self).__init__(message)
 

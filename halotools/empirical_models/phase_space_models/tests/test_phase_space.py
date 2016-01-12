@@ -9,7 +9,6 @@ from ..nfw_phase_space import NFWPhaseSpace
 from ..profile_models.tests import analytic_nfw_density_outer_shell_normalization
 from ..profile_models.tests import monte_carlo_density_outer_shell_normalization
 
-from ....sim_manager import HaloCatalog
 from ....custom_exceptions import HalotoolsError
 
 __all__ = ['TestNFWPhaseSpace']
@@ -77,7 +76,7 @@ class TestNFWPhaseSpace(TestCase):
         assert hasattr(self.nfw, 'conc_mass_model')
 
     def test_mc_unit_sphere(self):
-        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_unit_sphere`.
+        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_unit_sphere`.
 
         This test verifies that all returned 3d points are at unit distance from the origin.   
         """
@@ -87,11 +86,11 @@ class TestNFWPhaseSpace(TestCase):
         assert np.allclose(norm, 1, rtol=1e-4)
 
     def test_mc_dimensionless_radial_distance(self):
-        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
+        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance`. 
 
-        Method uses the `~halotools.empirical_models.phase_space_models.profile_models.tests.analytic_nfw_density_outer_shell_normalization` function 
-        and the `~halotools.empirical_models.phase_space_models.profile_models.tests.monte_carlo_density_outer_shell_normalization` function 
-        to verify that the points returned by `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._mc_dimensionless_radial_distance` 
+        Method uses the `~halotools.empirical_models.analytic_nfw_density_outer_shell_normalization` function 
+        and the `~halotools.empirical_models.monte_carlo_density_outer_shell_normalization` function 
+        to verify that the points returned by `~halotools.empirical_models.NFWPhaseSpace._mc_dimensionless_radial_distance` 
         do indeed trace an NFW profile. 
 
         """
@@ -121,7 +120,7 @@ class TestNFWPhaseSpace(TestCase):
 
 
     def test_mc_solid_sphere(self):
-        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_solid_sphere`. 
+        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_solid_sphere`. 
 
         Method ensures that all returned points lie inside the unit sphere. 
         """
@@ -138,7 +137,7 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(z < 1)
 
     def test_mc_halo_centric_pos(self):
-        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_halo_centric_pos`. 
+        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`. 
 
         Method verifies 
 
@@ -199,7 +198,7 @@ class TestNFWPhaseSpace(TestCase):
         # assert np.all(norm < halo_radius)
 
     def test_mc_pos(self):
-        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_halo_centric_pos`. 
+        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_halo_centric_pos`. 
         
         Method verifies that passing an input ``seed`` results in deterministic behavior. 
 
@@ -221,7 +220,7 @@ class TestNFWPhaseSpace(TestCase):
         self.nfw.mc_pos(table = self._dummy_halo_table)
 
     def test_vrad_disp_from_lookup(self):
-        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace._vrad_disp_from_lookup`. 
+        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace._vrad_disp_from_lookup`. 
         
         Method verifies that all scaled velocities are between zero and unity. 
 
@@ -237,11 +236,11 @@ class TestNFWPhaseSpace(TestCase):
         assert np.all(vr_disp > 0)
 
     def test_mc_radial_velocity(self):
-        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_radial_velocity`. 
+        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_radial_velocity`. 
         
         Method generates a Monte Carlo velocity profile realization with all points at :math:`R_{\\rm max}`, 
         and compares the manually computed velocity dispersion to the analytical expectation for :math:`V_{\\rm max}`, 
-        as computed by the `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.vmax`. Method 
+        as computed by the `~halotools.empirical_models.NFWPhaseSpace.vmax`. Method 
         verifies that these two results agree within the expected random noise level. 
         """
         npts = 1e4
@@ -263,7 +262,7 @@ class TestNFWPhaseSpace(TestCase):
 
 
     def test_mc_vel(self):
-        """ Method used to test `~halotools.empirical_models.phase_space_models.NFWPhaseSpace.mc_vel`. 
+        """ Method used to test `~halotools.empirical_models.NFWPhaseSpace.mc_vel`. 
 
         Method verifies that the ``vx`` column of an input ``table`` is in fact over-written. 
 

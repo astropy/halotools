@@ -16,9 +16,8 @@ from ..factories import SubhaloModelFactory, HodModelFactory
 from .. import model_helpers
 from .. import model_defaults 
 
-from ...sim_manager.supported_sims import HaloCatalog
 from ...sim_manager import sim_defaults
-from ...sim_manager.generate_random_sim import FakeSim
+from ...sim_manager import FakeSim
 from ...utils.array_utils import custom_len
 from ...custom_exceptions import *
 

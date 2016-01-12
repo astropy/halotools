@@ -15,7 +15,7 @@ from ..nfw_profile import NFWProfile
 
 from .... import model_defaults 
 
-from .....sim_manager import HaloCatalog
+from .....sim_manager import CachedHaloCatalog
 from .....utils import table_utils
 from .....utils.array_utils import convert_to_ndarray
 from .....custom_exceptions import HalotoolsError
@@ -34,10 +34,10 @@ else:
     APH_MACHINE = False
 
 
-__all__ = ['TestHaloCatalogNFWConsistency']
+__all__ = ['TestHaloCatNFWConsistency']
 
-class TestHaloCatalogNFWConsistency(TestCase):
-    """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` in which comparisons are made to a Bolshoi halo catalog. 
+class TestHaloCatNFWConsistency(TestCase):
+    """ Tests of `~halotools.empirical_models.NFWProfile` in which comparisons are made to a Bolshoi halo catalog. 
 
     """
     @pytest.mark.slow
@@ -45,7 +45,7 @@ class TestHaloCatalogNFWConsistency(TestCase):
     def setup_class(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
-        halocat = HaloCatalog(simname = 'bolshoi', redshift = 0.)
+        halocat = CachedHaloCatalog(simname = 'bolshoi', redshift = 0.)
         hosts = table_utils.SampleSelector.host_halo_selection(table = halocat.halo_table)
 
         mask_mvir_1e11 = (hosts['halo_mvir'] > 1e11) & (hosts['halo_mvir'] < 2e11)

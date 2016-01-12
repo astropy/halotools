@@ -19,11 +19,11 @@ class ConcMass(object):
     """ Container class for commonly used concentration-mass relations in the literature. 
 
     `ConcMass` can be instantiated as a stand-alone class, or used as an orthogonal mix-in 
-    with the `~halotools.empirical_models.phase_space_models.profile_models.NFWProfile` or any of its sub-classes. 
+    with the `~halotools.empirical_models.NFWProfile` or any of its sub-classes. 
 
     Notes 
     ------
-    Testing for this class is done by the `~halotools.empirical_models.phase_space_models.profile_models.tests.TestConcMass` class. 
+    Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class. 
 
     """
 
@@ -96,7 +96,7 @@ class ConcMass(object):
 
         Notes 
         ------
-        Testing for this class is done by the `~halotools.empirical_models.phase_space_models.profile_models.tests.TestConcMass` class. 
+        Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class. 
 
         """
         conc_mass_func = getattr(self, self.conc_mass_model)
@@ -117,7 +117,7 @@ class ConcMass(object):
 
         Notes 
         ------
-        Testing for this class is done by the `~halotools.empirical_models.phase_space_models.profile_models.tests.TestConcMass` class. 
+        Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class. 
 
         """
         key = self.concentration_key
@@ -177,7 +177,7 @@ class ConcMass(object):
 
         Model assumes that halo mass definition is Mvir.
 
-        Testing for this class is done by the `~halotools.empirical_models.phase_space_models.profile_models.tests.TestConcMass` class. 
+        Testing for this class is done by the `~halotools.empirical_models.TestConcMass` class. 
 
         """
 

@@ -11,7 +11,6 @@ from ..nfw_isotropic_jeans import NFWJeansVelocity
 
 from ...nfw_phase_space import NFWPhaseSpace
 
-from .....sim_manager import HaloCatalog
 from .....custom_exceptions import HalotoolsError
 
 class TestNFWJeansVelocity(TestCase):
