@@ -2,7 +2,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .sim_defaults import *
+
 
 from .supported_sims import *
 from .fake_sim import FakeSim

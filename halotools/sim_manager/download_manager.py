@@ -5,7 +5,7 @@ retrieving the Halotools-provided simulation data from the web
 and storing it in the Halotools cache. 
 """
 
-__all__ = ['DownloadManager']
+__all__ = ('DownloadManager', )
 
 import numpy as np
 from warnings import warn
