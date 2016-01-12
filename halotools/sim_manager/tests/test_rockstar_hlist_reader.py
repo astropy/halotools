@@ -12,6 +12,12 @@ from ..halo_table_cache import HaloTableCache
 
 from ...custom_exceptions import HalotoolsError
 
+try:
+    import h5py 
+    HAS_H5PY = True
+except ImportError:
+    HAS_H5PY = False
+
 
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
@@ -81,7 +87,7 @@ class TestRockstarHlistReader(TestCase):
             'halo_mvir': (5, 'f4')
             })
 
-
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_good_args(self):
 
         reader = RockstarHlistReader(
@@ -92,6 +98,7 @@ class TestRockstarHlistReader(TestCase):
             redshift = 4, version_name = 'dummy', Lbox = 100, particle_mass = 1e8 
             )
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict1(self):
 
         with pytest.raises(HalotoolsError) as err:
@@ -105,6 +112,7 @@ class TestRockstarHlistReader(TestCase):
         substr = "at least have the following columns"
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict2(self):
 
         with pytest.raises(HalotoolsError) as err:
@@ -118,6 +126,7 @@ class TestRockstarHlistReader(TestCase):
         substr = "at least have the following columns"
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict3(self):
 
         with pytest.raises(HalotoolsError) as err:
@@ -131,6 +140,7 @@ class TestRockstarHlistReader(TestCase):
         substr = "at least have the following columns"
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_bad_columns_to_keep_dict4(self):
 
         with pytest.raises(ValueError) as err:
@@ -146,6 +156,7 @@ class TestRockstarHlistReader(TestCase):
 
 
     @pytest.mark.slow
+    @pytest.mark.skipif('not HAS_H5PY')
     @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog1(self):
         """
@@ -173,6 +184,7 @@ class TestRockstarHlistReader(TestCase):
 
 
     @pytest.mark.slow
+    @pytest.mark.skipif('not HAS_H5PY')
     @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog2(self):
         """
@@ -199,6 +211,7 @@ class TestRockstarHlistReader(TestCase):
         assert substr in err.value.message
 
     @pytest.mark.slow
+    @pytest.mark.skipif('not HAS_H5PY')
     @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog3(self):
         """
@@ -222,6 +235,7 @@ class TestRockstarHlistReader(TestCase):
         assert substr in err.value.message
 
     @pytest.mark.slow
+    @pytest.mark.skipif('not HAS_H5PY')
     @pytest.mark.skipif('not APH_MACHINE')
     def test_read_dummy_halo_catalog4(self):
         """
