@@ -6,6 +6,8 @@ from warnings import warn
 import numpy as np 
 
 from .ptcl_table_cache_log_entry import PtclTableCacheLogEntry
+
+from ..sim_manager import halotools_cache_dirname
 from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 
 __all__ = ('PtclTableCache', )
@@ -15,8 +17,7 @@ class PtclTableCache(object):
     """ 
 
     def __init__(self, read_log_from_standard_loc = True, **kwargs):
-        self._standard_log_dirname = os.path.join(_find_home(), 
-            '.astropy', 'cache', 'halotools')
+        self._standard_log_dirname = halotools_cache_dirname
         try:
             os.makedirs(os.path.dirname(self._standard_log_dirname))
         except OSError:

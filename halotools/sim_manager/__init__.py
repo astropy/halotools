@@ -2,7 +2,13 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-
+import os
+from astropy.config.paths import _find_home
+halotools_cache_dirname = os.path.join(_find_home(), '.astropy', 'cache', 'halotools')
+try:
+	os.makedirs(halotools_cache_dirname)
+except OSError:
+	pass
 
 from .supported_sims import *
 from .fake_sim import FakeSim

@@ -24,6 +24,7 @@ from .tabular_ascii_reader import TabularAsciiReader
 from .halo_table_cache import HaloTableCache
 from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
 
+from ..sim_manager import halotools_cache_dirname
 from ..custom_exceptions import HalotoolsError
 
 def _infer_redshift_from_input_fname(fname):
@@ -408,8 +409,7 @@ class RockstarHlistReader(TabularAsciiReader):
     def _get_default_output_fname(self):
         """
         """
-        basedir = get_astropy_cache_dir()
-        dirname = os.path.join(basedir, 'halotools', 'halo_catalogs', 
+        dirname = os.path.join(halotools_cache_dirname, 'halo_catalogs', 
             self.simname, self.halo_finder)
         try:
             os.makedirs(dirname)

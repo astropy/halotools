@@ -12,6 +12,8 @@ except ImportError:
         "requires h5py to be installed.")
 
 from .halo_table_cache_log_entry import HaloTableCacheLogEntry
+
+from ..sim_manager import halotools_cache_dirname
 from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 
 __all__ = ('HaloTableCache', )
@@ -21,8 +23,7 @@ class HaloTableCache(object):
     """ 
 
     def __init__(self, read_log_from_standard_loc = True, **kwargs):
-        self._standard_log_dirname = os.path.join(_find_home(), 
-            '.astropy', 'cache', 'halotools')
+        self._standard_log_dirname = halotools_cache_dirname
         try:
             os.makedirs(os.path.dirname(self._standard_log_dirname))
         except OSError:
