@@ -7,6 +7,12 @@ import warnings, os, shutil
 from astropy.config.paths import _find_home 
 from astropy.tests.helper import remote_data, pytest
 
+try:
+    import h5py 
+    HAS_H5PY = True
+except ImportError:
+    HAS_H5PY = False
+
 import numpy as np 
 from copy import copy, deepcopy 
 
@@ -60,8 +66,6 @@ class TestUserSuppliedHaloCatalog(TestCase):
             'z': np.zeros(self.num_ptcl)}
             )
 
-        import h5py
-        self.h5py = h5py
 
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
         try:
@@ -236,7 +240,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
                 Lbox = 200, particle_mass = 100, redshift = self.redshift,
                 ptcl_table = ptcl_table2, **self.good_halocat_args)
 
-    @pytest.mark.skipif('not APH_MACHINE')
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache1(self):
         halocat = UserSuppliedHaloCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
@@ -260,7 +264,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
                 overwrite = True)
         assert substr not in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache2(self):
         halocat = UserSuppliedHaloCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
@@ -275,7 +279,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         substr = "The directory you are trying to store the file does not exist."
         assert substr in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache3(self):
         halocat = UserSuppliedHaloCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
@@ -294,7 +298,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         substr = "The fname must end with an ``.hdf5`` extension."
         assert substr in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache4(self):
         halocat = UserSuppliedHaloCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
@@ -320,7 +324,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         substr = "must all be strings."
         assert substr in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache5(self):
         halocat = UserSuppliedHaloCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
@@ -347,7 +351,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
         assert substr in err.value.message
 
 
-    @pytest.mark.skipif('not APH_MACHINE')
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache6(self):
         halocat = UserSuppliedHaloCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
@@ -378,7 +382,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
             update_ascii = True,
             delete_corresponding_halo_catalog = True)
 
-
+    @pytest.mark.skipif('not HAS_H5PY')
     @pytest.mark.xfail
     def test_add_ptcl_table_to_cache(self):
         halocat = UserSuppliedHaloCatalog(Lbox = 200, 

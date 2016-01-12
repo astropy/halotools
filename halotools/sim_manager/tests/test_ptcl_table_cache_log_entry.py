@@ -11,6 +11,12 @@ from copy import copy, deepcopy
 from astropy.table import Table
 from astropy.table import vstack as table_vstack
 
+try:
+    import h5py 
+    HAS_H5PY = True
+except ImportError:
+    HAS_H5PY = False
+
 from astropy.config.paths import _find_home 
 
 from . import helper_functions
@@ -34,7 +40,6 @@ __all__ = ('TestPtclTableCacheLogEntry',  )
 class TestPtclTableCacheLogEntry(TestCase):
     """ Class providing unit testing for `~halotools.sim_manager.PtclTableCacheLogEntry`. 
     """
-    import h5py
     hard_coded_log_attrs = ['simname', 'version_name', 'redshift', 'fname']
 
     def setUp(self):
@@ -76,6 +81,7 @@ class TestPtclTableCacheLogEntry(TestCase):
             'redshift': self.redshifts[num_scenario], 
             'fname': self.fnames[num_scenario]})
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_instantiation(self):
         """ We can instantiate the log entry with a complete set of metadata
         """
@@ -85,12 +91,14 @@ class TestPtclTableCacheLogEntry(TestCase):
             log_entry = PtclTableCacheLogEntry(**constructor_kwargs)
             assert set(log_entry.log_attributes) == set(self.hard_coded_log_attrs)
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario0(self):
         num_scenario = 0
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
         assert log_entry.safe_for_cache == False
         assert "The input filename does not exist." in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario1(self):
         num_scenario = 1
 
@@ -101,6 +109,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert "The input filename does not exist." not in log_entry._cache_safety_message
         assert "The input file must have '.hdf5' extension" in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario2(self):
         num_scenario = 2
 
@@ -112,6 +121,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert "The input file must have '.hdf5' extension" not in log_entry._cache_safety_message
         assert "access the hdf5 metadata raised an exception." in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario2a(self):
         num_scenario = 2
 
@@ -121,7 +131,7 @@ class TestPtclTableCacheLogEntry(TestCase):
             pass
         self.table1.write(self.fnames[num_scenario], path='data')
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         k = f.attrs.keys()
         f.close()
 
@@ -130,6 +140,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert "access the hdf5 metadata raised an exception." not in log_entry._cache_safety_message
         assert "missing the following metadata" in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario2b(self):
         num_scenario = 2
 
@@ -141,7 +152,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.close()
@@ -149,13 +160,14 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "``particle_mass``" in log_entry._cache_safety_message
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         f.attrs['Lbox'] = 100.
         f.attrs['particle_mass'] = 1.e8
         f.close()
         _ =  log_entry.safe_for_cache
         assert "``particle_mass``" not in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario2c(self):
         num_scenario = 2
 
@@ -167,7 +179,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             if attr != 'redshift':
                 f.attrs[attr] = getattr(log_entry, attr)
@@ -180,18 +192,19 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "does not match" in log_entry._cache_safety_message
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         f.attrs['redshift'] = 1.3390001
         f.close()
         assert log_entry.safe_for_cache == False
         assert "does not match" not in log_entry._cache_safety_message
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         f.attrs['redshift'] = '1.3390001'
         f.close()
         assert log_entry.safe_for_cache == False
         assert "does not match" not in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario3(self):
         num_scenario = 3
 
@@ -203,7 +216,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             if attr != 'redshift':
                 f.attrs[attr] = getattr(log_entry, attr)
@@ -217,7 +230,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         substr = "must at a minimum have the following columns"
         assert substr in log_entry._cache_safety_message
 
-
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario4(self):
         num_scenario = 4
 
@@ -229,7 +242,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 2.
@@ -241,6 +254,7 @@ class TestPtclTableCacheLogEntry(TestCase):
         assert substr in log_entry._cache_safety_message
 
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_passing_scenario(self):
         num_scenario = 4
 
@@ -252,7 +266,7 @@ class TestPtclTableCacheLogEntry(TestCase):
 
         log_entry = PtclTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 100.

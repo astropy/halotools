@@ -13,6 +13,12 @@ from astropy.table import vstack as table_vstack
 
 from astropy.config.paths import _find_home 
 
+try:
+    import h5py 
+    HAS_H5PY = True
+except ImportError:
+    HAS_H5PY = False
+
 from . import helper_functions
 from ..halo_table_cache_log_entry import HaloTableCacheLogEntry
 
@@ -40,8 +46,7 @@ class TestHaloTableCacheLogEntry(TestCase):
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
-        import h5py
-        self.h5py = h5py
+
 
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
         try:
@@ -93,6 +98,7 @@ class TestHaloTableCacheLogEntry(TestCase):
             'version_name': self.version_names[num_scenario], 'redshift': self.redshifts[num_scenario], 
             'fname': self.fnames[num_scenario]})
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_instantiation(self):
         """ We can instantiate the log entry with a complete set of metadata
         """
@@ -102,6 +108,7 @@ class TestHaloTableCacheLogEntry(TestCase):
             log_entry = HaloTableCacheLogEntry(**constructor_kwargs)
             assert set(log_entry.log_attributes) == set(self.hard_coded_log_attrs)
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_comparison_override1(self):
         constructor_kwargs = self.get_scenario_kwargs(1)
         log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
@@ -111,6 +118,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry1 != log_entry2
         assert log_entry1 != 7
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_comparison_override2(self):
         constructor_kwargs = self.get_scenario_kwargs(1)
         log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
@@ -124,24 +132,29 @@ class TestHaloTableCacheLogEntry(TestCase):
         substr = "You cannot compare the order"
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_comparison_override3(self):
         constructor_kwargs = self.get_scenario_kwargs(1)
         log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
         _ = hash(log_entry1)
 
-    @pytest.mark.skipif('not APH_MACHINE')
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_comparison_override4(self):
-        constructor_kwargs = self.get_scenario_kwargs(1)
+        num_scenario = 1
+        constructor_kwargs = self.get_scenario_kwargs(num_scenario)
         log_entry1 = HaloTableCacheLogEntry(**constructor_kwargs)
         msg = str(log_entry1)
-        assert str(msg) == "('consuelo', 'bdm', 'v1', '-0.1000', '/Users/aphearin/Desktop/tmp_dummy_cache/existent.file')"
+        fname = self.fnames[num_scenario]
+        assert str(msg) == "('consuelo', 'bdm', 'v1', '-0.1000', '"+fname+"')"
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario0(self):
         num_scenario = 0
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
         assert log_entry.safe_for_cache == False
         assert "The input filename does not exist." in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario1(self):
         num_scenario = 1
 
@@ -152,6 +165,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert "The input filename does not exist." not in log_entry._cache_safety_message
         assert "The input file must have '.hdf5' extension" in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario2(self):
         num_scenario = 2
 
@@ -163,6 +177,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert "The input file must have '.hdf5' extension" not in log_entry._cache_safety_message
         assert "access the hdf5 metadata raised an exception." in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario2a(self):
         num_scenario = 2
 
@@ -172,7 +187,7 @@ class TestHaloTableCacheLogEntry(TestCase):
             pass
         self.table1.write(self.fnames[num_scenario], path='data')
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         k = f.attrs.keys()
         f.close()
 
@@ -181,6 +196,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert "access the hdf5 metadata raised an exception." not in log_entry._cache_safety_message
         assert "missing the following metadata" in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario2b(self):
         num_scenario = 2
 
@@ -192,7 +208,7 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.close()
@@ -200,14 +216,14 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "``particle_mass``" in log_entry._cache_safety_message
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         f.attrs['Lbox'] = 100.
         f.attrs['particle_mass'] = 1.e8
         f.close()
         _ =  log_entry.safe_for_cache
         assert "``particle_mass``" not in log_entry._cache_safety_message
 
-
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario2c(self):
         num_scenario = 2
 
@@ -219,7 +235,7 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             if attr != 'redshift':
                 f.attrs[attr] = getattr(log_entry, attr)
@@ -232,18 +248,19 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "does not match" in log_entry._cache_safety_message
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         f.attrs['redshift'] = 1.3390001
         f.close()
         assert log_entry.safe_for_cache == False
         assert "does not match" not in log_entry._cache_safety_message
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         f.attrs['redshift'] = '1.3390001'
         f.close()
         assert log_entry.safe_for_cache == False
         assert "does not match" not in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario3(self):
         num_scenario = 3
 
@@ -255,7 +272,7 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 100.
@@ -269,6 +286,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "must begin with the following five characters" not in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario3b(self):
         num_scenario = 3
 
@@ -280,7 +298,7 @@ class TestHaloTableCacheLogEntry(TestCase):
 
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 100.
@@ -296,6 +314,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert "must begin with the following five characters:" not in log_entry._cache_safety_message
         assert "``halo_id``, ``halo_x``, ``halo_y``, ``halo_z``" in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario3c(self):
         num_scenario = 3
 
@@ -307,7 +326,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
         self.table3.write(self.fnames[num_scenario], path='data')
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 100.
@@ -321,7 +340,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert "must contain a unique set of integers" not in log_entry._cache_safety_message
 
         self.table4.write(self.fnames[num_scenario], path='data', overwrite=True)
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 100.
@@ -332,6 +351,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert "must be bounded by [0, Lbox]" not in log_entry._cache_safety_message
         assert "must contain a unique set of integers" in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_scenario4a(self):
         num_scenario = 4
 
@@ -346,7 +366,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         del bad_table['halo_id']
         bad_table['halo_id'] = np.arange(len(bad_table), dtype = float)
         bad_table.write(self.fnames[num_scenario], path='data')
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 100.
@@ -356,6 +376,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         assert log_entry.safe_for_cache == False
         assert "Your ``halo_id`` has the incorrect data type." in log_entry._cache_safety_message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_passing_scenario(self):
         num_scenario = 4
 
@@ -367,7 +388,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         log_entry = HaloTableCacheLogEntry(**self.get_scenario_kwargs(num_scenario))
 
         self.good_table.write(self.fnames[num_scenario], path='data')
-        f = self.h5py.File(self.fnames[num_scenario])
+        f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
             f.attrs[attr] = getattr(log_entry, attr)
         f.attrs['Lbox'] = 100.
