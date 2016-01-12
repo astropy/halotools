@@ -5,6 +5,12 @@ from astropy.table import Table
 from warnings import warn
 import numpy as np 
 
+try:
+    import h5py
+except ImportError:
+    warn("Some of the functionality of the HaloTableCache class"
+        "requires h5py to be installed.")
+
 from .halo_table_cache_log_entry import HaloTableCacheLogEntry
 from ..custom_exceptions import InvalidCacheLogEntry, HalotoolsError
 
@@ -143,6 +149,11 @@ class HaloTableCache(object):
     def add_entry_to_cache_log(self, log_entry, update_ascii = True):
         """
         """
+        try:
+            import h5py 
+        except ImportError:
+            msg = ("\nCannot add_entry_to_cache_log without h5py installed.\n")
+            raise HalotoolsError(msg)
 
         try:
             assert isinstance(log_entry, HaloTableCacheLogEntry)
@@ -200,6 +211,11 @@ class HaloTableCache(object):
             the corresponding hdf5 file will be deleted from your disk. 
             Default is False. 
         """
+        try:
+            import h5py 
+        except ImportError:
+            msg = ("\nCannot remove_entry_from_cache_log without h5py installed.\n")
+            raise HalotoolsError(msg)
         ######################################################
         # update_ascii kwarg is for unit-testing only 
         # this feature is intentionally hidden from the docstring
@@ -335,6 +351,11 @@ class HaloTableCache(object):
         old_fname : string 
             Name of the old location of the file 
         """
+        try:
+            import h5py
+        except ImportError:
+            raise HalotoolsError("Must have h5py package installed \n"
+                "to use the update_cached_file_location method. ")
 
         ######################################################
         # update_ascii kwarg is for unit-testing only 

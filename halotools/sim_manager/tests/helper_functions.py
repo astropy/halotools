@@ -15,13 +15,6 @@ from astropy.config.paths import _find_home
 
 from ...custom_exceptions import HalotoolsError
 
-try:
-    import h5py
-except ImportError:
-    warn("\nMost of the functionality of the sim_manager sub-package"
-    " requires h5py to be installed,\n"
-        "which can be accomplished either with pip or conda")
-
 ### Determine whether the machine is mine
 # This will be used to select tests whose 
 # returned values depend on the configuration 
@@ -69,98 +62,4 @@ def add_new_row_to_cache_log(scenario,
         return table_vstack([existing_table, new_table])
     except KeyError:
         return new_table
-
-def create_halo_table_hdf5(cache_log_entry, **kwargs):
-    try:
-        num_halos = kwargs['num_halos']
-    except KeyError:
-        num_halos = 10
-
-    try:
-        Lbox = kwargs['Lbox']
-    except KeyError:
-        Lbox = 100.
-
-    try:
-        particle_mass = kwargs['particle_mass']
-    except KeyError:
-        particle_mass = 1.e8
-
-    try:
-        halo_id = kwargs['halo_id']
-    except KeyError:
-        halo_id = np.arange(num_halos)
-
-    try:
-        halo_x = kwargs['halo_x']
-    except KeyError:
-        halo_x = np.linspace(0, 0.999*Lbox, num_halos)   
-    try:
-        halo_y = kwargs['halo_y']
-    except KeyError:
-        halo_y = np.linspace(0, 0.999*Lbox, num_halos)
-    try:
-        halo_z = kwargs['halo_z']
-    except KeyError:
-        halo_z = np.linspace(0, 0.999*Lbox, num_halos)
-
-    table = Table({
-        'halo_id': halo_id, 
-        'halo_x': halo_x, 
-        'halo_y': halo_y, 
-        'halo_z': halo_z}
-        )
-    if 'omit_column' in kwargs:
-        del table[kwargs['omit_column']]
-
-    try:
-        simname = kwargs['simname']
-    except KeyError:
-        simname = cache_log_entry['simname']
-    try:
-        halo_finder = kwargs['halo_finder']
-    except KeyError:
-        halo_finder = cache_log_entry['halo_finder']
-    try:
-        redshift = kwargs['redshift']
-    except KeyError:
-        redshift = cache_log_entry['redshift']
-    try:
-        version_name = kwargs['version_name']
-    except KeyError:
-        version_name = cache_log_entry['version_name']
-    try:
-        fname = str(kwargs['fname'])
-    except KeyError:
-        fname = str(cache_log_entry['fname'])
-    basename = os.path.dirname(fname)
-    
-    try:
-        os.makedirs(basename)
-    except OSError:
-        pass
-
-    table.write(fname, path='data')
-    f = h5py.File(fname)
-    f.attrs.create('Lbox', Lbox)
-    f.attrs.create('particle_mass', particle_mass)
-    f.attrs.create('simname', simname)
-    f.attrs.create('halo_finder', halo_finder)
-    f.attrs.create('redshift', '{0:.4f}'.format(float(redshift)))
-    f.attrs.create('version_name', version_name)
-    f.attrs.create('fname', fname)
-
-    f.close()
-
-
-
-
-
-
-
-
-
-
-
-
 

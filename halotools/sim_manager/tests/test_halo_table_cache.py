@@ -8,6 +8,12 @@ import warnings, os, shutil
 import numpy as np 
 from copy import copy, deepcopy 
 
+try:
+    import h5py 
+    HAS_H5PY = True
+except ImportError:
+    HAS_H5PY = False
+
 from astropy.config.paths import _find_home 
 from astropy.table import Table
 from astropy.table import vstack as table_vstack
@@ -37,8 +43,7 @@ class TestHaloTableCache(TestCase):
     """
 
     def setUp(self):
-        import h5py
-        self.h5py = h5py
+
 
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
         try:
@@ -48,62 +53,64 @@ class TestHaloTableCache(TestCase):
         os.makedirs(self.dummy_cache_baseloc)
 
 
-        # Create a good halo catalog and log entry
-        self.good_table = Table(
-            {'halo_id': [1, 2, 3], 
-            'halo_x': [1, 2, 3], 
-            'halo_y': [1, 2, 3], 
-            'halo_z': [1, 2, 3], 
-            'halo_mass': [1, 2, 3], 
-            })
-        self.good_table_fname = os.path.join(self.dummy_cache_baseloc, 
-            'good_table.hdf5')
-        self.good_table.write(self.good_table_fname, path='data')
+        if HAS_H5PY:
 
-        self.good_log_entry = HaloTableCacheLogEntry('good_simname1', 
-            'good_halo_finder', 'good_version_name', 
-            get_redshift_string(0.0), self.good_table_fname)
+            # Create a good halo catalog and log entry
+            self.good_table = Table(
+                {'halo_id': [1, 2, 3], 
+                'halo_x': [1, 2, 3], 
+                'halo_y': [1, 2, 3], 
+                'halo_z': [1, 2, 3], 
+                'halo_mass': [1, 2, 3], 
+                })
+            self.good_table_fname = os.path.join(self.dummy_cache_baseloc, 
+                'good_table.hdf5')
+            self.good_table.write(self.good_table_fname, path='data')
 
-        f = self.h5py.File(self.good_table_fname)
-        for attr in self.good_log_entry.log_attributes:
-            f.attrs.create(str(attr), str(getattr(self.good_log_entry, attr)))
-        f.attrs.create('Lbox', 100.)
-        f.attrs.create('particle_mass', 1e8)
-        f.close()
+            self.good_log_entry = HaloTableCacheLogEntry('good_simname1', 
+                'good_halo_finder', 'good_version_name', 
+                get_redshift_string(0.0), self.good_table_fname)
 
-        # Create a second good halo catalog and log entry
+            f = h5py.File(self.good_table_fname)
+            for attr in self.good_log_entry.log_attributes:
+                f.attrs.create(str(attr), str(getattr(self.good_log_entry, attr)))
+            f.attrs.create('Lbox', 100.)
+            f.attrs.create('particle_mass', 1e8)
+            f.close()
 
-        self.good_table2 = deepcopy(self.good_table)
-        self.good_table2_fname = os.path.join(self.dummy_cache_baseloc, 
-            'good_table2.hdf5')
-        self.good_table2.write(self.good_table2_fname, path='data')
+            # Create a second good halo catalog and log entry
 
-        self.good_log_entry2 = HaloTableCacheLogEntry('good_simname2', 
-            'good_halo_finder2', 'good_version_name', 
-            get_redshift_string(1.0), self.good_table2_fname)
+            self.good_table2 = deepcopy(self.good_table)
+            self.good_table2_fname = os.path.join(self.dummy_cache_baseloc, 
+                'good_table2.hdf5')
+            self.good_table2.write(self.good_table2_fname, path='data')
 
-        f = self.h5py.File(self.good_table2_fname)
-        for attr in self.good_log_entry2.log_attributes:
-            f.attrs.create(str(attr), str(getattr(self.good_log_entry2, attr)))
-        f.attrs.create('Lbox', 100.)
-        f.attrs.create('particle_mass', 1e8)
-        f.close()
+            self.good_log_entry2 = HaloTableCacheLogEntry('good_simname2', 
+                'good_halo_finder2', 'good_version_name', 
+                get_redshift_string(1.0), self.good_table2_fname)
 
-        # Create a bad halo catalog and log entry
+            f = h5py.File(self.good_table2_fname)
+            for attr in self.good_log_entry2.log_attributes:
+                f.attrs.create(str(attr), str(getattr(self.good_log_entry2, attr)))
+            f.attrs.create('Lbox', 100.)
+            f.attrs.create('particle_mass', 1e8)
+            f.close()
 
-        self.bad_table = Table(
-            {'halo_id': [1, 2, 3], 
-            'halo_y': [1, 2, 3], 
-            'halo_z': [1, 2, 3], 
-            'halo_mass': [1, 2, 3], 
-            })
-        bad_table_fname = os.path.join(self.dummy_cache_baseloc, 
-            'bad_table.hdf5')
-        self.bad_table.write(bad_table_fname, path='data')
+            # Create a bad halo catalog and log entry
 
-        self.bad_log_entry = HaloTableCacheLogEntry('1', '2', '3', '4', '5')
+            self.bad_table = Table(
+                {'halo_id': [1, 2, 3], 
+                'halo_y': [1, 2, 3], 
+                'halo_z': [1, 2, 3], 
+                'halo_mass': [1, 2, 3], 
+                })
+            bad_table_fname = os.path.join(self.dummy_cache_baseloc, 
+                'bad_table.hdf5')
+            self.bad_table.write(bad_table_fname, path='data')
 
+            self.bad_log_entry = HaloTableCacheLogEntry('1', '2', '3', '4', '5')
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_determine_log_entry_from_fname(self):
         cache = HaloTableCache(read_log_from_standard_loc = False)
 
@@ -124,19 +131,19 @@ class TestHaloTableCache(TestCase):
 
         entry = self.good_log_entry
         fname = entry.fname
-        f = self.h5py.File(fname)
+        f = h5py.File(fname)
         tmp = deepcopy(f.attrs['version_name'])
         del f.attrs['version_name']
         f.close()
         result = cache.determine_log_entry_from_fname(fname)
         assert "The hdf5 file is missing the following metadata:" in result
 
-        f = self.h5py.File(fname)
+        f = h5py.File(fname)
         f.attrs.create('version_name', tmp)
         f.close()
 
 
-
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_add_entry_to_cache_log(self):
         cache = HaloTableCache(read_log_from_standard_loc = False)
         assert len(cache.log) == 0
@@ -164,6 +171,7 @@ class TestHaloTableCache(TestCase):
         substr = "The input filename does not exist."
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_remove_entry_from_cache_log(self):
         cache = HaloTableCache(read_log_from_standard_loc = False)
         cache.add_entry_to_cache_log(self.good_log_entry, update_ascii = False)
@@ -184,6 +192,7 @@ class TestHaloTableCache(TestCase):
             raise_non_existence_exception = False)
         assert len(cache.log) == 1
 
+    @pytest.mark.skipif('not HAS_H5PY')
     def test_update_cached_file_location(self):
         """
         """
@@ -202,9 +211,6 @@ class TestHaloTableCache(TestCase):
 
         new_entry = cache.determine_log_entry_from_fname(new_fname)
         assert new_entry in cache.log
-
-
-
 
 
     def tearDown(self):

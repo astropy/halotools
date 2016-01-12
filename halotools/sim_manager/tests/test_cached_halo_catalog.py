@@ -7,6 +7,12 @@ import warnings, os, shutil
 from astropy.config.paths import _find_home 
 from astropy.tests.helper import remote_data, pytest
 
+try:
+    import h5py 
+    HAS_H5PY = True
+except ImportError:
+    HAS_H5PY = False
+
 import numpy as np 
 
 from . import helper_functions
@@ -38,9 +44,6 @@ class TestCachedHaloCatalog(TestCase):
     def setUp(self):
         """ Pre-load various arrays into memory for use by all tests. 
         """
-        import h5py
-        self.h5py = h5py
-
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
         try:
             shutil.rmtree(self.dummy_cache_baseloc)
@@ -235,13 +238,15 @@ class TestCachedHaloCatalog(TestCase):
         fname = cache.log[0].fname
         halocat = CachedHaloCatalog(fname = fname)
 
+    @pytest.mark.skipif('not HAS_H5PY')
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments7(self):
         cache = HaloTableCache()
         correct_fname = cache.log[10].fname
         temporary_bad_fname = 'abc.hdf5'
 
-        f = self.h5py.File(correct_fname)
+        import h5py
+        f = h5py.File(correct_fname)
         f.attrs['fname'] = temporary_bad_fname
         f.close()
 
@@ -249,7 +254,7 @@ class TestCachedHaloCatalog(TestCase):
             halocat = CachedHaloCatalog(fname = correct_fname)
         print(err.value.message)
 
-        f = self.h5py.File(correct_fname)
+        f = h5py.File(correct_fname)
         f.attrs['fname'] = correct_fname
         f.close()
        

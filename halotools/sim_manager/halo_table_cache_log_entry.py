@@ -146,6 +146,13 @@ class HaloTableCacheLogEntry(object):
         the responsibility of the `~halotools.sim_manager.HaloTableCache` class. 
 
         """
+        try:
+            import h5py 
+        except ImportError:
+            msg = ("\nCannot determine whether an hdf5 file "
+                "is safe_for_cache without h5py installed.\n")
+            raise HalotoolsError(msg)
+
         self._cache_safety_message = "The halo catalog is safe to add to the cache log."
 
         message_preamble = ("The halo catalog and/or its associated metadata fail the following tests:\n\n")
