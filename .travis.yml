@@ -30,10 +30,8 @@ env:
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
-        # For this package-template, we include examples of Cython modules,
-        # so Cython is required for testing. If your package does not include
-        # Cython code, you can set CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES='Cython scipy beautifulsoup4 requests matplotlib'
+        # Here we list the dependencies to be installed that are in conda
+        - CONDA_DEPENDENCIES='Cython scipy beautifulsoup4 requests matplotlib h5py'
     matrix:
         # Make sure that egg_info works without dependencies
         - SETUP_CMD='egg_info'
@@ -61,6 +59,10 @@ matrix:
         # Try numpy 1.10 - might want to switch this so that 1.10 is *default* and 1.9 is checked here down the road
         - python: 2.7
           env: NUMPY_VERSION=1.10
+
+        # try a version *without* h5py - we need this for readthedocs
+        - python: 2.7
+          env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
 
     allow_failures:
         - python: 3.3
