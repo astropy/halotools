@@ -167,7 +167,6 @@ class TestDownloadManager(TestCase):
         assert file_list != []
 
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_ptcl_tables_available_for_download(self):
         """ Test that there is exactly one ptcl_table available for Bolshoi. 
@@ -207,7 +206,6 @@ class TestDownloadManager(TestCase):
             )
         assert (f, np.round(z, 1)) == ('hlist_0.50648.particles.hdf5', 1.)
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_unsupported_sim_download_attempt(self): 
         simname = 'consuelo'
@@ -309,7 +307,6 @@ class TestDownloadManager(TestCase):
                 delete_corresponding_halo_catalog = delete_corresponding_halo_catalog
                 )
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_download_processed_halo_table1(self):
         """
@@ -325,7 +322,6 @@ class TestDownloadManager(TestCase):
         assert substr in err.value.message
 
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_download_processed_halo_table2(self):
         """
@@ -354,7 +350,6 @@ class TestDownloadManager(TestCase):
         substr = "you must set the ``overwrite`` keyword argument to True" 
         assert substr in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_download_processed_halo_table4(self):
         """
@@ -383,7 +378,6 @@ class TestDownloadManager(TestCase):
         substr = "the ``ignore_nearby_redshifts`` to True, or decrease ``dz_tol``" 
         assert substr in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_download_processed_halo_table6(self):
         """
@@ -420,7 +414,6 @@ class TestDownloadManager(TestCase):
 
         self.clear_APH_MACHINE_of_highz_file()
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_download_ptcl_table1(self):
         """
@@ -433,7 +426,6 @@ class TestDownloadManager(TestCase):
                 download_dirname=self.halocat_dir)
         substr = "no web locations" 
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_download_ptcl_table2(self):
         """
@@ -461,7 +453,6 @@ class TestDownloadManager(TestCase):
         substr = "you must set the ``overwrite`` keyword argument to True."
         assert substr in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_download_ptcl_table4(self):
         """
@@ -475,7 +466,6 @@ class TestDownloadManager(TestCase):
         substr = "Your input ``download_dirname`` is a non-existent path."
         assert substr in err.value.message
 
-    @pytest.mark.skipif('not APH_MACHINE')
     @remote_data
     def test_download_ptcl_table5(self):
         """
