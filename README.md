@@ -21,6 +21,8 @@ The latest build of the documentation can be found at http://halotools.readthedo
 
 ## Project Status
 
+[![Coverage Status](https://coveralls.io/repos/astropy/halotools/badge.svg?branch=master&service=github)](https://coveralls.io/github/astropy/halotools?branch=master)
+
 Halotools is a fully open-source package with contributing scientists spread across many universities. The package will soon be ready for beta release. If you are willing to serve as a beta-tester, or if you just wish to use Halotools before the first official release, please contact andrew.hearin@yale.edu.
 
 ---
