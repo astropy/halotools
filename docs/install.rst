@@ -45,11 +45,6 @@ will be automatically handled for you. However, if you installed using setup.py 
 cloning the main repository (currently the only available method), 
 then you will need to be aware of the following dependencies.
 
-Core Dependencies
----------------------
-
-Halotools is built upon the following core dependencies:
-
 - `Python <http://www.python.org/>`_: 2.7.x
 
 - `Numpy <http://www.numpy.org/>`_: 1.9 or later
