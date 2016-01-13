@@ -111,7 +111,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         MonteCarloGalProf.mc_vel(self, table = table)
 
 
-    def mc_generate_nfw_phase_space_points(self, Ngals = 1e4, conc=5, mass = 1e12):
+    def mc_generate_nfw_phase_space_points(self, Ngals = 1e4, conc=5, mass = 1e12, verbose=True):
         """ Stand-alone convenience function for returning a Monte Carlo realization of points in the phase space of an NFW halo in isotropic Jeans equilibrium.
 
         Parameters 
@@ -128,6 +128,10 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
             Mass of the halo whose phase space distribution is being realized. 
             Default is 1e12. 
 
+        verbose : bool, optional 
+            If True, a message prints with an estimate of the build time. 
+            Default is True. 
+
         Returns 
         --------
         t : table 
@@ -139,7 +143,7 @@ class NFWPhaseSpace(NFWProfile, NFWJeansVelocity, MonteCarloGalProf):
         ---------
         >>> nfw = NFWPhaseSpace()
         >>> mass, conc = 1e13, 8.
-        >>> data = nfw.mc_generate_nfw_phase_space_points(Ngals = 1e2, mass = mass, conc = conc) 
+        >>> data = nfw.mc_generate_nfw_phase_space_points(Ngals = 1e2, mass = mass, conc = conc, verbose=False) 
 
         Now suppose you wish to compute the radial velocity dispersion of all the returned points:
 

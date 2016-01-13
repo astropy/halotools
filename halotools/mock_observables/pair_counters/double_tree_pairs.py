@@ -22,7 +22,6 @@ import sys
 import multiprocessing
 from multiprocessing import Value, Lock
 from functools import partial
-import pytest
 
 from .double_tree import FlatRectanguloidDoubleTree
 from .double_tree_helpers import *
