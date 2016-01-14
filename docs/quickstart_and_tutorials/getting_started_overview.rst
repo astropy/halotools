@@ -80,7 +80,7 @@ Choosing ``most_recent`` as the version_name automatically selects the most up-t
 Getting started with subpackages
 ================================
 
-Although the different sub-packages of Halotools are woven together for the science aims of the package (see :ref:`halotools_science_overview`), individually the sub-packages have very different functionality. The sections below give a broad-brush overview of the functionality of each sub-package as well as links to quickstart guides and tutorials containing more detailed instructions. 
+Although the different sub-packages of Halotools are woven together for the specialized science aims of the package (see :ref:`halotools_science_overview`), individually the sub-packages have very different functionality. The sections below give a broad-brush overview of the functionality of each sub-package as well as links to quickstart guides and tutorials containing more detailed instructions. 
 
 Working with simulation data
 ------------------------------------------------------
@@ -95,7 +95,7 @@ different simulations.
 
 See the :ref:`supported_sim_list` section of the documentation for information about the catalogs that come with the package. 
 
-The full functionality of Halotools is available for use with halos in any N-body simulation identified with any halo-finder. For example, the `~halotools.sim_manager.RockstarHlistReader` class in the ``sim_manager`` sub-package  provides a memory-efficient tool for reading any Rockstar-produced ASCII data and storing the halo catalog in cache.
+The full functionality of Halotools is available for use with halos in any N-body simulation identified with any halo-finder. For example, the `~halotools.sim_manager.RockstarHlistReader` class in the ``sim_manager`` sub-package  provides a memory-efficient tool for reading any Rockstar-produced ASCII data and storing the processed halo catalog in cache.
 
 >>> from halotools.sim_manager import RockstarHlistReader
 
