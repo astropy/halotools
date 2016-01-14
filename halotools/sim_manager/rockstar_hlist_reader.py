@@ -255,6 +255,80 @@ class RockstarHlistReader(TabularAsciiReader):
         ``row_cut_eq_dict`` and ``row_cut_neq_dict`` keyword arguments are used 
         simultaneously, only rows passing all cuts will be kept. 
 
+        Examples 
+        ----------
+        Suppose you wish to reduce the ASCII data stored by ``input_fname`` 
+        into a data structure with the following columns: 
+        halo ID, virial mass, x, y, z position, and peak circular velocity, 
+        where the data are stored in column 1, 45, 17, 18, 19 and 56, 
+        respectively, where the first column is index 0. 
+        If you wish to keep *all* rows of the halo catalog:
+
+        >>> columns_to_keep_dict = {'halo_id': (1, 'i8'), 'halo_mvir': (45, 'f4'), 'halo_x': (17, 'f4'), 'halo_y': (18, 'f4'), 'halo_z': (19, 'f4'), 'halo_vpeak': (56, 'f4')}
+        >>> simname = 'any_nickname'
+        >>> halo_finder = 'rockstar'
+        >>> version_name = 'rockstar_v1.53_no_cuts'
+        >>> redshift = 0.3478
+        >>> Lbox, particle_mass = 400, 3.5e8
+
+        >>> reader = RockstarHlistReader(input_fname, columns_to_keep_dict, output_fname, simname, halo_finder, redshift, version_name, Lbox, particle_mass) # doctest: +SKIP
+        >>> reader.read_halocat(write_to_disk = True, update_cache_log = True) # doctest: +SKIP
+
+        The halo catalog is now stored in cache and can be loaded into memory 
+        at any time using the `~halotools.sim_manager.CachedHaloCatalog` class 
+        with the following syntax. 
+
+        >>> from halotools.sim_manager import CachedHaloCatalog
+        >>> halocat = CachedHaloCatalog(simname = 'any_nickname', halo_finder = 'rockstar', version_name = 'rockstar_v1.53_no_cuts', redshift = 0.3) # doctest: +SKIP
+
+        Note that once you have stored the catalog with the precise redshift, 
+        to load it back into memory you do not need to remember the exact redshift 
+        to four significant digits, you just need to be within ``dz_tol``. 
+        You can always verify that you are working with the catalog you intended 
+        by inspecting the metadata:
+
+        >>> print(halocat.redshift) # doctest: +SKIP
+        >>> print(halocat.version_name) # doctest: +SKIP
+
+        Now suppose that for your science target of interest, 
+        subhalos in your simulation with :math:`V_{\\rm peak} < 100` km/s 
+        are not properly resolved. In this case you can use the ``row_cut_min_dict`` keyword 
+        argument to discard such halos as the file is read. 
+
+        >>> row_cut_min_dict = {'halo_vpeak': 100}
+        >>> version_name = 'rockstar_v1.53_vpeak_gt_100'
+        >>> processing_notes = 'All halos with Vpeak < 100 km/s were thrown out during the initial catalog reduction'
+
+        >>> reader = RockstarHlistReader(input_fname, columns_to_keep_dict, output_fname, simname, halo_finder, redshift, version_name, Lbox, particle_mass, row_cut_min_dict=row_cut_min_dict, processing_notes=processing_notes) # doctest: +SKIP
+        >>> reader.read_halocat(write_to_disk = True, update_cache_log = True) # doctest: +SKIP
+
+        This halo catalog is also stored in cache, and we load it in the same way as before 
+        but now using a different ``version_name``: 
+
+        >>> halocat = CachedHaloCatalog(simname = 'any_nickname', halo_finder = 'rockstar', version_name = 'rockstar_v1.53_vpeak_gt_100', redshift = 0.3) # doctest: +SKIP
+
+        Using the ``processing_notes`` argument is helpful 
+        in case you forgot exactly how the catalog was initially reduced. 
+        The ``processing_notes`` string you passed to the constructor 
+        is stored as metadata on the cached hdf5 file and is automatically 
+        bound to the `~halotools.sim_manager.CachedHaloCatalog` instance:
+
+        >>> print(halocat.processing_notes) # doctest: +SKIP
+        >>> 'All halos with Vpeak < 100 km/s were thrown out during the initial catalog reduction' # doctest: +SKIP
+
+        Any cut you placed on the catalog during its initial 
+        reduction is automatically bound to the cached halo catalog as additional metadata. 
+        In this case, since we placed a lower bound on :math:`V_{\\rm peak}`:
+
+        >>> print(halocat.halo_vpeak_row_cut_min) # doctest: +SKIP
+        >>> 100 # doctest: +SKIP
+
+        This metadata provides protection against typographical errors 
+        that may have been accidentally introduced in the hand-written ``processing_notes``. 
+        Additional metadata that is automatically bound to all cached catalogs 
+        includes other sanity checks on our bookkeeping such as ``orig_ascii_fname`` 
+        and ``time_of_catalog_production``. 
+
         See also 
         ---------
         :ref:`reducing_and_caching_a_new_rockstar_catalog`

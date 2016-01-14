@@ -29,6 +29,15 @@ Setting up the simulation data
    quickstart_guides/working_with_halotools_provided_catalogs
    quickstart_guides/working_with_alternative_catalogs
 
+Halo catalog analysis
+---------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   quickstart_guides/halo_catalog_analysis_quickstart
+
+
 Building and testing models of the galaxy-halo connection
 ------------------------------------------------------------
 
