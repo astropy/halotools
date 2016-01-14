@@ -36,8 +36,9 @@ Depending on how you have configured your copy of the gcc compiler, Mac users ma
 	CC=clang python setup.py test 
 
 This will trigger Cython compilation of various package components, 
-and the execution of every function in the test suite of every sub-package. 
-This typically takes less than a minute. 
+and the execution of every function in the test suite of every sub-package, 
+generating a large number of compiler warnings that you can ignore. 
+Runtime for test suite execution typically takes less than a minute. 
 At the end, you will see a short summary of the outcome of the test suite. 
 
 .. _download_default_halos:
@@ -56,7 +57,7 @@ download script::
 Running this script will set up the Halotools cache directory system on your local machine, 
 and then download the default halo catalog to the cache (Bolshoi z=0 rockstar halos), 
 storing the catalog as a pre-processed hdf5 file. The default catalog is ~400Mb. 
-Because this script automatically updates the Halotools cache log with the catalog, 
+Because this script automatically updates the Halotools cache with the catalog, 
 you can now load these halos into memory using the `~halotools.sim_manager.CachedHaloCatalog` class: 
 
 >>> from halotools import sim_manager 
@@ -66,12 +67,12 @@ you can now load these halos into memory using the `~halotools.sim_manager.Cache
 To see simple examples of how to manipulate the data stored in halo catalogs, 
 see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` documentation. 
 
-If you wish to download alternate snapshots, you should can either use the 
-`~halotools.sim_manager.DownloadManager`, or use the download_additional_halocat.py convenience script, which should be called with four arguments: simname, halo_finder, version_name and redshift. For example: 
+If you wish to download alternate snapshots, you can either use the 
+`~halotools.sim_manager.DownloadManager`, or use the download_additional_halocat.py convenience script, which should be called with four arguments: simname, halo_finder, version_name and redshift. For example::
 
 	python scripts/download_additional_halocat.py multidark rockstar most_recent 0.5
 
-Choosing ``most_recent`` as the version_name automatically selects the most up-to-date version of the Halotools-provided catalogs. You can read about your download options by executing the script and throwing the help flag:
+Choosing ``most_recent`` as the version_name automatically selects the most up-to-date version of the Halotools-provided catalogs. You can read about your download options by executing the script and throwing the help flag::
 
 	python scripts/download_alternate_halocats.py --help
 

@@ -33,10 +33,11 @@ class CachedHaloCatalog(object):
 
     The halos are stored in the ``halo_table`` attribute 
     in the form of an Astropy `~astropy.table.Table`. 
-
     If available, another `~astropy.table.Table` storing 
     a random downsampling of dark matter particles 
     is stored in the ``ptcl_table`` attribute. 
+    See the Examples section below for details on how to 
+    access and manipulate this data. 
     """
 
     def __init__(self, preload_halo_table = False, dz_tol = 0.05, 
@@ -108,8 +109,8 @@ class CachedHaloCatalog(object):
         halos can be accessed in the same manner as a Numpy structured array 
         or python dictionary:
 
-        >>> array_of_masses = halos['halo_mvir'] # doctest: +SKIP
-        >>> x_positions = halos['halo_x'] # doctest: +SKIP
+        >>> array_of_masses = halocat.halo_table['halo_mvir'] # doctest: +SKIP
+        >>> x_positions = halocat.halo_table['halo_x'] # doctest: +SKIP
 
         Note that all keys of a cached halo catalog begin with the substring 
         ``halo_``. This is a bookkeeping device used to help 
@@ -133,7 +134,7 @@ class CachedHaloCatalog(object):
         >>> for entry in cache.log: print(entry) # doctest: +SKIP
 
         Alternatively, you can simply use a text editor to open the cache log, 
-        which is stored as ASCII data in the following location on your machine: 
+        which is stored as ASCII data in the following location on your machine:
 
         $HOME/.astropy/cache/halotools/halo_table_cache_log.txt
 
