@@ -3,8 +3,10 @@
 .. _supported_sim_list:
 
 *****************************************************
-Simulations and halo catalogs supported by Halotools
+Simulations and Halo Catalogs Provided by Halotools
 *****************************************************
+
+In this section of the documentation we give a brief description of each of the simulations provided by the package. If you would like to use your own catalog, rather than one of the simulations listed below, see the :ref:`working_with_alternative_catalogs`. 
 
 Halotools is configured to download, process and manage a range of  
 simulations and halo catalogs. 
@@ -13,12 +15,9 @@ for download for redshifts z = 0, 0.5, 1, and 2.
 Halo catalogs based on the Rockstar halo-finder are available for all 
 of the simulations below; for Bolshoi, BDM-based catalogs are also available. 
 To see simple examples of how to manipulate the data stored in halo catalogs, 
-see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` API documentation. 
+see the Examples section of the `~halotools.sim_manager.CachedHaloCatalog` documentation. 
+For more detailed information, refer to the :ref:`halo_catalog_analysis_quickstart` tutorial. 
 
-Below we give a 
-brief description of each of the simulations supported by the package.
-If you would like to use your own catalog, rather than one of the simulations listed below, 
-see the :ref:`working_with_alternative_catalogs`. 
 
 Bolshoi (simname = `bolshoi`)
 ==================================

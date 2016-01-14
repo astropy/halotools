@@ -80,17 +80,30 @@ Choosing ``most_recent`` as the version_name automatically selects the most up-t
 Getting started with subpackages
 ================================
 
-Although the different sub-packages of Halotools are woven together for the science aims of the package (see :ref:`halotools_science_overview`), individually the sub-packages have very different functionality. 
+Although the different sub-packages of Halotools are woven together for the science aims of the package (see :ref:`halotools_science_overview`), individually the sub-packages have very different functionality. The sections below give a broad-brush overview of the functionality of each sub-package as well as links to quickstart guides and tutorials containing more detailed instructions. 
 
-Downloading and processing simulations
----------------------------------------
+Working with simulation data
+------------------------------------------------------
 
 The Halotools ``sim_manager`` sub-package  
-makes it easy to download halo catalogs, process them into fast-loading binaries, 
-store them in a cache directory of your choosing, and swap back and forth between 
-different simulations using a single line of code. 
+makes it easy to download Halotools-provided halo catalogs, 
+process them into fast-loading binaries with self-expressive metadata, 
+create a persistent memory of each catalog's disk location, and swap back and forth between 
+different simulations. 
 
 	>>> from halotools import sim_manager
+
+See the :ref:`supported_sim_list` section of the documentation for information about the catalogs that come with the package. 
+
+The full functionality of Halotools is available for use with halos in any N-body simulation identified with any halo-finder. For example, the `~halotools.sim_manager.RockstarHlistReader` class in the ``sim_manager`` sub-package  provides a memory-efficient tool for reading any Rockstar-produced ASCII data and storing the halo catalog in cache.
+
+>>> from halotools.sim_manager import RockstarHlistReader
+
+See :ref:`reducing_and_caching_a_new_rockstar_catalog` for more information. 
+
+For halo catalog ASCII data produced by a different halo finder, and/or if you want to reduce N-body ASCII data but do not wish to use the Halotools cache system, you can use the stand-alone `~halotools.sim_manager.TabularAsciiReader` class instead. For more information about using Halotools with your own simulation data, see :ref:`working_with_alternative_catalogs`. 
+
+For information about how to get started using Halotools to analyze N-body simulations and halo catalogs, see :ref:`halo_catalog_analysis_quickstart`. 
 
 
 Building models and making mocks
