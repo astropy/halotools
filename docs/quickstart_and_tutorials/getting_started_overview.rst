@@ -141,14 +141,39 @@ For a comprehensive list of pre-built models provided by Halotools, see :ref:`pr
 Designing your own galaxy-halo model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To learn how to build a customized model that is tailored to your interests, see :ref:`model_building`. 
+Halotools has special factories that allow you to build your own model of the galaxy-halo connection. The foundation of this factory pattern is the modular design of the ``empirical_models`` sub-package. 
+
+Galaxy-halo models are broken down into a set of independently-defined *component models*. For example, the `~halotools.empirical_models.NFWProfile` class is a component model governing the spatial distribution of satellite galaxies within their halos, and the `~halotools.empirical_models.Tinker13Cens` class is a component model controlling the stellar-to-halo mass relation of quenched and star-forming central galaxies. To build your own model, you choose a collection of component models and compose them together into a *composite model* using the appropriate Halotools factory class: `~halotools.empirical_models.HodModelFactory` for HOD-style models and `~halotools.empirical_models.SubhaloModelFactory` for abundance matching-style models. 
+
+Composing together different collections of components gives you a large amount of flexibility to construct highly complex models of galaxy evolution. There are no limits on the number of component models you can use, nor on the number or kind of galaxy population(s) that make up the universe in your composite model. 
+
+In choosing component models, you are not restricted to choose from the set of features that ship with the Halotools package. You are welcome to write your own component models and use the Halotools factories to build the composite, to write just one new component model and include it in a collection of Halotools-provided components, or anywhere in between. This way, if you are mostly interested in a specific feature of the galaxy population, you can focus exclusively on developing code for that one feature, and use existing Halotools components to model the remaining features. 
+
+For a step-by-step guide and many worked examples of how to build a customized model that is tailored to your interests, see :ref:`model_building`. 
 
 Making mock observations 
 -------------------------
 
-The ``mock_observables`` sub-package provides a large collection of functions you can use both to study halo catalogs and generate predictions of Halotools models that can be directly compared to observational data: 
+The ``mock_observables`` sub-package provides a large collection of heavily optimized functions for calculating commonly encountered astronomical statistics. 
 
 >>> from halotools import mock_observables # doctest: +SKIP
+
+To list a few examples of functions you can use the ``mock_observables`` sub-package to calculate: 
+
+    1.  the projected correlation function, `~halotools.mock_observables.wp`, 
+
+    2. the pairwise line-of-sight velocity dispersion, `~halotools.mock_observables.los_pvd_vs_rp`, 
+
+    3. marked correlation functions with highly customizable weights, `~halotools.mock_observables.marked_tpcf`, 
+
+    4. galaxy-galaxy lensing, `~halotools.mock_observables.delta_sigma`,  
+
+    5. friends-of-friends group identification, `~halotools.mock_observables.FoFGroups`. 
+
+These functions take simple point data as input. This means that the ``mock_observables`` sub-package not only works with Halotools models and catalogs, but also equally well with hydrodynamical simulation outputs or mocks based on semi-analytic models that have no connection to Halotools. See `~halotools.mock_observables` for a comprehensive list of functions you can choose from. 
+
+
+
 
 
 
