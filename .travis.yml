@@ -64,11 +64,7 @@ matrix:
         - python: 2.7
           env: CONDA_DEPENDENCIES="`echo $CONDA_DEPENDENCIES | sed 's/ h5py//'`" # this magic incantation removes the substring " h5py" from the dependencies
 
-    allow_failures:
-        - python: 3.3
-        - python: 3.4
-        - python: 3.5
-
+    
 before_install:
 
     # If there are matplotlib tests, comment these out to
