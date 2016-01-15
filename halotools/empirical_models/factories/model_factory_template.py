@@ -114,6 +114,8 @@ class ModelFactory(object):
         def test_consistency_with_existing_mock(**kwargs):
             if 'redshift' in kwargs:
                 redshift = kwargs['redshift']
+            elif hasattr(self, 'redshift'):
+                redshift = self.redshift
             elif 'halocat' in kwargs:
                 redshift = kwargs['halocat'].redshift
             else:
@@ -146,7 +148,13 @@ class ModelFactory(object):
                 halocat = kwargs['halocat']
                 del kwargs['halocat'] # otherwise the call to the mock factory below has multiple halocat kwargs
             else:
-                halocat = CachedHaloCatalog(**kwargs)
+                if 'redshift' in kwargs:
+                    halocat = CachedHaloCatalog(**kwargs)
+                elif hasattr(self, 'redshift'):
+                    halocat = CachedHaloCatalog(redshift = self.redshift, **kwargs)
+                else:
+                    halocat = CachedHaloCatalog(**kwargs)
+
 
             if hasattr(self, 'redshift'):
                 if abs(self.redshift - halocat.redshift) > 0.05:

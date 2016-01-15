@@ -46,7 +46,7 @@ class TestHearin15(TestCase):
 		self.highz_toy_halos = self.toy_halo_table[highz_mask]
 		self.lowz_toy_halos = self.toy_halo_table[np.invert(highz_mask)]
 
-		self.halocat = CachedHaloCatalog(preload_halo_table = True)
+		self.halocat = CachedHaloCatalog(preload_halo_table = True, redshift = 0.)
 
 		self.halocat2 = CachedHaloCatalog(preload_halo_table = True, redshift = 2.)
 
@@ -54,31 +54,48 @@ class TestHearin15(TestCase):
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Hearin15(self):
 
-		model = PrebuiltHodModelFactory('hearin15', concentration_binning = (1, 35, 5))
+		model = PrebuiltHodModelFactory('hearin15')
 		model.populate_mock(halocat = self.halocat)
 
 	@pytest.mark.slow
 	@pytest.mark.skipif('not APH_MACHINE')
 	def test_Leauthaud11(self):
 
-		model = PrebuiltHodModelFactory('leauthaud11', concentration_binning = (1, 35, 5))
+		model = PrebuiltHodModelFactory('leauthaud11')
 		model.populate_mock(halocat = self.halocat)
 
+	@pytest.mark.slow
+	@pytest.mark.skipif('not APH_MACHINE')
+	def test_Leauthaud11b(self):
+
+		model = PrebuiltHodModelFactory('leauthaud11') 
 		# Test that an attempt to repopulate with a different halocat raises an exception
 		with pytest.raises(HalotoolsError) as exc:
-			model.populate_mock(redshift=2)
-		with pytest.raises(HalotoolsError) as exc:
-			model.populate_mock(simname='consuelo')
-		with pytest.raises(HalotoolsError) as exc:
-			model.populate_mock(halo_finder='bdm')
+			model.populate_mock(redshift=2) #default redshift != 2
 
-		model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2., 
-			concentration_binning = (1, 35, 5))
+	@pytest.mark.slow
+	@pytest.mark.skipif('not APH_MACHINE')
+	def test_Leauthaud11c(self):
+
+		model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2.)
 		model_highz.populate_mock(halocat = self.halocat2)
+
+	@pytest.mark.slow
+	@pytest.mark.skipif('not APH_MACHINE')
+	def test_Leauthaud11d(self):
+
+		model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2.)
+
 		with pytest.raises(HalotoolsError) as exc:
-			model_highz.populate_mock()
+			model_highz.populate_mock(redshift = 0.)
 		with pytest.raises(HalotoolsError) as exc:
 			model_highz.populate_mock(halocat = self.halocat)
+
+	@pytest.mark.slow
+	@pytest.mark.skipif('not APH_MACHINE')
+	def test_Leauthaud11e(self):
+
+		model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2.)
 		model_highz.populate_mock(redshift = 2.)
 
 
