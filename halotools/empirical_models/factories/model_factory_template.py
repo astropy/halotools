@@ -331,6 +331,8 @@ class ModelFactory(object):
             halocat_kwargs['simname'] = kwargs['simname']
         if 'redshift' in kwargs:
             halocat_kwargs['redshift'] = kwargs['redshift']
+        elif hasattr(self, 'redshift'):
+            halocat_kwargs['redshift'] = self.redshift
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
@@ -506,6 +508,8 @@ class ModelFactory(object):
             halocat_kwargs['simname'] = kwargs['simname']
         if 'redshift' in kwargs:
             halocat_kwargs['redshift'] = kwargs['redshift']
+        elif hasattr(self, 'redshift'):
+            halocat_kwargs['redshift'] = self.redshift
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
