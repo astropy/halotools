@@ -70,29 +70,41 @@ class TestUserSuppliedPtclCatalog(TestCase):
     def test_particle_mass_requirement(self):
 
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedPtclCatalog(Lbox = 200, 
+            ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
                 **self.good_ptclcat_args)
 
     def test_lbox_requirement(self):
 
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedPtclCatalog(particle_mass = 200, 
+            ptclcat = UserSuppliedPtclCatalog(particle_mass = 200, 
                 **self.good_ptclcat_args)
 
     def test_ptcls_contained_inside_lbox(self):
 
         with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedPtclCatalog(Lbox = 20, particle_mass = 100, 
+            ptclcat = UserSuppliedPtclCatalog(Lbox = 20, particle_mass = 100, 
                 **self.good_ptclcat_args)
 
     def test_redshift_is_float(self):
 
         with pytest.raises(HalotoolsError) as err:
-            halocat = UserSuppliedPtclCatalog(
+            ptclcat = UserSuppliedPtclCatalog(
                 Lbox = 200, particle_mass = 100, redshift = '1.0', 
                 **self.good_ptclcat_args)
         substr = "The ``redshift`` metadata must be a float."
         assert substr in err.value.message
+
+
+    def test_successful_load(self):
+
+        ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_ptclcat_args)
+        assert hasattr(ptclcat, 'Lbox')
+        assert ptclcat.Lbox == 200
+        assert hasattr(ptclcat, 'particle_mass')
+        assert ptclcat.particle_mass == 100
+
 
     def tearDown(self):
         try:
