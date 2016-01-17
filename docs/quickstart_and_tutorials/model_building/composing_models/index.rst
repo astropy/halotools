@@ -4,6 +4,4 @@
 Composing New Models from Existing Components
 *********************************************
 
-See :ref:`model_factory_overview`. 
-
-
+Tutorial coming soon!

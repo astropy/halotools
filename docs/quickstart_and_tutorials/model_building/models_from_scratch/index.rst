@@ -4,8 +4,7 @@
 Building New Models from Scratch
 *********************************************
 
-
-
+Tutorial coming soon!
 
 
 
