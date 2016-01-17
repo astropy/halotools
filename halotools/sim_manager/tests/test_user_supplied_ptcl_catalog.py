@@ -105,6 +105,24 @@ class TestUserSuppliedPtclCatalog(TestCase):
         assert hasattr(ptclcat, 'particle_mass')
         assert ptclcat.particle_mass == 100
 
+    def test_additional_metadata(self):
+
+        ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift,
+            arnold_schwarzenegger = 'Stick around!', 
+            **self.good_ptclcat_args)
+        assert hasattr(ptclcat, 'arnold_schwarzenegger')
+        assert ptclcat.arnold_schwarzenegger == 'Stick around!'
+
+    def test_all_halo_columns_have_length_nhalos(self):
+
+        # All halo catalog columns must have length-Nhalos
+        bad_ptclcat_args = deepcopy(self.good_ptclcat_args)
+        with pytest.raises(HalotoolsError):
+            bad_ptclcat_args['x'][0] = -1
+            ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+                particle_mass = 100, redshift = self.redshift,
+                **bad_ptclcat_args)
 
     def tearDown(self):
         try:
