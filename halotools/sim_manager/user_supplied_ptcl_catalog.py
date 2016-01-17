@@ -57,7 +57,7 @@ class UserSuppliedPtclCatalog(object):
             assert Nptcls == len(y)
             assert Nptcls == len(z)
         except KeyError, AssertionError:
-            msg = ("\nThe UserSuppliedHaloCatalog requires ``x``, ``y`` and ``z`` keyword arguments,\n "
+            msg = ("\nThe UserSuppliedPtclCatalog requires ``x``, ``y`` and ``z`` keyword arguments,\n "
                 "each of which must store an ndarray of the same length Nptcls >= 1e4.\n")
             raise HalotoolsError(msg)
 
