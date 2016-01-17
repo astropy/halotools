@@ -169,6 +169,22 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 overwrite = True)
         assert substr not in err.value.message
 
+    @pytest.mark.skipif('not HAS_H5PY')
+    def test_add_ptclcat_to_cache2(self):
+    	""" Verify that the appropriate message is issued when trying to save the file to a non-existent directory.
+    	""" 
+        ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_ptclcat_args)
+
+        basename = 'abc'
+
+        dummy_string = '  '
+        with pytest.raises(HalotoolsError) as err:
+            ptclcat.add_ptclcat_to_cache(
+                basename, dummy_string, dummy_string, dummy_string, dummy_string)
+        substr = "The directory you are trying to store the file does not exist."
+        assert substr in err.value.message
 
 
 
