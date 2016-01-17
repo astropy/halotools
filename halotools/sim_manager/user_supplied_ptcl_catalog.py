@@ -44,10 +44,34 @@ class UserSuppliedPtclCatalog(object):
 
 
     def _parse_constructor_kwargs(self, **kwargs):
-    	return ptcl_table_dict, metadata_dict 
+        try:
+            x = kwargs['x']
+            assert type(x) is np.ndarray 
+            y = kwargs['y']
+            assert type(y) is np.ndarray 
+            z = kwargs['z']
+            assert type(z) is np.ndarray 
 
-    def _test_ptcl_table_dict(self, ptcl_table_dict):
-    	pass
+            Nptcls = custom_len(x)
+            assert Nptcls >= 1e4
+            assert Nptcls == len(y)
+            assert Nptcls == len(z)
+        except KeyError, AssertionError:
+            msg = ("\nThe UserSuppliedHaloCatalog requires ``x``, ``y`` and ``z`` keyword arguments,\n "
+                "each of which must store an ndarray of the same length Nptcls >= 1e4.\n")
+            raise HalotoolsError(msg)
+
+        ptcl_table_dict = (
+            {key: kwargs[key] for key in kwargs 
+            if (type(kwargs[key]) is np.ndarray) 
+            and (custom_len(kwargs[key]) == Nptcls)}
+            )
+
+        metadata_dict = (
+            {key: kwargs[key] for key in kwargs if key not in ptcl_table_dict}
+            )
+
+    	return ptcl_table_dict, metadata_dict 
 
     def _test_metadata_dict(self, **metadata_dict):
     	pass
