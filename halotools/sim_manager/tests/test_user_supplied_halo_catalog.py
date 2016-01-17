@@ -191,6 +191,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         * Enforce that ptcl_table input is an Astropy `~astropy.table.Table` object, not a Numpy recarray
         """
+        pass
 
     def test_ptcl_table_dne(self):
         # Must not have a ptcl_table attribute when none is passed

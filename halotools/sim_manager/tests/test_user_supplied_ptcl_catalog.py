@@ -133,7 +133,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 particle_mass = 100, redshift = self.redshift,
                 **bad_ptclcat_args)
 
-    def test_has_halo_x_column(self):
+    def test_has_x_column(self):
         # must have x column 
         bad_ptclcat_args = deepcopy(self.good_ptclcat_args)
         with pytest.raises(HalotoolsError):
@@ -141,6 +141,35 @@ class TestUserSuppliedPtclCatalog(TestCase):
             ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
                 particle_mass = 100, redshift = self.redshift,
                 **bad_ptclcat_args)
+
+
+    @pytest.mark.skipif('not HAS_H5PY')
+    def test_add_ptclcat_to_cache1(self):
+    	""" Verify the overwrite requirement is enforced
+    	"""
+        ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_ptclcat_args)
+
+        basename = 'abc'
+        fname = os.path.join(self.dummy_cache_baseloc, basename)
+        os.system('touch ' + fname)
+        assert os.path.isfile(fname)
+
+        dummy_string = '  '
+        with pytest.raises(HalotoolsError) as err:
+            ptclcat.add_ptclcat_to_cache(
+                fname, dummy_string, dummy_string, dummy_string)
+        substr = "Either choose a different fname or set ``overwrite`` to True"
+        assert substr in err.value.message
+
+        with pytest.raises(HalotoolsError) as err:
+            ptclcat.add_ptclcat_to_cache(
+                fname, dummy_string, dummy_string, dummy_string, 
+                overwrite = True)
+        assert substr not in err.value.message
+
+
 
 
     def tearDown(self):
