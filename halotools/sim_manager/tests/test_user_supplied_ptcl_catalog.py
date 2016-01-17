@@ -209,7 +209,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache4(self):
-    	""" Enforce string representation of metadata
+    	""" Enforce string representation of positional arguments
     	"""
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
@@ -238,6 +238,8 @@ class TestUserSuppliedPtclCatalog(TestCase):
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache5(self):
+    	""" Enforce string representation of metadata 
+    	"""
         ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
             particle_mass = 100, redshift = self.redshift, 
             **self.good_ptclcat_args)
@@ -262,6 +264,39 @@ class TestUserSuppliedPtclCatalog(TestCase):
         substr = "keyword is not representable as a string."
         assert substr in err.value.message
 
+
+    @pytest.mark.skipif('not HAS_H5PY')
+    def test_add_ptclcat_to_cache6(self):
+        ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_ptclcat_args)
+
+        basename = 'abc.hdf5'
+        fname = os.path.join(self.dummy_cache_baseloc, basename)
+
+        simname = 'dummy_simname'
+        version_name = 'dummy_version_name'
+        processing_notes = 'dummy processing notes'
+
+        assert 'x' in ptclcat.ptcl_table.keys()
+        assert 'y' in ptclcat.ptcl_table.keys()
+        assert 'z' in ptclcat.ptcl_table.keys()
+
+        ptclcat.add_ptclcat_to_cache(
+            fname, simname, version_name, processing_notes, 
+            overwrite = True, some_additional_metadata = processing_notes)
+
+        cache = PtclTableCache()
+        assert ptclcat.log_entry in cache.log
+
+        cache.remove_entry_from_cache_log(
+            ptclcat.log_entry.simname, 
+            ptclcat.log_entry.version_name,
+            ptclcat.log_entry.redshift,
+            ptclcat.log_entry.fname, 
+            raise_non_existence_exception = True, 
+            update_ascii = True,
+            delete_corresponding_ptcl_catalog = True)
 
 
     def tearDown(self):

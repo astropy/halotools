@@ -234,7 +234,6 @@ class PtclTableCacheLogEntry(object):
                 assert 'x' in keys
                 assert 'y' in keys
                 assert 'z' in keys
-                assert len(keys) >= 5
             except AssertionError:
                 num_failures += 1
                 msg += (str(num_failures)+". The particle table "
