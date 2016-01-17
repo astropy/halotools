@@ -74,7 +74,45 @@ class UserSuppliedPtclCatalog(object):
     	return ptcl_table_dict, metadata_dict 
 
     def _test_metadata_dict(self, **metadata_dict):
-    	pass
+        try:
+            assert 'Lbox' in metadata_dict
+            assert custom_len(metadata_dict['Lbox']) == 1
+            assert 'particle_mass' in metadata_dict
+            assert custom_len(metadata_dict['particle_mass']) == 1
+            assert 'redshift' in metadata_dict
+        except AssertionError:
+            msg = ("\nThe UserSuppliedPtclCatalog requires "
+                "keyword arguments ``Lbox``, ``particle_mass`` and ``redshift``\n"
+                "storing scalars that will be interpreted as metadata about the particle catalog.\n")
+            raise HalotoolsError(msg)
+
+        Lbox = metadata_dict['Lbox']
+        assert Lbox > 0, "``Lbox`` must be a positive number"
+
+        try:
+            x, y, z = (
+                self.ptcl_table['x'], 
+                self.ptcl_table['x'], 
+                self.ptcl_table['z']
+                )
+            assert np.all(x >= 0)
+            assert np.all(x <= Lbox)
+            assert np.all(y >= 0)
+            assert np.all(y <= Lbox)
+            assert np.all(z >= 0)
+            assert np.all(z <= Lbox)
+        except AssertionError:
+            msg = ("The ``x``, ``y`` and ``z`` columns must only store arrays\n"
+                "that are bound by 0 and the input ``Lbox``. \n")
+            raise HalotoolsError(msg)
+
+        redshift = metadata_dict['redshift']
+        try:
+            assert type(redshift) == float
+        except AssertionError:
+            msg = ("\nThe ``redshift`` metadata must be a float.\n")
+            raise HalotoolsError(msg)
+
 
     def add_ptclcat_to_cache(self, 
         fname, simname, version_name, processing_notes, 
