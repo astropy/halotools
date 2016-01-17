@@ -124,6 +124,25 @@ class TestUserSuppliedPtclCatalog(TestCase):
                 particle_mass = 100, redshift = self.redshift,
                 **bad_ptclcat_args)
 
+    def test_positions_contained_inside_lbox_alt_test(self):
+        # positions must be < Lbox
+        bad_ptclcat_args = deepcopy(self.good_ptclcat_args)
+        with pytest.raises(HalotoolsError):
+            bad_ptclcat_args['x'][0] = 10000
+            ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+                particle_mass = 100, redshift = self.redshift,
+                **bad_ptclcat_args)
+
+    def test_has_halo_x_column(self):
+        # must have x column 
+        bad_ptclcat_args = deepcopy(self.good_ptclcat_args)
+        with pytest.raises(HalotoolsError):
+            del bad_ptclcat_args['x']
+            ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+                particle_mass = 100, redshift = self.redshift,
+                **bad_ptclcat_args)
+
+
     def tearDown(self):
         try:
             shutil.rmtree(self.dummy_cache_baseloc)
