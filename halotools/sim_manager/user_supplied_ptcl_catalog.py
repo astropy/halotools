@@ -29,9 +29,113 @@ __all__ = ('UserSuppliedPtclCatalog', )
 class UserSuppliedPtclCatalog(object):
     """ Class used to transform a user-provided particle catalog 
     into the standard form recognized by Halotools. 
+
+    Random downsamplings of dark matter particles are not especially useful 
+    catalogs in their own right. So primary purpose of this class 
+    is the `add_ptclcat_to_cache` method, 
+    which sets you up to use the dark matter particle collection 
+    together with the associated halo catalog. 
     
+    See :ref:`working_with_alternative_particle_data` for a tutorial on this class. 
+
     """
     def __init__(self, **kwargs):
+        """
+
+        Parameters 
+        ------------
+        **metadata : float or string 
+            Keyword arguments storing catalog metadata. 
+            The quantities `Lbox` and `particle_mass` 
+            are required and must be in Mpc/h and Msun/h units, respectively. 
+            `redshift` is also required metadata. 
+            See Examples section for further notes. 
+
+        **ptcl_catalog_columns : sequence of arrays 
+            Sequence of length-*Nptcls* arrays passed in as keyword arguments. 
+
+            Each key will be the column name attached to the input array. 
+            At a minimum, there must be columns ``x``, ``y`` and ``z``. 
+            See Examples section for further notes. 
+
+        Notes 
+        -------
+        This class is tested by 
+        `~halotools.sim_manager.tests.test_user_supplied_halo_catalog.TestUserSuppliedPtclCatalog`. 
+
+        Examples 
+        ----------
+        Here is an example using dummy data to show how to create a new `UserSuppliedPtclCatalog` 
+        and store it in cache for future use with the associated halo catalog. 
+        First the setup:
+
+        >>> redshift = 0.0
+        >>> Lbox = 250.
+        >>> particle_mass = 1e9
+        >>> num_ptcls = 1e4
+        >>> x = np.random.uniform(0, Lbox, num_ptcls)
+        >>> y = np.random.uniform(0, Lbox, num_ptcls)
+        >>> z = np.random.uniform(0, Lbox, num_ptcls)
+        >>> ptcl_ids = np.arange(0, num_ptcls)
+        >>> vx = np.random.uniform(-100, 100, num_ptcls)
+        >>> vy = np.random.uniform(-100, 100, num_ptcls)
+        >>> vz = np.random.uniform(-100, 100, num_ptcls)
+
+        Now we simply pass in both the metadata and the particle catalog columns as keyword arguments:
+
+        >>> ptcl_catalog = UserSuppliedPtclCatalog(redshift = redshift, Lbox = Lbox, particle_mass = particle_mass, x = x, y = y, z = z, vx = vx, vy = vy, vz = vz, ptcl_ids = ptcl_ids)
+
+        Take note: it is important that the value of the input ``redshift`` matches 
+        whatever the redshift is of the associated halo catalog. Your ``redshift`` 
+        should be accurate to four decimal places. 
+
+        Now that we have built a Halotools-formatted particle, we add it to the cache as follows. 
+
+        First choose a relatively permanent location on disk where you will be storing the particle data: 
+
+        >>> my_fname = 'some_fname.hdf5'
+
+        Next choose the ``simname`` that matches the ``simname`` of the associated halo catalog, for example:
+
+        >>> my_simname = 'bolplanck'
+
+        Now choose any version name that will help you keep track of 
+        potentially different version of the same catalog of particles. 
+
+        >>> my_version_name = 'any version name'
+
+        Finally, give a short, plain-language descriptions of how 
+        you obtained your collection of particles: 
+
+        >>> my_processing_notes = 'This particle catalog was obtained through the following means: ...'
+
+        Now we add the particle catalog to cache using the following syntax:
+
+        >>> ptcl_catalog.add_ptclcat_to_cache(my_fname, my_simname, my_version_name, my_processing_notes) # doctest: +SKIP
+
+        Your particle catalog has now been cached and is accessible whenever 
+        you load the associated halo catalog into memory. For example:
+
+        >>> from halotools.sim_manager import CachedHaloCatalog
+        >>> halocat = CachedHaloCatalog(simname = my_simname, halo_finder = 'some halo-finder', version_name = 'some version-name', redshift = redshift, ptcl_version_name = my_version_name) # doctest: +SKIP
+
+        Note the arguments passed to the `~halotools.sim_manager.CachedHaloCatalog` class. 
+        The ``version_name`` here refers to the *halos*, not the particles. 
+        When loading the `~halotools.sim_manager.CachedHaloCatalog`, 
+        you specify the version name of the particles 
+        with the ``ptcl_version_name`` keyword argument. 
+        The ``ptcl_version_name`` need not agree with the ``version_name`` of the associated halos. 
+        This allows halo and particle catalogs to evolve independently over time. 
+        In fact, for cases where you have supplied your own particles, it is *strongly* recommended 
+        that you choose a version name for your particles that differs from the version name 
+        that Halotools uses for its catalogs. This will help avoid future confusion over the 
+        where the cached particle catalog came from. 
+
+        The particle catalog itself is stored in the ``ptcl_table`` attribute, with columns accessed as follows:
+
+        >>> array_of_x_positions = halocat.ptcl_table['x'] # doctest: +SKIP
+
+        """
 
         ptcl_table_dict, metadata_dict = self._parse_constructor_kwargs(**kwargs)
         self.ptcl_table = Table(ptcl_table_dict)
