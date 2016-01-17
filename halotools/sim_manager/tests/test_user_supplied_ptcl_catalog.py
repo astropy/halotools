@@ -186,6 +186,26 @@ class TestUserSuppliedPtclCatalog(TestCase):
         substr = "The directory you are trying to store the file does not exist."
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not HAS_H5PY')
+    def test_add_ptclcat_to_cache3(self):
+    	""" Verify that the .hdf5 extension requirement is enforced.
+    	"""
+        ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_ptclcat_args)
+
+        basename = 'abc'
+        fname = os.path.join(self.dummy_cache_baseloc, basename)
+        os.system('touch ' + fname)
+        assert os.path.isfile(fname)
+
+        dummy_string = '  '
+        with pytest.raises(HalotoolsError) as err:
+            ptclcat.add_ptclcat_to_cache(
+                fname, dummy_string, dummy_string, dummy_string, 
+                overwrite = True)
+        substr = "The fname must end with an ``.hdf5`` extension."
+        assert substr in err.value.message
 
 
     def tearDown(self):
