@@ -383,15 +383,6 @@ class TestUserSuppliedHaloCatalog(TestCase):
             update_ascii = True,
             delete_corresponding_halo_catalog = True)
 
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.xfail
-    def test_add_ptcl_table_to_cache(self):
-        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
-            particle_mass = 100, redshift = self.redshift, 
-            **self.good_halocat_args)
-        halocat.add_ptcl_table_to_cache()
-
-
     def tearDown(self):
         try:
             shutil.rmtree(self.dummy_cache_baseloc)
