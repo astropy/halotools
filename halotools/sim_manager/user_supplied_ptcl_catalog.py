@@ -32,7 +32,15 @@ class UserSuppliedPtclCatalog(object):
     
     """
     def __init__(self, **kwargs):
-    	pass
+
+        ptcl_table_dict, metadata_dict = self._parse_constructor_kwargs(**kwargs)
+        self.ptcl_table = Table(ptcl_table_dict)
+
+        self._test_metadata_dict(**metadata_dict)
+        for key, value in metadata_dict.iteritems():
+            setattr(self, key, value)
+
+        self._passively_bind_ptcl_table(**kwargs)
 
 
     def _parse_constructor_kwargs(self, **kwargs):
