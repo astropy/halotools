@@ -207,6 +207,33 @@ class TestUserSuppliedPtclCatalog(TestCase):
         substr = "The fname must end with an ``.hdf5`` extension."
         assert substr in err.value.message
 
+    @pytest.mark.skipif('not HAS_H5PY')
+    def test_add_ptclcat_to_cache4(self):
+    	""" Enforce string representation of metadata
+    	"""
+        ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
+            particle_mass = 100, redshift = self.redshift, 
+            **self.good_ptclcat_args)
+
+        basename = 'abc.hdf5'
+        fname = os.path.join(self.dummy_cache_baseloc, basename)
+        os.system('touch ' + fname)
+        assert os.path.isfile(fname)
+
+        dummy_string = '  '
+        class Dummy(object):
+            pass
+            
+            def __str__(self):
+                raise TypeError
+        not_representable_as_string = Dummy()
+
+        with pytest.raises(HalotoolsError) as err:
+            ptclcat.add_ptclcat_to_cache(
+                fname, not_representable_as_string, dummy_string, dummy_string, 
+                overwrite = True)
+        substr = "must all be strings."
+        assert substr in err.value.message
 
     def tearDown(self):
         try:
