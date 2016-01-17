@@ -295,7 +295,7 @@ class CachedHaloCatalog(object):
 
         matching_entries = list(gen0)     
 
-        msg = ("\nYou tried to load a cached halo catalog "
+        msg = ("\nYou tried to load a cached particle catalog "
             "with the following characteristics:\n\n")
 
         if self._default_simname_choice is True:
