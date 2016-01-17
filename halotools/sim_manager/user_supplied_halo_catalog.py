@@ -275,7 +275,7 @@ class UserSuppliedHaloCatalog(object):
             Nickname of the version of the halo catalog. 
             The ``version_name`` is used as a bookkeeping tool in the cache log.
 
-        processing_notes : string, optional 
+        processing_notes : string 
             String used to provide supplementary notes that will be attached to 
             the hdf5 file storing your halo catalog. 
 
