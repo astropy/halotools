@@ -69,6 +69,14 @@ class TestCachedHaloCatalog(TestCase):
     def test_halo_ptcl_consistency(self):
         """
         """
+        type_mismatch_msg = ("\nThe redshift attribute of your particle catalog\n"
+            "is formatted as a float, not a string, \nwhich conflicts with the "
+            "formatting of the redshfit attribute \nof the corresponding halo catalog.\n"
+            "This is due to a now-fixed bug in the production of the \n"
+            "Halotools-provided particle catalogs. \n"
+            "To resolve this, just run the scripts/download_additional_halocat.py script \n"
+            "and throw the -ptcls_only and -overwrite flags")
+
         cache = HaloTableCache()
         for entry in cache.log:
             constructor_kwargs = (
@@ -84,8 +92,16 @@ class TestCachedHaloCatalog(TestCase):
 
                 hf = h5py.File(halo_log_entry.fname)
                 pf = h5py.File(ptcl_log_entry.fname)
+
                 assert hf.attrs['simname'] == pf.attrs['simname']
-                assert hf.attrs['redshift'] == pf.attrs['redshift']
+
+                try:
+                    assert type(hf.attrs['redshift']) == type(pf.attrs['redshift'])
+                except AssertionError:
+                    msg = ("Type error for the redshift attribute of the ``"+hf.attrs['simname']
+                        +"`` simulation.\n")
+                    msg += type_mismatch_msg
+                    raise HalotoolsError(msg)
 
                 hf.close()
                 pf.close()
