@@ -146,6 +146,8 @@ class UserSuppliedPtclCatalog(object):
 
 
     def _parse_constructor_kwargs(self, **kwargs):
+        """
+        """
         try:
             x = kwargs['x']
             assert type(x) is np.ndarray 
@@ -217,9 +219,34 @@ class UserSuppliedPtclCatalog(object):
 
 
     def add_ptclcat_to_cache(self, 
-        fname, simname, version_name, processing_notes, 
-        overwrite = False, **additional_metadata):
+        fname, simname, version_name, processing_notes, overwrite = False):
+        """
+        Parameters 
+        ------------
+        fname : string 
+            Absolute path of the file to be stored in cache. 
+            Must conclude with an `.hdf5` extension. 
 
+        simname : string 
+            Nickname of the simulation used as a shorthand way to keep track 
+            of the catalogs in your cache. 
+
+        version_name : string 
+            Nickname of the version of the particle catalog. 
+            The ``version_name`` is used as a bookkeeping tool in the cache log.
+            As described in the `~halotools.sim_manager.UserSuppliedPtclCatalog` docstring, 
+            the version name selected here need not match the version name 
+            of the associated halo catalog. 
+
+        processing_notes : string 
+            String used to provide supplementary notes that will be attached to 
+            the hdf5 file storing your particle data. 
+
+        overwrite : bool, optional 
+            If the chosen ``fname`` already exists, then you must set ``overwrite`` 
+            to True in order to write the file to disk. Default is False. 
+
+        """
         try:
             import h5py 
         except ImportError:
@@ -258,17 +285,6 @@ class UserSuppliedPtclCatalog(object):
                 "and ``processing_notes``\nmust all be strings.")
             raise HalotoolsError(msg)
 
-        for key, value in additional_metadata.iteritems():
-            try:
-                _ = str(value)
-            except:
-                msg = ("\nIf you use ``additional_metadata`` keyword arguments \n"
-                    "to provide supplementary metadata about your catalog, \n"
-                    "all such metadata will be bound to the hdf5 file in the "
-                    "format of a string.\nHowever, the value you bound to the "
-                    "``"+key+"`` keyword is not representable as a string.\n")
-                raise HalotoolsError(msg)
-
         ############################################################
         ## Now write the file to disk and add the appropriate metadata 
 
@@ -290,9 +306,6 @@ class UserSuppliedPtclCatalog(object):
         f.attrs.create('time_catalog_was_originally_cached', time_right_now)
 
         f.attrs.create('processing_notes', str(processing_notes))
-
-        for key, value in additional_metadata.iteritems():
-            f.attrs.create(key, str(value))
 
         f.close()
 

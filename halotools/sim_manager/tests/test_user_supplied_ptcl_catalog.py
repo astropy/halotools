@@ -236,34 +236,6 @@ class TestUserSuppliedPtclCatalog(TestCase):
         assert substr in err.value.message
 
 
-    @pytest.mark.skipif('not HAS_H5PY')
-    def test_add_ptclcat_to_cache5(self):
-    	""" Enforce string representation of metadata 
-    	"""
-        ptclcat = UserSuppliedPtclCatalog(Lbox = 200, 
-            particle_mass = 100, redshift = self.redshift, 
-            **self.good_ptclcat_args)
-
-        basename = 'abc.hdf5'
-        fname = os.path.join(self.dummy_cache_baseloc, basename)
-        os.system('touch ' + fname)
-        assert os.path.isfile(fname)
-
-        dummy_string = '  '
-        class Dummy(object):
-            pass
-            
-            def __str__(self):
-                raise TypeError
-        not_representable_as_string = Dummy()
-
-        with pytest.raises(HalotoolsError) as err:
-            ptclcat.add_ptclcat_to_cache(
-                fname, dummy_string, dummy_string, dummy_string, 
-                overwrite = True, some_more_metadata = not_representable_as_string)
-        substr = "keyword is not representable as a string."
-        assert substr in err.value.message
-
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_ptclcat_to_cache6(self):
@@ -283,8 +255,7 @@ class TestUserSuppliedPtclCatalog(TestCase):
         assert 'z' in ptclcat.ptcl_table.keys()
 
         ptclcat.add_ptclcat_to_cache(
-            fname, simname, version_name, processing_notes, 
-            overwrite = True, some_additional_metadata = processing_notes)
+            fname, simname, version_name, processing_notes, overwrite = True)
 
         cache = PtclTableCache()
         assert ptclcat.log_entry in cache.log
