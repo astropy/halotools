@@ -72,6 +72,15 @@ class CachedHaloCatalog(object):
             Default is set by the ``default_version_name`` variable in the 
             `~halotools.sim_manager.sim_defaults` module. 
 
+        ptcl_version_name : string, optional    
+            Nicknake of the version of the particle catalog associated with 
+            the halos. 
+
+            This argument is typically only used if you have cached your own 
+            particles via the `~halotools.sim_manager.UserSuppliedPtclCatalog` class.
+            Default is set by the ``default_version_name`` variable in the 
+            `~halotools.sim_manager.sim_defaults` module.             
+
         fname : string, optional 
             Absolute path to the location on disk storing the hdf5 file 
             of halo data. If passing ``fname``, do not pass the metadata keys 
@@ -167,6 +176,12 @@ class CachedHaloCatalog(object):
     def _determine_cache_log_entry(self, **kwargs):
         """
         """ 
+        try:
+            self.ptcl_version_name = kwargs['ptcl_version_name']
+            self._default_ptcl_version_name_choice = False
+        except KeyError:
+            self.ptcl_version_name = sim_defaults.default_version_name
+            self._default_ptcl_version_name_choice = True
 
         if 'fname' in kwargs:
             fname = kwargs['fname']
@@ -287,10 +302,10 @@ class CachedHaloCatalog(object):
             raise HalotoolsError(msg)
 
         gen0 = ptcl_table_cache.matching_log_entry_generator(
-            simname = self.simname, version_name = self.version_name, 
+            simname = self.simname, version_name = self.ptcl_version_name, 
             redshift = self.redshift, dz_tol = self._dz_tol)
         gen1 = ptcl_table_cache.matching_log_entry_generator(
-            simname = self.simname, version_name = self.version_name)
+            simname = self.simname, version_name = self.ptcl_version_name)
         gen2 = ptcl_table_cache.matching_log_entry_generator(simname = self.simname)
 
         matching_entries = list(gen0)     
@@ -304,11 +319,11 @@ class CachedHaloCatalog(object):
         else:
             msg += "simname = ``" + str(self.simname) + "``\n"
 
-        if self._default_version_name_choice is True:
-            msg += ("version_name = ``" + str(self.version_name) 
+        if self._default_ptcl_version_name_choice is True:
+            msg += ("ptcl_version_name = ``" + str(self.ptcl_version_name) 
                 + "``  (set by sim_defaults.default_version_name)\n")
         else:
-            msg += "version_name = ``" + str(self.version_name) + "``\n"
+            msg += "ptcl_version_name = ``" + str(self.ptcl_version_name) + "``\n"
 
         if self._default_redshift_choice is True:
             msg += ("redshift = ``" + str(self.redshift) 
