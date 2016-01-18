@@ -65,6 +65,37 @@ class TestCachedHaloCatalog(TestCase):
             assert hasattr(halocat, 'redshift')
             assert hasattr(halocat, 'Lbox')
 
+    @pytest.mark.skipif('not HAS_H5PY')
+    def test_halo_ptcl_consistency(self):
+        """
+        """
+        cache = HaloTableCache()
+        for entry in cache.log:
+            constructor_kwargs = (
+                {attr: getattr(entry, attr) 
+                for attr in entry.log_attributes})
+            del constructor_kwargs['fname']
+            halocat = CachedHaloCatalog(**constructor_kwargs)
+            halo_log_entry = halocat.log_entry
+            try:
+                ptcl_log_entry = halocat._retrieve_matching_ptcl_cache_log_entry()
+                assert halo_log_entry.simname == ptcl_log_entry.simname
+                assert halo_log_entry.redshift == ptcl_log_entry.redshift
+
+                hf = h5py.File(halo_log_entry.fname)
+                pf = h5py.File(ptcl_log_entry.fname)
+                assert hf.attrs['simname'] == pf.attrs['simname']
+                assert hf.attrs['redshift'] == pf.attrs['redshift']
+
+                hf.close()
+                pf.close()
+
+
+            except InvalidCacheLogEntry:
+                pass
+
+
+
     @pytest.mark.skipif('not APH_MACHINE')
     def test_default_catalog(self):
         """ Verify that the default halo catalog loads. 
