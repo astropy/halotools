@@ -35,6 +35,9 @@ class PtclTableCache(object):
         else:
             self.log = []
 
+    def update_log_from_current_ascii(self):
+        self.log = self.retrieve_log_from_ascii()
+
     def _overwrite_log_ascii(self, new_log):
         new_log.sort()
         log_table = self._log_table_from_log(new_log)
