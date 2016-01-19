@@ -19,6 +19,7 @@ from . import helper_functions
 
 from ..cached_halo_catalog import CachedHaloCatalog
 from ..halo_table_cache import HaloTableCache
+from ..ptcl_table_cache import PtclTableCache
 from ..download_manager import DownloadManager 
 
 from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
@@ -64,6 +65,53 @@ class TestCachedHaloCatalog(TestCase):
             halocat = CachedHaloCatalog(**constructor_kwargs)
             assert hasattr(halocat, 'redshift')
             assert hasattr(halocat, 'Lbox')
+
+    @pytest.mark.skipif('not HAS_H5PY')
+    def test_halo_ptcl_consistency(self):
+        """
+        """
+        type_mismatch_msg = ("\nThe redshift attribute of your particle catalog\n"
+            "is formatted as a float, not a string, \nwhich conflicts with the "
+            "formatting of the redshfit attribute \nof the corresponding halo catalog.\n"
+            "This is due to a now-fixed bug in the production of the \n"
+            "Halotools-provided particle catalogs. \n"
+            "To resolve this, just run the scripts/download_additional_halocat.py script \n"
+            "and throw the -ptcls_only and -overwrite flags")
+
+        cache = HaloTableCache()
+        for entry in cache.log:
+            constructor_kwargs = (
+                {attr: getattr(entry, attr) 
+                for attr in entry.log_attributes})
+            del constructor_kwargs['fname']
+            halocat = CachedHaloCatalog(**constructor_kwargs)
+            halo_log_entry = halocat.log_entry
+            try:
+                ptcl_log_entry = halocat._retrieve_matching_ptcl_cache_log_entry()
+                assert halo_log_entry.simname == ptcl_log_entry.simname
+                assert halo_log_entry.redshift == ptcl_log_entry.redshift
+
+                hf = h5py.File(halo_log_entry.fname)
+                pf = h5py.File(ptcl_log_entry.fname)
+
+                assert hf.attrs['simname'] == pf.attrs['simname']
+
+                try:
+                    assert type(hf.attrs['redshift']) == type(pf.attrs['redshift'])
+                except AssertionError:
+                    msg = ("Type error for the redshift attribute of the ``"+hf.attrs['simname']
+                        +"`` simulation.\n")
+                    msg += type_mismatch_msg
+                    raise HalotoolsError(msg)
+
+                hf.close()
+                pf.close()
+
+
+            except InvalidCacheLogEntry:
+                pass
+
+
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_default_catalog(self):
@@ -379,6 +427,51 @@ class TestCachedHaloCatalog(TestCase):
                 version_name = 'halotools_alpha_version1', redshift = 11.7632)
         # ######################################################
 
+    @pytest.mark.skipif('not HAS_H5PY')
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_user_supplied_ptcl_consistency(self):
+
+        from ..user_supplied_ptcl_catalog import UserSuppliedPtclCatalog 
+        halocat = CachedHaloCatalog()
+
+        ptclcat = UserSuppliedPtclCatalog(
+            redshift = halocat.redshift, Lbox = halocat.Lbox, 
+            particle_mass = halocat.particle_mass, 
+            x = np.array(halocat.ptcl_table['x']), 
+            y = np.array(halocat.ptcl_table['y']), 
+            z = np.array(halocat.ptcl_table['z']), 
+            vx = np.array(halocat.ptcl_table['vx']), 
+            vy = np.array(halocat.ptcl_table['vy']), 
+            vz = np.array(halocat.ptcl_table['vz'])
+            )
+        ptclcat.ptcl_table['x'] = 0.
+
+        fname = os.path.join(self.dummy_cache_baseloc, 'temp_particles.hdf5')
+
+        ptclcat.add_ptclcat_to_cache(
+            fname, halocat.simname, 'temp_testing_version_name', 'dummy string') 
+
+        assert os.path.isfile(ptclcat.log_entry.fname)
+
+        ptcl_cache = PtclTableCache()
+        assert ptclcat.log_entry in ptcl_cache.log
+
+        halocat2 = CachedHaloCatalog(ptcl_version_name = 'temp_testing_version_name')
+
+        assert np.all(halocat2.ptcl_table['x'] == 0)
+        assert not np.all(halocat.ptcl_table['x'] == 0)
+
+        ptcl_cache.remove_entry_from_cache_log(
+            ptclcat.log_entry.simname, 
+            ptclcat.log_entry.version_name,
+            ptclcat.log_entry.redshift,
+            ptclcat.log_entry.fname, 
+            raise_non_existence_exception = True, 
+            update_ascii = True,
+            delete_corresponding_ptcl_catalog = True)
+
+        assert ptclcat.log_entry not in ptcl_cache.log
+        assert os.path.isfile(ptclcat.log_entry.fname) is False
 
     def tearDown(self):
         try:

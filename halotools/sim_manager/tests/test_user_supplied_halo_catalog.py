@@ -21,6 +21,7 @@ from . import helper_functions
 from astropy.table import Table
 
 from .. import UserSuppliedHaloCatalog
+from ..user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 from ..halo_table_cache import HaloTableCache
 
 from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
@@ -65,7 +66,6 @@ class TestUserSuppliedHaloCatalog(TestCase):
             'y': np.zeros(self.num_ptcl), 
             'z': np.zeros(self.num_ptcl)}
             )
-
 
         self.dummy_cache_baseloc = helper_functions.dummy_cache_baseloc
         try:
@@ -191,6 +191,7 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         * Enforce that ptcl_table input is an Astropy `~astropy.table.Table` object, not a Numpy recarray
         """
+        pass
 
     def test_ptcl_table_dne(self):
         # Must not have a ptcl_table attribute when none is passed
@@ -202,43 +203,81 @@ class TestUserSuppliedHaloCatalog(TestCase):
     def test_ptcl_table_exists_when_given_goodargs(self):
    
         # Must have ptcl_table attribute when argument is legitimate
+        ptclcat = UserSuppliedPtclCatalog(
+            x = np.zeros(self.num_ptcl), 
+            y = np.zeros(self.num_ptcl), 
+            z = np.zeros(self.num_ptcl), 
+            Lbox = 200, particle_mass = 100, 
+            redshift = self.redshift
+            )
+
         halocat = UserSuppliedHaloCatalog(
             Lbox = 200, particle_mass = 100, redshift = self.redshift,
-            ptcl_table = self.good_ptcl_table, **self.good_halocat_args)
+            user_supplied_ptclcat = ptclcat, **self.good_halocat_args)
         assert hasattr(halocat, 'ptcl_table')
 
-    def test_min_numptcl_requirement(self):
-        # Must have at least 1e4 particles
-        num_ptcl2 = 1e3
-        ptcl_table2 = Table(
-            {'x': np.zeros(num_ptcl2), 
-            'y': np.zeros(num_ptcl2), 
-            'z': np.zeros(num_ptcl2)}
-            )
-        with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(
-                Lbox = 200, particle_mass = 100, redshift = self.redshift,
-                ptcl_table = ptcl_table2, **self.good_halocat_args)
+    def test_ptcl_table_bad_args1(self):
 
-    def test_ptcls_have_zposition(self):
-        # Must have a 'z' column 
-        num_ptcl2 = 1e4
-        ptcl_table2 = Table(
-            {'x': np.zeros(num_ptcl2), 
-            'y': np.zeros(num_ptcl2)}
+        # Must have ptcl_table attribute when argument is legitimate
+        ptclcat = UserSuppliedPtclCatalog(
+            x = np.zeros(self.num_ptcl), 
+            y = np.zeros(self.num_ptcl), 
+            z = np.zeros(self.num_ptcl), 
+            Lbox = 100, particle_mass = 100, 
+            redshift = self.redshift
             )
-        with pytest.raises(HalotoolsError):
-            halocat = UserSuppliedHaloCatalog(
-                Lbox = 200, particle_mass = 100, redshift = self.redshift,
-                ptcl_table = ptcl_table2, **self.good_halocat_args)
 
-    def test_ptcls_are_astropy_table(self):
-        # Data structure must be an astropy table, not an ndarray
-        ptcl_table2 = self.good_ptcl_table.as_array()
-        with pytest.raises(HalotoolsError):
+        with pytest.raises(HalotoolsError) as err:
             halocat = UserSuppliedHaloCatalog(
                 Lbox = 200, particle_mass = 100, redshift = self.redshift,
-                ptcl_table = ptcl_table2, **self.good_halocat_args)
+                user_supplied_ptclcat = ptclcat, **self.good_halocat_args)
+        substr = "Inconsistent values of Lbox"
+        assert substr in err.value.message
+
+    def test_ptcl_table_bad_args2(self):
+
+        # Must have ptcl_table attribute when argument is legitimate
+        ptclcat = UserSuppliedPtclCatalog(
+            x = np.zeros(self.num_ptcl), 
+            y = np.zeros(self.num_ptcl), 
+            z = np.zeros(self.num_ptcl), 
+            Lbox = 200, particle_mass = 200, 
+            redshift = self.redshift
+            )
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = UserSuppliedHaloCatalog(
+                Lbox = 200, particle_mass = 100, redshift = self.redshift,
+                user_supplied_ptclcat = ptclcat, **self.good_halocat_args)
+        substr = "Inconsistent values of particle_mass"
+        assert substr in err.value.message
+
+    def test_ptcl_table_bad_args3(self):
+
+        # Must have ptcl_table attribute when argument is legitimate
+        ptclcat = UserSuppliedPtclCatalog(
+            x = np.zeros(self.num_ptcl), 
+            y = np.zeros(self.num_ptcl), 
+            z = np.zeros(self.num_ptcl), 
+            Lbox = 200, particle_mass = 200, 
+            redshift = self.redshift + 0.1
+            )
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = UserSuppliedHaloCatalog(
+                Lbox = 200, particle_mass = 200, redshift = self.redshift,
+                user_supplied_ptclcat = ptclcat, **self.good_halocat_args)
+        substr = "Inconsistent values of redshift"
+        assert substr in err.value.message
+
+    def test_ptcl_table_bad_args4(self):
+
+        with pytest.raises(HalotoolsError) as err:
+            halocat = UserSuppliedHaloCatalog(
+                Lbox = 200, particle_mass = 200, redshift = self.redshift,
+                user_supplied_ptclcat = 98, **self.good_halocat_args)
+        substr = "an instance of UserSuppliedPtclCatalog"
+        assert substr in err.value.message
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_add_halocat_to_cache1(self):
@@ -381,15 +420,6 @@ class TestUserSuppliedHaloCatalog(TestCase):
             raise_non_existence_exception = True, 
             update_ascii = True,
             delete_corresponding_halo_catalog = True)
-
-    @pytest.mark.skipif('not HAS_H5PY')
-    @pytest.mark.xfail
-    def test_add_ptcl_table_to_cache(self):
-        halocat = UserSuppliedHaloCatalog(Lbox = 200, 
-            particle_mass = 100, redshift = self.redshift, 
-            **self.good_halocat_args)
-        halocat.add_ptcl_table_to_cache()
-
 
     def tearDown(self):
         try:

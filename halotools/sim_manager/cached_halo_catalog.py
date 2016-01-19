@@ -72,6 +72,15 @@ class CachedHaloCatalog(object):
             Default is set by the ``default_version_name`` variable in the 
             `~halotools.sim_manager.sim_defaults` module. 
 
+        ptcl_version_name : string, optional    
+            Nicknake of the version of the particle catalog associated with 
+            the halos. 
+
+            This argument is typically only used if you have cached your own 
+            particles via the `~halotools.sim_manager.UserSuppliedPtclCatalog` class.
+            Default is set by the ``default_version_name`` variable in the 
+            `~halotools.sim_manager.sim_defaults` module.             
+
         fname : string, optional 
             Absolute path to the location on disk storing the hdf5 file 
             of halo data. If passing ``fname``, do not pass the metadata keys 
@@ -167,6 +176,12 @@ class CachedHaloCatalog(object):
     def _determine_cache_log_entry(self, **kwargs):
         """
         """ 
+        try:
+            self.ptcl_version_name = kwargs['ptcl_version_name']
+            self._default_ptcl_version_name_choice = False
+        except KeyError:
+            self.ptcl_version_name = sim_defaults.default_version_name
+            self._default_ptcl_version_name_choice = True
 
         if 'fname' in kwargs:
             fname = kwargs['fname']
@@ -287,15 +302,15 @@ class CachedHaloCatalog(object):
             raise HalotoolsError(msg)
 
         gen0 = ptcl_table_cache.matching_log_entry_generator(
-            simname = self.simname, version_name = self.version_name, 
+            simname = self.simname, version_name = self.ptcl_version_name, 
             redshift = self.redshift, dz_tol = self._dz_tol)
         gen1 = ptcl_table_cache.matching_log_entry_generator(
-            simname = self.simname, version_name = self.version_name)
+            simname = self.simname, version_name = self.ptcl_version_name)
         gen2 = ptcl_table_cache.matching_log_entry_generator(simname = self.simname)
 
         matching_entries = list(gen0)     
 
-        msg = ("\nYou tried to load a cached halo catalog "
+        msg = ("\nYou tried to load a cached particle catalog "
             "with the following characteristics:\n\n")
 
         if self._default_simname_choice is True:
@@ -304,11 +319,11 @@ class CachedHaloCatalog(object):
         else:
             msg += "simname = ``" + str(self.simname) + "``\n"
 
-        if self._default_version_name_choice is True:
-            msg += ("version_name = ``" + str(self.version_name) 
+        if self._default_ptcl_version_name_choice is True:
+            msg += ("ptcl_version_name = ``" + str(self.ptcl_version_name) 
                 + "``  (set by sim_defaults.default_version_name)\n")
         else:
-            msg += "version_name = ``" + str(self.version_name) + "``\n"
+            msg += "ptcl_version_name = ``" + str(self.ptcl_version_name) + "``\n"
 
         if self._default_redshift_choice is True:
             msg += ("redshift = ``" + str(self.redshift) 
@@ -544,9 +559,44 @@ class CachedHaloCatalog(object):
             else:
                 raise InvalidCacheLogEntry(ptcl_log_entry._cache_safety_message)
 
+    def _enforce_halo_ptcl_catalog_consistency(self, halo_log_entry, ptcl_log_entry):
+        """
+        """
+        halo_fname = halo_log_entry.fname
+        ptcl_fname = ptcl_log_entry.fname
 
+        hf = self.h5py.File(halo_fname)
+        pf = self.h5py.File(ptcl_fname)
 
+        try:
+            assert abs(float(hf.attrs['redshift']) - float(pf.attrs['redshift'])) < 0.001
+        except AssertionError:
+            msg = ("\nYour halo and particle catalogs have inconsistent redshifts:\n\n"
+                "Halo catalog redshift = " + str(hf.attrs['redshift']) + "\n"
+                "Ptcl catalog redshift = " + str(pf.attrs['redshift']) + "\n\n"
+                )
+            raise HalotoolsError(msg)
 
+        try:
+            assert hf.attrs['simname'] == pf.attrs['simname']
+        except AssertionError:
+            msg = ("\nYour halo and particle catalogs have inconsistent simnames:\n\n"
+                "Halo catalog simname = " + str(hf.attrs['simname']) + "\n"
+                "Ptcl catalog simname = " + str(pf.attrs['simname']) + "\n\n"
+                )
+            raise HalotoolsError(msg)
+
+        try:
+            assert abs(float(hf.attrs['Lbox']) - float(pf.attrs['Lbox'])) < 0.01
+        except AssertionError:
+            msg = ("\nYour halo and particle catalogs have inconsistent Lbox:\n\n"
+                "Halo catalog Lbox = " + str(hf.attrs['Lbox']) + "\n"
+                "Ptcl catalog Lbox = " + str(pf.attrs['Lbox']) + "\n\n"
+                )
+            raise HalotoolsError(msg)
+
+        hf.close()
+        pf.close()
 
 
 
