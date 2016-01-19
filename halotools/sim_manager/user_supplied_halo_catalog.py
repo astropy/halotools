@@ -19,6 +19,7 @@ except ImportError:
 
 from .halo_table_cache import HaloTableCache 
 from .halo_table_cache_log_entry import HaloTableCacheLogEntry, get_redshift_string
+from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
@@ -55,10 +56,12 @@ class UserSuppliedHaloCatalog(object):
             for which you can use any name that begins with ``halo_``
             See Examples section for further notes. 
 
-        ptcl_table : table, optional 
-            Astropy `~astropy.table.Table` object storing dark matter particles 
+        user_supplied_ptclcat : table, optional 
+            Instance of the `~halotools.sim_manager.UserSuppliedPtclCatalog` class. 
+            If this keyword is passed, the `UserSuppliedHaloCatalog` instance 
+            will have a ``ptcl_table`` attribute bound to it storing dark matter particles 
             randomly selected from the snapshot. At a minimum, the table must have 
-            columns ``x``, ``y`` and ``z``. 
+            columns ``x``, ``y`` and ``z``. Default is None. 
 
         Notes 
         -------
@@ -109,6 +112,23 @@ class UserSuppliedHaloCatalog(object):
 
         If you want to store your halo catalog in the Halotools cache, 
         use the `add_halocat_to_cache` method. 
+
+        You also have the option to supply a randomly selected downsample of dark matter particles 
+        via the ``user_supplied_ptclcat`` keyword. This keyword have an instance of the 
+        `~halotools.sim_manager.UserSuppliedPtclCatalog` class bound to it, which 
+        helps ensure consistency between the halo catalog and particles. 
+
+        Here's an example of how to use this argument using some fake data:
+
+        >>> num_ptcls = 1e4
+        >>> ptcl_x = np.random.uniform(0, Lbox, num_ptcls)
+        >>> ptcl_y = np.random.uniform(0, Lbox, num_ptcls)
+        >>> ptcl_z = np.random.uniform(0, Lbox, num_ptcls)
+
+        >>> from halotools.sim_manager import UserSuppliedPtclCatalog
+        >>> ptclcat = UserSuppliedPtclCatalog(x = ptcl_x, y = ptcl_y, z = ptcl_z, Lbox = Lbox, particle_mass = particle_mass, redshift = redshift)
+        >>> halo_catalog = UserSuppliedHaloCatalog(user_supplied_ptclcat = ptclcat, redshift = redshift, halo_spin = spin, simname = simname, Lbox = Lbox, particle_mass = particle_mass, halo_x = x, halo_y = y, halo_z = z, halo_id = ids, halo_mvir = mass)
+
 
         """
         halo_table_dict, metadata_dict = self._parse_constructor_kwargs(**kwargs)
@@ -234,21 +254,47 @@ class UserSuppliedHaloCatalog(object):
         """
 
         try:
-            ptcl_table = kwargs['ptcl_table']
+            user_supplied_ptclcat = kwargs['user_supplied_ptclcat']
 
-            assert type(ptcl_table) is Table
-            assert len(ptcl_table) >= 1e4
-            assert 'x' in ptcl_table.keys()
-            assert 'y' in ptcl_table.keys()
-            assert 'z' in ptcl_table.keys()
+            try:
+                assert isinstance(user_supplied_ptclcat, UserSuppliedPtclCatalog)
+            except AssertionError:
+                msg = ("\n``user_supplied_ptclcat`` must be "
+                    "an instance of UserSuppliedPtclCatalog\n")
+                raise HalotoolsError(msg)
+
+            ptcl_table = user_supplied_ptclcat.ptcl_table
+
+            try:
+                assert user_supplied_ptclcat.Lbox == self.Lbox
+            except AssertionError:
+                msg = ("\nInconsistent values of Lbox between halo and particle catalogs:\n"
+                    "For the halo catalog, Lbox = " + str(self.Lbox) + "\n"
+                    "For the ``user_supplied_ptclcat``, Lbox = " + 
+                    str(user_supplied_ptclcat.Lbox) + "\n\n")
+                raise HalotoolsError(msg)
+
+            try:
+                assert user_supplied_ptclcat.particle_mass == self.particle_mass
+            except AssertionError:
+                msg = ("\nInconsistent values of particle_mass between halo and particle catalogs:\n"
+                    "For the halo catalog, particle_mass = " + str(self.particle_mass) + "\n"
+                    "For the ``user_supplied_ptclcat``, particle_mass = " + 
+                    str(user_supplied_ptclcat.particle_mass) + "\n\n")
+                raise HalotoolsError(msg)
+
+            try:
+                z1 = get_redshift_string(user_supplied_ptclcat.redshift)
+                z2 = get_redshift_string(self.redshift)
+                assert z1 == z2
+            except AssertionError:
+                msg = ("\nInconsistent values of redshift between halo and particle catalogs:\n"
+                    "For the halo catalog, redshift = " + str(self.redshift) + "\n"
+                    "For the ``user_supplied_ptclcat``, redshift = " + 
+                    str(user_supplied_ptclcat.redshift) + "\n\n")
+                raise HalotoolsError(msg)
 
             self.ptcl_table = ptcl_table
-
-        except AssertionError:
-            msg = ("\nIf passing a ``ptcl_table`` to UserSuppliedHaloCatalog, \n"
-                "this argument must contain an Astropy Table object with at least 1e4 rows\n"
-                "and ``x``, ``y`` and ``z`` columns. \n")
-            raise HalotoolsError(msg)
 
         except KeyError:
             pass

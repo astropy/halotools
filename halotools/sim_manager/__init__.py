@@ -17,6 +17,7 @@ from .download_manager import *
 
 from .cached_halo_catalog import CachedHaloCatalog
 from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
+from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
 from .rockstar_hlist_reader import RockstarHlistReader
 from .tabular_ascii_reader import TabularAsciiReader
