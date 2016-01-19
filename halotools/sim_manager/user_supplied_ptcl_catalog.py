@@ -89,7 +89,7 @@ class UserSuppliedPtclCatalog(object):
         whatever the redshift is of the associated halo catalog. Your ``redshift`` 
         should be accurate to four decimal places. 
 
-        Now that we have built a Halotools-formatted particle, we add it to the cache as follows. 
+        Now that we have built a Halotools-formatted particle catalog, we can add it to the cache as follows. 
 
         First choose a relatively permanent location on disk where you will be storing the particle data: 
 
@@ -134,6 +134,10 @@ class UserSuppliedPtclCatalog(object):
         The particle catalog itself is stored in the ``ptcl_table`` attribute, with columns accessed as follows:
 
         >>> array_of_x_positions = halocat.ptcl_table['x'] # doctest: +SKIP
+
+        If you do not wish to store your particle catalog in cache, 
+        see the :ref:`using_user_supplied_ptcl_catalog_without_the_cache` section 
+        of the :ref:`working_with_alternative_particle_data` tutorial. 
 
         """
 

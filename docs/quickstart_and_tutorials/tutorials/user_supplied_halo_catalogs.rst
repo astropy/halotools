@@ -21,7 +21,7 @@ work with the mock-population factories of Halotools, with or without caching th
 Basic usage of the `~halotools.sim_manager.UserSuppliedHaloCatalog` class
 ============================================================================
 
-In order to put your halo catalog into a standard form recognized by halos, 
+In order to put your halo catalog into a standard form recognized by Halotools, 
 the only thing you need to do is instantiate the 
 `~halotools.sim_manager.UserSuppliedHaloCatalog` class 
 by passing your simulation data and metadata to the constructor. 
