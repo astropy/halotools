@@ -75,8 +75,10 @@ class BinaryGalpropModel(object):
 
         setattr(self, 'mc_'+self.galprop_name, self._mc_galprop)
 
-        self._methods_to_inherit = ['mc_'+self.galprop_name]
-        self._mock_generation_calling_sequence = copy(self._methods_to_inherit)
+        self._mock_generation_calling_sequence = ['mc_'+self.galprop_name]
+        self._methods_to_inherit = (
+            ['mean_'+self.galprop_name+'_fraction', 
+            'mc_'+self.galprop_name])
 
         self._galprop_dtypes_to_allocate = np.dtype([(self.galprop_name, bool)])
 
@@ -117,7 +119,10 @@ class BinaryGalpropModel(object):
         mean_func = getattr(self, 'mean_'+self.galprop_name+'_fraction')
         mean_galprop_fraction = mean_func(**kwargs)
         mc_generator = np.random.random(custom_len(mean_galprop_fraction))
-        return np.where(mc_generator < mean_galprop_fraction, True, False)
+        result = np.where(mc_generator < mean_galprop_fraction, True, False)
+        if 'table' in kwargs:
+            kwargs['table'][self.galprop_name] = result
+        return result
 
 class BinaryGalpropInterpolModel(BinaryGalpropModel):
     """
