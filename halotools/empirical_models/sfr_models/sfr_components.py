@@ -143,6 +143,11 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         galprop_name : array, keyword argument
             String giving the name of galaxy property being assigned a binary value. 
 
+        gal_type : string, optional 
+            Name of the galaxy population.
+            Default is None, in which case the model instance will not have 
+            the ``gal_type`` attribute. 
+
         prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
             stellar mass.  
@@ -222,6 +227,11 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         self._abcissa = galprop_abcissa
         self._ordinates = galprop_ordinates
 
+        try:
+            self.gal_type = kwargs['gal_type']
+        except KeyError:
+            pass
+
         if self._interpol_method=='spline':
             if 'input_spline_degree' in kwargs.keys():
                 self._input_spine_degree = kwargs['input_spline_degree']
@@ -233,7 +243,10 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
                 custom_len(self._abcissa)-1])
 
         self._abcissa_key = self.galprop_name+'_abcissa'
-        self._ordinates_key_prefix = self.galprop_name+'_ordinates'
+        try:
+            self._ordinates_key_prefix = self.gal_type + '_'+self.galprop_name+'_ordinates'
+        except AttributeError:
+            self._ordinates_key_prefix = self.galprop_name+'_ordinates'
         self._build_param_dict()
 
         setattr(self, self.galprop_name+'_abcissa', self._abcissa)
