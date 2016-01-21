@@ -620,32 +620,26 @@ class SubhaloModelFactory(ModelFactory):
                 warn(missing_calling_sequence_msg % component_model.__class__.__name__)
 
     def set_model_redshift(self):
-        """ Method sets the redshift of the composite model, simultaneously enforcing self-consistency 
-        between the the redshifts of the component models. 
+        """ 
         """
-        msg = ("Inconsistency between the redshifts of the component models:\n"
-            "    For component model 1 = ``%s``, the model has redshift = %.2f.\n"
-            "    For component model 2 = ``%s``, the model has redshift = %.2f.\n")
 
-        # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        zlist = list(model.redshift for model in self.model_dictionary.values() 
+            if hasattr(model, 'redshift'))
 
-            if hasattr(component_model, 'redshift'):
-                redshift = component_model.redshift 
-                try:
-                    if redshift != existing_redshift:
-                        t = (component_model.__class__.__name__, redshift, 
-                            last_component.__class__.__name__, existing_redshift)
-                        raise HalotoolsError(msg % t)
-                except NameError:
-                    existing_redshift = redshift 
-
-            last_component = component_model
-
-        try:
-            self.redshift = redshift
-        except NameError:
+        if len(set(zlist)) == 0:
             self.redshift = sim_defaults.default_redshift
+        elif len(set(zlist)) == 1:
+            self.redshift = float(zlist[0])
+        else:
+            msg = ("Inconsistency between the redshifts of the component models:\n\n")
+            for modelname, model in self.model_dictionary.iteritems():
+                clname = model.__class__.__name__
+                if hasattr(model, 'redshift'):
+                    zs = str(model.redshift)
+                    msg += ("For modelname = ``" + modelname + "``, the "
+                        +clname+" instance has redshift = " + zs + "\n")
+            raise HalotoolsError(msg)
+
 
     def build_prim_sec_haloprop_list(self):
         """ Method builds the ``_haloprop_list`` of strings. 
