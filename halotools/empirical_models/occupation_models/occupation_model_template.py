@@ -70,6 +70,11 @@ class OccupationComponent(object):
             raise SyntaxError("Any sub-class of OccupationComponent must "
                 "implement a method named %s " % required_method_name)
 
+        try:
+            self.redshift = kwargs['redshift']
+        except KeyError:
+            pass
+
         # The _methods_to_inherit determines which methods will be directly callable 
         # by the composite model built by the HodModelFactory
         try:
