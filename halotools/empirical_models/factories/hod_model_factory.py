@@ -701,31 +701,26 @@ class HodModelFactory(ModelFactory):
     def set_model_redshift(self):
         """ 
         """
-        msg = ("Inconsistency between the redshifts of the component models:\n"
-            "    For gal_type = ``%s``, the %s model has redshift = %.2f.\n"
-            "    For gal_type = ``%s``, the %s model has redshift = %.2f.\n")
 
+        zlist = list(model.redshift for model in self.model_dictionary.values() 
+            if hasattr(model, 'redshift'))
 
-        for component_model in self.model_dictionary.values():
-            gal_type = component_model.gal_type
-
-            if hasattr(component_model, 'redshift'):
-                redshift = component_model.redshift 
-                try:
-                    if redshift != existing_redshift:
-                        t = (gal_type, component_model.__class__.__name__, redshift, 
-                            last_gal_type, last_component.__class__.__name__, existing_redshift)
-                        raise HalotoolsError(msg % t)
-                except NameError:
-                    existing_redshift = redshift 
-
-            last_component = component_model
-            last_gal_type = gal_type
-
-        try:
-            self.redshift = redshift
-        except NameError:
+        if len(set(zlist)) == 0:
             self.redshift = sim_defaults.default_redshift
+        elif len(set(zlist)) == 1:
+            self.redshift = float(zlist[0])
+        else:
+            msg = ("Inconsistency between the redshifts of the component models:\n\n")
+            for model in self.model_dictionary.values():
+                gal_type = model.gal_type
+                clname = model.__class__.__name__
+                if hasattr(model, 'redshift'):
+                    zs = str(model.redshift)
+                    msg += ("For gal_type = ``" + gal_type + "``, the "
+                        +clname+" instance has redshift = " + zs + "\n")
+            raise HalotoolsError(msg)
+
+
 
 
     def build_prim_sec_haloprop_list(self):
@@ -743,6 +738,8 @@ class HodModelFactory(ModelFactory):
                 haloprop_list.append(component_model.prim_haloprop_key)
             if hasattr(component_model, 'sec_haloprop_key'):
                 haloprop_list.append(component_model.sec_haloprop_key)
+            if hasattr(component_model, 'list_of_haloprops_needed'):
+                haloprop_list.extend(component_model.list_of_haloprops_needed)
 
         self._haloprop_list = list(set(haloprop_list))
 
