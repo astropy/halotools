@@ -185,6 +185,10 @@ class MockFactory(object):
             Bins in which the correlation function will be calculated. 
             Default is set in `~halotools.empirical_models.model_defaults` module. 
 
+        num_threads : int, optional 
+            Number of CPU cores to use in the calculation. 
+            Default is maximum number available. 
+
         Returns 
         --------
         rbin_centers : array 
@@ -245,7 +249,11 @@ class MockFactory(object):
                 )
             raise HalotoolsError(msg)
 
-        Nthreads = cpu_count()
+        try:
+            num_threads = kwargs['num_threads']
+        except KeyError:
+            num_threads = cpu_count()
+
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
         else:
@@ -263,7 +271,7 @@ class MockFactory(object):
             pos = three_dim_pos_bundle(table = self.galaxy_table, 
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
-                pos, rbins, period=self.halocat.Lbox, num_threads=Nthreads, 
+                pos, rbins, period=self.halocat.Lbox, num_threads=num_threads, 
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
@@ -277,7 +285,7 @@ class MockFactory(object):
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             xi11, xi12, xi22 = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=pos2, 
-                period=self.halocat.Lbox, num_threads=Nthreads, 
+                period=self.halocat.Lbox, num_threads=num_threads, 
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, xi11, xi12, xi22 
 
@@ -309,6 +317,10 @@ class MockFactory(object):
         rbins : array, optional 
             Bins in which the correlation function will be calculated. 
             Default is set in `~halotools.empirical_models.model_defaults` module. 
+
+        num_threads : int, optional 
+            Number of CPU cores to use in the calculation. 
+            Default is maximum number available. 
 
         Returns 
         --------
@@ -374,7 +386,11 @@ class MockFactory(object):
         ptcl_pos = three_dim_pos_bundle(table = ptcl_table, 
             key1='x', key2='y', key3='z')
 
-        Nthreads = cpu_count()
+        try:
+            num_threads = kwargs['num_threads']
+        except KeyError:
+            num_threads = cpu_count()
+
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
         else:
@@ -393,7 +409,7 @@ class MockFactory(object):
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                period=self.halocat.Lbox, num_threads=Nthreads, do_auto=False, 
+                period=self.halocat.Lbox, num_threads=num_threads, do_auto=False, 
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
@@ -407,11 +423,11 @@ class MockFactory(object):
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                period=self.halocat.Lbox, num_threads=Nthreads, do_auto=False, 
+                period=self.halocat.Lbox, num_threads=num_threads, do_auto=False, 
                 approx_cell1_size = [rmax, rmax, rmax])
             clustering2 = mock_observables.tpcf(
                 sample1=pos2, rbins=rbins, sample2=ptcl_pos, 
-                period=self.halocat.Lbox, num_threads=Nthreads, do_auto=False, 
+                period=self.halocat.Lbox, num_threads=num_threads, do_auto=False, 
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering, clustering2 
 
@@ -440,6 +456,10 @@ class MockFactory(object):
             normalized by the mean separation between galaxies. 
             Default is set in `~halotools.empirical_models.model_defaults` module. 
 
+        num_threads : int, optional 
+            Number of CPU cores to use in the calculation. 
+            Default is maximum number available. 
+
         Returns 
         --------
         ids : array 
@@ -461,7 +481,10 @@ class MockFactory(object):
                 )
             raise HalotoolsError(msg)
 
-        Nthreads = cpu_count()
+        try:
+            num_threads = kwargs['num_threads']
+        except KeyError:
+            num_threads = cpu_count()
 
         x = self.galaxy_table['x']
         y = self.galaxy_table['y']
@@ -473,7 +496,7 @@ class MockFactory(object):
 
         group_finder = mock_observables.FoFGroups(positions=pos, 
             b_perp = b_perp, b_para = b_para, 
-            Lbox = self.halocat.Lbox, num_threads = Nthreads)
+            Lbox = self.halocat.Lbox, num_threads = num_threads)
 
         return group_finder.group_ids
 
