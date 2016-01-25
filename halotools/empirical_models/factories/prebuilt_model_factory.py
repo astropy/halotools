@@ -133,7 +133,7 @@ class PrebuiltHodModelFactory(HodModelFactory):
     """ Factory class providing instances of `HodModelFactory` models that come prebuilt with Halotools. 
     The list of available options are 
 
-    * 'zheng07' (see `~halotools.empirical_models.zheng07_model_dictionary`)
+    * 'zheng07' (see :ref:`zheng07_composite_model` for a tutorial)
     
     * 'leauthaud11' (see `~halotools.empirical_models.leauthaud11_model_dictionary`)
 

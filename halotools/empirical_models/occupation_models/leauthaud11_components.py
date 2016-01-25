@@ -167,7 +167,7 @@ class Leauthaud11Cens(OccupationComponent):
 
     def mean_log_halo_mass(self, log_stellar_mass):
         """ Return the base-10 logarithm of the halo mass of a central galaxy as a function 
-        of the input stellar mass.  
+        of the base-10 logarithm of the input stellar mass. 
 
         Parameters 
         ----------
@@ -226,8 +226,6 @@ class Leauthaud11Sats(OccupationComponent):
         self.central_occupation_model = Leauthaud11Cens(
             threshold=threshold, prim_haloprop_key = prim_haloprop_key, 
             redshift = redshift, **kwargs)
-        self.ancillary_model_dependencies = ['central_occupation_model']
-        self.ancillary_model_param_keys = self.central_occupation_model.param_dict.keys()
 
         super(Leauthaud11Sats, self).__init__(
             gal_type='satellites', threshold=threshold, 

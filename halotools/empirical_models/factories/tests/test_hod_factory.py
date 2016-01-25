@@ -58,11 +58,11 @@ def test_alt_Zheng07_composites():
 	default_model = PrebuiltHodModelFactory('zheng07')
 	default_model_dictionary = default_model._input_model_dictionary
 	default_satocc_component = default_model_dictionary['satellites_occupation']
-	assert not hasattr(default_satocc_component, 'ancillary_model_dependencies')
+
 	cenmod_satocc_compoent = Zheng07Sats(
 		threshold = default_satocc_component.threshold, modulate_with_cenocc = True, 
 		gal_type_centrals = 'centrals')
-	assert hasattr(cenmod_satocc_compoent, 'ancillary_model_dependencies')
+
 	cenmod_model_dictionary = copy(default_model_dictionary)
 	cenmod_model_dictionary['satellites_occupation'] = cenmod_satocc_compoent
 	cenmod_model = factories.HodModelFactory(**cenmod_model_dictionary)

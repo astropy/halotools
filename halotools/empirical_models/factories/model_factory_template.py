@@ -73,28 +73,34 @@ class ModelFactory(object):
     def populate_mock(self, **kwargs):
         """ Method used to populate a simulation using the model. 
 
-        After calling this method, ``self`` will have a new ``mock`` attribute, 
-        which has a ``table`` bound to it containing the Monte Carlo 
+        After calling this method, the model instance will have a new ``mock`` attribute, 
+        which has a ``galaxy_table`` attribute bound to it containing the Monte Carlo 
         realization of the model. 
 
         Parameters 
         ----------
         halocat : object, optional 
-            Class instance of `~halotools.sim_manager.CachedHaloCatalog`. 
-            This object contains the halo catalog and its metadata.  
+            Either an instance of `~halotools.sim_manager.CachedHaloCatalog` 
+            or `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+            If you pass a ``halocat`` argument, do not pass additional arguments. 
 
         simname : string, optional
-            Nickname of the simulation. Currently supported simulations are 
+            Nickname of the simulation of the cached catalog. 
+            Currently supported simulations are 
             Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Nickname of the halo-finder, of the cached catalog, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        version_name : string, optional 
+            Nickname of the version of the cached halo catalog you want to populate. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         redshift : float, optional
-            Redshift of the desired catalog. 
+            Redshift of the cached catalog. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         """

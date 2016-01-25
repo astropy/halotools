@@ -22,8 +22,11 @@ __all__ = ['leauthaud11_model_dictionary']
     
 def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass_threshold, 
     **kwargs):
-    """ Dictionary to build an HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
+    """ 
+    Dictionary to build an HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
     The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
+
+    See :ref:`leauthaud11_composite_model` for a tutorial on this model. 
 
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
@@ -38,8 +41,7 @@ def leauthaud11_model_dictionary(threshold = model_defaults.default_stellar_mass
     satellites in this model follow an (unbiased) NFW profile, as governed by the 
     `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-    This composite model is built by the `~halotools.empirical_models.HodModelFactory`, 
-    which followed the instructions contained in `~halotools.empirical_models.Leauthaud11_dictionary`. 
+    This composite model is built by the `~halotools.empirical_models.HodModelFactory`.
 
     Parameters 
     ----------
