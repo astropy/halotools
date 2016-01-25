@@ -31,6 +31,8 @@ the probability that a halo of mass :math:`M_{\rm halo}` contains :math:`N_{\rm 
 galaxies in some sample. All HOD models are based on host halos only; 
 this distinguishes them from "subhalo-based models": in HOD-style models 
 there is no connection between subhalo and satellite abundance. 
+All the models in this section are built by the 
+`~halotools.empirical_models.PrebuiltHodModelFactory` 
 
 
 Traditional HOD models
@@ -77,6 +79,8 @@ Subhalo models presume a one-to-one correspondence between galaxies and (sub)hal
 Central galaxies reside at the center of host halos, satellite galaxies at the center of subhalos. 
 This assumption relaxes many of the "spherical cow" assumptions typical of HOD-style models, 
 though this is at the expense of fine-grained control over the galaxy distribution. 
+All the models in this section are built by the 
+`~halotools.empirical_models.PrebuiltSubhaloModelFactory` 
 
 
 Stellar-to-halo mass models (SMHM)
