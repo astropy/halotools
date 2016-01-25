@@ -22,16 +22,21 @@ Before diving in to the list of prebuilt models, we'll first begin by defining s
 
 * A **component model** provides a map between dark matter halos and a single property of the resident galaxy population. Examples include the stellar-to-halo mass relation, an NFW radial profile and the halo mass-dependence of the quenched fraction. 
 
+HOD-Style Models
+========================
+HOD-style models make predictions for galaxy samples selected 
+to be brighter or more massive than some threshold lower bound. 
+The fundamental quantity in HOD-style models is :math:`P(N_{\rm gal} | M_{\rm halo})`, 
+the probability that a halo of mass :math:`M_{\rm halo}` contains :math:`N_{\rm gal}` 
+galaxies in some sample. All HOD models are based on host halos only; 
+this distinguishes them from "subhalo-based models": in HOD-style models 
+there is no connection between subhalo and satellite abundance. 
 
 
 Traditional HOD models
-=========================
-
-HOD-style models make predictions for galaxy samples selected 
-to be brighter or more massive than some threshold lower bound. 
-It is also common in the literature to apply this class of model 
-to galaxy samples that have a more complex selection function 
-such as red sequence galaxies or quasars. 
+--------------------------------------
+The following models are two of the most widely used HODs in the literature. 
+The first is based on luminosity threshold samples, the second stellar mass thresholds. 
 
 .. toctree::
    :maxdepth: 1
@@ -41,7 +46,7 @@ such as red sequence galaxies or quasars.
 
 
 Decorated HOD models
-============================
+--------------------------------------
 Decorated HOD models relax the assumption that halo mass is the only 
 relevant halo property governing galaxy occupation statistics. 
 This class of model naturally inherits all of the flexibility 
@@ -54,7 +59,7 @@ further flexibility to study the co-evolution of galaxies and their halos.
    hearin15_composite_model
 
 HOD models with color/SFR
-==========================
+--------------------------------------
 While traditional HOD models have historically been applied to color-selected 
 samples, such models do not contain any parameters controlling the dependence 
 of color/SFR on halo properties. The HOD models in this section *do* 
@@ -66,14 +71,19 @@ constrain the physics of star formation and quenching.
 
    tinker13_composite_model
 
+Subhalo-based Models
+====================================
+Subhalo models presume a one-to-one correspondence between galaxies and (sub)halos. 
+Central galaxies reside at the center of host halos, satellite galaxies at the center of subhalos. 
+This assumption relaxes many of the "spherical cow" assumptions typical of HOD-style models, 
+though this is at the expense of fine-grained control over the galaxy distribution. 
+
 
 Stellar-to-halo mass models (SMHM)
-====================================
+--------------------------------------
 An SMHM model presumes that there is a one-to-one correspondence between 
 stellar mass and subhalo mass. The SMHM relation is given by some parameterized form 
 typically motivated by results based on abundance matching. 
-As SMHM models are based on subhalos, they relax many of the "spherical cow" assumptions 
-typical of HOD-style models. 
 
 .. toctree::
    :maxdepth: 1
@@ -82,7 +92,10 @@ typical of HOD-style models.
 
 
 Abundance matching models 
-===========================
+--------------------------------------
+Abundance matching models do not parameterize the stellar-to-halo mass relation. 
+In abundance matching, the SMHM relation is defined by the condition that the 
+stellar mass function of the model must be exactly correct. 
 
 .. toctree::
    :maxdepth: 1
