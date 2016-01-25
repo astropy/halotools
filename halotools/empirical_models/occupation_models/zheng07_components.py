@@ -64,10 +64,9 @@ class Zheng07Cens(OccupationComponent):
         >>> cen_model = Zheng07Cens(threshold=-19.5)
         >>> cen_model = Zheng07Cens(prim_haloprop_key='halo_m200b')
 
-        Notes 
-        -----
-        The test suite for this model is documented at 
-        `~halotools.empirical_models.test_empirical_models.test_Zheng07Cens`
+        See also 
+        ----------
+        TestZheng07Cens
         """
         upper_occupation_bound = 1.0
 
@@ -285,10 +284,9 @@ class Zheng07Sats(OccupationComponent):
         :math:`\\langle N_{\mathrm{sat}}\\rangle^{\mathrm{model 2}} = \\langle N_{\mathrm{cen}}\\rangle\\times\\langle N_{\mathrm{sat}}\\rangle^{\mathrm{model 1}}`
 
 
-        Notes 
-        -----
-        The test suite for this model is documented at 
-        `~halotools.empirical_models.test_empirical_models.test_Zheng07Sats`
+        See also 
+        ----------
+        TestZheng07Sats
 
         """
         upper_occupation_bound = float("inf")
