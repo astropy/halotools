@@ -79,7 +79,7 @@ def test_Leauthaud11Sats():
 #
 	# Check that modulate_with_cenocc strictly decreases the mean occupations
 	model2a = Leauthaud11Sats(modulate_with_cenocc = False)
-	model2b = Leauthaud11Sats(modulate_with_cenocc = True, gal_type_centrals='centrals')
+	model2b = Leauthaud11Sats(modulate_with_cenocc = True)
 	nsat2a = model2a.mean_occupation(prim_haloprop = 5.e12)
 	nsat2b = model2b.mean_occupation(prim_haloprop = 5.e12)
 	assert model2b.central_occupation_model.mean_occupation(prim_haloprop = 5.e12) < 1
