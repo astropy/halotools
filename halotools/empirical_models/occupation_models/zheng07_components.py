@@ -137,8 +137,9 @@ class Zheng07Cens(OccupationComponent):
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
-            function_name = "Zheng07Cens.mean_occupation"
-            raise HalotoolsModelInputError(function_name)
+            msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
+                "to the ``mean_occupation`` function of the ``Zheng07Cens`` class.\n")
+            raise HalotoolsError(msg)
 
         logM = np.log10(mass)
         mean_ncen = 0.5*(1.0 + erf(
@@ -188,15 +189,22 @@ class Zheng07Cens(OccupationComponent):
             threshold_array = threshold_array[::-1]
 
             threshold_index = np.where(threshold_array==threshold)[0]
-            if len(threshold_index)==1:
-                param_dict = {
-                'logMmin': logMmin_array[threshold_index[0]],
-                'sigma_logM' : sigma_logM_array[threshold_index[0]]
-                }
-            else:
-                raise ValueError("Input luminosity threshold "
-                    "does not match any of the Table 1 values of "
-                    "Zheng et al. 2007 (arXiv:0703457)")
+            if len(threshold_index)==0:
+                msg = ("\nInput luminosity threshold "
+                    "does not match any of the Table 1 values \nof "
+                    "Zheng et al. 2007 (arXiv:0703457).\n"
+                    "Choosing the best-fit parameters "
+                    "associated the default_luminosity_threshold variable \n"
+                    "set in the model_defaults module.\n"
+                    "You can always manually change the values in ``param_dict``.\n")
+                warnings.warn(msg)
+                threshold = model_defaults.default_luminosity_threshold
+                threshold_index = np.where(threshold_array==threshold)[0]
+
+            param_dict = (
+                {'logMmin': logMmin_array[threshold_index[0]],
+                'sigma_logM' : sigma_logM_array[threshold_index[0]]}
+                )
 
             return param_dict
 
@@ -367,8 +375,9 @@ class Zheng07Sats(OccupationComponent):
         elif 'prim_haloprop' in kwargs.keys():
             mass = kwargs['prim_haloprop']
         else:
-            function_name = "Zheng07Sats.mean_occupation"
-            raise HalotoolsModelInputError(function_name)
+            msg = ("\nYou must pass either a ``table`` or ``prim_haloprop`` argument \n"
+                "to the ``mean_occupation`` function of the ``Zheng07Sats`` class.\n")
+            raise HalotoolsError(msg)
         mass = np.array(mass)
         if np.shape(mass) == ():
             mass = np.array([mass])
@@ -433,15 +442,25 @@ class Zheng07Sats(OccupationComponent):
             threshold_array = threshold_array[::-1]
 
             threshold_index = np.where(threshold_array==threshold)[0]
-            if len(threshold_index)==1:
-                param_dict = {
-                'logM0' : logM0_array[threshold_index[0]],
+
+            if len(threshold_index)==0:
+                msg = ("\nInput luminosity threshold "
+                    "does not match any of the Table 1 values \nof "
+                    "Zheng et al. 2007 (arXiv:0703457).\n"
+                    "Choosing the best-fit parameters "
+                    "associated the default_luminosity_threshold variable \n"
+                    "set in the model_defaults module.\n"
+                    "You can always manually change the values in ``param_dict``.\n")
+                warnings.warn(msg)
+                threshold = model_defaults.default_luminosity_threshold
+                threshold_index = np.where(threshold_array==threshold)[0]
+                warnings.warn(msg)
+
+            param_dict = (
+                {'logM0' : logM0_array[threshold_index[0]],
                 'logM1' : logM1_array[threshold_index[0]],
-                'alpha' : alpha_array[threshold_index[0]]
-                }
-            else:
-                raise ValueError("Input luminosity threshold "
-                    "does not match any of the Table 1 values of Zheng et al. 2007 (arXiv:0703457).")
+                'alpha' : alpha_array[threshold_index[0]]}
+                )
             return param_dict
 
         if publication in ['zheng07', 'Zheng07', 'Zheng_etal07', 'zheng_etal07','zheng2007','Zheng2007']:
