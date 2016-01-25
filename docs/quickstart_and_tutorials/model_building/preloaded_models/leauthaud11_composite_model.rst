@@ -19,13 +19,13 @@ The behavior of this model is governed by an assumed underlying stellar-to-halo-
 There are two populations, centrals and satellites. 
 Central occupation statistics are given by a nearest integer distribution 
 with first moment given by an ``erf`` function; the class governing this 
-behavior is `~halotools.empirical_models.occupation_components.Leauthaud11Cens`. 
+behavior is `~halotools.empirical_models.Leauthaud11Cens`. 
 Central galaxies are assumed to reside at the exact center of the host halo; 
 the class governing this behavior is `~halotools.empirical_models.TrivialPhaseSpace`. 
 
 Satellite occupation statistics are given by a Poisson distribution 
 with first moment given by a power law that has been truncated at the low-mass end; 
-the class governing this behavior is `~halotools.empirical_models.occupation_components.Leauthaud11Sats`; 
+the class governing this behavior is `~halotools.empirical_models.Leauthaud11Sats`; 
 satellites in this model follow an (unbiased) NFW profile, as governed by the 
 `~halotools.empirical_models.NFWPhaseSpace` class. 
 
