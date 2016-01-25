@@ -1,8 +1,8 @@
 
 .. _mock_observation_overview:
 
-****************************************
-Overview of Mock Observations
-****************************************
+*************************************************************
+Tutorial on Making Observations of Your Mock Galaxy Sample
+*************************************************************
 
 Tutorial coming soon!

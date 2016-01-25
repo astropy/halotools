@@ -4,6 +4,8 @@
 Zheng et al. (2007) Composite Model
 *********************************************
 
+.. currentmodule:: halotools.empirical_models
+
 This section of the documentation describes the basic behavior of 
 the ``zheng07`` composite HOD model. To see how this composite 
 model is built by the `~halotools.empirical_models.PrebuiltHodModelFactory` class, 
@@ -33,7 +35,7 @@ You can build an instance of this model using the
 `~halotools.empirical_models.PrebuiltHodModelFactory` class as follows:
 
 >>> from halotools.empirical_models import PrebuiltHodModelFactory
->>> model_instance = PrebuiltHodModelFactory('zheng07')
+>>> model = PrebuiltHodModelFactory('zheng07')
 
 
 Customizing the Model
@@ -43,7 +45,11 @@ There are two keyword arguments you can use to customize
 the instance returned by the factory:
 
 First, the ``threshold`` keyword argument pertains to the r-band absolute magnitude 
-of the luminosity of the galaxy sample. The only purpose of this keyword is to allow you 
+of the luminosity of the galaxy sample:
+
+>>> model = PrebuiltHodModelFactory('zheng07', luminosity = -20)
+
+The only purpose of this keyword is to allow you 
 to instantiate your model according to the best-fit values of the parameters 
 taken from Table 1 of Zheng et al. (2007). After instantiation, the 
 ``threshold`` attribute has no impact whatsoever on the behavior of the model. 
@@ -57,17 +63,32 @@ alter the ``param_dict`` however you like.
 
 Second, the ``redshift`` keyword argument must be set to the redshift of the 
 halo catalog you might populate with this model. 
+
+>>> model = PrebuiltHodModelFactory('zheng07', luminosity = -20, redshift = 2)
+
 For the ``zheng07`` model, the ``redshift`` attribute has no impact whatsoever on 
 the behavior of the model; the purpose of this keyword for factory standardization purposes only. 
 
-Populating Mocks
-==================
+Populating Mocks and Generating Model Predictions
+======================================================
 
 As with any Halotools composite model, the above line of code 
 will return a model instance that can populate N-body simulations 
-with mock galaxy catalogs using the following syntax:
+with mock galaxy catalogs. In the following, we'll show how to do this 
+with fake simulation data via the ``halocat`` argument. 
 
->>> model_instance.populate_mock(simname = 'any_halotools_formatted_catalog') # doctest: +SKIP
+>>> from halotools.sim_manager import FakeSim
+>>> halocat = FakeSim()
+>>> model = PrebuiltHodModelFactory('zheng07')
+>>> model.populate_mock(halocat = halocat) 
+
+See `ModelFactory.populate_mock` for information about how to  
+populate your model into different simulations.  
+See :ref:`mock_observation_quickstart` for a quick reference on 
+generating common model predictions such as galaxy clustering and lensing, 
+and :ref:`mock_observation_overview` for more detailed information on how the 
+`~halotools.mock_observables` sub-package can be used to study 
+a wide range of astronomical statistics predicted by your model. 
 
 Studying the Model Features 
 ==============================
@@ -77,8 +98,8 @@ its underlying analytical relations. Here are a few examples:
 
 >>> import numpy as np
 >>> halo_mass = np.logspace(11, 15, 100)
->>> mean_ncen = model_instance.mean_occupation_centrals(prim_haloprop = halo_mass)
->>> mean_nsat = model_instance.mean_occupation_satellites(prim_haloprop = halo_mass)
+>>> mean_ncen = model.mean_occupation_centrals(prim_haloprop = halo_mass)
+>>> mean_nsat = model.mean_occupation_satellites(prim_haloprop = halo_mass)
 
 
 
