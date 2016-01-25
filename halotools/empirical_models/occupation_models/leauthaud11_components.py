@@ -167,7 +167,7 @@ class Leauthaud11Cens(OccupationComponent):
 
     def mean_log_halo_mass(self, log_stellar_mass):
         """ Return the base-10 logarithm of the halo mass of a central galaxy as a function 
-        of the input stellar mass.  
+        of the base-10 logarithm of the input stellar mass. 
 
         Parameters 
         ----------

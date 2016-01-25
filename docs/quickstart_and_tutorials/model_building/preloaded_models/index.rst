@@ -5,7 +5,9 @@ Overview of Preloaded Models
 *********************************************
 
 This section of the documentation reviews the prebuilt composite models 
-provided by Halotools. All prebuilt models can directly populate a simulation 
+provided by Halotools. For a quick reference, instead see :ref:`preloaded_models_list`. 
+
+All prebuilt models can directly populate a simulation 
 with a mock catalog and make observational predictions that can be compared 
 to measurements made on a real galaxy sample. You need only choose the 
 prebuilt model and simulation snapshot that is appropriate for your science application. 

@@ -13,7 +13,7 @@ see `~halotools.empirical_models.zheng07_model_dictionary`.
 
 Overview of the Model Features
 =================================
-
+This HOD-style is based on Zheng et al. (2007), arXiv:0703457. 
 There are two populations, centrals and satellites. 
 Central occupation statistics are given by a nearest integer distribution 
 with first moment given by an ``erf`` function; the class governing this 
@@ -30,7 +30,6 @@ satellites in this model follow an (unbiased) NFW profile, as governed by the
 
 Building the Model 
 =====================
-This HOD-style is based on Zheng et al. (2007), arXiv:0703457. 
 You can build an instance of this model using the 
 `~halotools.empirical_models.PrebuiltHodModelFactory` class as follows:
 
@@ -47,7 +46,7 @@ the instance returned by the factory:
 First, the ``threshold`` keyword argument pertains to the r-band absolute magnitude 
 of the luminosity of the galaxy sample:
 
->>> model = PrebuiltHodModelFactory('zheng07', luminosity = -20)
+>>> model = PrebuiltHodModelFactory('zheng07', threshold = -20)
 
 The only purpose of this keyword is to allow you 
 to instantiate your model according to the best-fit values of the parameters 
@@ -64,7 +63,7 @@ alter the ``param_dict`` however you like.
 Second, the ``redshift`` keyword argument must be set to the redshift of the 
 halo catalog you might populate with this model. 
 
->>> model = PrebuiltHodModelFactory('zheng07', luminosity = -20, redshift = 2)
+>>> model = PrebuiltHodModelFactory('zheng07', threshold = -20, redshift = 2)
 
 For the ``zheng07`` model, the ``redshift`` attribute has no impact whatsoever on 
 the behavior of the model; the purpose of this keyword for factory standardization purposes only. 
@@ -98,6 +97,9 @@ its underlying analytical relations. Here are a few examples:
 
 >>> import numpy as np
 >>> halo_mass = np.logspace(11, 15, 100)
+
+To compute the mean number of each galaxy type as a function of halo mass:
+
 >>> mean_ncen = model.mean_occupation_centrals(prim_haloprop = halo_mass)
 >>> mean_nsat = model.mean_occupation_satellites(prim_haloprop = halo_mass)
 
