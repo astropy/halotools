@@ -151,7 +151,6 @@ class HeavisideAssembias(object):
 
         if 'splitting_model' in kwargs:
             self.splitting_model = kwargs['splitting_model']
-            self.ancillary_model_dependencies = ['splitting_model']
             func = getattr(self.splitting_model, kwargs['splitting_method_name'])
             if callable(func):
                 self._input_split_func = func

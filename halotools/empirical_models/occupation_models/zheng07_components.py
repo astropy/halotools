@@ -310,8 +310,6 @@ class Zheng07Sats(OccupationComponent):
                 threshold = threshold)
             for key, value in self.central_occupation_model.param_dict.iteritems():
                 self.param_dict[key] = value
-            self.ancillary_model_dependencies = ['central_occupation_model']
-            self.ancillary_model_param_keys = self.central_occupation_model.param_dict.keys()
 
         self.publications = ['arXiv:0308519', 'arXiv:0703457']
 
