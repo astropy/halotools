@@ -153,7 +153,7 @@ the parameters of the ``leauthaud11`` model, which you can read about
 in :ref:`leauthaud11_parameters`. Here we only describe the parameters 
 that are unique to the ``hearin15`` model. 
 
-
+* param_dict['mean_occupation_centrals_assembias_param1'] - controls the strength of assembly bias in the centrals population as specified at the first control point. If you passed in a float to the ``centrals_assembias_strength`` keyword argument, there will only be one such parameter. If you passsed in a list, there will be one parameter per list element. Changing the values of this parameter modulates the strength of assembly bias. The only permissible values are between -1 to 1; values outside this range will be interpreted as endpoint values. 
 
 
 
