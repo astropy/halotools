@@ -362,7 +362,16 @@ class ModelFactory(object):
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
-        halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
+        try:
+            assert kwargs['simname'] == 'fake'
+            use_fake_sim = True
+        except (AssertionError, KeyError):
+            use_fake_sim = False
+
+        if use_fake_sim is True:
+            halocat = FakeSim(**halocat_kwargs)
+        else:
+            halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']

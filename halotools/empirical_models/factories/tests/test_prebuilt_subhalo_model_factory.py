@@ -51,6 +51,15 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
 
             model2.populate_mock(simname = 'fake', redshift = 2.)
 
+    @pytest.mark.slow
+    def test_fake_mock_observations1(self):
+        for modelname in PrebuiltSubhaloModelFactory.prebuilt_model_nickname_list:
+            model = PrebuiltSubhaloModelFactory(modelname)
+            model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
+        model.compute_average_galaxy_clustering(num_iterations=2, simname='fake')
+
+
+
 
 
 
