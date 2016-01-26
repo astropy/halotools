@@ -99,6 +99,11 @@ class HeavisideAssembias(object):
 
         self._bind_new_haloprop_func_dict()
 
+        try:
+            self.publications.append('arXiv:1512.03050')
+        except:
+            self.publications = ['arXiv:1512.03050']
+
 
     def _interpret_constructor_inputs(self, loginterp = True, 
         sec_haloprop_key = model_defaults.sec_haloprop_key, **kwargs):

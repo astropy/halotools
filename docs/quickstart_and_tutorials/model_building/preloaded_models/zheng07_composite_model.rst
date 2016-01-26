@@ -13,7 +13,7 @@ see `~halotools.empirical_models.zheng07_model_dictionary`.
 
 Overview of the Model Features
 =================================
-This HOD-style is based on Zheng et al. (2007), arXiv:0703457. 
+This HOD-style model is based on Zheng et al. (2007), arXiv:0703457. 
 There are two populations, centrals and satellites. 
 Central occupation statistics are given by a nearest integer distribution 
 with first moment given by an ``erf`` function; the class governing this 

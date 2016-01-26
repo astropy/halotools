@@ -13,7 +13,7 @@ see `~halotools.empirical_models.leauthaud11_model_dictionary`.
 
 Overview of the Model Features
 =================================
-HOD-style based on Leauthaud et al. (2011), arXiv:1103.2077. 
+This HOD-style model is based on Leauthaud et al. (2011), arXiv:1103.2077. 
 The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
 
 There are two populations, centrals and satellites. 
