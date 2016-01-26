@@ -52,13 +52,20 @@ The only purpose of this keyword is to allow you
 to instantiate your model according to the best-fit values of the parameters 
 taken from Table 1 of Zheng et al. (2007). After instantiation, the 
 ``threshold`` attribute has no impact whatsoever on the behavior of the model. 
-As described in :ref:`altering_param_dict`, you can always change the model parameters 
-after instantiation by changing the values in the ``param_dict`` dictionary. 
 If you choose a different value for ``threshold`` than one of the values in Table 1 
 of Zheng et al. (2007), the model behavior will be set to the best-fit parameters 
 of the ``default_luminosity_threshold`` variable set in the 
 `~halotools.empirical_models.model_defaults` module, and you can proceed to 
-alter the ``param_dict`` however you like. 
+alter the ``param_dict`` however you like (see below)
+
+As described in :ref:`altering_param_dict`, you can always change the model parameters 
+after instantiation by changing the values in the ``param_dict`` dictionary. For example, 
+
+>>> model.param_dict['logMmin'] = 12.5
+
+The above line of code changes the minimum mass for 
+a halo to host a central galaxy to :math:`10^{12.5}M_{\odot}`. 
+See :ref:`zheng07_parameters` for a description of all parameters of this model. 
 
 Second, the ``redshift`` keyword argument must be set to the redshift of the 
 halo catalog you might populate with this model. 
@@ -104,6 +111,30 @@ To compute the mean number of each galaxy type as a function of halo mass:
 >>> mean_nsat = model.mean_occupation_satellites(prim_haloprop = halo_mass)
 
 
+.. _zheng07_parameters:
 
+Parameters of the Zheng et al. (2007) model
+=================================================
+
+The best way to learn what the parameters of a model do is to 
+just play with the code: change parameter values, make plots of how the 
+underying analytical relations vary, and also of how the 
+mock observables vary. Here we just give a simple description of the meaning 
+of each parameter. You can also refer to the original publication, arXiv:0703457, 
+for further details. 
+
+To see how the following parameters are implemented, see `Zheng07Cens.mean_occupation`. 
+
+* param_dict['logMmin'] - Minimum mass required for a halo to host a central galaxy. 
+
+* param_dict['sigma_logM'] - Rate of transition from :math:`\langle N_{\rm cen} \rangle = 0 \Rightarrow \langle N_{\rm cen} = 1 \rangle`. 
+
+To see how the following parameters are implemented, see `Zheng07Sats.mean_occupation`. 
+
+* param_dict['alpha'] - Power law slope of the relation between halo mass and :math:`\langle N_{\rm sat} \rangle`. 
+
+* param_dict['logM0'] - Low-mass cutoff in :math:`\langle N_{\rm sat} \rangle`. 
+
+* param_dict['logM1'] - Characteristic halo mass where :math:`\langle N_{\rm sat} \rangle` begins to assume a power law form. 
 
 
