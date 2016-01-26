@@ -17,7 +17,7 @@ from functools import partial
 from .. import model_defaults
 from .. import model_helpers as model_helpers
 
-from ...utils.array_utils import custom_len
+from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...sim_manager import sim_defaults 
 
 
@@ -71,8 +71,8 @@ class LogNormalScatterModel(object):
         self.prim_haloprop_key = prim_haloprop_key
 
         if ('scatter_abcissa' in kwargs.keys()) and ('scatter_ordinates' in kwargs.keys()):
-            self.abcissa = kwargs['scatter_abcissa']
-            self.ordinates = kwargs['scatter_ordinates']
+            self.abcissa = convert_to_ndarray(kwargs['scatter_abcissa'])
+            self.ordinates = convert_to_ndarray(kwargs['scatter_ordinates'])
         else:
             self.abcissa = [12]
             self.ordinates = [default_scatter]
