@@ -11,8 +11,8 @@ the ``zheng07`` composite HOD model. To see how this composite
 model is built by the `~halotools.empirical_models.PrebuiltHodModelFactory` class, 
 see `~halotools.empirical_models.zheng07_model_dictionary`. 
 
-Overview of the Model Features
-=================================
+Overview of the Zheng et al. (2007) Model Features
+==================================================
 This HOD-style model is based on Zheng et al. (2007), arXiv:0703457. 
 There are two populations, centrals and satellites. 
 Central occupation statistics are given by a nearest integer distribution 
@@ -28,8 +28,8 @@ satellites in this model follow an (unbiased) NFW profile, as governed by the
 `~halotools.empirical_models.NFWPhaseSpace` class. 
 
 
-Building the Model 
-=====================
+Building the Zheng et al. (2007) Model 
+=========================================
 You can build an instance of this model using the 
 `~halotools.empirical_models.PrebuiltHodModelFactory` class as follows:
 
@@ -37,8 +37,8 @@ You can build an instance of this model using the
 >>> model = PrebuiltHodModelFactory('zheng07')
 
 
-Customizing the Model
-=================================
+Customizing the Zheng et al. (2007) Model
+===============================================
 
 There are two keyword arguments you can use to customize 
 the instance returned by the factory:
@@ -75,12 +75,12 @@ halo catalog you might populate with this model.
 For the ``zheng07`` model, the ``redshift`` attribute has no impact whatsoever on 
 the behavior of the model; the purpose of this keyword for factory standardization purposes only. 
 
-Populating Mocks and Generating Model Predictions
-======================================================
+Populating Mocks and Generating Zheng et al. (2007) Model Predictions
+=======================================================================
 
-As with any Halotools composite model, the above line of code 
-will return a model instance that can populate N-body simulations 
-with mock galaxy catalogs. In the following, we'll show how to do this 
+As with any Halotools composite model, the model instance 
+can populate N-body simulations with mock galaxy catalogs. 
+In the following, we'll show how to do this 
 with fake simulation data via the ``halocat`` argument. 
 
 >>> from halotools.sim_manager import FakeSim
@@ -96,8 +96,8 @@ and :ref:`mock_observation_overview` for more detailed information on how the
 `~halotools.mock_observables` sub-package can be used to study 
 a wide range of astronomical statistics predicted by your model. 
 
-Studying the Model Features 
-==============================
+Studying the Zheng et al. (2007) Model Features 
+====================================================
 
 In addition to populating mocks, the ``zheng07`` model also gives you access to 
 its underlying analytical relations. Here are a few examples:

@@ -11,8 +11,8 @@ the ``hearin15`` composite HOD model. To see how this composite
 model is built by the `~halotools.empirical_models.PrebuiltHodModelFactory` class, 
 see `~halotools.empirical_models.hearin15_model_dictionary`. 
 
-Overview of the Model Features
-=================================
+Overview of the Hearin et al. (2015) Model Features
+======================================================
 This HOD-style model is based on Hearin et al. (2015), arXiv:1512.03050. 
 The behavior of this model is identical to Leauthaud et al. (2011), 
 except this model implements assemby bias using decorated HOD methods in the  
@@ -33,16 +33,16 @@ satellites in this model follow an (unbiased) NFW profile, as governed by the
 
 For both centrals and satellites, the occupation statistics are decorated with assembly bias. 
 
-Building the Model 
-=====================
+Building the Hearin et al. (2015) Model 
+=========================================
 You can build an instance of this model using the 
 `~halotools.empirical_models.PrebuiltHodModelFactory` class as follows:
 
 >>> from halotools.empirical_models import PrebuiltHodModelFactory
 >>> model = PrebuiltHodModelFactory('hearin15')
 
-Customizing the Model
-=================================
+Customizing the Hearin et al. (2015) Model
+=============================================
 
 There are numerous keyword arguments you can use to customize 
 the instance returned by the factory. 
@@ -85,12 +85,12 @@ Once you make a choice for ``split``, you cannot change this after instantiating
 If you want to study the effects of different choices for ``split``, 
 you must instantiate a new model. 
 
-Populating Mocks and Generating Model Predictions
-======================================================
+Populating Mocks and Generating Hearin et al. (2015) Model Predictions
+=========================================================================
 
-As with any Halotools composite model, the above line of code 
-will return a model instance that can populate N-body simulations 
-with mock galaxy catalogs. In the following, we'll show how to do this 
+As with any Halotools composite model, the model instance 
+can populate N-body simulations with mock galaxy catalogs. 
+In the following, we'll show how to do this 
 with fake simulation data via the ``halocat`` argument. 
 
 >>> from halotools.sim_manager import FakeSim
@@ -106,8 +106,8 @@ and :ref:`mock_observation_overview` for more detailed information on how the
 `~halotools.mock_observables` sub-package can be used to study 
 a wide range of astronomical statistics predicted by your model. 
 
-Studying the Model Features 
-==============================
+Studying the Hearin et al. (2015) Model Features 
+==================================================
 
 In addition to populating mocks, the ``hearin15`` model also gives you access to 
 its underlying analytical relations. Firstly, the ``hearin15`` model naturally 
@@ -145,7 +145,7 @@ To compute the strength of assembly bias as a function of halo mass:
 
 .. _hearin15_parameters:
 
-Parameters of the Hearin et al. (2015) model
+Parameters of the Hearin et al. (2015) Model
 =================================================
 
 The ``hearin15`` model naturally inherits all of 

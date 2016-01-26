@@ -26,6 +26,8 @@ def tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_th
     **kwargs):
     """ Dictionary to build an HOD-style based on Tinker et al. (2013), arXiv:1308.2974. 
 
+    See :ref:`tinker13_composite_model` for a tutorial on this model. 
+
     Parameters 
     ----------
     threshold : float, optional 
