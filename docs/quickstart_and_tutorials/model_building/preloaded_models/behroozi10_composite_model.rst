@@ -75,7 +75,7 @@ though you can vary the ordinates by changing the appropriate values in the ``pa
 For example, in the above model, the following line will change the 
 scatter to 0.2 dex in :math:`M_{\rm halo} = 10^{12}M_{\odot}` halos:
 
->>> model.param_dict['scatter_model_param1] = 0.2
+>>> model.param_dict['scatter_model_param1'] = 0.2
 
 Populating Mocks and Generating Behroozi et al. (2010) Model Predictions
 ===========================================================================
