@@ -153,7 +153,17 @@ def compute_conditional_percentiles(**kwargs):
 
         return output
 
-    prim_haloprop_bins = compute_prim_haloprop_bins(prim_haloprop = prim_haloprop, **kwargs)
+    compute_prim_haloprop_bins_dict = {}
+    compute_prim_haloprop_bins_dict['prim_haloprop'] = prim_haloprop
+    try:
+        compute_prim_haloprop_bins_dict['prim_haloprop_bin_boundaries'] = kwargs['prim_haloprop_bin_boundaries']
+    except KeyError:
+        pass
+    try:
+        compute_prim_haloprop_bins_dict['dlog10_prim_haloprop'] = kwargs['dlog10_prim_haloprop']
+    except KeyError:
+        pass
+    prim_haloprop_bins = compute_prim_haloprop_bins(**compute_prim_haloprop_bins_dict)
 
     output = np.zeros_like(prim_haloprop)
 

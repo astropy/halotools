@@ -29,11 +29,16 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
     Dictionary to build an HOD-style model in which 
     central and satellite occupations statistics are assembly-biased. 
 
+    See :ref:`hearin15_composite_model` for a tutorial on this model. 
+
     Parameters 
     ----------
     threshold : float, optional
         Stellar mass threshold of the mock galaxy sample. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    redshift : float, optional  
+        Default is set in the `~halotools.sim_manager.sim_defaults` module. 
 
     sec_haloprop_key : string, optional  
         String giving the column name of the secondary halo property modulating 
@@ -61,9 +66,6 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
         we split halos into two groupings based on 
         their conditional secondary percentiles. 
         Default is 0.5 for a constant 50/50 split. 
-
-    redshift : float, optional  
-        Default is set in the `~halotools.sim_manager.sim_defaults` module. 
 
     concentration_binning : tuple, optional 
         Three-element tuple. The first entry will be the minimum 

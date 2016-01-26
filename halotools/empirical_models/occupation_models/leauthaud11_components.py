@@ -87,6 +87,8 @@ class Leauthaud11Cens(OccupationComponent):
             )
 
         self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
+        self.publications.extend(self.smhm_model.publications)
+        self.publications = list(set(self.publications))
 
     def get_published_parameters(self):
         """ Return the values of ``self.param_dict`` according to 
