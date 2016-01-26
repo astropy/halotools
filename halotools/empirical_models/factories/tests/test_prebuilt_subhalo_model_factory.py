@@ -41,6 +41,16 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
         for modelname in PrebuiltSubhaloModelFactory.prebuilt_model_nickname_list:
             model = PrebuiltSubhaloModelFactory(modelname)
             model.populate_mock(simname = 'fake')
+            model.populate_mock(simname = 'fake')
+
+            model2 = PrebuiltSubhaloModelFactory(modelname, redshift=2)
+            with pytest.raises(HalotoolsError) as err:
+                model2.populate_mock(simname = 'fake')
+            substr = "Inconsistency between the model redshift"
+            assert substr in err.value.message
+
+            model2.populate_mock(simname = 'fake', redshift = 2.)
+
 
 
 
