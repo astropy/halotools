@@ -31,6 +31,7 @@ class PrebuiltSubhaloModelFactory(SubhaloModelFactory):
     * 'smhm_binary_sfr' (see `~halotools.empirical_models.smhm_binary_sfr_model_dictionary`)
 
     """
+    prebuilt_model_nickname_list = ['behroozi10']
 
     def __init__(self, model_nickname, **kwargs):
         """
@@ -142,6 +143,8 @@ class PrebuiltHodModelFactory(HodModelFactory):
     * 'hearin15' (see `~halotools.empirical_models.hearin15_model_dictionary`)
 
     """
+
+    prebuilt_model_nickname_list = ['zheng07', 'leauthaud11', 'tinker13', 'hearin15']
 
     def __init__(self, model_nickname, **kwargs):
         """

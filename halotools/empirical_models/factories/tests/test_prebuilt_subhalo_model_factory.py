@@ -2,7 +2,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-import pytest 
+from astropy.tests.helper import pytest
 
 import numpy as np 
 from copy import copy 
@@ -35,3 +35,19 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
         """
         model = PrebuiltSubhaloModelFactory('smhm_binary_sfr')
         alt_model = SubhaloModelFactory(**model.model_dictionary)
+
+    @pytest.mark.slow
+    def test_fake_mock_population(self):
+        for modelname in PrebuiltSubhaloModelFactory.prebuilt_model_nickname_list:
+            model = PrebuiltSubhaloModelFactory(modelname)
+            model.populate_mock(simname = 'fake')
+
+
+
+
+
+
+
+
+
+
