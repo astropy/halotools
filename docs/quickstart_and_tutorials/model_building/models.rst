@@ -29,9 +29,6 @@ We describe each of these three modes of model-building below.
    composing_models/index
    models_from_scratch/index
 
-If you are looking for a tutorial on a specific component model, 
-see :ref:`model_components_tutorials`. 
-
 
 
 
