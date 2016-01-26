@@ -55,8 +55,8 @@ Tutorials
    :maxdepth: 1
 
    model_building/models
-   mock_making/overview
-   mock_observations/overview
+   mock_making/index
+   mock_observations/index
 
 
 Developer Documentation

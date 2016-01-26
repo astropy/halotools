@@ -2,7 +2,7 @@
 .. _mock_observation_quickstart:
 
 ******************************************************************
-Quickstart Guide to Mock Observations 
+Quickstart Guide to Making Observations on your Mock
 ******************************************************************
 
 
