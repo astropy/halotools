@@ -405,7 +405,7 @@ class Tinker13QuiescentSats(OccupationComponent):
         self.smhm_model = Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
-        self._initialize_param_dict(**kwargs)
+        self._initialize_param_dict()
 
         self.sfr_designation_key = 'sfr_designation'
 
@@ -569,7 +569,7 @@ class Tinker13ActiveSats(OccupationComponent):
         self.smhm_model = Behroozi10SmHm(
             prim_haloprop_key = prim_haloprop_key, **kwargs)
 
-        self._initialize_param_dict(**kwargs)
+        self._initialize_param_dict()
 
         self.sfr_designation_key = 'sfr_designation'
 

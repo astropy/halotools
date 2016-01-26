@@ -11,8 +11,8 @@ the ``leauthaud11`` composite HOD model. To see how this composite
 model is built by the `~halotools.empirical_models.PrebuiltHodModelFactory` class, 
 see `~halotools.empirical_models.leauthaud11_model_dictionary`. 
 
-Overview of the Model Features
-=================================
+Overview of the Leauthaud et al. (2011) Model Features
+========================================================
 This HOD-style model is based on Leauthaud et al. (2011), arXiv:1103.2077. 
 The behavior of this model is governed by an assumed underlying stellar-to-halo-mass relation. 
 
@@ -29,8 +29,8 @@ the class governing this behavior is `~halotools.empirical_models.Leauthaud11Sat
 satellites in this model follow an (unbiased) NFW profile, as governed by the 
 `~halotools.empirical_models.NFWPhaseSpace` class. 
 
-Building the Model 
-=====================
+Building the Leauthaud et al. (2011) Model 
+============================================
 You can build an instance of this model using the 
 `~halotools.empirical_models.PrebuiltHodModelFactory` class as follows:
 
@@ -38,8 +38,8 @@ You can build an instance of this model using the
 >>> model = PrebuiltHodModelFactory('leauthaud11')
 
 
-Customizing the Model
-=================================
+Customizing the Leauthaud et al. (2011) Model
+=================================================
 
 There are two keyword arguments you can use to customize 
 the instance returned by the factory:
@@ -67,12 +67,12 @@ The above line of code changes the power law slope between
 halo mass and satellite occupation number, :math:`\langle N_{\rm sat} \rangle \propto M_{\rm halo}^{\alpha}`. 
 See :ref:`leauthaud11_parameters` for a description of all parameters of this model. 
 
-Populating Mocks and Generating Model Predictions
-======================================================
+Populating Mocks and Generating Leauthaud et al. (2011) Model Predictions
+===========================================================================
 
-As with any Halotools composite model, the above line of code 
-will return a model instance that can populate N-body simulations 
-with mock galaxy catalogs. In the following, we'll show how to do this 
+As with any Halotools composite model, the model instance 
+can populate N-body simulations with mock galaxy catalogs. 
+In the following, we'll show how to do this 
 with fake simulation data via the ``halocat`` argument. 
 
 >>> from halotools.sim_manager import FakeSim
@@ -89,8 +89,8 @@ and :ref:`mock_observation_overview` for more detailed information on how the
 a wide range of astronomical statistics predicted by your model. 
 
 
-Studying the Model Features 
-==============================
+Studying the Leauthaud et al. (2011) Model Features 
+======================================================
 
 In addition to populating mocks, the ``leauthaud11`` model also gives you access to 
 its underlying analytical relations. Here are a few examples:

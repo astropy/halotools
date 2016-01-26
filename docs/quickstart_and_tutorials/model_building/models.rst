@@ -2,7 +2,7 @@
 .. _model_building:
 
 *************************************************
-Overview of modeling the Galaxy-Halo connection
+Tutorial on modeling the Galaxy-Halo connection
 *************************************************
 
 .. currentmodule:: halotools.empirical_models
@@ -28,9 +28,6 @@ We describe each of these three modes of model-building below.
    preloaded_models/index
    composing_models/index
    models_from_scratch/index
-
-If you are looking for a tutorial on a specific component model, 
-see :ref:`model_components_tutorials`. 
 
 
 

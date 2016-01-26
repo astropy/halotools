@@ -114,8 +114,8 @@ def test_LogNormalScatterModel_initialization():
 	scatter_model2 = LogNormalScatterModel(
 		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
 
-	assert scatter_model2.abcissa == input_abcissa
-	assert scatter_model2.ordinates == input_ordinates
+	assert np.all(scatter_model2.abcissa == input_abcissa)
+	assert np.all(scatter_model2.ordinates == input_ordinates)
 	model2_param_dict = {'scatter_model_param1': 0.3, 'scatter_model_param2': 0.1}
 	assert scatter_model2.param_dict == model2_param_dict
 
