@@ -58,6 +58,12 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
             model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
         model.compute_average_galaxy_clustering(num_iterations=2, simname='fake')
 
+    @pytest.mark.slow
+    def test_fake_mock_observations2(self):
+        modelname = 'behroozi10'
+        model = PrebuiltSubhaloModelFactory(modelname)
+        model.compute_average_galaxy_matter_cross_clustering(
+            num_iterations=1, simname='fake')
 
 
 

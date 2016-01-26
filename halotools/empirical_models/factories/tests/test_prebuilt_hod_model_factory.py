@@ -26,6 +26,6 @@ class TestPrebuiltHodModelFactory(TestCase):
 
     @pytest.mark.slow
     def test_fake_mock_observations1(self):
-        modelname = np.random.choice(PrebuiltHodModelFactory.prebuilt_model_nickname_list)
-        model = PrebuiltHodModelFactory(modelname)
-        model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
+        for modelname in PrebuiltHodModelFactory.prebuilt_model_nickname_list:
+            model = PrebuiltHodModelFactory(modelname)
+            model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')

@@ -9,6 +9,7 @@ from astropy.table import Table
 import numpy as np
 
 from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
+from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
 __all__ = ('FakeSim', )
 
@@ -98,8 +99,11 @@ class FakeSim(UserSuppliedHaloCatalog):
 		pvx = np.random.uniform(-1000, 1000, self.num_ptcl)
 		pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
 		pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
+		ptclcat = UserSuppliedPtclCatalog(
+			Lbox = Lbox, redshift = redshift, particle_mass = particle_mass, 
+			x = px, y = py, z = pz, vx = pvx, vy = pvy, vz = pvz)
+		
 		d = {'x': px, 'y': py, 'z': pz, 'vx': pvx, 'vy': pvy, 'vz': pvz}
-		ptcl_table = Table(d)
 
 
 		UserSuppliedHaloCatalog.__init__(self, 
@@ -118,7 +122,7 @@ class FakeSim(UserSuppliedHaloCatalog):
 			halo_nfw_conc = conc, 
 			halo_vmax = vmax, 
 			halo_vpeak = vpeak, 
-			ptcl_table = ptcl_table
+			user_supplied_ptclcat = ptclcat
 			)
 
 
