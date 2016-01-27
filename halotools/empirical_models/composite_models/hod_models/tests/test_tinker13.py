@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 from unittest import TestCase
-import pytest
+from astropy.tests.helper import pytest
+
 import numpy as np
 from astropy.table import Table
 
 from ....factories import PrebuiltHodModelFactory
 
+from .....sim_manager import FakeSim
 from .....custom_exceptions import *
 
 ### Determine whether the machine is mine
@@ -33,6 +35,19 @@ class TestTinker13(TestCase):
 			quiescent_fraction_abcissa = [1e12, 1e13, 1e14, 1e15], 
 			quiescent_fraction_ordinates = [0.25, 0.5, 0.75, 0.9])
 
+	@pytest.mark.slow
+	def test_tinker13_populate1(self):
+		model = PrebuiltHodModelFactory('tinker13')
+		fake_sim = FakeSim()
+		model.populate_mock(halocat = fake_sim)
+
+	@pytest.mark.slow
+	def test_tinker13_populate2(self):
+		model = PrebuiltHodModelFactory('tinker13')
+		fake_sim = FakeSim()
+		model.populate_mock(simname = 'fake')
+
+	
 
 
 

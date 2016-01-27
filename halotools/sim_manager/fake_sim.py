@@ -9,6 +9,7 @@ from astropy.table import Table
 import numpy as np
 
 from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
+from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
 __all__ = ('FakeSim', )
 
@@ -28,8 +29,8 @@ class FakeSim(UserSuppliedHaloCatalog):
 	for calls with the same arguments. 
 	"""
 
-	def __init__(self, num_massbins = 6, num_halos_per_massbin = int(1e3), 
-		num_ptcl = int(1e4), seed = 43, redshift = 0.):
+	def __init__(self, num_massbins = 6, num_halos_per_massbin = int(100), 
+		num_ptcl = int(1e4), seed = 43, redshift = 0., **kwargs):
 		"""
 		Parameters 
 		----------
@@ -49,7 +50,9 @@ class FakeSim(UserSuppliedHaloCatalog):
 		"""
 		Lbox = 250.0
 		particle_mass = 1.e8
-		simname = 'fake'
+		self.simname = 'fake'
+		self.halo_finder = 'fake'
+		self.version_name = 'dummy_version'
 
 		self.seed = seed
 		np.random.seed(self.seed)
@@ -96,13 +99,16 @@ class FakeSim(UserSuppliedHaloCatalog):
 		pvx = np.random.uniform(-1000, 1000, self.num_ptcl)
 		pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
 		pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
+		ptclcat = UserSuppliedPtclCatalog(
+			Lbox = Lbox, redshift = redshift, particle_mass = particle_mass, 
+			x = px, y = py, z = pz, vx = pvx, vy = pvy, vz = pvz)
+		
 		d = {'x': px, 'y': py, 'z': pz, 'vx': pvx, 'vy': pvy, 'vz': pvz}
-		ptcl_table = Table(d)
 
 
 		UserSuppliedHaloCatalog.__init__(self, 
 			Lbox = Lbox, particle_mass = particle_mass, 
-			redshift = 0.0, 
+			redshift = redshift, 
 			halo_id = halo_id, 
 			halo_x = x, halo_y = y, halo_z = z, 
 			halo_vx = vx, halo_vy = vy, halo_vz = vz, 
@@ -116,7 +122,7 @@ class FakeSim(UserSuppliedHaloCatalog):
 			halo_nfw_conc = conc, 
 			halo_vmax = vmax, 
 			halo_vpeak = vpeak, 
-			ptcl_table = ptcl_table
+			user_supplied_ptclcat = ptclcat
 			)
 
 
