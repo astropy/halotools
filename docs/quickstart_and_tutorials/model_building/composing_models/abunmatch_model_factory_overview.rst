@@ -1,4 +1,3 @@
-:orphan:
 
 .. _abunmatch_model_factory_overview:
 

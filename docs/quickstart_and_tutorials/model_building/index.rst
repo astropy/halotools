@@ -25,6 +25,8 @@ Basic terminology: *composite models* and *component models*
 
 * A **component model** provides a map between dark matter halos and a single property of the resident galaxy population. Examples include the stellar-to-halo mass relation, an NFW radial profile and the halo mass-dependence of the quenched fraction. 
 
+.. _factory_design_diagram: 
+
 Overview of the factory design pattern
 ------------------------------------------------------------------
 
@@ -32,7 +34,7 @@ To get a better understanding of how composite models are composed of components
 
 .. image:: halotools_design.png
 
-Each of the gray boxes represents a component model. In Halotools source code, component models are *instances* of a class responsible for modeling some particular feature(s) of the galaxy distribution. When you pass a collection of component models to the appropriate model factory, what you get is a composite model whose behavior is defined by the set of components passed to the factory. Halotools model factories provide a standardized interface so that no matter what choices you make for the component model features, all composite can directly populate mocks and compute astronomical observables with a uniform syntax. 
+Each of the gray boxes represents a component model. In Halotools source code, component models are *instances* of a class responsible for modeling some particular feature(s) of the galaxy distribution. When you pass a collection of component models to the model factory, what you get is a composite model whose behavior is defined by that set of components. Halotools model factories provide a standardized interface so that no matter what choices you make for the component model features, all composite can directly populate mocks and compute astronomical observables with a uniform syntax. 
 
 Further reading
 =================
