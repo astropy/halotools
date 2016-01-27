@@ -1,12 +1,12 @@
 .. _mock_making_quickstart:
 
 ****************************************************************
-Quickstart Guide to Generating a Mock Galaxy Distribution
+Quickstart guide to generating a mock galaxy distribution
 ****************************************************************
 
 Tutorial coming soon!
 
-Making Mock Observations
+Making mock observations
 ==========================
 
 Once you have a synthetic galaxy catalog in hand, you can use the 

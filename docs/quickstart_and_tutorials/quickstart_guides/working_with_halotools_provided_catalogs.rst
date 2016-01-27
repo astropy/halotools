@@ -1,7 +1,7 @@
 .. _working_with_halotools_provided_catalogs:
 
 ********************************************************
-Downloading and Caching Halotools-Provided Catalogs
+Downloading and caching Halotools-provided catalogs
 ********************************************************
 
 This section of the documentation describes how to get up and running 
