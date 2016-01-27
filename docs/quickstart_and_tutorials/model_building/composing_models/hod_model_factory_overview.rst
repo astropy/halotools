@@ -1,4 +1,3 @@
-:orphan:
 
 .. _hod_model_factory_overview:
 
@@ -12,7 +11,7 @@ In this section of the documentation we'll cover the basic structure of any HOD/
 Structure of HOD/CLF model dictionarys 
 ---------------------------------------
 
-As discussed in the :ref:`model_factory_overview`, the data structure of any composite model dictionary is a python dictionary. The set of key-value pairs in this dictionary constitutes the complete set of instructions required to build the composite model.  For HOD-style models, the keys of the composite model dictionary are the names of the galaxy population being modeled, e.g., `centrals` and `satellites`. The value of each key of an HOD-style composite model dictionary is itself a python dictionary; in Halotools lingo this second dictionary is called a *subpopulation dictionary*. This means that in HOD-style models, a composite model dictionary is actually a dictionary of dictionaries. So to build any HOD-style model, what you must do is build a collection of subpopulation dictionarys, and bundle the set of subpopulation dictionarys together into a composite model dictionary. The cartoon diagram below gives a schematic for the `~halotools.empirical_models.Zheng07` composite HOD model that we will look at in detail below. 
+The data structure of any composite model dictionary is a python dictionary. The set of key-value pairs in this dictionary constitutes the complete set of instructions required to build the composite model.  For HOD-style models, the keys of the composite model dictionary are the names of the galaxy population being modeled, e.g., `centrals` and `satellites`. The value of each key of an HOD-style composite model dictionary is itself a python dictionary; in Halotools lingo this second dictionary is called a *subpopulation dictionary*. This means that in HOD-style models, a composite model dictionary is actually a dictionary of dictionaries. So to build any HOD-style model, what you must do is build a collection of subpopulation dictionarys, and bundle the set of subpopulation dictionarys together into a composite model dictionary. The cartoon diagram below gives a schematic for the `~halotools.empirical_models.Zheng07` composite HOD model that we will look at in detail below. 
 
 .. image:: hod_blueprint_structure.png
 
@@ -25,7 +24,7 @@ A concrete example of a composite HOD model dictionary
 
 With the above picture in mind, let's now look at a specific example of how a composite model dictionary is built. For our example, we’ll use the particularly simple `~halotools.empirical_models.Zheng07` composite model, one of the fully-functional composite models that comes pre-built with Halotools in the `~halotools.empirical_models` sub-package. 
 
-All the pre-built dictionary functions in the `~halotools.empirical_models` sub-package do the same thing: they build a composite model dictionary, pass the dictionary to the relevant factory, and return an instance of a composite model, as diagrammed in :ref:`model_factory_flowchart`. To help understand this example, have a look at the source code for the `~halotools.empirical_models.Zheng07` composite model while you read this section of the documentation. 
+All the pre-built dictionary functions in the `~halotools.empirical_models` sub-package do the same thing: they build a composite model dictionary, pass the dictionary to the relevant factory, and return an instance of a composite model, as diagrammed in :ref:`factory_design_diagram`. To help understand this example, have a look at the source code for the `~halotools.empirical_models.Zheng07` composite model while you read this section of the documentation. 
 
 
 For definiteness, let’s look at how the Zheng07 composite model is built. The first chunk of code builds a dictionary called `subpopulation_dictionary_centrals`:
