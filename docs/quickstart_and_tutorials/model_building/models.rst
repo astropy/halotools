@@ -2,7 +2,7 @@
 .. _model_building:
 
 *************************************************
-Tutorial on modeling the Galaxy-Halo connection
+Tutorial on modeling the galaxy-halo connection
 *************************************************
 
 .. currentmodule:: halotools.empirical_models
