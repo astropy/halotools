@@ -23,9 +23,13 @@ class TestPrebuiltHodModelFactory(TestCase):
         for modelname in PrebuiltHodModelFactory.prebuilt_model_nickname_list:
             model = PrebuiltHodModelFactory(modelname)
             model.populate_mock(simname = 'fake')
+        model.populate_mock(simname = 'fake')
 
     @pytest.mark.slow
     def test_fake_mock_observations1(self):
         for modelname in PrebuiltHodModelFactory.prebuilt_model_nickname_list:
             model = PrebuiltHodModelFactory(modelname)
-            model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
+            result = model.compute_average_galaxy_clustering(num_iterations=1, simname='fake')
+        result = model.compute_average_galaxy_clustering(
+            num_iterations=1, simname='fake', 
+            gal_type = 'centrals', include_crosscorr = True)
