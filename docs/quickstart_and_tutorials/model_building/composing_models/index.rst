@@ -1,7 +1,9 @@
 .. _composing_new_models:
 
-*********************************************
-Composing New Models from Existing Components
-*********************************************
+**********************************************************************
+Tutorial on designing your own model of the galaxy-halo connection
+**********************************************************************
 
-Tutorial coming soon!
+By following this tutorial, 
+you will learn how to use the Halotools framework to design your own model of 
+the galaxy-halo connection.  
