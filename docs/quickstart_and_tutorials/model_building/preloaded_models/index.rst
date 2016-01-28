@@ -1,28 +1,19 @@
 .. _preloaded_models_overview:
 
 *********************************************
-Overview of Preloaded Models
+Tutorial on models pre-built by Halotools
 *********************************************
 
-This section of the documentation reviews the prebuilt composite models 
+This section of the documentation reviews the pre-built composite models 
 provided by Halotools. For a quick reference, instead see :ref:`preloaded_models_list`. 
 
-All prebuilt models can directly populate a simulation 
+All pre-built models can directly populate a simulation 
 with a mock catalog and make observational predictions that can be compared 
 to measurements made on a real galaxy sample. You need only choose the 
-prebuilt model and simulation snapshot that is appropriate for your science application. 
+pre-built model and simulation snapshot that is appropriate for your science application. 
 By following the links below, you can 
 find a step-by-step tutorial for how to get going with 
-any of the Halotools-provided prebuilt models. 
-
-Basic Terminology: Composite Models and Component Models 
-==========================================================
-
-Before diving in to the list of prebuilt models, we'll first begin by defining some Halotools-specific terminology. Users already familiar with Halotools lingo can skip ahead to the next section. 
-
-* A **composite model** is a complete description of the mapping(s) between dark matter halos and *all* properties of their resident galaxy population. A composite model provides sufficient information to populate an ensemble of halos with a Monte Carlo realization of a galaxy population. Such a population constitutes the fundamental observable prediction of the model.  
-
-* A **component model** provides a map between dark matter halos and a single property of the resident galaxy population. Examples include the stellar-to-halo mass relation, an NFW radial profile and the halo mass-dependence of the quenched fraction. 
+any of the Halotools-provided pre-built models. 
 
 HOD-Style Models
 ========================
