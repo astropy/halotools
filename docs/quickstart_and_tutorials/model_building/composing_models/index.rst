@@ -6,9 +6,8 @@ Tutorial on designing your own model of the galaxy-halo connection
 
 By following this tutorial, you will learn how to use the 
 Halotools framework to design your own model of the galaxy-halo connection. 
-
 The `~halotools.empirical_models` factories come in two different types, 
-HOD-style models and subhalo-based models. In HOD-style models, 
+*HOD-style models* and *subhalo-based models.* In HOD-style models, 
 there is no connection between the abundance of satellite 
 galaxies in a host halo and the number of subhalos in that host halo. In these models, 
 satellite abundance in each halo is determined by a Monte Carlo realization 
