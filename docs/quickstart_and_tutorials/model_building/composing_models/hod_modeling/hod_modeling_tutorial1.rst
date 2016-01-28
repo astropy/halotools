@@ -40,6 +40,8 @@ For the sake of having something concrete to hold on to,
 let's now dive in and write down the source code for how 
 to call the `HodModelFactory`. 
 
+.. _hod_factory_tutorial_zheng07_source_code:
+
 Source code for the ``zheng07`` model
 =====================================================
 
@@ -48,11 +50,11 @@ Source code for the ``zheng07`` model
 	from halotools.empirical_models import HodModelFactory
 
 	from halotools.empirical_models import TrivialPhaseSpace, Zheng07Cens
-	cens_occ_model =  Zheng07Cens(threshold = -20.5)
+	cens_occ_model =  Zheng07Cens()
 	cens_prof_model = TrivialPhaseSpace()
 
 	from halotools.empirical_models import NFWPhaseSpace, Zheng07Sats
-	sats_occ_model =  Zheng07Sats(threshold = -20.5)
+	sats_occ_model =  Zheng07Sats()
 	sats_prof_model = NFWPhaseSpace()
 
 	model_instance = HodModelFactory(
@@ -89,6 +91,12 @@ we passed in a *component model instance*. These particular component models
 were defined by Halotools, but as we will see in more complex examples, 
 you can also include component models that are entirely of your devising. 
 
+We will not cover any of the details about the component model 
+features collected together by the ``zheng07`` composite model. 
+You can read about that in the :ref:`zheng07_composite_model` 
+section of the documentation, 
+and also by reading the docstring of each component model class. 
+
 Required features of any HOD-style composite model
 =====================================================
 
@@ -120,6 +128,56 @@ The process for defining your own profile model is described in
 for the purpose of this example, 
 we will stick with profile models that already 
 appear in the Halotools code base. 
+
+The `PrebuiltHodModelFactory` is just syntax candy
+=====================================================
+
+If you followed the :ref:`preloaded_models_overview` section of the documentation, 
+or if you have just played around a bit with the code, 
+you are already familiar with the `PrebuiltHodModelFactory` class. 
+The calling sequence for this class takes a string that serves as a 
+nickname of a model, e.g., ``zheng07``. Under the hood, the 
+`PrebuiltHodModelFactory` class has virtually no functionality of its own. 
+The only task that the `PrebuiltHodModelFactory` does is to translate a 
+small collection of strings into the appropriate set of arguments 
+to pass on to the `HodModelFactory`, that's it. 
+So the code that appears in the :ref:`hod_factory_tutorial_zheng07_source_code` 
+section above actually produces an identical composite model as the following:
+
+>>> from halotools.empirical_models import PrebuiltHodModelFactory
+>>> model_instance = PrebuiltHodModelFactory('zheng07')
+
+Final example: source code for the ``leauthaud11`` model
+==========================================================
+
+We'll cement our understanding of how to build simple HOD-style models 
+by providing just one more example of a bare bones composite model. 
+Compare the source code below to the code that appears in the 
+:ref:`hod_factory_tutorial_zheng07_source_code` to convince yourself 
+that you see the pattern and are ready to move to building more complex models. 
+
+.. code:: python
+
+	from halotools.empirical_models import HodModelFactory
+
+	from halotools.empirical_models import TrivialPhaseSpace, Leauthaud11Cens
+	another_cens_occ_model =  Leauthaud11Cens()
+	another_cens_prof_model = TrivialPhaseSpace()
+
+	from halotools.empirical_models import NFWPhaseSpace, Leauthaud11Sats
+	another_sats_occ_model =  Leauthaud11Sats()
+	another_sats_prof_model = NFWPhaseSpace()
+
+	model_instance = HodModelFactory(
+		centrals_occupation = another_cens_occ_model, 
+		centrals_profile = another_cens_prof_model, 
+		satellites_occupation = another_sats_occ_model, 
+		satellites_profile = another_sats_prof_model)
+
+See the :ref:`leauthaud11_composite_model` section of the documentation 
+for more more information about this model. 
+
+This tutorial continues with :ref:`hod_modeling_tutorial2`. 
 
 
 

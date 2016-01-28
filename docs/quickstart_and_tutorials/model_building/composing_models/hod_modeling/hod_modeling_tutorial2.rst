@@ -1,8 +1,7 @@
-
-.. _abunmatch_model_factory_overview:
+.. _hod_modeling_tutorial2:
 
 ****************************************************************
-Tutorial on building a subhalo-based model
+Example 2: An HOD-style model with additional features
 ****************************************************************
 
-Tutorial coming soon!
+.. currentmodule:: halotools.empirical_models

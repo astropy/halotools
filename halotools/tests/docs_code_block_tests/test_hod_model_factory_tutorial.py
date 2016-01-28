@@ -17,11 +17,11 @@ class TestHodModelFactoryTutorial(TestCase):
 
         from ...empirical_models import TrivialPhaseSpace, Zheng07Cens
 
-        cens_occ_model =  Zheng07Cens(threshold = -20.5)
+        cens_occ_model =  Zheng07Cens()
         cens_prof_model = TrivialPhaseSpace()
 
         from ...empirical_models import NFWPhaseSpace, Zheng07Sats
-        sats_occ_model =  Zheng07Sats(threshold = -20.5)
+        sats_occ_model =  Zheng07Sats()
         sats_prof_model = NFWPhaseSpace()
 
         model_instance = HodModelFactory(

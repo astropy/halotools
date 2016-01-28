@@ -17,4 +17,5 @@ of worked examples with increasingly complexity.
    :maxdepth: 1
 
    hod_modeling_tutorial1 
+   hod_modeling_tutorial2
 
