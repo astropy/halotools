@@ -82,15 +82,44 @@ followed by a nickname for the feature being passed in.
 From the set of keywords alone, the `HodModelFactory` learns  
 1. there are two galaxy populations: ``centrals`` and ``satellites``, 
 and 2. the list features of each of these galaxy populations are 
-``occupation`` and ``profile``. More about this in a moment. 
+``occupation`` and ``profile``. More about this in the next section. 
 
 Next notice what value we bound to each keyword. In all cases, 
 we passed in a *component model instance*. These particular component models 
 were defined by Halotools, but as we will see in more complex examples, 
 you can also include component models that are entirely of your devising. 
 
+Required features of any HOD-style composite model
+=====================================================
 
+As mentioned above and elsewhere in the documentation, there is no 
+limitation on the number of features you can include in an composite model. 
+However, for any HOD-style model the ``occupation`` and ``profile`` features 
+are compulsory for each galaxy type in your model. 
 
+``occupation`` component 
+--------------------------
+
+The `HodModelFactory` needs to know ``occupation`` in order to create 
+the appropriate number of galaxies in each halo. 
+As described in :ref:`writing_your_own_hod_occupation_component` and 
+in a more complex worked example in a later part of this tutorial, 
+all classes used to define an occupation feature must 
+sub-class from `OccupationComponent`. 
+For the purpose of this example, 
+we will stick with `OccupationComponent` sub-classes that already 
+appear in the Halotools code base. 
+
+``profile`` component 
+--------------------------
+
+The `HodModelFactory` needs ``profile`` in order to know how to 
+distribute the galaxies within their parent halo. 
+The process for defining your own profile model is described in 
+:ref:`writing_your_own_hod_profile_component`. Again, 
+for the purpose of this example, 
+we will stick with profile models that already 
+appear in the Halotools code base. 
 
 
 
