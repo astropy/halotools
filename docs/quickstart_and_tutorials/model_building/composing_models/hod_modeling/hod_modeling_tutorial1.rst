@@ -59,8 +59,35 @@ Source code for the ``zheng07`` model
 		centrals_occupation = cens_occ_model, 
 		centrals_profile = cens_prof_model, 
 		satellites_occupation = sats_occ_model, 
-		satellites_profile = sats_prof_model
+		satellites_profile = sats_prof_model)
 
+	# The model_instance is a composite model 
+	# All composite models can directly populate N-body simulations 
+	# with mock galaxy catalogs using the populate_mock method:
+
+	model_instance.populate_mock(simname = 'fake')
+
+	# Setting simname to 'fake' populates a mock into a fake halo catalog 
+	# that is generated on-the-fly, but you can use the populate_mock 
+	# method with any Halotools-formatted catalog 
+
+Unpacking the ``zheng07`` source code
+=====================================================
+
+First notice how the `HodModelFactory` was instantiated 
+with a set of keyword arguments. 
+Each of the strings we used for the keys were formatted in a specific way:
+the name of the galaxy type, followed by an underscore, 
+followed by a nickname for the feature being passed in. 
+From the set of keywords alone, the `HodModelFactory` learns  
+1. there are two galaxy populations: ``centrals`` and ``satellites``, 
+and 2. the list features of each of these galaxy populations are 
+``occupation`` and ``profile``. More about this in a moment. 
+
+Next notice what value we bound to each keyword. In all cases, 
+we passed in a *component model instance*. These particular component models 
+were defined by Halotools, but as we will see in more complex examples, 
+you can also include component models that are entirely of your devising. 
 
 
 
