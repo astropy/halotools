@@ -1,8 +1,8 @@
 
-.. _hod_model_factory_overview:
+.. _hod_modeling_tutorial0:
 
 ****************************************************************
-Tutorial in building an HOD-style composite model
+Tutorial on building an HOD-style model
 ****************************************************************
 
 .. currentmodule:: halotools.empirical_models

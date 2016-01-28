@@ -33,7 +33,7 @@ and follow the link to the appropriate tutorial:
 .. toctree::
    :maxdepth: 1
 
-   abunmatch_model_factory_overview
-   hod_model_factory_overview
+   subhalo_modeling/abunmatch_model_factory_overview
+   hod_modeling/hod_modeling_tutorial0
 
 
