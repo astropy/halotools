@@ -2,7 +2,7 @@
 .. _abunmatch_model_factory_overview:
 
 ****************************************************************
-Factory Design for Abundance Matching-style models
+Tutorial in building a subhalo-based composite model
 ****************************************************************
 
 Tutorial coming soon!
