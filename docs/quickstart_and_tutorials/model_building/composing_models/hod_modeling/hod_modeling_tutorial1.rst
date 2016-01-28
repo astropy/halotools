@@ -59,7 +59,7 @@ Source code for the ``zheng07`` model
 		centrals_occupation = cens_occ_model, 
 		centrals_profile = cens_prof_model, 
 		satellites_occupation = sats_occ_model, 
-		satellites_profile = sats_prof_model)
+		satellites_profile = sats_prof_model
 
 
 
