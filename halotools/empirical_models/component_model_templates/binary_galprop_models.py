@@ -18,7 +18,7 @@ import warnings
 from .. import model_defaults
 from .. import model_helpers
 
-from ...utils.array_utils import custom_len
+from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...custom_exceptions import HalotoolsError
 
 @six.add_metaclass(ABCMeta)
@@ -140,7 +140,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
     """
 
-    def __init__(self, galprop_abcissa = [12, 15], galprop_ordinates = [0.25, 0.75], 
+    def __init__(self, galprop_abcissa, galprop_ordinates, 
         logparam=True, interpol_method='spline', **kwargs):
         """ 
         Parameters 
@@ -160,11 +160,9 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         galprop_abcissa : array, optional  
             Values of the primary halo property at which the galprop fraction is specified. 
-            Default is [12, 15], in accord with the default True value for ``logparam``. 
 
         galprop_ordinates : array, optional  
             Values of the galprop fraction when evaluated at the input abcissa. 
-            Default is [0.25, 0.75]
 
         logparam : bool, optional 
             If set to True, the interpolation will be done 
@@ -229,6 +227,16 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
         self._interpol_method = interpol_method
         self._logparam = logparam
+
+
+        galprop_abcissa = convert_to_ndarray(galprop_abcissa)
+        galprop_ordinates = convert_to_ndarray(galprop_ordinates)
+        try:
+            assert len(set(galprop_abcissa)) == len(galprop_abcissa)
+        except AssertionError:
+            msg = ("\nYour input ``galprop_abcissa`` cannot have any repeated values\n")
+            raise HalotoolsError(msg)
+
         self._abcissa = galprop_abcissa
         self._ordinates = galprop_ordinates
 

@@ -96,9 +96,9 @@ def smhm_binary_sfr_model_dictionary(
 
     """
 
-    sfr_model = BinaryGalpropInterpolModel(
+    sfr_model = BinaryGalpropInterpolModel(sfr_abcissa, sfr_ordinates, 
         galprop_name = 'quiescent', prim_haloprop_key=prim_haloprop_key, 
-        abcissa = sfr_abcissa, ordinates = sfr_ordinates, logparam = logparam, **kwargs)
+        logparam = logparam, **kwargs)
 
     sm_model = smhm_model(
         prim_haloprop_key = prim_haloprop_key, redshift = redshift, 

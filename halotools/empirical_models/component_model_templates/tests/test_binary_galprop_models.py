@@ -1,42 +1,76 @@
 #!/usr/bin/env python
+import numpy as np
+from astropy.table import Table
+from copy import copy, deepcopy
 
-import numpy as np 
-from astropy.table import Table 
+from astropy.tests.helper import pytest
+from unittest import TestCase
+import warnings 
 
-from ..binary_galprop_models import BinaryGalpropInterpolModel as BinaryModel
+from ..binary_galprop_models import BinaryGalpropInterpolModel
 
-from ... import model_defaults
+from ....custom_exceptions import HalotoolsError
 
-def test_BinaryGalpropInterpolModel():
-    """ Function testing the initialization of 
+__all__ = ['TestBinaryGalpropInterpolModel']
+
+
+class TestBinaryGalpropInterpolModel(TestCase):
+
+    """ Class providing testing for the 
     `~halotools.empirical_models.BinaryGalpropInterpolModel`. 
     """
-    abcissa, ordinates = [12, 15], [1/3., 0.9]
-    m = BinaryModel(galprop_name='late_type', 
-        galprop_abcissa = abcissa, galprop_ordinates = ordinates, 
-        prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
 
-    Npts = 5e3
-    testmass12 = np.ones(Npts)*1e12
-    testmass135 = np.ones(Npts)*10.**13.5
-    testmass15 = np.ones(Npts)*1e15
+    def setUp(self):
 
-    frac12 = m.mean_late_type_fraction(prim_haloprop = testmass12)
-    frac135 = m.mean_late_type_fraction(prim_haloprop = testmass135)
-    frac15 = m.mean_late_type_fraction(prim_haloprop = testmass15)
+        self.abcissa, self.ordinates = [12, 15], [1/3., 0.9]
+        self.model = BinaryGalpropInterpolModel(galprop_name='late_type', 
+            galprop_abcissa = self.abcissa, galprop_ordinates = self.ordinates, 
+            prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
 
-    midval = 0.5*np.sum(ordinates)
-    assert np.all(frac12 == ordinates[0])
-    assert np.all(frac135 == midval)
-    assert np.all(frac15 == ordinates[1])
+        Npts = 5e3
+        self.testmass12 = np.ones(Npts)*1e12
+        self.testmass135 = np.ones(Npts)*10.**13.5
+        self.testmass15 = np.ones(Npts)*1e15
 
-    mean_mcfrac12 = np.mean(m.mc_late_type(prim_haloprop = testmass12, seed=43))
-    mean_mcfrac135 = np.mean(m.mc_late_type(prim_haloprop = testmass135, seed=43))
-    mean_mcfrac15 = np.mean(m.mc_late_type(prim_haloprop = testmass15, seed=43))
+    def test_mean_galprop_fraction(self):
+        m = self.model
 
-    np.testing.assert_allclose(mean_mcfrac12, frac12, rtol=1e-2, atol=1.e-2)
-    np.testing.assert_allclose(mean_mcfrac135, frac135, rtol=1e-2, atol=1.e-2)
-    np.testing.assert_allclose(mean_mcfrac15, frac15, rtol=1e-2, atol=1.e-2)
+        frac12 = m.mean_late_type_fraction(prim_haloprop = self.testmass12)
+        frac135 = m.mean_late_type_fraction(prim_haloprop = self.testmass135)
+        frac15 = m.mean_late_type_fraction(prim_haloprop = self.testmass15)
+
+        midval = 0.5*np.sum(self.ordinates)
+        assert np.all(frac12 == self.ordinates[0])
+        assert np.all(frac135 == midval)
+        assert np.all(frac15 == self.ordinates[1])
+
+    def test_mc_galprop_fraction(self):
+        m = self.model
+
+        frac12 = m.mean_late_type_fraction(prim_haloprop = self.testmass12)
+        frac135 = m.mean_late_type_fraction(prim_haloprop = self.testmass135)
+        frac15 = m.mean_late_type_fraction(prim_haloprop = self.testmass15)
+
+        mean_mcfrac12 = np.mean(m.mc_late_type(prim_haloprop = self.testmass12, seed=43))
+        mean_mcfrac135 = np.mean(m.mc_late_type(prim_haloprop = self.testmass135, seed=43))
+        mean_mcfrac15 = np.mean(m.mc_late_type(prim_haloprop = self.testmass15, seed=43))
+
+        np.testing.assert_allclose(mean_mcfrac12, frac12, rtol=1e-2, atol=1.e-2)
+        np.testing.assert_allclose(mean_mcfrac135, frac135, rtol=1e-2, atol=1.e-2)
+        np.testing.assert_allclose(mean_mcfrac15, frac15, rtol=1e-2, atol=1.e-2)
+
+
+    def test_abcissa_check(self):
+        with pytest.raises(HalotoolsError) as err:
+            model = BinaryGalpropInterpolModel(galprop_name='late_type', 
+                galprop_abcissa = [12, 12], galprop_ordinates = [0.5, 0.9], 
+                prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
+        substr = "Your input ``galprop_abcissa`` cannot have any repeated values"
+        assert substr in err.value.message
+
+    
+
+
 
 
 
