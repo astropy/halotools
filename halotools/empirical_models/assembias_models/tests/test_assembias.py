@@ -9,7 +9,7 @@ from astropy.table import Table
 
 from ...occupation_models import *
 from ... import model_defaults
-from ...sfr_models import BinaryGalpropInterpolModel
+from ...component_model_templates import BinaryGalpropInterpolModel
 
 from ....sim_manager import FakeSim
 from ....utils.table_utils import SampleSelector, compute_conditional_percentiles
