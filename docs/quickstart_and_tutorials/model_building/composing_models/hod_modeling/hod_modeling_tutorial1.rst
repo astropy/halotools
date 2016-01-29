@@ -168,11 +168,28 @@ that you see the pattern and are ready to move to building more complex models.
 	another_sats_occ_model =  Leauthaud11Sats()
 	another_sats_prof_model = NFWPhaseSpace()
 
+	another_sats_occ_model._suppress_repeated_param_warning = True
+
 	model_instance = HodModelFactory(
 		centrals_occupation = another_cens_occ_model, 
 		centrals_profile = another_cens_prof_model, 
 		satellites_occupation = another_sats_occ_model, 
 		satellites_profile = another_sats_prof_model)
+
+The only line in the above code that may be unfamiliar is setting 
+``_suppress_repeated_param_warning`` to True. This is not strictly necessary, 
+and is only there to prevent Halotools from raising a warning message which 
+in this case is harmless. Briefly, the parameter dictionaries of 
+`Leauthaud11Cens` and `Leauthaud11Sats` share several parameters in common 
+as both models make use of the `Behroozi10SmHm` model. In general, Halotools 
+raises a warning if multiple component models have parameters with the exact 
+same name as this can lead to buggy behavior if two parameters with the same 
+name have different meanings. In this case, it is harmless so we can simply 
+``_suppress_repeated_param_warning`` to True and not be bothered with a warning. 
+You can read more about this bookkeeping device at the end of the 
+:ref:`param_dict_mechanism` section of the :ref:`composite_model_constructor_bookkeeping_mechanisms` 
+page of the documentation. 
+
 
 See the :ref:`leauthaud11_composite_model` section of the documentation 
 for more more information about this model. 

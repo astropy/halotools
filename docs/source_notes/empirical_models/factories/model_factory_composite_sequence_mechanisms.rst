@@ -16,7 +16,7 @@ This tutorial remains to be written. See `Github Issue 211 <https://github.com/a
 The ``param_dict`` mechanism
 ================================================
 
-The component model classes in Halotools determine the functional form of the aspect of the galaxy-halo connection being modeled, but in many cases models have a handful of parameters allows you to tune the behavior of the functions. For example, the `~halotools.empirical_models.zheng07_components.Zheng07Cens` class dictates that the average number of central galaxies as a function of halo mass, :math:`\langle N_{\rm cen}\vert M_{\rm halo}\rangle`, is governed by an ``erf`` function, but the speed of the transition of the ``erf`` function between 0 and 1 can be varied by changing the :math:`\sigma_{\log M}` parameter. 
+The component model classes in Halotools determine the functional form of the aspect of the galaxy-halo connection being modeled, but in many cases models have a handful of parameters allows you to tune the behavior of the functions. For example, the `~halotools.empirical_models.Zheng07Cens` class dictates that the average number of central galaxies as a function of halo mass, :math:`\langle N_{\rm cen}\vert M_{\rm halo}\rangle`, is governed by an ``erf`` function, but the speed of the transition of the ``erf`` function between 0 and 1 can be varied by changing the :math:`\sigma_{\log M}` parameter. 
 
 In all such cases, parameters such as :math:`\sigma_{\log M}` are elements of ``param_dict``, a python dictionary bound to the component model instance. By changing the values bound to the parameters in the ``param_dict``, you change the behavior of the model. 
 
