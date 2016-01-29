@@ -16,7 +16,7 @@ from ...occupation_models import leauthaud11_components
 from ...occupation_models import tinker13_components 
 
 from ...smhm_models import Moster13SmHm, Behroozi10SmHm
-from ...sfr_models import BinaryGalpropInterpolModel
+from ...component_model_templates import BinaryGalpropInterpolModel
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 
 from ....sim_manager import FakeSim, sim_defaults
