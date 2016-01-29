@@ -228,15 +228,9 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         self._interpol_method = interpol_method
         self._logparam = logparam
 
-
         galprop_abcissa = convert_to_ndarray(galprop_abcissa)
         galprop_ordinates = convert_to_ndarray(galprop_ordinates)
-        try:
-            assert len(set(galprop_abcissa)) == len(galprop_abcissa)
-        except AssertionError:
-            msg = ("\nYour input ``galprop_abcissa`` cannot have any repeated values\n")
-            raise HalotoolsError(msg)
-
+        self._test_abcissa_ordinates(galprop_abcissa, galprop_ordinates)
         self._abcissa = galprop_abcissa
         self._ordinates = galprop_ordinates
 
@@ -263,6 +257,27 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         self._build_param_dict()
 
         setattr(self, self.galprop_name+'_abcissa', self._abcissa)
+
+    def _test_abcissa_ordinates(self, galprop_abcissa, galprop_ordinates):
+        try:
+            assert len(galprop_abcissa) == len(galprop_ordinates)
+        except AssertionError:
+            msg = ("\nInput ``galprop_abcissa`` and ``galprop_ordinates`` must have the same length\n")
+            raise HalotoolsError(msg)
+
+        try:
+            assert len(set(galprop_abcissa)) == len(galprop_abcissa)
+        except AssertionError:
+            msg = ("\nYour input ``galprop_abcissa`` cannot have any repeated values\n")
+            raise HalotoolsError(msg)
+
+        try:
+            assert np.all(galprop_abcissa >= 0)
+            assert np.all(galprop_ordinates <= 1)
+        except AssertionError:
+            msg = ("\nAll values of the input ``galprop_ordinates`` must be between 0 and 1, inclusive.")
+            raise HalotoolsError(msg)
+
 
     def _build_param_dict(self):
 
