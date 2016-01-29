@@ -77,6 +77,17 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
         Now ``quiescent_designation`` is a boolean-valued array of the same length as the 
         input ``mass_array``. True values correspond to quiescent galaxies, and conversely. 
 
+        At any time, you can change the values of the quiescent fraction in your model 
+        by changing the appropriate key in ``param_dict``:
+
+        >>> model.param_dict['quiescent_ordinates_param1'] = 0.35. 
+
+        The above line of code changed the quiescent fraction to 0.35 at the first control value 
+        of :math:`M_{\\rm vir} = 10^{12}M_{\\odot}`. You will have one parameter for every 
+        control value you used to instantiate the model. While you can always change the 
+        quiescent fraction of your model instance at any given control value, you cannot 
+        change the halo masses at which the control values are evaluated. To do that, 
+        you must instantiate a new model. 
 
         """
         quiescent_fraction_control_values = convert_to_ndarray(quiescent_fraction_control_values)
