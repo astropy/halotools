@@ -89,12 +89,7 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
             galprop_name = 'quiescent', prim_haloprop_key=halo_mass_key, 
             galprop_abcissa = log10_halo_mass_abcissa, 
             galprop_ordinates = quiescent_fraction_control_values, 
-            logparam = True)
-
-        try:
-            self.gal_type = kwargs['gal_type']
-        except KeyError:
-            pass
+            logparam = True, **kwargs)
 
 
 
