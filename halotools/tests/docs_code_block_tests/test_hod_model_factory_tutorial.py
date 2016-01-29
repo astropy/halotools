@@ -41,8 +41,32 @@ class TestHodModelFactoryTutorial(TestCase):
         # that is generated on-the-fly, but you can use the populate_mock 
         # method with any Halotools-formatted catalog 
 
+    def test_hod_modeling_tutorial2a(self):
+        from ...empirical_models import HodModelFactory
+
+        from ...empirical_models import TrivialPhaseSpace, Zheng07Cens
+        another_cens_occ_model =  Zheng07Cens()
+        another_cens_prof_model = TrivialPhaseSpace()
+
+        from ...empirical_models import NFWPhaseSpace, Zheng07Sats
+        another_sats_occ_model =  Zheng07Sats()
+        another_sats_prof_model = NFWPhaseSpace()
+
+        from ...empirical_models import HaloMassInterpolQuenching
+        sat_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
+        cen_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
+
+        model_instance = HodModelFactory(
+            centrals_occupation = another_cens_occ_model, 
+            centrals_profile = another_cens_prof_model, 
+            satellites_occupation = another_sats_occ_model, 
+            satellites_profile = another_sats_prof_model, 
+            centrals_quenching = cen_quenching, 
+            satellites_quenching = sat_quenching
+            )
+
     @pytest.mark.slow
-    def test_hod_modeling_tutorial2(self):
+    def test_hod_modeling_tutorial2b(self):
 
         from ...empirical_models import HodModelFactory
 
@@ -55,8 +79,10 @@ class TestHodModelFactoryTutorial(TestCase):
         another_sats_prof_model = NFWPhaseSpace()
 
         from ...empirical_models import HaloMassInterpolQuenching
-        sat_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
-        cen_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
+        sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
+            [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
+        cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
+            [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
@@ -108,7 +134,35 @@ class TestHodModelFactoryTutorial(TestCase):
         sats = model_instance.mock.galaxy_table[satmask]
         assert set(sats['quiescent']) == {True, False}
 
+    def test_hod_modeling_tutorial2c(self):
 
+        from ...empirical_models import HodModelFactory
+
+        from ...empirical_models import TrivialPhaseSpace, Zheng07Cens
+        another_cens_occ_model =  Zheng07Cens()
+        another_cens_prof_model = TrivialPhaseSpace()
+
+        from ...empirical_models import NFWPhaseSpace, Zheng07Sats
+        another_sats_occ_model =  Zheng07Sats()
+        another_sats_prof_model = NFWPhaseSpace()
+
+        ordinary_zheng07_model = HodModelFactory(
+            centrals_occupation = another_cens_occ_model, 
+            centrals_profile = another_cens_prof_model, 
+            satellites_occupation = another_sats_occ_model, 
+            satellites_profile = another_sats_prof_model)
+
+        from ...empirical_models import HaloMassInterpolQuenching
+        sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
+            [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
+        cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
+            [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
+
+        zheng07_with_quenching = HodModelFactory(
+            baseline_model_instance = ordinary_zheng07_model, 
+            centrals_quenching = cen_quenching, 
+            satellites_quenching = sat_quenching
+            )
 
 
 
