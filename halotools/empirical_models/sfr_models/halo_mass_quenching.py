@@ -80,7 +80,7 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
         At any time, you can change the values of the quiescent fraction in your model 
         by changing the appropriate key in ``param_dict``:
 
-        >>> model.param_dict['quiescent_ordinates_param1'] = 0.35. 
+        >>> model_instance.param_dict['quiescent_ordinates_param1'] = 0.35
 
         The above line of code changed the quiescent fraction to 0.35 at the first control value 
         of :math:`M_{\\rm vir} = 10^{12}M_{\\odot}`. You will have one parameter for every 
@@ -88,6 +88,17 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
         quiescent fraction of your model instance at any given control value, you cannot 
         change the halo masses at which the control values are evaluated. To do that, 
         you must instantiate a new model. 
+
+        If you passed in a ``gal_type`` keyword, the keys of your ``param_dict`` will 
+        reflect this choice:
+
+        >>> model_instance = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.25, 0.9], gal_type = 'centrals')
+        >>> model_instance.param_dict['centrals_quiescent_ordinates_param1'] = 0.35
+
+        The purpose for this distinction is to provide disambiguation for composite models 
+        that use the `HaloMassInterpolQuenching` class for more than one galaxy population. 
+
+
 
         """
         quiescent_fraction_control_values = convert_to_ndarray(quiescent_fraction_control_values)
