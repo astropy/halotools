@@ -3,6 +3,7 @@ import numpy as np
 
 from astropy.tests.helper import pytest
 from unittest import TestCase
+import warnings 
 
 from ...custom_exceptions import HalotoolsError
 
@@ -57,14 +58,34 @@ class TestHodModelFactoryTutorial(TestCase):
         sat_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
         cen_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
 
-        model_instance = HodModelFactory(
-            centrals_occupation = another_cens_occ_model, 
-            centrals_profile = another_cens_prof_model, 
-            satellites_occupation = another_sats_occ_model, 
-            satellites_profile = another_sats_prof_model, 
-            centrals_quenching = cen_quenching, 
-            satellites_quenching = sat_quenching
-            )
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+
+            model_instance = HodModelFactory(
+                centrals_occupation = another_cens_occ_model, 
+                centrals_profile = another_cens_prof_model, 
+                satellites_occupation = another_sats_occ_model, 
+                satellites_profile = another_sats_prof_model, 
+                centrals_quenching = cen_quenching, 
+                satellites_quenching = sat_quenching
+                )
+            assert len(w) > 0
+            assert 'appears in more than one component model' in str(w[-1].message)
+
+        cen_quenching._suppress_repeated_param_warning = True
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+
+            model_instance = HodModelFactory(
+                centrals_occupation = another_cens_occ_model, 
+                centrals_profile = another_cens_prof_model, 
+                satellites_occupation = another_sats_occ_model, 
+                satellites_profile = another_sats_prof_model, 
+                centrals_quenching = cen_quenching, 
+                satellites_quenching = sat_quenching
+                )
+            assert len(w) == 0
+
 
         assert hasattr(model_instance, 'mean_quiescent_fraction_centrals')
         assert hasattr(model_instance, 'mean_quiescent_fraction_satellites')
