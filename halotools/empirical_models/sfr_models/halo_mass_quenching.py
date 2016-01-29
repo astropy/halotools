@@ -1,0 +1,108 @@
+# -*- coding: utf-8 -*-
+"""
+
+"""
+from __future__ import (
+    division, print_function, absolute_import)
+
+__all__ = ['HaloMassInterpolQuenching']
+
+from functools import partial
+from copy import copy
+import numpy as np
+from scipy.interpolate import UnivariateSpline as spline
+from astropy.extern import six
+from abc import ABCMeta, abstractmethod, abstractproperty
+import warnings
+
+from .. import model_defaults
+from .. import model_helpers
+from ..component_model_templates import BinaryGalpropInterpolModel
+
+from ...utils.array_utils import custom_len, convert_to_ndarray
+from ...custom_exceptions import HalotoolsError
+
+class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
+    """ Model for the quiescent fraction as a function of halo mass 
+    defined by interpolating between a set of input control points. 
+
+    Notes 
+    -------
+    The interpolation is automatically done in log-space. 
+
+    See also 
+    ----------
+    BinaryGalpropInterpolModel : Parent class from which all behavior derives. 
+    """
+
+    def __init__(self, halo_mass_key, 
+        halo_mass_abcissa, quiescent_fraction_control_values, **kwargs):
+        """
+        Parameters 
+        -----------
+        halo_mass_key : string 
+            Name of the column of the halo table storing the 
+            mass-like variable the model is based on, 
+            e.g., 'halo_mvir' or 'halo_m200b'.
+
+        halo_mass_abcissa : array_like 
+            Values of halo mass at which the quiescent fraction is specified. 
+
+        quiescent_fraction_control_values : array_like 
+            Values of the quiescent fraction evaluated at the ``halo_mass_abcissa``. 
+
+        gal_type : string, optional 
+            Name of the galaxy population.
+            This is only relevant if you are building an HOD-style composite model.  
+
+        Examples 
+        ----------
+
+        Suppose you wish to build a model for quenching in which 
+        1/4 of galaxies in Milky Way halos are quiescent and 9/10 of galaxies 
+        in cluster halos are quiescent:
+
+        >>> model_instance = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.25, 0.9])
+
+        Your model has a method called ``mean_quiescent_fraction`` that accepts 
+        a ``prim_haloprop`` keyword argument:
+
+        >>> mass_array = np.logspace(10, 15, 1000)
+        >>> quiescent_fraction = model_instance.mean_quiescent_fraction(prim_haloprop = mass_array)
+
+        You can also generate Monte Carlo realizations of quiescent designation:
+
+        >>> quiescent_designation = model_instance.mc_quiescent(prim_haloprop = mass_array)
+
+        Now ``quiescent_designation`` is a boolean-valued array of the same length as the 
+        input ``mass_array``. True values correspond to quiescent galaxies, and conversely. 
+
+
+        """
+        quiescent_fraction_control_values = convert_to_ndarray(quiescent_fraction_control_values)
+
+        halo_mass_abcissa = convert_to_ndarray(halo_mass_abcissa)
+        log10_halo_mass_abcissa = np.log10(halo_mass_abcissa)
+
+
+        BinaryGalpropInterpolModel.__init__(self, 
+            galprop_name = 'quiescent', prim_haloprop_key=halo_mass_key, 
+            galprop_abcissa = log10_halo_mass_abcissa, 
+            galprop_ordinates = quiescent_fraction_control_values, 
+            logparam = True)
+
+        try:
+            self.gal_type = kwargs['gal_type']
+        except KeyError:
+            pass
+
+
+
+
+
+
+
+
+
+
+

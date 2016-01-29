@@ -8,7 +8,7 @@ import numpy as np
 from copy import copy 
 
 from ...smhm_models import Behroozi10SmHm, Moster13SmHm
-from ...sfr_models import BinaryGalpropInterpolModel
+from ...component_model_templates import BinaryGalpropInterpolModel
 
 from ...factories import PrebuiltSubhaloModelFactory, SubhaloModelFactory
 from ...composite_models.smhm_models.behroozi10 import behroozi10_model_dictionary

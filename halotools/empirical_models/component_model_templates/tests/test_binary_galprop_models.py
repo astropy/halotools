@@ -3,13 +3,13 @@
 import numpy as np 
 from astropy.table import Table 
 
-from ..sfr_components import BinaryGalpropInterpolModel as BinaryModel
+from ..binary_galprop_models import BinaryGalpropInterpolModel as BinaryModel
 
 from ... import model_defaults
 
 def test_BinaryGalpropInterpolModel():
     """ Function testing the initialization of 
-    `~halotools.empirical_models.sfr_components.BinaryGalpropInterpolModel`. 
+    `~halotools.empirical_models.BinaryGalpropInterpolModel`. 
     """
     abcissa, ordinates = [12, 15], [1/3., 0.9]
     m = BinaryModel(galprop_name='late_type', 
