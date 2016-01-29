@@ -99,5 +99,3 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
 
 
 
-
-
