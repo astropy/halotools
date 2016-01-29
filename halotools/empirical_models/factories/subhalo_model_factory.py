@@ -132,7 +132,7 @@ class SubhaloModelFactory(ModelFactory):
         >>> stellar_mass_model = Behroozi10SmHm(redshift = 0.5)
 
         >>> from halotools.empirical_models import BinaryGalpropInterpolModel
-        >>> sfr_model = BinaryGalpropInterpolModel(galprop_name = 'quiescent_designation')
+        >>> sfr_model = BinaryGalpropInterpolModel(galprop_name = 'quiescent_designation', galprop_abcissa = [12, 15], galprop_ordinates = [0.25, 0.75])
 
         At this point we have two component model instances, ``stellar_mass_model`` and 
         ``sfr_model``. The following call to the factory uses the ``model_features`` option 
