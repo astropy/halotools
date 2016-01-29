@@ -113,6 +113,9 @@ The ``baseline_model_instance`` feature is designed to make it easy to study the
 effects of swapping in and out individual components without having to build a new 
 model from scratch. This feature is made possible by the fact that all instances 
 of Halotools composite models carry with them the instructions from which they were built. 
+This standardization is provided by the `HodModelFactory` itself, 
+so this statement holds true whether or not the 
+composite model is built by Halotools. 
 So by passing in an instance of a composite model to the `HodModelFactory` via 
 the ``baseline_model_instance`` keyword, the composite model instance is able to inform 
 the factory of the appropriate features. 
