@@ -49,8 +49,8 @@ a more full-features version of the previous
             else:
                 return is_disrupted
 
-        def assign_axis_ratio(self, table):
-
+        def assign_axis_ratio(self, **kwargs):
+            table = kwargs['table']
             mask = table['disrupted'] == True
             num_disrupted = len(table['disrupted'][mask])
             table['axis_ratio'][mask][:] = np.random.random(num_disrupted)

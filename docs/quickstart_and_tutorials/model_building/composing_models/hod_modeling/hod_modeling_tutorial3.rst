@@ -56,8 +56,8 @@ However, for now, while reading this code take note of the big picture.
             self._galprop_dtypes_to_allocate = np.dtype([('galsize', 'f4')])
             self.list_of_haloprops_needed = ['halo_spin']
             
-        def assign_size(self, table):
-            
+        def assign_size(self, **kwargs):
+            table = kwargs['table']
             table['galsize'][:] = table['halo_spin']/5.
 
 Now we'll build an instance of the *Size* component model for centrals and satellites 
@@ -162,14 +162,13 @@ whatever the spin of the halo is, divide it by five and call the result
 the size of the galaxy. Obviously this is physically silly, but the 
 calling signature illustrates how to write your more physically realistic model. 
 
-Any method in your ``_mock_generation_calling_sequence`` must accept a ``table`` 
+Any method in your ``_mock_generation_calling_sequence`` must accept a ``table`` keyword 
 argument. That is because when the `MockFactory` calls your component model 
 methods, it will pass the ``galaxy_table`` that is being built to each of your 
 physics functions via a ``table`` keyword argument. 
-The simplest way to handle this is to just have your physics functions 
-accept a single positional argument called ``table``, although we will see in the 
-next tutorial that you can support more full-featured behavior by using the 
-`Python builtin kwargs syntax <http://stackoverflow.com/questions/1769403/understanding-kwargs-in-python>`_. 
+The simplest way to handle this in a way that will be compatible with future Halotools 
+updates is to have your physics functions use the Python built-in kwargs mechanism, 
+as demonstrated in the source code above. 
 
 In order for your model's underlying physics to propagate into the properties 
 of the mock galaxy population, your physics function(s) must write 
