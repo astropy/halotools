@@ -61,7 +61,8 @@ class MockFactory(object):
             `mock.galaxy_table` will have a column key storing this property of its host halo. 
             If ``additional_haloprops`` is set to the string value ``all``, 
             the galaxy table will inherit every halo property in the catalog. Default is None. 
-
+            
+            See :ref:`additional_haloprops_mechanism` for further discussion. 
         """
 
         required_kwargs = ['model']

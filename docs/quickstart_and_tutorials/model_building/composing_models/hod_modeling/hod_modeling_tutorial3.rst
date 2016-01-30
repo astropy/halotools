@@ -134,6 +134,17 @@ for further discussion.
 The role of the `list_of_haloprops_needed`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This attribute provides a list of all the keys of the ``halo_table`` that 
+the methods appearing ``_mock_generation_calling_sequence`` will need to access 
+during mock population. For example, the **assign_size** method requires 
+access to the ``halo_spin`` column, and so the ``halo_spin`` string appears in 
+``list_of_haloprops_needed``. This is fairly self-explanatory, but you can 
+read more about the under-the-hood details in the 
+:ref:`list_of_haloprops_needed_mechanism` section of the 
+:ref:`composite_model_constructor_bookkeeping_mechanisms` documentation page. 
+
+
+
 The role of the HOD `gal_type`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

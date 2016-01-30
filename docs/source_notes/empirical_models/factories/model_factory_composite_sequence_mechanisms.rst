@@ -141,6 +141,54 @@ input function, `decorated_func` first opens up the component model ``param_dict
 
 Note that this mechanism does *not* automatically and immediately propagate changes in the composite model ``param_dict`` to the component model ``param_dict``. If you manually change values in the composite model ``param_dict``, nothing happens to the component model by that action alone. The role of the `~ModelFactory.update_param_dict_decorator` is to accomplish this propagation when it counts: when you actually call the methods of the component model that the composite model actually needs. 
 
+.. _list_of_haloprops_needed_mechanism:
+
+The ``list_of_haloprops_needed`` mechanism 
+============================================
+
+When the `MockFactory` calls upon the component model methods, the only thing that 
+gets passed to each methods is a ``table`` keyword argument. In *almost* all cases, 
+the table bound to this keyword is the ``galaxy_table`` that is in the process of 
+being generated (see the :ref:`galprops_assigned_before_mc_occupation` section of the 
+:ref:`hod_mock_factory_source_code_notes` documentation page for the only exception to this rule). 
+
+The ``galaxy_table`` differs from the ``halo_table`` in several respects. 
+In subhalo-based models, they will have the same length, but in HOD-style models 
+they will generally have different lengths. The ``galaxy_table`` will have columns 
+associated with mock galaxy properties that the ``halo_table`` generally will not. 
+
+For the purpose of this discussion, the most important difference is this: 
+*the ``galaxy_table`` only inherits the columns of the ``halo_table`` that the 
+composite model tells it to inherit.* The ``list_of_haloprops_needed`` is one of the 
+two mechanisms that the composite model exploits to inform the `MockFactory` which ``halo_table`` 
+columns should be inherited by the ``galaxy_table`` 
+(see :ref:`additional_haloprops_mechanism` for a discussion of the other mechanism). 
+
+All component models have the option to define a ``list_of_haloprops_needed`` attribute, 
+a list of strings of ``halo_table`` column names. The model factory collects together all these lists 
+and forms their union. Any ``halo_table`` column name in this union will be inherited by 
+the mock galaxy population. Component models need not necessarily define 
+a ``list_of_haloprops_needed`` attribute. For example, in cases where 
+multiple component models require the same halo property, only one component need 
+declare a need for this property. Multiple requests of the same column is always harmless, 
+but for if you ever choose to include a component model that does not include a 
+``list_of_haloprops_needed`` attribute, 
+the model factory will always raise a (possibly harmless) warning. 
+
+
+.. _additional_haloprops_mechanism:
+
+The ``additional_haloprops`` mechanism 
+============================================
+
+When building a 
+
+
+
+
+
+
+
 
 
 
