@@ -28,10 +28,17 @@ Building the new component model
 
 All component models are instances of python classes, 
 so we will define a new class for our new feature. 
+You can always brush up on python classes by reading the  
+`Python documentation on classes <https://docs.python.org/2/tutorial/classes.html>`_. 
+But for our purposes there is really only one basic thing to know. 
+If you define a **__init__** method inside your class, then this 
+method is what gets called whenever your class is instantiated. This means that 
+any data that gets bound to *self* inside **__init__** will be bound to any 
+instance of your class. 
+
 The example source code below shows the basic pattern 
 you need to match when writing your own component model. 
 We'll unpack each line of this code in the discussion that follows.
-
 However, for now, while reading this code take note of the big picture. 
 
     1. You need to provide a few pieces of boilerplate data in the **__init__** method so that the Halotools factory knows how to interface with your model. 
@@ -52,10 +59,64 @@ However, for now, while reading this code take note of the big picture.
         def assign_size(self, table):
             
             table['galsize'][:] = table['halo_spin']/5.
+
+Now we'll build an instance of the *Size* component model for centrals and satellites 
+and incorporate this feature into a composite model:
+
+.. code:: python 
+
+    cen_size = Size('centrals')
+    sat_size = Size('satellites')
+    from halotools.empirical_models import PrebuiltHodModelFactory, HodModelFactory
+    zheng_model = PrebuiltHodModelFactory('zheng07')
+    new_model = HodModelFactory(baseline_model_instance = zheng_model, centrals_size = cen_size, satellites_size = sat_size)
+
             
 
+Comments on formatting the class controlling your new HOD component model
+===========================================================================
+
+In this section we'll unpack the above source code line-by-line. 
+
+The **__init__** method of your component model 
+----------------------------------------------------
+
+There are four lines of code here, and each of them binds some new data 
+to the class instance. Thus the *component_model_instance* above 
+will have four attributes: ``gal_type``, ``_mock_generation_calling_sequence``, 
+``_galprop_dtypes_to_allocate`` and ``list_of_haloprops_needed``. 
+Each of these attributes plays an important role in structuring the interface 
+between your model and the `HodModelFactory`, so we'll now discuss 
+them one by one. 
+
+.. _role_of_hod_mock_generation_calling_sequence:
+
+The role of the `_mock_generation_calling_sequence`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+During the generation of a mock catalog, the `HodModelFactory` calls upon 
+the component models one-by-one to assign their properties to the ``galaxy_table``. 
+When each component is called upon, every method whose name appears in 
+the component model's ``_mock_generation_calling_sequence`` gets passed 
+the ``galaxy_table``. These methods are called in the order they appear 
+in the ``_mock_generation_calling_sequence`` list. So the purpose of 
+the ``_mock_generation_calling_sequence`` list is to inform the 
+`HodModelFactory` what to do when it comes time for the 
+component model to play its role in creating the mock galaxy distribution. 
+
+See the :ref:`mock_generation_calling_sequence_mechanism` section of the 
+:ref:`composite_model_constructor_bookkeeping_mechanisms` page 
+for further discussion. 
+
+The role of the `_galprop_dtypes_to_allocate`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+
+The role of the `list_of_haloprops_needed`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The role of the HOD `gal_type`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 

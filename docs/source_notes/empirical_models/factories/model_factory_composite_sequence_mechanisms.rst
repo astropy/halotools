@@ -5,7 +5,7 @@
 .. _composite_model_constructor_bookkeeping_mechanisms:
 
 ****************************************************
-Composite Model Constructor Bookkeeping Mechanisms
+Composite Model Bookkeeping Mechanisms
 ****************************************************
 
 This tutorial remains to be written. See `Github Issue 211 <https://github.com/astropy/halotools/issues/211/>`_
