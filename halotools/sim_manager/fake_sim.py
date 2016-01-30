@@ -81,7 +81,7 @@ class FakeSim(UserSuppliedHaloCatalog):
 		logvmaxbins = -4.25 + 0.5*(np.log10(massbins) - logrvirbins)
 		vmax = np.repeat(10.**logvmaxbins, self.num_halos_per_massbin, axis=0)
 		vpeak = vmax
-
+		spin = np.random.random(self.num_halos)
 		conc = np.random.uniform(4, 15, self.num_halos)
 		rs = rvir/conc
 		zhalf = np.random.uniform(0, 10, self.num_halos)
@@ -122,6 +122,7 @@ class FakeSim(UserSuppliedHaloCatalog):
 			halo_nfw_conc = conc, 
 			halo_vmax = vmax, 
 			halo_vpeak = vpeak, 
+			halo_spin = spin, 
 			user_supplied_ptclcat = ptclcat
 			)
 

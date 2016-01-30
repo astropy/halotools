@@ -7,6 +7,9 @@ import warnings
 
 from ...custom_exceptions import HalotoolsError
 
+__all__ = ['TestHodModelFactoryTutorial']
+
+
 class TestHodModelFactoryTutorial(TestCase):
     """
     """
@@ -163,6 +166,36 @@ class TestHodModelFactoryTutorial(TestCase):
             centrals_quenching = cen_quenching, 
             satellites_quenching = sat_quenching
             )
+
+    @pytest.mark.slow
+    def test_hod_modeling_tutorial3(self):
+
+        class Size(object):
+            
+            def __init__(self, gal_type):
+
+                self.gal_type = gal_type
+                self._mock_generation_calling_sequence = ['assign_size']
+                self._galprop_dtypes_to_allocate = np.dtype([('galsize', 'f4')])
+                self.list_of_haloprops_needed = ['halo_spin']
+                
+            def assign_size(self, table):
+                
+                table['galsize'][:] = table['halo_spin']/5.
+
+        cen_size = Size('centrals')
+        sat_size = Size('satellites')
+        from ...empirical_models import PrebuiltHodModelFactory, HodModelFactory
+        zheng_model = PrebuiltHodModelFactory('zheng07')
+        new_model = HodModelFactory(baseline_model_instance = zheng_model, 
+            centrals_size = cen_size, satellites_size = sat_size)
+
+        assert hasattr(new_model, 'assign_size_centrals')
+
+        new_model.populate_mock(simname = 'fake')
+        assert 'galsize' in new_model.mock.galaxy_table.keys()
+        assert len(set(new_model.mock.galaxy_table['galsize'])) > 0
+
 
 
 
