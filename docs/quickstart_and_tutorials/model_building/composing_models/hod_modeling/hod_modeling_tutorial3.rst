@@ -71,6 +71,8 @@ and incorporate this feature into a composite model:
     zheng_model = PrebuiltHodModelFactory('zheng07')
     new_model = HodModelFactory(baseline_model_instance = zheng_model, centrals_size = cen_size, satellites_size = sat_size)
 
+    # Your new model can generate a mock in the same way as always
+    new_model.populate_mock(simname = 'bolshoi')
             
 
 Comments on formatting the class controlling your new HOD component model
@@ -93,7 +95,7 @@ them one by one.
 
 The role of the `_mock_generation_calling_sequence`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-During the generation of a mock catalog, the `HodModelFactory` calls upon 
+During the generation of a mock catalog, the `HodMockFactory` calls upon 
 the component models one-by-one to assign their properties to the ``galaxy_table``. 
 When each component is called upon, every method whose name appears in 
 the component model's ``_mock_generation_calling_sequence`` gets passed 
@@ -109,7 +111,24 @@ for further discussion.
 
 The role of the `_galprop_dtypes_to_allocate`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+One of the tasks handled by the `HodMockFactory` is the allocation of 
+the appropriate memory that will be stored in your ``galaxy_table``. 
+For every galaxy property in a composite model, there needs to be a 
+corresponding column of the ``galaxy_table`` of the appropriate data type. 
+The ``_galprop_dtypes_to_allocate`` ensures that this is the case. 
 
+The way this works is that every component model must declare a 
+`numpy.dtype` object and bind it to the 
+``_galprop_dtypes_to_allocate`` attribute of the composite model instance. 
+You can read more about Numpy `~numpy.dtype` objects in the Numpy documentation, 
+but the basic syntax is illustrated in the source code above: 
+our new column will be named ``galsize``, and each row stores a float. 
+
+You can see how to alter the syntax for the case of a component model that assigns 
+more than one galaxy property in the more elaborate example below. 
+See the :ref:`galprop_dtypes_to_allocate_mechanism` section of the 
+:ref:`composite_model_constructor_bookkeeping_mechanisms` documentation page 
+for further discussion. 
 
 
 The role of the `list_of_haloprops_needed`
