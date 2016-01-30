@@ -73,15 +73,10 @@ and incorporate this feature into a composite model:
 
     # Your new model can generate a mock in the same way as always
     new_model.populate_mock(simname = 'bolshoi')
-            
 
-Comments on formatting the class controlling your new HOD component model
-===========================================================================
-
-In this section we'll unpack the above source code line-by-line. 
 
 The **__init__** method of your component model 
-----------------------------------------------------
+===========================================================================
 
 There are four lines of code here, and each of them binds some new data 
 to the class instance. Thus the *component_model_instance* above 
@@ -94,7 +89,8 @@ them one by one.
 .. _role_of_hod_mock_generation_calling_sequence:
 
 The role of the `_mock_generation_calling_sequence`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------------
+
 During the generation of a mock catalog, the `HodMockFactory` calls upon 
 the component models one-by-one to assign their properties to the ``galaxy_table``. 
 When each component is called upon, every method whose name appears in 
@@ -110,7 +106,7 @@ See the :ref:`mock_generation_calling_sequence_mechanism` section of the
 for further discussion. 
 
 The role of the `_galprop_dtypes_to_allocate`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------------
 One of the tasks handled by the `HodMockFactory` is the allocation of 
 the appropriate memory that will be stored in your ``galaxy_table``. 
 For every galaxy property in a composite model, there needs to be a 
@@ -125,17 +121,16 @@ but the basic syntax is illustrated in the source code above:
 our new column will be named ``galsize``, and each row stores a float. 
 
 You can see how to alter the syntax for the case of a component model that assigns 
-more than one galaxy property in the more elaborate example below. 
+more than one galaxy property in the next example of this tutorial. 
 See the :ref:`galprop_dtypes_to_allocate_mechanism` section of the 
 :ref:`composite_model_constructor_bookkeeping_mechanisms` documentation page 
 for further discussion. 
 
-
 The role of the `list_of_haloprops_needed`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------------
 
 This attribute provides a list of all the keys of the ``halo_table`` that 
-the methods appearing ``_mock_generation_calling_sequence`` will need to access 
+the functions appearing ``_mock_generation_calling_sequence`` will need to access 
 during mock population. For example, the **assign_size** method requires 
 access to the ``halo_spin`` column, and so the ``halo_spin`` string appears in 
 ``list_of_haloprops_needed``. This is fairly self-explanatory, but you can 
@@ -143,27 +138,49 @@ read more about the under-the-hood details in the
 :ref:`list_of_haloprops_needed_mechanism` section of the 
 :ref:`composite_model_constructor_bookkeeping_mechanisms` documentation page. 
 
-
-
 The role of the HOD `gal_type`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------------
 
+Each of the component model methods appearing in 
+``_mock_generation_calling_sequence`` will not only be called 
+by the composite model during mock generation, but these methods will also 
+be passed on as methods that the composite model itself can use for other 
+applications. The only difference will be that your choice for the ``gal_type`` 
+string will be appended to these method names. For example, 
+in the source code above, the composite model instance will have two methods:  
+``assign_size_centrals`` and ``assign_size_satellites``. Besides mock population, 
+you may find it useful to call upon these methods to make plots or 
+study the behavior of your model. 
 
+The "physics function" of your component model 
+==================================================
 
+In the example above, there is just one function responsible for 
+the physics underlying this model: **assign_size.** 
+The behavior of this simple function is pretty trivial: 
+whatever the spin of the halo is, divide it by five and call the result 
+the size of the galaxy. Obviously this is physically silly, but the 
+calling signature illustrates how to write your more physically realistic model. 
 
+Any method in your ``_mock_generation_calling_sequence`` must accept a ``table`` 
+argument. That is because when the `MockFactory` calls your component model 
+methods, it will pass the ``galaxy_table`` that is being built to each of your 
+physics functions via a ``table`` keyword argument. 
+The simplest way to handle this is to just have your physics functions 
+accept a single positional argument called ``table``, although we will see in the 
+next tutorial that you can support more full-featured behavior by using the 
+`Python builtin kwargs syntax <http://stackoverflow.com/questions/1769403/understanding-kwargs-in-python>`_. 
 
+In order for your model's underlying physics to propagate into the properties 
+of the mock galaxy population, your physics function(s) must write 
+values to the appropriate column of the ``table``. In this case, 
+we wrote to the ``galsize`` column. The **[:]** syntax is not strictly necessary, 
+but it is good practice to use it because it ensures that an exception will be raised 
+if you attempt to write to column that does not exist in the ``galaxy_table``; 
+you can omit the **[:]** if you want to eschew this safety mechanism, 
+but there is no difference in performance and so this is syntax is recommended 
+as a sanity check on all the bookkeeping. 
 
-
-
-
-
-
-
-
-
-
-
-
-
+This tutorial continues with :ref:`hod_modeling_tutorial4`. 
 
 

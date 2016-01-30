@@ -159,10 +159,9 @@ associated with mock galaxy properties that the ``halo_table`` generally will no
 
 For the purpose of this discussion, the most important difference is this: 
 *the ``galaxy_table`` only inherits the columns of the ``halo_table`` that the 
-composite model tells it to inherit.* The ``list_of_haloprops_needed`` is one of the 
-two mechanisms that the composite model exploits to inform the `MockFactory` which ``halo_table`` 
-columns should be inherited by the ``galaxy_table`` 
-(see :ref:`additional_haloprops_mechanism` for a discussion of the other mechanism). 
+composite model tells it to inherit.* The ``list_of_haloprops_needed`` is the 
+mechanism that the composite model exploits to inform the `MockFactory` which ``halo_table`` 
+columns should be inherited by the ``galaxy_table``. 
 
 All component models have the option to define a ``list_of_haloprops_needed`` attribute, 
 a list of strings of ``halo_table`` column names. The model factory collects together all these lists 
@@ -175,13 +174,6 @@ but for if you ever choose to include a component model that does not include a
 ``list_of_haloprops_needed`` attribute, 
 the model factory will always raise a (possibly harmless) warning. 
 
-
-.. _additional_haloprops_mechanism:
-
-The ``additional_haloprops`` mechanism 
-============================================
-
-When building a 
 
 
 
