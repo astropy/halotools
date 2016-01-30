@@ -69,8 +69,8 @@ providing a boolean designation for whether or not the mock galaxy is quiescent.
 
 .. _baseline_model_instance_mechanism_hod_building: 
 
-Some more syntax candy: the ``baseline_model_instance`` mechanism
-====================================================================
+Model-building syntax candy: the ``baseline_model_instance`` mechanism
+=========================================================================
 
 The `HodModelFactory` comes with a convenient feature that makes it easier to 
 add new features to existing models. By passing in a ``baseline_model_instance`` keyword argument, 
