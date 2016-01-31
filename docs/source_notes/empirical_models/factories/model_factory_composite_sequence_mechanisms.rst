@@ -20,6 +20,8 @@ The component model classes in Halotools determine the functional form of the as
 
 In all such cases, parameters such as :math:`\sigma_{\log M}` are elements of ``param_dict``, a python dictionary bound to the component model instance. By changing the values bound to the parameters in the ``param_dict``, you change the behavior of the model. 
 
+Propagating ``param_dict`` from component to composite 
+--------------------------------------------------------
 While creating a composite model from a set of component models, the factory classes `~SubhaloModelFactory` and `~HodModelFactory` collect every parameter that appears in each component model ``param_dict``, and create a new composite ``param_dict`` that is bound to the composite model instance. The way that composite model methods are written, in order to change the behavior of the composite model all you need to do is change the values of the parameters in the ``param_dict`` bound to the composite model and the changes propagate down to the component model defining the behavior. 
 
 In most cases this propagation process is unambiguous and straightforwardly accomplished with :ref:`update_param_dict_decorator_mechanism`. However, if two or more component models have a parameter with the exact same name, then care is required. 
@@ -28,6 +30,8 @@ As an example, consider the composite model dictionary built by the `~halotools.
 
 In this example, the repeated appearance of the stellar-to-halo-mass parameters is harmless because these these really are the same parameters that just so happen to appear twice. But since Halotools users are free to define their own model components and compose any arbitrary collection of components together, it is possible that the same name could have been inadvertently given to parameters in different components controlling entirely distinct behavior. In such a case, when that parameter is modified in the composite model ``param_dict`` it is ambiguous how to propagate the change down in to the appropriate component model. 
 
+Suppressing harmless warnings 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To protect against this ambiguity, whenever a repeated parameter is detected during the building of the composite model ``param_dict``, a warning is issued to the user. It is up to the user to determine whether the repetition is harmless or if one of the component model parameter names needs to be changed to disambiguate. As the appearance of such a warning can be annoying for commonly-used models in which the repetition is harmless, it is possible to suppress this warning by creating a ``_suppress_repeated_param_warning`` attribute to *any* of the components in the composite model, and setting this attribute to ``True``. You can see this mechanism at work in the source code of the `~halotools.empirical_models.leauthaud11_model_dictionary` function. 
 
 
