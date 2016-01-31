@@ -23,7 +23,7 @@ In the HOD, the galaxy population is decomposed into distinct types:
 are typically very different, and so Halotools requires you to use 
 independently defined component models for these two sub-populations. 
 As described below, this is accomplished by your choices for the 
-keyword arguments you spply to the `HodModelFactory`. 
+keyword arguments you supply to the `HodModelFactory`. 
 
 As sketched in :ref:`factory_design_diagram`, 
 to build any composite model you pass a 
@@ -36,9 +36,8 @@ that informs the `HodModelFactory` of the name of galaxy type
 (e.g., 'centrals' or 'satellites'), as well as the kind of feature 
 supplied by the component model. 
 
-For the sake of having something concrete to hold on to, 
-let's now dive in and write down the source code for how 
-to call the `HodModelFactory`. 
+For the sake of concreteness, let's now dive in and 
+write down the source code for how to call the `HodModelFactory`. 
 
 .. _hod_factory_tutorial_zheng07_source_code:
 
@@ -101,7 +100,7 @@ Required features of any HOD-style composite model
 =====================================================
 
 As mentioned above and elsewhere in the documentation, there is no 
-limitation on the number of features you can include in an composite model. 
+limitation on the number of features you can include in a composite model. 
 However, for any HOD-style model the ``occupation`` and ``profile`` features 
 are compulsory for each galaxy type in your model. 
 
@@ -135,11 +134,11 @@ The `PrebuiltHodModelFactory` is just syntax candy
 If you followed the :ref:`preloaded_models_overview` section of the documentation, 
 or if you have just played around a bit with the code, 
 you are already familiar with the `PrebuiltHodModelFactory` class. 
-The calling sequence for this class takes a string that serves as a 
+The calling signature for this class takes a string that serves as a 
 nickname of a model, e.g., ``zheng07``. Under the hood, the 
 `PrebuiltHodModelFactory` class has virtually no functionality of its own. 
 The only task that the `PrebuiltHodModelFactory` does is to translate a 
-small collection of strings into the appropriate set of arguments 
+string into the appropriate set of arguments 
 to pass on to the `HodModelFactory`, that's it. 
 So the code that appears in the :ref:`hod_factory_tutorial_zheng07_source_code` 
 section above actually produces an identical composite model as the following:
@@ -154,7 +153,7 @@ We'll cement our understanding of how to build simple HOD-style models
 by providing just one more example of a bare bones composite model. 
 Compare the source code below to the code that appears in the 
 :ref:`hod_factory_tutorial_zheng07_source_code` to convince yourself 
-that you see the pattern and are ready to move to building more complex models. 
+that you see the pattern and are ready to move on to building more complex models. 
 
 .. code:: python
 

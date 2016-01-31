@@ -7,11 +7,11 @@ Tutorial on building an HOD-style model
 
 .. currentmodule:: halotools.empirical_models
 
-This section of the documentation describes how you can use the 
+This section of the documentation describes how you can  
 build a custom-designed HOD-style model of the galaxy-halo connection. 
 This material is most easily learned by way of example, and so 
 the remainder of the tutorial is organized into a sequence 
-of worked examples with increasingly complexity. 
+of worked examples with increasing complexity. 
 
 .. toctree::
    :maxdepth: 1

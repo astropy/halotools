@@ -8,7 +8,7 @@ Example 5: An HOD model with cross-component dependencies
 
 This section of the :ref:`hod_modeling_tutorial0`, 
 illustrates an example of a component model that 
-depends on the results of some other component model. 
+depends on the results of some other, independently defined component model. 
 
 Overview of the Example 5 HOD model 
 ====================================
@@ -74,7 +74,6 @@ Source code for the new model
             table = kwargs['table']
             return 0.5*table['halo_rvir']*table['halo_rs']
 
-
 Now we'll build our composite model using the ``model_feature_calling_sequence``, 
 a new keyword introduced in this tutorial:
 
@@ -96,8 +95,57 @@ a new keyword introduced in this tutorial:
             'centrals_profile', 'centrals_shape', 'centrals_size')
         )
 
+The **__init__** method of the component models 
+===========================================================================
 
+All features in the constructor of the *Shape* class have been covered 
+previously in this tutorial. The only thing that may be worth noting is that 
+if your component model assigns a string, the most robust way to handle 
+this is to use a Python object as the `numpy.dtype`. 
 
+The role of ``new_haloprop_func_dict`` 
+------------------------------------------
+The *Size* component model illustrates the use of the 
+``new_haloprop_func_dict`` feature. As described in the 
+:ref:`new_haloprop_func_dict_mechanism` section of the 
+:ref:`composite_model_constructor_bookkeeping_mechanisms` documentation page, 
+this feature allows you to add new columns to the ``halo_table`` in a 
+pre-processing phase of mock-making. Here we use this mechanism 
+to add a new column to the halo catalog called ``halo_custom_size``, 
+which in this case is just the ratio of :math:`R_{\rm vir} / R_{\rm s}`. 
+This is necessary because the **assign_size** method expects the 
+``halo_custom_size`` column to be present in the ``table`` passed to it. 
+The way the ``new_haloprop_func_dict`` mechanism works is this: 
+it stores a dictionary whose key(s) is the name of the new halo column 
+that will be created, and the value bound to that key is a function 
+object that computes this quantity. 
+See :ref:`new_haloprop_func_dict_mechanism` for further discussion. 
+
+The "physics functions" of the component models 
+===========================================================================
+
+The physics function in the *Size* class differs from those covered previously 
+in a subtle but critical detail: the **assign_size** method requires that 
+the ``galaxy_table`` has a column called ``shape`` that has already been 
+assigned sensible values, but yet this assignment is not carried out 
+by the *Size* class, it is carried out by the *Shape* class. 
+This means that we need to make sure that during the process of mock generation, 
+the physics functions in the *Shape* class are called before the physics 
+functions of the *Size* class. 
+
+The order in which the component models are called is controllable by the 
+``model_feature_calling_sequence``. Previously, we did not use this keyword. 
+When this keyword is not supplied, the default behavior is for 
+all ``occupation`` components to be called first, and all other 
+features to be called in a random order. By explicitly listing the features 
+of your model in the ``model_feature_calling_sequence`` keyword, 
+you override this default behavior with your own calling sequence. 
+
+Concluding comments 
+=====================
+This example concludes the tutorial on HOD-style model building. 
+If you have further questions on how to build HOD models, 
+please contact the Halotools developers and/or raise an Issue on GitHub. 
 
 
 

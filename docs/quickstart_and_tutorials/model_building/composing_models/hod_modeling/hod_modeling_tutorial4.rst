@@ -9,7 +9,7 @@ Example 4: A more complex HOD component model
 This section of the :ref:`hod_modeling_tutorial0`, 
 illustrates a more complex example of a component model that 
 that you have written yourself. What follows is basically just 
-a more full-features version of the previous 
+a more full-featured version of the previous 
 :ref:`hod_modeling_tutorial3` that illustrates a few more tricks. 
 
 .. _overview_hod_tutorial_example4: 
@@ -165,7 +165,9 @@ that vary with the ``gal_type``, as we have done here, this issue is resolved
 because the composite model will have four parameters with unambiguous interpretations: 
 ``max_disruption_mass_centrals``, ``max_disruption_mass_satellites``, 
 ``disrupted_fraction_centrals`` and ``disrupted_fraction_satellites``. 
-If we were using entirely separate classes to define shapes of centrals and satellites, 
+If we were using entirely separate classes 
+with entirely dissimilar parameter names 
+to define shapes of centrals and satellites, 
 this precaution would be unnecessary. 
 
 
@@ -194,7 +196,7 @@ mock generation. This functionality can be useful for making plots, tracking dow
 or just generally studying the behavior of your component model. 
 All Halotools-provided component models support passing in arrays of the relevant 
 quantities for exactly this purpose. In Halotools, the convention is that these arrays 
-are passed in via the ``prim_haloprop`` keyword, though this you need not follow 
+are passed in via the ``prim_haloprop`` keyword, though you need not follow 
 this convention if you find some other syntax more convenient or intuitive. 
 
 This tutorial continues with :ref:`hod_modeling_tutorial5`. 

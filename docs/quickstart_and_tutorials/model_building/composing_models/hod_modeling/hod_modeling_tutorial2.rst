@@ -8,7 +8,7 @@ Example 2: An HOD-style model with additional features
 
 In this section of the :ref:`hod_modeling_tutorial0`, 
 we'll build a composite model that is not part of the Halotools code base 
-by composing together a collection of Halotools-provided features. 
+by composing together a customized collection of Halotools-provided features. 
 Before reading on, be sure you have read and understood 
 :ref:`hod_modeling_tutorial1`. 
 
@@ -33,8 +33,6 @@ Source code for an HOD model with a new feature
 
 .. code:: python
 
-	from halotools.empirical_models import HodModelFactory
-
 	from halotools.empirical_models import TrivialPhaseSpace, Zheng07Cens
 	another_cens_occ_model =  Zheng07Cens()
 	another_cens_prof_model = TrivialPhaseSpace()
@@ -44,9 +42,16 @@ Source code for an HOD model with a new feature
 	another_sats_prof_model = NFWPhaseSpace()
 
 	from halotools.empirical_models import HaloMassInterpolQuenching
-	sat_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
-	cen_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
+	sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
+		halo_mass_abcissa = [1e12, 1e13, 1e14, 1e15], 
+		quiescent_fraction_control_values = [0.35, 0.5, 0.6, 0.9], 
+		gal_type = 'satellites')
+	cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
+		halo_mass_abcissa = [1e12, 1e15], 
+		quiescent_fraction_control_values = [0.25, 0.95], 
+		gal_type = 'centrals')
 
+	from halotools.empirical_models import HodModelFactory
 	zheng07_with_quenching = HodModelFactory(
 		centrals_occupation = another_cens_occ_model, 
 		centrals_profile = another_cens_prof_model, 
@@ -62,10 +67,12 @@ First note how similar this code is to the code in :ref:`hod_factory_tutorial_zh
 In fact, it is identical except for the initializing of the ``cen_quenching`` and ``sat_quenching`` 
 component models, and the additional keywords passing them to the factory. So this model 
 will behave in the exact same way as the ``zheng07`` model, except 
-1. it has additional methods for computing the mean quiescent fraction as a function of halo mass 
-for centrals and satellites, 
-2. when you use it to populate mocks, the resulting ``galaxy_table`` will have a ``quiescent`` column 
-providing a boolean designation for whether or not the mock galaxy is quiescent. 
+
+	1. this model has additional methods for computing the mean quiescent fraction as a function of halo mass for centrals and satellites, 
+	2. when you use this model to populate mocks, the resulting ``galaxy_table`` will have a ``quiescent`` column providing a boolean designation for whether or not each mock galaxy is quiescent. 
+
+Thus you could use this model to make predictions, for example, for the clustering of red and blue galaxy populations. Or, alternatively, you could fit the parameters of this model to observational measurements of the clustering of red/blue galaxies. 
+
 
 .. _baseline_model_instance_mechanism_hod_building: 
 
@@ -79,26 +86,20 @@ whatever additional arguments you may also pass to the factory. For example:
 
 .. code:: python
 
-	from halotools.empirical_models import HodModelFactory
-
-	from halotools.empirical_models import TrivialPhaseSpace, Zheng07Cens
-	another_cens_occ_model =  Zheng07Cens()
-	another_cens_prof_model = TrivialPhaseSpace()
-
-	from halotools.empirical_models import NFWPhaseSpace, Zheng07Sats
-	another_sats_occ_model =  Zheng07Sats()
-	another_sats_prof_model = NFWPhaseSpace()
-
-	ordinary_zheng07_model = HodModelFactory(
-		centrals_occupation = another_cens_occ_model, 
-		centrals_profile = another_cens_prof_model, 
-		satellites_occupation = another_sats_occ_model, 
-		satellites_profile = another_sats_prof_model)
+	from halotools.empirical_models import PrebuiltHodModelFactory
+	ordinary_zheng07_model = PrebuiltHodModelFactory('zheng07')
 
 	from halotools.empirical_models import HaloMassInterpolQuenching
-	sat_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], gal_type = 'satellites')
-	cen_quenching = HaloMassInterpolQuenching('halo_mvir', [1e12, 1e15], [0.25, 0.95], gal_type = 'centrals')
+	sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
+		halo_mass_abcissa = [1e12, 1e13, 1e14, 1e15], 
+		quiescent_fraction_control_values = [0.35, 0.5, 0.6, 0.9], 
+		gal_type = 'satellites')
+	cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
+		halo_mass_abcissa = [1e12, 1e15], 
+		quiescent_fraction_control_values = [0.25, 0.95], 
+		gal_type = 'centrals')
 
+	from halotools.empirical_models import HodModelFactory
 	zheng07_with_quenching = HodModelFactory(
 		baseline_model_instance = ordinary_zheng07_model, 
 		centrals_quenching = cen_quenching, 
@@ -112,13 +113,10 @@ is identical in every respect to the composite model built in the
 The ``baseline_model_instance`` feature is designed to make it easy to study the 
 effects of swapping in and out individual components without having to build a new 
 model from scratch. This feature is made possible by the fact that all instances 
-of Halotools composite models carry with them the instructions from which they were built. 
-This standardization is provided by the `HodModelFactory` itself, 
-so this statement holds true whether or not the 
-composite model is built by Halotools. 
+of Halotools composite models carry with them the instructions from which they were originally built. 
 So by passing in an instance of a composite model to the `HodModelFactory` via 
 the ``baseline_model_instance`` keyword, the composite model instance is able to inform 
-the factory of the appropriate features. 
+the factory of how to build a new instance of itself. 
 
 Note that the use of the ``baseline_model_instance`` feature illustrated in 
 :ref:`baseline_model_instance_mechanism_hod_building` can be applied 

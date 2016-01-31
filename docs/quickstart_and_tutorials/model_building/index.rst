@@ -8,9 +8,9 @@ Tutorial on modeling the galaxy-halo connection
 This section of the documentation is the starting point for in-depth tutorials 
 on the model-building factories, which give you two basic options:  
 
-	1. **Use a pre-built model.** Each of the Halotools pre-built models is an implementation of some specific publication, has many options for customizing its behavior, and right out-of-the-box can populate mock catalogs and make a wide range of observational predictions. 
+	1. **Use a pre-built model.** Halotools ships with a handful of pre-built models based on some specific publication. Each pre-built model has many options for customizing its behavior, but also can populate mock catalogs and make a wide range of observational predictions right out of the box.  
 
-	2. **Design your own model.** You have the option to choose between Halotools-provided features, write all of your own features, or anywhere in between. 
+	2. **Design your own model.** The Halotools factory design pattern allows you to build a model with fully customized behavior. You have the option to choose between Halotools-provided features, write all of your own features, or anywhere in between. 
 
 Before diving in to the rest of the tutorial, in :ref:`preliminaries_on_halotools_model_building` we'll take a look at how Halotools models are designed in broad strokes. If you are already familiar with the basic outline of the Halotools factory design pattern, you may want to skip ahead to :ref:`further_reading_on_model_building` to choose the subsequent tutorial section that is most relevant to you. 
 
