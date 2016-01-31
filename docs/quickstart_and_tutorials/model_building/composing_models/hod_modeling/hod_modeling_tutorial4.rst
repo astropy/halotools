@@ -171,8 +171,30 @@ this precaution would be unnecessary.
 The "physics functions" of the component model 
 ===========================================================================
 
+The physics functions in the *Shape* class differ from the one covered in the 
+*Size* class of the previous example in one important respect: 
+the *disrupted* column of the ``galaxy_table`` must be assigned before 
+the **assign_axis_ratio** method is called in order to get sensible results. 
+This is guaranteed by proper use of the ``_mock_generation_calling_sequence``, 
+as described above. 
 
-
+There is another, less important difference to notice: the 
+**assign_disrupted** method accepts either a ``table`` keyword argument 
+or a ``prim_haloprop`` argument. As discussed in the previous example, 
+it is compulsory for any physics function to accept a ``table`` keyword argument, 
+and for the appropriate columns of the input ``table`` to be overwritten as necessary. 
+That is because the `HodMockFactory` always passes a ``galaxy_table`` to each physics 
+function via the ``table`` keyword argument. However, nothing stops you from 
+adding functionality to your physics functions so that they will behave differently 
+in different circumstances. In this example, your composite model will have the freedom 
+to pass in an array of halo masses and the **assign_disrupted** method will 
+return the array of values it *would* have assigned had the method been called during 
+mock generation. This functionality can be useful for making plots, tracking down bugs, 
+or just generally studying the behavior of your component model. 
+All Halotools-provided component models support passing in arrays of the relevant 
+quantities for exactly this purpose. In Halotools, the convention is that these arrays 
+are passed in via the ``prim_haloprop`` keyword, though this you need not follow 
+this convention if you find some other syntax more convenient or intuitive. 
 
 
 
