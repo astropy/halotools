@@ -196,6 +196,7 @@ quantities for exactly this purpose. In Halotools, the convention is that these 
 are passed in via the ``prim_haloprop`` keyword, though this you need not follow 
 this convention if you find some other syntax more convenient or intuitive. 
 
+This tutorial continues with :ref:`hod_modeling_tutorial5`. 
 
 
 
