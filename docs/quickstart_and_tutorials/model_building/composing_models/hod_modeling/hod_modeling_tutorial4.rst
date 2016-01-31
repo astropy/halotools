@@ -168,6 +168,7 @@ because the composite model will have four parameters with unambiguous interpret
 If we were using entirely separate classes to define shapes of centrals and satellites, 
 this precaution would be unnecessary. 
 
+
 The "physics functions" of the component model 
 ===========================================================================
 
