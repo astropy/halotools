@@ -43,14 +43,14 @@ class Moster13SmHm(PrimGalpropModel):
             Class governing stochasticity of stellar mass. Default scatter is log-normal, 
             implemented by the `LogNormalScatterModel` class. 
 
-        scatter_abcissa : array_like, optional  
-            Array of values giving the abcissa at which
+        scatter_abscissa : array_like, optional  
+            Array of values giving the abscissa at which
             the level of scatter will be specified by the input ordinates.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
         scatter_ordinates : array_like, optional  
-            Array of values defining the level of scatter at the input abcissa.
+            Array of values defining the level of scatter at the input abscissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 

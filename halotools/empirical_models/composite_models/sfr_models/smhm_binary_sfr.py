@@ -30,7 +30,7 @@ def smhm_binary_sfr_model_dictionary(
     smhm_model = Behroozi10SmHm, 
     scatter_level = 0.2, 
     redshift = sim_defaults.default_redshift, 
-    sfr_abcissa = [12, 15], sfr_ordinates = [0.25, 0.75], logparam = True, 
+    sfr_abscissa = [12, 15], sfr_ordinates = [0.25, 0.75], logparam = True, 
     **kwargs):
     """ Dictionary to build a subhalo-based model for both stellar mass 
     and star-formation rate. 
@@ -65,12 +65,12 @@ def smhm_binary_sfr_model_dictionary(
         Redshift of the halo hosting the galaxy. Used to evaluate the 
         stellar-to-halo-mass relation. Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-    sfr_abcissa : array, optional  
+    sfr_abscissa : array, optional  
         Values of the primary halo property at which the quiescent fraction is specified. 
         Default is [12, 15], in accord with the default True value for ``logparam``. 
 
     sfr_ordinates : array, optional  
-        Values of the quiescent fraction when evaluated at the input abcissa. 
+        Values of the quiescent fraction when evaluated at the input abscissa. 
         Default is [0.25, 0.75]
 
     logparam : bool, optional 
@@ -96,13 +96,13 @@ def smhm_binary_sfr_model_dictionary(
 
     """
 
-    sfr_model = BinaryGalpropInterpolModel(sfr_abcissa, sfr_ordinates, 
+    sfr_model = BinaryGalpropInterpolModel(sfr_abscissa, sfr_ordinates, 
         galprop_name = 'quiescent', prim_haloprop_key=prim_haloprop_key, 
         logparam = logparam, **kwargs)
 
     sm_model = smhm_model(
         prim_haloprop_key = prim_haloprop_key, redshift = redshift, 
-        scatter_abcissa = [12], scatter_ordinates = [scatter_level], **kwargs)
+        scatter_abscissa = [12], scatter_ordinates = [scatter_level], **kwargs)
 
     model_dictionary = {'stellar_mass': sm_model, 'quiescent': sfr_model}
 

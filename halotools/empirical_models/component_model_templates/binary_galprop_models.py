@@ -140,7 +140,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
     """
 
-    def __init__(self, galprop_abcissa, galprop_ordinates, 
+    def __init__(self, galprop_abscissa, galprop_ordinates, 
         logparam=True, interpol_method='spline', **kwargs):
         """ 
         Parameters 
@@ -158,11 +158,11 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             stellar mass.  
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        galprop_abcissa : array, optional  
+        galprop_abscissa : array, optional  
             Values of the primary halo property at which the galprop fraction is specified. 
 
         galprop_ordinates : array, optional  
-            Values of the galprop fraction when evaluated at the input abcissa. 
+            Values of the galprop fraction when evaluated at the input abscissa. 
 
         logparam : bool, optional 
             If set to True, the interpolation will be done 
@@ -173,13 +173,13 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             Keyword specifying how `mean_galprop_fraction` 
             evaluates input values of the primary halo property. 
             The default spline option interpolates the 
-            model's abcissa and ordinates. 
+            model's abscissa and ordinates. 
             The polynomial option uses the unique, degree N polynomial 
             passing through the ordinates, where N is the number of supplied ordinates. 
 
         input_spline_degree : int, optional 
             Degree of the spline interpolation for the case of interpol_method='spline'. 
-            If there are k abcissa values specifying the model, input_spline_degree 
+            If there are k abscissa values specifying the model, input_spline_degree 
             is ensured to never exceed k-1, nor exceed 5. Default is 3. 
 
         Examples
@@ -190,8 +190,8 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         and 90% for massive cluster centrals (:math:`M_{\\mathrm{vir}}=10^{15}M_{\odot}`). 
         We can use the `BinaryGalpropInterpolModel` to implement this as follows:
 
-        >>> abcissa, ordinates = [12, 15], [1/3., 0.9]
-        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_name='quiescent', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='mvir')
+        >>> abscissa, ordinates = [12, 15], [1/3., 0.9]
+        >>> cen_quiescent_model = BinaryGalpropInterpolModel(galprop_name='quiescent', galprop_abscissa=abscissa, galprop_ordinates=ordinates, prim_haloprop_key='mvir')
 
         The ``cen_quiescent_model`` has a built-in method that computes the quiescent fraction 
         as a function of mass:
@@ -210,7 +210,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         to construct a simple model for satellite morphology, where the early- vs. late-type 
         of the satellite depends on :math:`V_{\\mathrm{peak}}` value of the host halo
 
-        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_name='late_type', galprop_abcissa=abcissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host')
+        >>> sat_morphology_model = BinaryGalpropInterpolModel(galprop_name='late_type', galprop_abscissa=abscissa, galprop_ordinates=ordinates, prim_haloprop_key='vpeak_host')
         >>> vmax_array = np.logspace(2, 3, num=100)
         >>> morphology_realization = sat_morphology_model.mc_late_type(prim_haloprop =vmax_array)
 
@@ -228,10 +228,10 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         self._interpol_method = interpol_method
         self._logparam = logparam
 
-        galprop_abcissa = convert_to_ndarray(galprop_abcissa)
+        galprop_abscissa = convert_to_ndarray(galprop_abscissa)
         galprop_ordinates = convert_to_ndarray(galprop_ordinates)
-        self._test_abcissa_ordinates(galprop_abcissa, galprop_ordinates)
-        self._abcissa = galprop_abcissa
+        self._test_abscissa_ordinates(galprop_abscissa, galprop_ordinates)
+        self._abscissa = galprop_abscissa
         self._ordinates = galprop_ordinates
 
         try:
@@ -247,32 +247,32 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
             scipy_maxdegree = 5
             self._spline_degree = np.min(
                 [scipy_maxdegree, self._input_spline_degree, 
-                custom_len(self._abcissa)-1])
+                custom_len(self._abscissa)-1])
 
-        self._abcissa_key = self.galprop_name+'_abcissa'
+        self._abscissa_key = self.galprop_name+'_abscissa'
         try:
             self._ordinates_key_prefix = self.gal_type + '_'+self.galprop_name+'_ordinates'
         except AttributeError:
             self._ordinates_key_prefix = self.galprop_name+'_ordinates'
         self._build_param_dict()
 
-        setattr(self, self.galprop_name+'_abcissa', self._abcissa)
+        setattr(self, self.galprop_name+'_abscissa', self._abscissa)
 
-    def _test_abcissa_ordinates(self, galprop_abcissa, galprop_ordinates):
+    def _test_abscissa_ordinates(self, galprop_abscissa, galprop_ordinates):
         try:
-            assert len(galprop_abcissa) == len(galprop_ordinates)
+            assert len(galprop_abscissa) == len(galprop_ordinates)
         except AssertionError:
-            msg = ("\nInput ``galprop_abcissa`` and ``galprop_ordinates`` must have the same length\n")
+            msg = ("\nInput ``galprop_abscissa`` and ``galprop_ordinates`` must have the same length\n")
             raise HalotoolsError(msg)
 
         try:
-            assert len(set(galprop_abcissa)) == len(galprop_abcissa)
+            assert len(set(galprop_abscissa)) == len(galprop_abscissa)
         except AssertionError:
-            msg = ("\nYour input ``galprop_abcissa`` cannot have any repeated values\n")
+            msg = ("\nYour input ``galprop_abscissa`` cannot have any repeated values\n")
             raise HalotoolsError(msg)
 
         try:
-            assert np.all(galprop_abcissa >= 0)
+            assert np.all(galprop_abscissa >= 0)
             assert np.all(galprop_ordinates <= 1)
         except AssertionError:
             msg = ("\nAll values of the input ``galprop_ordinates`` must be between 0 and 1, inclusive.")
@@ -281,7 +281,7 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
 
     def _build_param_dict(self):
 
-        self._ordinates_keys = [self._ordinates_key_prefix + '_param' + str(i+1) for i in range(custom_len(self._abcissa))]
+        self._ordinates_keys = [self._ordinates_key_prefix + '_param' + str(i+1) for i in range(custom_len(self._abscissa))]
         self.param_dict = {key:value for key, value in zip(self._ordinates_keys, self._ordinates)}
 
     def _mean_galprop_fraction(self, **kwargs):
@@ -316,16 +316,16 @@ class BinaryGalpropInterpolModel(BinaryGalpropModel):
         if self._logparam is True:
             prim_haloprop = np.log10(prim_haloprop)
 
-        # Update self._abcissa, in case the user has changed it
-        self._abcissa = getattr(self, self.galprop_name+'_abcissa')
+        # Update self._abscissa, in case the user has changed it
+        self._abscissa = getattr(self, self.galprop_name+'_abscissa')
 
         model_ordinates = [self.param_dict[ordinate_key] for ordinate_key in self._ordinates_keys]
         if self._interpol_method=='polynomial':
             mean_galprop_fraction = model_helpers.polynomial_from_table(
-                self._abcissa, model_ordinates, prim_haloprop)
+                self._abscissa, model_ordinates, prim_haloprop)
         elif self._interpol_method=='spline':
             spline_function = model_helpers.custom_spline(
-                self._abcissa, model_ordinates,
+                self._abscissa, model_ordinates,
                     k=self._spline_degree)
             mean_galprop_fraction = spline_function(prim_haloprop)
         else:

@@ -70,9 +70,9 @@ class TestSubhaloModelFactory(TestCase):
         moster = Moster13SmHm(redshift = 0)
 
         quenching1 = BinaryGalpropInterpolModel(galprop_name = 'quiescent', 
-            galprop_abcissa = [12, 15], galprop_ordinates = [0.25, 0.75])
+            galprop_abscissa = [12, 15], galprop_ordinates = [0.25, 0.75])
         quenching2 = BinaryGalpropInterpolModel(galprop_name = 'quiescent', 
-            galprop_abcissa = [13], galprop_ordinates = [0.5])
+            galprop_abscissa = [13], galprop_ordinates = [0.5])
 
         # The following instantiation methods should give the same results
         model1 = SubhaloModelFactory(stellar_mass = behroozi)
