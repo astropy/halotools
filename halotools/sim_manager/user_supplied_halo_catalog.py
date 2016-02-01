@@ -307,8 +307,13 @@ class UserSuppliedHaloCatalog(object):
         Parameters 
         ------------
         fname : string 
-            Absolute path of the file to be stored in cache. 
-            Must conclude with an `.hdf5` extension. 
+            Absolute path of the file where you will store the halo catalog. 
+            Your filename must conclude with an `.hdf5` extension. 
+
+            The Halotools cache system will remember whatever location 
+            you choose, so try to choose a reasonably permanent resting place on disk. 
+            You can always relocate your catalog after caching it 
+            by following the :ref:`relocating_simulation_data` documentation page. 
 
         simname : string 
             Nickname of the simulation used as a shorthand way to keep track 
