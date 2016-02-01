@@ -196,7 +196,129 @@ class TestHodModelFactoryTutorial(TestCase):
         assert 'galsize' in new_model.mock.galaxy_table.keys()
         assert len(set(new_model.mock.galaxy_table['galsize'])) > 0
 
+    @pytest.mark.slow
+    def test_hod_modeling_tutorial4(self):
 
+        class Shape(object):
+            
+            def __init__(self, gal_type, prim_haloprop_key):
+
+                self.gal_type = gal_type
+                self._mock_generation_calling_sequence = (
+                    ['assign_disrupted', 'assign_axis_ratio'])
+                self._galprop_dtypes_to_allocate = np.dtype(
+                    [('axis_ratio', 'f4'), ('disrupted', bool)])
+                self.list_of_haloprops_needed = ['halo_spin']
+
+                self.prim_haloprop_key = prim_haloprop_key
+                self._methods_to_inherit = (
+                    ['assign_disrupted', 'assign_axis_ratio', 
+                    'disrupted_fraction_vs_halo_mass'])
+                self.param_dict = ({
+                    'max_disruption_mass_'+self.gal_type: 1e12, 
+                    'disrupted_fraction_'+self.gal_type: 0.25})
+
+            def assign_disrupted(self, **kwargs):
+                if 'table' in kwargs.keys():
+                    table = kwargs['table']
+                    halo_mass = table[self.prim_haloprop_key]
+                else:
+                    halo_mass = kwargs['prim_haloprop']
+
+                disrupted_fraction = self.disrupted_fraction_vs_halo_mass(halo_mass)
+                randomizer = np.random.uniform(0, 1, len(halo_mass))
+                is_disrupted = randomizer < disrupted_fraction
+
+                if 'table' in kwargs.keys():
+                    table['disrupted'][:] = is_disrupted
+                else:
+                    return is_disrupted
+
+            def assign_axis_ratio(self, **kwargs):
+                table = kwargs['table']
+                mask = table['disrupted'] == True
+                num_disrupted = len(table['disrupted'][mask])
+                table['axis_ratio'][mask] = np.random.random(num_disrupted)
+                table['axis_ratio'][~mask] = 0.3
+
+            def disrupted_fraction_vs_halo_mass(self, mass):
+                bool_mask = mass > self.param_dict['max_disruption_mass_'+self.gal_type]
+                val = self.param_dict['disrupted_fraction_'+self.gal_type]
+                return np.where(bool_mask == True, 0, val)
+
+        cen_shape = Shape('centrals', 'halo_mvir')
+        sat_shape = Shape('satellites', 'halo_m200b')
+        from ...empirical_models import PrebuiltHodModelFactory, HodModelFactory
+        zheng_model = PrebuiltHodModelFactory('zheng07')
+        new_model = HodModelFactory(baseline_model_instance = zheng_model, 
+            centrals_shape = cen_shape, satellites_shape = sat_shape)
+
+        new_model.populate_mock(simname = 'fake')
+        assert 'axis_ratio' in new_model.mock.galaxy_table.keys()
+        assert len(set(new_model.mock.galaxy_table['axis_ratio'])) > 1
+
+        assert 'disrupted' in new_model.mock.galaxy_table.keys()
+        assert set(new_model.mock.galaxy_table['disrupted']) == {True, False}
+
+        mask = new_model.mock.galaxy_table['disrupted'] == False
+        np.testing.assert_allclose(
+            new_model.mock.galaxy_table['axis_ratio'][mask], 0.3)
+        assert np.all(new_model.mock.galaxy_table['axis_ratio'] >= 0)
+        assert np.all(new_model.mock.galaxy_table['axis_ratio'] <= 1)
+
+    @pytest.mark.slow
+    def test_hod_modeling_tutorial5(self):
+
+        class Shape(object):
+            
+            def __init__(self, gal_type):
+
+                self.gal_type = gal_type
+                self._mock_generation_calling_sequence = ['assign_shape']
+                self._galprop_dtypes_to_allocate = np.dtype([('shape', object)])
+
+            def assign_shape(self, **kwargs):
+                table = kwargs['table']
+                randomizer = np.random.random(len(table))
+                table['shape'][:] = np.where(randomizer > 0.5, 'elliptical', 'disk')
+
+        class Size(object):
+
+            def __init__(self, gal_type):
+
+                self.gal_type = gal_type
+                self._mock_generation_calling_sequence = ['assign_size']
+                self._galprop_dtypes_to_allocate = np.dtype([('galsize', 'f4')])
+
+                self.new_haloprop_func_dict = {'halo_custom_size': self.calculate_halo_size}
+
+            def assign_size(self, **kwargs):
+                table = kwargs['table']
+                disk_mask = table['shape'] == 'disk'
+                table['galsize'][disk_mask] = table['halo_spin'][disk_mask]
+                table['galsize'][~disk_mask] = table['halo_custom_size'][~disk_mask]
+
+            def calculate_halo_size(self, **kwargs):
+                table = kwargs['table']
+                return 2*table['halo_rs']
+
+        from ...empirical_models import Leauthaud11Cens, TrivialPhaseSpace
+        cen_occupation = Leauthaud11Cens()
+        cen_profile = TrivialPhaseSpace(gal_type = 'centrals')
+        cen_shape = Shape(gal_type = 'centrals')
+        cen_size = Size(gal_type = 'centrals')
+
+        from ...empirical_models import HodModelFactory
+        model = HodModelFactory(
+            centrals_occupation = cen_occupation, 
+            centrals_profile = cen_profile, 
+            centrals_shape = cen_shape, 
+            centrals_size = cen_size, 
+            model_feature_calling_sequence = ('centrals_occupation', 
+                'centrals_profile', 'centrals_shape', 'centrals_size')
+            )
+
+        model.populate_mock(simname = 'fake')
 
 
 

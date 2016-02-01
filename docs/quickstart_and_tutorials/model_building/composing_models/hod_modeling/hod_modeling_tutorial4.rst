@@ -82,8 +82,8 @@ Source code for the new model
             table = kwargs['table']
             mask = table['disrupted'] == True
             num_disrupted = len(table['disrupted'][mask])
-            table['axis_ratio'][mask][:] = np.random.random(num_disrupted)
-            table['axis_ratio'][~mask][:] = 0.3
+            table['axis_ratio'][mask] = np.random.random(num_disrupted)
+            table['axis_ratio'][~mask] = 0.3
 
         def disrupted_fraction_vs_halo_mass(self, mass):
             bool_mask = mass > self.param_dict['max_disruption_mass_'+self.gal_type]

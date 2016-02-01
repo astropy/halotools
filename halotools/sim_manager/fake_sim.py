@@ -116,6 +116,7 @@ class FakeSim(UserSuppliedHaloCatalog):
 			halo_hostid = halo_hostid, 
 			halo_mvir = mvir, 
 			halo_mpeak = mpeak, 
+			halo_m200b = mvir, 
 			halo_rvir = rvir, 
 			halo_rs = rs, 
 			halo_zhalf = zhalf, 
