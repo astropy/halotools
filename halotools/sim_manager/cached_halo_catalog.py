@@ -147,14 +147,14 @@ class CachedHaloCatalog(object):
         $HOME/.astropy/cache/halotools/halo_table_cache_log.txt
 
         """
+        self._verify_acceptable_constructor_call(*args, **kwargs)
+
         try:
             import h5py
             self.h5py = h5py
         except ImportError:
             raise HalotoolsError("Must have h5py package installed "
                 "to use CachedHaloCatalog objects")
-
-        self._verify_acceptable_constructor_call(*args, **kwargs)
 
         try:
             dz_tol = kwargs['dz_tol']
