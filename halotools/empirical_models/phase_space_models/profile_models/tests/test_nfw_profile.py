@@ -213,7 +213,7 @@ class TestNFWProfile(TestCase):
         we can generate a Monte Carlo realization of an NFW profile provided that we have the mapping 
         :math:`P^{-1}_{\\rm NFW}(<\\tilde{r})`. The method 
         `~halotools.empirical_models.NFWProfile.mc_generate_nfw_radial_positions`
-        obtains this mapping by first computing :math:`P_{\\rm NFW}(<\\tilde{r})` at a set of abcissa, 
+        obtains this mapping by first computing :math:`P_{\\rm NFW}(<\\tilde{r})` at a set of abscissa, 
         and then using `~scipy.interpolate.InterpolatedUnivariateSpline` to tabulate the inverse mapping. 
         In the Halotools implementation, the code calling the inverse mapping is 
         `~halotools.empirical_models.custom_spline`, which is just a convenience wrapper 

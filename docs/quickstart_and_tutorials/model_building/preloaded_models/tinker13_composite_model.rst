@@ -53,14 +53,14 @@ argument behave in the exact same way as they do in the ``leauthaud11`` model.
 See :ref:`leauthaud11_composite_model` for further details. 
 
 In the ``tinker13`` model, the quiescent fraction of central galaxies is 
-specified at a set of control points via the ``quiescent_fraction_abcissa`` 
+specified at a set of control points via the ``quiescent_fraction_abscissa`` 
 and ``quiescent_fraction_ordinates`` keywords. Linear interpolation is used to 
 for the values of the quenched fraction evaluated at distinct values from the control points. 
 So, for example, if you wanted to initialize your model so that the quenched fraction 
 at :math:`M_{\rm vir}/M_{\odot} = 10^{12}, 10^{13}, 10^{14}, 10^{15}` is 
 :math:`0.25, 0.5, 0.75, 0.9`:
 
->>> model = PrebuiltHodModelFactory('tinker13', quiescent_fraction_abcissa = [1e12, 1e13, 1e14, 1e15], quiescent_fraction_ordinates = [0.25, 0.5, 0.75, 0.9])
+>>> model = PrebuiltHodModelFactory('tinker13', quiescent_fraction_abscissa = [1e12, 1e13, 1e14, 1e15], quiescent_fraction_ordinates = [0.25, 0.5, 0.75, 0.9])
 
 As described in :ref:`altering_param_dict`, you can always change the model parameters 
 after instantiation by changing the values in the ``param_dict`` dictionary. For example, 
@@ -69,7 +69,7 @@ after instantiation by changing the values in the ``param_dict`` dictionary. For
 
 There will be one ``param_dict`` parameter for each entry of 
 the input ``quiescent_fraction_ordinates``. 
-Once you instantiate the model you are not permitted to change the abcissa. 
+Once you instantiate the model you are not permitted to change the abscissa. 
 To do that, you need to instantiate another model. 
 
 Populating Mocks and Generating Tinker et al. (2013) Model Predictions
@@ -128,7 +128,7 @@ The same duplicate parameter inheritance applies for centrals.
 Additionally, as described in :ref:`tinker13_model_features_overview`, 
 there are parameters specifying the quiescent fraction of 
 centrals at the set of control points determined by the 
-``quiescent_fraction_abcissa`` keyword passed to the constructor. 
+``quiescent_fraction_abscissa`` keyword passed to the constructor. 
 
 
 

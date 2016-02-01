@@ -37,7 +37,7 @@ default_bin_max_epsilon = 1.e-5
 # Used by models in the halo_occupation module
 
 default_profile_dict = {
-    'profile_abcissa' : [12,15], 
+    'profile_abscissa' : [12,15], 
     'profile_ordinates' : [0.5,1]
 }
 
