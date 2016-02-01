@@ -36,7 +36,7 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
     """
 
     def __init__(self, halo_mass_key, 
-        halo_mass_abcissa, quiescent_fraction_control_values, **kwargs):
+        halo_mass_abscissa, quiescent_fraction_control_values, **kwargs):
         """
         Parameters 
         -----------
@@ -45,11 +45,11 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
             mass-like variable the model is based on, 
             e.g., 'halo_mvir' or 'halo_m200b'.
 
-        halo_mass_abcissa : array_like 
+        halo_mass_abscissa : array_like 
             Values of halo mass at which the quiescent fraction is specified. 
 
         quiescent_fraction_control_values : array_like 
-            Values of the quiescent fraction evaluated at the ``halo_mass_abcissa``. 
+            Values of the quiescent fraction evaluated at the ``halo_mass_abscissa``. 
 
         gal_type : string, optional 
             Name of the galaxy population.
@@ -81,13 +81,13 @@ class HaloMassInterpolQuenching(BinaryGalpropInterpolModel):
         """
         quiescent_fraction_control_values = convert_to_ndarray(quiescent_fraction_control_values)
 
-        halo_mass_abcissa = convert_to_ndarray(halo_mass_abcissa)
-        log10_halo_mass_abcissa = np.log10(halo_mass_abcissa)
+        halo_mass_abscissa = convert_to_ndarray(halo_mass_abscissa)
+        log10_halo_mass_abscissa = np.log10(halo_mass_abscissa)
 
 
         BinaryGalpropInterpolModel.__init__(self, 
             galprop_name = 'quiescent', prim_haloprop_key=halo_mass_key, 
-            galprop_abcissa = log10_halo_mass_abcissa, 
+            galprop_abscissa = log10_halo_mass_abscissa, 
             galprop_ordinates = quiescent_fraction_control_values, 
             logparam = True, **kwargs)
 

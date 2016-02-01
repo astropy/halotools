@@ -495,7 +495,7 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
             their conditional secondary percentiles. 
             Default is 0.5 for a constant 50/50 split. 
 
-        split_abcissa : list, optional 
+        split_abscissa : list, optional 
             Values of the primary halo property at which the halos are split as described above in 
             the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
             the interpolation will be done in the logarithm of the primary halo property. 
@@ -506,10 +506,10 @@ class AssembiasZheng07Sats(Zheng07Sats, HeavisideAssembias):
             defining the assembly bias correlation strength. 
             Default is 0.5. 
 
-        assembias_strength_abcissa : list, optional 
+        assembias_strength_abscissa : list, optional 
             Values of the primary halo property at which the assembly bias strength is specified. 
             Default is to assume a constant strength of 0.5. If passing a list, the strength 
-            will interpreted at the input ``assembias_strength_abcissa``.
+            will interpreted at the input ``assembias_strength_abscissa``.
             Default is to assume a constant strength of 0.5. 
 
         """
@@ -551,7 +551,7 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
             their conditional secondary percentiles. 
             Default is 0.5 for a constant 50/50 split. 
 
-        split_abcissa : list, optional 
+        split_abscissa : list, optional 
             Values of the primary halo property at which the halos are split as described above in 
             the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
             the interpolation will be done in the logarithm of the primary halo property. 
@@ -562,10 +562,10 @@ class AssembiasZheng07Cens(Zheng07Cens, HeavisideAssembias):
             defining the assembly bias correlation strength. 
             Default is 0.5. 
 
-        assembias_strength_abcissa : list, optional 
+        assembias_strength_abscissa : list, optional 
             Values of the primary halo property at which the assembly bias strength is specified. 
             Default is to assume a constant strength of 0.5. If passing a list, the strength 
-            will interpreted at the input ``assembias_strength_abcissa``.
+            will interpreted at the input ``assembias_strength_abscissa``.
             Default is to assume a constant strength of 0.5. 
 
         """

@@ -30,9 +30,9 @@ class TestTinker13(TestCase):
 	def test_tinker13_default(self):
 		model = PrebuiltHodModelFactory('tinker13')
 
-	def test_tinker13_abcissa(self):
+	def test_tinker13_abscissa(self):
 		model = PrebuiltHodModelFactory('tinker13', 
-			quiescent_fraction_abcissa = [1e12, 1e13, 1e14, 1e15], 
+			quiescent_fraction_abscissa = [1e12, 1e13, 1e14, 1e15], 
 			quiescent_fraction_ordinates = [0.25, 0.5, 0.75, 0.9])
 
 	@pytest.mark.slow

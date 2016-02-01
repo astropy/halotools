@@ -22,9 +22,9 @@ class TestBinaryGalpropInterpolModel(TestCase):
 
     def setUp(self):
 
-        self.abcissa, self.ordinates = [12, 15], [1/3., 0.9]
+        self.abscissa, self.ordinates = [12, 15], [1/3., 0.9]
         self.model = BinaryGalpropInterpolModel(galprop_name='late_type', 
-            galprop_abcissa = self.abcissa, galprop_ordinates = self.ordinates, 
+            galprop_abscissa = self.abscissa, galprop_ordinates = self.ordinates, 
             prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
 
         Npts = 5e3
@@ -60,18 +60,18 @@ class TestBinaryGalpropInterpolModel(TestCase):
         np.testing.assert_allclose(mean_mcfrac15, frac15, rtol=1e-2, atol=1.e-2)
 
 
-    def test_abcissa_check(self):
+    def test_abscissa_check(self):
         with pytest.raises(HalotoolsError) as err:
             model = BinaryGalpropInterpolModel(galprop_name='late_type', 
-                galprop_abcissa = [12, 12], galprop_ordinates = [0.5, 0.9], 
+                galprop_abscissa = [12, 12], galprop_ordinates = [0.5, 0.9], 
                 prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
-        substr = "Your input ``galprop_abcissa`` cannot have any repeated values"
+        substr = "Your input ``galprop_abscissa`` cannot have any repeated values"
         assert substr in err.value.message
 
     def test_ordinates_check(self):
         with pytest.raises(HalotoolsError) as err:
             model = BinaryGalpropInterpolModel(galprop_name='late_type', 
-                galprop_abcissa = [12, 13], galprop_ordinates = [0.5, 1.9], 
+                galprop_abscissa = [12, 13], galprop_ordinates = [0.5, 1.9], 
                 prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
         substr = "All values of the input ``galprop_ordinates`` must be between 0 and 1, inclusive."
         assert substr in err.value.message
@@ -80,9 +80,9 @@ class TestBinaryGalpropInterpolModel(TestCase):
     def test_galprop_ordinates_consistency(self):
         with pytest.raises(HalotoolsError) as err:
             model = BinaryGalpropInterpolModel(galprop_name='late_type', 
-                galprop_abcissa = [12, 13], galprop_ordinates = [0.5, 0.7, 0.9], 
+                galprop_abscissa = [12, 13], galprop_ordinates = [0.5, 0.7, 0.9], 
                 prim_haloprop_key = 'vpeak_host', gal_type = 'sats')
-        substr = "Input ``galprop_abcissa`` and ``galprop_ordinates`` must have the same length"
+        substr = "Input ``galprop_abscissa`` and ``galprop_ordinates`` must have the same length"
         assert substr in err.value.message
 
 

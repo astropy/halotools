@@ -60,17 +60,17 @@ If you want to explore the effects of choosing different
 halo properties, you should instantiate multiple models. 
 
 Finally, you can choose how stochasticity between halo and stellar mass is modeled 
-with the ``scatter_abcissa`` and ``scatter_ordinates`` keywords. 
+with the ``scatter_abscissa`` and ``scatter_ordinates`` keywords. 
 These arguments determine the level of scatter in stellar mass, given in dex. 
-The abcissa serve as control points and the ordinates the values of the scatter 
+The abscissa serve as control points and the ordinates the values of the scatter 
 at those control points. So, for example, if you wanted to have 0.3 dex of 
 scatter at :math:`M_{\rm halo} = 10^{12}M_{\odot}` and 0.1 dex of scatter 
 at :math:`M_{\rm halo} = 10^{15}M_{\odot}`:
 
->>> model = PrebuiltSubhaloModelFactory('behroozi10', scatter_abcissa = [1e12, 1e15], scatter_ordinates = [0.3, 0.1])
+>>> model = PrebuiltSubhaloModelFactory('behroozi10', scatter_abscissa = [1e12, 1e15], scatter_ordinates = [0.3, 0.1])
 
 For constant scatter, use a one-element python list. 
-It is not permissible to dynamically change the abcissa after instantiation, 
+It is not permissible to dynamically change the abscissa after instantiation, 
 though you can vary the ordinates by changing the appropriate values in the ``param_dict``. 
 For example, in the above model, the following line will change the 
 scatter to 0.2 dex in :math:`M_{\rm halo} = 10^{12}M_{\odot}` halos:

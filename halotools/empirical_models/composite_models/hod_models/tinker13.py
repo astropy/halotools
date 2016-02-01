@@ -43,12 +43,12 @@ def tinker13_model_dictionary(threshold = model_defaults.default_stellar_mass_th
         Redshift of the stellar-to-halo-mass relation. 
         Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-    quiescent_fraction_abcissa : array, optional  
+    quiescent_fraction_abscissa : array, optional  
         Values of the primary halo property at which the quiescent fraction is specified. 
         Default is [10**12, 10**13.5, 10**15].  
 
     quiescent_fraction_ordinates : array, optional  
-        Values of the quiescent fraction when evaluated at the input abcissa. 
+        Values of the quiescent fraction when evaluated at the input abscissa. 
         Default is [0.25, 0.7, 0.95]
 
     Examples 

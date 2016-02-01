@@ -62,16 +62,16 @@ For constant assembly bias strength at all masses,
 set this variable to be a float between -1 to 1. 
 For assembly bias strength that has mass-dependence, 
 you should provide a list of control values, which will be interpreted as the 
-strength at each of the input ``central_assembias_strength_abcissa`` control points. 
+strength at each of the input ``central_assembias_strength_abscissa`` control points. 
 
 As described below in :ref:`hearin15_parameters`, the strength of assembly bias 
 can always be modulated after instantiation by changing the appropriate values 
-in ``param_dict``. However, the ``central_assembias_strength_abcissa`` cannot be 
-determined dynamically after instantiation. If you want to change the abcissa, 
+in ``param_dict``. However, the ``central_assembias_strength_abscissa`` cannot be 
+determined dynamically after instantiation. If you want to change the abscissa, 
 you must instantiate a new model. 
 
 Exactly analogous comments apply to the ``satellite_assembias_strength`` and 
-``satellite_assembias_strength_abcissa`` keyword arguments. 
+``satellite_assembias_strength_abscissa`` keyword arguments. 
 
 The ``split`` keyword argument determines how your halo population is divided into 
 two sub-populations at each mass. So, if you want halos in the upper 75th 
@@ -79,7 +79,7 @@ percentile of concentration at each mass to have different occupation statistics
 halos in the lower 25th percentile, you would set ``split`` to 0.75. 
 You can study the impact of mass-dependence of subpopulation division by passing in 
 a list of control values for the ``split`` keyword, which will be interpreted as the 
-splitting fraction at each of the input ``split_abcissa`` control points. 
+splitting fraction at each of the input ``split_abscissa`` control points. 
 
 Once you make a choice for ``split``, you cannot change this after instantiating a model. 
 If you want to study the effects of different choices for ``split``, 
