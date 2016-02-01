@@ -54,7 +54,7 @@ Tutorials
 .. toctree::
    :maxdepth: 1
 
-   model_building/index
+   tutorials/model_building/index
    mock_making/index
    mock_observations/index
 
