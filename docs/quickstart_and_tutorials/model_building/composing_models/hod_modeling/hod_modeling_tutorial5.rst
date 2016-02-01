@@ -23,10 +23,10 @@ one governing galaxy shape, a second governing galaxy size.
 
 In terms of implementation details, 
 the new feature to focus on here is this: the model for galaxy 
-size will have an explicit dependence on galaxy size, even though 
+size will have an explicit dependence on galaxy shape, even though 
 these models are controlled by independently defined components. 
-Again, our model will not be physically motivated, 
-and the purpose will be to teach you how to 
+Again, our model will not be physically motivated: 
+the purpose is to teach you how to 
 build a model with inter-dependence between different components.  
 
 Briefly, in our model the shape of a galaxy will be randomly selected 
@@ -72,7 +72,7 @@ Source code for the new model
 
         def calculate_halo_size(self, **kwargs):
             table = kwargs['table']
-            return 0.5*table['halo_rvir']*table['halo_rs']
+            return 2*table['halo_rs']
 
 Now we'll build our composite model using the ``model_feature_calling_sequence``, 
 a new keyword introduced in this tutorial:
@@ -112,8 +112,8 @@ The *Size* component model illustrates the use of the
 this feature allows you to add new columns to the ``halo_table`` in a 
 pre-processing phase of mock-making. Here we use this mechanism 
 to add a new column to the halo catalog called ``halo_custom_size``, 
-which in this case is just the ratio of :math:`R_{\rm vir} / R_{\rm s}`. 
-This is necessary because the **assign_size** method expects the 
+which in this case is twice the NFW scale radius. 
+This mechanism is necessary because the **assign_size** method expects the 
 ``halo_custom_size`` column to be present in the ``table`` passed to it. 
 The way the ``new_haloprop_func_dict`` mechanism works is this: 
 it stores a dictionary whose key(s) is the name of the new halo column 
@@ -128,7 +128,7 @@ The physics function in the *Size* class differs from those covered previously
 in a subtle but critical detail: the **assign_size** method requires that 
 the ``galaxy_table`` has a column called ``shape`` that has already been 
 assigned sensible values, but yet this assignment is not carried out 
-by the *Size* class, it is carried out by the *Shape* class. 
+by the *Size* class itself, it is carried out by the *Shape* class. 
 This means that we need to make sure that during the process of mock generation, 
 the physics functions in the *Shape* class are called before the physics 
 functions of the *Size* class. 
