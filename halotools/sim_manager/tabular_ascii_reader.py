@@ -340,7 +340,7 @@ class TabularAsciiReader(object):
             )
 
     def _get_fname(self, input_fname):
-        """ Verify that the input fname does not already exist. 
+        """ Verify that the input fname exists on disk. 
         """
         # Check whether input_fname exists. 
         if not os.path.isfile(input_fname):
