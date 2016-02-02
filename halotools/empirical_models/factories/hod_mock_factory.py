@@ -121,7 +121,7 @@ class HodMockFactory(MockFactory):
         # make a conservative mvir completeness cut 
         # This cut can be controlled by changing sim_defaults.Num_ptcl_requirement
         if apply_completeness_cut is True:
-            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.halocat.particle_mass
+            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.particle_mass
             mass_cut = (self.halo_table['halo_mvir'] > cutoff_mvir)
             self.halo_table = self.halo_table[mass_cut]
 
@@ -178,11 +178,11 @@ class HodMockFactory(MockFactory):
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
         self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['x'], self.halocat.Lbox)
+            self.galaxy_table['x'], self.Lbox)
         self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['y'], self.halocat.Lbox)
+            self.galaxy_table['y'], self.Lbox)
         self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['z'], self.halocat.Lbox)
+            self.galaxy_table['z'], self.Lbox)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)

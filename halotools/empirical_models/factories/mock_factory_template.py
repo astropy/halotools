@@ -64,18 +64,22 @@ class MockFactory(object):
 
         """
 
-        required_kwargs = ['halocat', 'model']
+        required_kwargs = ['model']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
         # Make any cuts on the halo catalog requested by the model
-        try: 
-            f = self.model.halo_selection_func
-            self.halo_table = f(self.halocat.halo_table)
-        except AttributeError:
-            self.halo_table = self.halocat.halo_table            
+        try:
+            halocat = kwargs['halocat']
+            self.halo_table = halocat.halo_table
+            self.model = kwargs['model']
+        except KeyError:
+            msg = ("\n``halocat`` and ``model`` are required ``MockFactory`` arguments\n")
+            raise HalotoolsError(msg)
+        for key in halocat.__dict__.keys():
+            setattr(self, key, halocat.__dict__[key])
 
         try:
-            self.ptcl_table = self.halocat.ptcl_table # pre-retrieve the particles from disk, if available
+            self.ptcl_table = halocat.ptcl_table # pre-retrieve the particles from disk, if available
         except:
             pass   
             
@@ -153,7 +157,7 @@ class MockFactory(object):
 
         """
         ngals = len(self.galaxy_table)
-        comoving_volume = self.halocat.Lbox**3
+        comoving_volume = self.Lbox**3
         return ngals/float(comoving_volume)
 
     def compute_galaxy_clustering(self, include_crosscorr = False, **kwargs):
@@ -271,7 +275,7 @@ class MockFactory(object):
             pos = three_dim_pos_bundle(table = self.galaxy_table, 
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
-                pos, rbins, period=self.halocat.Lbox, num_threads=num_threads, 
+                pos, rbins, period=self.Lbox, num_threads=num_threads, 
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
@@ -285,7 +289,7 @@ class MockFactory(object):
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             xi11, xi12, xi22 = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=pos2, 
-                period=self.halocat.Lbox, num_threads=num_threads, 
+                period=self.Lbox, num_threads=num_threads, 
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, xi11, xi12, xi22 
 
@@ -382,7 +386,7 @@ class MockFactory(object):
             raise HalotoolsError(msg)
 
         nptcl = np.max([model_defaults.default_nptcls, len(self.galaxy_table)])
-        ptcl_table = randomly_downsample_data(self.halocat.ptcl_table, nptcl)
+        ptcl_table = randomly_downsample_data(self.ptcl_table, nptcl)
         ptcl_pos = three_dim_pos_bundle(table = ptcl_table, 
             key1='x', key2='y', key3='z')
 
@@ -409,7 +413,7 @@ class MockFactory(object):
                 key1='x', key2='y', key3='z', mask=mask, return_complement=False)
             clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                period=self.halocat.Lbox, num_threads=num_threads, do_auto=False, 
+                period=self.Lbox, num_threads=num_threads, do_auto=False, 
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering
         else:
@@ -423,11 +427,11 @@ class MockFactory(object):
                 key1='x', key2='y', key3='z', mask=mask, return_complement=True)
             clustering = mock_observables.tpcf(
                 sample1=pos, rbins=rbins, sample2=ptcl_pos, 
-                period=self.halocat.Lbox, num_threads=num_threads, do_auto=False, 
+                period=self.Lbox, num_threads=num_threads, do_auto=False, 
                 approx_cell1_size = [rmax, rmax, rmax])
             clustering2 = mock_observables.tpcf(
                 sample1=pos2, rbins=rbins, sample2=ptcl_pos, 
-                period=self.halocat.Lbox, num_threads=num_threads, do_auto=False, 
+                period=self.Lbox, num_threads=num_threads, do_auto=False, 
                 approx_cell1_size = [rmax, rmax, rmax])
             return rbin_centers, clustering, clustering2 
 
@@ -491,12 +495,12 @@ class MockFactory(object):
         z = self.galaxy_table['z']
         if zspace is True:
             z += self.galaxy_table['vz']/100.
-            z = model_helpers.enforce_periodicity_of_box(z, self.halocat.Lbox)
+            z = model_helpers.enforce_periodicity_of_box(z, self.Lbox)
         pos = np.vstack((x, y, z)).T
 
         group_finder = mock_observables.FoFGroups(positions=pos, 
             b_perp = b_perp, b_para = b_para, 
-            Lbox = self.halocat.Lbox, num_threads = num_threads)
+            Lbox = self.Lbox, num_threads = num_threads)
 
         return group_finder.group_ids
 
