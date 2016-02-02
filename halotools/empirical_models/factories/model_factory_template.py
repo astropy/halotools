@@ -125,8 +125,8 @@ class ModelFactory(object):
                 redshift = kwargs['halocat'].redshift
             else:
                 redshift = sim_defaults.default_redshift
-            if abs(redshift - self.mock.halocat.redshift) > 0.05:
-                raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, self.mock.halocat.redshift))
+            if abs(redshift - self.mock.redshift) > 0.05:
+                raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, self.mock.redshift))
 
             if 'simname' in kwargs:
                 simname = kwargs['simname']
@@ -134,8 +134,8 @@ class ModelFactory(object):
                 simname = kwargs['halocat'].simname
             else:
                 simname = sim_defaults.default_simname
-            if simname != self.mock.halocat.simname:
-                raise HalotoolsError(inconsistent_simname_error_msg % (self.mock.halocat.simname, simname))
+            if simname != self.mock.simname:
+                raise HalotoolsError(inconsistent_simname_error_msg % (self.mock.simname, simname))
 
             if 'halo_finder' in kwargs:
                 halo_finder = kwargs['halo_finder']
@@ -143,8 +143,8 @@ class ModelFactory(object):
                 halo_finder = kwargs['halocat'].halo_finder
             else:
                 halo_finder = sim_defaults.default_halo_finder
-            if halo_finder != self.mock.halocat.halo_finder:
-                raise HalotoolsError(inconsistent_halo_finder_error_msg % (self.mock.halocat.halo_finder,halo_finder ))
+            if halo_finder != self.mock.halo_finder:
+                raise HalotoolsError(inconsistent_halo_finder_error_msg % (self.mock.halo_finder,halo_finder ))
 
 
         try:
