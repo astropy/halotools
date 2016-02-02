@@ -70,7 +70,6 @@ class MockFactory(object):
         # Make any cuts on the halo catalog requested by the model
         try:
             halocat = kwargs['halocat']
-            self.halo_table = halocat.halo_table
             self.model = kwargs['model']
         except KeyError:
             msg = ("\n``halocat`` and ``model`` are required ``MockFactory`` arguments\n")

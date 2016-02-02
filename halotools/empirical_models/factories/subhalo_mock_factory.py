@@ -50,6 +50,7 @@ class SubhaloMockFactory(MockFactory):
         """
 
         MockFactory.__init__(self, populate = populate, **kwargs)
+        self.halo_table = kwargs['halocat'].halo_table
 
         # Pre-compute any additional halo properties required by the model
         self.preprocess_halo_catalog()

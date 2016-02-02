@@ -81,12 +81,13 @@ class HodMockFactory(MockFactory):
 
         MockFactory.__init__(self, populate=populate, **kwargs)
 
-        self.preprocess_halo_catalog()
+        halocat = kwargs['halocat']
+        self.preprocess_halo_catalog(halocat)
 
         if populate is True:
             self.populate()
 
-    def preprocess_halo_catalog(self, apply_completeness_cut = True, **kwargs):
+    def preprocess_halo_catalog(self, halocat, apply_completeness_cut = True):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. This pre-processing includes identifying the 
         catalog columns that will be used by the model to create the mock, 
@@ -112,18 +113,16 @@ class HodMockFactory(MockFactory):
             `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
             Default is True. 
         """
-
         ################ Make cuts on halo catalog ################
         # Select host halos only, since this is an HOD-style model
-        self.halo_table = SampleSelector.host_halo_selection(
-            table = self.halo_table)
+        halo_table = SampleSelector.host_halo_selection(table = halocat.halo_table)
 
         # make a conservative mvir completeness cut 
         # This cut can be controlled by changing sim_defaults.Num_ptcl_requirement
         if apply_completeness_cut is True:
             cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.particle_mass
-            mass_cut = (self.halo_table['halo_mvir'] > cutoff_mvir)
-            self.halo_table = self.halo_table[mass_cut]
+            mass_cut = (halo_table['halo_mvir'] > cutoff_mvir)
+            halo_table = halo_table[mass_cut]
 
         ############################################################
 
@@ -131,12 +130,16 @@ class HodMockFactory(MockFactory):
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(table = self.halo_table)
+                halo_table[new_haloprop_key] = new_haloprop_func(table = halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
             pass
 
-        self.model.build_lookup_tables(**kwargs)
+        self.halo_table = Table()
+        for key in self.additional_haloprops:
+            self.halo_table[key] = halo_table[key]
+
+        self.model.build_lookup_tables()
 
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
