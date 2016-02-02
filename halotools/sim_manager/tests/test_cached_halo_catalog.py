@@ -52,6 +52,19 @@ class TestCachedHaloCatalog(TestCase):
             pass
         os.makedirs(self.dummy_cache_baseloc)
 
+    def test_raises_bad_constructor_args_exception1(self):
+        with pytest.raises(HalotoolsError) as err:
+            _ = CachedHaloCatalog('bolshoi')
+        substr = "CachedHaloCatalog only accepts keyword arguments,"
+        assert substr in err.value.message
+
+    def test_raises_bad_constructor_args_exception2(self):
+        with pytest.raises(HalotoolsError) as err:
+            _ = CachedHaloCatalog(z = 0.04)
+        substr = "CachedHaloCatalog got an unexpected keyword"
+        assert substr in err.value.message
+
+
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_all_catalogs(self):
         """ Verify that the default halo catalog loads. 
