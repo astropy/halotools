@@ -8,6 +8,8 @@ based on models that populate subhalos.
 import numpy as np
 from copy import copy 
 
+from astropy.table import Table 
+
 from .mock_factory_template import MockFactory
 
 from .. import model_helpers, model_defaults
@@ -50,16 +52,16 @@ class SubhaloMockFactory(MockFactory):
         """
 
         MockFactory.__init__(self, populate = populate, **kwargs)
-        self.halo_table = kwargs['halocat'].halo_table
+        halocat = kwargs['halocat']
 
         # Pre-compute any additional halo properties required by the model
-        self.preprocess_halo_catalog()
+        self.preprocess_halo_catalog(halocat)
         self.precompute_galprops()
 
         if populate is True:
             self.populate()
 
-    def preprocess_halo_catalog(self):
+    def preprocess_halo_catalog(self, halocat):
         """ Method to pre-process a halo catalog upon instantiation of the mock object. 
 
         New columns are added to the ``halo_table`` according to any entries in the 
@@ -70,15 +72,19 @@ class SubhaloMockFactory(MockFactory):
         :ref:`new_haloprop_func_dict_mechanism`
 
         """
-
+        halo_table = halocat.halo_table
         ### Create new columns of the halo catalog, if applicable
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(table = self.halo_table)
+                halo_table[new_haloprop_key] = new_haloprop_func(table = halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
             pass
+
+        self.halo_table = Table()
+        for key in self.additional_haloprops:
+            self.halo_table[key] = halo_table[key]
 
 
     def precompute_galprops(self):
