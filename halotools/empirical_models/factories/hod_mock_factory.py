@@ -79,7 +79,7 @@ class HodMockFactory(MockFactory):
             Default is True. 
         """
 
-        super(HodMockFactory, self).__init__(populate=populate, **kwargs)
+        MockFactory.__init__(self, populate=populate, **kwargs)
 
         self.preprocess_halo_catalog()
 

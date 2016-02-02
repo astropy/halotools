@@ -49,7 +49,7 @@ class SubhaloMockFactory(MockFactory):
             with mock galaxies and their observable properties. Default is ``True``. 
         """
 
-        super(SubhaloMockFactory, self).__init__(populate = populate, **kwargs)
+        MockFactory.__init__(self, populate = populate, **kwargs)
 
         # Pre-compute any additional halo properties required by the model
         self.preprocess_halo_catalog()
