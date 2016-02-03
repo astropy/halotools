@@ -167,12 +167,14 @@ class ModelFactory(object):
                     halocat = kwargs['halocat']
                     del kwargs['halocat'] # otherwise the call to the mock factory below has multiple halocat kwargs
                 else:
-                    if 'redshift' in kwargs:
-                        halocat = CachedHaloCatalog(**kwargs)
+                    key_intersection = set(kwargs) & set(CachedHaloCatalog.acceptable_kwargs)
+                    halocat_kwargs = {key: kwargs[key] for key in key_intersection}
+                    if 'redshift' in key_intersection:
+                        halocat = CachedHaloCatalog(**halocat_kwargs)
                     elif hasattr(self, 'redshift'):
-                        halocat = CachedHaloCatalog(redshift = self.redshift, **kwargs)
+                        halocat = CachedHaloCatalog(redshift = self.redshift, **halocat_kwargs)
                     else:
-                        halocat = CachedHaloCatalog(**kwargs)
+                        halocat = CachedHaloCatalog(**halocat_kwargs)
 
             if hasattr(self, 'redshift'):
                 if abs(self.redshift - halocat.redshift) > 0.05:
@@ -180,10 +182,13 @@ class ModelFactory(object):
                         " and the halocat redshift = %.2f" % (self.redshift, halocat.redshift))
 
             mock_factory = self.mock_factory 
-            self.mock = mock_factory(halocat=halocat, model=self, populate=False)
+            self.mock = mock_factory(halocat=halocat, model=self)
 
-
-        self.mock.populate()
+        if 'masking_function' in kwargs.keys():
+            f = kwargs['masking_function']
+            self.mock.populate(masking_function = f)
+        else:
+            self.mock.populate()
 
     def update_param_dict_decorator(self, component_model, func_name):
         """ Decorator used to propagate any possible changes in the composite model param_dict 

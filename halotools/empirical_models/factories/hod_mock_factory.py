@@ -127,15 +127,32 @@ class HodMockFactory(MockFactory):
         except AttributeError:
             pass
 
-        self.halo_table = Table()
+        self._orig_halo_table = Table()
         for key in self.additional_haloprops:
-            self.halo_table[key] = halo_table[key]
+            self._orig_halo_table[key] = halo_table[key][:]
 
         self.model.build_lookup_tables()
 
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
+
+        Parameters 
+        ------------
+        masking_function : function, optional 
+            Function object used to place a mask on the halo table prior to 
+            calling the mock generating functions. Calling signature of the 
+            function should be to accept a single positional argument storing 
+            a table, and returning a boolean numpy array that will be used 
+            as a fancy indexing mask. All masked halos will be ignored during 
+            mock population. Default is None. 
         """
+        try:
+            masking_function = kwargs['masking_function']
+            mask = masking_function(self._orig_halo_table)
+            self.halo_table = self._orig_halo_table[mask]
+        except:
+            self.halo_table = self._orig_halo_table
+
         self.allocate_memory()
 
         # Loop over all gal_types in the model 
