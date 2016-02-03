@@ -53,9 +53,11 @@ class TestSupportedSims(TestCase):
         """
         for simname in self.adict.keys():
             alist = self.adict[simname]
-            for a in alist:
-                z = 1/a - 1
-                halocat = CachedHaloCatalog(simname = simname, redshift = z)
+            a = alist[0]
+            z = 1/a - 1
+            halocat = CachedHaloCatalog(simname = simname, redshift = z)
+            r = halocat.halo_table['halo_rvir']
+            assert np.all(r < 50.)
         
 
 
