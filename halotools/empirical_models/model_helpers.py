@@ -111,7 +111,8 @@ def polynomial_from_table(table_abscissa,table_ordinates,input_abscissa):
 
     return output_ordinates
 
-def enforce_periodicity_of_box(coords, box_length):
+def enforce_periodicity_of_box(coords, box_length, 
+    check_multiple_box_lengths = False):
     """ Function used to apply periodic boundary conditions 
     of the simulation, so that mock galaxies all lie in the range [0, Lbox].
 
@@ -124,13 +125,24 @@ def enforce_periodicity_of_box(coords, box_length):
     box_length : float
         the size of simulation box (currently hard-coded to be Mpc/h units)
 
+    check_multiple_box_lengths : bool, optional 
+        If True, an exception will be raised if the points span a range 
+        of more than 2Lbox. Default is False.     
+
     Returns
     -------
     periodic_coords : array_like
         array with values and shape equal to input coords, 
         but with periodic boundary conditions enforced
 
-    """    
+    """
+    if check_multiple_box_lengths is True:
+        multiples = np.abs(coords/box_length)
+        if multiples.max() > 1:
+            msg = ("\nThe ``enforce_periodicity_of_box`` function detected \n"
+                "points that are more than one box_length outside of the boundaries.\n")
+            raise HalotoolsError(msg)
+
     return coords % box_length
 
 

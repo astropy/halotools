@@ -46,7 +46,7 @@ class TestSupportedSims(TestCase):
 
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
-    def test_halo_rvir(self):
+    def test_halo_rvir_in_correct_units(self):
         """ Loop over all halo catalogs in cache and verify that the 
         ``halo_rvir`` column never exeeds the number 50. This is a crude way of 
         ensuring that units are in Mpc/h, not kpc/h. 
