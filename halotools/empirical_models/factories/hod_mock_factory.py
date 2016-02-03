@@ -50,7 +50,7 @@ class HodMockFactory(MockFactory):
 
     """
 
-    def __init__(self, populate=True, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters 
         ----------
@@ -68,24 +68,16 @@ class HodMockFactory(MockFactory):
             If ``additional_haloprops`` is set to the string value ``all``, 
             the galaxy table will inherit every halo property in the catalog. Default is None. 
 
-        populate : boolean, optional   
-            If set to ``False``, the class will perform all pre-processing tasks 
-            but will not call the ``model`` to populate the ``galaxy_table`` 
-            with mock galaxies and their observable properties. Default is ``True``. 
-
         apply_completeness_cut : bool, optional 
             If True, only halos passing the mass completeness cut defined in 
             `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
             Default is True. 
         """
 
-        MockFactory.__init__(self, populate=populate, **kwargs)
+        MockFactory.__init__(self, **kwargs)
 
         halocat = kwargs['halocat']
         self.preprocess_halo_catalog(halocat)
-
-        if populate is True:
-            self.populate()
 
     def preprocess_halo_catalog(self, halocat, apply_completeness_cut = True):
         """ Method to pre-process a halo catalog upon instantiation of 

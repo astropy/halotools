@@ -27,7 +27,7 @@ class SubhaloMockFactory(MockFactory):
 
     """
 
-    def __init__(self, populate=True, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters 
         ----------
@@ -45,21 +45,14 @@ class SubhaloMockFactory(MockFactory):
             If ``additional_haloprops`` is set to the string value ``all``, 
             the galaxy table will inherit every halo property in the catalog. Default is None. 
 
-        populate : boolean, optional   
-            If set to ``False``, the class will perform all pre-processing tasks 
-            but will not call the ``model`` to populate the ``galaxy_table`` 
-            with mock galaxies and their observable properties. Default is ``True``. 
         """
 
-        MockFactory.__init__(self, populate = populate, **kwargs)
+        MockFactory.__init__(self, **kwargs)
         halocat = kwargs['halocat']
 
         # Pre-compute any additional halo properties required by the model
         self.preprocess_halo_catalog(halocat)
         self.precompute_galprops()
-
-        if populate is True:
-            self.populate()
 
     def preprocess_halo_catalog(self, halocat):
         """ Method to pre-process a halo catalog upon instantiation of the mock object. 
