@@ -3,7 +3,8 @@
 import os, shutil
 import numpy as np
 from unittest import TestCase
-import warnings, pytest
+import warnings
+from astropy.tests.helper import pytest 
 
 from astropy.config.paths import _find_home 
 
