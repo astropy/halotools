@@ -519,7 +519,7 @@ class RockstarHlistReader(TabularAsciiReader):
 
         return output_fname
 
-    def read_halocat(self, 
+    def read_halocat(self, columns_to_convert_from_kpc_to_mpc, 
         write_to_disk = False, update_cache_log = False, 
         add_supplementary_halocat_columns = True):
         """ Method reads the ascii data and  
@@ -534,6 +534,26 @@ class RockstarHlistReader(TabularAsciiReader):
 
         Parameters 
         -----------
+        columns_to_convert_from_kpc_to_mpc : list 
+            By default, the Rockstar halo-finder produces some outputs 
+            in Mpc/h, and others in kpc/h, a potential source of bugs 
+            in catalog production. For example, in producing the Halotools-provided 
+            catalogs, the following columns are divided by 1000: 
+            ``halo_rvir``, ``halo_rs``, ``halo_xoff``. 
+            The ``columns_to_convert_from_kpc_to_mpc`` argument 
+            should be supplied a list of strings for all columns that you 
+            would like to divide by 1000. This list may be empty, but you are 
+            required to define it so that you are mindful of your units. 
+            Of course, there could be other columns whose units you want to convert 
+            prior to caching the catalog, and simply division by 1000 may not be the 
+            appropriate unit conversion. To handle such cases, you should 
+            use the ``read_halocat`` method with the ``write_to_disk`` and 
+            ``update_cache_log`` arguments both set to False, and manually 
+            overwrite the halo_table prior to calling the `write_to_disk` 
+            and `update_cache_log` methods (in that order). 
+            It is generally good practice to include any such unit 
+            manipulation in the ``processing_notes``. 
+
         write_to_disk : bool, optional 
             If True, the `write_to_disk` method will be called automatically. 
             Default is False, in which case you must call the `write_to_disk` 
@@ -552,8 +572,20 @@ class RockstarHlistReader(TabularAsciiReader):
             Note that this feature is rather bare-bones and is likely to significantly 
             evolve and/or entirely vanish in future releases. 
         """
+        for key in columns_to_convert_from_kpc_to_mpc:
+            try:
+                assert key in self.columns_to_keep_dict
+            except AssertionError:
+                msg = ("\nYou included the ``" + key + "`` column in the input \n"
+                    "``columns_to_convert_from_kpc_to_mpc`` but not in the input "
+                    "``columns_to_keep_dict``\n")
+                raise HalotoolsError(msg)
+
         result = self.read_ascii()
         self.halo_table = Table(result)
+
+        for key in columns_to_convert_from_kpc_to_mpc:
+            self.halo_table[key] /= 1000.
 
         if add_supplementary_halocat_columns == True: 
             self.add_supplementary_halocat_columns()
