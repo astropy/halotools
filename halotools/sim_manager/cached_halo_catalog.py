@@ -39,6 +39,9 @@ class CachedHaloCatalog(object):
     See the Examples section below for details on how to 
     access and manipulate this data. 
     """
+    acceptable_kwargs = ('ptcl_version_name', 'fname', 'simname', 
+        'halo_finder', 'redshift', 'version_name', 'dz_tol', 'update_cached_fname', 
+        'preload_halo_table')
 
     def __init__(self, *args, **kwargs):
         """
@@ -197,17 +200,13 @@ class CachedHaloCatalog(object):
             msg = ("\nCachedHaloCatalog only accepts keyword arguments, not position arguments. \n")
             raise HalotoolsError(msg)
 
-        acceptable_kwargs = ('ptcl_version_name', 'fname', 'simname', 
-            'halo_finder', 'redshift', 'version_name', 'dz_tol', 'update_cached_fname', 
-            'preload_halo_table')
-
         for key in kwargs.keys():
             try:
-                assert key in acceptable_kwargs
+                assert key in self.acceptable_kwargs
             except AssertionError:
                 msg = ("\nCachedHaloCatalog got an unexpected keyword ``" + key + "``\n"
                     "The only acceptable keywords are listed below:\n\n")
-                for acceptable_key in acceptable_kwargs:
+                for acceptable_key in self.acceptable_kwargs:
                     msg += "``" + acceptable_key + "``\n"
                 raise HalotoolsError(msg)
 

@@ -50,7 +50,7 @@ class HodMockFactory(MockFactory):
 
     """
 
-    def __init__(self, populate=True, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters 
         ----------
@@ -68,24 +68,16 @@ class HodMockFactory(MockFactory):
             If ``additional_haloprops`` is set to the string value ``all``, 
             the galaxy table will inherit every halo property in the catalog. Default is None. 
 
-        populate : boolean, optional   
-            If set to ``False``, the class will perform all pre-processing tasks 
-            but will not call the ``model`` to populate the ``galaxy_table`` 
-            with mock galaxies and their observable properties. Default is ``True``. 
-
         apply_completeness_cut : bool, optional 
             If True, only halos passing the mass completeness cut defined in 
             `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
             Default is True. 
         """
 
-        MockFactory.__init__(self, populate=populate, **kwargs)
+        MockFactory.__init__(self, **kwargs)
 
         halocat = kwargs['halocat']
         self.preprocess_halo_catalog(halocat)
-
-        if populate is True:
-            self.populate()
 
     def preprocess_halo_catalog(self, halocat, apply_completeness_cut = True):
         """ Method to pre-process a halo catalog upon instantiation of 
@@ -135,15 +127,32 @@ class HodMockFactory(MockFactory):
         except AttributeError:
             pass
 
-        self.halo_table = Table()
+        self._orig_halo_table = Table()
         for key in self.additional_haloprops:
-            self.halo_table[key] = halo_table[key]
+            self._orig_halo_table[key] = halo_table[key][:]
 
         self.model.build_lookup_tables()
 
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
+
+        Parameters 
+        ------------
+        masking_function : function, optional 
+            Function object used to place a mask on the halo table prior to 
+            calling the mock generating functions. Calling signature of the 
+            function should be to accept a single positional argument storing 
+            a table, and returning a boolean numpy array that will be used 
+            as a fancy indexing mask. All masked halos will be ignored during 
+            mock population. Default is None. 
         """
+        try:
+            masking_function = kwargs['masking_function']
+            mask = masking_function(self._orig_halo_table)
+            self.halo_table = self._orig_halo_table[mask]
+        except:
+            self.halo_table = self._orig_halo_table
+
         self.allocate_memory()
 
         # Loop over all gal_types in the model 
