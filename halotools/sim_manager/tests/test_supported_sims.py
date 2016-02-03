@@ -44,6 +44,7 @@ class TestSupportedSims(TestCase):
                     if a == 1:
                         particles = halocat.ptcl_table
 
+    @pytest.mark.xfail
     @pytest.mark.slow
     @pytest.mark.skipif('not APH_MACHINE')
     def test_halo_rvir_in_correct_units(self):

@@ -72,12 +72,14 @@ class HodMockFactory(MockFactory):
             If True, only halos passing the mass completeness cut defined in 
             `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
             Default is True. 
+
         """
 
         MockFactory.__init__(self, **kwargs)
 
         halocat = kwargs['halocat']
         self.preprocess_halo_catalog(halocat)
+
 
     def preprocess_halo_catalog(self, halocat, apply_completeness_cut = True):
         """ Method to pre-process a halo catalog upon instantiation of 
@@ -147,6 +149,11 @@ class HodMockFactory(MockFactory):
             mock population. Default is None. 
         """
         try:
+            self._testing_mode = kwargs['_testing_mode']
+        except KeyError:
+            self._testing_mode = False
+
+        try:
             masking_function = kwargs['masking_function']
             mask = masking_function(self._orig_halo_table)
             self.halo_table = self._orig_halo_table[mask]
@@ -190,11 +197,14 @@ class HodMockFactory(MockFactory):
         # Positions are now assigned to all populations. 
         # Now enforce the periodic boundary conditions for all populations at once
         self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['x'], self.Lbox)
+            self.galaxy_table['x'], self.Lbox, 
+            check_multiple_box_lengths = self._testing_mode)
         self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['y'], self.Lbox)
+            self.galaxy_table['y'], self.Lbox, 
+            check_multiple_box_lengths = self._testing_mode)
         self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['z'], self.Lbox)
+            self.galaxy_table['z'], self.Lbox, 
+            check_multiple_box_lengths = self._testing_mode)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)

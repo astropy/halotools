@@ -137,10 +137,14 @@ def enforce_periodicity_of_box(coords, box_length,
 
     """
     if check_multiple_box_lengths is True:
-        multiples = np.abs(coords/box_length)
-        if multiples.max() > 1:
-            msg = ("\nThe ``enforce_periodicity_of_box`` function detected \n"
-                "points that are more than one box_length outside of the boundaries.\n")
+        xmin = np.min(coords)
+        if xmin < -box_length:
+            msg = ("\nThere is at least one input point with a coordinate less than -Lbox\n")
+            raise HalotoolsError(msg)
+
+        xmax = np.max(coords)
+        if xmax > 2*box_length:
+            msg = ("\nThere is at least one input point with a coordinate greater than 2*Lbox\n")
             raise HalotoolsError(msg)
 
     return coords % box_length

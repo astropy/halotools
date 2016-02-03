@@ -38,6 +38,13 @@ class TestHodMockFactory(TestCase):
     	model.populate_mock(simname = 'fake')
     	assert np.any(model.mock.galaxy_table['halo_z'] < 150)
 
+    @pytest.mark.xfail
+    @pytest.mark.slow
+    def test_mock_population_pbcs(self):
+        model = PrebuiltHodModelFactory('zheng07')
+        model.populate_mock(simname = 'bolshoi', _testing_mode = True)
+        assert model.mock._testing_mode == True
+
 
 
 
