@@ -47,7 +47,9 @@ simname = args.simname
 halo_finder = args.halo_finder
 version_name = args.version_name
 redshift = args.redshift
-if args.version_name == 'most_recent': version_name = sim_defaults.default_version_name
+if args.version_name == 'most_recent': 
+    version_name = sim_defaults.default_version_name
+    ptcl_version_name = sim_defaults.default_ptcl_version_name
 
 if args.ptcls_only is True: 
     download_halos = False
@@ -85,7 +87,7 @@ if args.overwrite == False:
 
         gen2 = downman.ptcl_table_cache.matching_log_entry_generator
         matching_ptcl_cats = list(
-            gen2(simname = simname, version_name = version_name, 
+            gen2(simname = simname, version_name = ptcl_version_name, 
                 redshift = redshift, dz_tol = 0.1))
 
         if len(matching_ptcl_cats) > 0:

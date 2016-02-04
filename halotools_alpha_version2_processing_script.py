@@ -12,9 +12,9 @@ num_ptcl_cut = 300.
 
 columns_to_convert_from_kpc_to_mpc = ('halo_rvir', 'halo_rs', 'halo_xoff')
 
-processing_notes = ("Catalog only contains (sub)halos with Mpeak greater than 300 particles. \n"
+processing_notes = ("Catalog only contains (sub)halos with Mpeak greater than 300 particles. "
     "The following columns have been divided by 1000 to convert them from the kpc/h units "
-    "provided in the original ASCII source to the Mpc/h units assumed by Halotools:\n")
+    "provided in the original ASCII source to the Mpc/h units assumed by Halotools:  ")
 for key in columns_to_convert_from_kpc_to_mpc: processing_notes += key + ", "
 processing_notes = processing_notes[:-2]
 

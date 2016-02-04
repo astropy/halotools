@@ -141,7 +141,7 @@ class TestCachedHaloCatalog(TestCase):
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
-                halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
+                halo_finder = 'bdm', version_name = 'halotools_alpha_version2', 
                 redshift = 5, dz_tol = 1)
         assert 'The following entries in the cache log' in err.value.message
 
@@ -152,7 +152,7 @@ class TestCachedHaloCatalog(TestCase):
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
-                halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
+                halo_finder = 'bdm', version_name = 'halotools_alpha_version2', 
                 redshift = 5, dz_tol = 1)
         assert 'The following entries in the cache log' in err.value.message
 
@@ -195,7 +195,7 @@ class TestCachedHaloCatalog(TestCase):
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'Jose Canseco', 
-                halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
+                halo_finder = 'bdm', version_name = 'halotools_alpha_version2', 
                 redshift = 5, dz_tol = 1)
         assert 'There are no simulations matching your input simname' in err.value.message
 
@@ -219,7 +219,7 @@ class TestCachedHaloCatalog(TestCase):
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_fname_optional_load(self):
-        fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolplanck/rockstar/hlist_0.33406.list.halotools_alpha_version1.hdf5'
+        fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolplanck/rockstar/hlist_0.33406.list.halotools_alpha_version2.hdf5'
         halocat = CachedHaloCatalog(fname = fname)
         assert halocat.simname == 'bolplanck'
 
@@ -328,7 +328,7 @@ class TestCachedHaloCatalog(TestCase):
 
         ######################################################
         ### Make sure the file does not already exist on disk or in cache
-        tmp_fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.07835.list.halotools_alpha_version1.hdf5'
+        tmp_fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.07835.list.halotools_alpha_version2.hdf5'
 
         if os.path.isfile(tmp_fname):
             matching_log_entry = cache.determine_log_entry_from_fname(tmp_fname)
@@ -352,7 +352,7 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'rockstar', 
-                version_name = 'halotools_alpha_version1', 
+                version_name = 'halotools_alpha_version2', 
                 redshift = 11.7632)
 
         #####################################################
@@ -360,7 +360,7 @@ class TestCachedHaloCatalog(TestCase):
 
         dman.download_processed_halo_table(simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', 
+            version_name = 'halotools_alpha_version2', 
             redshift = 11.7632, overwrite = True)
 
         ######################################################
@@ -374,7 +374,7 @@ class TestCachedHaloCatalog(TestCase):
 
         halocat = CachedHaloCatalog(simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', redshift = 11.7632)
+            version_name = 'halotools_alpha_version2', redshift = 11.7632)
 
         #####################################################
         ## Now move the file to a new location 
@@ -390,7 +390,7 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'rockstar', 
-                version_name = 'halotools_alpha_version1', redshift = 11.7632)
+                version_name = 'halotools_alpha_version2', redshift = 11.7632)
         substr = "The following input fname does not exist: "
         assert substr in err.value.message
         assert tmp_fname in err.value.message 
@@ -408,7 +408,7 @@ class TestCachedHaloCatalog(TestCase):
         ## Verify that we can load the catalog from metadata again
         halocat = CachedHaloCatalog(simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', redshift = 11.7632)
+            version_name = 'halotools_alpha_version2', redshift = 11.7632)
 
         # ######################################################
         # # Now clean up and remove the file again
@@ -417,7 +417,7 @@ class TestCachedHaloCatalog(TestCase):
         matching_log_entries = cache.matching_log_entry_generator(
             simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', 
+            version_name = 'halotools_alpha_version2', 
             redshift = 11.7632, dz_tol = 0.05)
 
         for matching_log_entry in matching_log_entries:
@@ -437,7 +437,7 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'rockstar', 
-                version_name = 'halotools_alpha_version1', redshift = 11.7632)
+                version_name = 'halotools_alpha_version2', redshift = 11.7632)
         # ######################################################
 
     @pytest.mark.skipif('not HAS_H5PY')

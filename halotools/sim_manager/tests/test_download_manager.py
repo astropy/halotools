@@ -257,7 +257,7 @@ class TestDownloadManager(TestCase):
         """
         fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi', 
             halo_finder = 'rockstar', desired_redshift = 0., catalog_type = 'halos')
-        assert 'hlist_1.00035.list.halotools_alpha_version1.hdf5' in fname 
+        assert 'hlist_1.00035.list.halotools_alpha_version2.hdf5' in fname 
 
     @remote_data
     def test_closest_halo_catalog_on_web2(self):
@@ -265,7 +265,7 @@ class TestDownloadManager(TestCase):
         """
         fname, redshift = self.downman._closest_catalog_on_web(simname = 'bolshoi', 
             halo_finder = 'bdm', desired_redshift = 0., catalog_type = 'halos')
-        assert 'bolshoi/bdm/hlist_1.00030.list.halotools_alpha_version1.hdf5' in fname 
+        assert 'bolshoi/bdm/hlist_1.00030.list.halotools_alpha_version2.hdf5' in fname 
 
     @remote_data
     def test_closest_halo_catalog_on_web3(self):
@@ -293,7 +293,7 @@ class TestDownloadManager(TestCase):
         matching_log_entries = cache.matching_log_entry_generator(
             simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', 
+            version_name = 'halotools_alpha_version2', 
             redshift = 11.7, dz_tol = 0.2 
             )
         for matching_log_entry in matching_log_entries:
@@ -315,7 +315,7 @@ class TestDownloadManager(TestCase):
             self.downman.download_processed_halo_table(
                 simname = 'Jose Canseco', 
                 halo_finder = 'rockstar', 
-                version_name = 'halotools_alpha_version1', 
+                version_name = 'halotools_alpha_version2', 
                 redshift = 11.7, 
                 download_dirname=self.halocat_dir)
         substr = "no web locations" 
@@ -405,7 +405,7 @@ class TestDownloadManager(TestCase):
         self.downman.download_processed_halo_table(
             simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', 
+            version_name = 'halotools_alpha_version2', 
             redshift = 11.7, overwrite = True)
         cache2 = HaloTableCache()
         assert len(cache1.log) == len(cache2.log) - 1
@@ -421,10 +421,11 @@ class TestDownloadManager(TestCase):
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_ptcl_table(
                 simname = 'Jose Canseco', 
-                version_name = 'halotools_alpha_version1', 
+                version_name = sim_defaults.default_ptcl_version_name, 
                 redshift = 11.7, 
                 download_dirname=self.halocat_dir)
         substr = "no web locations" 
+        assert substr in err.value.message
 
     @remote_data
     def test_download_ptcl_table2(self):
@@ -447,7 +448,7 @@ class TestDownloadManager(TestCase):
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_ptcl_table(
                 simname = 'bolshoi', 
-                version_name = sim_defaults.default_version_name,  
+                version_name = sim_defaults.default_ptcl_version_name,  
                 redshift = 0, 
                 download_dirname=self.halocat_dir)
         substr = "you must set the ``overwrite`` keyword argument to True."
@@ -460,7 +461,7 @@ class TestDownloadManager(TestCase):
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_ptcl_table(
                 simname = 'bolshoi', 
-                version_name = sim_defaults.default_version_name,  
+                version_name = sim_defaults.default_ptcl_version_name,  
                 redshift = 0, 
                 download_dirname='abc')
         substr = "Your input ``download_dirname`` is a non-existent path."
@@ -473,7 +474,7 @@ class TestDownloadManager(TestCase):
         with pytest.raises(HalotoolsError) as err:
             self.downman.download_ptcl_table(
                 simname = 'bolshoi', 
-                version_name = sim_defaults.default_version_name,  
+                version_name = sim_defaults.default_ptcl_version_name,  
                 redshift = 0.2, dz_tol = 0.001,  
                 download_dirname=self.halocat_dir)
         substr = "The closest redshift for these catalogs is"

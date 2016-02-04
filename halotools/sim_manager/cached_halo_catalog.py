@@ -218,7 +218,7 @@ class CachedHaloCatalog(object):
             self.ptcl_version_name = kwargs['ptcl_version_name']
             self._default_ptcl_version_name_choice = False
         except KeyError:
-            self.ptcl_version_name = sim_defaults.default_version_name
+            self.ptcl_version_name = sim_defaults.default_ptcl_version_name
             self._default_ptcl_version_name_choice = True
 
         if 'fname' in kwargs:
