@@ -99,7 +99,7 @@ def process_catalog(simname, halo_finder, fname, particle_mass, Lbox, columns_to
 bolshoi_Lbox = 250.
 bolshoi_particle_mass = 1.35e8
 dirname = '/Volumes/NbodyDisk1/July19_new_catalogs/raw_halo_catalogs/bolshoi/rockstar'
-basename_list = ('hlist_0.54435.list', 'hlist_0.67035.list', 'hlist_1.00035.list')
+basename_list = ('hlist_0.33035.list', 'hlist_0.54435.list', 'hlist_0.67035.list', 'hlist_1.00035.list')
 fname_generator = (os.path.join(dirname, basename) for basename in basename_list)
 
 for fname in fname_generator:
