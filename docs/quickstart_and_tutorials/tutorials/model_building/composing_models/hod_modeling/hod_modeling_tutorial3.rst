@@ -10,6 +10,18 @@ In this section of the :ref:`hod_modeling_tutorial0`,
 we'll build a composite model that includes a component model that 
 is not part of Halotools, but that you yourself have written. 
 
+There is also an IPython Notebook in the following location that can be 
+used as a companion to the material in this section of the tutorial:
+
+
+    halotools/docs/notebooks/hod_modeling/hod_modeling_tutorial3.ipynb
+
+By following this tutorial together with this notebook, 
+you can play around with your own variations of the models we'll build 
+as you learn the basic syntax. 
+The notebook also covers supplementary material that you may find clarifying, 
+so we recommend that you read the notebook side by side with this documentation. 
+
 Overview of the new model
 =============================
 
