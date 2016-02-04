@@ -12,6 +12,18 @@ that you have written yourself. What follows is basically just
 a more full-featured version of the previous 
 :ref:`hod_modeling_tutorial3` that illustrates a few more tricks. 
 
+There is also an IPython Notebook in the following location that can be 
+used as a companion to the material in this section of the tutorial:
+
+
+    halotools/docs/notebooks/hod_modeling/hod_modeling_tutorial4.ipynb
+
+By following this tutorial together with this notebook, 
+you can play around with your own variations of the models we'll build 
+as you learn the basic syntax. 
+The notebook also covers supplementary material that you may find clarifying, 
+so we recommend that you read the notebook side by side with this documentation. 
+
 .. _overview_hod_tutorial_example4: 
 
 Overview of the Example 4 HOD model 
