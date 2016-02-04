@@ -24,6 +24,8 @@ used as a companion to the material in this section of the tutorial:
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the models we'll build 
 as you learn the basic syntax. 
+The notebook also covers supplementary material that you may find clarifying, 
+so we recommend that you read the notebook side by side with this documentation. 
 
 
 Preliminary comments

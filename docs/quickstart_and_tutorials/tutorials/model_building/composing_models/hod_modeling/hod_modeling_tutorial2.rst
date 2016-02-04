@@ -12,6 +12,18 @@ by composing together a customized collection of Halotools-provided features.
 Before reading on, be sure you have read and understood 
 :ref:`hod_modeling_tutorial1`. 
 
+There is also an IPython Notebook in the following location that can be 
+used as a companion to the material in this section of the tutorial:
+
+
+	halotools/docs/notebooks/hod_modeling/hod_modeling_tutorial2.ipynb
+
+By following this tutorial together with this notebook, 
+you can play around with your own variations of the models we'll build 
+as you learn the basic syntax. 
+The notebook also covers supplementary material that you may find clarifying, 
+so we recommend that you read the notebook side by side with this documentation. 
+
 Overview of the new model
 =============================
 
@@ -43,12 +55,10 @@ Source code for an HOD model with a new feature
 
 	from halotools.empirical_models import HaloMassInterpolQuenching
 	sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
-		halo_mass_abcissa = [1e12, 1e13, 1e14, 1e15], 
-		quiescent_fraction_control_values = [0.35, 0.5, 0.6, 0.9], 
+		[1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], 
 		gal_type = 'satellites')
 	cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
-		halo_mass_abcissa = [1e12, 1e15], 
-		quiescent_fraction_control_values = [0.25, 0.95], 
+		[1e12, 1e15], [0.25, 0.95], 
 		gal_type = 'centrals')
 
 	from halotools.empirical_models import HodModelFactory
@@ -91,12 +101,10 @@ whatever additional arguments you may also pass to the factory. For example:
 
 	from halotools.empirical_models import HaloMassInterpolQuenching
 	sat_quenching = HaloMassInterpolQuenching('halo_mvir', 
-		halo_mass_abcissa = [1e12, 1e13, 1e14, 1e15], 
-		quiescent_fraction_control_values = [0.35, 0.5, 0.6, 0.9], 
+		[1e12, 1e13, 1e14, 1e15], [0.35, 0.5, 0.6, 0.9], 
 		gal_type = 'satellites')
 	cen_quenching = HaloMassInterpolQuenching('halo_mvir', 
-		halo_mass_abcissa = [1e12, 1e15], 
-		quiescent_fraction_control_values = [0.25, 0.95], 
+		[1e12, 1e15], [0.25, 0.95], 
 		gal_type = 'centrals')
 
 	from halotools.empirical_models import HodModelFactory
