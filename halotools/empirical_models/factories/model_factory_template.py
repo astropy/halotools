@@ -184,7 +184,7 @@ class ModelFactory(object):
             mock_factory = self.mock_factory 
             self.mock = mock_factory(halocat=halocat, model=self)
 
-        additional_potential_kwargs = ('masking_function', '_testing_mode')
+        additional_potential_kwargs = ('masking_function', '_testing_mode', 'enforce_PBC')
         mockpop_keys = set(additional_potential_kwargs) & set(kwargs)
         mockpop_kwargs = {key:kwargs[key] for key in mockpop_keys}
         self.mock.populate(**mockpop_kwargs)
