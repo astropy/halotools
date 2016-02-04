@@ -140,10 +140,13 @@ msg = (
     "Both hdf5 files store an Astropy Table data structure. \n"
     "\nThe Halotools cache system allows you to \n"
     "load these catalogs into memory with the following syntax:\n\n"
-    ">>> from halotools.sim_manager import CachedHaloCatalog\n"
-    ">>> bolshoi_z0 = CachedHaloCatalog()\n"
-    ">>> halos = bolshoi_z0.halo_table\n"
-    ">>> particles = bolshoi_z0.ptcl_table\n\n")
+    ">>> from halotools.sim_manager import CachedHaloCatalog\n")
+
+msg += (">>> halocat = CachedHaloCatalog(simname = '" + simname + "', " + 
+    "halo_finder = '" + halo_finder + "', redshift = " + str(redshift) + ", " + 
+    "version_name = '" + version_name + "')\n")
+msg += ">>> halos = halocat.halo_table\n"
+msg += ">>> particles = halocat.ptcl_table\n\n"
 
 
 print(msg)
