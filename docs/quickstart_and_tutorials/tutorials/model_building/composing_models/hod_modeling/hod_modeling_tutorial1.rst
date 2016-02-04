@@ -15,6 +15,17 @@ We will build an exact replica of the ``zheng07`` pre-built model,
 so you will also learn how the `PrebuiltHodModelFactory` is really just 
 "syntax candy" for the `HodModelFactory`. 
 
+There is also an IPython Notebook in the following location that can be 
+used as a companion to the material in this section of the tutorial:
+
+
+	halotools/docs/notebooks/hod_modeling/hod_modeling_tutorial1.ipynb
+
+By following this tutorial together with this notebook, 
+you can play around with your own variations of the models we'll build 
+as you learn the basic syntax. 
+
+
 Preliminary comments
 =====================================================
 
