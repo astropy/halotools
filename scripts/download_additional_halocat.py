@@ -29,7 +29,7 @@ parser.add_argument("halo_finder", type = str, help = "Nickname of the halo-find
     choices = ['rockstar', 'bdm'])
 
 parser.add_argument("version_name", type = str, 
-    choices = ['halotools_alpha_version1', 'most_recent'], 
+    choices = ['halotools_alpha_version2', 'most_recent'], 
     help = "Processing version of the requested catalog. "
     "Selecting `most_recent` will automatically choose the most up-to-date catalogs. ")
 
@@ -49,7 +49,8 @@ version_name = args.version_name
 redshift = args.redshift
 if args.version_name == 'most_recent': 
     version_name = sim_defaults.default_version_name
-    ptcl_version_name = sim_defaults.default_ptcl_version_name
+
+ptcl_version_name = sim_defaults.default_ptcl_version_name
 
 if args.ptcls_only is True: 
     download_halos = False
