@@ -72,12 +72,14 @@ class HodMockFactory(MockFactory):
             If True, only halos passing the mass completeness cut defined in 
             `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
             Default is True. 
+
         """
 
         MockFactory.__init__(self, **kwargs)
 
         halocat = kwargs['halocat']
         self.preprocess_halo_catalog(halocat)
+
 
     def preprocess_halo_catalog(self, halocat, apply_completeness_cut = True):
         """ Method to pre-process a halo catalog upon instantiation of 
@@ -145,7 +147,28 @@ class HodMockFactory(MockFactory):
             a table, and returning a boolean numpy array that will be used 
             as a fancy indexing mask. All masked halos will be ignored during 
             mock population. Default is None. 
+
+        enforce_PBC : bool, optional 
+            If set to True, after galaxy positions are assigned the 
+            `model_helpers.enforce_periodicity_of_box` will re-map 
+            satellite galaxies whose positions spilled over the edge 
+            of the periodic box. Default is True. This variable should only 
+            ever be set to False when using the ``masking_function`` to 
+            populate a specific spatial subvolume, as in that case PBCs 
+            no longer apply. 
         """
+        # The _testing_mode keyword is for unit-testing only 
+        # it has been intentionally left out of the docstring
+        try:
+            self._testing_mode = kwargs['_testing_mode']
+        except KeyError:
+            self._testing_mode = False
+
+        try:
+            self.enforce_PBC = kwargs['enforce_PBC']
+        except KeyError:
+            self.enforce_PBC = True
+
         try:
             masking_function = kwargs['masking_function']
             mask = masking_function(self._orig_halo_table)
@@ -187,14 +210,16 @@ class HodMockFactory(MockFactory):
             gal_type_slice = self._gal_type_indices[func.gal_type]
             func(table = self.galaxy_table[gal_type_slice])
                 
-        # Positions are now assigned to all populations. 
-        # Now enforce the periodic boundary conditions for all populations at once
-        self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['x'], self.Lbox)
-        self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['y'], self.Lbox)
-        self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['z'], self.Lbox)
+        if self.enforce_PBC is True:
+            self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
+                self.galaxy_table['x'], self.Lbox, 
+                check_multiple_box_lengths = self._testing_mode)
+            self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
+                self.galaxy_table['y'], self.Lbox, 
+                check_multiple_box_lengths = self._testing_mode)
+            self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
+                self.galaxy_table['z'], self.Lbox, 
+                check_multiple_box_lengths = self._testing_mode)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)

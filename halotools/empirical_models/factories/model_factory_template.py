@@ -184,11 +184,11 @@ class ModelFactory(object):
             mock_factory = self.mock_factory 
             self.mock = mock_factory(halocat=halocat, model=self)
 
-        if 'masking_function' in kwargs.keys():
-            f = kwargs['masking_function']
-            self.mock.populate(masking_function = f)
-        else:
-            self.mock.populate()
+        additional_potential_kwargs = ('masking_function', '_testing_mode', 'enforce_PBC')
+        mockpop_keys = set(additional_potential_kwargs) & set(kwargs)
+        mockpop_kwargs = {key:kwargs[key] for key in mockpop_keys}
+        self.mock.populate(**mockpop_kwargs)
+
 
     def update_param_dict_decorator(self, component_model, func_name):
         """ Decorator used to propagate any possible changes in the composite model param_dict 

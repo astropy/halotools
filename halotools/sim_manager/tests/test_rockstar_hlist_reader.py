@@ -3,7 +3,8 @@
 import os, shutil
 import numpy as np
 from unittest import TestCase
-import warnings, pytest
+import warnings
+from astropy.tests.helper import pytest 
 
 from astropy.config.paths import _find_home 
 
@@ -180,7 +181,8 @@ class TestRockstarHlistReader(TestCase):
             row_cut_neq_dict = {'halo_id': -1}
             )
 
-        reader.read_halocat(write_to_disk = True)
+        reader.read_halocat(columns_to_convert_from_kpc_to_mpc=[], 
+            write_to_disk = True)
 
 
     @pytest.mark.slow
