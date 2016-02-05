@@ -3,9 +3,3 @@
 div.topbar {
   background-image: url("dm-splatting-large.png");
 }
-
-div.sphinxsidebar {
-  word-wrap: break-word;
-  /* overflow-wrap is the name for word-wrap in the draft CSS3.  Include it for future support */
-  overflow-wrap: break-word;
-}
