@@ -10,6 +10,18 @@ This section of the :ref:`hod_modeling_tutorial0`,
 illustrates an example of a component model that 
 depends on the results of some other, independently defined component model. 
 
+There is also an IPython Notebook in the following location that can be 
+used as a companion to the material in this section of the tutorial:
+
+
+    halotools/docs/notebooks/hod_modeling/hod_modeling_tutorial5.ipynb
+
+By following this tutorial together with this notebook, 
+you can play around with your own variations of the models we'll build 
+as you learn the basic syntax. 
+The notebook also covers supplementary material that you may find clarifying, 
+so we recommend that you read the notebook side by side with this documentation. 
+
 Overview of the Example 5 HOD model 
 ====================================
 
@@ -61,6 +73,7 @@ Source code for the new model
             self.gal_type = gal_type
             self._mock_generation_calling_sequence = ['assign_size']
             self._galprop_dtypes_to_allocate = np.dtype([('galsize', 'f4')])
+            self.list_of_haloprops_needed = ['halo_spin']
 
             self.new_haloprop_func_dict = {'halo_custom_size': self.calculate_halo_size}
 
@@ -99,9 +112,11 @@ The **__init__** method of the component models
 ===========================================================================
 
 All features in the constructor of the *Shape* class have been covered 
-previously in this tutorial. The only thing that may be worth noting is that 
-if your component model assigns a string, the most robust way to handle 
-this is to use a Python object as the `numpy.dtype`. 
+previously in this tutorial. The only thing that may be worth noting here
+is that one of the physics functions assigns a string: 
+**assign_shape** writes either ``elliptical`` or ``disk``. 
+In such a case, when declaring the ``_galprop_dtypes_to_allocate``, 
+the most robust way to handle this is to use a Python object as the `numpy.dtype`. 
 
 The role of ``new_haloprop_func_dict`` 
 ------------------------------------------
