@@ -317,6 +317,68 @@ class TestHodModelFactoryTutorial(TestCase):
 
                 self.new_haloprop_func_dict = {'halo_custom_size': self.calculate_halo_size}
 
+                # self.list_of_haloprops_needed = ['halo_spin']
+
+            def assign_size(self, **kwargs):
+                table = kwargs['table']
+                disk_mask = table['shape'] == 'disk'
+                table['galsize'][disk_mask] = table['halo_spin'][disk_mask]
+                table['galsize'][~disk_mask] = table['halo_custom_size'][~disk_mask]
+
+            def calculate_halo_size(self, **kwargs):
+                table = kwargs['table']
+                return 2*table['halo_rs']
+
+        from ...empirical_models import Leauthaud11Cens, TrivialPhaseSpace
+        cen_occupation = Leauthaud11Cens()
+        cen_profile = TrivialPhaseSpace(gal_type = 'centrals')
+        cen_shape = Shape(gal_type = 'centrals')
+        cen_size = Size(gal_type = 'centrals')
+
+        from ...empirical_models import HodModelFactory
+        model = HodModelFactory(
+            centrals_occupation = cen_occupation, 
+            centrals_profile = cen_profile, 
+            centrals_shape = cen_shape, 
+            centrals_size = cen_size, 
+            model_feature_calling_sequence = ('centrals_occupation', 
+                'centrals_profile', 'centrals_shape', 'centrals_size')
+            )
+
+        # We forgot to put 'halo_spin' in list_of_haloprops_needed, 
+        # so attempting to populate a mock should raise an exception
+        with pytest.raises(KeyError) as err:
+            model.populate_mock(simname = 'fake')
+        assert "halo_spin" in err.value.message
+
+    @pytest.mark.slow
+    def test_hod_modeling_tutorial6(self):
+
+        class Shape(object):
+            
+            def __init__(self, gal_type):
+
+                self.gal_type = gal_type
+                self._mock_generation_calling_sequence = ['assign_shape']
+                self._galprop_dtypes_to_allocate = np.dtype([('shape', object)])
+
+            def assign_shape(self, **kwargs):
+                table = kwargs['table']
+                randomizer = np.random.random(len(table))
+                table['shape'][:] = np.where(randomizer > 0.5, 'elliptical', 'disk')
+
+        class Size(object):
+
+            def __init__(self, gal_type):
+
+                self.gal_type = gal_type
+                self._mock_generation_calling_sequence = ['assign_size']
+                self._galprop_dtypes_to_allocate = np.dtype([('galsize', 'f4')])
+
+                self.new_haloprop_func_dict = {'halo_custom_size': self.calculate_halo_size}
+
+                self.list_of_haloprops_needed = ['halo_spin']
+
             def assign_size(self, **kwargs):
                 table = kwargs['table']
                 disk_mask = table['shape'] == 'disk'
@@ -344,8 +406,8 @@ class TestHodModelFactoryTutorial(TestCase):
             )
 
         model.populate_mock(simname = 'fake')
-        print(model.mock.galaxy_table.keys())
-        assert 'halo_spin' not in model.mock.galaxy_table.keys()
+
+
 
 
 

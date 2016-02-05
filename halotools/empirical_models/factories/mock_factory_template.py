@@ -10,7 +10,7 @@ Currently only composite HOD models are supported.
 
 import numpy as np
 from multiprocessing import cpu_count
-from copy import copy 
+from copy import copy, deepcopy
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.table import Table 
@@ -81,7 +81,9 @@ class MockFactory(object):
             pass   
 
         # Create a list of halo properties that will be inherited by the mock galaxies
-        self.additional_haloprops = model_defaults.default_haloprop_list_inherited_by_mock
+        self.additional_haloprops = copy(model_defaults.default_haloprop_list_inherited_by_mock)
+
+
         if hasattr(self.model, '_haloprop_list'):
             self.additional_haloprops.extend(self.model._haloprop_list)
         # Eliminate any possible redundancies 
