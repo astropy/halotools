@@ -18,8 +18,20 @@ The code is publicly available at https://github.com/astropy/halotools.
 The latest build of the documentation can be found at http://halotools.readthedocs.org. The docs includes installation instructions, quickstart guides and step-by-step tutorials. 
 
 ---
+## Basic features
 
-## Project Status
+Once you have installed the code and downloaded the default halo catalog (see the Getting Started guide in the documentation), you can use Halotools models to populate mock galaxy populations.
+
+``` 
+from halotools.empirical_models import PrebuiltHodModelFactory 
+model = PrebuiltHodModelFactory('zheng07')
+model.populate_mock(simname = 'bolshoi')
+```
+The pre-built model factories give you a wide range of models to choose from. Alternatively, you can use the Halotools factories to design a customized model of your own creation. Either way, any Halotools model can populate any Halotools-formatted halo catalog with the above syntax. 
+
+---
+
+## Project status
 
 [![Coverage Status](https://coveralls.io/repos/astropy/halotools/badge.svg?branch=master&service=github)](https://coveralls.io/github/astropy/halotools?branch=master)
 
