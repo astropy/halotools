@@ -29,7 +29,7 @@ class FakeSim(UserSuppliedHaloCatalog):
 	for calls with the same arguments. 
 	"""
 
-	def __init__(self, num_massbins = 6, num_halos_per_massbin = int(100), 
+	def __init__(self, num_massbins = 10, num_halos_per_massbin = int(1000), 
 		num_ptcl = int(1e4), seed = 43, redshift = 0., **kwargs):
 		"""
 		Parameters 
