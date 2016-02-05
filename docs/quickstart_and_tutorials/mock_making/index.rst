@@ -1,7 +1,7 @@
 :orphan:
 
 ****************************************
-Tutorial on mock-making methods
+Tutorial on the mock-making algorithm
 ****************************************
 
 .. _making_mocks:

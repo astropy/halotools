@@ -10,7 +10,7 @@ Currently only composite HOD models are supported.
 
 import numpy as np
 from multiprocessing import cpu_count
-from copy import copy 
+from copy import copy, deepcopy
 from astropy.extern import six
 from abc import ABCMeta, abstractmethod, abstractproperty
 from astropy.table import Table 
@@ -55,13 +55,6 @@ class MockFactory(object):
         model : object 
             A model built by a sub-class of `~halotools.empirical_models.ModelFactory`. 
 
-        additional_haloprops : string or list of strings, optional   
-            Each entry in this list must be a column key of ``halocat.halo_table``. 
-            For each entry of ``additional_haloprops``, each member of 
-            `mock.galaxy_table` will have a column key storing this property of its host halo. 
-            If ``additional_haloprops`` is set to the string value ``all``, 
-            the galaxy table will inherit every halo property in the catalog. Default is None. 
-
         """
 
         required_kwargs = ['model']
@@ -87,7 +80,14 @@ class MockFactory(object):
         except:
             pass   
 
-        self.build_additional_haloprops_list(**kwargs)
+        # Create a list of halo properties that will be inherited by the mock galaxies
+        self.additional_haloprops = copy(model_defaults.default_haloprop_list_inherited_by_mock)
+
+
+        if hasattr(self.model, '_haloprop_list'):
+            self.additional_haloprops.extend(self.model._haloprop_list)
+        # Eliminate any possible redundancies 
+        self.additional_haloprops = list(set(self.additional_haloprops))
 
         self.galaxy_table = Table() 
 
@@ -100,50 +100,6 @@ class MockFactory(object):
         """
         raise NotImplementedError("All subclasses of MockFactory"
         " must include a populate method")
-
-    def build_additional_haloprops_list(self, **kwargs):
-        """
-        Method used to determine which halo properties will be included in the 
-        mock ``galaxy_table``. 
-
-        All halo properties in the ``_haloprop_list`` of the model will automatically be included. 
-        This list stores any ``prim_haloprop_key`` and/or ``sec_haloprop_key`` used in any 
-        component model. All ``halo_table`` keys listed in the ``additional_haloprops`` keyword argument 
-        will also be included. If ``additional_haloprops`` is set to the string ``all``, every single 
-        column of the ``halo_table`` will be included. 
-
-        Parameters 
-        -----------
-        additional_haloprops : string or list of strings, optional   
-            Each entry in this list must be a column key of ``halocat.halo_table``. 
-            For each entry of ``additional_haloprops``, each member of 
-            `mock.galaxy_table` will have a column key storing this property of its host halo. 
-            If ``additional_haloprops`` is set to the string value ``all``, 
-            the galaxy table will inherit every halo property in the catalog. Default is None. 
-        """
-
-        # Create a list of halo properties that will be inherited by the mock galaxies
-        self.additional_haloprops = model_defaults.default_haloprop_list_inherited_by_mock
-
-        if hasattr(self.model, '_haloprop_list'):
-            self.additional_haloprops.extend(self.model._haloprop_list)
-
-        if 'additional_haloprops' in kwargs.keys():
-            if kwargs['additional_haloprops'] == 'all':
-                self.additional_haloprops.extend(self.halo_table.keys())
-            else:
-                proplist = kwargs['additional_haloprops']
-                if type(proplist) in [str, unicode]:
-                    self.additional_haloprops.append(proplist)
-                elif type(proplist) is list:
-                    self.additional_haloprops.extend(proplist)
-                else:
-                    msg = ("Input keyword argument `additional_haloprops` must be "
-                        "a string or list of strings")
-                    raise HalotoolsError(msg)                
-
-        # Eliminate any possible redundancies 
-        self.additional_haloprops = list(set(self.additional_haloprops))
 
     @property 
     def number_density(self):

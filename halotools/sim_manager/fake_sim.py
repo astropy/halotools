@@ -29,7 +29,7 @@ class FakeSim(UserSuppliedHaloCatalog):
 	for calls with the same arguments. 
 	"""
 
-	def __init__(self, num_massbins = 6, num_halos_per_massbin = int(100), 
+	def __init__(self, num_massbins = 10, num_halos_per_massbin = int(1000), 
 		num_ptcl = int(1e4), seed = 43, redshift = 0., **kwargs):
 		"""
 		Parameters 
@@ -81,7 +81,7 @@ class FakeSim(UserSuppliedHaloCatalog):
 		logvmaxbins = -4.25 + 0.5*(np.log10(massbins) - logrvirbins)
 		vmax = np.repeat(10.**logvmaxbins, self.num_halos_per_massbin, axis=0)
 		vpeak = vmax
-
+		spin = np.random.random(self.num_halos)
 		conc = np.random.uniform(4, 15, self.num_halos)
 		rs = rvir/conc
 		zhalf = np.random.uniform(0, 10, self.num_halos)
@@ -116,12 +116,14 @@ class FakeSim(UserSuppliedHaloCatalog):
 			halo_hostid = halo_hostid, 
 			halo_mvir = mvir, 
 			halo_mpeak = mpeak, 
+			halo_m200b = mvir, 
 			halo_rvir = rvir, 
 			halo_rs = rs, 
 			halo_zhalf = zhalf, 
 			halo_nfw_conc = conc, 
 			halo_vmax = vmax, 
 			halo_vpeak = vpeak, 
+			halo_spin = spin, 
 			user_supplied_ptclcat = ptclcat
 			)
 

@@ -3,7 +3,7 @@
 .. _getting_started:
 
 ******************************
-Getting Started with Halotools
+Getting started with Halotools
 ******************************
 
 This 10-minute guide gives an overview of the functionality of Halotools 
