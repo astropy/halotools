@@ -266,6 +266,31 @@ class TestHodModelFactoryTutorial(TestCase):
         assert np.all(new_model.mock.galaxy_table['axis_ratio'] >= 0)
         assert np.all(new_model.mock.galaxy_table['axis_ratio'] <= 1)
 
+        cenmask = new_model.mock.galaxy_table['gal_type'] == 'centrals'
+        cens = new_model.mock.galaxy_table[cenmask]
+        cens_disrupted_mask = cens['disrupted'] == True
+        disrupted_cens = cens[cens_disrupted_mask]
+        try:
+            assert (disrupted_cens['halo_mvir'].max() <= 
+                new_model.param_dict['max_disruption_mass_centrals']
+                )
+        except ValueError:
+            # in this Monte Carlo realization, there were zero disrupted centrals
+            pass
+
+        sats = new_model.mock.galaxy_table[~cenmask]
+        sats_disrupted_mask = sats['disrupted'] == True
+        disrupted_sats = sats[sats_disrupted_mask]
+        try:
+            assert (
+                disrupted_sats['halo_mvir'].max() <= 
+                new_model.param_dict['max_disruption_mass_satellites']
+                )
+        except ValueError:
+            # in this Monte Carlo realization, there were zero disrupted satellites
+            pass
+
+
     @pytest.mark.slow
     def test_hod_modeling_tutorial5(self):
 
@@ -319,7 +344,8 @@ class TestHodModelFactoryTutorial(TestCase):
             )
 
         model.populate_mock(simname = 'fake')
-
+        print(model.mock.galaxy_table.keys())
+        assert 'halo_spin' not in model.mock.galaxy_table.keys()
 
 
 
