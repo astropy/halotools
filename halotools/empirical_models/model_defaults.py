@@ -58,7 +58,7 @@ galprop_prefix = 'gal_'
 default_haloprop_list_inherited_by_mock = (
     ['halo_id', 'halo_x', 'halo_y', 'halo_z', 
     'halo_vx', 'halo_vy', 'halo_vz', 
-    'halo_mvir', 'halo_rvir']
+    'halo_mvir', 'halo_rvir', 'halo_upid']
     )
 
 prim_haloprop_key = 'halo_mvir'
