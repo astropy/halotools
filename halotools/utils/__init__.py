@@ -12,3 +12,4 @@ from .array_utils import *
 from .io_utils import *
 from .table_utils import *
 from .distances import *
+from .aggregation import add_new_table_column
