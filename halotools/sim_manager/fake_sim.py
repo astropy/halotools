@@ -29,7 +29,7 @@ class FakeSim(UserSuppliedHaloCatalog):
 	for calls with the same arguments. 
 	"""
 
-	def __init__(self, num_massbins = 10, num_halos_per_massbin = int(1000), 
+	def __init__(self, num_massbins = 10, num_halos_per_massbin = int(100), 
 		num_ptcl = int(1e4), seed = 43, redshift = 0., **kwargs):
 		"""
 		Parameters 
@@ -62,18 +62,23 @@ class FakeSim(UserSuppliedHaloCatalog):
 		self.num_halos = self.num_massbins*self.num_halos_per_massbin
 		self.num_ptcl = num_ptcl
 
-		halo_id = np.arange(1e9, 1e9+self.num_halos)
+		halo_id = np.arange(1e5, 1e5+2*self.num_halos, dtype = 'i8')
+		np.random.shuffle(halo_id)
+		halo_id = halo_id[:self.num_halos]
 
 		randomizer = np.random.random(self.num_halos)
 		subhalo_fraction = 0.1
 		upid = np.where(randomizer > subhalo_fraction, -1, 1)
 
 		host_mask = upid == -1
-		halo_hostid = np.zeros(len(halo_id))
+		host_ids = halo_id[host_mask]
+		upid[~host_mask] = np.random.choice(host_ids, len(upid[~host_mask]))
+		
+		halo_hostid = np.zeros(len(halo_id), dtype = 'i8')
 		halo_hostid[host_mask] = halo_id[host_mask]
 		halo_hostid[~host_mask] = upid[~host_mask]
 
-		massbins = np.logspace(10, 15, self.num_massbins)
+		massbins = np.logspace(10, 16, self.num_massbins)
 		mvir = np.repeat(massbins, self.num_halos_per_massbin, axis=0)
 		mpeak = np.repeat(massbins, self.num_halos_per_massbin, axis=0)
 		logrvirbins = (np.log10(massbins) - 15)/3.
