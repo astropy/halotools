@@ -14,6 +14,7 @@ except ImportError:
 
 from ..sim_manager import sim_defaults, supported_sims
 
+from ..utils import broadcast_host_halo_property, add_halo_hostid
 
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
@@ -516,9 +517,17 @@ class CachedHaloCatalog(object):
         except AttributeError:
             if self.log_entry.safe_for_cache == True:
                 self._halo_table = Table.read(self.fname, path='data')
+                self._add_new_derived_columns(self._halo_table)
                 return self._halo_table
             else:
                 raise InvalidCacheLogEntry(self.log_entry._cache_safety_message)
+
+    def _add_new_derived_columns(self, t):
+        if 'halo_hostid' not in t.keys():
+            add_halo_hostid(t)
+
+        if 'halo_mvir_host_halo' not in t.keys():
+            broadcast_host_halo_property(t, 'halo_mvir')
 
     def _bind_additional_metadata(self):
         """ Create convenience bindings of all metadata to the `CachedHaloCatalog` instance. 
