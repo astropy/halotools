@@ -115,6 +115,64 @@ class MockFactory(object):
         comoving_volume = self.Lbox**3
         return ngals/float(comoving_volume)
 
+    def xyz_positions(self, period = np.inf, **kwargs):
+        """ Returns a Numpy array of shape *(Ngals, 3)* storing the 
+        xyz-positions of the mock galaxies, 
+        the format used throughout the `~halotools.mock_observables` package. 
+
+        Parameters 
+        -----------
+        mask : array_like, optional 
+            Boolean mask that can be used to select the positions 
+            of a subcollection of the galaxies stored in the ``galaxy_table``. 
+
+        velocity_distortion_dimension : string, optional 
+            If set to ``'x'``, ``'y'`` or ``'z'``, 
+            the requested dimension in the returned ``pos`` array 
+            will be distorted due to peculiar motion. 
+            For example, if ``velocity_distortion_dimension`` is ``z``, 
+            then ``pos`` can be treated as physically observed 
+            galaxy positions under the distant-observer approximation. 
+            Default is no distortions. 
+
+        period : float, optional 
+            Length of the periodic box. Default is np.inf. 
+
+        Returns 
+        --------
+        pos : array_like 
+            Numpy array with shape *(Ngals, 3)*. 
+        """
+
+        posdict = {key: self.galaxy_table[key] for key in ('x', 'y', 'z')}
+
+        # Apply peculiar velocity distortions, if applicable
+        try:
+            vel_dist_dim = kwargs['velocity_distortion_dimension']
+            assert vel_dist_dim in ('x', 'y', 'z')
+            vel = self.galaxy_table['v'+vel_dist_dim]
+            posdict[vel_dist_dim] += vel/100.
+            if period != np.inf:
+                pbc_fix = model_helpers.enforce_periodicity_of_box
+                posdict[vel_dist_dim] = pbc_fix(posdict[vel_dist_dim], period)
+        except AssertionError:
+            msg = ("\nInput ``velocity_distortion_dimension`` must be either \n"
+                "``'x'``, ``'y'`` or ``'z'``.")
+        except KeyError:
+            pass
+
+        x, y, z = posdict['x'], posdict['y'], posdict['z']
+        pos = np.vstack([x, y, z]).T
+
+        # Apply a mask, if applicable
+        try:
+            mask = kwargs['mask']
+            return pos[mask]
+        except KeyError:
+            return pos
+
+        
+
     def compute_galaxy_clustering(self, include_crosscorr = False, **kwargs):
         """
         Built-in method for all mock catalogs to compute the galaxy clustering signal. 
