@@ -62,7 +62,9 @@ def add_new_table_column(table, new_colname, new_coltype, grouping_key,
         If set to True, `add_new_table_column` will skip the pre-processing 
         step of sorting the table. This improves performance, 
         but `add_new_table_column` will return incorrect values 
-        if the table has not been sorted properly. Default is False. 
+        if the table has not been sorted properly. 
+        Default is False, in which case the returned table will 
+        generally be sorted in a different order than the input table. 
 
     Examples 
     ----------
@@ -180,13 +182,13 @@ def add_new_table_column(table, new_colname, new_coltype, grouping_key,
         return_index = True, return_counts = True)
 
     try:
-        dt = np.dtype([(new_colname, new_coltype)])
+        dt = np.dtype(new_coltype)
     except TypeError:
         msg = ("\nThe input ``new_coltype`` must be Numpy-compatible.\n"
             "In particular, your input must work properly with the following syntax:\n\n"
-            ">>> dt = np.dtype([(new_colname, new_coltype)]) \n\n")
+            ">>> dt = np.dtype(new_coltype) \n\n")
         raise HalotoolsError(msg)
-    result = np.zeros(len(table), dtype=dt[new_colname])
+    result = np.zeros(len(table), dtype=dt)
 
     func_arglist = [table[key].data for key in colnames_needed_by_function]
 

@@ -16,7 +16,6 @@ import collections
 from warnings import warn 
 from astropy.table import Table
 
-from ..sim_manager.fake_sim import FakeSim
 from ..custom_exceptions import HalotoolsError
 
 def compute_conditional_percentiles(**kwargs):
@@ -62,6 +61,7 @@ def compute_conditional_percentiles(**kwargs):
 
     Examples 
     --------
+    >>> from halotools.sim_manager import FakeSim
     >>> fakesim = FakeSim()
     >>> result = compute_conditional_percentiles(table = fakesim.halo_table, prim_haloprop_key = 'halo_mvir', sec_haloprop_key = 'halo_vmax')
 
@@ -248,6 +248,7 @@ class SampleSelector(object):
         To demonstrate the `property_range` method, we will start out by loading 
         a table of halos into memory using the `FakeSim` class:
 
+        >>> from halotools.sim_manager import FakeSim
         >>> halocat = FakeSim()
         >>> halos = halocat.halo_table
 
@@ -307,6 +308,7 @@ class SampleSelector(object):
         To demonstrate the `split_sample` method, we will start out by loading 
         a table of halos into memory using the `FakeSim` class:
 
+        >>> from halotools.sim_manager import FakeSim
         >>> halocat = FakeSim()
         >>> halos = halocat.halo_table
 

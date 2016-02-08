@@ -19,11 +19,6 @@ from ...custom_exceptions import HalotoolsError
 
 __all__ = ['TestAggregation']
 
-# def add_new_table_column(table, new_colname, grouping_key,  
-#   aggregation_function, colnames_needed_by_function, 
-#   sorting_keys = None, table_is_already_sorted = False, 
-#   group_ids = None, idx_groups = None, group_richness = None):
-
 class TestAggregation(TestCase):
     """ Class providing tests of the `~halotools.utils.aggregation`. 
     """
