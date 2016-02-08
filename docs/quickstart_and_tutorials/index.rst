@@ -55,8 +55,7 @@ Tutorials
    :maxdepth: 1
 
    tutorials/model_building/index
-   mock_making/index
-   mock_observations/index
+   tutorials/catalog_analysis/galcat_analysis/index
 
 
 Developer Documentation
