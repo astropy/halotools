@@ -27,6 +27,7 @@ class TestCatalogAnalysisHelpers(TestCase):
 
         halocat = FakeSim()
         self.halo_table = halocat.halo_table
+        self.Lbox = halocat.Lbox
 
     def test_mean_y_vs_x1(self):
         abscissa, mean, err = cat_helpers.mean_y_vs_x(
@@ -44,6 +45,37 @@ class TestCatalogAnalysisHelpers(TestCase):
                 error_estimator = 'Jose Canseco')
         substr = "Input ``error_estimator`` must be either"
         assert substr in err.value.message
+
+    def test_return_xyz_formatted_array1(self):
+        x, y, z = (self.halo_table['halo_x'], 
+            self.halo_table['halo_y'], self.halo_table['halo_z'])
+        pos = cat_helpers.return_xyz_formatted_array(x, y, z)
+        assert np.shape(pos) == (len(x), 3)
+
+        mask = self.halo_table['halo_mvir'] >= 10**13.5
+        masked_pos = cat_helpers.return_xyz_formatted_array(x, y, z, mask=mask)
+        npts = len(self.halo_table[mask])
+        assert np.shape(masked_pos) == (npts, 3)
+
+        assert masked_pos.shape[0] < pos.shape[0]
+
+        pos_zdist = cat_helpers.return_xyz_formatted_array(
+            x, y, z, velocity = self.halo_table['halo_vz'], 
+            velocity_distortion_dimension = 'z')
+        assert np.all(pos_zdist[:,0] == pos[:,0])
+        assert np.all(pos_zdist[:,1] == pos[:,1])
+        assert np.any(pos_zdist[:,2] != pos[:,2])
+        assert np.all(abs(pos_zdist[:,2] - pos[:,2]) < 50)
+
+        pos_zdist_pbc = cat_helpers.return_xyz_formatted_array(
+            x, y, z, velocity = self.halo_table['halo_vz'], 
+            velocity_distortion_dimension = 'z', 
+            period = self.Lbox)
+        assert np.all(pos_zdist_pbc[:,0] == pos[:,0])
+        assert np.all(pos_zdist_pbc[:,1] == pos[:,1])
+        assert np.any(pos_zdist_pbc[:,2] != pos[:,2])
+
+        assert np.any(abs(pos_zdist_pbc[:,2] - pos[:,2]) > 50)
 
     def tearDown(self):
         del self.halo_table
