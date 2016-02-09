@@ -38,8 +38,12 @@ def tpcf_jackknife(sample1, randoms, rbins, Nsub=[5,5,5],\
     volume.  The spatial samples are defined by splitting the box along each dimension, 
     N times, set by the ``Nsub`` argument.
     
-    Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`tpcf_jackknife_usage_tutorial`.
+    Example calls to this function appear in the documentation below. 
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` and ``sample2`` arguments.   
+
+    For thorough documentation of all features, see :ref:`tpcf_jackknife_usage_tutorial`.
     
     Parameters
     ----------

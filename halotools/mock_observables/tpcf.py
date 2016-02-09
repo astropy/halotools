@@ -31,8 +31,12 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     """ 
     Calculate the real space two-point correlation function, :math:`\\xi(r)`.
     
-    Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`tpcf_usage_tutorial`. 
+    Example calls to this function appear in the documentation below. 
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` and ``sample2`` arguments.   
+
+    For thorough documentation of all features, see :ref:`tpcf_usage_tutorial`. 
     
     Parameters 
     ----------

@@ -32,8 +32,12 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     integrates the result to get :math:`\\Delta\\Sigma(r_p)`.  See the notes for details 
     about the calculation.
     
-    Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`delta_sigma_usage_tutorial`. 
+    Example calls to this function appear in the documentation below. 
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``galaxies`` and ``particles`` arguments.   
+
+    For thorough documentation of all features, see :ref:`delta_sigma_usage_tutorial`. 
     
     Parameters
     ----------
