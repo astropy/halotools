@@ -27,6 +27,10 @@ def nearest_neighbor(sample1, sample2, r_max, period=None, nth_nearest=1,
     """
     Find the nearest neighbor between two sets of points.
     
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` and ``sample2`` arguments.   
+
     Parameters
     ----------
     sample1 : array_like

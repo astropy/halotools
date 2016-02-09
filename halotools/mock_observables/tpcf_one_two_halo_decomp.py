@@ -39,8 +39,12 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     This returns the correlation function for galaxies which reside in the same halo, and 
     those that reside in seperate halos, as indicated by a host halo ID. 
     
-    example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`tpcf_one_two_halo_decomp_usage_tutorial`. 
+    Example calls to this function appear in the documentation below. 
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` and ``sample2`` arguments.   
+    For thorough documentation of all features, 
+    see :ref:`tpcf_one_two_halo_decomp_usage_tutorial`. 
     
     Parameters 
     ----------

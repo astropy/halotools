@@ -31,7 +31,12 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     """ 
     Calculate the angular two-point correlation function, :math:`w(\\theta)`.
     
-    Example calls to this function appear in the documentation below. For thorough 
+    Example calls to this function appear in the documentation below. 
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` argument.   
+
+    For thorough 
     documentation of all features, see :ref:`angular_tpcf_usage_tutorial`. 
     
     Parameters 

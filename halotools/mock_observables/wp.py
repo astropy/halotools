@@ -40,8 +40,11 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     dimension is used for parallel distances.  i.e. x,y positions are on the plane of the
     sky, and z is the redshift coordinate. This is the 'distant observer' approximation.
     
-    Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`wp_usage_tutorial`. 
+    Example calls to this function appear in the documentation below. 
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` and ``sample2`` arguments.   
+    For thorough documentation of all features, see :ref:`wp_usage_tutorial`. 
     
     Parameters 
     ----------

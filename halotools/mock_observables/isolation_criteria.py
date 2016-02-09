@@ -26,7 +26,11 @@ def spherical_isolation(sample1, sample2, r_max, period=None,
     """
     Determine whether a set of points, ``sample1``, has a neighbor in ``sample2`` within 
     a spherical volume.
-    
+
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` and ``sample2`` arguments.   
+
     Parameters
     ----------
     sample1 : array_like
