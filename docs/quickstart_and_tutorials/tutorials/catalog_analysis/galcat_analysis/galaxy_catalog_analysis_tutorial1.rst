@@ -34,11 +34,12 @@ in the form of an Astropy table.
     sample_mask = model.mock.galaxy_table['stellar_mass'] > 1e10
     gals = model.mock.galaxy_table[sample_mask]
 
-Calculate average total stellar mass :math:`<M_{\ast}^{\rm tot}>` in each halo
+Calculate total stellar mass :math:`M_{\ast}^{\rm tot}` in each halo
 ------------------------------------------------------------------------------
 
 To calculate the total stellar mass of galaxies in each halo, we'll use
-the `halotools.utils.add_new_table_column` function. 
+the `halotools.utils.add_new_table_column` function. You can read more about the 
+details of that function in its documentation, here we'll just demo some basic usage. 
 
 The ``halo_id`` is a natural grouping key for a galaxy catalog whose
 host halos are known. Let's use this grouping key to calculate the total
@@ -49,11 +50,13 @@ broadcast the result to the members of the halo.
 
     from halotools.utils import add_new_table_column
 
-    new_colname, new_coltype = 'halo_total_stellar_mass', 'f4'
     grouping_key = 'halo_id'
+    new_colname, new_coltype = 'halo_total_stellar_mass', 'f4'
     
-    aggregation_function = lambda x: x.sum() 
-    colnames_needed_by_function = ['stellar_mass'] # our function only takes one argument, M*
+    # The aggregation function operates on the members of each halo, 
+    # in this case returning the sum of whatever column it is passed
+    aggregation_function = np.sum
+    colnames_needed_by_function = ['stellar_mass'] 
     
     add_new_table_column(gals, 
             new_colname, new_coltype, grouping_key, 
@@ -77,18 +80,21 @@ host halo mass to each halo's members
     # so this choice for ``sorting_keys`` will place 
     # host halos in the first element of each grouped array
     
-    # Now define the function that operates on the members of each group
+    # Define the function that returns whatever value 
+    # is stored in the first group member
     def return_first_element_in_sequence(x):
         return x[0]
     aggregation_function = return_first_element_in_sequence 
-    colnames_needed_by_function = ['halo_mvir'] # our function only takes one argument: virial mass
+    colnames_needed_by_function = ['halo_mvir'] 
     
     add_new_table_column(gals, 
             new_colname, new_coltype, grouping_key, 
             aggregation_function, colnames_needed_by_function, 
             sorting_keys=sorting_keys)
 
-Use Halotools to compute :math:`\langle M_{\ast}^{\rm tot}\rangle` vs. :math:`M_{\rm halo}`
+Our ``gals`` table now has a ``halo_mhost`` column.
+
+Calculate :math:`\langle M_{\ast}^{\rm tot}\rangle` vs. :math:`M_{\rm halo}`
 -------------------------------------------------------------------------------------------------
     
 .. code:: python
@@ -99,11 +105,11 @@ Use Halotools to compute :math:`\langle M_{\ast}^{\rm tot}\rangle` vs. :math:`M_
     result = mean_y_vs_x(gals['halo_mhost'].data, 
                          gals['halo_total_stellar_mass'].data, 
                          bins = bins, 
-                         error_estimator = 'variance') # Choose sample variance to observe the intrinsic scatter
+                         error_estimator = 'variance') 
     
     host_mass, mean_stellar_mass, mean_stellar_mass_err = result
 
-Plot the result and compare to underlying analytical relation
+Plot the result 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
@@ -113,14 +119,12 @@ Plot the result and compare to underlying analytical relation
     plt.errorbar(host_mass, mean_stellar_mass, yerr=mean_stellar_mass_err, 
                  fmt = "none", ecolor='gray')
     plt.plot(host_mass, mean_stellar_mass, 'D', color='k')
+
     plt.loglog()
-    
     plt.xticks(size=18)
     plt.yticks(size=18)
-    
     plt.xlabel(r'$M_{\rm halo}/M_{\odot}$', fontsize=25)
     plt.ylabel(r'$\langle M_{\ast}^{\rm tot}/M_{\odot}\rangle$', fontsize=25)
-    
     plt.ylim(ymax=2e12)
 
 .. image:: output_18_1.png
@@ -134,6 +138,8 @@ In this section we'll perform a very similar calculation to the above, only here
 Calculate :math:`\langle F_{\rm q}^{\rm cen}\vert M_{\rm halo} \rangle` and :math:`\langle F_{\rm q}^{\rm sat} \vert M_{\rm halo}\rangle`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+In the above calculation, we needed to create new columns for our galaxy catalog, :math:`M_{\rm host}` and :math:`M_{\ast}^{\rm tot}`. Here we'll reuse the :math:`M_{\rm host}` column, and our model already created a boolean-valued ``quiescent`` column for our galaxies. So all we need to do is calculate the average trends as a function of halo mass. 
+
 .. code:: python
 
     cens_mask = gals['halo_upid'] == -1
@@ -143,44 +149,40 @@ Calculate :math:`\langle F_{\rm q}^{\rm cen}\vert M_{\rm halo} \rangle` and :mat
     bins = np.logspace(12, 14.5, 15)
     
     # centrals 
-    result = mean_y_vs_x(cens['halo_mhost'].data, 
-                        cens['quiescent'].data, 
-                        bins = bins)
+    result = mean_y_vs_x(cens['halo_mhost'].data, cens['quiescent'].data, 
+                bins = bins)
     host_mass, fq_cens, fq_cens_err_on_mean = result 
     
     # satellites 
-    result = mean_y_vs_x(sats['halo_mhost'].data, 
-                        sats['quiescent'].data, 
-                        bins = bins)
+    result = mean_y_vs_x(sats['halo_mhost'].data, sats['quiescent'].data, 
+                bins = bins)
     host_mass, fq_sats, fq_sats_err_on_mean = result 
 
-Plot the result
-~~~~~~~~~~~~~~~
+Plot the result and compare it to the underlying analytical relation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
+
+    plt.errorbar(host_mass, fq_cens, yerr=fq_cens_err_on_mean, 
+                 color='seagreen', fmt = "none")
+    plt.plot(host_mass, fq_cens, 'D', color='seagreen', 
+                 label = 'galaxy population')
 
     analytic_result_mhost_bins = np.logspace(10, 15.5, 100)
     analytic_result_mean_quiescent_fraction = model.mean_quiescent_fraction(prim_haloprop = analytic_result_mhost_bins)
     plt.plot(analytic_result_mhost_bins,
              analytic_result_mean_quiescent_fraction, 
              color='blue', label = 'analytical model')
-    plt.xscale('log')
     
-    plt.errorbar(host_mass, fq_cens, yerr=fq_cens_err_on_mean, 
-                 color='seagreen', fmt = "none")
-    plt.plot(host_mass, fq_cens, 'D', color='seagreen', 
-                 label = 'galaxy population')
+    plt.xscale('log')
     plt.xticks(size=22)
     plt.yticks(size=18)
-    
     plt.xlabel(r'$M_{\rm halo}/M_{\odot}$', fontsize=25)
     plt.ylabel('quiescent fraction', fontsize=20)
     plt.xlim(xmin = 1e12, xmax = 1e15)
     plt.ylim(ymin = 0.2, ymax=0.8)
     plt.legend(frameon=False, loc='best', fontsize=20)
-    
     plt.title('Central galaxy quenching: model vs. mock', fontsize=17)
-
 
 
 .. image:: output_23_1.png
