@@ -1,3 +1,4 @@
+:orphan: 
 
 .. _mock_observation_overview:
 
