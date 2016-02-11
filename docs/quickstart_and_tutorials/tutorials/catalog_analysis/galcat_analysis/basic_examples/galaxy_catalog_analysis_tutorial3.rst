@@ -1,6 +1,6 @@
 .. _galaxy_catalog_analysis_tutorial3:
 
-Galaxy Catalog Analysis Example 3: Galaxy-galaxy lensing
+Basic Galaxy Catalog Analysis Example 3: Galaxy-galaxy lensing
 =====================================================================================
 
 In this example, we'll show how to calculate :math:`\Delta\Sigma(r),`
@@ -10,7 +10,7 @@ There is also an IPython Notebook in the following location that can be
 used as a companion to the material in this section of the tutorial:
 
 
-    halotools/docs/notebooks/galcat_analysis/galaxy_catalog_analysis_tutorial3.ipynb
+    halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial3.ipynb
 
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the calculation 
@@ -136,5 +136,4 @@ Plot the results
 
 .. image:: gg_lensing_tutorial3.png
 
-
-
+This tutorial continues with :ref:`galaxy_catalog_analysis_tutorial4`. 

@@ -1,7 +1,7 @@
 .. _galaxy_catalog_analysis_tutorial2:
 
-Galaxy Catalog Analysis Example 2: Calculating galaxy clustering in 3d
-===========================================================================
+Basic Galaxy Catalog Analysis Example 2: Calculating galaxy clustering in 3d
+========================================================================================
 
 In this example, we'll show how to calculate the two-point clustering 
 of a mock galaxy catalog, :math:`\xi_{\rm gg}(r)`. 
@@ -13,7 +13,7 @@ There is also an IPython Notebook in the following location that can be
 used as a companion to the material in this section of the tutorial:
 
 
-    halotools/docs/notebooks/galcat_analysis/galaxy_catalog_analysis_tutorial2.ipynb
+    halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial2.ipynb
 
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the calculation 
