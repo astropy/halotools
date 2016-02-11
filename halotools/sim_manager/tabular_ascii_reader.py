@@ -33,11 +33,13 @@ class TabularAsciiReader(object):
     only requires you to have enough RAM to store the *cut* catalog, 
     not the entire ASCII file. 
 
-    The primary method is the class is  
+    The primary method of the class is  
     `~halotools.sim_manager.TabularAsciiReader.read_ascii`. 
     The output of this method is a structured Numpy array, 
     which can then be stored in your preferred binary format 
-    using the built-in Numpy methods, h5py, etc. 
+    using the built-in Numpy methods, h5py, etc. If you wish to 
+    store the catalog in the Halotools cache, you should instead 
+    use the `~halotools.sim_manager.RockstarHlistReader` class. 
 
     The algorithm assumes that data of known, unchanging type is 
     arranged in a consecutive sequence of lines within the ascii file, 
@@ -143,6 +145,38 @@ class TabularAsciiReader(object):
 
             For example, if row_cut_neq_dict = {'upid': -1}, then *no* rows of the 
             returned data table will have a upid of -1. 
+
+
+        Examples 
+        ---------
+
+        Suppose you are only interested in reading the tenth and fifth  
+        columns of data of your ascii file, and that these columns store 
+        a float variable you want to call *mass*, and a long integer variable 
+        you want to call *id*, respectively. If you want a Numpy structured array 
+        storing *all* rows of these two columns: 
+
+        >>> cols = {'mass': (9, 'f4'), 'id': (4, 'i8')}
+        >>> reader = TabularAsciiReader(fname, cols) # doctest: +SKIP
+        >>> arr = reader.read_ascii() # doctest: +SKIP
+
+        If you are only interested in rows where *mass* exceeds 1e10:
+
+        >>> row_cut_min_dict = {'mass': 1e10}
+        >>> reader = TabularAsciiReader(fname, cols, row_cut_min_dict = row_cut_min_dict) # doctest: +SKIP
+        >>> arr = reader.read_ascii() # doctest: +SKIP
+
+        Finally, suppose the fortieth column stores an integer called *resolved*, 
+        and in addition to the above mass cut, you do not wish to store 
+        any rows for which the *resolved* column value equals zero. 
+        As described above, you are not permitted to make a row-cut on a column 
+        that you do not keep, so in addition to defining the new row cut, 
+        you must also include the *resolved* column in your *columns_to_keep_dict*:
+
+        >>> cols = {'mass': (9, 'f4'), 'id': (4, 'i8'), 'resolved': (39, 'i4')}
+        >>> row_cut_neq_dict = {'resolved': 0}
+        >>> reader = TabularAsciiReader(fname, cols, row_cut_neq_dict = row_cut_neq_dict, row_cut_min_dict = row_cut_min_dict) # doctest: +SKIP
+        >>> arr = reader.read_ascii() # doctest: +SKIP
 
 
         """
@@ -306,7 +340,7 @@ class TabularAsciiReader(object):
             )
 
     def _get_fname(self, input_fname):
-        """ Verify that the input fname does not already exist. 
+        """ Verify that the input fname exists on disk. 
         """
         # Check whether input_fname exists. 
         if not os.path.isfile(input_fname):

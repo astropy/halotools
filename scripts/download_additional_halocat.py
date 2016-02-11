@@ -29,7 +29,7 @@ parser.add_argument("halo_finder", type = str, help = "Nickname of the halo-find
     choices = ['rockstar', 'bdm'])
 
 parser.add_argument("version_name", type = str, 
-    choices = ['halotools_alpha_version1', 'most_recent'], 
+    choices = ['halotools_alpha_version2', 'most_recent'], 
     help = "Processing version of the requested catalog. "
     "Selecting `most_recent` will automatically choose the most up-to-date catalogs. ")
 
@@ -47,7 +47,10 @@ simname = args.simname
 halo_finder = args.halo_finder
 version_name = args.version_name
 redshift = args.redshift
-if args.version_name == 'most_recent': version_name = sim_defaults.default_version_name
+if args.version_name == 'most_recent': 
+    version_name = sim_defaults.default_version_name
+
+ptcl_version_name = sim_defaults.default_ptcl_version_name
 
 if args.ptcls_only is True: 
     download_halos = False
@@ -85,7 +88,7 @@ if args.overwrite == False:
 
         gen2 = downman.ptcl_table_cache.matching_log_entry_generator
         matching_ptcl_cats = list(
-            gen2(simname = simname, version_name = version_name, 
+            gen2(simname = simname, version_name = ptcl_version_name, 
                 redshift = redshift, dz_tol = 0.1))
 
         if len(matching_ptcl_cats) > 0:
@@ -137,10 +140,13 @@ msg = (
     "Both hdf5 files store an Astropy Table data structure. \n"
     "\nThe Halotools cache system allows you to \n"
     "load these catalogs into memory with the following syntax:\n\n"
-    ">>> from halotools.sim_manager import CachedHaloCatalog\n"
-    ">>> bolshoi_z0 = CachedHaloCatalog()\n"
-    ">>> halos = bolshoi_z0.halo_table\n"
-    ">>> particles = bolshoi_z0.ptcl_table\n\n")
+    ">>> from halotools.sim_manager import CachedHaloCatalog\n")
+
+msg += (">>> halocat = CachedHaloCatalog(simname = '" + simname + "', " + 
+    "halo_finder = '" + halo_finder + "', redshift = " + str(redshift) + ", " + 
+    "version_name = '" + version_name + "')\n")
+msg += ">>> halos = halocat.halo_table\n"
+msg += ">>> particles = halocat.ptcl_table\n\n"
 
 
 print(msg)

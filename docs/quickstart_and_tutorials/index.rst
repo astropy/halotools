@@ -38,7 +38,7 @@ Halo catalog analysis
    quickstart_guides/halo_catalog_analysis_quickstart
 
 
-Building and testing models of the galaxy-halo connection
+Testing model predictions 
 ------------------------------------------------------------
 
 .. toctree::
@@ -54,9 +54,8 @@ Tutorials
 .. toctree::
    :maxdepth: 1
 
-   mock_making/overview
-   model_building/models
-   mock_observations/overview
+   tutorials/model_building/index
+   tutorials/catalog_analysis/galcat_analysis/index
 
 
 Developer Documentation

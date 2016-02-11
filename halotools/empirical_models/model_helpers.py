@@ -24,19 +24,19 @@ from warnings import warn
 from ..utils.array_utils import custom_len, convert_to_ndarray
 from ..custom_exceptions import HalotoolsError
 
-def solve_for_polynomial_coefficients(abcissa, ordinates):
+def solve_for_polynomial_coefficients(abscissa, ordinates):
     """ Solves for coefficients of the unique, 
     minimum-degree polynomial that passes through 
-    the input abcissa and attains values equal the input ordinates.  
+    the input abscissa and attains values equal the input ordinates.  
 
     Parameters
     ----------
-    abcissa : array 
-        Elements are the abcissa at which the desired values of the polynomial 
+    abscissa : array 
+        Elements are the abscissa at which the desired values of the polynomial 
         have been tabulated.
 
     ordinates : array 
-        Elements are the desired values of the polynomial when evaluated at the abcissa.
+        Elements are the desired values of the polynomial when evaluated at the abscissa.
 
     Returns
     -------
@@ -46,52 +46,52 @@ def solve_for_polynomial_coefficients(abcissa, ordinates):
 
     Notes
     --------
-    Input arrays abcissa and ordinates can in principle be of any dimension Ndim, 
+    Input arrays abscissa and ordinates can in principle be of any dimension Ndim, 
     and there will be Ndim output coefficients.
 
     The input ordinates specify the desired values of the polynomial 
-    when evaluated at the Ndim inputs specified by the input abcissa.
+    when evaluated at the Ndim inputs specified by the input abscissa.
     There exists a unique, order Ndim polynomial that returns the input 
-    ordinates when the polynomial is evaluated at the input abcissa.
+    ordinates when the polynomial is evaluated at the input abscissa.
     The coefficients of that unique polynomial are the output of the function. 
 
     As an example, suppose that a model in which the quenched fraction is 
     :math:`F_{q}(logM_{\\mathrm{halo}} = 12) = 0.25` and :math:`F_{q}(logM_{\\mathrm{halo}} = 15) = 0.9`. 
-    Then this function takes [12, 15] as the input abcissa, 
+    Then this function takes [12, 15] as the input abscissa, 
     [0.25, 0.9] as the input ordinates, 
     and returns the array :math:`[c_{0}, c_{1}]`. 
     The unique polynomial linear in :math:`log_{10}M`  
-    that passes through the input ordinates and abcissa is given by 
+    that passes through the input ordinates and abscissa is given by 
     :math:`F(logM) = c_{0} + c_{1}*log_{10}logM`.
     
     """
 
-    columns = np.ones(len(abcissa))
-    for i in np.arange(len(abcissa)-1):
-        columns = np.append(columns,[abcissa**(i+1)])
+    columns = np.ones(len(abscissa))
+    for i in np.arange(len(abscissa)-1):
+        columns = np.append(columns,[abscissa**(i+1)])
     quenching_model_matrix = columns.reshape(
-        len(abcissa),len(abcissa)).transpose()
+        len(abscissa),len(abscissa)).transpose()
 
     polynomial_coefficients = np.linalg.solve(
         quenching_model_matrix,ordinates)
 
     return np.array(polynomial_coefficients)
 
-def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
-    """ Method to evaluate an input polynomial at the input_abcissa. 
+def polynomial_from_table(table_abscissa,table_ordinates,input_abscissa):
+    """ Method to evaluate an input polynomial at the input_abscissa. 
     The input polynomial is determined by `solve_for_polynomial_coefficients` 
-    from table_abcissa and table_ordinates. 
+    from table_abscissa and table_ordinates. 
 
     Parameters
     ----------
-    table_abcissa : array 
-        Elements are the abcissa determining the input polynomial. 
+    table_abscissa : array 
+        Elements are the abscissa determining the input polynomial. 
 
     table_ordinates : array 
         Elements are the desired values of the input polynomial 
-        when evaluated at table_abcissa
+        when evaluated at table_abscissa
 
-    input_abcissa : array 
+    input_abscissa : array 
         Points at which to evaluate the input polynomial. 
 
     Returns 
@@ -100,18 +100,19 @@ def polynomial_from_table(table_abcissa,table_ordinates,input_abcissa):
         Values of the input polynomial when evaluated at input_abscissa. 
 
     """
-    if not isinstance(input_abcissa, np.ndarray):
-        input_abcissa = np.array(input_abcissa)
+    if not isinstance(input_abscissa, np.ndarray):
+        input_abscissa = np.array(input_abscissa)
     coefficient_array = solve_for_polynomial_coefficients(
-        table_abcissa,table_ordinates)
-    output_ordinates = np.zeros(custom_len(input_abcissa))
+        table_abscissa,table_ordinates)
+    output_ordinates = np.zeros(custom_len(input_abscissa))
     # Use coefficients to compute values of the inflection function polynomial
     for n,coeff in enumerate(coefficient_array):
-        output_ordinates += coeff*input_abcissa**n
+        output_ordinates += coeff*input_abscissa**n
 
     return output_ordinates
 
-def enforce_periodicity_of_box(coords, box_length):
+def enforce_periodicity_of_box(coords, box_length, 
+    check_multiple_box_lengths = False):
     """ Function used to apply periodic boundary conditions 
     of the simulation, so that mock galaxies all lie in the range [0, Lbox].
 
@@ -124,17 +125,32 @@ def enforce_periodicity_of_box(coords, box_length):
     box_length : float
         the size of simulation box (currently hard-coded to be Mpc/h units)
 
+    check_multiple_box_lengths : bool, optional 
+        If True, an exception will be raised if the points span a range 
+        of more than 2Lbox. Default is False.     
+
     Returns
     -------
     periodic_coords : array_like
         array with values and shape equal to input coords, 
         but with periodic boundary conditions enforced
 
-    """    
+    """
+    if check_multiple_box_lengths is True:
+        xmin = np.min(coords)
+        if xmin < -box_length:
+            msg = ("\nThere is at least one input point with a coordinate less than -Lbox\n")
+            raise HalotoolsError(msg)
+
+        xmax = np.max(coords)
+        if xmax > 2*box_length:
+            msg = ("\nThere is at least one input point with a coordinate greater than 2*Lbox\n")
+            raise HalotoolsError(msg)
+
     return coords % box_length
 
 
-def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outside_bins, abcissa):
+def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outside_bins, abscissa):
     """ Piecewise heaviside function. 
 
     The function returns values_inside_bins  
@@ -144,11 +160,11 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
     Parameters 
     ----------
     bin_midpoints : array_like 
-        Length-Nbins array containing the midpoint of the abcissa bins. 
+        Length-Nbins array containing the midpoint of the abscissa bins. 
         Bin boundaries may touch, but overlapping bins will raise an exception. 
 
     bin_width : float  
-        Width of the abcissa bins. 
+        Width of the abscissa bins. 
 
     values_inside_bins : array_like 
         Length-Nbins array providing values of the desired function when evaluated 
@@ -157,56 +173,56 @@ def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outs
     value_outside_bins : float 
         value of the desired function when evaluated at any point outside the bins.
 
-    abcissa : array_like 
+    abscissa : array_like 
         Points at which to evaluate binned_heaviside
 
     Returns 
     -------
     output : array_like  
-        Values of the function when evaluated at the input abcissa
+        Values of the function when evaluated at the input abscissa
 
     """
 
-    if custom_len(abcissa) > 1:
-        abcissa = np.array(abcissa)
+    if custom_len(abscissa) > 1:
+        abscissa = np.array(abscissa)
     if custom_len(values_inside_bins) > 1:
         values_inside_bins = np.array(values_inside_bins)
         bin_midpoints = np.array(bin_midpoints)
 
-    # If there are multiple abcissa bins, make sure they do not overlap
+    # If there are multiple abscissa bins, make sure they do not overlap
     if custom_len(bin_midpoints)>1:
         midpoint_differences = np.diff(bin_midpoints)
         minimum_separation = midpoint_differences.min()
         if minimum_separation < bin_width:
-            raise ValueError("Abcissa bins are not permitted to overlap")
+            raise ValueError("abscissa bins are not permitted to overlap")
 
-    output = np.zeros(custom_len(abcissa)) + value_outside_bins
+    output = np.zeros(custom_len(abscissa)) + value_outside_bins
 
     if custom_len(bin_midpoints)==1:
-        idx_abcissa_in_bin = np.where( 
-            (abcissa >= bin_midpoints - bin_width/2.) & (abcissa < bin_midpoints + bin_width/2.) )[0]
-        print(idx_abcissa_in_bin)
-        output[idx_abcissa_in_bin] = values_inside_bins
+        idx_abscissa_in_bin = np.where( 
+            (abscissa >= bin_midpoints - bin_width/2.) & (abscissa < bin_midpoints + bin_width/2.) )[0]
+        print(idx_abscissa_in_bin)
+        output[idx_abscissa_in_bin] = values_inside_bins
     else:
         for ii, x in enumerate(bin_midpoints):
-            idx_abcissa_in_binii = np.where(
-                (abcissa >= bin_midpoints[ii] - bin_width/2.) & 
-                (abcissa < bin_midpoints[ii] + bin_width/2.)
+            idx_abscissa_in_binii = np.where(
+                (abscissa >= bin_midpoints[ii] - bin_width/2.) & 
+                (abscissa < bin_midpoints[ii] + bin_width/2.)
                 )[0]
-            output[idx_abcissa_in_binii] = values_inside_bins[ii]
+            output[idx_abscissa_in_binii] = values_inside_bins[ii]
 
     return output
 
 
-def custom_spline(table_abcissa, table_ordinates, **kwargs):
+def custom_spline(table_abscissa, table_ordinates, **kwargs):
     """ Convenience wrapper around `~scipy.interpolate.InterpolatedUnivariateSpline`, 
     written specifically to handle the edge case of a spline table being 
     built from a single point.  
 
     Parameters 
     ----------
-    table_abcissa : array_like
-        abcissa values defining the interpolation 
+    table_abscissa : array_like
+        abscissa values defining the interpolation 
 
     table_ordinates : array_like
         ordinate values defining the interpolation 
@@ -218,13 +234,13 @@ def custom_spline(table_abcissa, table_ordinates, **kwargs):
     -------
     output : object  
         Function object to use to evaluate the interpolation of 
-        the input table_abcissa & table_ordinates 
+        the input table_abscissa & table_ordinates 
 
     Notes 
     -----
     Only differs from `~scipy.interpolate.UnivariateSpline` in two respects. 
     First, the degree of the spline interpolation is automatically chosen to 
-    be the maximum allowable degree permitted by the number of abcissa points. 
+    be the maximum allowable degree permitted by the number of abscissa points. 
     Second, the behavior differs for the case where the input tables 
     have only a single element. In this case, the default behavior 
     of the scipy function is to raise an exception.  
@@ -232,30 +248,30 @@ def custom_spline(table_abcissa, table_ordinates, **kwargs):
     where the returned value is simply the scalar value of the input ordinates. 
 
     """
-    if custom_len(table_abcissa) != custom_len(table_ordinates):
-        len_abcissa = custom_len(table_abcissa)
+    if custom_len(table_abscissa) != custom_len(table_ordinates):
+        len_abscissa = custom_len(table_abscissa)
         len_ordinates = custom_len(table_ordinates)
-        raise HalotoolsError("table_abcissa and table_ordinates must have the same length \n"
-            " len(table_abcissa) = %i and len(table_ordinates) = %i" % (len_abcissa, len_ordinates))
+        raise HalotoolsError("table_abscissa and table_ordinates must have the same length \n"
+            " len(table_abscissa) = %i and len(table_ordinates) = %i" % (len_abscissa, len_ordinates))
 
     max_scipy_spline_degree = 5
     if 'k' in kwargs:
-        k = np.min([custom_len(table_abcissa)-1, kwargs['k'], max_scipy_spline_degree])
+        k = np.min([custom_len(table_abscissa)-1, kwargs['k'], max_scipy_spline_degree])
     else:
-        k = np.min([custom_len(table_abcissa)-1, max_scipy_spline_degree])
+        k = np.min([custom_len(table_abscissa)-1, max_scipy_spline_degree])
 
     if k<0:
         raise HalotoolsError("Spline degree must be non-negative")
     elif k==0:
         if custom_len(table_ordinates) != 1:
             raise HalotoolsError("In spline_degree=0 edge case, "
-                "table_abcissa and table_abcissa must be 1-element arrays")
+                "table_abscissa and table_abscissa must be 1-element arrays")
         return lambda x : np.zeros(custom_len(x)) + table_ordinates[0]
     else:
-        spline_function = spline(table_abcissa, table_ordinates, k=k)
+        spline_function = spline(table_abscissa, table_ordinates, k=k)
         return spline_function
 
-def call_func_table(func_table, abcissa, func_indices):
+def call_func_table(func_table, abscissa, func_indices):
     """ Returns the output of an array of functions evaluated at a set of input points 
     if the indices of required functions is known. 
 
@@ -264,32 +280,32 @@ def call_func_table(func_table, abcissa, func_indices):
     func_table : array_like 
         Length k array of function objects
 
-    abcissa : array_like 
+    abscissa : array_like 
         Length Npts array of points at which to evaluate the functions. 
 
     func_indices : array_like 
         Length Npts array providing the indices to use to choose which function 
-        operates on each abcissa element. Thus func_indices is an array of integers 
+        operates on each abscissa element. Thus func_indices is an array of integers 
         ranging between 0 and k-1. 
 
     Returns 
     -------
     out : array_like 
         Length Npts array giving the evaluation of the appropriate function on each 
-        abcissa element. 
+        abscissa element. 
 
     """
     func_table = convert_to_ndarray(func_table)
-    abcissa = convert_to_ndarray(abcissa)
+    abscissa = convert_to_ndarray(abscissa)
     func_indices = convert_to_ndarray(func_indices)
     
     func_argsort = func_indices.argsort()
     func_ranges = list(np.searchsorted(func_indices[func_argsort], range(len(func_table))))
     func_ranges.append(None)
-    out = np.zeros_like(abcissa)
+    out = np.zeros_like(abscissa)
     for f, start, end in zip(func_table, func_ranges, func_ranges[1:]):
         ix = func_argsort[start:end]
-        out[ix] = f(abcissa[ix])
+        out[ix] = f(abscissa[ix])
     return out
 
 def bind_required_kwargs(required_kwargs, obj, **kwargs):

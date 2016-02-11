@@ -97,25 +97,25 @@ def test_LogNormalScatterModel_initialization():
 
 		* Class successfully instantiates when called with no arguments. 
 
-		* Class successfully instantiates when constructor is passed ``ordinates`` and ``abcissa``. 
+		* Class successfully instantiates when constructor is passed ``ordinates`` and ``abscissa``. 
 
 		* When the above arguments are passed to the constructor, the instance is correctly initialized with the input values.
 
 	"""
 	default_scatter_model = LogNormalScatterModel()
 	assert default_scatter_model.prim_haloprop_key == model_defaults.default_smhm_haloprop
-	assert default_scatter_model.abcissa == [12]
+	assert default_scatter_model.abscissa == [12]
 	assert default_scatter_model.ordinates == [model_defaults.default_smhm_scatter]
 	default_param_dict = {'scatter_model_param1': model_defaults.default_smhm_scatter}
 	assert default_scatter_model.param_dict == default_param_dict
 
-	input_abcissa = [12, 15]
+	input_abscissa = [12, 15]
 	input_ordinates = [0.3, 0.1]
 	scatter_model2 = LogNormalScatterModel(
-		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
+		scatter_abscissa = input_abscissa, scatter_ordinates = input_ordinates)
 
-	assert scatter_model2.abcissa == input_abcissa
-	assert scatter_model2.ordinates == input_ordinates
+	assert np.all(scatter_model2.abscissa == input_abscissa)
+	assert np.all(scatter_model2.ordinates == input_ordinates)
 	model2_param_dict = {'scatter_model_param1': 0.3, 'scatter_model_param2': 0.1}
 	assert scatter_model2.param_dict == model2_param_dict
 
@@ -128,7 +128,7 @@ def test_LogNormalScatterModel_behavior():
 
 		* The default model returns the default scatter, both the mean_scatter method and the scatter_realization method. 
 
-		* A model defined by interpolation between 12 and 15 returns the input scatter at the input abcissa, both the mean_scatter method and the scatter_realization method. 
+		* A model defined by interpolation between 12 and 15 returns the input scatter at the input abscissa, both the mean_scatter method and the scatter_realization method. 
 
 		* The 12-15 model returns the correct intermediate level of scatter at the halfway point between 12 and 15, both the mean_scatter method and the scatter_realization method. 
 
@@ -165,23 +165,23 @@ def test_LogNormalScatterModel_behavior():
 	np.testing.assert_almost_equal(disp, model_defaults.default_smhm_scatter, decimal=2)
 
 
-	input_abcissa = [12, 15]
+	input_abscissa = [12, 15]
 	input_ordinates = [0.3, 0.1]
 	scatter_model2 = LogNormalScatterModel(
-		scatter_abcissa = input_abcissa, scatter_ordinates = input_ordinates)
+		scatter_abscissa = input_abscissa, scatter_ordinates = input_ordinates)
 
-	assert len(scatter_model2.abcissa) == 2
+	assert len(scatter_model2.abscissa) == 2
 	assert len(scatter_model2.param_dict) == 2
 	assert set(scatter_model2.param_dict.keys()) == set(['scatter_model_param1', 'scatter_model_param2'])
 	assert set(scatter_model2.param_dict.values()) == set(input_ordinates)
 
-	# Test the mean_scatter method of a non-trivial model at the first abcissa
+	# Test the mean_scatter method of a non-trivial model at the first abscissa
 	scatter_array = scatter_model2.mean_scatter(prim_haloprop = mass12)
 	assert np.allclose(scatter_array, 0.3)
 	scatter_array = scatter_model2.mean_scatter(table = halos12)
 	assert np.allclose(scatter_array, 0.3)
 
-	# Test the scatter_realization method of a non-trivial model at the first abcissa
+	# Test the scatter_realization method of a non-trivial model at the first abscissa
 	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop =mass12)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, 0.3, decimal=2)
@@ -190,7 +190,7 @@ def test_LogNormalScatterModel_behavior():
 	np.testing.assert_almost_equal(disp, 0.3, decimal=2)
 
 
-	# Test the mean_scatter method of a non-trivial model at the second abcissa
+	# Test the mean_scatter method of a non-trivial model at the second abscissa
 	testmass15 = 1e15
 	mass15 = np.zeros(Npts) + testmass15
 	masskey = model_defaults.default_smhm_haloprop 
@@ -202,7 +202,7 @@ def test_LogNormalScatterModel_behavior():
 	scatter_array = scatter_model2.mean_scatter(table = halos15)
 	assert np.allclose(scatter_array, 0.1)
 
-	# Test the scatter_realization method of a non-trivial model at the second abcissa
+	# Test the scatter_realization method of a non-trivial model at the second abscissa
 	scatter_realization = scatter_model2.scatter_realization(seed=testing_seed, prim_haloprop =mass15)
 	disp = np.std(scatter_realization)
 	np.testing.assert_almost_equal(disp, 0.1, decimal=2)

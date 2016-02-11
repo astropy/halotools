@@ -22,7 +22,10 @@ __author__ = ['Duncan Campbell']
 def distant_observer_redshift(x, v, period=None, cosmo=None):
     """
     Calculate observed redshifts, :math:`z_{\\rm obs}`, assuming the distant observer approximation.
-    
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``x`` and ``v`` arguments.   
+
     The line-of-sight (LOS) is assumed to be the z-direction.
     
     Parameters

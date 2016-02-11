@@ -2,13 +2,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
-import pytest 
+from astropy.tests.helper import pytest
 
 import numpy as np 
 from copy import copy 
 
 from ...smhm_models import Behroozi10SmHm, Moster13SmHm
-from ...sfr_models import BinaryGalpropInterpolModel
+from ...component_model_templates import BinaryGalpropInterpolModel
 
 from ...factories import SubhaloModelFactory
 from ...composite_models.smhm_models.behroozi10 import behroozi10_model_dictionary
@@ -68,9 +68,11 @@ class TestSubhaloModelFactory(TestCase):
 
         behroozi = Behroozi10SmHm(redshift = 0)
         moster = Moster13SmHm(redshift = 0)
-        quenching1 = BinaryGalpropInterpolModel(galprop_name = 'quiescent')
+
+        quenching1 = BinaryGalpropInterpolModel(galprop_name = 'quiescent', 
+            galprop_abscissa = [12, 15], galprop_ordinates = [0.25, 0.75])
         quenching2 = BinaryGalpropInterpolModel(galprop_name = 'quiescent', 
-            galprop_abcissa = [13], galprop_ordinates = [0.5])
+            galprop_abscissa = [13], galprop_ordinates = [0.5])
 
         # The following instantiation methods should give the same results
         model1 = SubhaloModelFactory(stellar_mass = behroozi)

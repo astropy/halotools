@@ -1,7 +1,7 @@
 .. _developer-docs:
 
 =======================
-Developer Documentation
+Developer documentation
 =======================
 
 The developer documentation contains guidlines for how to 

@@ -49,7 +49,7 @@ class HeavisideAssembias(object):
             their conditional secondary percentiles. 
             Default is 0.5 for a constant 50/50 split. 
 
-        split_abcissa : list, optional 
+        split_abscissa : list, optional 
             Values of the primary halo property at which the halos are split as described above in 
             the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
             the interpolation will be done in the logarithm of the primary halo property. 
@@ -73,7 +73,7 @@ class HeavisideAssembias(object):
 
             If provided, you must ensure that the splitting of the ``table`` 
             was self-consistently performed with the 
-            input ``split``, or ``split_abcissa`` and ``split_ordinates``, or 
+            input ``split``, or ``split_abscissa`` and ``split_ordinates``, or 
             ``split_func`` keyword arguments. 
 
         assembias_strength : float or list, optional 
@@ -81,10 +81,10 @@ class HeavisideAssembias(object):
             defining the assembly bias correlation strength. 
             Default is 0.5. 
 
-        assembias_strength_abcissa : list, optional 
+        assembias_strength_abscissa : list, optional 
             Values of the primary halo property at which the assembly bias strength is specified. 
             Default is to assume a constant strength of 0.5. If passing a list, the strength 
-            will interpreted at the input ``assembias_strength_abcissa``.
+            will interpreted at the input ``assembias_strength_abscissa``.
             Default is to assume a constant strength of 0.5. 
 
         loginterp : bool, optional
@@ -98,6 +98,11 @@ class HeavisideAssembias(object):
         self._decorate_baseline_method()
 
         self._bind_new_haloprop_func_dict()
+
+        try:
+            self.publications.append('arXiv:1512.03050')
+        except:
+            self.publications = ['arXiv:1512.03050']
 
 
     def _interpret_constructor_inputs(self, loginterp = True, 
@@ -151,25 +156,24 @@ class HeavisideAssembias(object):
 
         if 'splitting_model' in kwargs:
             self.splitting_model = kwargs['splitting_model']
-            self.ancillary_model_dependencies = ['splitting_model']
             func = getattr(self.splitting_model, kwargs['splitting_method_name'])
             if callable(func):
                 self._input_split_func = func
             else:
                 raise HalotoolsError("Input ``splitting_model`` must have a callable function "
                     "named ``%s``" % kwargs['splitting_method_name'])
-        elif 'split_abcissa' in kwargs.keys():
-            if custom_len(kwargs['split_abcissa']) != custom_len(split):
-                raise HalotoolsError("``split`` and ``split_abcissa`` must have the same length")
-            self._split_abcissa = kwargs['split_abcissa']
+        elif 'split_abscissa' in kwargs.keys():
+            if custom_len(kwargs['split_abscissa']) != custom_len(split):
+                raise HalotoolsError("``split`` and ``split_abscissa`` must have the same length")
+            self._split_abscissa = kwargs['split_abscissa']
             self._split_ordinates = split
         else:
             try:
-                self._split_abcissa = [2]
+                self._split_abscissa = [2]
                 self._split_ordinates = [split]
             except KeyError:
                 msg = ("The _set_percentile_splitting method must at least be called with a ``split``" 
-                    "keyword argument, or alternatively ``split`` and ``split_abcissa`` arguments.")
+                    "keyword argument, or alternatively ``split`` and ``split_abscissa`` arguments.")
                 raise HalotoolsError(msg)
 
     def _initialize_assembias_param_dict(self, assembias_strength = 0.5, **kwargs):
@@ -186,20 +190,20 @@ class HeavisideAssembias(object):
         except TypeError:
             strength = [strength]
 
-        if 'assembias_strength_abcissa' in kwargs:
-            abcissa = kwargs['assembias_strength_abcissa']
+        if 'assembias_strength_abscissa' in kwargs:
+            abscissa = kwargs['assembias_strength_abscissa']
             try:
-                iterator = iter(abcissa)
-                abcissa = list(abcissa)
+                iterator = iter(abscissa)
+                abscissa = list(abscissa)
             except TypeError:
-                abcissa = [abcissa]
+                abscissa = [abscissa]
         else:
-            abcissa = [2]
+            abscissa = [2]
 
-        if custom_len(abcissa) != custom_len(strength):
-            raise HalotoolsError("``assembias_strength`` and ``assembias_strength_abcissa`` must have the same length")
+        if custom_len(abscissa) != custom_len(strength):
+            raise HalotoolsError("``assembias_strength`` and ``assembias_strength_abscissa`` must have the same length")
 
-        self._assembias_strength_abcissa = abcissa
+        self._assembias_strength_abscissa = abscissa
         for ipar, val in enumerate(strength):
             self.param_dict[self._get_assembias_param_dict_key(ipar)] = val
 
@@ -272,12 +276,12 @@ class HeavisideAssembias(object):
 
         elif self._loginterp is True:
             spline_function = model_helpers.custom_spline(
-                np.log10(self._split_abcissa), self._split_ordinates)
+                np.log10(self._split_abscissa), self._split_ordinates)
             result = spline_function(np.log10(prim_haloprop))
         else:
-            model_abcissa = self._split_abcissa
+            model_abscissa = self._split_abscissa
             spline_function = model_helpers.custom_spline(
-                self._split_abcissa, self._split_ordinates)
+                self._split_abscissa, self._split_ordinates)
             result = spline_function(prim_haloprop)
 
         return result
@@ -302,9 +306,9 @@ class HeavisideAssembias(object):
             Strength of assembly bias as a function of the input halo property. 
         """
         model_ordinates = (self.param_dict[self._get_assembias_param_dict_key(ipar)] 
-            for ipar in range(len(self._assembias_strength_abcissa)))
+            for ipar in range(len(self._assembias_strength_abscissa)))
         spline_function = model_helpers.custom_spline(
-            self._assembias_strength_abcissa, list(model_ordinates))
+            self._assembias_strength_abscissa, list(model_ordinates))
 
         if self._loginterp is True:
             result = spline_function(np.log10(prim_haloprop))

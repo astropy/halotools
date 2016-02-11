@@ -19,6 +19,7 @@ from . import helper_functions
 
 from ..cached_halo_catalog import CachedHaloCatalog
 from ..halo_table_cache import HaloTableCache
+from ..ptcl_table_cache import PtclTableCache
 from ..download_manager import DownloadManager 
 
 from ...custom_exceptions import HalotoolsError, InvalidCacheLogEntry
@@ -51,6 +52,19 @@ class TestCachedHaloCatalog(TestCase):
             pass
         os.makedirs(self.dummy_cache_baseloc)
 
+    def test_raises_bad_constructor_args_exception1(self):
+        with pytest.raises(HalotoolsError) as err:
+            _ = CachedHaloCatalog('bolshoi')
+        substr = "CachedHaloCatalog only accepts keyword arguments,"
+        assert substr in err.value.message
+
+    def test_raises_bad_constructor_args_exception2(self):
+        with pytest.raises(HalotoolsError) as err:
+            _ = CachedHaloCatalog(z = 0.04)
+        substr = "CachedHaloCatalog got an unexpected keyword"
+        assert substr in err.value.message
+
+
     @pytest.mark.skipif('not APH_MACHINE')
     def test_load_all_catalogs(self):
         """ Verify that the default halo catalog loads. 
@@ -64,6 +78,53 @@ class TestCachedHaloCatalog(TestCase):
             halocat = CachedHaloCatalog(**constructor_kwargs)
             assert hasattr(halocat, 'redshift')
             assert hasattr(halocat, 'Lbox')
+
+    @pytest.mark.skipif('not HAS_H5PY')
+    def test_halo_ptcl_consistency(self):
+        """
+        """
+        type_mismatch_msg = ("\nThe redshift attribute of your particle catalog\n"
+            "is formatted as a float, not a string, \nwhich conflicts with the "
+            "formatting of the redshfit attribute \nof the corresponding halo catalog.\n"
+            "This is due to a now-fixed bug in the production of the \n"
+            "Halotools-provided particle catalogs. \n"
+            "To resolve this, just run the scripts/download_additional_halocat.py script \n"
+            "and throw the -ptcls_only and -overwrite flags")
+
+        cache = HaloTableCache()
+        for entry in cache.log:
+            constructor_kwargs = (
+                {attr: getattr(entry, attr) 
+                for attr in entry.log_attributes})
+            del constructor_kwargs['fname']
+            halocat = CachedHaloCatalog(**constructor_kwargs)
+            halo_log_entry = halocat.log_entry
+            try:
+                ptcl_log_entry = halocat._retrieve_matching_ptcl_cache_log_entry()
+                assert halo_log_entry.simname == ptcl_log_entry.simname
+                assert halo_log_entry.redshift == ptcl_log_entry.redshift
+
+                hf = h5py.File(halo_log_entry.fname)
+                pf = h5py.File(ptcl_log_entry.fname)
+
+                assert hf.attrs['simname'] == pf.attrs['simname']
+
+                try:
+                    assert type(hf.attrs['redshift']) == type(pf.attrs['redshift'])
+                except AssertionError:
+                    msg = ("Type error for the redshift attribute of the ``"+hf.attrs['simname']
+                        +"`` simulation.\n")
+                    msg += type_mismatch_msg
+                    raise HalotoolsError(msg)
+
+                hf.close()
+                pf.close()
+
+
+            except InvalidCacheLogEntry:
+                pass
+
+
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_default_catalog(self):
@@ -80,7 +141,7 @@ class TestCachedHaloCatalog(TestCase):
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
-                halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
+                halo_finder = 'bdm', version_name = 'halotools_alpha_version2', 
                 redshift = 5, dz_tol = 1)
         assert 'The following entries in the cache log' in err.value.message
 
@@ -91,7 +152,7 @@ class TestCachedHaloCatalog(TestCase):
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
-                halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
+                halo_finder = 'bdm', version_name = 'halotools_alpha_version2', 
                 redshift = 5, dz_tol = 1)
         assert 'The following entries in the cache log' in err.value.message
 
@@ -134,7 +195,7 @@ class TestCachedHaloCatalog(TestCase):
         """
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'Jose Canseco', 
-                halo_finder = 'bdm', version_name = 'halotools_alpha_version1', 
+                halo_finder = 'bdm', version_name = 'halotools_alpha_version2', 
                 redshift = 5, dz_tol = 1)
         assert 'There are no simulations matching your input simname' in err.value.message
 
@@ -158,7 +219,7 @@ class TestCachedHaloCatalog(TestCase):
 
     @pytest.mark.skipif('not APH_MACHINE')
     def test_fname_optional_load(self):
-        fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolplanck/rockstar/hlist_0.33406.list.halotools_alpha_version1.hdf5'
+        fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolplanck/rockstar/hlist_0.33406.list.halotools_alpha_version2.hdf5'
         halocat = CachedHaloCatalog(fname = fname)
         assert halocat.simname == 'bolplanck'
 
@@ -267,7 +328,7 @@ class TestCachedHaloCatalog(TestCase):
 
         ######################################################
         ### Make sure the file does not already exist on disk or in cache
-        tmp_fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.07835.list.halotools_alpha_version1.hdf5'
+        tmp_fname = '/Users/aphearin/.astropy/cache/halotools/halo_catalogs/bolshoi/rockstar/hlist_0.07835.list.halotools_alpha_version2.hdf5'
 
         if os.path.isfile(tmp_fname):
             matching_log_entry = cache.determine_log_entry_from_fname(tmp_fname)
@@ -291,7 +352,7 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'rockstar', 
-                version_name = 'halotools_alpha_version1', 
+                version_name = 'halotools_alpha_version2', 
                 redshift = 11.7632)
 
         #####################################################
@@ -299,7 +360,7 @@ class TestCachedHaloCatalog(TestCase):
 
         dman.download_processed_halo_table(simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', 
+            version_name = 'halotools_alpha_version2', 
             redshift = 11.7632, overwrite = True)
 
         ######################################################
@@ -313,7 +374,7 @@ class TestCachedHaloCatalog(TestCase):
 
         halocat = CachedHaloCatalog(simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', redshift = 11.7632)
+            version_name = 'halotools_alpha_version2', redshift = 11.7632)
 
         #####################################################
         ## Now move the file to a new location 
@@ -329,7 +390,7 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'rockstar', 
-                version_name = 'halotools_alpha_version1', redshift = 11.7632)
+                version_name = 'halotools_alpha_version2', redshift = 11.7632)
         substr = "The following input fname does not exist: "
         assert substr in err.value.message
         assert tmp_fname in err.value.message 
@@ -347,7 +408,7 @@ class TestCachedHaloCatalog(TestCase):
         ## Verify that we can load the catalog from metadata again
         halocat = CachedHaloCatalog(simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', redshift = 11.7632)
+            version_name = 'halotools_alpha_version2', redshift = 11.7632)
 
         # ######################################################
         # # Now clean up and remove the file again
@@ -356,7 +417,7 @@ class TestCachedHaloCatalog(TestCase):
         matching_log_entries = cache.matching_log_entry_generator(
             simname = 'bolshoi', 
             halo_finder = 'rockstar', 
-            version_name = 'halotools_alpha_version1', 
+            version_name = 'halotools_alpha_version2', 
             redshift = 11.7632, dz_tol = 0.05)
 
         for matching_log_entry in matching_log_entries:
@@ -376,9 +437,54 @@ class TestCachedHaloCatalog(TestCase):
         with pytest.raises(InvalidCacheLogEntry) as err:
             halocat = CachedHaloCatalog(simname = 'bolshoi', 
                 halo_finder = 'rockstar', 
-                version_name = 'halotools_alpha_version1', redshift = 11.7632)
+                version_name = 'halotools_alpha_version2', redshift = 11.7632)
         # ######################################################
 
+    @pytest.mark.skipif('not HAS_H5PY')
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_user_supplied_ptcl_consistency(self):
+
+        from ..user_supplied_ptcl_catalog import UserSuppliedPtclCatalog 
+        halocat = CachedHaloCatalog()
+
+        ptclcat = UserSuppliedPtclCatalog(
+            redshift = halocat.redshift, Lbox = halocat.Lbox, 
+            particle_mass = halocat.particle_mass, 
+            x = np.array(halocat.ptcl_table['x']), 
+            y = np.array(halocat.ptcl_table['y']), 
+            z = np.array(halocat.ptcl_table['z']), 
+            vx = np.array(halocat.ptcl_table['vx']), 
+            vy = np.array(halocat.ptcl_table['vy']), 
+            vz = np.array(halocat.ptcl_table['vz'])
+            )
+        ptclcat.ptcl_table['x'] = 0.
+
+        fname = os.path.join(self.dummy_cache_baseloc, 'temp_particles.hdf5')
+
+        ptclcat.add_ptclcat_to_cache(
+            fname, halocat.simname, 'temp_testing_version_name', 'dummy string') 
+
+        assert os.path.isfile(ptclcat.log_entry.fname)
+
+        ptcl_cache = PtclTableCache()
+        assert ptclcat.log_entry in ptcl_cache.log
+
+        halocat2 = CachedHaloCatalog(ptcl_version_name = 'temp_testing_version_name')
+
+        assert np.all(halocat2.ptcl_table['x'] == 0)
+        assert not np.all(halocat.ptcl_table['x'] == 0)
+
+        ptcl_cache.remove_entry_from_cache_log(
+            ptclcat.log_entry.simname, 
+            ptclcat.log_entry.version_name,
+            ptclcat.log_entry.redshift,
+            ptclcat.log_entry.fname, 
+            raise_non_existence_exception = True, 
+            update_ascii = True,
+            delete_corresponding_ptcl_catalog = True)
+
+        assert ptclcat.log_entry not in ptcl_cache.log
+        assert os.path.isfile(ptclcat.log_entry.fname) is False
 
     def tearDown(self):
         try:

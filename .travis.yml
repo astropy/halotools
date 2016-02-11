@@ -31,7 +31,7 @@ env:
         - SETUP_CMD='test'
         - PIP_DEPENDENCIES=''
         # Here we list the dependencies to be installed that are in conda
-        - CONDA_DEPENDENCIES='Cython scipy beautifulsoup4 requests matplotlib h5py'
+        - CONDA_DEPENDENCIES='cython scipy beautifulsoup4 requests matplotlib h5py'
     matrix:
         # Make sure that egg_info works without dependencies
         - SETUP_CMD='egg_info'
@@ -95,7 +95,7 @@ install:
     # As described above, using ci-helpers, you should be able to set up an
     # environment with dependencies installed using conda and pip, but in some
     # cases this may not provide enough flexibility in how to install a
-    # specific dependency (and it will not be able to install non-Python 
+    # specific dependency (and it will not be able to install non-Python
     # dependencies). Therefore, you can also include commands below (as
     # well as at the start of the install section or in the before_install
     # section if they are needed before setting up conda) to install any

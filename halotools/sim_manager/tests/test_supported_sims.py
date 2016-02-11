@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import pytest
+from astropy.tests.helper import pytest 
 slow = pytest.mark.slow
 
+from unittest import TestCase
 
 import numpy as np
 from astropy.config.paths import _find_home 
@@ -16,29 +17,48 @@ else:
 
 from ..cached_halo_catalog import CachedHaloCatalog 
 
-__all__ = ('test_load_halo_catalogs', )
+__all__ = ('TestSupportedSims', )
 
-@pytest.mark.slow
-@pytest.mark.skipif('not APH_MACHINE')
-def test_load_halo_catalogs():
+class TestSupportedSims(TestCase):
+    """ Class providing unit testing for `~halotools.sim_manager.HaloTableCacheLogEntry`. 
     """
-    """
-
     adict = {'bolshoi': [0.33035, 0.54435, 0.67035, 1], 'bolplanck': [0.33406, 0.50112, 0.67, 1], 
         'consuelo': [0.333, 0.506, 0.6754, 1], 'multidark': [0.318, 0.5, 0.68, 1]}
-    for simname in adict.keys():
-        alist = adict[simname]
-        for a in alist:
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_load_halo_catalogs(self):
+        """
+        """
+
+        for simname in self.adict.keys():
+            alist = self.adict[simname]
+            for a in alist:
+                z = 1/a - 1
+                halocat = CachedHaloCatalog(simname = simname, redshift = z)
+                assert np.allclose(halocat.redshift, z, atol = 0.01)
+
+                if simname not in ['bolshoi', 'multidark']:
+                    particles = halocat.ptcl_table
+                else:
+                    if a == 1:
+                        particles = halocat.ptcl_table
+
+    @pytest.mark.slow
+    @pytest.mark.skipif('not APH_MACHINE')
+    def test_halo_rvir_in_correct_units(self):
+        """ Loop over all halo catalogs in cache and verify that the 
+        ``halo_rvir`` column never exeeds the number 50. This is a crude way of 
+        ensuring that units are in Mpc/h, not kpc/h. 
+        """
+        for simname in self.adict.keys():
+            alist = self.adict[simname]
+            a = alist[0]
             z = 1/a - 1
             halocat = CachedHaloCatalog(simname = simname, redshift = z)
-            assert np.allclose(halocat.redshift, z, atol = 0.01)
-
-            if simname not in ['bolshoi', 'multidark']:
-                particles = halocat.ptcl_table
-            else:
-                if a == 1:
-                    particles = halocat.ptcl_table
-
+            r = halocat.halo_table['halo_rvir']
+            assert np.all(r < 50.)
+        
 
 
 

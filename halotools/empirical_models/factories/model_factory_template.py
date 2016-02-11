@@ -73,28 +73,34 @@ class ModelFactory(object):
     def populate_mock(self, **kwargs):
         """ Method used to populate a simulation using the model. 
 
-        After calling this method, ``self`` will have a new ``mock`` attribute, 
-        which has a ``table`` bound to it containing the Monte Carlo 
+        After calling this method, the model instance will have a new ``mock`` attribute, 
+        which has a ``galaxy_table`` attribute bound to it containing the Monte Carlo 
         realization of the model. 
 
         Parameters 
         ----------
         halocat : object, optional 
-            Class instance of `~halotools.sim_manager.CachedHaloCatalog`. 
-            This object contains the halo catalog and its metadata.  
+            Either an instance of `~halotools.sim_manager.CachedHaloCatalog` 
+            or `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+            If you pass a ``halocat`` argument, do not pass additional arguments. 
 
         simname : string, optional
-            Nickname of the simulation. Currently supported simulations are 
+            Nickname of the simulation of the cached catalog. 
+            Currently supported simulations are 
             Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Nickname of the halo-finder, of the cached catalog, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        version_name : string, optional 
+            Nickname of the version of the cached halo catalog you want to populate. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         redshift : float, optional
-            Redshift of the desired catalog. 
+            Redshift of the cached catalog. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         """
@@ -110,7 +116,6 @@ class ModelFactory(object):
             "and the halo-finder passed as a keyword argument = ``%s``.\n"
             "You should instantiate a new model object if you wish to switch halo catalogs.")
 
-
         def test_consistency_with_existing_mock(**kwargs):
             if 'redshift' in kwargs:
                 redshift = kwargs['redshift']
@@ -120,8 +125,8 @@ class ModelFactory(object):
                 redshift = kwargs['halocat'].redshift
             else:
                 redshift = sim_defaults.default_redshift
-            if abs(redshift - self.mock.halocat.redshift) > 0.05:
-                raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, self.mock.halocat.redshift))
+            if abs(redshift - self.mock.redshift) > 0.05:
+                raise HalotoolsError(inconsistent_redshift_error_msg % (redshift, self.mock.redshift))
 
             if 'simname' in kwargs:
                 simname = kwargs['simname']
@@ -129,8 +134,8 @@ class ModelFactory(object):
                 simname = kwargs['halocat'].simname
             else:
                 simname = sim_defaults.default_simname
-            if simname != self.mock.halocat.simname:
-                raise HalotoolsError(inconsistent_simname_error_msg % (self.mock.halocat.simname, simname))
+            if simname != self.mock.simname:
+                raise HalotoolsError(inconsistent_simname_error_msg % (self.mock.simname, simname))
 
             if 'halo_finder' in kwargs:
                 halo_finder = kwargs['halo_finder']
@@ -138,23 +143,38 @@ class ModelFactory(object):
                 halo_finder = kwargs['halocat'].halo_finder
             else:
                 halo_finder = sim_defaults.default_halo_finder
-            if halo_finder != self.mock.halocat.halo_finder:
-                raise HalotoolsError(inconsistent_halo_finder_error_msg % (self.mock.halocat.halo_finder,halo_finder ))
+            if halo_finder != self.mock.halo_finder:
+                raise HalotoolsError(inconsistent_halo_finder_error_msg % (self.mock.halo_finder,halo_finder ))
+
+
+        try:
+            assert kwargs['simname'] == 'fake'
+            use_fake_sim = True
+        except (AssertionError, KeyError):
+            use_fake_sim = False
 
         if hasattr(self, 'mock'):
-            test_consistency_with_existing_mock(**kwargs)
-        else:
-            if 'halocat' in kwargs.keys():
-                halocat = kwargs['halocat']
-                del kwargs['halocat'] # otherwise the call to the mock factory below has multiple halocat kwargs
+            if use_fake_sim is True:
+                halocat = FakeSim(**kwargs)
+                test_consistency_with_existing_mock(halocat=halocat)
             else:
-                if 'redshift' in kwargs:
-                    halocat = CachedHaloCatalog(**kwargs)
-                elif hasattr(self, 'redshift'):
-                    halocat = CachedHaloCatalog(redshift = self.redshift, **kwargs)
+                test_consistency_with_existing_mock(**kwargs)
+        else:
+            if use_fake_sim is True:
+                halocat = FakeSim(**kwargs)
+            else:
+                if 'halocat' in kwargs.keys():
+                    halocat = kwargs['halocat']
+                    del kwargs['halocat'] # otherwise the call to the mock factory below has multiple halocat kwargs
                 else:
-                    halocat = CachedHaloCatalog(**kwargs)
-
+                    key_intersection = set(kwargs) & set(CachedHaloCatalog.acceptable_kwargs)
+                    halocat_kwargs = {key: kwargs[key] for key in key_intersection}
+                    if 'redshift' in key_intersection:
+                        halocat = CachedHaloCatalog(**halocat_kwargs)
+                    elif hasattr(self, 'redshift'):
+                        halocat = CachedHaloCatalog(redshift = self.redshift, **halocat_kwargs)
+                    else:
+                        halocat = CachedHaloCatalog(**halocat_kwargs)
 
             if hasattr(self, 'redshift'):
                 if abs(self.redshift - halocat.redshift) > 0.05:
@@ -162,10 +182,13 @@ class ModelFactory(object):
                         " and the halocat redshift = %.2f" % (self.redshift, halocat.redshift))
 
             mock_factory = self.mock_factory 
-            self.mock = mock_factory(halocat=halocat, model=self, populate=False)
+            self.mock = mock_factory(halocat=halocat, model=self)
 
+        additional_potential_kwargs = ('masking_function', '_testing_mode', 'enforce_PBC')
+        mockpop_keys = set(additional_potential_kwargs) & set(kwargs)
+        mockpop_kwargs = {key:kwargs[key] for key in mockpop_keys}
+        self.mock.populate(**mockpop_kwargs)
 
-        self.mock.populate()
 
     def update_param_dict_decorator(self, component_model, func_name):
         """ Decorator used to propagate any possible changes in the composite model param_dict 
@@ -344,7 +367,16 @@ class ModelFactory(object):
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
-        halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
+        try:
+            assert kwargs['simname'] == 'fake'
+            use_fake_sim = True
+        except (AssertionError, KeyError):
+            use_fake_sim = False
+
+        if use_fake_sim is True:
+            halocat = FakeSim(**halocat_kwargs)
+        else:
+            halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
@@ -521,7 +553,16 @@ class ModelFactory(object):
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
-        halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
+        try:
+            assert kwargs['simname'] == 'fake'
+            use_fake_sim = True
+        except (AssertionError, KeyError):
+            use_fake_sim = False
+
+        if use_fake_sim is True:
+            halocat = FakeSim(num_ptcl=1e5, **halocat_kwargs)
+        else:
+            halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']

@@ -25,6 +25,9 @@ if aph_home == detected_home:
 else:
     APH_MACHINE = False
 
+
+__all__ = ('TestHearin15', )
+
 class TestHearin15(TestCase):
 
 	@pytest.mark.slow
@@ -97,10 +100,6 @@ class TestHearin15(TestCase):
 
 		model_highz = PrebuiltHodModelFactory('leauthaud11', redshift = 2.)
 		model_highz.populate_mock(redshift = 2.)
-
-
-
-
 
 
 

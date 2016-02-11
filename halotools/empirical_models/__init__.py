@@ -10,6 +10,7 @@ from .model_helpers import *
 from .factories import *
 from .assembias_models import *
 from .phase_space_models import *
+from .component_model_templates import *
 from .sfr_models import *
 from .occupation_models import *
 from .smhm_models import *

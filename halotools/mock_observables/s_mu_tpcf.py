@@ -39,8 +39,12 @@ def s_mu_tpcf(sample1, s_bins, mu_bins, sample2=None, randoms=None,\
     the plane of the sky, and z is the radial distance coordinate.  This is the 'distant 
     observer' approximation.
     
-    Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`s_mu_tpcf_usage_tutorial`. 
+    Example calls to this function appear in the documentation below. 
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` and ``sample2`` arguments.   
+
+    For thorough documentation of all features, see :ref:`s_mu_tpcf_usage_tutorial`. 
     
     Parameters 
     ----------

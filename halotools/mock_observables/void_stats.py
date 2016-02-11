@@ -29,6 +29,10 @@ def void_prob_func(sample1, rbins, n_ran, period, num_threads=1,
     :math:`P_0(r)` is defined as the probability that randomly placed sphere of size 
     :math:`r` contains zero points.
     
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` argument.   
+
     Parameters
     ----------
     sample1 : array_like
@@ -128,7 +132,11 @@ def underdensity_prob_func(sample1, rbins, n_ran, period, u=0.2, num_threads=1,
     
     :math:`P_U(r)` is defined as the probability that a randomly placed sphere of size 
     :math:`r` encompases a volume with less than a specified density.
-    
+
+    See the :ref:`mock_obs_pos_formatting` documentation page for 
+    instructions on how to transform your coordinate position arrays into the 
+    format accepted by the ``sample1`` argument.   
+
     Parameters
     ----------
     sample1 : array_like

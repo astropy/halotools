@@ -351,7 +351,7 @@ class DownloadManager(object):
 
 
     def download_ptcl_table(self, simname, redshift, 
-        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_version_name, 
+        dz_tol = 0.1, overwrite=False, version_name = sim_defaults.default_ptcl_version_name, 
         download_dirname = 'std_cache_loc', ignore_nearby_redshifts = False, 
         **kwargs):
         """ Method to download one of the binary files storing a 
@@ -792,10 +792,15 @@ class DownloadManager(object):
         except KeyError:
             version_name = sim_defaults.default_version_name
 
+        try:
+            ptcl_version_name = kwargs['ptcl_version_name']
+        except KeyError:
+            ptcl_version_name = sim_defaults.default_ptcl_version_name
+
         if catalog_type is 'particles':
             filename_list = (
                 self._ptcl_tables_available_for_download(simname = simname, 
-                    version_name = version_name)
+                    version_name = ptcl_version_name)
                 )
         elif catalog_type is 'halos':
             filename_list = (
@@ -810,7 +815,7 @@ class DownloadManager(object):
         return output_fname, actual_redshift
 
     def _ptcl_tables_available_for_download(self, 
-        version_name = sim_defaults.default_version_name, **kwargs):
+        version_name = sim_defaults.default_ptcl_version_name, **kwargs):
         """ Method searches the appropriate web location and
         returns a list of the filenames of all reduced
         halo catalog binaries processed by Halotools

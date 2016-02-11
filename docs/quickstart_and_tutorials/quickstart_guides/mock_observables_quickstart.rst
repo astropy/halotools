@@ -2,7 +2,7 @@
 .. _mock_observation_quickstart:
 
 ******************************************************************
-Quickstart Guide to Mock Observations 
+Quickstart guide to making observations on your mock
 ******************************************************************
 
 
@@ -32,14 +32,20 @@ For any model, all mock populations come with a built-in method to calculate thi
 See `~halotools.empirical_models.MockFactory.compute_galaxy_matter_cross_clustering` for further documentation 
 and more example usages. 
 
-Group Identification 
+
+Redshift-Space Distortions 
+-----------------------------
+
+Description coming soon!
+
+
+
+Galaxy Group Identification 
 ------------------------------------
 
-Galaxies congregate into groups. The ideal group-finding algorithm would 
-group galaxies together according to their true, underlying dark matter halos. In reality, 
-no group-finder is perfect, particularly because of line-of-sight interpolers due to 
-redshift-space distortions. There are a variety of algorithms with different 
-levels of purity and incompleteness; to compute group membership of a mock galaxy population 
-using a common friends-of-friends algorithm:
+Description coming soon!
 
->>> groupIDs = hod_model.mock.compute_fof_group_ids() # doctest: +SKIP
+
+
+
+

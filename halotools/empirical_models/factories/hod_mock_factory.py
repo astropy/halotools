@@ -50,7 +50,7 @@ class HodMockFactory(MockFactory):
 
     """
 
-    def __init__(self, populate=True, **kwargs):
+    def __init__(self, **kwargs):
         """
         Parameters 
         ----------
@@ -61,13 +61,6 @@ class HodMockFactory(MockFactory):
         model : object, keyword argument
             A model built by a sub-class of `~halotools.empirical_models.HodModelFactory`. 
 
-        additional_haloprops : string or list of strings, optional   
-            Each entry in this list must be a column key of ``halocat.halo_table``. 
-            For each entry of ``additional_haloprops``, each member of 
-            `mock.galaxy_table` will have a column key storing this property of its host halo. 
-            If ``additional_haloprops`` is set to the string value ``all``, 
-            the galaxy table will inherit every halo property in the catalog. Default is None. 
-
         populate : boolean, optional   
             If set to ``False``, the class will perform all pre-processing tasks 
             but will not call the ``model`` to populate the ``galaxy_table`` 
@@ -77,16 +70,16 @@ class HodMockFactory(MockFactory):
             If True, only halos passing the mass completeness cut defined in 
             `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
             Default is True. 
+
         """
 
-        super(HodMockFactory, self).__init__(populate=populate, **kwargs)
+        MockFactory.__init__(self, **kwargs)
 
-        self.preprocess_halo_catalog()
+        halocat = kwargs['halocat']
+        self.preprocess_halo_catalog(halocat)
 
-        if populate is True:
-            self.populate()
 
-    def preprocess_halo_catalog(self, apply_completeness_cut = True, **kwargs):
+    def preprocess_halo_catalog(self, halocat, apply_completeness_cut = True):
         """ Method to pre-process a halo catalog upon instantiation of 
         the mock object. This pre-processing includes identifying the 
         catalog columns that will be used by the model to create the mock, 
@@ -112,18 +105,16 @@ class HodMockFactory(MockFactory):
             `~halotools.empirical_models.model_defaults` will be used to populate the mock. 
             Default is True. 
         """
-
         ################ Make cuts on halo catalog ################
         # Select host halos only, since this is an HOD-style model
-        self.halo_table = SampleSelector.host_halo_selection(
-            table = self.halo_table)
+        halo_table = SampleSelector.host_halo_selection(table = halocat.halo_table)
 
         # make a conservative mvir completeness cut 
         # This cut can be controlled by changing sim_defaults.Num_ptcl_requirement
         if apply_completeness_cut is True:
-            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.halocat.particle_mass
-            mass_cut = (self.halo_table['halo_mvir'] > cutoff_mvir)
-            self.halo_table = self.halo_table[mass_cut]
+            cutoff_mvir = sim_defaults.Num_ptcl_requirement*self.particle_mass
+            mass_cut = (halo_table['halo_mvir'] > cutoff_mvir)
+            halo_table = halo_table[mass_cut]
 
         ############################################################
 
@@ -131,16 +122,58 @@ class HodMockFactory(MockFactory):
         try:
             d = self.model.new_haloprop_func_dict
             for new_haloprop_key, new_haloprop_func in d.iteritems():
-                self.halo_table[new_haloprop_key] = new_haloprop_func(table = self.halo_table)
+                halo_table[new_haloprop_key] = new_haloprop_func(table = halo_table)
                 self.additional_haloprops.append(new_haloprop_key)
         except AttributeError:
             pass
 
-        self.model.build_lookup_tables(**kwargs)
+        self._orig_halo_table = Table()
+        for key in self.additional_haloprops:
+            self._orig_halo_table[key] = halo_table[key][:]
+
+        self.model.build_lookup_tables()
 
     def populate(self, **kwargs):
         """ Method populating halos with mock galaxies. 
+
+        Parameters 
+        ------------
+        masking_function : function, optional 
+            Function object used to place a mask on the halo table prior to 
+            calling the mock generating functions. Calling signature of the 
+            function should be to accept a single positional argument storing 
+            a table, and returning a boolean numpy array that will be used 
+            as a fancy indexing mask. All masked halos will be ignored during 
+            mock population. Default is None. 
+
+        enforce_PBC : bool, optional 
+            If set to True, after galaxy positions are assigned the 
+            `model_helpers.enforce_periodicity_of_box` will re-map 
+            satellite galaxies whose positions spilled over the edge 
+            of the periodic box. Default is True. This variable should only 
+            ever be set to False when using the ``masking_function`` to 
+            populate a specific spatial subvolume, as in that case PBCs 
+            no longer apply. 
         """
+        # The _testing_mode keyword is for unit-testing only 
+        # it has been intentionally left out of the docstring
+        try:
+            self._testing_mode = kwargs['_testing_mode']
+        except KeyError:
+            self._testing_mode = False
+
+        try:
+            self.enforce_PBC = kwargs['enforce_PBC']
+        except KeyError:
+            self.enforce_PBC = True
+
+        try:
+            masking_function = kwargs['masking_function']
+            mask = masking_function(self._orig_halo_table)
+            self.halo_table = self._orig_halo_table[mask]
+        except:
+            self.halo_table = self._orig_halo_table
+
         self.allocate_memory()
 
         # Loop over all gal_types in the model 
@@ -175,14 +208,16 @@ class HodMockFactory(MockFactory):
             gal_type_slice = self._gal_type_indices[func.gal_type]
             func(table = self.galaxy_table[gal_type_slice])
                 
-        # Positions are now assigned to all populations. 
-        # Now enforce the periodic boundary conditions for all populations at once
-        self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['x'], self.halocat.Lbox)
-        self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['y'], self.halocat.Lbox)
-        self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
-            self.galaxy_table['z'], self.halocat.Lbox)
+        if self.enforce_PBC is True:
+            self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
+                self.galaxy_table['x'], self.Lbox, 
+                check_multiple_box_lengths = self._testing_mode)
+            self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
+                self.galaxy_table['y'], self.Lbox, 
+                check_multiple_box_lengths = self._testing_mode)
+            self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
+                self.galaxy_table['z'], self.Lbox, 
+                check_multiple_box_lengths = self._testing_mode)
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)

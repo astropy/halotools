@@ -22,6 +22,7 @@ simname = sim_defaults.default_simname
 halo_finder = sim_defaults.default_halo_finder
 redshift = sim_defaults.default_redshift
 version_name = sim_defaults.default_version_name
+ptcl_version_name = sim_defaults.default_ptcl_version_name
 
 # Done parsing inputs
 
@@ -41,7 +42,7 @@ if args.overwrite == False:
 
     gen2 = downman.ptcl_table_cache.matching_log_entry_generator
     matching_ptcl_cats = list(
-        gen2(simname = simname, version_name = version_name, 
+        gen2(simname = simname, version_name = ptcl_version_name, 
             redshift = redshift, dz_tol = 0.1))
 
     if len(matching_halocats) > 0:

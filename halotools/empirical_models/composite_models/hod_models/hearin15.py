@@ -21,19 +21,24 @@ __all__ = ['hearin15_model_dictionary']
 
 
 def hearin15_model_dictionary(central_assembias_strength = 1, 
-    central_assembias_strength_abcissa = [1e12], 
+    central_assembias_strength_abscissa = [1e12], 
     satellite_assembias_strength = 0.2, 
-    satellite_assembias_strength_abcissa = [1e12], 
+    satellite_assembias_strength_abscissa = [1e12], 
     **kwargs):
     """ 
     Dictionary to build an HOD-style model in which 
     central and satellite occupations statistics are assembly-biased. 
+
+    See :ref:`hearin15_composite_model` for a tutorial on this model. 
 
     Parameters 
     ----------
     threshold : float, optional
         Stellar mass threshold of the mock galaxy sample. 
         Default value is specified in the `~halotools.empirical_models.model_defaults` module.
+
+    redshift : float, optional  
+        Default is set in the `~halotools.sim_manager.sim_defaults` module. 
 
     sec_haloprop_key : string, optional  
         String giving the column name of the secondary halo property modulating 
@@ -44,7 +49,7 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
         Fraction or list of fractions between -1 and 1 defining 
         the assembly bias correlation strength. Default is a constant strength of 0.5. 
 
-    central_assembias_strength_abcissa : list, optional 
+    central_assembias_strength_abscissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
         Default is a constant strength of 0.5. 
 
@@ -52,7 +57,7 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
         Fraction or list of fractions between -1 and 1 defining 
         the assembly bias correlation strength. Default is a constant strength of 0.5. 
 
-    satellite_assembias_strength_abcissa : list, optional 
+    satellite_assembias_strength_abscissa : list, optional 
         Values of the primary halo property at which the assembly bias strength is specified. 
         Default is a constant strength of 0.5. 
 
@@ -61,9 +66,6 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
         we split halos into two groupings based on 
         their conditional secondary percentiles. 
         Default is 0.5 for a constant 50/50 split. 
-
-    redshift : float, optional  
-        Default is set in the `~halotools.sim_manager.sim_defaults` module. 
 
     concentration_binning : tuple, optional 
         Three-element tuple. The first entry will be the minimum 
@@ -104,7 +106,7 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
     else:
         centrals_occupation = leauthaud11_components.AssembiasLeauthaud11Cens(
             assembias_strength = central_assembias_strength, 
-            assembias_strength_abcissa = central_assembias_strength_abcissa, 
+            assembias_strength_abscissa = central_assembias_strength_abscissa, 
             **kwargs)
 
     # Build the profile model
@@ -117,7 +119,7 @@ def hearin15_model_dictionary(central_assembias_strength = 1,
     else:
         satellites_occupation = leauthaud11_components.AssembiasLeauthaud11Sats(
             assembias_strength = satellite_assembias_strength, 
-            assembias_strength_abcissa = satellite_assembias_strength_abcissa, 
+            assembias_strength_abscissa = satellite_assembias_strength_abscissa, 
             **kwargs)
         # There is no need for a redundant new_haloprop_func_dict 
         # if this is already possessed by the central model

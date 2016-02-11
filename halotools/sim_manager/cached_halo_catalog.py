@@ -14,6 +14,7 @@ except ImportError:
 
 from ..sim_manager import sim_defaults, supported_sims
 
+from ..utils import broadcast_host_halo_property, add_halo_hostid
 
 from .halo_table_cache import HaloTableCache
 from .ptcl_table_cache import PtclTableCache
@@ -39,9 +40,11 @@ class CachedHaloCatalog(object):
     See the Examples section below for details on how to 
     access and manipulate this data. 
     """
+    acceptable_kwargs = ('ptcl_version_name', 'fname', 'simname', 
+        'halo_finder', 'redshift', 'version_name', 'dz_tol', 'update_cached_fname', 
+        'preload_halo_table')
 
-    def __init__(self, preload_halo_table = False, dz_tol = 0.05, 
-        update_cached_fname = False, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Parameters 
         ------------
@@ -71,6 +74,15 @@ class CachedHaloCatalog(object):
 
             Default is set by the ``default_version_name`` variable in the 
             `~halotools.sim_manager.sim_defaults` module. 
+
+        ptcl_version_name : string, optional    
+            Nicknake of the version of the particle catalog associated with 
+            the halos. 
+
+            This argument is typically only used if you have cached your own 
+            particles via the `~halotools.sim_manager.UserSuppliedPtclCatalog` class.
+            Default is set by the ``default_version_name`` variable in the 
+            `~halotools.sim_manager.sim_defaults` module.             
 
         fname : string, optional 
             Absolute path to the location on disk storing the hdf5 file 
@@ -139,6 +151,8 @@ class CachedHaloCatalog(object):
         $HOME/.astropy/cache/halotools/halo_table_cache_log.txt
 
         """
+        self._verify_acceptable_constructor_call(*args, **kwargs)
+
         try:
             import h5py
             self.h5py = h5py
@@ -146,7 +160,16 @@ class CachedHaloCatalog(object):
             raise HalotoolsError("Must have h5py package installed "
                 "to use CachedHaloCatalog objects")
 
+        try:
+            dz_tol = kwargs['dz_tol']
+        except KeyError:
+            dz_tol = 0.05
         self._dz_tol = dz_tol
+
+        try:
+            update_cached_fname = kwargs['update_cached_fname']
+        except KeyError:
+            update_cached_fname = False
         self._update_cached_fname = update_cached_fname
 
         self.halo_table_cache = HaloTableCache() 
@@ -160,13 +183,44 @@ class CachedHaloCatalog(object):
 
         self._bind_additional_metadata()
 
+        try:
+            preload_halo_table = kwargs['preload_halo_table']
+        except KeyError:
+            preload_halo_table = False 
         if preload_halo_table is True:
             _ = self.halo_table
             del _
 
+    def _verify_acceptable_constructor_call(self, *args, **kwargs):
+        """
+        """
+
+        try:
+            assert len(args) == 0
+        except AssertionError:
+            msg = ("\nCachedHaloCatalog only accepts keyword arguments, not position arguments. \n")
+            raise HalotoolsError(msg)
+
+        for key in kwargs.keys():
+            try:
+                assert key in self.acceptable_kwargs
+            except AssertionError:
+                msg = ("\nCachedHaloCatalog got an unexpected keyword ``" + key + "``\n"
+                    "The only acceptable keywords are listed below:\n\n")
+                for acceptable_key in self.acceptable_kwargs:
+                    msg += "``" + acceptable_key + "``\n"
+                raise HalotoolsError(msg)
+
+
     def _determine_cache_log_entry(self, **kwargs):
         """
         """ 
+        try:
+            self.ptcl_version_name = kwargs['ptcl_version_name']
+            self._default_ptcl_version_name_choice = False
+        except KeyError:
+            self.ptcl_version_name = sim_defaults.default_ptcl_version_name
+            self._default_ptcl_version_name_choice = True
 
         if 'fname' in kwargs:
             fname = kwargs['fname']
@@ -209,28 +263,28 @@ class CachedHaloCatalog(object):
         else:
 
             try:
-                simname = kwargs['simname']
+                simname = str(kwargs['simname'])
                 self._default_simname_choice = False
             except KeyError:
                 simname = sim_defaults.default_simname
                 self._default_simname_choice = True
 
             try:
-                halo_finder = kwargs['halo_finder']
+                halo_finder = str(kwargs['halo_finder'])
                 self._default_halo_finder_choice = False
             except KeyError:
                 halo_finder = sim_defaults.default_halo_finder
                 self._default_halo_finder_choice = True
 
             try:
-                version_name = kwargs['version_name']
+                version_name = str(kwargs['version_name'])
                 self._default_version_name_choice = False
             except KeyError:
                 version_name = sim_defaults.default_version_name
                 self._default_version_name_choice = True
             
             try:
-                redshift = kwargs['redshift']
+                redshift = float(kwargs['redshift'])
                 self._default_redshift_choice = False
             except KeyError:
                 redshift = sim_defaults.default_redshift
@@ -287,15 +341,15 @@ class CachedHaloCatalog(object):
             raise HalotoolsError(msg)
 
         gen0 = ptcl_table_cache.matching_log_entry_generator(
-            simname = self.simname, version_name = self.version_name, 
+            simname = self.simname, version_name = self.ptcl_version_name, 
             redshift = self.redshift, dz_tol = self._dz_tol)
         gen1 = ptcl_table_cache.matching_log_entry_generator(
-            simname = self.simname, version_name = self.version_name)
+            simname = self.simname, version_name = self.ptcl_version_name)
         gen2 = ptcl_table_cache.matching_log_entry_generator(simname = self.simname)
 
         matching_entries = list(gen0)     
 
-        msg = ("\nYou tried to load a cached halo catalog "
+        msg = ("\nYou tried to load a cached particle catalog "
             "with the following characteristics:\n\n")
 
         if self._default_simname_choice is True:
@@ -304,11 +358,11 @@ class CachedHaloCatalog(object):
         else:
             msg += "simname = ``" + str(self.simname) + "``\n"
 
-        if self._default_version_name_choice is True:
-            msg += ("version_name = ``" + str(self.version_name) 
+        if self._default_ptcl_version_name_choice is True:
+            msg += ("ptcl_version_name = ``" + str(self.ptcl_version_name) 
                 + "``  (set by sim_defaults.default_version_name)\n")
         else:
-            msg += "version_name = ``" + str(self.version_name) + "``\n"
+            msg += "ptcl_version_name = ``" + str(self.ptcl_version_name) + "``\n"
 
         if self._default_redshift_choice is True:
             msg += ("redshift = ``" + str(self.redshift) 
@@ -463,9 +517,17 @@ class CachedHaloCatalog(object):
         except AttributeError:
             if self.log_entry.safe_for_cache == True:
                 self._halo_table = Table.read(self.fname, path='data')
+                self._add_new_derived_columns(self._halo_table)
                 return self._halo_table
             else:
                 raise InvalidCacheLogEntry(self.log_entry._cache_safety_message)
+
+    def _add_new_derived_columns(self, t):
+        if 'halo_hostid' not in t.keys():
+            add_halo_hostid(t)
+
+        if 'halo_mvir_host_halo' not in t.keys():
+            broadcast_host_halo_property(t, 'halo_mvir')
 
     def _bind_additional_metadata(self):
         """ Create convenience bindings of all metadata to the `CachedHaloCatalog` instance. 
@@ -500,12 +562,6 @@ class CachedHaloCatalog(object):
                         raise HalotoolsError(msg)
                 else:
                     setattr(self, attr, getattr(matching_sim, attr))
-        else:
-            msg = ("You have stored your own simulation in the Halotools cache \n"
-                "but you have not added a corresponding NbodySimulation sub-class. \n"
-                "This is permissible, but not recommended. \n"
-                "See, for example, the Bolshoi sub-class for how to add your own simulation. \n")
-            warn(msg)
 
     def _retrieve_supported_sim(self):
         """
@@ -544,9 +600,44 @@ class CachedHaloCatalog(object):
             else:
                 raise InvalidCacheLogEntry(ptcl_log_entry._cache_safety_message)
 
+    def _enforce_halo_ptcl_catalog_consistency(self, halo_log_entry, ptcl_log_entry):
+        """
+        """
+        halo_fname = halo_log_entry.fname
+        ptcl_fname = ptcl_log_entry.fname
 
+        hf = self.h5py.File(halo_fname)
+        pf = self.h5py.File(ptcl_fname)
 
+        try:
+            assert abs(float(hf.attrs['redshift']) - float(pf.attrs['redshift'])) < 0.001
+        except AssertionError:
+            msg = ("\nYour halo and particle catalogs have inconsistent redshifts:\n\n"
+                "Halo catalog redshift = " + str(hf.attrs['redshift']) + "\n"
+                "Ptcl catalog redshift = " + str(pf.attrs['redshift']) + "\n\n"
+                )
+            raise HalotoolsError(msg)
 
+        try:
+            assert hf.attrs['simname'] == pf.attrs['simname']
+        except AssertionError:
+            msg = ("\nYour halo and particle catalogs have inconsistent simnames:\n\n"
+                "Halo catalog simname = " + str(hf.attrs['simname']) + "\n"
+                "Ptcl catalog simname = " + str(pf.attrs['simname']) + "\n\n"
+                )
+            raise HalotoolsError(msg)
+
+        try:
+            assert abs(float(hf.attrs['Lbox']) - float(pf.attrs['Lbox'])) < 0.01
+        except AssertionError:
+            msg = ("\nYour halo and particle catalogs have inconsistent Lbox:\n\n"
+                "Halo catalog Lbox = " + str(hf.attrs['Lbox']) + "\n"
+                "Ptcl catalog Lbox = " + str(pf.attrs['Lbox']) + "\n\n"
+                )
+            raise HalotoolsError(msg)
+
+        hf.close()
+        pf.close()
 
 
 

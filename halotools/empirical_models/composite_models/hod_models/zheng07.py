@@ -14,15 +14,18 @@ from ...occupation_models import zheng07_components
 from ...phase_space_models import NFWPhaseSpace, TrivialPhaseSpace
 from ... import factories
 
-from ....sim_manager import FakeSim
+from ....sim_manager import FakeSim, sim_defaults
 
 
 __all__ = ['zheng07_model_dictionary']
 
 
 def zheng07_model_dictionary(
-    threshold = model_defaults.default_luminosity_threshold, **kwargs):
+    threshold = model_defaults.default_luminosity_threshold, 
+    redshift = sim_defaults.default_redshift, **kwargs):
     """ Dictionary for an HOD-style based on Zheng et al. (2007), arXiv:0703457. 
+
+    See :ref:`zheng07_composite_model` for a tutorial on this model. 
 
     There are two populations, centrals and satellites. 
     Central occupation statistics are given by a nearest integer distribution 
@@ -44,6 +47,12 @@ def zheng07_model_dictionary(
     threshold : float, optional 
         Luminosity threshold of the galaxy sample being modeled. 
         Default is set in the `~halotools.empirical_models.model_defaults` module. 
+
+    redshift : float, optional 
+        Redshift of the galaxy population being modeled. 
+        If you will be using the model instance to populate mock catalogs, 
+        you must choose a redshift that is consistent with the halo catalog. 
+        Default is set in the `~halotools.empirical_models.model_defaults` module.         
 
     Returns 
     -------
@@ -68,21 +77,23 @@ def zheng07_model_dictionary(
     subpopulation_dictionary_centrals = {}
 
     # Build the `occupation` feature
-    centrals_occupation = zheng07_components.Zheng07Cens(threshold = threshold, **kwargs)
+    centrals_occupation = zheng07_components.Zheng07Cens(
+        threshold = threshold, redshift = redshift)
 
     # Build the `profile` feature
-    centrals_profile = TrivialPhaseSpace(**kwargs)
+    centrals_profile = TrivialPhaseSpace(redshift = redshift, **kwargs)
 
     ####################################
     ### Build subpopulation dictionary for satellites
     subpopulation_dictionary_satellites = {}
 
     # Build the occupation model
-    satellites_occupation = zheng07_components.Zheng07Sats(threshold = threshold, **kwargs)
+    satellites_occupation = zheng07_components.Zheng07Sats(
+        threshold = threshold, redshift = redshift, **kwargs)
     satellites_occupation._suppress_repeated_param_warning = True
 
     # Build the profile model
-    satellites_profile = NFWPhaseSpace(**kwargs)    
+    satellites_profile = NFWPhaseSpace(redshift = redshift, **kwargs)    
 
 
     return ({'centrals_occupation': centrals_occupation, 

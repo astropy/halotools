@@ -87,6 +87,8 @@ class Leauthaud11Cens(OccupationComponent):
             )
 
         self.publications = ['arXiv:1103.2077', 'arXiv:1104.0928']
+        self.publications.extend(self.smhm_model.publications)
+        self.publications = list(set(self.publications))
 
     def get_published_parameters(self):
         """ Return the values of ``self.param_dict`` according to 
@@ -167,7 +169,7 @@ class Leauthaud11Cens(OccupationComponent):
 
     def mean_log_halo_mass(self, log_stellar_mass):
         """ Return the base-10 logarithm of the halo mass of a central galaxy as a function 
-        of the input stellar mass.  
+        of the base-10 logarithm of the input stellar mass. 
 
         Parameters 
         ----------
@@ -226,8 +228,6 @@ class Leauthaud11Sats(OccupationComponent):
         self.central_occupation_model = Leauthaud11Cens(
             threshold=threshold, prim_haloprop_key = prim_haloprop_key, 
             redshift = redshift, **kwargs)
-        self.ancillary_model_dependencies = ['central_occupation_model']
-        self.ancillary_model_param_keys = self.central_occupation_model.param_dict.keys()
 
         super(Leauthaud11Sats, self).__init__(
             gal_type='satellites', threshold=threshold, 
@@ -363,7 +363,7 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
             their conditional secondary percentiles. 
             Default is 0.5 for a constant 50/50 split. 
 
-        split_abcissa : list, optional 
+        split_abscissa : list, optional 
             Values of the primary halo property at which the halos are split as described above in 
             the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
             the interpolation will be done in the logarithm of the primary halo property. 
@@ -374,10 +374,10 @@ class AssembiasLeauthaud11Cens(Leauthaud11Cens, HeavisideAssembias):
             defining the assembly bias correlation strength. 
             Default is 0.5. 
 
-        assembias_strength_abcissa : list, optional 
+        assembias_strength_abscissa : list, optional 
             Values of the primary halo property at which the assembly bias strength is specified. 
             Default is to assume a constant strength of 0.5. If passing a list, the strength 
-            will interpreted at the input ``assembias_strength_abcissa``.
+            will interpreted at the input ``assembias_strength_abscissa``.
             Default is to assume a constant strength of 0.5. 
 
         """
@@ -420,7 +420,7 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
             their conditional secondary percentiles. 
             Default is 0.5 for a constant 50/50 split. 
 
-        split_abcissa : list, optional 
+        split_abscissa : list, optional 
             Values of the primary halo property at which the halos are split as described above in 
             the ``split`` argument. If ``loginterp`` is set to True (the default behavior), 
             the interpolation will be done in the logarithm of the primary halo property. 
@@ -431,10 +431,10 @@ class AssembiasLeauthaud11Sats(Leauthaud11Sats, HeavisideAssembias):
             defining the assembly bias correlation strength. 
             Default is 0.5. 
 
-        assembias_strength_abcissa : list, optional 
+        assembias_strength_abscissa : list, optional 
             Values of the primary halo property at which the assembly bias strength is specified. 
             Default is to assume a constant strength of 0.5. If passing a list, the strength 
-            will interpreted at the input ``assembias_strength_abcissa``.
+            will interpreted at the input ``assembias_strength_abscissa``.
             Default is to assume a constant strength of 0.5. 
 
 

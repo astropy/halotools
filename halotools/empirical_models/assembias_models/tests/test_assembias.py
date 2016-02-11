@@ -9,7 +9,7 @@ from astropy.table import Table
 
 from ...occupation_models import *
 from ... import model_defaults
-from ...sfr_models import BinaryGalpropInterpolModel
+from ...component_model_templates import BinaryGalpropInterpolModel
 
 from ....sim_manager import FakeSim
 from ....utils.table_utils import SampleSelector, compute_conditional_percentiles
@@ -95,9 +95,9 @@ class TestAssembias(TestCase):
         yield model_class()
         yield model_class(split=0.75)
         yield model_class(split=0.25, assembias_strength = -0.5)
-        yield model_class(split_abcissa = [1e10, 1e15], 
+        yield model_class(split_abscissa = [1e10, 1e15], 
             split = [-0.25, 1.75], 
-            assembias_strength_abcissa = [1e10, 1e13, 1e15],
+            assembias_strength_abscissa = [1e10, 1e13, 1e15],
             assembias_strength = [-1.25, 0.25, -5.75])
 
     def test_preloaded_assembiased_occupation_models(self):

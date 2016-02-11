@@ -13,6 +13,8 @@ from warnings import warn
 
 from .match import crossmatch
 
+__all__ = ('host_status', )
+
 def host_status(halos):
 	"""
 	Function divides input ``halos`` into a few categories:

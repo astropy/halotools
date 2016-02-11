@@ -41,6 +41,9 @@ class FoFGroups(object):
         The first two dimensions (x, y) define the plane for perpendicular distances. 
         The third dimension (z) is used for line-of-sight distances.  This is the 
         "distant observer" approximation.
+        See the :ref:`mock_obs_pos_formatting` documentation page for 
+        instructions on how to transform your coordinate position arrays into the 
+        format accepted by the ``positions`` argument.   
         
         Parameters
         ----------

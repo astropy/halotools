@@ -9,8 +9,9 @@ from astropy.table import Table
 import numpy as np
 
 from .user_supplied_halo_catalog import UserSuppliedHaloCatalog
+from .user_supplied_ptcl_catalog import UserSuppliedPtclCatalog
 
-__all__ = ('FakeSim', )
+__all__ = ('FakeSim', 'FakeSimHalosNearBoundaries')
 
 class FakeSim(UserSuppliedHaloCatalog):
 	""" Fake simulation data used in the test suite of `~halotools.empirical_models`. 
@@ -28,8 +29,8 @@ class FakeSim(UserSuppliedHaloCatalog):
 	for calls with the same arguments. 
 	"""
 
-	def __init__(self, num_massbins = 6, num_halos_per_massbin = int(1e3), 
-		num_ptcl = int(1e4), seed = 43, redshift = 0.):
+	def __init__(self, num_massbins = 10, num_halos_per_massbin = int(100), 
+		num_ptcl = int(1e4), seed = 43, redshift = 0., **kwargs):
 		"""
 		Parameters 
 		----------
@@ -49,7 +50,122 @@ class FakeSim(UserSuppliedHaloCatalog):
 		"""
 		Lbox = 250.0
 		particle_mass = 1.e8
-		simname = 'fake'
+		self.simname = 'fake'
+		self.halo_finder = 'fake'
+		self.version_name = 'dummy_version'
+
+		self.seed = seed
+		np.random.seed(self.seed)
+
+		self.num_massbins = num_massbins
+		self.num_halos_per_massbin = num_halos_per_massbin
+		self.num_halos = self.num_massbins*self.num_halos_per_massbin
+		self.num_ptcl = num_ptcl
+
+		halo_id = np.arange(1e5, 1e5+2*self.num_halos, dtype = 'i8')
+		np.random.shuffle(halo_id)
+		halo_id = halo_id[:self.num_halos]
+
+		randomizer = np.random.random(self.num_halos)
+		subhalo_fraction = 0.1
+		upid = np.where(randomizer > subhalo_fraction, -1, 1)
+
+		host_mask = upid == -1
+		host_ids = halo_id[host_mask]
+		upid[~host_mask] = np.random.choice(host_ids, len(upid[~host_mask]))
+		
+		halo_hostid = np.zeros(len(halo_id), dtype = 'i8')
+		halo_hostid[host_mask] = halo_id[host_mask]
+		halo_hostid[~host_mask] = upid[~host_mask]
+
+		massbins = np.logspace(10, 16, self.num_massbins)
+		mvir = np.repeat(massbins, self.num_halos_per_massbin, axis=0)
+		mpeak = np.repeat(massbins, self.num_halos_per_massbin, axis=0)
+		logrvirbins = (np.log10(massbins) - 15)/3.
+		rvir = np.repeat(10.**logrvirbins, self.num_halos_per_massbin, axis=0)
+		logvmaxbins = -4.25 + 0.5*(np.log10(massbins) - logrvirbins)
+		vmax = np.repeat(10.**logvmaxbins, self.num_halos_per_massbin, axis=0)
+		vpeak = vmax
+		spin = np.random.random(self.num_halos)
+		conc = np.random.uniform(4, 15, self.num_halos)
+		rs = rvir/conc
+		zhalf = np.random.uniform(0, 10, self.num_halos)
+
+		x = np.random.uniform(0, Lbox, self.num_halos)
+		y = np.random.uniform(0, Lbox, self.num_halos)
+		z = np.random.uniform(0, Lbox, self.num_halos)
+		vx = np.random.uniform(-500, 500, self.num_halos)
+		vy = np.random.uniform(-500, 500, self.num_halos)
+		vz = np.random.uniform(-500, 500, self.num_halos)
+
+		px = np.random.uniform(0, Lbox, self.num_ptcl)
+		py = np.random.uniform(0, Lbox, self.num_ptcl)
+		pz = np.random.uniform(0, Lbox, self.num_ptcl)
+		pvx = np.random.uniform(-1000, 1000, self.num_ptcl)
+		pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
+		pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
+		ptclcat = UserSuppliedPtclCatalog(
+			Lbox = Lbox, redshift = redshift, particle_mass = particle_mass, 
+			x = px, y = py, z = pz, vx = pvx, vy = pvy, vz = pvz)
+		
+		d = {'x': px, 'y': py, 'z': pz, 'vx': pvx, 'vy': pvy, 'vz': pvz}
+
+
+		UserSuppliedHaloCatalog.__init__(self, 
+			Lbox = Lbox, particle_mass = particle_mass, 
+			redshift = redshift, 
+			halo_id = halo_id, 
+			halo_x = x, halo_y = y, halo_z = z, 
+			halo_vx = vx, halo_vy = vy, halo_vz = vz, 
+			halo_upid = upid, 
+			halo_hostid = halo_hostid, 
+			halo_mvir = mvir, 
+			halo_mpeak = mpeak, 
+			halo_m200b = mvir, 
+			halo_rvir = rvir, 
+			halo_rs = rs, 
+			halo_zhalf = zhalf, 
+			halo_nfw_conc = conc, 
+			halo_vmax = vmax, 
+			halo_vpeak = vpeak, 
+			halo_spin = spin, 
+			user_supplied_ptclcat = ptclcat
+			)
+
+
+
+class FakeSimHalosNearBoundaries(UserSuppliedHaloCatalog):
+	""" Fake simulation data used in the test suite of `~halotools.empirical_models`. 
+
+	The only difference between `FakeSim` and `FakeSimHalosNearBoundaries` 
+	is that all halos reside right near the very edge of the box. 
+	Useful for unit-testing the treatment of periodic boundary conditions. 
+	"""
+
+	def __init__(self, num_massbins = 6, num_halos_per_massbin = int(100), 
+		num_ptcl = int(1e4), seed = 43, redshift = 0., **kwargs):
+		"""
+		Parameters 
+		----------
+		num_massbins : int, optional 
+			Number of distinct masses that will appear in the halo catalog. 
+			Default is 6.
+
+		num_halos_per_massbin : int, optional 
+			Default is 1000
+
+		num_ptcl : int, optional
+			Number of dark matter particles. Default is 1000. 
+
+		seed : int, optional 
+			Random number seed used to generate the fake halos and particles. 
+			Default is 43.
+		"""
+		Lbox = 250.0
+		particle_mass = 1.e8
+		self.simname = 'fake'
+		self.halo_finder = 'fake'
+		self.version_name = 'dummy_version'
 
 		self.seed = seed
 		np.random.seed(self.seed)
@@ -83,9 +199,17 @@ class FakeSim(UserSuppliedHaloCatalog):
 		rs = rvir/conc
 		zhalf = np.random.uniform(0, 10, self.num_halos)
 
-		x = np.random.uniform(0, Lbox, self.num_halos)
-		y = np.random.uniform(0, Lbox, self.num_halos)
-		z = np.random.uniform(0, Lbox, self.num_halos)
+		x = np.zeros(self.num_halos)
+		y = np.zeros(self.num_halos)
+		z = np.zeros(self.num_halos)
+		middle_index = int(self.num_halos/2.)
+		x[:middle_index] = np.random.uniform(0, 0.001, len(x[:middle_index]))
+		x[middle_index:] = np.random.uniform(Lbox-0.001, Lbox, len(x[middle_index:]))
+		y[:middle_index] = np.random.uniform(0, 0.001, len(y[:middle_index]))
+		y[middle_index:] = np.random.uniform(Lbox-0.001, Lbox, len(y[middle_index:]))
+		z[:middle_index] = np.random.uniform(0, 0.001, len(z[:middle_index]))
+		z[middle_index:] = np.random.uniform(Lbox-0.001, Lbox, len(z[middle_index:]))
+
 		vx = np.random.uniform(-500, 500, self.num_halos)
 		vy = np.random.uniform(-500, 500, self.num_halos)
 		vz = np.random.uniform(-500, 500, self.num_halos)
@@ -96,13 +220,16 @@ class FakeSim(UserSuppliedHaloCatalog):
 		pvx = np.random.uniform(-1000, 1000, self.num_ptcl)
 		pvy = np.random.uniform(-1000, 1000, self.num_ptcl)
 		pvz = np.random.uniform(-1000, 1000, self.num_ptcl)
+		ptclcat = UserSuppliedPtclCatalog(
+			Lbox = Lbox, redshift = redshift, particle_mass = particle_mass, 
+			x = px, y = py, z = pz, vx = pvx, vy = pvy, vz = pvz)
+		
 		d = {'x': px, 'y': py, 'z': pz, 'vx': pvx, 'vy': pvy, 'vz': pvz}
-		ptcl_table = Table(d)
 
 
 		UserSuppliedHaloCatalog.__init__(self, 
 			Lbox = Lbox, particle_mass = particle_mass, 
-			redshift = 0.0, 
+			redshift = redshift, 
 			halo_id = halo_id, 
 			halo_x = x, halo_y = y, halo_z = z, 
 			halo_vx = vx, halo_vy = vy, halo_vz = vz, 
@@ -116,10 +243,8 @@ class FakeSim(UserSuppliedHaloCatalog):
 			halo_nfw_conc = conc, 
 			halo_vmax = vmax, 
 			halo_vpeak = vpeak, 
-			ptcl_table = ptcl_table
+			user_supplied_ptclcat = ptclcat
 			)
-
-
 
 
 

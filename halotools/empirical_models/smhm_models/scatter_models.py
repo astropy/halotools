@@ -17,7 +17,7 @@ from functools import partial
 from .. import model_defaults
 from .. import model_helpers as model_helpers
 
-from ...utils.array_utils import custom_len
+from ...utils.array_utils import custom_len, convert_to_ndarray
 from ...sim_manager import sim_defaults 
 
 
@@ -40,14 +40,14 @@ class LogNormalScatterModel(object):
             the level of scatter. 
             Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
-        scatter_abcissa : array_like, optional  
-            Array of values giving the abcissa at which
+        scatter_abscissa : array_like, optional  
+            Array of values giving the abscissa at which
             the level of scatter will be specified by the input ordinates.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
         scatter_ordinates : array_like, optional  
-            Array of values defining the level of scatter at the input abcissa.
+            Array of values defining the level of scatter at the input abscissa.
             Default behavior will result in constant scatter at a level set in the 
             `~halotools.empirical_models.model_defaults` module. 
 
@@ -61,20 +61,20 @@ class LogNormalScatterModel(object):
         of the primary halo property. Here we give an example of a model 
         in which the scatter is 0.3 dex for Milky Way table and 0.1 dex in cluster table:
 
-        >>> scatter_abcissa = [12, 15]
+        >>> scatter_abscissa = [12, 15]
         >>> scatter_ordinates = [0.3, 0.1]
-        >>> scatter_model = LogNormalScatterModel(scatter_abcissa=scatter_abcissa, scatter_ordinates=scatter_ordinates)
+        >>> scatter_model = LogNormalScatterModel(scatter_abscissa=scatter_abscissa, scatter_ordinates=scatter_ordinates)
 
         """
         
         default_scatter = model_defaults.default_smhm_scatter
         self.prim_haloprop_key = prim_haloprop_key
 
-        if ('scatter_abcissa' in kwargs.keys()) and ('scatter_ordinates' in kwargs.keys()):
-            self.abcissa = kwargs['scatter_abcissa']
-            self.ordinates = kwargs['scatter_ordinates']
+        if ('scatter_abscissa' in kwargs.keys()) and ('scatter_ordinates' in kwargs.keys()):
+            self.abscissa = convert_to_ndarray(kwargs['scatter_abscissa'])
+            self.ordinates = convert_to_ndarray(kwargs['scatter_ordinates'])
         else:
-            self.abcissa = [12]
+            self.abscissa = [12]
             self.ordinates = [default_scatter]
 
         self._initialize_param_dict()
@@ -152,13 +152,13 @@ class LogNormalScatterModel(object):
         """
 
         scipy_maxdegree = 5
-        degree_list = [scipy_maxdegree, custom_len(self.abcissa)-1]
+        degree_list = [scipy_maxdegree, custom_len(self.abscissa)-1]
         self.spline_degree = np.min(degree_list)
 
-        self.ordinates = [self.param_dict[self._get_param_key(i)] for i in range(len(self.abcissa))]
+        self.ordinates = [self.param_dict[self._get_param_key(i)] for i in range(len(self.abscissa))]
 
         self.spline_function = model_helpers.custom_spline(
-            self.abcissa, self.ordinates, k=self.spline_degree)
+            self.abscissa, self.ordinates, k=self.spline_degree)
 
     def _initialize_param_dict(self):
         """ Private method used to initialize ``self.param_dict``. 

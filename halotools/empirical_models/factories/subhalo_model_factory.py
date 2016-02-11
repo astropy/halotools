@@ -132,7 +132,7 @@ class SubhaloModelFactory(ModelFactory):
         >>> stellar_mass_model = Behroozi10SmHm(redshift = 0.5)
 
         >>> from halotools.empirical_models import BinaryGalpropInterpolModel
-        >>> sfr_model = BinaryGalpropInterpolModel(galprop_name = 'quiescent_designation')
+        >>> sfr_model = BinaryGalpropInterpolModel(galprop_name = 'quiescent_designation', galprop_abscissa = [12, 15], galprop_ordinates = [0.25, 0.75])
 
         At this point we have two component model instances, ``stellar_mass_model`` and 
         ``sfr_model``. The following call to the factory uses the ``model_features`` option 
@@ -620,32 +620,26 @@ class SubhaloModelFactory(ModelFactory):
                 warn(missing_calling_sequence_msg % component_model.__class__.__name__)
 
     def set_model_redshift(self):
-        """ Method sets the redshift of the composite model, simultaneously enforcing self-consistency 
-        between the the redshifts of the component models. 
+        """ 
         """
-        msg = ("Inconsistency between the redshifts of the component models:\n"
-            "    For component model 1 = ``%s``, the model has redshift = %.2f.\n"
-            "    For component model 2 = ``%s``, the model has redshift = %.2f.\n")
 
-        # Loop over all component features in the composite model
-        for feature, component_model in self.model_dictionary.iteritems():
+        zlist = list(model.redshift for model in self.model_dictionary.values() 
+            if hasattr(model, 'redshift'))
 
-            if hasattr(component_model, 'redshift'):
-                redshift = component_model.redshift 
-                try:
-                    if redshift != existing_redshift:
-                        t = (component_model.__class__.__name__, redshift, 
-                            last_component.__class__.__name__, existing_redshift)
-                        raise HalotoolsError(msg % t)
-                except NameError:
-                    existing_redshift = redshift 
-
-            last_component = component_model
-
-        try:
-            self.redshift = redshift
-        except NameError:
+        if len(set(zlist)) == 0:
             self.redshift = sim_defaults.default_redshift
+        elif len(set(zlist)) == 1:
+            self.redshift = float(zlist[0])
+        else:
+            msg = ("Inconsistency between the redshifts of the component models:\n\n")
+            for modelname, model in self.model_dictionary.iteritems():
+                clname = model.__class__.__name__
+                if hasattr(model, 'redshift'):
+                    zs = str(model.redshift)
+                    msg += ("For modelname = ``" + modelname + "``, the "
+                        +clname+" instance has redshift = " + zs + "\n")
+            raise HalotoolsError(msg)
+
 
     def build_prim_sec_haloprop_list(self):
         """ Method builds the ``_haloprop_list`` of strings. 
@@ -663,6 +657,8 @@ class SubhaloModelFactory(ModelFactory):
                 haloprop_list.append(component_model.prim_haloprop_key)
             if hasattr(component_model, 'sec_haloprop_key'):
                 haloprop_list.append(component_model.sec_haloprop_key)
+            if hasattr(component_model, 'list_of_haloprops_needed'):
+                haloprop_list.extend(component_model.list_of_haloprops_needed)
 
         self._haloprop_list = list(set(haloprop_list))
 
@@ -848,21 +844,27 @@ class SubhaloModelFactory(ModelFactory):
         Parameters 
         ----------
         halocat : object, optional 
-            Class instance of `~halotools.sim_manager.CachedHaloCatalog`. 
-            This object contains the halo catalog and its metadata.  
+            Either an instance of `~halotools.sim_manager.CachedHaloCatalog` 
+            or `~halotools.sim_manager.UserSuppliedHaloCatalog`. 
+            If you pass a ``halocat`` argument, do not pass additional arguments. 
 
         simname : string, optional
-            Nickname of the simulation. Currently supported simulations are 
+            Nickname of the simulation of the cached catalog. 
+            Currently supported simulations are 
             Bolshoi  (simname = ``bolshoi``), Consuelo (simname = ``consuelo``), 
             MultiDark (simname = ``multidark``), and Bolshoi-Planck (simname = ``bolplanck``). 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         halo_finder : string, optional
-            Nickname of the halo-finder, e.g. ``rockstar`` or ``bdm``. 
+            Nickname of the halo-finder, of the cached catalog, e.g. ``rockstar`` or ``bdm``. 
+            Default is set in `~halotools.sim_manager.sim_defaults`. 
+
+        version_name : string, optional 
+            Nickname of the version of the cached halo catalog you want to populate. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         redshift : float, optional
-            Redshift of the desired catalog. 
+            Redshift of the cached catalog. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
         See also 
