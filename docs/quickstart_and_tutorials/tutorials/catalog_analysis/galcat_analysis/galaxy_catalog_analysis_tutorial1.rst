@@ -24,7 +24,7 @@ as you learn the basic syntax.
 Generate a mock galaxy catalog 
 ---------------------------------
 Let's start out by generating a mock galaxy catalog into an N-body
-simulation in the usual way. Here we'll assume you have the :math:`z=0`
+simulation in the usual way. Here we'll assume you have the *z=0*
 rockstar halos for the bolshoi simulation, as this is the
 default halo catalog. 
 
@@ -110,7 +110,8 @@ Calculate :math:`\langle M_{\ast}^{\rm tot}\rangle` vs. :math:`M_{\rm halo}`
 .. code:: python
 
     from halotools.mock_observables import mean_y_vs_x
-
+    import numpy as np 
+    
     bins = np.logspace(12, 15, 25)
     result = mean_y_vs_x(gals['halo_mhost'].data, 
                          gals['halo_total_stellar_mass'].data, 
@@ -197,4 +198,4 @@ Plot the result and compare it to the underlying analytical relation
 
 .. image:: output_23_1.png
 
-
+This tutorial continues with :ref:`galaxy_catalog_analysis_tutorial2`. 

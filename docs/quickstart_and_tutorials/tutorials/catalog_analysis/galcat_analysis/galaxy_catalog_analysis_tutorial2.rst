@@ -1,5 +1,3 @@
-:orphan:
-
 .. _galaxy_catalog_analysis_tutorial2:
 
 Example 2: Calculating galaxy clustering in 3d
@@ -24,7 +22,7 @@ as you learn the basic syntax.
 Generate a mock galaxy catalog 
 ---------------------------------
 Let's start out by generating a mock galaxy catalog into an N-body
-simulation in the usual way. Here we'll assume you have the :math:`z=0`
+simulation in the usual way. Here we'll assume you have the *z=0*
 rockstar halos for the bolshoi simulation, as this is the
 default halo catalog. 
 
@@ -71,6 +69,7 @@ To calculate the clustering:
 
     from halotools.mock_observables import tpcf
 
+    import numpy as np
     rbins = np.logspace(-1, 1.25, 15)
     rbin_centers = (rbins[1:] + rbins[:-1])/2.
 
@@ -125,6 +124,7 @@ Plot the results
 .. image:: one_two_halo_clustering.png
 
 
+This tutorial continues with :ref:`galaxy_catalog_analysis_tutorial3`. 
 
 
 
