@@ -135,7 +135,7 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     pos : array_like 
         Numpy array with shape *(Npts, 3)*. 
     """
-    posdict = {'x': x, 'y': y, 'z': z}
+    posdict = {'x': np.copy(x), 'y': np.copy(y), 'z': np.copy(z)}
 
     a = 'velocity_distortion_dimension' in kwargs.keys()
     b = 'velocity' in kwargs.keys()
@@ -146,7 +146,7 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
             raise KeyError(msg)
         else:
             vel_dist_dim = kwargs['velocity_distortion_dimension']
-            velocity = kwargs['velocity']
+            velocity = np.copy(kwargs['velocity'])
             apply_distortion = True
     else:
         apply_distortion = False
@@ -154,7 +154,7 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
     if apply_distortion is True:
         try:
             assert vel_dist_dim in ('x', 'y', 'z')
-            posdict[vel_dist_dim] += velocity/100.
+            posdict[vel_dist_dim] = np.copy(posdict[vel_dist_dim]) + np.copy(velocity/100.)
             if period != np.inf:
                 posdict[vel_dist_dim] = enforce_periodicity_of_box(
                     posdict[vel_dist_dim], period)
@@ -163,8 +163,8 @@ def return_xyz_formatted_array(x, y, z, period=np.inf, **kwargs):
                 "``'x'``, ``'y'`` or ``'z'``.")
             raise KeyError(msg)
 
-    x, y, z = posdict['x'], posdict['y'], posdict['z']
-    pos = np.vstack([x, y, z]).T
+    xout, yout, zout = np.copy(posdict['x']), np.copy(posdict['y']), np.copy(posdict['z'])
+    pos = np.vstack([xout, yout, zout]).T
 
     # Apply a mask, if applicable
     try:
