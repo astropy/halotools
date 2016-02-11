@@ -1,7 +1,7 @@
 .. _galaxy_catalog_analysis_tutorial3:
 
-Example 3: Galaxy-galaxy lensing
-================================
+Galaxy Catalog Analysis Example 3: Galaxy-galaxy lensing
+=====================================================================================
 
 In this example, we'll show how to calculate :math:`\Delta\Sigma(r),`
 the galaxy-galaxy lensing signal of a mock catalog.

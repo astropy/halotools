@@ -1,7 +1,7 @@
 .. _galaxy_catalog_analysis_tutorial4:
 
-Example 4: Projected galaxy clustering :math:`w_{\rm p}`
-========================================================
+Galaxy Catalog Analysis Example 4: Projected galaxy clustering :math:`w_{\rm p}`
+=====================================================================================
 
 In this example, we'll show how to calculate :math:`w_{\rm p},` the
 projected clustering signal of a mock catalog.
@@ -82,6 +82,7 @@ Plot the results
 ~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
+
     from seaborn import plt
 
     rp_bin_centers = (rp_bins[:1] + rp_bins[1:])/2.

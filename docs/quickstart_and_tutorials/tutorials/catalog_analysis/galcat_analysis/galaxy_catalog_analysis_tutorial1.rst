@@ -1,8 +1,8 @@
 
 .. _galaxy_catalog_analysis_tutorial1:
 
-Example 1: Galaxy properties as a function of halo mass
-=======================================================
+Galaxy Catalog Analysis Example 1: Galaxy properties as a function of halo mass
+===================================================================================
 
 In this example, we'll show how to start from a sample of mock galaxies 
 and calculate how various galaxies properties scale with halo mass. 

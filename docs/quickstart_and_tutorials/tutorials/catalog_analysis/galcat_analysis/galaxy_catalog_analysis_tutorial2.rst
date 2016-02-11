@@ -1,7 +1,7 @@
 .. _galaxy_catalog_analysis_tutorial2:
 
-Example 2: Calculating galaxy clustering in 3d
-================================================
+Galaxy Catalog Analysis Example 2: Calculating galaxy clustering in 3d
+===========================================================================
 
 In this example, we'll show how to calculate the two-point clustering 
 of a mock galaxy catalog, :math:`\xi_{\rm gg}(r)`. 
