@@ -21,7 +21,7 @@ from .....sim_manager import sim_defaults
 __all__ = ['TestTrivialProfile']
 
 class TestTrivialProfile(TestCase):
-    """ Tests of `~halotools.empirical_models.phase_space_models.profile_models.TrivialProfile`. 
+    """ Tests of `~halotools.empirical_models.TrivialProfile`. 
 
     The TrivialProfile has very little functionality. It is mostly just a standard-form class 
     called during mock population to assign the positions of central galaxies to be equal 

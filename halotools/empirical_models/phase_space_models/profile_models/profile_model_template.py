@@ -89,7 +89,7 @@ class AnalyticDensityProf(object):
         The quantity :math:`\\rho_{\\rm thresh}` is a function of 
         the halo mass definition, cosmology and redshift, 
         and is computed via the 
-        `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` function. 
+        `~halotools.empirical_models.profile_helpers.density_threshold` function. 
         The quantity :math:`\\rho_{\\rm prof}` is the physical mass density of the 
         halo profile and is computed via the `mass_density` function. 
 
@@ -111,7 +111,7 @@ class AnalyticDensityProf(object):
         dimensionless_density: array_like 
             Dimensionless density of a dark matter halo 
             at the input ``scaled_radius``, normalized by the 
-            `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.density_threshold` 
+            `~halotools.empirical_models.profile_helpers.density_threshold` 
             :math:`\\rho_{\\rm thresh}` for the 
             halo mass definition, cosmology, and redshift. 
             Result is an array of the dimension as the input ``scaled_radius``. 
@@ -437,10 +437,10 @@ class AnalyticDensityProf(object):
         Notes 
         ------
         The behavior of this function derives from 
-        `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_mass_to_halo_radius`. 
+        `~halotools.empirical_models.profile_helpers.halo_mass_to_halo_radius`. 
 
         This function is tested by the 
-        `~halotools.empirical_models.phase_space_models.profile_models.tests.TestProfileHelpers` class. 
+        `~halotools.empirical_models.TestProfileHelpers` class. 
 
         """
         return profile_helpers.halo_mass_to_halo_radius(
@@ -467,10 +467,10 @@ class AnalyticDensityProf(object):
         Notes 
         ------
         The behavior of this function derives from 
-        `~halotools.empirical_models.phase_space_models.profile_models.profile_helpers.halo_radius_to_halo_mass`. 
+        `~halotools.empirical_models.profile_helpers.halo_radius_to_halo_mass`. 
 
         This function is tested by the 
-        `~halotools.empirical_models.phase_space_models.profile_models.tests.TestProfileHelpers` class. 
+        `~halotools.empirical_models.TestProfileHelpers` class. 
 
         """
         return profile_helpers.halo_radius_to_halo_mass(

@@ -1,0 +1,36 @@
+# This file is an example of how to use the ``columns_to_keep_ascii_fname`` 
+# feature of the RockstarHlistReader. 
+# The present file can have any number of header lines beginning with the '#' character, 
+# all of which will be ignored by the RockstarHlistReader, 
+# but which may be useful for your own private bookkeeping, e.g., 
+# ``columns_to_keep_ascii_fname`` used to process ``some_hlist_file`` on 28 July, 2015. 
+#
+# The number of rows of data below determine the number of halo properties 
+# that will be extracted from a Rockstar hlist file. 
+#
+# Column 1: the column index of the hlist file storing the desired data, 
+# beginning with 0 for the first column of data in the halo catalog ASCII file. 
+#
+# Column 2: the name that will be given to the halo property stored in the desired column. 
+#
+# Column 3: the type of data stored in the column, 
+# e.g., 'f4' for a float, 'f8' for a double, 'i8' for a long. 
+#
+# Halotools convention is to have all halo properties begin with `halo_`. 
+# This will be necessary if you want to store the halo catalog in the Halotools cache 
+# and use it to populate mock catalogs with Halotools. 
+# But if you are processing a Rockstar hlist file for other purposes, 
+# you can safely ignore this convention. 
+#
+# In the example provided here, we will compose our entries so that 
+# the RockstarHlistReader class will extract eight halo properties from 
+# a hypothetical Rockstar hlist file. 
+# 
+0  halo_scale_factor  'f4'
+1  halo_id  'i8'
+5  halo_upid  'i8'
+16  halo_mvir  'f4'
+38  halo_vmax  'f4'
+18  halo_x  'f4'
+19  halo_y  'f4'
+20  halo_z  'f4'

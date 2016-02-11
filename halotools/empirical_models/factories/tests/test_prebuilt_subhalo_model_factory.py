@@ -23,14 +23,14 @@ class TestPrebuiltSubhaloModelFactory(TestCase):
     """ Class providing tests of the `~halotools.empirical_models.PrebuiltSubhaloModelFactory`. 
     """
     def test_behroozi_composite(self):
-        """ Require that the `~halotools.empirical_models.composite_models.smhm_models.behroozi10_model_dictionary` 
+        """ Require that the `~halotools.empirical_models.behroozi10_model_dictionary` 
         model dictionary builds without raising an exception. 
         """
         model = PrebuiltSubhaloModelFactory('behroozi10')
         alt_model = SubhaloModelFactory(**model.model_dictionary)
 
     def test_smhm_binary_sfr_composite(self):
-        """ Require that the `~halotools.empirical_models.composite_models.sfr_models.smhm_binary_sfr_model_dictionary` 
+        """ Require that the `~halotools.empirical_models.smhm_binary_sfr_model_dictionary` 
         model dictionary builds without raising an exception. 
         """
         model = PrebuiltSubhaloModelFactory('smhm_binary_sfr')

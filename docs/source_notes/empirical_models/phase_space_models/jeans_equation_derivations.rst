@@ -31,7 +31,7 @@ If we further assume that satellite orbits are isotropic, then the second term o
 
 	\Rightarrow \sigma^{2}_{r}(r) = \frac{1}{\rho_{\rm sat}(r)}\int_{r}^{\infty}\rho_{\rm sat}(r)\frac{{\rm d}\Phi(r)}{{\rm d}r}, 
 
-where in the last equation we have applied the boundary condition that :math:`\rho_{\rm sat}(r\rightarrow\infty)\rightarrow 0`. This is the form of the equation used by the `~halotools.empirical_models.phase_space_models.velocity_models.IsotropicJeansVelocity` component model and the `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` composite model. 
+where in the last equation we have applied the boundary condition that :math:`\rho_{\rm sat}(r\rightarrow\infty)\rightarrow 0`. This is the form of the equation used by the `~halotools.empirical_models.IsotropicJeansVelocity` component model and the `~halotools.empirical_models.NFWPhaseSpace` composite model. 
 
 Further Reading 
 =================

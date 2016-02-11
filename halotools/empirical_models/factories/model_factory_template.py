@@ -19,9 +19,8 @@ from .subhalo_mock_factory import SubhaloMockFactory
 from .. import model_helpers
 from .. import model_defaults 
 
-from ...sim_manager.supported_sims import HaloCatalog
+from ...sim_manager import CachedHaloCatalog, FakeSim
 from ...sim_manager import sim_defaults
-from ...sim_manager.generate_random_sim import FakeSim
 from ...utils.array_utils import custom_len
 from ...custom_exceptions import *
 
@@ -81,7 +80,7 @@ class ModelFactory(object):
         Parameters 
         ----------
         halocat : object, optional 
-            Class instance of `~halotools.sim_manager.HaloCatalog`. 
+            Class instance of `~halotools.sim_manager.CachedHaloCatalog`. 
             This object contains the halo catalog and its metadata.  
 
         simname : string, optional
@@ -115,6 +114,8 @@ class ModelFactory(object):
         def test_consistency_with_existing_mock(**kwargs):
             if 'redshift' in kwargs:
                 redshift = kwargs['redshift']
+            elif hasattr(self, 'redshift'):
+                redshift = self.redshift
             elif 'halocat' in kwargs:
                 redshift = kwargs['halocat'].redshift
             else:
@@ -147,7 +148,13 @@ class ModelFactory(object):
                 halocat = kwargs['halocat']
                 del kwargs['halocat'] # otherwise the call to the mock factory below has multiple halocat kwargs
             else:
-                halocat = HaloCatalog(**kwargs)
+                if 'redshift' in kwargs:
+                    halocat = CachedHaloCatalog(**kwargs)
+                elif hasattr(self, 'redshift'):
+                    halocat = CachedHaloCatalog(redshift = self.redshift, **kwargs)
+                else:
+                    halocat = CachedHaloCatalog(**kwargs)
+
 
             if hasattr(self, 'redshift'):
                 if abs(self.redshift - halocat.redshift) > 0.05:
@@ -228,7 +235,7 @@ class ModelFactory(object):
             will be populated, e.g., `rockstar` or `bdm`. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-        desired_redshift : float, optional
+        redshift : float, optional
             Redshift of the desired halocat into which mock galaxies will be populated. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
@@ -286,9 +293,9 @@ class ModelFactory(object):
         >>> r, clustering = model.compute_average_galaxy_clustering() # doctest: +SKIP 
 
         To control how which simulation is used, you use the same syntax you use to load 
-        a `~halotools.sim_manager.HaloCatalog` into memory from your cache directory: 
+        a `~halotools.sim_manager.CachedHaloCatalog` into memory from your cache directory: 
 
-        >>> r, clustering = model.compute_average_galaxy_clustering(simname = 'multidark', desired_redshift=1) # doctest: +SKIP 
+        >>> r, clustering = model.compute_average_galaxy_clustering(simname = 'multidark', redshift=1) # doctest: +SKIP 
 
         You can control the number of mock catalogs that are generated via: 
 
@@ -330,12 +337,14 @@ class ModelFactory(object):
         halocat_kwargs = {}
         if 'simname' in kwargs:
             halocat_kwargs['simname'] = kwargs['simname']
-        if 'desired_redshift' in kwargs:
-            halocat_kwargs['redshift'] = kwargs['desired_redshift']
+        if 'redshift' in kwargs:
+            halocat_kwargs['redshift'] = kwargs['redshift']
+        elif hasattr(self, 'redshift'):
+            halocat_kwargs['redshift'] = self.redshift
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
-        halocat = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
+        halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']
@@ -403,7 +412,7 @@ class ModelFactory(object):
             will be populated, e.g., `rockstar` or `bdm`. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
-        desired_redshift : float, optional
+        redshift : float, optional
             Redshift of the desired halocat into which mock galaxies will be populated. 
             Default is set in `~halotools.sim_manager.sim_defaults`. 
 
@@ -442,9 +451,9 @@ class ModelFactory(object):
         >>> r, clustering = model.compute_average_galaxy_matter_cross_clustering() # doctest: +SKIP 
 
         To control how which simulation is used, you use the same syntax you use to load 
-        a `~halotools.sim_manager.HaloCatalog` into memory from your cache directory: 
+        a `~halotools.sim_manager.CachedHaloCatalog` into memory from your cache directory: 
 
-        >>> r, clustering = model.compute_average_galaxy_matter_cross_clustering(simname = 'multidark', desired_redshift=1) # doctest: +SKIP 
+        >>> r, clustering = model.compute_average_galaxy_matter_cross_clustering(simname = 'multidark', redshift=1) # doctest: +SKIP 
 
         You can control the number of mock catalogs that are generated via: 
 
@@ -505,12 +514,14 @@ class ModelFactory(object):
         halocat_kwargs = {}
         if 'simname' in kwargs:
             halocat_kwargs['simname'] = kwargs['simname']
-        if 'desired_redshift' in kwargs:
-            halocat_kwargs['redshift'] = kwargs['desired_redshift']
+        if 'redshift' in kwargs:
+            halocat_kwargs['redshift'] = kwargs['redshift']
+        elif hasattr(self, 'redshift'):
+            halocat_kwargs['redshift'] = self.redshift
         if 'halo_finder' in kwargs:
             halocat_kwargs['halo_finder'] = kwargs['halo_finder']
 
-        halocat = HaloCatalog(preload_halo_table = True, **halocat_kwargs)
+        halocat = CachedHaloCatalog(preload_halo_table = True, **halocat_kwargs)
 
         if 'rbins' in kwargs:
             rbins = kwargs['rbins']

@@ -7,7 +7,7 @@ The result of using `MonteCarloGalProf` as an orthogonal mix-in class
 is a composite class that can be used to generate Monte Carlo realizations 
 of the full phase space distribution of galaxies within their halos. 
 
-Testing for this module is done in `~halotools.empirical_models.phase_space_models.tests.test_phase_space` module. 
+Testing for this module is done in `~halotools.empirical_models.test_phase_space` module. 
 """
 # from __future__ import (
 #     division, print_function, absolute_import, unicode_literals)
@@ -29,11 +29,11 @@ from ...custom_exceptions import HalotoolsError
 
 class MonteCarloGalProf(object):
     """ Orthogonal mix-in class used to turn an analytical 
-    phase space model (e.g., `~halotools.empirical_models.phase_space_models.NFWPhaseSpace`)
+    phase space model (e.g., `~halotools.empirical_models.NFWPhaseSpace`)
     into a class that can generate the phase space distribution 
     of a mock galaxy population. 
 
-    Testing for this module is done in `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace` class. 
+    Testing for this module is done in `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace` class. 
 
     """
 
@@ -63,10 +63,10 @@ class MonteCarloGalProf(object):
         sets up how we will digitize the value of each such parameter for the purposes of 
         mock population. 
 
-        As an example, the `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` 
+        As an example, the `~halotools.empirical_models.NFWPhaseSpace` 
         model has a single profile parameter, ``conc_NFWmodel``. After calling the 
         `setup_prof_lookup_tables` method, there will be three new attributes bound to the 
-        `~halotools.empirical_models.phase_space_models.NFWPhaseSpace` instance:
+        `~halotools.empirical_models.NFWPhaseSpace` instance:
 
         * ``_conc_NFWmodel_lookup_table_min``
 
@@ -89,7 +89,7 @@ class MonteCarloGalProf(object):
             the input ``lookup_table_binning`` sequence 
             is assumed to correspond to the i^th element of ``self.prof_param_keys``, 
             which is defined in the 
-            `~halotools.empirical_models.phase_space_models.profile_params.profile_model_template.AnalyticalDensityProf` sub-class. 
+            `~halotools.empirical_models.profile_params.profile_model_template.AnalyticalDensityProf` sub-class. 
         """
         for ipar, prof_param_key in enumerate(self.prof_param_keys):
             setattr(self, '_' + prof_param_key + '_lookup_table_min', lookup_table_binning[ipar][0])
@@ -199,7 +199,7 @@ class MonteCarloGalProf(object):
 
         Notes 
         ------
-        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_dimensionless_radial_distance` function. 
+        This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_dimensionless_radial_distance` function. 
         """
 
         if not hasattr(self, 'rad_prof_func_table'):
@@ -266,7 +266,7 @@ class MonteCarloGalProf(object):
 
         Notes 
         ------
-        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_unit_sphere` function. 
+        This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_unit_sphere` function. 
 
         """
         if 'seed' in kwargs:
@@ -309,7 +309,7 @@ class MonteCarloGalProf(object):
 
         Notes 
         ------
-        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_solid_sphere` function. 
+        This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_solid_sphere` function. 
         """
         # Retrieve the list of profile_params
         if 'table' in kwargs:
@@ -391,7 +391,7 @@ class MonteCarloGalProf(object):
 
         Notes 
         ------
-        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_halo_centric_pos` function. 
+        This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_halo_centric_pos` function. 
         """
 
         x, y, z = self.mc_solid_sphere(*profile_params, **kwargs)
@@ -466,7 +466,7 @@ class MonteCarloGalProf(object):
 
         Notes 
         ------
-        This method is tested by the `~halotools.empirical_models.phase_space_models.tests.test_phase_space.TestNFWPhaseSpace.test_mc_pos` function. 
+        This method is tested by the `~halotools.empirical_models.test_phase_space.TestNFWPhaseSpace.test_mc_pos` function. 
         """
         try:
             overwrite_table_pos = kwargs['overwrite_table_pos']
