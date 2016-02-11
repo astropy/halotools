@@ -25,6 +25,7 @@ storing the spatial positions of halos or galaxies.
 
 >>> Npts = 1e5
 >>> Lbox = 250
+>>> import numpy as np
 >>> x = np.random.uniform(0, Lbox, Npts)
 >>> y = np.random.uniform(0, Lbox, Npts)
 >>> z = np.random.uniform(0, Lbox, Npts)

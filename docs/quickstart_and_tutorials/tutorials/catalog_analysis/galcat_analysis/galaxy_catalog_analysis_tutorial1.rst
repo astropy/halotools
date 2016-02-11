@@ -110,7 +110,8 @@ Calculate :math:`\langle M_{\ast}^{\rm tot}\rangle` vs. :math:`M_{\rm halo}`
 .. code:: python
 
     from halotools.mock_observables import mean_y_vs_x
-
+    import numpy as np 
+    
     bins = np.logspace(12, 15, 25)
     result = mean_y_vs_x(gals['halo_mhost'].data, 
                          gals['halo_total_stellar_mass'].data, 

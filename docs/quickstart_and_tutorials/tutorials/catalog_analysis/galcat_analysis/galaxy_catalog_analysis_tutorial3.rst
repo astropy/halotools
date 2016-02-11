@@ -59,6 +59,7 @@ dark matter particles.
 
     from halotools.mock_observables import return_xyz_formatted_array
 
+    import numpy as np
     Nptcls_to_keep = int(1e5)
     randomizer = np.random.random(len(model.mock.ptcl_table))
     sorted_randoms = np.sort(randomizer)

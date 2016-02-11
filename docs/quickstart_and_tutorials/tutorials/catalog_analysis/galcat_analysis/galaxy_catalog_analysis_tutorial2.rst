@@ -69,6 +69,7 @@ To calculate the clustering:
 
     from halotools.mock_observables import tpcf
 
+    import numpy as np
     rbins = np.logspace(-1, 1.25, 15)
     rbin_centers = (rbins[1:] + rbins[:-1])/2.
 
