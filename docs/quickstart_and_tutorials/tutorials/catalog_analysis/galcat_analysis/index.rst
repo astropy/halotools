@@ -20,4 +20,5 @@ Worked examples
    :maxdepth: 1
 
    galaxy_catalog_analysis_tutorial1
+   galaxy_catalog_analysis_tutorial2
 
