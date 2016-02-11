@@ -197,4 +197,4 @@ Plot the result and compare it to the underlying analytical relation
 
 .. image:: output_23_1.png
 
-
+This tutorial continues with :ref:`galaxy_catalog_analysis_tutorial2`. 

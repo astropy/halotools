@@ -1,5 +1,3 @@
-:orphan:
-
 .. _galaxy_catalog_analysis_tutorial2:
 
 Example 2: Calculating galaxy clustering in 3d
@@ -125,6 +123,7 @@ Plot the results
 .. image:: one_two_halo_clustering.png
 
 
+This tutorial continues with :ref:`galaxy_catalog_analysis_tutorial3`. 
 
 
 

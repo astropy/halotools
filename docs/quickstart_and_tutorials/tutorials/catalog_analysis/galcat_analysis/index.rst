@@ -21,4 +21,5 @@ Worked examples
 
    galaxy_catalog_analysis_tutorial1
    galaxy_catalog_analysis_tutorial2
+   galaxy_catalog_analysis_tutorial3
 
