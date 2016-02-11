@@ -13,7 +13,7 @@ slow = pytest.mark.slow
 
 __all__=['test_tpcf_auto', 'test_tpcf_cross', 'test_tpcf_estimators',\
          'test_tpcf_sample_size_limit',\
-         'test_tpcf_randoms', 'test_tpcf_period_API']
+         'test_tpcf_randoms', 'test_tpcf_period_API', 'test_tpcf_cross_consistency_w_auto']
 
 """
 Note that these are almost all unit-tests.  Non tirival tests are a little heard to think
@@ -225,4 +225,57 @@ def test_tpcf_period_API():
     assert len(result_1)==3, "wrong number of correlation functions returned erroneously."
     assert len(result_2)==3, "wrong number of correlation functions returned erroneously."
 
+
+@slow
+def test_tpcf_cross_consistency_w_auto():
+    """
+    test the tpcf cross-correlation mode consistency with auto-correlation mode
+    """
+    
+    sample1 = np.random.random((200,3))
+    sample2 = np.random.random((100,3))
+    randoms = np.random.random((300,3))
+    period = np.array([1.0,1.0,1.0])
+    rbins = np.linspace(0,0.3,5)
+    rmax = rbins.max()
+    
+    #with out randoms
+    result1 = tpcf(sample1, rbins, sample2 = None, 
+                   randoms=None, period = period, 
+                   max_sample_size=int(1e4), estimator='Natural', 
+                   approx_cell1_size = [rmax, rmax, rmax])
+    
+    result2 = tpcf(sample2, rbins, sample2 = None, 
+                   randoms=None, period = period, 
+                   max_sample_size=int(1e4), estimator='Natural', 
+                   approx_cell1_size = [rmax, rmax, rmax])
+    
+    result1_p, result12, result2_p = tpcf(sample1, rbins, sample2 = sample2, 
+                                          randoms=None, period = period, 
+                                          max_sample_size=int(1e4),
+                                          estimator='Natural', 
+                                          approx_cell1_size=[rmax, rmax, rmax])
+    
+    assert np.allclose(result1,result1_p), "cross mode and auto mode are not the same"
+    assert np.allclose(result2,result2_p), "cross mode and auto mode are not the same"
+    
+    #with randoms
+    result1 = tpcf(sample1, rbins, sample2 = None, 
+                   randoms=randoms, period = period, 
+                   max_sample_size=int(1e4), estimator='Natural', 
+                   approx_cell1_size = [rmax, rmax, rmax])
+    
+    result2 = tpcf(sample2, rbins, sample2 = None, 
+                   randoms=randoms, period = period, 
+                   max_sample_size=int(1e4), estimator='Natural', 
+                   approx_cell1_size = [rmax, rmax, rmax])
+    
+    result1_p, result12, result2_p = tpcf(sample1, rbins, sample2 = sample2, 
+                                          randoms=randoms, period = period, 
+                                          max_sample_size=int(1e4),
+                                          estimator='Natural', 
+                                          approx_cell1_size=[rmax, rmax, rmax])
+                                          
+    assert np.allclose(result1,result1_p), "cross mode and auto mode are not the same"
+    assert np.allclose(result2,result2_p), "cross mode and auto mode are not the same"
 

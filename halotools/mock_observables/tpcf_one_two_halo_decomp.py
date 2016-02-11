@@ -237,31 +237,28 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
             return D1R, D2R, RR
         #PBCs and no randoms--calculate randoms analytically.
         elif randoms is None:
+            #set the number of randoms equal to the number of points in sample1
+            NR = len(sample1)
+            
             #do volume calculations
-            dv = nball_volume(rbins) #volume of spheres
-            dv = np.diff(dv) #volume of shells
+            v = nball_volume(rbins) #volume of spheres
+            dv = np.diff(v) #volume of shells
             global_volume = period.prod() #volume of simulation
             
             #calculate randoms for sample1
             N1 = np.shape(sample1)[0] #number of points in sample1
             rho1 = N1/global_volume #number density of points
-            D1R = (N1)*(dv*rho1) #random counts are N**2*dv*rho
+            D1R = (NR)*(dv*rho1) #random counts are N**2*dv*rho
             
-            #if not calculating cross-correlation, set RR exactly equal to D1R.
-            if _sample1_is_sample2:
-                D2R = None
-                RR = D1R #in the analytic case, for the auto-correlation, DR==RR.
-            else: #if there is a sample2, calculate randoms for it.
-                N2 = np.shape(sample2)[0]
-                rho2 = N2/global_volume #number density of points
-                D2R = N2*(dv*rho2)
-                #calculate the random-random pairs.
-                #RR is only the RR for the cross-correlation when using analytical randoms
-                #for the non-cross case, DR==RR (in analytical world).
-                NR = N1*N2
-                rhor = NR/global_volume
-                RR = (dv*rhor)
-
+            #calculate randoms for sample2
+            N2 = np.shape(sample2)[0] #number of points in sample2
+            rho2 = N2/global_volume #number density of points
+            D2R = (NR)*(dv*rho2) #random counts are N**2*dv*rho
+            
+            #calculate the random-random pairs.
+            rhor = (NR**2)/global_volume
+            RR = (dv*rhor)
+            
             return D1R, D2R, RR
     
     
@@ -303,24 +300,21 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
                                      period=period, num_threads=num_threads)
                 D2D2 = np.diff(D2D2)
             else: D2D2=None
-
+        
         return D1D1, D1D2, D2D2
     
     #What needs to be done?
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
     # How many points are there (for normalization purposes)?
+    N1 = len(sample1)
+    N2 = len(sample2)
     if randoms is not None:
-        N1 = len(sample1)
         NR = len(randoms)
-        if _sample1_is_sample2:
-            N2 = N1
-        else:
-            N2 = len(sample2)
-    else: # This is taken care of in the analytical case.  See comments in random_pairs().
-        N1 = 1.0
-        N2 = 1.0
-        NR = 1.0
+    else:
+        #set the number of randoms equal to the number of points in sample1
+        #this is arbitrarily set, but must remain consistent!
+        NR = N1
     
     #calculate 1-halo pairs
     wfunc=3
