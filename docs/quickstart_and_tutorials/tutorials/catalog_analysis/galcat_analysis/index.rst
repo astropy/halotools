@@ -17,9 +17,6 @@ Worked examples
 ===================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   galaxy_catalog_analysis_tutorial1
-   galaxy_catalog_analysis_tutorial2
-   galaxy_catalog_analysis_tutorial3
-   galaxy_catalog_analysis_tutorial4
+   basic_examples/basic_galaxy_catalog_analysis_examples
