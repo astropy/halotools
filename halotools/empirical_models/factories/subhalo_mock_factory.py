@@ -67,6 +67,10 @@ class SubhaloMockFactory(MockFactory):
         if ( ('halo_hostid' not in self.additional_haloprops) & ('halo_hostid' in halo_table.keys()) ):
             self.additional_haloprops.append('halo_hostid')
 
+        if ( ('halo_mvir_host_halo' not in self.additional_haloprops) & 
+            ('halo_mvir_host_halo' in halo_table.keys()) ):
+            self.additional_haloprops.append('halo_mvir_host_halo')
+
         ### Create new columns of the halo catalog, if applicable
         try:
             d = self.model.new_haloprop_func_dict
