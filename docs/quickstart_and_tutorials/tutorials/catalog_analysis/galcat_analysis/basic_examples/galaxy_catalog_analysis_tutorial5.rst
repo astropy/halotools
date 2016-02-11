@@ -84,10 +84,8 @@ Determine group centrals and satellites
 .. code:: python
 
     from halotools.utils import add_new_table_column
-.. code:: python
 
     galaxy_sample['negative_stellar_mass'] = -1*galaxy_sample['stellar_mass']
-.. code:: python
 
     grouping_key = 'fof_group_id'
     new_colname, new_coltype = 'group_central', bool
@@ -114,6 +112,7 @@ Determine group centrals and satellites
     
     # we can now dispense with the negative_stellar_mass column
     del galaxy_sample['negative_stellar_mass']
+
 Let's inspect our results
 
 .. code:: python
@@ -238,7 +237,6 @@ Calculate :math:`\langle N_{\rm group}\rangle` as a function of :math:`M_{\rm ce
 .. code:: python
 
     from halotools.mock_observables import mean_y_vs_x
-.. code:: python
 
     group_cenmask = galaxy_sample['group_central'] == True
     group_cens = galaxy_sample[group_cenmask]
@@ -252,13 +250,10 @@ Plot the result
 
 .. code:: python
 
-    %matplotlib inline 
     from seaborn import plt
-.. code:: python
 
     plt.errorbar(10**log10_mvir_array, avg_richness, yerr=err_richness, 
                  color='red', fmt = "none")
-    
     plt.plot(10**log10_mvir_array, avg_richness, 'D', color='seagreen')
     
     plt.xscale('log')
@@ -269,15 +264,6 @@ Plot the result
     plt.xlim(xmin = 1e12, xmax = 1e15)
 
 
-
-
-.. parsed-literal::
-
-    (1000000000000.0, 1000000000000000.0)
-
-
-
-
-.. image:: output_33_1.png
+.. image:: group_richness_vs_group_cenmass.png
 
 
