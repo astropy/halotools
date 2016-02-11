@@ -11,6 +11,16 @@ In particular, we'll calculate the average total stellar mass,
 for centrals and satellites, :math:`\langle F_{\rm cen}^{\rm q}\vert M_{\rm halo}\rangle` 
 and :math:`\langle F_{\rm sat}^{\rm q}\vert M_{\rm halo}\rangle`. 
 
+There is also an IPython Notebook in the following location that can be 
+used as a companion to the material in this section of the tutorial:
+
+
+    halotools/docs/notebooks/galcat_analysis/galaxy_catalog_analysis_tutorial1.ipynb
+
+By following this tutorial together with this notebook, 
+you can play around with your own variations of the calculation 
+as you learn the basic syntax. 
+
 Generate a mock galaxy catalog 
 ---------------------------------
 Let's start out by generating a mock galaxy catalog into an N-body
@@ -27,7 +37,7 @@ default halo catalog.
 Now suppose the data we are interested in is complete for
 :math:`M_{\ast} > 10^{10}M_{\odot},` so we will make a cut on the mock.
 Our mock galaxies are stored in the ``galaxy_table`` of ``model.mock``
-in the form of an Astropy table.
+in the form of an Astropy `~astropy.table.Table`.
 
 .. code:: python
 
