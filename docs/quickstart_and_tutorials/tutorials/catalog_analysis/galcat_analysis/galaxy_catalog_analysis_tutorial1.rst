@@ -24,7 +24,7 @@ as you learn the basic syntax.
 Generate a mock galaxy catalog 
 ---------------------------------
 Let's start out by generating a mock galaxy catalog into an N-body
-simulation in the usual way. Here we'll assume you have the :math:`z=0`
+simulation in the usual way. Here we'll assume you have the *z=0*
 rockstar halos for the bolshoi simulation, as this is the
 default halo catalog. 
 

@@ -10,7 +10,7 @@ There is also an IPython Notebook in the following location that can be
 used as a companion to the material in this section of the tutorial:
 
 
-    halotools/docs/notebooks/galcat_analysis/galaxy_catalog_analysis_tutorial2.ipynb
+    halotools/docs/notebooks/galcat_analysis/galaxy_catalog_analysis_tutorial3.ipynb
 
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the calculation 
@@ -19,7 +19,7 @@ as you learn the basic syntax.
 Generate a mock galaxy catalog 
 ---------------------------------
 Let's start out by generating a mock galaxy catalog into an N-body
-simulation in the usual way. Here we'll assume you have the :math:`z=0`
+simulation in the usual way. Here we'll assume you have the *z=0*
 rockstar halos for the bolshoi simulation, as this is the
 default halo catalog. 
 
@@ -41,14 +41,31 @@ positions stored in the ``ptcl_table`` attribute of the mock.
     px = model.mock.ptcl_table['x']
     py = model.mock.ptcl_table['y']
     pz = model.mock.ptcl_table['z']
-    
+
+As described in :ref:`mock_obs_pos_formatting`, 
+functions in the `~halotools.mock_observables` package 
+such `~halotools.mock_observables.delta_sigma` take array inputs in a 
+specific form: a (*Npts, 3)*-shape Numpy array. You can use the 
+`~halotools.mock_observables.return_xyz_formatted_array` convenience 
+function for this purpose, which has a built-in *mask* feature 
+that we'll also demonstrate to select a random downsampling of :math:`10^{5}` 
+dark matter particles.
+
+.. code:: python
+
+    px = model.mock.ptcl_table['x']
+    py = model.mock.ptcl_table['y']
+    pz = model.mock.ptcl_table['z']
+
     from halotools.mock_observables import return_xyz_formatted_array
-    
+
+    Nptcls_to_keep = int(1e5)
     randomizer = np.random.random(len(model.mock.ptcl_table))
-    ptcl_mask = np.where(randomizer < 0.1)[0]
+    sorted_randoms = np.sort(randomizer)
+    ptcl_mask = np.where(sorted_randoms < sorted_randoms[Nptcls_to_keep])[0]
     particle_positions = return_xyz_formatted_array(px, py, pz, mask = ptcl_mask)
 
-Now we will extract the *x, y, z* positions of various subsamples of our galaxies. 
+Now we'll extract the *x, y, z* positions of various subsamples of our galaxies. 
 
 .. code:: python
 
@@ -97,10 +114,14 @@ Plot the results
 
     from seaborn import plt
 
-    plt.plot(rp_bins, result_mstar11, label=r'All galaxies: $M_{\ast} > 10^{11}M_{\odot}$')
-    plt.plot(rp_bins, result_mstar105, label=r'All galaxies: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
-    plt.plot(rp_bins, result_mstar105_satellite, label=r'Satellites: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
-    plt.plot(rp_bins, result_mstar105_central, label=r'Centrals: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
+    plt.plot(rp_bins, result_mstar11, 
+                label=r'All galaxies: $M_{\ast} > 10^{11}M_{\odot}$')
+    plt.plot(rp_bins, result_mstar105, 
+                label=r'All galaxies: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
+    plt.plot(rp_bins, result_mstar105_satellite, 
+                label=r'Satellites: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
+    plt.plot(rp_bins, result_mstar105_central, 
+                label=r'Centrals: $M_{\ast} \approx 10^{10.5}M_{\odot}$')
     
     plt.xlim(xmin = 0.1, xmax = 10)
     plt.ylim(ymin = 0.01, ymax = 100)
