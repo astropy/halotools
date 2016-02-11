@@ -37,8 +37,8 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``galaxies`` and ``particles`` arguments.   
 
-    For thorough documentation of all features, see :ref:`delta_sigma_usage_tutorial`. 
-    
+    See also :ref:`galaxy_catalog_analysis_tutorial3`. 
+
     Parameters
     ----------
     galaxies : array_like
@@ -147,6 +147,11 @@ def delta_sigma(galaxies, particles, rp_bins, pi_max, period,
     
     >>> rp_bins = np.logspace(-2,-1,10)
     >>> result = delta_sigma(gal_coords, ptcl_coords, rp_bins, pi_max=0.3, period=period)
+
+    See also 
+    --------
+    :ref:`galaxy_catalog_analysis_tutorial3`
+
     """
     
     #process the input parameters

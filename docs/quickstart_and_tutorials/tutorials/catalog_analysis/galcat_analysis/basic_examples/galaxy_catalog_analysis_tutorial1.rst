@@ -106,7 +106,13 @@ Our ``gals`` table now has a ``halo_mhost`` column.
 
 Calculate :math:`\langle M_{\ast}^{\rm tot}\rangle` vs. :math:`M_{\rm halo}`
 -------------------------------------------------------------------------------------------------
-    
+
+Now we'll exploit our previous calculations to compute the mean total stellar mass 
+in bins of halo mass. For this calculation, 
+the `~halotools.mock_observables.mean_y_vs_x` provides useful wrapper behavior around 
+`scipy.stats.binned_statistic` and `numpy.histogram`. 
+
+
 .. code:: python
 
     from halotools.mock_observables import mean_y_vs_x

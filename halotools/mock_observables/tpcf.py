@@ -36,7 +36,7 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` and ``sample2`` arguments.   
 
-    For thorough documentation of all features, see :ref:`tpcf_usage_tutorial`. 
+    See also :ref:`galaxy_catalog_analysis_tutorial2`. 
     
     Parameters 
     ----------
@@ -161,6 +161,10 @@ def tpcf(sample1, rbins, sample2=None, randoms=None, period=None,
     
     The result should be consistent with zero correlation at all *r* within 
     statistical errors
+
+    See also 
+    --------
+    :ref:`galaxy_catalog_analysis_tutorial2`
     """
     
     #check input arguments using clustering helper functions

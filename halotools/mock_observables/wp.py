@@ -43,9 +43,10 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     Example calls to this function appear in the documentation below. 
     See the :ref:`mock_obs_pos_formatting` documentation page for 
     instructions on how to transform your coordinate position arrays into the 
-    format accepted by the ``sample1`` and ``sample2`` arguments.   
-    For thorough documentation of all features, see :ref:`wp_usage_tutorial`. 
-    
+    format accepted by the ``sample1`` and ``sample2`` arguments. 
+      
+    See also :ref:`galaxy_catalog_analysis_tutorial4`. 
+
     Parameters 
     ----------
     sample1 : array_like
@@ -163,6 +164,10 @@ def wp(sample1, rp_bins, pi_bins, sample2=None, randoms=None, period=None,\
     >>> pi_bins = np.logspace(-2,-1,10)
     >>> xi = wp(coords, rp_bins, pi_bins, period=period)
     
+    See also 
+    --------
+    :ref:`galaxy_catalog_analysis_tutorial4`
+
     """
     
     #process input parameters

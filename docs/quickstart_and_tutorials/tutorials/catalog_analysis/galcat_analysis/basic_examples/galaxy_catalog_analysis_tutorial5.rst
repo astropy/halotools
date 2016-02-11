@@ -80,6 +80,12 @@ including redshift-space distortion effects.
 
 Determine group centrals and satellites
 ---------------------------------------
+In the following calculation, we'll use the 
+`~halotools.utils.add_new_table_column` function in order to group our 
+galaxy table together according to the FoF-determined group, and then 
+calculate a few quantities based on group membership. You can read about 
+the `~halotools.utils.add_new_table_column` function in its docstring, 
+and see usage similar to what follows in :ref:`galaxy_catalog_analysis_tutorial1`. 
 
 .. code:: python
 
@@ -206,33 +212,13 @@ Calculate true halo mass of group central :math:`M_{\rm cen}^{\rm true}`
             aggregation_function, colnames_needed_by_function, 
             table_is_already_sorted = True)
 
-.. code:: python
-
-    print(galaxy_sample[0:15])
-
-.. parsed-literal::
-
-    halo_upid  halo_mpeak  halo_x ... group_richness group_central_true_mvir
-    ---------- ---------- ------- ... -------------- -----------------------
-            -1  2.549e+12 20.8524 ...              2               2.451e+12
-            -1  8.513e+11 20.6768 ...              2               2.451e+12
-            -1  1.237e+12 22.3349 ...              6               6.728e+11
-    3058440575  3.237e+12 21.9039 ...              6               6.728e+11
-            -1  1.144e+14  21.812 ...              6               6.728e+11
-    3058440575   1.39e+12 22.3782 ...              6               6.728e+11
-    3058440575  1.163e+12 21.7744 ...              6               6.728e+11
-    3058440575   2.56e+12 21.9585 ...              6               6.728e+11
-            -1  9.709e+13 26.1803 ...              4               9.709e+13
-            -1  1.869e+12 25.4072 ...              4               9.709e+13
-            -1  8.876e+11 25.4922 ...              4               9.709e+13
-            -1  1.373e+12  25.946 ...              4               9.709e+13
-    3058441456  2.926e+13 25.6703 ...              1               9.709e+13
-    3058441456  8.404e+11 26.3213 ...              1               9.709e+13
-            -1  4.076e+13 23.7934 ...              1               3.718e+13
-
-
 Calculate :math:`\langle N_{\rm group}\rangle` as a function of :math:`M_{\rm cen}^{\rm true}`
 ----------------------------------------------------------------------------------------------
+
+For this calculation, we'll use `~halotools.mock_observables.mean_y_vs_x` to 
+compute the mean group richness as a function of true central halo mass. 
+Note that we only loop over group centrals, otherwise we would incorrectly fold each 
+group's satellites into the Poisson error estimate. 
 
 .. code:: python
 
