@@ -164,6 +164,7 @@ Plot the results
 
 .. image:: wp_red_blue_cross.png
 
+This tutorial continues with :ref:`galaxy_catalog_analysis_tutorial5`. 
 
 
 
