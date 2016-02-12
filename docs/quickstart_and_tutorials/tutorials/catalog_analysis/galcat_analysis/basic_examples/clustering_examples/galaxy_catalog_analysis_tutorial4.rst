@@ -1,6 +1,6 @@
 .. _galaxy_catalog_analysis_tutorial4:
 
-Basic Galaxy Catalog Analysis Example 4: Projected galaxy clustering 
+Galaxy Catalog Analysis Example: Projected galaxy clustering 
 =====================================================================================
 
 In this example, we'll show how to calculate :math:`w_{\rm p},` the
@@ -10,7 +10,7 @@ There is also an IPython Notebook in the following location that can be
 used as a companion to the material in this section of the tutorial:
 
 
-    halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial4.ipynb
+    **halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial4.ipynb**
 
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the calculation 

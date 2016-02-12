@@ -1,7 +1,7 @@
 
 .. _galaxy_catalog_analysis_tutorial1:
 
-Basic Galaxy Catalog Analysis Example 1: Galaxy properties as a function of halo mass
+Galaxy Catalog Analysis Example: Galaxy properties as a function of halo mass
 ========================================================================================
 
 In this example, we'll show how to start from a sample of mock galaxies 
@@ -15,7 +15,7 @@ There is also an IPython Notebook in the following location that can be
 used as a companion to the material in this section of the tutorial:
 
 
-    halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial1.ipynb
+    **halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial1.ipynb**
 
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the calculation 

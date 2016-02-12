@@ -1,7 +1,7 @@
 .. _galaxy_catalog_analysis_tutorial:
 
 **********************************************************************
-Tutorial on analyzing galaxy catalogs 
+Tutorials on analyzing galaxy catalogs 
 **********************************************************************
 
 By following this tutorial, you will learn how to use Halotools to 
@@ -13,10 +13,44 @@ In cases where material covered in a previous example is necessary
 to understand some aspect of one of the more complicated later calculations, 
 a link to the previous example will always be provided. 
 
-Worked examples
+Basic examples
 ===================
+Each of the examples in this section gives a specific demonstration of how to perform a 
+straightforward calculation on a mock galaxy catalog. By reading through 
+these examples, you will gain a working knowledge of all the major functions 
+in the `~halotools.mock_observables` package. 
+
+galaxy properties as a function of halo mass
+-------------------------------------------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   basic_examples/basic_galaxy_catalog_analysis_examples
+   basic_examples/galaxy_catalog_analysis_tutorial1
+
+galaxy clustering 
+-----------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial2
+   basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial3
+   basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial4
+
+galaxy group identification
+-------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   basic_examples/group_identification/galaxy_catalog_analysis_tutorial5
+
+velocity statistics 
+------------------------
+.. toctree::
+   :maxdepth: 1
+
+   basic_examples/velocity_statistics/galaxy_catalog_analysis_tutorial6
+
+
