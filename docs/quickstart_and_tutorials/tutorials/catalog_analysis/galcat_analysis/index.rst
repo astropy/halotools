@@ -52,5 +52,6 @@ velocity statistics
    :maxdepth: 1
 
    basic_examples/velocity_statistics/galaxy_catalog_analysis_tutorial6
+   basic_examples/velocity_statistics/galaxy_catalog_analysis_tutorial7
 
 
