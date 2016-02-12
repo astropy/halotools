@@ -1,6 +1,6 @@
 .. _galaxy_catalog_analysis_tutorial6:
 
-Basic Galaxy Catalog Analysis Example 6: Mean infall velocity into cluster BCGs
+Galaxy Catalog Analysis Example: Mean infall velocity into cluster BCGs
 ==================================================================================================
 
 In this example we'll show how to calculate the mean infall velocity of

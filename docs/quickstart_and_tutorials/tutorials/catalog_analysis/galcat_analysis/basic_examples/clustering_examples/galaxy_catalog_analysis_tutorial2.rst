@@ -1,6 +1,6 @@
 .. _galaxy_catalog_analysis_tutorial2:
 
-Basic Galaxy Catalog Analysis Example 2: Calculating galaxy clustering in 3d
+Galaxy Catalog Analysis Example: Calculating galaxy clustering in 3d
 ========================================================================================
 
 In this example, we'll show how to calculate the two-point clustering 

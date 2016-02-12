@@ -1,6 +1,6 @@
 .. _galaxy_catalog_analysis_tutorial4:
 
-Basic Galaxy Catalog Analysis Example 4: Projected galaxy clustering 
+Galaxy Catalog Analysis Example: Projected galaxy clustering 
 =====================================================================================
 
 In this example, we'll show how to calculate :math:`w_{\rm p},` the

@@ -1,6 +1,6 @@
 .. _galaxy_catalog_analysis_tutorial3:
 
-Basic Galaxy Catalog Analysis Example 3: Galaxy-galaxy lensing
+Galaxy Catalog Analysis Example: Galaxy-galaxy lensing
 =====================================================================================
 
 In this example, we'll show how to calculate :math:`\Delta\Sigma(r),`

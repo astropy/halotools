@@ -1,6 +1,6 @@
 .. _galaxy_catalog_analysis_tutorial5:
 
-Basic Galaxy Catalog Analysis Example 5: Galaxy group identification
+Galaxy Catalog Analysis Example: Galaxy group identification
 ====================================================================
 
 In this example, we'll show how to start from a sample of mock galaxies

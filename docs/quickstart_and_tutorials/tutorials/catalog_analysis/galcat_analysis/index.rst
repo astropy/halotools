@@ -1,7 +1,7 @@
 .. _galaxy_catalog_analysis_tutorial:
 
 **********************************************************************
-Tutorial on analyzing galaxy catalogs 
+Tutorials on analyzing galaxy catalogs 
 **********************************************************************
 
 By following this tutorial, you will learn how to use Halotools to 
