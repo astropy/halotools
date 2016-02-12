@@ -178,6 +178,10 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
                 else: D2R=None
             return D1R, D2R, RR
         elif randoms is None:
+            
+            #set the number of randoms equal to the number of points in sample1
+            NR = len(sample1)
+            
             #do area calculations
             da = area_spherical_cap(chord_bins)
             da = np.diff(da)
@@ -188,21 +192,14 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
             rho1 = N1/global_area #number density of points
             D1R = (N1)*(da*rho1) #random counts are N**2*dv*rho
             
-            #if not calculating cross-correlation, set RR exactly equal to D1R.
-            if _sample1_is_sample2:
-                D2R = None
-                RR = D1R #in the analytic case, for the auto-correlation, DR==RR.
-            else: #if there is a sample2, calculate randoms for it.
-                N2 = np.shape(sample2)[0]
-                rho2 = N2/global_area #number density of points
-                D2R = N2*(da*rho2)
-                #calculate the random-random pairs.
-                #RR is only the RR for the cross-correlation when using analytical randoms
-                #for the non-cross case, DR==RR (in analytical world).
-                NR = N1*N2
-                rhor = NR/global_volume
-                RR = (dv*rhor)
-
+            N2 = np.shape(sample2)[0]
+            rho2 = N2/global_area #number density of points
+            D2R = N2*(da*rho2)
+            
+            #calculate the random-random pairs.
+            rhor = NR**2/global_area
+            RR = (da*rhor)
+            
             return D1R, D2R, RR
     
     def pair_counts(sample1, sample2, chord_bins, N_thread, do_auto, do_cross,\
@@ -237,17 +234,14 @@ def angular_tpcf(sample1, theta_bins, sample2=None, randoms=None,
     do_DD, do_DR, do_RR = _TP_estimator_requirements(estimator)
     
     # How many points are there (for normalization purposes)?
+    N1 = len(sample1)
+    N2 = len(sample2)
     if randoms is not None:
-        N1 = len(sample1)
         NR = len(randoms)
-        if _sample1_is_sample2:
-            N2 = N1
-        else:
-            N2 = len(sample2)
-    else: # This is taken care of in the analytical case.  See comments in random_pairs().
-        N1 = 1.0
-        N2 = 1.0
-        NR = 1.0
+    else:
+        #set the number of randoms equal to the number of points in sample1
+        #this is arbitrarily set, but must remain consistent!
+        NR = N1
     
     #count data pairs
     D1D1,D1D2,D2D2 = pair_counts(sample1, sample2, chord_bins,
