@@ -106,6 +106,12 @@ def add_new_table_column(table, new_colname, new_coltype, grouping_key,
     After calling `add_new_table_column` as above, 
     the ``halo_table`` has a new column named ``mass_weighted_spin``. 
 
+    See also 
+    ---------
+    :ref:`galaxy_catalog_analysis_tutorial1`
+    
+    :ref:`galaxy_catalog_analysis_tutorial5`
+
     """
     try:
         assert type(table) == Table 

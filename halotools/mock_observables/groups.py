@@ -44,7 +44,8 @@ class FoFGroups(object):
         See the :ref:`mock_obs_pos_formatting` documentation page for 
         instructions on how to transform your coordinate position arrays into the 
         format accepted by the ``positions`` argument.   
-        
+        See also :ref:`galaxy_catalog_analysis_tutorial5`. 
+
         Parameters
         ----------
         positions : array_like
@@ -91,6 +92,10 @@ class FoFGroups(object):
         >>> b_perp, b_para = (0.1,0.2)
         >>> groups = FoFGroups(coords, b_perp, b_para, period=period)
         >>> IDs = groups.group_ids
+
+        See also 
+        --------
+        :ref:`galaxy_catalog_analysis_tutorial5`
         """
         
         self.b_perp = float(b_perp) #perpendicular linking length

@@ -26,6 +26,8 @@ def mean_y_vs_x(x, y, error_estimator = 'error_on_mean', **kwargs):
     The `mean_y_vs_x` function is just a convenience wrapper 
     around `scipy.stats.binned_statistic` and `np.histogram`. 
 
+    See also :ref:`galaxy_catalog_analysis_tutorial1`. 
+
     Parameters 
     -----------
     x : array_like 
@@ -67,6 +69,10 @@ def mean_y_vs_x(x, y, error_estimator = 'error_on_mean', **kwargs):
     >>> halos = halocat.halo_table 
     >>> halo_mass, mean_spin, err = mean_y_vs_x(halos['halo_mvir'], halos['halo_spin'])
 
+    See also 
+    ---------
+    :ref:`galaxy_catalog_analysis_tutorial1`
+    
     """
     try:
         assert error_estimator in ('error_on_mean', 'variance')
