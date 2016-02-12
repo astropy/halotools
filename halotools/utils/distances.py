@@ -11,6 +11,7 @@ import numpy as np
 import collections
 from astropy.table import Table
 from ..custom_exceptions import HalotoolsError
+from .array_utils import *
 
 def distance(x1,x2,period=None):
     """ 
@@ -35,18 +36,29 @@ def distance(x1,x2,period=None):
     """
     
     #process inputs
-    x1 = np.asarray(x1)
-    if x1.ndim ==1: x1 = np.array([x1])
-    x2 = np.asarray(x2)
-    if x2.ndim ==1: x2 = np.array([x2])
+    x1 = convert_to_ndarray(x1)
+    x2 = convert_to_ndarray(x2)
     if period is None:
-        period = np.array([np.inf]*np.shape(x1)[-1])
+        period = np.array([np.inf]*k)
+    else:
+        period = convert_to_ndarray(period)
+    
+    #dimension of data
+    k = np.shape(x1)[-1]
+    
+    if np.shape(period)==(1,):
+        period = np.array([period[0]]*k)
+    
+    if period is None:
+        period = np.array([np.inf]*k)
+    else:
+       period = np.array(period)
     
     #check for consistency
     if np.shape(x1)[-1] != np.shape(x2)[-1]:
         raise ValueError("x1 and x2 list of points must have same dimension k.")
     else: k = np.shape(x1)[-1]
-    if np.shape(period)[0] != np.shape(x1)[-1]:
+    if np.shape(period)[0] != k:
         raise ValueError("period must have length equal to the dimension of x1 and x2.")
     
     m = np.minimum(np.fabs(x1 - x2), period - np.fabs(x1 - x2))
