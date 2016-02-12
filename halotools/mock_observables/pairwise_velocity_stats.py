@@ -35,7 +35,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` and ``sample2`` arguments.   
 
-    For thorough documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
+    See also :ref:`galaxy_catalog_analysis_tutorial6` and :ref:`galaxy_catalog_analysis_tutorial7`. 
     
     Parameters
     ----------
@@ -139,6 +139,12 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     >>> rbins = np.logspace(-2,-1,10)
     >>> v_12 = mean_radial_velocity_vs_r(coords, velocities, rbins, period=period)
     
+    See also 
+    --------
+    :ref:`galaxy_catalog_analysis_tutorial6`
+
+    :ref:`galaxy_catalog_analysis_tutorial7`
+
     """
     
     function_args = [sample1, velocities1, sample2, velocities2, period,\
