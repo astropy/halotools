@@ -11,6 +11,8 @@ import numpy as np
 from .pair_counters.double_tree_per_object_pairs import *
 from ..custom_exceptions import *
 from warnings import warn
+
+from ..utils import convert_to_ndarray
 ##########################################################################################
 
 
@@ -103,7 +105,15 @@ def void_prob_func(sample1, rbins, n_ran, period, num_threads=1,
     >>> n_ran = 1000
     >>> vpf = void_prob_func(coords, rbins, n_ran, period)
     """
-    
+    period = convert_to_ndarray(period)
+    if len(period) == 1:
+        period = np.array([period, period, period])
+    elif len(period) == 3:
+        pass
+    else:
+        msg = ("\nInput ``period`` must either be a float or length-3 sequence")
+        raise HalotoolsError(msg)
+
     #process input
     if type(n_ran) is not int:
         msg = ("\n `n_ran` must be a positive integer.")
@@ -112,7 +122,7 @@ def void_prob_func(sample1, rbins, n_ran, period, num_threads=1,
         raise HalotoolsError(msg)
     
     #create random sphere centers
-    randoms = np.random.random((n_ran,3))*period
+    randoms = np.random.uniform(0, period[0], (n_ran,3))
     
     result = per_object_npairs(randoms, sample1, rbins, period = period,\
                               num_threads = num_threads,\
@@ -210,6 +220,14 @@ def underdensity_prob_func(sample1, rbins, n_ran, period, u=0.2, num_threads=1,
     >>> n_ran = 1000
     >>> upf = underdensity_prob_func(coords, rbins, n_ran, period, u=0.2)
     """
+    period = convert_to_ndarray(period)
+    if len(period) == 1:
+        period = np.array([period, period, period])
+    elif len(period) == 3:
+        pass
+    else:
+        msg = ("\nInput ``period`` must either be a float or length-3 sequence")
+        raise HalotoolsError(msg)
     
     #process input
     if type(n_ran) is not int:
@@ -221,7 +239,7 @@ def underdensity_prob_func(sample1, rbins, n_ran, period, u=0.2, num_threads=1,
     u = float(u)
     
     #create random sphere centers
-    randoms = np.random.random((n_ran,3))*period
+    randoms = np.random.uniform(0, period[0], (n_ran,3))
     
     result = per_object_npairs(randoms, sample1, rbins, period = period,\
                                num_threads = num_threads,\
