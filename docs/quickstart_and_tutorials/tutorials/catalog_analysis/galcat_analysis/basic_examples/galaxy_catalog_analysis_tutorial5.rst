@@ -252,4 +252,6 @@ Plot the result
 
 .. image:: group_richness_vs_group_cenmass.png
 
+This tutorial continues with :ref:`galaxy_catalog_analysis_tutorial6`. 
+
 

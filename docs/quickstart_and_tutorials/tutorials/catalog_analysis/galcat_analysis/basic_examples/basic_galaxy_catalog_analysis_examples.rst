@@ -16,3 +16,4 @@ in the `~halotools.mock_observables` package.
    galaxy_catalog_analysis_tutorial3
    galaxy_catalog_analysis_tutorial4
    galaxy_catalog_analysis_tutorial5
+   galaxy_catalog_analysis_tutorial6
