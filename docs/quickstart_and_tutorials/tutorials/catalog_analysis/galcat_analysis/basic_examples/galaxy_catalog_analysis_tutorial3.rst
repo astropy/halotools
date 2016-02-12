@@ -10,7 +10,7 @@ There is also an IPython Notebook in the following location that can be
 used as a companion to the material in this section of the tutorial:
 
 
-    halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial3.ipynb
+    **halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial3.ipynb**
 
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the calculation 

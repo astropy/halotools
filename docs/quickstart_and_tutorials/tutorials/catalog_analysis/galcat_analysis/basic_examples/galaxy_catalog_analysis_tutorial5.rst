@@ -6,6 +6,16 @@ Basic Galaxy Catalog Analysis Example 5: Galaxy group identification
 In this example, we'll show how to start from a sample of mock galaxies
 and identify galaxy groups in an observationally realistic manner.
 
+There is also an IPython Notebook in the following location that can be 
+used as a companion to the material in this section of the tutorial:
+
+
+    **halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial5.ipynb**
+
+By following this tutorial together with this notebook, 
+you can play around with your own variations of the calculation 
+as you learn the basic syntax. 
+
 Generate a mock galaxy catalog
 ------------------------------
 

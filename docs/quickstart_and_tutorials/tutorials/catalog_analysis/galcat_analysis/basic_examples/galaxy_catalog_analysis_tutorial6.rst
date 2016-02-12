@@ -11,6 +11,16 @@ population of :math:`M_{\ast}/M_{\odot}>10^{11.75}` galaxies as our BCG sample,
 and :math:`10^{10.75}<M_{\ast}/M_{\odot}<10^{11}` galaxies as the 
 population we'll use as tracers of the velocity field. 
 
+There is also an IPython Notebook in the following location that can be 
+used as a companion to the material in this section of the tutorial:
+
+
+    **halotools/docs/notebooks/galcat_analysis/basic_examples/galaxy_catalog_analysis_tutorial6.ipynb**
+
+By following this tutorial together with this notebook, 
+you can play around with your own variations of the calculation 
+as you learn the basic syntax. 
+
 Generate a mock galaxy catalog
 ------------------------------
 
