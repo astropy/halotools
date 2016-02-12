@@ -44,7 +44,7 @@ We can retrieve these arrays as follows:
 
 As described in :ref:`mock_obs_pos_formatting`, 
 functions in the `~halotools.mock_observables` package 
-such `~halotools.mock_observables.wp` take array inputs in a 
+such as `~halotools.mock_observables.wp` take array inputs in a 
 specific form: a (*Npts, 3)*-shape Numpy array. You can use the 
 `~halotools.mock_observables.return_xyz_formatted_array` convenience 
 function for this purpose, which has a built-in *mask* feature 

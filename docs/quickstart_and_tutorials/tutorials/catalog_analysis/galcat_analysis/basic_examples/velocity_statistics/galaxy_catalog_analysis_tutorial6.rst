@@ -43,7 +43,7 @@ To calculate the mean radial velocity between two sets of points,
 we need to know both their positions and velocities. 
 As described in :ref:`mock_obs_pos_formatting`, 
 functions in the `~halotools.mock_observables` package 
-such `~halotools.mock_observables.mean_radial_velocity_vs_r` take array inputs in a 
+such as `~halotools.mock_observables.mean_radial_velocity_vs_r` take array inputs in a 
 specific form: a (*Npts, 3)*-shape Numpy array. You can use the 
 `~halotools.mock_observables.return_xyz_formatted_array` convenience 
 function for this purpose, which we will do after first 
