@@ -43,8 +43,8 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     See the :ref:`mock_obs_pos_formatting` documentation page for 
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` and ``sample2`` arguments.   
-    For thorough documentation of all features, 
-    see :ref:`tpcf_one_two_halo_decomp_usage_tutorial`. 
+
+    See also :ref:`galaxy_catalog_analysis_tutorial2`. 
     
     Parameters 
     ----------
@@ -172,6 +172,10 @@ def tpcf_one_two_halo_decomp(sample1, sample1_host_halo_id, rbins,
     >>> host_halo_IDs = np.random.random_integers(1,10,size=Npts)
     >>> xi_1h, xi_2h = tpcf_one_two_halo_decomp(coords, host_halo_IDs, rbins, period=period)
     
+    See also 
+    -----------
+    :ref:`galaxy_catalog_analysis_tutorial3`. 
+
     """
     
     #check input arguments using clustering helper functions

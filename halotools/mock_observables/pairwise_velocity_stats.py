@@ -35,7 +35,7 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` and ``sample2`` arguments.   
 
-    For thorough documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
+    See also :ref:`galaxy_catalog_analysis_tutorial6`. 
     
     Parameters
     ----------
@@ -139,6 +139,10 @@ def mean_radial_velocity_vs_r(sample1, velocities1, rbins,
     >>> rbins = np.logspace(-2,-1,10)
     >>> v_12 = mean_radial_velocity_vs_r(coords, velocities, rbins, period=period)
     
+    See also 
+    --------
+    :ref:`galaxy_catalog_analysis_tutorial6`
+
     """
     
     function_args = [sample1, velocities1, sample2, velocities2, period,\
@@ -247,9 +251,10 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     """
     Calculate the pairwise velocity dispersion (PVD), :math:`\\sigma_{12}(r)`.
     
-    Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
+    Example calls to this function appear in the documentation below.
     
+    See also :ref:`galaxy_catalog_analysis_tutorial7`. 
+
     Parameters
     ----------
     sample1 : array_like
@@ -337,6 +342,9 @@ def radial_pvd_vs_r(sample1, velocities1, rbins, sample2=None,
     >>> rbins = np.logspace(-2,-1,10)
     >>> sigma_12 = radial_pvd_vs_r(coords, velocities, rbins, period=period)
     
+    See also 
+    ---------
+    ref:`galaxy_catalog_analysis_tutorial7`
     """
     
     #process input arguments
@@ -467,9 +475,8 @@ def mean_los_velocity_vs_rp(sample1, velocities1, rp_bins, pi_max,
     """ 
     Calculate the mean pairwise line-of-sight (LOS) velocity as a function of projected seperation, :math:`\\bar{v}_{z,12}(r_p)`.
     
-    Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
-    
+    Example calls to this function appear in the documentation below. 
+
     Parameters
     ----------
     sample1 : array_like
@@ -691,8 +698,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     """
     Calculate the pairwise line-of-sight (LOS) velocity dispersion (PVD), :math:`\\sigma_{z12}(r_p)`.
     
-    Example calls to this function appear in the documentation below. For thorough 
-    documentation of all features, see :ref:`pairwise_velocity_usage_tutorial`. 
+    Example calls to this function appear in the documentation below. 
     
     Parameters
     ----------
