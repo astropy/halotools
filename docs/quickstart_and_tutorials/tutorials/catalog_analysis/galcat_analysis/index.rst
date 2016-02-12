@@ -15,6 +15,10 @@ a link to the previous example will always be provided.
 
 Basic examples
 ===================
+Each of the examples in this section gives a specific demonstration of how to perform a 
+straightforward calculation on a mock galaxy catalog. By reading through 
+these examples, you will gain a working knowledge of all the major functions 
+in the `~halotools.mock_observables` package. 
 
 galaxy properties as a function of halo mass
 -------------------------------------------------
