@@ -54,4 +54,12 @@ velocity statistics
    basic_examples/velocity_statistics/galaxy_catalog_analysis_tutorial6
    basic_examples/velocity_statistics/galaxy_catalog_analysis_tutorial7
 
+void statistics 
+---------------------
+.. toctree::
+   :maxdepth: 1
+
+   basic_examples/void_stats/galaxy_catalog_analysis_tutorial8
+
+
 

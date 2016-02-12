@@ -35,6 +35,8 @@ def void_prob_func(sample1, rbins, n_ran, period, num_threads=1,
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` argument.   
 
+    See also :ref:`galaxy_catalog_analysis_tutorial8`
+
     Parameters
     ----------
     sample1 : array_like
@@ -104,6 +106,11 @@ def void_prob_func(sample1, rbins, n_ran, period, num_threads=1,
     >>> rbins = np.logspace(-2,-1,20)
     >>> n_ran = 1000
     >>> vpf = void_prob_func(coords, rbins, n_ran, period)
+
+    See also 
+    ----------
+    :ref:`galaxy_catalog_analysis_tutorial8`
+
     """
     period = convert_to_ndarray(period)
     if len(period) == 1:
@@ -146,6 +153,8 @@ def underdensity_prob_func(sample1, rbins, n_ran, period, u=0.2, num_threads=1,
     See the :ref:`mock_obs_pos_formatting` documentation page for 
     instructions on how to transform your coordinate position arrays into the 
     format accepted by the ``sample1`` argument.   
+
+    See also :ref:`galaxy_catalog_analysis_tutorial8`. 
 
     Parameters
     ----------
@@ -219,6 +228,10 @@ def underdensity_prob_func(sample1, rbins, n_ran, period, u=0.2, num_threads=1,
     >>> rbins = np.logspace(-2,-1,20)
     >>> n_ran = 1000
     >>> upf = underdensity_prob_func(coords, rbins, n_ran, period, u=0.2)
+
+    See also 
+    ----------
+    :ref:`galaxy_catalog_analysis_tutorial8`
     """
     period = convert_to_ndarray(period)
     if len(period) == 1:
