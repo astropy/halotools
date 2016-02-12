@@ -13,10 +13,40 @@ In cases where material covered in a previous example is necessary
 to understand some aspect of one of the more complicated later calculations, 
 a link to the previous example will always be provided. 
 
-Worked examples
+Basic examples
 ===================
 
-.. toctree::
-   :maxdepth: 2
+galaxy properties as a function of halo mass
+-------------------------------------------------
 
-   basic_examples/basic_galaxy_catalog_analysis_examples
+.. toctree::
+   :maxdepth: 1
+
+   basic_examples/galaxy_catalog_analysis_tutorial1
+
+galaxy clustering 
+-----------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial2
+   basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial3
+   basic_examples/clustering_examples/galaxy_catalog_analysis_tutorial4
+
+galaxy group identification
+-------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   basic_examples/group_identification/galaxy_catalog_analysis_tutorial5
+
+velocity statistics 
+------------------------
+.. toctree::
+   :maxdepth: 1
+
+   basic_examples/velocity_statistics/galaxy_catalog_analysis_tutorial6
+
+

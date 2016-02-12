@@ -1,3 +1,5 @@
+:orphan:
+
 .. _basic_galaxy_catalog_analysis_examples:
 
 Basic examples of galaxy catalog analyses
@@ -9,11 +11,11 @@ these examples, you will gain a working knowledge of all the major functions
 in the `~halotools.mock_observables` package. 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    galaxy_catalog_analysis_tutorial1
-   galaxy_catalog_analysis_tutorial2
-   galaxy_catalog_analysis_tutorial3
-   galaxy_catalog_analysis_tutorial4
-   galaxy_catalog_analysis_tutorial5
-   galaxy_catalog_analysis_tutorial6
+   clustering_examples/galaxy_catalog_analysis_tutorial2
+   clustering_examples/galaxy_catalog_analysis_tutorial3
+   clustering_examples/galaxy_catalog_analysis_tutorial4
+   group_identification/galaxy_catalog_analysis_tutorial5
+   velocity_statistics/galaxy_catalog_analysis_tutorial6
