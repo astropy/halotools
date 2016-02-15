@@ -9,7 +9,6 @@ import sys
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, fmin
 from libcpp.vector cimport vector
 
 from .distances cimport *

@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function,
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, fmin
 
 __all__=['periodic_square_distance','square_distance','perp_square_distance',\
          'para_square_distance','periodic_perp_square_distance',\
@@ -33,12 +32,12 @@ cdef double periodic_square_distance(np.float64_t x1,\
     
     cdef double dx, dy, dz
     
-    dx = fabs(x1 - x2)
-    dx = fmin(dx, period[0] - dx)
-    dy = fabs(y1 - y2)
-    dy = fmin(dy, period[1] - dy)
-    dz = fabs(z1 - z2)
-    dz = fmin(dz, period[2] - dz)
+    dx = np.fabs(x1 - x2)
+    dx = np.fmin(dx, period[0] - dx)
+    dy = np.fabs(y1 - y2)
+    dy = np.fmin(dy, period[1] - dy)
+    dz = np.fabs(z1 - z2)
+    dz = np.fmin(dz, period[2] - dz)
     return dx*dx+dy*dy+dz*dz
 
 @cython.boundscheck(False)
@@ -101,10 +100,10 @@ cdef double periodic_perp_square_distance(np.float64_t x1, np.float64_t y1,\
     
     cdef double dx, dy
     
-    dx = fabs(x1 - x2)
-    dx = fmin(dx, period[0] - dx)
-    dy = fabs(y1 - y2)
-    dy= fmin(dy, period[1] - dy)
+    dx = np.fabs(x1 - x2)
+    dx = np.fmin(dx, period[0] - dx)
+    dy = np.fabs(y1 - y2)
+    dy= np.fmin(dy, period[1] - dy)
     return dx*dx+dy*dy
 
 @cython.boundscheck(False)
@@ -120,8 +119,8 @@ cdef double periodic_para_square_distance(np.float64_t z1, np.float64_t z2,\
     
     cdef double dz
     
-    dz = fabs(z1 - z2)
-    dz = fmin(dz, period[2] - dz)
+    dz = np.fabs(z1 - z2)
+    dz = np.fmin(dz, period[2] - dz)
     return dz*dz
 
 
