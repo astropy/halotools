@@ -24,7 +24,8 @@ from ...custom_exceptions import *
 
 
 class SubhaloModelFactory(ModelFactory):
-    """ Class used to build models of the galaxy-halo connection in which galaxies live at the centers of subhalos.  
+    """ Class used to build models of the galaxy-halo connection 
+    in which galaxies live at the centers of subhalos.  
 
     The arguments passed to the `SubhaloModelFactory` constructor determine 
     the features of the model that are returned by the factory. This works in one of two ways, 
@@ -218,17 +219,18 @@ class SubhaloModelFactory(ModelFactory):
         # Build up and bind several lists from the component models
         self.build_prim_sec_haloprop_list()
         self.build_publication_list()
-        self.build_new_haloprop_func_dict()
         self.build_dtype_list()
+        self.build_new_haloprop_func_dict()
         self.set_warning_suppressions()
-        self.set_model_redshift()
         self.set_inherited_methods()
+        self.set_model_redshift()
         self.build_init_param_dict()
 
         # Create a set of bound methods with specific names 
         # that will be called by the mock factory 
         self.set_primary_behaviors()
         self.set_calling_sequence()
+        self._test_dictionary_consistency()
 
     def parse_constructor_kwargs(self, **kwargs):
         """ Method used to parse the arguments passed to 
@@ -333,30 +335,6 @@ class SubhaloModelFactory(ModelFactory):
                     "component model instances, not component model classes. \n" + msg_conclusion)
                 raise HalotoolsError(msg % feature_key)
 
-            try:
-                assert hasattr(component_model, '_methods_to_inherit')
-                for methodname in component_model._methods_to_inherit:
-                    assert hasattr(component_model, methodname)
-            except AssertionError:
-                msg = (msg_preface + "You bound an instance of the ``"+clname+"`` to this keyword,\n"
-                    "but the instance does not have a properly defined ``_methods_to_inherit`` attribute.\n"
-                    "At a minimum, all component models must have this attribute, \n"
-                    "even if there is only an empty list bound to it.\n"
-                    "Any items in this list must be names of methods bound to the component model.\n" + msg_conclusion)
-                raise HalotoolsError(msg % feature_key)
-
-            try:
-                assert hasattr(component_model, '_galprop_dtypes_to_allocate')
-                dt = component_model._galprop_dtypes_to_allocate
-                assert type(dt) == np.dtype
-            except AssertionError:
-                msg = (msg_preface + "You bound an instance of the ``"+clname+"`` to this keyword,\n"
-                    "but the instance does not have a np.dtype object"
-                    "bound to the ``_galprop_dtypes_to_allocate`` attribute.\n"
-                    "At a minimum, all component models must have this attribute, \n"
-                    "and it must be numpy.dtype object,"
-                    "even if the dtype is empty.\n" + msg_conclusion)
-                raise HalotoolsError(msg % feature_key)
         
     def build_model_feature_calling_sequence(self, supplementary_kwargs):
         """ Method uses the ``model_feature_calling_sequence`` passed to __init__, if available. 
@@ -875,4 +853,21 @@ class SubhaloModelFactory(ModelFactory):
 
         """
         ModelFactory.populate_mock(self, **kwargs)
+
+    def _test_dictionary_consistency(self):
+        """
+        """
+        for component_model in self.model_dictionary.values():
+            try:
+                assert hasattr(component_model, '_methods_to_inherit')
+                for methodname in component_model._methods_to_inherit:
+                    assert hasattr(component_model, methodname)
+            except AssertionError:
+                msg = (msg_preface + "You bound an instance of the ``"+clname+"`` to this keyword,\n"
+                    "but the instance does not have a properly defined ``_methods_to_inherit`` attribute.\n"
+                    "At a minimum, all component models must have this attribute, \n"
+                    "even if there is only an empty list bound to it.\n"
+                    "Any items in this list must be names of methods bound to the component model.\n" + msg_conclusion)
+                raise HalotoolsError(msg % feature_key)
+
 
