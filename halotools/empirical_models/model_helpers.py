@@ -112,7 +112,7 @@ def polynomial_from_table(table_abscissa,table_ordinates,input_abscissa):
     return output_ordinates
 
 def enforce_periodicity_of_box(coords, box_length, 
-    check_multiple_box_lengths = False):
+    check_multiple_box_lengths = False, **kwargs):
     """ Function used to apply periodic boundary conditions 
     of the simulation, so that mock galaxies all lie in the range [0, Lbox].
 
@@ -124,6 +124,11 @@ def enforce_periodicity_of_box(coords, box_length,
         
     box_length : float
         the size of simulation box (currently hard-coded to be Mpc/h units)
+
+    velocity : array_like, optional 
+        velocity in the same dimension as the input coords. 
+        For all coords outside the box, the corresponding velocities 
+        will receive a sign flip. 
 
     check_multiple_box_lengths : bool, optional 
         If True, an exception will be raised if the points span a range 
@@ -147,7 +152,14 @@ def enforce_periodicity_of_box(coords, box_length,
             msg = ("\nThere is at least one input point with a coordinate greater than 2*Lbox\n")
             raise HalotoolsError(msg)
 
-    return coords % box_length
+    try:
+        velocity = kwargs['velocity']
+        outbox = ((coords > box_length) | (coords < 0))
+        newcoords = coords % box_length 
+        new_velocity = np.where(outbox, -velocity, velocity)
+        return newcoords, new_velocity
+    except:
+        return coords % box_length
 
 
 def piecewise_heaviside(bin_midpoints, bin_width, values_inside_bins, value_outside_bins, abscissa):
