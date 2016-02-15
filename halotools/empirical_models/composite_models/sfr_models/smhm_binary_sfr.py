@@ -55,8 +55,8 @@ def smhm_binary_sfr_model_dictionary(
         Default is set in the `~halotools.empirical_models.model_defaults` module. 
 
     smhm_model : object, optional  
-        Sub-class of `~halotools.empirical_models.smhm_components.PrimGalpropModel` governing 
-        the stellar-to-halo-mass relation. Default is `Moster13SmHm`. 
+        Sub-class of `~halotools.empirical_models.PrimGalpropModel` governing 
+        the stellar-to-halo-mass relation. Default is `Behroozi10SmHm`. 
 
     scatter_level : float, optional  
         Constant amount of scatter in stellar mass, in dex. Default is 0.2. 

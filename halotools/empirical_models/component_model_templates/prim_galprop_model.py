@@ -16,7 +16,7 @@ from astropy import cosmology
 from warnings import warn
 from functools import partial
 
-from .scatter_models import LogNormalScatterModel
+from . import LogNormalScatterModel
 
 from .. import model_defaults
 from .. import model_helpers as model_helpers
@@ -43,8 +43,13 @@ class PrimGalpropModel(object):
         ----------
         galprop_name : string  
             Name of the galaxy property being assigned. Most likely, 
-            this is either ``stellar mass`` or ``luminosity``. This will be name of the 
-            column assigned to your mock galaxy catalog. 
+            this is either ``stellar mass`` or ``luminosity``, 
+            but any name is permissible, e.g. ``baryonic_mass``. 
+            Whatever you choose, this will be name of the 
+            column assigned to your mock galaxy catalog, 
+            and your model will have methods with the following two names 
+            deriving from your choice: 
+            ``mean_galprop_name``, ``mc_galprop_name``. 
 
         prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
@@ -111,7 +116,7 @@ class PrimGalpropModel(object):
 
         # The _mock_generation_calling_sequence determines which methods 
         # will be called during mock population, as well as in what order they will be called
-        self._mock_generation_calling_sequence = ['mc_stellar_mass']
+        self._mock_generation_calling_sequence = ['mc_'+self.galprop_name]
         self._galprop_dtypes_to_allocate = np.dtype([(str(self.galprop_name), 'f4')])
 
         # The _methods_to_inherit determines which methods will be directly callable 
@@ -121,8 +126,6 @@ class PrimGalpropModel(object):
             self._methods_to_inherit.extend(method_names_to_inherit)
         except AttributeError:
             self._methods_to_inherit = method_names_to_inherit
-
-
 
     def mean_scatter(self, **kwargs):
         """ Use the ``param_dict`` of `PrimGalpropModel` to update the ``param_dict`` 

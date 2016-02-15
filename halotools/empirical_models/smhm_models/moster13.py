@@ -14,11 +14,9 @@ from astropy import cosmology
 from warnings import warn
 from functools import partial
 
-from .scatter_models import LogNormalScatterModel
-from .smhm_model_template import PrimGalpropModel
-
 from .. import model_defaults
 from .. import model_helpers as model_helpers
+from ..component_model_templates import LogNormalScatterModel, PrimGalpropModel
 
 from ...utils.array_utils import custom_len
 from ...sim_manager import sim_defaults 
