@@ -123,10 +123,12 @@ influence the properties of your mock galaxy population. The only change
 in the source code below from the above is that we will use ``mstar`` as the 
 keyword attached to the `Behroozi10SmHm` controlling :math:`M_{\ast}`. 
 
->>> sm_model =  Behroozi10SmHm(redshift = 0)
->>> model_instance = SubhaloModelFactory(mstar = sm_model)
->>> model_instance.populate_mock(simname = 'fake')
->>> print(model_instance.mock.galaxy_table[0:5])
+.. code:: python
+
+    sm_model =  Behroozi10SmHm(redshift = 0)
+    model_instance = SubhaloModelFactory(mstar = sm_model)
+    model_instance.populate_mock(simname = 'fake')
+    print(model_instance.mock.galaxy_table[0:5])
 
 .. parsed-literal::
 
