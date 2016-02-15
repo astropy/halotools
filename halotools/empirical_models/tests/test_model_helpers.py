@@ -51,6 +51,23 @@ class TestModelHelpers(TestCase):
         newcoords = occuhelp.enforce_periodicity_of_box(x, box_length, 
             check_multiple_box_lengths = True)
 
+    def test_velocity_flip(self):
+        box_length = 250
+        Npts = 1e4
+
+        x = np.linspace(-0.5*box_length, 1.5*box_length, Npts)
+        vx = np.ones(Npts)
+
+        newcoords, newvel = occuhelp.enforce_periodicity_of_box(
+            x, box_length, velocity = vx)
+
+        inbox = ( (x >= 0) & (x <= box_length) )
+        assert np.all(newvel[inbox] == 1.0)
+        assert np.all(newvel[~inbox] == -1.0)
+
+
+
+
 
 
 

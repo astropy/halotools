@@ -209,15 +209,26 @@ class HodMockFactory(MockFactory):
             func(table = self.galaxy_table[gal_type_slice])
                 
         if self.enforce_PBC is True:
-            self.galaxy_table['x'] = model_helpers.enforce_periodicity_of_box(
-                self.galaxy_table['x'], self.Lbox, 
-                check_multiple_box_lengths = self._testing_mode)
-            self.galaxy_table['y'] = model_helpers.enforce_periodicity_of_box(
-                self.galaxy_table['y'], self.Lbox, 
-                check_multiple_box_lengths = self._testing_mode)
-            self.galaxy_table['z'] = model_helpers.enforce_periodicity_of_box(
-                self.galaxy_table['z'], self.Lbox, 
-                check_multiple_box_lengths = self._testing_mode)
+            self.galaxy_table['x'], self.galaxy_table['vx'] = (
+                model_helpers.enforce_periodicity_of_box(
+                    self.galaxy_table['x'], self.Lbox, 
+                    velocity = self.galaxy_table['vx'], 
+                    check_multiple_box_lengths = self._testing_mode)
+                )
+
+            self.galaxy_table['y'], self.galaxy_table['vy'] = (
+                model_helpers.enforce_periodicity_of_box(
+                    self.galaxy_table['y'], self.Lbox, 
+                    velocity = self.galaxy_table['vy'], 
+                    check_multiple_box_lengths = self._testing_mode)
+                )
+
+            self.galaxy_table['z'], self.galaxy_table['vz'] = (
+                model_helpers.enforce_periodicity_of_box(
+                    self.galaxy_table['z'], self.Lbox, 
+                    velocity = self.galaxy_table['vz'], 
+                    check_multiple_box_lengths = self._testing_mode)
+                )
 
         if hasattr(self.model, 'galaxy_selection_func'):
             mask = self.model.galaxy_selection_func(self.galaxy_table)
