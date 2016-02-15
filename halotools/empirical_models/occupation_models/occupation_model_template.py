@@ -52,17 +52,32 @@ class OccupationComponent(object):
             Upper bound on the number of gal_type galaxies per halo. 
             The only currently supported values are unity or infinity. 
 
-        prim_haloprop_key : string, keyword argument 
+        prim_haloprop_key : string, optional  
             String giving the column name of the primary halo property governing 
-            the occupation statistics of gal_type galaxies, e.g., ``halo_mvir``. 
+            the occupation statistics of gal_type galaxies, e.g., ``halo_mvir``.
+
+        See also 
+        ---------
+        :ref:`writing_your_own_hod_occupation_component` 
         """
-        required_kwargs = ['gal_type', 'threshold', 'prim_haloprop_key']
+        required_kwargs = ['gal_type', 'threshold']
         model_helpers.bind_required_kwargs(required_kwargs, self, **kwargs)
 
-        self._upper_occupation_bound = kwargs['upper_occupation_bound']
-        self._lower_occupation_bound = 0
+        try:
+            self.prim_haloprop_key = kwargs['prim_haloprop_key']
+        except:
+            pass
 
-        self.param_dict = {}
+        try:
+            self._upper_occupation_bound = kwargs['upper_occupation_bound']
+        except KeyError:
+            msg = ("\n``upper_occupation_bound`` is a required keyword argument of OccupationComponent\n")
+            raise KeyError(msg)
+
+        self._lower_occupation_bound = 0.
+
+        if not hasattr(self, 'param_dict'):
+            self.param_dict = {}
 
         # Enforce the requirement that sub-classes have been configured properly
         required_method_name = 'mean_occupation'
@@ -97,7 +112,7 @@ class OccupationComponent(object):
         self._mock_generation_calling_sequence = ['mc_occupation']
         self._galprop_dtypes_to_allocate = np.dtype([('halo_num_'+ self.gal_type, 'i4')])
 
-    def mc_occupation(self, seed=None, **kwargs):
+    def mc_occupation(self, seed = None, **kwargs):
         """ Method to generate Monte Carlo realizations of the abundance of galaxies. 
 
         Parameters
@@ -125,8 +140,11 @@ class OccupationComponent(object):
         elif self._upper_occupation_bound == float("inf"):
             return self._poisson_distribution(first_occupation_moment, seed=seed, **kwargs)
         else:
-            raise KeyError("The only permissible values of upper_occupation_bound for instances "
-                "of OccupationComponent are unity and infinity.")
+            msg = ("\nYou have chosen to set ``_upper_occupation_bound`` to some value \n"
+                "besides 1 or infinity. In such cases, you must also \n"
+                "write your own ``mc_occupation`` method that overrides the method in the \n"
+                "OccupationComponent super-class\n")
+            raise HalotoolsError(msg)
 
     def _nearest_integer_distribution(self, first_occupation_moment, seed=None, **kwargs):
         """ Nearest-integer distribution used to draw Monte Carlo occupation statistics 
