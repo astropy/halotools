@@ -8,7 +8,7 @@ from astropy.tests.helper import remote_data, pytest
 from unittest import TestCase
 from copy import copy
 
-
+from ...component_model_templates import *
 from ...smhm_models import *
 
 from ... import model_defaults
