@@ -1,20 +1,19 @@
-.. _hod_modeling_tutorial3:
+.. _subhalo_modeling_tutorial3:
 
-*******************************************************************
-Example 3: An HOD-style model with a feature of your own creation
-*******************************************************************
-
+*********************************************************************
+Example 3: A subhalo-based model with a feature of your own creation
+*********************************************************************
 .. currentmodule:: halotools.empirical_models
 
-In this section of the :ref:`hod_modeling_tutorial0`, 
+In this section of the :ref:`subhalo_modeling_tutorial0`, 
 we'll build a composite model that includes a component model that 
 is not part of Halotools, but that you yourself have written. 
 
-There is also an IPython Notebook in the following location that can be 
+TThere is also an IPython Notebook in the following location that can be 
 used as a companion to the material in this section of the tutorial:
 
 
-    **halotools/docs/notebooks/hod_modeling/hod_modeling_tutorial3.ipynb**
+    **halotools/docs/notebooks/subhalo_modeling/subhalo_modeling_tutorial3.ipynb**
 
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the models we'll build 
@@ -25,11 +24,11 @@ so we recommend that you read the notebook side by side with this documentation.
 Overview of the new model
 =============================
 
-The model we'll build will be based on the ``zheng07`` HOD, 
+The model we'll build will be based on the ``behroozi10`` model, 
 and we will use the ``baseline_model_instance`` feature 
-described in the :ref:`baseline_model_instance_mechanism_hod_building` 
+described in the :ref:`baseline_model_instance_mechanism_subhalo_model_building` 
 section of the documentation. 
-In addition to the basic ``zheng07`` features, we'll add 
+In addition to the stellar mass modeled in ``behroozi10``, we'll add 
 a component model that governs galaxy size. 
 Our model for size will have no physical motivation whatsoever. That 
 part is up to you. This tutorial just teaches you the mechanics of 
@@ -60,57 +59,56 @@ However, for now, while reading this code take note of the big picture.
 .. code:: python
 
     class Size(object):
-        
-        def __init__(self, gal_type):
-
-            self.gal_type = gal_type
+    
+        def __init__(self):
+    
             self._mock_generation_calling_sequence = ['assign_size']
             self._galprop_dtypes_to_allocate = np.dtype([('galsize', 'f4')])
             self.list_of_haloprops_needed = ['halo_spin']
-            
+    
         def assign_size(self, **kwargs):
             table = kwargs['table']
             table['galsize'][:] = table['halo_spin']/5.
 
-Now we'll build an instance of the *Size* component model for centrals and satellites 
+Now we'll build an instance of the *Size* component model  
 and incorporate this feature into a composite model:
 
-.. code:: python 
+.. code:: python
 
-    cen_size = Size('centrals')
-    sat_size = Size('satellites')
-    from halotools.empirical_models import PrebuiltHodModelFactory, HodModelFactory
-    zheng_model = PrebuiltHodModelFactory('zheng07')
-    new_model = HodModelFactory(baseline_model_instance = zheng_model, centrals_size = cen_size, satellites_size = sat_size)
+    galaxy_size = Size()
+
+    from halotools.empirical_models import PrebuiltSubhaloModelFactory, SubhaloModelFactory
+    behroozi10_model = PrebuiltSubhaloModelFactory('behroozi10')
+    new_model = SubhaloModelFactory(baseline_model_instance = behroozi10_model, 
+                                size = galaxy_size)
 
     # Your new model can generate a mock in the same way as always
     new_model.populate_mock(simname = 'bolshoi')
 
-
 The **__init__** method of your component model 
 ===========================================================================
 
-There are four lines of code here, and each of them binds some new data 
+There are three lines of code here, and each of them binds some new data 
 to the class instance. Thus the *component_model_instance* above 
-will have four attributes: ``gal_type``, ``_mock_generation_calling_sequence``, 
+will have three attributes: ``_mock_generation_calling_sequence``, 
 ``_galprop_dtypes_to_allocate`` and ``list_of_haloprops_needed``. 
 Each of these attributes plays an important role in structuring the interface 
-between your model and the `HodModelFactory`, so we'll now discuss 
+between your model and the `SubhaloModelFactory`, so we'll now discuss 
 them one by one. 
 
-.. _role_of_hod_mock_generation_calling_sequence:
+.. _role_of_subhalo_mock_generation_calling_sequence:
 
 The role of the `_mock_generation_calling_sequence`
 -----------------------------------------------------
 
-During the generation of a mock catalog, the `HodMockFactory` calls upon 
+During the generation of a mock catalog, the `SubhaloMockFactory` calls upon 
 the component models one-by-one to assign their properties to the ``galaxy_table``. 
 When each component is called upon, every method whose name appears in 
 the component model's ``_mock_generation_calling_sequence`` gets passed 
 the ``galaxy_table``. These methods are called in the order they appear 
 in the ``_mock_generation_calling_sequence`` list. So the purpose of 
 the ``_mock_generation_calling_sequence`` list is to inform the 
-`HodModelFactory` what to do when it comes time for the 
+`SubhaloModelFactory` what to do when it comes time for the 
 component model to play its role in creating the mock galaxy distribution. 
 
 See the :ref:`mock_generation_calling_sequence_mechanism` section of the 
@@ -119,7 +117,7 @@ for further discussion.
 
 The role of the `_galprop_dtypes_to_allocate`
 -----------------------------------------------------
-One of the tasks handled by the `HodMockFactory` is the allocation of 
+One of the tasks handled by the `SubhaloMockFactory` is the allocation of 
 the appropriate memory that will be stored in your ``galaxy_table``. 
 For every galaxy property in a composite model, there needs to be a 
 corresponding column of the ``galaxy_table`` of the appropriate data type. 
@@ -150,22 +148,6 @@ read more about the under-the-hood details in the
 :ref:`list_of_haloprops_needed_mechanism` section of the 
 :ref:`composite_model_constructor_bookkeeping_mechanisms` documentation page. 
 
-The role of the HOD `gal_type`
------------------------------------------------------
-
-Each of the component model methods appearing in 
-``_mock_generation_calling_sequence`` will not only be called 
-by the composite model during mock generation, but these methods will also 
-be passed on as methods that the composite model itself can use for other 
-applications. The only difference will be that your choice for the ``gal_type`` 
-string will be appended to these method names. For example, 
-in the source code above, the composite model instance will have two methods:  
-``assign_size_centrals`` and ``assign_size_satellites``. Besides mock population, 
-you may find it useful to call upon these methods to make plots or 
-study the behavior of your model. 
-
-.. _physics_function_hod_explanation: 
-
 The "physics function" of your component model 
 ==================================================
 
@@ -194,6 +176,5 @@ you can omit the **[:]** if you want to eschew this safety mechanism,
 but there is no difference in performance and so this is syntax is recommended 
 as a sanity check on all the bookkeeping. 
 
-This tutorial continues with :ref:`hod_modeling_tutorial4`. 
-
+This tutorial continues with :ref:`subhalo_modeling_tutorial4`. 
 

@@ -9,8 +9,9 @@ Example 1: Building a simple HOD-style model
 This section of the documentation describes how you can use the 
 `HodModelFactory` to build one of the simplest and most widely 
 used galaxy-halo models in the literature: the HOD based on 
-Zheng et al. (2007), arXiv:0703457. By following this example, 
-you will learn the basic calling sequence for building HOD models. 
+`Zheng et al 2007 <http://arxiv.org/abs/astro-ph/0703457>`_. 
+By following this example, you will learn the basic 
+calling sequence for building HOD models. 
 We will build an exact replica of the ``zheng07`` pre-built model, 
 so you will also learn how the `PrebuiltHodModelFactory` is really just 
 "syntax candy" for the `HodModelFactory`. 
@@ -19,7 +20,7 @@ There is also an IPython Notebook in the following location that can be
 used as a companion to the material in this section of the tutorial:
 
 
-	halotools/docs/notebooks/hod_modeling/hod_modeling_tutorial1.ipynb
+	**halotools/docs/notebooks/hod_modeling/hod_modeling_tutorial1.ipynb**
 
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the models we'll build 

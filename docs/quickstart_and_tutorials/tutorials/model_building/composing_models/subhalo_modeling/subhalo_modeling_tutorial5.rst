@@ -1,12 +1,12 @@
-.. _hod_modeling_tutorial5:
+.. _subhalo_modeling_tutorial5:
 
-****************************************************************
-Example 5: An HOD model with cross-component dependencies
-****************************************************************
+*********************************************************************
+Example 5: A subhalo-based model with cross-component dependencies
+*********************************************************************
 
 .. currentmodule:: halotools.empirical_models
 
-This section of the :ref:`hod_modeling_tutorial0`, 
+This section of the :ref:`subhalo_modeling_tutorial0`, 
 illustrates an example of a component model that 
 depends on the results of some other, independently defined component model. 
 
@@ -14,7 +14,7 @@ There is also an IPython Notebook in the following location that can be
 used as a companion to the material in this section of the tutorial:
 
 
-    **halotools/docs/notebooks/hod_modeling/hod_modeling_tutorial5.ipynb**
+    **halotools/docs/notebooks/hod_modeling/subhalo_modeling_tutorial5.ipynb**
 
 By following this tutorial together with this notebook, 
 you can play around with your own variations of the models we'll build 
@@ -22,14 +22,10 @@ as you learn the basic syntax.
 The notebook also covers supplementary material that you may find clarifying, 
 so we recommend that you read the notebook side by side with this documentation. 
 
-Overview of the Example 5 HOD model 
+Overview of the Example 5 model 
 ====================================
 
-The model we'll build will only have central galaxies, no satellites. 
-This is perfectly permissible: Halotools places no restrictions on the 
-number or kind of subpopulations of galaxies that must be present 
-in the universe you create. Our population of centrals will 
-be based on the models used in the ``leauthaud11`` HOD model. 
+The model we'll build will be based on the ``behroozi10`` model. 
 Additionally, we'll add two new component models: 
 one governing galaxy shape, a second governing galaxy size. 
 
@@ -49,40 +45,39 @@ computed in a pre-processing phase. To streamline the presentation,
 we will omit the features described in the previous example 
 and focus on just the new features introduced in this example. 
 
-Source code for the new model 
-=================================
+Source code for the new model
+-----------------------------
+
 .. code:: python
 
     class Shape(object):
-        
-        def __init__(self, gal_type):
-
-            self.gal_type = gal_type
+    
+        def __init__(self):
+    
             self._mock_generation_calling_sequence = ['assign_shape']
             self._galprop_dtypes_to_allocate = np.dtype([('shape', object)])
-
+    
         def assign_shape(self, **kwargs):
             table = kwargs['table']
             randomizer = np.random.random(len(table))
             table['shape'][:] = np.where(randomizer > 0.5, 'elliptical', 'disk')
-
+    
     class Size(object):
-
-        def __init__(self, gal_type):
-
-            self.gal_type = gal_type
+    
+        def __init__(self):
+    
             self._mock_generation_calling_sequence = ['assign_size']
             self._galprop_dtypes_to_allocate = np.dtype([('galsize', 'f4')])
             self.list_of_haloprops_needed = ['halo_spin']
-
+            
             self.new_haloprop_func_dict = {'halo_custom_size': self.calculate_halo_size}
-
+    
         def assign_size(self, **kwargs):
             table = kwargs['table']
             disk_mask = table['shape'] == 'disk'
             table['galsize'][disk_mask] = table['halo_spin'][disk_mask]
             table['galsize'][~disk_mask] = table['halo_custom_size'][~disk_mask]
-
+    
         def calculate_halo_size(self, **kwargs):
             table = kwargs['table']
             return 2*table['halo_rs']
@@ -92,21 +87,20 @@ a new keyword introduced in this tutorial:
 
 .. code:: python
 
-    from halotools.empirical_models import Leauthaud11Cens, TrivialPhaseSpace
-    cen_occupation = Leauthaud11Cens()
-    cen_profile = TrivialPhaseSpace(gal_type = 'centrals')
-    cen_shape = Shape(gal_type = 'centrals')
-    cen_size = Size(gal_type = 'centrals')
-
-    from halotools.empirical_models import HodModelFactory
-    model = HodModelFactory(
-        centrals_occupation = cen_occupation, 
-        centrals_profile = cen_profile, 
-        centrals_shape = cen_shape, 
-        centrals_size = cen_size, 
-        model_feature_calling_sequence = ('centrals_occupation', 
-            'centrals_profile', 'centrals_shape', 'centrals_size')
+    from halotools.empirical_models import Behroozi10SmHm
+    mstar_model = Behroozi10SmHm(redshift = 0)
+    shape_model = Shape()
+    size_model = Size()
+    
+    from halotools.empirical_models import SubhaloModelFactory
+    model = SubhaloModelFactory(
+        stellar_mass = mstar_model, 
+        size = size_model, 
+        shape = shape_model, 
+        model_feature_calling_sequence = ('stellar_mass','shape', 'size')
         )
+
+
 
 The **__init__** method of the component models 
 ===========================================================================
@@ -150,17 +144,21 @@ functions of the *Size* class.
 
 The order in which the component models are called is controllable by the 
 ``model_feature_calling_sequence``. Previously, we did not use this keyword. 
-When this keyword is not supplied, the default behavior is for 
-all ``occupation`` components to be called first, and all other 
+When this keyword is not supplied, the default behavior is for the 
+``stellar_mass`` component to be called first (if it is present), and all other 
 features to be called in a random order. By explicitly listing the features 
 of your model in the ``model_feature_calling_sequence`` keyword, 
 you override this default behavior with your own calling sequence. 
 
 Concluding comments 
 =====================
-This example concludes the tutorial on HOD-style model building. 
-If you have further questions on how to build HOD models, 
+This example concludes the tutorial on subhalo-based model building. 
+If you have further questions on how to build models, 
 please contact the Halotools developers and/or raise an Issue on GitHub. 
+
+
+
+
 
 
 
