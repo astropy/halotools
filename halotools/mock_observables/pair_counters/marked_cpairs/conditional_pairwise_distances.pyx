@@ -9,7 +9,6 @@ import sys
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, fmin
 from libcpp.vector cimport vector
 from .distances cimport *
 ctypedef bint (*f_type)(np.float64_t* w1, np.float64_t* w2)

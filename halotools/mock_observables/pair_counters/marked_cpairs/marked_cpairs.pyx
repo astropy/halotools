@@ -10,7 +10,6 @@ import sys
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, fmin
 from .weighting_functions cimport *
 from .custom_weighting_func cimport *
 from .pairwise_velocity_funcs cimport *

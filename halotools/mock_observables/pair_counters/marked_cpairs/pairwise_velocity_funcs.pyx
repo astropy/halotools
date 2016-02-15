@@ -8,7 +8,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, sqrt
 
 __all__= ["relative_radial_velocity_weights", "radial_velocity_weights",\
           "radial_velocity_variance_counter_weights",\
@@ -58,7 +57,7 @@ cdef void relative_radial_velocity_weights(np.float64_t* w1,
     cdef float rx = w1[0] - (w2[0] + shift[0])
     cdef float ry = w1[1] - (w2[1] + shift[1])
     cdef float rz = w1[2] - (w2[2] + shift[2])
-    cdef float norm = sqrt(rx*rx + ry*ry + rz*rz)
+    cdef float norm = np.sqrt(rx*rx + ry*ry + rz*rz)
     
     #if shift[i]<0 or shift[i]>0 return -1, else return 1
     cdef float xshift = -1.0*(shift[0]!=0.0) + (shift[0]==0.0)
@@ -126,7 +125,7 @@ cdef void radial_velocity_weights(np.float64_t* w1,
     cdef float rx = w1[0] - (w2[0] + shift[0])
     cdef float ry = w1[1] - (w2[1] + shift[1])
     cdef float rz = w1[2] - (w2[2] + shift[2])
-    cdef float norm = sqrt(rx*rx + ry*ry + rz*rz)
+    cdef float norm = np.sqrt(rx*rx + ry*ry + rz*rz)
     
     #if shift[i]<0 or shift[i]>0 return -1, else return 1
     cdef float xshift = -1.0*(shift[0]!=0.0) + (shift[0]==0.0)
@@ -194,7 +193,7 @@ cdef void radial_velocity_variance_counter_weights(np.float64_t* w1,
     cdef float rx = w1[0] - (w2[0] + shift[0])
     cdef float ry = w1[1] - (w2[1] + shift[1])
     cdef float rz = w1[2] - (w2[2] + shift[2])
-    cdef float norm = sqrt(rx*rx + ry*ry + rz*rz)
+    cdef float norm = np.sqrt(rx*rx + ry*ry + rz*rz)
     
     #if shift[i]<0 or shift[i]>0 return -1, else return 1
     cdef float xshift = -1.0*(shift[0]!=0.0) + (shift[0]==0.0)
@@ -256,7 +255,7 @@ cdef void relative_los_velocity_weights(np.float64_t* w1,
     
     """
     
-    cdef float dvz = fabs(w1[0] - w2[0])
+    cdef float dvz = np.fabs(w1[0] - w2[0])
     result1[0] = dvz #LOS velocity
     result2[0] = 0.0 #unused value
     result3[0] = 1.0 #number of pairs
@@ -339,7 +338,7 @@ cdef void los_velocity_variance_counter_weights(np.float64_t* w1,
     
     """
     
-    cdef float dvz = fabs(w1[0] - w2[0]) - w1[1]*w2[1]
+    cdef float dvz = np.fabs(w1[0] - w2[0]) - w1[1]*w2[1]
     
     result1[0] = dvz #LOS velocity
     result2[0] = dvz*dvz #LOS velocity squared

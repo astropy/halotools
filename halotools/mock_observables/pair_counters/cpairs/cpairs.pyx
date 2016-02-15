@@ -9,7 +9,6 @@ import sys
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, fmin, sqrt
 from .distances cimport *
 
 __all__ = ['npairs_no_pbc',\
@@ -1293,8 +1292,8 @@ def s_mu_npairs_no_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
             d_para = para_square_distance(z_icell1[i], z_icell2[j])
                         
             #transform to s and mu
-            s = sqrt(d_perp + d_para)
-            if s!=0: mu = sqrt(d_para)/s
+            s = np.sqrt(d_perp + d_para)
+            if s!=0: mu = np.sqrt(d_para)/s
             else: mu=0.0
             
             #calculate counts in bins
@@ -1385,9 +1384,9 @@ def s_mu_npairs_pbc(np.ndarray[np.float64_t, ndim=1] x_icell1,
                                                    <np.float64_t*>period.data)
             
             #transform to s and mu
-            s = sqrt(d_perp + d_para)
-            #if s!=0: mu = sqrt(d_para)/s
-            if s!=0: mu = sqrt(d_perp)/s
+            s = np.sqrt(d_perp + d_para)
+            #if s!=0: mu = np.sqrt(d_para)/s
+            if s!=0: mu = np.sqrt(d_perp)/s
             else: mu=0.0
             
             #calculate counts in bins

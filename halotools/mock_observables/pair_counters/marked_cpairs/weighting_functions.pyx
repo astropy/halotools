@@ -10,7 +10,6 @@ import sys
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport fabs, sqrt
 
 __author__ = ["Duncan Campbell"]
 
@@ -107,7 +106,7 @@ cdef double tweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     id: 9
     expects length 2 arrays
     """
-    if fabs(w1[0]-w2[0])<w1[1]: return w2[1]
+    if np.fabs(w1[0]-w2[0])<w1[1]: return w2[1]
     else: return 0.0
 
 
@@ -118,7 +117,7 @@ cdef double exweights(np.float64_t* w1, np.float64_t* w2, np.float64_t* shift):
     id: 10
     expects length 2 arrays
     """
-    if fabs(w1[0]-w2[0])>w1[1]: return w2[1]
+    if np.fabs(w1[0]-w2[0])>w1[1]: return w2[1]
     else: return 0.0
 
 
