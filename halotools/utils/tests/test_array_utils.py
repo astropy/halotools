@@ -51,7 +51,7 @@ def test_find_idx_nearest_val():
     assert np.all(result >= 10)
     assert np.all(result <= 11)
 
-def test_convert_to_ndarray():
+def test_convert_to_ndarray1():
     """
     """
     x = 0
@@ -60,68 +60,109 @@ def test_convert_to_ndarray():
     assert len(xarr) == 1
     assert type(xarr[0]) == np.int64
 
+
+def test_convert_to_ndarray2():
+    """
+    """
+    x = 0
     xarr = array_utils.convert_to_ndarray(x, dt = float)
     assert type(xarr) == np.ndarray
     assert len(xarr) == 1
     assert type(xarr[0]) == np.float64
 
+def test_convert_to_ndarray3():
+    """
+    """
     y = [0]
     yarr = array_utils.convert_to_ndarray(y)
     assert type(yarr) == np.ndarray
     assert len(yarr) == 1
     assert type(yarr[0]) == np.int64
 
+def test_convert_to_ndarray4():
+    """
+    """
+    y = [0]
     yarr = array_utils.convert_to_ndarray(y, dt = float)
     assert type(yarr) == np.ndarray
     assert len(yarr) == 1
     assert type(yarr[0]) == np.float64
 
+def test_convert_to_ndarray5():
+    """
+    """
     z  = None 
     zarr = array_utils.convert_to_ndarray(z)
     assert type(zarr) == np.ndarray
     assert len(zarr) == 1
     assert type(zarr[0]) == type(None)
 
+def test_convert_to_ndarray6():
+    """
+    """
     t = np.array(1)
     tarr  = array_utils.convert_to_ndarray(t)
     assert type(tarr) == np.ndarray
     assert len(tarr) == 1
     assert type(tarr[0]) == np.int64
 
+def test_convert_to_ndarray7():
+    """
+    """
+    t = np.array(1)
     tarr  = array_utils.convert_to_ndarray(t, dt = float)
     assert type(tarr) == np.ndarray
     assert len(tarr) == 1
     assert type(tarr[0]) == np.float64
 
+def test_convert_to_ndarray8():
+    """
+    """
     u = np.array([1])
     uarr = array_utils.convert_to_ndarray(u)
     assert type(uarr) == np.ndarray
     assert len(uarr) == 1
     assert type(uarr[0]) == np.int64
 
+def test_convert_to_ndarray9():
+    """
+    """
+    u = np.array([1])
     uarr = array_utils.convert_to_ndarray(u, dt = float)
     assert type(uarr) == np.ndarray
     assert len(uarr) == 1
     assert type(uarr[0]) == np.float64
 
+def test_convert_to_ndarray10():
+    """
+    """
     v = np.array('abc')
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
     assert len(varr) == 1
     assert type(varr[0]) == np.string_
 
+def test_convert_to_ndarray11():
+    """
+    """
     v = 'abc'
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
     assert len(varr) == 1
     assert type(varr[0]) == np.string_
 
+def test_convert_to_ndarray12():
+    """
+    """
     v = np.array(u'abc')
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
     assert len(varr) == 1
     assert type(varr[0]) == np.unicode_
 
+def test_convert_to_ndarray13():
+    """
+    """
     v = u'abc'
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
