@@ -10,7 +10,7 @@ environment:
       PYTHON_ARCH: "64" # needs to be set for CMD_IN_ENV to succeed. If a mix
                         # of 32 bit and 64 bit builds are needed, move this
                         # to the matrix section.
-      CONDA_DEPENDENCIES: "numpy cython sphinx pytest h5py beautifulsoup4 requests astropy"
+      CONDA_DEPENDENCIES: "numpy cython sphinx pytest h5py beautifulsoup4 requests astropy scipy"
 
   matrix:
 
