@@ -1,0 +1,21 @@
+# AppVeyor.com is a Continuous Integration service to build and run tests under
+# Windows
+
+environment:
+
+  global:
+      PYTHON: "C:\\conda"
+      MINICONDA_VERSION: "3.5.5"
+      CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\ci-helpers\\appveyor\\windows_sdk.cmd"
+      PYTHON_ARCH: "64" # needs to be set for CMD_IN_ENV to succeed. If a mix
+                        # of 32 bit and 64 bit builds are needed, move this
+                        # to the matrix section.
+      CONDA_DEPENDENCIES: "numpy cython sphinx pytest h5py beautifulsoup4 requests astropy"
+
+  matrix:
+      - PYTHON_VERSION: "2.6"
+      - PYTHON_VERSION: "2.7"
+      - PYTHON_VERSION: "3.4"
+
+platform:
+    -x64
