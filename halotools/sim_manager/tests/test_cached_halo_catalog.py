@@ -6,6 +6,7 @@ import warnings, os, shutil
 
 from astropy.config.paths import _find_home 
 from astropy.tests.helper import remote_data, pytest
+from astropy.table import Table 
 
 try:
     import h5py 
@@ -239,7 +240,8 @@ class TestCachedHaloCatalog(TestCase):
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments1(self):
         fname = os.path.join(self.dummy_cache_baseloc, 'abc.hdf5')
-        os.system('touch '+ fname)
+        _t = Table({'x': [0]})
+        _t.write(fname, format='ascii')
 
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, simname = 'bolshoi')
@@ -251,7 +253,8 @@ class TestCachedHaloCatalog(TestCase):
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments2(self):
         fname = os.path.join(self.dummy_cache_baseloc, 'abc.hdf5')
-        os.system('touch '+ fname)
+        _t = Table({'x': [0]})
+        _t.write(fname, format='ascii')
 
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, version_name = 'dummy')
@@ -263,7 +266,8 @@ class TestCachedHaloCatalog(TestCase):
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments3(self):
         fname = os.path.join(self.dummy_cache_baseloc, 'abc.hdf5')
-        os.system('touch '+ fname)
+        _t = Table({'x': [0]})
+        _t.write(fname, format='ascii')
 
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, halo_finder = 'dummy')
@@ -275,7 +279,8 @@ class TestCachedHaloCatalog(TestCase):
     @pytest.mark.skipif('not APH_MACHINE')
     def test_acceptable_arguments4(self):
         fname = os.path.join(self.dummy_cache_baseloc, 'abc.hdf5')
-        os.system('touch '+ fname)
+        _t = Table({'x': [0]})
+        _t.write(fname, format='ascii')
 
         with pytest.raises(HalotoolsError) as err:
             halocat = CachedHaloCatalog(fname = fname, redshift = 0)
