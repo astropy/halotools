@@ -365,6 +365,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         bad_table = deepcopy(self.good_table)
         del bad_table['halo_id']
         bad_table['halo_id'] = np.arange(len(bad_table), dtype = float)
+        bad_table['halo_id'][0] = 0.1
         bad_table.write(self.fnames[num_scenario], path='data')
         f = h5py.File(self.fnames[num_scenario])
         for attr in self.hard_coded_log_attrs:
@@ -374,7 +375,7 @@ class TestHaloTableCacheLogEntry(TestCase):
         f.close()
 
         assert log_entry.safe_for_cache == False
-        assert "Your ``halo_id`` has the incorrect data type." in log_entry._cache_safety_message
+        assert "must contain a unique set of integers" in log_entry._cache_safety_message
 
     @pytest.mark.skipif('not HAS_H5PY')
     def test_passing_scenario(self):
