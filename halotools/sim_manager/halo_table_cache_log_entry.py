@@ -335,18 +335,14 @@ class HaloTableCacheLogEntry(object):
         try:
             data = Table.read(self.fname, path='data')
             try:
-                halo_id = data['halo_id']
-                assert halo_id.dtype == np.int
+                halo_id = data['halo_id'].data
+                assert np.all(halo_id == halo_id.astype(int))
                 assert len(halo_id) == len(set(halo_id))
             except AssertionError:
                 num_failures += 1
                 msg = (str(num_failures)+". The ``halo_id`` column "
                     "must contain a unique set of integers.\n\n"
                     )
-                if halo_id.dtype != np.int:
-                    msg = msg[:-1]
-                    msg += ("Your ``halo_id`` has the incorrect data type.\n"
-                        "Should be ``np.int``, instead got " + str(halo_id.dtype) + "\n\n")
         except:
             pass
 
