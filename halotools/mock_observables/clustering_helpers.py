@@ -796,11 +796,11 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
     """
     
     sample1 = convert_to_ndarray(sample1)
-    sample1_host_halo_id = convert_to_ndarray(sample1_host_halo_id)
+    sample1_host_halo_id = convert_to_ndarray(sample1_host_halo_id, dt = np.int64)
     
     if sample2 is not None: 
         sample2 = convert_to_ndarray(sample2)
-        sample2_host_halo_id = convert_to_ndarray(sample2_host_halo_id)
+        sample2_host_halo_id = convert_to_ndarray(sample2_host_halo_id, dt = np.int64)
         if np.all(sample1==sample2):
             _sample1_is_sample2 = True
             msg = ("\n `sample1` and `sample2` are exactly the same, \n"
@@ -816,15 +816,7 @@ def _tpcf_one_two_halo_decomp_process_args(sample1, sample1_host_halo_id, rbins,
     
     if randoms is not None: 
         randoms = convert_to_ndarray(randoms)
-    
-    #test to see if halo ids are integers
-    if sample1_host_halo_id.dtype.type is not np.int64:
-        msg = "\n `sample1_host_halo_id` must be an integer array."
-        raise HalotoolsError(msg)
-    if sample2_host_halo_id.dtype.type is not np.int64:
-        msg = "\n `sample2_host_halo_id` must be an integer array."
-        raise HalotoolsError(msg)
-    
+        
     #test to see if halo ids are the same length as samples
     if np.shape(sample1_host_halo_id) != (len(sample1),):
         msg = ("\n `sample1_host_halo_id` must be a 1-D \n"

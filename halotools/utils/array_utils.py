@@ -25,7 +25,7 @@ def convert_to_ndarray(x, dt = None):
     x : array_like 
         Any sequence or scalar. 
 
-    t : numpy dtype, optional 
+    dt : numpy dtype, optional 
         np.dtype of the returned array. 
         Default is to return the same dtype as the input ``x``
 
