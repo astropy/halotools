@@ -287,7 +287,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         basename = 'abc'
         fname = os.path.join(self.dummy_cache_baseloc, basename)
-        os.system('touch ' + fname)
+        _t = Table({'x': [0]})
+        _t.write(fname, format='ascii')
         assert os.path.isfile(fname)
 
         dummy_string = '  '
@@ -326,7 +327,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         basename = 'abc'
         fname = os.path.join(self.dummy_cache_baseloc, basename)
-        os.system('touch ' + fname)
+        _t = Table({'x': [0]})
+        _t.write(fname, format='ascii')
         assert os.path.isfile(fname)
 
         dummy_string = '  '
@@ -345,7 +347,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         basename = 'abc.hdf5'
         fname = os.path.join(self.dummy_cache_baseloc, basename)
-        os.system('touch ' + fname)
+        _t = Table({'x': [0]})
+        _t.write(fname, format='ascii')
         assert os.path.isfile(fname)
 
         dummy_string = '  '
@@ -371,7 +374,8 @@ class TestUserSuppliedHaloCatalog(TestCase):
 
         basename = 'abc.hdf5'
         fname = os.path.join(self.dummy_cache_baseloc, basename)
-        os.system('touch ' + fname)
+        _t = Table({'x': [0]})
+        _t.write(fname, format='ascii')
         assert os.path.isfile(fname)
 
         dummy_string = '  '

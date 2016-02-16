@@ -5,6 +5,7 @@ import numpy as np
 from unittest import TestCase
 import warnings
 from astropy.tests.helper import pytest 
+from astropy.table import Table 
 
 from astropy.config.paths import _find_home 
 
@@ -46,7 +47,8 @@ class TestRockstarHlistReader(TestCase):
 
         basename = 'abc.txt'
         self.dummy_fname = os.path.join(self.tmpdir, basename)
-        os.system('touch '+self.dummy_fname)
+        _t = Table({'x': [0]})
+        _t.write(self.dummy_fname, format='ascii')
 
 
         self.good_columns_to_keep_dict = ({

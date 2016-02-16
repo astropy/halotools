@@ -4,6 +4,7 @@ import os, shutil
 import numpy as np
 from unittest import TestCase
 from astropy.tests.helper import pytest 
+from astropy.table import Table 
 
 from astropy.config.paths import _find_home 
 
@@ -35,7 +36,8 @@ class TestTabularAsciiReader(TestCase):
 
         basename = 'abc.txt'
         self.dummy_fname = os.path.join(self.tmpdir, basename)
-        os.system('touch '+self.dummy_fname)
+        _t = Table({'x': [0]})
+        _t.write(self.dummy_fname, format='ascii')
 
     def test_get_fname(self):
         reader = TabularAsciiReader(

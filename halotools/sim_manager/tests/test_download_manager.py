@@ -5,6 +5,7 @@ import os, fnmatch, shutil
 import numpy as np
 from astropy.config.paths import _find_home 
 from astropy.tests.helper import remote_data, pytest
+from astropy.table import Table 
 from unittest import TestCase
 
 from ..download_manager import DownloadManager
@@ -91,7 +92,8 @@ class TestDownloadManager(TestCase):
                 for version in self.dummy_version_names:
                     full_fname = name + '.' + version + self.extension
                     abs_fname = os.path.join(rockstardir, full_fname)
-                    os.system('touch ' + abs_fname)
+                    _t = Table({'x': [0]})
+                    _t.write(abs_fname, format='ascii')
 
             if simname == 'bolshoi':
                 simdir = os.path.join(self.halocat_dir, simname)
@@ -102,7 +104,8 @@ class TestDownloadManager(TestCase):
                     for version in self.dummy_version_names:
                         full_fname = name + '.' + version + self.extension
                         abs_fname = os.path.join(bdmdir, full_fname)
-                        os.system('touch ' + abs_fname)
+                        _t = Table({'x': [0]})
+                        _t.write(abs_fname, format='ascii')
 
         p = os.path.join(self.halocat_dir, 'bolshoi', 'bdm')
         assert os.path.isdir(p)

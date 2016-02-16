@@ -133,7 +133,8 @@ class TestPtclTableCache(TestCase):
         cache = PtclTableCache(read_log_from_standard_loc = False)
         entry = self.bad_log_entry
         entry.fname = self.bad_log_entry.fname
-        os.system('touch ' + entry.fname)
+        _t = Table({'x': [0]})
+        _t.write(entry.fname, format='ascii')
         result = cache.determine_log_entry_from_fname(entry.fname)
         assert result == "Can only self-determine the log entry of files with .hdf5 extension"
 

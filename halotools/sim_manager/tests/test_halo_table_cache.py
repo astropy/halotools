@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from unittest import TestCase
 from astropy.tests.helper import pytest 
+from astropy.table import Table 
 import warnings, os, shutil
 
 import numpy as np 
@@ -125,7 +126,8 @@ class TestHaloTableCache(TestCase):
         assert result == "File does not exist"
 
         entry.fname = self.bad_log_entry.fname
-        os.system('touch ' + entry.fname)
+        _t = Table({'x': [0]})
+        _t.write(entry.fname, format='ascii')
         result = cache.determine_log_entry_from_fname(fname)
         assert result == "Can only self-determine the log entry of files with .hdf5 extension"
 
