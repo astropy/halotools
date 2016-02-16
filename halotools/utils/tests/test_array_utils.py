@@ -58,7 +58,6 @@ def test_convert_to_ndarray1():
     xarr = array_utils.convert_to_ndarray(x)
     assert type(xarr) == np.ndarray
     assert len(xarr) == 1
-    assert type(xarr[0]) == np.int64
 
 
 def test_convert_to_ndarray2():
@@ -68,7 +67,7 @@ def test_convert_to_ndarray2():
     xarr = array_utils.convert_to_ndarray(x, dt = float)
     assert type(xarr) == np.ndarray
     assert len(xarr) == 1
-    assert type(xarr[0]) == np.float64
+    assert xarr[0] == 0
 
 def test_convert_to_ndarray3():
     """
@@ -77,7 +76,7 @@ def test_convert_to_ndarray3():
     yarr = array_utils.convert_to_ndarray(y)
     assert type(yarr) == np.ndarray
     assert len(yarr) == 1
-    assert type(yarr[0]) == np.int64
+    assert y[0] == 0
 
 def test_convert_to_ndarray4():
     """
@@ -86,7 +85,7 @@ def test_convert_to_ndarray4():
     yarr = array_utils.convert_to_ndarray(y, dt = float)
     assert type(yarr) == np.ndarray
     assert len(yarr) == 1
-    assert type(yarr[0]) == np.float64
+    assert y[0] == 0
 
 def test_convert_to_ndarray5():
     """
@@ -95,7 +94,7 @@ def test_convert_to_ndarray5():
     zarr = array_utils.convert_to_ndarray(z)
     assert type(zarr) == np.ndarray
     assert len(zarr) == 1
-    assert type(zarr[0]) == type(None)
+    assert zarr[0] == None
 
 def test_convert_to_ndarray6():
     """
@@ -104,7 +103,7 @@ def test_convert_to_ndarray6():
     tarr  = array_utils.convert_to_ndarray(t)
     assert type(tarr) == np.ndarray
     assert len(tarr) == 1
-    assert type(tarr[0]) == np.int64
+    assert tarr[0] == 1
 
 def test_convert_to_ndarray7():
     """
@@ -113,7 +112,7 @@ def test_convert_to_ndarray7():
     tarr  = array_utils.convert_to_ndarray(t, dt = float)
     assert type(tarr) == np.ndarray
     assert len(tarr) == 1
-    assert type(tarr[0]) == np.float64
+    assert tarr[0] == 1
 
 def test_convert_to_ndarray8():
     """
@@ -122,7 +121,7 @@ def test_convert_to_ndarray8():
     uarr = array_utils.convert_to_ndarray(u)
     assert type(uarr) == np.ndarray
     assert len(uarr) == 1
-    assert type(uarr[0]) == np.int64
+    assert uarr[0] == 1
 
 def test_convert_to_ndarray9():
     """
@@ -131,7 +130,7 @@ def test_convert_to_ndarray9():
     uarr = array_utils.convert_to_ndarray(u, dt = float)
     assert type(uarr) == np.ndarray
     assert len(uarr) == 1
-    assert type(uarr[0]) == np.float64
+    assert uarr[0] == 1
 
 def test_convert_to_ndarray10():
     """
@@ -140,7 +139,7 @@ def test_convert_to_ndarray10():
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
     assert len(varr) == 1
-    assert type(varr[0]) == np.string_
+    assert str(varr[0]) == str('abc')
 
 def test_convert_to_ndarray11():
     """
@@ -149,7 +148,7 @@ def test_convert_to_ndarray11():
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
     assert len(varr) == 1
-    assert type(varr[0]) == np.string_
+    assert str(varr[0]) == str('abc')
 
 def test_convert_to_ndarray12():
     """
@@ -158,7 +157,7 @@ def test_convert_to_ndarray12():
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
     assert len(varr) == 1
-    assert type(varr[0]) == np.unicode_
+    assert str(varr[0]) == str('abc')
 
 def test_convert_to_ndarray13():
     """
@@ -167,7 +166,7 @@ def test_convert_to_ndarray13():
     varr = array_utils.convert_to_ndarray(v) 
     assert type(varr) == np.ndarray
     assert len(varr) == 1
-    assert type(varr[0]) == np.unicode_
+    assert str(varr[0]) == str('abc')
 
 
 
