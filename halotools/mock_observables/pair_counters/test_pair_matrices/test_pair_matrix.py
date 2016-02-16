@@ -8,7 +8,6 @@ import numpy as np
 import scipy
 from scipy import spatial
 from scipy.sparse import coo_matrix
-import matplotlib.pyplot as plt
 
 #load comparison simple pair counters
 from ..double_tree_pair_matrix import pair_matrix, xy_z_pair_matrix
