@@ -857,13 +857,13 @@ class DownloadManager(object):
         for a in soup.find_all('a', href=True):
             dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
             if dirpath and dirpath[0] != '/':
-                simloclist.append(os.path.join(baseurl, dirpath))
+                simloclist.append(baseurl + '/' + dirpath)
 
         catlist = []
         for simloc in simloclist:
             soup = BeautifulSoup(requests.get(simloc).text)
             for a in soup.find_all('a'):
-                catlist.append(os.path.join(simloc, a['href']))
+                catlist.append(simloc + '/' + a['href'])
 
         file_pattern = version_name
         all_ptcl_tables = fnmatch.filter(catlist, '*'+file_pattern + '*.hdf5')
@@ -934,7 +934,7 @@ class DownloadManager(object):
         for a in soup.find_all('a', href=True):
             dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
             if dirpath and dirpath[0] != '/':
-                simloclist.append(os.path.join(baseurl, dirpath))
+                simloclist.append(baseurl + '/' + dirpath)
 
         halocatloclist = []
         for simloc in simloclist:
@@ -942,13 +942,13 @@ class DownloadManager(object):
             for a in soup.find_all('a', href=True):
                 dirpath = posixpath.dirname(urlparse.urlparse(a['href']).path)
                 if dirpath and dirpath[0] != '/':
-                    halocatloclist.append(os.path.join(simloc, dirpath))
+                    halocatloclist.append(simloc + '/' + dirpath)
 
         catlist = []
         for halocatdir in halocatloclist:
             soup = BeautifulSoup(requests.get(halocatdir).text)
             for a in soup.find_all('a'):
-                catlist.append(os.path.join(halocatdir, a['href']))
+                catlist.append(halocatdir + '/' + a['href'])
 
         file_pattern = version_name + '.hdf5'
         all_halocats = fnmatch.filter(catlist, '*'+file_pattern)
