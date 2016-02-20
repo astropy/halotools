@@ -336,7 +336,7 @@ class HaloTableCacheLogEntry(object):
             data = Table.read(self.fname, path='data')
             try:
                 halo_id = data['halo_id'].data
-                assert np.all(halo_id == halo_id.astype(int))
+                assert halo_id.dtype.str[1] in ('i','u')
                 assert len(halo_id) == len(set(halo_id))
             except AssertionError:
                 num_failures += 1
