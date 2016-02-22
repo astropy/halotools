@@ -771,9 +771,9 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     >>> Lbox = 1.0
     >>> period = np.array([Lbox,Lbox,Lbox])
     
-    >>> x = np.random.random(Npts)-0.5
-    >>> y = np.random.random(Npts)-0.5
-    >>> z = np.random.random(Npts)-0.5
+    >>> x = np.random.random(Npts)
+    >>> y = np.random.random(Npts)
+    >>> z = np.random.random(Npts)
     
     We transform our *x, y, z* points into the array shape used by the pair-counter by 
     taking the transpose of the result of `numpy.vstack`. This boilerplate transformation 
@@ -791,6 +791,20 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
     >>> rp_bins = np.logspace(-2,-1,10)
     >>> pi_max = 0.3
     >>> sigmaz_12 = los_pvd_vs_rp(coords, velocities, rp_bins, pi_max, period=period)
+
+    >>> x2 = np.random.random(Npts)
+    >>> y2 = np.random.random(Npts)
+    >>> z2 = np.random.random(Npts)
+    >>> coords2 = np.vstack((x2,y2,z2)).T
+
+    >>> vx2 = np.random.random(Npts)
+    >>> vy2 = np.random.random(Npts)
+    >>> vz2 = np.random.random(Npts)
+    >>> velocities2 = np.vstack((vx2,vy2,vz2)).T
+
+    >>> sigmaz_12 = los_pvd_vs_rp(coords, velocities, rp_bins, pi_max, period=period, sample2=coords2, velocities2=velocities2)
+
+
     
     """
     
@@ -855,7 +869,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
             S2S2 = S1S1
         else:
             if do_cross==True:
-                D1D2, S1S2, N1N2 = xy_z_velocity_marked_npairs(sample1, sample2, rbins, pi_bins,\
+                D1D2, S1S2, N1N2 = xy_z_velocity_marked_npairs(sample1, sample2, rp_bins, pi_bins,\
                                      weights1=marks1, weights2=marks2,\
                                      wfunc = wfunc,\
                                      period=period, num_threads=num_threads,
@@ -871,7 +885,7 @@ def los_pvd_vs_rp(sample1, velocities1, rp_bins, pi_max, sample2=None,
                 D1D2=None
                 N1N2=None
             if do_auto==True:
-                D2D2, S2S2, N2N2 = xy_z_velocity_marked_npairs(sample2, sample2, rbins, pi_bins,\
+                D2D2, S2S2, N2N2 = xy_z_velocity_marked_npairs(sample2, sample2, rp_bins, pi_bins,\
                                      weights1=marks2, weights2=marks2,\
                                      wfunc = wfunc,\
                                      period=period, num_threads=num_threads,
