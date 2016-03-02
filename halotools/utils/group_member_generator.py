@@ -10,7 +10,7 @@ from astropy.table import Table
 from .array_utils import array_is_monotonic
 from ..custom_exceptions import HalotoolsError
 
-__all__ = ('add_new_table_column', )
+__all__ = ('group_member_generator', )
 
 def group_member_generator(data, grouping_key, requested_columns, 
     data_is_already_sorted=False):
@@ -26,6 +26,10 @@ def group_member_generator(data, grouping_key, requested_columns,
     corresponding to the yielded group members, allowing you to 
     create new columns for your data table storing the results 
     of your intra-group calculations. 
+
+    Before calling `group_member_generator`, the input ``data`` 
+    must be sorted by the ``grouping_key`` so that 
+    ``data[grouping_key]`` is monotonic. 
 
     Common applications of `group_member_generator` include 
     subhalo analysis (e.g., calculating host halo mass) and 
@@ -69,10 +73,36 @@ def group_member_generator(data, grouping_key, requested_columns,
     >>> from halotools.sim_manager import FakeSim
     >>> halocat = FakeSim()
 
-    The ``halo_hostid`` is a natural grouping key for a halo table. 
-    Let's use this key to broadcast the host halo mass to all members 
-    of the same host halo. 
-    
+    As described in :ref:`rockstar_subhalo_nomenclature`, 
+    the ``halo_hostid`` is a natural grouping key for a halo table. 
+    Let's use this key to calculate the host halo mass of all halos in 
+    the data table. 
+
+    >>> halos = halocat.halo_table
+    >>> halos.sort(['halo_hostid', 'halo_upid'])
+    >>> grouping_key = 'halo_hostid'
+    >>> requested_columns = ['halo_mvir']
+    >>> group_gen = group_member_generator(halos, grouping_key, requested_columns)
+
+    >>> result = np.zeros(len(halos))
+    >>> for first, last, member_props in group_gen: pass 
+    >>> masses = member_props[0]
+    >>> host_mass = masses[0]
+    >>> result[first:last] = host_mass
+
+    >>> halos['halo_mvir_host_halo'] = result   
+
+    Inside the scope of the loop, the first two yielded integers 
+    allow us to access the appropriate slice of the array being calculated. 
+    The ``member_props`` list only stores a single element, the 
+    *masses* array storing the value of ``halo_mvir`` 
+    of each member of the host + subhalo system. 
+    Because we have sorted the halos by *both* ``halo_hostid`` and 
+    ``halo_upid``, then within each ``halo_hostid`` grouping, 
+    the host system will appear first because -1 is smaller than any 
+    value for ``halo_upid`` stored by a subhalo. Thus by selecting the 
+    first element of the *masses* array, we select the virial mass 
+    of the host halo. 
 
     """
 
