@@ -50,6 +50,9 @@ def group_member_generator(data, grouping_key, requested_columns,
         List of column names that will be yielded by the generator. 
         As you loop over the generator, for every string entry in 
         ``requested_columns`` there will be an array that is yielded. 
+        It is permissible for ``requested_columns`` to be an empty list, 
+        in which case the ``group_data_list`` yielded at each iteration 
+        will also be an empty list.
 
     Returns 
     ---------
