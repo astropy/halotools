@@ -72,13 +72,13 @@ def group_member_generator(data, grouping_key, requested_columns,
 
     >>> from halotools.sim_manager import FakeSim
     >>> halocat = FakeSim()
+    >>> halos = halocat.halo_table
 
     As described in :ref:`rockstar_subhalo_nomenclature`, 
     the ``halo_hostid`` is a natural grouping key for a halo table. 
     Let's use this key to calculate the host halo mass of all halos in 
     the data table. 
 
-    >>> halos = halocat.halo_table
     >>> halos.sort(['halo_hostid', 'halo_upid'])
     >>> grouping_key = 'halo_hostid'
     >>> requested_columns = ['halo_mvir']
@@ -103,6 +103,23 @@ def group_member_generator(data, grouping_key, requested_columns,
     value for ``halo_upid`` stored by a subhalo. Thus by selecting the 
     first element of the *masses* array, we select the virial mass 
     of the host halo. 
+
+    We can also use the `group_member_generator` to compute more complicated quantities. 
+    For example, let's calculate the mean mass-weighted spin of all halo members. 
+    Note that our halo table is already sorted, so we save CPU time by not re-sorting it. 
+
+    >>> grouping_key = 'halo_hostid'
+    >>> requested_columns = ['halo_mvir', 'halo_spin']
+    >>> group_gen = group_member_generator(halos, grouping_key, requested_columns)
+
+    >>> result = np.zeros(len(halos))
+    >>> for first, last, member_props in group_gen: pass 
+    >>> masses = member_props[0]
+    >>> spins = member_props[1]
+    >>> mass_weighted_avg_spin = sum(masses*spins)/float(len(masses))
+    >>> result[first:last] = mass_weighted_avg_spin
+
+    >>> halos['halo_mass_weighted_avg_spin'] = result   
 
     """
 
