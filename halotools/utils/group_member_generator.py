@@ -79,17 +79,18 @@ def group_member_generator(data, grouping_key, requested_columns,
     Let's use this key to calculate the host halo mass of all halos in 
     the data table. 
 
+    First we build the generator:
     >>> halos.sort(['halo_hostid', 'halo_upid'])
     >>> grouping_key = 'halo_hostid'
     >>> requested_columns = ['halo_mvir']
     >>> group_gen = group_member_generator(halos, grouping_key, requested_columns)
 
+    Then we loop over it:
     >>> result = np.zeros(len(halos))
-    >>> for first, last, member_props in group_gen: pass 
-    >>> masses = member_props[0]
-    >>> host_mass = masses[0]
-    >>> result[first:last] = host_mass
-
+    ...     for first, last, member_props in group_gen: pass 
+    ...     masses = member_props[0]
+    ...     host_mass = masses[0]
+    ...     result[first:last] = host_mass
     >>> halos['halo_mvir_host_halo'] = result   
 
     Inside the scope of the loop, the first two yielded integers 
@@ -113,12 +114,11 @@ def group_member_generator(data, grouping_key, requested_columns,
     >>> group_gen = group_member_generator(halos, grouping_key, requested_columns)
 
     >>> result = np.zeros(len(halos))
-    >>> for first, last, member_props in group_gen: pass 
-    >>> masses = member_props[0]
-    >>> spins = member_props[1]
-    >>> mass_weighted_avg_spin = sum(masses*spins)/float(len(masses))
-    >>> result[first:last] = mass_weighted_avg_spin
-
+    >>> for first, last, member_props in group_gen:
+    ...     masses = member_props[0]
+    ...     spins = member_props[1]
+    ...     mass_weighted_avg_spin = sum(masses*spins)/float(len(masses))
+    ...     result[first:last] = mass_weighted_avg_spin
     >>> halos['halo_mass_weighted_avg_spin'] = result   
 
     """
