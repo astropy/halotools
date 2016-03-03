@@ -23,6 +23,23 @@ catalogs is `~halotools.sim_manager.DownloadManager`.
 >>> from halotools.sim_manager import DownloadManager
 >>> dman = DownloadManager()
 
+Below appears a summary table of the snapshots available for download. 
+See the :ref:`supported_sim_list` for further information about the snapshots. 
+The information in the table below can be used to select the appropriate 
+arguments to pass to the `~halotools.sim_manager.DownloadManager`. 
+
+============  ===========================  ======================
+simname          available halo-finders     available redshifts 
+============  ===========================  ======================
+bolshoi       rockstar, bdm                0.0, 0.5, 0.84, 2.00
+bolplanck     rockstar                     0.0, 0.5, 1.00, 2.00
+multidark     rockstar                     0.0, 0.5, 1.00, 2.15
+consuelo      rockstar                     0.0, 0.5, 1.00, 2.00
+============  ===========================  ======================
+
+Using the convenience script 
+===============================
+
 There is also a convenience script providing 
 command-line wrapper behavior around this class: 
 scripts/download_additional_halocat.py. Whether you use 

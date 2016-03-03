@@ -51,6 +51,9 @@ unsupported_simname_msg = "There are no web locations recognized by Halotools \n
 
 class DownloadManager(object):
     """ Class used to scrape the web for simulation data and cache the downloaded catalogs.
+
+    For a list of available pre-processed halo catalogs provided by Halotools, 
+    see :ref:`supported_sim_list`.
     """
 
     def __init__(self):
